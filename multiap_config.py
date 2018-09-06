@@ -1,6 +1,7 @@
 import logging
 import argparse
 import os
+import getpass
 
 class owrtcfg(object):
     def __init__(self, path):
@@ -72,6 +73,14 @@ class mapcfg(object):
         self.gui_status_label = Tkinter.Label(self.gui_master, textvariable=self.gui_status)
         self.gui_status_label.pack()
 
+        self.gui_user_label = Tkinter.Label(self.gui_master, text="User ID")
+        self.gui_user_label.pack()
+        self.gui_user_str = Tkinter.StringVar()
+        if self.args.user: self.gui_user_str.set(self.args.user)
+        else: user = self.gui_user_str.set(getpass.getuser())
+        self.gui_user_ent = Tkinter.Entry(self.gui_master, textvariable=self.gui_user_str)
+        self.gui_user_ent.pack()
+    
         self.gui_board_label = Tkinter.Label(self.gui_master, text="Board ID")
         self.gui_board_label.pack()
         self.gui_board_str = Tkinter.StringVar()
@@ -101,6 +110,7 @@ class mapcfg(object):
         self.gui_master.mainloop()
 
     def __gui_submit(self):
+        self.args.user = self.gui_user_ent.get()
         self.args.board_id = self.gui_board_ent.get()
         self.args.toolchain_path = self.gui_ugw_path_ent.get()
         self.args.no_overwrite = self.gui_no_overwrite_ent.get()

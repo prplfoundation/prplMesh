@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "type": "process",
+    "presentation" : { "echo": true, },
+    "options": {
+        "cwd": "${workspaceRoot}"
+    },
+    "tasks": [
+        {
+            "label": "Generate configuration files",
+            "command": "python",
+            "args": ["maptools.py", "config", "--gui"],
+            "options": {
+                "cwd": "${workspaceRoot}/"
+            },
+            "problemMatcher":"$tsc"
+        }
+    ]
+}
