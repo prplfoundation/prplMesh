@@ -30,9 +30,9 @@ class owrtcfg(object):
         return "path={}\nvalues={}".format(self.path, self.cfg)
 
 class chdlab_board(object):
-    def __init__(cls, board):
+    def __init__(cls, board, user=None):
         from chdlab_commands.tools.chdlab_jira import CHDLAB_jira
-        cls.jira = CHDLAB_jira.create(board)
+        cls.jira = CHDLAB_jira.create(board, user=user)
 
     def __str__(self):
         return self.jira
@@ -165,7 +165,7 @@ class mapcfg(object):
         config = owrtcfg(toolchain_path+'/.config').parse()
         if self.args.board_id:
             try: 
-                board = chdlab_board(self.args.board_id)
+                board = chdlab_board(self.args.board_id, self.args.user)
             except RuntimeError as e:
                 self.logger.error("board jira failure (%s)" %e)
                 raise
@@ -181,7 +181,7 @@ class mapcfg(object):
     def configure_parser(parser=argparse.ArgumentParser(prog='config')):
         parser.help = "configure multiap standalone build"
         parser.add_argument("--toolchain_path", "-p", help="path to openwrt/core")
-        parser.add_argument("--output_path", "-O", default=mapcfg.default_out_path, help="path to openwrt/core")
+        parser.add_argument("--output_path", "-O", default=mapcfg.default_out_path, help="path to save output config files")
         parser.add_argument("--board_id", "-b", help="chdlab board id")
         parser.add_argument("--target", "-t", default="grx350", help="target platform")
         parser.add_argument("--ssh_deploy_pc", help="ssh deploy pc")

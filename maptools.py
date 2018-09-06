@@ -27,6 +27,7 @@ class maptools(object):
         self.logger = logging.getLogger("maptools")
         self.parent_parser = argparse.ArgumentParser(description="MultiAP Tools")
         self.parent_parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
+        self.parent_parser.add_argument("--user", "-u", type=str, help="use custom username when connecting to jira")
         self.child_parser = self.parent_parser.add_subparsers(title="subcommand", help="subcommand help", dest="cmd")
 
         self.config_command = self.child_parser.add_parser('config')
