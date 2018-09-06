@@ -6,7 +6,7 @@ import argparse
 import os
 from multiap_config import *
 
-THIS_SCRIPT_PATH = os.path.dirname(__file__)
+THIS_SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 logging.config.fileConfig(os.path.abspath(THIS_SCRIPT_PATH + "/logging.conf"))
 
 def print_color(string, color):
