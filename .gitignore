@@ -1,1 +1,6 @@
 *.pyc
+agent/
+beerocks/
+common/
+controller/
+framework/
