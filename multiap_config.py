@@ -32,14 +32,14 @@ class owrtcfg(object):
 
 class chdlab_board(object):
     def __init__(cls, board, user=None):
-        from chdlab_commands.tools.chdlab_jira import CHDLAB_jira
-        cls.jira = CHDLAB_jira.create(board, user=user)
+        from chdlab_commands.jira_tools.jira_board import JiraBoard
+        cls.jira = JiraBoard(board)
 
     def __str__(self):
         return self.jira
 
     def get_ssh_deploy_pc(cls):
-        return "libit:libit@{}".format(cls.jira.get_lan_vms()[0].ep.management_ip)
+        return "libit:libit@{}".format(cls.jira.get_lan_vms()[0].management_ip)
 
     def get_ssh_deploy_gw(cls):
         return "admin:admin@192.168.1.1"
@@ -192,7 +192,7 @@ class mapcfg(object):
         parser.help = "configure multiap standalone build"
         parser.add_argument("--toolchain_path", "-p", help="path to openwrt/core")
         parser.add_argument("--output_path", "-O", default=mapcfg.default_out_path, help="path to save output config files")
-        parser.add_argument("--board_id", "-b", help="chdlab board id")
+        parser.add_argument("--board_id", "-b", help="chdlab board id (requires chdlab python package)")
         parser.add_argument("--target", "-t", default="grx350", help="target platform")
         parser.add_argument("--ssh_deploy_pc", help="ssh deploy pc")
         parser.add_argument("--ssh_deploy_gw", default="admin:admin@192.168.1.1", help="ssh deploy gw")
