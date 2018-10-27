@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../beerocks"
+		},
+		{
+			"path": "../common"
+		},
+		{
+			"path": "../framework"
+		}
+	],
+	"settings": {}
+}
