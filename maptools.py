@@ -5,6 +5,7 @@ import logging.config
 import argparse
 import os
 from commands.config import mapcfg
+from commands.build import mapbuild
 
 THIS_SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 logging.config.fileConfig(os.path.abspath(THIS_SCRIPT_PATH + "/logging.conf"))
@@ -31,7 +32,9 @@ class maptools(object):
         self.child_parser = self.parent_parser.add_subparsers(title="subcommand", help="subcommand help", dest="cmd")
 
         self.config_command = self.child_parser.add_parser('config')
+        self.build_command = self.child_parser.add_parser('build')
         mapcfg.configure_parser(self.config_command)
+        mapbuild.configure_parser(self.build_command)
         
         self.args = self.parent_parser.parse_args()
 
@@ -41,9 +44,13 @@ class maptools(object):
     def __config__(self):
         mapcfg(self.args)
     
+    def __build__(self):
+        mapbuild(self.args)
+
     def run(self):
         commands = {
-            'config': self.__config__
+            'config': self.__config__, 
+            'build': self.__build__
         }
 
         try:

@@ -48,7 +48,7 @@ class chdlab_board(object):
         return cls.jira.type.lower()
 
 class mapcfg(object):
-    default_out_path = os.path.abspath(os.path.dirname(__file__)+'/../../') #one dir above the tools repo
+    default_path = os.path.abspath(os.path.dirname(__file__)+'/../../') #one dir above the tools repo
     supported_targets = ["grx350"]
 
     def __init__(self, args):
@@ -170,7 +170,7 @@ class mapcfg(object):
     def __generate(self):
         toolchain_path = self.args.toolchain_path
         if not toolchain_path or not os.path.exists(toolchain_path):
-            self.logger.warning("Invalid toolchain_path={}".format(toolchain_path))
+            raise Exception("Invalid toolchain_path={}".format(toolchain_path))
         
         config = owrtcfg(toolchain_path+'/.config').parse()
         if self.args.board_id:
@@ -191,7 +191,7 @@ class mapcfg(object):
     def configure_parser(parser=argparse.ArgumentParser(prog='config')):
         parser.help = "configure multiap standalone build"
         parser.add_argument("--toolchain_path", "-p", help="path to openwrt/core")
-        parser.add_argument("--output_path", "-O", default=mapcfg.default_out_path, help="path to save output config files")
+        parser.add_argument("--output_path", "-O", default=mapcfg.default_path, help="path to save output config files")
         parser.add_argument("--board_id", "-b", help="chdlab board id (requires chdlab python package)")
         parser.add_argument("--target", "-t", default="grx350", help="target platform")
         parser.add_argument("--ssh_deploy_pc", help="ssh deploy pc")
