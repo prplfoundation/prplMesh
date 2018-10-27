@@ -48,7 +48,7 @@ class chdlab_board(object):
         return cls.jira.type.lower()
 
 class mapcfg(object):
-    default_out_path = os.path.abspath(os.path.dirname(__file__)+'/../')
+    default_out_path = os.path.abspath(os.path.dirname(__file__)+'/../../') #one dir above the tools repo
     supported_targets = ["grx350"]
 
     def __init__(self, args):
