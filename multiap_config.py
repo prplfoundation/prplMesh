@@ -91,7 +91,7 @@ class mapcfg(object):
         self.gui_ugw_path_label = Tkinter.Label(self.gui_master, text="path to openwrt/core")
         self.gui_ugw_path_label.pack()
         self.gui_ugw_path_str = Tkinter.StringVar()
-        if self.args.toolchain_path: self.gui_ugw_path_str.set(self.args.toolchain_path)
+        if self.args.toolchain_path and os.path.exists(self.args.toolchain_path): self.gui_ugw_path_str.set(os.path.realpath(self.args.toolchain_path))
         self.gui_ugw_path_ent = Tkinter.Entry(self.gui_master, textvariable=self.gui_ugw_path_str, width=55)
         self.gui_ugw_path_ent.pack()
 

@@ -7,13 +7,14 @@
     },
     "tasks": [
         {
-            "label": "Generate configuration files",
+            "label": "Configure",
             "command": "python",
             "args": ["maptools.py", "config", "--gui"],
             "options": {
                 "cwd": "${workspaceRoot}/",
                 "env": {
-                        "PYTHONPATH" : "/opt/ugw/chdlab"
+                        "PYTHONPATH" : "/opt/ugw/chdlab",
+                        "UGW_CORE_DIR" : "${workspaceRoot}/../../../ugw/ugw_sw/ugw/openwrt/core/"
                 }
             },
             "problemMatcher":"$tsc"
