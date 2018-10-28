@@ -48,7 +48,6 @@ class chdlab_board(object):
         return cls.jira.type.lower()
 
 class mapcfg(object):
-    default_path = os.path.abspath(os.path.dirname(__file__)+'/../../') #one dir above the tools repo
     supported_targets = ["grx350"]
 
     def __init__(self, args):
@@ -183,15 +182,14 @@ class mapcfg(object):
             self.args.ssh_deploy_pc = board.get_ssh_deploy_pc()
             self.args.target = board.get_target()
 
-        self.__gen_beerocks_dist_conf(self.args.output_path, toolchain_path, config)
-        self.__gen_external_toolchain_conf(self.args.output_path, toolchain_path, config)
+        self.__gen_beerocks_dist_conf(self.args.map_path, toolchain_path, config)
+        self.__gen_external_toolchain_conf(self.args.map_path, toolchain_path, config)
         
 
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='config')):
         parser.help = "configure multiap standalone build"
         parser.add_argument("--toolchain_path", "-p", help="path to openwrt/core")
-        parser.add_argument("--output_path", "-O", default=mapcfg.default_path, help="path to save output config files")
         parser.add_argument("--board_id", "-b", help="chdlab board id (requires chdlab python package)")
         parser.add_argument("--target", "-t", default="grx350", help="target platform")
         parser.add_argument("--ssh_deploy_pc", help="ssh deploy pc")

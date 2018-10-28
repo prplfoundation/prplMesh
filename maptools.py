@@ -24,9 +24,12 @@ def WARNING(string):
 	print_color('%s' %(string), 'yellow')
 
 class maptools(object):
+    default_multiap_root = os.path.abspath(os.path.dirname(__file__)+'/../') #one dir above the tools repo
+
     def __init__(self):
         self.logger = logging.getLogger("maptools")
         self.parent_parser = argparse.ArgumentParser(description="MultiAP Tools")
+        self.parent_parser.add_argument("--map-path", "-m", default=maptools.default_multiap_root, help="path to multiap sources tree")
         self.parent_parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
         self.parent_parser.add_argument("--user", "-u", type=str, help="use custom username when connecting to jira")
         self.child_parser = self.parent_parser.add_subparsers(title="subcommand", help="subcommand help", dest="cmd")
@@ -37,6 +40,7 @@ class maptools(object):
         mapbuild.configure_parser(self.build_command)
         
         self.args = self.parent_parser.parse_args()
+        if self.args.verbose: self.logger.setLevel(logging.DEBUG)
 
     def __str__(self):
 		return str(self.args)
@@ -54,7 +58,7 @@ class maptools(object):
         }
 
         try:
-            print self.args.cmd
+            self.logger.debug(self.args.cmd)
             commands[self.args.cmd]()
         except KeyError as err:
             raise Exception("Operation not supported ({}, err={})".format(self.args.cmd, err))
