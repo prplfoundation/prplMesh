@@ -33,14 +33,15 @@ class cmakebuilder(object):
             shutil.rmtree(self.build_path)
 
     def prepare(self):
-        if os.path.exists(self.build_path):
-            logger.info("{} exists, skip preparing {}".format(self.build_path, self.name))
+        if os.path.exists("{}/.prepared".format(self.build_path)):
+            logger.info("{} already prepared, skip cmake {}".format(self.build_path, self.name))
             return
 
         logger.info("preparing {}".format(self.name))
         cmd = "cmake -H{} -B{} -DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake -DCMAKE_INSTALL_PREFIX={}".format(
             self.src_path, self.build_path, self.install_path)
         subprocess.check_call(cmd, shell=True, env=self.env)
+        open("{}/.prepared".format(self.build_path), 'a').close()
     
     def make(self):
         logger.info("building & installing {}".format(self.name))
