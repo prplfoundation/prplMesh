@@ -48,7 +48,7 @@ class chdlab_board(object):
         return cls.jira.type.lower()
 
 class mapcfg(object):
-    supported_targets = ["grx350"]
+    supported_targets = ["grx350", "axepoint"]
 
     def __init__(self, args):
         self.logger = logging.getLogger("config")
