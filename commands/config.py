@@ -3,13 +3,16 @@ import argparse
 import os
 import getpass
 
+logger = logging.getLogger("config")
+
 class owrtcfg(object):
     def __init__(self, path):
         self.path = path
+        self.dotconfig = '{}/.config'.format(path)
         self.cfg = {'CONFIG_BUILD_SUFFIX' : None,
                     'CONFIG_TARGET_NAME' : None,
-                    'CONFIG_TOOLCHAIN_ROOT' : None,
-                    'CONFIG_TOOLCHAIN_PREFIX' : None
+                    'CONFIG_TOOLCHAIN_ROOT' : '{}/staging_dir'.format(path),
+                    'CONFIG_TOOLCHAIN_PREFIX' : 'mips-openwrt-linux-uclibc-'
                     }
 
     def __get_entry_value(self, lines, name):
@@ -18,12 +21,13 @@ class owrtcfg(object):
 
     def parse(self):
         lines = None
-        with open(os.path.realpath(self.path), "r") as c:
+        with open(os.path.realpath(self.dotconfig), "r") as c:
                 lines = c.readlines()
         for key in self.cfg:
-            self.cfg[key] = self.__get_entry_value(lines, key)
+            value = self.__get_entry_value(lines, key)
+            if value: self.cfg[key] = value
             if not self.cfg[key]:
-                raise Exception("Failed to parse {} from {}".format(key, self.path))
+                raise Exception("Failed to parse {} from {}".format(key, self.dotconfig))
         
         return self.cfg
 
@@ -50,11 +54,21 @@ class chdlab_board(object):
 class mapcfg(object):
     supported_targets = ["grx350", "axepoint"]
 
+    def __guess_toolchain_path(self):
+        guess = os.environ.get('UGW_CORE_DIR')
+        if guess:
+            logger.info("guessed external_toolchain_path from UGW_CORE_DIR environment variable: {}".format(guess))
+            return guess
+        guess = self.__get_external_toolchain_path(self.args.map_path)
+        if guess:
+            logger.info("guessed external_toolchain_path from previous config: {}".format(guess))
+            return guess
+
     def __init__(self, args):
-        self.logger = logging.getLogger("config")
         self.args = args
         if self.args.guess:
-            if not self.args.toolchain_path: self.args.toolchain_path = os.environ.get('UGW_CORE_DIR')
+            if not self.args.toolchain_path:
+                self.args.toolchain_path = self.__guess_toolchain_path()
         
         if self.args.gui:
             self.__gui_start()
@@ -116,15 +130,27 @@ class mapcfg(object):
         self.gui_master.quit()
         self.__generate()
 
+    def __get_external_toolchain_path(self, config_path):
+        in_file = config_path+'/external_toolchain.cfg'
+        if not os.path.isfile(in_file):
+            return None
+
+        with open(in_file, 'r') as f:
+            for line in f.readlines():
+                arg, value = line.strip().split("=")
+                if arg == 'PLATFORM_BASE_DIR': return value
+
+        return None
+
     def __gen_external_toolchain_conf(self, config_path, toolchain_path, cfg):
         ''' Generate external_toolchain.cfg (for multiap repos compilation and deploy) '''
         
         out_file = config_path+'/external_toolchain.cfg'
-        self.logger.info("Generate {}".format(out_file))
+        logger.info("Generate {}".format(out_file))
         if os.path.isfile(out_file):
             if self.args.no_overwrite:
                 raise Exception("{} already exist and no_overwrite set".format(out_file))
-            self.logger.info("Overriding {}".format(out_file))
+            logger.info("Overriding {}".format(out_file))
         
         with open(out_file, 'w') as f:
             f.write('TARGET_PLATFORM=ugw\n')
@@ -136,20 +162,20 @@ class mapcfg(object):
         ''' Generate beerocks_dist.conf (for beerocks compilation and deploy) '''
 
         out_file = output_path+'/beerocks_dist.conf'
-        self.logger.info("Generate {}".format(out_file))
+        logger.info("Generate {}".format(out_file))
         if os.path.isfile(out_file):
             if self.args.no_overwrite:
                 raise Exception("{} already exist and no_overwrite set".format(out_file))
-            self.logger.info("Overriding {}".format(out_file))
+            logger.info("Overriding {}".format(out_file))
         
         target = self.args.target
         if not target or target not in mapcfg.supported_targets:
             raise Exception("target {} not supported for writing beerocks_dist.conf".format(target))
 
         ssh_deploy_pc = self.args.ssh_deploy_pc
-        if not ssh_deploy_pc: self.logger.warning("ssh_deploy_pc missing")
+        if not ssh_deploy_pc: logger.warning("ssh_deploy_pc missing")
         ssh_deploy_gw = self.args.ssh_deploy_gw
-        if not ssh_deploy_gw: self.logger.warning("ssh_deploy_gw missing")
+        if not ssh_deploy_gw: logger.warning("ssh_deploy_gw missing")
 
         with open(out_file, 'w') as f:
             f.write('[global]\n')
@@ -171,12 +197,12 @@ class mapcfg(object):
         if not toolchain_path or not os.path.exists(toolchain_path):
             raise Exception("Invalid toolchain_path={}".format(toolchain_path))
         
-        config = owrtcfg(toolchain_path+'/.config').parse()
+        config = owrtcfg(toolchain_path).parse()
         if self.args.board_id:
             try: 
                 board = chdlab_board(self.args.board_id, self.args.user)
             except RuntimeError as e:
-                self.logger.error("board jira failure (%s)" %e)
+                logger.error("board jira failure (%s)" %e)
                 raise
             self.args.ssh_deploy_gw = board.get_ssh_deploy_gw()
             self.args.ssh_deploy_pc = board.get_ssh_deploy_pc()
@@ -195,8 +221,8 @@ class mapcfg(object):
         parser.add_argument("--ssh_deploy_pc", help="ssh deploy pc")
         parser.add_argument("--ssh_deploy_gw", default="admin:admin@192.168.1.1", help="ssh deploy gw")
         parser.add_argument("--no_overwrite", "-o", action="store_true", help="do not overwrite existing configuration")
-        parser.add_argument("--gui", "-g", action="store_true", help="run conifuration helper gui")
-        parser.add_argument("--guess", default=True, help="try to guess configuration parameters from environment variables")
+        parser.add_argument("--gui", action="store_true", help="run conifuration helper gui")
+        parser.add_argument("--guess", "-g", action="store_true", help="try to guess configuration parameters from environment variables")
         parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
 
         return parser

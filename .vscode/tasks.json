@@ -9,12 +9,11 @@
         {
             "label": "Configure",
             "command": "python",
-            "args": ["maptools.py", "config", "--gui"],
+            "args": ["maptools.py", "-m", "${workspaceRoot}/..", "config", "--gui", "-g"],
             "options": {
                 "cwd": "${workspaceRoot}/",
                 "env": {
-                        "PYTHONPATH" : "/opt/ugw/chdlab",
-                        "UGW_CORE_DIR" : "${workspaceRoot}/../../../ugw/ugw_sw/ugw/openwrt/core/"
+                        "PYTHONPATH" : "/opt/ugw/chdlab"
                 }
             },
             "problemMatcher":"$tsc"
