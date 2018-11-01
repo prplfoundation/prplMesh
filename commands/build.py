@@ -16,7 +16,7 @@ class cmakebuilder(object):
         self.src_path = "{}/{}".format(modules_dir, name)
         self.build_path = "{}/{}".format(build_dir, name)
         '''
-        Use relative path for self.install_path, as it isused for CMAKE_INSTALL_PREFIX,
+        Use relative path for self.install_path, as it is used for CMAKE_INSTALL_PREFIX,
         and external_toolchain.cfg (in source repos) expects relative paths otherwise it treats
         the build as out of tree.
         '''

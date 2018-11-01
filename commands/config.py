@@ -10,8 +10,8 @@ class owrtcfg(object):
         self.path = path
         self.dotconfig = '{}/.config'.format(path)
         self.cfg = {'CONFIG_BUILD_SUFFIX' : None,
-                    'CONFIG_TARGET_NAME' : None,
-                    'CONFIG_TOOLCHAIN_ROOT' : '{}/staging_dir'.format(path),
+                    'CONFIG_TARGET_NAME' : 'mips_mips32_uClibc-0.9.33.2',
+                    'CONFIG_TOOLCHAIN_ROOT' : '{}/staging_dir/toolchain-mips_mips32_gcc-4.8-linaro_uClibc-0.9.33.2'.format(path),
                     'CONFIG_TOOLCHAIN_PREFIX' : 'mips-openwrt-linux-uclibc-'
                     }
 
@@ -27,7 +27,7 @@ class owrtcfg(object):
             value = self.__get_entry_value(lines, key)
             if value: self.cfg[key] = value
             if not self.cfg[key]:
-                raise Exception("Failed to parse {} from {}".format(key, self.dotconfig))
+                logger.error("Failed to parse {} from {}".format(key, self.dotconfig))
         
         return self.cfg
 
