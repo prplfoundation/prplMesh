@@ -4,13 +4,19 @@
 			"path": "."
 		},
 		{
-			"path": "../beerocks"
-		},
-		{
 			"path": "../common"
 		},
 		{
 			"path": "../framework"
+		},
+		{
+			"path": "../agent"
+		},
+		{
+			"path": "../controller"
+		},
+		{
+			"path": "../platform_service"
 		}
 	],
 	"settings": {}
