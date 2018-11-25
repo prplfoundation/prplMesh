@@ -28,7 +28,10 @@
             },
             "options": {
                 "cwd": "${workspaceRoot}/klocwork/",
-            },                  
+            },
+            "presentation": {
+                "focus": true
+            }
         },
 
     ]
