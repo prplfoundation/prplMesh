@@ -4,3 +4,10 @@ beerocks/
 common/
 controller/
 framework/
+
+#klocwork files
+.kw*/
+_GO_KW
+klocwork_database.kb
+kw_override.h
+analysis_profile.pconf

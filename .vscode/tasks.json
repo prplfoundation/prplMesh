@@ -17,6 +17,19 @@
                 }
             },
             "problemMatcher":"$tsc"
-        }
+        },
+
+        {
+            "label": "Klocwork",
+            "command": "./kw.sh",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceRoot}/klocwork/",
+            },                  
+        },
+
     ]
 }
