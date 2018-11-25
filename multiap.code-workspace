@@ -17,6 +17,9 @@
 		},
 		{
 			"path": "../platform_service"
+		},
+		{
+			"path": "../../ugw/feed_multiap"
 		}
 	],
 	"settings": {}
