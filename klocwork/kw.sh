@@ -74,4 +74,16 @@ kwcheck list -F detailed --status 'Analyze','Fix' --report ${REPORT_PATH}/kwrepo
 kwcheck list -F detailed --severity 1,2 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_high.log
 kwcheck list -F detailed --severity 3,4 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_low.log
 
+# Generate output summary
+declare -a KW_TYPES=("1:Critical" "2:Error" "3:Warning" "4:Review")
+
+echo -e "\nSummary by components:" > ${REPORT_PATH}/kwreport_summary.log
+cp ${REPORT_PATH}/kwreport_detailed.log ${REPORT_PATH}/kwreport_tmp.log
+for t in ${KW_TYPES[@]}; do
+      issue_cnt=`grep -c $t ${REPORT_PATH}/kwreport_detailed.log`
+      echo "    $t: $issue_cnt" >> ${REPORT_PATH}/kwreport_summary.log
+done
+rm ${REPORT_PATH}/kwreport_tmp.log
+
+
 
