@@ -1,42 +1,61 @@
 #!/bin/bash 
 
+# In order to use the script in non interactive mode, 
+# enter first argument to be the repo name, one of the following: 'framework', 'common', 'controller', 'agent'
+# and second argument to be the report severity level seperated by commas, for example: '1,2', '2,3,4'
+# Level number meaning: 1=Critical, 2=Error, 3=Warning, 4=Review
+
 #set -x
 
 echo kwcheck --version
-echo "current folder: "`pwd`
+echo current folder: `pwd`
+echo number of input arguments: "$#"
+
+INTERACTIVE_KW=true
+
+if [ "$#" -eq 2 ]; then
+      INTERACTIVE_KW=false
+      REPO=$1
+      SEVERITY=$2
+fi
+
+echo intercative mode: $INTERACTIVE_KW
 
 # Repo Select
-read -p "On which repo do you with to perfrom klocwork? [1-framework, 2-common, 3-controller, 4-agent]: " REPO
-case $REPO in
-      "1") REPO="framework"    ;;
-      "2") REPO="common"       ;;
-      "3") REPO="controller"   ;;
-      "4") REPO="agent"        ;;
-      *)   
-            echo "Error: unrecognized input value:'$REPO'" 
-            exit 128 # Invalid argument to exit
-            ;;
-esac
+if [ "$INTERACTIVE_KW" = true ]; then
+      read -p "On which repo do you with to perfrom klocwork? [1-framework, 2-common, 3-controller, 4-agent]: " REPO
 
-# Report Severity Select
-read -p "Enter severity seperated [1-Critical & Error (default), 2-Warning & Review, 3-All]: " SEVERITY
-case $SEVERITY in
-      "1")  SEVERITY="1,2"     ;;
-      "2")  SEVERITY="3,4"     ;;
-      "3")  SEVERITY="1,2,3,4" ;;
-      "")   SEVERITY="1,2"     ;;
-      *)   
-            echo "Error: unrecognized input value:'$SEVERITY'" 
-            exit 128 # Invalid argument to exit
-            ;;
-esac 
+      case $REPO in
+            "1") REPO="framework"    ;;
+            "2") REPO="common"       ;;
+            "3") REPO="controller"   ;;
+            "4") REPO="agent"        ;;
+            *)   
+                  echo "Error: unrecognized input value:'$REPO'" 
+                  exit 128 # Invalid argument to exit
+                  ;;
+      esac
+      
+      # Report Severity Select
+      read -p "Enter severity seperated [1-Critical & Error (default), 2-Warning & Review, 3-All]: " SEVERITY
+      case $SEVERITY in
+            "1")  SEVERITY="1,2"     ;;
+            "2")  SEVERITY="3,4"     ;;
+            "3")  SEVERITY="1,2,3,4" ;;
+            "")   SEVERITY="1,2"     ;;
+            *)   
+                  echo "Error: unrecognized input value:'$SEVERITY'" 
+                  exit 128 # Invalid argument to exit
+                  ;;
+      esac
+fi
+
+echo Performing KW on: $REPO, generating report with severity $SEVERITY.
 
 # Clean Repos
 CLEAN_PATH=`pwd`"/../../$REPO/build"
 echo "cleaning $CLEAN_PATH"
 rm -rf $CLEAN_PATH/*
-
-echo "Performing KW on: $REPO"
 
 # Generate input script to klocwork checker
 rm -rf _GO_KW

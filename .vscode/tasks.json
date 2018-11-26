@@ -31,7 +31,8 @@
             },
             "presentation": {
                 "focus": true
-            }
+            },
+            "problemMatcher": []
         },
 
     ]
