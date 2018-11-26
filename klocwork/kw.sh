@@ -2,8 +2,6 @@
 
 # In order to use the script in non interactive mode, 
 # enter first argument to be the repo name, one of the following: 'framework', 'common', 'controller', 'agent'
-# and second argument to be the report severity level seperated by commas, for example: '1,2', '2,3,4'
-# Level number meaning: 1=Critical, 2=Error, 3=Warning, 4=Review
 
 #set -x
 
@@ -13,10 +11,9 @@ echo number of input arguments: "$#"
 
 INTERACTIVE_KW=true
 
-if [ "$#" -eq 2 ]; then
+if [ "$#" -eq 1 ]; then
       INTERACTIVE_KW=false
       REPO=$1
-      SEVERITY=$2
 fi
 
 echo intercative mode: $INTERACTIVE_KW
@@ -35,22 +32,9 @@ if [ "$INTERACTIVE_KW" = true ]; then
                   exit 128 # Invalid argument to exit
                   ;;
       esac
-      
-      # Report Severity Select
-      read -p "Enter severity seperated [1-Critical & Error (default), 2-Warning & Review, 3-All]: " SEVERITY
-      case $SEVERITY in
-            "1")  SEVERITY="1,2"     ;;
-            "2")  SEVERITY="3,4"     ;;
-            "3")  SEVERITY="1,2,3,4" ;;
-            "")   SEVERITY="1,2"     ;;
-            *)   
-                  echo "Error: unrecognized input value:'$SEVERITY'" 
-                  exit 128 # Invalid argument to exit
-                  ;;
-      esac
 fi
 
-echo Performing KW on: $REPO, generating report with severity $SEVERITY.
+echo Performing KW on: $REPO.
 
 # Clean Repos
 CLEAN_PATH=`pwd`"/../../$REPO/build"
@@ -87,6 +71,7 @@ REPORT_PATH=`pwd`"/../../$REPO/kw_reports"
 mkdir -p $REPORT_PATH
 kwcheck run
 kwcheck list -F detailed --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_detailed.log
-kwcheck list -F detailed --severity $SEVERITY --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_high.log
+kwcheck list -F detailed --severity 1,2 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_high.log
+kwcheck list -F detailed --severity 3,4 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_low.log
 
 
