@@ -8,7 +8,7 @@ import shutil
 
 logger = logging.getLogger("build")
 build_targets=['clean', 'distclean', 'make']
-build_modules=['framework', 'common', 'beerocks'] # TODO change beerocks to 'controller', 'agent' once split
+build_modules=['framework', 'common', 'controller', 'agent']
 
 class cmakebuilder(object):
     def __init__(self, name, modules_dir, build_dir, install_dir):
@@ -37,9 +37,9 @@ class cmakebuilder(object):
             logger.info("{} already prepared, skip cmake {}".format(self.build_path, self.name))
             return
 
-        logger.info("preparing {}".format(self.name))
-        cmd = "cmake -H{} -B{} -DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake -DCMAKE_INSTALL_PREFIX={}".format(
+        cmd = "cmake -H{} -B{} -DBEEROCKS_PACK=ON -DMULTIAP_PACK=ON -DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake -DCMAKE_INSTALL_PREFIX={}".format(
             self.src_path, self.build_path, self.install_path)
+        logger.info("preparing {}: {}".format(self.name, cmd))
         subprocess.check_call(cmd, shell=True, env=self.env)
         open("{}/.prepared".format(self.build_path), 'a').close()
     
