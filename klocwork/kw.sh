@@ -70,6 +70,7 @@ kwcheck import analysis_profile.pconf
 REPORT_PATH=`pwd`"/../../$REPO/kw_reports"
 mkdir -p $REPORT_PATH
 kwcheck run
+echo generating reports...
 kwcheck list -F detailed --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_all.log
 kwcheck list -F detailed --severity 1 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_critical.log
 kwcheck list -F detailed --severity 2 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_error.log
@@ -86,6 +87,8 @@ for t in ${KW_TYPES[@]}; do
       echo "    $t: $issue_cnt" >> ${REPORT_PATH}/kwreport_summary.log
 done
 rm ${REPORT_PATH}/kwreport_tmp.log
+
+echo DONE!
 
 
 
