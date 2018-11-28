@@ -23,6 +23,14 @@
 		}
 	],
 	"settings": {
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/*.pyc": true,
+		},
 		"files.associations": {
 			"cctype": "cpp",
 			"cmath": "cpp",
