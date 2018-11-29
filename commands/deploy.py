@@ -24,10 +24,14 @@ class mapdeploy(object):
         logger.debug("deploy configuration: {}".format(self.conf))
         logger.info("deploy {}".format(modules))
 
-        for name in modules:
-            logger.debug("deploy {}".format(name))
+        if args.file:
+            logger.info("copy single file {} to target @{}".format(args.file, args.path))
+            self.upload(args.file, args.path)
+        else:
+            for name in modules:
+                logger.debug("deploy {}".format(name))
 
-        self.upload("{}/controller/beerocks_v1.4_controller.tar.gz".format(build_dir), "/tmp/multiap/deploy/")
+            self.upload("{}/controller/beerocks_v1.4_controller.tar.gz".format(build_dir), args.path)
 
     def upload(self, file, path):
         ''' Uploads a file to the target vi proxy
@@ -71,6 +75,8 @@ class mapdeploy(object):
     def configure_parser(parser=argparse.ArgumentParser(prog='deploy')):
         parser.help = "multiap_sw standalone deploy module"
         parser.add_argument('modules', choices=['all'] + deploy_modules, nargs='+', help='module[s] to deploy')
+        parser.add_argument("--file", "-f", help="only upload a file to target")
+        parser.add_argument("--path", "-p", default="/tmp/multiap/deploy/", help="path to deploy on in target")
         parser.add_argument("--conf", "-c", help="path to beerocks_dist.conf")
         parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
 
