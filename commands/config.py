@@ -2,6 +2,8 @@ import logging
 import argparse
 import os
 import getpass
+import re
+import yaml
 
 logger = logging.getLogger("config")
 
@@ -158,6 +160,30 @@ class mapcfg(object):
             f.write('PLATFORM_BASE_DIR={}\n'.format(toolchain_path))
             f.write('PLATFORM_BUILD_NAME=target-{}_{}\n'.format(cfg['CONFIG_TARGET_NAME'], cfg['CONFIG_BUILD_SUFFIX']))
 
+    def __gen_deploy_yaml(self, output_path, toolchain_path, cfg):
+        ''' Generate deploy.yaml (for multiap deploy) '''
+
+        out_file = output_path+'/deploy.yaml'
+        logger.info("Generate {}".format(out_file))
+        if os.path.isfile(out_file):
+            if self.args.no_overwrite:
+                raise Exception("{} already exist and no_overwrite set".format(out_file))
+            logger.info("Overriding {}".format(out_file))
+        
+        proxy = {}
+        proxy['pass'], proxy['user'], proxy['ip'] = re.split(':|@', self.args.ssh_deploy_pc)
+        logger.info("proxy: {}".format(proxy))
+
+        target = {}
+        if not self.args.target or self.args.target not in mapcfg.supported_targets:
+            raise Exception("target {} not supported for writing beerocks_dist.conf".format(self.args.target))
+        target['type'] = self.args.target
+        target['pass'], target['user'], target['ip'] = re.split(':|@', self.args.ssh_deploy_gw)
+        logger.info("target: {}".format(target))
+
+        with open(out_file, 'w') as f:
+            yaml.dump({'target' : target, 'proxy' : proxy}, f, default_flow_style=False)
+
     def __gen_beerocks_dist_conf(self, output_path, toolchain_path, cfg):
         ''' Generate beerocks_dist.conf (for beerocks compilation and deploy) '''
 
@@ -208,7 +234,10 @@ class mapcfg(object):
             self.args.ssh_deploy_pc = board.get_ssh_deploy_pc()
             self.args.target = board.get_target()
 
-        self.__gen_beerocks_dist_conf(self.args.map_path, toolchain_path, config)
+        try: self.__gen_beerocks_dist_conf(self.args.map_path, toolchain_path, config)
+        except Exception as e: logger.error("failed to generate beerocks_dist.conf - {}".format(e))
+        try: self.__gen_deploy_yaml(self.args.map_path, toolchain_path, config)
+        except Exception as e: logger.error("failed to generate deploy.conf - {}".format(e))
         self.__gen_external_toolchain_conf(self.args.map_path, toolchain_path, config)
         
 

@@ -37,7 +37,7 @@ class cmakebuilder(object):
             logger.info("{} already prepared, skip cmake {}".format(self.build_path, self.name))
             return
 
-        cmd = "cmake -H{} -B{} -DBEEROCKS_PACK=ON -DMULTIAP_PACK=ON -DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake -DCMAKE_INSTALL_PREFIX={}".format(
+        cmd = "cmake -H{} -B{} -DSTANDALONE=ON -DBEEROCKS_PACK=ON -DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake -DCMAKE_INSTALL_PREFIX={}".format(
             self.src_path, self.build_path, self.install_path)
         logger.info("preparing {}: {}".format(self.name, cmd))
         subprocess.check_call(cmd, shell=True, env=self.env)
