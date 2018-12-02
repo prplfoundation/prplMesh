@@ -18,7 +18,69 @@
             },
             "problemMatcher":"$tsc"
         },
-
+        {
+            "label": "BuildAll",
+            "command": "python",
+            "args": ["./maptools.py", "build", "all"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "DeployAll",
+            "command": "python",
+            "args": ["./maptools.py", "deploy", "all"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "CleanAll",
+            "command": "python",
+            "args": ["./maptools.py", "build", "all", "-c", "clean"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "Distclean",
+            "command": "python",
+            "args": ["./maptools.py", "build", "all", "-c", "distclean"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
         {
             "label": "Klocwork",
             "command": "./kw.sh",
