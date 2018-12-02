@@ -79,11 +79,13 @@ class mapdeploy(object):
         # start sftp connection
         t = paramiko.Transport((proxy['ip'], 22))
         t.connect(username=proxy['user'], password=proxy['pass'])
+        logger.info("connect SFTP @{}".format(proxy['ip']))
         self.sftp = paramiko.SFTPClient.from_transport(t)
         # start ssh connection
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        logger.info("connect SSH {}@{}".format(proxy['user'], proxy['ip']))
         self.client.connect(proxy['ip'], port=22, username=proxy['user'], password=proxy['pass'])
 
     def run(self, commands=[]):
@@ -103,21 +105,23 @@ class mapdeploy(object):
         '''
         proxy = self.conf['proxy']
         target = self.conf['target']
+        proxy_file_paths = ['/tmp/%s' % (os.path.basename(f)) for f in files]
+
         for file in files:
             md5sum = hashlib.md5(open(file, 'rb').read()).hexdigest()
             logger.info("Upload {} (md5sum {}) to {}:{} via {}".format(os.path.basename(file), md5sum, target['ip'], path, proxy['ip']))
-
             # copy to proxy via sftp
             proxy_file_path = '/tmp/%s' % (os.path.basename(file))
             self.sftp.put(file, proxy_file_path)
 
-            # copy from proxy to target via ssh
-            commands = ['sshpass -p {} ssh {} {}@{} "mkdir -p {}"'.format(target['pass'], self.sshoptions, target['user'], target['ip'], path),
-                        'sshpass -p admin scp -r {} {} admin@192.168.1.1:{}'.format(self.sshoptions, proxy_file_path, path)]
+        # copy from proxy to target via ssh
+        commands = ['sshpass -p {} ssh {} {}@{} "mkdir -p {}"'.format(target['pass'], self.sshoptions, target['user'], target['ip'], path),
+                    'sshpass -p admin scp -r {} {} admin@192.168.1.1:{}'.format(self.sshoptions, ' '.join(proxy_file_paths), path)]
 
-            self.run(commands)
-            # remove copied file from proxy
-            self.sftp.remove(proxy_file_path)
+        self.run(commands)
+
+        # remove copied files from proxy
+        for p in proxy_file_paths: self.sftp.remove(p)
 
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='deploy')):
