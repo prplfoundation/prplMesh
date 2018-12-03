@@ -6,7 +6,7 @@ import argparse
 import os
 from commands.config import mapcfg
 from commands.build import mapbuild
-from commands.deploy import mapdeploy
+from commands.deploy import mapdeploy, mapcopy
 
 THIS_SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 logging.config.fileConfig(os.path.abspath(THIS_SCRIPT_PATH + "/logging.conf"))
@@ -38,9 +38,11 @@ class maptools(object):
         self.config_command = self.child_parser.add_parser('config')
         self.build_command = self.child_parser.add_parser('build')
         self.deploy_command = self.child_parser.add_parser('deploy')
+        self.copy_command = self.child_parser.add_parser('copy')
         mapcfg.configure_parser(self.config_command)
         mapbuild.configure_parser(self.build_command)
         mapdeploy.configure_parser(self.deploy_command)
+        mapcopy.configure_parser(self.copy_command)
         
         self.args = self.parent_parser.parse_args()
         if self.args.verbose: self.logger.setLevel(logging.DEBUG)
@@ -57,11 +59,15 @@ class maptools(object):
     def __deploy__(self):
         mapdeploy(self.args)
 
+    def __copy__(self):
+        mapcopy(self.args)
+
     def run(self):
         commands = {
             'config': self.__config__, 
             'build': self.__build__,
-            'deploy': self.__deploy__
+            'deploy': self.__deploy__,
+            'copy': self.__copy__
         }
 
         try:
