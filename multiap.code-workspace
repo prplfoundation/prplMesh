@@ -20,6 +20,9 @@
 		},
 		{
 			"path": "../../ugw/feed_multiap"
+		},
+		{
+			"path": "../../ugw/sl_multiap"
 		}
 	],
 	"settings": {
