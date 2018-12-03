@@ -1,0 +1,27 @@
+deploy:
+  ugw:
+    framework:
+      bin: /opt/multiap/framework
+      lib: /usr/lib
+    common:
+      bin:
+      lib: /usr/lib
+    agent:
+      bin: /opt/beerocks
+      lib:
+    controller:
+      bin: /opt/beerocks
+      lib:
+  rdkb:
+    framework:
+      bin:
+      lib:
+    common:
+      bin:
+      lib:
+    agent:
+      bin:
+      lib:
+    controller:
+      bin:
+      lib:

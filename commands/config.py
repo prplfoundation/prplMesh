@@ -163,6 +163,7 @@ class mapcfg(object):
     def __gen_deploy_yaml(self, output_path, toolchain_path, cfg):
         ''' Generate deploy.yaml (for multiap deploy) '''
 
+        template = os.path.dirname(os.path.realpath(__file__)) + '/deploy.template.yaml'
         out_file = output_path+'/deploy.yaml'
         logger.info("Generate {}".format(out_file))
         if os.path.isfile(out_file):
@@ -181,8 +182,9 @@ class mapcfg(object):
         target['pass'], target['user'], target['ip'] = re.split(':|@', self.args.ssh_deploy_gw)
         logger.info("target: {}".format(target))
 
-        with open(out_file, 'w') as f:
+        with open(out_file, 'w') as f, open(template, 'r') as t:
             yaml.dump({'target' : target, 'proxy' : proxy}, f, default_flow_style=False)
+            yaml.dump(yaml.load(t), f, default_flow_style=False)
 
     def __gen_beerocks_dist_conf(self, output_path, toolchain_path, cfg):
         ''' Generate beerocks_dist.conf (for beerocks compilation and deploy) '''
@@ -234,8 +236,8 @@ class mapcfg(object):
             self.args.ssh_deploy_pc = board.get_ssh_deploy_pc()
             self.args.target = board.get_target()
 
-        try: self.__gen_beerocks_dist_conf(self.args.map_path, toolchain_path, config)
-        except Exception as e: logger.error("failed to generate beerocks_dist.conf - {}".format(e))
+        #try: self.__gen_beerocks_dist_conf(self.args.map_path, toolchain_path, config)
+        #except Exception as e: logger.error("failed to generate beerocks_dist.conf - {}".format(e))
         try: self.__gen_deploy_yaml(self.args.map_path, toolchain_path, config)
         except Exception as e: logger.error("failed to generate deploy.conf - {}".format(e))
         self.__gen_external_toolchain_conf(self.args.map_path, toolchain_path, config)

@@ -13,11 +13,6 @@ import hashlib
 logging.getLogger("paramiko").setLevel(logging.WARNING)
 logger = logging.getLogger("deploy")
 deploy_modules=['framework', 'common', 'controller', 'agent']
-deploy_paths = {"framework" : {"bin" : "/opt/multiap/framework", "lib" : "/usr/lib"},
-                "common" : {"bin" : "/opt/multiap/common", "lib" : "/usr/lib"},
-                "agent" : {"bin" : "/opt/beerocks", "lib" : "/usr/lib"},
-                "controller" : {"bin" : "/opt/beerocks", "lib" : "/usr/lib"},
-                }
 
 class mapconnect(object):
     SSHOPTIONS = "-oUserKnownHostsFile=/dev/null -oStrictHostKeyChecking=no" #default ssh options
@@ -110,9 +105,10 @@ class mapdeploy(object):
         with open(conf_file, 'r') as f:
             self.conf = yaml.load(f)
             self.connect = mapconnect(self.conf)
+            self.os = 'ugw' if self.conf['target']['type'] in ['grx350', 'axepoint'] else 'rdkb'
     
         logger.debug("deploy configuration: {}".format(self.conf))
-        logger.info("deploy {}".format(modules))
+        logger.info("{} deploy {}".format(self.os, modules))
 
         for m in modules:
             logger.debug("deploy {}".format(m))
@@ -122,7 +118,7 @@ class mapdeploy(object):
         if name in ['agent', 'controller']:
             archive = "{}/{}/beerocks_v1.4_{}.tar.gz".format(self.build_dir, name, name)
             softlink = "/opt/beerocks/update_beerocks_{}".format(name)
-            path = deploy_paths[name]['bin']
+            path = self.conf['deploy'][self.os][name]['bin']
             # copy archive to target
             self.connect.upload([archive], path)
             # delete old soft link if exists and create a new soft link on target
@@ -139,11 +135,11 @@ class mapdeploy(object):
             logger.info("{} bin_dir: {}".format(name, bin_dir))
             logger.info("{} lib_dir: {}".format(name, lib_dir))
             if bins:
-                logger.info("{} deploy binaries: {}-->{}".format(name, [os.path.basename(b) for b in bins], deploy_paths[name]['bin']))
-                self.upload(bins, deploy_paths[name]['bin'])
+                logger.info("{} deploy binaries: {}-->{}".format(name, [os.path.basename(b) for b in bins], self.conf['deploy'][self.os][name]['bin']))
+                self.connect.upload(bins, self.conf['deploy'][self.os][name]['bin'])
             if libs:
-                logger.info("{} deploy libraries: {}-->{}".format(name, [os.path.basename(l) for l in libs], deploy_paths[name]['lib']))
-                self.upload(libs, deploy_paths[name]['lib'])
+                logger.info("{} deploy libraries: {}-->{}".format(name, [os.path.basename(l) for l in libs], self.conf['deploy'][self.os][name]['lib']))
+                self.connect.upload(libs, self.conf['deploy'][self.os][name]['lib'])
 
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='deploy')):
