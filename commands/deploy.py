@@ -55,23 +55,24 @@ class mapconnect(object):
             files - local files
             path - path in target
         '''
-        proxy_file_paths = ['/tmp/%s' % (os.path.basename(f)) for f in files]
+        # update list - (local_path, proxy_path, perm, md5sum)
+        update_list = [(os.path.abspath(f), '/tmp/%s' % (os.path.basename(f)), oct(os.stat(f).st_mode & 0777), hashlib.md5(open(f, 'rb').read()).hexdigest()) for f in files]
 
-        for file in files:
-            md5sum = hashlib.md5(open(file, 'rb').read()).hexdigest()
-            logger.info("Upload {} (md5sum {}) to {}:{} via {}".format(os.path.basename(file), md5sum, self.target['ip'], path, self.proxy['ip']))
-            # copy to proxy via sftp
-            proxy_file_path = '/tmp/%s' % (os.path.basename(file))
-            self.sftp.put(file, proxy_file_path)
+        # copy to proxy
+        for lpath, ppath, perm, md5sum in update_list:
+             logger.info("Upload {} (md5sum {}) to {}:{} via {}".format(lpath, md5sum, self.target['ip'], path, self.proxy['ip']))
+             self.sftp.put(lpath, ppath)
 
-        # copy from proxy to target via ssh
-        commands = ['sshpass -p {} ssh {} {}@{} "mkdir -p {}"'.format(self.target['pass'], mapconnect.SSHOPTIONS, self.target['user'], self.target['ip'], path),
-                    'sshpass -p admin scp -r {} {} admin@192.168.1.1:{}'.format(mapconnect.SSHOPTIONS, ' '.join(proxy_file_paths), path)]
+        ssh_cmd_template = 'sshpass -p {} ssh {} {}@{}'.format(self.target['pass'], mapconnect.SSHOPTIONS, self.target['user'], self.target['ip'])
+        mkdir_cmd = '{} "mkdir -p {}"'.format(ssh_cmd_template, path)
+        scp_cmd = 'sshpass -p admin scp -r {} {} admin@192.168.1.1:{}'.format(mapconnect.SSHOPTIONS, ' '.join(['{}'.format(ppath) for lpath, ppath, perm, md5sum in update_list]), path)
+        chmod_cmd = '{} "{}"'.format(ssh_cmd_template, ';'.join(['chmod {} {}'.format(perm, os.path.join(path, os.path.basename(lpath))) for lpath, ppath, perm, md5sum in update_list]))
 
-        self.run(commands)
+        # run commands at proxy
+        self.run([mkdir_cmd, scp_cmd, chmod_cmd])
 
-        # remove copied files from proxy
-        for p in proxy_file_paths: self.sftp.remove(p)
+        # delete from proxy
+        for lpath, ppath, perm, md5sum in update_list: self.sftp.remove(ppath)
 
 class mapcopy(object):
     def __init__(self, args):
