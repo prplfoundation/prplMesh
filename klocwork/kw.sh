@@ -36,19 +36,12 @@ fi
 
 echo Performing KW on: $REPO.
 
-# Clean Repos
-CLEAN_PATH=`pwd`"/../../$REPO/build"
-echo "cleaning $CLEAN_PATH"
-rm -rf $CLEAN_PATH/*
-
 # Generate input script to klocwork checker
 rm -rf _GO_KW
 cat  > _GO_KW << DONE
 #!/bin/sh
 echo "starting kw from folder: `pwd`"
-cd ../../$REPO
-export STAGING_DIR=""
-cmake -H. -B./build -DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake -DCMAKE_INSTALL_PREFIX:FILEPATH=../out && cmake --build ./build -- install -j
+../maptools.py build $REPO -c clean make
 exit
 DONE
 
