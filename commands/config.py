@@ -14,7 +14,8 @@ class owrtcfg(object):
         self.cfg = {'CONFIG_BUILD_SUFFIX' : None,
                     'CONFIG_TARGET_NAME' : 'mips_mips32_uClibc-0.9.33.2',
                     'CONFIG_TOOLCHAIN_ROOT' : '{}/staging_dir/toolchain-mips_mips32_gcc-4.8-linaro_uClibc-0.9.33.2'.format(path),
-                    'CONFIG_TOOLCHAIN_PREFIX' : 'mips-openwrt-linux-uclibc-'
+                    'CONFIG_TOOLCHAIN_PREFIX' : 'mips-openwrt-linux-uclibc-',
+                    'CONFIG_TARGET_lantiq_xrx500_easy350_anywan_axepoint' : None
                     }
 
     def __get_entry_value(self, lines, name):
@@ -159,6 +160,8 @@ class mapcfg(object):
             f.write('PLATFORM_TOOLCHAIN_PREFIX={}/bin/{}\n'.format(cfg['CONFIG_TOOLCHAIN_ROOT'], cfg['CONFIG_TOOLCHAIN_PREFIX']))
             f.write('PLATFORM_BASE_DIR={}\n'.format(toolchain_path))
             f.write('PLATFORM_BUILD_NAME=target-{}_{}\n'.format(cfg['CONFIG_TARGET_NAME'], cfg['CONFIG_BUILD_SUFFIX']))
+            bwl_type = 'DWPAL' if cfg['CONFIG_TARGET_lantiq_xrx500_easy350_anywan_axepoint'] else 'WAV_FAPI'
+            f.write('BWL_TYPE={}'.format(bwl_type))
 
     def __gen_deploy_yaml(self, output_path, toolchain_path, cfg):
         ''' Generate deploy.yaml (for multiap deploy) '''
