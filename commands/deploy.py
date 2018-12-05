@@ -60,7 +60,7 @@ class mapconnect(object):
 
         ssh_cmd_template = 'sshpass -p {} ssh {} {}@{}'.format(self.target['pass'], mapconnect.SSHOPTIONS, self.target['user'], self.target['ip'])
         mkdir_cmd = '{} "mkdir -p {}"'.format(ssh_cmd_template, path)
-        scp_cmd = 'sshpass -p admin scp -r {} {} admin@192.168.1.1:{}'.format(mapconnect.SSHOPTIONS, ' '.join(['{}'.format(ppath) for lpath, ppath, perm, md5sum in update_list]), path)
+        scp_cmd = 'sshpass -p {} scp -r {} {} {}@{}:{}'.format(self.target['pass'], mapconnect.SSHOPTIONS, ' '.join(['{}'.format(ppath) for lpath, ppath, perm, md5sum in update_list]), self.target['user'], self.target['ip'], path)
         chmod_cmd = '{} "{}"'.format(ssh_cmd_template, ';'.join(['chmod {} {}'.format(perm, os.path.join(path, os.path.basename(lpath))) for lpath, ppath, perm, md5sum in update_list]))
 
         # run commands at proxy
