@@ -9,39 +9,23 @@ echo kwcheck --version
 echo current folder: `pwd`
 echo number of input arguments: "$#"
 
-INTERACTIVE_KW=true
+declare -a REPOS=("framework" "common" "controller" "agent")
 
-if [ "$#" -eq 1 ]; then
-      INTERACTIVE_KW=false
-      REPO=$1
-fi
+################################################################
+####################### Local Functions ########################
+################################################################
 
-echo intercative mode: $INTERACTIVE_KW
-
-# Repo Select
-if [ "$INTERACTIVE_KW" = true ]; then
-      read -p "On which repo do you with to perfrom klocwork? [1-framework, 2-common, 3-controller, 4-agent]: " REPO
-
-      case $REPO in
-            "1") REPO="framework"    ;;
-            "2") REPO="common"       ;;
-            "3") REPO="controller"   ;;
-            "4") REPO="agent"        ;;
-            *)   
-                  echo "Error: unrecognized input value:'$REPO'" 
-                  exit 128 # Invalid argument to exit
-                  ;;
-      esac
-fi
-
+kw()
+{ 
 echo Performing KW on: $REPO.
 
 # Generate input script to klocwork checker
 rm -rf _GO_KW
 cat  > _GO_KW << DONE
 #!/bin/sh
-echo "starting kw from folder: `pwd`"
-../maptools.py build $REPO -c clean make
+cd `pwd`/../../$REPO
+echo "starting kw from folder: \`pwd\`"
+../tools/maptools.py build $REPO -c clean make
 exit
 DONE
 
@@ -74,15 +58,46 @@ kwcheck list -F detailed --severity 4 --status 'Analyze','Fix' --report ${REPORT
 # Generate output summary
 declare -a KW_TYPES=("1:Critical" "2:Error" "3:Warning" "4:Review")
 
-echo -e "\nSummary by components:" > ${REPORT_PATH}/kwreport_summary.log
+echo -e "Summary by components:" > ${REPORT_PATH}/kwreport_summary.log
 cp ${REPORT_PATH}/kwreport_all.log ${REPORT_PATH}/kwreport_tmp.log
 for t in ${KW_TYPES[@]}; do
       issue_cnt=`grep -c $t ${REPORT_PATH}/kwreport_all.log`
       echo "    $t: $issue_cnt" >> ${REPORT_PATH}/kwreport_summary.log
 done
 rm ${REPORT_PATH}/kwreport_tmp.log
+echo -e "\nLast KW: `date +%x' '%H:%M`" >> ${REPORT_PATH}/kwreport_summary.log
 
 echo ""
+
+}
+
+################################################################
+####################### Script begining ########################
+################################################################
+
+# Repo Select
+read -p "On which repo do you with to perfrom klocwork? [1-framework, 2-common, 3-controller, 4-agent, 5-all]: " REPO
+case $REPO in
+      "1") REPO="framework"    ;;
+      "2") REPO="common"       ;;
+      "3") REPO="controller"   ;;
+      "4") REPO="agent"        ;;
+      "5") REPO="all"          ;;
+      *)   
+            echo "Error: unrecognized input value:'$REPO'" 
+            exit 128 # Invalid argument to exit
+            ;;
+esac
+
+if [ "$REPO" == "all" ]; then
+      echo "Performing KW on all repos! \n" 
+      for REPO in ${REPOS[@]}; do
+            kw
+      done
+else
+      kw
+fi
+
 echo DONE!
 
 
