@@ -117,7 +117,7 @@ class mapdeploy(object):
         logger.debug("modules_dir={}, build_dir={}, conf={}".format(self.modules_dir, self.build_dir, conf_file))
         with open(conf_file, 'r') as f:
             self.conf = yaml.load(f)
-            self.connect = mapconnect(self.conf)
+            if not args.pack_only: self.connect = mapconnect(self.conf)
             self.os = 'ugw' if self.conf['target']['type'] in ['grx350', 'axepoint'] else 'rdkb'
     
         logger.debug("deploy configuration: {}".format(self.conf))
@@ -139,7 +139,7 @@ class mapdeploy(object):
         shutil.copy(deploy_sh, os.path.join(self.pack_dir, os.path.basename(deploy_sh)))
 
         # upload to target
-        self.connect.upload([archive, deploy_sh], args.path)
+        if not args.pack_only: self.connect.upload([archive, deploy_sh], args.path)
 
     def pack(self, name):
         pack_dir = self.pack_dir
@@ -161,6 +161,7 @@ class mapdeploy(object):
         parser.help = "multiap_sw standalone deploy module"
         parser.add_argument('modules', choices=['all'] + deploy_modules, nargs='+', help='module[s] to deploy')
         parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
+        parser.add_argument("--pack-only", action="store_true", help="only pack multiap for later deployment (multiap_deploy.tar.gz and deploy.sh)")
         parser.add_argument("--path", "-p", default="/tmp/multiap/deploy/", help="path to deploy on in target")
         parser.add_argument("--conf", "-c", help="path to deploy.yaml")
 
