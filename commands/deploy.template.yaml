@@ -2,16 +2,18 @@ deploy:
   ugw:
     framework:
       bin: /opt/multiap/framework
+      share: /opt/multiap/framework/share
       lib: /usr/lib
     common:
-      bin:
+      scripts: /opt/beerocks/
       lib: /usr/lib
     agent:
       bin: /opt/beerocks
-      lib:
+      config: /opt/beerocks
     controller:
       bin: /opt/beerocks
-      lib:
+      config: /opt/beerocks
+      lib: /usr/lib
   rdkb:
     framework:
       bin:
