@@ -9,6 +9,8 @@ import yaml
 import paramiko
 import glob
 import hashlib
+import errno
+import tarfile
 
 logging.getLogger("paramiko").setLevel(logging.WARNING)
 logger = logging.getLogger("deploy")
@@ -94,12 +96,23 @@ class mapcopy(object):
     def __str__(self):
         return str(self.args)
 
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
 class mapdeploy(object):
     def __init__(self, args):
         if args.verbose: logger.setLevel(logging.DEBUG)
         modules = deploy_modules if 'all' in args.modules else [m for m in deploy_modules if m in args.modules]
         self.modules_dir = os.path.realpath(args.map_path)
         self.build_dir = os.path.realpath(self.modules_dir + '/build')
+        self.pack_dir = os.path.realpath(self.build_dir + '/pack')
+        
         conf_file = args.conf if args.conf else os.path.realpath(self.modules_dir + '/deploy.yaml')
         logger.debug("modules_dir={}, build_dir={}, conf={}".format(self.modules_dir, self.build_dir, conf_file))
         with open(conf_file, 'r') as f:
@@ -110,44 +123,46 @@ class mapdeploy(object):
         logger.debug("deploy configuration: {}".format(self.conf))
         logger.info("{} deploy {}".format(self.os, modules))
 
+        if os.path.exists(self.pack_dir):
+            logger.info("Delete previous packing {}".format(self.pack_dir))
+            shutil.rmtree(self.pack_dir)
+    
         for m in modules:
-            logger.debug("deploy {}".format(m))
-            self.deploy(m)
+            logger.debug("pack {}".format(m))
+            self.pack(m)
 
-    def deploy(self, name):
-        if name in ['agent', 'controller']:
-            archive = "{}/{}/beerocks_v1.4_{}.tar.gz".format(self.build_dir, name, name)
-            softlink = "/opt/beerocks/update_beerocks_{}".format(name)
-            path = self.conf['deploy'][self.os][name]['bin']
-            # copy archive to target
-            self.connect.upload([archive], path)
-            # delete old soft link if exists and create a new soft link on target
-            target = self.conf['target']
-            ssh_command = 'sshpass -p {} ssh {} {}@{} '.format(target['pass'], mapconnect.SSHOPTIONS, target['user'], target['ip'])
-            command = '{} "rm {}; ln -s {} {}"'.format(ssh_command, softlink, os.path.join(path, os.path.basename(archive)), softlink)
-            self.connect.run([command])
-        else:
-            # deploy out/bin and out/lib in all other modules
-            bin_dir = os.path.join(self.build_dir, name, 'out/bin')
-            lib_dir = os.path.join(self.build_dir, name, 'out/lib')
-            bins = glob.glob('{}/*'.format(bin_dir))
-            libs = glob.glob('{}/*'.format(lib_dir))
-            logger.info("{} bin_dir: {}".format(name, bin_dir))
-            logger.info("{} lib_dir: {}".format(name, lib_dir))
-            if bins:
-                logger.info("{} deploy binaries: {}-->{}".format(name, [os.path.basename(b) for b in bins], self.conf['deploy'][self.os][name]['bin']))
-                self.connect.upload(bins, self.conf['deploy'][self.os][name]['bin'])
-            if libs:
-                logger.info("{} deploy libraries: {}-->{}".format(name, [os.path.basename(l) for l in libs], self.conf['deploy'][self.os][name]['lib']))
-                self.connect.upload(libs, self.conf['deploy'][self.os][name]['lib'])
+        # create multiap_deploy.tar.gz
+        archive = os.path.join(self.pack_dir, "multiap_deploy.tar.gz")
+        with tarfile.open(archive, "w:gz") as tar:
+            tar.add(self.pack_dir, arcname='/')
+        deploy_sh = os.path.dirname(os.path.realpath(__file__)) + '/deploy_%s.sh' %self.os
+        shutil.copy(deploy_sh, os.path.join(self.pack_dir, os.path.basename(deploy_sh)))
+
+        # upload to target
+        self.connect.upload([archive, deploy_sh], args.path)
+
+    def pack(self, name):
+        pack_dir = self.pack_dir
+        out_dir = os.path.join(self.build_dir, name, 'out')
+        pack_dirs = [(d,self.conf['deploy'][self.os][name][d]) for d in os.listdir(out_dir) if os.path.isdir(os.path.join(out_dir, d))]
+
+        for src, dst in pack_dirs:
+            src_path = os.path.join(out_dir, src)
+            dst_path = os.path.join(pack_dir, os.path.relpath(dst, '/'))
+            mkdir_p(dst_path)
+            files = glob.glob('{}/*'.format(src_path))
+            for f in files:
+                md5sum = hashlib.md5(open(f, 'rb').read()).hexdigest()
+                logger.debug("packing {} (md5sum {})".format(f, md5sum))
+                shutil.copy(os.path.abspath(f), os.path.join(dst_path, os.path.basename(f)))
 
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='deploy')):
         parser.help = "multiap_sw standalone deploy module"
         parser.add_argument('modules', choices=['all'] + deploy_modules, nargs='+', help='module[s] to deploy')
+        parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
         parser.add_argument("--path", "-p", default="/tmp/multiap/deploy/", help="path to deploy on in target")
         parser.add_argument("--conf", "-c", help="path to deploy.yaml")
-        parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
 
         return parser
 
