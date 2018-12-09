@@ -65,7 +65,7 @@ for t in ${KW_TYPES[@]}; do
       echo "    $t: $issue_cnt" >> ${REPORT_PATH}/kwreport_summary.log
 done
 rm ${REPORT_PATH}/kwreport_tmp.log
-echo -e "\nLast KW: `date +%x' '%H:%M`" >> ${REPORT_PATH}/kwreport_summary.log
+echo -e "\nLast KW: `date +'%d/%m/%Y %H:%M'`" >> ${REPORT_PATH}/kwreport_summary.log
 
 echo ""
 
