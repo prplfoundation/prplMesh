@@ -105,6 +105,11 @@ def mkdir_p(path):
         else:
             raise
 
+def reset(tarinfo):
+    tarinfo.uid = tarinfo.gid = 0
+    tarinfo.uname = tarinfo.gname = "root"
+    return tarinfo
+
 class mapdeploy(object):
     def __init__(self, args):
         if args.verbose: logger.setLevel(logging.DEBUG)
@@ -134,7 +139,7 @@ class mapdeploy(object):
         # create multiap_deploy.tar.gz
         archive = os.path.join(self.pack_dir, "multiap_deploy.tar.gz")
         with tarfile.open(archive, "w:gz") as tar:
-            tar.add(self.pack_dir, arcname='/')
+            tar.add(self.pack_dir, arcname='/', filter=reset)
         deploy_sh = os.path.dirname(os.path.realpath(__file__)) + '/deploy_%s.sh' %self.os
         shutil.copy(deploy_sh, os.path.join(self.pack_dir, os.path.basename(deploy_sh)))
 

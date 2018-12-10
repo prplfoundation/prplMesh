@@ -222,7 +222,7 @@
         {
             "label": "BuildController",
             "command": "python",
-            "args": ["./maptools.py", "build", "framework"],
+            "args": ["./maptools.py", "build", "controller"],
             "options": {"cwd": "${workspaceRoot}/",},
             "group": {"kind": "build", "isDefault": true},
             "problemMatcher": {
