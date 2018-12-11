@@ -12,7 +12,7 @@ echo "$0: Deploy $archive ..."
 cd / && tar -xzvf $archive && cd -
 
 echo "$0: Start mAP Framework"
-/etc/init.d/multiap_init.sh start
+/etc/init.d/multiap_init.sh start_wd
 
 echo "$0: Start beerocks"
 /opt/beerocks/beerocks_utils.sh start
