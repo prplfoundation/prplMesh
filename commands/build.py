@@ -30,6 +30,7 @@ class cmakebuilder(object):
     def clean(self):
         if os.path.exists(self.build_path):
             logger.info("cleaning {}".format(self.name))
+            os.system("xargs rm < {}/install_manifest.txt".format(self.build_path))
             shutil.rmtree(self.build_path)
 
     def prepare(self):
