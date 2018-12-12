@@ -11,8 +11,10 @@ build_targets=['clean', 'distclean', 'make']
 build_modules=['framework', 'common', 'controller', 'agent']
 
 class cmakebuilder(object):
-    def __init__(self, name, modules_dir, build_dir, install_dir):
+    def __init__(self, name, modules_dir, build_dir, install_dir, cmake_verbose=False, make_verbose=False):
         self.name = name
+        self.cmake_verbose = cmake_verbose
+        self.make_verbose = make_verbose
         self.src_path = "{}/{}".format(modules_dir, name)
         self.build_path = "{}/{}".format(build_dir, name)
         '''
@@ -38,15 +40,15 @@ class cmakebuilder(object):
             logger.info("{} already prepared, skip cmake {}".format(self.build_path, self.name))
             return
 
-        cmd = "cmake -H{} -B{} -DSTANDALONE=ON -DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake -DCMAKE_INSTALL_PREFIX={}".format(
-            self.src_path, self.build_path, self.install_path)
+        cmd = "cmake -H{} -B{} -DSTANDALONE=ON -DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake -DCMAKE_INSTALL_PREFIX={} {}".format(
+            self.src_path, self.build_path, self.install_path, "" if not self.cmake_verbose else "--debug-output")
         logger.info("preparing {}: {}".format(self.name, cmd))
         subprocess.check_call(cmd, shell=True, env=self.env)
         open("{}/.prepared".format(self.build_path), 'a').close()
     
     def make(self):
         logger.info("building & installing {}".format(self.name))
-        cmd = "cmake --build {} -- install -j".format(self.build_path)
+        cmd = "cmake --build {} -- install -j {}".format(self.build_path, "" if not self.make_verbose else "VERBOSE=1")
         subprocess.check_call(cmd, shell=True, env=self.env)
 
 class mapbuild(object):
@@ -66,7 +68,7 @@ class mapbuild(object):
         logger.debug("modules_dir={}, build_dir={}, install_dir={}".format(modules_dir, build_dir, install_dir))
 
         for name in modules:
-            builder = cmakebuilder(name, modules_dir, build_dir, install_dir)
+            builder = cmakebuilder(name, modules_dir, build_dir, install_dir, args.cmake_verbose, args.make_verbose)
             logger.debug(builder)
             if 'clean' in commands:
                 builder.clean()
@@ -80,6 +82,8 @@ class mapbuild(object):
         parser.add_argument('modules', choices=['all'] + build_modules, nargs='+', help='module[s] to build')
         parser.add_argument('-c', '--commands', choices=build_targets, nargs='+', default=['make'], help="build command (default is clean+make)")
         parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
+        parser.add_argument("--cmake-verbose", action="store_true", help="cmake verbosity on (pass --debug-output to cmake command)")
+        parser.add_argument("--make-verbose", action="store_true", help="make verbosity on (pass VERBOSE=1 to make)")
 
         return parser
 
