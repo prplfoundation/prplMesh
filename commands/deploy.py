@@ -159,7 +159,10 @@ class mapdeploy(object):
             for f in files:
                 md5sum = hashlib.md5(open(f, 'rb').read()).hexdigest()
                 logger.debug("packing {} (md5sum {})".format(f, md5sum))
-                shutil.copy(os.path.abspath(f), os.path.join(dst_path, os.path.basename(f)))
+                if (os.path.islink(f)):
+                    os.symlink(os.readlink(f), os.path.join(dst_path, os.path.basename(f)))
+                else:
+                    shutil.copy(os.path.abspath(f), os.path.join(dst_path, os.path.basename(f)))
 
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='deploy')):
