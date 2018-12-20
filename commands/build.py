@@ -17,12 +17,7 @@ class cmakebuilder(object):
         self.make_verbose = make_verbose
         self.src_path = "{}/{}".format(modules_dir, name)
         self.build_path = "{}/{}".format(build_dir, name)
-        '''
-        Use relative path for self.install_path, as it is used for CMAKE_INSTALL_PREFIX,
-        and external_toolchain.cfg (in source repos) expects relative paths otherwise it treats
-        the build as out of tree.
-        '''
-        self.install_path = os.path.relpath(install_dir, self.src_path)
+        self.install_path = install_dir
         self.env = os.environ.copy()
         self.env["STAGING_DIR"] = ""
 
@@ -59,7 +54,7 @@ class mapbuild(object):
         modules_dir = os.path.realpath(args.map_path)
         build_dir = os.path.realpath(modules_dir + '/build')
         install_dir = os.path.realpath(build_dir + '/install')
-       
+
         if 'distclean' in commands and os.path.exists(build_dir):
              logger.info("distclean - deleting {}".format(build_dir))
              shutil.rmtree(build_dir)
