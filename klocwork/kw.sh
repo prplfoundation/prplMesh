@@ -44,7 +44,10 @@ kwcheck import klocwork_database.kb
 kwcheck import analysis_profile.pconf
 
 # Analyze and generate reports
-REPORT_PATH=`pwd`"/../../$REPO/kw_reports"
+ROOT_PATH=$(realpath `pwd`/../../)
+REPO_PATH=$(realpath `pwd`/../../$REPO)
+TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
+REPORT_PATH=$REPO_PATH/kw_reports
 mkdir -p $REPORT_PATH
 kwcheck run
 echo ""
@@ -54,6 +57,15 @@ kwcheck list -F detailed --severity 1 --status 'Analyze','Fix' --report ${REPORT
 kwcheck list -F detailed --severity 2 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_error.log
 kwcheck list -F detailed --severity 3 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_warning.log
 kwcheck list -F detailed --severity 4 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_review.log
+
+# finalize reports
+# remove local prefixes from source controlled reports
+declare -a KW_REPORTS=(${REPORT_PATH}/kwreport_all.log ${REPORT_PATH}/kwreport_critical.log ${REPORT_PATH}/kwreport_error.log ${REPORT_PATH}/kwreport_warning.log ${REPORT_PATH}/kwreport_review.log)
+for r in ${KW_REPORTS[@]}; do
+      cp $r ${r}.tmp
+      sed -i -e "s/${ROOT_PATH////\\/}\///g" $r # remove local path prefixes from multiap modules
+      sed -i -e "s/${TOOLCHAIN_PATH////\\/}\///g" $r # remove local path prefixes from external toolchain files
+done
 
 # Generate output summary
 declare -a KW_TYPES=("1:Critical" "2:Error" "3:Warning" "4:Review")
