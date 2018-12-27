@@ -4,6 +4,7 @@ import logging
 import logging.config
 import argparse
 import os
+import sys
 from commands.config import mapcfg
 from commands.build import mapbuild
 from commands.deploy import mapdeploy, mapcopy
@@ -16,7 +17,7 @@ def print_color(string, color):
 	attr = []
 	attr.append(colors[color])
 	attr.append('1')
-	print '\x1b[%sm%s\x1b[0m' % (';'.join(attr), string)
+	print('\x1b[%sm%s\x1b[0m' % (';'.join(attr), string))
 
 def ASSERT(string):
 	print_color('ASSERT: %s' %(string), 'red')
@@ -48,7 +49,7 @@ class maptools(object):
         if self.args.verbose: self.logger.setLevel(logging.DEBUG)
 
     def __str__(self):
-		return str(self.args)
+        return str(self.args)
 
     def __config__(self):
         mapcfg(self.args)
@@ -74,6 +75,9 @@ class maptools(object):
             self.logger.debug(self.args.cmd)
             commands[self.args.cmd]()
         except KeyError as err:
+            if not self.args.cmd:
+                self.parent_parser.print_help()
+                sys.exit(0)
             raise Exception("Operation not supported ({}, err={})".format(self.args.cmd, err))
 
 if __name__ == '__main__':

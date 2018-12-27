@@ -53,7 +53,7 @@ class mapconnect(object):
             path - path in target
         '''
         # update list - (local_path, proxy_path, perm, md5sum)
-        update_list = [(os.path.abspath(f), '/tmp/%s' % (os.path.basename(f)), oct(os.stat(f).st_mode & 0777), hashlib.md5(open(f, 'rb').read()).hexdigest()) for f in files]
+        update_list = [(os.path.abspath(f), '/tmp/%s' % (os.path.basename(f)), oct(os.stat(f).st_mode & 0o0777), hashlib.md5(open(f, 'rb').read()).hexdigest()) for f in files]
 
         # copy to proxy
         for lpath, ppath, perm, md5sum in update_list:

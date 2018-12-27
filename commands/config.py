@@ -37,7 +37,28 @@ class owrtcfg(object):
     def __str__(self):
         return "path={}\nvalues={}".format(self.path, self.cfg)
 
-class chdlab_board(object):
+class chdlabv3(object):
+    def __init__(cls, board, user=None):
+        from chdlab.commands.config import CHDLAB_config
+        from chdlab.jira_wrappers.board_jira import BoardJira
+        from chdlab.jira_wrappers.parent_jira import _ParentJira
+        _ParentJira.set_config(CHDLAB_config(cache=False, fetch=True))
+        cls.jira = BoardJira(name=board)
+
+    def __str__(self):
+        return self.jira
+
+    def get_ssh_deploy_pc(cls):
+        vm = cls.jira.linked_lan_vms[0]
+        return "{}:{}@{}".format(vm.password, vm.username, vm.management_ip)
+
+    def get_ssh_deploy_gw(cls):
+        return "{}:{}@{}".format(cls.jira.password, cls.jira.username, cls.jira.ip)
+
+    def get_target(cls):
+        return cls.jira.platform.lower()
+
+class chdlabv2(object):
     def __init__(cls, board, user=None):
         from chdlab_commands.jira_tools.jira_board import JiraBoard
         cls.jira = JiraBoard(board)
@@ -79,8 +100,8 @@ class mapcfg(object):
             self.__generate()
 
     def __gui_start(self):
-        #from Tkinter import Tk, StringVar, Label, Entry, IntVar, CheckButton, Button
-        import Tkinter
+        try: import Tkinter
+        except: import tkinter as Tkinter
         self.gui_master = Tkinter.Tk()
         self.gui_master.title("multiap configuration gui")
         
@@ -230,8 +251,10 @@ class mapcfg(object):
         
         config = owrtcfg(toolchain_path).parse()
         if self.args.board_id:
-            try: 
-                board = chdlab_board(self.args.board_id, self.args.user)
+            try:
+                board = chdlabv2(self.args.board_id, self.args.user)
+            except ImportError as e:
+                board = chdlabv3(self.args.board_id, self.args.user)
             except RuntimeError as e:
                 logger.error("board jira failure (%s)" %e)
                 raise
