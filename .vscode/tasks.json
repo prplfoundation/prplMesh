@@ -11,10 +11,7 @@
             "command": "python",
             "args": ["maptools.py", "-m", "${workspaceRoot}/..", "config", "--gui", "-g"],
             "options": {
-                "cwd": "${workspaceRoot}/",
-                "env": {
-                        "PYTHONPATH" : "/opt/ugw/chdlab"
-                }
+                "cwd": "${workspaceRoot}/"
             },
             "problemMatcher":"$tsc"
         },
