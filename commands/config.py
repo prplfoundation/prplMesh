@@ -38,25 +38,31 @@ class owrtcfg(object):
         return "path={}\nvalues={}".format(self.path, self.cfg)
 
 class chdlabv3(object):
-    def __init__(cls, board, user=None):
+    def __init__(self, board, setup=None, user=None):
         from chdlab.commands.config import CHDLAB_config
-        from chdlab.jira_wrappers.board_jira import BoardJira
         from chdlab.jira_wrappers.parent_jira import _ParentJira
-        _ParentJira.set_config(CHDLAB_config(cache=False, fetch=True))
-        cls.jira = BoardJira(name=board)
+        cfg = CHDLAB_config(cache=False, setup_number=setup, fetch=True)
+        _ParentJira.set_config(cfg)
+        self.cfg = cfg
+        self.board_id = board
 
     def __str__(self):
-        return self.jira
+        return self.cfg
 
-    def get_ssh_deploy_pc(cls):
-        vm = cls.jira.linked_lan_vms[0]
+    @property
+    def jira(self):
+        from chdlab.jira_wrappers.board_jira import BoardJira
+        return BoardJira(name=self.board_id)
+
+    def get_ssh_deploy_pc(self):
+        vm = self.jira.linked_lan_vms[0]
         return "{}:{}@{}".format(vm.password, vm.username, vm.management_ip)
 
-    def get_ssh_deploy_gw(cls):
-        return "{}:{}@{}".format(cls.jira.password, cls.jira.username, cls.jira.ip)
+    def get_ssh_deploy_gw(self):
+        return "{}:{}@{}".format(self.jira.password, self.jira.username, self.jira.ip)
 
-    def get_target(cls):
-        return cls.jira.platform.lower()
+    def get_target(self):
+        return self.jira.platform.lower()
 
 class chdlabv2(object):
     def __init__(cls, board, user=None):
@@ -78,6 +84,14 @@ class chdlabv2(object):
 class mapcfg(object):
     supported_targets = ["grx350", "axepoint"]
 
+    def __guess_setup_id(self):
+        try:
+            from chdlab.commands.config import CHDLAB_config
+            return CHDLAB_config().setup_number
+        except:
+            logger.warning("chdlabv3 not supported, ignoring setup key")
+            pass
+
     def __guess_toolchain_path(self):
         guess = os.environ.get('UGW_CORE_DIR')
         if guess:
@@ -93,6 +107,8 @@ class mapcfg(object):
         if self.args.guess:
             if not self.args.toolchain_path:
                 self.args.toolchain_path = self.__guess_toolchain_path()
+            if not self.args.setup_id:
+                self.args.setup_id = self.__guess_setup_id()
         
         if self.args.gui:
             self.__gui_start()
@@ -117,7 +133,14 @@ class mapcfg(object):
         else: user = self.gui_user_str.set(getpass.getuser())
         self.gui_user_ent = Tkinter.Entry(self.gui_master, textvariable=self.gui_user_str)
         self.gui_user_ent.pack()
-    
+
+        self.gui_setup_label = Tkinter.Label(self.gui_master, text="Setup ID")
+        self.gui_setup_label.pack()
+        self.gui_setup_str = Tkinter.StringVar()
+        if self.args.setup_id: self.gui_setup_str.set(self.args.setup_id)
+        self.gui_setup_ent = Tkinter.Entry(self.gui_master, textvariable=self.gui_setup_str)
+        self.gui_setup_ent.pack()
+
         self.gui_board_label = Tkinter.Label(self.gui_master, text="Board ID")
         self.gui_board_label.pack()
         self.gui_board_str = Tkinter.StringVar()
@@ -148,6 +171,7 @@ class mapcfg(object):
 
     def __gui_submit(self):
         self.args.user = self.gui_user_ent.get()
+        self.args.setup_id = self.gui_setup_ent.get()
         self.args.board_id = self.gui_board_ent.get()
         self.args.toolchain_path = self.gui_ugw_path_ent.get()
         self.args.no_overwrite = self.gui_no_overwrite_ent.get()
@@ -254,7 +278,7 @@ class mapcfg(object):
             try:
                 board = chdlabv2(self.args.board_id, self.args.user)
             except ImportError as e:
-                board = chdlabv3(self.args.board_id, self.args.user)
+                board = chdlabv3(self.args.board_id, self.args.setup_id, self.args.user)
             except RuntimeError as e:
                 logger.error("board jira failure (%s)" %e)
                 raise
@@ -273,6 +297,7 @@ class mapcfg(object):
     def configure_parser(parser=argparse.ArgumentParser(prog='config')):
         parser.help = "configure multiap standalone build"
         parser.add_argument("--toolchain_path", "-p", help="path to openwrt/core")
+        parser.add_argument("--setup_id", "-s", help="chdlab setup id (requires chdlab python package)")
         parser.add_argument("--board_id", "-b", help="chdlab board id (requires chdlab python package)")
         parser.add_argument("--target", "-t", default="grx350", help="target platform")
         parser.add_argument("--ssh_deploy_pc", help="ssh deploy pc")
