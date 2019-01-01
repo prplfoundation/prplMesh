@@ -8,8 +8,8 @@
     "tasks": [
         {
             "label": "Configure",
-            "command": "python",
-            "args": ["maptools.py", "-m", "${workspaceRoot}/..", "config", "--gui", "-g"],
+            "type": "shell",
+            "command": "./maptools.sh config --gui -g",
             "options": {
                 "cwd": "${workspaceRoot}/"
             },
