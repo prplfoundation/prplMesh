@@ -7,7 +7,7 @@ import collections
 import shutil
 
 logger = logging.getLogger("build")
-build_targets=['clean', 'distclean', 'make']
+build_targets=['prepare', 'clean', 'distclean', 'make']
 build_modules=['framework', 'common', 'controller', 'agent']
 
 class cmakebuilder(object):
@@ -42,8 +42,8 @@ class cmakebuilder(object):
         open("{}/.prepared".format(self.build_path), 'a').close()
     
     def make(self):
-        logger.info("building & installing {}".format(self.name))
-        cmd = "cmake --build {} -- install -j {}".format(self.build_path, "" if not self.make_verbose else "VERBOSE=1")
+        cmd = "cmake --build {} -- install {}".format(self.build_path, "-j" if not self.make_verbose else "VERBOSE=1")
+        logger.info("building & installing {}: {}".format(self.name, cmd))
         subprocess.check_call(cmd, shell=True, env=self.env)
 
 class mapbuild(object):
@@ -67,6 +67,8 @@ class mapbuild(object):
             logger.debug(builder)
             if 'clean' in commands:
                 builder.clean()
+            if 'prepare' in commands:
+                builder.prepare()
             if 'make' in commands:
                 builder.prepare()
                 builder.make()
