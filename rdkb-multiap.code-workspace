@@ -1,0 +1,102 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../common"
+		},
+		{
+			"path": "../framework"
+		},
+		{
+			"path": "../agent"
+		},
+		{
+			"path": "../controller"
+		},
+		{
+			"path": "../../wav-dpal"
+		},
+		{
+			"path": "../../wav-spal"
+		},
+		{
+			"path": "../../../atom_rdkbos/meta-rdk-soc-intel-puma7/meta-intelce"
+		},
+		{
+			"path": "../../../atom_rdkbos/meta-rdk-soc-intel-puma7/meta-multiap"
+		},
+		{
+			"path": "../../../atom_rdkbos/meta-rdk-soc-intel-puma7/meta-rdkbos-compat"
+		},
+		{
+			"path": "../../../atom_rdkbos/meta-rdk-soc-intel-puma7/meta-wave"
+		},
+		{
+			"path": "../../../atom_rdkbos/meta-rdk-soc-intel-puma7/meta-wave-rdkb"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/*.pyc": true,
+		},
+		"files.associations": {
+			"cctype": "cpp",
+			"cmath": "cpp",
+			"csignal": "cpp",
+			"cstdarg": "cpp",
+			"cstddef": "cpp",
+			"cstdio": "cpp",
+			"cstdlib": "cpp",
+			"cstring": "cpp",
+			"ctime": "cpp",
+			"cwchar": "cpp",
+			"strstream": "cpp",
+			"chrono": "cpp",
+			"condition_variable": "cpp",
+			"cstdint": "cpp",
+			"initializer_list": "cpp",
+			"iosfwd": "cpp",
+			"mutex": "cpp",
+			"ratio": "cpp",
+			"system_error": "cpp",
+			"thread": "cpp",
+			"cinttypes": "cpp",
+			"typeindex": "cpp",
+			"array": "cpp",
+			"*.tcc": "cpp",
+			"bitset": "cpp",
+			"clocale": "cpp",
+			"cwctype": "cpp",
+			"deque": "cpp",
+			"list": "cpp",
+			"unordered_map": "cpp",
+			"unordered_set": "cpp",
+			"vector": "cpp",
+			"exception": "cpp",
+			"fstream": "cpp",
+			"functional": "cpp",
+			"iomanip": "cpp",
+			"iostream": "cpp",
+			"istream": "cpp",
+			"limits": "cpp",
+			"new": "cpp",
+			"ostream": "cpp",
+			"numeric": "cpp",
+			"sstream": "cpp",
+			"stdexcept": "cpp",
+			"streambuf": "cpp",
+			"type_traits": "cpp",
+			"tuple": "cpp",
+			"typeinfo": "cpp",
+			"utility": "cpp",
+			"atomic": "cpp"
+		}
+	}
+}
