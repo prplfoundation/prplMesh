@@ -23,9 +23,10 @@ echo Performing KW on: $REPO.
 rm -rf _GO_KW
 cat  > _GO_KW << DONE
 #!/bin/sh
-cd `pwd`/../../$REPO
+cd `pwd`/../../../../atom_rdkbos/build/
 echo "starting kw from folder: \`pwd\`"
-../tools/maptools.py build $REPO -c clean make
+bitbake -c cleanall multiap-$REPO
+bitbake -c compile -f multiap-$REPO
 exit
 DONE
 
@@ -46,7 +47,8 @@ kwcheck import analysis_profile.pconf
 # Analyze and generate reports
 ROOT_PATH=$(realpath `pwd`/../../)
 REPO_PATH=$(realpath `pwd`/../../$REPO)
-TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
+#TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
+TOOLCHAIN_PATH=$(realpath `pwd`/../../../../atom_rdkbos/build/tmp/work/core2-32-rdk-linux)
 REPORT_PATH=$REPO_PATH/kw_reports
 mkdir -p $REPORT_PATH
 kwcheck run -j auto
