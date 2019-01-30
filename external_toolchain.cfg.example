@@ -1,0 +1,13 @@
+DUPLICATE AS "external_toolchain.cfg" <-- REMOVE THIS LINE
+
+# UGW example
+#TARGET_PLATFORM=ugw
+#PLATFORM_TOOLCHAIN_PREFIX=<PATH_TO>/toolchain-mips_mips32_gcc-4.8-linaro_uClibc-0.9.33.2_linux_3_10/bin/mips-openwrt-linux-uclibc-
+#PLATFORM_BASE_DIR=<PATH_TO>/ugw_sw/ugw/openwrt/core
+#PLATFORM_BUILD_NAME=target-mips-openwrt-linux-uclibc_grx350_1600_mr_eth_rt_74
+
+#rdkb example
+#TARGET_PLATFORM=rdkb
+#PLATFORM_TOOLCHAIN_PREFIX=<PATH_TO>/atom_rdkbos/build/tmp/sysroots/x86_64-linux/usr/bin/i686-rdk-linux/i686-rdk-linux-
+#PLATFORM_BASE_DIR=<PATH_TO>/atom_rdkbos/build/tmp/sysroots
+#PLATFORM_BUILD_NAME=puma7-atom
