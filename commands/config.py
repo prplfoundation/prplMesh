@@ -82,7 +82,13 @@ class chdlabv2(object):
         return cls.jira.type.lower()
 
 class mapcfg(object):
-    supported_targets = ["grx350", "axepoint"]
+    supported_targets = ["grx350", "axepoint", "cgr"]
+
+    def __guess_target(self):
+        guess = os.environ.get('rdkb_root')
+        if guess:
+            logger.info("guessed target=cgr since rdkb_root environment variable defined")
+            return 'cgr'
 
     def __guess_setup_id(self):
         try:
@@ -93,10 +99,16 @@ class mapcfg(object):
             pass
 
     def __guess_toolchain_path(self):
+        guess = os.environ.get('rdkb_root')
+        if guess:
+            logger.info("guessed external_toolchain_path from rdkb_root environment variable: {}/atom_rdkbos/build/tmp/sysroots".format(guess))
+            return "{}/atom_rdkbos/build/tmp/sysroots".format(guess)
+
         guess = os.environ.get('UGW_CORE_DIR')
         if guess:
             logger.info("guessed external_toolchain_path from UGW_CORE_DIR environment variable: {}".format(guess))
             return guess
+
         guess = self.__get_external_toolchain_path(self.args.map_path)
         if guess:
             logger.info("guessed external_toolchain_path from previous config: {}".format(guess))
@@ -105,6 +117,8 @@ class mapcfg(object):
     def __init__(self, args):
         self.args = args
         if self.args.guess:
+            if not self.args.target:
+                self.args.target = self.__guess_target()
             if not self.args.toolchain_path:
                 self.args.toolchain_path = self.__guess_toolchain_path()
             if not self.args.setup_id:
@@ -190,10 +204,10 @@ class mapcfg(object):
 
         return None
 
-    def __gen_external_toolchain_conf(self, config_path, toolchain_path, cfg):
+    def __gen_external_toolchain_conf(self, target, toolchain_prefix, base_dir, build_name):
         ''' Generate external_toolchain.cfg (for multiap repos compilation and deploy) '''
         
-        out_file = config_path+'/external_toolchain.cfg'
+        out_file = self.args.map_path + '/external_toolchain.cfg'
         logger.info("Generate {}".format(out_file))
         if os.path.isfile(out_file):
             if self.args.no_overwrite:
@@ -201,14 +215,13 @@ class mapcfg(object):
             logger.info("Overriding {}".format(out_file))
         
         with open(out_file, 'w') as f:
-            f.write('TARGET_PLATFORM=ugw\n')
-            f.write('PLATFORM_TOOLCHAIN_PREFIX={}/bin/{}\n'.format(cfg['CONFIG_TOOLCHAIN_ROOT'], cfg['CONFIG_TOOLCHAIN_PREFIX']))
-            f.write('PLATFORM_BASE_DIR={}\n'.format(toolchain_path))
-            f.write('PLATFORM_BUILD_NAME=target-{}_{}\n'.format(cfg['CONFIG_TARGET_NAME'], cfg['CONFIG_BUILD_SUFFIX']))
-            bwl_type = 'DWPAL' if cfg['CONFIG_TARGET_lantiq_xrx500_easy350_anywan_axepoint'] else 'WAV_FAPI'
-            f.write('BWL_TYPE={}'.format(bwl_type))
+            f.write('TARGET_PLATFORM={}\n'.format(target))
+            f.write('PLATFORM_TOOLCHAIN_PREFIX={}\n'.format(toolchain_prefix))
+            f.write('PLATFORM_BASE_DIR={}\n'.format(base_dir))
+            f.write('PLATFORM_BUILD_NAME={}\n'.format(build_name))
+            f.write('BWL_TYPE=DWPAL')
 
-    def __gen_deploy_yaml(self, output_path, toolchain_path, cfg):
+    def __gen_deploy_yaml(self, output_path, toolchain_path):
         ''' Generate deploy.yaml (for multiap deploy) '''
 
         template = os.path.dirname(os.path.realpath(__file__)) + '/deploy.template.yaml'
@@ -273,7 +286,6 @@ class mapcfg(object):
         if not toolchain_path or not os.path.exists(toolchain_path):
             raise Exception("Invalid toolchain_path={}".format(toolchain_path))
         
-        config = owrtcfg(toolchain_path).parse()
         if self.args.board_id:
             try:
                 board = chdlabv2(self.args.board_id, self.args.user)
@@ -286,12 +298,18 @@ class mapcfg(object):
             self.args.ssh_deploy_pc = board.get_ssh_deploy_pc()
             self.args.target = board.get_target()
 
-        #try: self.__gen_beerocks_dist_conf(self.args.map_path, toolchain_path, config)
-        #except Exception as e: logger.error("failed to generate beerocks_dist.conf - {}".format(e))
-        try: self.__gen_deploy_yaml(self.args.map_path, toolchain_path, config)
+        if 'cgr' in self.args.target:
+            target = 'rdkb'
+            toolchain_prefix = '{}/x86_64-linux/usr/bin/i686-rdk-linux/i686-rdk-linux-'.format(toolchain_path)
+            build_name = 'puma7-atom'
+        else:
+            cfg = owrtcfg(toolchain_path).parse()
+            target = 'ugw'
+            toolchain_prefix = 'PLATFORM_TOOLCHAIN_PREFIX={}/bin/{}\n'.format(cfg['CONFIG_TOOLCHAIN_ROOT'], cfg['CONFIG_TOOLCHAIN_PREFIX'])
+            build_name = 'PLATFORM_BUILD_NAME=target-{}_{}\n'.format(cfg['CONFIG_TARGET_NAME'], cfg['CONFIG_BUILD_SUFFIX'])
+        try: self.__gen_deploy_yaml(self.args.map_path, toolchain_path)
         except Exception as e: logger.error("failed to generate deploy.conf - {}".format(e))
-        self.__gen_external_toolchain_conf(self.args.map_path, toolchain_path, config)
-        
+        self.__gen_external_toolchain_conf(target, toolchain_prefix, toolchain_path, build_name)
 
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='config')):
@@ -299,7 +317,7 @@ class mapcfg(object):
         parser.add_argument("--toolchain_path", "-p", help="path to openwrt/core")
         parser.add_argument("--setup_id", "-s", help="chdlab setup id (requires chdlab python package)")
         parser.add_argument("--board_id", "-b", help="chdlab board id (requires chdlab python package)")
-        parser.add_argument("--target", "-t", default="grx350", help="target platform")
+        parser.add_argument("--target", "-t", help="target platform")
         parser.add_argument("--ssh_deploy_pc", help="ssh deploy pc")
         parser.add_argument("--ssh_deploy_gw", default="admin:admin@192.168.1.1", help="ssh deploy gw")
         parser.add_argument("--no_overwrite", "-o", action="store_true", help="do not overwrite existing configuration")
