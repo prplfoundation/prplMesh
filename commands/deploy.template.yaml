@@ -16,14 +16,16 @@ deploy:
       lib: /usr/lib
   rdkb:
     framework:
-      bin:
-      lib:
+      bin: /opt/multiap/framework/bin
+      share: /opt/multiap/framework/share
+      lib: /usr/lib
     common:
-      bin:
-      lib:
+      scripts: /opt/beerocks/
+      lib: /usr/lib
     agent:
-      bin:
-      lib:
+      bin: /opt/beerocks
+      config: /opt/beerocks
     controller:
-      bin:
-      lib:
+      bin: /opt/beerocks
+      config: /opt/beerocks
+      lib: /usr/lib

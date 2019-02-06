@@ -1,4 +1,4 @@
-if [ ! -d ${CHDLAB_PATH} ]; then
+if [ ! -d "${CHDLAB_PATH}" ]; then
     echo "Error: CHDLAB_PATH not set, aborting."
     exit 1
 fi

@@ -82,13 +82,13 @@ class chdlabv2(object):
         return cls.jira.type.lower()
 
 class mapcfg(object):
-    supported_targets = ["grx350", "axepoint", "cgr"]
+    supported_targets = ["grx350", "axepoint", "grx750"]
 
     def __guess_target(self):
         guess = os.environ.get('rdkb_root')
         if guess:
             logger.info("guessed target=cgr since rdkb_root environment variable defined")
-            return 'cgr'
+            return 'grx750'
 
     def __guess_setup_id(self):
         try:
@@ -298,7 +298,7 @@ class mapcfg(object):
             self.args.ssh_deploy_pc = board.get_ssh_deploy_pc()
             self.args.target = board.get_target()
 
-        if 'cgr' in self.args.target:
+        if 'grx750' in self.args.target:
             target = 'rdkb'
             toolchain_prefix = '{}/x86_64-linux/usr/bin/i686-rdk-linux/i686-rdk-linux-'.format(toolchain_path)
             build_name = 'puma7-atom'
@@ -307,6 +307,7 @@ class mapcfg(object):
             target = 'ugw'
             toolchain_prefix = 'PLATFORM_TOOLCHAIN_PREFIX={}/bin/{}\n'.format(cfg['CONFIG_TOOLCHAIN_ROOT'], cfg['CONFIG_TOOLCHAIN_PREFIX'])
             build_name = 'PLATFORM_BUILD_NAME=target-{}_{}\n'.format(cfg['CONFIG_TARGET_NAME'], cfg['CONFIG_BUILD_SUFFIX'])
+
         try: self.__gen_deploy_yaml(self.args.map_path, toolchain_path)
         except Exception as e: logger.error("failed to generate deploy.conf - {}".format(e))
         self.__gen_external_toolchain_conf(target, toolchain_prefix, toolchain_path, build_name)
