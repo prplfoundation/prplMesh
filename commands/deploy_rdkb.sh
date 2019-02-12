@@ -1,7 +1,7 @@
 #!/bin/sh
 
 archive=${1-/tmp/multiap_deploy.tar.gz}
-path=${2-/}
+path=${2-/tmp}
 
 echo "$0: RDKB Deploy APM"
 echo "$0: Stop APM"
