@@ -8,9 +8,8 @@ echo "$0: Stop APM"
 /opt/beerocks/apm_utils.sh stop
 
 echo "$0: WiFi Restart"
-wifi down #stops hostapd
-systemctl stop systemd-wave_init.service #rmmods ko’s
-systemctl start systemd-wave_init.service # insmod ko’s, runs recovery daemon
+wifi down
+sleep 2
 wifi
 
 echo "$0: Deploy $archive to $path..."
