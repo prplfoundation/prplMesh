@@ -263,23 +263,8 @@
             }
         },
         {
-            "label": "Klocwork_axepoint",
+            "label": "Klocwork",
             "command": "./kw.sh",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "options": {
-                "cwd": "${workspaceRoot}/klocwork/",
-            },
-            "presentation": {
-                "focus": true
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Klocwork_rdkb",
-            "command": "./kw_rdkb.sh",
             "group": {
                 "kind": "build",
                 "isDefault": true
