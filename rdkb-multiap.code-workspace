@@ -96,7 +96,9 @@
 			"tuple": "cpp",
 			"typeinfo": "cpp",
 			"utility": "cpp",
-			"atomic": "cpp"
+			"atomic": "cpp",
+			"codecvt": "cpp",
+			"memory": "cpp"
 		}
 	}
 }

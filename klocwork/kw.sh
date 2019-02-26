@@ -11,6 +11,30 @@ echo number of input arguments: "$#"
 
 declare -a REPOS=("framework" "common" "controller" "agent")
 
+# set an initial value for the flag
+PASSIVE_MODE=false
+
+# read the options
+OPTS=`getopt -o p -n 'kw.sh' -- "$@"`
+eval set -- "$OPTS"
+
+# extract options and their arguments into variables.
+while true ; do
+      case "$1" in
+            "") break ;;
+            -p) PASSIVE_MODE=true; shift; break ;;
+            * ) break ;;
+      esac   
+done
+
+PASSIVE_MODE_OPT=""
+if $PASSIVE_MODE ; then
+      PASSIVE_MODE_OPT="-f PASSIVE_MODE=ON"
+      echo "PASSIVE_MODE=ON"
+else
+      echo "PASSIVE_MODE=OFF"
+fi
+
 ################################################################
 ####################### Local Functions ########################
 ################################################################
@@ -22,10 +46,11 @@ echo Performing KW on: $REPO.
 # Generate input script to klocwork checker
 rm -rf _GO_KW
 cat  > _GO_KW << DONE
-#!/bin/sh
+#!/bin/bash
 cd `pwd`/../../$REPO
 echo "starting kw from folder: \`pwd\`"
-../tools/maptools.py build $REPO -c clean make
+echo "../tools/maptools.sh build $REPO $PASSIVE_MODE_OPT -c clean make"
+../tools/maptools.sh build $REPO $PASSIVE_MODE_OPT -c clean make
 exit
 DONE
 
@@ -46,7 +71,13 @@ kwcheck import analysis_profile.pconf
 # Analyze and generate reports
 ROOT_PATH=$(realpath `pwd`/../../)
 REPO_PATH=$(realpath `pwd`/../../$REPO)
-TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
+declare TOOLCHAIN_PATH
+if $PASSIVE_MODE; then
+      TOOLCHAIN_PATH=$(realpath `pwd`/../../../../atom_rdkbos/build/tmp/work/core2-32-rdk-linux)
+else 
+      TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
+fi
+
 REPORT_PATH=$REPO_PATH/kw_reports
 mkdir -p $REPORT_PATH
 kwcheck run -j auto
