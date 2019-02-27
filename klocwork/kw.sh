@@ -56,15 +56,15 @@ DONE
 
 ROOT_PATH=$(realpath `pwd`/../../)
 REPO_PATH=$(realpath `pwd`/../../$REPO)
-#TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
-TOOLCHAIN_PATH=$(realpath `pwd`/../../../../atom_rdkbos/build/tmp/work/core2-32-rdk-linux)
+PLATFORM_TYPE=$(grep -Po "(?<=^TARGET_PLATFORM=).*" $(realpath `pwd`/../../external_toolchain.cfg)) # "ugw"/"rdkb"
+echo platfrom identified: $PLATFORM_TYPE
 REPORT_PATH=$REPO_PATH/kw_reports
 mkdir -p $REPORT_PATH
 
-if $PASSIVE_MODE; then
+if [ "$PLATFORM_TYPE" = "rdkb" ]; then
       TOOLCHAIN_PATH=$(realpath `pwd`/../../../../atom_rdkbos/build/tmp/work/core2-32-rdk-linux)
       URL_PATH="https://klocwork3-jf.devtools.intel.com:8140/Atom-Puma7-RDKB"
-else 
+elif [ "$PLATFORM_TYPE" = "ugw" ]; then
       TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
       URL_PATH="https://klocwork-iind4.devtools.intel.com:8105/UGW_master_grx350_rt"
 fi
