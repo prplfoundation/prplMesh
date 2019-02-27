@@ -10,6 +10,8 @@ echo current folder: `pwd`
 echo number of input arguments: "$#"
 
 declare -a REPOS=("framework" "common" "controller" "agent")
+declare TOOLCHAIN_PATH
+declare URL_PATH
 
 # set an initial value for the flag
 PASSIVE_MODE=false
@@ -59,14 +61,12 @@ TOOLCHAIN_PATH=$(realpath `pwd`/../../../../atom_rdkbos/build/tmp/work/core2-32-
 REPORT_PATH=$REPO_PATH/kw_reports
 mkdir -p $REPORT_PATH
 
-declare TOOLCHAIN_PATH
-declare URL_PATH
 if $PASSIVE_MODE; then
       TOOLCHAIN_PATH=$(realpath `pwd`/../../../../atom_rdkbos/build/tmp/work/core2-32-rdk-linux)
-      URL_PATH=$(https://klocwork3-jf.devtools.intel.com:8140/Atom-Puma7-RDKB)
+      URL_PATH="https://klocwork3-jf.devtools.intel.com:8140/Atom-Puma7-RDKB"
 else 
       TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
-      URL_PATH=$(https://klocwork-iind4.devtools.intel.com:8105/UGW_master_grx350_rt)
+      URL_PATH="https://klocwork-iind4.devtools.intel.com:8105/UGW_master_grx350_rt"
 fi
 
 REPORT_PATH=$REPO_PATH/kw_reports
@@ -80,13 +80,15 @@ echo Performing KW on: $REPO.
 #prepare any build specific and paths before common section
 prepare_kw
 
+echo url_path=$URL_PATH
+
 # Create a klocwork project based on the feeds compilation
 rm -rf .kw*/
 kwcheck create --url $URL_PATH || { rm -rf .kw*; kwcheck create; echo "*** WARNING: Creating local KW project, not synced with UGW/RDKB *** " ; }
 chmod +x _GO_KW
 kwshell -s ./_GO_KW
 
-Add checkers/overrides that are used by UGW for SDL
+# Add checkers/overrides that are used by UGW for SDL
 git archive --remote=ssh://git@gts-chd.intel.com:29418/sw_ugw/ugw_sw.git HEAD:kw_support/ kw_override.h | tar -x
 git archive --remote=ssh://git@gts-chd.intel.com:29418/sw_ugw/ugw_sw.git HEAD:kw_support/ klocwork_database.kb | tar -x
 git archive --remote=ssh://git@gts-chd.intel.com:29418/sw_ugw/ugw_sw.git HEAD:kw_support/ analysis_profile.pconf | tar -x
