@@ -39,10 +39,8 @@ fi
 ####################### Local Functions ########################
 ################################################################
 
-kw()
-{ 
-echo Performing KW on: $REPO.
-
+prepare_kw()
+{
 # Generate input script to klocwork checker
 rm -rf _GO_KW
 cat  > _GO_KW << DONE
@@ -54,13 +52,41 @@ echo "../tools/maptools.sh build $REPO $PASSIVE_MODE_OPT -c clean make"
 exit
 DONE
 
+ROOT_PATH=$(realpath `pwd`/../../)
+REPO_PATH=$(realpath `pwd`/../../$REPO)
+#TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
+TOOLCHAIN_PATH=$(realpath `pwd`/../../../../atom_rdkbos/build/tmp/work/core2-32-rdk-linux)
+REPORT_PATH=$REPO_PATH/kw_reports
+mkdir -p $REPORT_PATH
+
+declare TOOLCHAIN_PATH
+declare URL_PATH
+if $PASSIVE_MODE; then
+      TOOLCHAIN_PATH=$(realpath `pwd`/../../../../atom_rdkbos/build/tmp/work/core2-32-rdk-linux)
+      URL_PATH=$(https://klocwork3-jf.devtools.intel.com:8140/Atom-Puma7-RDKB)
+else 
+      TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
+      URL_PATH=$(https://klocwork-iind4.devtools.intel.com:8105/UGW_master_grx350_rt)
+fi
+
+REPORT_PATH=$REPO_PATH/kw_reports
+mkdir -p $REPORT_PATH
+}
+
+kw()
+{ 
+echo Performing KW on: $REPO.
+
+#prepare any build specific and paths before common section
+prepare_kw
+
 # Create a klocwork project based on the feeds compilation
 rm -rf .kw*/
-kwcheck create
+kwcheck create --url $URL_PATH || { rm -rf .kw*; kwcheck create; echo "*** WARNING: Creating local KW project, not synced with UGW/RDKB *** " ; }
 chmod +x _GO_KW
 kwshell -s ./_GO_KW
 
-# Add checkers/overrides that are used by UGW for SDL
+Add checkers/overrides that are used by UGW for SDL
 git archive --remote=ssh://git@gts-chd.intel.com:29418/sw_ugw/ugw_sw.git HEAD:kw_support/ kw_override.h | tar -x
 git archive --remote=ssh://git@gts-chd.intel.com:29418/sw_ugw/ugw_sw.git HEAD:kw_support/ klocwork_database.kb | tar -x
 git archive --remote=ssh://git@gts-chd.intel.com:29418/sw_ugw/ugw_sw.git HEAD:kw_support/ analysis_profile.pconf | tar -x
@@ -69,17 +95,6 @@ kwcheck import klocwork_database.kb
 kwcheck import analysis_profile.pconf
 
 # Analyze and generate reports
-ROOT_PATH=$(realpath `pwd`/../../)
-REPO_PATH=$(realpath `pwd`/../../$REPO)
-declare TOOLCHAIN_PATH
-if $PASSIVE_MODE; then
-      TOOLCHAIN_PATH=$(realpath `pwd`/../../../../atom_rdkbos/build/tmp/work/core2-32-rdk-linux)
-else 
-      TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
-fi
-
-REPORT_PATH=$REPO_PATH/kw_reports
-mkdir -p $REPORT_PATH
 kwcheck run -j auto
 echo ""
 echo Generating reports...
@@ -100,7 +115,6 @@ done
 
 # Generate output summary
 declare -a KW_TYPES=("1:Critical" "2:Error" "3:Warning" "4:Review")
-
 echo -e "Summary by components:" > ${REPORT_PATH}/kwreport_summary.log
 cp ${REPORT_PATH}/kwreport_all.log ${REPORT_PATH}/kwreport_tmp.log
 for t in ${KW_TYPES[@]}; do
@@ -119,13 +133,13 @@ echo ""
 ################################################################
 
 # Repo Select
-read -p "On which repo do you with to perfrom klocwork? [1-framework, 2-common, 3-controller, 4-agent, 5-all]: " REPO
+read -p "On which repo do you with to perfrom klocwork? [0-all, 1-framework, 2-common, 3-controller, 4-agent]: " REPO
 case $REPO in
+      "0") REPO="all"          ;;
       "1") REPO="framework"    ;;
       "2") REPO="common"       ;;
       "3") REPO="controller"   ;;
       "4") REPO="agent"        ;;
-      "5") REPO="all"          ;;
       *)   
             echo "Error: unrecognized input value:'$REPO'" 
             exit 128 # Invalid argument to exit

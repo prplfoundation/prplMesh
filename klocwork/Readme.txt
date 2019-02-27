@@ -3,7 +3,11 @@ open a new shell and make sure you are using the new path:
 Answer should be: /opt/ugw/klockwork/kw123/bin/kwauth
 
 Authenticate user with Klockwork server:
->> kwauth --url https://plxv7007.pdx.intel.com:8140/
+#UGW:
+>> kwauth --url https://klocwork-iind4.devtools.intel.com:8105
+#RDKB
+>> kwauth --url https://klocwork3-jf.devtools.intel.com:8140/
+
       
 Login: [WIN_USER_NAME]
 Password: [WIN_PASSWORD]
