@@ -12,6 +12,10 @@ echo number of input arguments: "$#"
 declare -a REPOS=("framework" "common" "controller" "agent")
 declare TOOLCHAIN_PATH
 declare URL_PATH
+declare REPORT_PATH
+declare REPO_PATH
+declare ROOT_PATH
+declare PLATFORM_TYPE
 
 # set an initial value for the flag
 PASSIVE_MODE=false
@@ -58,7 +62,7 @@ ROOT_PATH=$(realpath `pwd`/../../)
 REPO_PATH=$(realpath `pwd`/../../$REPO)
 PLATFORM_TYPE=$(grep -Po "(?<=^TARGET_PLATFORM=).*" $(realpath `pwd`/../../external_toolchain.cfg)) # "ugw"/"rdkb"
 echo platfrom identified: $PLATFORM_TYPE
-REPORT_PATH=$REPO_PATH/kw_reports
+REPORT_PATH=$REPO_PATH/kw_reports/$PLATFORM_TYPE
 mkdir -p $REPORT_PATH
 
 if [ "$PLATFORM_TYPE" = "rdkb" ]; then
@@ -68,9 +72,6 @@ elif [ "$PLATFORM_TYPE" = "ugw" ]; then
       TOOLCHAIN_PATH=$(grep -Po "(?<=^PLATFORM_BASE_DIR=).*" $(realpath `pwd`/../../external_toolchain.cfg))
       URL_PATH="https://klocwork-iind4.devtools.intel.com:8105/UGW_master_grx350_rt"
 fi
-
-REPORT_PATH=$REPO_PATH/kw_reports
-mkdir -p $REPORT_PATH
 }
 
 kw()
@@ -80,14 +81,13 @@ echo Performing KW on: $REPO.
 #prepare any build specific and paths before common section
 prepare_kw
 
-echo url_path=$URL_PATH
-
 # Create a klocwork project based on the feeds compilation
 rm -rf .kw*/
 kwcheck create --url $URL_PATH || { rm -rf .kw*; kwcheck create; echo "*** WARNING: Creating local KW project, not synced with UGW/RDKB *** " ; }
 chmod +x _GO_KW
 kwshell -s ./_GO_KW
 
+if [ "$PLATFORM_TYPE" = "ugw" ]; then
 # Add checkers/overrides that are used by UGW for SDL
 git archive --remote=ssh://git@gts-chd.intel.com:29418/sw_ugw/ugw_sw.git HEAD:kw_support/ kw_override.h | tar -x
 git archive --remote=ssh://git@gts-chd.intel.com:29418/sw_ugw/ugw_sw.git HEAD:kw_support/ klocwork_database.kb | tar -x
@@ -95,6 +95,7 @@ git archive --remote=ssh://git@gts-chd.intel.com:29418/sw_ugw/ugw_sw.git HEAD:kw
 kwcheck import kw_override.h
 kwcheck import klocwork_database.kb
 kwcheck import analysis_profile.pconf
+fi
 
 # Analyze and generate reports
 kwcheck run -j auto
@@ -148,7 +149,7 @@ case $REPO in
             ;;
 esac
 
-if [ "$REPO" == "all" ]; then
+if [ "$REPO" = "all" ]; then
       echo "Performing KW on all repos!" 
       for REPO in ${REPOS[@]}; do
             kw
