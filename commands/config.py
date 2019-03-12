@@ -85,9 +85,9 @@ class mapcfg(object):
     supported_targets = ["grx350", "axepoint", "grx750"]
 
     def __guess_target(self):
-        guess = os.environ.get('rdkb_root')
+        guess = os.environ.get('rdkb_atom_root')
         if guess:
-            logger.info("guessed target=cgr since rdkb_root environment variable defined")
+            logger.info("guessed target=cgr since rdkb_atom_root environment variable defined")
             return 'grx750'
 
     def __guess_setup_id(self):
@@ -99,9 +99,9 @@ class mapcfg(object):
             pass
 
     def __guess_toolchain_path(self):
-        guess = os.environ.get('rdkb_root')
+        guess = os.environ.get('rdkb_atom_root')
         if guess:
-            logger.info("guessed external_toolchain_path from rdkb_root environment variable: {}/atom_rdkbos/build/tmp/sysroots".format(guess))
+            logger.info("guessed external_toolchain_path from rdkb_atom_root environment variable: {}/atom_rdkbos/build/tmp/sysroots".format(guess))
             return "{}/atom_rdkbos/build/tmp/sysroots".format(guess)
 
         guess = os.environ.get('UGW_CORE_DIR')
