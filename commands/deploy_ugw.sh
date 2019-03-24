@@ -7,6 +7,9 @@ echo "$0: Kill mAP controller & Agent"
 /opt/beerocks/beerocks_utils.sh killall_forced
 echo "$0: Stop mAP Framework"
 /etc/init.d/multiap_init.sh stop
+echo "$0: Stop hostapds"
+/opt/lantiq/wave/scripts/fapi_wlan_wave_bpl_set ap_stop wlan0
+/opt/lantiq/wave/scripts/fapi_wlan_wave_bpl_set ap_stop wlan2
 
 echo "$0: Deploy $archive ..."
 tar -C / -xzvf $archive
