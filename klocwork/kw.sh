@@ -106,10 +106,11 @@ kwcheck list -F detailed --severity 1 --status 'Analyze','Fix' --report ${REPORT
 kwcheck list -F detailed --severity 2 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_error.log
 kwcheck list -F detailed --severity 3 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_warning.log
 kwcheck list -F detailed --severity 4 --status 'Analyze','Fix' --report ${REPORT_PATH}/kwreport_review.log
+kwcheck list -F detailed --status 'Ignore','Not a Problem','Defer' --report ${REPORT_PATH}/kwreport_ignore.log
 
 # finalize reports
 # remove local prefixes from source controlled reports
-declare -a KW_REPORTS=(${REPORT_PATH}/kwreport_all.log ${REPORT_PATH}/kwreport_critical.log ${REPORT_PATH}/kwreport_error.log ${REPORT_PATH}/kwreport_warning.log ${REPORT_PATH}/kwreport_review.log)
+declare -a KW_REPORTS=(${REPORT_PATH}/kwreport_all.log ${REPORT_PATH}/kwreport_critical.log ${REPORT_PATH}/kwreport_error.log ${REPORT_PATH}/kwreport_warning.log ${REPORT_PATH}/kwreport_review.log ${REPORT_PATH}/kwreport_ignore.log)
 for r in ${KW_REPORTS[@]}; do
       cp $r ${r}.tmp
       sed -i -e "s/${ROOT_PATH////\\/}\///g" $r # remove local path prefixes from multiap modules
@@ -121,9 +122,10 @@ declare -a KW_TYPES=("1:Critical" "2:Error" "3:Warning" "4:Review")
 echo -e "Summary by components:" > ${REPORT_PATH}/kwreport_summary.log
 cp ${REPORT_PATH}/kwreport_all.log ${REPORT_PATH}/kwreport_tmp.log
 for t in ${KW_TYPES[@]}; do
-      issue_cnt=`grep -c $t ${REPORT_PATH}/kwreport_all.log`
+      issue_cnt=`grep -i $t ${REPORT_PATH}/kwreport_all.log | grep -civ "Ignore\|Not a Problem\|Defer"`
       echo "    $t: $issue_cnt" >> ${REPORT_PATH}/kwreport_summary.log
 done
+
 rm ${REPORT_PATH}/kwreport_tmp.log
 echo -e "\nLast KW: `date +'%d/%m/%Y %H:%M'`" >> ${REPORT_PATH}/kwreport_summary.log
 
