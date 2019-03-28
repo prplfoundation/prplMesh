@@ -7,6 +7,16 @@ import yaml
 
 logger = logging.getLogger("config")
 
+def print_color(string, color):
+	colors = {'red':'31', 'yellow':'33', 'blue':'34', 'magenta':'35', 'turquoise':'36', 'white':'37'}
+	attr = []
+	attr.append(colors[color])
+	attr.append('1')
+	print('\x1b[%sm%s\x1b[0m' % (';'.join(attr), string))
+
+def NOTICE(string):
+	print_color('%s' %(string), 'white')
+ 
 class owrtcfg(object):
     def __init__(self, path):
         self.path = path
@@ -41,18 +51,20 @@ class chdlabv3(object):
     def __init__(self, board, setup=None, user=None):
         from chdlab.commands.config import CHDLAB_config
         from chdlab.jira_wrappers.parent_jira import _ParentJira
+        from chdlab.jira_wrappers.board_jira import BoardJira
         cfg = CHDLAB_config(cache=False, setup_number=setup, fetch=True)
         _ParentJira.set_config(cfg)
         self.cfg = cfg
         self.board_id = board
+        NOTICE("Connecting to CHD JIRA site (setup {} {}) ...".format(setup, board))
+        self.jira_ = BoardJira(name=self.board_id)
 
     def __str__(self):
         return self.cfg
 
     @property
     def jira(self):
-        from chdlab.jira_wrappers.board_jira import BoardJira
-        return BoardJira(name=self.board_id)
+        return self.jira_
 
     def get_ssh_deploy_pc(self):
         vm = self.jira.linked_lan_vms[0]
@@ -62,7 +74,7 @@ class chdlabv3(object):
         return "{}:{}@{}".format(self.jira.password, self.jira.username, self.jira.ip)
 
     def get_target(self):
-        return self.jira.platform.lower()
+        return 'rdkb' if 'grx750' in self.jira.platform.lower() else 'ugw'
 
 class chdlabv2(object):
     def __init__(cls, board, user=None):
@@ -82,13 +94,20 @@ class chdlabv2(object):
         return cls.jira.type.lower()
 
 class mapcfg(object):
-    supported_targets = ["grx350", "axepoint", "grx750"]
+    supported_targets = ["ugw", "rdkb"]
 
     def __guess_target(self):
-        guess = os.environ.get('rdkb_atom_root')
-        if guess:
-            logger.info("guessed target=cgr since rdkb_atom_root environment variable defined")
-            return 'grx750'
+        rdkb = os.environ.get('rdkb_atom_root')
+        ugw = os.environ.get('UGW_CORE_DIR')
+        logger.info("rdkb={}, ugw={}".format(rdkb, ugw))
+        if rdkb and not ugw:
+            logger.info("guessed target=rdkb since rdkb_atom_root environment variable defined")
+            return 'rdkb'
+        if ugw and not rdkb:
+            logger.info("guessed target=ugw since UGW_CORE_DIR environment variable defined")
+            return 'ugw'
+        logger.warning("Failed to guess target")
+        return None
 
     def __guess_setup_id(self):
         try:
@@ -99,31 +118,48 @@ class mapcfg(object):
             pass
 
     def __guess_toolchain_path(self):
-        guess = os.environ.get('rdkb_atom_root')
-        if guess:
-            logger.info("guessed external_toolchain_path from rdkb_atom_root environment variable: {}/atom_rdkbos/build/tmp/sysroots".format(guess))
-            return "{}/atom_rdkbos/build/tmp/sysroots".format(guess)
+        toolchain_root = None
 
-        guess = os.environ.get('UGW_CORE_DIR')
-        if guess:
-            logger.info("guessed external_toolchain_path from UGW_CORE_DIR environment variable: {}".format(guess))
-            return guess
+        if self.args.target == 'rdkb':
+            toolchain_root = "{}/atom_rdkbos/build/tmp/sysroots".format(os.environ.get('rdkb_atom_root'))
+        elif self.args.target == 'ugw':
+            toolchain_root = os.environ.get('UGW_CORE_DIR')
+        else:
+            toolchain_root = self.__get_external_toolchain_path(self.args.map_path)
 
-        guess = self.__get_external_toolchain_path(self.args.map_path)
-        if guess:
-            logger.info("guessed external_toolchain_path from previous config: {}".format(guess))
-            return guess
+        logger.debug("guessed external_toolchain_path: {}".format(toolchain_root))
+        return toolchain_root
 
     def __init__(self, args):
         self.args = args
-        if self.args.guess:
-            if not self.args.target:
-                self.args.target = self.__guess_target()
-            if not self.args.toolchain_path:
-                self.args.toolchain_path = self.__guess_toolchain_path()
-            if not self.args.setup_id:
-                self.args.setup_id = self.__guess_setup_id()
-        
+        if args.guess and not args.setup_id:
+            self.args.setup_id = self.__guess_setup_id()
+        if args.guess and not args.board_id:
+            self.args.board_id = "GW"
+
+        if self.args.board_id:
+            try:
+                board = chdlabv2(self.args.board_id, self.args.user)
+            except ImportError as e:
+                board = chdlabv3(self.args.board_id, self.args.setup_id, self.args.user)
+            except RuntimeError as e:
+                logger.error("board jira failure (%s)" %e)
+                raise
+            if args.guess and not args.ssh_deploy_gw:
+                self.args.ssh_deploy_gw = board.get_ssh_deploy_gw()
+            if args.guess and not args.ssh_deploy_pc:
+                self.args.ssh_deploy_pc = board.get_ssh_deploy_pc()
+            if args.guess and not args.target:
+                self.args.target = board.get_target()
+
+        if args.guess and not self.args.target:
+            self.args.target = self.__guess_target()
+        if args.guess and not self.args.toolchain_path:
+            self.args.toolchain_path = self.__guess_toolchain_path()
+
+        NOTICE("Configuration params:\nsetup: WLANLABSUP-{} ({} {})\nssh_deploy_pc: {}\nssh_deploy_gw: {}\ntoolchain_path: {}".format(
+            self.args.setup_id, self.args.target, self.args.board_id, self.args.ssh_deploy_pc, self.args.ssh_deploy_gw, self.args.toolchain_path
+        ))
         if self.args.gui:
             self.__gui_start()
         else:
@@ -256,7 +292,7 @@ class mapcfg(object):
             if self.args.no_overwrite:
                 raise Exception("{} already exist and no_overwrite set".format(out_file))
             logger.info("Overriding {}".format(out_file))
-        
+
         target = self.args.target
         if not target or target not in mapcfg.supported_targets:
             raise Exception("target {} not supported for writing beerocks_dist.conf".format(target))
@@ -285,32 +321,20 @@ class mapcfg(object):
         toolchain_path = self.args.toolchain_path
         if not toolchain_path or not os.path.exists(toolchain_path):
             raise Exception("Invalid toolchain_path={}".format(toolchain_path))
-        
-        if self.args.board_id:
-            try:
-                board = chdlabv2(self.args.board_id, self.args.user)
-            except ImportError as e:
-                board = chdlabv3(self.args.board_id, self.args.setup_id, self.args.user)
-            except RuntimeError as e:
-                logger.error("board jira failure (%s)" %e)
-                raise
-            self.args.ssh_deploy_gw = board.get_ssh_deploy_gw()
-            self.args.ssh_deploy_pc = board.get_ssh_deploy_pc()
-            self.args.target = board.get_target()
 
-        if 'grx750' in self.args.target:
-            target = 'rdkb'
+        if self.args.target == 'rdkb':
             toolchain_prefix = '{}/x86_64-linux/usr/bin/i686-rdk-linux/i686-rdk-linux-'.format(toolchain_path)
             build_name = 'puma7-atom'
-        else:
+        elif self.args.target == 'ugw':
             cfg = owrtcfg(toolchain_path).parse()
-            target = 'ugw'
             toolchain_prefix = 'PLATFORM_TOOLCHAIN_PREFIX={}/bin/{}\n'.format(cfg['CONFIG_TOOLCHAIN_ROOT'], cfg['CONFIG_TOOLCHAIN_PREFIX'])
             build_name = 'PLATFORM_BUILD_NAME=target-{}_{}\n'.format(cfg['CONFIG_TARGET_NAME'], cfg['CONFIG_BUILD_SUFFIX'])
+        else:
+            raise Exception("Invalid target {}".format(self.args.target))
 
         try: self.__gen_deploy_yaml(self.args.map_path, toolchain_path)
         except Exception as e: logger.error("failed to generate deploy.conf - {}".format(e))
-        self.__gen_external_toolchain_conf(target, toolchain_prefix, toolchain_path, build_name)
+        self.__gen_external_toolchain_conf(self.args.target, toolchain_prefix, toolchain_path, build_name)
 
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='config')):

@@ -123,7 +123,7 @@ class mapdeploy(object):
         with open(conf_file, 'r') as f:
             self.conf = yaml.load(f)
             if not args.pack_only: self.connect = mapconnect(self.conf)
-            self.os = 'ugw' if self.conf['target']['type'] in ['grx350', 'axepoint'] else 'rdkb'
+            self.os = self.conf['target']['type']
     
         logger.debug("deploy configuration: {}".format(self.conf))
         logger.info("{} deploy {}".format(self.os, modules))
