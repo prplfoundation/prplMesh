@@ -327,8 +327,8 @@ class mapcfg(object):
             build_name = 'puma7-atom'
         elif self.args.target == 'ugw':
             cfg = owrtcfg(toolchain_path).parse()
-            toolchain_prefix = 'PLATFORM_TOOLCHAIN_PREFIX={}/bin/{}\n'.format(cfg['CONFIG_TOOLCHAIN_ROOT'], cfg['CONFIG_TOOLCHAIN_PREFIX'])
-            build_name = 'PLATFORM_BUILD_NAME=target-{}_{}\n'.format(cfg['CONFIG_TARGET_NAME'], cfg['CONFIG_BUILD_SUFFIX'])
+            toolchain_prefix = '{}/bin/{}'.format(cfg['CONFIG_TOOLCHAIN_ROOT'], cfg['CONFIG_TOOLCHAIN_PREFIX'])
+            build_name = 'target-{}_{}'.format(cfg['CONFIG_TARGET_NAME'], cfg['CONFIG_BUILD_SUFFIX'])
         else:
             raise Exception("Invalid target {}".format(self.args.target))
 
