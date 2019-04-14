@@ -7,6 +7,7 @@ import os
 import sys
 from commands.config import mapcfg
 from commands.build import mapbuild
+from commands.package import mappackage
 from commands.deploy import mapdeploy, mapcopy
 
 THIS_SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -38,10 +39,12 @@ class maptools(object):
 
         self.config_command = self.child_parser.add_parser('config')
         self.build_command = self.child_parser.add_parser('build')
+        self.package_command = self.child_parser.add_parser('package')
         self.deploy_command = self.child_parser.add_parser('deploy')
         self.copy_command = self.child_parser.add_parser('copy')
         mapcfg.configure_parser(self.config_command)
         mapbuild.configure_parser(self.build_command)
+        mappackage.configure_parser(self.package_command)
         mapdeploy.configure_parser(self.deploy_command)
         mapcopy.configure_parser(self.copy_command)
         
@@ -57,6 +60,9 @@ class maptools(object):
     def __build__(self):
         mapbuild(self.args)
 
+    def __package__(self):
+        mappackage(self.args)
+
     def __deploy__(self):
         mapdeploy(self.args)
 
@@ -67,6 +73,7 @@ class maptools(object):
         commands = {
             'config': self.__config__, 
             'build': self.__build__,
+            'package': self.__package__,
             'deploy': self.__deploy__,
             'copy': self.__copy__
         }
@@ -82,7 +89,7 @@ class maptools(object):
 
 if __name__ == '__main__':
     try:
-	    maptools().run()
+        maptools().run()
     except Exception as e:
         ASSERT(e)
         raise
