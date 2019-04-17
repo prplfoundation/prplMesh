@@ -1,0 +1,33 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvAssociatedClients:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_ASSOCIATED_CLIENTS
+  length: uint16_t
+  bss_list_length:
+    _type: uint8_t
+    _length_var: True
+  bss_list:
+    _type: sBssInfo
+    _length: [ bss_list_length ]
+
+sBssInfo:
+  _type: struct
+  bssid: sMacAddr
+  clients_associated_list_length:
+    _type: uint16_t
+    _length_var: True
+  clients_associated_list:
+    _type: sClientInfo
+    _length: [ clients_associated_list_length ]
+
+sClientInfo:
+  _type: struct
+  mac: sMacAddr
+  time_since_last_association_sec: uint16_t
+

@@ -1,0 +1,17 @@
+#
+---
+_namespace: ieee1905_1
+_is_tlv_class : True
+
+tlvLinkMetricResultCode:
+  _type: class  
+  type:
+    _type: eTlvType
+    _value_const: TLV_LINK_METRIC_RESULT_CODE
+  length: uint16_t
+  value: eValue
+
+eValue:
+  _type: enum
+  _enum_storage: uint8_t
+  INVALID_NEIGHBOR: 0x00

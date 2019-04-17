@@ -1,0 +1,20 @@
+#
+---
+_namespace: ieee1905_1
+_is_tlv_class : True
+
+tlvAutoconfigFreqBand:
+  _type: class  
+  type:
+    _type: eTlvType
+    _value_const: TLV_AUTOCONFIG_FREQ_BAND
+  length: uint16_t
+  value: eValue
+
+eValue:
+  _type: enum
+  _enum_storage: uint8_t
+  IEEE_802_11_2_4_GHZ: 0x00
+  IEEE_802_11_5_GHZ: 0x01
+  IEEE_802_11_60_GHZ: 0x02
+  

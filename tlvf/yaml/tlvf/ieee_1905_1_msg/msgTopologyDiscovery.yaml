@@ -1,0 +1,13 @@
+#
+---
+_namespace: ieee1905_1
+
+msgTopologyDiscovery:
+  _type: class
+  header:
+    _type: cmduHeader
+    _setValue: { "messageType" : TOPOLOGY_DISCOVERY_MESSAGE }
+  tlv_al_mac_tlv: tlvAlMacAddressType
+  tlv_mac_tlv: tlvAlMacAddressType
+  tlv_eof: tlvEndOfMessage
+  

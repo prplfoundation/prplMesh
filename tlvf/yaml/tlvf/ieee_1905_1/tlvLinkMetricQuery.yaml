@@ -1,0 +1,30 @@
+#
+---
+_namespace: ieee1905_1
+_is_tlv_class : True
+
+tlvLinkMetricQuery:
+  _type: class
+  type:
+    _type: eTlvType
+    _value_const: TLV_LINK_METRIC_QUERY
+  length: uint16_t
+  neighbor_type: eNeighborType
+  mac_al_1905_device:
+    _type: sMacAddress
+    _optional: true
+  link_metrics: eLinkMetricsType
+
+eNeighborType:
+  _type: enum
+  _enum_storage: uint8_t
+  ALL_NEIGHBORS: 0x00
+  SPECIFIC_NEIGHBOR: 0x01
+
+eLinkMetricsType:
+  _type: enum
+  _enum_storage: uint8_t
+  TX_LINK_METRICS_ONLY: 0x00
+  RX_LINK_METRICS_ONLY: 0x01
+  BOTH_TX_AND_RX_LINK_METRICS: 0x02
+  

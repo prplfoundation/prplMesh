@@ -1,0 +1,17 @@
+#
+---
+_namespace: ieee1905_1
+_is_tlv_class : True
+
+tlvSearchedRole:
+  _type: class  
+  type:
+    _type: eTlvType
+    _value_const: TLV_SEARCHED_ROLE
+  length: uint16_t
+  value: eValue
+
+eValue:
+  _type: enum
+  _enum_storage: uint8_t
+  REGISTRAR: 0x00

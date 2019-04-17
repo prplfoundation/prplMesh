@@ -1,0 +1,17 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvApMetricQuery:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_AP_METRIC_QUERY
+  length: uint16_t
+  bssid_list_length:
+    _type: uint8_t
+    _length_var: True
+  bssid_list:
+    _type: sAddress
+    _length: [ bssid_list_length ]

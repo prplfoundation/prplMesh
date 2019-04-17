@@ -1,0 +1,21 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvChannelSelectionResponse:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_CHANNEL_SELECTION_RESPONSE
+  length: uint16_t
+  radio_uid: sMacAddr
+  response_code: eResponseCode
+
+eResponseCode:
+  _type: enum
+  _enum_storage: uint8_t
+  ACCEPT: 0x00
+  DECLINE_VIOLATES_CURRENT_PREFERENCES: 0x01
+  DECLINE_VIOLATES_MOST_RECENTLY_REPORTED_PREFERENCES: 0x02
+  DECLINE_PREVENT_OPERATION_OF_BACKHAUL_LINK: 0x03

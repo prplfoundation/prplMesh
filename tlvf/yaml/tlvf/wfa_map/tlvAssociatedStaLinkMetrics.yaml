@@ -1,0 +1,31 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvAssociatedStaLinkMetrics:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_ASSOCIATED_STA_LINK_METRICS
+  length: uint16_t
+  sta_mac: sMacAddr
+  bssid_info_list_length:
+    _type: uint8_t
+    _length_var: True
+  bssid_info_list: 
+    _type: sBssidInfo
+    _length: [ bssid_info_list_length ]
+
+sBssidInfo:
+  _type: struct
+  bssid: sMacAddr
+  earliest_measurement_delta:
+    _type:  uint32_t
+    _comment: |
+      The time delta in ms between the time at which the earliest
+      measurement that contributed to the data rate estimates were made,
+      and the time at which this report was sent
+  downlink_estimated_mac_data_rate_mbps: uint32_t
+  uplink_estimated_mac_data_rate_mbps: uint32_t
+  sta_measured_uplink_rssi_dbm_enc: uint8_t

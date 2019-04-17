@@ -1,0 +1,5 @@
+if(BUILD_EXAMPLES)
+	message("-- Building with examples")
+	add_subdirectory(transport)
+	add_subdirectory(zmq)
+endif()

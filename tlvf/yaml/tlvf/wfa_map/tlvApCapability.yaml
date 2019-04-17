@@ -1,0 +1,25 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvApCapability:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_AP_CAPABILITY
+  length: uint16_t
+  value: sValue
+
+sValue:
+    _type: struct
+    _bit_field: uint8_t
+    support_unassociated_sta_link_metrics_on_operating_bssid:
+      _bit_range: [7,7]
+    support_unassociated_sta_link_metrics_on_non_operating_bssid:
+      _bit_range: [6,6]
+    support_agent_initiated_rssi_based_steering:
+      _bit_range: [5,5]
+    reserved:
+      _bit_range: [4,0]
+      _value: 0

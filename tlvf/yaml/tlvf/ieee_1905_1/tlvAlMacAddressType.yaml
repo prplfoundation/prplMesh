@@ -1,0 +1,12 @@
+#
+---
+_namespace: ieee1905_1
+_is_tlv_class : True
+
+tlvAlMacAddressType:
+  _type: class
+  type:
+    _type: eTlvType
+    _value_const: TLV_AL_MAC_ADDRESS_TYPE
+  length: uint16_t
+  mac: sMacAddress

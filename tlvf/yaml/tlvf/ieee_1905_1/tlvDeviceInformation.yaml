@@ -1,0 +1,25 @@
+#
+---
+_namespace: ieee1905_1
+_is_tlv_class : True
+
+tlvDeviceInformation:
+  _type: class
+  type:
+    _type: eTlvType
+    _value_const: TLV_DEVICE_INFORMATION
+  length: uint16_t
+  mac: sMacAddress
+  info_length:
+    _type: uint8_t
+    _length_var: True
+  info:
+    _type: sInfo
+    _length: [ info_length ]
+
+sInfo:
+  _type: struct
+  mac: sMacAddress
+  media_type: eMediaType
+  media_info_length: uint8_t
+  media_info: eMediaType

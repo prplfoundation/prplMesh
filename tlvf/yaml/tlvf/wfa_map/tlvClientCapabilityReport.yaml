@@ -1,0 +1,24 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvClientCapabilityReport:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_CLIENT_CAPABILITY_REPORT
+  length: uint16_t
+  result_code: eResultCode
+  association_frame_length:
+    _type: uint8_t
+    _length_var: True
+  association_frame:
+    _type: uint8_t
+    _length: [ association_frame_length ] 
+
+eResultCode:
+  _type: enum
+  _enum_storage: uint8_t
+  SUCCESS: 0x00
+  FAILURE: 0x01

@@ -1,0 +1,13 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvStaMacAddressType:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_STAMAC_ADDRESS_TYPE
+  length: uint16_t
+  sta_mac: sMacAddr
+  

@@ -1,0 +1,23 @@
+#
+---
+_namespace: ieee1905_1
+
+msgLinkMetricResponse:
+  _type: class
+  header:
+    _type: cmduHeader
+    _setValue: { "messageType" : LINK_METRIC_RESPONSE_MESSAGE }
+  tlv_link_metric:
+    _type: sLinkMetric
+    _length: []
+  tlv_eof: tlvEndOfMessage
+
+sLinkMetric:
+  tx_link_metric:
+    _type: tlvTransmitterLinkMetric
+    _length: []
+    _lengthMax: 1
+  rx_link_metric:
+    _type: tlvReceiverLinkMetric
+    _length: []
+    _lengthMax: 1

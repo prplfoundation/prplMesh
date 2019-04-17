@@ -1,0 +1,22 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvBeaconMetricsResponse:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_BEACON_METRICS_RESPONSE
+  length: uint16_t
+  associated_sta_mac: sMacAddr
+  reserved: uint8_t
+  measurement_report_list_length:
+    _type: uint8_t
+    _length_var: True
+  measurement_report_list:
+    _type: uint8_t
+    _length: [ measurement_report_list_length ]
+    _comment: |
+      Contains a Measurement Report element that was received from the STA
+      since the corresponding Beacon Metrics Query message was received by the Multi-AP Agent

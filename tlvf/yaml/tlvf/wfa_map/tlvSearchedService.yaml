@@ -1,0 +1,22 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvSearchedService:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_SEARCHED_SERVICE
+  length: uint16_t
+  supported_service_list_length:
+    _type: uint8_t
+    _length_var: True
+  supported_service_list:
+    _type: eSearchedService
+    _length: [ supported_service_list_length ]
+
+eSearchedService:
+  _type: enum
+  _enum_storage: uint8_t
+  MULTI_AP_CONTROLLER: 0x00 

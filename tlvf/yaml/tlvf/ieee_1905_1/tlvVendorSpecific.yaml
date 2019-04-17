@@ -1,0 +1,25 @@
+#
+---
+_namespace: ieee1905_1
+
+tlvVendorSpecific:
+  _type: class  
+  type:
+    _type: eTlvType
+    _value_const: TLV_VENDOR_SPECIFIC
+  length:
+    _type: uint16_t
+    _value: 3
+    _length_var: True
+  vendor_oui:
+    _type: uint8_t
+    _length: [ 3 ]
+    _comment: Use eVendorOUI
+
+eVendorOUI:
+  _type: enum
+  _enum_storage: uint32_t
+  _comment: #TODO change OUI value for Intel
+  OUI_BYTES: 3
+  OUI_INTEL: 0x000000
+  

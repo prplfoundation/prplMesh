@@ -1,0 +1,57 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvChannelPreference:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_CHANNEL_PREFERENCE
+  length: uint16_t
+  radio_uid: sMacAddress
+  operating_classes_list_length:
+    _type: uint8_t
+    _length_var: True
+  operating_classes_list:
+    _type: cOperatingClasses
+    _length: [ operating_classes_list_length ]
+
+
+cOperatingClasses:
+  _type: class
+  operating_class: uint8_t
+  channel_list_length:
+    _type: uint8_t
+    _length_var: True
+  channel_list:
+    _type: uint8_t
+    _length: [ channel_list_length ]
+  flags: sFlags
+
+eReasonCode:
+  _type: enum
+  UNSPECIFIED: 0
+  PROXIMATE_NON_802_11_INTERFERER_IN_LOCAL_ENVIRONMENT: 1
+  INTRA_NETWORK_802_11_OBSS_INTERFERENCE_MANAGEMENT: 2
+  EXTERNAL_NETWORK_802_11_OBSS_INTERFERENCE_MANAGEMENT: 3
+  REDUCED_COVERAGE_LIMITED_TRANSMIT_POWER: 4
+  REDUCED_THROUGHPUT_LIMITED_CHANNEL_BANDWIDTH: 5
+  IN_DEVICE_INTERFERER_WITHIN_AP: 6
+  OPERATION_DISALLOWED_DUE_TO_RADAR_DETECTION_ON_A_DFS_CHANNEL: 7
+  OPERATION_WOULD_PREVENT_BACKHAUL_OPERATION_USING_SHARED_RADIO: 8
+  IMMEDIATE_OPERATION_POSSIBLE_ON_A_DFS_CHANNEL_CAC_HAS_BEEN_RUN__CHANNEL_HAS_BEEN_CLEARED_FOR_USE: 9
+  DFS_CHANNEL_STATE_UNKNOWN_CAC_HAS_NOT_RUN: 10
+
+sFlags:
+  _type: struct
+  _bit_field: uint8_t
+  preference:
+    _bit_range: [7,4]
+    _comment: |
+      0 : non-operable
+      1-14 : preference score
+      15 : most preferred
+  reason_code:
+    _bit_range: [3,0]
+    _bit_field_enum: eReasonCode

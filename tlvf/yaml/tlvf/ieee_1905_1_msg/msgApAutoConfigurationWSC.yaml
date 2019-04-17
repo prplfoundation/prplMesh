@@ -1,0 +1,11 @@
+#
+---
+_namespace: ieee1905_1
+
+msgApAutoConfigurationWSC:
+  _type: class
+  header:
+    _type: cmduHeader
+    _setValue: { "messageType" : AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION }
+  tlv_wsc: tlvWSC
+  tlv_eof: tlvEndOfMessage

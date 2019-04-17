@@ -1,0 +1,34 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvApRadioBasicCapabilities:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_AP_RADIO_BASIC_CAPABILITIES
+  length: uint16_t
+  radio_uid: sMacAddr
+  maximum_number_of_bsss_supported: uint8_t
+  operating_classes_info_list_length:
+    _type: uint8_t
+    _length_var: True
+  operating_classes_info_list:
+    _type: sOperatingClassesInfo
+    _length: [ operating_classes_info_list_length ]
+
+sOperatingClassesInfo:
+  _type: struct
+  operating_class: uint8_t
+  maximum_transmit_power_dbm: uint8_t
+  statically_non_operable_channels_list_length:
+    _type: uint8_t
+    _length_var: True
+  statically_non_operable_channels_list: 
+    _type: sChannel
+    _length: [ statically_non_operable_channels_list_length ]
+
+sChannel:
+  _type: struct
+  channel: uint8_t

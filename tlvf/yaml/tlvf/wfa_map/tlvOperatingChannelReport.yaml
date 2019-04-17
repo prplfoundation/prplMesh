@@ -1,0 +1,29 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvOperatingChannelReport:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_OPERATING_CHANNEL_REPORT
+  length: uint16_t
+  radio_uid: sMacAddr
+  operating_classes_list_length:
+    _type: uint8_t
+    _length_var: True
+  operating_classes_list:
+    _type: sOperatingClasses
+    _length: [ operating_classes_list_length ]
+  current_transmit_power:
+    _type: uint8_t
+    _comment: |
+      Current Transmit Power EIRP representing the current nominal transmit power.
+      The field is coded as a 2's complement signed integer in units of decibels relative to 1 mW (dBm).
+      This value is less than or equal to the Maximum Transmit Power specified in the AP Radio Basic Capabilities TLV for the current operating class.    
+
+sOperatingClasses:
+  _type: struct
+  operating_class: uint8_t
+  channel_number: uint8_t

@@ -1,0 +1,16 @@
+#
+---
+_namespace: ieee1905_1
+
+_is_tlv_class: True
+tlvNon1905neighborDeviceList:
+  _type: class
+  type:
+    _type: eTlvType
+    _value_const: TLV_NON_1905_NEIGHBOR_DEVICE_LIST
+  length: uint16_t
+  mac_local_iface: sMacAddress
+  mac_non_1905_device:
+    _type: sMacAddress
+    _length: []
+  

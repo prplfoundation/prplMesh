@@ -1,0 +1,11 @@
+#
+---
+_namespace: ieee1905_1
+
+msgLinkMetricQuery:
+  _type: class
+  header:
+    _type: cmduHeader
+    _setValue: { "messageType" : LINK_METRIC_QUERY_MESSAGE }
+  tlv_link_metric: tlvLinkMetricQuery
+  tlv_eof: tlvEndOfMessage

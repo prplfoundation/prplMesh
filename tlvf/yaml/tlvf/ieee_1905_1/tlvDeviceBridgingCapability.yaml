@@ -1,0 +1,28 @@
+#
+---
+_namespace: ieee1905_1
+_is_tlv_class : True
+
+tlvDeviceBridgingCapability:
+  _type: class
+  type:
+    _type: eTlvType
+    _value_const: TLV_DEVICE_BRIDGING_CAPABILITY
+  length: uint16_t
+  bridging_tuples_list_length:
+    _type: uint8_t
+    _length_var: True
+  bridging_tuples_list:
+    _type: cMacList
+    _length: [ bridging_tuples_list_length ]
+
+cMacList:
+  _type: class
+  mac_list_length:
+    _type: uint8_t
+    _length_var: True
+  mac_list:
+    _type: sMacAddress
+    _length: [ mac_list_length ]
+
+  

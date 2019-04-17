@@ -1,0 +1,18 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvTransmitPowerLimit:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_TRANSMIT_POWER_LIMIT
+  length: uint16_t
+  radio_uid: sMacAddr
+  transmit_power_limit_dbm:
+    _type: uint8_t
+    _comment: |
+      Transmit Power Limit EIRP per 20 MHz bandwidth representing the nominal transmit power limit for this radio.
+      The field is coded as a 2's complement signed integer in units of decibels relative to 1 mW (dBm).
+      
