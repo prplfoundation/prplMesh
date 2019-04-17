@@ -34,13 +34,11 @@ class mappackage(object):
             except: pass
             logger.debug("Copy {} to {}".format(src_path, dst_path))
             shutil.copytree(src_path, dst_path, symlinks=True, ignore=lambda directory, contents: [".git"])
+            with open("{}/VERSION".format(dst_path), 'w') as f: f.write("intel_multiap_{}_{}_{}".format(name, time.strftime("%Y%m%d"), h[name]))
             for root, dirs, files in os.walk(dst_path):
                 for name in files: self.remove_patents(os.path.join(root, name))
         
-        version = "intel-multiap-{}-{}_{}_{}_{}".format(time.strftime("%Y%m%d"), h['framework'], h['common'], h['controller'], h['agent'])
-        with open("{}/README".format(package_dir), 'w') as f:
-            f.write(version)
-        with tarfile.open("{}/{}.tar.gz".format(package_dir, version), "w:gz") as tar:
+        with tarfile.open("{}/intel_multiap_{}.tar.gz".format(package_dir, time.strftime("%Y%m%d")), "w:gz") as tar:
             tar.add(package_dir, arcname=os.path.basename(package_dir))
 
     def remove_patents(self, file):
