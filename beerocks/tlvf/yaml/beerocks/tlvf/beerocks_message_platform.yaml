@@ -1,0 +1,259 @@
+#
+---
+_include: beerocks/tlvf/beerocks_message_common.h
+_namespace: beerocks_message
+_multi_class: True
+_multi_class_auto_insert:
+  action_op:
+    _type: eActionOp_PLATFORM
+    _value_const: [_auto_value_by_name, 1]  
+    _class_const: True
+
+#################################################
+#################################################
+
+cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION:
+  _type: class
+  is_backhaul_manager: uint8_t
+
+cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST:
+  _type: class
+  iface_name:
+    _type: char    
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+
+cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE:
+  _type: class
+  platform_settings: sPlatformSettings 
+  wlan_settings: sWlanSettings 
+  valid:
+    _type: uint32_t
+    _comment: #Marks whether the settings are valid
+
+cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST:
+  _type: class
+  iface_name:
+    _type: char    
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+
+cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE:
+  _type: class
+  result: uint8_t
+  _comment: # 0 - Failure, 1 - Success
+
+cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION:
+  _type: class
+  params: sArpMonitorData 
+
+cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION:
+  _type: class
+  dhcp_op: eDHCPOp
+  op: uint32_t 
+  mac: beerocks::net::sMacAddr 
+  ipv4: beerocks::net::sIpv4Addr 
+  hostname: 
+    _type: char 
+    _length: [ "beerocks::message::NODE_NAME_LENGTH" ]
+
+cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL:
+  _type: class
+  params: sLoggingLevelChange 
+
+cACTION_PLATFORM_ARP_QUERY_REQUEST:
+  _type: class
+  params: sArpQuery 
+
+cACTION_PLATFORM_ARP_QUERY_RESPONSE:
+  _type: class
+  params: sArpMonitorData 
+
+cACTION_PLATFORM_ONBOARD_QUERY_REQUEST:
+  _type: class
+
+cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE:
+  _type: class
+  params: sOnboarding 
+
+cACTION_PLATFORM_ONBOARD_SET_REQUEST:
+  _type: class
+  params: sOnboarding 
+
+cACTION_PLATFORM_WPS_ONBOARDING_REQUEST:
+  _type: class
+  iface_name: 
+    _type: char 
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+
+cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST:
+  _type: class
+  params: sWifiCredentials 
+
+cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE:
+  _type: class
+  result:
+    _type: uint32_t
+    _comment: # 0 - Failure, 1 - Success
+
+cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST:
+  _type: class
+  iface_name: 
+    _type: char 
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  ssid:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  pass:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+  security_type:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH" ]
+
+cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE:
+  _type: class
+  iface_name: 
+    _type: char 
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  success: uint8_t
+
+cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST:
+  _type: class
+  flag: uint32_t 
+
+cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE:
+  _type: class
+  result: uint32_t 
+
+cACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST:
+  _type: class
+
+cACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE:
+  _type: class
+  result: uint8_t
+  _comment: # 0 - Failure, 1 - Success
+
+cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST:
+  _type: class
+  vap_id: uint8_t 
+
+cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE:
+  _type: class
+  front_params: sWifiCredentials 
+  back_params: sWifiCredentials 
+  result:
+    _type: uint32_t
+    _comment: # 0 - Failure, 1 - Success
+
+cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST:
+  _type: class
+
+cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE:
+  _type: class
+  params: sAdminCredentials 
+  result:
+    _type: uint32_t
+    _comment: # 0 - Failure, 1 - Success
+
+cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST:
+  _type: class
+
+cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE:
+  _type: class
+  params: sDeviceInfo 
+  result:
+    _type: uint32_t
+    _comment: # 0 - Failure, 1 - Success
+
+cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST:
+  _type: class
+
+cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE:
+  _type: class
+  local_master: uint8_t 
+
+cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST:
+  _type: class
+  iface_name: 
+    _type: char     
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  iface_operation:
+    _type: int8_t
+    _comment: # -1 (Ignore), 0 (Disable), 1 (Enable), 2 (Restore), 3 (Restart)
+
+cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE:
+  _type: class
+  iface_name: 
+    _type: char     
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  iface_operation:
+    _type: int8_t
+    _comment: # -1 (Ignore), 0 (Disable), 1 (Enable), 2 (Restore), 3 (Restart)
+  success: uint8_t  
+
+cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST:
+  _type: class
+  iface_name: 
+    _type: char     
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  enable: uint8_t  
+
+cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE:
+  _type: class
+  iface_name: 
+    _type: char     
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  enable: uint8_t  
+  success: uint8_t  
+
+cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION:
+  _type: class
+  versions: sVersions 
+
+cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION:
+  _type: class
+  versions: sVersions 
+
+cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST:
+  _type: class
+
+cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE:
+  _type: class
+  versions: sVersions 
+  result:
+    _type: uint32_t
+    _comment: # 0 - Failure, 1 - Success
+
+cACTION_PLATFORM_ERROR_NOTIFICATION:
+  _type: class
+  code: uint32_t 
+  data: 
+    _type: char 
+    _length: [ 256 ]
+    _comment: # Must match BPL_ERROR_STRING_LEN
+
+cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION:
+  _type: class
+  iface_name_ap: 
+    _type: char     
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  iface_name_bh: 
+    _type: char     
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  status_ap: uint8_t 
+  status_bh: uint8_t 
+  status_bh_wired: uint8_t 
+  is_bh_manager: uint8_t 
+  status_operational: uint8_t 
+
+cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST:
+  _type: class
+  config_start:
+    _type: uint8_t
+    _comment: # 0 - configuration end, 1 - configuration start
+
+cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_RESPONSE:
+  _type: class
+
+cACTION_PLATFORM_OPERATIONAL_NOTIFICATION:
+  _type: class
+  operational: uint8_t  

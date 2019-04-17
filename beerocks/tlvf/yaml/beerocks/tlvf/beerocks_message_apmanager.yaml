@@ -1,0 +1,172 @@
+#
+---
+_include: beerocks/tlvf/beerocks_message_common.h
+_namespace: beerocks_message
+_multi_class: True
+_multi_class_auto_insert:
+  action_op:
+    _type: eActionOp_APMANAGER
+    _value_const: [_auto_value_by_name, 1]  
+    _class_const: True
+
+#################################################
+#################################################
+
+###FIXME temp###
+cACTION_APMANAGER_4ADDR_STA_JOINED:
+  _type: class
+  src_mac: beerocks::net::sMacAddr
+  dst_mac: beerocks::net::sMacAddr
+################
+ 
+cACTION_APMANAGER_JOINED_NOTIFICATION:
+  _type: class
+  params: sNodeHostap
+  cs_params: sApChannelSwitch
+
+cACTION_APMANAGER_INIT_DONE_NOTIFICATION:
+  _type: class
+
+cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST:
+  _type: class
+  params: sApSetRestrictedFailsafe
+
+cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE:
+  _type: class
+  success: uint8_t
+
+cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION:
+  _type: class
+  vap_id: int8_t
+
+cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION:
+  _type: class
+  vap_id: int8_t
+  vap_info: sVapInfo
+
+cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST:
+  _type: class
+
+cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION:
+  _type: class
+  params: sVapsList
+
+cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START:
+  _type: class
+  cs_params: sApChannelSwitch
+
+cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION:
+  _type: class
+  cs_params: sApChannelSwitch
+
+cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION:
+  _type: class
+  cs_params: sApChannelSwitch
+
+cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION:
+  _type: class
+  cs_params: sApChannelSwitch
+
+cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION:
+  _type: class
+  cs_params: sApChannelSwitch
+  supported_channels_list:
+    _type: sWifiChannel
+    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+
+cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION:
+  _type: class
+  params: sDfsCacCompleted
+
+cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION:
+  _type: class
+  params: sDfsChannelAvailable
+
+cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE:
+  _type: class
+  mac: beerocks::net::sMacAddr
+
+cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE:
+  _type: class
+  mac: beerocks::net::sMacAddr
+
+cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST:
+  _type: class
+  params: sNeighborSetParams11k
+
+cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST:
+  _type: class
+  params: sNeighborRemoveParams11k
+
+cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION:
+  _type: class
+  params: sClientAssociationParams
+
+cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION:
+  _type: class
+  params: sClientDisconnectionParams
+
+cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST:
+  _type: class
+  mac: beerocks::net::sMacAddr
+  vap_id: int8_t
+  type: uint32_t
+  reason: uint32_t
+
+cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE:
+  _type: class
+  params: sClientDisconnectResponse
+
+cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST:
+  _type: class
+  mac: beerocks::net::sMacAddr
+  reject_sta: uint8_t
+
+cACTION_APMANAGER_CLIENT_ALLOW_REQUEST:
+  _type: class
+  mac: beerocks::net::sMacAddr
+  ipv4: beerocks::net::sIpv4Addr
+
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST:
+  _type: class
+  params: sNodeRssiMeasurementRequest
+
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE:
+  _type: class
+  params: sNodeRssiMeasurement
+
+cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION:
+  _type: class
+  mac: beerocks::net::sMacAddr
+
+cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST:
+  _type: class
+  params: sNodeBssSteerRequest
+
+cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE:
+  _type: class
+  params: sNodeBssSteerResponse
+
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE:
+  _type: class
+  mac: beerocks::net::sMacAddr
+
+cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST:
+  _type: class
+  params: sSteeringClientSetRequest
+
+cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE:
+  _type: class
+  params: sSteeringClientSetResponse
+
+cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION:
+  _type: class
+  params: sSteeringEvProbeReq
+
+cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION:
+  _type: class
+  params: sSteeringEvAuthFail
+
+cACTION_APMANAGER_HEARTBEAT_NOTIFICATION:
+  _type: class
+

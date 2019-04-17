@@ -1,0 +1,28 @@
+# Temporary and binary files
+*.swp
+*.so
+build/
+tags
+
+# CMake generated files
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*Config.cmake
+
+# UGW generated files
+ipkg-*
+install_manifest.txt
+.built*
+.dep_files
+.configured_*
+.prepared_*
+
+#tlvf
+tlvf.log
+
+#klockwork
+kw_reports/*.tmp
+kw_reports/rdkb/*.tmp
+kw_reports/ugw/*.tmp

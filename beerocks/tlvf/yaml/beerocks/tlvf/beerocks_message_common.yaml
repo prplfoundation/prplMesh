@@ -1,0 +1,833 @@
+#
+---
+_include: {
+  beerocks/tlvf/beerocks_message_action.h,
+  beerocks/bcl/beerocks_message_structs.h,
+}
+
+_namespace: beerocks_message
+
+eWiFiSec:
+  _type: enum
+  _enum_storage: uint8_t
+  eWiFiSec_None: 0
+  eWiFiSec_WEP64: 1
+  eWiFiSec_WEP128: 2
+  eWiFiSec_WPA_PSK: 3
+  eWiFiSec_WPA2_PSK: 4
+  eWiFiSec_WPA_WPA2_PSK: 5
+
+eDHCPOp:
+  _type: enum
+  _enum_storage: uint8_t
+  eDHCPOp_Add: 0
+  eDHCPOp_Del: 1
+  eDHCPOp_Old: 2
+
+sVapInfo:
+  _type: struct
+  mac: beerocks::net::sMacAddr 
+  ssid: 
+    _type: char 
+    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  backhaul_vap: uint8_t 
+
+sSonConfig:
+  _type: struct
+  monitor_total_ch_load_notification_lo_th_percent: uint8_t 
+  monitor_total_ch_load_notification_hi_th_percent: uint8_t 
+  monitor_total_ch_load_notification_delta_th_percent: uint8_t 
+  monitor_min_active_clients: uint8_t 
+
+  monitor_active_client_th: uint8_t
+  monitor_client_load_notification_delta_th_percent: uint8_t
+  monitor_rx_rssi_notification_threshold_dbm: int8_t
+  monitor_rx_rssi_notification_delta_db: uint8_t
+  monitor_ap_idle_threshold_B: uint32_t
+  monitor_ap_active_threshold_B: uint32_t
+  monitor_ap_idle_stable_time_sec: uint16_t
+  monitor_disable_initiative_arp: uint8_t
+  
+  slave_keep_alive_retries: uint8_t 
+  ire_rssi_report_rate_sec: uint8_t 
+
+sPlatformSettings:
+  _type: struct
+  front_ssid:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  front_pass:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+  front_security_type:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH" ]
+  back_ssid:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  back_pass:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+  back_security_type:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH" ]
+  onboarding: uint8_t 
+  local_master: uint8_t 
+  local_gw: uint8_t 
+  operating_mode: uint8_t 
+
+  client_band_steering_enabled: uint8_t 
+  client_optimal_path_roaming_enabled: uint8_t 
+  dfs_reentry_enabled: uint8_t 
+  passive_mode_enabled: uint8_t
+
+  client_optimal_path_roaming_prefer_signal_strength_enabled: uint8_t 
+  client_11k_roaming_enabled: uint8_t 
+  load_balancing_enabled: uint8_t 
+  service_fairness_enabled: uint8_t 
+
+  rdkb_extensions_enabled: uint8_t
+
+  wired_backhaul: uint8_t 
+  backhaul_max_vaps: uint8_t 
+  backhaul_network_enabled: uint8_t 
+  backhaul_prefered_radio_band: uint8_t 
+  backhaul_vaps_bssid:
+    _type: beerocks::net::sMacAddr 
+    _length: [ 12 ]
+    _comment: # 4 groups of 3 bssid in each group
+
+sWlanSettings:
+  _type: struct
+  band_enabled:
+    _type: uint8_t
+  acs_enabled: uint8_t 
+  advertise_ssid: uint8_t 
+  ssid:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  pass:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+  security_type:
+    _type: char    
+    _length: [ "beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH" ]
+
+sApSetRestrictedFailsafe:
+  _type: struct
+  failsafe_channel: uint8_t 
+  failsafe_channel_bandwidth: uint8_t 
+  restricted_channels:
+    _type: uint8_t 
+    _length: [ "beerocks::message::RESTRICTED_CHANNEL_LENGTH" ]
+  vht_center_frequency: uint16_t
+
+sApChannelSwitch:
+  _type: struct
+  channel: uint8_t 
+  bandwidth: uint8_t       #beerocks::eWiFiBandwidth
+  channel_ext_above_primary: int8_t  #bool
+  switch_reason: uint8_t 
+  is_dfs_channel: uint8_t 
+  vht_center_frequency: uint16_t
+
+sDfsCacCompleted:
+  _type: struct      
+  timeout: uint32_t
+  frequency: uint32_t
+  success: uint8_t 
+  channel: uint8_t 
+  bandwidth: uint8_t 
+
+sDfsChannelAvailable:
+  _type: struct
+  frequency: uint32_t
+  channel: uint8_t 
+  bandwidth: uint8_t      #beerocks::eWiFiBandwidth
+  vht_center_frequency: uint16_t  
+
+sWifiChannel:
+  _type: struct
+  channel: uint8_t 
+  noise: int8_t
+  tx_pow: uint8_t 
+  bss_overlap: uint8_t 
+  channel_bandwidth: uint8_t 
+  is_dfs_channel: uint8_t 
+  radar_affected: uint8_t 
+
+sClientAssociationParams:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  bssid: beerocks::net::sMacAddr
+  capabilities: beerocks::message::sRadioCapabilities
+  vap_id: int8_t
+
+sClientDisconnectionParams:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  bssid: beerocks::net::sMacAddr
+  vap_id: int8_t
+
+sClientMonitoringParams:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  bridge_4addr_mac: beerocks::net::sMacAddr
+  ipv4: beerocks::net::sIpv4Addr
+  channel: uint8_t 
+  vap_id: int8_t
+  is_ire: uint8_t 
+
+sConfigVapInfo:
+  _type: struct
+  type: uint8_t
+  auth: uint8_t
+  enc: uint8_t
+  al_mac:
+    _type: uint8_t
+    _length: [ "beerocks::net::MAC_ADDR_LEN" ]
+    _comment: # al_mac    
+  ruid:
+    _type: uint8_t
+    _length: [ "beerocks::net::MAC_ADDR_LEN" ]       
+  bssid:
+    _type: uint8_t
+    _length: [ "beerocks::net::MAC_ADDR_LEN" ]        
+  ssid:
+    _type: char 
+    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  key:
+    _type: char 
+    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+
+sStaStatsParams:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  rx_packets: uint32_t
+  tx_packets: uint32_t
+  tx_bytes: uint32_t
+  rx_bytes: uint32_t
+  retrans_count: uint32_t
+  tx_phy_rate_100kb: uint16_t
+  rx_phy_rate_100kb: uint16_t
+  tx_load_percent: uint8_t 
+  rx_load_percent: uint8_t 
+  stats_delta_ms: uint16_t
+  rx_rssi: int8_t
+
+sApStatsParams:
+  _type: struct
+  rx_packets: uint32_t
+  tx_packets: uint32_t
+  tx_bytes: uint32_t
+  rx_bytes: uint32_t
+  errors_sent: uint32_t
+  errors_received: uint32_t
+  retrans_count: uint32_t
+  client_count: uint8_t 
+  active_client_count: uint8_t 
+  channel_load_percent: uint8_t 
+  client_tx_load_percent: uint8_t 
+  client_rx_load_percent: uint8_t 
+  noise: int8_t
+  stats_delta_ms: uint16_t
+
+sApLoadNotificationParams:
+  _type: struct
+  stats_delta_ms: uint16_t
+  client_count: uint8_t 
+  active_client_count: uint8_t 
+  channel_load_percent: uint8_t 
+  client_tx_load_percent: uint8_t 
+  client_rx_load_percent: uint8_t 
+
+sApActivityNotificationParams:
+  _type: struct
+  ap_activity_mode: uint8_t  # enum eApActiveMode
+
+sNodeRssiMeasurementRequest:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  ipv4: beerocks::net::sIpv4Addr
+  channel: uint8_t 
+  cross: uint8_t 
+  bandwidth: uint8_t 
+  mon_ping_burst_pkt_num: uint8_t 
+  vht_center_frequency: uint16_t
+  measurement_delay: uint8_t 
+
+sNodeRssiMeasurement:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  rx_phy_rate_100kb: uint16_t
+  tx_phy_rate_100kb: uint16_t
+  rx_rssi: int8_t
+  rx_snr: uint8_t
+  rx_packets: int8_t
+  src_module: uint8_t 
+  vap_id: int8_t
+
+sNodeHostap:
+  _type: struct
+  iface_name:
+    _type: char  
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  iface_type: uint8_t    #beerocks::eIfaceType
+  iface_mac: beerocks::net::sMacAddr
+  iface_is_5ghz: uint8_t
+  ant_num: uint8_t 
+  ant_gain: uint8_t 
+  conducted_power: uint8_t 
+  driver_version:
+    _type: char  
+    _length: [ "beerocks::message::WIFI_DRIVER_VER_LENGTH" ]
+  supported_channels:
+    _type: sWifiChannel 
+    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]          
+
+sVapsList:
+  _type: struct
+  vaps:
+    _type: sVapInfo 
+    _length: [ "beerocks::IFACE_TOTAL_VAPS" ]         
+
+sArpMonitorData:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  ipv4: beerocks::net::sIpv4Addr
+  iface_idx: uint32_t
+  state: uint8_t 
+  source: uint8_t 
+  type: uint8_t 
+
+sArpQuery:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  ipv4: beerocks::net::sIpv4Addr
+
+sNodeBssSteerTarget:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  channel: uint8_t 
+
+sNodeBssSteerRequest:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  disassoc_timer: uint16_t
+  disassoc_imminent: uint8_t 
+  bssid: sNodeBssSteerTarget 
+
+sNodeBssSteerResponse:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  status_code: uint8_t 
+
+sNeighborSetParams11k:
+  _type: struct
+  bssid: beerocks::net::sMacAddr   #ap mac
+  ssid:
+    _type: char
+    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  op_class: uint8_t 
+  channel: uint8_t 
+  phy_type: uint8_t 
+
+  # BSSID inforamtion booleans:
+  ap_reachabilty: uint16_t # '0' - reserved, '1' - not reachable, '2' - unknowned, '3' - reachable --> bit 0-1
+  security: uint8_t            # bit 2
+  key_scope: uint8_t           # bit 3
+  # BSSID inforamtion -> capabilities:
+  spectrum_managment: uint8_t    # bit 4
+  qos: uint8_t                   # bit 5
+  apsd: uint8_t                    # bit 6
+  radio_measurement: uint8_t       # bit 7
+  delayed_block_ack: uint8_t       # bit 8
+  immediate_block_ack: uint8_t     # bit 9
+  roaming_domain: uint8_t         # bit 10
+  high_throughput: uint8_t         # bit 11
+  very_high_throughput: uint8_t    # bit 12
+  ftm: uint8_t                     # bit 13
+  vap_id: int8_t
+
+sNeighborRemoveParams11k:
+  _type: struct
+  bssid: beerocks::net::sMacAddr     #ap mac
+  ssid:
+    _type: char 
+    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  vap_id: int8_t
+
+sStaChannelLoadRequest11k:
+  _type: struct
+  channel: uint8_t 
+  op_class: uint8_t 
+  repeats: uint16_t   # '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
+  rand_ival: uint16_t # random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
+  duration: uint16_t  # measurement duration, expressed in units of TUs [=1024usec]
+  sta_mac: beerocks::net::sMacAddr
+
+  # Measurement request mode booleans:
+  parallel: uint8_t            # (for multiple requests)'0' - measurements are to be performed in sequence, 
+                              #  '1' - request that the measurement is to start at the same time as the measurement described 
+                              #  by the next Measurement Request element in the same Measurement Request frame
+  enable: uint8_t 
+  request: uint8_t 
+  report: uint8_t 
+  mandatory_duration: uint8_t  # '0' - the duration can be lower than in the duration fiels, '1' - duration is mandantory
+
+  # Optional:
+  use_optional_ch_load_rep: uint8_t            # bool
+  ch_load_rep_first: uint8_t   
+  ch_load_rep_second: uint8_t 
+    
+  use_optional_wide_band_ch_switch: uint8_t    # bool
+  new_ch_width: uint32_t                      # not sure if this type is most fit
+  new_ch_center_freq_seg_0: uint32_t          # not sure if this type is most fit
+  new_ch_center_freq_seg_1: uint32_t          # not sure if this type is most fit
+
+sStaChannelLoadResponse11k:
+  _type: struct
+  channel: uint8_t 
+  channel_load: uint8_t 
+  op_class: uint8_t 
+  rep_mode: uint8_t      # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
+  dialog_token: uint8_t 
+  measurement_token: uint8_t 
+  duration: uint16_t    # measurement duration, expressed in units of TUs [=1024usec]
+  start_time: uint64_t 
+  sta_mac: beerocks::net::sMacAddr
+
+  # Optinal fields:
+  use_optional_wide_band_ch_switch: uint8_t    # bool
+
+  new_ch_width: uint32_t
+  new_ch_center_freq_seg_0: uint32_t
+  new_ch_center_freq_seg_1: uint32_t
+
+sBeaconRequest11k:
+  _type: struct
+  measurement_mode: uint8_t  # beerocks::eWiFiMeasurementMode11K. Should be replaced with string "passive"/"active"/"table"
+  channel: uint8_t 
+  op_class: int16_t
+  repeats: uint16_t         # '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
+  rand_ival: uint16_t         # random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
+  duration: uint16_t          # measurement duration, expressed in units of TUs [=1024usec]
+  sta_mac: beerocks::net::sMacAddr
+  bssid: beerocks::net::sMacAddr             # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
+
+  # Measurement request mode booleans:
+  parallel: uint8_t            # (for multiple requests)'0' - measurements are to be performed in sequence, 
+                                #  '1' - request that the measurement is to start at the same time as the measurement described 
+                                #  by the next Measurement Request element in the same Measurement Request frame
+  enable: uint8_t 
+  request: uint8_t 
+  report: uint8_t 
+  mandatory_duration: uint8_t  # '0' - the duration can be lower than in the duration fiels, '1' - duration is mandantory
+
+  expected_reports_count: uint8_t 
+  # Optional:
+  use_optional_ssid: uint8_t                   # bool
+  ssid:
+    _type: char
+    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]         # 36 bytes
+
+  use_optional_ap_ch_report: uint8_t           # bool
+  ap_ch_report:
+    _type: uint8_t 
+    _length: [ 237 ]
+
+  use_optional_req_elements: uint8_t           # bool
+  req_elements:
+    _type: uint8_t 
+    _length: [ 13 ]                   # NOTE: I didnt find any reference to "req_element", and set the max num of elements to 13 randomly
+  
+  use_optional_wide_band_ch_switch: uint8_t    # bool
+  new_ch_width: uint32_t                      # not sure if this type is most fit
+  new_ch_center_freq_seg_0: uint32_t          # not sure if this type is most fit
+  new_ch_center_freq_seg_1: uint32_t          # not sure if this type is most fit
+
+sBeaconResponse11k:
+  _type: struct
+  channel: uint8_t         # A Channel Number of 0 indicates a request to make iterative measurements for all supported channels in the Regulatory Class  
+  op_class: uint8_t 
+  dialog_token: uint8_t 
+  measurement_token: uint8_t 
+  rep_mode: uint8_t        # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
+  phy_type: uint8_t        # integer 0-127 (bits 0-6 of "frame info")
+  frame_type: uint8_t      # (bool) '0' - beacon/probe response frame, '1' - pilot frame (bits 7 of "frame info")
+  rcpi: int8_t           # received channel power
+  rsni: uint8_t            # received signal to noise
+  ant_id: uint8_t          # number for the antennas used for this measurement
+  duration: uint16_t      # measurement duration, expressed in units of TUs [=1024usec]
+  parent_tsf: uint32_t           # see IEEE part11, page 42
+  start_time: uint64_t
+  sta_mac: beerocks::net::sMacAddr       # mac to send response
+  bssid: beerocks::net::sMacAddr      # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
+
+  #optional:
+  new_ch_width: uint32_t                      # not sure if this type is most fit
+  new_ch_center_freq_seg_0: uint32_t          # not sure if this type is most fit
+  new_ch_center_freq_seg_1: uint32_t          # not sure if this type is most fit
+  use_optional_wide_band_ch_switch: uint8_t   # bool
+
+sStatisticsRequest11k:
+  _type: struct
+  sta_mac: beerocks::net::sMacAddr
+  peer_mac_addr: beerocks::net::sMacAddr # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
+
+  group_identity: uint8_t 
+
+  # Measurement request mode booleans:
+  parallel: uint8_t            # (for multiple requests)'0' - measurements are to be performed in sequence, 
+                                #  '1' - request that the measurement is to start at the same time as the measurement described 
+                                #  by the next Measurement Request element in the same Measurement Request frame
+  enable: uint8_t 
+  request: uint8_t 
+
+  report: uint8_t 
+  mandatory_duration: uint8_t  # '0' - the duration can be lower than in the duration fiels, '1' - duration is mandantory
+  repeats: uint16_t       # '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
+
+  rand_ival: uint16_t     # random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
+  duration: uint16_t      # measurement duration, expressed in units of TUs [=1024usec]
+
+  # Optional: 
+  use_optional_trig_rep_sta_counters: uint8_t     # bool
+  measurement_count_1: uint8_t
+  trigger_timeout_1: uint8_t
+  sta_counter_trigger_condition: uint8_t
+  dot11FailedCountThreshold: uint8_t
+  dot11FCSErrorCountThreshold: uint8_t
+  dot11MultipleRetryCountThreshold: uint8_t
+  dot11FrameDuplicateCountThreshold: uint8_t
+  dot11RTSFailureCountThreshold: uint8_t
+  dot11AckFailureCountThreshold: uint8_t
+  dot11RetryCountThreshold: uint8_t
+
+  use_optional_trig_rep_qos_sta_counters: uint8_t # bool
+  measurement_count_2: uint8_t
+  trigger_timeout_2: uint8_t
+  qos_sta_counter_trigger_condition: uint8_t
+  dot11QoSFailedCountThreshold: uint8_t
+  dot11QoSRetryCountThreshold: uint8_t
+  dot11QoSMultipleRetryCountThreshold: uint8_t
+  dot11QoSFrameDuplicateCountThreshold: uint8_t
+  dot11QoSRTSCountFailureThreshold: uint8_t
+  dot11QoSAckFailureCountThreshold: uint8_t
+  dot11QoSDiscardedCountThreshold: uint8_t
+
+  use_optional_trig_rep_rsna_counters: uint8_t  # bool
+  measurement_count_3: uint8_t
+  trigger_timeout_3: uint8_t
+  rsna_counter_trigger_condition: uint8_t
+  dot11RSNAStatsCMACICVErrorsThreshold: uint8_t
+  dot11RSNAStatsCMACReplaysThreshold: uint8_t
+  dot11RSNAStatsRobustMgmtCCMPReplaysThreshold: uint8_t
+  dot11RSNAStatsTKIPICVErrorsThreshold: uint8_t
+  dot11RSNAStatsTKIPReplaysThreshold: uint8_t
+  dot11RSNAStatsCCMPDecryptErrorsThreshold: uint8_t
+  dot11RSNAStatsCCMPReplaysThreshold: uint8_t
+
+sStatisticsResponse11k:
+  _type: struct
+  dialog_token: uint8_t 
+  measurement_token: uint8_t 
+  rep_mode: uint8_t              # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
+  group_identity: uint8_t 
+
+  statistics_group_data_size: uint16_t  
+  duration: uint16_t            # measurement duration, expressed in units of TUs [=1024usec]
+  statistics_group_data:
+    _type: uint32_t 
+    _length: [ 13 ] # different data for each group identity, 4 octets counters with commas between them
+  sta_mac: beerocks::net::sMacAddr             # mac to send the request to
+  
+  # Optional:
+  use_optional_rep_reason: uint8_t 
+  # Report Reason booleans:
+  average_trigger: uint8_t         # bit 0
+  consecutive_trigger: uint8_t       # bit 1
+  delay_trigger: uint8_t           # bit 2
+
+sLinkMeasurementsResponse11k:
+  _type: struct
+  dialog_token: uint8_t 
+  rep_mode: uint8_t      # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
+  rx_ant_id: uint8_t 
+  tx_ant_id: uint8_t 
+  rcpi: uint8_t 
+  rsni: uint8_t 
+  transmit_power: uint8_t 
+  link_margin: uint8_t 
+  sta_mac: beerocks::net::sMacAddr  # mac to send the request to
+
+  #Optional:
+  use_optional_dmg_link_margin: uint8_t            # bool
+  dmg_link_margin_activity: uint8_t 
+  dmg_link_margin_mcs: uint8_t 
+  dmg_link_margin_link_margin: uint8_t 
+
+  dmg_link_margin_snr: uint8_t 
+  use_optional_dmg_link_adapt_ack: uint8_t         # bool
+  dmg_link_adapt_ack_activity: uint8_t 
+  dmg_link_margin_reference_timestamp: uint32_t
+  dmg_link_adapt_ack_reference_timestamp: uint32_t
+
+sBackhaulParams:
+  _type: struct
+  gw_ipv4: beerocks::net::sIpv4Addr
+  gw_bridge_mac: beerocks::net::sMacAddr
+  controller_bridge_mac: beerocks::net::sMacAddr
+  bridge_mac: beerocks::net::sMacAddr
+  bridge_ipv4: beerocks::net::sIpv4Addr
+  backhaul_mac: beerocks::net::sMacAddr
+  backhaul_ipv4: beerocks::net::sIpv4Addr
+  backhaul_bssid: beerocks::net::sMacAddr
+  # uint32_t  backhaul_freq # HACK temp disabled because of a bug on endian converter
+  backhaul_channel: uint8_t 
+  backhaul_is_wireless: uint8_t 
+  backhaul_iface_type: uint8_t 
+  is_backhaul_manager: uint8_t 
+  gw_manage_type: uint8_t 
+  backhaul_scan_measurement_list:
+    _type: beerocks::net::sMacAddr  
+    _length: [ "beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH" ]
+
+sBackhaulRoam:
+  _type: struct
+  bssid: beerocks::net::sMacAddr
+  channel: uint8_t 
+
+sBackhaulRssi:
+  _type: struct
+  rssi: int8_t
+
+sLoggingLevelChange:
+  _type: struct
+  mac: beerocks::net::sMacAddr
+  module_name: uint8_t  # beerocks::eBeeRocksModules
+  log_level: uint8_t    # beerocks::eLogLevel
+  enable: uint8_t 
+
+sVersions:
+  _type: struct
+  master_version:
+    _type: char 
+    _length: [ "beerocks::message::VERSION_LENGTH" ]
+  slave_version:
+    _type: char 
+    _length: [ "beerocks::message::VERSION_LENGTH" ]
+
+sWifiCredentials:
+  _type: struct
+  wifi_sec: eWiFiSec
+  ssid:
+   _type: char 
+   _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  pass:
+    _type: char 
+    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+  sec: uint8_t  # eWiFiSec
+  # Place holder to use in future to identify diffrent VAPS (Home, Guest....) 
+  vap_id: uint8_t 
+  force: uint8_t 
+  radio_dir: uint8_t 
+
+sOnboarding:
+  _type: struct
+  onboarding: uint8_t 
+
+sAdminCredentials:
+  _type: struct
+  user_password:
+    _type: char 
+    _length: [ "beerocks::message::USER_PASS_LEN" ]
+
+sDeviceInfo:
+  _type: struct
+  manufacturer:
+    _type: char
+    _length: [ "beerocks::message::DEV_INFO_STR_MAX_LEN" ]
+  model_name:
+    _type: char 
+    _length: [ "beerocks::message::DEV_INFO_STR_MAX_LEN" ]
+  serial_number:
+    _type: char 
+    _length: [ "beerocks::message::DEV_INFO_STR_MAX_LEN" ]
+  
+  lan_iface_name:
+    _type: char 
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  lan_ip_address: uint32_t
+  lan_network_mask: uint32_t
+
+  wan_iface_name:
+    _type: char 
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  wan_ip_address: uint32_t
+  wan_network_mask: uint32_t
+
+sRestrictedChannels:
+  _type: struct
+  hostap_mac: beerocks::net::sMacAddr
+  restricted_channels:
+    _type: uint8_t 
+    _length: [ "beerocks::message::RESTRICTED_CHANNEL_LENGTH" ]
+  is_global: uint8_t 
+
+sSteeringApConfig:
+  _type: struct
+  bssid: beerocks::net::sMacAddr
+  utilCheckIntervalSec: uint32_t
+  utilAvgCount: uint32_t
+  inactCheckIntervalSec: uint32_t 
+  inactCheckThresholdSec: uint32_t
+
+sSteeringClientConfig:
+  _type: struct
+  snrProbeHWM: uint32_t
+  snrProbeLWM: uint32_t
+  snrAuthHWM: uint32_t
+  snrAuthLWM: uint32_t
+  snrInactXing: uint32_t
+  snrHighXing: uint32_t
+  snrLowXing: uint32_t
+  authRejectReason: uint32_t
+
+sSteeringSetGroupRequest:
+  _type: struct
+  steeringGroupIndex: uint32_t
+  cfg: sSteeringApConfig
+  remove : uint8_t
+
+sSteeringSetGroupResponse:
+  _type: struct
+  error_code: int32_t
+
+sSteeringClientSetRequest:
+  _type: struct
+  steeringGroupIndex: uint32_t
+  bssid: beerocks::net::sMacAddr
+  client_mac: beerocks::net::sMacAddr
+  config: sSteeringClientConfig
+  remove : uint8_t
+
+sSteeringClientSetResponse:
+  _type: struct
+  error_code: int32_t
+
+sSteeringEvProbeReq:
+  _type: struct
+  client_mac: beerocks::net::sMacAddr
+  bssid: beerocks::net::sMacAddr
+  rx_snr: uint8_t
+  blocked: uint8_t
+  broadcast: uint8_t
+
+sSteeringEvAuthFail:
+  _type: struct
+  client_mac: beerocks::net::sMacAddr
+  bssid: beerocks::net::sMacAddr
+  rx_snr: uint8_t
+  blocked: uint8_t
+  reject: uint8_t
+  reason: uint8_t
+
+sClientDisconnectResponse:
+  _type: struct
+  error_code: int32_t
+
+sSteeringDatarateInfo:
+  _type: struct
+  maxChwidth: uint8_t  
+  maxStreams: uint8_t 
+  phyMode: uint8_t  
+  maxMCS: uint8_t  
+  maxTxpower: uint8_t  
+  isStaticSmps: uint8_t  
+  isMUMimoSupported: uint8_t  
+
+sSteeringRrmCaps:
+  _type: struct
+  linkMeas: uint8_t
+  neighRpt: uint8_t
+  bcnRptPassive: uint8_t
+  bcnRptActive: uint8_t
+  bcnRptTable: uint8_t
+  lciMeas: uint8_t
+  ftmRangeRpt: uint8_t
+
+eDisconnectSource:
+  _type: enum
+  _enum_storage: uint8_t
+  eDisconnect_Source_Unknown : 0
+  eDisconnect_Source_Local : 1
+  eDisconnect_Source_Remote : 2
+
+
+eDisconnectType:
+  _type: enum
+  _enum_storage: uint8_t
+  eDisconnect_Type_Unknown : 0
+  eDisconnect_Type_Disassoc : 1 
+  eIsconnect_Type_Deauth : 2
+
+
+eSteeringSnrChange:
+  _type: enum
+  _enum_storage: uint8_t
+  eWifi_Steering_Snr_Unchanged : 0           
+  eWifi_Steering_Snr_Higher : 1                      
+  eWifi_Steering_Snr_Lower : 2
+
+eSteeringEventType:
+  _type: enum
+  _enum_storage: uint8_t
+  eWifi_Steering_Event_Probe_Req : 1
+  eWifi_Steering_Event_Client_Connect : 2
+  eWifi_Steering_Event_Client_Disconnect : 3
+  eWifi_Steering_Event_Client_Activity : 4
+  eWifi_Steering_Event_Snr_Xing : 5
+  eWifi_Steering_Event_Snr : 6
+  eWifi_Steering_Event_Auth_Fail : 7
+
+sSteeringEvConnect:
+  _type: struct
+  client_mac: beerocks::net::sMacAddr
+  bssid: beerocks::net::sMacAddr
+  isBTMSupported: uint32_t 
+  isRRMSupported: uint32_t
+  bandCap2G: uint8_t
+  bandCap5G: uint8_t
+  datarateInfo: sSteeringDatarateInfo
+  rrmCaps: sSteeringRrmCaps
+
+sSteeringEvDisconnect:
+  _type: struct
+  client_mac: beerocks::net::sMacAddr
+  bssid: beerocks::net::sMacAddr
+  reason: uint32_t
+  source: eDisconnectSource
+  type: eDisconnectType
+
+sSteeringEvActivity:
+  _type: struct
+  client_mac: beerocks::net::sMacAddr
+  bssid: beerocks::net::sMacAddr
+  active: uint8_t 
+
+sSteeringEvSnrXing:
+ _type: struct
+ client_mac: beerocks::net::sMacAddr
+ bssid: beerocks::net::sMacAddr
+ snr: uint32_t
+ inactveXing: eSteeringSnrChange
+ highXing: eSteeringSnrChange
+ lowXing: eSteeringSnrChange 
+
+sSteeringEvSnr:
+ _type: struct
+ client_mac: beerocks::net::sMacAddr
+ bssid: beerocks::net::sMacAddr
+ snr: uint32_t
+                

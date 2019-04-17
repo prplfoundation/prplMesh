@@ -1,0 +1,6 @@
+DUPLICATE AS "external_toolchain.cfg" <-- REMOVE THIS LINE
+
+TARGET_PLATFORM=ugw
+PLATFORM_TOOLCHAIN_PREFIX=/opt/ugw/toolchain/64bit/toolchain-mips_mips32_gcc-4.8-linaro_uClibc-0.9.33.2_linux_3_10/bin/mips-openwrt-linux-uclibc-
+PLATFORM_BASE_DIR=/home/vbukhovsky/work/GRX/UGW-7.2-Repo/beerocks_1_2_wcci_master_1.2_latest/ugw_sw/ugw/openwrt/core
+PLATFORM_BUILD_NAME=target-mips-openwrt-linux-uclibc_grx350_1200_mr_eth_rt_72
