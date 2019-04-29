@@ -176,10 +176,6 @@ int bpl_cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PA
 	int retVal = 0;
 	bool disabled = false;
 	int index = 0;
-	char disabled_param[MAX_UCI_BUF_LEN] = "disabled";
-	char key_param[MAX_UCI_BUF_LEN] = "key";
-	char ssid_param[MAX_UCI_BUF_LEN] = "ssid";
-	char security_mode_param[MAX_UCI_BUF_LEN] = "wav_security_mode";
 	
 	if (!iface || !wlan_params) {
 		return RETURN_ERR;
@@ -190,7 +186,7 @@ int bpl_cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PA
 		return retVal;
 	}
 
-	retVal |= uci_converter_get_bool(TYPE_RADIO, index, disabled_param, &disabled);
+	retVal |= uci_converter_get_bool(TYPE_RADIO, index, "disabled", &disabled);
 	if (!retVal) {
 		wlan_params->enabled = !disabled;
 	}
@@ -198,13 +194,13 @@ int bpl_cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PA
 	retVal |= bpl_cfg_get_ssid_advertisement_enabled(index, &wlan_params->advertise_ssid);
 
 	char ssid[MAX_UCI_BUF_LEN] = {0}, security[MAX_UCI_BUF_LEN] = {0}, passphrase[MAX_UCI_BUF_LEN] = {0};
-	retVal |= uci_converter_get_str(TYPE_VAP, index, ssid_param, ssid);
-	retVal |= uci_converter_get_str(TYPE_VAP, index, security_mode_param, security);
+	retVal |= uci_converter_get_str(TYPE_VAP, index, "ssid", ssid);
+	retVal |= uci_converter_get_str(TYPE_VAP, index, "wav_security_mode", security);
 	std::string mode = std::string(security);
 	if (mode == BPL_WLAN_SEC_WEP64_STR || mode == BPL_WLAN_SEC_WEP128_STR) {
 		retVal |= bpl_cfg_get_wep_key(index, -1, passphrase);
 	} else if (mode != BPL_WLAN_SEC_NONE_STR) {
-		retVal |= uci_converter_get_str(TYPE_VAP, index, key_param, passphrase);
+		retVal |= uci_converter_get_str(TYPE_VAP, index, "key", passphrase);
 	}
 
 	utils::copy_string(wlan_params->ssid, ssid, BPL_SSID_LEN);

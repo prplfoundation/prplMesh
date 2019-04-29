@@ -33,34 +33,41 @@ public:
 				  << sub_ << "\nsub2 socket: " << sub2_ << "\npublisher socket: " << pub_ << std::endl;
 	}
 
-	void Run()
+	void SlowJoinerMultipleAttempts()
 	{
 		int attempts = 0, max_attempts = 100, rc;
 
-		rc = poller_.Add(sub_);
-		mapf_assert(rc == 0);
-		rc = poller_.Add(sub2_);
-		mapf_assert(rc == 0);
-
-		std::cout << "sending first message multiple attempts (slow joiner fix)" <<std::endl;
-		/* slow joiner syndrom - send multiple times untill received */
+		std::cout << "sending first message multiple attempts (slow joiner fix)" << std::endl;
+		// slow joiner syndrom - send multiple times untill received 
 		while (attempts++ < max_attempts) {
 			Send();
 			rc = poller_.Poll(10);
 			if (rc > 0) {
 				mapf_assert(poller_.CheckEvent(sub_) == MAPF_POLLIN ||
-							poller_.CheckEvent(sub2_) == MAPF_POLLIN);
+                                                       poller_.CheckEvent(sub2_) == MAPF_POLLIN);
+
 				break;
 			}
 		}
-
 		mapf_assert(attempts < max_attempts);
 		Recv();
 		std::cout << "finished first message send after " << attempts << " attempts" << std::endl;
+	}
+
+	void Run()
+	{
+		int rc;
+		MAPF_INFO("START");
+		rc = poller_.Add(sub_);
+		mapf_assert(rc == 0);
+		rc = poller_.Add(sub2_);
+		mapf_assert(rc == 0);
+		SlowJoinerMultipleAttempts();
+		Send();
+		Recv();
 
 		// verify poll doesn't return false events
 		rc = poller_.Poll(10);
-		mapf_assert(rc == 0);
 
 		// Send and receive once more
 		std::cout << "sending second message" << std::endl;
@@ -161,7 +168,6 @@ int start_broker()
 		broker.Bind(mapf::BrokerSocket::BACKEND, kSubAddr);
 		broker.Run();
 	}
-	usleep(1000); //wait till broker is ready...
 	return pid;
 }
 
@@ -174,7 +180,7 @@ int main(int argc, char *argv[])
 	MAPF_INFO("broker pid = " << pid);
 
 	mapf::Context& ctx = mapf::Context::Instance();
-
+	
 	PollerTest test(ctx);
 	test.Run();
 

@@ -32,12 +32,10 @@ public:
 		Frame() : Frame(0) {}
 		virtual ~Frame() {}
 
-		size_t size() const { return data_->size(); }
 		size_t len() const { return data_->size(); }
 
-		uint8_t* get() const { return data_->data(); }
-		uint8_t* data() const { return get(); }
-		std::string str() const { return std::string(reinterpret_cast<char*>(get()), len()); }
+		uint8_t* data() const { return data_->data(); }
+		std::string str() const { return std::string(reinterpret_cast<char*>(data()), len()); }
 
 		void set_size(size_t size)
 		{
@@ -51,7 +49,7 @@ public:
 		}
 
 		virtual std::ostream& print(std::ostream& os) const {
-			return os << "size=" << size() << " use_count=" << data_.use_count();
+			return os << "size=" << len() << " use_count=" << data_.use_count();
 		}
 
 	private:

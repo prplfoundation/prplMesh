@@ -28,6 +28,11 @@ void BrokerInterface::PrintConfig()
 
 void BrokerInterface::Sync()
 {
+	if (!Socket::SyncRequired())
+	{
+		return;
+	}
+
 	syncCount++;
 	const std::string& msg_topic = sync_topic();
 	Message tx_msg(msg_topic);

@@ -3,47 +3,22 @@
 
 #include <mapf/common/logger.h>
 #include <mapf/common/err.h>
-#include <zmq.h>
 #include <iostream>
 
 namespace mapf
 {
 
-class Socket;
-
 class Context
 {
 public:
 	
-	static Context& Instance()
-	{
-			   static Context instance;
-			   return instance;
-	}
-
-	inline ~Context()
-	{
-		Close();
-	}
-
-	inline void* context() {return ctx_;}
-	
+	static Context& Instance();
+	~Context();
+	void* get();
 
 private:
-	Context() : ctx_(zmq_ctx_new())
-	{
-		mapf_assert(ctx_);
-	}
-	inline void Close()
-	{
-		if (ctx_ == nullptr)
-			return;
-
-		int rc = zmq_ctx_destroy(ctx_);
-		mapf_assert(rc == 0);
-		ctx_ = nullptr;
-	}
-
+	Context();
+	void Close();
 	Context(const Context&) = delete;
 	void operator = (const Context&) = delete;
 	void *ctx_;

@@ -18,7 +18,7 @@ public:
 	struct SocketTestConfig {
 		unsigned iterations = 1;
 		unsigned max_attempts = 1000;
-		unsigned init_delay = 100;
+		unsigned init_delay = 0;
 		bool verbose = false;
 	};
 
@@ -26,64 +26,40 @@ public:
 		: name_(name)
 		, pub_(context)
 		, sub_(context)
-		, item_({sub_.handle(), 0, ZMQ_POLLIN, 0})
 	{
 		if (cfg)
 			cfg_ = SocketTestConfig(*cfg);
-		usleep(cfg_.init_delay);
 		int rc = pub_.Connect(kPubAddr);
 		mapf_assert(rc == 0);
 		rc = sub_.Connect(kSubAddr);
 		mapf_assert(rc == 0);
 		rc = sub_.Subscribe(kTopic);
 		mapf_assert(rc == 0);
-		mapf::MessageFactory::Instance().DumpMakers();
-	}
-
-	void SlowJoinerMultipleAttempts()
-	{
-		int attempts = 0, max_attempts = cfg_.max_attempts, rc;
-
-		if (cfg_.verbose)
-			std::cout << "sending first message multiple attempts (slow joiner fix)" << std::endl;
-		/* slow joiner syndrom - send multiple times untill received */
-		while (attempts++ < max_attempts) {
-			Send();
-			rc = zmq_poll(&item_, 1, 10); //poll minimal timeout
-			if (rc > 0) {
-				mapf_assert(item_.revents == ZMQ_POLLIN);
-				break;
-			}
-		}
-		mapf_assert(attempts < max_attempts);
-		Recv();
-		if (cfg_.verbose)
-			std::cout << "finished first message send after " << attempts << " attempts" << std::endl;
+		mapf::MessageFactory::Instance().DumpMakers();		
 	}
 
 	void Run()
 	{
-		for (int i = 0; i < int(cfg_.iterations); i++) {
-			if (cfg_.verbose) {
+		for (int i = 0; i < int(cfg_.iterations); i++) 
+		{
+			if (cfg_.verbose) 
+			{
 				std::cout << "\n#" << i << ": TEST START: " << name_  << std::endl;
 				std::cout << "subscriber socket: " << sub_ << "\npublisher socket: " << pub_ << std::endl;
 			}
 
-			SlowJoinerMultipleAttempts();
-			//sleep(1);
-
-			// verify poll doesn't return false events
-			int rc = zmq_poll(&item_, 1, 10);
-			mapf_assert(rc == 0);
+			if (mapf::Socket::SyncRequired())
+			{
+				usleep(200000); //handle slow joiner syndrom - best effort:)
+			}
 
 			// Send and receive once more
 			if (cfg_.verbose)
 				std::cout << "sending second message" << std::endl;
 			Send();
-			rc = zmq_poll(&item_, 1, 10);
-			mapf_assert(rc == 1);
 			Recv();
-			if (cfg_.verbose) {
+			if (cfg_.verbose) 
+			{
 				std::cout << "finished second message send (single attempt)" << std::endl;
 				std::cout << "#" << i << ": TEST PASSED: " << name_ << std::endl;
 			}
@@ -98,7 +74,6 @@ protected:
 	SocketTestConfig cfg_;
 	mapf::PubSocket pub_;
 	mapf::SubSocket sub_;
-	zmq_pollitem_t item_;
 
 private:
 	SocketTest();
@@ -112,7 +87,7 @@ public:
 
 	void Send() override
 	{
-		int rc = pub_.Send(kTopic.data(), kTopic.size());
+		int rc = pub_.Send((void*)(kTopic.data()), kTopic.size(), 0);
 		mapf_assert(rc >= 0);
 	}
 
@@ -134,19 +109,18 @@ public:
 
 	void Send() override
 	{
-		mapf::Message::Frame topic(kTopic.size(), kTopic.data());
-		bool rc = pub_.Send(topic);
+		bool rc = pub_.Send((void*)kTopic.data(), (size_t)kTopic.size(), 0);
 		mapf_assert(rc == true);
 	}
 
 	void Recv() override
 	{
 		mapf::Message::Frame topic(kTopic.size());
-		memset(topic.get(), 0, topic.len());
+		memset(topic.data(), 0, topic.len());
 		bool rc = sub_.Receive(topic);
 		mapf_assert(rc == true);
 		if (cfg_.verbose)
-			MAPF_INFO(name_ << ": received frame " << topic << " data: " << topic.get());
+			MAPF_INFO(name_ << ": received frame " << topic << " data: " << topic.data());
 	}
 };
 
@@ -243,41 +217,6 @@ public:
 			MAPF_INFO("received multi frame message:\n\tMessage: " << *msg << "\n\tFrame: " << msg->frame().str());
 	}
 };
-
-int test_zmq_direct()
-{
-	void *ctx = zmq_ctx_new();
-	mapf_assert(ctx);
-
-	void *pub = zmq_socket(ctx, ZMQ_PUB);
-	mapf_assert(pub);
-	int rc = zmq_connect(pub, kPubAddr);
-	mapf_assert(rc == 0);
-
-	//sleep(1);
-	void *sub = zmq_socket(ctx, ZMQ_SUB);
-	mapf_assert(sub);
-	rc = zmq_connect(sub, kSubAddr);
-	mapf_assert(rc == 0);
-	//sleep(1);
-	rc = zmq_setsockopt(sub, ZMQ_SUBSCRIBE, kTopic.c_str(), kTopic.length());
-	mapf_assert(rc == 0);
-
-	sleep(1);
-	rc = zmq_send(pub, kTopic.c_str(), kTopic.length(), 0);
-	std::cout << "kTopic=" << kTopic << " len=" << kTopic.length() << " rc=" << rc << std::endl;
-	mapf_assert(rc == int(kTopic.length()));
-	//sleep(1);
-
-	zmq_pollitem_t item = {sub, 0, ZMQ_POLLIN, 0};
-	rc = zmq_poll(&item, 1, -1);
-	mapf_assert(rc == 1);
-
-	char buf[256];
-	rc = zmq_recv(sub, buf, 256, 0);
-	std::cout << buf << std::endl;
-	return 0;
-}
 
 SocketTest::SocketTestConfig g_cfg;
 std::string g_test = "all";
@@ -376,7 +315,6 @@ int start_broker(SocketTest::SocketTestConfig& cfg)
 	return pid;
 }
 
-
 int main(int argc, char *argv[])
 {
 	mapf::Logger::Instance().LoggerInit("socket_test");
@@ -388,26 +326,31 @@ int main(int argc, char *argv[])
 	mapf::Context& ctx = mapf::Context::Instance();
 
 	if (g_test == "all" || g_test == "string") {
+		MAPF_INFO("Socket test string start");
 		SocketTestString test_string(ctx, &g_cfg);
 		test_string.Run();
 	}
 
 	if (g_test == "all" || g_test == "frame") {
+		MAPF_INFO("Socket test frame start");
 		SocketTestFrame test_frame(ctx, &g_cfg);
 		test_frame.Run();
 	}
 	
 	if (g_test == "all" || g_test == "message") {
+		MAPF_INFO("Socket test message start");
 		SocketTestMessage test_message(ctx, &g_cfg);
 		test_message.Run();
 	}
 
 	if (g_test == "all" || g_test == "mult") {
+		MAPF_INFO("Socket test message mult start");
 		SocketTestMessageMult test_multi(ctx, &g_cfg);
 		test_multi.Run();
 	}
 
 	if (g_test == "all" || g_test == "factory") {
+		MAPF_INFO("Socket test message mult factory start");
 		SocketTestMessageMultFactory test_factory(ctx, &g_cfg);
 		test_factory.Run();
 	}
