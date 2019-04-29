@@ -61,6 +61,7 @@ struct SRadioCapabilitiesStrings {
 	std::string ht_mcs;
 	std::string vht_cap;
 	std::string vht_mcs;
+	std::string rrm_caps;
 };
 
 // Temporary storage for parsed ACS report
@@ -143,7 +144,7 @@ static uint8_t dwpal_bw_to_beerocks_bw(const uint8_t chan_width)
 }
 
 static bool get_sta_caps(SRadioCapabilitiesStrings& caps_strings,
-	sRadioCapabilities& sta_caps,
+	beerocks::message::sRadioCapabilities& sta_caps,
 	bool is_5ghz)
 {
 	bool break_upper_loop = false;
@@ -151,17 +152,17 @@ static bool get_sta_caps(SRadioCapabilitiesStrings& caps_strings,
 	std::string item;
 	uint8_t i = 0;
 
-	memset(&sta_caps, 0, sizeof(sRadioCapabilities));
+	memset(&sta_caps, 0, sizeof(beerocks::message::sRadioCapabilities));
 	sta_caps.ht_bw = 0xFF;
 	sta_caps.vht_bw = 0xFF;
 
 	// HT, VHT caps parsing
 	if (!caps_strings.ht_cap.empty()) {
 		uint16_t ht_cap = uint16_t(std::stoul(caps_strings.ht_cap, nullptr, 16));
-		sta_caps.ht_bw = (ht_cap >> 1) & 0x01; //20 == 0 / 40 == 1
-		sta_caps.ht_sm_power_save = (ht_cap >> 2) & 0x11; // 0=static, 1=dynamic, 2=reserved, 3=disabled
-		sta_caps.ht_low_bw_short_gi = (ht_cap >> 5) & 0x01; // 20 long == 0 / short == 1
-		sta_caps.ht_high_bw_short_gi = (ht_cap >> 6) & 0x01; // 40
+		sta_caps.ht_bw = (ht_cap  & HT_CAP_INFO_SUPP_CHANNEL_WIDTH_SET) >> 1; //20 == 0 / 40 == 1
+		sta_caps.ht_sm_power_save = (ht_cap & HT_CAP_INFO_SMPS_MASK) >> 2; // 0=static, 1=dynamic, 2=reserved, 3=disabled
+		sta_caps.ht_low_bw_short_gi = (ht_cap & HT_CAP_INFO_SHORT_GI20MHZ) >> 5; // 20 long == 0 / short == 1
+		sta_caps.ht_high_bw_short_gi = (ht_cap & HT_CAP_INFO_SHORT_GI40MHZ) >> 6; // 40
 		
 		// parsing "AA BB CC DD XX ..." to 0xDDCCBBAA
 		uint32_t ht_mcs = 0;
@@ -187,6 +188,9 @@ static bool get_sta_caps(SRadioCapabilitiesStrings& caps_strings,
 				break;
 			}
 		}
+	} else {
+		// Use default value
+		sta_caps.ant_num = 1;
 	}
 
 	if (is_5ghz && (!caps_strings.vht_cap.empty())) {
@@ -220,6 +224,29 @@ static bool get_sta_caps(SRadioCapabilitiesStrings& caps_strings,
 				break;
 			}
 		}
+	} else {
+		// Use default value
+		sta_caps.ant_num = 1;
+	}
+
+	if (!caps_strings.rrm_caps.empty()) {
+		uint8_t rrm_caps[6];
+		str_stream.str(caps_strings.rrm_caps);
+		std::string token;
+
+		for (int i =0 ; i < 6 ; i++)
+		{
+			std::getline(str_stream, token, ' ');
+            rrm_caps[i] = std::stoul(token, nullptr, 16);
+		}
+		
+		sta_caps.nr_enabled = ((rrm_caps[0] & WLAN_RRM_CAPS_NEIGHBOR_REPORT) != 0);
+		sta_caps.link_meas = ((rrm_caps[0] & WLAN_RRM_CAPS_LINK_MEASUREMENT) != 0);
+		sta_caps.beacon_report_passive = ((rrm_caps[0] & WLAN_RRM_CAPS_BEACON_REPORT_PASSIVE) != 0);
+		sta_caps.beacon_report_active = ((rrm_caps[0] & WLAN_RRM_CAPS_BEACON_REPORT_ACTIVE) != 0);
+		sta_caps.beacon_report_table = ((rrm_caps[0] & WLAN_RRM_CAPS_BEACON_REPORT_TABLE) != 0);
+		sta_caps.lci_meas = ((rrm_caps[1] & WLAN_RRM_CAPS_LCI_MEASUREMENT) != 0);
+		sta_caps.fmt_range_report = ((rrm_caps[4] & WLAN_RRM_CAPS_FTM_RANGE_REPORT) != 0);
 	}
 
 	// find deafult mcs
@@ -289,7 +316,13 @@ static bool get_sta_caps(SRadioCapabilitiesStrings& caps_strings,
 		<< std::endl << "wifi_standard [enum] = "   << int(sta_caps.wifi_standard)
 		<< std::endl << "btm_supported = "          << (sta_caps.btm_supported ? "true" : "false")
 		<< std::endl << "nr_enabled = "             << (sta_caps.nr_enabled ? "true" : "false")
-		<< std::endl << "cell_capa = "              << int(sta_caps.cell_capa);
+		<< std::endl << "cell_capa = "              << int(sta_caps.cell_capa)
+		<< std::endl << "link_meas = "				<< int(sta_caps.link_meas)
+		<< std::endl << "beacon_report_passive = " 	<< int(sta_caps.beacon_report_passive)
+		<< std::endl << "beacon_report_active = " 	<< int(sta_caps.beacon_report_active)
+		<< std::endl << "beacon_report_table = " 	<< int(sta_caps.beacon_report_table)
+		<< std::endl << "lci_meas = " 				<< int(sta_caps.lci_meas)
+		<< std::endl << "fmt_range_report = " 		<< int(sta_caps.fmt_range_report);
 
 	return true;
 }
@@ -998,20 +1031,31 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         char HT_MCS[64] = { 0 };
         char VHT_CAP[16] = { 0 };
         char VHT_MCS[24] = { 0 };
-        size_t numOfValidArgs[11] = { 0 };
+		char RRM_CAP[20] = { 0 };
+        size_t numOfValidArgs[20] = { 0 };
         FieldsToParse fieldsToParse[] =
         {
-            { NULL /*opCode*/,                                 &numOfValidArgs[0], DWPAL_STR_PARAM,  NULL,              0 },
-            { (void *)VAP,                                     &numOfValidArgs[1], DWPAL_STR_PARAM,  NULL,              sizeof(VAP) },
-            { (void *)MACAddress,                              &numOfValidArgs[2], DWPAL_STR_PARAM,  NULL,              sizeof(MACAddress) },
-            { (void *)supportedRates,                          &numOfValidArgs[3], DWPAL_STR_PARAM,  "SupportedRates=", sizeof(supportedRates) },
-            { (void *)HT_CAP,                                  &numOfValidArgs[4], DWPAL_STR_PARAM,  "HT_CAP=",         sizeof(HT_CAP) },
-            { (void *)HT_MCS,                                  &numOfValidArgs[5], DWPAL_STR_PARAM,  "HT_MCS=",         sizeof(HT_MCS) },
-            { (void *)VHT_CAP,                                 &numOfValidArgs[6], DWPAL_STR_PARAM,  "VHT_CAP=",        sizeof(VHT_CAP) },
-            { (void *)VHT_MCS,                                 &numOfValidArgs[7], DWPAL_STR_PARAM,  "VHT_MCS=",        sizeof(VHT_MCS) },
-            { (void *)&msg->params.capabilities.btm_supported, &numOfValidArgs[8], DWPAL_CHAR_PARAM, "btm_supported=",  0 },
-            { (void *)&msg->params.capabilities.nr_enabled,    &numOfValidArgs[9], DWPAL_CHAR_PARAM, "nr_enabled=",     0 },
-            { (void *)&msg->params.capabilities.cell_capa,     &numOfValidArgs[10],DWPAL_CHAR_PARAM, "cell_capa=",      0 },
+            { NULL /*opCode*/,                                 		&numOfValidArgs[0], DWPAL_STR_PARAM,  NULL,              0 },
+            { (void *)VAP,                                     		&numOfValidArgs[1], DWPAL_STR_PARAM,  NULL,              sizeof(VAP) },
+            { (void *)MACAddress,                              		&numOfValidArgs[2], DWPAL_STR_PARAM,  NULL,              sizeof(MACAddress) },
+            { (void *)supportedRates,                          		&numOfValidArgs[3], DWPAL_STR_PARAM,  "SupportedRates=", sizeof(supportedRates) },
+            { (void *)HT_CAP,                                  		&numOfValidArgs[4], DWPAL_STR_PARAM,  "HT_CAP=",         sizeof(HT_CAP) },
+            { (void *)HT_MCS,                                  		&numOfValidArgs[5], DWPAL_STR_PARAM,  "HT_MCS=",         sizeof(HT_MCS) },
+            { (void *)VHT_CAP,                                 		&numOfValidArgs[6], DWPAL_STR_PARAM,  "VHT_CAP=",        sizeof(VHT_CAP) },
+            { (void *)VHT_MCS,                                 		&numOfValidArgs[7], DWPAL_STR_PARAM,  "VHT_MCS=",        sizeof(VHT_MCS) },
+            { (void *)&msg->params.capabilities.btm_supported, 		&numOfValidArgs[8], DWPAL_CHAR_PARAM, "btm_supported=",  0 },
+            { (void *)&msg->params.capabilities.cell_capa,     		&numOfValidArgs[9],DWPAL_CHAR_PARAM, "cell_capa=",      0 },
+			{ (void *)&msg->params.capabilities.band_2g_capable,	&numOfValidArgs[10],DWPAL_CHAR_PARAM, "band_2g_capable=",      0 },
+			{ (void *)&msg->params.capabilities.band_5g_capable,	&numOfValidArgs[11],DWPAL_CHAR_PARAM, "band_5g_capable=",      0 },
+			{ (void *)&msg->params.capabilities.rrm_supported, 		&numOfValidArgs[12],DWPAL_CHAR_PARAM, "rrm_supported=",  0 },
+			{ (void *)RRM_CAP,  							   		&numOfValidArgs[13],DWPAL_STR_PARAM,  "rrm_cap=",   	sizeof(RRM_CAP) },
+			{ (void *)&msg->params.capabilities.max_ch_width,  		&numOfValidArgs[14],DWPAL_CHAR_PARAM, "max_ch_width=",   0 },
+			{ (void *)&msg->params.capabilities.max_streams,   		&numOfValidArgs[15],DWPAL_CHAR_PARAM, "max_streams=",	0 },
+			{ (void *)&msg->params.capabilities.phy_mode,  	   		&numOfValidArgs[16],DWPAL_CHAR_PARAM, "phy_mode=",       0 },
+			{ (void *)&msg->params.capabilities.max_mcs,  	   		&numOfValidArgs[17],DWPAL_CHAR_PARAM, "max_mcs=",   		0 },
+			{ (void *)&msg->params.capabilities.max_tx_power,  		&numOfValidArgs[18],DWPAL_CHAR_PARAM, "max_tx_power=",   0 },
+			{ (void *)&msg->params.capabilities.mumimo_supported, 	&numOfValidArgs[19],DWPAL_CHAR_PARAM, "mu_mimo=",      0 },
+			
             /* Must be at the end */
             { NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0 }
         };
@@ -1022,44 +1066,44 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         }
 
         /* TEMP: Traces... */
-        LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " vap_id= " << VAP;
-        LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2] << " MACAddress= " << MACAddress;
-        LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3] << " supportedRates= " << supportedRates;
-        LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " HT_CAP= " << HT_CAP;
-        LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " HT_MCS= " << HT_MCS;
-        LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " VHT_CAP= " << VHT_CAP;
-        LOG(DEBUG) << "numOfValidArgs[7]= " << numOfValidArgs[7] << " VHT_MCS= " << VHT_MCS;
-        LOG(DEBUG) << "numOfValidArgs[8]= " << numOfValidArgs[8] << " btm_supported= " << (int)msg->params.capabilities.btm_supported;
-        LOG(DEBUG) << "numOfValidArgs[9]= " << numOfValidArgs[9] << " nr_enabled= " << (int)msg->params.capabilities.nr_enabled;
-        LOG(DEBUG) << "numOfValidArgs[10]= " << numOfValidArgs[10] << " cell_capa= " << (int)msg->params.capabilities.cell_capa;
+        LOG(DEBUG) << "numOfValidArgs[1]= "  << numOfValidArgs[1]  << " vap_id= " << VAP;
+        LOG(DEBUG) << "numOfValidArgs[2]= "  << numOfValidArgs[2]  << " MACAddress= " << MACAddress;
+        LOG(DEBUG) << "numOfValidArgs[3]= "  << numOfValidArgs[3]  << " supportedRates= " << supportedRates;
+        LOG(DEBUG) << "numOfValidArgs[4]= "  << numOfValidArgs[4]  << " HT_CAP= " << HT_CAP;
+        LOG(DEBUG) << "numOfValidArgs[5]= "  << numOfValidArgs[5]  << " HT_MCS= " << HT_MCS;
+        LOG(DEBUG) << "numOfValidArgs[6]= "  << numOfValidArgs[6]  << " VHT_CAP= " << VHT_CAP;
+        LOG(DEBUG) << "numOfValidArgs[7]= "  << numOfValidArgs[7]  << " VHT_MCS= " << VHT_MCS;
+        LOG(DEBUG) << "numOfValidArgs[8]= "  << numOfValidArgs[8]  << " btm_supported= " << (int)msg->params.capabilities.btm_supported;
+        LOG(DEBUG) << "numOfValidArgs[9]= "  << numOfValidArgs[9]  << " cell_capa= " << (int)msg->params.capabilities.cell_capa;
+		LOG(DEBUG) << "numOfValidArgs[10]= " << numOfValidArgs[10] << " band_2g_capable= " << (int)msg->params.capabilities.band_2g_capable;
+		LOG(DEBUG) << "numOfValidArgs[11]= " << numOfValidArgs[11] << " band_5g_capable= " << (int)msg->params.capabilities.band_5g_capable;
+		LOG(DEBUG) << "numOfValidArgs[12]= " << numOfValidArgs[12] << " rrm_supported= " << (int)msg->params.capabilities.rrm_supported;
+		LOG(DEBUG) << "numOfValidArgs[13]= " << numOfValidArgs[13] << " RRM_CAP= " << RRM_CAP;
+		LOG(DEBUG) << "numOfValidArgs[14]= " << numOfValidArgs[14] << " max_ch_width= " << (int)msg->params.capabilities.max_ch_width;
+		LOG(DEBUG) << "numOfValidArgs[15]= " << numOfValidArgs[15] << " max_streams= " << (int)msg->params.capabilities.max_streams;
+		LOG(DEBUG) << "numOfValidArgs[16]= " << numOfValidArgs[16] << " phy_mode= " << (int)msg->params.capabilities.phy_mode;
+		LOG(DEBUG) << "numOfValidArgs[17]= " << numOfValidArgs[17] << " max_mcs= " << (int)msg->params.capabilities.max_mcs;
+		LOG(DEBUG) << "numOfValidArgs[18]= " << numOfValidArgs[18] << " max_tx_power= " << (int)msg->params.capabilities.max_tx_power;
+		LOG(DEBUG) << "numOfValidArgs[19]= " << numOfValidArgs[19] << " mumimo_supported= " << (int)msg->params.capabilities.mumimo_supported;
         /* End of TEMP: Traces... */
 
-        bool caps_valid = true;
         for (uint8_t i = 0; i < (sizeof(numOfValidArgs)/sizeof(size_t)); i++) {
             if (numOfValidArgs[i] == 0) {
                 LOG(ERROR) << "Failed reading parsed parameter " << (int)i << " ==> Continue with default values";
-                caps_valid = false;
             }
         }
 
         msg->params.vap_id = beerocks::utils::get_ids_from_iface_string(VAP).vap_id;
         msg->params.mac = beerocks::net::network_utils::mac_from_string(MACAddress);
 
-        if (caps_valid) {
-            SRadioCapabilitiesStrings caps_strings;
-            caps_strings.supported_rates.assign(supportedRates);
-            caps_strings.ht_cap.assign(HT_CAP);
-            caps_strings.ht_mcs.assign(HT_MCS);
-            caps_strings.vht_cap.assign(VHT_CAP);
-            caps_strings.vht_mcs.assign(VHT_MCS);
-            get_sta_caps(caps_strings, msg->params.capabilities, get_radio_info().is_5ghz);
-        } else {
-            LOG(ERROR) << "One or more of required capability strings is missing!";
-            // Setting minimum default values
-            msg->params.capabilities.ant_num          = 1;
-            msg->params.capabilities.wifi_standard    = STANDARD_N;
-            msg->params.capabilities.default_mcs      = MCS_6;
-        }
+		SRadioCapabilitiesStrings caps_strings;
+		caps_strings.supported_rates.assign(supportedRates);
+		caps_strings.ht_cap.assign(HT_CAP);
+		caps_strings.ht_mcs.assign(HT_MCS);
+		caps_strings.vht_cap.assign(VHT_CAP);
+		caps_strings.vht_mcs.assign(VHT_MCS);
+		caps_strings.rrm_caps.assign(RRM_CAP);
+		get_sta_caps(caps_strings, msg->params.capabilities, get_radio_info().is_5ghz);
 
         // Add the message to the queue
         event_queue_push(Event::STA_Connected, msg_buff);
@@ -1078,12 +1122,15 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
 
         char VAP[SSID_MAX_SIZE] = { 0 };
         char MACAddress[MAC_ADDR_SIZE] = { 0 };
-        size_t numOfValidArgs[3] = { 0 };
+        size_t numOfValidArgs[6] = { 0 };
         FieldsToParse fieldsToParse[] =
         {
-            { NULL /*opCode*/,     &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0 },
-            { (void *)VAP,         &numOfValidArgs[1], DWPAL_STR_PARAM, NULL, sizeof(VAP) },
-            { (void *)MACAddress,  &numOfValidArgs[2], DWPAL_STR_PARAM, NULL, sizeof(MACAddress) },
+            { NULL /*opCode*/,     			&numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0 },
+            { (void *)VAP,         			&numOfValidArgs[1], DWPAL_STR_PARAM, NULL, sizeof(VAP) },
+            { (void *)MACAddress,  			&numOfValidArgs[2], DWPAL_STR_PARAM, NULL, sizeof(MACAddress) },
+			{ (void *)&msg->params.reason, 	&numOfValidArgs[3],DWPAL_CHAR_PARAM, "reason=",  0 },
+			{ (void *)&msg->params.source, 	&numOfValidArgs[4],DWPAL_CHAR_PARAM, "source=",  0 },
+			{ (void *)&msg->params.type,   	&numOfValidArgs[5],DWPAL_CHAR_PARAM, "type=",  0 },
             /* Must be at the end */
             { NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0 }
         };
@@ -1096,6 +1143,9 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         /* TEMP: Traces... */
         LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " vap_id= " << VAP;
         LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2] << " MACAddress= " << MACAddress;
+		LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3] << " reason= " << int(msg->params.reason);
+		LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " source= " << int(msg->params.source);
+		LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " type= " <<   int(msg->params.type);
 
         for (uint8_t i = 0; i < (sizeof(numOfValidArgs)/sizeof(size_t)); i++) {
             if (numOfValidArgs[i] == 0) {

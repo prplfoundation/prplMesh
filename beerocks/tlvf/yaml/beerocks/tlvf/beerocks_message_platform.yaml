@@ -45,6 +45,10 @@ cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION:
   _type: class
   params: sArpMonitorData 
 
+cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION:
+  _type: class
+  wlan_settings: sWlanSettings 
+
 cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION:
   _type: class
   dhcp_op: eDHCPOp

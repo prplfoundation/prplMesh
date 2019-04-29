@@ -79,7 +79,8 @@ namespace beerocks
             // Only mapf_socket thread need to access these functions and memebers, other classes should not
             // TODO: redesign the socket thread in order to not use "friend" - Vitaly
             friend class btl::transport_socket_thread;
-            bool socket_disconnected_uds(Socket *sd);
+
+            int socket_disconnected_uds(Socket *sd);
             bool handle_cmdu_message_uds(Socket *sd);
             bool verify_cmdu(message::sUdsHeader* uds_header);
 
@@ -91,7 +92,7 @@ namespace beerocks
 
             std::unique_ptr<SocketServer> server_socket;
             std::vector<Socket*> sockets;
-
+            
             ///////////////////////////////////////////////
             
             int server_max_connections;

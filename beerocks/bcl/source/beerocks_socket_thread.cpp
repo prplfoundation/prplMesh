@@ -121,17 +121,17 @@ void socket_thread::socket_connected(Socket *sd)
     }
 }
 
-bool socket_thread::socket_disconnected_uds(Socket* sd)
+int socket_thread::socket_disconnected_uds(Socket* sd)
 {
     // Dummy read for disconnected check
+
     ssize_t available_bytes = sd->readBytes(rx_buffer, sizeof(rx_buffer), false, 1, true); // try to read 1 byte, non-blocking
     if (available_bytes > 0) {
-        return false;
+        return 0;
     } else if ((available_bytes < 0) && (errno == EAGAIN || errno == EWOULDBLOCK)) {
         // In case the read operation failed due to timeout, don't close the socket
-        THREAD_LOG(ERROR) << "Got event on socket but read operation timedout!! sd=" << int(sd);
-        clear_ready(sd);
-        return true;
+        THREAD_LOG(ERROR) << "Got event on socket but read operation timedout! sd=" << int(sd);
+        return -1;
     }
     
     // handle disconnection
@@ -143,7 +143,7 @@ bool socket_thread::socket_disconnected_uds(Socket* sd)
         }
     }
 
-    return true;
+    return 1;
 }
 
 bool socket_thread::handle_cmdu_message_uds(Socket *sd)
@@ -300,8 +300,10 @@ bool socket_thread::work()
                     continue;
                 }
 
-                if (socket_disconnected_uds(sd)) {
-                    break;
+                auto ret = socket_disconnected_uds(sd); // '0' - socket not disconnected (bytes to read), '1' - socket disconnected, '-1' - error
+                if (ret != 0) {
+                    // breaking instead of continue because socket_disconnected_uds() may erase element from Select Socket Vector while iterating it
+                    break; 
                 }
 
                 if (!handle_cmdu_message_uds(sd)) {

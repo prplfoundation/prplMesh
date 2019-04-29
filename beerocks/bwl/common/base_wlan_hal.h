@@ -24,6 +24,7 @@
 #define _BWL_BASE_WLAN_HAL_H_
 
 #include "base_wlan_hal_types.h"
+#include "base_802_11_defs.h"
 
 #include <beerocks/bcl/beerocks_thread_safe_queue.h>
 

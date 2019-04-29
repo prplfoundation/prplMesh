@@ -226,6 +226,9 @@ typedef struct sClientDisconnectionParams {
     beerocks::net::sMacAddr mac;
     beerocks::net::sMacAddr bssid;
     int8_t vap_id;
+    uint8_t reason;
+    uint8_t source;
+    uint8_t type;
     void struct_swap(){
         mac.struct_swap();
         bssid.struct_swap();

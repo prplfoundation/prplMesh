@@ -8,7 +8,6 @@ message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the $
 find_package(bcl REQUIRED)
 
 find_package(MapfCommon REQUIRED)
-find_package(MapfLocalBus QUIET)
 find_package(MapfTransport QUIET)
 
 if(MapfTransport_FOUND)
@@ -33,7 +32,7 @@ add_library(${PROJECT_NAME} SHARED ${btl_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
 if (MapfTransport_FOUND)
      target_link_libraries(${PROJECT_NAME} PUBLIC beerocks::bcl tlvf beerocks::btlvf
-         PRIVATE mapf::localbus mapf::ieee1905_transport_messages elpp)
+         PRIVATE mapf::common mapf::ieee1905_transport_messages elpp)
 else() # UDS Bus
     target_link_libraries(${PROJECT_NAME} PUBLIC beerocks::bcl tlvf elpp beerocks::btlvf)
 endif()

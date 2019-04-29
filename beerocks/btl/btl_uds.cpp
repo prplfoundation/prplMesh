@@ -173,10 +173,16 @@ bool transport_socket_thread::work()
 
                 bool bus_socket_event = (sd == bus);
 
-                if (socket_disconnected_uds(sd)) {
-                    THREAD_LOG(WARNING) << "setting bus to nullptr";
-                    if (bus_socket_event) bus = nullptr;
+                auto ret = socket_disconnected_uds(sd); // '0' - socket not disconnected (bytes to read), '1' - socket disconnected, '-1' - error
+                if (ret == 1) {
+                    if (bus_socket_event) {
+                        THREAD_LOG(FATAL) << "setting bus to nullptr";
+                        bus = nullptr;
+                    }
+                    // breaking instead of continue because socket_disconnected_uds() may erase element from Select Socket Vector while iterating it
                     break;
+                } else if (ret == -1) {
+                    continue;
                 }
 
                 if (!handle_cmdu_message_uds(sd)) {
