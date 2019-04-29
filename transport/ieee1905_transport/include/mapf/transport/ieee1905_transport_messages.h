@@ -65,7 +65,7 @@ public:
         if(this->frames().empty()) {
             Message::Frame frame(sizeof(Metadata));
             Add(frame);
-        } else if (this->frames().back().size() < sizeof(Metadata)) {
+        } else if (this->frames().back().len() < sizeof(Metadata)) {
             this->frames().back().set_size(sizeof(Metadata));
         }
     }
@@ -77,14 +77,14 @@ public:
     }
 
     Metadata *metadata() const {
-        return (Metadata *)frames().back().get();
+        return (Metadata *)frames().back().data();
     };
 
     uint8_t *data() const {
         mapf_assert(!frames().empty());
 
         frames().back().set_size(sizeof(Metadata) + metadata()->length);
-        return frames().back().get() + sizeof(Metadata);
+        return frames().back().data() + sizeof(Metadata);
     };
 
     virtual std::ostream& print(std::ostream& os) const {
@@ -193,7 +193,7 @@ public:
         if(this->frames().empty()) {
             Message::Frame frame(sizeof(Metadata));
             Add(frame);
-        } else if (this->frames().back().size() < sizeof(Metadata)) {
+        } else if (this->frames().back().len() < sizeof(Metadata)) {
             this->frames().back().set_size(sizeof(Metadata));
         }
     }
@@ -213,7 +213,7 @@ public:
     Metadata *metadata() const {
         mapf_assert(!frames().empty());
 
-        return (Metadata *)frames().back().get();
+        return (Metadata *)frames().back().data();
     };
 
     virtual std::ostream& print(std::ostream& os) const {
@@ -294,7 +294,7 @@ public:
         if(this->frames().empty()) {
             Message::Frame frame(sizeof(Metadata));
             Add(frame);
-        } else if (this->frames().back().size() < sizeof(Metadata)) {
+        } else if (this->frames().back().len() < sizeof(Metadata)) {
             this->frames().back().set_size(sizeof(Metadata));
         }
     }
@@ -308,7 +308,7 @@ public:
     }
 
     Metadata *metadata() const {
-        return (Metadata *)frames().back().get();
+        return (Metadata *)frames().back().data();
     };
 
     virtual std::ostream& print(std::ostream& os) const {

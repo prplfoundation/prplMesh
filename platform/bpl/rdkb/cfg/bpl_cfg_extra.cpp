@@ -41,12 +41,11 @@ using namespace beerocks::bpl;
 static int bpl_get_number_of_radios(int *radios)
 {
 	char radio_dev[MAX_LEN_PARAM_VALUE] = "";
-	char phy_param[MAX_LEN_PARAM_VALUE] = "phy";
 	int i;
 
 	*radios = 0;
 	for (i = 0; i < MAX_NUM_OF_RADIOS; i++) {
-		if (uci_converter_get_str(TYPE_RADIO, i, phy_param, radio_dev) == RETURN_OK)
+		if (uci_converter_get_str(TYPE_RADIO, i, "phy", radio_dev) == RETURN_OK)
 			(*radios)++;
 	}
 
@@ -56,7 +55,6 @@ static int bpl_get_number_of_radios(int *radios)
 static int bpl_cfg_iface_config_up(int index)
 {
 	char radio_dev[MAX_LEN_PARAM_VALUE] = { '\0' };
-	char device_param[MAX_LEN_PARAM_VALUE] = "device";
 	char command[MAX_LEN_PARAM_VALUE] = { '\0' };
 	int radioCount = 0;
 
@@ -65,7 +63,7 @@ static int bpl_cfg_iface_config_up(int index)
 	if (index < radioCount) {/* radio */
 		sprintf(command, "%s up radio%d", "/sbin/wifi", UCI_INDEX(TYPE_RADIO, index));
 	} else { /* VAP */
-		if (uci_converter_get_str(TYPE_VAP, index, device_param, radio_dev) == RETURN_ERR) {
+		if (uci_converter_get_str(TYPE_VAP, index, "device", radio_dev) == RETURN_ERR) {
 			MAPF_ERR("%s failed retrieving radio device for vap %d\n", __FUNCTION__, index);
 			return RETURN_ERR;
 		}
@@ -98,7 +96,6 @@ int bpl_cfg_set_wifi_advertise_ssid(const char iface[BPL_IFNAME_LEN], int advert
 {
 	int retVal = 0;
 	int index = 0;
-	char hidden_param[MAX_UCI_BUF_LEN] = "hidden";
 
 	if (!iface) {
 		return RETURN_ERR;
@@ -109,7 +106,7 @@ int bpl_cfg_set_wifi_advertise_ssid(const char iface[BPL_IFNAME_LEN], int advert
 		return retVal;
 	}
 
-	retVal |= uci_converter_set_bool(TYPE_VAP, index, hidden_param, !advertise_ssid);
+	retVal |= uci_converter_set_bool(TYPE_VAP, index, "hidden", !advertise_ssid);
 
 	return retVal;
 }
@@ -142,21 +139,17 @@ int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SS
     int retVal = 0;
 	char ssid_str[BPL_SSID_LEN] = { 0 }, sec_str[BPL_SEC_LEN] = { 0 }, pass_str[BPL_PASS_LEN] = { 0 };
 	char wireless_beerocks_path[MAX_UCI_BUF_LEN] = "wireless.beerocks";
-	char ssid_param[MAX_UCI_BUF_LEN] = "ssid";
-	char mode_enabled_param[MAX_UCI_BUF_LEN] = "mode_enabled";
-	char wep_key_param[MAX_UCI_BUF_LEN] = "wep_key";
-	char key_passphrase_param[MAX_UCI_BUF_LEN] = "key_passphrase";
 
 	utils::copy_string(ssid_str, ssid, BPL_SSID_LEN);
 	utils::copy_string(sec_str,  sec,  BPL_SEC_LEN);
 	utils::copy_string(pass_str, pass, BPL_PASS_LEN);
 
-	retVal |= uci_converter_set(wireless_beerocks_path, ssid_param, ssid_str);
-	retVal |= uci_converter_set(wireless_beerocks_path, mode_enabled_param, sec_str);
+	retVal |= uci_converter_set(wireless_beerocks_path, "ssid", ssid_str);
+	retVal |= uci_converter_set(wireless_beerocks_path, "mode_enabled", sec_str);
 	if (!strcmp(sec,"WEP-64") || !strcmp(sec,"WEP-128")) {
-		retVal |= uci_converter_set(wireless_beerocks_path, wep_key_param, pass_str);
+		retVal |= uci_converter_set(wireless_beerocks_path, "wep_key", pass_str);
 	} else {
-		retVal |= uci_converter_set(wireless_beerocks_path, key_passphrase_param, pass_str);
+		retVal |= uci_converter_set(wireless_beerocks_path, "key_passphrase", pass_str);
 	}
 	
 	return retVal;
@@ -197,7 +190,6 @@ int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable
 {
 	int retVal = 0;
 	int index = 0;
-	char disabled_param[MAX_UCI_BUF_LEN] = "disabled";
 
 	if (!iface) {
 		return RETURN_ERR;
@@ -208,7 +200,7 @@ int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable
 		return retVal;
 	}
 
-	retVal = uci_converter_set_bool(TYPE_RADIO, index, disabled_param, !enable);
+	retVal = uci_converter_set_bool(TYPE_RADIO, index, "disabled", !enable);
 
 	return retVal;
 }

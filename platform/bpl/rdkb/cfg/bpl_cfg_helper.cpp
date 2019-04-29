@@ -34,7 +34,6 @@ using namespace beerocks::bpl;
 
 static int bpl_cfg_set_security_mode(int index, const std::string& beaconType, const std::string& authMode) {
 	char security_mode[MAX_UCI_BUF_LEN] = { 0 };
-	char security_mode_param[MAX_UCI_BUF_LEN] = "wav_security_mode";
 	std::string security_mode_str = { 0 };
 
 	if (!beaconType.compare("None")) {
@@ -69,7 +68,7 @@ static int bpl_cfg_set_security_mode(int index, const std::string& beaconType, c
 
 	utils::copy_string(security_mode, security_mode_str.c_str(), MAX_UCI_BUF_LEN);
 
-	return uci_converter_set_str(TYPE_VAP, index, security_mode_param, security_mode);
+	return uci_converter_set_str(TYPE_VAP, index, "wav_security_mode", security_mode);
 }
 
 static int bpl_cfg_set_encryption(int index)
@@ -77,17 +76,13 @@ static int bpl_cfg_set_encryption(int index)
 	int status;
 	char security_mode[MAX_UCI_BUF_LEN] = { 0 }, encryption_mode[MAX_UCI_BUF_LEN] = { 0 }, authentication_mode[MAX_UCI_BUF_LEN] = { 0 };
 	char empty_str[MAX_UCI_BUF_LEN] = { 0 };
-	char security_mode_param[MAX_UCI_BUF_LEN] = "wav_security_mode";
-	char encryption_param[MAX_UCI_BUF_LEN] = "encryption";
-	char encryption_mode_param[MAX_UCI_BUF_LEN] = "wav_encryption_mode";
-	char authentication_mode_param[MAX_UCI_BUF_LEN] = "wav_authentication_mode";
 
-	status = uci_converter_get_str(TYPE_VAP, index, security_mode_param, security_mode);
+	status = uci_converter_get_str(TYPE_VAP, index, "wav_security_mode", security_mode);
 	if (status == RETURN_ERR)
 		return RETURN_ERR;
 
-	uci_converter_get_optional_str(TYPE_VAP, index, encryption_mode_param, encryption_mode, empty_str);
-	uci_converter_get_optional_str(TYPE_VAP, index, authentication_mode_param, authentication_mode, empty_str);
+	uci_converter_get_optional_str(TYPE_VAP, index, "wav_encryption_mode", encryption_mode, empty_str);
+	uci_converter_get_optional_str(TYPE_VAP, index, "wav_authentication_mode", authentication_mode, empty_str);
 
 	std::string security_mode_str(security_mode, MAX_UCI_BUF_LEN);
 
@@ -122,7 +117,7 @@ static int bpl_cfg_set_encryption(int index)
 			return RETURN_ERR;
 	}
 
-	return uci_converter_set_str(TYPE_VAP, index, encryption_param, encryption);
+	return uci_converter_set_str(TYPE_VAP, index, "encryption", encryption);
 }
 
 static int bpl_cfg_set_wep_key(int index, int keyIndex, const char key[MAX_UCI_BUF_LEN])
@@ -137,14 +132,8 @@ static int bpl_cfg_set_basic_authentication_modes(int index, const std::string& 
 {
 	int status;
 	char security[MAX_UCI_BUF_LEN] = { 0 }, beaconType[MAX_UCI_BUF_LEN] = { 0 }, wep_empty_str[MAX_UCI_BUF_LEN] = { 0 };
-	char security_mode_param[MAX_UCI_BUF_LEN] = "wav_security_mode";
-	char beacon_type_param[MAX_UCI_BUF_LEN] = "wav_beacon_type";
-	char authentication_mode_param[MAX_UCI_BUF_LEN] = "wav_authentication_mode";
-	char wep_str[MAX_UCI_BUF_LEN] = "wep";
-	char wep_mixed_str[MAX_UCI_BUF_LEN] = "wep-mixed";
-	char wep_shared_str[MAX_UCI_BUF_LEN] = "wep-shared";
 
-	status = uci_converter_get_str(TYPE_VAP, index, beacon_type_param, beaconType);
+	status = uci_converter_get_str(TYPE_VAP, index, "wav_beacon_type", beaconType);
 	if (status == RETURN_ERR)
 		return RETURN_ERR;
 
@@ -153,20 +142,20 @@ static int bpl_cfg_set_basic_authentication_modes(int index, const std::string& 
 		return RETURN_ERR;
 
 	if (!authMode.compare("None")) {
-		status = uci_converter_get_str(TYPE_VAP, index, security_mode_param, security);
+		status = uci_converter_get_str(TYPE_VAP, index, "wav_security_mode", security);
 		if (status == RETURN_ERR)
 			return RETURN_ERR;
 		
 		std::string security_str(security);
 		if (!security_str.compare("WEP-64") || !security_str.compare("WEP-128")) {
-			status = uci_converter_set_str(TYPE_VAP, index, authentication_mode_param, wep_str);
+			status = uci_converter_set_str(TYPE_VAP, index, "wav_authentication_mode", "wep");
 		} else {
-			status = uci_converter_set_str(TYPE_VAP, index, authentication_mode_param, wep_empty_str);
+			status = uci_converter_set_str(TYPE_VAP, index, "wav_authentication_mode", wep_empty_str);
 		}
 	} else if (!authMode.compare("EAPAuthentication")) {
-		status = uci_converter_set_str(TYPE_VAP, index, authentication_mode_param, wep_mixed_str);
+		status = uci_converter_set_str(TYPE_VAP, index, "wav_authentication_mode", "wep-mixed");
 	} else if (authMode.compare("SharedAuthentication")) {
-		status = uci_converter_set_str(TYPE_VAP, index, authentication_mode_param, wep_shared_str);
+		status = uci_converter_set_str(TYPE_VAP, index, "wav_authentication_mode", "wep-shared");
 	} else {
 		status = RETURN_ERR;
 	}
@@ -181,34 +170,24 @@ static int bpl_cfg_set_wpa_encryption_modes(int index, const std::string& encMod
 {
 	int status;
 	char encryption_mode_empty_val[MAX_UCI_BUF_LEN] = { 0 };
-	char encryption_mode_param[MAX_UCI_BUF_LEN] = "wav_encryption_mode";
-	char encryption_mode_tkip_val[MAX_UCI_BUF_LEN] = "tkip";
-	char encryption_mode_aes_val[MAX_UCI_BUF_LEN] = "aes";
-	char encryption_mode_tkip_aes_val[MAX_UCI_BUF_LEN] = "tkip+aes";
-	char beacon_type_param[MAX_UCI_BUF_LEN] = "wav_beacon_type";
-	char beacon_type_none_val[MAX_UCI_BUF_LEN] = "None";
-	char beacon_type_basic_val[MAX_UCI_BUF_LEN] = "Basic";
-	char beacon_type_wpa_val[MAX_UCI_BUF_LEN] = "WPA";
-	char beacon_type_11i_val[MAX_UCI_BUF_LEN] = "11i";
-	char beacon_type_wpa_11i_val[MAX_UCI_BUF_LEN] = "WPAand11i";
 
 	if (!encModes.compare("None")) {
-		status = uci_converter_set_str(TYPE_VAP, index, encryption_mode_param, encryption_mode_empty_val);
-		status += uci_converter_set_str(TYPE_VAP, index, beacon_type_param, beacon_type_none_val);
+		status = uci_converter_set_str(TYPE_VAP, index, "wav_encryption_mode", encryption_mode_empty_val);
+		status += uci_converter_set_str(TYPE_VAP, index, "wav_beacon_type", "None");
 		bpl_cfg_set_basic_authentication_modes(index, "None");
 	} else if (!encModes.compare("WEPEncryption")) {
-		status = uci_converter_set_str(TYPE_VAP, index, encryption_mode_param, encryption_mode_empty_val);
-		status += uci_converter_set_str(TYPE_VAP, index, beacon_type_param, beacon_type_basic_val);
+		status = uci_converter_set_str(TYPE_VAP, index, "wav_encryption_mode", encryption_mode_empty_val);
+		status += uci_converter_set_str(TYPE_VAP, index, "wav_beacon_type", "Basic");
 		bpl_cfg_set_basic_authentication_modes(index, "None");
 	} else if (!encModes.compare("TKIPEncryption")) {
-		status = uci_converter_set_str(TYPE_VAP, index, encryption_mode_param, encryption_mode_tkip_val);
-		status += uci_converter_set_str(TYPE_VAP, index, beacon_type_param, beacon_type_wpa_val);
+		status = uci_converter_set_str(TYPE_VAP, index, "wav_encryption_mode", "tkip");
+		status += uci_converter_set_str(TYPE_VAP, index, "wav_beacon_type", "WPA");
 	} else if (!encModes.compare("AESEncryption")) {
-		status = uci_converter_set_str(TYPE_VAP, index, encryption_mode_param, encryption_mode_aes_val);
-		status += uci_converter_set_str(TYPE_VAP, index, beacon_type_param, beacon_type_11i_val);
+		status = uci_converter_set_str(TYPE_VAP, index, "wav_encryption_mode", "aes");
+		status += uci_converter_set_str(TYPE_VAP, index, "wav_beacon_type", "11i");
 	} else if (!encModes.compare("TKIPandAESEncryption")) {
-		status = uci_converter_set_str(TYPE_VAP, index, encryption_mode_param, encryption_mode_tkip_aes_val);
-		status += uci_converter_set_str(TYPE_VAP, index, beacon_type_param, beacon_type_wpa_11i_val);
+		status = uci_converter_set_str(TYPE_VAP, index, "wav_encryption_mode", "tkip+aes");
+		status += uci_converter_set_str(TYPE_VAP, index, "wav_beacon_type", "WPAand11i");
 	} else {
 		status = RETURN_ERR;
 	}
@@ -223,11 +202,10 @@ static int bpl_cfg_set_ap_security_mode_enabled(int index, const std::string& mo
 {
 	int status;
 	char mode_enabled[MAX_UCI_BUF_LEN] = { 0 };
-	char security_mode_param[MAX_UCI_BUF_LEN] = "wav_security_mode";
 	
 	utils::copy_string(mode_enabled, modeEnabled.c_str(), MAX_UCI_BUF_LEN);
 
-	status = uci_converter_set_str(TYPE_VAP, index, security_mode_param, mode_enabled);
+	status = uci_converter_set_str(TYPE_VAP, index, "wav_security_mode", mode_enabled);
 	if (status == RETURN_ERR)
 		return RETURN_ERR;
 
@@ -318,13 +296,12 @@ int bpl_cfg_get_beerocks_param_int(const std::string& param, int *buf)
 int bpl_cfg_get_auto_channel_enable(int index, int *enable)
 {
 	char channel[MAX_UCI_BUF_LEN] = { 0 };
-	char channel_param[MAX_UCI_BUF_LEN] = "channel";
 
 	if(!enable) {
 		return RETURN_ERR;
 	}
 
-	int status = uci_converter_get_str(TYPE_RADIO, index, channel_param, channel);
+	int status = uci_converter_get_str(TYPE_RADIO, index, "channel", channel);
 	if (status == RETURN_ERR)
 		return RETURN_ERR;
 
@@ -341,9 +318,8 @@ int bpl_cfg_get_auto_channel_enable(int index, int *enable)
 int bpl_cfg_get_ssid_advertisement_enabled(int index, int *enabled)
 {
 	bool hidden;
-	char hidden_param[MAX_UCI_BUF_LEN] = "hidden";
 
-	int status = uci_converter_get_bool(TYPE_VAP, index, hidden_param, &hidden);
+	int status = uci_converter_get_bool(TYPE_VAP, index, "hidden", &hidden);
 	if(status == RETURN_OK) {
 		*enabled = (!hidden) ? 1 : 0;
 	}
@@ -361,13 +337,11 @@ int bpl_cfg_get_wep_key(int index, int keyIndex, char *key)
 int bpl_cfg_set_vap_credentials(int index, const char ssid[BPL_SSID_LEN], const char sec[BPL_SEC_LEN], const char key[BPL_PASS_LEN], const char psk[BPL_PASS_LEN])
 {
 	int ret = RETURN_OK;
-	char ssid_param[MAX_UCI_BUF_LEN] = "ssid";
-	char key_param[MAX_UCI_BUF_LEN] = "key";
 
 	if (ssid) {
 		char ssid_str[MAX_UCI_BUF_LEN] = { 0 };
 		utils::copy_string(ssid_str, ssid, MAX_UCI_BUF_LEN);
-		ret |= uci_converter_set_str(TYPE_VAP, index, ssid_param, ssid_str);
+		ret |= uci_converter_set_str(TYPE_VAP, index, "ssid", ssid_str);
 	}
 	if (sec) {
 		ret |= bpl_cfg_set_ap_security_mode_enabled(index, sec);
@@ -378,7 +352,7 @@ int bpl_cfg_set_vap_credentials(int index, const char ssid[BPL_SSID_LEN], const 
 	if (psk) {
 		char psk_str[MAX_UCI_BUF_LEN] = { 0 };
 		utils::copy_string(psk_str, psk, MAX_UCI_BUF_LEN);
-		ret |= uci_converter_set_str(TYPE_VAP, index, key_param, psk_str);
+		ret |= uci_converter_set_str(TYPE_VAP, index, "key", psk_str);
 	}
 
 	return ret;

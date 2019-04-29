@@ -10,6 +10,11 @@
 #define MAPF_INFO(msg) 	LOG(INFO) << msg << resetiosflags((std::ios_base::fmtflags)0xFFFF)
 #define MAPF_DBG(msg) 	LOG(DEBUG) << msg << resetiosflags((std::ios_base::fmtflags)0xFFFF)
 
+#define MAPF_ERR_IF(cond, msg) 	LOG_IF(cond, ERROR) << msg << resetiosflags((std::ios_base::fmtflags)0xFFFF)
+#define MAPF_WARN_IF(cond, msg) LOG_IF(cond, WARNING) << msg << resetiosflags((std::ios_base::fmtflags)0xFFFF)
+#define MAPF_INFO_IF(cond, msg) LOG_IF(cond, INFO) << msg << resetiosflags((std::ios_base::fmtflags)0xFFFF)
+#define MAPF_DBG_IF(cond, msg) 	LOG_IF(cond, DEBUG) << msg << resetiosflags((std::ios_base::fmtflags)0xFFFF)
+
 #define CONF_FILE_PATH std::string(MAPF_ROOT) + "/share/logging.conf"
 #define CONF_FILE_TMP_PATH std::string("/tmp/share/logging.conf")
 #define MAPF_INITIALIZE_LOGGER INITIALIZE_EASYLOGGINGPP

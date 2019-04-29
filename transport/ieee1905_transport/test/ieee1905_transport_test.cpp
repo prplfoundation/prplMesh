@@ -336,13 +336,13 @@ int main(int argc, char *argv[])
         {
             // Send a multicast CmduTxMessage on the local bus - expect a CmduRxMessage (due to multicast)
             CmduTxMessage cmdu_tx_msg;
-            memcpy(cmdu_tx_msg.metadata()->dst, "\x01\x80\xc2\x00\x00\x13", 6);
+            std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
             cmdu_tx_msg.metadata()->msg_type = 0x8000;
             cmdu_tx_msg.metadata()->length = 32;
-            memset(cmdu_tx_msg.data(), 0x00, cmdu_tx_msg.metadata()->length);
+            std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
             uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0xc0 };
-            memcpy(cmdu_tx_msg.data(), ieee1905_header, sizeof(ieee1905_header));
+            std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
@@ -433,14 +433,14 @@ int main(int argc, char *argv[])
             bool got_cmdu_tx_confirmation_msg = false;
 
             CmduTxMessage cmdu_tx_msg;
-            memcpy(cmdu_tx_msg.metadata()->dst, "\x01\x80\xc2\x00\x00\x13", 6);
+            std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
             cmdu_tx_msg.metadata()->msg_type = 0x8016;
             cmdu_tx_msg.metadata()->length = 32;
             cmdu_tx_msg.metadata()->cookie = 1;
-            memset(cmdu_tx_msg.data(), 0x00, cmdu_tx_msg.metadata()->length);
+            std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
             uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x16, 0x00, 0x00, 0x00, 0xc0 };
-            memcpy(cmdu_tx_msg.data(), ieee1905_header, sizeof(ieee1905_header));
+            std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
@@ -499,13 +499,13 @@ int main(int argc, char *argv[])
         // Send a non-relayed multicast CmduTxMessage on the local bus (helps to manually verify relayed multicast mechanism)
         {
             CmduTxMessage cmdu_tx_msg;
-            memcpy(cmdu_tx_msg.metadata()->dst, "\x01\x80\xc2\x00\x00\x13", 6);
+            std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
             cmdu_tx_msg.metadata()->msg_type = 0x8017;
             cmdu_tx_msg.metadata()->length = 32;
-            memset(cmdu_tx_msg.data(), 0x00, cmdu_tx_msg.metadata()->length);
+            std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
             uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x17, 0x00, 0x00, 0x00, 0x80 };
-            memcpy(cmdu_tx_msg.data(), ieee1905_header, sizeof(ieee1905_header));
+            std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
@@ -515,14 +515,14 @@ int main(int argc, char *argv[])
         // Send a relayed multicast CmduTxMessage on the local bus (helps to manually verify relayed multicast mechanism)
         {
             CmduTxMessage cmdu_tx_msg;
-            memcpy(cmdu_tx_msg.metadata()->dst, "\x01\x80\xc2\x00\x00\x13", 6);
+            std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
             cmdu_tx_msg.metadata()->msg_type = 0x8018;
             cmdu_tx_msg.metadata()->length = (8) + (3 + 0);
-            memset(cmdu_tx_msg.data(), 0x00, cmdu_tx_msg.metadata()->length);
+            std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
 
             uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x18, 0x00, 0x00, 0x00, 0xc0 };
-            memcpy(cmdu_tx_msg.data(), ieee1905_header, sizeof(ieee1905_header));
+            std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
@@ -532,14 +532,14 @@ int main(int argc, char *argv[])
         // Send a large CmduTxMessage on the local bus (helps to manually verify fragmentation code)
         {
             CmduTxMessage cmdu_tx_msg;
-            memcpy(cmdu_tx_msg.metadata()->dst, "\x01\x80\xc2\x00\x00\x13", 6);
+            std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
             cmdu_tx_msg.metadata()->msg_type = 0x8019;
             cmdu_tx_msg.metadata()->length = 8;
-            memset(cmdu_tx_msg.data(), 0x00, cmdu_tx_msg.metadata()->length);
+            std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
 
             uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x19, 0x00, 0x00, 0x00, 0xc0 };
-            memcpy(cmdu_tx_msg.data(), ieee1905_header, sizeof(ieee1905_header));
+            std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             uint16_t tlvlen = 1024;
             uint8_t *tlv;
@@ -547,7 +547,7 @@ int main(int argc, char *argv[])
             tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
             *tlv = 1; // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            memset(tlv + 3, *tlv, tlvlen);
+            std::fill_n(tlv+3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 0;
@@ -555,7 +555,7 @@ int main(int argc, char *argv[])
             tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
             *tlv = 2; // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            memset(tlv + 3, *tlv, tlvlen);
+            std::fill_n(tlv+3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 1;
@@ -563,7 +563,7 @@ int main(int argc, char *argv[])
             tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
             *tlv = 3; // tlvType
             *(uint16_t *)(tlv + 1) = htons(1); // tlvLength
-            memset(tlv + 3, *tlv, tlvlen);
+            std::fill_n(tlv+3, tlvlen, *tlv);
             tlv = tlv + 3 + 1;
 
             tlvlen = 2;
@@ -571,7 +571,7 @@ int main(int argc, char *argv[])
             tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
             *tlv = 4; // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            memset(tlv + 3, *tlv, tlvlen);
+            std::fill_n(tlv+3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 3;
@@ -579,7 +579,7 @@ int main(int argc, char *argv[])
             tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
             *tlv = 5; // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            memset(tlv + 3, *tlv, tlvlen);
+            std::fill_n(tlv+3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 4;
@@ -587,7 +587,7 @@ int main(int argc, char *argv[])
             tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
             *tlv = 6; // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            memset(tlv + 3, *tlv, tlvlen);
+            std::fill_n(tlv+3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 1000;
@@ -595,7 +595,7 @@ int main(int argc, char *argv[])
             tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
             *tlv = 7; // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            memset(tlv + 3, *tlv, tlvlen);
+            std::fill_n(tlv+3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 0;
@@ -603,7 +603,7 @@ int main(int argc, char *argv[])
             tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
             *tlv = 0; // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            memset(tlv + 3, *tlv, tlvlen);
+            std::fill_n(tlv+3, tlvlen, *tlv);
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
@@ -615,14 +615,14 @@ int main(int argc, char *argv[])
         if (use_unicast_address)
         {
             CmduTxMessage cmdu_tx_msg;
-            memcpy(cmdu_tx_msg.metadata()->dst, unicast_address, 6);
+            std::copy_n(unicast_address, 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
             cmdu_tx_msg.metadata()->msg_type = 0x8020;
             cmdu_tx_msg.metadata()->length = (8) + (3 + 0);
-            memset(cmdu_tx_msg.data(), 0x00, cmdu_tx_msg.metadata()->length);
+            std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
 
             uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x20, 0x00, 0x00, 0x00, 0x80 };
-            memcpy(cmdu_tx_msg.data(), ieee1905_header, sizeof(ieee1905_header));
+            std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
@@ -638,14 +638,14 @@ int main(int argc, char *argv[])
             bool got_cmdu_tx_confirmation_msg = false;
 
             CmduTxMessage cmdu_tx_msg;
-            memcpy(cmdu_tx_msg.metadata()->dst, "\x01\x80\xc2\x00\x00\x13", 6);
+            std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
             cmdu_tx_msg.metadata()->msg_type = 0x8016;
             cmdu_tx_msg.metadata()->length = 32;
             cmdu_tx_msg.metadata()->cookie = 1;
-            memset(cmdu_tx_msg.data(), 0x00, cmdu_tx_msg.metadata()->length);
+            std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
             uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x16, 0x00, 0x00, 0x00, 0xc0 };
-            memcpy(cmdu_tx_msg.data(), ieee1905_header, sizeof(ieee1905_header));
+            std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);

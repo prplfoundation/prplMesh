@@ -10,7 +10,6 @@ void usage()
     std::cout << "   c <path>     - broker.conf path" << std::endl;
     std::cout << "   f <endpoint> - extra frontend endpoints (comma seperated list)" << std::endl;
     std::cout << "   b <endpoint> - extra backend endpoints (comma seperated list)" << std::endl;
-    std::cout << "   d <endpoint> - extra debug (capture) endpoints (comma seperated list)" << std::endl;
     std::cout << "   h            - show this help menu" << std::endl;
 
 }
@@ -18,10 +17,10 @@ int main (int argc, char *argv[])
 {
 	mapf::Logger::Instance().LoggerInit("local_bus");
     std::string conf = std::string(MAPF_ROOT) + "/share/local_bus.conf";
-    std::string endpoint, capture, frontend, backend;
+    std::string endpoint, frontend, backend;
     int opt;
 
-    while ((opt = getopt(argc, argv,"c:f:b:d:h")) != EOF) {
+    while ((opt = getopt(argc, argv,"c:f:b:h")) != EOF) {
         switch(opt) {
             case 'c':
                 conf = optarg;
@@ -32,9 +31,6 @@ int main (int argc, char *argv[])
                 break;
             case 'b':
                 backend = optarg;
-                break;
-            case 'd':
-                capture = optarg;
                 break;
             case 'h':
             default: 
@@ -51,10 +47,6 @@ int main (int argc, char *argv[])
     std::istringstream b_endpoints(backend);
     while(std::getline(b_endpoints, endpoint, ','))
         broker.Bind(mapf::BrokerSocket::BACKEND, endpoint);
-
-    std::istringstream c_endpoints(capture);
-    while(std::getline(c_endpoints, endpoint, ','))
-        broker.Bind(mapf::BrokerSocket::CAPTURE, endpoint);
 
     broker.PrintConfig();
     broker.Run();

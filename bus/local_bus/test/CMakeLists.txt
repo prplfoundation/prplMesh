@@ -1,7 +1,0 @@
-if(BUILD_TESTS)
-		set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-		add_executable(local_bus_test local_bus_test.cpp)
-		target_link_libraries(local_bus_test localbus mapf::elpp)
-		install(TARGETS local_bus_test DESTINATION bin/tests/local_bus)
-		add_test(test_local_bus local_bus_test)
-endif()

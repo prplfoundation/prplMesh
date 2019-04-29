@@ -1,115 +1,61 @@
 #ifndef __MAPF_COMMON_SOCKET_H__
 #define __MAPF_COMMON_SOCKET_H__
 
-#include "context.h"
-#include "message.h"
-#include "message_maker.h"
-#include "logger.h"
-#include "err.h"
-#include <zmq.h>
+#include <mapf/common/context.h>
+#include <mapf/common/message.h>
+#include <mapf/common/message_maker.h>
+#include <mapf/common/logger.h>
+#include <mapf/common/err.h>
 #include <iostream>
 #include <memory>
 
 namespace mapf
 {
 
+struct msglib_socket;
 class Socket
 {
 	friend inline std::ostream& operator << (std::ostream& os, const Socket& socket);
 public:
-	Socket() {};
-	virtual ~Socket()
-	{
-		Close();
-	};
+	Socket();
+	virtual ~Socket();
 
-	int Connect(const std::string& addr)
-	{
-		mapf_assert(!addr.empty());
-		return zmq_connect(ptr_, addr.c_str());
-	}
+	int Connect(const std::string& addr, bool retry = true);
 
-	int Disconnect(const std::string& addr)
-	{
-		return zmq_disconnect(ptr_, addr.c_str());
-	}
-
-	void Close()
-	{
-		if (ptr_ == nullptr)
-			return; // already closed
-		int rc = zmq_close(ptr_);
-		errno_assert(rc == 0);
-		ptr_ = nullptr;
-	}
+	void Close();
 
 	virtual std::ostream& Print(std::ostream& s) const = 0;
 	virtual bool Pollable() const = 0;
-
-	/** Accessors & Mutators */
-	void* handle() const { return ptr_; }
-
-	bool connected() const
-	{
-		return endpoint().empty() == false;
-	}
-
-	std::string endpoint() const // returns the last endpoint to which the socket connected
-	{
-		char buf[32];
-		size_t len = sizeof(buf);
-		int rc = zmq_getsockopt(ptr_, ZMQ_LAST_ENDPOINT, buf, &len);
-		return (rc == 0) ? std::string(buf, len - 1) : std::string(0);
-	}
+	int fd() const;
+	msglib_socket *handle() const { return sock; };
+	static bool SyncRequired();
 
 protected:
-	Socket(void* ptr) : ptr_(ptr) {}
-
-	void* ptr_ = nullptr;
+	msglib_socket *sock;
 };
 
 class PubSocket : public Socket
 {
 public:
-	PubSocket(Context& ctx) : Socket(zmq_socket(ctx.context(), ZMQ_PUB))
-	{
-		mapf_assert(ptr_);
-	}
-
-	std::ostream& Print(std::ostream& s) const override
-	{
-		s << "PUB socket, " << (connected() ? "connected" : "not connected") <<  " (" << endpoint() << ")" << std::endl;
-		return s;
-	}
-
+	PubSocket(Context& ctx);
+	std::ostream& Print(std::ostream& s) const override;
 	bool Pollable() const override { return false; }
-
 	bool Send(const std::unique_ptr<Message>& msg, int flags = 0);
 	bool Send(const Message& msg, int flags = 0);
-	size_t Send(const void *buf, size_t len, int flags = 0); //TODO - change to private
-	bool Send(const Message::Frame& frame, int flags = 0);   //TODO - change to private
+	size_t Send(void *buf, size_t len, int flags); //TODO - change to private
 
 private:
 	PubSocket();
+	static std::string padTopic(const std::string& topic);
+	static const char topic_pad_char = '\0';
 };
 
 class SubSocket : public Socket
 {
 public:
-	SubSocket(Context& ctx) : Socket(zmq_socket(ctx.context(), ZMQ_SUB))
-	{
-		mapf_assert(ptr_);
-	}
+	SubSocket(Context& ctx);
 
-	std::ostream& Print(std::ostream& s) const override
-	{
-		s << "SUB socket, " << (connected() ? "connected" : "not connected") <<  " (" << endpoint() << ") topics:";
-		for (const auto& topic : topics_) {
-			s << std::endl << topic;
-		}
-
-		return s;
-	}
+	std::ostream& Print(std::ostream& s) const override;
 
 	bool Pollable() const override { return true; }
 
@@ -150,11 +96,11 @@ public:
 
 private:
 	SubSocket();
-	bool More() const;
-	std::unique_ptr<std::string> ReceiveTopic(int flags = 0);
-	std::unique_ptr<Message::Header> ReceiveHeader(int flags = 0);
-	Message::Frame ReceiveFrames(size_t max_len, int flags = 0);
 	std::vector<std::string>::iterator FindSubscription(const std::string& topic);
+	bool More() const;
+	std::unique_ptr<std::string> ReceiveTopic(int flags);
+	std::unique_ptr<Message::Header> ReceiveHeader(int flags);
+	Message::Frame ReceiveFrames(size_t total_len, int flags);
 	void EraseSubscription(const std::string& topic);
 	void AddSubscription(const std::string& topic);
 

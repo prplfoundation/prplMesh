@@ -59,9 +59,9 @@ void test1()
 	mapf::Message::Frame f2(512);
 	std::string str("valkiry");
 	mapf::Message::Frame f3(str.size(), str.c_str());
-	std::cout << f3.get() << std::endl;
+	std::cout << f3.data() << std::endl;
 	f3.set_data("1234567890", sizeof("1234567890"));
-	std::cout << f3.get() << std::endl;
+	std::cout << f3.data() << std::endl;
 	mapf::Message::Frame f4 = f3;
 	mapf::Message::Frame *f5 = new mapf::Message::Frame(f4);
 	std::cout << "f1: " << f1 << std::endl; 
@@ -151,12 +151,12 @@ void test4()
 
 int main()
 {
-	mapf::Logger::Instance().LoggerInit("message_test");
+	/*mapf::Logger::Instance().LoggerInit("message_test");
 	mapf::LocalBusInterface bus(mapf::Context::Instance());
 	bus.subscriber().Subscribe<mapf::Dummy1Message>();
 	bus.subscriber().Subscribe<mapf::Dummy2Message>();
 	mapf::MessageFactory::Instance().DumpMakers();
-	std::cout << "Subscriber: " << bus.subscriber() << std::endl;
+	std::cout << "Subscriber: " << bus.subscriber() << std::endl;*/
 
 	test1();
 	test2();
