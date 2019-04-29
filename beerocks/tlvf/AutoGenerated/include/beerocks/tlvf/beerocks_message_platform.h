@@ -174,6 +174,26 @@ class cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION : public BaseClass
         sArpMonitorData* m_params = nullptr;
 };
 
+class cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION();
+
+        static eActionOp_PLATFORM get_action_op(){
+            return (eActionOp_PLATFORM)(ACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION);
+        }
+        sWlanSettings& wlan_settings();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_PLATFORM* m_action_op = nullptr;
+        sWlanSettings* m_wlan_settings = nullptr;
+};
+
 class cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION : public BaseClass
 {
     public:

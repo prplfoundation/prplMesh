@@ -25,6 +25,7 @@
 
 #include <beerocks/bcl/network/net_struct.h>
 #include <beerocks/bcl/beerocks_defines.h>
+#include <beerocks/bcl/beerocks_message_structs.h>
 
 #include <stdint.h>
 
@@ -166,28 +167,6 @@ enum eWiFiBandwidth : uint8_t {
     BANDWIDTH_MAX,
 };
 
-typedef struct {
-    uint8_t ht_mcs;                //beerocks::eWiFiMCS RX
-    uint8_t vht_mcs;               //beerocks::eWiFiMCS RX
-    uint8_t ht_ss;                 //beerocks::eWiFiSS RX
-    uint8_t vht_ss;                //beerocks::eWiFiSS RX
-    uint8_t ht_bw;                 //beerocks::eWiFiBandwidth
-    uint8_t vht_bw;                //beerocks::eWiFiBandwidth
-    uint8_t ht_low_bw_short_gi;    //20 Mhz
-    uint8_t ht_high_bw_short_gi;   //40 Mhz
-    uint8_t vht_low_bw_short_gi;   //80 Mhz
-    uint8_t vht_high_bw_short_gi;  //160 Mhz
-    uint8_t ht_sm_power_save;      //beerocks::eHtCapsSmPowerSaveMode
-    uint8_t ant_num;
-    uint8_t wifi_standard;
-    uint8_t default_short_gi;
-    uint8_t default_mcs;
-    uint8_t btm_supported;
-    uint8_t nr_enabled;
-    uint8_t cell_capa;
-    uint8_t cap_flag;
-} sRadioCapabilities;
-
 enum eWiFiStandard : uint8_t {
     STANDARD_NONE = 0x00,
     STANDARD_A  = 0x01,
@@ -243,7 +222,7 @@ typedef struct {
 
 typedef struct {
     beerocks::net::sMacAddr mac;
-    sRadioCapabilities capabilities;
+    beerocks::message::sRadioCapabilities capabilities;
     int8_t vap_id;
     uint8_t reserved1;
     uint8_t reserved2;
@@ -253,9 +232,9 @@ typedef struct {
 typedef struct {
     beerocks::net::sMacAddr mac;
     int8_t vap_id;
-    uint8_t reserved1;
-    uint8_t reserved2;
-    uint8_t reserved3;
+    uint8_t reason;
+    uint8_t source;
+    uint8_t type;
 } sClientDisconnectionParams;
 
 typedef struct {

@@ -303,8 +303,11 @@ bool transport_socket_thread::work()
             if (read_ready(sockets.at(i))) {
                 num_events--;
                 Socket *sd = sockets.at(i);
-                if (socket_disconnected_uds(sd)) {
-					continue;
+
+                auto ret = socket_disconnected_uds(sd); // '0' - socket not disconnected (bytes to read), '1' - socket disconnected, '-1' - error
+                if (ret != 0) {
+                    // breaking instead of continue because socket_disconnected_uds() may erase element from Select Socket Vector while iterating it
+                    break;
                 }
 
                 if (!handle_cmdu_message_uds(sd)) {

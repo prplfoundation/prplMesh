@@ -360,6 +360,49 @@ bool cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION::init()
     return true;
 }
 
+cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION::cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION::cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION::~cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION() {
+}
+sWlanSettings& cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION::wlan_settings() {
+    return (sWlanSettings&)(*m_wlan_settings);
+}
+
+void cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION::class_swap()
+{
+    m_wlan_settings->struct_swap();
+}
+
+size_t cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sWlanSettings); // wlan_settings
+    return class_size;
+}
+
+bool cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_wlan_settings = (sWlanSettings*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sWlanSettings) * 1;
+    if (!m_parse__) { m_wlan_settings->struct_init(); }
+    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
 cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
     BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();

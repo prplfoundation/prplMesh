@@ -66,6 +66,21 @@ typedef struct sRadioCapabilities {
     uint8_t nr_enabled = 0;
     uint8_t cell_capa = 0;
     uint8_t cap_flag = 0;
+    uint8_t rrm_supported = 0;
+    uint8_t band_2g_capable = 0;
+    uint8_t band_5g_capable = 0;
+    uint8_t max_ch_width = 0;
+    uint8_t phy_mode = 0;
+    uint8_t max_mcs = 0;
+    uint8_t max_tx_power = 0;
+    uint8_t link_meas = 0;
+    uint8_t beacon_report_passive = 0;
+    uint8_t beacon_report_active = 0;
+    uint8_t beacon_report_table = 0;
+    uint8_t lci_meas = 0;
+    uint8_t fmt_range_report = 0;
+    uint8_t mumimo_supported = 0;
+    uint8_t max_streams = 0;
     sRadioCapabilities(){
     }
     void struct_swap(){
