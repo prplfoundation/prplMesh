@@ -7,9 +7,20 @@ import collections
 import shutil
 import tarfile
 import time
+import filecmp
 
 logger = logging.getLogger("package")
 package_modules=['framework', 'common', 'controller', 'agent']
+license = os.path.realpath(os.path.dirname(os.path.realpath(__file__)) + '/../LICENSE')
+header_template = '''
+/* SPDX-License-Identifier: BSD-2-Clause-Patent
+ *
+ * Copyright (c) 2018 Intel Corporation
+ *
+ * This code is subject to the terms of the BSD+Patent license.
+ * See LICENSE file for more details.
+ */
+'''
 
 class mappackage(object):
     def __init__(self, args):
@@ -29,6 +40,8 @@ class mappackage(object):
         for name in modules:
             src_path = "{}/{}".format(modules_dir, name)
             dst_path = "{}/{}".format(package_dir, name)
+            if not filecmp.cmp(license, src_path + '/LICENSE'):
+                raise Exception("{} has invalid license, aborting!".format(name))
             stdout, stderr = subprocess.Popen(['git', 'rev-parse', '--short', 'HEAD'], cwd=src_path, stdout=subprocess.PIPE).communicate()
             try: h[name] = stdout.decode("utf-8").strip()
             except: pass
@@ -36,10 +49,16 @@ class mappackage(object):
             shutil.copytree(src_path, dst_path, symlinks=True, ignore=lambda directory, contents: [".git"])
             with open("{}/VERSION".format(dst_path), 'w') as f: f.write("intel_multiap_{}_{}_{}".format(name, time.strftime("%Y%m%d"), h[name]))
             for root, dirs, files in os.walk(dst_path):
-                for name in files: self.remove_patents(os.path.join(root, name))
+                for name in files:
+                    self.remove_patents(os.path.join(root, name))
+                    self.verify_header(os.path.join(root, name))
         
         with tarfile.open("{}/intel_multiap_{}.tar.gz".format(package_dir, time.strftime("%Y%m%d")), "w:gz") as tar:
             tar.add(package_dir, arcname=os.path.basename(package_dir))
+
+    def verify_header(self, file):
+        if file.endswith(('.h', '.hpp', '.c', '.cpp')) and header_template not in open(file).read():
+            logger.error("{} does not have the required header template".format(file))
 
     def remove_patents(self, file):
         if file.endswith(('.h', '.hpp', '.c', '.cpp')) and 'PATENT' in open(file).read():
