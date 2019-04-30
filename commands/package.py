@@ -12,8 +12,7 @@ import filecmp
 logger = logging.getLogger("package")
 package_modules=['framework', 'common', 'controller', 'agent']
 license = os.path.realpath(os.path.dirname(os.path.realpath(__file__)) + '/../LICENSE')
-header_template = '''
-/* SPDX-License-Identifier: BSD-2-Clause-Patent
+header_template = '''/* SPDX-License-Identifier: BSD-2-Clause-Patent
  *
  * Copyright (c) 2016-2019 Intel Corporation
  *
@@ -21,6 +20,8 @@ header_template = '''
  * See LICENSE file for more details.
  */
 '''
+
+ignored_keywords = ['/external/', '/ipkg-install/']
 
 class mappackage(object):
     def __init__(self, args):
@@ -57,8 +58,10 @@ class mappackage(object):
             tar.add(package_dir, arcname=os.path.basename(package_dir))
 
     def verify_header(self, file):
-        if file.endswith(('.h', '.hpp', '.c', '.cpp')) and header_template not in open(file).read():
-            logger.error("{} does not have the required header template".format(file))
+        if file.endswith(('.h', '.hpp', '.c', '.cpp')) and not any(s in file for s in ignored_keywords):
+            with open(file) as f:
+                if header_template not in f.read():
+                    logger.error("{} does not have the required header template".format(file))
 
     def remove_patents(self, file):
         if file.endswith(('.h', '.hpp', '.c', '.cpp')) and 'PATENT' in open(file).read():
