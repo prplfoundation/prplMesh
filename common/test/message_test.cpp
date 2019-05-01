@@ -1,3 +1,11 @@
+/* SPDX-License-Identifier: BSD-2-Clause-Patent
+ *
+ * Copyright (c) 2016-2019 Intel Corporation
+ *
+ * This code is subject to the terms of the BSD+Patent license.
+ * See LICENSE file for more details.
+ */
+
 #include "config.h"
 #include "messages/dummy_messages.h"
 #include <mapf/common/message.h>
