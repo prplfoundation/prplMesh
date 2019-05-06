@@ -9,12 +9,12 @@ tlvSearchedService:
     _type: eTlvTypeMap
     _value_const: TLV_SEARCHED_SERVICE
   length: uint16_t
-  supported_service_list_length:
+  searched_service_list_length:
     _type: uint8_t
     _length_var: True
-  supported_service_list:
+  searched_service_list:
     _type: eSearchedService
-    _length: [ supported_service_list_length ]
+    _length: [ searched_service_list_length ]
 
 eSearchedService:
   _type: enum

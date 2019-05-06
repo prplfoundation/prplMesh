@@ -4,23 +4,13 @@
 include_yaml_path: {
   "tlvf/ieee_1905_1/",
   "tlvf/common/",
-  # "ieee_1905_1/sMacAddress.yaml",
-  # "ieee_1905_1/eMessageType.yaml",
-  # "ieee_1905_1/cCmduHeader.yaml",
-  # "ieee_1905_1/tlvDeviceInformation",
-  # "ieee_1905_1/tlvDeviceBridgingCapability.yaml",
   #
   # "wfa_map/",
   "tlvf/wfa_map/eTlvTypeMap.yaml",
   "tlvf/wfa_map/tlvApCapability.yaml",
   "tlvf/wfa_map/tlvChannelPreference.yaml",
-  #
-  # "tlvf/beerocks/",
-  # "beerocks/sIpv4Addr.yaml",
-  # "beerocks/sMacAddr.yaml",
-  # "beerocks/beerocks_message_action.yaml",
-  # "beerocks/beerocks_message_common.yaml",
-  # "beerocks/beerocks_message_platform.yaml",
+  "tlvf/wfa_map/tlvSupportedService.yaml",
+  "tlvf/wfa_map/tlvSearchedService.yaml",
 }
 
 # Relative to tlvf.py src_path variable
