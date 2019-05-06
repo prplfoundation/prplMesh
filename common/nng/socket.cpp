@@ -231,7 +231,7 @@ std::unique_ptr<Message> SubSocket::Receive(int flags)
 	if (rc != 0)
 	{
 		MAPF_ERR("Can't allocate buffer for message");
-		return false;
+		return nullptr;
 	}
 	std::string topic = std::string((char*)buf, 0, Message::kMaxTopicSize);
 	int nbytes = size - Message::kMaxTopicSize;

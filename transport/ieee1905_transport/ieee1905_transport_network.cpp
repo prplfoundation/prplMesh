@@ -16,6 +16,7 @@
 #include <linux/filter.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/uio.h>
 #include <iomanip>
 
 namespace mapf {
