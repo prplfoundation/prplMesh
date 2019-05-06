@@ -116,7 +116,7 @@ int socket_thread::socket_disconnected_uds(Socket* sd)
         return 0;
     } else if ((available_bytes < 0) && (errno == EAGAIN || errno == EWOULDBLOCK)) {
         // In case the read operation failed due to timeout, don't close the socket
-        THREAD_LOG(ERROR) << "Got event on socket but read operation timedout! sd=" << int(sd);
+        THREAD_LOG(ERROR) << "Got event on socket but read operation timedout! sd=" << intptr_t(sd);
         return -1;
     }
     
@@ -266,9 +266,9 @@ bool socket_thread::work()
         } else {
             if(unix_socket_path.empty()){
                 THREAD_LOG(DEBUG) << "new connection from ip=" << sd->getPeerIP()
-                       << " port=" << sd->getPeerPort() << " sd=" << int(sd);
+                       << " port=" << sd->getPeerPort() << " sd=" << intptr_t(sd);
             }else{
-                THREAD_LOG(DEBUG) << "new connection on " << unix_socket_path << " sd=" << int(sd);
+                THREAD_LOG(DEBUG) << "new connection on " << unix_socket_path << " sd=" << intptr_t(sd);
             }
             socket_connected(sd);
         }

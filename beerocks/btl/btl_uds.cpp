@@ -69,7 +69,7 @@ bool transport_socket_thread::bus_connect(const std::string& beerocks_temp_path,
         return false;
     }
     
-    THREAD_LOG(DEBUG) << "Link to between agent & controller has succesfully established!, bus_socket=" << int(bus);
+    THREAD_LOG(DEBUG) << "Link to between agent & controller has succesfully established!, bus_socket=" << intptr_t(bus);
     add_socket(bus);
 
     return true;

@@ -3,10 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 set(PROJECT_NAME bwl)
 project(${PROJECT_NAME})
 
-if(NOT BWL_TYPE)
-set(BWL_TYPE "DWPAL")
-endif()
-
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} ${BWL_TYPE} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 # Find required packages
@@ -23,6 +19,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
 # UGW
 if (TARGET_PLATFORM STREQUAL "ugw")
+    set(BWL_TYPE "DWPAL")
     # Extra libraries
     list(APPEND BWL_LIBS rt fapiwlancommon dl helper ugwhelper blobmsg_json)
     # UGW platform libraries
@@ -33,6 +30,7 @@ if (TARGET_PLATFORM STREQUAL "ugw")
     set(HOSTAPD_DIR "${PLATFORM_BUILD_DIR}/iwlwav-hostap-2.6")
 # RDKB
 elseif(TARGET_PLATFORM STREQUAL "rdkb")
+    set(BWL_TYPE "DWPAL")
     # Extra libraries
     list(APPEND BWL_LIBS rt dl)
     # Extre directories
