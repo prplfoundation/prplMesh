@@ -83,7 +83,7 @@ bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::set_iface_name(const std::stri
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -95,7 +95,10 @@ bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::set_iface_name(char str[], siz
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::IFACE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_iface_name, str, size + 1);
     m_iface_name[size] = '\0';
     return true;
@@ -215,7 +218,7 @@ bool cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST::set_iface_name(const std::string
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -227,7 +230,10 @@ bool cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST::set_iface_name(char str[], size_
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::IFACE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_iface_name, str, size + 1);
     m_iface_name[size] = '\0';
     return true;
@@ -430,7 +436,7 @@ bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::set_hostname(const std::string&
         TLVF_LOG(WARNING) << "set_hostname received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::NODE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::NODE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -442,7 +448,10 @@ bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::set_hostname(char str[], size_t
         TLVF_LOG(WARNING) << "set_hostname received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::NODE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::NODE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_hostname, str, size + 1);
     m_hostname[size] = '\0';
     return true;
@@ -768,7 +777,7 @@ bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::set_iface_name(const std::string& 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -780,7 +789,10 @@ bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::set_iface_name(char str[], size_t 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::IFACE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_iface_name, str, size + 1);
     m_iface_name[size] = '\0';
     return true;
@@ -925,7 +937,7 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_iface_name(const std::st
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -937,7 +949,10 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_iface_name(char str[], s
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::IFACE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_iface_name, str, size + 1);
     m_iface_name[size] = '\0';
     return true;
@@ -959,7 +974,7 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_ssid(const std::string& 
         TLVF_LOG(WARNING) << "set_ssid received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::WIFI_SSID_MAX_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::WIFI_SSID_MAX_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -971,7 +986,10 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_ssid(char str[], size_t 
         TLVF_LOG(WARNING) << "set_ssid received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::WIFI_SSID_MAX_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::WIFI_SSID_MAX_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_ssid, str, size + 1);
     m_ssid[size] = '\0';
     return true;
@@ -993,7 +1011,7 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_pass(const std::string& 
         TLVF_LOG(WARNING) << "set_pass received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::WIFI_PASS_MAX_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::WIFI_PASS_MAX_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -1005,7 +1023,10 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_pass(char str[], size_t 
         TLVF_LOG(WARNING) << "set_pass received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::WIFI_PASS_MAX_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::WIFI_PASS_MAX_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_pass, str, size + 1);
     m_pass[size] = '\0';
     return true;
@@ -1027,7 +1048,7 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_security_type(const std:
         TLVF_LOG(WARNING) << "set_security_type received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -1039,7 +1060,10 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_security_type(char str[]
         TLVF_LOG(WARNING) << "set_security_type received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_security_type, str, size + 1);
     m_security_type[size] = '\0';
     return true;
@@ -1111,7 +1135,7 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE::set_iface_name(const std::s
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -1123,7 +1147,10 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE::set_iface_name(char str[], 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::IFACE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_iface_name, str, size + 1);
     m_iface_name[size] = '\0';
     return true;
@@ -1695,7 +1722,7 @@ bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST::set_iface_name(const std::st
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -1707,7 +1734,10 @@ bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST::set_iface_name(char str[], s
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::IFACE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_iface_name, str, size + 1);
     m_iface_name[size] = '\0';
     return true;
@@ -1774,7 +1804,7 @@ bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE::set_iface_name(const std::s
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -1786,7 +1816,10 @@ bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE::set_iface_name(char str[], 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::IFACE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_iface_name, str, size + 1);
     m_iface_name[size] = '\0';
     return true;
@@ -1860,7 +1893,7 @@ bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST::set_iface_name(const std:
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -1872,7 +1905,10 @@ bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST::set_iface_name(char str[]
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::IFACE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_iface_name, str, size + 1);
     m_iface_name[size] = '\0';
     return true;
@@ -1939,7 +1975,7 @@ bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE::set_iface_name(const std
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -1951,7 +1987,10 @@ bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE::set_iface_name(char str[
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::IFACE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_iface_name, str, size + 1);
     m_iface_name[size] = '\0';
     return true;
@@ -2200,7 +2239,7 @@ bool cACTION_PLATFORM_ERROR_NOTIFICATION::set_data(const std::string& str) {
         TLVF_LOG(WARNING) << "set_data received an empty string.";
         return false;
     }
-    if (str_size + 1 < 256) { // +1 for null terminator
+    if (str_size + 1 > 256) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -2212,7 +2251,10 @@ bool cACTION_PLATFORM_ERROR_NOTIFICATION::set_data(char str[], size_t size) {
         TLVF_LOG(WARNING) << "set_data received an empty string.";
         return false;
     }
-    if (size + 1 < 256) { return false; } // +1 for null terminator
+    if (size + 1 > 256) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_data, str, size + 1);
     m_data[size] = '\0';
     return true;
@@ -2276,7 +2318,7 @@ bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_ap(cons
         TLVF_LOG(WARNING) << "set_iface_name_ap received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -2288,7 +2330,10 @@ bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_ap(char
         TLVF_LOG(WARNING) << "set_iface_name_ap received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::IFACE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_iface_name_ap, str, size + 1);
     m_iface_name_ap[size] = '\0';
     return true;
@@ -2310,7 +2355,7 @@ bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_bh(cons
         TLVF_LOG(WARNING) << "set_iface_name_bh received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -2322,7 +2367,10 @@ bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_bh(char
         TLVF_LOG(WARNING) << "set_iface_name_bh received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::IFACE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_iface_name_bh, str, size + 1);
     m_iface_name_bh[size] = '\0';
     return true;
