@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include <cstddef>
+#include <cstdint>
 
 namespace beerocks {
 

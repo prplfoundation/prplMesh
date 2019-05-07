@@ -42,7 +42,7 @@ bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const std::str
         TLVF_LOG(WARNING) << "set_slave_version received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::VERSION_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::VERSION_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -54,7 +54,10 @@ bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(char str[], si
         TLVF_LOG(WARNING) << "set_slave_version received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::VERSION_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::VERSION_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_slave_version, str, size + 1);
     m_slave_version[size] = '\0';
     return true;
@@ -196,7 +199,7 @@ bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const std::string
         TLVF_LOG(WARNING) << "set_master_version received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::VERSION_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::VERSION_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -208,7 +211,10 @@ bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(char str[], size_
         TLVF_LOG(WARNING) << "set_master_version received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::VERSION_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::VERSION_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_master_version, str, size + 1);
     m_master_version[size] = '\0';
     return true;
@@ -3149,7 +3155,7 @@ bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const std::stri
         TLVF_LOG(WARNING) << "set_name received an empty string.";
         return false;
     }
-    if (str_size + 1 < beerocks::message::NODE_NAME_LENGTH) { // +1 for null terminator
+    if (str_size + 1 > beerocks::message::NODE_NAME_LENGTH) { // +1 for null terminator
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -3161,7 +3167,10 @@ bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(char str[], siz
         TLVF_LOG(WARNING) << "set_name received an empty string.";
         return false;
     }
-    if (size + 1 < beerocks::message::NODE_NAME_LENGTH) { return false; } // +1 for null terminator
+    if (size + 1 > beerocks::message::NODE_NAME_LENGTH) { // +1 for null terminator
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
+        return false;
+    }
     tlvf_copy_string(m_name, str, size + 1);
     m_name[size] = '\0';
     return true;
