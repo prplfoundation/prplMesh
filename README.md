@@ -25,8 +25,9 @@ The following are needed for building the MultiAP framework on any Linux machine
 | cmake  | >=2.8 |
 | c++11  |   |
 | json-c  |  0.12.1  |
+| ubus  |  any  |
 
-Cross compiling - currently supporting UGW cross compiling, see [feed_multiap](https://gts-chd.intel.com/projects/SW_UGW/repos/feed_multiap/browse).
+Cross compiling - currently supporting UGW & RDKB cross compiling, see [feed_multiap](https://gts-chd.intel.com/projects/SW_UGW/repos/feed_multiap/browse).
 
 ## Build & Install
 <a name="build"></a>

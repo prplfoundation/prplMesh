@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 set(PROJECT_NAME bpl)
 project(${PROJECT_NAME})
 
+message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} ${BWL_TYPE} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
+
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
@@ -10,7 +12,8 @@ set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 file(GLOB_RECURSE bpl_common_sources ${MODULE_PATH}/common/*.c*)
 
 # Common libraries
-set(BPL_LIBS bridge ubus nl-3 nl-route-3)
+find_package(ubus REQUIRED)
+set(BPL_LIBS ubus)
 
 find_package(elpp REQUIRED)
 
@@ -32,7 +35,7 @@ if (TARGET_PLATFORM STREQUAL "ugw")
     file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/ugw/*.c*)
 
     # UGW specific libraries
-    list(APPEND BPL_LIBS ugwhelper msgapi cal capi blobmsg_json)
+    list(APPEND BPL_LIBS nl-3 nl-route-3 bridge ugwhelper msgapi cal capi blobmsg_json)
 
 elseif (TARGET_PLATFORM STREQUAL "rdkb")
 
@@ -48,7 +51,11 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
     # RDKB specific sources
     file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/rdkb/*.c*)
 
-    list(APPEND BPL_LIBS dl swpal slibc)
+    list(APPEND BPL_LIBS nl-3 nl-route-3 bridge dl swpal slibc)
+
+elseif (TARGET_PLATFORM STREQUAL "linux")
+
+    file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
 
 else()
 

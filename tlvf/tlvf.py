@@ -779,7 +779,7 @@ class TlvF:
                 lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                 lines_cpp.append( "%s}" % self.getIndentation(1) )
                 if is_const_len or is_int_len:
-                    lines_cpp.append( "%sif (str_size + 1 < %s) { // +1 for null terminator"  % (self.getIndentation(1), param_length))
+                    lines_cpp.append( "%sif (str_size + 1 > %s) { // +1 for null terminator"  % (self.getIndentation(1), param_length))
                     lines_cpp.append( '%sTLVF_LOG(ERROR) << "Received buffer size is smaller than string length";' %  self.getIndentation(2) )
                     lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                     lines_cpp.append( "%s}" % self.getIndentation(1) )
@@ -796,7 +796,10 @@ class TlvF:
                 lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                 lines_cpp.append( "%s}" % self.getIndentation(1) )
                 if is_const_len or is_int_len:
-                    lines_cpp.append( "%sif (size + 1 < %s) { return false; } // +1 for null terminator"  % (self.getIndentation(1), param_length))
+                    lines_cpp.append( "%sif (size + 1 > %s) { // +1 for null terminator"  % (self.getIndentation(1), param_length))
+                    lines_cpp.append( '%sTLVF_LOG(ERROR) << "Received buffer size is smaller than string length";' %  self.getIndentation(2) )
+                    lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
+                    lines_cpp.append( "%s}" % self.getIndentation(1) )
                 else:
                     lines_cpp.append( "%sif (!alloc_%s(size + 1)) { return false; } // +1 for null terminator"  % (self.getIndentation(1), param_name))
                 lines_cpp.append( "%stlvf_copy_string(m_%s, str, size + 1);"  % (self.getIndentation(1), param_name))
