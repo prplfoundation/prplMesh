@@ -68,9 +68,6 @@ public:
     // TODO: TEMP!
     void print_arp_table();
 
-/*
- * Private data-members:
- */
 private:
 
     // Monitoring Netlink Socket
