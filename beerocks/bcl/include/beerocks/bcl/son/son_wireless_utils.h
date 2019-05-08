@@ -13,6 +13,8 @@
 #include "../beerocks_message_structs.h"
 
 #include <vector>
+#include <string>
+#include <iostream>
 
 #define NOISE_FIGURE            8
 #define TX_POWER_MIN            19
