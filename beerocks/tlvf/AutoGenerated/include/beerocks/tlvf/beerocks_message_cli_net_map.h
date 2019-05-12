@@ -13,10 +13,10 @@
 #ifndef _BEEROCKS_TLVF_BEEROCKS_MESSAGE_CLI_NET_MAP_H_
 #define _BEEROCKS_TLVF_BEEROCKS_MESSAGE_CLI_NET_MAP_H_
 
+#include "beerocks/tlvf/beerocks_message_common.h"
 #include <cstddef>
 #include <stdint.h>
 #include <tlvf/swap.h>
-#include "beerocks/tlvf/beerocks_message_common.h"
 
 namespace beerocks_message {
 
@@ -24,25 +24,20 @@ typedef struct sCliNetworkMapNodeAp {
     beerocks::net::sMacAddr mac;
     uint16_t length;
     uint8_t hierarchy;
-    void struct_swap(){
+    void struct_swap()
+    {
         mac.struct_swap();
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&length));
+        tlvf_swap(16, reinterpret_cast<uint8_t *>(&length));
     }
-    void struct_init(){
-        mac.struct_init();
-    }
+    void struct_init() { mac.struct_init(); }
 } sCliNetworkMapNodeAp;
 
 typedef struct sCliNetworkMapNodeSta {
     beerocks::net::sMacAddr mac;
     uint8_t type;
     int8_t rx_rssi;
-    void struct_swap(){
-        mac.struct_swap();
-    }
-    void struct_init(){
-        mac.struct_init();
-    }
+    void struct_swap() { mac.struct_swap(); }
+    void struct_init() { mac.struct_init(); }
 } sCliNetworkMapNodeSta;
 
 typedef struct sCliNetworkMapsNodeInfo {
@@ -64,19 +59,20 @@ typedef struct sCliNetworkMapsNodeInfo {
     uint8_t channel_load_percent;
     uint8_t iface_type;
     int8_t vap_id;
-    void struct_swap(){
+    void struct_swap()
+    {
         mac.struct_swap();
         ipv4.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t*>(&tx_bytes));
-        tlvf_swap(32, reinterpret_cast<uint8_t*>(&rx_bytes));
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&stats_delta_ms));
+        tlvf_swap(32, reinterpret_cast<uint8_t *>(&tx_bytes));
+        tlvf_swap(32, reinterpret_cast<uint8_t *>(&rx_bytes));
+        tlvf_swap(16, reinterpret_cast<uint8_t *>(&stats_delta_ms));
     }
-    void struct_init(){
+    void struct_init()
+    {
         mac.struct_init();
         ipv4.struct_init();
     }
 } sCliNetworkMapsNodeInfo;
-
 
 }; // close namespace: beerocks_message
 
