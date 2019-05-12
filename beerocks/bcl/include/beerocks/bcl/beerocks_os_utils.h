@@ -40,53 +40,50 @@
 #ifndef snprintf
 #define snprintf _snprintf
 #endif
-#define UTILS_SLEEP_MSEC(msec)  Sleep(msec)
+#define UTILS_SLEEP_MSEC(msec) Sleep(msec)
 #else // Linux
 #include <unistd.h>
-#define UTILS_SLEEP_MSEC(msec)  usleep(msec*1000)
+#define UTILS_SLEEP_MSEC(msec) usleep(msec * 1000)
 #endif
 
-#include <string>
-#include <set>
 #include <map>
+#include <set>
+#include <string>
 
-namespace beerocks
-{
-    #define SYSTEM_CALL os_utils::system_call
+namespace beerocks {
+#define SYSTEM_CALL os_utils::system_call
 
-    class os_utils
-    {
-        public:
-            ///
-            /// @brief Function to get current process executable path
-            ///
-            /// @return string containing executable binary path location.
-            ///     if information can't be acquired.
-            ///
-            static std::string get_process_path();
+class os_utils {
+public:
+    ///
+    /// @brief Function to get current process executable path
+    ///
+    /// @return string containing executable binary path location.
+    ///     if information can't be acquired.
+    ///
+    static std::string get_process_path();
 
-            ///
-            /// @brief Function to get current process directory
-            ///
-            /// @return string containing the directory where the executable binary is located.
-            ///
-            static std::string get_process_dir();
+    ///
+    /// @brief Function to get current process directory
+    ///
+    /// @return string containing the directory where the executable binary is located.
+    ///
+    static std::string get_process_dir();
 
-            static std::string system_call(std::string cmd,  int log_lvl = 0, bool detached=false);
+    static std::string system_call(std::string cmd, int log_lvl = 0, bool detached = false);
 
-            static void kill_pid(std::string path, std::string file_name);
+    static void kill_pid(std::string path, std::string file_name);
 
-            static bool is_pid_running(std::string path, std::string file_name, int* pid_out = nullptr);
-            
-            static bool write_pid_file(std::string path, std::string file_name);
+    static bool is_pid_running(std::string path, std::string file_name, int *pid_out = nullptr);
 
-            static bool touch_pid_file(std::string file_path);
+    static bool write_pid_file(std::string path, std::string file_name);
 
-            static int redirect_console_std(std::string log_file_name);
+    static bool touch_pid_file(std::string file_path);
 
-            static void close_file(int fd);
-    };
+    static int redirect_console_std(std::string log_file_name);
+
+    static void close_file(int fd);
+};
 } // namespace beerocks
-
 
 #endif //_BEEROCKS_OS_UTILS_H_

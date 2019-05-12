@@ -9,77 +9,77 @@
 #ifndef _BWL_STA_WLAN_HAL_WAV_H_
 #define _BWL_STA_WLAN_HAL_WAV_H_
 
-#include "base_wlan_hal_wav.h"
 #include "../common/sta_wlan_hal.h"
+#include "base_wlan_hal_wav.h"
 
 namespace bwl {
 namespace wav {
 
-    /*!
+/*!
      * Hardware abstraction layer for WLAN Station/Client.
      */
-    class sta_wlan_hal_wav : public base_wlan_hal_wav, public sta_wlan_hal {
+class sta_wlan_hal_wav : public base_wlan_hal_wav, public sta_wlan_hal {
 
-        // Public methods
-        public:
-
-            /*!
+    // Public methods
+public:
+    /*!
              * Constructor.
              *
              * @param [in] iface_name STA/Client interface name.
              * @param [in] callback Callback for handling internal events.
              */
-            sta_wlan_hal_wav(std::string iface_name, hal_event_cb_t callback);
-            virtual ~sta_wlan_hal_wav();
+    sta_wlan_hal_wav(std::string iface_name, hal_event_cb_t callback);
+    virtual ~sta_wlan_hal_wav();
 
-            virtual bool detach() override;
+    virtual bool detach() override;
 
-            virtual bool initiate_scan() override;
-            virtual int  get_scan_results(const std::string& ssid, SScanResult* list, int size) override;
+    virtual bool initiate_scan() override;
+    virtual int get_scan_results(const std::string &ssid, SScanResult *list, int size) override;
 
-            virtual bool connect(const std::string& ssid, const std::string& pass, 
-                    WiFiSec sec, const std::string& bssid, uint8_t channel, bool hidden_ssid) override;
+    virtual bool connect(const std::string &ssid, const std::string &pass, WiFiSec sec,
+                         const std::string &bssid, uint8_t channel, bool hidden_ssid) override;
 
-            virtual bool disconnect() override;
+    virtual bool disconnect() override;
 
-            virtual bool roam(const std::string& bssid, uint8_t channel) override;
+    virtual bool roam(const std::string &bssid, uint8_t channel) override;
 
-            virtual bool get_4addr_mode() override;
-            virtual bool set_4addr_mode(bool enable) override;
+    virtual bool get_4addr_mode() override;
+    virtual bool set_4addr_mode(bool enable) override;
 
-            virtual bool unassoc_rssi_measurement(const std::string& mac, int chan, int bw, 
-                    int vht_center_frequency, int delay, int window_size) override;
+    virtual bool unassoc_rssi_measurement(const std::string &mac, int chan, int bw,
+                                          int vht_center_frequency, int delay,
+                                          int window_size) override;
 
-            virtual bool is_connected() override;
-            virtual int  get_rssi() override;
-            virtual int  get_channel() override;
+    virtual bool is_connected() override;
+    virtual int get_rssi() override;
+    virtual int get_channel() override;
 
-            std::string  get_ssid() override;
-            std::string  get_bssid() override;
+    std::string get_ssid() override;
+    std::string get_bssid() override;
 
-        protected:
+protected:
+    virtual bool process_wav_event(parsed_obj_map_t &parsed_obj) override;
 
-            virtual bool process_wav_event(parsed_obj_map_t& parsed_obj) override;
+    // Overload for Monitor events
+    bool event_queue_push(sta_wlan_hal::Event event, std::shared_ptr<void> data = {})
+    {
+        return base_wlan_hal::event_queue_push(int(event), data);
+    }
 
-            // Overload for Monitor events
-            bool event_queue_push(sta_wlan_hal::Event event, std::shared_ptr<void> data = {})
-            { return base_wlan_hal::event_queue_push(int(event), data); }
+private:
+    // Active network parameters
+    std::string m_active_ssid;
+    std::string m_active_bssid;
+    std::string m_active_pass;
+    WiFiSec m_active_security;
+    uint8_t m_active_channel = 0;
+    int m_active_network_id  = -1;
 
-        private:
-
-            // Active network parameters
-            std::string             m_active_ssid;
-            std::string             m_active_bssid;
-            std::string             m_active_pass;
-            WiFiSec                 m_active_security;
-            uint8_t                 m_active_channel    = 0;
-            int                     m_active_network_id = -1;
-
-            // Unassociated measurement state variables
-            std::chrono::steady_clock::time_point   m_unassoc_measure_start;
-            int                                     m_unassoc_measure_window_size   = 0;
-            int                                     m_unassoc_measure_delay         = 0;
-    };
+    // Unassociated measurement state variables
+    std::chrono::steady_clock::time_point m_unassoc_measure_start;
+    int m_unassoc_measure_window_size = 0;
+    int m_unassoc_measure_delay       = 0;
+};
 
 } // namespace wav
 } // namespace bwl

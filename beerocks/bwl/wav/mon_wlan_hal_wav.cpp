@@ -20,9 +20,8 @@
 //////////////////////////////////////////////////////////////////////////////
 
 extern "C" {
-    #include <wpa_ctrl.h>
+#include <wpa_ctrl.h>
 }
-
 
 namespace bwl {
 namespace wav {
@@ -32,19 +31,20 @@ namespace wav {
 //////////////////////////////////////////////////////////////////////////////
 
 #define GET_OP_CLASS(channel) ((channel < 14) ? 4 : 5)
-#define BUFFER_SIZE 4096  
+#define BUFFER_SIZE 4096
 
 // Allocate a char array wrapped in a shared_ptr
-#define ALLOC_SMART_BUFFER(size)                \
-    std::shared_ptr<char>(new char[size],       \
-    [](char* obj) { if (obj) delete [] obj; })
-
+#define ALLOC_SMART_BUFFER(size)                                                                   \
+    std::shared_ptr<char>(new char[size], [](char *obj) {                                          \
+        if (obj)                                                                                   \
+            delete[] obj;                                                                          \
+    })
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-static mon_wlan_hal::Event wav_to_bwl_event(const std::string& opcode)
+static mon_wlan_hal::Event wav_to_bwl_event(const std::string &opcode)
 {
     if (opcode == "RRM-CHANNEL-LOAD-RECEIVED") {
         return mon_wlan_hal::Event::RRM_Channel_Load_Response;
@@ -59,7 +59,7 @@ static mon_wlan_hal::Event wav_to_bwl_event(const std::string& opcode)
     return mon_wlan_hal::Event::Invalid;
 }
 
-static void calc_curr_traffic(char* buff, uint64_t& total, uint32_t& curr)
+static void calc_curr_traffic(char *buff, uint64_t &total, uint32_t &curr)
 {
     // Convert to numeric value
     uint64_t val = beerocks::string_utils::stoi(buff);
@@ -76,25 +76,22 @@ static void calc_curr_traffic(char* buff, uint64_t& total, uint32_t& curr)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-mon_wlan_hal_wav::mon_wlan_hal_wav(
-    std::string iface_name, hal_event_cb_t callback) :
-    base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, false,  callback),
-    base_wlan_hal_wav(bwl::HALType::Monitor, iface_name, false, callback, BUFFER_SIZE)
+mon_wlan_hal_wav::mon_wlan_hal_wav(std::string iface_name, hal_event_cb_t callback)
+    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, false, callback),
+      base_wlan_hal_wav(bwl::HALType::Monitor, iface_name, false, callback, BUFFER_SIZE)
 {
 }
 
-mon_wlan_hal_wav::~mon_wlan_hal_wav()
-{
-}
+mon_wlan_hal_wav::~mon_wlan_hal_wav() {}
 
-bool mon_wlan_hal_wav::update_radio_stats(SRadioStats& radio_stats)
+bool mon_wlan_hal_wav::update_radio_stats(SRadioStats &radio_stats)
 {
-    char* tmp_str;
+    char *tmp_str;
     int64_t tmp_int;
 
     parsed_obj_map_t reply;
 
-    if(!wpa_ctrl_send_msg("GET_RADIO_INFO", reply)){
+    if (!wpa_ctrl_send_msg("GET_RADIO_INFO", reply)) {
         LOG(ERROR) << __func__ << " failed";
         return false;
     }
@@ -162,17 +159,17 @@ bool mon_wlan_hal_wav::update_radio_stats(SRadioStats& radio_stats)
     return true;
 }
 
-bool mon_wlan_hal_wav::update_vap_stats(const std::string vap_iface_name, SVapStats& vap_stats)
+bool mon_wlan_hal_wav::update_vap_stats(const std::string vap_iface_name, SVapStats &vap_stats)
 {
-    char* tmp_str;
+    char *tmp_str;
     int64_t temp_int;
 
     std::string cmd = "GET_VAP_MEASUREMENTS " + vap_iface_name;
 
     parsed_obj_map_t reply;
 
-    if(!wpa_ctrl_send_msg(cmd, reply)){
-        LOG(ERROR) << __func__ <<   " failed";
+    if (!wpa_ctrl_send_msg(cmd, reply)) {
+        LOG(ERROR) << __func__ << " failed";
         return false;
     }
 
@@ -234,9 +231,9 @@ bool mon_wlan_hal_wav::update_vap_stats(const std::string vap_iface_name, SVapSt
     }
 
     vap_stats.retrans_count = temp_int;
-    
+
     // TODO: Handle timeouts/deltas externally!
-    // auto now = std::chrono::steady_clock::now(); 
+    // auto now = std::chrono::steady_clock::now();
     // auto time_span = std::chrono::duration_cast<std::chrono::milliseconds>(now - vap_stats->last_update_time);
     // vap_stats->delta_ms = float(time_span.count());
     // vap_stats->last_update_time = now;
@@ -244,16 +241,17 @@ bool mon_wlan_hal_wav::update_vap_stats(const std::string vap_iface_name, SVapSt
     return true;
 }
 
-bool mon_wlan_hal_wav::update_stations_stats(const std::string vap_iface_name, const std::string sta_mac, SStaStats& sta_stats)
+bool mon_wlan_hal_wav::update_stations_stats(const std::string vap_iface_name,
+                                             const std::string sta_mac, SStaStats &sta_stats)
 {
-    char* tmp_str;
+    char *tmp_str;
     int64_t tmp_int;
 
-    std::string cmd = "GET_STA_MEASUREMENTS " +  vap_iface_name + " " + sta_mac;
+    std::string cmd = "GET_STA_MEASUREMENTS " + vap_iface_name + " " + sta_mac;
 
     parsed_obj_map_t reply;
 
-    if(!wpa_ctrl_send_msg(cmd, reply)){
+    if (!wpa_ctrl_send_msg(cmd, reply)) {
         LOG(ERROR) << __func__ << " failed";
         return false;
     }
@@ -261,9 +259,9 @@ bool mon_wlan_hal_wav::update_stations_stats(const std::string vap_iface_name, c
     if (!wav_obj_read_str("ShortTermRSSIAverage", reply, &tmp_str)) {
         LOG(ERROR) << "Failed reading ShortTermRSSIAverage parameter!";
         return false;
-    } else {        
+    } else {
         // Format ShortTermRSSIAverage = %d %d %d %d
-        auto samples = beerocks::string_utils::str_split(tmp_str, ' '); 
+        auto samples = beerocks::string_utils::str_split(tmp_str, ' ');
         for (auto s : samples) {
             float s_float = float(beerocks::string_utils::stoi(s));
             if (s_float > beerocks::RSSI_MIN) {
@@ -279,11 +277,11 @@ bool mon_wlan_hal_wav::update_stations_stats(const std::string vap_iface_name, c
     if (!wav_obj_read_str("SNR", reply, &tmp_str)) {
         LOG(ERROR) << "Failed reading SNR parameter!";
         return false;
-    } else {        
+    } else {
         // Format SNR = %d %d %d %d
-        auto samples = beerocks::string_utils::str_split(tmp_str, ' '); 
+        auto samples = beerocks::string_utils::str_split(tmp_str, ' ');
         for (auto s : samples) {
-            float s_float = float(beerocks::string_utils::stoi(s));            
+            float s_float = float(beerocks::string_utils::stoi(s));
             if (s_float >= beerocks::SNR_MIN) {
                 sta_stats.rx_snr_watt += std::pow(10, s_float / float(10));
                 sta_stats.rx_snr_watt_samples_cnt++;
@@ -293,14 +291,12 @@ bool mon_wlan_hal_wav::update_stations_stats(const std::string vap_iface_name, c
         // TODO: Update SNR externally!
     }
 
-
-
     // Last Downlink (TX) Rate
     if (!wav_obj_read_str("LastDataDownlinkRate", reply, &tmp_str)) {
         LOG(ERROR) << "Failed reading LastDataDownlinkRate parameter!";
         return false;
     }
-    
+
     sta_stats.tx_phy_rate_100kb = (uint16_t)(beerocks::string_utils::stoi(tmp_str) / double(100));
 
     // Last Uplink (RX) Rate
@@ -308,9 +304,9 @@ bool mon_wlan_hal_wav::update_stations_stats(const std::string vap_iface_name, c
         LOG(ERROR) << "Failed reading LastDataUplinkRate parameter!";
         return false;
     }
-    
+
     sta_stats.rx_phy_rate_100kb = (uint16_t)(beerocks::string_utils::stoi(tmp_str) / double(100));
-    
+
     // TX Bytes
     if (!wav_obj_read_str("BytesSent", reply, &tmp_str)) {
         LOG(ERROR) << "Failed reading BytesSent parameter!";
@@ -353,14 +349,14 @@ bool mon_wlan_hal_wav::update_stations_stats(const std::string vap_iface_name, c
     return true;
 }
 
-bool mon_wlan_hal_wav::sta_channel_load_11k_request(const SStaChannelLoadRequest11k& req)
+bool mon_wlan_hal_wav::sta_channel_load_11k_request(const SStaChannelLoadRequest11k &req)
 {
     LOG(TRACE) << __func__;
 
     return true;
 }
 
-bool mon_wlan_hal_wav::sta_beacon_11k_request(const SBeaconRequest11k& req, int& dialog_token)
+bool mon_wlan_hal_wav::sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token)
 {
     LOG(TRACE) << __func__;
 
@@ -374,40 +370,41 @@ bool mon_wlan_hal_wav::sta_beacon_11k_request(const SBeaconRequest11k& req, int&
     auto request = (!req.enable) ? 0 : req.request;
     auto report  = (!req.enable) ? 0 : req.report;
 
-    uint8_t req_mode = (req.parallel 
-        | (req.enable               ? 0x02:0)
-        | (request                  ? 0x04:0)
-        | (report                   ? 0x08:0)
-        | (req.mandatory_duration   ? 0x10:0));
+    uint8_t req_mode = (req.parallel | (req.enable ? 0x02 : 0) | (request ? 0x04 : 0) |
+                        (report ? 0x08 : 0) | (req.mandatory_duration ? 0x10 : 0));
 
     auto op_class = req.op_class < 0 ? GET_OP_CLASS(get_radio_info().channel) : req.op_class;
 
     std::string measurement_mode;
     switch ((SBeaconRequest11k::MeasurementMode)(req.measurement_mode)) {
-        case SBeaconRequest11k::MeasurementMode::Passive: measurement_mode = "passive"; break;
-        case SBeaconRequest11k::MeasurementMode::Active:  measurement_mode = "active"; break;
-        case SBeaconRequest11k::MeasurementMode::Table:   measurement_mode = "table"; break;
-        default: {
-            LOG(WARNING) << "Invalid measuremetn mode: " << int(req.measurement_mode)
-                         << ", using PASSIVE...";
+    case SBeaconRequest11k::MeasurementMode::Passive:
+        measurement_mode = "passive";
+        break;
+    case SBeaconRequest11k::MeasurementMode::Active:
+        measurement_mode = "active";
+        break;
+    case SBeaconRequest11k::MeasurementMode::Table:
+        measurement_mode = "table";
+        break;
+    default: {
+        LOG(WARNING) << "Invalid measuremetn mode: " << int(req.measurement_mode)
+                     << ", using PASSIVE...";
 
-            measurement_mode = "passive";
-        }
+        measurement_mode = "passive";
     }
-    
+    }
 
     // build command
-    std::string cmd = "REQ_BEACON " + 
-        beerocks::net::network_utils::mac_to_string(req.sta_mac.oct) + " " + // Destination MAC Address
-        std::to_string(req.repeats)               + " " + // Number of repitions
-        std::to_string(req_mode)                  + " " + // Measurements Request Mode
-        std::to_string(op_class)                  + " " + // Operating Class
-        std::to_string(req.channel)               + " " + // Channel
-        std::to_string(req.rand_ival)             + " " + // Random Interval
-        std::to_string(req.duration)              + " " + // Duration
-        measurement_mode                                             + " " + // Measurement Mode
-        beerocks::net::network_utils::mac_to_string(req.bssid.oct);      // Target BSSID
-
+    std::string cmd = "REQ_BEACON " + beerocks::net::network_utils::mac_to_string(req.sta_mac.oct) +
+                      " " +                                 // Destination MAC Address
+                      std::to_string(req.repeats) + " " +   // Number of repitions
+                      std::to_string(req_mode) + " " +      // Measurements Request Mode
+                      std::to_string(op_class) + " " +      // Operating Class
+                      std::to_string(req.channel) + " " +   // Channel
+                      std::to_string(req.rand_ival) + " " + // Random Interval
+                      std::to_string(req.duration) + " " +  // Duration
+                      measurement_mode + " " +              // Measurement Mode
+                      beerocks::net::network_utils::mac_to_string(req.bssid.oct); // Target BSSID
 
     /////////////////////////////////////////////////
     //////////////// Optional Fields ////////////////
@@ -415,17 +412,17 @@ bool mon_wlan_hal_wav::sta_beacon_11k_request(const SBeaconRequest11k& req, int&
 
     // SSID
     if (req.use_optional_ssid) {
-        std::string req_ssid = '"' + std::string((char*)req.ssid) + '"';
+        std::string req_ssid = '"' + std::string((char *)req.ssid) + '"';
 
         cmd += " ssid=" + req_ssid;
     }
 
-    // send command 
-    if(!wpa_ctrl_send_msg(cmd, reply)){
-        LOG(ERROR) << __func__ <<   " failed";
+    // send command
+    if (!wpa_ctrl_send_msg(cmd, reply)) {
+        LOG(ERROR) << __func__ << " failed";
         return false;
     }
-    
+
     // Read the Dialog Token value from the object and store it in the output parameter
     if (!wav_obj_read_int("dialog_token", reply, tmp_int)) {
         LOG(ERROR) << "Failed reading dialog_token parameter!";
@@ -437,28 +434,29 @@ bool mon_wlan_hal_wav::sta_beacon_11k_request(const SBeaconRequest11k& req, int&
     return true;
 }
 
-bool mon_wlan_hal_wav::sta_statistics_11k_request(const SStatisticsRequest11k& req)
-{
-    LOG(TRACE) << __func__;
-    
-    return true;
-}
-
-bool mon_wlan_hal_wav::sta_link_measurements_11k_request(const std::string& sta_mac)
+bool mon_wlan_hal_wav::sta_statistics_11k_request(const SStatisticsRequest11k &req)
 {
     LOG(TRACE) << __func__;
 
     return true;
 }
 
-bool mon_wlan_hal_wav::process_wav_event(parsed_obj_map_t& parsed_obj)
-{   
-    char* tmp_str;
+bool mon_wlan_hal_wav::sta_link_measurements_11k_request(const std::string &sta_mac)
+{
+    LOG(TRACE) << __func__;
+
+    return true;
+}
+
+bool mon_wlan_hal_wav::process_wav_event(parsed_obj_map_t &parsed_obj)
+{
+    char *tmp_str;
     int64_t tmp_int;
-    
+
     // Filter out empty events
     std::string opcode;
-    if (!(parsed_obj.find(WAV_EVENT_KEYLESS_PARAM_OPCODE) != parsed_obj.end() && !(opcode = parsed_obj[WAV_EVENT_KEYLESS_PARAM_OPCODE]).empty())) {
+    if (!(parsed_obj.find(WAV_EVENT_KEYLESS_PARAM_OPCODE) != parsed_obj.end() &&
+          !(opcode = parsed_obj[WAV_EVENT_KEYLESS_PARAM_OPCODE]).empty())) {
         return true;
     }
 
@@ -468,104 +466,107 @@ bool mon_wlan_hal_wav::process_wav_event(parsed_obj_map_t& parsed_obj)
 
     // Handle the event
     switch (event) {
-        
-        case Event::RRM_Channel_Load_Response: {
-            
-        } break;
 
-        case Event::RRM_Beacon_Response: {
+    case Event::RRM_Channel_Load_Response: {
 
-            // Allocate response object
-            auto resp_buff = ALLOC_SMART_BUFFER(sizeof(SBeaconResponse11k));
-            auto resp = reinterpret_cast<SBeaconResponse11k*>(resp_buff.get());
-            LOG_IF(!resp, FATAL) << "Memory allocation failed!";
-                
-            // Initialize the message
-            memset(resp_buff.get(), 0, sizeof(SBeaconResponse11k));
+    } break;
 
-            // Channel
-            if (!wav_obj_read_int("channel", parsed_obj, tmp_int)) {
-                LOG(ERROR) << "Failed reading channel parameter!";
-                return false;
-            }
-            resp->channel = tmp_int;
+    case Event::RRM_Beacon_Response: {
 
-            // STA MAC
-            if (!wav_obj_read_str(WAV_EVENT_KEYLESS_PARAM_MAC, parsed_obj, &tmp_str)) {
-                LOG(ERROR) << "Failed reading mac parameter!";
-                return false;
-            }
+        // Allocate response object
+        auto resp_buff = ALLOC_SMART_BUFFER(sizeof(SBeaconResponse11k));
+        auto resp      = reinterpret_cast<SBeaconResponse11k *>(resp_buff.get());
+        LOG_IF(!resp, FATAL) << "Memory allocation failed!";
 
-            beerocks::net::network_utils::mac_from_string(resp->sta_mac.oct, tmp_str);
-            
-            // Dialog Token
-            if (!wav_obj_read_int("dialog_token", parsed_obj, tmp_int)) {
-                LOG(ERROR) << "Failed reading dialog_token parameter!";
-                return false;
-            }
-            resp->dialog_token = tmp_int;
+        // Initialize the message
+        memset(resp_buff.get(), 0, sizeof(SBeaconResponse11k));
 
-            // Measurement Response Mode
-            if (!wav_obj_read_int("measurement_rep_mode", parsed_obj, tmp_int)) {
-                LOG(ERROR) << "Failed reading measurement_rep_mode parameter!";
-                return false;
-            }
-            resp->rep_mode = tmp_int;
+        // Channel
+        if (!wav_obj_read_int("channel", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading channel parameter!";
+            return false;
+        }
+        resp->channel = tmp_int;
 
-            // Operating Class
-            if (!wav_obj_read_int("op_class", parsed_obj, tmp_int)) {
-                LOG(ERROR) << "Failed reading op_class parameter!";
-                return false;
-            }
-            resp->op_class = tmp_int;
+        // STA MAC
+        if (!wav_obj_read_str(WAV_EVENT_KEYLESS_PARAM_MAC, parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
 
-            // Measurement Duration
-            if (!wav_obj_read_int("duration", parsed_obj, tmp_int)) {
-                LOG(ERROR) << "Failed reading duration parameter!";
-                return false;
-            }
-            resp->duration = tmp_int;
+        beerocks::net::network_utils::mac_from_string(resp->sta_mac.oct, tmp_str);
 
-            // RCPI
-            if (!wav_obj_read_int("rcpi", parsed_obj, tmp_int)) {
-                LOG(ERROR) << "Failed reading rcpi parameter!";
-                return false;
-            }
-            resp->rcpi = tmp_int;
+        // Dialog Token
+        if (!wav_obj_read_int("dialog_token", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading dialog_token parameter!";
+            return false;
+        }
+        resp->dialog_token = tmp_int;
 
-            // RSNI
-            if (!wav_obj_read_int("rsni", parsed_obj, tmp_int)) {
-                LOG(ERROR) << "Failed reading rsni parameter!";
-                return false;
-            }
-            resp->rsni = tmp_int;
-            
-            // BSSID
-            if (!wav_obj_read_str("bssid", parsed_obj, &tmp_str)) {
-                LOG(ERROR) << "Failed reading mac parameter!";
-                return false;
-            }
-            beerocks::net::network_utils::mac_from_string(resp->bssid.oct, tmp_str);
-            
-            // Add the message to the queue
-            event_queue_push(event, resp_buff);
-            
-        } break;
+        // Measurement Response Mode
+        if (!wav_obj_read_int("measurement_rep_mode", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading measurement_rep_mode parameter!";
+            return false;
+        }
+        resp->rep_mode = tmp_int;
 
-        case Event::RRM_STA_Statistics_Response: {
+        // Operating Class
+        if (!wav_obj_read_int("op_class", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading op_class parameter!";
+            return false;
+        }
+        resp->op_class = tmp_int;
 
-        } break;
+        // Measurement Duration
+        if (!wav_obj_read_int("duration", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading duration parameter!";
+            return false;
+        }
+        resp->duration = tmp_int;
 
-        case Event::RRM_Link_Measurement_Response: {
+        // RCPI
+        if (!wav_obj_read_int("rcpi", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading rcpi parameter!";
+            return false;
+        }
+        resp->rcpi = tmp_int;
 
-        } break;
+        // RSNI
+        if (!wav_obj_read_int("rsni", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading rsni parameter!";
+            return false;
+        }
+        resp->rsni = tmp_int;
 
-        // Gracefully ignore unhandled events
-        // TODO: Probably should be changed to an error once WAV will stop
-        //       sending empty or irrelevant events...
-        default: { LOG(WARNING) << "Unhandled event received: " << opcode; break; };
+        // BSSID
+        if (!wav_obj_read_str("bssid", parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
+        beerocks::net::network_utils::mac_from_string(resp->bssid.oct, tmp_str);
+
+        // Add the message to the queue
+        event_queue_push(event, resp_buff);
+
+    } break;
+
+    case Event::RRM_STA_Statistics_Response: {
+
+    } break;
+
+    case Event::RRM_Link_Measurement_Response: {
+
+    } break;
+
+    // Gracefully ignore unhandled events
+    // TODO: Probably should be changed to an error once WAV will stop
+    //       sending empty or irrelevant events...
+    default: {
+        LOG(WARNING) << "Unhandled event received: " << opcode;
+        break;
+    };
     }
-    
+
     return true;
 }
 
@@ -575,11 +576,11 @@ bool mon_wlan_hal_wav::process_wav_event(parsed_obj_map_t& parsed_obj)
 // AP WAV HAL Factory Functions
 extern "C" {
 
-bwl::mon_wlan_hal* mon_wlan_hal_create(
-    std::string iface_name, bwl::base_wlan_hal::hal_event_cb_t callback)
-{ return new bwl::wav::mon_wlan_hal_wav(iface_name, callback); }
+bwl::mon_wlan_hal *mon_wlan_hal_create(std::string iface_name,
+                                       bwl::base_wlan_hal::hal_event_cb_t callback)
+{
+    return new bwl::wav::mon_wlan_hal_wav(iface_name, callback);
+}
 
-void mon_wlan_hal_destroy(bwl::mon_wlan_hal* obj)
-{ delete obj; }
-
+void mon_wlan_hal_destroy(bwl::mon_wlan_hal *obj) { delete obj; }
 }

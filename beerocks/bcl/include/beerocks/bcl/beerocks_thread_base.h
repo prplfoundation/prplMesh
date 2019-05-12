@@ -11,44 +11,38 @@
 
 #define THREAD_LOG(a) (LOG(a) << get_name() << ": ")
 
-#include <thread>
-#include <string>
 #include <atomic>
+#include <string>
+#include <thread>
 
-namespace beerocks
-{
-    class thread_base
-    {
-        public:
-            thread_base() : should_stop(false), worker_is_running(false) {}
-            virtual ~thread_base();
-            bool start(std::string name = "");
-            void join();
-            void stop(bool block = true);
-            bool is_running() {
-                return worker_is_running;
-            }
-            std::string get_name() {
-                return thread_name;
-            }
+namespace beerocks {
+class thread_base {
+public:
+    thread_base() : should_stop(false), worker_is_running(false) {}
+    virtual ~thread_base();
+    bool start(std::string name = "");
+    void join();
+    void stop(bool block = true);
+    bool is_running() { return worker_is_running; }
+    std::string get_name() { return thread_name; }
 
-            int get_thread_last_error_code() { return thread_last_error_code;}
-            
-        protected:
-            std::string thread_name;
-            uint32_t thread_last_error_code = 0;
-            bool should_stop;
+    int get_thread_last_error_code() { return thread_last_error_code; }
 
-            virtual bool init() = 0;
-            virtual bool work() = 0;
-            virtual void before_stop() {}
-            virtual void on_thread_stop() {}
+protected:
+    std::string thread_name;
+    uint32_t thread_last_error_code = 0;
+    bool should_stop;
 
-        private:
-            void run();
-            std::thread worker;
-            bool worker_is_running;
-    };
+    virtual bool init() = 0;
+    virtual bool work() = 0;
+    virtual void before_stop() {}
+    virtual void on_thread_stop() {}
+
+private:
+    void run();
+    std::thread worker;
+    bool worker_is_running;
+};
 }
 
 #endif // _BEEROCKS_THREAD_BASE_H_

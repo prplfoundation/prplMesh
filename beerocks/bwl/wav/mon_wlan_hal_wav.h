@@ -9,8 +9,8 @@
 #ifndef _BWL_MON_WLAN_HAL_WAV_H_
 #define _BWL_MON_WLAN_HAL_WAV_H_
 
-#include "base_wlan_hal_wav.h"
 #include "../common/mon_wlan_hal.h"
+#include "base_wlan_hal_wav.h"
 
 namespace bwl {
 namespace wav {
@@ -20,9 +20,8 @@ namespace wav {
  */
 class mon_wlan_hal_wav : public base_wlan_hal_wav, public mon_wlan_hal {
 
-// Public methods
+    // Public methods
 public:
-    
     /*!
      * Constructor.
      *
@@ -32,28 +31,29 @@ public:
     mon_wlan_hal_wav(std::string iface_name, hal_event_cb_t callback);
     virtual ~mon_wlan_hal_wav();
 
-    virtual bool update_radio_stats(SRadioStats& radio_stats) override;
-    virtual bool update_vap_stats(const std::string vap_iface_name, SVapStats& vap_stats) override;
-    virtual bool update_stations_stats(const std::string vap_iface_name, const std::string sta_mac, SStaStats& sta_stats) override;
-    
-    virtual bool sta_channel_load_11k_request(const SStaChannelLoadRequest11k& req) override;
-    virtual bool sta_beacon_11k_request(const SBeaconRequest11k& req, int& dialog_token) override;
-    virtual bool sta_statistics_11k_request(const SStatisticsRequest11k& req) override;
-    virtual bool sta_link_measurements_11k_request(const std::string& sta_mac) override;
+    virtual bool update_radio_stats(SRadioStats &radio_stats) override;
+    virtual bool update_vap_stats(const std::string vap_iface_name, SVapStats &vap_stats) override;
+    virtual bool update_stations_stats(const std::string vap_iface_name, const std::string sta_mac,
+                                       SStaStats &sta_stats) override;
 
-// Protected methods:
+    virtual bool sta_channel_load_11k_request(const SStaChannelLoadRequest11k &req) override;
+    virtual bool sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token) override;
+    virtual bool sta_statistics_11k_request(const SStatisticsRequest11k &req) override;
+    virtual bool sta_link_measurements_11k_request(const std::string &sta_mac) override;
+
+    // Protected methods:
 protected:
-    
-    virtual bool process_wav_event(parsed_obj_map_t& parsed_obj) override;
+    virtual bool process_wav_event(parsed_obj_map_t &parsed_obj) override;
 
     // Overload for Monitor events
     bool event_queue_push(mon_wlan_hal::Event event, std::shared_ptr<void> data = {})
-    { return base_wlan_hal::event_queue_push(int(event), data); }
+    {
+        return base_wlan_hal::event_queue_push(int(event), data);
+    }
 
-// Private data-members:
+    // Private data-members:
 private:
-    
-    std::shared_ptr<char> m_temp_wav_value;        
+    std::shared_ptr<char> m_temp_wav_value;
 };
 
 } // namespace wav

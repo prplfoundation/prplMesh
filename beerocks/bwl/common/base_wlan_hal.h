@@ -9,14 +9,14 @@
 #ifndef _BWL_BASE_WLAN_HAL_H_
 #define _BWL_BASE_WLAN_HAL_H_
 
-#include "base_wlan_hal_types.h"
 #include "base_802_11_defs.h"
+#include "base_wlan_hal_types.h"
 
 #include <beerocks/bcl/beerocks_thread_safe_queue.h>
 
-#include <string>
-#include <memory>
 #include <functional>
+#include <memory>
+#include <string>
 
 namespace bwl {
 
@@ -25,17 +25,15 @@ namespace bwl {
  */
 class base_wlan_hal {
 
-// Public definitions
+    // Public definitions
 public:
-
     // Pair of event ID and payload pointer
     typedef std::pair<int, std::shared_ptr<void>> hal_event_t;
     typedef std::shared_ptr<hal_event_t> hal_event_ptr_t;
     typedef std::function<bool(hal_event_ptr_t)> hal_event_cb_t;
 
-// Public methods
+    // Public methods
 public:
-
     virtual ~base_wlan_hal();
 
     /*!
@@ -51,14 +49,14 @@ public:
      * @return The state of the attach process.
      */
     virtual HALState attach(bool block = false) = 0;
-    
+
     /*!
      * Detach from the WLAN hardware/middleware.
      *
      * @return true on success or false on error.
      */
     virtual bool detach() = 0;
-    
+
     /*!
      * Refresh the internal radio (and VAPs) information structure 
      * with the latest values from the hardware.
@@ -83,7 +81,7 @@ public:
      * @return true on success or false on error.
      */
     virtual bool refresh_vaps_info(int id = beerocks::IFACE_RADIO_ID) = 0;
-    
+
     /*!
      * Process incoming events from the underlying hardware/middleware.
      * This method should be called if the file descriptor returned by
@@ -101,21 +99,18 @@ public:
      * @return true on success or false on error.
      */
     virtual bool process_int_events();
-      
-// Public getter methods:
-public:
 
+    // Public getter methods:
+public:
     /*!
      * Returns the type of the HAL instance.
      */
-    HALType get_type() const
-    { return (m_type); }
+    HALType get_type() const { return (m_type); }
 
     /*!
      * Returns the current state.
      */
-    HALState get_state() const
-    { return (m_hal_state); }
+    HALState get_state() const { return (m_hal_state); }
 
     /*!
      * Returns a file descriptor to the external events queue, 0 is events
@@ -124,42 +119,36 @@ public:
      * 
      * The returned file descriptor supports select(), poll() and epoll().
      */
-    int get_ext_events_fd() const
-    { return (m_fd_ext_events); }
+    int get_ext_events_fd() const { return (m_fd_ext_events); }
 
     /*!
      * Returns a file descriptor to the internal events queue, or -1 on error.
      * The returned file descriptor supports select(), poll() and epoll().
      */
-    int get_int_events_fd() const
-    { return (m_fd_int_events); }
-    
+    int get_int_events_fd() const { return (m_fd_int_events); }
+
     /*!
      * Returns the interface name.
      */
-    const std::string& get_iface_name() const
-    { return (m_iface_name); } 
+    const std::string &get_iface_name() const { return (m_iface_name); }
 
     /*!
      * Returns the interface type
      */
-    IfaceType get_iface_type() const
-    { return (m_iface_type); }
+    IfaceType get_iface_type() const { return (m_iface_type); }
 
     /*!
      * Return the radio information.
      */
-    const RadioInfo& get_radio_info() const
-    { return (m_radio_info); }
-    
+    const RadioInfo &get_radio_info() const { return (m_radio_info); }
+
     /*!
      * Returns the Radio's main MAC address.
      */
     virtual std::string get_radio_mac() = 0;
 
-// Protected methods
+    // Protected methods
 protected:
-
     /*!
      * Constructor.
      *
@@ -168,8 +157,9 @@ protected:
      * @param [in] iface_type Interface type.
      * @param [in] callback Callback for handling internal events.
      */
-    base_wlan_hal(HALType type, std::string iface_name, IfaceType iface_type, bool m_acs_enabled, hal_event_cb_t callback);
-    
+    base_wlan_hal(HALType type, std::string iface_name, IfaceType iface_type, bool m_acs_enabled,
+                  hal_event_cb_t callback);
+
     /*!
      * Push a new (internal) event into the queue.
      * 
@@ -180,40 +170,36 @@ protected:
      */
     bool event_queue_push(int event, std::shared_ptr<void> data = {});
 
-// Protected methods:
+    // Protected methods:
 protected:
-
     /*!
      * Default constructor (for virtual inheritance)
      */
-    base_wlan_hal() = default;    
+    base_wlan_hal() = default;
 
-// Protected data-members:
+    // Protected data-members:
 protected:
+    RadioInfo m_radio_info;
 
-    RadioInfo   m_radio_info;
-    
-    HALState    m_hal_state     = HALState::Uninitialized;
-    
-    int         m_fd_ext_events = -1;
-    
-// Private data-members:
+    HALState m_hal_state = HALState::Uninitialized;
+
+    int m_fd_ext_events = -1;
+
+    // Private data-members:
 private:
-    
-    HALType         m_type;
+    HALType m_type;
 
-    std::string     m_iface_name;
-    
-    IfaceType       m_iface_type;
+    std::string m_iface_name;
 
-    bool            m_acs_enabled;
-    
-    int             m_fd_int_events = -1;
+    IfaceType m_iface_type;
 
-    hal_event_cb_t  m_int_event_cb;
+    bool m_acs_enabled;
+
+    int m_fd_int_events = -1;
+
+    hal_event_cb_t m_int_event_cb;
 
     beerocks::thread_safe_queue<hal_event_ptr_t> m_queue_events;
-    
 };
 
 } // namespace bwl

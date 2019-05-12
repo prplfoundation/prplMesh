@@ -11,31 +11,32 @@
 #include "../include/beerocks/bcl/network/socket.h"
 
 #include <algorithm>
-#include <iostream>
 #include <algorithm>
-#include <unistd.h>
+#include <iostream>
 #include <linux/limits.h>
+#include <unistd.h>
 
 #include <easylogging++.h>
 
-#define LOG_MAX_LEVELS  6
-#define LOGGING_DEFAULT_MAX_SIZE (size_t )100000
+#define LOG_MAX_LEVELS 6
+#define LOGGING_DEFAULT_MAX_SIZE (size_t)100000
 
 // Use the easylogging++ instance from the parent process
 SHARE_EASYLOGGINGPP(el::Helpers::storage())
 
 class RollMonitor : public el::LogDispatchCallback {
 public:
-    void enable(bool enable) {
+    void enable(bool enable)
+    {
         m_enabled = enable;
         if (!m_enabled) {
-            m_fsLogFileStream = nullptr;
+            m_fsLogFileStream   = nullptr;
             m_szRollLogFileSize = 0;
         }
     }
 
-    void handle(const el::LogDispatchData* logData) {
-        
+    void handle(const el::LogDispatchData *logData)
+    {
 
         //////////////////////////////
         // DO NOT USE LOGGING HERE! //
@@ -43,21 +44,26 @@ public:
 
         if (!m_enabled) {
             return;
-        } 
+        }
 
         if (!m_fsLogFileStream) {
-            if (!(m_fsLogFileStream = logData->logMessage()->logger()->typedConfigurations()->fileStream(el::Level::Info))) {
+            if (!(m_fsLogFileStream =
+                      logData->logMessage()->logger()->typedConfigurations()->fileStream(
+                          el::Level::Info))) {
                 return;
             }
         }
 
         if (!m_szRollLogFileSize) {
-            if (!(m_szRollLogFileSize = (logData->logMessage()->logger()->typedConfigurations()->maxLogFileSize(el::Level::Info) / 2))) {
+            if (!(m_szRollLogFileSize =
+                      (logData->logMessage()->logger()->typedConfigurations()->maxLogFileSize(
+                           el::Level::Info) /
+                       2))) {
                 return;
             }
         }
 
-        // Get current file size        
+        // Get current file size
         auto logFileSize = el::base::utils::File::getSizeOfFile(m_fsLogFileStream);
 
         // Check if rolling should be triggered
@@ -72,11 +78,12 @@ public:
                 // remove process name from process path to get process dir path
                 std::string process_dir_str(process_dir);
                 process_dir_str.erase(process_dir_str.rfind("/"));
-                
-                std::string fullPathCmd(process_dir_str + std::string("/beerocks_utils.sh roll_logs&"));
+
+                std::string fullPathCmd(process_dir_str +
+                                        std::string("/beerocks_utils.sh roll_logs&"));
 
                 if (system(fullPathCmd.c_str()) != 0) {
-                     std::cout << "System returned non-zero" << std::endl;
+                    std::cout << "System returned non-zero" << std::endl;
                 }
 
                 // Disable the callback - it will be reenabled after the roll
@@ -88,60 +95,63 @@ public:
     }
 
 private:
-    el::base::type::fstream_t*  m_fsLogFileStream   = nullptr;
-    std::size_t                 m_szRollLogFileSize = 0;
-    bool                        m_enabled = true;
+    el::base::type::fstream_t *m_fsLogFileStream = nullptr;
+    std::size_t m_szRollLogFileSize              = 0;
+    bool m_enabled                               = true;
 };
 
-class NetLogger : public el::LogDispatchCallback
+class NetLogger : public el::LogDispatchCallback {
+public:
+    void enable(const std::string &server, uint16_t port, std::string module_name)
+    {
+        m_server      = server;
+        m_port        = port;
+        m_module_name = module_name;
+        this->setEnabled(true);
+    }
+
+protected:
+    void handle(const el::LogDispatchData *logdata) noexcept override
+    {
+        std::string msg = m_module_name + ": " +
+                          logdata->logMessage()->logger()->logBuilder()->build(
+                              logdata->logMessage(),
+                              logdata->dispatchAction() == el::base::DispatchAction::NormalLog);
+        SocketClient logmaster(m_server, m_port);
+        logmaster.writeString(msg);
+    }
+
+private:
+    std::string m_server;
+    uint16_t m_port;
+    std::string m_module_name;
+};
+
+static std::string log_level_to_string(const beerocks::eLogLevel &log_level)
 {
-    public:
-        void enable(const std::string& server, uint16_t port, std::string module_name) {
-            m_server = server;
-            m_port = port;
-            m_module_name = module_name;
-            this->setEnabled(true);
-        }
-    protected:
-        void handle(const el::LogDispatchData* logdata) noexcept override {
-            std::string msg = m_module_name + ": " + logdata->logMessage()->logger()->logBuilder()->build(
-                logdata->logMessage(),
-                logdata->dispatchAction() == el::base::DispatchAction::NormalLog
-            );
-            SocketClient logmaster(m_server, m_port);
-            logmaster.writeString(msg);
-        }
-    private:
-        std::string m_server;
-        uint16_t m_port;
-        std::string m_module_name;
-};
-
-static std::string log_level_to_string(const beerocks::eLogLevel& log_level)
-{   
     std::string log_level_str;
     switch (log_level) {
-        case beerocks::LOG_LEVEL_INFO:
-            log_level_str = "info";
-            break;
-        case beerocks::LOG_LEVEL_DEBUG:
-            log_level_str = "debug";
-            break;
-        case beerocks::LOG_LEVEL_ERROR:
-            log_level_str = "error";
-            break;
-        case beerocks::LOG_LEVEL_FATAL:
-            log_level_str = "fatal";
-            break;
-        case beerocks::LOG_LEVEL_TRACE:
-            log_level_str = "trace";
-            break;
-        case beerocks::LOG_LEVEL_WARNING:
-            log_level_str = "warning";
-            break;
-        default:
-            log_level_str = std::string();
-            break;
+    case beerocks::LOG_LEVEL_INFO:
+        log_level_str = "info";
+        break;
+    case beerocks::LOG_LEVEL_DEBUG:
+        log_level_str = "debug";
+        break;
+    case beerocks::LOG_LEVEL_ERROR:
+        log_level_str = "error";
+        break;
+    case beerocks::LOG_LEVEL_FATAL:
+        log_level_str = "fatal";
+        break;
+    case beerocks::LOG_LEVEL_TRACE:
+        log_level_str = "trace";
+        break;
+    case beerocks::LOG_LEVEL_WARNING:
+        log_level_str = "warning";
+        break;
+    default:
+        log_level_str = std::string();
+        break;
     }
     return log_level_str;
 }
@@ -149,28 +159,24 @@ static std::string log_level_to_string(const beerocks::eLogLevel& log_level)
 //====================================================================================
 // log_levels
 //====================================================================================
-namespace beerocks
-{
-    const log_levels LOG_LEVELS_ALL = log_levels(log_levels::set_t({"debug", "error", "fatal", "info", "trace", "warning"}));
-    const log_levels LOG_LEVELS_OFF = log_levels(log_levels::set_t());
-    const log_levels LOG_LEVELS_GLOBAL_DEFAULT = log_levels(log_levels::set_t({"error", "fatal", "warning"}));
-    const log_levels LOG_LEVELS_MODULE_DEFAULT = log_levels(log_levels::set_t({"debug", "error", "fatal", "info", "trace", "warning"}));
-    const log_levels LOG_LEVELS_SYSLOG_DEFAULT = log_levels(log_levels::set_t({"error", "fatal"}));
+namespace beerocks {
+const log_levels LOG_LEVELS_ALL =
+    log_levels(log_levels::set_t({"debug", "error", "fatal", "info", "trace", "warning"}));
+const log_levels LOG_LEVELS_OFF = log_levels(log_levels::set_t());
+const log_levels LOG_LEVELS_GLOBAL_DEFAULT =
+    log_levels(log_levels::set_t({"error", "fatal", "warning"}));
+const log_levels LOG_LEVELS_MODULE_DEFAULT =
+    log_levels(log_levels::set_t({"debug", "error", "fatal", "info", "trace", "warning"}));
+const log_levels LOG_LEVELS_SYSLOG_DEFAULT = log_levels(log_levels::set_t({"error", "fatal"}));
 }
 
 using namespace beerocks;
 
-log_levels::log_levels(const std::set<std::string>& log_levels)
-    : m_level_set(log_levels)
-{
-}
+log_levels::log_levels(const std::set<std::string> &log_levels) : m_level_set(log_levels) {}
 
-log_levels::log_levels(const std::string& log_level_str)
-{
-    parse_string(log_level_str);
-}
+log_levels::log_levels(const std::string &log_level_str) { parse_string(log_level_str); }
 
-log_levels& log_levels::operator=(const log_levels& rhs)
+log_levels &log_levels::operator=(const log_levels &rhs)
 {
     if (&rhs != this) {
         m_level_set = rhs.m_level_set;
@@ -178,22 +184,22 @@ log_levels& log_levels::operator=(const log_levels& rhs)
     return *this;
 }
 
-log_levels& log_levels::operator=(const std::string& log_level_str)
+log_levels &log_levels::operator=(const std::string &log_level_str)
 {
     m_level_set.clear();
     parse_string(log_level_str);
     return *this;
 }
 
-log_levels log_levels::operator&(const log_levels& rhs)
+log_levels log_levels::operator&(const log_levels &rhs)
 {
     set_t intersect;
     std::set_intersection(m_level_set.begin(), m_level_set.end(), rhs.m_level_set.begin(),
-        rhs.m_level_set.end(), std::inserter(intersect, intersect.begin()));
+                          rhs.m_level_set.end(), std::inserter(intersect, intersect.begin()));
     return log_levels(intersect);
 }
 
-void log_levels::parse_string(const std::string& str)
+void log_levels::parse_string(const std::string &str)
 {
     size_t token_start = 0;
     size_t token_end;
@@ -210,11 +216,11 @@ void log_levels::parse_string(const std::string& str)
         std::transform(token.begin(), token.end(), token.begin(), ::tolower);
         if ("all" == token) {
             // ignore any additional tokens
-            token_end = std::string::npos;
+            token_end   = std::string::npos;
             m_level_set = LOG_LEVELS_ALL.m_level_set;
         } else if ("off" == token) {
             // ignore any additional tokens
-            token_end = std::string::npos;
+            token_end   = std::string::npos;
             m_level_set = LOG_LEVELS_OFF.m_level_set;
         } else {
             if (LOG_LEVELS_ALL.m_level_set.end() != LOG_LEVELS_ALL.m_level_set.find(token)) {
@@ -229,20 +235,20 @@ void log_levels::parse_string(const std::string& str)
     } while (token_end != std::string::npos);
 }
 
-void log_levels::set_log_level_state(const eLogLevel& log_level, const bool& new_state)
+void log_levels::set_log_level_state(const eLogLevel &log_level, const bool &new_state)
 {
-    if(log_level == LOG_LEVEL_ALL){
-        if(new_state){
+    if (log_level == LOG_LEVEL_ALL) {
+        if (new_state) {
             m_level_set = LOG_LEVELS_ALL.m_level_set;
-        }else{
+        } else {
             m_level_set = LOG_LEVELS_OFF.m_level_set;
         }
-    }else if(log_level != LOG_LEVEL_NONE){
+    } else if (log_level != LOG_LEVEL_NONE) {
         std::string log_level_str = log_level_to_string(log_level);
-        if(!log_level_str.empty()){
-            if(new_state){
+        if (!log_level_str.empty()) {
+            if (new_state) {
                 m_level_set.insert(log_level_str);
-            }else {
+            } else {
                 m_level_set.erase(log_level_str);
             }
         }
@@ -256,66 +262,38 @@ std::string log_levels::to_string()
     }
 
     std::string str;
-    for (auto& elt : m_level_set) {
+    for (auto &elt : m_level_set) {
         str += elt + ", ";
     }
     str.erase(str.size() - 2);
     return str;
 }
 
-bool log_levels::is_all()
-{
-    return (m_level_set.size() == LOG_MAX_LEVELS);
-}
+bool log_levels::is_all() { return (m_level_set.size() == LOG_MAX_LEVELS); }
 
-bool log_levels::is_off()
-{
-    return (m_level_set.size() == 0);
-}
+bool log_levels::is_off() { return (m_level_set.size() == 0); }
 
-bool log_levels::fatal_enabled()
-{
-    return (m_level_set.end() != m_level_set.find("fatal"));
-}
+bool log_levels::fatal_enabled() { return (m_level_set.end() != m_level_set.find("fatal")); }
 
-bool log_levels::error_enabled()
-{
-    return (m_level_set.end() != m_level_set.find("error"));
-}
+bool log_levels::error_enabled() { return (m_level_set.end() != m_level_set.find("error")); }
 
-bool log_levels::warning_enabled()
-{
-    return (m_level_set.end() != m_level_set.find("warning"));
-}
+bool log_levels::warning_enabled() { return (m_level_set.end() != m_level_set.find("warning")); }
 
-bool log_levels::info_enabled()
-{
-    return (m_level_set.end() != m_level_set.find("info"));
-}
+bool log_levels::info_enabled() { return (m_level_set.end() != m_level_set.find("info")); }
 
-bool log_levels::debug_enabled()
-{
-    return (m_level_set.end() != m_level_set.find("debug"));
-}
+bool log_levels::debug_enabled() { return (m_level_set.end() != m_level_set.find("debug")); }
 
-bool log_levels::trace_enabled()
-{
-    return (m_level_set.end() != m_level_set.find("trace"));
-}
+bool log_levels::trace_enabled() { return (m_level_set.end() != m_level_set.find("trace")); }
 
 //====================================================================================
 // logging
 //====================================================================================
-const std::string logging::format(
-    "%level %datetime{%H:%m:%s:%g} <%thread> %fbase[%line] --> %msg");
+const std::string logging::format("%level %datetime{%H:%m:%s:%g} <%thread> %fbase[%line] --> %msg");
 
 logging::logging(const std::string config_path, std::string module_name)
-    : m_module_name(module_name)
-    , m_logfile_size(LOGGING_DEFAULT_MAX_SIZE)
-    , m_levels(LOG_LEVELS_GLOBAL_DEFAULT)
-    , m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)
-    , m_netlog_host("")
-    , m_netlog_port(0)
+    : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
+      m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
+      m_netlog_host(""), m_netlog_port(0)
 {
     bool found_settings = false;
 
@@ -333,16 +311,12 @@ logging::logging(const std::string config_path, std::string module_name)
     }
 }
 
-logging::logging(
-    const settings_t& settings, bool cache_settings, std::string module_name)
-    : m_module_name(module_name)
-    , m_logfile_size(LOGGING_DEFAULT_MAX_SIZE)
-    , m_levels(LOG_LEVELS_GLOBAL_DEFAULT)
-    , m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)
-    , m_netlog_host("")
-    , m_netlog_port(0)
+logging::logging(const settings_t &settings, bool cache_settings, std::string module_name)
+    : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
+      m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
+      m_netlog_host(""), m_netlog_port(0)
 {
-    for (auto& setting : settings) {
+    for (auto &setting : settings) {
         if (0 == setting.first.find("log_")) {
             m_settings_map.insert(setting);
         }
@@ -355,31 +329,25 @@ logging::logging(
     eval_settings();
 }
 
-logging::logging(
-    const beerocks::config_file::SConfigLog& settings, std::string module_name, bool cache_settings)
-    : m_module_name(module_name)
-    , m_logfile_size(LOGGING_DEFAULT_MAX_SIZE)
-    , m_levels(LOG_LEVELS_GLOBAL_DEFAULT)
-    , m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)
-    , m_netlog_host("")
-    , m_netlog_port(0)
+logging::logging(const beerocks::config_file::SConfigLog &settings, std::string module_name,
+                 bool cache_settings)
+    : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
+      m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
+      m_netlog_host(""), m_netlog_port(0)
 {
-    m_settings_map.insert({ "log_path", settings.path });
-    m_settings_map.insert({ "log_global_levels", settings.global_levels });
-    m_settings_map.insert({ "log_global_syslog_levels", settings.syslog_levels });
-    m_settings_map.insert({ "log_global_size", settings.global_size });
+    m_settings_map.insert({"log_path", settings.path});
+    m_settings_map.insert({"log_global_levels", settings.global_levels});
+    m_settings_map.insert({"log_global_syslog_levels", settings.syslog_levels});
+    m_settings_map.insert({"log_global_size", settings.global_size});
     if (!settings.netlog_host.empty()) {
-        m_settings_map.insert({ "log_netlog_host", settings.netlog_host });
-        m_settings_map.insert({ "log_netlog_port", settings.netlog_port });
+        m_settings_map.insert({"log_netlog_host", settings.netlog_host});
+        m_settings_map.insert({"log_netlog_port", settings.netlog_port});
     }
 
     eval_settings();
 }
 
-std::string logging::get_module_name()
-{
-    return m_module_name;
-}
+std::string logging::get_module_name() { return m_module_name; }
 
 std::string logging::get_config_path(std::string config_path)
 {
@@ -416,7 +384,7 @@ std::string logging::get_log_path()
 
 std::string logging::get_log_filepath()
 {
-    auto path = get_log_path();
+    auto path     = get_log_path();
     auto filename = get_log_filename();
 
     return path + "/" + filename;
@@ -435,50 +403,39 @@ std::string logging::get_log_max_size_setting()
     // Since we perform a semi-manual rolling, the maximal
     // allowed size is twice the specified value from the configuration
     // file (just in case our manual process will fail...)
-    
+
     return std::to_string((unsigned long)(get_log_max_size() * 2));
 }
 
-size_t logging::get_log_max_size()
-{
-    return m_logfile_size;
-}
+size_t logging::get_log_max_size() { return m_logfile_size; }
 
-size_t logging::get_log_rollover_size()
-{
-    return m_logfile_size / 2;
-}
+size_t logging::get_log_rollover_size() { return m_logfile_size / 2; }
 
-log_levels logging::get_log_levels()
-{
-    return m_levels;
-}
+log_levels logging::get_log_levels() { return m_levels; }
 
-log_levels logging::get_syslog_levels()
-{
-    return m_syslog_levels;
-}
+log_levels logging::get_syslog_levels() { return m_syslog_levels; }
 
-void logging::set_log_level_state(const eLogLevel& log_level, const bool &new_state){
+void logging::set_log_level_state(const eLogLevel &log_level, const bool &new_state)
+{
     m_levels.set_log_level_state(log_level, new_state);
     apply_settings();
 }
 
-void logging::handle_logging_rollover(const char* log_name, std::size_t)
+void logging::handle_logging_rollover(const char *log_name, std::size_t)
 {
     if (!log_name) {
         LOG(ERROR) << "input log_name is null";
         return;
     }
-    
+
     std::string rollover_name(std::string(log_name) + std::string(".rollover"));
-    
+
     remove(rollover_name.c_str());
     rename(log_name, rollover_name.c_str());
 }
 void logging::apply_settings()
 {
-    // Disable The instance of RollMonitor to start fresh 
+    // Disable The instance of RollMonitor to start fresh
     {
         auto roll_monitor = el::Helpers::logDispatchCallback<RollMonitor>("RollMonitor");
         if (roll_monitor) {
@@ -492,21 +449,21 @@ void logging::apply_settings()
     defaultConf.setGlobally(el::ConfigurationType::ToFile, "true");
     defaultConf.setGlobally(el::ConfigurationType::Filename, get_log_filepath().c_str());
     defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "false");
-    defaultConf.setGlobally(
-        el::ConfigurationType::MaxLogFileSize, get_log_max_size_setting().c_str());
+    defaultConf.setGlobally(el::ConfigurationType::MaxLogFileSize,
+                            get_log_max_size_setting().c_str());
 
     defaultConf.set(el::Level::Fatal, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_levels.fatal_enabled()));
+                    string_utils::bool_str(m_levels.fatal_enabled()));
     defaultConf.set(el::Level::Error, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_levels.error_enabled()));
+                    string_utils::bool_str(m_levels.error_enabled()));
     defaultConf.set(el::Level::Warning, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_levels.warning_enabled()));
+                    string_utils::bool_str(m_levels.warning_enabled()));
     defaultConf.set(el::Level::Info, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_levels.info_enabled()));
+                    string_utils::bool_str(m_levels.info_enabled()));
     defaultConf.set(el::Level::Debug, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_levels.debug_enabled()));
+                    string_utils::bool_str(m_levels.debug_enabled()));
     defaultConf.set(el::Level::Trace, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_levels.trace_enabled()));
+                    string_utils::bool_str(m_levels.trace_enabled()));
 
     // configure syslog settings
     el::Configurations syslogConf;
@@ -514,18 +471,17 @@ void logging::apply_settings()
     syslogConf.setGlobally(el::ConfigurationType::Format, format);
 
     syslogConf.set(el::Level::Fatal, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_syslog_levels.fatal_enabled()));
+                   string_utils::bool_str(m_syslog_levels.fatal_enabled()));
     syslogConf.set(el::Level::Error, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_syslog_levels.error_enabled()));
+                   string_utils::bool_str(m_syslog_levels.error_enabled()));
     syslogConf.set(el::Level::Warning, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_syslog_levels.warning_enabled()));
+                   string_utils::bool_str(m_syslog_levels.warning_enabled()));
     syslogConf.set(el::Level::Info, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_syslog_levels.info_enabled()));
+                   string_utils::bool_str(m_syslog_levels.info_enabled()));
     syslogConf.set(el::Level::Debug, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_syslog_levels.debug_enabled()));
+                   string_utils::bool_str(m_syslog_levels.debug_enabled()));
     syslogConf.set(el::Level::Trace, el::ConfigurationType::Enabled,
-        string_utils::bool_str(m_syslog_levels.trace_enabled()));
-
+                   string_utils::bool_str(m_syslog_levels.trace_enabled()));
 
     el::Loggers::reconfigureLogger("default", defaultConf);
     el::Loggers::reconfigureLogger("syslog", syslogConf);
@@ -569,15 +525,15 @@ void logging::apply_settings()
         el::Helpers::installLogDispatchCallback<NetLogger>("NetLogger");
         auto nlg = el::Helpers::logDispatchCallback<NetLogger>("NetLogger");
         if (!nlg) {
-           LOG(ERROR) << "invalid NetLogger!"; 
-           return;
+            LOG(ERROR) << "invalid NetLogger!";
+            return;
         }
         nlg->enable(m_netlog_host, m_netlog_port, m_module_name);
         LOG(INFO) << "Netlogger enabled.";
     }
 }
 
-bool logging::load_settings(const std::string& config_file_path)
+bool logging::load_settings(const std::string &config_file_path)
 {
     std::ifstream in_conf_file(config_file_path);
     std::string line;
@@ -597,7 +553,7 @@ bool logging::load_settings(const std::string& config_file_path)
             if (line.at(0) == '[') {
                 if (line.find(SETTING) != std::string::npos) {
                     in_setting_block = true;
-                } else {  // global
+                } else { // global
                     in_setting_block = false;
                 }
                 continue;
@@ -621,12 +577,12 @@ bool logging::load_settings(const std::string& config_file_path)
     return true;
 }
 
-bool logging::save_settings(const std::string& config_file_path)
+bool logging::save_settings(const std::string &config_file_path)
 {
     std::ofstream out_conf_file(config_file_path);
 
     out_conf_file << "[setting]" << std::endl;
-    for (auto& setting : m_settings_map) {
+    for (auto &setting : m_settings_map) {
         out_conf_file << setting.first << "=" << setting.second << std::endl;
     }
     out_conf_file.close();
@@ -654,7 +610,7 @@ void logging::eval_settings()
 
     // module log filename - must be a non-path filename
     auto module_setting_name = std::string("log_") + m_module_name + std::string("_name");
-    auto module_setting = m_settings_map.find(module_setting_name);
+    auto module_setting      = m_settings_map.find(module_setting_name);
     if (module_setting != m_settings_map.end()) {
         auto filename = string_utils::trimmed_substr(module_setting->second);
         if (std::string::npos == filename.find("/")) {
@@ -663,26 +619,25 @@ void logging::eval_settings()
     }
 
     // log_size
-    setting = m_settings_map.find("log_global_size");
+    setting             = m_settings_map.find("log_global_size");
     module_setting_name = std::string("log_") + m_module_name + std::string("_size");
-    module_setting = m_settings_map.find(module_setting_name);
-    size_t size = LOGGING_DEFAULT_MAX_SIZE;
-    size_t module_size = LOGGING_DEFAULT_MAX_SIZE;
+    module_setting      = m_settings_map.find(module_setting_name);
+    size_t size         = LOGGING_DEFAULT_MAX_SIZE;
+    size_t module_size  = LOGGING_DEFAULT_MAX_SIZE;
     if (setting != m_settings_map.end()) {
         size = strtoul(setting->second.c_str(), nullptr, 10);
     }
     if (module_setting != m_settings_map.end()) {
         module_size = strtoul(module_setting->second.c_str(), nullptr, 10);
-    }
-    else {
+    } else {
         module_size = size; // If no module specific setting, accept a global, then default
     }
     m_logfile_size = std::min(size, module_size);
 
     // levels
-    setting = m_settings_map.find("log_global_levels");
+    setting             = m_settings_map.find("log_global_levels");
     module_setting_name = std::string("log_") + m_module_name + std::string("_levels");
-    module_setting = m_settings_map.find(module_setting_name);
+    module_setting      = m_settings_map.find(module_setting_name);
     log_levels levels(LOG_LEVELS_GLOBAL_DEFAULT);
     log_levels module_levels(LOG_LEVELS_MODULE_DEFAULT);
     if (setting != m_settings_map.end()) {
@@ -694,22 +649,21 @@ void logging::eval_settings()
     m_levels = levels & module_levels;
 
     // syslog_levels
-    setting = m_settings_map.find("log_global_syslog_levels");
+    setting             = m_settings_map.find("log_global_syslog_levels");
     module_setting_name = std::string("log_") + m_module_name + std::string("_syslog_levels");
-    module_setting = m_settings_map.find(module_setting_name);
-    levels = LOG_LEVELS_SYSLOG_DEFAULT;
-    module_levels = LOG_LEVELS_MODULE_DEFAULT;
+    module_setting      = m_settings_map.find(module_setting_name);
+    levels              = LOG_LEVELS_SYSLOG_DEFAULT;
+    module_levels       = LOG_LEVELS_MODULE_DEFAULT;
     if (setting != m_settings_map.end()) {
         levels = setting->second;
     }
     if (module_setting != m_settings_map.end()) {
         module_levels = module_setting->second;
     }
-    m_syslog_levels = levels & module_levels;
+    m_syslog_levels       = levels & module_levels;
     auto netlog_host_pair = m_settings_map.find("log_netlog_host");
     auto netlog_port_pair = m_settings_map.find("log_netlog_port");
-    if (   netlog_host_pair != m_settings_map.end()
-        && netlog_port_pair != m_settings_map.end()) {
+    if (netlog_host_pair != m_settings_map.end() && netlog_port_pair != m_settings_map.end()) {
         m_netlog_host = netlog_host_pair->second;
         m_netlog_port = string_utils::stoi(netlog_port_pair->second);
     }

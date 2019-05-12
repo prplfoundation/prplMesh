@@ -9,18 +9,15 @@
 #ifndef _BEEROCKS_THREAD_SAFE_QUEUE_H_
 #define _BEEROCKS_THREAD_SAFE_QUEUE_H_
 
-#include <queue>
-#include <mutex>
 #include <chrono>
 #include <condition_variable>
+#include <mutex>
+#include <queue>
 
 namespace beerocks {
- 
-template <typename T>
-class thread_safe_queue
-{
+
+template <typename T> class thread_safe_queue {
 public:
- 
     T pop(bool block = true, int timeout = 0)
     {
         std::unique_lock<std::mutex> mlock(mutex_, std::defer_lock);
@@ -30,11 +27,13 @@ public:
             while (queue_.empty()) {
                 if (!timeout) {
                     cond_.wait(mlock);
-                    if (queue_.empty()) { return T(); }
+                    if (queue_.empty()) {
+                        return T();
+                    }
 
                 } else {
-                    if (cond_.wait_for(mlock, std::chrono::milliseconds(timeout)) == 
-                            std::cv_status::timeout) {
+                    if (cond_.wait_for(mlock, std::chrono::milliseconds(timeout)) ==
+                        std::cv_status::timeout) {
                         return T();
                     }
                 }
@@ -49,8 +48,8 @@ public:
         queue_.pop();
         return item;
     }
- 
-    bool push(const T& item, bool block = true)
+
+    bool push(const T &item, bool block = true)
     {
         std::unique_lock<std::mutex> mlock(mutex_, std::defer_lock);
 
@@ -66,8 +65,8 @@ public:
 
         return true;
     }
- 
-    bool push(T&& item, bool block = true)
+
+    bool push(T &&item, bool block = true)
     {
         std::unique_lock<std::mutex> mlock(mutex_, std::defer_lock);
 
@@ -103,7 +102,7 @@ public:
         // Unblock any client that is blocked on the pop() method
         cond_.notify_one();
     }
- 
+
 private:
     std::queue<T> queue_;
     std::condition_variable cond_;

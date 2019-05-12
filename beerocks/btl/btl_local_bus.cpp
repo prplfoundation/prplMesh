@@ -18,7 +18,8 @@ using namespace beerocks::net;
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-static bool local_bus_read_ready(std::shared_ptr<mapf::LocalBusInterface> bus, std::shared_ptr<mapf::Poller> poller)
+static bool local_bus_read_ready(std::shared_ptr<mapf::LocalBusInterface> bus,
+                                 std::shared_ptr<mapf::Poller> poller)
 {
     LOG_IF(!poller, FATAL) << "Poller is not allocated!";
 
@@ -33,14 +34,15 @@ static bool local_bus_read_ready(std::shared_ptr<mapf::LocalBusInterface> bus, s
 
     LOG(ERROR) << "check event error on local bus sub socket, rc=" << rc;
     return false;
-
 }
 
 static bool subscribe_topic_to_bus(std::shared_ptr<mapf::LocalBusInterface> bus,
-                                   std::shared_ptr<mapf::Poller> poller, const ieee1905_1::eMessageType msg_type)
+                                   std::shared_ptr<mapf::Poller> poller,
+                                   const ieee1905_1::eMessageType msg_type)
 {
     LOG(INFO) << "subscribing topic=" << (int)msg_type;
-    int rc = bus->subscriber().Subscribe<mapf::CmduRxMessage>(mapf::CmduRxMessage::ieee1905_topic((uint16_t)msg_type));
+    int rc = bus->subscriber().Subscribe<mapf::CmduRxMessage>(
+        mapf::CmduRxMessage::ieee1905_topic((uint16_t)msg_type));
     if (rc) {
         LOG(ERROR) << "Subscribe error rc=" << rc << ", on topic=" << (int)msg_type;
         return false;
@@ -50,8 +52,7 @@ static bool subscribe_topic_to_bus(std::shared_ptr<mapf::LocalBusInterface> bus,
     if (rc && errno != EEXIST) {
         LOG(ERROR) << "Add to poller error rc=" << rc;
         return false;
-    }
-    else if (errno == EEXIST) {
+    } else if (errno == EEXIST) {
         LOG(DEBUG) << "Adding subscriber already exist";
     }
 
@@ -71,33 +72,33 @@ void transport_socket_thread::bus_init()
     LOG_IF(!poller, FATAL) << "Failed allocating Poller!";
 }
 
-bool transport_socket_thread::bus_subscribe(const std::vector<ieee1905_1::eMessageType>& msg_types)
+bool transport_socket_thread::bus_subscribe(const std::vector<ieee1905_1::eMessageType> &msg_types)
 {
     bool ret = true;
 
     LOG_IF(!bus, FATAL) << "Bus is not allocated!";
     LOG_IF(!poller, FATAL) << "Poller is not allocaed!";
     bus->Init();
-    for_each (msg_types.begin(), msg_types.end(), [&](const ieee1905_1::eMessageType msg_type) {
+    for_each(msg_types.begin(), msg_types.end(), [&](const ieee1905_1::eMessageType msg_type) {
         ret &= subscribe_topic_to_bus(bus, poller, msg_type);
     });
 
     return ret;
 }
 
-bool transport_socket_thread::bus_connect(const std::string& beerocks_temp_path, const bool local_master)
+bool transport_socket_thread::bus_connect(const std::string &beerocks_temp_path,
+                                          const bool local_master)
 {
     return true;
 }
 
-void transport_socket_thread::bus_connected(Socket *sd)
-{    
-}
+void transport_socket_thread::bus_connected(Socket *sd) {}
 
-bool transport_socket_thread::configure_ieee1905_transport_interfaces(const std::string& bridge_iface, const std::vector<std::string>& ifaces)
+bool transport_socket_thread::configure_ieee1905_transport_interfaces(
+    const std::string &bridge_iface, const std::vector<std::string> &ifaces)
 {
     LOG_IF(!bus, FATAL) << "Bus is not allocated!";
-    
+
     int bridge_if_index = network_utils::linux_get_iface_index(bridge_iface);
 
     mapf::InterfaceConfigurationRequestMessage interface_configuration_request_msg;
@@ -108,15 +109,20 @@ bool transport_socket_thread::configure_ieee1905_transport_interfaces(const std:
         interface_configuration_request_msg.metadata()->interfaces[n].if_index = bridge_if_index;
         interface_configuration_request_msg.metadata()->interfaces[n].flags |= Flags::IS_BRIDGE;
         n++;
-        THREAD_LOG(DEBUG) << "adding bridge " << bridge_iface << " to ieee1905 transport, bridge_if_index=" << bridge_if_index;
+        THREAD_LOG(DEBUG) << "adding bridge " << bridge_iface
+                          << " to ieee1905 transport, bridge_if_index=" << bridge_if_index;
     }
-    for (const auto& iface : ifaces) {
+    for (const auto &iface : ifaces) {
         int if_index = network_utils::linux_get_iface_index(iface);
         interface_configuration_request_msg.metadata()->interfaces[n].if_index = if_index;
-        interface_configuration_request_msg.metadata()->interfaces[n].bridge_if_index = bridge_if_index;
-        interface_configuration_request_msg.metadata()->interfaces[n].flags |= Flags::ENABLE_IEEE1905_TRANSPORT;
+        interface_configuration_request_msg.metadata()->interfaces[n].bridge_if_index =
+            bridge_if_index;
+        interface_configuration_request_msg.metadata()->interfaces[n].flags |=
+            Flags::ENABLE_IEEE1905_TRANSPORT;
         n++;
-        THREAD_LOG(DEBUG) << "adding interface " << iface << " to ieee1905 transport, if_index=" << if_index << " bridge_if_index=" << bridge_if_index;
+        THREAD_LOG(DEBUG) << "adding interface " << iface
+                          << " to ieee1905 transport, if_index=" << if_index
+                          << " bridge_if_index=" << bridge_if_index;
     }
     interface_configuration_request_msg.metadata()->numInterfaces = n;
     THREAD_LOG(DEBUG) << "numInterfaces=" << n;
@@ -134,12 +140,12 @@ void transport_socket_thread::add_socket(Socket *s, bool add_to_vector)
     }
 }
 
-void transport_socket_thread::remove_socket(Socket *s) 
+void transport_socket_thread::remove_socket(Socket *s)
 {
     LOG_IF(!poller, FATAL) << "Poller is not allocated!";
 
     poller->Remove(s->getSocketFd());
-    sockets.erase(std::remove(sockets.begin(), sockets.end(), s), sockets.end()); 
+    sockets.erase(std::remove(sockets.begin(), sockets.end(), s), sockets.end());
 }
 
 bool transport_socket_thread::read_ready(Socket *s)
@@ -149,9 +155,9 @@ bool transport_socket_thread::read_ready(Socket *s)
     int rc = poller->CheckEvent(s->getSocketFd());
     if (rc & MAPF_POLLIN) {
         return true;
-	} else if (rc & MAPF_POLLERR) {
+    } else if (rc & MAPF_POLLERR) {
         THREAD_LOG(DEBUG) << "Received POLLER";
-		return true;
+        return true;
     } else if (rc == 0) {
         return false;
     } else {
@@ -163,31 +169,36 @@ bool transport_socket_thread::read_ready(Socket *s)
 bool transport_socket_thread::handle_cmdu_message_bus()
 {
     auto msg = bus->subscriber().Receive();
-    if(msg == nullptr) {
+    if (msg == nullptr) {
         THREAD_LOG(ERROR) << "Received msg is null";
         return false;
     }
 
-    auto cmdu_rx_msg = dynamic_cast<mapf::CmduRxMessage*>(msg.get());
+    auto cmdu_rx_msg = dynamic_cast<mapf::CmduRxMessage *>(msg.get());
     if (cmdu_rx_msg) {
     } else {
-        THREAD_LOG(ERROR) << "received non CmduRxMessage:\n\tMessage: " << *msg << "\n\tFrame: " << msg->frame().str();
+        THREAD_LOG(ERROR) << "received non CmduRxMessage:\n\tMessage: " << *msg
+                          << "\n\tFrame: " << msg->frame().str();
         return false;
     }
 
     // Copy the data to rx_buffer
-    if (sizeof(message::sUdsHeader) + cmdu_rx_msg->metadata()->length > sizeof(rx_buffer)){
-        THREAD_LOG(ERROR) << "sizeof(message::sUdsHeader) + cmdu_rx_msg->metadata()->length > sizeof(rx_buffer)";
+    if (sizeof(message::sUdsHeader) + cmdu_rx_msg->metadata()->length > sizeof(rx_buffer)) {
+        THREAD_LOG(ERROR)
+            << "sizeof(message::sUdsHeader) + cmdu_rx_msg->metadata()->length > sizeof(rx_buffer)";
         return false;
     }
 
-    std::copy_n((uint8_t*)cmdu_rx_msg->data(), cmdu_rx_msg->metadata()->length, rx_buffer + sizeof(message::sUdsHeader));
+    std::copy_n((uint8_t *)cmdu_rx_msg->data(), cmdu_rx_msg->metadata()->length,
+                rx_buffer + sizeof(message::sUdsHeader));
 
     // fill UDS Header
-    message::sUdsHeader* uds_header = (message::sUdsHeader*)rx_buffer;
-    std::copy_n((uint8_t*)cmdu_rx_msg->metadata()->src, sizeof(mapf::CmduRxMessage::Metadata::src), uds_header->src_bridge_mac);
-    std::copy_n((uint8_t*)cmdu_rx_msg->metadata()->dst, sizeof(mapf::CmduRxMessage::Metadata::dst), uds_header->dst_bridge_mac);
-    uds_header->length = cmdu_rx_msg->metadata()->length;
+    message::sUdsHeader *uds_header = (message::sUdsHeader *)rx_buffer;
+    std::copy_n((uint8_t *)cmdu_rx_msg->metadata()->src, sizeof(mapf::CmduRxMessage::Metadata::src),
+                uds_header->src_bridge_mac);
+    std::copy_n((uint8_t *)cmdu_rx_msg->metadata()->dst, sizeof(mapf::CmduRxMessage::Metadata::dst),
+                uds_header->dst_bridge_mac);
+    uds_header->length      = cmdu_rx_msg->metadata()->length;
     uds_header->swap_needed = true;
 
     if (!verify_cmdu(uds_header)) {
@@ -195,9 +206,11 @@ bool transport_socket_thread::handle_cmdu_message_bus()
         return false;
     }
 
-    if (!cmdu_rx.parse(rx_buffer + sizeof(message::sUdsHeader), uds_header->length, uds_header->swap_needed)) {
-         THREAD_LOG(ERROR) << "parsing cmdu failure, rx_buffer" << std::hex << rx_buffer << std::dec 
-                           << ", uds_header->length=" << int(uds_header->length) << ", uds_header->swap_needed=" << int(uds_header->swap_needed);
+    if (!cmdu_rx.parse(rx_buffer + sizeof(message::sUdsHeader), uds_header->length,
+                       uds_header->swap_needed)) {
+        THREAD_LOG(ERROR) << "parsing cmdu failure, rx_buffer" << std::hex << rx_buffer << std::dec
+                          << ", uds_header->length=" << int(uds_header->length)
+                          << ", uds_header->swap_needed=" << int(uds_header->swap_needed);
         return false;
     }
 
@@ -208,7 +221,8 @@ bool transport_socket_thread::handle_cmdu_message_bus()
     return true;
 }
 
-bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage& cmdu, const std::string& dst_mac, const std::string& src_mac, uint16_t length)
+bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
+                                       const std::string &src_mac, uint16_t length)
 {
     mapf::CmduTxMessage msg;
 
@@ -216,17 +230,14 @@ bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage& cmdu, const std:
     net::network_utils::mac_from_string(msg.metadata()->dst, dst_mac);
 
     msg.metadata()->ether_type = ETH_P_1905_1;
-    msg.metadata()->length = length;
-    msg.metadata()->msg_type = static_cast<uint16_t>(cmdu.getMessageType());
+    msg.metadata()->length     = length;
+    msg.metadata()->msg_type   = static_cast<uint16_t>(cmdu.getMessageType());
 
-    std::copy_n((uint8_t*)cmdu.getMessageBuff(), msg.metadata()->length, (uint8_t*)msg.data());
+    std::copy_n((uint8_t *)cmdu.getMessageBuff(), msg.metadata()->length, (uint8_t *)msg.data());
     return bus->publisher().Send(msg);
 }
 
-bool transport_socket_thread::from_bus(Socket *sd)
-{
-    return sd == nullptr;
-}
+bool transport_socket_thread::from_bus(Socket *sd) { return sd == nullptr; }
 
 bool transport_socket_thread::work()
 {
@@ -262,9 +273,9 @@ bool transport_socket_thread::work()
             THREAD_LOG(ERROR) << "acceptConnections == nullptr: " << server_socket->getError();
             return false;
         } else {
-            if(unix_socket_path.empty()) {
+            if (unix_socket_path.empty()) {
                 THREAD_LOG(DEBUG) << "new connection from ip=" << sd->getPeerIP()
-                       << " port=" << sd->getPeerPort() << " sd=" << sd;
+                                  << " port=" << sd->getPeerPort() << " sd=" << sd;
             } else {
                 THREAD_LOG(DEBUG) << "new connection on " << unix_socket_path << " sd=" << sd;
             }
@@ -274,14 +285,16 @@ bool transport_socket_thread::work()
         num_events--;
     }
 
-    if (!num_events) return true;
+    if (!num_events)
+        return true;
     // read from bus
     if (local_bus_read_ready(bus, poller)) {
         handle_cmdu_message_bus();
         num_events--;
     }
 
-    if (!num_events) return true;
+    if (!num_events)
+        return true;
 
     // read from UDS
     do {
@@ -290,7 +303,8 @@ bool transport_socket_thread::work()
                 num_events--;
                 Socket *sd = sockets.at(i);
 
-                auto ret = socket_disconnected_uds(sd); // '0' - socket not disconnected (bytes to read), '1' - socket disconnected, '-1' - error
+                auto ret = socket_disconnected_uds(
+                    sd); // '0' - socket not disconnected (bytes to read), '1' - socket disconnected, '-1' - error
                 if (ret != 0) {
                     // breaking instead of continue because socket_disconnected_uds() may erase element from Select Socket Vector while iterating it
                     break;

@@ -22,26 +22,26 @@
 extern "C" {
 #ifdef USE_FAPI_DAEMON
 
-    #include <fapi_wlan_daemon.h>
-    #include <fapi_wlan_public.h>
-    
+#include <fapi_wlan_daemon.h>
+#include <fapi_wlan_public.h>
+
 #else
 
-    #include <fapi_wlan_beerock.h>
-    #include <wpa_ctrl.h>
+#include <fapi_wlan_beerock.h>
+#include <wpa_ctrl.h>
 
 #endif
 }
 
 #ifndef LOG_LEVEL
-uint16_t   LOGLEVEL = SYS_LOG_DEBUG + 1;
+uint16_t LOGLEVEL = SYS_LOG_DEBUG + 1;
 #else
-uint16_t   LOGLEVEL = LOG_LEVEL + 1;
+uint16_t LOGLEVEL = LOG_LEVEL + 1;
 #endif
 #ifndef LOG_TYPE
-uint16_t   LOGTYPE = SYS_LOG_TYPE_FILE;
+uint16_t LOGTYPE = SYS_LOG_TYPE_FILE;
 #else
-uint16_t   LOGTYPE = LOG_TYPE;
+uint16_t LOGTYPE            = LOG_TYPE;
 #endif
 
 extern ObjList *mapperObjPtr;
@@ -53,10 +53,9 @@ namespace wav_fapi {
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-base_wlan_hal_fapi::base_wlan_hal_fapi(
-    HALType type, std::string iface_name, 
-    IfaceType iface_type, bool acs_enabled, hal_event_cb_t callback) :
-    base_wlan_hal(type, iface_name, iface_type, acs_enabled, callback)
+base_wlan_hal_fapi::base_wlan_hal_fapi(HALType type, std::string iface_name, IfaceType iface_type,
+                                       bool acs_enabled, hal_event_cb_t callback)
+    : base_wlan_hal(type, iface_name, iface_type, acs_enabled, callback)
 {
     // Initialize the FAPI
     if (mapperObjPtr == nullptr) {
@@ -64,11 +63,10 @@ base_wlan_hal_fapi::base_wlan_hal_fapi(
     }
 
     using namespace std::placeholders; // for "_1" arguments
-    
+
     // Create a new instance of the FAPI attach state machine
-    m_fapi_attach_fsm = std::make_shared<fapi_attach_fsm>
-        (type, m_radio_info, 
-         std::bind(&base_wlan_hal_fapi::parse_fapi_event, this, _1, _2));
+    m_fapi_attach_fsm = std::make_shared<fapi_attach_fsm>(
+        type, m_radio_info, std::bind(&base_wlan_hal_fapi::parse_fapi_event, this, _1, _2));
 
     // Initialize the FSM
     m_fapi_attach_fsm->setup();
@@ -85,61 +83,55 @@ HALState base_wlan_hal_fapi::attach(bool block)
 
         auto attach_state = m_fapi_attach_fsm->attach();
         if (m_last_attach_state != attach_state) {
-            LOG(DEBUG) << "FAPI FSM " << m_radio_info.iface_name << " Attach State: " << m_fapi_attach_fsm->state_enum_to_string(attach_state);
+            LOG(DEBUG) << "FAPI FSM " << m_radio_info.iface_name << " Attach State: "
+                       << m_fapi_attach_fsm->state_enum_to_string(attach_state);
             m_last_attach_state = attach_state;
         }
 
-        switch (attach_state)
-        {
-            // Initializing
-            case fapi_fsm_state::Delay:
-            case fapi_fsm_state::Init:
-            case fapi_fsm_state::GetRadioInfo: 
-            case fapi_fsm_state::Attach: {
-                if (block) {
-                    // TODO: Delay?
-                    continue;
-                } else {
-                    return (m_hal_state = HALState::Initializing);
-                }
+        switch (attach_state) {
+        // Initializing
+        case fapi_fsm_state::Delay:
+        case fapi_fsm_state::Init:
+        case fapi_fsm_state::GetRadioInfo:
+        case fapi_fsm_state::Attach: {
+            if (block) {
+                // TODO: Delay?
+                continue;
+            } else {
+                return (m_hal_state = HALState::Initializing);
             }
-            
-            // Initialization completed
-            case fapi_fsm_state::Operational: {
-                
-                // Store the FD for external (FAPI) events
+        }
+
+        // Initialization completed
+        case fapi_fsm_state::Operational: {
+
+// Store the FD for external (FAPI) events
 #ifdef USE_FAPI_DAEMON
-                m_fd_ext_events = m_fapi_attach_fsm->get_wpa_ctrl_events_fd();
+            m_fd_ext_events = m_fapi_attach_fsm->get_wpa_ctrl_events_fd();
 #else
-                auto wpa_ctrl = m_fapi_attach_fsm->get_wpa_ctrl_socket();
-                m_fd_ext_events = (wpa_ctrl) ? wpa_ctrl_get_fd(wpa_ctrl) : -1;
+            auto wpa_ctrl   = m_fapi_attach_fsm->get_wpa_ctrl_socket();
+            m_fd_ext_events = (wpa_ctrl) ? wpa_ctrl_get_fd(wpa_ctrl) : -1;
 #endif
 
-                return (m_hal_state = HALState::Operational);
-            }
+            return (m_hal_state = HALState::Operational);
+        }
 
-            // Initialization failed
-            case fapi_fsm_state::Detach: {
-                return (m_hal_state = HALState::Failed);
-            }
+        // Initialization failed
+        case fapi_fsm_state::Detach: {
+            return (m_hal_state = HALState::Failed);
+        }
 
-            // Invalid state
-            default: {
-                LOG(ERROR) << "Invalid FAPI Attach State: " << int(attach_state);
-            }
+        // Invalid state
+        default: {
+            LOG(ERROR) << "Invalid FAPI Attach State: " << int(attach_state);
+        }
         }
     };
 }
 
-bool base_wlan_hal_fapi::detach()
-{
-    return m_fapi_attach_fsm->detach();
-}
+bool base_wlan_hal_fapi::detach() { return m_fapi_attach_fsm->detach(); }
 
-bool base_wlan_hal_fapi::refresh_radio_info()
-{
-    return m_fapi_attach_fsm->refresh_radio_info();
-}
+bool base_wlan_hal_fapi::refresh_radio_info() { return m_fapi_attach_fsm->refresh_radio_info(); }
 
 bool base_wlan_hal_fapi::refresh_vaps_info(int id)
 {
@@ -148,20 +140,21 @@ bool base_wlan_hal_fapi::refresh_vaps_info(int id)
 
 bool base_wlan_hal_fapi::process_ext_events()
 {
-    
+
 #ifdef USE_FAPI_DAEMON
 
-    if (m_fd_ext_events == -1) return true;
+    if (m_fd_ext_events == -1)
+        return true;
 
-    int ret = fapi_wlan_report_process(get_radio_info().iface_name.c_str());    
+    int ret = fapi_wlan_report_process(get_radio_info().iface_name.c_str());
     if (ret == UGW_FAILURE) {
         LOG(ERROR) << "fapi_wlan_report_process failed: " << ret;
         return false;
     }
 
-#else 
-    
-    auto wpa_ctrl = m_fapi_attach_fsm->get_wpa_ctrl_socket();    
+#else
+
+    auto wpa_ctrl = m_fapi_attach_fsm->get_wpa_ctrl_socket();
 
     if (!wpa_ctrl) {
         LOG(ERROR) << "Invalid WPA Control socket (wpa_ctrl == nullptr)";
@@ -173,7 +166,8 @@ bool base_wlan_hal_fapi::process_ext_events()
 
     // No pending messages
     if (status == 0) {
-        LOG(WARNING) << "base_wlan_hal_fapi::process_ext_events() called but there are no pending messages...";
+        LOG(WARNING) << "base_wlan_hal_fapi::process_ext_events() called but there are no pending "
+                        "messages...";
         return false;
     } else if (status < 0) {
         LOG(ERROR) << "Invalid WPA Control socket status: " << status << " --> detaching!";
@@ -184,17 +178,18 @@ bool base_wlan_hal_fapi::process_ext_events()
     // Create a new object
     UGW_OBJLIST_CREATE(wlObj);
     LOG_IF(!wlObj, FATAL) << "Memory allocation failed!";
-    
+
     // Process the event
     char opcode[128] = {0};
-    int ret = fapi_wlan_hostapd_report_process(get_radio_info().iface_name.c_str(), wlObj.get(), opcode);    
+    int ret =
+        fapi_wlan_hostapd_report_process(get_radio_info().iface_name.c_str(), wlObj.get(), opcode);
     if (ret == UGW_FAILURE) {
         LOG(ERROR) << "fapi_wlan_hostapd_report_process failed: " << ret;
         return false;
     } else if (ret == WPA_CTRL_DISCONNECT) {
         LOG(INFO) << "Ignoring HOSTAPD-DISCONNECTED or CTRL-EVENT-TERMINATING event...";
     } else {
-        
+
         // Process the event
         if (!parse_fapi_event(opcode, wlObj)) {
             LOG(ERROR) << "Failed parsing FAPI event: " << opcode;

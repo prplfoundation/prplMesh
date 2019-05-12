@@ -19,35 +19,37 @@
 namespace bwl {
 namespace dwpal {
 
-    //////////////////////////////////////////////////////////////////////////////
-    ////////////////////////// Local Module Definitions //////////////////////////
-    //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+////////////////////////// Local Module Definitions //////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 //Allocate a char array wrapped in a shared_ptr
-#define ALLOC_SMART_BUFFER(size)                \
-        std::shared_ptr<char>(new char[size],       \
-                [](char* obj) { if (obj) delete [] obj; })
+#define ALLOC_SMART_BUFFER(size)                                                                   \
+    std::shared_ptr<char>(new char[size], [](char *obj) {                                          \
+        if (obj)                                                                                   \
+            delete[] obj;                                                                          \
+    })
 
-        // Client connection status
-        struct ConnectionStatus {
-            std::string bssid;
-            int freq;
-            std::string ssid;
-            std::string id;
-            std::string mode;
-            std::string pairwise_cipher;
-            std::string group_cipher;
-            std::string key_mgmt;
-            std::string wpa_state;
-            std::string address;
-            std::string uuid;
-        };
+// Client connection status
+struct ConnectionStatus {
+    std::string bssid;
+    int freq;
+    std::string ssid;
+    std::string id;
+    std::string mode;
+    std::string pairwise_cipher;
+    std::string group_cipher;
+    std::string key_mgmt;
+    std::string wpa_state;
+    std::string address;
+    std::string uuid;
+};
 
-    //////////////////////////////////////////////////////////////////////////////
-    /////////////////////////// Local Module Functions ///////////////////////////
-    //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////// Local Module Functions ///////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
-    /*
+/*
     static sta_wlan_hal::Event fapi_to_bwl_event(const std::string& opcode)
     {
         if (opcode == "CTRL-EVENT-CONNECTED") {
@@ -287,35 +289,31 @@ namespace dwpal {
     }
     */
 
-    //////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////// Implementation ///////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// Implementation ///////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
-    sta_wlan_hal_dwpal::sta_wlan_hal_dwpal(std::string iface_name, hal_event_cb_t callback) :
-    base_wlan_hal(),
-    base_wlan_hal_dwpal(bwl::HALType::Station, iface_name, true, callback, 1024)
-    {
-    }
+sta_wlan_hal_dwpal::sta_wlan_hal_dwpal(std::string iface_name, hal_event_cb_t callback)
+    : base_wlan_hal(), base_wlan_hal_dwpal(bwl::HALType::Station, iface_name, true, callback, 1024)
+{
+}
 
-    sta_wlan_hal_dwpal::~sta_wlan_hal_dwpal()
-    {
-        detach();
-    }
+sta_wlan_hal_dwpal::~sta_wlan_hal_dwpal() { detach(); }
 
-    bool sta_wlan_hal_dwpal::detach()
-    {
-        /*
+bool sta_wlan_hal_dwpal::detach()
+{
+    /*
         LOG(TRACE) << __func__ << ": iface = " << get_iface_name();
         // Disconnect before detaching
         disconnect();
         return base_wlan_hal_fapi::detach();
 */
-        return true;
-    }
+    return true;
+}
 
-    bool sta_wlan_hal_dwpal::initiate_scan()
-    {
-        /*
+bool sta_wlan_hal_dwpal::initiate_scan()
+{
+    /*
         auto& iface_name = get_iface_name();
         LOG(DEBUG) << "Initiating scan on interface: " << iface_name;
 
@@ -325,11 +323,11 @@ namespace dwpal {
             return false;
         }
 */
-        return true;
-    }
+    return true;
+}
 
-    int sta_wlan_hal_dwpal::get_scan_results(const std::string& ssid, SScanResult* list, int size)
-    {
+int sta_wlan_hal_dwpal::get_scan_results(const std::string &ssid, SScanResult *list, int size)
+{
 #if 0
         // Validate input parameters
         if (!list || !size) {
@@ -360,13 +358,13 @@ namespace dwpal {
 
         return num_of_results;
 #endif
-        return 0;
-    }
+    return 0;
+}
 
-    bool sta_wlan_hal_dwpal::connect(const std::string& ssid, const std::string& pass, 
-            WiFiSec sec, const std::string& bssid, uint8_t channel, bool hidden_ssid)
-    {
-        /*
+bool sta_wlan_hal_dwpal::connect(const std::string &ssid, const std::string &pass, WiFiSec sec,
+                                 const std::string &bssid, uint8_t channel, bool hidden_ssid)
+{
+    /*
         LOG(DEBUG) << __func__ << ": iface " << get_iface_name() << " to SSID = " << ssid 
             << ", BSSID = " << bssid << ", Channel = " << int(channel) 
             << ", Sec = " << fapi_security_val(sec);
@@ -405,12 +403,12 @@ namespace dwpal {
         m_active_secutiry   = sec;
         m_active_network_id = network_id;
 */
-        return true;
-    }
+    return true;
+}
 
-    bool sta_wlan_hal_dwpal::disconnect()
-    {
-        /*
+bool sta_wlan_hal_dwpal::disconnect()
+{
+    /*
         LOG(TRACE) << __func__ << ": iface = " << get_iface_name() << ", m_active_network_id = " << m_active_network_id;
 
         // Return gracefully if no network is connected
@@ -454,12 +452,12 @@ namespace dwpal {
 
         return (res != UGW_FAILURE);
         */
-        return true;
-    }
+    return true;
+}
 
-    bool sta_wlan_hal_dwpal::roam(const std::string& bssid, uint8_t channel)
-    {
-        /*
+bool sta_wlan_hal_dwpal::roam(const std::string &bssid, uint8_t channel)
+{
+    /*
         auto& iface = get_iface_name();
         LOG(TRACE) << __func__ << ": iface = " << iface << " to bssid " << bssid << " on channel " << int(channel);
 
@@ -486,12 +484,12 @@ namespace dwpal {
         m_active_bssid.assign(bssid);
         m_active_channel = channel;
 */
-        return true;
-    }
+    return true;
+}
 
-    bool sta_wlan_hal_dwpal::get_4addr_mode()
-    {
-        /*
+bool sta_wlan_hal_dwpal::get_4addr_mode()
+{
+    /*
         LOG(TRACE) << __func__ << ": iface = " << get_iface_name();
 
         // Allocate a new FAPI object
@@ -514,12 +512,12 @@ namespace dwpal {
         
         return (!std::string(tmpBuff).compare("4_ADDRESS_MODE"));
         */
-        return true;
-    }
+    return true;
+}
 
-    bool sta_wlan_hal_dwpal::set_4addr_mode(bool enable)
-    {
-        /*
+bool sta_wlan_hal_dwpal::set_4addr_mode(bool enable)
+{
+    /*
         LOG(TRACE) << __func__ << ": iface = " << get_iface_name() << ", enable: " << enable;
 
         // Allocate a new FAPI object
@@ -537,12 +535,14 @@ namespace dwpal {
             return false;
         }
 */
-        return true;
-    }
+    return true;
+}
 
-    bool sta_wlan_hal_dwpal::unassoc_rssi_measurement(const std::string& mac, int chan, int bw, int vht_center_frequency, int delay, int window_size)
-    {
-        /*
+bool sta_wlan_hal_dwpal::unassoc_rssi_measurement(const std::string &mac, int chan, int bw,
+                                                  int vht_center_frequency, int delay,
+                                                  int window_size)
+{
+    /*
         LOG(TRACE) << __func__ << " mac: " << mac << ", channel: " << chan 
             << ", bw: " << bw << ", vht_center_frequency: " << vht_center_frequency 
             << ", delay: " << delay;
@@ -579,12 +579,12 @@ namespace dwpal {
             return false;
         }
 */
-        return true;
-    }
+    return true;
+}
 
-    bool sta_wlan_hal_dwpal::is_connected()
-    {
-        /*
+bool sta_wlan_hal_dwpal::is_connected()
+{
+    /*
         // Allocate a new FAPI object
         UGW_OBJLIST_CREATE(wlObj);
         LOG_IF(!wlObj, FATAL) << "Memory allocation failed!";
@@ -605,33 +605,21 @@ namespace dwpal {
 
         return (!std::string(tmpBuff).compare("COMPLETED"));
         */
-        return true;
-    }
+    return true;
+}
 
-    int  sta_wlan_hal_dwpal::get_rssi()
-    {
-        return beerocks::RSSI_INVALID;
-    }
+int sta_wlan_hal_dwpal::get_rssi() { return beerocks::RSSI_INVALID; }
 
-    int  sta_wlan_hal_dwpal::get_channel()
-    {
-        return m_active_channel;
-    }
+int sta_wlan_hal_dwpal::get_channel() { return m_active_channel; }
 
-    std::string sta_wlan_hal_dwpal::get_ssid()
-    {
-        return m_active_ssid;
-    }
+std::string sta_wlan_hal_dwpal::get_ssid() { return m_active_ssid; }
 
-    std::string sta_wlan_hal_dwpal::get_bssid()
-    {
-        return m_active_bssid;
-    }
+std::string sta_wlan_hal_dwpal::get_bssid() { return m_active_bssid; }
 
-    bool sta_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std::string& opcode)
-    {
-        return true;
-    }
+bool sta_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std::string &opcode)
+{
+    return true;
+}
 
 #if 0
     bool sta_wlan_hal_dwpal::parse_fapi_event(const std::string& opcode, std::shared_ptr<void> obj)
@@ -803,11 +791,11 @@ namespace dwpal {
 // AP FAPI HAL Factory Functions
 extern "C" {
 
-    bwl::sta_wlan_hal* sta_wlan_hal_create(
-            std::string iface_name, bwl::base_wlan_hal::hal_event_cb_t callback)
-    { return new bwl::dwpal::sta_wlan_hal_dwpal(iface_name, callback); }
+bwl::sta_wlan_hal *sta_wlan_hal_create(std::string iface_name,
+                                       bwl::base_wlan_hal::hal_event_cb_t callback)
+{
+    return new bwl::dwpal::sta_wlan_hal_dwpal(iface_name, callback);
+}
 
-    void sta_wlan_hal_destroy(bwl::sta_wlan_hal* obj)
-    { delete obj; }
-
+void sta_wlan_hal_destroy(bwl::sta_wlan_hal *obj) { delete obj; }
 }
