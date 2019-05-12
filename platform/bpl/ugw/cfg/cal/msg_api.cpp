@@ -11,8 +11,8 @@ extern "C" {
 #include <ugw_msg_api.h>
 }
 
-#include <bpl_cfg.h>
 #include "../../../common/utils/utils.h"
+#include <bpl_cfg.h>
 
 #include <mapf/common/logger.h>
 
@@ -25,7 +25,7 @@ namespace bpl {
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-static void init_msg(Msg_t& xMsg)
+static void init_msg(Msg_t &xMsg)
 {
     // Clear the message
     memset(&xMsg, 0, sizeof(xMsg));
@@ -33,26 +33,25 @@ static void init_msg(Msg_t& xMsg)
     // Fill in the server and SL names
     utils::copy_string(xMsg.sSerName, "servd", MAX_SERVER_NAME);
     utils::copy_string(xMsg.sSLId, "sl_beerocks", MAX_SL_NAME);
-    
+
     // OPT_NOTIFY - Notify operation
     // OPT_THREAD_ENV - Consider thread handling in ubus communication
-    xMsg.nOperType = OPT_NOTIFY | OPT_THREAD_ENV;    
+    xMsg.nOperType = OPT_NOTIFY | OPT_THREAD_ENV;
 }
 
- 
-static bool send_msg(Msg_t& xMsg)
+static bool send_msg(Msg_t &xMsg)
 {
     int nRet = UGW_SUCCESS;
 
     // Send the message
     nRet = msg_send(&xMsg);
-    if(nRet == ERR_UBUS_TIME_OUT) {
+    if (nRet == ERR_UBUS_TIME_OUT) {
         nRet = msg_send(&xMsg);
-    } 
-    
+    }
+
     if (nRet != UGW_SUCCESS) {
-        MAPF_ERR("Failed sending message to sl_beerocks: " << nRet <<
-                 " For msg_type: " << (int)xMsg.nMsgType);
+        MAPF_ERR("Failed sending message to sl_beerocks: " << nRet << " For msg_type: "
+                                                           << (int)xMsg.nMsgType);
 
         return false;
     }
@@ -78,14 +77,14 @@ bool sl_beerocks_notify_fw_mismatch()
     uint32_t uiDummyData = 1;
 
     // Build the message
-    xMsg.pMsg = &uiDummyData;
+    xMsg.pMsg     = &uiDummyData;
     xMsg.nMsgSize = sizeof(uint32_t);
 
     // Send the message
     return send_msg(xMsg);
 }
 
-bool sl_beerocks_notify_error(int code, const char* data)
+bool sl_beerocks_notify_error(int code, const char *data)
 {
     Msg_t xMsg;
 
@@ -102,14 +101,15 @@ bool sl_beerocks_notify_error(int code, const char* data)
     utils::copy_string(sError.data, data, BPL_ERROR_STRING_LEN);
 
     // Build the message
-    xMsg.pMsg = &sError;
+    xMsg.pMsg     = &sError;
     xMsg.nMsgSize = sizeof(sError);
 
     // Send the message
-    return send_msg(xMsg);    
+    return send_msg(xMsg);
 }
 
-bool sl_beerocks_set_wifi_credentials(const int radio_int, const char* ssid, const char* pass, const char* sec)
+bool sl_beerocks_set_wifi_credentials(const int radio_int, const char *ssid, const char *pass,
+                                      const char *sec)
 {
     Msg_t xMsg;
 
@@ -124,22 +124,23 @@ bool sl_beerocks_set_wifi_credentials(const int radio_int, const char* ssid, con
 
     utils::copy_string(sWifiCred.ssid, ssid, BPL_SSID_LEN);
     utils::copy_string(sWifiCred.pass, pass, BPL_PASS_LEN);
-    utils::copy_string(sWifiCred.sec,  sec,  BPL_SEC_LEN);
+    utils::copy_string(sWifiCred.sec, sec, BPL_SEC_LEN);
 
     // Build the message
-    xMsg.pMsg = &sWifiCred;
+    xMsg.pMsg     = &sWifiCred;
     xMsg.nMsgSize = sizeof(sWifiCred);
 
     // Send the message
     return send_msg(xMsg);
 }
 
-bool sl_beerocks_set_wifi_advertise_ssid(const char* iface, int advertise_ssid)
+bool sl_beerocks_set_wifi_advertise_ssid(const char *iface, int advertise_ssid)
 {
     Msg_t xMsg;
 
-    MAPF_ERR("sl_beerocks_set_wifi_advertise_ssid iface=" << iface << " advertise_ssid=" << advertise_ssid);
-    
+    MAPF_ERR("sl_beerocks_set_wifi_advertise_ssid iface=" << iface
+                                                          << " advertise_ssid=" << advertise_ssid);
+
     // Initialize the message
     init_msg(xMsg);
 
@@ -152,14 +153,14 @@ bool sl_beerocks_set_wifi_advertise_ssid(const char* iface, int advertise_ssid)
     sWifiAdvertiseSsid.advertise_ssid = advertise_ssid;
 
     // Build the message
-    xMsg.pMsg = &sWifiAdvertiseSsid;
+    xMsg.pMsg     = &sWifiAdvertiseSsid;
     xMsg.nMsgSize = sizeof(sWifiAdvertiseSsid);
 
     // Send the message
     return send_msg(xMsg);
 }
 
-bool sl_beerocks_set_wifi_iface_state(const char* iface, int op)
+bool sl_beerocks_set_wifi_iface_state(const char *iface, int op)
 {
     Msg_t xMsg;
 
@@ -178,14 +179,14 @@ bool sl_beerocks_set_wifi_iface_state(const char* iface, int op)
     sWifiIfaceState.op = op;
 
     // Build the message
-    xMsg.pMsg = &sWifiIfaceState;
+    xMsg.pMsg     = &sWifiIfaceState;
     xMsg.nMsgSize = sizeof(sWifiIfaceState);
 
     // Send the message
     return send_msg(xMsg);
 }
 
-bool sl_beerocks_set_wifi_radio_tx_state(const char* iface, int enable)
+bool sl_beerocks_set_wifi_radio_tx_state(const char *iface, int enable)
 {
     Msg_t xMsg;
 
@@ -201,20 +202,20 @@ bool sl_beerocks_set_wifi_radio_tx_state(const char* iface, int enable)
     BPL_WIFI_RADIO_TX_STATE sWifiIRadioTxState = {0};
 
     utils::copy_string(sWifiIRadioTxState.ifname, iface, BPL_IFNAME_LEN);
-    
+
     sWifiIRadioTxState.enable = enable;
 
     // Build the message
-    xMsg.pMsg = &sWifiIRadioTxState;
+    xMsg.pMsg     = &sWifiIRadioTxState;
     xMsg.nMsgSize = sizeof(sWifiIRadioTxState);
 
     // Send the message
     return send_msg(xMsg);
 }
 
-bool sl_beerocks_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION* status_notif)
+bool sl_beerocks_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif)
 {
-    if(status_notif == nullptr) {
+    if (status_notif == nullptr) {
         MAPF_ERR("sl_beerocks_notify_iface_status - Invalid param");
         return false;
     }
@@ -228,14 +229,15 @@ bool sl_beerocks_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION* st
     xMsg.nMsgType = BPL_MSG_SET_WIFI_INTERFACE_STATUS;
 
     // Build the message
-    xMsg.pMsg = (void*)status_notif;
+    xMsg.pMsg     = (void *)status_notif;
     xMsg.nMsgSize = sizeof(BPL_INTERFACE_STATUS_NOTIFICATION);
 
     // Send the message
     return send_msg(xMsg);
 }
 
-bool sl_beerocks_notify_onboarding_completed(const char* ssid, const char* pass,const char* sec, const char* iface_name, const int success)
+bool sl_beerocks_notify_onboarding_completed(const char *ssid, const char *pass, const char *sec,
+                                             const char *iface_name, const int success)
 {
     Msg_t xMsg;
 
@@ -244,7 +246,7 @@ bool sl_beerocks_notify_onboarding_completed(const char* ssid, const char* pass,
 
     // Set the message status
     xMsg.nMsgType = BPL_NOTIF_WPS_COMPLETE;
-    
+
     // Fill the credentials structure
     struct BPL_NOTIF_WPS_COMPLETE_NOTIFICATION sWpsCompleteNotification = {0};
 
@@ -255,7 +257,7 @@ bool sl_beerocks_notify_onboarding_completed(const char* ssid, const char* pass,
     sWpsCompleteNotification.status = success; //should this be reversed?
 
     // Build the message
-    xMsg.pMsg = &sWpsCompleteNotification;
+    xMsg.pMsg     = &sWpsCompleteNotification;
     xMsg.nMsgSize = sizeof(sWpsCompleteNotification);
 
     // Send the message

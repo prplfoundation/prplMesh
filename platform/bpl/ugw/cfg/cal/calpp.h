@@ -9,9 +9,9 @@
 #ifndef __COMMON_CALPP_H__
 #define __COMMON_CALPP_H__
 
-#include <calpp_param_list.h>
-#include <calpp_object_list.h>
 #include <calpp_message.h>
+#include <calpp_object_list.h>
+#include <calpp_param_list.h>
 #include <calpp_util.h>
 
 #endif // __COMMON_CALPP_H__

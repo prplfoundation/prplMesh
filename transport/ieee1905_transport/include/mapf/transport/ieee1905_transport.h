@@ -13,9 +13,9 @@
 #include <mapf/common/poller.h>
 #include <mapf/local_bus.h>
 
-#include <map>
 #include <chrono>
 #include <linux/netlink.h>
+#include <map>
 
 //
 // Notes:
@@ -47,20 +47,20 @@ namespace mapf {
 
 class Ieee1905Transport {
 public:
-
     void run();
 
 private:
-
     // network interface status table
     // this table holds all the network interfaces that are to be used by
     // the transport.
     //
     // interface index (if_index) is used as Key to the table
     struct NetworkInterface {
-        int fd = -1; // the file descriptor of the socket bound to this interface (or -1 if inactive)
-        uint8_t addr[ETH_ALEN] = { 0 };
-        unsigned int bridge_if_index = 0; // the bridge's interface index (if this interface is in a bridge)
+        int fd =
+            -1; // the file descriptor of the socket bound to this interface (or -1 if inactive)
+        uint8_t addr[ETH_ALEN] = {0};
+        unsigned int bridge_if_index =
+            0;                  // the bridge's interface index (if this interface is in a bridge)
         bool is_bridge = false; // is this interface a bridge interface
     };
     std::map<unsigned int, NetworkInterface> network_interfaces_;
@@ -71,11 +71,11 @@ private:
     mapf::LocalBusInterface *local_bus_;
     mapf::Poller poller_;
 
-    uint16_t message_id_ = 0;
-    uint8_t al_mac_addr_[ETH_ALEN] = { 0 };
+    uint16_t message_id_           = 0;
+    uint8_t al_mac_addr_[ETH_ALEN] = {0};
 
-    // IEEE1905 CMDU header in packed format
-    #pragma pack(push, 1)
+// IEEE1905 CMDU header in packed format
+#pragma pack(push, 1)
     struct Ieee1905CmduHeader {
         uint8_t messageVersion;
         uint8_t _reservedField0;
@@ -83,20 +83,15 @@ private:
         uint16_t messageId;
         uint8_t fragmentId;
         uint8_t flags;
-        void SetLastFragmentIndicator(bool value) {
+        void SetLastFragmentIndicator(bool value)
+        {
             flags = (flags & ~0x80) | (value ? 0x80 : 0x00);
         };
-        bool GetLastFragmentIndicator() {
-            return (flags & 0x80);
-        };
-        void SetRelayIndicator(bool value) {
-            flags = (flags & ~0x40) | (value ? 0x40 : 0x00);
-        };
-        bool GetRelayIndicator() {
-            return (flags & 0x40);
-        };
+        bool GetLastFragmentIndicator() { return (flags & 0x80); };
+        void SetRelayIndicator(bool value) { flags = (flags & ~0x40) | (value ? 0x40 : 0x00); };
+        bool GetRelayIndicator() { return (flags & 0x40); };
     };
-    #pragma pack(pop)
+#pragma pack(pop)
 
     // internal statistics counters
     enum CounterId {
@@ -113,20 +108,19 @@ private:
     // an internal data structure used for manipulating packets (CMDUs, LLDP, etc.)
     class Packet {
     public:
-        uint8_t dst_if_type = CmduRxMessage::IF_TYPE_NONE;
+        uint8_t dst_if_type       = CmduRxMessage::IF_TYPE_NONE;
         unsigned int dst_if_index = 0;
-        uint8_t src_if_type = CmduRxMessage::IF_TYPE_NONE;
+        uint8_t src_if_type       = CmduRxMessage::IF_TYPE_NONE;
         unsigned int src_if_index = 0;
-        uint8_t dst[ETH_ALEN] = { 0 };  // destination mac address
-        uint8_t src[ETH_ALEN] = { 0 };  // source mac address
-        uint16_t ether_type  = 0x0000;
-        struct iovec header  = { .iov_base = NULL, .iov_len = 0 };
-        struct iovec payload = { .iov_base = NULL, .iov_len = 0 };
+        uint8_t dst[ETH_ALEN]     = {0}; // destination mac address
+        uint8_t src[ETH_ALEN]     = {0}; // source mac address
+        uint16_t ether_type       = 0x0000;
+        struct iovec header = {.iov_base = NULL, .iov_len = 0};
+        struct iovec payload = {.iov_base = NULL, .iov_len = 0};
 
-        virtual std::ostream& print(std::ostream& os) const;
+        virtual std::ostream &print(std::ostream &os) const;
     };
-    friend std::ostream& operator<< (std::ostream& os, const Packet& m);
-
+    friend std::ostream &operator<<(std::ostream &os, const Packet &m);
 
     // de-duplication internal data structures
 
@@ -141,13 +135,15 @@ private:
 
     struct DeDuplicationKey {
         uint8_t src[ETH_ALEN];
-        uint16_t messageType;  // required to distinguish the case of Request / Reply (when the reply carries an out of sync MID)
+        uint16_t
+            messageType; // required to distinguish the case of Request / Reply (when the reply carries an out of sync MID)
         uint16_t messageId;
         uint8_t fragmentId;
     };
     struct DeDuplicationKeyCompare {
         // implement Compare for the std::map template
-        bool operator() (const DeDuplicationKey& lhs, const DeDuplicationKey& rhs) const {
+        bool operator()(const DeDuplicationKey &lhs, const DeDuplicationKey &rhs) const
+        {
             // compare based on src address first then messageId, then fragmentId
             int srccmp = memcmp(lhs.src, rhs.src, ETH_ALEN);
             if (srccmp)
@@ -165,7 +161,6 @@ private:
     };
     std::map<DeDuplicationKey, DeDuplicationValue, DeDuplicationKeyCompare> de_duplication_map_;
 
-
     // de-fragmentation internal data structures
 
     // two IEE1905 packet fragments received from the same src address and with the same messageId
@@ -177,16 +172,18 @@ private:
     // limit the size of the de-fragmentation map (to prevent memory exhaustion attack)
     const int kMaximumDeFragmentationThreads = 16;
 
-    static const size_t kMaximumDeFragmentionSize = (64*1024);
+    static const size_t kMaximumDeFragmentionSize = (64 * 1024);
 
     struct DeFragmentationKey {
         uint8_t src[ETH_ALEN];
-        uint16_t messageType;  // required to distinguish the case of Request / Reply (when the reply carries an out of sync MID)
+        uint16_t
+            messageType; // required to distinguish the case of Request / Reply (when the reply carries an out of sync MID)
         uint16_t messageId;
     };
     struct DeFragmentationKeyCompare {
         // implement Compare for the std::map template
-        bool operator() (const DeFragmentationKey& lhs, const DeFragmentationKey& rhs) const {
+        bool operator()(const DeFragmentationKey &lhs, const DeFragmentationKey &rhs) const
+        {
             // compare based on src address first then messageId
             int srccmp = memcmp(lhs.src, rhs.src, ETH_ALEN);
             if (srccmp)
@@ -199,20 +196,22 @@ private:
     };
     struct DeFragmentationValue {
         std::chrono::steady_clock::time_point time;
-        uint8_t numFragments = 0;
-        uint8_t buf[kMaximumDeFragmentionSize] = { 0 };
-        int bufIndex = 0;
-        bool complete = false;
+        uint8_t numFragments                   = 0;
+        uint8_t buf[kMaximumDeFragmentionSize] = {0};
+        int bufIndex                           = 0;
+        bool complete                          = false;
     };
-    std::map<DeFragmentationKey, DeFragmentationValue, DeFragmentationKeyCompare> de_fragmentation_map_;
+    std::map<DeFragmentationKey, DeFragmentationValue, DeFragmentationKeyCompare>
+        de_fragmentation_map_;
 
-    static const int kIeee1905FragmentationThreashold = 1500; // IEEE1905 packets (CMDU) should be fragmented if larger than this threashold
-
+    static const int kIeee1905FragmentationThreashold =
+        1500; // IEEE1905 packets (CMDU) should be fragmented if larger than this threashold
 
     //
     // NETWORK INTERFACE STUFF
     //
-    void update_network_interfaces(std::map<unsigned int, NetworkInterface> updated_network_interfaces);
+    void
+    update_network_interfaces(std::map<unsigned int, NetworkInterface> updated_network_interfaces);
     bool open_interface_socket(unsigned int if_index);
     bool attach_interface_socket_filter(unsigned int if_index);
     void handle_interface_status_change(unsigned int if_index, bool is_active);
@@ -221,7 +220,6 @@ private:
     bool send_packet_to_network_interface(unsigned int if_index, Packet &packet);
     void set_al_mac_addr(const uint8_t *addr);
 
-
     //
     // NETLINK STUFF
     //
@@ -229,17 +227,16 @@ private:
     int handle_netlink_message(struct nlmsghdr *msg);
     void handle_netlink_pollin_event();
 
-
     //
     // LOCAL BUS STUFF
     //
     void handle_local_bus_pollin_event();
-    void handle_local_bus_cmdu_tx_message(CmduTxMessage& msg);
-    void handle_local_bus_interface_configuration_request_message(InterfaceConfigurationRequestMessage& msg);
+    void handle_local_bus_cmdu_tx_message(CmduTxMessage &msg);
+    void handle_local_bus_interface_configuration_request_message(
+        InterfaceConfigurationRequestMessage &msg);
     bool send_packet_to_local_bus(Packet &packet);
     void publish_interface_configuration_indication();
     uint16_t get_next_message_id();
-
 
     //
     // PACKET PROCESSING STUFF
@@ -252,7 +249,8 @@ private:
     bool forward_packet(Packet &packet);
 };
 
-inline std::ostream& operator<< (std::ostream& os, const Ieee1905Transport::Packet& m) {
+inline std::ostream &operator<<(std::ostream &os, const Ieee1905Transport::Packet &m)
+{
     return m.print(os);
 }
 

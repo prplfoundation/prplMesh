@@ -18,8 +18,7 @@ namespace ieee1905_1 {
 class CmduMessageTx : public CmduMessage {
 
 public:
-
-    CmduMessageTx(uint8_t* buff, size_t buff_len);
+    CmduMessageTx(uint8_t *buff, size_t buff_len);
     ~CmduMessageTx();
 
 public:

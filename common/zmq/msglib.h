@@ -11,12 +11,10 @@
 
 #include <zmq.h>
 
-namespace mapf
-{
+namespace mapf {
 
-struct msglib_socket
-{
-	void *sd_;
+struct msglib_socket {
+    void *sd_;
 };
 
 } //namespace mapf

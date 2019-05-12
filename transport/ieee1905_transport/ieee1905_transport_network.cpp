@@ -8,16 +8,16 @@
 
 #include <mapf/transport/ieee1905_transport.h>
 
-#include <unistd.h>
 #include <arpa/inet.h>
+#include <iomanip>
+#include <linux/filter.h>
 #include <net/if.h>
 #include <netinet/ether.h>
 #include <netpacket/packet.h>
-#include <linux/filter.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
-#include <iomanip>
+#include <unistd.h>
 
 namespace mapf {
 
@@ -30,8 +30,10 @@ class Ieee1905SocketFilter {
 public:
     // create a filter that accepts packets that match the basic transport requirements - see below.
     // The two addresses are here to specify the AL MAC address and the interface's hardware address
-    Ieee1905SocketFilter(const uint8_t *addr0 = NULL, const uint8_t *addr1 = NULL) {
-        static const uint8_t ieee1905_multicast_address[ETH_ALEN] = { 0x01, 0x80, 0xc2, 0x00, 0x00, 0x13 }; // 01:80:c2:00:00:13
+    Ieee1905SocketFilter(const uint8_t *addr0 = NULL, const uint8_t *addr1 = NULL)
+    {
+        static const uint8_t ieee1905_multicast_address[ETH_ALEN] = {
+            0x01, 0x80, 0xc2, 0x00, 0x00, 0x13}; // 01:80:c2:00:00:13
 
         // use the IEEE1905 Multicast Address as default value (it is passed by the filter anyway)
         if (!addr0)
@@ -40,20 +42,20 @@ public:
         if (!addr1)
             addr1 = ieee1905_multicast_address;
 
-        filter[4].k = (uint32_t)addr0[2] << 24 | (uint32_t)addr0[3] << 16 | (uint32_t)addr0[4] << 8 | (uint32_t)addr0[5];
-        filter[6].k = (uint32_t)addr0[0] <<  8 | (uint32_t)addr0[1];
+        filter[4].k = (uint32_t)addr0[2] << 24 | (uint32_t)addr0[3] << 16 |
+                      (uint32_t)addr0[4] << 8 | (uint32_t)addr0[5];
+        filter[6].k = (uint32_t)addr0[0] << 8 | (uint32_t)addr0[1];
 
-        filter[7].k = (uint32_t)addr1[2] << 24 | (uint32_t)addr1[3] << 16 | (uint32_t)addr1[4] << 8 | (uint32_t)addr1[5];
-        filter[9].k = (uint32_t)addr1[0] <<  8 | (uint32_t)addr1[1];
+        filter[7].k = (uint32_t)addr1[2] << 24 | (uint32_t)addr1[3] << 16 |
+                      (uint32_t)addr1[4] << 8 | (uint32_t)addr1[5];
+        filter[9].k = (uint32_t)addr1[0] << 8 | (uint32_t)addr1[1];
 
         if (!addr0 && !addr1) {
             MAPF_WARN("at least one address should be specified for socket filter.");
         }
     }
 
-    const struct sock_fprog &sock_fprog() const {
-        return fprog;
-    }
+    const struct sock_fprog &sock_fprog() const { return fprog; }
 
 private:
     struct sock_filter filter[17] = {
@@ -65,37 +67,27 @@ private:
         // generated using: tcpdump -dd '(ether proto 0x893a and (ether dst 01:80:c2:00:00:13 or ether dst 11:22:33:44:55:66 or ether dst 77:88:99:aa:bb:cc)) or (ether proto 0x88cc and ether dst 01:80:c2:00:00:0e)'
         // the two dummy addresses in this filter 11:22... and 77:88... will be replaced in runtime with the AL MAC address and the interface's HW address
         //
-        { 0x28, 0, 0, 0x0000000c },
-        { 0x15, 0, 8, 0x0000893a },
-        { 0x20, 0, 0, 0x00000002 },
-        { 0x15, 9, 0, 0xc2000013 },
-        { 0x15, 0, 2, 0x33445566 }, // 4: replace with AL MAC Addr [2..5]
-        { 0x28, 0, 0, 0x00000000 },
-        { 0x15, 8, 9, 0x00001122 }, // 6: replace with AL MAC Addr [0..1]
-        { 0x15, 0, 8, 0x99aabbcc }, // 7: replace with IF MAC Addr [2..5]
-        { 0x28, 0, 0, 0x00000000 },
-        { 0x15, 5, 6, 0x00007788 }, // 9: replace with IF MAC Addr [0..1]
-        { 0x15, 0, 5, 0x000088cc },
-        { 0x20, 0, 0, 0x00000002 },
-        { 0x15, 0, 3, 0xc200000e },
-        { 0x28, 0, 0, 0x00000000 },
-        { 0x15, 0, 1, 0x00000180 },
-        { 0x6, 0, 0, 0x0000ffff },
-        { 0x6, 0, 0, 0x00000000 },
+        {0x28, 0, 0, 0x0000000c}, {0x15, 0, 8, 0x0000893a}, {0x20, 0, 0, 0x00000002},
+        {0x15, 9, 0, 0xc2000013}, {0x15, 0, 2, 0x33445566}, // 4: replace with AL MAC Addr [2..5]
+        {0x28, 0, 0, 0x00000000}, {0x15, 8, 9, 0x00001122}, // 6: replace with AL MAC Addr [0..1]
+        {0x15, 0, 8, 0x99aabbcc},                           // 7: replace with IF MAC Addr [2..5]
+        {0x28, 0, 0, 0x00000000}, {0x15, 5, 6, 0x00007788}, // 9: replace with IF MAC Addr [0..1]
+        {0x15, 0, 5, 0x000088cc}, {0x20, 0, 0, 0x00000002}, {0x15, 0, 3, 0xc200000e},
+        {0x28, 0, 0, 0x00000000}, {0x15, 0, 1, 0x00000180}, {0x6, 0, 0, 0x0000ffff},
+        {0x6, 0, 0, 0x00000000},
     };
 
-    struct sock_fprog fprog = {
-        .len = sizeof(filter)/sizeof(struct sock_filter),
-        .filter = filter
-    };
+    struct sock_fprog fprog = {.len    = sizeof(filter) / sizeof(struct sock_filter),
+                               .filter = filter};
 };
 
-
-void Ieee1905Transport::update_network_interfaces(std::map<unsigned int, NetworkInterface> updated_network_interfaces) {
+void Ieee1905Transport::update_network_interfaces(
+    std::map<unsigned int, NetworkInterface> updated_network_interfaces)
+{
     // find and remove interfaces that are no longer in use
     for (auto it = network_interfaces_.begin(); it != network_interfaces_.end();) {
-        unsigned int if_index = it->first;
-        auto& network_interface = it->second;
+        unsigned int if_index   = it->first;
+        auto &network_interface = it->second;
 
         if (updated_network_interfaces.count(it->first) == 0) {
             MAPF_DBG("interface " << if_index << " is no longer used.");
@@ -111,13 +103,14 @@ void Ieee1905Transport::update_network_interfaces(std::map<unsigned int, Network
     }
 
     // add new interfaces or update existing ones
-    for (auto it = updated_network_interfaces.begin(); it != updated_network_interfaces.end(); ++it) {
-        unsigned int if_index = it->first;
-        auto& updated_network_interface = it->second;
+    for (auto it = updated_network_interfaces.begin(); it != updated_network_interfaces.end();
+         ++it) {
+        unsigned int if_index           = it->first;
+        auto &updated_network_interface = it->second;
 
         MAPF_DBG("interface " << if_index << " is used.");
         network_interfaces_[if_index].bridge_if_index = updated_network_interface.bridge_if_index;
-        network_interfaces_[if_index].is_bridge = updated_network_interface.is_bridge;
+        network_interfaces_[if_index].is_bridge       = updated_network_interface.is_bridge;
 
         // must be called before open_interface_socket (address is used for packet filtering)
         if (!get_interface_mac_addr(if_index, network_interfaces_[if_index].addr)) {
@@ -144,7 +137,8 @@ void Ieee1905Transport::update_network_interfaces(std::map<unsigned int, Network
     }
 }
 
-bool Ieee1905Transport::open_interface_socket(unsigned int if_index) {
+bool Ieee1905Transport::open_interface_socket(unsigned int if_index)
+{
     MAPF_DBG("opening raw socket on interface " << if_index << ".");
 
     if (network_interfaces_[if_index].fd != -1) {
@@ -166,7 +160,8 @@ bool Ieee1905Transport::open_interface_socket(unsigned int if_index) {
     // the interface can be used by other processes
     int optval = 1;
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) {
-        MAPF_ERR("cannot set socket option SO_REUSEADDR \"" << strerror(errno) << "\" (" << errno << ").");
+        MAPF_ERR("cannot set socket option SO_REUSEADDR \"" << strerror(errno) << "\" (" << errno
+                                                            << ").");
         close(sockfd);
         return false;
     }
@@ -174,11 +169,12 @@ bool Ieee1905Transport::open_interface_socket(unsigned int if_index) {
     // bind to specifed interface - note that we cannot use SO_BINDTODEVICE sockopt as it does not support AF_PACKET sockets
     struct sockaddr_ll sockaddr;
     memset(&sockaddr, 0, sizeof(struct sockaddr_ll));
-    sockaddr.sll_family = AF_PACKET;
+    sockaddr.sll_family   = AF_PACKET;
     sockaddr.sll_protocol = htons(ETH_P_ALL);
-    sockaddr.sll_ifindex = if_index;
+    sockaddr.sll_ifindex  = if_index;
     if (bind(sockfd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0) {
-        MAPF_ERR("cannot bind socket to interface \"" << strerror(errno) << "\" (" << errno << ").");
+        MAPF_ERR("cannot bind socket to interface \"" << strerror(errno) << "\" (" << errno
+                                                      << ").");
         close(sockfd);
         return false;
     }
@@ -190,29 +186,34 @@ bool Ieee1905Transport::open_interface_socket(unsigned int if_index) {
     return true;
 }
 
-bool Ieee1905Transport::attach_interface_socket_filter(unsigned int if_index) {
+bool Ieee1905Transport::attach_interface_socket_filter(unsigned int if_index)
+{
     if (!network_interfaces_.count(if_index)) {
         MAPF_ERR("un-tracked interface " << if_index << ".");
         return false;
     }
 
     // 1st step is to put the interface in promiscuous mode.
-    // promiscuous mode is required since we expect to receive packets destined to 
+    // promiscuous mode is required since we expect to receive packets destined to
     // the AL MAC address (which is different the the interfaces HW address)
     //
-    struct packet_mreq mr = { 0 };
-    mr.mr_ifindex = if_index;
-    mr.mr_type = PACKET_MR_PROMISC;
-    if (setsockopt(network_interfaces_[if_index].fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr, sizeof(mr)) == -1) {
-        MAPF_ERR("cannot put interface in promiscuous mode \"" << strerror(errno) << "\" (" << errno << ").");
+    struct packet_mreq mr = {0};
+    mr.mr_ifindex         = if_index;
+    mr.mr_type            = PACKET_MR_PROMISC;
+    if (setsockopt(network_interfaces_[if_index].fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr,
+                   sizeof(mr)) == -1) {
+        MAPF_ERR("cannot put interface in promiscuous mode \"" << strerror(errno) << "\" (" << errno
+                                                               << ").");
         return false;
     }
 
     // prepare linux packet filter for this interface
-    struct sock_fprog fprog = Ieee1905SocketFilter(al_mac_addr_, network_interfaces_[if_index].addr).sock_fprog();
+    struct sock_fprog fprog =
+        Ieee1905SocketFilter(al_mac_addr_, network_interfaces_[if_index].addr).sock_fprog();
 
     // attach filter
-    if (setsockopt(network_interfaces_[if_index].fd, SOL_SOCKET, SO_ATTACH_FILTER, &fprog, sizeof(fprog)) == -1) {
+    if (setsockopt(network_interfaces_[if_index].fd, SOL_SOCKET, SO_ATTACH_FILTER, &fprog,
+                   sizeof(fprog)) == -1) {
         MAPF_ERR("cannot attach socket filter \"" << strerror(errno) << "\" (" << errno << ").");
         return false;
     }
@@ -220,7 +221,8 @@ bool Ieee1905Transport::attach_interface_socket_filter(unsigned int if_index) {
     return true;
 }
 
-void Ieee1905Transport::handle_interface_status_change(unsigned int if_index, bool is_active) {
+void Ieee1905Transport::handle_interface_status_change(unsigned int if_index, bool is_active)
+{
     if (!network_interfaces_.count(if_index)) {
         MAPF_ERR("un-tracked interface " << if_index << ".");
         return;
@@ -243,7 +245,8 @@ void Ieee1905Transport::handle_interface_status_change(unsigned int if_index, bo
     }
 }
 
-void Ieee1905Transport::handle_interface_pollin_event(int fd) {
+void Ieee1905Transport::handle_interface_pollin_event(int fd)
+{
     if (fd < 0) {
         MAPF_ERR("illegal file descriptor " << fd << ".");
         return;
@@ -254,7 +257,8 @@ void Ieee1905Transport::handle_interface_pollin_event(int fd) {
     uint8_t buf[ETH_FRAME_LEN];
     struct sockaddr_ll addr;
     socklen_t addr_len = sizeof(addr);
-    ssize_t len = recvfrom(fd, buf, sizeof(buf), MSG_DONTWAIT | MSG_TRUNC, (struct sockaddr*)&addr, &addr_len);
+    ssize_t len = recvfrom(fd, buf, sizeof(buf), MSG_DONTWAIT | MSG_TRUNC, (struct sockaddr *)&addr,
+                           &addr_len);
     if (len == -1 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
         return;
     }
@@ -276,27 +280,23 @@ void Ieee1905Transport::handle_interface_pollin_event(int fd) {
     // convert packet to internal data structure for further handling
     struct ether_header *eh = (struct ether_header *)buf;
     struct Packet packet;
-    packet.dst_if_type = CmduRxMessage::IF_TYPE_NONE;
+    packet.dst_if_type  = CmduRxMessage::IF_TYPE_NONE;
     packet.dst_if_index = 0;
-    packet.src_if_type = CmduRxMessage::IF_TYPE_NET;
+    packet.src_if_type  = CmduRxMessage::IF_TYPE_NET;
     packet.src_if_index = (unsigned int)addr.sll_ifindex;
     std::copy_n(eh->ether_dhost, ETH_ALEN, packet.dst);
     std::copy_n(eh->ether_shost, ETH_ALEN, packet.src);
     packet.ether_type = ntohs(eh->ether_type);
-    packet.header = {
-        .iov_base = buf,
-        .iov_len = sizeof(struct ether_header)
-    };
-    packet.payload = {
-        .iov_base = buf + sizeof(struct ether_header),
-        .iov_len = len - sizeof(struct ether_header)
-    };
+    packet.header = {.iov_base = buf, .iov_len = sizeof(struct ether_header)};
+    packet.payload = {.iov_base = buf + sizeof(struct ether_header),
+                      .iov_len  = len - sizeof(struct ether_header)};
 
     counters_[CounterId::INCOMMING_NETWORK_PACKETS]++;
     handle_packet(packet);
 }
 
-bool Ieee1905Transport::get_interface_mac_addr(unsigned int if_index, uint8_t *addr) {
+bool Ieee1905Transport::get_interface_mac_addr(unsigned int if_index, uint8_t *addr)
+{
     int sockfd;
     if ((sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) == -1) {
         MAPF_ERR("cannot open raw socket \"" << strerror(errno) << "\" (" << errno << ").");
@@ -311,27 +311,29 @@ bool Ieee1905Transport::get_interface_mac_addr(unsigned int if_index, uint8_t *a
         return false;
     }
 
-    if((ioctl(sockfd, SIOCGIFHWADDR, &ifr)) < 0) {
-        MAPF_ERR("raw socket SIOCGIFHWADDR ioctl failed \"" << strerror(errno) << "\" (" << errno << ").");
+    if ((ioctl(sockfd, SIOCGIFHWADDR, &ifr)) < 0) {
+        MAPF_ERR("raw socket SIOCGIFHWADDR ioctl failed \"" << strerror(errno) << "\" (" << errno
+                                                            << ").");
         close(sockfd);
         return false;
     }
     std::copy_n(ifr.ifr_hwaddr.sa_data, ETH_ALEN, addr);
 
-    MAPF_DBG("address of interface " << if_index << " is "
-        << std::hex << std::setfill('0') << std::setw(2) << (unsigned)addr[0] << ":"
-        << std::hex << std::setfill('0') << std::setw(2) << (unsigned)addr[1] << ":"
-        << std::hex << std::setfill('0') << std::setw(2) << (unsigned)addr[2] << ":"
-        << std::hex << std::setfill('0') << std::setw(2) << (unsigned)addr[3] << ":"
-        << std::hex << std::setfill('0') << std::setw(2) << (unsigned)addr[4] << ":"
-        << std::hex << std::setfill('0') << std::setw(2) << (unsigned)addr[5] << "."
-        << std::dec);
+    MAPF_DBG("address of interface "
+             << if_index << " is " << std::hex << std::setfill('0') << std::setw(2)
+             << (unsigned)addr[0] << ":" << std::hex << std::setfill('0') << std::setw(2)
+             << (unsigned)addr[1] << ":" << std::hex << std::setfill('0') << std::setw(2)
+             << (unsigned)addr[2] << ":" << std::hex << std::setfill('0') << std::setw(2)
+             << (unsigned)addr[3] << ":" << std::hex << std::setfill('0') << std::setw(2)
+             << (unsigned)addr[4] << ":" << std::hex << std::setfill('0') << std::setw(2)
+             << (unsigned)addr[5] << "." << std::dec);
 
     close(sockfd);
     return true;
 }
 
-bool Ieee1905Transport::send_packet_to_network_interface(unsigned int if_index, Packet &packet) {
+bool Ieee1905Transport::send_packet_to_network_interface(unsigned int if_index, Packet &packet)
+{
     MAPF_DBG("sending packet on interface " << if_index << ".");
 
     if (!network_interfaces_.count(if_index)) {
@@ -346,20 +348,14 @@ bool Ieee1905Transport::send_packet_to_network_interface(unsigned int if_index, 
     std::copy_n(packet.src, ETH_ALEN, eh.ether_shost);
     eh.ether_type = htons(packet.ether_type);
 
-    packet.header = {
-        .iov_base = &eh,
-        .iov_len = sizeof(eh)
-    };
+    packet.header = {.iov_base = &eh, .iov_len = sizeof(eh)};
 
-    int fd = network_interfaces_[if_index].fd;
-    struct iovec iov[] = {
-        packet.header,
-        packet.payload
-    };
-    int n = writev(fd, iov, sizeof(iov)/sizeof(struct iovec));
+    int fd             = network_interfaces_[if_index].fd;
+    struct iovec iov[] = {packet.header, packet.payload};
+    int n              = writev(fd, iov, sizeof(iov) / sizeof(struct iovec));
 
     // Clear the packet header to prevent leaking locally allocated stack pointer
-    packet.header = { .iov_base = nullptr, .iov_len = sizeof(eh) };
+    packet.header = {.iov_base = nullptr, .iov_len = sizeof(eh)};
     if (size_t(n) != sizeof(eh) + packet.payload.iov_len) {
         MAPF_ERR("cannot write to socket \"" << strerror(errno) << "\" (" << errno << ").");
         return false;
@@ -368,7 +364,8 @@ bool Ieee1905Transport::send_packet_to_network_interface(unsigned int if_index, 
     return true;
 }
 
-void Ieee1905Transport::set_al_mac_addr(const uint8_t *addr) {
+void Ieee1905Transport::set_al_mac_addr(const uint8_t *addr)
+{
     if (!addr)
         return;
 
@@ -376,8 +373,8 @@ void Ieee1905Transport::set_al_mac_addr(const uint8_t *addr) {
 
     // refresh packet filtering on all active interfaces to use the new AL MAC address
     for (auto it = network_interfaces_.begin(); it != network_interfaces_.end(); ++it) {
-        unsigned int if_index = it->first;
-        auto& network_interface = it->second;
+        unsigned int if_index   = it->first;
+        auto &network_interface = it->second;
 
         if (network_interface.fd >= 0) {
             attach_interface_socket_filter(if_index);
@@ -386,7 +383,6 @@ void Ieee1905Transport::set_al_mac_addr(const uint8_t *addr) {
 }
 
 } // namespace mapf
-
 
 #if 0
     static const uint8_t ieee1905_multicast_address[ETH_ALEN] = { 0x01, 0x80, 0xc2, 0x00, 0x00, 0x13 }; // 01:80:c2:00:00:13

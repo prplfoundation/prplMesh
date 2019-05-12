@@ -23,62 +23,62 @@ extern "C" {
 /****************************************************************************/
 
 /* Wi-Fi Settings */
-#define BPL_DEV_INFO_LEN         (32 + 4)  /* Device information string length */
-#define BPL_SSID_LEN             (32 + 1)  /* Maximal length of Wi-Fi SSID */
-#define BPL_PASS_LEN             (64 + 1)  /* Maximal length of Wi-Fi password */
-#define BPL_SEC_LEN              32        /* Maximal length of Wi-Fi security string */
-#define BPL_IFNAME_LEN           32        /* Maximal length of Wi-Fi interface name */
-#define BPL_NUM_OF_INTERFACES    7         /* Maximal number of Interfaces: (3 APs + 3 STAs) + 1 Wired */
-#define BPL_MNS_DATA_LEN         256	      /* Maximal length of BPL MNS data */
-#define BPL_BACK_VAPS_GROUPS     4	      /* Backhaul VAPS Groups size, group contain 1 Vap for every radio */
-#define BPL_BACK_VAPS_IN_GROUP   3	      /* Number of vaps in 1 VAP group */
-#define BPL_MAC_ADDR_OCTETS_LEN  6	      /* Number of octets in mac address */
-#define BPL_IPV4_ADDR_OCTETS_LEN 4	      /* Number of octets in ipv4 address */
+#define BPL_DEV_INFO_LEN (32 + 4) /* Device information string length */
+#define BPL_SSID_LEN (32 + 1)     /* Maximal length of Wi-Fi SSID */
+#define BPL_PASS_LEN (64 + 1)     /* Maximal length of Wi-Fi password */
+#define BPL_SEC_LEN 32            /* Maximal length of Wi-Fi security string */
+#define BPL_IFNAME_LEN 32         /* Maximal length of Wi-Fi interface name */
+#define BPL_NUM_OF_INTERFACES 7   /* Maximal number of Interfaces: (3 APs + 3 STAs) + 1 Wired */
+#define BPL_MNS_DATA_LEN 256      /* Maximal length of BPL MNS data */
+#define BPL_BACK_VAPS_GROUPS 4 /* Backhaul VAPS Groups size, group contain 1 Vap for every radio */
+#define BPL_BACK_VAPS_IN_GROUP 3   /* Number of vaps in 1 VAP group */
+#define BPL_MAC_ADDR_OCTETS_LEN 6  /* Number of octets in mac address */
+#define BPL_IPV4_ADDR_OCTETS_LEN 4 /* Number of octets in ipv4 address */
 
 /* Radio Direction */
 #define BPL_RADIO_FRONT 0
-#define BPL_RADIO_BACK  1
+#define BPL_RADIO_BACK 1
 
 /* Radio Band */
 #define BPL_RADIO_BAND_5G 5
 #define BPL_RADIO_BAND_2G 2
 
 /* Platform Operating Mode */
-#define BPL_OPER_MODE_GATEWAY       0
-#define BPL_OPER_MODE_GATEWAY_WISP  1
-#define BPL_OPER_MODE_WDS_EXTENDER  2
-#define BPL_OPER_MODE_WDS_REPEATER  3
-#define BPL_OPER_MODE_L2NAT_CLIENT  4
+#define BPL_OPER_MODE_GATEWAY 0
+#define BPL_OPER_MODE_GATEWAY_WISP 1
+#define BPL_OPER_MODE_WDS_EXTENDER 2
+#define BPL_OPER_MODE_WDS_REPEATER 3
+#define BPL_OPER_MODE_L2NAT_CLIENT 4
 
 /* Platform Information */
-#define BPL_USER_PASS_LEN       (64 + 1)  /* Maximal length of USER_PASS */
-#define BPL_SERIAL_NUMBER_LEN   (64 + 1)  /* Maximal length of SERIAL_NUMBER */
+#define BPL_USER_PASS_LEN (64 + 1)     /* Maximal length of USER_PASS */
+#define BPL_SERIAL_NUMBER_LEN (64 + 1) /* Maximal length of SERIAL_NUMBER */
 
 /* Platform notification types */
-#define BPL_NOTIF_VER_MISMATCH  1 /* Version mismatch detected */
-#define BPL_NOTIF_ERROR         2 /* Error notification */
-#define BPL_NOTIF_WPS_START    	3 /* WPS button pressed */
-#define BPL_NOTIF_MNS_OPER    	4 /* MNS operation request */
-#define BPL_NOTIF_WPS_COMPLETE  5 /* Set WPS Status */
+#define BPL_NOTIF_VER_MISMATCH 1 /* Version mismatch detected */
+#define BPL_NOTIF_ERROR 2        /* Error notification */
+#define BPL_NOTIF_WPS_START 3    /* WPS button pressed */
+#define BPL_NOTIF_MNS_OPER 4     /* MNS operation request */
+#define BPL_NOTIF_WPS_COMPLETE 5 /* Set WPS Status */
 
 /* Platform messages types */
-#define BPL_MSG_SET_WIFI_CRED               10 /* Set Wi-Fi Credentials */
-#define BPL_MSG_SET_WIFI_IFACE_STATE   	    11 /* Set Wi-Fi Interface state (ON/OFF/RESET) */
-#define BPL_MSG_SET_WIFI_RADIO_TX_STATE     12 /* Set Wi-Fi Radio TX state (ON/OFF) */
-#define BPL_MSG_SET_WIFI_INTERFACE_STATUS   13 /* Set the Radio status */
-#define BPL_MSG_SET_WIFI_ADVERTISE_SSID     14 /* Set Wi-Fi SSID Advertisement */
+#define BPL_MSG_SET_WIFI_CRED 10             /* Set Wi-Fi Credentials */
+#define BPL_MSG_SET_WIFI_IFACE_STATE 11      /* Set Wi-Fi Interface state (ON/OFF/RESET) */
+#define BPL_MSG_SET_WIFI_RADIO_TX_STATE 12   /* Set Wi-Fi Radio TX state (ON/OFF) */
+#define BPL_MSG_SET_WIFI_INTERFACE_STATUS 13 /* Set the Radio status */
+#define BPL_MSG_SET_WIFI_ADVERTISE_SSID 14   /* Set Wi-Fi SSID Advertisement */
 
 /* Wi-Fi Security Mode Strings */
-#define BPL_WLAN_SEC_NONE_STR               "None"              
-#define BPL_WLAN_SEC_WEP64_STR              "WEP-64"             
-#define BPL_WLAN_SEC_WEP128_STR             "WEP-128"
-#define BPL_WLAN_SEC_WPA_PSK_STR            "WPA-Personal"
-#define BPL_WLAN_SEC_WPA2_PSK_STR           "WPA2-Personal"
-#define BPL_WLAN_SEC_WPA_WPA2_PSK_STR       "WPA-WPA2-Personal"
+#define BPL_WLAN_SEC_NONE_STR "None"
+#define BPL_WLAN_SEC_WEP64_STR "WEP-64"
+#define BPL_WLAN_SEC_WEP128_STR "WEP-128"
+#define BPL_WLAN_SEC_WPA_PSK_STR "WPA-Personal"
+#define BPL_WLAN_SEC_WPA2_PSK_STR "WPA2-Personal"
+#define BPL_WLAN_SEC_WPA_WPA2_PSK_STR "WPA-WPA2-Personal"
 
 /* Gateway database*/
-#define BPL_GW_DB_MANAGE_MODE_LEN            (127 + 1)  /* Maximal length of MANAGEMENT MODE string */
-#define BPL_GW_DB_OPER_MODE_LEN              (127 + 1)  /* Maximal length of OPERATING MODE string */
+#define BPL_GW_DB_MANAGE_MODE_LEN (127 + 1) /* Maximal length of MANAGEMENT MODE string */
+#define BPL_GW_DB_OPER_MODE_LEN (127 + 1)   /* Maximal length of OPERATING MODE string */
 
 /****************************************************************************/
 /******************************* Structures *********************************/
@@ -88,10 +88,10 @@ extern "C" {
 struct BPL_ERROR {
 
     /* Error code of type BPL_ERR_... */
-    int     code;
+    int code;
 
     /* Custom string data reported by the module */
-    char    data[BPL_ERROR_STRING_LEN];
+    char data[BPL_ERROR_STRING_LEN];
 };
 
 /* Generic device information */
@@ -108,20 +108,20 @@ struct BPL_DEVICE_INFO {
 
     /* LAN interface name */
     char lan_iface_name[BPL_IFNAME_LEN];
-    
-    /* LAN interface IP address */ 
+
+    /* LAN interface IP address */
     uint32_t lan_ip_address;
 
-    /* LAN interface network mask */ 
+    /* LAN interface network mask */
     uint32_t lan_network_mask;
 
     /* WAN interface name */
     char wan_iface_name[BPL_IFNAME_LEN];
 
-    /* WAN interface IP address */ 
+    /* WAN interface IP address */
     uint32_t wan_ip_address;
 
-    /* WAN interface network mask */ 
+    /* WAN interface network mask */
     uint32_t wan_network_mask;
 };
 
@@ -130,10 +130,10 @@ struct BPL_WIFI_CREDENTIALS {
 
     /* Wi-Fi SSID */
     char ssid[BPL_SSID_LEN];
-    
+
     /* Wi-Fi KeyPassphrase */
     char pass[BPL_PASS_LEN];
-    
+
     /* Wi-Fi Security Mode */
     char sec[BPL_SEC_LEN];
 };
@@ -143,7 +143,7 @@ struct BPL_WIFI_IFACE_STATE {
 
     /* Wi-Fi interface name */
     char ifname[BPL_IFNAME_LEN];
-    
+
     /* Wi-Fi interface operation */
     int op;
 };
@@ -153,7 +153,7 @@ struct BPL_WIFI_RADIO_TX_STATE {
 
     /* Wi-Fi interface name */
     char ifname[BPL_IFNAME_LEN];
-    
+
     /* Wi-Fi Radio operation */
     int enable;
 };
@@ -163,7 +163,7 @@ struct BPL_WIFI_ADVERTISE_SSID_FLAG {
 
     /* Wi-Fi interface name */
     char ifname[BPL_IFNAME_LEN];
-    
+
     /* Wi-Fi SSID advertisement flag */
     int advertise_ssid;
 };
@@ -182,7 +182,7 @@ typedef struct {
 
 } BPL_INTERFACE_STATUS_NOTIFICATION;
 
-enum BPL_INTERFACE_STATUS{
+enum BPL_INTERFACE_STATUS {
     INVALID = 0,
     OFF,
     AP_OK,
@@ -204,28 +204,25 @@ struct BPL_WPS_PARAMS {
     int wps_type;
 };
 
-enum BPL_WPS_TYPE {
-	BPL_WPS_PBC = 0,
-	BPL_WPS_PIN
-};
+enum BPL_WPS_TYPE { BPL_WPS_PBC = 0, BPL_WPS_PIN };
 
 /* MNS operation params */
 struct BPL_MNS_PARAMS {
-	/* operation of type BPL_MNS_OP_... */
-	int op;
+    /* operation of type BPL_MNS_OP_... */
+    int op;
 
-	/* data */
-	char data[BPL_MNS_DATA_LEN];
+    /* data */
+    char data[BPL_MNS_DATA_LEN];
 };
 
 enum BPL_MNS_OP {
-	BPL_MNS_OP_RESET = 0,
+    BPL_MNS_OP_RESET = 0,
 };
 
 /* Interface state for the platform*/
 struct BPL_NOTIF_WPS_COMPLETE_NOTIFICATION {
-   
-   /* Wi-Fi SSID */
+
+    /* Wi-Fi SSID */
     char ssid[BPL_SSID_LEN];
 
     /* Wi-Fi KeyPassphrase */
@@ -239,7 +236,6 @@ struct BPL_NOTIF_WPS_COMPLETE_NOTIFICATION {
 
     /* WPS Status success=0/fail=1*/
     int status;
-
 };
 
 /* WLAN params */
@@ -370,7 +366,7 @@ int bpl_cfg_get_client_roaming();
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_device_info(struct BPL_DEVICE_INFO* device_info);
+int bpl_cfg_get_device_info(struct BPL_DEVICE_INFO *device_info);
 
 /**
  * Returns miscellaneous Wi-Fi parameters. 
@@ -383,7 +379,7 @@ int bpl_cfg_get_device_info(struct BPL_DEVICE_INFO* device_info);
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_wifi_params(const char* iface, struct BPL_WLAN_PARAMS* wlan_params);
+int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params);
 
 /**
  * Returns backhaul vaps configuration. 
@@ -395,7 +391,7 @@ int bpl_cfg_get_wifi_params(const char* iface, struct BPL_WLAN_PARAMS* wlan_para
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_backhaul_params(int* max_vaps, int* network_enabled, int* prefered_radio_band);
+int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefered_radio_band);
 
 /**
  * Returns backhaul vaps list. 
@@ -406,7 +402,7 @@ int bpl_cfg_get_backhaul_params(int* max_vaps, int* network_enabled, int* prefer
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_backhaul_vaps(char* backhaul_vaps_buf, const int buf_len);
+int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len);
 
 /**
  * Update the SSID advertisement flag
@@ -417,7 +413,7 @@ int bpl_cfg_get_backhaul_vaps(char* backhaul_vaps_buf, const int buf_len);
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_set_wifi_advertise_ssid(const char* iface, int advertise_ssid);
+int bpl_cfg_set_wifi_advertise_ssid(const char *iface, int advertise_ssid);
 
 /**
  * Returns the platform Wi-Fi settings.
@@ -432,7 +428,8 @@ int bpl_cfg_set_wifi_advertise_ssid(const char* iface, int advertise_ssid);
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN], char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN]);
+int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
+                                     char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN]);
 
 /**
  * Update the platform Wi-Fi settings.
@@ -445,7 +442,8 @@ int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SSID_LEN], const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN]);
+int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SSID_LEN],
+                                     const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN]);
 
 /**
  * Update the Wi-Fi settings.
@@ -458,7 +456,8 @@ int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SS
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_set_wifi_credentials(const char iface[BPL_IFNAME_LEN], const char ssid[BPL_SSID_LEN], const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN]);
+int bpl_cfg_set_wifi_credentials(const char iface[BPL_IFNAME_LEN], const char ssid[BPL_SSID_LEN],
+                                 const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN]);
 
 /**
  * Set platform onboarding state.
@@ -479,7 +478,8 @@ int bpl_cfg_set_onboarding(int enable);
  * @param [in] iface_name Interface name (up to 32 bytes in length).
  * @param [in] success Success of onboarding (0 - failure, 1 - success).
  */
-int bpl_cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN], const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN],
+int bpl_cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN],
+                                        const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN],
                                         const char iface_name[BPL_IFNAME_LEN], const int success);
 
 /**

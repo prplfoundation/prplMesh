@@ -25,4 +25,3 @@ std::string int_to_hex_string(const unsigned int integer, const uint8_t number_o
 } // namespace beerocks
 
 #endif // _BPL_UTILS_NET_H
-

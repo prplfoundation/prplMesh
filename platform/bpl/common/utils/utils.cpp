@@ -12,11 +12,11 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <algorithm>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <iomanip>
-#include <algorithm>
 
 #include <mapf/common/logger.h>
 
@@ -26,11 +26,11 @@ namespace utils {
 
 void copy_string(char *dst, const char *src, size_t dst_len)
 {
-    const char* src_end = std::find((char*)src, ((char*)src) + dst_len, '\0');
+    const char *src_end = std::find((char *)src, ((char *)src) + dst_len, '\0');
     std::copy(src, src_end, dst);
     std::ptrdiff_t src_size = src_end - src;
     std::ptrdiff_t dst_size = dst_len;
-    if (src_size < dst_size ) {
+    if (src_size < dst_size) {
         dst[src_size] = 0;
     } else {
         dst[dst_size - 1] = 0;
@@ -50,7 +50,7 @@ int64_t stoi(std::string str)
 }
 
 std::string int_to_hex_string(const unsigned int integer, const uint8_t number_of_digits)
-{         
+{
     // 'number_of_digits' represent how much digits the number should have, so the function will
     // pad the number with zeroes from left, if necessary.
     // for example: int_to_hex_string(255, 4) -> "00ff"
@@ -58,7 +58,7 @@ std::string int_to_hex_string(const unsigned int integer, const uint8_t number_o
 
     std::string return_string;
     std::stringstream ss_hex_string;
-    
+
     // convert to hex
     ss_hex_string << std::setw(number_of_digits) << std::setfill('0') << std::hex << integer;
 
@@ -68,4 +68,3 @@ std::string int_to_hex_string(const unsigned int integer, const uint8_t number_o
 } // namespace utils
 } // namespace bpl
 } // namespace beerocks
-

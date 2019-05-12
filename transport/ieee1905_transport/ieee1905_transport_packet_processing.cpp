@@ -12,7 +12,7 @@
 #include <chrono>
 
 #ifndef ETHER_IS_MULTICAST
-#define	ETHER_IS_MULTICAST(addr) (*(addr) & 0x01) // is address multicast or broadcast
+#define ETHER_IS_MULTICAST(addr) (*(addr)&0x01) // is address multicast or broadcast
 #endif
 
 #define ETHER_IS_SAME(addr1, addr2) (memcmp((addr1), (addr2), ETH_ALEN) == 0)
@@ -21,7 +21,8 @@ namespace mapf {
 
 static const uint8_t ieee1905_max_message_version = 0x00;
 
-void Ieee1905Transport::handle_packet(Packet &packet) {
+void Ieee1905Transport::handle_packet(Packet &packet)
+{
     MAPF_DBG("handling packet:" << std::endl << packet);
 
     if (!verify_packet(packet)) {
@@ -40,17 +41,20 @@ void Ieee1905Transport::handle_packet(Packet &packet) {
 }
 
 // do some basic sanity checking on the packet
-bool Ieee1905Transport::verify_packet(Packet &packet) {
+bool Ieee1905Transport::verify_packet(Packet &packet)
+{
     if (packet.ether_type == ETH_P_1905_1) {
         // verify minimum packet length (should at least contain an IEEE1905 header + End of Message TLV)
         if (packet.payload.iov_len < sizeof(Ieee1905CmduHeader) + 3) {
-            MAPF_DBG("packet verification failed - IEEE1905 packet is too short (" << (unsigned)packet.payload.iov_len << "bytes).");
+            MAPF_DBG("packet verification failed - IEEE1905 packet is too short ("
+                     << (unsigned)packet.payload.iov_len << "bytes).");
             return false;
         }
 
         Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
         if (ch->messageVersion > ieee1905_max_message_version) {
-            MAPF_DBG("packet verification failed - unsupported IEEE1905 messageVersion " << (unsigned)ch->messageVersion << ".");
+            MAPF_DBG("packet verification failed - unsupported IEEE1905 messageVersion "
+                     << (unsigned)ch->messageVersion << ".");
             return false;
         }
 
@@ -67,7 +71,8 @@ bool Ieee1905Transport::verify_packet(Packet &packet) {
         // not much to verify at this layer...
         // verify minimum packet length (should at least contain a single empty TLV)
         if (packet.payload.iov_len < 3) {
-            MAPF_DBG("packet verification failed - LLDP packet is too short (" << (unsigned)packet.payload.iov_len << "bytes).");
+            MAPF_DBG("packet verification failed - LLDP packet is too short ("
+                     << (unsigned)packet.payload.iov_len << "bytes).");
             return false;
         }
     } else {
@@ -93,7 +98,8 @@ bool Ieee1905Transport::verify_packet(Packet &packet) {
 // Since de-duplication happens before relaying - multicast duplicate packets will not be relayed. (duplicate
 // unicast packets for other devices will be forwarded by the bridge interface).
 //
-bool Ieee1905Transport::de_duplicate_packet(Packet &packet) {
+bool Ieee1905Transport::de_duplicate_packet(Packet &packet)
+{
     // only try to detect duplicate IEEE1905 packets
     if (packet.ether_type != ETH_P_1905_1) {
         return true;
@@ -102,8 +108,8 @@ bool Ieee1905Transport::de_duplicate_packet(Packet &packet) {
     std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
 
     // de-duplication map aging - go over all entries and remove old ones
-    for (auto it = de_duplication_map_.begin(); it != de_duplication_map_.end(); ) {
-        auto& dupval = it->second;
+    for (auto it = de_duplication_map_.begin(); it != de_duplication_map_.end();) {
+        auto &dupval = it->second;
 
         if (now > dupval.time + kMaximumDeDuplicationAge) {
             it = de_duplication_map_.erase(it);
@@ -116,17 +122,17 @@ bool Ieee1905Transport::de_duplicate_packet(Packet &packet) {
     DeDuplicationKey key;
     std::copy_n(packet.src, ETH_ALEN, key.src);
     key.messageType = ((Ieee1905CmduHeader *)packet.payload.iov_base)->messageType;
-    key.messageId = ((Ieee1905CmduHeader *)packet.payload.iov_base)->messageId;
-    key.fragmentId = ((Ieee1905CmduHeader *)packet.payload.iov_base)->fragmentId;
+    key.messageId   = ((Ieee1905CmduHeader *)packet.payload.iov_base)->messageId;
+    key.fragmentId  = ((Ieee1905CmduHeader *)packet.payload.iov_base)->fragmentId;
 
-    auto it = de_duplication_map_.find(key);
+    auto it           = de_duplication_map_.find(key);
     bool is_duplicate = (it != de_duplication_map_.end());
 
     if (is_duplicate) {
         // this is a duplicate packet - update timestamp
         counters_[CounterId::DUPLICATE_PACKETS]++;
-        auto& val = it->second;
-        val.time = now;
+        auto &val = it->second;
+        val.time  = now;
     } else if (int(de_duplication_map_.size()) >= kMaximumDeDuplicationThreads) {
         // this is not really a duplicate but we cannot track it so it will be dropped now
         MAPF_WARN("too many de-duplication threads - dropping packet as duplicate");
@@ -135,7 +141,7 @@ bool Ieee1905Transport::de_duplicate_packet(Packet &packet) {
         // this is not a duplicate packet - add new entry to the de-duplication map
         DeDuplicationValue val;
 
-        val.time = now;
+        val.time                 = now;
         de_duplication_map_[key] = val;
     }
 
@@ -152,7 +158,8 @@ bool Ieee1905Transport::de_duplicate_packet(Packet &packet) {
 // The current implementation does not support out-of-order arrival of fragments.
 //
 // see paragraph 7.1.2 of IEEE1905.1-2013
-bool Ieee1905Transport::de_fragment_packet(Packet &packet) {
+bool Ieee1905Transport::de_fragment_packet(Packet &packet)
+{
     // only try to de-fragment IEEE1905 packets
     if (packet.ether_type != ETH_P_1905_1) {
         return true;
@@ -166,8 +173,8 @@ bool Ieee1905Transport::de_fragment_packet(Packet &packet) {
     std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
 
     // de-fragmentation map cleanup - go over all entries and remove old ones or complete ones
-    for (auto it = de_fragmentation_map_.begin(); it != de_fragmentation_map_.end(); ) {
-        auto& val = it->second;
+    for (auto it = de_fragmentation_map_.begin(); it != de_fragmentation_map_.end();) {
+        auto &val = it->second;
 
         if (val.complete) {
             it = de_fragmentation_map_.erase(it);
@@ -185,7 +192,7 @@ bool Ieee1905Transport::de_fragment_packet(Packet &packet) {
     DeFragmentationKey key;
     std::copy_n(packet.src, ETH_ALEN, key.src);
     key.messageType = ch->messageType;
-    key.messageId = ch->messageId;
+    key.messageId   = ch->messageId;
 
     auto &val = de_fragmentation_map_[key]; // find a match (or create a new entry)
 
@@ -207,7 +214,8 @@ bool Ieee1905Transport::de_fragment_packet(Packet &packet) {
 
     // copy the IEEE1905 header from the first fragment
     if (ch->fragmentId == 0) {
-        std::copy_n((uint8_t*)packet.payload.iov_base, sizeof(Ieee1905CmduHeader), (uint8_t*)val.buf);
+        std::copy_n((uint8_t *)packet.payload.iov_base, sizeof(Ieee1905CmduHeader),
+                    (uint8_t *)val.buf);
         val.bufIndex = sizeof(Ieee1905CmduHeader);
 
         // set the last fragment indicator flag as this will be the header of a complete CMDU
@@ -221,15 +229,17 @@ bool Ieee1905Transport::de_fragment_packet(Packet &packet) {
         MAPF_WARN("defragmentation buffer overflow - dropping fragment");
         return false;
     }
-    std::copy_n((uint8_t *)packet.payload.iov_base + sizeof(Ieee1905CmduHeader), fragmentTlvsLength, val.buf + val.bufIndex);
+    std::copy_n((uint8_t *)packet.payload.iov_base + sizeof(Ieee1905CmduHeader), fragmentTlvsLength,
+                val.buf + val.bufIndex);
     val.bufIndex += fragmentTlvsLength;
     val.numFragments++;
 
     // detect defragmentation completion and update Packet object
     if (ch->GetLastFragmentIndicator()) {
-        val.complete = true; // mark as complete - the map entry will be deleted on the next invocation
+        val.complete =
+            true; // mark as complete - the map entry will be deleted on the next invocation
         packet.payload.iov_base = val.buf; // buffer is valid until next invocation of this method
-        packet.payload.iov_len = val.bufIndex;
+        packet.payload.iov_len  = val.bufIndex;
 
         return true;
     }
@@ -249,7 +259,9 @@ bool Ieee1905Transport::de_fragment_packet(Packet &packet) {
 // alternative transport interface).
 //
 // see paragraph 7.1.1 of IEEE1905.1-2013
-bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned int if_index, Packet &packet) {
+bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned int if_index,
+                                                                      Packet &packet)
+{
     // only fragment IEEE1905 packets longer than the threashold, that originate from the local device
     if (packet.ether_type != ETH_P_1905_1 ||
         packet.payload.iov_len <= kIeee1905FragmentationThreashold ||
@@ -263,39 +275,34 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
     uint8_t buf[kIeee1905FragmentationThreashold];
 
     // copy the IEEE1905 header (will be reused by all fragments)
-    std::copy_n((uint8_t*)packet.payload.iov_base, sizeof(Ieee1905CmduHeader), buf);
+    std::copy_n((uint8_t *)packet.payload.iov_base, sizeof(Ieee1905CmduHeader), buf);
     int remainingPacketLength = packet.payload.iov_len - sizeof(Ieee1905CmduHeader);
 
-    // packed TLV struct to help in the parsing of the packet
-    #pragma pack(push, 1)
+// packed TLV struct to help in the parsing of the packet
+#pragma pack(push, 1)
     struct Tlv {
     protected:
         uint8_t tlvType;
         uint16_t tlvLength;
 
     public:
-        uint8_t& type() {
-            return tlvType;
-        }
+        uint8_t &type() { return tlvType; }
 
-        Tlv *next() {
-            return (Tlv *)((uint8_t *)this + size());
-        }
+        Tlv *next() { return (Tlv *)((uint8_t *)this + size()); }
 
-        size_t size() {
-            return sizeof(Tlv) + ntohs(tlvLength);
-        }
+        size_t size() { return sizeof(Tlv) + ntohs(tlvLength); }
     };
-    #pragma pack(pop)
+#pragma pack(pop)
 
     // points to the first TLV in the currently built fragment
-    Tlv *firstTlvInFragment = (Tlv *)((uint8_t *)packet.payload.iov_base + sizeof(Ieee1905CmduHeader));
+    Tlv *firstTlvInFragment =
+        (Tlv *)((uint8_t *)packet.payload.iov_base + sizeof(Ieee1905CmduHeader));
 
     for (int fragmentId = 0; fragmentId < 256 && remainingPacketLength > 0; fragmentId++) {
         // search for the optimal TLV boundary for fragmentation
         // include as many TLVs as can fit into the maximum fragment size (threashold).
         int fragmentTlvsLength = 0;
-        Tlv *nextTlv = firstTlvInFragment;
+        Tlv *nextTlv           = firstTlvInFragment;
         while (1) {
             if (remainingPacketLength == 0) {
                 // we are all done
@@ -307,7 +314,8 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
                 return false;
             }
             if (nextTlv->type() == 0 && remainingPacketLength > int(nextTlv->size())) {
-                MAPF_WARN("bad packet format - extra bytes after end of message TLV. " << remainingPacketLength);
+                MAPF_WARN("bad packet format - extra bytes after end of message TLV. "
+                          << remainingPacketLength);
                 return false;
             }
             if (sizeof(Ieee1905CmduHeader) + nextTlv->size() > kIeee1905FragmentationThreashold) {
@@ -319,7 +327,8 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
                 MAPF_WARN("bad packet format - TLV exceeds packet bounds.");
                 return false;
             }
-            if (sizeof(Ieee1905CmduHeader) + fragmentTlvsLength + nextTlv->size() >= kIeee1905FragmentationThreashold) {
+            if (sizeof(Ieee1905CmduHeader) + fragmentTlvsLength + nextTlv->size() >=
+                kIeee1905FragmentationThreashold) {
                 // including the next TLV will go over the threashold - let's fragment at this TLV's boundary
                 break;
             }
@@ -333,18 +342,20 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
         }
 
         // copy the TLVs into the fragment packet buffer
-        std::copy_n((uint8_t*)firstTlvInFragment, fragmentTlvsLength, buf + sizeof(Ieee1905CmduHeader));
+        std::copy_n((uint8_t *)firstTlvInFragment, fragmentTlvsLength,
+                    buf + sizeof(Ieee1905CmduHeader));
 
         // update IEEE1905 header (fragmentId and lastFragmentIndicator)
         Ieee1905CmduHeader *hdr = reinterpret_cast<Ieee1905CmduHeader *>(buf);
-        hdr->fragmentId = fragmentId;
+        hdr->fragmentId         = fragmentId;
         hdr->SetLastFragmentIndicator(remainingPacketLength == 0 ? 1 : 0);
 
         fragment_packet.payload.iov_base = buf;
-        fragment_packet.payload.iov_len = sizeof(Ieee1905CmduHeader) + fragmentTlvsLength;
+        fragment_packet.payload.iov_len  = sizeof(Ieee1905CmduHeader) + fragmentTlvsLength;
 
         // send the fragment
-        MAPF_DBG("sending fragment " << (int)fragmentId << " (length=" << fragment_packet.payload.iov_len << ").");
+        MAPF_DBG("sending fragment " << (int)fragmentId
+                                     << " (length=" << fragment_packet.payload.iov_len << ").");
         if (!send_packet_to_network_interface(if_index, fragment_packet)) {
             return false;
         }
@@ -394,7 +405,8 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
 // Network      Multicast                     +           -                   -                               will be forwarded by linux bridge interface
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 //
-bool Ieee1905Transport::forward_packet(Packet &packet) {
+bool Ieee1905Transport::forward_packet(Packet &packet)
+{
     if (packet.dst_if_type == CmduRxMessage::IF_TYPE_LOCAL_BUS) {
         MAPF_DBG("forwarding packet to local bus.");
         if (!send_packet_to_local_bus(packet)) {
@@ -410,8 +422,8 @@ bool Ieee1905Transport::forward_packet(Packet &packet) {
             return false;
         }
     } else { // no dst interface is specified
-        bool forward_to_local_bus = false;
-        bool forward_to_bridge = false;
+        bool forward_to_local_bus          = false;
+        bool forward_to_bridge             = false;
         bool forward_to_network_interfaces = false;
 
         //
@@ -447,7 +459,7 @@ bool Ieee1905Transport::forward_packet(Packet &packet) {
                 addressed_to_this_device = true;
             } else {
                 for (auto it = network_interfaces_.begin(); it != network_interfaces_.end(); ++it) {
-                    auto& network_interface = it->second;
+                    auto &network_interface = it->second;
 
                     if (ETHER_IS_SAME(network_interface.addr, packet.dst)) {
                         addressed_to_this_device = true;
@@ -466,12 +478,16 @@ bool Ieee1905Transport::forward_packet(Packet &packet) {
         // Step 2: forward to sink(s) decided in Step 1
         //
         if (forward_to_local_bus || forward_to_bridge || forward_to_network_interfaces) {
-            MAPF_DBG("forwarding packet to" << (forward_to_local_bus ? " local bus," : "") << (forward_to_bridge ? " bridge," : "") << (forward_to_network_interfaces ? " network interfaces" : ""));
+            MAPF_DBG("forwarding packet to"
+                     << (forward_to_local_bus ? " local bus," : "")
+                     << (forward_to_bridge ? " bridge," : "")
+                     << (forward_to_network_interfaces ? " network interfaces" : ""));
         } else {
             MAPF_DBG("dropping packet");
         }
         if (forward_to_local_bus) {
-            Packet defragmented_packet = packet; // create a copy because de_fragment_packet may modify Packet.
+            Packet defragmented_packet =
+                packet; // create a copy because de_fragment_packet may modify Packet.
             if (de_fragment_packet(defragmented_packet)) {
                 if (!send_packet_to_local_bus(defragmented_packet)) {
                     MAPF_ERR("cannot forward packet to Local Bus.");
@@ -480,12 +496,14 @@ bool Ieee1905Transport::forward_packet(Packet &packet) {
         }
         if (forward_to_network_interfaces || forward_to_bridge) {
             for (auto it = network_interfaces_.begin(); it != network_interfaces_.end(); ++it) {
-                unsigned int if_index = it->first;
-                auto& network_interface = it->second;
+                unsigned int if_index   = it->first;
+                auto &network_interface = it->second;
 
-                if ( ((forward_to_bridge && network_interface.is_bridge) || (forward_to_network_interfaces && !network_interface.is_bridge)) &&
-                     (network_interface.fd >= 0) &&
-                     !(packet.src_if_type == CmduRxMessage::IF_TYPE_NET && packet.src_if_index == if_index)) { /* avoid loop-back */
+                if (((forward_to_bridge && network_interface.is_bridge) ||
+                     (forward_to_network_interfaces && !network_interface.is_bridge)) &&
+                    (network_interface.fd >= 0) &&
+                    !(packet.src_if_type == CmduRxMessage::IF_TYPE_NET &&
+                      packet.src_if_index == if_index)) { /* avoid loop-back */
                     if (!fragment_and_send_packet_to_network_interface(if_index, packet)) {
                         MAPF_ERR("cannot forward packet to network inteface " << if_index << ".");
                     }
@@ -497,34 +515,41 @@ bool Ieee1905Transport::forward_packet(Packet &packet) {
     return true;
 }
 
-
-std::ostream& Ieee1905Transport::Packet::print(std::ostream& os) const {
+std::ostream &Ieee1905Transport::Packet::print(std::ostream &os) const
+{
     std::stringstream ss;
 
     ss << "ethernet header:" << std::endl;
-    ss << "  dst        : " << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[0] << ":"
-                            << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[1] << ":"
-                            << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[2] << ":"
-                            << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[3] << ":"
-                            << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[4] << ":"
-                            << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[5] << std::endl;
-    ss << "  src        : " << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[0] << ":"
-                            << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[1] << ":"
-                            << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[2] << ":"
-                            << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[3] << ":"
-                            << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[4] << ":"
-                            << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[5] << std::endl;
-    ss << "  ether_type : " << std::hex << std::setfill('0') << std::setw(4) << ether_type << std::endl;
+    ss << "  dst        : " << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[0]
+       << ":" << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[1] << ":"
+       << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[2] << ":" << std::hex
+       << std::setfill('0') << std::setw(2) << (unsigned)dst[3] << ":" << std::hex
+       << std::setfill('0') << std::setw(2) << (unsigned)dst[4] << ":" << std::hex
+       << std::setfill('0') << std::setw(2) << (unsigned)dst[5] << std::endl;
+    ss << "  src        : " << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[0]
+       << ":" << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[1] << ":"
+       << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[2] << ":" << std::hex
+       << std::setfill('0') << std::setw(2) << (unsigned)src[3] << ":" << std::hex
+       << std::setfill('0') << std::setw(2) << (unsigned)src[4] << ":" << std::hex
+       << std::setfill('0') << std::setw(2) << (unsigned)src[5] << std::endl;
+    ss << "  ether_type : " << std::hex << std::setfill('0') << std::setw(4) << ether_type
+       << std::endl;
 
     if (ether_type == ETH_P_1905_1) {
         Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)payload.iov_base;
         ss << "  IEEE1905 header:" << std::endl;
-        ss << "    messageVersion        : " << std::hex << std::setfill('0') << std::setw(2) << (unsigned)ch->messageVersion << std::endl;
-        ss << "    messageType           : " << std::hex << std::setfill('0') << std::setw(4) << (unsigned)ntohs(ch->messageType) << std::endl;
-        ss << "    messageId             : " << std::hex << std::setfill('0') << std::setw(4) << (unsigned)ntohs(ch->messageId) << std::endl;
-        ss << "    fragmentId            : " << std::hex << std::setfill('0') << std::setw(2) << (unsigned)ch->fragmentId << std::endl;
-        ss << "    lastFragmentIndicator : " << std::hex << std::setfill('0') << std::setw(1) << (unsigned)ch->GetLastFragmentIndicator() << std::endl;
-        ss << "    relayIndicator        : " << std::hex << std::setfill('0') << std::setw(1) << (unsigned)ch->GetRelayIndicator() << std::endl;
+        ss << "    messageVersion        : " << std::hex << std::setfill('0') << std::setw(2)
+           << (unsigned)ch->messageVersion << std::endl;
+        ss << "    messageType           : " << std::hex << std::setfill('0') << std::setw(4)
+           << (unsigned)ntohs(ch->messageType) << std::endl;
+        ss << "    messageId             : " << std::hex << std::setfill('0') << std::setw(4)
+           << (unsigned)ntohs(ch->messageId) << std::endl;
+        ss << "    fragmentId            : " << std::hex << std::setfill('0') << std::setw(2)
+           << (unsigned)ch->fragmentId << std::endl;
+        ss << "    lastFragmentIndicator : " << std::hex << std::setfill('0') << std::setw(1)
+           << (unsigned)ch->GetLastFragmentIndicator() << std::endl;
+        ss << "    relayIndicator        : " << std::hex << std::setfill('0') << std::setw(1)
+           << (unsigned)ch->GetRelayIndicator() << std::endl;
     } else if (ether_type == ETH_P_LLDP) {
         ss << "  LLDP packet" << std::endl;
     }

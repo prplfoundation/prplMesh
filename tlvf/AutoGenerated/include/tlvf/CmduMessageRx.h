@@ -22,15 +22,13 @@ namespace ieee1905_1 {
 class CmduMessageRx : public CmduMessage {
 
 public:
-
     CmduMessageRx();
-    CmduMessageRx(CmduMessageRx& original);
+    CmduMessageRx(CmduMessageRx &original);
     ~CmduMessageRx();
 
 public:
-
-    std::shared_ptr<cCmduHeader> parse(uint8_t* buff, size_t buff_len, bool swap_needed = true);
-    CmduMessageRx& operator=(const CmduMessageRx&) = delete;
+    std::shared_ptr<cCmduHeader> parse(uint8_t *buff, size_t buff_len, bool swap_needed = true);
+    CmduMessageRx &operator=(const CmduMessageRx &) = delete;
 };
 
 }; // close namespace: ieee1905_1

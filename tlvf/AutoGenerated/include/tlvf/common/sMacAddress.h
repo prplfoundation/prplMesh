@@ -18,14 +18,13 @@
 #include <tlvf/swap.h>
 typedef struct sMacAddress {
     uint8_t mac[6];
-    void struct_swap(){
-    }
-    void struct_init(){
-            for (size_t i = 0; i < 6; i++) {
-                mac[i] = 0x0;
-            }
+    void struct_swap() {}
+    void struct_init()
+    {
+        for (size_t i = 0; i < 6; i++) {
+            mac[i] = 0x0;
+        }
     }
 } sMacAddress;
-
 
 #endif //_TLVF/COMMON_SMACADDRESS_H_

@@ -11,20 +11,20 @@
 #include "../../../common/utils/utils_net.h"
 
 #include <errno.h>
-#include <unistd.h>
 #include <netinet/in.h>
+#include <unistd.h>
 
 #include <linux/if_arp.h>
 #include <linux/rtnetlink.h>
 
 #ifdef BEEROCKS_BRCM_DDWRT
+#include <netlink/msg.h>
 #include <netlink/netlink.h>
 #include <netlink/socket.h>
-#include <netlink/msg.h>
 #elif BEEROCKS_BRCM_ASUSWRT
+#include <linux/msg.h>
 #include <linux/netlink.h>
 #include <linux/socket.h>
-#include <linux/msg.h>
 #endif
 
 #include <mapf/common/logger.h>
@@ -40,10 +40,10 @@ namespace bpl {
 #define IP4_HDRLEN 20 // IPv4 header length
 #define ARP_HDRLEN 28 // ARP header length
 
-#define SOCKET_SEND_BUF_SIZE    32768
-#define SOCKET_RECV_BUF_SIZE    (1024 * 1024)
+#define SOCKET_SEND_BUF_SIZE 32768
+#define SOCKET_RECV_BUF_SIZE (1024 * 1024)
 
-#define PROBE_TIMEOUT_SEC       5
+#define PROBE_TIMEOUT_SEC 5
 
 typedef struct {
     uint16_t htype;
@@ -68,8 +68,8 @@ typedef struct {
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-static bool send_arp(std::string iface, std::string dst_ip, std::string src_ip,
-        uint8_t* dst_mac, uint8_t* src_mac, int count, int arp_socket)
+static bool send_arp(std::string iface, std::string dst_ip, std::string src_ip, uint8_t *dst_mac,
+                     uint8_t *src_mac, int count, int arp_socket)
 {
     int tx_len;
     arp_hdr arphdr;
@@ -80,67 +80,61 @@ static bool send_arp(std::string iface, std::string dst_ip, std::string src_ip,
     uint32_t src_ip_uint = utils::uint_ipv4_from_string(src_ip);
 
     // Fill out sockaddr_ll
-    memset (&sock, 0, sizeof (sock));
-    sock.sll_family = AF_PACKET;
+    memset(&sock, 0, sizeof(sock));
+    sock.sll_family  = AF_PACKET;
     sock.sll_ifindex = utils::linux_iface_to_index(iface);
-    sock.sll_halen = 6;
-    memcpy (sock.sll_addr, dst_mac, 6 * sizeof (uint8_t));
+    sock.sll_halen   = 6;
+    memcpy(sock.sll_addr, dst_mac, 6 * sizeof(uint8_t));
 
     // build ARP header
-    arphdr.htype = htons(1); //type: 1 for ethernet
-    arphdr.ptype = htons(ETH_P_IP); // proto
-    arphdr.hlen = 6; // mac addr len
-    arphdr.plen = 4; // ip addr len
-    arphdr.opcode = htons (ARPOP_REQUEST);
-    memcpy (&arphdr.sender_mac, src_mac, 6);
-    memcpy (&arphdr.sender_ip, &src_ip_uint, 4);
-    memcpy (&arphdr.target_mac, dst_mac, 6);
-    memcpy (&arphdr.target_ip, &dst_ip_uint, 4);
+    arphdr.htype  = htons(1);        //type: 1 for ethernet
+    arphdr.ptype  = htons(ETH_P_IP); // proto
+    arphdr.hlen   = 6;               // mac addr len
+    arphdr.plen   = 4;               // ip addr len
+    arphdr.opcode = htons(ARPOP_REQUEST);
+    memcpy(&arphdr.sender_mac, src_mac, 6);
+    memcpy(&arphdr.sender_ip, &src_ip_uint, 4);
+    memcpy(&arphdr.target_mac, dst_mac, 6);
+    memcpy(&arphdr.target_ip, &dst_ip_uint, 4);
 
     // build ethernet frame
     tx_len = 6 + 6 + 2 + ARP_HDRLEN; // dest mac, src mac, type, arp header len
-    memcpy (packet_buffer, dst_mac, 6 * sizeof (uint8_t));
-    memcpy (packet_buffer + 6, src_mac, 6 * sizeof (uint8_t));
+    memcpy(packet_buffer, dst_mac, 6 * sizeof(uint8_t));
+    memcpy(packet_buffer + 6, src_mac, 6 * sizeof(uint8_t));
     packet_buffer[12] = ETH_P_ARP / 256;
     packet_buffer[13] = ETH_P_ARP % 256;
 
     // ARP header
-    memcpy (packet_buffer + ETH_HDRLEN, &arphdr, ARP_HDRLEN * sizeof (uint8_t));
+    memcpy(packet_buffer + ETH_HDRLEN, &arphdr, ARP_HDRLEN * sizeof(uint8_t));
 
     bool new_socket = (arp_socket < 0);
     if (new_socket) {
-        if((arp_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ARP))) < 0){
+        if ((arp_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ARP))) < 0) {
             MAPF_ERR("Opening ARP socket");
             return false;
         }
     }
 
     // Send ethernet frame to socket.
-    for(int i = 0; i < count ; i++) {
-        if (sendto(arp_socket, packet_buffer, tx_len, 0, (struct sockaddr *) &sock, sizeof (sock)) <= 0) {
+    for (int i = 0; i < count; i++) {
+        if (sendto(arp_socket, packet_buffer, tx_len, 0, (struct sockaddr *)&sock, sizeof(sock)) <=
+            0) {
             MAPF_ERR("sendto() failed");
         }
     }
-    if(new_socket) {
+    if (new_socket) {
         close(arp_socket);
     }
     return true;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-arp_monitor::arp_monitor() :
-    m_fdMonSocket(-1),
-    m_fdArpSocket(-1)
-{
-}
+arp_monitor::arp_monitor() : m_fdMonSocket(-1), m_fdArpSocket(-1) {}
 
-arp_monitor::~arp_monitor()
-{
-}
+arp_monitor::~arp_monitor() {}
 
 bool arp_monitor::start(std::string strIface)
 {
@@ -149,17 +143,15 @@ bool arp_monitor::start(std::string strIface)
 
     // Read interface values
     m_strIface = strIface;
-    
+
     // open netlink sock
-    if ((m_fdMonSocket = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE)) < 0)
-    {
+    if ((m_fdMonSocket = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE)) < 0) {
         MAPF_ERR("Failed opening socket: " << strerror(errno));
         return false;
     }
 
     int sndbuf = SOCKET_SEND_BUF_SIZE;
-    if (setsockopt(m_fdMonSocket, SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(sndbuf)) < 0)
-    {
+    if (setsockopt(m_fdMonSocket, SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(sndbuf)) < 0) {
         MAPF_ERR("Failed setting SO_SNDBUF option: " << strerror(errno));
         stop();
         return false;
@@ -178,7 +170,7 @@ bool arp_monitor::start(std::string strIface)
     local.nl_family = AF_NETLINK;
     local.nl_groups = RTNLGRP_TC;
 
-    if (bind(m_fdMonSocket, (struct sockaddr*)&local, sizeof(local)) < 0) {
+    if (bind(m_fdMonSocket, (struct sockaddr *)&local, sizeof(local)) < 0) {
         MAPF_ERR("Failed binding socket: " << strerror(errno));
         stop();
         return false;
@@ -207,18 +199,18 @@ void arp_monitor::stop()
     }
 }
 
-bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
+bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY &sArpMonData)
 {
-    char   buf_local[256];
+    char buf_local[256];
     struct sockaddr_nl nladdr;
     struct iovec iov;
 
     memset(&nladdr, 0, sizeof(nladdr));
     nladdr.nl_family = AF_NETLINK;
-    nladdr.nl_pid = 0;
+    nladdr.nl_pid    = 0;
     nladdr.nl_groups = 0;
-    iov.iov_base = buf_local;
-    iov.iov_len = sizeof(buf_local);
+    iov.iov_base     = buf_local;
+    iov.iov_len      = sizeof(buf_local);
 
     // Reading the message (non-blocking)
     struct msghdr msg;
@@ -230,13 +222,12 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
     memset(&sArpMonData, 0, sizeof(sArpMonData));
 
     ssize_t status;
-    if ((status = recvmsg(m_fdMonSocket, &msg, MSG_DONTWAIT | MSG_ERRQUEUE)) < 0) 
-    {
-       MAPF_ERR("Failed reading from socket: " << strerror(errno));
+    if ((status = recvmsg(m_fdMonSocket, &msg, MSG_DONTWAIT | MSG_ERRQUEUE)) < 0) {
+        MAPF_ERR("Failed reading from socket: " << strerror(errno));
         // if (errno == EINTR || errno == EAGAIN || errno == ENOBUFS)
         return false;
     }
-    
+
     if (status == 0) {
         MAPF_ERR("EOF on netlink\n");
         return false;
@@ -247,10 +238,9 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
     }
 
     // for loop to retrieve all ARP data.
-    for (nlmsghdr* h = (struct nlmsghdr*)buf_local; status >= ssize_t(sizeof(*h));) 
-    {
-        int len = h->nlmsg_len;
-        int l = len - sizeof(*h);
+    for (nlmsghdr *h = (struct nlmsghdr *)buf_local; status >= ssize_t(sizeof(*h));) {
+        int len    = h->nlmsg_len;
+        int l      = len - sizeof(*h);
         int len_at = len;
 
         if (l < 0 || len > status) {
@@ -266,10 +256,9 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
         status -= NLMSG_ALIGN(len);
 
         // Skip irrelevant messages
-        if (h->nlmsg_type != RTM_NEWNEIGH &&
-            h->nlmsg_type != RTM_DELNEIGH &&
+        if (h->nlmsg_type != RTM_NEWNEIGH && h->nlmsg_type != RTM_DELNEIGH &&
             h->nlmsg_type != RTM_GETNEIGH) {
-                continue;
+            continue;
             // if (r->ndm_family != AF_INET) {
             //     MAPF_ERR("ndm_family != AF_INET");
             //     return false;
@@ -277,7 +266,7 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
         }
 
         struct ndmsg *r = (struct ndmsg *)NLMSG_DATA(h);
-        if(r == nullptr) {
+        if (r == nullptr) {
             MAPF_ERR("ndmsg is NULL");
             return false;
         }
@@ -285,7 +274,7 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
         // State
         sArpMonData.state = r->ndm_state;
 
-        struct rtattr* tb[NDA_MAX+1];
+        struct rtattr *tb[NDA_MAX + 1];
         len_at -= NLMSG_LENGTH(sizeof(*r));
         if (len_at < 0) {
             MAPF_ERR("BUG: wrong nlmsg len = " << len_at);
@@ -294,18 +283,18 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
 
         // creating atrribute table
         unsigned short type;
-        int max = NDA_MAX;
-        struct rtattr *rta = ((struct rtattr*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ndmsg))));
-        len_at = h->nlmsg_len - NLMSG_LENGTH(sizeof(*r));
+        int max            = NDA_MAX;
+        struct rtattr *rta = ((struct rtattr *)(((char *)(r)) + NLMSG_ALIGN(sizeof(struct ndmsg))));
+        len_at             = h->nlmsg_len - NLMSG_LENGTH(sizeof(*r));
         unsigned short flags = 0;
 
         memset(tb, 0, sizeof(struct rtattr *) * (max + 1));
         while (RTA_OK(rta, len_at)) {
             type = rta->rta_type & ~flags;
-            if ((type <= max) && (!tb[type])){
+            if ((type <= max) && (!tb[type])) {
                 tb[type] = rta;
             }
-            rta = RTA_NEXT(rta,len_at);
+            rta = RTA_NEXT(rta, len_at);
         }
 
         // IP address
@@ -321,7 +310,7 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
         // MAC address
         if (tb[NDA_LLADDR]) {
             memcpy(sArpMonData.mac, RTA_DATA(tb[NDA_LLADDR]), 6);
-        } 
+        }
         // else {
         //     h = (struct nlmsghdr*)((char*)h + NLMSG_ALIGN(len));
         //     MAPF_WARN("MAC address not found in ARP message.");
@@ -352,7 +341,7 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
     return true;
 }
 
-int arp_monitor::process_arp(BPL_ARP_MON_ENTRY& sArpMonData)
+int arp_monitor::process_arp(BPL_ARP_MON_ENTRY &sArpMonData)
 {
     // Receive the data
     int iLen = 0;
@@ -362,7 +351,7 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY& sArpMonData)
     }
 
     // Do NOT continue if the nodes list is empty
-    if (!m_lstProbe.size()){
+    if (!m_lstProbe.size()) {
         return -1;
     }
 
@@ -372,18 +361,18 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY& sArpMonData)
         return -1;
     }
 
-    struct ethhdr* pEthHeader = (struct ethhdr*)m_arrArpPacket;
-    arp_hdr* pArpHeader = (arp_hdr*)(m_arrArpPacket + ETH_HLEN);
+    struct ethhdr *pEthHeader = (struct ethhdr *)m_arrArpPacket;
+    arp_hdr *pArpHeader       = (arp_hdr *)(m_arrArpPacket + ETH_HLEN);
 
     // Non ARP-Reply packet
-    if((pEthHeader->h_proto != ETH_P_ARP) || (ntohs(pArpHeader->opcode) != ARPOP_REPLY)) {      
+    if ((pEthHeader->h_proto != ETH_P_ARP) || (ntohs(pArpHeader->opcode) != ARPOP_REPLY)) {
         return -1;
     }
 
     // Check whether the received MAC is in the list
     int iTaskID = -1;
     for (auto iter = m_lstProbe.begin(); iter != m_lstProbe.end();) {
-        auto& node = *iter;
+        auto &node = *iter;
 
         // Found our node
         if (!std::memcmp(&node->mac, pArpHeader->sender_mac, ETH_ALEN)) {
@@ -397,7 +386,7 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY& sArpMonData)
             iter = m_lstProbe.erase(iter);
             continue;
         }
-        
+
         // Advance to the next node
         ++iter;
     }
@@ -412,19 +401,20 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY& sArpMonData)
     std::memcpy(&sArpMonData.mac, pArpHeader->sender_mac, sizeof(sArpMonData.mac));
     std::memcpy(&sArpMonData.ip, pArpHeader->sender_ip, sizeof(sArpMonData.ip));
 
-    // MAPF_DBG("ARP Response - IP: " << utils::ipv4_to_string(sArpMonData.ipv4) << 
+    // MAPF_DBG("ARP Response - IP: " << utils::ipv4_to_string(sArpMonData.ipv4) <<
     //          ", MAC: " << utils::mac_to_string(sArpMonData.mac) << " task_id:" << iTaskID);
 
     return iTaskID;
 }
 
-bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN], const uint8_t ip[BPL_ARP_MON_IP_LEN], int iTaskID)
+bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                        const uint8_t ip[BPL_ARP_MON_IP_LEN], int iTaskID)
 {
     bool create_new_entrie = true;
-    
-    // Check whether the given node is already waiting for a response 
+
+    // Check whether the given node is already waiting for a response
     for (auto iter = m_lstProbe.begin(); iter != m_lstProbe.end();) {
-        auto& node = *iter;
+        auto &node = *iter;
 
         // If the MAC of the given node is already in the list
         if (!std::memcmp(&node->mac, mac, BPL_ARP_MON_MAC_LEN)) {
@@ -438,12 +428,13 @@ bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN], const uint8_t ip
     }
 
     // Create a new node entry
-    if(create_new_entrie){
+    if (create_new_entrie) {
         auto pProbeEntry = std::make_shared<SProbeEntry>();
         std::memcpy(pProbeEntry->mac, mac, BPL_ARP_MON_MAC_LEN);
         std::memcpy(pProbeEntry->ip, ip, BPL_ARP_MON_IP_LEN);
         pProbeEntry->iTaskID = iTaskID;
-        pProbeEntry->tpTimeout = std::chrono::steady_clock::now() + std::chrono::seconds(PROBE_TIMEOUT_SEC);
+        pProbeEntry->tpTimeout =
+            std::chrono::steady_clock::now() + std::chrono::seconds(PROBE_TIMEOUT_SEC);
 
         // Add the entry to the list
         m_lstProbe.push_back(pProbeEntry);
@@ -460,9 +451,9 @@ bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN], const uint8_t ip
         return false;
     }
 
-    MAPF_DBG("send arp, iface=" <<  m_strIface << " dst_ip=" << utils::ipv4_to_string(ip) << 
-             " src_ip=" << str_iface_ip << " dst_mac=" << utils::mac_to_string(mac) << 
-             " src_mac=" << str_iface_mac);
+    MAPF_DBG("send arp, iface=" << m_strIface << " dst_ip=" << utils::ipv4_to_string(ip)
+                                << " src_ip=" << str_iface_ip << " dst_mac="
+                                << utils::mac_to_string(mac) << " src_mac=" << str_iface_mac);
 
     uint8_t src_mac[BPL_ARP_MON_MAC_LEN];
     uint8_t dst_mac[BPL_ARP_MON_MAC_LEN];
@@ -472,27 +463,27 @@ bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN], const uint8_t ip
 
     send_arp(m_strIface, ipv4_to_string(ip), str_iface_ip, dst_mac, src_mac, 1, m_fdArpSocket);
 
-    // TODO: optimize system to send unicast arp when dst_mac is in arp table 
-    // network_utils::arp_send(m_strIface, network_utils::ipv4_to_string(sParams.ipv4), 
+    // TODO: optimize system to send unicast arp when dst_mac is in arp table
+    // network_utils::arp_send(m_strIface, network_utils::ipv4_to_string(sParams.ipv4),
     //     str_iface_ip, sParams.mac, network_utils::mac_from_string(str_iface_mac),
     //     1, m_fdArpSocket);
 
     return (true);
 }
 
-bool arp_monitor::get_mac_for_ip(const uint8_t ip[BPL_ARP_MON_IP_LEN], uint8_t mac[BPL_ARP_MON_MAC_LEN])
+bool arp_monitor::get_mac_for_ip(const uint8_t ip[BPL_ARP_MON_IP_LEN],
+                                 uint8_t mac[BPL_ARP_MON_MAC_LEN])
 {
     return false;
 }
 
-bool arp_monitor::get_ip_for_mac(const uint8_t mac[BPL_ARP_MON_MAC_LEN], uint8_t ip[BPL_ARP_MON_IP_LEN])
+bool arp_monitor::get_ip_for_mac(const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                                 uint8_t ip[BPL_ARP_MON_IP_LEN])
 {
     return false;
 }
 
-void arp_monitor::print_arp_table()
-{
-}
+void arp_monitor::print_arp_table() {}
 
 } // namespace bpl
 } // namespace beerocks

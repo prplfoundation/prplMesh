@@ -17,32 +17,20 @@
 extern "C" {
 #undef DEBUG
 #include <cal.h>
-}  // extern "C"
+} // extern "C"
 
 #include <cal_interface.h>
 
 namespace beerocks {
 namespace bpl {
 
-int cal_interface::cal_getValue(MsgHeader *pxObj)
-{
-    return ::cal_getValue(pxObj);
-}
+int cal_interface::cal_getValue(MsgHeader *pxObj) { return ::cal_getValue(pxObj); }
 
-int cal_interface::cal_setValue(MsgHeader *pxObjList)
-{
-    return ::cal_setValue(pxObjList);
-}
+int cal_interface::cal_setValue(MsgHeader *pxObjList) { return ::cal_setValue(pxObjList); }
 
-int cal_interface::cal_getValueFromDb(MsgHeader *pxObj)
-{
-    return ::cal_getValueFromDb(pxObj);
-}
+int cal_interface::cal_getValueFromDb(MsgHeader *pxObj) { return ::cal_getValueFromDb(pxObj); }
 
-int cal_interface::cal_setValueToDb(MsgHeader *pxObjList)
-{
-    return ::cal_setValueToDb(pxObjList);
-}
+int cal_interface::cal_setValueToDb(MsgHeader *pxObjList) { return ::cal_setValueToDb(pxObjList); }
 
 int cal_interface::cal_updatePeriodicValues(MsgHeader *pxMsg)
 {

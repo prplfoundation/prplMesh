@@ -11,15 +11,14 @@
 
 extern "C" {
 #include <ugw_structs.h>
-}  // extern "C"
+} // extern "C"
 
 namespace beerocks {
 namespace bpl {
 
-class cal_interface
-{
-  public:
-    cal_interface() = default;
+class cal_interface {
+public:
+    cal_interface()          = default;
     virtual ~cal_interface() = default;
 
     virtual int cal_getValue(MsgHeader *pxObj);
@@ -36,4 +35,4 @@ class cal_interface
 } // namespace bpl
 } // namespace beerocks
 
-#endif  // __COMMON_CAL_INTERFACE_H__
+#endif // __COMMON_CAL_INTERFACE_H__
