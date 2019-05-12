@@ -12,6 +12,7 @@
 #include "monitor/arp_monitor.h"
 
 #include <sys/socket.h>
+// must come after sys/socket.h - see https://lore.kernel.org/patchwork/patch/762406/
 #include <linux/if.h>
 
 extern "C" {
