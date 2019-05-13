@@ -1,0 +1,57 @@
+#############################################################################
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+# Copyright (c) 2016-2019 Intel Corporation
+# This code is subject to the terms of the BSD+Patent license.
+# See LICENSE file for more details.
+#############################################################################
+
+#Supported platform: LINUX, GRX_350, GRX_350_LVP_1_0,  
+#iface_type: ETHERNET, GW_BRIDGE, WAVE_512, WAVE_513, WAVE_514, WAVE_522, WAVE_523, WAVE_524, STA_8265, STA_8260
+
+[global]
+platform=@BEEROCKS_PLATFORM@
+temp_path=/tmp/beerocks/
+enable_arp_monitor=1
+enable_keep_alive=1
+enable_bpl_iface_status_notifications=@BEEROCKS_NOTIFY@
+bridge_iface=@BEEROCKS_BRIDGE_IFACE@
+stop_on_failure_attempts=@BEEROCKS_STOP_ON_FAILURE_ATTEMPTS@ # 0 - disabled, else num of attempts
+enable_system_hang_test=0 # 0 - disabled
+enable_credentials_automatic_unify=@BEEROCKS_AUTOMATIC_CREDENTIALS_UNIFY@
+debug_disable_arp=0
+
+[backhaul]
+backhaul_preferred_bssid=
+backhaul_wire_iface_type=ETHERNET
+backhaul_wire_iface=@BEEROCKS_BH_WIRE_IFACE@
+
+[agent0]
+radio_identifier=00:00:00:00:00:00
+hostap_iface_type=WIFI_INTEL
+hostap_iface=wlan0
+hostap_ant_gain=0
+sta_iface=#wlan1  <-- 2.4G station has been disabled due to GEN4 instability 
+enable_repeater_mode=@BEEROCKS_REPEATER_MODE@
+
+[agent1]
+radio_identifier=00:00:00:00:00:02
+hostap_iface_type=WIFI_INTEL
+hostap_iface=wlan2
+hostap_ant_gain=0
+sta_iface=#wlan3
+enable_repeater_mode=0
+
+#[agent2]
+#hostap_iface_type=WIFI_INTEL
+#hostap_iface=wlan4
+#hostap_ant_gain=0
+#sta_iface=wlan5
+#enable_repeater_mode=0
+#sta_iface_filter_low=1
+
+[log]
+log_path=/tmp/beerocks/logs/
+log_global_levels=error,info,warning,fatal,trace,debug
+log_global_syslog_levels=error,info,warning,fatal,trace,debug
+log_global_size=1000000
+
