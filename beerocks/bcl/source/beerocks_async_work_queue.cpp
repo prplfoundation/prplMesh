@@ -14,25 +14,23 @@
 
 namespace beerocks {
 
-bool async_work_queue::init()
-{
-    return true;
-}
+bool async_work_queue::init() { return true; }
 
 bool async_work_queue::work()
 {
     auto task = queue.pop();
 
     // Execute valid tasks
-    if (task) { task->execute(); }
-    
+    if (task) {
+        task->execute();
+    }
+
     return true;
 }
 
 void async_work_queue::before_stop()
-{ 
+{
     // Unblock the worker thread
     queue.unblock();
 }
-
 }

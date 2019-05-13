@@ -8,15 +8,15 @@
 
 #include "bwl_utils.h"
 
-#include <wlioctl.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
 #include <errno.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
 #include <linux/types.h>
- 
+#include <net/if.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <wlioctl.h>
+
 int bwl_wl_ioctl(char *name, int cmd, void *buf, int len)
 {
     struct ifreq ifr;
@@ -39,7 +39,7 @@ int bwl_wl_ioctl(char *name, int cmd, void *buf, int len)
     ioc.buf = buf;
     ioc.len = len;
     strncpy(ifr.ifr_name, name, IFNAMSIZ);
-    ifr.ifr_data = (caddr_t) & ioc;
+    ifr.ifr_data = (caddr_t)&ioc;
     if ((ret = ioctl(s, SIOCDEVPRIVATE, &ifr)) < 0) {
         if (cmd != WLC_GET_MAGIC) {
             perror(ifr.ifr_name);
@@ -51,4 +51,4 @@ int bwl_wl_ioctl(char *name, int cmd, void *buf, int len)
     */
     close(s);
     return ret;
-} 
+}

@@ -26,46 +26,47 @@ beerocks::version::version(std::string ver, std::string build_date, std::string 
     set_module_version("__main__", ver, build_date, build_rev);
 }
 
-void beerocks::version::set_module_version(std::string so_name, std::string ver, std::string build_date, std::string build_rev)
+void beerocks::version::set_module_version(std::string so_name, std::string ver,
+                                           std::string build_date, std::string build_rev)
 {
     s_beerocks_version_map[so_name] = std::make_tuple(ver, build_date, build_rev);
 }
 
-std::string beerocks::version::get_module_version(const std::string& module_name)
+std::string beerocks::version::get_module_version(const std::string &module_name)
 {
     return std::get<0>(s_beerocks_version_map[module_name]);
 }
 
-std::string beerocks::version::get_module_timestamp(const std::string& module_name)
+std::string beerocks::version::get_module_timestamp(const std::string &module_name)
 {
     return std::get<1>(s_beerocks_version_map[module_name]);
 }
 
-std::string beerocks::version::get_module_revision(const std::string& module_name)
+std::string beerocks::version::get_module_revision(const std::string &module_name)
 {
     return std::get<2>(s_beerocks_version_map[module_name]);
 }
 
-std::string beerocks::version::version_to_string(const sBinaryVersion& version)
+std::string beerocks::version::version_to_string(const sBinaryVersion &version)
 {
     std::stringstream ss;
-    ss << static_cast<uint32_t>(version.major) << "."
-       << static_cast<uint32_t>(version.minor) << "."
+    ss << static_cast<uint32_t>(version.major) << "." << static_cast<uint32_t>(version.minor) << "."
        << static_cast<uint32_t>(version.build_number);
 
     return ss.str();
 }
 
-sBinaryVersion beerocks::version::version_from_string(const std::string& version)
+sBinaryVersion beerocks::version::version_from_string(const std::string &version)
 {
     sBinaryVersion ret = {};
-    if (version.empty())  return ret;
+    if (version.empty())
+        return ret;
     char delim; // hold on '.' delimiter from version string "X.X.X"
     uint32_t arr[3] = {0, 0, 0};
     std::stringstream ss(version);
     ss >> arr[0] >> delim >> arr[1] >> delim >> arr[2];
-    ret.major = static_cast<uint8_t>(arr[0]);
-    ret.minor = static_cast<uint8_t>(arr[1]);
+    ret.major        = static_cast<uint8_t>(arr[0]);
+    ret.minor        = static_cast<uint8_t>(arr[1]);
     ret.build_number = static_cast<uint16_t>(arr[2]);
     return ret;
 }
@@ -90,12 +91,11 @@ static std::string get_last_path(std::string path)
     }
 }
 
-void beerocks::version::print_version(
-    bool verbose, const std::string& name, const std::string& description)
+void beerocks::version::print_version(bool verbose, const std::string &name,
+                                      const std::string &description)
 {
     std::cout << name << " " << version::get_module_version() << " ("
-              << version::get_module_timestamp() << ") ["
-              << version::get_module_revision() << "]"
+              << version::get_module_timestamp() << ") [" << version::get_module_revision() << "]"
               << std::endl;
 
     if (description.length() > 0) {
@@ -106,13 +106,12 @@ void beerocks::version::print_version(
     if (verbose) {
         if (s_beerocks_version_map.size() > 1) {
             std::cout << "Additional Modules:" << std::endl;
-            for (auto& module_node : s_beerocks_version_map) {
+            for (auto &module_node : s_beerocks_version_map) {
                 if (module_node.first != "__main__") {
                     std::cout << std::string("  ") << module_node.first << std::string(": ")
                               << std::get<0>(module_node.second) << " ("
-                              << std::get<1>(module_node.second) << ") [" 
-                              << std::get<2>(module_node.second) << "]" 
-                              << std::endl;
+                              << std::get<1>(module_node.second) << ") ["
+                              << std::get<2>(module_node.second) << "]" << std::endl;
                 }
             }
         }
@@ -127,17 +126,16 @@ void beerocks::version::print_version(
     }
 }
 
-void beerocks::version::log_version(int, char** argv)
+void beerocks::version::log_version(int, char **argv)
 {
     std::string name(get_last_path(argv[0]));
 
     LOG(INFO) << name << " " << version::get_module_version() << " ("
-              << version::get_module_timestamp() << ") ["
-              << version::get_module_revision() << "]";
+              << version::get_module_timestamp() << ") [" << version::get_module_revision() << "]";
 
     if (s_beerocks_version_map.size() > 1) {
-        LOG(INFO)  << "Additional Modules:";
-        for (auto& module_node : s_beerocks_version_map) {
+        LOG(INFO) << "Additional Modules:";
+        for (auto &module_node : s_beerocks_version_map) {
             if (module_node.first != "__main__") {
                 LOG(INFO) << std::string("  ") << module_node.first << std::string(": ")
                           << std::get<0>(module_node.second) << " ("
@@ -156,19 +154,18 @@ void beerocks::version::log_version(int, char** argv)
     LOG(INFO) << "Kernel Version: " << version::get_kernel_version();
 }
 
-bool beerocks::version::handle_version_query(
-    int argc, char** argv, const std::string& description)
+bool beerocks::version::handle_version_query(int argc, char **argv, const std::string &description)
 {
     if (argc > 1) {
         bool version = false;
-        bool all = false;
+        bool all     = false;
         for (int i = 1; i < argc; ++i) {
             if ((std::string("-v") == argv[i]) || (std::string("--version") == argv[i])) {
                 version = true;
-            } else if ((std::string("-va") == argv[i])
-                       || (std::string("--version-all") == argv[i])) {
+            } else if ((std::string("-va") == argv[i]) ||
+                       (std::string("--version-all") == argv[i])) {
                 version = true;
-                all = true;
+                all     = true;
             }
         }
 
@@ -198,7 +195,7 @@ std::string beerocks::version::get_bootloader_version()
     std::string uboottok("ubootver=");
     auto start_ver = bootloader_version_raw.find(uboottok);
     if (std::string::npos == start_ver) {
-        uboottok = "BOOT_IMAGE=";
+        uboottok  = "BOOT_IMAGE=";
         start_ver = bootloader_version_raw.find(uboottok);
     }
     if (std::string::npos == start_ver) {
@@ -221,7 +218,7 @@ std::string beerocks::version::get_ugw_version()
 {
     std::string ugw_version;
 
-    std::string ugw_version_file_name = "/etc/version";
+    std::string ugw_version_file_name   = "/etc/version";
     std::string ugw_timestamp_file_name = "/etc/timestamp";
     std::ifstream version_file(ugw_version_file_name);
     std::ifstream timestamp_file(ugw_timestamp_file_name);
@@ -298,7 +295,8 @@ std::string beerocks::version::get_wave_version()
         if (std::string::npos != wave_version_line) {
             auto value_start = line.find("=");
             if (std::string::npos != value_start) {
-                wave_version = line.substr(value_start + 2, ((line.length() - 1) - (value_start + 2)));
+                wave_version =
+                    line.substr(value_start + 2, ((line.length() - 1) - (value_start + 2)));
                 return wave_version;
             }
         }

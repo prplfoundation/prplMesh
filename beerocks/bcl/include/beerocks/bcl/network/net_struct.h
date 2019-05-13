@@ -9,8 +9,8 @@
 #ifndef _NET_STRUCT_
 #define _NET_STRUCT_
 
-#include <stdint.h>
 #include <cstring>
+#include <stdint.h>
 
 namespace beerocks {
 namespace net {
@@ -22,10 +22,10 @@ enum eNetworkStructsConsts {
 
 typedef struct sIpv4Addr {
     uint8_t oct[IP_ADDR_LEN];
-    void struct_swap(){
-    }
-    void struct_init(){
-        for(size_t i=0; i<IP_ADDR_LEN; i++){
+    void struct_swap() {}
+    void struct_init()
+    {
+        for (size_t i = 0; i < IP_ADDR_LEN; i++) {
             oct[i] = 0;
         }
     }
@@ -35,17 +35,16 @@ typedef struct sMacAddr {
     uint8_t oct[MAC_ADDR_LEN];
     uint8_t channel;
     int8_t rssi;
-    void struct_swap(){
-    }
-    void struct_init(){
-        for(size_t i=0; i<MAC_ADDR_LEN; i++){
+    void struct_swap() {}
+    void struct_init()
+    {
+        for (size_t i = 0; i < MAC_ADDR_LEN; i++) {
             oct[i] = 0;
         }
         channel = 0;
-        rssi = 0;
+        rssi    = 0;
     }
 } sMacAddr;
-
 }
 }
 

@@ -19,26 +19,25 @@ namespace bwl {
  */
 class ap_wlan_hal : public virtual base_wlan_hal {
 
-// Public definitions
+    // Public definitions
 public:
-
     /*!
      * Supported 4 address (WDS) modes
      */
     enum class WDSMode {
-        Disabled        = 0, /*!< 4 address mode not supported */
-        Static          = 1, /*!< Single MAC */
-        Dynamic         = 2, /*!< Automatic learning */
-        List            = 3  /*!< Manually managed list of MACs */
+        Disabled = 0, /*!< 4 address mode not supported */
+        Static   = 1, /*!< Single MAC */
+        Dynamic  = 2, /*!< Automatic learning */
+        List     = 3  /*!< Manually managed list of MACs */
     };
-        
+
     enum class Event {
         Invalid = 0,
-        
+
         AP_Attached,
         AP_Enabled,
         AP_Disabled,
-    
+
         STA_Connected,
         STA_Disconnected,
         STA_Unassoc_RSSI,
@@ -48,23 +47,22 @@ public:
 
         Interface_Enabled,
         Interface_Disabled,
-    
+
         ACS_Started,
         ACS_Completed,
         ACS_Failed,
-    
+
         CSA_Finished,
-    
+
         BSS_TM_Response,
-    
+
         DFS_CAC_Completed,
         DFS_NOP_Finished,
         DFS_RADAR_Detected
-    };       
-    
-// Public methods
+    };
+
+    // Public methods
 public:
-        
     virtual ~ap_wlan_hal() = default;
 
     /*!
@@ -74,8 +72,8 @@ public:
      *
      * @return true on success or false on error.
      */
-     virtual bool sta_allow(const std::string& mac) = 0;
-     
+    virtual bool sta_allow(const std::string &mac) = 0;
+
     /*!
      * Deny the station with the given MAC address from connecting to the AP.
      *
@@ -85,7 +83,7 @@ public:
      * 
      * @return true on success or false on error.
      */
-    virtual bool sta_deny(const std::string& mac, int reject_sta) = 0;
+    virtual bool sta_deny(const std::string &mac, int reject_sta) = 0;
 
     /*!
      * Disassociate the station with the given MAC address.
@@ -96,7 +94,7 @@ public:
      *
      * @return true on success or false on error.
      */
-    virtual bool sta_disassoc(int8_t vap_id, const std::string& mac, uint32_t reason = 0) = 0;
+    virtual bool sta_disassoc(int8_t vap_id, const std::string &mac, uint32_t reason = 0) = 0;
 
     /*!
      * Deautanticate the station with the given MAC address.
@@ -107,8 +105,8 @@ public:
      *
      * @return true on success or false on error.
      */
-    virtual bool sta_deauth(int8_t vap_id, const std::string& mac, uint32_t reason = 0) = 0;
-     
+    virtual bool sta_deauth(int8_t vap_id, const std::string &mac, uint32_t reason = 0) = 0;
+
     /*!
      * Send a 802.11v steer request (BSS Transition) to a connected station.
      *
@@ -123,7 +121,8 @@ public:
      *
      * @return true on success or false on error.
      */
-    virtual bool sta_bss_steer(const std::string& mac, const std::string& bssid, int chan, int disassoc_timer, int valid_int) = 0;
+    virtual bool sta_bss_steer(const std::string &mac, const std::string &bssid, int chan,
+                               int disassoc_timer, int valid_int) = 0;
 
     /*!
      * TODO: Move to the base class?
@@ -140,7 +139,9 @@ public:
      *
      * @return true on success or false on error.
      */
-    virtual bool sta_unassoc_rssi_measurement(const std::string& mac, int chan, int bw, int vht_center_frequency, int delay, int window_size) = 0;
+    virtual bool sta_unassoc_rssi_measurement(const std::string &mac, int chan, int bw,
+                                              int vht_center_frequency, int delay,
+                                              int window_size) = 0;
 
     /*!
      * Add a station to softblock list
@@ -155,11 +156,12 @@ public:
      *
      * @return true on success or false on error.
      */
-    virtual bool sta_softblock_add(const std::string& vap_name, const std::string& client_mac, uint8_t reject_error_code, 
-                                        uint8_t probe_snr_threshold_hi, uint8_t probe_snr_threshold_lo, 
-                                        uint8_t authetication_snr_threshold_hi, uint8_t authetication_snr_threshold_lo) = 0;
-    
-    
+    virtual bool sta_softblock_add(const std::string &vap_name, const std::string &client_mac,
+                                   uint8_t reject_error_code, uint8_t probe_snr_threshold_hi,
+                                   uint8_t probe_snr_threshold_lo,
+                                   uint8_t authetication_snr_threshold_hi,
+                                   uint8_t authetication_snr_threshold_lo) = 0;
+
     // TODO: To be removed?  since hostapd doesn't support removeing STA from softblock list.
     /*!
      * Remove a station from softblock list
@@ -169,8 +171,8 @@ public:
      *
      * @return true on success or false on error.
      */
-    virtual bool sta_softblock_remove(const std::string& vap_name, const std::string& client_mac) = 0
-    ;
+    virtual bool sta_softblock_remove(const std::string &vap_name,
+                                      const std::string &client_mac) = 0;
     /*!
      * Switch the AP to the given channel.
      *
@@ -181,7 +183,7 @@ public:
      * @return true on success or false on error.
      */
     virtual bool switch_channel(int chan, int bw, int vht_center_frequency) = 0;
-     
+
     /*!
      * Update the Radio antenna configuration.
      * 
@@ -207,7 +209,7 @@ public:
      *
      * @return true on success or false on error.
      */
-    virtual bool wds_add_sta(const std::string& mac) = 0;
+    virtual bool wds_add_sta(const std::string &mac) = 0;
 
     /*!
      * Delete a STA from the WDS list.
@@ -216,7 +218,7 @@ public:
      *
      * @return true on success or false on error.
      */
-    virtual bool wds_del_sta(const std::string& mac) = 0;
+    virtual bool wds_del_sta(const std::string &mac) = 0;
 
     /*!
      * Clear the WDS list.
@@ -244,11 +246,11 @@ public:
      * 
      * @return true on success or false on error.
      */
-    virtual bool failsafe_channel_get(int& chan, int& bw) = 0;
-    
+    virtual bool failsafe_channel_get(int &chan, int &bw) = 0;
+
     // TODO: UPDATE AFTER THE MERGE WITH CHANNEL SELECTION
-    virtual bool restricted_channels_set(char* channel_list) = 0;
-    virtual bool restricted_channels_get(char* channel_list) = 0;
+    virtual bool restricted_channels_set(char *channel_list) = 0;
+    virtual bool restricted_channels_get(char *channel_list) = 0;
     //virtual bool restricted_channels_set(...);
     //virtual bool restricted_channels_get(...);
 
@@ -271,8 +273,8 @@ public:
      * 
      * @return true on success or false on error.
      */
-    virtual bool set_vap_enable(const std::string& iface_name, const bool enable) = 0;
-    virtual bool get_vap_enable(const std::string& iface_name, bool& enable) = 0;
+    virtual bool set_vap_enable(const std::string &iface_name, const bool enable) = 0;
+    virtual bool get_vap_enable(const std::string &iface_name, bool &enable)      = 0;
 };
 
 } // namespace bwl
@@ -281,13 +283,14 @@ public:
 extern "C" {
 
 // Types
-typedef bwl::ap_wlan_hal* (*ap_wlan_hal_create_t)(std::string, bool, bwl::base_wlan_hal::hal_event_cb_t);
-typedef void              (*ap_wlan_hal_destroy_t)(bwl::ap_wlan_hal*);
+typedef bwl::ap_wlan_hal *(*ap_wlan_hal_create_t)(std::string, bool,
+                                                  bwl::base_wlan_hal::hal_event_cb_t);
+typedef void (*ap_wlan_hal_destroy_t)(bwl::ap_wlan_hal *);
 
 // Prototypes
-bwl::ap_wlan_hal* ap_wlan_hal_create(std::string iface_name, bool acs_enabled, bwl::base_wlan_hal::hal_event_cb_t cb);
-void              ap_wlan_hal_destroy(bwl::ap_wlan_hal* obj);
+bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bool acs_enabled,
+                                     bwl::base_wlan_hal::hal_event_cb_t cb);
+void ap_wlan_hal_destroy(bwl::ap_wlan_hal *obj);
 }
 
 #endif // _BWL_AP_WLAN_HAL_H_
- 

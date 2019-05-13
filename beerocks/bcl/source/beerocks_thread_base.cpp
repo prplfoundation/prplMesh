@@ -10,10 +10,7 @@
 
 using namespace beerocks;
 
-thread_base::~thread_base()
-{
-    stop();
-}
+thread_base::~thread_base() { stop(); }
 
 bool thread_base::start(std::string name)
 {
@@ -21,15 +18,15 @@ bool thread_base::start(std::string name)
     if (!init_ok) {
         should_stop = true;
     } else {
-        if (!name.empty()) thread_name = name;
+        if (!name.empty())
+            thread_name = name;
         stop();
-        should_stop = false;
+        should_stop       = false;
         worker_is_running = true;
-        worker = std::thread(&thread_base::run, this);
+        worker            = std::thread(&thread_base::run, this);
     }
     return init_ok;
 }
-
 
 void thread_base::join()
 {
@@ -57,5 +54,3 @@ void thread_base::run()
     on_thread_stop();
     worker_is_running = false;
 }
-
-

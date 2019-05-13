@@ -8,12 +8,12 @@
 
 #ifndef _BWL_BASE_WLAN_HAL_FAPI_H_
 #define _BWL_BASE_WLAN_HAL_FAPI_H_
- 
+
 #include "../common/base_wlan_hal.h"
 #include "fapi_attach_fsm.h"
 
-#include <memory>
 #include <chrono>
+#include <memory>
 
 namespace bwl {
 namespace wav_fapi {
@@ -27,9 +27,8 @@ class fapi_attach_fsm;
  */
 class base_wlan_hal_fapi : public virtual base_wlan_hal {
 
-// Public methods:
+    // Public methods:
 public:
- 
     virtual ~base_wlan_hal_fapi();
 
     virtual HALState attach(bool block = false) override;
@@ -39,23 +38,22 @@ public:
     virtual bool process_ext_events() override;
     virtual std::string get_radio_mac() override;
 
-// Protected methods
+    // Protected methods
 protected:
-
-    base_wlan_hal_fapi(HALType type, std::string iface_name, IfaceType iface_type, bool acs_enabled ,hal_event_cb_t callback);
+    base_wlan_hal_fapi(HALType type, std::string iface_name, IfaceType iface_type, bool acs_enabled,
+                       hal_event_cb_t callback);
 
     // Parse FAPI event
-    virtual bool parse_fapi_event(const std::string& opcode, std::shared_ptr<void> obj) = 0;
+    virtual bool parse_fapi_event(const std::string &opcode, std::shared_ptr<void> obj) = 0;
 
-// Private data-members:
+    // Private data-members:
 private:
-
     std::shared_ptr<fapi_attach_fsm> m_fapi_attach_fsm;
 
     fapi_fsm_state m_last_attach_state = fapi_fsm_state::Detach;
 };
- 
+
 } // namespace bwl
-} // namespace wav_fapi 
+} // namespace wav_fapi
 
 #endif // _BWL_BASE_WLAN_HAL_FAPI_H_

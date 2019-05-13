@@ -11,26 +11,24 @@
 #include <easylogging++.h>
 
 #include <errno.h>
-#include <unistd.h>
 #include <sys/eventfd.h>
+#include <unistd.h>
 
 // Use easylogging++ instance of the main application
 SHARE_EASYLOGGINGPP(el::Helpers::storage())
 
 namespace bwl {
 
-base_wlan_hal::base_wlan_hal(HALType type, std::string iface_name, IfaceType iface_type, bool acs_enabled, hal_event_cb_t callback) :
-    m_type(type),
-    m_iface_name(iface_name),
-    m_iface_type(iface_type),
-    m_acs_enabled(acs_enabled),
-    m_int_event_cb(callback)
-    
+base_wlan_hal::base_wlan_hal(HALType type, std::string iface_name, IfaceType iface_type,
+                             bool acs_enabled, hal_event_cb_t callback)
+    : m_type(type), m_iface_name(iface_name), m_iface_type(iface_type), m_acs_enabled(acs_enabled),
+      m_int_event_cb(callback)
+
 {
 
     // Initialize radio info structure
-    m_radio_info.iface_name = iface_name;
-    m_radio_info.iface_type = iface_type;
+    m_radio_info.iface_name  = iface_name;
+    m_radio_info.iface_type  = iface_type;
     m_radio_info.acs_enabled = acs_enabled;
     // Create an eventfd for internal events
     if ((m_fd_int_events = eventfd(0, EFD_SEMAPHORE)) < 0) {
@@ -80,11 +78,11 @@ bool base_wlan_hal::process_int_events()
 
     // Pop an event from the queue
     auto event = m_queue_events.pop(false);
-    
+
     if (!event || !counter) {
         LOG(WARNING) << "process_int_events() called by the event queue pointer is " << event
                      << " and/or eventfd counter = " << counter;
-        
+
         return false;
     }
 
@@ -93,7 +91,7 @@ bool base_wlan_hal::process_int_events()
         LOG(ERROR) << "Event callback not registered!";
         return false;
     }
-    
+
     return m_int_event_cb(event);
 }
 

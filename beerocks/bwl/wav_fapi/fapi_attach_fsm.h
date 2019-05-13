@@ -22,35 +22,21 @@ struct wpa_ctrl;
 namespace bwl {
 namespace wav_fapi {
 
-enum class fapi_fsm_state
-{
-    Delay,
-    Init,
-    GetRadioInfo,
-    Attach,
-    Operational,
-    Detach
-};
+enum class fapi_fsm_state { Delay, Init, GetRadioInfo, Attach, Operational, Detach };
 
-enum class fapi_fsm_event
-{
-    Attach,
-    Detach
-};
+enum class fapi_fsm_event { Attach, Detach };
 
-class fapi_attach_fsm : protected beerocks::beerocks_fsm<fapi_fsm_state, fapi_fsm_event>
-{
+class fapi_attach_fsm : protected beerocks::beerocks_fsm<fapi_fsm_state, fapi_fsm_event> {
 
-// Public definitions
+    // Public definitions
 public:
-    
     // FAPI event callback
-    typedef std::function<bool(const std::string& opcode, std::shared_ptr<void> obj)> fapi_event_cb_t;
+    typedef std::function<bool(const std::string &opcode, std::shared_ptr<void> obj)>
+        fapi_event_cb_t;
 
-// Public methods:
+    // Public methods:
 public:
-
-    fapi_attach_fsm(HALType type, RadioInfo& radio_info, fapi_event_cb_t cb);
+    fapi_attach_fsm(HALType type, RadioInfo &radio_info, fapi_event_cb_t cb);
     ~fapi_attach_fsm() = default;
 
     bool setup();
@@ -64,46 +50,43 @@ public:
     bool refresh_vaps_info();
 
     //Read the interface information ,indication for interface and hostapd up.
-    bool get_interface_info( std::string iface_name );
-    
+    bool get_interface_info(std::string iface_name);
+
 #ifdef USE_FAPI_DAEMON
 
-    int get_wpa_ctrl_events_fd() const
-    { return (m_fapi_event_fd); }
+    int get_wpa_ctrl_events_fd() const { return (m_fapi_event_fd); }
 
 #else
 
-    struct wpa_ctrl* get_wpa_ctrl_socket() const
-    { return (m_wpa_ctrl); }
+    struct wpa_ctrl *get_wpa_ctrl_socket() const { return (m_wpa_ctrl); }
 
 #endif
 
     // Inject FAPI event (from internal FAPI callback)
-    void inject_fapi_event(const std::string opcode, void* obj);
+    void inject_fapi_event(const std::string opcode, void *obj);
 
     std::string state_enum_to_string(fapi_fsm_state state);
 
 private:
-    
-    std::chrono::steady_clock::time_point   m_state_timeout;
+    std::chrono::steady_clock::time_point m_state_timeout;
 
-    HALType                                 m_hal_type;
-    RadioInfo&                              m_radio_info;
+    HALType m_hal_type;
+    RadioInfo &m_radio_info;
 
 #ifdef USE_FAPI_DAEMON
 
-    int                                     m_fapi_event_fd = -1;
+    int m_fapi_event_fd = -1;
 
 #else
 
-    struct wpa_ctrl*                        m_wpa_ctrl = nullptr;
+    struct wpa_ctrl *m_wpa_ctrl = nullptr;
 
 #endif
 
-    std::shared_ptr<char>                   m_temp_fapi_value;
-    
+    std::shared_ptr<char> m_temp_fapi_value;
+
     // FAPI events callback
-    fapi_event_cb_t                         m_fapi_event_cb;
+    fapi_event_cb_t m_fapi_event_cb;
 };
 
 } // namespace bwl

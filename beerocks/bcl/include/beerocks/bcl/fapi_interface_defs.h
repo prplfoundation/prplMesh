@@ -13,7 +13,8 @@
 
 // FAPI object names
 #define OBJECT_ACCESSPOINT_ASSOCIATEDDEVICE "Device.WiFi.AccessPoint.AssociatedDevice"
-#define OBJECT_ACCESSPOINT_VENDOR_ASSOCIATEDDEVICE "Device.WiFi.AccessPoint.X_LANTIQ_COM_Vendor.AssociatedDevice"
+#define OBJECT_ACCESSPOINT_VENDOR_ASSOCIATEDDEVICE                                                 \
+    "Device.WiFi.AccessPoint.X_LANTIQ_COM_Vendor.AssociatedDevice"
 #define OBJECT_ENDPOINT "Device.WiFi.EndPoint"
 #define OBJECT_ENDPOINT_PROFILE "Device.WiFi.EndPoint.Profile"
 #define OBJECT_ENDPOINT_PROFILE_SECURITY "Device.WiFi.EndPoint.Profile.Security"
@@ -55,7 +56,8 @@
 #define PARAM_VENDOR_NAME "X_LANTIQ_COM_Vendor_Name"
 #define PARAM_VENDOR_NETWORK_ID "X_LANTIQ_COM_Vendor_NetworkId"
 #define PARAM_VENDOR_NOISE "X_LANTIQ_COM_Vendor_Noise"
-#define PARAM_VENDOR_OPERATING_CHANNEL_BANDWIDTH "X_LANTIQ_COM_Vendor_OperatingChannelBandwidt" // (intentional, that's how it appears in FAPI)
+#define PARAM_VENDOR_OPERATING_CHANNEL_BANDWIDTH                                                   \
+    "X_LANTIQ_COM_Vendor_OperatingChannelBandwidt" // (intentional, that's how it appears in FAPI)
 #define PARAM_VENDOR_PACKETS_OTHER_RECEIVED "X_LANTIQ_COM_Vendor_PacketsOtherReceived"
 #define PARAM_VENDOR_PACKETS_RECEIVED "X_LANTIQ_COM_Vendor_PacketsReceived"
 #define PARAM_VENDOR_PACKETS_SENT "X_LANTIQ_COM_Vendor_PacketsSent"
