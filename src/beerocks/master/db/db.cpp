@@ -2813,7 +2813,7 @@ bool db::get_node_channel_ext_above_secondary(std::string mac)
     auto n = get_node(mac);
     if (!n) {
         LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return beerocks::BANDWIDTH_MAX;
+        return false;
     }
     return n->channel_ext_above_secondary;
 }
