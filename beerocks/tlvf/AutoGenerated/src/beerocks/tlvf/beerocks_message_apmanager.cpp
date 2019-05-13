@@ -15,28 +15,22 @@
 
 using namespace beerocks_message;
 
-cACTION_APMANAGER_4ADDR_STA_JOINED::cACTION_APMANAGER_4ADDR_STA_JOINED(uint8_t *buff,
-                                                                       size_t buff_len, bool parse,
-                                                                       bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_4ADDR_STA_JOINED::cACTION_APMANAGER_4ADDR_STA_JOINED(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_4ADDR_STA_JOINED::cACTION_APMANAGER_4ADDR_STA_JOINED(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_4ADDR_STA_JOINED::cACTION_APMANAGER_4ADDR_STA_JOINED(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_4ADDR_STA_JOINED::~cACTION_APMANAGER_4ADDR_STA_JOINED() {}
-beerocks::net::sMacAddr &cACTION_APMANAGER_4ADDR_STA_JOINED::src_mac()
-{
-    return (beerocks::net::sMacAddr &)(*m_src_mac);
+cACTION_APMANAGER_4ADDR_STA_JOINED::~cACTION_APMANAGER_4ADDR_STA_JOINED() {
+}
+beerocks::net::sMacAddr& cACTION_APMANAGER_4ADDR_STA_JOINED::src_mac() {
+    return (beerocks::net::sMacAddr&)(*m_src_mac);
 }
 
-beerocks::net::sMacAddr &cACTION_APMANAGER_4ADDR_STA_JOINED::dst_mac()
-{
-    return (beerocks::net::sMacAddr &)(*m_dst_mac);
+beerocks::net::sMacAddr& cACTION_APMANAGER_4ADDR_STA_JOINED::dst_mac() {
+    return (beerocks::net::sMacAddr&)(*m_dst_mac);
 }
 
 void cACTION_APMANAGER_4ADDR_STA_JOINED::class_swap()
@@ -59,46 +53,36 @@ bool cACTION_APMANAGER_4ADDR_STA_JOINED::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_src_mac = (beerocks::net::sMacAddr *)m_buff_ptr__;
+    m_src_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
-    if (!m_parse__) {
-        m_src_mac->struct_init();
-    }
-    m_dst_mac = (beerocks::net::sMacAddr *)m_buff_ptr__;
+    if (!m_parse__) { m_src_mac->struct_init(); }
+    m_dst_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
-    if (!m_parse__) {
-        m_dst_mac->struct_init();
-    }
+    if (!m_parse__) { m_dst_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_JOINED_NOTIFICATION::cACTION_APMANAGER_JOINED_NOTIFICATION(uint8_t *buff,
-                                                                             size_t buff_len,
-                                                                             bool parse,
-                                                                             bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_JOINED_NOTIFICATION::cACTION_APMANAGER_JOINED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_JOINED_NOTIFICATION::cACTION_APMANAGER_JOINED_NOTIFICATION(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_JOINED_NOTIFICATION::cACTION_APMANAGER_JOINED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_JOINED_NOTIFICATION::~cACTION_APMANAGER_JOINED_NOTIFICATION() {}
-sNodeHostap &cACTION_APMANAGER_JOINED_NOTIFICATION::params() { return (sNodeHostap &)(*m_params); }
+cACTION_APMANAGER_JOINED_NOTIFICATION::~cACTION_APMANAGER_JOINED_NOTIFICATION() {
+}
+sNodeHostap& cACTION_APMANAGER_JOINED_NOTIFICATION::params() {
+    return (sNodeHostap&)(*m_params);
+}
 
-sApChannelSwitch &cACTION_APMANAGER_JOINED_NOTIFICATION::cs_params()
-{
-    return (sApChannelSwitch &)(*m_cs_params);
+sApChannelSwitch& cACTION_APMANAGER_JOINED_NOTIFICATION::cs_params() {
+    return (sApChannelSwitch&)(*m_cs_params);
 }
 
 void cACTION_APMANAGER_JOINED_NOTIFICATION::class_swap()
@@ -110,7 +94,7 @@ void cACTION_APMANAGER_JOINED_NOTIFICATION::class_swap()
 size_t cACTION_APMANAGER_JOINED_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(sNodeHostap);      // params
+    class_size += sizeof(sNodeHostap); // params
     class_size += sizeof(sApChannelSwitch); // cs_params
     return class_size;
 }
@@ -121,42 +105,33 @@ bool cACTION_APMANAGER_JOINED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNodeHostap *)m_buff_ptr__;
+    m_params = (sNodeHostap*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sNodeHostap) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
-    m_cs_params = (sApChannelSwitch *)m_buff_ptr__;
+    if (!m_parse__) { m_params->struct_init(); }
+    m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
-    if (!m_parse__) {
-        m_cs_params->struct_init();
-    }
+    if (!m_parse__) { m_cs_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_INIT_DONE_NOTIFICATION::cACTION_APMANAGER_INIT_DONE_NOTIFICATION(uint8_t *buff,
-                                                                                   size_t buff_len,
-                                                                                   bool parse,
-                                                                                   bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_INIT_DONE_NOTIFICATION::cACTION_APMANAGER_INIT_DONE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_INIT_DONE_NOTIFICATION::cACTION_APMANAGER_INIT_DONE_NOTIFICATION(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_INIT_DONE_NOTIFICATION::cACTION_APMANAGER_INIT_DONE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_INIT_DONE_NOTIFICATION::~cACTION_APMANAGER_INIT_DONE_NOTIFICATION() {}
-void cACTION_APMANAGER_INIT_DONE_NOTIFICATION::class_swap() {}
+cACTION_APMANAGER_INIT_DONE_NOTIFICATION::~cACTION_APMANAGER_INIT_DONE_NOTIFICATION() {
+}
+void cACTION_APMANAGER_INIT_DONE_NOTIFICATION::class_swap()
+{
+}
 
 size_t cACTION_APMANAGER_INIT_DONE_NOTIFICATION::get_initial_size()
 {
@@ -174,33 +149,22 @@ bool cACTION_APMANAGER_INIT_DONE_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::
-    cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(uint8_t *buff, size_t buff_len,
-                                                                     bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::
-    cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(
-        std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::
-    ~cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST()
-{
+cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::~cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST() {
 }
-sApSetRestrictedFailsafe &cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::params()
-{
-    return (sApSetRestrictedFailsafe &)(*m_params);
+sApSetRestrictedFailsafe& cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::params() {
+    return (sApSetRestrictedFailsafe&)(*m_params);
 }
 
 void cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::class_swap()
@@ -221,46 +185,34 @@ bool cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sApSetRestrictedFailsafe *)m_buff_ptr__;
+    m_params = (sApSetRestrictedFailsafe*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sApSetRestrictedFailsafe) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::
-    cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(uint8_t *buff,
-                                                                      size_t buff_len, bool parse,
-                                                                      bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::
-    cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(
-        std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::
-    ~cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE()
-{
+cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::~cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE() {
 }
-uint8_t &cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::success()
-{
-    return (uint8_t &)(*m_success);
+uint8_t& cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::success() {
+    return (uint8_t&)(*m_success);
 }
 
-void cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::class_swap() {}
+void cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::class_swap()
+{
+}
 
 size_t cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::get_initial_size()
 {
@@ -275,42 +227,33 @@ bool cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_success = (uint8_t *)m_buff_ptr__;
+    m_success = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::
-    cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION(uint8_t *buff, size_t buff_len, bool parse,
-                                                      bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::
-    cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse,
-                                                      bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::
-    ~cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION()
-{
+cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION() {
 }
-int8_t &cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::vap_id()
-{
-    return (int8_t &)(*m_vap_id);
+int8_t& cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::vap_id() {
+    return (int8_t&)(*m_vap_id);
 }
 
-void cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::class_swap() {}
+void cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::class_swap()
+{
+}
 
 size_t cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::get_initial_size()
 {
@@ -325,47 +268,43 @@ bool cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_vap_id = (int8_t *)m_buff_ptr__;
+    m_vap_id = (int8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(int8_t) * 1;
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::
-    ~cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION()
-{
+cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION() {
 }
-int8_t &cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::vap_id() { return (int8_t &)(*m_vap_id); }
-
-sVapInfo &cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::vap_info()
-{
-    return (sVapInfo &)(*m_vap_info);
+int8_t& cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::vap_id() {
+    return (int8_t&)(*m_vap_id);
 }
 
-void cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::class_swap() { m_vap_info->struct_swap(); }
+sVapInfo& cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::vap_info() {
+    return (sVapInfo&)(*m_vap_info);
+}
+
+void cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::class_swap()
+{
+    m_vap_info->struct_swap();
+}
 
 size_t cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(int8_t);   // vap_id
+    class_size += sizeof(int8_t); // vap_id
     class_size += sizeof(sVapInfo); // vap_info
     return class_size;
 }
@@ -376,42 +315,32 @@ bool cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_vap_id = (int8_t *)m_buff_ptr__;
+    m_vap_id = (int8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(int8_t) * 1;
-    m_vap_info = (sVapInfo *)m_buff_ptr__;
+    m_vap_info = (sVapInfo*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sVapInfo) * 1;
-    if (!m_parse__) {
-        m_vap_info->struct_init();
-    }
+    if (!m_parse__) { m_vap_info->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::
-    cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST(uint8_t *buff, size_t buff_len, bool parse,
-                                                      bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::
-    cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST(std::shared_ptr<BaseClass> base, bool parse,
-                                                      bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::
-    ~cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST()
+cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::~cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST() {
+}
+void cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::class_swap()
 {
 }
-void cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::class_swap() {}
 
 size_t cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::get_initial_size()
 {
@@ -429,33 +358,22 @@ bool cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::
-    cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(uint8_t *buff, size_t buff_len,
-                                                           bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::
-    cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(std::shared_ptr<BaseClass> base,
-                                                           bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::
-    ~cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION()
-{
+cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION() {
 }
-sVapsList &cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::params()
-{
-    return (sVapsList &)(*m_params);
+sVapsList& cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::params() {
+    return (sVapsList&)(*m_params);
 }
 
 void cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::class_swap()
@@ -476,45 +394,35 @@ bool cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sVapsList *)m_buff_ptr__;
+    m_params = (sVapsList*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sVapsList) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::
-    cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START(uint8_t *buff, size_t buff_len, bool parse,
-                                                      bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::
-    cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START(std::shared_ptr<BaseClass> base, bool parse,
-                                                      bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::
-    ~cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START()
-{
+cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::~cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START() {
 }
-sApChannelSwitch &cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::cs_params()
-{
-    return (sApChannelSwitch &)(*m_cs_params);
+sApChannelSwitch& cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::cs_params() {
+    return (sApChannelSwitch&)(*m_cs_params);
 }
 
-void cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::class_swap() { m_cs_params->struct_swap(); }
+void cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::class_swap()
+{
+    m_cs_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::get_initial_size()
 {
@@ -529,42 +437,35 @@ bool cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_cs_params = (sApChannelSwitch *)m_buff_ptr__;
+    m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
-    if (!m_parse__) {
-        m_cs_params->struct_init();
-    }
+    if (!m_parse__) { m_cs_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION()
-{
+cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION() {
 }
-sApChannelSwitch &cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::cs_params()
-{
-    return (sApChannelSwitch &)(*m_cs_params);
+sApChannelSwitch& cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::cs_params() {
+    return (sApChannelSwitch&)(*m_cs_params);
 }
 
-void cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::class_swap() { m_cs_params->struct_swap(); }
+void cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::class_swap()
+{
+    m_cs_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::get_initial_size()
 {
@@ -579,40 +480,35 @@ bool cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_cs_params = (sApChannelSwitch *)m_buff_ptr__;
+    m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
-    if (!m_parse__) {
-        m_cs_params->struct_init();
-    }
+    if (!m_parse__) { m_cs_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION() {}
-sApChannelSwitch &cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::cs_params()
-{
-    return (sApChannelSwitch &)(*m_cs_params);
+cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION() {
+}
+sApChannelSwitch& cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::cs_params() {
+    return (sApChannelSwitch&)(*m_cs_params);
 }
 
-void cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::class_swap() { m_cs_params->struct_swap(); }
+void cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::class_swap()
+{
+    m_cs_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::get_initial_size()
 {
@@ -627,42 +523,35 @@ bool cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_cs_params = (sApChannelSwitch *)m_buff_ptr__;
+    m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
-    if (!m_parse__) {
-        m_cs_params->struct_init();
-    }
+    if (!m_parse__) { m_cs_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION()
-{
+cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION() {
 }
-sApChannelSwitch &cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::cs_params()
-{
-    return (sApChannelSwitch &)(*m_cs_params);
+sApChannelSwitch& cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::cs_params() {
+    return (sApChannelSwitch&)(*m_cs_params);
 }
 
-void cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::class_swap() { m_cs_params->struct_swap(); }
+void cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::class_swap()
+{
+    m_cs_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::get_initial_size()
 {
@@ -677,44 +566,33 @@ bool cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_cs_params = (sApChannelSwitch *)m_buff_ptr__;
+    m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
-    if (!m_parse__) {
-        m_cs_params->struct_init();
-    }
+    if (!m_parse__) { m_cs_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION() {}
-sApChannelSwitch &cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::cs_params()
-{
-    return (sApChannelSwitch &)(*m_cs_params);
+cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION() {
+}
+sApChannelSwitch& cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::cs_params() {
+    return (sApChannelSwitch&)(*m_cs_params);
 }
 
-std::tuple<bool, sWifiChannel &>
-cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::supported_channels_list(size_t idx)
-{
-    bool ret_success =
-        ((m_supported_channels_list_idx__ > 0) && (m_supported_channels_list_idx__ > idx));
+std::tuple<bool, sWifiChannel&> cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::supported_channels_list(size_t idx) {
+    bool ret_success = ( (m_supported_channels_list_idx__ > 0) && (m_supported_channels_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
     if (!ret_success) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
@@ -725,7 +603,7 @@ cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::supported_channels_list(size_t idx)
 void cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::class_swap()
 {
     m_cs_params->struct_swap();
-    for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+    for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels_list[i].struct_swap();
     }
 }
@@ -734,8 +612,7 @@ size_t cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sApChannelSwitch); // cs_params
-    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH *
-                  sizeof(sWifiChannel); // supported_channels_list
+    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(sWifiChannel); // supported_channels_list
     return class_size;
 }
 
@@ -745,50 +622,35 @@ bool cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_cs_params = (sApChannelSwitch *)m_buff_ptr__;
+    m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
-    if (!m_parse__) {
-        m_cs_params->struct_init();
-    }
-    m_supported_channels_list = (sWifiChannel *)m_buff_ptr__;
+    if (!m_parse__) { m_cs_params->struct_init(); }
+    m_supported_channels_list = (sWifiChannel*)m_buff_ptr__;
     m_buff_ptr__ += (sizeof(sWifiChannel) * beerocks::message::SUPPORTED_CHANNELS_LENGTH);
-    m_supported_channels_list_idx__ = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
-    if (!m_parse__) {
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
-            m_supported_channels_list->struct_init();
+    m_supported_channels_list_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
+        if (!m_parse__) { 
+            for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
         }
-    }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::
-    cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(uint8_t *buff, size_t buff_len,
-                                                            bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::
-    cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(std::shared_ptr<BaseClass> base,
-                                                            bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::
-    ~cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION()
-{
+cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION() {
 }
-sDfsCacCompleted &cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::params()
-{
-    return (sDfsCacCompleted &)(*m_params);
+sDfsCacCompleted& cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::params() {
+    return (sDfsCacCompleted&)(*m_params);
 }
 
 void cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::class_swap()
@@ -809,42 +671,29 @@ bool cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sDfsCacCompleted *)m_buff_ptr__;
+    m_params = (sDfsCacCompleted*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sDfsCacCompleted) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::
-    cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(uint8_t *buff, size_t buff_len,
-                                                                bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::
-    cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(std::shared_ptr<BaseClass> base,
-                                                                bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::
-    ~cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION()
-{
+cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::~cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION() {
 }
-sDfsChannelAvailable &cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::params()
-{
-    return (sDfsChannelAvailable &)(*m_params);
+sDfsChannelAvailable& cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::params() {
+    return (sDfsChannelAvailable&)(*m_params);
 }
 
 void cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::class_swap()
@@ -865,40 +714,35 @@ bool cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sDfsChannelAvailable *)m_buff_ptr__;
+    m_params = (sDfsChannelAvailable*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sDfsChannelAvailable) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::~cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE() {}
-beerocks::net::sMacAddr &cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::mac()
-{
-    return (beerocks::net::sMacAddr &)(*m_mac);
+cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::~cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE() {
+}
+beerocks::net::sMacAddr& cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::mac() {
+    return (beerocks::net::sMacAddr&)(*m_mac);
 }
 
-void cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::class_swap() { m_mac->struct_swap(); }
+void cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::class_swap()
+{
+    m_mac->struct_swap();
+}
 
 size_t cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::get_initial_size()
 {
@@ -913,40 +757,35 @@ bool cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr *)m_buff_ptr__;
+    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
-    if (!m_parse__) {
-        m_mac->struct_init();
-    }
+    if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::~cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE() {}
-beerocks::net::sMacAddr &cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::mac()
-{
-    return (beerocks::net::sMacAddr &)(*m_mac);
+cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::~cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE() {
+}
+beerocks::net::sMacAddr& cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::mac() {
+    return (beerocks::net::sMacAddr&)(*m_mac);
 }
 
-void cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::class_swap() { m_mac->struct_swap(); }
+void cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::class_swap()
+{
+    m_mac->struct_swap();
+}
 
 size_t cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::get_initial_size()
 {
@@ -961,45 +800,35 @@ bool cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr *)m_buff_ptr__;
+    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
-    if (!m_parse__) {
-        m_mac->struct_init();
-    }
+    if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::
-    cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST(uint8_t *buff, size_t buff_len, bool parse,
-                                                      bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::
-    cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse,
-                                                      bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::
-    ~cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST()
-{
+cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::~cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST() {
 }
-sNeighborSetParams11k &cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::params()
-{
-    return (sNeighborSetParams11k &)(*m_params);
+sNeighborSetParams11k& cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::params() {
+    return (sNeighborSetParams11k&)(*m_params);
 }
 
-void cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::class_swap() { m_params->struct_swap(); }
+void cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::class_swap()
+{
+    m_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::get_initial_size()
 {
@@ -1014,45 +843,35 @@ bool cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNeighborSetParams11k *)m_buff_ptr__;
+    m_params = (sNeighborSetParams11k*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sNeighborSetParams11k) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::
-    cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(uint8_t *buff, size_t buff_len, bool parse,
-                                                         bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::
-    cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base,
-                                                         bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::
-    ~cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST()
-{
+cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::~cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST() {
 }
-sNeighborRemoveParams11k &cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::params()
-{
-    return (sNeighborRemoveParams11k &)(*m_params);
+sNeighborRemoveParams11k& cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::params() {
+    return (sNeighborRemoveParams11k&)(*m_params);
 }
 
-void cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::class_swap() { m_params->struct_swap(); }
+void cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::class_swap()
+{
+    m_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::get_initial_size()
 {
@@ -1067,43 +886,35 @@ bool cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNeighborRemoveParams11k *)m_buff_ptr__;
+    m_params = (sNeighborRemoveParams11k*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sNeighborRemoveParams11k) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::
-    ~cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION()
-{
+cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::~cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION() {
 }
-sClientAssociationParams &cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::params()
-{
-    return (sClientAssociationParams &)(*m_params);
+sClientAssociationParams& cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::params() {
+    return (sClientAssociationParams&)(*m_params);
 }
 
-void cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::class_swap() { m_params->struct_swap(); }
+void cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::class_swap()
+{
+    m_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::get_initial_size()
 {
@@ -1118,45 +929,35 @@ bool cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sClientAssociationParams *)m_buff_ptr__;
+    m_params = (sClientAssociationParams*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sClientAssociationParams) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::
-    cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION(uint8_t *buff, size_t buff_len, bool parse,
-                                                       bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::
-    cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse,
-                                                       bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::
-    ~cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION()
-{
+cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::~cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION() {
 }
-sClientDisconnectionParams &cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::params()
-{
-    return (sClientDisconnectionParams &)(*m_params);
+sClientDisconnectionParams& cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::params() {
+    return (sClientDisconnectionParams&)(*m_params);
 }
 
-void cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::class_swap() { m_params->struct_swap(); }
+void cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::class_swap()
+{
+    m_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::get_initial_size()
 {
@@ -1171,59 +972,57 @@ bool cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sClientDisconnectionParams *)m_buff_ptr__;
+    m_params = (sClientDisconnectionParams*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sClientDisconnectionParams) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::~cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST() {}
-beerocks::net::sMacAddr &cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::mac()
-{
-    return (beerocks::net::sMacAddr &)(*m_mac);
+cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::~cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST() {
+}
+beerocks::net::sMacAddr& cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::mac() {
+    return (beerocks::net::sMacAddr&)(*m_mac);
 }
 
-int8_t &cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::vap_id() { return (int8_t &)(*m_vap_id); }
+int8_t& cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::vap_id() {
+    return (int8_t&)(*m_vap_id);
+}
 
-uint32_t &cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::type() { return (uint32_t &)(*m_type); }
+uint32_t& cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::type() {
+    return (uint32_t&)(*m_type);
+}
 
-uint32_t &cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::reason() { return (uint32_t &)(*m_reason); }
+uint32_t& cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::reason() {
+    return (uint32_t&)(*m_reason);
+}
 
 void cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::class_swap()
 {
     m_mac->struct_swap();
-    tlvf_swap(32, reinterpret_cast<uint8_t *>(m_type));
-    tlvf_swap(32, reinterpret_cast<uint8_t *>(m_reason));
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_type));
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_reason));
 }
 
 size_t cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(beerocks::net::sMacAddr); // mac
-    class_size += sizeof(int8_t);                  // vap_id
-    class_size += sizeof(uint32_t);                // type
-    class_size += sizeof(uint32_t);                // reason
+    class_size += sizeof(int8_t); // vap_id
+    class_size += sizeof(uint32_t); // type
+    class_size += sizeof(uint32_t); // reason
     return class_size;
 }
 
@@ -1233,46 +1032,41 @@ bool cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr *)m_buff_ptr__;
+    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
-    if (!m_parse__) {
-        m_mac->struct_init();
-    }
-    m_vap_id = (int8_t *)m_buff_ptr__;
+    if (!m_parse__) { m_mac->struct_init(); }
+    m_vap_id = (int8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(int8_t) * 1;
-    m_type = (uint32_t *)m_buff_ptr__;
+    m_type = (uint32_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
-    m_reason = (uint32_t *)m_buff_ptr__;
+    m_reason = (uint32_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::~cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE() {}
-sClientDisconnectResponse &cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::params()
-{
-    return (sClientDisconnectResponse &)(*m_params);
+cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::~cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE() {
+}
+sClientDisconnectResponse& cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::params() {
+    return (sClientDisconnectResponse&)(*m_params);
 }
 
-void cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::class_swap() { m_params->struct_swap(); }
+void cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::class_swap()
+{
+    m_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::get_initial_size()
 {
@@ -1287,51 +1081,45 @@ bool cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sClientDisconnectResponse *)m_buff_ptr__;
+    m_params = (sClientDisconnectResponse*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sClientDisconnectResponse) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::~cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST() {}
-beerocks::net::sMacAddr &cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::mac()
-{
-    return (beerocks::net::sMacAddr &)(*m_mac);
+cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::~cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST() {
+}
+beerocks::net::sMacAddr& cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::mac() {
+    return (beerocks::net::sMacAddr&)(*m_mac);
 }
 
-uint8_t &cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::reject_sta()
-{
-    return (uint8_t &)(*m_reject_sta);
+uint8_t& cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::reject_sta() {
+    return (uint8_t&)(*m_reject_sta);
 }
 
-void cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::class_swap() { m_mac->struct_swap(); }
+void cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::class_swap()
+{
+    m_mac->struct_swap();
+}
 
 size_t cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(beerocks::net::sMacAddr); // mac
-    class_size += sizeof(uint8_t);                 // reject_sta
+    class_size += sizeof(uint8_t); // reject_sta
     return class_size;
 }
 
@@ -1341,46 +1129,35 @@ bool cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr *)m_buff_ptr__;
+    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
-    if (!m_parse__) {
-        m_mac->struct_init();
-    }
-    m_reject_sta = (uint8_t *)m_buff_ptr__;
+    if (!m_parse__) { m_mac->struct_init(); }
+    m_reject_sta = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::cACTION_APMANAGER_CLIENT_ALLOW_REQUEST(uint8_t *buff,
-                                                                               size_t buff_len,
-                                                                               bool parse,
-                                                                               bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::cACTION_APMANAGER_CLIENT_ALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::cACTION_APMANAGER_CLIENT_ALLOW_REQUEST(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::cACTION_APMANAGER_CLIENT_ALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::~cACTION_APMANAGER_CLIENT_ALLOW_REQUEST() {}
-beerocks::net::sMacAddr &cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::mac()
-{
-    return (beerocks::net::sMacAddr &)(*m_mac);
+cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::~cACTION_APMANAGER_CLIENT_ALLOW_REQUEST() {
+}
+beerocks::net::sMacAddr& cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::mac() {
+    return (beerocks::net::sMacAddr&)(*m_mac);
 }
 
-beerocks::net::sIpv4Addr &cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::ipv4()
-{
-    return (beerocks::net::sIpv4Addr &)(*m_ipv4);
+beerocks::net::sIpv4Addr& cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::ipv4() {
+    return (beerocks::net::sIpv4Addr&)(*m_ipv4);
 }
 
 void cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::class_swap()
@@ -1392,7 +1169,7 @@ void cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::class_swap()
 size_t cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr);  // mac
+    class_size += sizeof(beerocks::net::sMacAddr); // mac
     class_size += sizeof(beerocks::net::sIpv4Addr); // ipv4
     return class_size;
 }
@@ -1403,50 +1180,38 @@ bool cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr *)m_buff_ptr__;
+    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
-    if (!m_parse__) {
-        m_mac->struct_init();
-    }
-    m_ipv4 = (beerocks::net::sIpv4Addr *)m_buff_ptr__;
+    if (!m_parse__) { m_mac->struct_init(); }
+    m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sIpv4Addr) * 1;
-    if (!m_parse__) {
-        m_ipv4->struct_init();
-    }
+    if (!m_parse__) { m_ipv4->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::
-    cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t *buff, size_t buff_len, bool parse,
-                                                         bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::
-    cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base,
-                                                         bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::
-    ~cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST()
-{
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::~cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST() {
 }
-sNodeRssiMeasurementRequest &cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::params()
-{
-    return (sNodeRssiMeasurementRequest &)(*m_params);
+sNodeRssiMeasurementRequest& cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::params() {
+    return (sNodeRssiMeasurementRequest&)(*m_params);
 }
 
-void cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::class_swap() { m_params->struct_swap(); }
+void cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::class_swap()
+{
+    m_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::get_initial_size()
 {
@@ -1461,42 +1226,29 @@ bool cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNodeRssiMeasurementRequest *)m_buff_ptr__;
+    m_params = (sNodeRssiMeasurementRequest*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sNodeRssiMeasurementRequest) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::
-    cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t *buff, size_t buff_len,
-                                                          bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::
-    cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base,
-                                                          bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::
-    ~cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE()
-{
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::~cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE() {
 }
-sNodeRssiMeasurement &cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::params()
-{
-    return (sNodeRssiMeasurement &)(*m_params);
+sNodeRssiMeasurement& cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::params() {
+    return (sNodeRssiMeasurement&)(*m_params);
 }
 
 void cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::class_swap()
@@ -1517,45 +1269,35 @@ bool cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNodeRssiMeasurement *)m_buff_ptr__;
+    m_params = (sNodeRssiMeasurement*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sNodeRssiMeasurement) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::
-    cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION(uint8_t *buff, size_t buff_len, bool parse,
-                                                        bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::
-    cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse,
-                                                        bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::
-    ~cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION()
-{
+cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::~cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION() {
 }
-beerocks::net::sMacAddr &cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::mac()
-{
-    return (beerocks::net::sMacAddr &)(*m_mac);
+beerocks::net::sMacAddr& cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::mac() {
+    return (beerocks::net::sMacAddr&)(*m_mac);
 }
 
-void cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::class_swap() { m_mac->struct_swap(); }
+void cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::class_swap()
+{
+    m_mac->struct_swap();
+}
 
 size_t cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::get_initial_size()
 {
@@ -1570,40 +1312,35 @@ bool cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr *)m_buff_ptr__;
+    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
-    if (!m_parse__) {
-        m_mac->struct_init();
-    }
+    if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::~cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST() {}
-sNodeBssSteerRequest &cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::params()
-{
-    return (sNodeBssSteerRequest &)(*m_params);
+cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::~cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST() {
+}
+sNodeBssSteerRequest& cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::params() {
+    return (sNodeBssSteerRequest&)(*m_params);
 }
 
-void cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::class_swap() { m_params->struct_swap(); }
+void cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::class_swap()
+{
+    m_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::get_initial_size()
 {
@@ -1618,40 +1355,35 @@ bool cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNodeBssSteerRequest *)m_buff_ptr__;
+    m_params = (sNodeBssSteerRequest*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sNodeBssSteerRequest) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::~cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE() {}
-sNodeBssSteerResponse &cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::params()
-{
-    return (sNodeBssSteerResponse &)(*m_params);
+cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::~cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE() {
+}
+sNodeBssSteerResponse& cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::params() {
+    return (sNodeBssSteerResponse&)(*m_params);
 }
 
-void cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::class_swap() { m_params->struct_swap(); }
+void cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::class_swap()
+{
+    m_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::get_initial_size()
 {
@@ -1666,42 +1398,29 @@ bool cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNodeBssSteerResponse *)m_buff_ptr__;
+    m_params = (sNodeBssSteerResponse*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sNodeBssSteerResponse) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::
-    cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t *buff, size_t buff_len,
-                                                              bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::
-    cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base,
-                                                              bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::
-    ~cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE()
-{
+cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::~cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE() {
 }
-beerocks::net::sMacAddr &cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::mac()
-{
-    return (beerocks::net::sMacAddr &)(*m_mac);
+beerocks::net::sMacAddr& cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::mac() {
+    return (beerocks::net::sMacAddr&)(*m_mac);
 }
 
 void cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::class_swap()
@@ -1722,40 +1441,35 @@ bool cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr *)m_buff_ptr__;
+    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
-    if (!m_parse__) {
-        m_mac->struct_init();
-    }
+    if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::~cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST() {}
-sSteeringClientSetRequest &cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::params()
-{
-    return (sSteeringClientSetRequest &)(*m_params);
+cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::~cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST() {
+}
+sSteeringClientSetRequest& cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::params() {
+    return (sSteeringClientSetRequest&)(*m_params);
 }
 
-void cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::class_swap() { m_params->struct_swap(); }
+void cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::class_swap()
+{
+    m_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::get_initial_size()
 {
@@ -1770,40 +1484,35 @@ bool cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sSteeringClientSetRequest *)m_buff_ptr__;
+    m_params = (sSteeringClientSetRequest*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sSteeringClientSetRequest) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE(
-    uint8_t *buff, size_t buff_len, bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::~cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE() {}
-sSteeringClientSetResponse &cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::params()
-{
-    return (sSteeringClientSetResponse &)(*m_params);
+cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::~cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE() {
+}
+sSteeringClientSetResponse& cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::params() {
+    return (sSteeringClientSetResponse&)(*m_params);
 }
 
-void cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::class_swap() { m_params->struct_swap(); }
+void cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::class_swap()
+{
+    m_params->struct_swap();
+}
 
 size_t cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::get_initial_size()
 {
@@ -1818,42 +1527,29 @@ bool cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sSteeringClientSetResponse *)m_buff_ptr__;
+    m_params = (sSteeringClientSetResponse*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sSteeringClientSetResponse) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::
-    cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION(uint8_t *buff, size_t buff_len,
-                                                            bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::
-    cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION(std::shared_ptr<BaseClass> base,
-                                                            bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::
-    ~cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION()
-{
+cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::~cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION() {
 }
-sSteeringEvProbeReq &cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::params()
-{
-    return (sSteeringEvProbeReq &)(*m_params);
+sSteeringEvProbeReq& cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::params() {
+    return (sSteeringEvProbeReq&)(*m_params);
 }
 
 void cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::class_swap()
@@ -1874,42 +1570,29 @@ bool cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sSteeringEvProbeReq *)m_buff_ptr__;
+    m_params = (sSteeringEvProbeReq*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sSteeringEvProbeReq) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::
-    cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(uint8_t *buff, size_t buff_len,
-                                                            bool parse, bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::
-    cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(std::shared_ptr<BaseClass> base,
-                                                            bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::
-    ~cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION()
-{
+cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::~cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION() {
 }
-sSteeringEvAuthFail &cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::params()
-{
-    return (sSteeringEvAuthFail &)(*m_params);
+sSteeringEvAuthFail& cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::params() {
+    return (sSteeringEvAuthFail&)(*m_params);
 }
 
 void cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::class_swap()
@@ -1930,37 +1613,30 @@ bool cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sSteeringEvAuthFail *)m_buff_ptr__;
+    m_params = (sSteeringEvAuthFail*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sSteeringEvAuthFail) * 1;
-    if (!m_parse__) {
-        m_params->struct_init();
-    }
+    if (!m_parse__) { m_params->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
 
-cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::cACTION_APMANAGER_HEARTBEAT_NOTIFICATION(uint8_t *buff,
-                                                                                   size_t buff_len,
-                                                                                   bool parse,
-                                                                                   bool swap_needed)
-    : BaseClass(buff, buff_len, parse, swap_needed)
-{
+cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::cACTION_APMANAGER_HEARTBEAT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::cACTION_APMANAGER_HEARTBEAT_NOTIFICATION(
-    std::shared_ptr<BaseClass> base, bool parse, bool swap_needed)
-    : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
-{
+cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::cACTION_APMANAGER_HEARTBEAT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::~cACTION_APMANAGER_HEARTBEAT_NOTIFICATION() {}
-void cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::class_swap() {}
+cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::~cACTION_APMANAGER_HEARTBEAT_NOTIFICATION() {
+}
+void cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::class_swap()
+{
+}
 
 size_t cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::get_initial_size()
 {
@@ -1978,8 +1654,8 @@ bool cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) {
-        class_swap();
-    }
+    if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
+
+

@@ -13,24 +13,24 @@
 #ifndef _BEEROCKS_TLVF_BEEROCKS_MESSAGE_COMMON_H_
 #define _BEEROCKS_TLVF_BEEROCKS_MESSAGE_COMMON_H_
 
-#include "beerocks/bcl/beerocks_message_structs.h"
-#include "beerocks/tlvf/beerocks_message_action.h"
 #include <cstddef>
 #include <stdint.h>
 #include <tlvf/swap.h>
+#include "beerocks/tlvf/beerocks_message_action.h"
+#include "beerocks/bcl/beerocks_message_structs.h"
 
 namespace beerocks_message {
 
-enum eWiFiSec : uint8_t {
-    eWiFiSec_None         = 0x0,
-    eWiFiSec_WEP64        = 0x1,
-    eWiFiSec_WEP128       = 0x2,
-    eWiFiSec_WPA_PSK      = 0x3,
-    eWiFiSec_WPA2_PSK     = 0x4,
+enum eWiFiSec: uint8_t {
+    eWiFiSec_None = 0x0,
+    eWiFiSec_WEP64 = 0x1,
+    eWiFiSec_WEP128 = 0x2,
+    eWiFiSec_WPA_PSK = 0x3,
+    eWiFiSec_WPA2_PSK = 0x4,
     eWiFiSec_WPA_WPA2_PSK = 0x5,
 };
 
-enum eDHCPOp : uint8_t {
+enum eDHCPOp: uint8_t {
     eDHCPOp_Add = 0x0,
     eDHCPOp_Del = 0x1,
     eDHCPOp_Old = 0x2,
@@ -40,8 +40,12 @@ typedef struct sVapInfo {
     beerocks::net::sMacAddr mac;
     char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
     uint8_t backhaul_vap;
-    void struct_swap() { mac.struct_swap(); }
-    void struct_init() { mac.struct_init(); }
+    void struct_swap(){
+        mac.struct_swap();
+    }
+    void struct_init(){
+        mac.struct_init();
+    }
 } sVapInfo;
 
 typedef struct sSonConfig {
@@ -59,13 +63,13 @@ typedef struct sSonConfig {
     uint8_t monitor_disable_initiative_arp;
     uint8_t slave_keep_alive_retries;
     uint8_t ire_rssi_report_rate_sec;
-    void struct_swap()
-    {
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&monitor_ap_idle_threshold_B));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&monitor_ap_active_threshold_B));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&monitor_ap_idle_stable_time_sec));
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&monitor_ap_idle_threshold_B));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&monitor_ap_active_threshold_B));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&monitor_ap_idle_stable_time_sec));
     }
-    void struct_init() {}
+    void struct_init(){
+    }
 } sSonConfig;
 
 typedef struct sPlatformSettings {
@@ -93,17 +97,15 @@ typedef struct sPlatformSettings {
     uint8_t backhaul_network_enabled;
     uint8_t backhaul_prefered_radio_band;
     beerocks::net::sMacAddr backhaul_vaps_bssid[12];
-    void struct_swap()
-    {
-        for (size_t i = 0; i < 12; i++) {
+    void struct_swap(){
+        for (size_t i = 0; i < 12; i++){
             (backhaul_vaps_bssid[i]).struct_swap();
         }
     }
-    void struct_init()
-    {
-        for (size_t i = 0; i < 12; i++) {
-            (backhaul_vaps_bssid[i]).struct_init();
-        }
+    void struct_init(){
+            for (size_t i = 0; i < 12; i++) {
+                (backhaul_vaps_bssid[i]).struct_init();
+            }
     }
 } sPlatformSettings;
 
@@ -114,8 +116,10 @@ typedef struct sWlanSettings {
     char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
     char pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
     char security_type[beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH];
-    void struct_swap() {}
-    void struct_init() {}
+    void struct_swap(){
+    }
+    void struct_init(){
+    }
 } sWlanSettings;
 
 typedef struct sApSetRestrictedFailsafe {
@@ -123,8 +127,11 @@ typedef struct sApSetRestrictedFailsafe {
     uint8_t failsafe_channel_bandwidth;
     uint8_t restricted_channels[beerocks::message::RESTRICTED_CHANNEL_LENGTH];
     uint16_t vht_center_frequency;
-    void struct_swap() { tlvf_swap(16, reinterpret_cast<uint8_t *>(&vht_center_frequency)); }
-    void struct_init() {}
+    void struct_swap(){
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&vht_center_frequency));
+    }
+    void struct_init(){
+    }
 } sApSetRestrictedFailsafe;
 
 typedef struct sApChannelSwitch {
@@ -134,8 +141,11 @@ typedef struct sApChannelSwitch {
     uint8_t switch_reason;
     uint8_t is_dfs_channel;
     uint16_t vht_center_frequency;
-    void struct_swap() { tlvf_swap(16, reinterpret_cast<uint8_t *>(&vht_center_frequency)); }
-    void struct_init() {}
+    void struct_swap(){
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&vht_center_frequency));
+    }
+    void struct_init(){
+    }
 } sApChannelSwitch;
 
 typedef struct sDfsCacCompleted {
@@ -144,12 +154,12 @@ typedef struct sDfsCacCompleted {
     uint8_t success;
     uint8_t channel;
     uint8_t bandwidth;
-    void struct_swap()
-    {
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&timeout));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&frequency));
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&timeout));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&frequency));
     }
-    void struct_init() {}
+    void struct_init(){
+    }
 } sDfsCacCompleted;
 
 typedef struct sDfsChannelAvailable {
@@ -157,12 +167,12 @@ typedef struct sDfsChannelAvailable {
     uint8_t channel;
     uint8_t bandwidth;
     uint16_t vht_center_frequency;
-    void struct_swap()
-    {
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&frequency));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&vht_center_frequency));
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&frequency));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&vht_center_frequency));
     }
-    void struct_init() {}
+    void struct_init(){
+    }
 } sDfsChannelAvailable;
 
 typedef struct sWifiChannel {
@@ -173,8 +183,10 @@ typedef struct sWifiChannel {
     uint8_t channel_bandwidth;
     uint8_t is_dfs_channel;
     uint8_t radar_affected;
-    void struct_swap() {}
-    void struct_init() {}
+    void struct_swap(){
+    }
+    void struct_init(){
+    }
 } sWifiChannel;
 
 typedef struct sClientAssociationParams {
@@ -182,14 +194,12 @@ typedef struct sClientAssociationParams {
     beerocks::net::sMacAddr bssid;
     beerocks::message::sRadioCapabilities capabilities;
     int8_t vap_id;
-    void struct_swap()
-    {
+    void struct_swap(){
         mac.struct_swap();
         bssid.struct_swap();
         capabilities.struct_swap();
     }
-    void struct_init()
-    {
+    void struct_init(){
         mac.struct_init();
         bssid.struct_init();
         capabilities.struct_init();
@@ -203,13 +213,11 @@ typedef struct sClientDisconnectionParams {
     uint8_t reason;
     uint8_t source;
     uint8_t type;
-    void struct_swap()
-    {
+    void struct_swap(){
         mac.struct_swap();
         bssid.struct_swap();
     }
-    void struct_init()
-    {
+    void struct_init(){
         mac.struct_init();
         bssid.struct_init();
     }
@@ -222,14 +230,12 @@ typedef struct sClientMonitoringParams {
     uint8_t channel;
     int8_t vap_id;
     uint8_t is_ire;
-    void struct_swap()
-    {
+    void struct_swap(){
         mac.struct_swap();
         bridge_4addr_mac.struct_swap();
         ipv4.struct_swap();
     }
-    void struct_init()
-    {
+    void struct_init(){
         mac.struct_init();
         bridge_4addr_mac.struct_init();
         ipv4.struct_init();
@@ -245,8 +251,10 @@ typedef struct sConfigVapInfo {
     uint8_t bssid[beerocks::net::MAC_ADDR_LEN];
     char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
     char key[beerocks::message::WIFI_PASS_MAX_LENGTH];
-    void struct_swap() {}
-    void struct_init() {}
+    void struct_swap(){
+    }
+    void struct_init(){
+    }
 } sConfigVapInfo;
 
 typedef struct sStaStatsParams {
@@ -262,19 +270,20 @@ typedef struct sStaStatsParams {
     uint8_t rx_load_percent;
     uint16_t stats_delta_ms;
     int8_t rx_rssi;
-    void struct_swap()
-    {
+    void struct_swap(){
         mac.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&rx_packets));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&tx_packets));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&tx_bytes));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&rx_bytes));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&retrans_count));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&tx_phy_rate_100kb));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&rx_phy_rate_100kb));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&stats_delta_ms));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&rx_packets));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&tx_packets));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&tx_bytes));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&rx_bytes));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&retrans_count));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&tx_phy_rate_100kb));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&rx_phy_rate_100kb));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&stats_delta_ms));
     }
-    void struct_init() { mac.struct_init(); }
+    void struct_init(){
+        mac.struct_init();
+    }
 } sStaStatsParams;
 
 typedef struct sApStatsParams {
@@ -292,18 +301,18 @@ typedef struct sApStatsParams {
     uint8_t client_rx_load_percent;
     int8_t noise;
     uint16_t stats_delta_ms;
-    void struct_swap()
-    {
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&rx_packets));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&tx_packets));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&tx_bytes));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&rx_bytes));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&errors_sent));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&errors_received));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&retrans_count));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&stats_delta_ms));
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&rx_packets));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&tx_packets));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&tx_bytes));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&rx_bytes));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&errors_sent));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&errors_received));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&retrans_count));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&stats_delta_ms));
     }
-    void struct_init() {}
+    void struct_init(){
+    }
 } sApStatsParams;
 
 typedef struct sApLoadNotificationParams {
@@ -313,14 +322,19 @@ typedef struct sApLoadNotificationParams {
     uint8_t channel_load_percent;
     uint8_t client_tx_load_percent;
     uint8_t client_rx_load_percent;
-    void struct_swap() { tlvf_swap(16, reinterpret_cast<uint8_t *>(&stats_delta_ms)); }
-    void struct_init() {}
+    void struct_swap(){
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&stats_delta_ms));
+    }
+    void struct_init(){
+    }
 } sApLoadNotificationParams;
 
 typedef struct sApActivityNotificationParams {
     uint8_t ap_activity_mode;
-    void struct_swap() {}
-    void struct_init() {}
+    void struct_swap(){
+    }
+    void struct_init(){
+    }
 } sApActivityNotificationParams;
 
 typedef struct sNodeRssiMeasurementRequest {
@@ -332,14 +346,12 @@ typedef struct sNodeRssiMeasurementRequest {
     uint8_t mon_ping_burst_pkt_num;
     uint16_t vht_center_frequency;
     uint8_t measurement_delay;
-    void struct_swap()
-    {
+    void struct_swap(){
         mac.struct_swap();
         ipv4.struct_swap();
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&vht_center_frequency));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&vht_center_frequency));
     }
-    void struct_init()
-    {
+    void struct_init(){
         mac.struct_init();
         ipv4.struct_init();
     }
@@ -354,13 +366,14 @@ typedef struct sNodeRssiMeasurement {
     int8_t rx_packets;
     uint8_t src_module;
     int8_t vap_id;
-    void struct_swap()
-    {
+    void struct_swap(){
         mac.struct_swap();
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&rx_phy_rate_100kb));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&tx_phy_rate_100kb));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&rx_phy_rate_100kb));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&tx_phy_rate_100kb));
     }
-    void struct_init() { mac.struct_init(); }
+    void struct_init(){
+        mac.struct_init();
+    }
 } sNodeRssiMeasurement;
 
 typedef struct sNodeHostap {
@@ -373,35 +386,31 @@ typedef struct sNodeHostap {
     uint8_t conducted_power;
     char driver_version[beerocks::message::WIFI_DRIVER_VER_LENGTH];
     sWifiChannel supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
-    void struct_swap()
-    {
+    void struct_swap(){
         iface_mac.struct_swap();
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
             (supported_channels[i]).struct_swap();
         }
     }
-    void struct_init()
-    {
+    void struct_init(){
         iface_mac.struct_init();
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
-            (supported_channels[i]).struct_init();
-        }
+            for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+                (supported_channels[i]).struct_init();
+            }
     }
 } sNodeHostap;
 
 typedef struct sVapsList {
     sVapInfo vaps[beerocks::IFACE_TOTAL_VAPS];
-    void struct_swap()
-    {
-        for (size_t i = 0; i < beerocks::IFACE_TOTAL_VAPS; i++) {
+    void struct_swap(){
+        for (size_t i = 0; i < beerocks::IFACE_TOTAL_VAPS; i++){
             (vaps[i]).struct_swap();
         }
     }
-    void struct_init()
-    {
-        for (size_t i = 0; i < beerocks::IFACE_TOTAL_VAPS; i++) {
-            (vaps[i]).struct_init();
-        }
+    void struct_init(){
+            for (size_t i = 0; i < beerocks::IFACE_TOTAL_VAPS; i++) {
+                (vaps[i]).struct_init();
+            }
     }
 } sVapsList;
 
@@ -412,14 +421,12 @@ typedef struct sArpMonitorData {
     uint8_t state;
     uint8_t source;
     uint8_t type;
-    void struct_swap()
-    {
+    void struct_swap(){
         mac.struct_swap();
         ipv4.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&iface_idx));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&iface_idx));
     }
-    void struct_init()
-    {
+    void struct_init(){
         mac.struct_init();
         ipv4.struct_init();
     }
@@ -428,13 +435,11 @@ typedef struct sArpMonitorData {
 typedef struct sArpQuery {
     beerocks::net::sMacAddr mac;
     beerocks::net::sIpv4Addr ipv4;
-    void struct_swap()
-    {
+    void struct_swap(){
         mac.struct_swap();
         ipv4.struct_swap();
     }
-    void struct_init()
-    {
+    void struct_init(){
         mac.struct_init();
         ipv4.struct_init();
     }
@@ -443,8 +448,12 @@ typedef struct sArpQuery {
 typedef struct sNodeBssSteerTarget {
     beerocks::net::sMacAddr mac;
     uint8_t channel;
-    void struct_swap() { mac.struct_swap(); }
-    void struct_init() { mac.struct_init(); }
+    void struct_swap(){
+        mac.struct_swap();
+    }
+    void struct_init(){
+        mac.struct_init();
+    }
 } sNodeBssSteerTarget;
 
 typedef struct sNodeBssSteerRequest {
@@ -452,14 +461,12 @@ typedef struct sNodeBssSteerRequest {
     uint16_t disassoc_timer;
     uint8_t disassoc_imminent;
     sNodeBssSteerTarget bssid;
-    void struct_swap()
-    {
+    void struct_swap(){
         mac.struct_swap();
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&disassoc_timer));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&disassoc_timer));
         bssid.struct_swap();
     }
-    void struct_init()
-    {
+    void struct_init(){
         mac.struct_init();
         bssid.struct_init();
     }
@@ -468,8 +475,12 @@ typedef struct sNodeBssSteerRequest {
 typedef struct sNodeBssSteerResponse {
     beerocks::net::sMacAddr mac;
     uint8_t status_code;
-    void struct_swap() { mac.struct_swap(); }
-    void struct_init() { mac.struct_init(); }
+    void struct_swap(){
+        mac.struct_swap();
+    }
+    void struct_init(){
+        mac.struct_init();
+    }
 } sNodeBssSteerResponse;
 
 typedef struct sNeighborSetParams11k {
@@ -492,20 +503,25 @@ typedef struct sNeighborSetParams11k {
     uint8_t very_high_throughput;
     uint8_t ftm;
     int8_t vap_id;
-    void struct_swap()
-    {
+    void struct_swap(){
         bssid.struct_swap();
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&ap_reachabilty));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&ap_reachabilty));
     }
-    void struct_init() { bssid.struct_init(); }
+    void struct_init(){
+        bssid.struct_init();
+    }
 } sNeighborSetParams11k;
 
 typedef struct sNeighborRemoveParams11k {
     beerocks::net::sMacAddr bssid;
     char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
     int8_t vap_id;
-    void struct_swap() { bssid.struct_swap(); }
-    void struct_init() { bssid.struct_init(); }
+    void struct_swap(){
+        bssid.struct_swap();
+    }
+    void struct_init(){
+        bssid.struct_init();
+    }
 } sNeighborRemoveParams11k;
 
 typedef struct sStaChannelLoadRequest11k {
@@ -527,17 +543,18 @@ typedef struct sStaChannelLoadRequest11k {
     uint32_t new_ch_width;
     uint32_t new_ch_center_freq_seg_0;
     uint32_t new_ch_center_freq_seg_1;
-    void struct_swap()
-    {
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&repeats));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&rand_ival));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&duration));
+    void struct_swap(){
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&repeats));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&rand_ival));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&duration));
         sta_mac.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_width));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_center_freq_seg_0));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_center_freq_seg_1));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_width));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_center_freq_seg_0));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_center_freq_seg_1));
     }
-    void struct_init() { sta_mac.struct_init(); }
+    void struct_init(){
+        sta_mac.struct_init();
+    }
 } sStaChannelLoadRequest11k;
 
 typedef struct sStaChannelLoadResponse11k {
@@ -554,16 +571,17 @@ typedef struct sStaChannelLoadResponse11k {
     uint32_t new_ch_width;
     uint32_t new_ch_center_freq_seg_0;
     uint32_t new_ch_center_freq_seg_1;
-    void struct_swap()
-    {
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&duration));
-        tlvf_swap(64, reinterpret_cast<uint8_t *>(&start_time));
+    void struct_swap(){
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&duration));
+        tlvf_swap(64, reinterpret_cast<uint8_t*>(&start_time));
         sta_mac.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_width));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_center_freq_seg_0));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_center_freq_seg_1));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_width));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_center_freq_seg_0));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_center_freq_seg_1));
     }
-    void struct_init() { sta_mac.struct_init(); }
+    void struct_init(){
+        sta_mac.struct_init();
+    }
 } sStaChannelLoadResponse11k;
 
 typedef struct sBeaconRequest11k {
@@ -591,20 +609,18 @@ typedef struct sBeaconRequest11k {
     uint32_t new_ch_width;
     uint32_t new_ch_center_freq_seg_0;
     uint32_t new_ch_center_freq_seg_1;
-    void struct_swap()
-    {
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&op_class));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&repeats));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&rand_ival));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&duration));
+    void struct_swap(){
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&op_class));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&repeats));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&rand_ival));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&duration));
         sta_mac.struct_swap();
         bssid.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_width));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_center_freq_seg_0));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_center_freq_seg_1));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_width));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_center_freq_seg_0));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_center_freq_seg_1));
     }
-    void struct_init()
-    {
+    void struct_init(){
         sta_mac.struct_init();
         bssid.struct_init();
     }
@@ -630,19 +646,17 @@ typedef struct sBeaconResponse11k {
     uint32_t new_ch_center_freq_seg_0;
     uint32_t new_ch_center_freq_seg_1;
     uint8_t use_optional_wide_band_ch_switch;
-    void struct_swap()
-    {
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&duration));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&parent_tsf));
-        tlvf_swap(64, reinterpret_cast<uint8_t *>(&start_time));
+    void struct_swap(){
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&duration));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&parent_tsf));
+        tlvf_swap(64, reinterpret_cast<uint8_t*>(&start_time));
         sta_mac.struct_swap();
         bssid.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_width));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_center_freq_seg_0));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&new_ch_center_freq_seg_1));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_width));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_center_freq_seg_0));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&new_ch_center_freq_seg_1));
     }
-    void struct_init()
-    {
+    void struct_init(){
         sta_mac.struct_init();
         bssid.struct_init();
     }
@@ -693,16 +707,14 @@ typedef struct sStatisticsRequest11k {
     uint8_t dot11RSNAStatsTKIPReplaysThreshold;
     uint8_t dot11RSNAStatsCCMPDecryptErrorsThreshold;
     uint8_t dot11RSNAStatsCCMPReplaysThreshold;
-    void struct_swap()
-    {
+    void struct_swap(){
         sta_mac.struct_swap();
         peer_mac_addr.struct_swap();
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&repeats));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&rand_ival));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&duration));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&repeats));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&rand_ival));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&duration));
     }
-    void struct_init()
-    {
+    void struct_init(){
         sta_mac.struct_init();
         peer_mac_addr.struct_init();
     }
@@ -721,16 +733,17 @@ typedef struct sStatisticsResponse11k {
     uint8_t average_trigger;
     uint8_t consecutive_trigger;
     uint8_t delay_trigger;
-    void struct_swap()
-    {
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&statistics_group_data_size));
-        tlvf_swap(16, reinterpret_cast<uint8_t *>(&duration));
-        for (size_t i = 0; i < 13; i++) {
-            tlvf_swap(32, reinterpret_cast<uint8_t *>(&(statistics_group_data[i])));
+    void struct_swap(){
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&statistics_group_data_size));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&duration));
+        for (size_t i = 0; i < 13; i++){
+            tlvf_swap(32, reinterpret_cast<uint8_t*>(&(statistics_group_data[i])));
         }
         sta_mac.struct_swap();
     }
-    void struct_init() { sta_mac.struct_init(); }
+    void struct_init(){
+        sta_mac.struct_init();
+    }
 } sStatisticsResponse11k;
 
 typedef struct sLinkMeasurementsResponse11k {
@@ -752,13 +765,14 @@ typedef struct sLinkMeasurementsResponse11k {
     uint8_t dmg_link_adapt_ack_activity;
     uint32_t dmg_link_margin_reference_timestamp;
     uint32_t dmg_link_adapt_ack_reference_timestamp;
-    void struct_swap()
-    {
+    void struct_swap(){
         sta_mac.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&dmg_link_margin_reference_timestamp));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&dmg_link_adapt_ack_reference_timestamp));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&dmg_link_margin_reference_timestamp));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&dmg_link_adapt_ack_reference_timestamp));
     }
-    void struct_init() { sta_mac.struct_init(); }
+    void struct_init(){
+        sta_mac.struct_init();
+    }
 } sLinkMeasurementsResponse11k;
 
 typedef struct sBackhaulParams {
@@ -775,10 +789,8 @@ typedef struct sBackhaulParams {
     uint8_t backhaul_iface_type;
     uint8_t is_backhaul_manager;
     uint8_t gw_manage_type;
-    beerocks::net::sMacAddr
-        backhaul_scan_measurement_list[beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];
-    void struct_swap()
-    {
+    beerocks::net::sMacAddr backhaul_scan_measurement_list[beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];
+    void struct_swap(){
         gw_ipv4.struct_swap();
         gw_bridge_mac.struct_swap();
         controller_bridge_mac.struct_swap();
@@ -787,12 +799,11 @@ typedef struct sBackhaulParams {
         backhaul_mac.struct_swap();
         backhaul_ipv4.struct_swap();
         backhaul_bssid.struct_swap();
-        for (size_t i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
+        for (size_t i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++){
             (backhaul_scan_measurement_list[i]).struct_swap();
         }
     }
-    void struct_init()
-    {
+    void struct_init(){
         gw_ipv4.struct_init();
         gw_bridge_mac.struct_init();
         controller_bridge_mac.struct_init();
@@ -801,23 +812,29 @@ typedef struct sBackhaulParams {
         backhaul_mac.struct_init();
         backhaul_ipv4.struct_init();
         backhaul_bssid.struct_init();
-        for (size_t i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
-            (backhaul_scan_measurement_list[i]).struct_init();
-        }
+            for (size_t i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
+                (backhaul_scan_measurement_list[i]).struct_init();
+            }
     }
 } sBackhaulParams;
 
 typedef struct sBackhaulRoam {
     beerocks::net::sMacAddr bssid;
     uint8_t channel;
-    void struct_swap() { bssid.struct_swap(); }
-    void struct_init() { bssid.struct_init(); }
+    void struct_swap(){
+        bssid.struct_swap();
+    }
+    void struct_init(){
+        bssid.struct_init();
+    }
 } sBackhaulRoam;
 
 typedef struct sBackhaulRssi {
     int8_t rssi;
-    void struct_swap() {}
-    void struct_init() {}
+    void struct_swap(){
+    }
+    void struct_init(){
+    }
 } sBackhaulRssi;
 
 typedef struct sLoggingLevelChange {
@@ -825,15 +842,21 @@ typedef struct sLoggingLevelChange {
     uint8_t module_name;
     uint8_t log_level;
     uint8_t enable;
-    void struct_swap() { mac.struct_swap(); }
-    void struct_init() { mac.struct_init(); }
+    void struct_swap(){
+        mac.struct_swap();
+    }
+    void struct_init(){
+        mac.struct_init();
+    }
 } sLoggingLevelChange;
 
 typedef struct sVersions {
     char master_version[beerocks::message::VERSION_LENGTH];
     char slave_version[beerocks::message::VERSION_LENGTH];
-    void struct_swap() {}
-    void struct_init() {}
+    void struct_swap(){
+    }
+    void struct_init(){
+    }
 } sVersions;
 
 typedef struct sWifiCredentials {
@@ -844,20 +867,26 @@ typedef struct sWifiCredentials {
     uint8_t vap_id;
     uint8_t force;
     uint8_t radio_dir;
-    void struct_swap() {}
-    void struct_init() {}
+    void struct_swap(){
+    }
+    void struct_init(){
+    }
 } sWifiCredentials;
 
 typedef struct sOnboarding {
     uint8_t onboarding;
-    void struct_swap() {}
-    void struct_init() {}
+    void struct_swap(){
+    }
+    void struct_init(){
+    }
 } sOnboarding;
 
 typedef struct sAdminCredentials {
     char user_password[beerocks::message::USER_PASS_LEN];
-    void struct_swap() {}
-    void struct_init() {}
+    void struct_swap(){
+    }
+    void struct_init(){
+    }
 } sAdminCredentials;
 
 typedef struct sDeviceInfo {
@@ -870,22 +899,26 @@ typedef struct sDeviceInfo {
     char wan_iface_name[beerocks::message::IFACE_NAME_LENGTH];
     uint32_t wan_ip_address;
     uint32_t wan_network_mask;
-    void struct_swap()
-    {
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&lan_ip_address));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&lan_network_mask));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&wan_ip_address));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&wan_network_mask));
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&lan_ip_address));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&lan_network_mask));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&wan_ip_address));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&wan_network_mask));
     }
-    void struct_init() {}
+    void struct_init(){
+    }
 } sDeviceInfo;
 
 typedef struct sRestrictedChannels {
     beerocks::net::sMacAddr hostap_mac;
     uint8_t restricted_channels[beerocks::message::RESTRICTED_CHANNEL_LENGTH];
     uint8_t is_global;
-    void struct_swap() { hostap_mac.struct_swap(); }
-    void struct_init() { hostap_mac.struct_init(); }
+    void struct_swap(){
+        hostap_mac.struct_swap();
+    }
+    void struct_init(){
+        hostap_mac.struct_init();
+    }
 } sRestrictedChannels;
 
 typedef struct sSteeringApConfig {
@@ -894,15 +927,16 @@ typedef struct sSteeringApConfig {
     uint32_t utilAvgCount;
     uint32_t inactCheckIntervalSec;
     uint32_t inactCheckThresholdSec;
-    void struct_swap()
-    {
+    void struct_swap(){
         bssid.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&utilCheckIntervalSec));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&utilAvgCount));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&inactCheckIntervalSec));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&inactCheckThresholdSec));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&utilCheckIntervalSec));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&utilAvgCount));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&inactCheckIntervalSec));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&inactCheckThresholdSec));
     }
-    void struct_init() { bssid.struct_init(); }
+    void struct_init(){
+        bssid.struct_init();
+    }
 } sSteeringApConfig;
 
 typedef struct sSteeringClientConfig {
@@ -914,36 +948,40 @@ typedef struct sSteeringClientConfig {
     uint32_t snrHighXing;
     uint32_t snrLowXing;
     uint32_t authRejectReason;
-    void struct_swap()
-    {
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&snrProbeHWM));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&snrProbeLWM));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&snrAuthHWM));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&snrAuthLWM));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&snrInactXing));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&snrHighXing));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&snrLowXing));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&authRejectReason));
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&snrProbeHWM));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&snrProbeLWM));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&snrAuthHWM));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&snrAuthLWM));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&snrInactXing));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&snrHighXing));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&snrLowXing));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&authRejectReason));
     }
-    void struct_init() {}
+    void struct_init(){
+    }
 } sSteeringClientConfig;
 
 typedef struct sSteeringSetGroupRequest {
     uint32_t steeringGroupIndex;
     sSteeringApConfig cfg;
     uint8_t remove;
-    void struct_swap()
-    {
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&steeringGroupIndex));
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&steeringGroupIndex));
         cfg.struct_swap();
     }
-    void struct_init() { cfg.struct_init(); }
+    void struct_init(){
+        cfg.struct_init();
+    }
 } sSteeringSetGroupRequest;
 
 typedef struct sSteeringSetGroupResponse {
     int32_t error_code;
-    void struct_swap() { tlvf_swap(32, reinterpret_cast<uint8_t *>(&error_code)); }
-    void struct_init() {}
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&error_code));
+    }
+    void struct_init(){
+    }
 } sSteeringSetGroupResponse;
 
 typedef struct sSteeringClientSetRequest {
@@ -952,15 +990,13 @@ typedef struct sSteeringClientSetRequest {
     beerocks::net::sMacAddr client_mac;
     sSteeringClientConfig config;
     uint8_t remove;
-    void struct_swap()
-    {
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&steeringGroupIndex));
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&steeringGroupIndex));
         bssid.struct_swap();
         client_mac.struct_swap();
         config.struct_swap();
     }
-    void struct_init()
-    {
+    void struct_init(){
         bssid.struct_init();
         client_mac.struct_init();
         config.struct_init();
@@ -969,8 +1005,11 @@ typedef struct sSteeringClientSetRequest {
 
 typedef struct sSteeringClientSetResponse {
     int32_t error_code;
-    void struct_swap() { tlvf_swap(32, reinterpret_cast<uint8_t *>(&error_code)); }
-    void struct_init() {}
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&error_code));
+    }
+    void struct_init(){
+    }
 } sSteeringClientSetResponse;
 
 typedef struct sSteeringEvProbeReq {
@@ -979,13 +1018,11 @@ typedef struct sSteeringEvProbeReq {
     uint8_t rx_snr;
     uint8_t blocked;
     uint8_t broadcast;
-    void struct_swap()
-    {
+    void struct_swap(){
         client_mac.struct_swap();
         bssid.struct_swap();
     }
-    void struct_init()
-    {
+    void struct_init(){
         client_mac.struct_init();
         bssid.struct_init();
     }
@@ -998,13 +1035,11 @@ typedef struct sSteeringEvAuthFail {
     uint8_t blocked;
     uint8_t reject;
     uint8_t reason;
-    void struct_swap()
-    {
+    void struct_swap(){
         client_mac.struct_swap();
         bssid.struct_swap();
     }
-    void struct_init()
-    {
+    void struct_init(){
         client_mac.struct_init();
         bssid.struct_init();
     }
@@ -1012,8 +1047,11 @@ typedef struct sSteeringEvAuthFail {
 
 typedef struct sClientDisconnectResponse {
     int32_t error_code;
-    void struct_swap() { tlvf_swap(32, reinterpret_cast<uint8_t *>(&error_code)); }
-    void struct_init() {}
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&error_code));
+    }
+    void struct_init(){
+    }
 } sClientDisconnectResponse;
 
 typedef struct sSteeringDatarateInfo {
@@ -1024,8 +1062,10 @@ typedef struct sSteeringDatarateInfo {
     uint8_t maxTxpower;
     uint8_t isStaticSmps;
     uint8_t isMUMimoSupported;
-    void struct_swap() {}
-    void struct_init() {}
+    void struct_swap(){
+    }
+    void struct_init(){
+    }
 } sSteeringDatarateInfo;
 
 typedef struct sSteeringRrmCaps {
@@ -1036,36 +1076,38 @@ typedef struct sSteeringRrmCaps {
     uint8_t bcnRptTable;
     uint8_t lciMeas;
     uint8_t ftmRangeRpt;
-    void struct_swap() {}
-    void struct_init() {}
+    void struct_swap(){
+    }
+    void struct_init(){
+    }
 } sSteeringRrmCaps;
 
-enum eDisconnectSource : uint8_t {
+enum eDisconnectSource: uint8_t {
     eDisconnect_Source_Unknown = 0x0,
-    eDisconnect_Source_Local   = 0x1,
-    eDisconnect_Source_Remote  = 0x2,
+    eDisconnect_Source_Local = 0x1,
+    eDisconnect_Source_Remote = 0x2,
 };
 
-enum eDisconnectType : uint8_t {
-    eDisconnect_Type_Unknown  = 0x0,
+enum eDisconnectType: uint8_t {
+    eDisconnect_Type_Unknown = 0x0,
     eDisconnect_Type_Disassoc = 0x1,
-    eIsconnect_Type_Deauth    = 0x2,
+    eIsconnect_Type_Deauth = 0x2,
 };
 
-enum eSteeringSnrChange : uint8_t {
+enum eSteeringSnrChange: uint8_t {
     eWifi_Steering_Snr_Unchanged = 0x0,
-    eWifi_Steering_Snr_Higher    = 0x1,
-    eWifi_Steering_Snr_Lower     = 0x2,
+    eWifi_Steering_Snr_Higher = 0x1,
+    eWifi_Steering_Snr_Lower = 0x2,
 };
 
-enum eSteeringEventType : uint8_t {
-    eWifi_Steering_Event_Probe_Req         = 0x1,
-    eWifi_Steering_Event_Client_Connect    = 0x2,
+enum eSteeringEventType: uint8_t {
+    eWifi_Steering_Event_Probe_Req = 0x1,
+    eWifi_Steering_Event_Client_Connect = 0x2,
     eWifi_Steering_Event_Client_Disconnect = 0x3,
-    eWifi_Steering_Event_Client_Activity   = 0x4,
-    eWifi_Steering_Event_Snr_Xing          = 0x5,
-    eWifi_Steering_Event_Snr               = 0x6,
-    eWifi_Steering_Event_Auth_Fail         = 0x7,
+    eWifi_Steering_Event_Client_Activity = 0x4,
+    eWifi_Steering_Event_Snr_Xing = 0x5,
+    eWifi_Steering_Event_Snr = 0x6,
+    eWifi_Steering_Event_Auth_Fail = 0x7,
 };
 
 typedef struct sSteeringEvConnect {
@@ -1077,17 +1119,15 @@ typedef struct sSteeringEvConnect {
     uint8_t bandCap5G;
     sSteeringDatarateInfo datarateInfo;
     sSteeringRrmCaps rrmCaps;
-    void struct_swap()
-    {
+    void struct_swap(){
         client_mac.struct_swap();
         bssid.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&isBTMSupported));
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&isRRMSupported));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&isBTMSupported));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&isRRMSupported));
         datarateInfo.struct_swap();
         rrmCaps.struct_swap();
     }
-    void struct_init()
-    {
+    void struct_init(){
         client_mac.struct_init();
         bssid.struct_init();
         datarateInfo.struct_init();
@@ -1101,14 +1141,12 @@ typedef struct sSteeringEvDisconnect {
     uint32_t reason;
     eDisconnectSource source;
     eDisconnectType type;
-    void struct_swap()
-    {
+    void struct_swap(){
         client_mac.struct_swap();
         bssid.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&reason));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&reason));
     }
-    void struct_init()
-    {
+    void struct_init(){
         client_mac.struct_init();
         bssid.struct_init();
     }
@@ -1118,13 +1156,11 @@ typedef struct sSteeringEvActivity {
     beerocks::net::sMacAddr client_mac;
     beerocks::net::sMacAddr bssid;
     uint8_t active;
-    void struct_swap()
-    {
+    void struct_swap(){
         client_mac.struct_swap();
         bssid.struct_swap();
     }
-    void struct_init()
-    {
+    void struct_init(){
         client_mac.struct_init();
         bssid.struct_init();
     }
@@ -1137,14 +1173,12 @@ typedef struct sSteeringEvSnrXing {
     eSteeringSnrChange inactveXing;
     eSteeringSnrChange highXing;
     eSteeringSnrChange lowXing;
-    void struct_swap()
-    {
+    void struct_swap(){
         client_mac.struct_swap();
         bssid.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&snr));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&snr));
     }
-    void struct_init()
-    {
+    void struct_init(){
         client_mac.struct_init();
         bssid.struct_init();
     }
@@ -1154,18 +1188,17 @@ typedef struct sSteeringEvSnr {
     beerocks::net::sMacAddr client_mac;
     beerocks::net::sMacAddr bssid;
     uint32_t snr;
-    void struct_swap()
-    {
+    void struct_swap(){
         client_mac.struct_swap();
         bssid.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t *>(&snr));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&snr));
     }
-    void struct_init()
-    {
+    void struct_init(){
         client_mac.struct_init();
         bssid.struct_init();
     }
 } sSteeringEvSnr;
+
 
 }; // close namespace: beerocks_message
 
