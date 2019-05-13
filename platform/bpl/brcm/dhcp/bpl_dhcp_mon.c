@@ -10,19 +10,19 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////// Local Module Definitions //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-static bpl_dhcp_mon_cb  s_pCallback = NULL;
-static int              s_fdDHCPEvents = -1;
-static char             s_arrReadBuff[1024];
+static bpl_dhcp_mon_cb s_pCallback = NULL;
+static int s_fdDHCPEvents          = -1;
+static char s_arrReadBuff[1024];
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
@@ -58,9 +58,9 @@ int bpl_dhcp_mon_start(bpl_dhcp_mon_cb cb)
 int bpl_dhcp_mon_handle_event()
 {
     // op, mac, ip, hostname
-    char* arrTok[4] = {0};
-    char* tmpTok;
-    int   numTok = 0;
+    char *arrTok[4] = {0};
+    char *tmpTok;
+    int numTok = 0;
 
     // Read incoming data
     int ret = read(s_fdDHCPEvents, s_arrReadBuff, sizeof(s_arrReadBuff));
@@ -76,17 +76,15 @@ int bpl_dhcp_mon_handle_event()
     tmpTok = strtok(s_arrReadBuff, ",");
     while (tmpTok != NULL && numTok < 4) {
         arrTok[numTok++] = tmpTok;
-        tmpTok = strtok(NULL, ",");
+        tmpTok           = strtok(NULL, ",");
     }
 
     // TODO: Handle multiple events in one buffer?
 
     // Execute the callback
     if (s_pCallback)
-        s_pCallback((arrTok[0]) ? arrTok[0] : "", 
-                    (arrTok[1]) ? arrTok[1] : "",
-                    (arrTok[2]) ? arrTok[2] : "",
-                    (arrTok[3]) ? arrTok[3] : "");
+        s_pCallback((arrTok[0]) ? arrTok[0] : "", (arrTok[1]) ? arrTok[1] : "",
+                    (arrTok[2]) ? arrTok[2] : "", (arrTok[3]) ? arrTok[3] : "");
 
     return 0;
 }
@@ -94,7 +92,7 @@ int bpl_dhcp_mon_handle_event()
 int bpl_dhcp_mon_stop()
 {
     if (s_fdDHCPEvents != -1) {
-        close (s_fdDHCPEvents);
+        close(s_fdDHCPEvents);
         s_fdDHCPEvents = -1;
     }
 

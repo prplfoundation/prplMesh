@@ -10,16 +10,16 @@
 
 // Ignore some warnings from libubus
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <string.h>
-#include <libubus.h>
 #include <libubox/blobmsg_json.h>
+#include <libubus.h>
+#include <string.h>
 
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////// Local Module Definitions //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-static struct ubus_context* s_pUbusCtx = NULL;
-static bpl_dhcp_mon_cb s_pCallback = NULL;
+static struct ubus_context *s_pUbusCtx = NULL;
+static bpl_dhcp_mon_cb s_pCallback     = NULL;
 
 enum {
     DHCP_EVENT_ID,
@@ -31,12 +31,11 @@ enum {
 };
 
 static const struct blobmsg_policy dhcp_event_policy[] = {
-    //TODO Remove: [DHCP_EVENT_ID] = { .name = "id", .type = BLOBMSG_TYPE_INT32 },
-    [DHCP_EVENT_OP] = { .name = "op", .type = BLOBMSG_TYPE_STRING },
-    [DHCP_EVENT_MAC] = { .name = "mac", .type = BLOBMSG_TYPE_STRING },
-    [DHCP_EVENT_IP] = { .name = "ip", .type = BLOBMSG_TYPE_STRING },
-    [DHCP_EVENT_HOSTNAME] = { .name = "hostname", .type = BLOBMSG_TYPE_STRING }
-};
+        //TODO Remove: [DHCP_EVENT_ID] = { .name = "id", .type = BLOBMSG_TYPE_INT32 },
+        [DHCP_EVENT_OP] = {.name = "op", .type = BLOBMSG_TYPE_STRING},
+        [DHCP_EVENT_MAC] = {.name = "mac", .type = BLOBMSG_TYPE_STRING},
+        [DHCP_EVENT_IP] = {.name = "ip", .type = BLOBMSG_TYPE_STRING},
+        [DHCP_EVENT_HOSTNAME] = {.name = "hostname", .type = BLOBMSG_TYPE_STRING}};
 
 struct dhcp_event_request {
     struct ubus_request_data req;
@@ -49,31 +48,35 @@ struct dhcp_event_request {
 //////////////////////////////////////////////////////////////////////////////
 
 static int dhcp_event_handler(struct ubus_context *ctx, struct ubus_object *obj,
-              struct ubus_request_data *req, const char *method,
-              struct blob_attr *msg)
+                              struct ubus_request_data *req, const char *method,
+                              struct blob_attr *msg)
 {
     struct blob_attr *tb[__DHCP_EVENT_MAX];
 
-    const char *op = "(unknown)";
-    const char *mac = "(unknown)";
-    const char *ip = "(unknown)";
+    const char *op       = "(unknown)";
+    const char *mac      = "(unknown)";
+    const char *ip       = "(unknown)";
     const char *hostname = "(unknown)";
 
     // Remove "unused variable" warnings
-    (void)ctx; (void)obj; (void)req; (void)method;
+    (void)ctx;
+    (void)obj;
+    (void)req;
+    (void)method;
 
-    blobmsg_parse(dhcp_event_policy, ARRAY_SIZE(dhcp_event_policy), tb, blob_data(msg), blob_len(msg));
+    blobmsg_parse(dhcp_event_policy, ARRAY_SIZE(dhcp_event_policy), tb, blob_data(msg),
+                  blob_len(msg));
 
-    if (tb[DHCP_EVENT_OP]){
+    if (tb[DHCP_EVENT_OP]) {
         op = blobmsg_data(tb[DHCP_EVENT_OP]);
     }
-    if (tb[DHCP_EVENT_MAC]){
+    if (tb[DHCP_EVENT_MAC]) {
         mac = blobmsg_data(tb[DHCP_EVENT_MAC]);
     }
-    if (tb[DHCP_EVENT_IP]){
+    if (tb[DHCP_EVENT_IP]) {
         ip = blobmsg_data(tb[DHCP_EVENT_IP]);
     }
-    if (tb[DHCP_EVENT_HOSTNAME]){
+    if (tb[DHCP_EVENT_HOSTNAME]) {
         hostname = blobmsg_data(tb[DHCP_EVENT_HOSTNAME]);
     }
 
@@ -101,9 +104,9 @@ static struct ubus_object_type dhcp_ubus_object_type =
     UBUS_OBJECT_TYPE("dhcp_event", dhcp_ubus_methods);
 
 static struct ubus_object dhcp_ubus_object = {
-    .name = "dhcp_event",
-    .type = &dhcp_ubus_object_type,
-    .methods = dhcp_ubus_methods,
+    .name      = "dhcp_event",
+    .type      = &dhcp_ubus_object_type,
+    .methods   = dhcp_ubus_methods,
     .n_methods = ARRAY_SIZE(dhcp_ubus_methods),
 };
 
@@ -116,7 +119,7 @@ int bpl_dhcp_mon_start(bpl_dhcp_mon_cb cb)
     // Modules doesn't support multiple starts
     if ((s_pUbusCtx != NULL) /*|| (pCallback == NULL)*/)
         return (-1);
-    
+
     if ((s_pUbusCtx = ubus_connect(NULL)) == NULL)
         return (-1);
 
