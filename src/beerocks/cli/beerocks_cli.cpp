@@ -65,8 +65,8 @@ void cli::resetArguments()
     command.clear();
     commandIt        = functionsMap.end();
     commandNumOfArgs = 0;
-    memset(args.intArgs, 0, ARGSNUM);
-    memset(args.floatArgs, 0, ARGSNUM);
+    memset(args.intArgs, 0, sizeof(args.intArgs));
+    memset(args.floatArgs, 0, sizeof(args.intArgs));
     for (int i = 0; i < ARGSNUM; i++) {
         args.stringArgs[i] = "";
     }
