@@ -9,42 +9,39 @@
 #ifndef __MAPF_BROKER_H__
 #define __MAPF_BROKER_H__
 
+#include <iostream>
 #include <mapf/broker/broker_config.h>
 #include <mapf/common/config.h>
 #include <mapf/common/err.h>
 #include <mapf/common/logger.h>
-#include <iostream>
 
-
-namespace mapf
-{
+namespace mapf {
 struct msglib_socket;
 
-enum class BrokerSocket:int {FRONTEND, BACKEND};
+enum class BrokerSocket : int { FRONTEND, BACKEND };
 
-class Broker
-{
+class Broker {
 public:
-	Broker();
+    Broker();
 
-	Broker(const std::string& cfg);
+    Broker(const std::string &cfg);
 
-	~Broker();
+    ~Broker();
 
-	void Bind(BrokerSocket socket_type, const std::string& endpoint);
-	void Run();
-	void PrintConfig();
+    void Bind(BrokerSocket socket_type, const std::string &endpoint);
+    void Run();
+    void PrintConfig();
 
 private:
-	void Init(const std::string& cfg);
-	void Bind();
+    void Init(const std::string &cfg);
+    void Bind();
 
-	BrokerConfig config_;
+    BrokerConfig config_;
 
 protected:
-	msglib_socket *frontend_;
-	msglib_socket *backend_;
-	void *context_;
+    msglib_socket *frontend_;
+    msglib_socket *backend_;
+    void *context_;
 };
 
 } /* namespace mapf */

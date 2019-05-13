@@ -11,48 +11,48 @@
 
 #include "broker_config.h"
 #include <mapf/common/context.h>
-#include <mapf/common/socket.h>
-#include <mapf/common/poller.h>
 #include <mapf/common/message.h>
+#include <mapf/common/poller.h>
+#include <mapf/common/socket.h>
 
 extern char *__progname;
-namespace mapf
-{
+namespace mapf {
 
-class BrokerInterface
-{
+class BrokerInterface {
 public:
-	BrokerInterface(Context& ctx, const std::string& cfg, std::string sync_topic = "hello")
-		: config_(cfg)
-		, sub_(ctx)
-		, pub_(ctx)
-		, kSyncTopic(sync_topic) {}
+    BrokerInterface(Context &ctx, const std::string &cfg, std::string sync_topic = "hello")
+        : config_(cfg), sub_(ctx), pub_(ctx), kSyncTopic(sync_topic)
+    {
+    }
 
-	~BrokerInterface() {}
+    ~BrokerInterface() {}
 
-	void Init();
+    void Init();
 
-	void PrintConfig();
+    void PrintConfig();
 
-	void Sync();
+    void Sync();
 
-	SubSocket& subscriber() const { return sub_; }
-	PubSocket& publisher() const { return pub_; }
+    SubSocket &subscriber() const { return sub_; }
+    PubSocket &publisher() const { return pub_; }
 
 protected:
-	BrokerConfig config_;
-	mutable SubSocket sub_;
-	mutable PubSocket pub_;
+    BrokerConfig config_;
+    mutable SubSocket sub_;
+    mutable PubSocket pub_;
 
 private:
-	BrokerInterface();
-	const std::string kSyncTopic;
-	static int syncCount;
-	const std::string sync_topic(){ return kSyncTopic + std::string(__progname) + std::to_string(syncCount); }
+    BrokerInterface();
+    const std::string kSyncTopic;
+    static int syncCount;
+    const std::string sync_topic()
+    {
+        return kSyncTopic + std::string(__progname) + std::to_string(syncCount);
+    }
 
-	void SyncSend(Message& msg);	
+    void SyncSend(Message &msg);
 
-	bool SyncRecv(const std::string& msg_topic);
+    bool SyncRecv(const std::string &msg_topic);
 };
 
 } /* namespace mapf */

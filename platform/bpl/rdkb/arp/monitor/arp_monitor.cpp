@@ -11,16 +11,16 @@
 #include "../../../common/utils/utils_net.h"
 
 #include <errno.h>
-#include <unistd.h>
 #include <netinet/in.h>
+#include <unistd.h>
 
 #include <linux/if_arp.h>
 
-#include <netlink/netlink.h>
-#include <netlink/socket.h>
 #include <netlink/msg.h>
-#include <netlink/route/neightbl.h>
+#include <netlink/netlink.h>
 #include <netlink/route/neighbour.h>
+#include <netlink/route/neightbl.h>
+#include <netlink/socket.h>
 
 #include <mapf/common/logger.h>
 
@@ -35,10 +35,10 @@ namespace bpl {
 #define IP4_HDRLEN 20 // IPv4 header length
 #define ARP_HDRLEN 28 // ARP header length
 
-#define SOCKET_SEND_BUF_SIZE    32768
-#define SOCKET_RECV_BUF_SIZE    (1024 * 1024)
+#define SOCKET_SEND_BUF_SIZE 32768
+#define SOCKET_RECV_BUF_SIZE (1024 * 1024)
 
-#define PROBE_TIMEOUT_SEC       5
+#define PROBE_TIMEOUT_SEC 5
 
 typedef struct {
     uint16_t htype;
@@ -63,11 +63,10 @@ typedef struct {
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-static bool read_arp_table(struct nl_sock* sock,  
-    std::vector<arp_neigh>& vecNeigh)
+static bool read_arp_table(struct nl_sock *sock, std::vector<arp_neigh> &vecNeigh)
 {
-	// ARP table cache
-    struct nl_cache* neightbl_cache = nullptr;
+    // ARP table cache
+    struct nl_cache *neightbl_cache = nullptr;
 
     // Allocate the cache and fill it with data
     int ret;
@@ -75,12 +74,12 @@ static bool read_arp_table(struct nl_sock* sock,
         LOG(ERROR) << "Failed probing ARP table: " << nl_geterror(ret);
         return false;
     }
-    
-	// struct nl_dump_params params;
+
+    // struct nl_dump_params params;
     // memset(&params, 0, sizeof(nl_dump_params));
 
-	// params.dp_type = NL_DUMP_DETAILS;//NL_DUMP_LINE;
-	// params.dp_fd = stdout;
+    // params.dp_type = NL_DUMP_DETAILS;//NL_DUMP_LINE;
+    // params.dp_fd = stdout;
     // // params.dp_type = NL_DUMP_DETAILS;
     // // params.dp_prefix = 30;
     // // params.dp_print_index = 1;
@@ -92,11 +91,11 @@ static bool read_arp_table(struct nl_sock* sock,
     // // params.dp_buf = NULL;
     // // params.dp_buflen = 0;
 
-	// nl_cache_dump(neightbl_cache, &params);
+    // nl_cache_dump(neightbl_cache, &params);
 
     int num_of_items = nl_cache_nitems(neightbl_cache);
 
-    struct rtnl_neigh* neigh = (rtnl_neigh*)nl_cache_get_first(neightbl_cache);
+    struct rtnl_neigh *neigh = (rtnl_neigh *)nl_cache_get_first(neightbl_cache);
     if (!neigh) {
         MAPF_ERR("neigh is null");
         nl_cache_free(neightbl_cache);
@@ -107,22 +106,24 @@ static bool read_arp_table(struct nl_sock* sock,
         arp_neigh curr_neigh = {0};
 
         curr_neigh.ifindex = rtnl_neigh_get_ifindex(neigh);
-        curr_neigh.state = rtnl_neigh_get_state(neigh);
+        curr_neigh.state   = rtnl_neigh_get_state(neigh);
 
         // Skip NOARP state and non IPv4 records
         if (curr_neigh.state != NUD_NOARP && rtnl_neigh_get_family(neigh) == AF_INET) {
 
             // Only store valid records
             if (rtnl_neigh_get_dst(neigh) && rtnl_neigh_get_lladdr(neigh)) {
-                std::copy_n((uint8_t*)nl_addr_get_binary_addr(rtnl_neigh_get_dst(neigh)), 4, curr_neigh.ip);
-                std::copy_n((uint8_t*)nl_addr_get_binary_addr(rtnl_neigh_get_lladdr(neigh)), 6, curr_neigh.mac);
+                std::copy_n((uint8_t *)nl_addr_get_binary_addr(rtnl_neigh_get_dst(neigh)), 4,
+                            curr_neigh.ip);
+                std::copy_n((uint8_t *)nl_addr_get_binary_addr(rtnl_neigh_get_lladdr(neigh)), 6,
+                            curr_neigh.mac);
 
                 vecNeigh.push_back(curr_neigh);
             }
         }
 
         // Advance to the next record
-        neigh = (rtnl_neigh*)nl_cache_get_next((nl_object*)neigh);
+        neigh = (rtnl_neigh *)nl_cache_get_next((nl_object *)neigh);
         if (!neigh) {
             MAPF_ERR("neigh is null");
             nl_cache_free(neightbl_cache);
@@ -132,12 +133,12 @@ static bool read_arp_table(struct nl_sock* sock,
 
     // Free the cache
     nl_cache_free(neightbl_cache);
-    
+
     return true;
 }
 
-static bool send_arp(std::string iface, std::string dst_ip, std::string src_ip,
-        uint8_t* dst_mac, uint8_t* src_mac, int count, int arp_socket)
+static bool send_arp(std::string iface, std::string dst_ip, std::string src_ip, uint8_t *dst_mac,
+                     uint8_t *src_mac, int count, int arp_socket)
 {
     int tx_len;
     arp_hdr arphdr;
@@ -148,22 +149,22 @@ static bool send_arp(std::string iface, std::string dst_ip, std::string src_ip,
     uint32_t src_ip_uint = utils::uint_ipv4_from_string(src_ip);
 
     // Fill out sockaddr_ll
-    memset (&sock, 0, sizeof (sock));
-    sock.sll_family = AF_PACKET;
+    memset(&sock, 0, sizeof(sock));
+    sock.sll_family  = AF_PACKET;
     sock.sll_ifindex = utils::linux_iface_to_index(iface);
-    sock.sll_halen = 6;
+    sock.sll_halen   = 6;
     std::copy_n(dst_mac, BPL_ARP_MON_MAC_LEN, sock.sll_addr);
 
     // build ARP header
-    arphdr.htype = htons(1); //type: 1 for ethernet
-    arphdr.ptype = htons(ETH_P_IP); // proto
-    arphdr.hlen = 6; // mac addr len
-    arphdr.plen = 4; // ip addr len
-    arphdr.opcode = htons (ARPOP_REQUEST);
+    arphdr.htype  = htons(1);        //type: 1 for ethernet
+    arphdr.ptype  = htons(ETH_P_IP); // proto
+    arphdr.hlen   = 6;               // mac addr len
+    arphdr.plen   = 4;               // ip addr len
+    arphdr.opcode = htons(ARPOP_REQUEST);
     std::copy_n(src_mac, BPL_ARP_MON_MAC_LEN, arphdr.sender_mac);
-    std::copy_n((uint8_t*)&src_ip_uint, BPL_ARP_MON_IP_LEN, arphdr.sender_ip);
+    std::copy_n((uint8_t *)&src_ip_uint, BPL_ARP_MON_IP_LEN, arphdr.sender_ip);
     std::copy_n(dst_mac, BPL_ARP_MON_MAC_LEN, arphdr.target_mac);
-    std::copy_n((uint8_t*)&dst_ip_uint, BPL_ARP_MON_IP_LEN, arphdr.target_ip);
+    std::copy_n((uint8_t *)&dst_ip_uint, BPL_ARP_MON_IP_LEN, arphdr.target_ip);
 
     // build ethernet frame
     tx_len = 6 + 6 + 2 + ARP_HDRLEN; // dest mac, src mac, type, arp header len
@@ -173,44 +174,37 @@ static bool send_arp(std::string iface, std::string dst_ip, std::string src_ip,
     packet_buffer[13] = ETH_P_ARP % 256;
 
     // ARP header
-    std::copy_n((uint8_t*)&arphdr, ARP_HDRLEN, packet_buffer + ETH_HDRLEN);
+    std::copy_n((uint8_t *)&arphdr, ARP_HDRLEN, packet_buffer + ETH_HDRLEN);
 
     bool new_socket = (arp_socket < 0);
     if (new_socket) {
-        if((arp_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ARP))) < 0){
+        if ((arp_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ARP))) < 0) {
             LOG(ERROR) << "Opening ARP socket";
             return false;
         }
     }
 
     // Send ethernet frame to socket.
-    for(int i = 0; i < count ; i++) {
+    for (int i = 0; i < count; i++) {
         //LOG_MONITOR(DEBUG) << "ARP to ip=" << dest_ip << " mac=" <<network_utils::mac_to_string(dest_mac);
-        if (sendto(arp_socket, packet_buffer, tx_len, 0, (struct sockaddr *) &sock, sizeof (sock)) <= 0) {
-            LOG(ERROR) <<"sendto() failed";
+        if (sendto(arp_socket, packet_buffer, tx_len, 0, (struct sockaddr *)&sock, sizeof(sock)) <=
+            0) {
+            LOG(ERROR) << "sendto() failed";
         }
     }
-    if(new_socket) {
+    if (new_socket) {
         close(arp_socket);
     }
     return true;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-arp_monitor::arp_monitor() :
-    m_fdMonSocket(-1),
-    m_fdArpSocket(-1),
-    m_pNlSocket(nullptr)
-{
-}
+arp_monitor::arp_monitor() : m_fdMonSocket(-1), m_fdArpSocket(-1), m_pNlSocket(nullptr) {}
 
-arp_monitor::~arp_monitor()
-{
-}
+arp_monitor::~arp_monitor() {}
 
 bool arp_monitor::start(std::string strIface)
 {
@@ -219,17 +213,15 @@ bool arp_monitor::start(std::string strIface)
 
     // Read interface values
     m_strIface = strIface;
-    
+
     // open netlink sock
-    if ((m_fdMonSocket = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE)) < 0)
-    {
+    if ((m_fdMonSocket = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE)) < 0) {
         LOG(ERROR) << "Failed opening socket: " << strerror(errno);
         return false;
     }
 
     int sndbuf = SOCKET_SEND_BUF_SIZE;
-    if (setsockopt(m_fdMonSocket, SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(sndbuf)) < 0)
-    {
+    if (setsockopt(m_fdMonSocket, SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(sndbuf)) < 0) {
         LOG(ERROR) << "Failed setting SO_SNDBUF option: " << strerror(errno);
         stop();
         return false;
@@ -248,7 +240,7 @@ bool arp_monitor::start(std::string strIface)
     local.nl_family = AF_NETLINK;
     local.nl_groups = RTNLGRP_TC;
 
-    if (bind(m_fdMonSocket, (struct sockaddr*)&local, sizeof(local)) < 0) {
+    if (bind(m_fdMonSocket, (struct sockaddr *)&local, sizeof(local)) < 0) {
         LOG(ERROR) << "Failed binding socket: " << strerror(errno);
         stop();
         return false;
@@ -275,7 +267,7 @@ bool arp_monitor::start(std::string strIface)
         stop();
         return false;
     }
-    
+
     return true;
 }
 
@@ -297,18 +289,18 @@ void arp_monitor::stop()
     }
 }
 
-bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
+bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY &sArpMonData)
 {
-    char   buf_local[256];
+    char buf_local[256];
     struct sockaddr_nl nladdr;
     struct iovec iov;
 
     memset(&nladdr, 0, sizeof(nladdr));
     nladdr.nl_family = AF_NETLINK;
-    nladdr.nl_pid = 0;
+    nladdr.nl_pid    = 0;
     nladdr.nl_groups = 0;
-    iov.iov_base = buf_local;
-    iov.iov_len = sizeof(buf_local);
+    iov.iov_base     = buf_local;
+    iov.iov_len      = sizeof(buf_local);
 
     // Reading the message (non-blocking)
     struct msghdr msg;
@@ -320,13 +312,12 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
     memset(&sArpMonData, 0, sizeof(sArpMonData));
 
     ssize_t status;
-    if ((status = recvmsg(m_fdMonSocket, &msg, MSG_DONTWAIT | MSG_ERRQUEUE)) < 0) 
-    {
-       LOG(ERROR) << "Failed reading from socket: " << strerror(errno);
+    if ((status = recvmsg(m_fdMonSocket, &msg, MSG_DONTWAIT | MSG_ERRQUEUE)) < 0) {
+        LOG(ERROR) << "Failed reading from socket: " << strerror(errno);
         // if (errno == EINTR || errno == EAGAIN || errno == ENOBUFS)
         return false;
     }
-    
+
     if (status == 0) {
         LOG(ERROR) << "EOF on netlink\n";
         return false;
@@ -337,10 +328,9 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
     }
 
     // for loop to retrieve all ARP data.
-    for (nlmsghdr* h = (struct nlmsghdr*)buf_local; status >= ssize_t(sizeof(*h));) 
-    {
-        int len = h->nlmsg_len;
-        int l = len - sizeof(*h);
+    for (nlmsghdr *h = (struct nlmsghdr *)buf_local; status >= ssize_t(sizeof(*h));) {
+        int len    = h->nlmsg_len;
+        int l      = len - sizeof(*h);
         int len_at = len;
 
         if (l < 0 || len > status) {
@@ -356,10 +346,9 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
         status -= NLMSG_ALIGN(len);
 
         // Skip irrelevant messages
-        if (h->nlmsg_type != RTM_NEWNEIGH &&
-            h->nlmsg_type != RTM_DELNEIGH &&
+        if (h->nlmsg_type != RTM_NEWNEIGH && h->nlmsg_type != RTM_DELNEIGH &&
             h->nlmsg_type != RTM_GETNEIGH) {
-                continue;
+            continue;
             // if (r->ndm_family != AF_INET) {
             //     LOG(ERROR) << "ndm_family != AF_INET";
             //     return false;
@@ -374,15 +363,14 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
         }
 
         // Header type converted to beerocks_define.h ARP_TYPE
-        if(h->nlmsg_type == RTM_NEWNEIGH) {
+        if (h->nlmsg_type == RTM_NEWNEIGH) {
             sArpMonData.type = BPL_ARP_TYPE_NEWNEIGH;
-        }
-        else if(h->nlmsg_type == RTM_GETNEIGH) {
+        } else if (h->nlmsg_type == RTM_GETNEIGH) {
             sArpMonData.type = BPL_ARP_TYPE_GETNEIGH;
         }
 
         struct ndmsg *r = (struct ndmsg *)NLMSG_DATA(h);
-        if(r == nullptr) {
+        if (r == nullptr) {
             LOG(ERROR) << "ndmsg is NULL";
             return false;
         }
@@ -390,7 +378,7 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
         // State
         sArpMonData.state = r->ndm_state;
 
-        struct rtattr* tb[NDA_MAX+1];
+        struct rtattr *tb[NDA_MAX + 1];
         len_at -= NLMSG_LENGTH(sizeof(*r));
         if (len_at < 0) {
             LOG(ERROR) << "BUG: wrong nlmsg len = " << len_at;
@@ -399,24 +387,24 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
 
         // creating atrribute table
         unsigned short type;
-        int max = NDA_MAX;
-        struct rtattr *rta = ((struct rtattr*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ndmsg))));
-        len_at = h->nlmsg_len - NLMSG_LENGTH(sizeof(*r));
+        int max            = NDA_MAX;
+        struct rtattr *rta = ((struct rtattr *)(((char *)(r)) + NLMSG_ALIGN(sizeof(struct ndmsg))));
+        len_at             = h->nlmsg_len - NLMSG_LENGTH(sizeof(*r));
         unsigned short flags = 0;
 
         memset(tb, 0, sizeof(struct rtattr *) * (max + 1));
         while (RTA_OK(rta, len_at)) {
             type = rta->rta_type & ~flags;
-            if ((type <= max) && (!tb[type])){
+            if ((type <= max) && (!tb[type])) {
                 tb[type] = rta;
             }
-            rta = RTA_NEXT(rta,len_at);
+            rta = RTA_NEXT(rta, len_at);
         }
 
         // IP address
         std::string ipv4_str;
         if (tb[NDA_DST]) {
-            std::copy_n((uint8_t*)RTA_DATA(tb[NDA_DST]), BPL_ARP_MON_IP_LEN, sArpMonData.ip);
+            std::copy_n((uint8_t *)RTA_DATA(tb[NDA_DST]), BPL_ARP_MON_IP_LEN, sArpMonData.ip);
         }
 
         // Interface index
@@ -425,8 +413,8 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
 
         // MAC address
         if (tb[NDA_LLADDR]) {
-            std::copy_n((uint8_t*)RTA_DATA(tb[NDA_LLADDR]), BPL_ARP_MON_MAC_LEN, sArpMonData.mac);
-        } 
+            std::copy_n((uint8_t *)RTA_DATA(tb[NDA_LLADDR]), BPL_ARP_MON_MAC_LEN, sArpMonData.mac);
+        }
         // else {
         //     h = (struct nlmsghdr*)((char*)h + NLMSG_ALIGN(len));
         //     LOG(WARNING) << "MAC address not found in ARP message.";
@@ -457,7 +445,7 @@ bool arp_monitor::process_mon(BPL_ARP_MON_ENTRY& sArpMonData)
     return true;
 }
 
-int arp_monitor::process_arp(BPL_ARP_MON_ENTRY& sArpMonData)
+int arp_monitor::process_arp(BPL_ARP_MON_ENTRY &sArpMonData)
 {
     // Receive the data
     int iLen = 0;
@@ -470,7 +458,7 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY& sArpMonData)
     }
 
     // Do NOT continue if the nodes list is empty
-    if (!m_lstProbe.size()){
+    if (!m_lstProbe.size()) {
         return -1;
     }
 
@@ -480,11 +468,11 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY& sArpMonData)
         return -1;
     }
 
-    struct ethhdr* pEthHeader = (struct ethhdr*)m_arrArpPacket;
-    arp_hdr* pArpHeader = (arp_hdr*)(m_arrArpPacket + ETH_HLEN);
+    struct ethhdr *pEthHeader = (struct ethhdr *)m_arrArpPacket;
+    arp_hdr *pArpHeader       = (arp_hdr *)(m_arrArpPacket + ETH_HLEN);
 
     // Non ARP-Reply packet
-    if((pEthHeader->h_proto != ETH_P_ARP) || (ntohs(pArpHeader->opcode) != ARPOP_REPLY)) {
+    if ((pEthHeader->h_proto != ETH_P_ARP) || (ntohs(pArpHeader->opcode) != ARPOP_REPLY)) {
         LOG(DEBUG) << "Non ARP-REPLY Packet";
         return -1;
     }
@@ -492,7 +480,7 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY& sArpMonData)
     // Check whether the received MAC is in the list
     int iTaskID = -1;
     for (auto iter = m_lstProbe.begin(); iter != m_lstProbe.end();) {
-        auto& node = *iter;
+        auto &node = *iter;
 
         // Found our node
         if (!std::memcmp(&node->mac, pArpHeader->sender_mac, ETH_ALEN)) {
@@ -503,18 +491,20 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY& sArpMonData)
 
         // Check the timeout of the node
         if (node->tpTimeout < std::chrono::steady_clock::now()) {
-            LOG(DEBUG) << "Removing the mac: " << utils::mac_to_string(node->mac) << " from probe list";
+            LOG(DEBUG) << "Removing the mac: " << utils::mac_to_string(node->mac)
+                       << " from probe list";
             iter = m_lstProbe.erase(iter);
             continue;
         }
-        
+
         // Advance to the next node
         ++iter;
     }
 
     // MAC was not found in the list
     if (iTaskID <= 0) {
-        LOG(DEBUG) << "MAC " << utils::mac_to_string(sArpMonData.mac) << " was not found in the list";
+        LOG(DEBUG) << "MAC " << utils::mac_to_string(sArpMonData.mac)
+                   << " was not found in the list";
         return -1;
     }
 
@@ -528,13 +518,14 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY& sArpMonData)
     return iTaskID;
 }
 
-bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN], const uint8_t ip[BPL_ARP_MON_IP_LEN], int iTaskID)
+bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                        const uint8_t ip[BPL_ARP_MON_IP_LEN], int iTaskID)
 {
     LOG(DEBUG) << "probe, mac=" << utils::mac_to_string(mac) << " task_id=" << iTaskID;
     bool create_new_entrie = true;
-    // Check whether the given node is already waiting for a response 
+    // Check whether the given node is already waiting for a response
     for (auto iter = m_lstProbe.begin(); iter != m_lstProbe.end();) {
-        auto& node = *iter;
+        auto &node = *iter;
 
         // If the MAC of the given node is already in the list
         if (!std::memcmp(&node->mac, mac, BPL_ARP_MON_MAC_LEN)) {
@@ -542,10 +533,12 @@ bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN], const uint8_t ip
             create_new_entrie = false;
             // If timedout for this mac then update the exisitng entry with current data
             if (node->tpTimeout < std::chrono::steady_clock::now()) {
-                LOG(DEBUG) << "Updating the mac: " << utils::mac_to_string(node->mac) << " from probe list";
+                LOG(DEBUG) << "Updating the mac: " << utils::mac_to_string(node->mac)
+                           << " from probe list";
                 std::copy_n(ip, BPL_ARP_MON_IP_LEN, node->ip);
                 node->iTaskID = iTaskID;
-                node->tpTimeout = std::chrono::steady_clock::now() + std::chrono::seconds(PROBE_TIMEOUT_SEC);
+                node->tpTimeout =
+                    std::chrono::steady_clock::now() + std::chrono::seconds(PROBE_TIMEOUT_SEC);
             }
             break;
         }
@@ -555,12 +548,13 @@ bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN], const uint8_t ip
     }
 
     // Create a new node entry
-    if(create_new_entrie){
+    if (create_new_entrie) {
         auto pProbeEntry = std::make_shared<SProbeEntry>();
         std::copy_n(mac, BPL_ARP_MON_MAC_LEN, pProbeEntry->mac);
         std::copy_n(ip, BPL_ARP_MON_IP_LEN, pProbeEntry->ip);
         pProbeEntry->iTaskID = iTaskID;
-        pProbeEntry->tpTimeout = std::chrono::steady_clock::now() + std::chrono::seconds(PROBE_TIMEOUT_SEC);
+        pProbeEntry->tpTimeout =
+            std::chrono::steady_clock::now() + std::chrono::seconds(PROBE_TIMEOUT_SEC);
 
         // Add the entry to the list
         m_lstProbe.push_back(pProbeEntry);
@@ -577,8 +571,8 @@ bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN], const uint8_t ip
         return false;
     }
 
-    LOG(DEBUG) << "send arp, iface=" <<  m_strIface << " dst_ip=" << utils::ipv4_to_string(ip) 
-               << " src_ip=" << str_iface_ip << " dst_mac=" << utils::mac_to_string(mac) 
+    LOG(DEBUG) << "send arp, iface=" << m_strIface << " dst_ip=" << utils::ipv4_to_string(ip)
+               << " src_ip=" << str_iface_ip << " dst_mac=" << utils::mac_to_string(mac)
                << " src_mac=" << str_iface_mac;
 
     uint8_t src_mac[BPL_ARP_MON_MAC_LEN];
@@ -587,17 +581,19 @@ bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN], const uint8_t ip
     utils::mac_from_string(src_mac, str_iface_mac);
     utils::mac_from_string(dst_mac, "ff:ff:ff:ff:ff:ff");
 
-    send_arp(m_strIface, utils::ipv4_to_string(ip), str_iface_ip, dst_mac, src_mac, 1, m_fdArpSocket);
+    send_arp(m_strIface, utils::ipv4_to_string(ip), str_iface_ip, dst_mac, src_mac, 1,
+             m_fdArpSocket);
 
-    // TODO: optimize system to send unicast arp when dst_mac is in arp table 
-    // network_utils::arp_send(m_strIface, network_utils::ipv4_to_string(sParams.ipv4), 
+    // TODO: optimize system to send unicast arp when dst_mac is in arp table
+    // network_utils::arp_send(m_strIface, network_utils::ipv4_to_string(sParams.ipv4),
     //     str_iface_ip, sParams.mac, network_utils::mac_from_string(str_iface_mac),
     //     1, m_fdArpSocket);
 
     return (true);
 }
 
-bool arp_monitor::get_mac_for_ip(const uint8_t ip[BPL_ARP_MON_IP_LEN], uint8_t mac[BPL_ARP_MON_MAC_LEN])
+bool arp_monitor::get_mac_for_ip(const uint8_t ip[BPL_ARP_MON_IP_LEN],
+                                 uint8_t mac[BPL_ARP_MON_MAC_LEN])
 {
     std::vector<arp_neigh> vecArpTable;
 
@@ -607,10 +603,10 @@ bool arp_monitor::get_mac_for_ip(const uint8_t ip[BPL_ARP_MON_IP_LEN], uint8_t m
     }
 
     // Clear the MAC address
-    memset((void*)mac, 0, BPL_ARP_MON_MAC_LEN);
+    memset((void *)mac, 0, BPL_ARP_MON_MAC_LEN);
 
     for (auto neigh : vecArpTable) {
-        if (memcmp((void*)ip, neigh.ip, BPL_ARP_MON_IP_LEN) == 0) {
+        if (memcmp((void *)ip, neigh.ip, BPL_ARP_MON_IP_LEN) == 0) {
             std::copy_n(neigh.mac, BPL_ARP_MON_MAC_LEN, mac);
             return true;
         }
@@ -619,7 +615,8 @@ bool arp_monitor::get_mac_for_ip(const uint8_t ip[BPL_ARP_MON_IP_LEN], uint8_t m
     return false;
 }
 
-bool arp_monitor::get_ip_for_mac(const uint8_t mac[BPL_ARP_MON_MAC_LEN], uint8_t ip[BPL_ARP_MON_IP_LEN])
+bool arp_monitor::get_ip_for_mac(const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                                 uint8_t ip[BPL_ARP_MON_IP_LEN])
 {
     std::vector<arp_neigh> vecArpTable;
 
@@ -629,16 +626,16 @@ bool arp_monitor::get_ip_for_mac(const uint8_t mac[BPL_ARP_MON_MAC_LEN], uint8_t
     }
 
     // Clear the IP address
-    memset((void*)ip, 0, BPL_ARP_MON_IP_LEN);
+    memset((void *)ip, 0, BPL_ARP_MON_IP_LEN);
 
     for (auto neigh : vecArpTable) {
-        if (memcmp((void*)mac, neigh.mac, BPL_ARP_MON_MAC_LEN) == 0) {
+        if (memcmp((void *)mac, neigh.mac, BPL_ARP_MON_MAC_LEN) == 0) {
             std::copy_n(neigh.ip, BPL_ARP_MON_IP_LEN, ip);
             return true;
         }
     }
 
-    return false;    
+    return false;
 }
 
 void arp_monitor::print_arp_table()
@@ -659,12 +656,12 @@ void arp_monitor::print_arp_table()
         // get_mac_for_ip(neigh.ip, mac);
         // LOG(DEBUG) << "MAC for IP: " << network_utils::ipv4_to_string(neigh.ip)
         //            << " --> " << network_utils::mac_to_string(mac);
-        
+
         // uint8_t ip[4];
         // get_ip_for_mac(neigh.mac, ip);
         // LOG(DEBUG) << "IP for MAC: " << network_utils::mac_to_string(neigh.mac)
         //            << " --> " << network_utils::ipv4_to_string(ip);
-    }    
+    }
 }
 
 } // namespace bpl

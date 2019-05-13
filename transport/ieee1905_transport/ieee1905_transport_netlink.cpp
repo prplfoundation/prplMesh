@@ -8,10 +8,10 @@
 
 #include <mapf/transport/ieee1905_transport.h>
 
-#include <sys/socket.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <net/if.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 // Why is this netlink interface tracking required?
@@ -23,7 +23,8 @@
 
 namespace mapf {
 
-bool Ieee1905Transport::open_netlink_socket() {
+bool Ieee1905Transport::open_netlink_socket()
+{
     struct sockaddr_nl addr;
 
     // open a netlink socket of NETLINK_ROUTE family to get link updates
@@ -36,7 +37,7 @@ bool Ieee1905Transport::open_netlink_socket() {
     memset((void *)&addr, 0, sizeof(addr));
 
     addr.nl_family = AF_NETLINK;
-    addr.nl_pid = 0; // let the kernel assign nl_pid
+    addr.nl_pid    = 0;           // let the kernel assign nl_pid
     addr.nl_groups = RTMGRP_LINK; // subscribe for link updates
 
     if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
@@ -52,7 +53,8 @@ bool Ieee1905Transport::open_netlink_socket() {
 
 // handle a single netlink message (each netlink received buffer can contain many messages)
 // return 1 if successful, or zero if last message or -1 on error.
-int Ieee1905Transport::handle_netlink_message(struct nlmsghdr *msghdr) {
+int Ieee1905Transport::handle_netlink_message(struct nlmsghdr *msghdr)
+{
     // done
     if (msghdr->nlmsg_type == NLMSG_DONE) {
         return 0;
@@ -67,9 +69,10 @@ int Ieee1905Transport::handle_netlink_message(struct nlmsghdr *msghdr) {
     // only consider interface state update messages (silently ignore other messages)
     if (msghdr->nlmsg_type == RTM_NEWLINK || msghdr->nlmsg_type == RTM_DELLINK) {
         struct ifinfomsg *ifi = (struct ifinfomsg *)NLMSG_DATA(msghdr);
-        bool is_active = (ifi->ifi_flags & IFF_RUNNING) && (ifi->ifi_flags & IFF_UP);
+        bool is_active        = (ifi->ifi_flags & IFF_RUNNING) && (ifi->ifi_flags & IFF_UP);
 
-        MAPF_DBG("received netlink RTM_NEWLINK/RTM_DELLINK message (interface " << ifi->ifi_index << " is " << (is_active ? "active" : "inactive") << ").");
+        MAPF_DBG("received netlink RTM_NEWLINK/RTM_DELLINK message (interface "
+                 << ifi->ifi_index << " is " << (is_active ? "active" : "inactive") << ").");
 
         if (ifi->ifi_index > 0 && network_interfaces_.count(ifi->ifi_index) > 0) {
             handle_interface_status_change((unsigned)ifi->ifi_index, is_active);
@@ -81,7 +84,8 @@ int Ieee1905Transport::handle_netlink_message(struct nlmsghdr *msghdr) {
     return 1;
 }
 
-void Ieee1905Transport::handle_netlink_pollin_event() {
+void Ieee1905Transport::handle_netlink_pollin_event()
+{
     if (netlink_fd_ < 0) {
         MAPF_ERR("invalid netlink socket file descriptor.");
         return;
@@ -93,12 +97,14 @@ void Ieee1905Transport::handle_netlink_pollin_event() {
         if (errno == EWOULDBLOCK || errno == EAGAIN)
             return;
 
-        MAPF_ERR("cannot read from netlink socket \"" << strerror(errno) << "\" (" << errno << ").");
+        MAPF_ERR("cannot read from netlink socket \"" << strerror(errno) << "\" (" << errno
+                                                      << ").");
         return;
     }
 
     // the stream can contain multiple messages
-    for (struct nlmsghdr *msghdr = (struct nlmsghdr *)buf; NLMSG_OK(msghdr, len); msghdr = NLMSG_NEXT(msghdr, len)) {
+    for (struct nlmsghdr *msghdr = (struct nlmsghdr *)buf; NLMSG_OK(msghdr, len);
+         msghdr                  = NLMSG_NEXT(msghdr, len)) {
         if (handle_netlink_message(msghdr) <= 0) {
             break;
         }

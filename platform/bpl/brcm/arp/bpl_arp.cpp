@@ -18,7 +18,7 @@ extern "C" {
 #include <libbridge.h>
 }
 
-int bpl_arp_mon_start(BPL_ARP_MON_CTX* ctx, const char* iface)
+int bpl_arp_mon_start(BPL_ARP_MON_CTX *ctx, const char *iface)
 {
     if (!ctx || !iface) {
         MAPF_ERR("Invalid arguments: ctx = " << ctx << ", iface = " << iface);
@@ -29,8 +29,9 @@ int bpl_arp_mon_start(BPL_ARP_MON_CTX* ctx, const char* iface)
     // Clear context pointer
     *ctx = nullptr;
 
-    arp_monitor* pArpMon = new arp_monitor();
-    if (pArpMon == nullptr) return -1;
+    arp_monitor *pArpMon = new arp_monitor();
+    if (pArpMon == nullptr)
+        return -1;
 
     // Start the monitor
     if (pArpMon->start(iface) == false) {
@@ -51,7 +52,7 @@ int bpl_arp_mon_stop(BPL_ARP_MON_CTX ctx)
         return -1;
     }
 
-    arp_monitor* pArpMon = (arp_monitor*)ctx;
+    arp_monitor *pArpMon = (arp_monitor *)ctx;
 
     // Stop the monitor
     pArpMon->stop();
@@ -70,7 +71,7 @@ int bpl_arp_mon_get_fd(BPL_ARP_MON_CTX ctx)
         return -1;
     }
 
-    arp_monitor* pArpMon = (arp_monitor*)ctx;
+    arp_monitor *pArpMon = (arp_monitor *)ctx;
 
     return pArpMon->get_mon_fd();
 }
@@ -82,87 +83,81 @@ int bpl_arp_mon_get_raw_arp_fd(BPL_ARP_MON_CTX ctx)
         return -1;
     }
 
-    arp_monitor* pArpMon = (arp_monitor*)ctx;
+    arp_monitor *pArpMon = (arp_monitor *)ctx;
 
     return pArpMon->get_arp_fd();
 }
 
-int bpl_arp_mon_process(BPL_ARP_MON_CTX ctx, 
-        struct BPL_ARP_MON_ENTRY* entry)
+int bpl_arp_mon_process(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry)
 {
     if (!ctx || !entry) {
         MAPF_ERR("Invalid argument: ctx = " << ctx << ", entry = " << entry);
         return -1;
     }
 
-    arp_monitor* pArpMon = (arp_monitor*)ctx;
-    if (pArpMon->process_mon(*entry) == false) return -1;
+    arp_monitor *pArpMon = (arp_monitor *)ctx;
+    if (pArpMon->process_mon(*entry) == false)
+        return -1;
 
     return 0;
 }
 
-int bpl_arp_mon_process_raw_arp(BPL_ARP_MON_CTX ctx, 
-        struct BPL_ARP_MON_ENTRY* entry)
+int bpl_arp_mon_process_raw_arp(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry)
 {
     if (!ctx || !entry) {
         MAPF_ERR("Invalid argument: ctx = " << ctx << ", entry = " << entry);
         return -1;
     }
 
-    arp_monitor* pArpMon = (arp_monitor*)ctx;
+    arp_monitor *pArpMon = (arp_monitor *)ctx;
     return (pArpMon->process_arp(*entry));
 }
 
-int bpl_arp_mon_probe(BPL_ARP_MON_CTX ctx, 
-        const uint8_t mac[BPL_ARP_MON_MAC_LEN], 
-        const uint8_t ip[BPL_ARP_MON_IP_LEN],
-        int task_id)
+int bpl_arp_mon_probe(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                      const uint8_t ip[BPL_ARP_MON_IP_LEN], int task_id)
 {
     if (!ctx || !mac || !ip) {
         MAPF_ERR("Invalid argument: ctx = " << ctx << ", mac = " << mac << ", ip = " << ip);
         return -1;
     }
 
-    arp_monitor* pArpMon = (arp_monitor*)ctx;
+    arp_monitor *pArpMon = (arp_monitor *)ctx;
     return (pArpMon->probe(mac, ip, task_id) ? 0 : -1);
 }
 
-int bpl_arp_mon_get_mac_for_ip(BPL_ARP_MON_CTX ctx, 
-        const uint8_t ip[BPL_ARP_MON_IP_LEN], 
-              uint8_t mac[BPL_ARP_MON_MAC_LEN])
+int bpl_arp_mon_get_mac_for_ip(BPL_ARP_MON_CTX ctx, const uint8_t ip[BPL_ARP_MON_IP_LEN],
+                               uint8_t mac[BPL_ARP_MON_MAC_LEN])
 {
     if (!ctx || !ip || !mac) {
         MAPF_ERR("Invalid argument: ctx = " << ctx << ", ip = " << ip << ", mac = " << mac);
         return -1;
     }
 
-    arp_monitor* pArpMon = (arp_monitor*)ctx;
+    arp_monitor *pArpMon = (arp_monitor *)ctx;
 
     return (pArpMon->get_mac_for_ip(ip, mac) ? 0 : -1);
 }
 
-int bpl_arp_mon_get_ip_for_mac(BPL_ARP_MON_CTX ctx, 
-        const uint8_t mac[BPL_ARP_MON_MAC_LEN], 
-              uint8_t ip[BPL_ARP_MON_IP_LEN])
+int bpl_arp_mon_get_ip_for_mac(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                               uint8_t ip[BPL_ARP_MON_IP_LEN])
 {
     if (!ctx || !mac || !ip) {
         MAPF_ERR("Invalid argument: ctx = " << ctx << ", mac = " << mac << ", ip = " << ip);
         return -1;
     }
 
-    arp_monitor* pArpMon = (arp_monitor*)ctx;
+    arp_monitor *pArpMon = (arp_monitor *)ctx;
 
     return (pArpMon->get_ip_for_mac(mac, ip) ? 0 : -1);
 }
 
-int bpl_arp_get_bridge_iface(
-        const char bridge[BPL_ARP_IFACE_NAME_LEN], 
-        const uint8_t mac[BPL_ARP_MON_MAC_LEN], 
-              char iface[BPL_ARP_IFACE_NAME_LEN])
+int bpl_arp_get_bridge_iface(const char bridge[BPL_ARP_IFACE_NAME_LEN],
+                             const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                             char iface[BPL_ARP_IFACE_NAME_LEN])
 {
     if (!bridge || !mac || !iface) {
-        MAPF_ERR("Invalid argument: bridge = " << (void*)bridge << 
-                 ", mac = " << (void*)mac << ", iface = " << (void*)iface);
+        MAPF_ERR("Invalid argument: bridge = " << (void *)bridge << ", mac = " << (void *)mac
+                                               << ", iface = " << (void *)iface);
 
         return -1;
     }
@@ -170,13 +165,13 @@ int bpl_arp_get_bridge_iface(
     // Clear the target buffer
     std::memset(iface, 0, BPL_ARP_IFACE_NAME_LEN);
 
-    // Allocate buffer for bridge entries
-    // Support up to 256 bridge entries
-    // TODO: Dynamically increase...
+// Allocate buffer for bridge entries
+// Support up to 256 bridge entries
+// TODO: Dynamically increase...
 #define MAX_BR_ENTRIES 256
     std::unique_ptr<fdb_entry[]> bridge_entries(new fdb_entry[MAX_BR_ENTRIES]);
     // fdb_entry* bridge_entries = new fdb_entry[MAX_BR_ENTRIES];
-    
+
     if (!bridge_entries) {
         MAPF_ERR("Memory allocation failed!");
         return -1;
@@ -185,7 +180,7 @@ int bpl_arp_get_bridge_iface(
     // Read bridge entries
     int ret = 0;
     // if ((ret = br_read_fdb(bridge, bridge_entries.get(), 0, MAX_BR_ENTRIES)) <= 0) {
-    //     MAPF_ERR("Failed reading brdige '" << bridge << 
+    //     MAPF_ERR("Failed reading brdige '" << bridge <<
     //              "' entries: " << ((ret < 0) ? strerror(errno) : "0");
 
     //     return -1;
@@ -197,7 +192,7 @@ int bpl_arp_get_bridge_iface(
     // Look for the received MAC address
     for (int i = 0; i < ret; i++) {
 
-        const fdb_entry* pFDB = &bridge_entries[i];
+        const fdb_entry *pFDB = &bridge_entries[i];
 
         // Skip other MACs
         if (std::memcmp(mac, pFDB->mac_addr, BPL_ARP_MON_MAC_LEN) != 0)

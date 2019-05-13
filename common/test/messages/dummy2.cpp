@@ -8,9 +8,7 @@
 
 #include "dummy2.h"
 
-namespace mapf
-{
+namespace mapf {
 
 const std::string Dummy2Message::kTopicPrefix = "dummy2.";
-
 }

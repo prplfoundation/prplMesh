@@ -14,9 +14,8 @@
 namespace beerocks {
 namespace bpl {
 
-class cal_message
-{
-  public:
+class cal_message {
+public:
     typedef cal_object_list::iterator iterator;
 
     cal_message(uint32_t main_op, uint32_t sub_op = SOPT_OBJVALUE, uint32_t owner = OWN_SERVD);
@@ -24,12 +23,12 @@ class cal_message
     // cal_message(const cal_message& src);
     // cal_message& operator=(const cal_message& src);
 
-    operator MsgHeader*();
+    operator MsgHeader *();
 
     // Object List Construction
-    cal_object_list add_get_object(const std::string& name, uint32_t sub_op = SOPT_OBJVALUE);
-    cal_object_list add_set_object(const std::string& name, uint32_t set_op = OBJOPT_ADD,
-        uint16_t sid = NO_ARG_VALUE, uint32_t sub_op = SOPT_OBJVALUE);
+    cal_object_list add_get_object(const std::string &name, uint32_t sub_op = SOPT_OBJVALUE);
+    cal_object_list add_set_object(const std::string &name, uint32_t set_op = OBJOPT_ADD,
+                                   uint16_t sid = NO_ARG_VALUE, uint32_t sub_op = SOPT_OBJVALUE);
 
     // List searching / lookup
     // cal_object_list& operator [](const std::string& name);
@@ -45,11 +44,11 @@ class cal_message
     uint32_t get_sub_op() const;
     uint32_t get_owner() const;
 
-  protected:
+protected:
     MsgHeader m_msg_header;
 };
 
 } // namespace bpl
 } // namespace beerocks
 
-#endif  // __COMMON_CALPP_MESSAGE_H__
+#endif // __COMMON_CALPP_MESSAGE_H__

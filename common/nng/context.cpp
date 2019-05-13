@@ -8,31 +8,20 @@
 
 #include <mapf/common/context.h>
 
-namespace mapf
-{
+namespace mapf {
 
-Context& Context::Instance()
+Context &Context::Instance()
 {
     static Context instance;
     return instance;
 }
 
-Context::~Context()
-{
-    Close();
-}
+Context::~Context() { Close(); }
 
-Context::Context()
-{
-}
+Context::Context() {}
 
-void Context::Close()
-{
-}
+void Context::Close() {}
 
-void *Context::get()
-{
-    return ctx_;
-}
+void *Context::get() { return ctx_; }
 
 } /* namespace mapf */

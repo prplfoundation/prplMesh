@@ -13,19 +13,19 @@
 #ifndef _TLVF_IEEE_1905_1_S802_11SPECIFICINFORMATION_H_
 #define _TLVF_IEEE_1905_1_S802_11SPECIFICINFORMATION_H_
 
+#include "tlvf/common/sMacAddress.h"
 #include <cstddef>
 #include <stdint.h>
 #include <tlvf/swap.h>
-#include "tlvf/common/sMacAddress.h"
 
 namespace ieee1905_1 {
 
-enum eRole: uint8_t {
-    AP = 0x0,
-    NON_AP_NON_PCP_STA = 0x40,
-    WI_FI_P2P_CLIENT = 0x80,
+enum eRole : uint8_t {
+    AP                    = 0x0,
+    NON_AP_NON_PCP_STA    = 0x40,
+    WI_FI_P2P_CLIENT      = 0x80,
     WI_FI_P2P_GROUP_OWNER = 0x90,
-    IEEE_802_11AD_PCP = 0xa0,
+    IEEE_802_11AD_PCP     = 0xa0,
 };
 
 typedef struct s802_11SpecificInformation {
@@ -37,14 +37,9 @@ typedef struct s802_11SpecificInformation {
     uint8_t ap_channel_center_frequency_index1;
     //Hex value of dot11CurrentChannelCenterFrequencyIndex2
     uint8_t ap_channel_center_frequency_index2;
-    void struct_swap(){
-        network_membership.struct_swap();
-    }
-    void struct_init(){
-        network_membership.struct_init();
-    }
+    void struct_swap() { network_membership.struct_swap(); }
+    void struct_init() { network_membership.struct_init(); }
 } s802_11SpecificInformation;
-
 
 }; // close namespace: ieee1905_1
 

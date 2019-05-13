@@ -7,21 +7,21 @@
  */
 
 #include <mapf/broker/broker.h>
-#include <mapf/transport/ieee1905_transport.h>
-#include <mapf/local_bus.h>
 #include <mapf/common/poller.h>
+#include <mapf/local_bus.h>
+#include <mapf/transport/ieee1905_transport.h>
 
 #include <mapf/common/logger.h>
 
-#include <stdio.h>
-#include <unistd.h>
-#include <exception>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <signal.h>
-#include <net/if.h>
 #include <arpa/inet.h>
 #include <ctype.h>
+#include <exception>
+#include <net/if.h>
+#include <signal.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 MAPF_INITIALIZE_LOGGER
 
@@ -138,19 +138,18 @@ MAPF_INITIALIZE_LOGGER
 //                                      To DUT
 //
 
-
 #define MAX_IFS 16
-static unsigned int ieee1905_bridge_if_index = 0;
-static unsigned int ieee1905_if_indexes[MAX_IFS] = { 0 };
-static bool only_configure_interfaces = false;
-static bool use_unicast_address = false;
+static unsigned int ieee1905_bridge_if_index     = 0;
+static unsigned int ieee1905_if_indexes[MAX_IFS] = {0};
+static bool only_configure_interfaces            = false;
+static bool use_unicast_address                  = false;
 static uint8_t unicast_address[6];
 using namespace mapf;
 
 int fork_local_bus()
 {
     pid_t pid = fork();
-    mapf_assert(pid >=0);
+    mapf_assert(pid >= 0);
 
     if (pid != 0)
         return pid;
@@ -166,7 +165,7 @@ int fork_local_bus()
 int fork_ieee1905_transport()
 {
     pid_t pid = fork();
-    mapf_assert(pid >=0);
+    mapf_assert(pid >= 0);
 
     if (pid != 0)
         return pid;
@@ -181,28 +180,24 @@ int fork_ieee1905_transport()
     exit(0);
 }
 
-int isValidMacAddress(const char* mac) {
-    int digits = 0;
+int isValidMacAddress(const char *mac)
+{
+    int digits     = 0;
     int seperators = 0;
 
     while (*mac) {
-       if (isxdigit(*mac))
-       {
-          digits++;
-       }
-       else if (*mac == ':')
-       {
-          if (digits == 0 || digits / 2 - 1 != seperators)
+        if (isxdigit(*mac)) {
+            digits++;
+        } else if (*mac == ':') {
+            if (digits == 0 || digits / 2 - 1 != seperators)
+                break;
+
+            seperators++;
+        } else {
+            seperators = -1;
             break;
-          
-          seperators++;
-       }
-       else
-       {
-           seperators = -1;
-           break;
-       }
-       mac++;
+        }
+        mac++;
     }
 
     return (digits == 12 && (seperators == 5 || seperators == 0));
@@ -210,53 +205,42 @@ int isValidMacAddress(const char* mac) {
 
 bool convertStringToMacAddress(const char *address, uint8_t *mac)
 {
-    if (!address)
-    {
+    if (!address) {
         return false;
     }
-    int digits = 0;
+    int digits     = 0;
     int seperators = 0;
     std::string cleanAddress;
 
     //validate mac address
     while (*address) {
-       if (isxdigit(*address))
-       {
-          digits++;
-          cleanAddress += *address;
-       }
-       else if (*address == ':')
-       {
-          if (digits == 0 || digits / 2 - 1 != seperators)
-            break;
+        if (isxdigit(*address)) {
+            digits++;
+            cleanAddress += *address;
+        } else if (*address == ':') {
+            if (digits == 0 || digits / 2 - 1 != seperators)
+                break;
 
-          seperators++;
-       }
-       else
-       {
-           seperators = -1;
-           break;
-       }
-       address++;
+            seperators++;
+        } else {
+            seperators = -1;
+            break;
+        }
+        address++;
     }
 
-    if (digits == 12 && (seperators == 5 || seperators == 0))
-    {
+    if (digits == 12 && (seperators == 5 || seperators == 0)) {
         unsigned long tempaddr = strtoul(cleanAddress.c_str(), NULL, 16);
 
-        for(int i = 5; i >= 0; i--)
-        {
-            mac[i] = tempaddr%0x100;
+        for (int i = 5; i >= 0; i--) {
+            mac[i] = tempaddr % 0x100;
             tempaddr /= 0x100;
         }
-    }
-    else
-    {
+    } else {
         return false;
     }
 
     return true;
-
 }
 
 int main(int argc, char *argv[])
@@ -271,14 +255,14 @@ int main(int argc, char *argv[])
         case 'b':
             ieee1905_bridge_if_index = if_nametoindex(optarg);
             if (ieee1905_bridge_if_index == 0) {
-                fprintf (stderr, "unknown interface %s\n", optarg);
+                fprintf(stderr, "unknown interface %s\n", optarg);
                 return false;
             }
             break;
         case 'i':
             ieee1905_if_indexes[interfaces] = if_nametoindex(optarg);
             if (ieee1905_if_indexes[interfaces] == 0) {
-                fprintf (stderr, "unknown interface %s\n", optarg);
+                fprintf(stderr, "unknown interface %s\n", optarg);
                 return false;
             }
             interfaces++;
@@ -287,35 +271,34 @@ int main(int argc, char *argv[])
             only_configure_interfaces = true;
             break;
         case 'u':
-            if (convertStringToMacAddress(optarg, unicast_address))
-            {
+            if (convertStringToMacAddress(optarg, unicast_address)) {
                 use_unicast_address = true;
-            }
-            else
-            {
-                fprintf (stderr, "Invalid MAC address\n");
+            } else {
+                fprintf(stderr, "Invalid MAC address\n");
                 return false;
             }
             break;
         case '?':
             if (optopt == 'i') {
-                fprintf (stderr, "Option -%c requires a network interface name as an argument.\n", optopt);
-            } else if (isprint (optopt)) {
-                fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+                fprintf(stderr, "Option -%c requires a network interface name as an argument.\n",
+                        optopt);
+            } else if (isprint(optopt)) {
+                fprintf(stderr, "Unknown option `-%c'.\n", optopt);
             } else {
-                fprintf (stderr, "Unknown option character `\\x%x'.\n",	optopt);
+                fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
             }
-            // intentional fallthrough
+        // intentional fallthrough
         default:
-            fprintf (stderr, "usage: %s [-b <interface name>] [-i <interface name>] [-x]...\n", argv[0]);
+            fprintf(stderr, "usage: %s [-b <interface name>] [-i <interface name>] [-x]...\n",
+                    argv[0]);
             return false;
         }
     }
 
-    pid_t local_bus_pid = 0;
+    pid_t local_bus_pid          = 0;
     pid_t ieee1905_transport_pid = 0;
     if (!only_configure_interfaces) {
-        local_bus_pid = fork_local_bus();
+        local_bus_pid          = fork_local_bus();
         ieee1905_transport_pid = fork_ieee1905_transport();
     }
 
@@ -330,42 +313,44 @@ int main(int argc, char *argv[])
 
         Poller poller;
         rc = poller.Add(bus.subscriber());
-        if(rc != 0) break;
+        if (rc != 0)
+            break;
 
         // messageType 0x8000 is used exclusively to make sure the Ieee1905Transport proccess is up and running
-        MAPF_INFO("subscribing to CmduRxMessage with topic " << CmduRxMessage::ieee1905_topic(0x8000));
+        MAPF_INFO("subscribing to CmduRxMessage with topic "
+                  << CmduRxMessage::ieee1905_topic(0x8000));
         rc = bus.subscriber().Subscribe<CmduRxMessage>(CmduRxMessage::ieee1905_topic(0x8000));
-        if(rc != 0) break;
+        if (rc != 0)
+            break;
         bus.Sync();
 
         // this loop is not part of the test it is just to make sure
         // the Ieee1905Transport has started (it is running in a forked process)
-        for (int i = 100; i > 0; i--) 
-        {
+        for (int i = 100; i > 0; i--) {
             // Send a multicast CmduTxMessage on the local bus - expect a CmduRxMessage (due to multicast)
             CmduTxMessage cmdu_tx_msg;
             std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
-            cmdu_tx_msg.metadata()->msg_type = 0x8000;
-            cmdu_tx_msg.metadata()->length = 32;
+            cmdu_tx_msg.metadata()->msg_type   = 0x8000;
+            cmdu_tx_msg.metadata()->length     = 32;
             std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
-            uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0xc0 };
+            uint8_t ieee1905_header[] = {0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0xc0};
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
-            if(rc != true) {
+            if (rc != true) {
                 success = false;
                 break;
             }
 
             MAPF_INFO("polling...");
             rc = poller.Poll(100);
-            if(rc == 0) {
+            if (rc == 0) {
                 continue; // timeout
             }
             rc = poller.CheckEvent(bus.subscriber());
-            if(rc != MAPF_POLLIN) {
+            if (rc != MAPF_POLLIN) {
                 success = false;
                 break;
             }
@@ -374,7 +359,8 @@ int main(int argc, char *argv[])
             auto msg = bus.subscriber().Receive();
 
             if (auto cmdu_rx_msg = dynamic_cast<CmduRxMessage *>(msg.get())) {
-                MAPF_INFO("received CmduRxMessage (initial synchronization): " << std::endl << *cmdu_rx_msg);
+                MAPF_INFO("received CmduRxMessage (initial synchronization): " << std::endl
+                                                                               << *cmdu_rx_msg);
                 break;
             } else {
                 MAPF_INFO("received other message: " << std::endl << *msg);
@@ -387,17 +373,20 @@ int main(int argc, char *argv[])
             break;
         }
 
-        MAPF_INFO("subscribing to CmduRxMessage with topic " << CmduRxMessage::ieee1905_topic(0x8016));
+        MAPF_INFO("subscribing to CmduRxMessage with topic "
+                  << CmduRxMessage::ieee1905_topic(0x8016));
         rc = bus.subscriber().Subscribe<CmduRxMessage>(CmduRxMessage::ieee1905_topic(0x8016));
-        if(rc != 0) {
+        if (rc != 0) {
             success = false;
             break;
         }
         bus.Sync();
 
-        MAPF_INFO("subscribing to CmduTxConfirmationMessage with topic " << CmduTxConfirmationMessage::ieee1905_topic(0x8016));
-        rc = bus.subscriber().Subscribe<CmduTxConfirmationMessage>(CmduTxConfirmationMessage::ieee1905_topic(0x8016));
-        if(rc != 0) {
+        MAPF_INFO("subscribing to CmduTxConfirmationMessage with topic "
+                  << CmduTxConfirmationMessage::ieee1905_topic(0x8016));
+        rc = bus.subscriber().Subscribe<CmduTxConfirmationMessage>(
+            CmduTxConfirmationMessage::ieee1905_topic(0x8016));
+        if (rc != 0) {
             success = false;
             break;
         }
@@ -408,23 +397,28 @@ int main(int argc, char *argv[])
         uint32_t n = 0;
         if (ieee1905_bridge_if_index) {
             using Flags = InterfaceConfigurationRequestMessage::Flags;
-            interface_configuration_request_msg.metadata()->interfaces[n].if_index = ieee1905_bridge_if_index;
+            interface_configuration_request_msg.metadata()->interfaces[n].if_index =
+                ieee1905_bridge_if_index;
             interface_configuration_request_msg.metadata()->interfaces[n].flags |= Flags::IS_BRIDGE;
             n++;
         }
         for (int i = 0; i < MAX_IFS; i++) {
             if (ieee1905_if_indexes[i]) {
                 using Flags = InterfaceConfigurationRequestMessage::Flags;
-                interface_configuration_request_msg.metadata()->interfaces[n].if_index = ieee1905_if_indexes[i];
-                interface_configuration_request_msg.metadata()->interfaces[n].flags |= Flags::ENABLE_IEEE1905_TRANSPORT;
+                interface_configuration_request_msg.metadata()->interfaces[n].if_index =
+                    ieee1905_if_indexes[i];
+                interface_configuration_request_msg.metadata()->interfaces[n].flags |=
+                    Flags::ENABLE_IEEE1905_TRANSPORT;
                 n++;
             }
         }
         interface_configuration_request_msg.metadata()->numInterfaces = n;
 
-        MAPF_INFO("sending InterfaceConfigurationRequestMessage: " << std::endl << interface_configuration_request_msg);
+        MAPF_INFO("sending InterfaceConfigurationRequestMessage: "
+                  << std::endl
+                  << interface_configuration_request_msg);
         rc = bus.publisher().Send(interface_configuration_request_msg);
-        if(rc != true) {
+        if (rc != true) {
             MAPF_INFO("failed to send");
             success = false;
             break;
@@ -437,22 +431,22 @@ int main(int argc, char *argv[])
         // Send a multicast CmduTxMessage on the local bus - expect a CmduRxMessage (due to multicast)
         // and a CmduTxConfirmationMessage.
         do {
-            bool got_cmdu_rx_msg = false;
+            bool got_cmdu_rx_msg              = false;
             bool got_cmdu_tx_confirmation_msg = false;
 
             CmduTxMessage cmdu_tx_msg;
             std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
-            cmdu_tx_msg.metadata()->msg_type = 0x8016;
-            cmdu_tx_msg.metadata()->length = 32;
-            cmdu_tx_msg.metadata()->cookie = 1;
+            cmdu_tx_msg.metadata()->msg_type   = 0x8016;
+            cmdu_tx_msg.metadata()->length     = 32;
+            cmdu_tx_msg.metadata()->cookie     = 1;
             std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
-            uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x16, 0x00, 0x00, 0x00, 0xc0 };
+            uint8_t ieee1905_header[] = {0x00, 0x00, 0x80, 0x16, 0x00, 0x00, 0x00, 0xc0};
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
-            if(rc != true) {
+            if (rc != true) {
                 MAPF_INFO("failed to send");
                 success = false;
                 break;
@@ -461,12 +455,12 @@ int main(int argc, char *argv[])
             for (int i = 10; i > 0; i--) {
                 MAPF_INFO("polling...");
                 rc = poller.Poll(100);
-                if(rc == 0) {
+                if (rc == 0) {
                     continue;
                 }
 
                 rc = poller.CheckEvent(bus.subscriber());
-                if(rc != MAPF_POLLIN) {
+                if (rc != MAPF_POLLIN) {
                     MAPF_INFO("unexpected event");
                     success = false;
                     break;
@@ -478,22 +472,26 @@ int main(int argc, char *argv[])
                     MAPF_INFO("received CmduRxMessage: " << std::endl << *cmdu_rx_msg);
                     if (cmdu_rx_msg->metadata()->length != cmdu_tx_msg.metadata()->length) {
                         MAPF_INFO("message length mismatch");
-                    } else if (cmdu_rx_msg->metadata()->ether_type != cmdu_tx_msg.metadata()->ether_type) {
+                    } else if (cmdu_rx_msg->metadata()->ether_type !=
+                               cmdu_tx_msg.metadata()->ether_type) {
                         MAPF_INFO("message metadata mismatch");
-                    } else if (cmdu_rx_msg->metadata()->msg_type != cmdu_tx_msg.metadata()->msg_type) {
+                    } else if (cmdu_rx_msg->metadata()->msg_type !=
+                               cmdu_tx_msg.metadata()->msg_type) {
                         MAPF_INFO("message metadata mismatch");
                     } else {
                         MAPF_INFO("this is the expected message");
                         got_cmdu_rx_msg = true;
                     }
-                } else if (auto cmdu_tx_confirmation_msg = dynamic_cast<CmduTxConfirmationMessage *>(msg.get())) {
-                    MAPF_INFO("received CmduTxConfirmationMessage: " << std::endl << *cmdu_tx_confirmation_msg);
+                } else if (auto cmdu_tx_confirmation_msg =
+                               dynamic_cast<CmduTxConfirmationMessage *>(msg.get())) {
+                    MAPF_INFO("received CmduTxConfirmationMessage: " << std::endl
+                                                                     << *cmdu_tx_confirmation_msg);
                     got_cmdu_tx_confirmation_msg = true;
                 } else {
                     MAPF_INFO("received other message: " << std::endl << *msg);
                 }
 
-                if(got_cmdu_rx_msg && got_cmdu_tx_confirmation_msg) {
+                if (got_cmdu_rx_msg && got_cmdu_tx_confirmation_msg) {
                     break;
                 }
             }
@@ -502,22 +500,23 @@ int main(int argc, char *argv[])
                 success = false;
                 break;
             }
-        } while(0);
+        } while (0);
 
         // Send a non-relayed multicast CmduTxMessage on the local bus (helps to manually verify relayed multicast mechanism)
         {
             CmduTxMessage cmdu_tx_msg;
             std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
-            cmdu_tx_msg.metadata()->msg_type = 0x8017;
-            cmdu_tx_msg.metadata()->length = 32;
+            cmdu_tx_msg.metadata()->msg_type   = 0x8017;
+            cmdu_tx_msg.metadata()->length     = 32;
             std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
-            uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x17, 0x00, 0x00, 0x00, 0x80 };
+            uint8_t ieee1905_header[] = {0x00, 0x00, 0x80, 0x17, 0x00, 0x00, 0x00, 0x80};
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
-            if(rc != true) break;
+            if (rc != true)
+                break;
         }
 
         // Send a relayed multicast CmduTxMessage on the local bus (helps to manually verify relayed multicast mechanism)
@@ -525,16 +524,17 @@ int main(int argc, char *argv[])
             CmduTxMessage cmdu_tx_msg;
             std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
-            cmdu_tx_msg.metadata()->msg_type = 0x8018;
-            cmdu_tx_msg.metadata()->length = (8) + (3 + 0);
+            cmdu_tx_msg.metadata()->msg_type   = 0x8018;
+            cmdu_tx_msg.metadata()->length     = (8) + (3 + 0);
             std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
 
-            uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x18, 0x00, 0x00, 0x00, 0xc0 };
+            uint8_t ieee1905_header[] = {0x00, 0x00, 0x80, 0x18, 0x00, 0x00, 0x00, 0xc0};
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
-            if(rc != true) break;
+            if (rc != true)
+                break;
         }
 
         // Send a large CmduTxMessage on the local bus (helps to manually verify fragmentation code)
@@ -542,122 +542,121 @@ int main(int argc, char *argv[])
             CmduTxMessage cmdu_tx_msg;
             std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
-            cmdu_tx_msg.metadata()->msg_type = 0x8019;
-            cmdu_tx_msg.metadata()->length = 8;
+            cmdu_tx_msg.metadata()->msg_type   = 0x8019;
+            cmdu_tx_msg.metadata()->length     = 8;
             std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
 
-            uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x19, 0x00, 0x00, 0x00, 0xc0 };
+            uint8_t ieee1905_header[] = {0x00, 0x00, 0x80, 0x19, 0x00, 0x00, 0x00, 0xc0};
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             uint16_t tlvlen = 1024;
             uint8_t *tlv;
             cmdu_tx_msg.metadata()->length += 3 + tlvlen;
-            tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
-            *tlv = 1; // tlvType
+            tlv  = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
+            *tlv = 1;                               // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            std::fill_n(tlv+3, tlvlen, *tlv);
+            std::fill_n(tlv + 3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 0;
             cmdu_tx_msg.metadata()->length += 3 + tlvlen;
-            tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
-            *tlv = 2; // tlvType
+            tlv  = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
+            *tlv = 2;                               // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            std::fill_n(tlv+3, tlvlen, *tlv);
+            std::fill_n(tlv + 3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 1;
             cmdu_tx_msg.metadata()->length += 3 + tlvlen;
-            tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
-            *tlv = 3; // tlvType
+            tlv  = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
+            *tlv = 3;                          // tlvType
             *(uint16_t *)(tlv + 1) = htons(1); // tlvLength
-            std::fill_n(tlv+3, tlvlen, *tlv);
+            std::fill_n(tlv + 3, tlvlen, *tlv);
             tlv = tlv + 3 + 1;
 
             tlvlen = 2;
             cmdu_tx_msg.metadata()->length += 3 + tlvlen;
-            tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
-            *tlv = 4; // tlvType
+            tlv  = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
+            *tlv = 4;                               // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            std::fill_n(tlv+3, tlvlen, *tlv);
+            std::fill_n(tlv + 3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 3;
             cmdu_tx_msg.metadata()->length += 3 + tlvlen;
-            tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
-            *tlv = 5; // tlvType
+            tlv  = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
+            *tlv = 5;                               // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            std::fill_n(tlv+3, tlvlen, *tlv);
+            std::fill_n(tlv + 3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 4;
             cmdu_tx_msg.metadata()->length += 3 + tlvlen;
-            tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
-            *tlv = 6; // tlvType
+            tlv  = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
+            *tlv = 6;                               // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            std::fill_n(tlv+3, tlvlen, *tlv);
+            std::fill_n(tlv + 3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 1000;
             cmdu_tx_msg.metadata()->length += 3 + tlvlen;
-            tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
-            *tlv = 7; // tlvType
+            tlv  = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
+            *tlv = 7;                               // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            std::fill_n(tlv+3, tlvlen, *tlv);
+            std::fill_n(tlv + 3, tlvlen, *tlv);
             tlv = tlv + 3 + tlvlen;
 
             tlvlen = 0;
             cmdu_tx_msg.metadata()->length += 3 + tlvlen;
-            tlv = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
-            *tlv = 0; // tlvType
+            tlv  = cmdu_tx_msg.data() + cmdu_tx_msg.metadata()->length - (3 + tlvlen);
+            *tlv = 0;                               // tlvType
             *(uint16_t *)(tlv + 1) = htons(tlvlen); // tlvLength
-            std::fill_n(tlv+3, tlvlen, *tlv);
+            std::fill_n(tlv + 3, tlvlen, *tlv);
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
-            if(rc != true) break;
+            if (rc != true)
+                break;
         }
 
-
         // Send a unicast CmduTxMessage on the local bus
-        if (use_unicast_address)
-        {
+        if (use_unicast_address) {
             CmduTxMessage cmdu_tx_msg;
             std::copy_n(unicast_address, 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
-            cmdu_tx_msg.metadata()->msg_type = 0x8020;
-            cmdu_tx_msg.metadata()->length = (8) + (3 + 0);
+            cmdu_tx_msg.metadata()->msg_type   = 0x8020;
+            cmdu_tx_msg.metadata()->length     = (8) + (3 + 0);
             std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
 
-            uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x20, 0x00, 0x00, 0x00, 0x80 };
+            uint8_t ieee1905_header[] = {0x00, 0x00, 0x80, 0x20, 0x00, 0x00, 0x00, 0x80};
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
-            if(rc != true) break;
+            if (rc != true)
+                break;
         }
-
 
         // Send a multicast CmduTxMessage on the local bus - expect a CmduRxMessage (due to multicast)
         // and a CmduTxConfirmationMessage.
         //Done to verify that all the messages were sent on the local bus before terminating
         do {
-            bool got_cmdu_rx_msg = false;
+            bool got_cmdu_rx_msg              = false;
             bool got_cmdu_tx_confirmation_msg = false;
 
             CmduTxMessage cmdu_tx_msg;
             std::copy_n("\x01\x80\xc2\x00\x00\x13", 6, cmdu_tx_msg.metadata()->dst);
             cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
-            cmdu_tx_msg.metadata()->msg_type = 0x8016;
-            cmdu_tx_msg.metadata()->length = 32;
-            cmdu_tx_msg.metadata()->cookie = 1;
+            cmdu_tx_msg.metadata()->msg_type   = 0x8016;
+            cmdu_tx_msg.metadata()->length     = 32;
+            cmdu_tx_msg.metadata()->cookie     = 1;
             std::fill_n(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0x00);
-            uint8_t ieee1905_header[] = { 0x00, 0x00, 0x80, 0x16, 0x00, 0x00, 0x00, 0xc0 };
+            uint8_t ieee1905_header[] = {0x00, 0x00, 0x80, 0x16, 0x00, 0x00, 0x00, 0xc0};
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
             rc = bus.publisher().Send(cmdu_tx_msg);
-            if(rc != true) {
+            if (rc != true) {
                 MAPF_INFO("failed to send");
                 success = false;
                 break;
@@ -666,12 +665,12 @@ int main(int argc, char *argv[])
             for (int i = 10; i > 0; i--) {
                 MAPF_INFO("polling...");
                 rc = poller.Poll(100);
-                if(rc == 0) {
+                if (rc == 0) {
                     continue;
                 }
 
                 rc = poller.CheckEvent(bus.subscriber());
-                if(rc != MAPF_POLLIN) {
+                if (rc != MAPF_POLLIN) {
                     MAPF_INFO("unexpected event");
                     success = false;
                     break;
@@ -683,22 +682,26 @@ int main(int argc, char *argv[])
                     MAPF_INFO("received CmduRxMessage: " << std::endl << *cmdu_rx_msg);
                     if (cmdu_rx_msg->metadata()->length != cmdu_tx_msg.metadata()->length) {
                         MAPF_INFO("message length mismatch");
-                    } else if (cmdu_rx_msg->metadata()->ether_type != cmdu_tx_msg.metadata()->ether_type) {
+                    } else if (cmdu_rx_msg->metadata()->ether_type !=
+                               cmdu_tx_msg.metadata()->ether_type) {
                         MAPF_INFO("message metadata mismatch");
-                    } else if (cmdu_rx_msg->metadata()->msg_type != cmdu_tx_msg.metadata()->msg_type) {
+                    } else if (cmdu_rx_msg->metadata()->msg_type !=
+                               cmdu_tx_msg.metadata()->msg_type) {
                         MAPF_INFO("message metadata mismatch");
                     } else {
                         MAPF_INFO("this is the expected message");
                         got_cmdu_rx_msg = true;
                     }
-                } else if (auto cmdu_tx_confirmation_msg = dynamic_cast<CmduTxConfirmationMessage *>(msg.get())) {
-                    MAPF_INFO("received CmduTxConfirmationMessage: " << std::endl << *cmdu_tx_confirmation_msg);
+                } else if (auto cmdu_tx_confirmation_msg =
+                               dynamic_cast<CmduTxConfirmationMessage *>(msg.get())) {
+                    MAPF_INFO("received CmduTxConfirmationMessage: " << std::endl
+                                                                     << *cmdu_tx_confirmation_msg);
                     got_cmdu_tx_confirmation_msg = true;
                 } else {
                     MAPF_INFO("received other message: " << std::endl << *msg);
                 }
 
-                if(got_cmdu_rx_msg && got_cmdu_tx_confirmation_msg) {
+                if (got_cmdu_rx_msg && got_cmdu_tx_confirmation_msg) {
                     break;
                 }
             }
@@ -707,8 +710,8 @@ int main(int argc, char *argv[])
                 success = false;
                 break;
             }
-        } while(0);
-    } while(0);
+        } while (0);
+    } while (0);
 
     usleep(300000);
 

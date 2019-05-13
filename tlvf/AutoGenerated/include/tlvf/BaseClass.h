@@ -12,32 +12,33 @@
 #ifndef _BaseClass_H_
 #define _BaseClass_H_
 
-#include <stdint.h>
-#include <stddef.h>
 #include <cstddef>
+#include <stddef.h>
+#include <stdint.h>
 #include <string>
 
 class BaseClass {
-    protected:
-        BaseClass(uint8_t* buff_, const size_t buff_len_, const bool parse_=false, const bool swap_needed = false);
-        ~BaseClass();
+protected:
+    BaseClass(uint8_t *buff_, const size_t buff_len_, const bool parse_ = false,
+              const bool swap_needed = false);
+    ~BaseClass();
 
-    public:
-        uint8_t* getBuffPtr();
-		uint8_t* getStartBuffPtr();
-        size_t getBuffRemainingBytes();
-        size_t getLen();
-        bool isInitialized();
-        virtual void class_swap() = 0;
+public:
+    uint8_t *getBuffPtr();
+    uint8_t *getStartBuffPtr();
+    size_t getBuffRemainingBytes();
+    size_t getLen();
+    bool isInitialized();
+    virtual void class_swap() = 0;
 
-    protected:
-        uint8_t* m_buff__;
-        uint8_t* m_buff_ptr__;
-        const size_t m_buff_len__;
-        const bool m_parse__;
-        const bool m_swap__;
-        bool m_init_succeeded;
-        static const size_t kMinimumLength = 4; // tlv header length
+protected:
+    uint8_t *m_buff__;
+    uint8_t *m_buff_ptr__;
+    const size_t m_buff_len__;
+    const bool m_parse__;
+    const bool m_swap__;
+    bool m_init_succeeded;
+    static const size_t kMinimumLength = 4; // tlv header length
 };
 
 #endif //_BaseClass_H_

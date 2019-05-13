@@ -9,24 +9,17 @@
 #include <mapf/common/context.h>
 #include <zmq.h>
 
-namespace mapf
-{
+namespace mapf {
 
-Context& Context::Instance()
+Context &Context::Instance()
 {
     static Context instance;
     return instance;
 }
 
-Context::~Context()
-{
-    Close();
-}
+Context::~Context() { Close(); }
 
-Context::Context() : ctx_(zmq_ctx_new())
-{
-    mapf_assert(ctx_);
-}
+Context::Context() : ctx_(zmq_ctx_new()) { mapf_assert(ctx_); }
 
 void Context::Close()
 {
@@ -38,9 +31,6 @@ void Context::Close()
     ctx_ = nullptr;
 }
 
-void *Context::get()
-{
-    return ctx_;
-}
+void *Context::get() { return ctx_; }
 
 } /* namespace mapf */

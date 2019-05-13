@@ -10,10 +10,10 @@
 
 #include <unistd.h>
 
-
 namespace mapf {
 
-void Ieee1905Transport::run() {
+void Ieee1905Transport::run()
+{
     MAPF_INFO("starting 1905 transport.");
 
     // init Local Bus interface, subscribe to specific topics
@@ -74,8 +74,8 @@ void Ieee1905Transport::run() {
 
         // check for events on all active network interface sockets
         for (auto it = network_interfaces_.begin(); it != network_interfaces_.end(); ++it) {
-            unsigned int if_index = it->first;
-            auto& network_interface = it->second;
+            unsigned int if_index   = it->first;
+            auto &network_interface = it->second;
 
             if (network_interface.fd >= 0 && !network_interface.is_bridge) {
                 MAPF_DBG("check for events on interface " << if_index << ".");
@@ -86,7 +86,8 @@ void Ieee1905Transport::run() {
                 }
                 if (revents & MAPF_POLLERR) {
                     // this could happen whenever an interface comes down
-                    MAPF_DBG("got MAPF_POLLERR event on interface " << if_index << " (disabling it).");
+                    MAPF_DBG("got MAPF_POLLERR event on interface " << if_index
+                                                                    << " (disabling it).");
                     handle_interface_status_change(if_index, false);
                 }
             }

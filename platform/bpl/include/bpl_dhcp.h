@@ -6,7 +6,6 @@
  * See LICENSE file for more details.
  */
 
-
 #ifndef _BPL_DHCP_H_
 #define _BPL_DHCP_H_
 
@@ -34,8 +33,8 @@ Example for sending an event using the "ubus" shell command ubus call:
  * @param [in] ip Client's IP address
  * @param [in] hostname Client's host name
  */
-typedef void (*bpl_dhcp_mon_cb)(const char* op, const char* mac, 
-                                const char* ip, const char* hostname);
+typedef void (*bpl_dhcp_mon_cb)(const char *op, const char *mac, const char *ip,
+                                const char *hostname);
 
 /****************************************************************************/
 /******************************** Functions *********************************/
@@ -64,7 +63,7 @@ int bpl_dhcp_mon_handle_event();
  * Stop the DHCP monitor.
  *
  * @return 0 On success of -1 on failure.
- */ 
+ */
 int bpl_dhcp_mon_stop();
 
 #ifdef __cplusplus

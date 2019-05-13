@@ -12,9 +12,6 @@ set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 file(GLOB_RECURSE bpl_common_sources ${MODULE_PATH}/common/*.c*)
 
 # Common libraries
-find_package(ubus REQUIRED)
-set(BPL_LIBS ubus)
-
 find_package(elpp REQUIRED)
 
 # UGW
@@ -35,7 +32,8 @@ if (TARGET_PLATFORM STREQUAL "ugw")
     file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/ugw/*.c*)
 
     # UGW specific libraries
-    list(APPEND BPL_LIBS nl-3 nl-route-3 bridge ugwhelper msgapi cal capi blobmsg_json)
+    find_package(ubus REQUIRED)
+    list(APPEND BPL_LIBS ubus nl-3 nl-route-3 bridge ugwhelper msgapi cal capi blobmsg_json)
 
 elseif (TARGET_PLATFORM STREQUAL "rdkb")
 
@@ -51,7 +49,8 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
     # RDKB specific sources
     file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/rdkb/*.c*)
 
-    list(APPEND BPL_LIBS nl-3 nl-route-3 bridge dl swpal slibc)
+    find_package(ubus REQUIRED)
+    list(APPEND BPL_LIBS ubus nl-3 nl-route-3 bridge dl swpal slibc)
 
 elseif (TARGET_PLATFORM STREQUAL "linux")
 

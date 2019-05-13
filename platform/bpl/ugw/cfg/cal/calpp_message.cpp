@@ -14,7 +14,6 @@
 #define PACKAGE_ID "0"
 #endif
 
-
 #include "calpp_message.h"
 
 #include <algorithm>
@@ -22,8 +21,8 @@
 #include <string.h>
 
 extern "C" {
-	uint16_t uncalpp_messageLogLevel = 7;
-	uint16_t uncalpp_messageLogType = 1;
+uint16_t uncalpp_messageLogLevel = 7;
+uint16_t uncalpp_messageLogType  = 1;
 }
 
 namespace beerocks {
@@ -35,60 +34,43 @@ cal_message::cal_message(uint32_t main_op, uint32_t sub_op, uint32_t owner)
     HELP_CREATE_MSG(&m_msg_header, main_op, sub_op, owner, 1);
 }
 
-cal_message::~cal_message()
+cal_message::~cal_message() { HELP_DELETE_MSG(&m_msg_header); }
+
+cal_message::operator MsgHeader *() { return &m_msg_header; }
+
+uint32_t cal_message::get_main_op() const { return m_msg_header.unMainOper; }
+
+uint32_t cal_message::get_sub_op() const { return m_msg_header.unSubOper; }
+
+uint32_t cal_message::get_owner() const { return m_msg_header.unOwner; }
+
+cal_object_list cal_message::add_get_object(const std::string &name, uint32_t sub_op)
 {
-    HELP_DELETE_MSG(&m_msg_header);
+    return cal_object_list(static_cast<ObjList *>(m_msg_header.pObjType), name, NO_ARG_VALUE,
+                           NO_ARG_VALUE, sub_op);
 }
 
-cal_message::operator MsgHeader*()
+cal_object_list cal_message::add_set_object(const std::string &name, uint32_t set_op, uint16_t sid,
+                                            uint32_t sub_op)
 {
-    return &m_msg_header;
-}
-
-uint32_t cal_message::get_main_op() const
-{
-    return m_msg_header.unMainOper;
-}
-
-uint32_t cal_message::get_sub_op() const
-{
-    return m_msg_header.unSubOper;
-}
-
-uint32_t cal_message::get_owner() const
-{
-    return m_msg_header.unOwner;
-}
-
-cal_object_list cal_message::add_get_object(const std::string& name, uint32_t sub_op)
-{
-    return cal_object_list(
-        static_cast<ObjList*>(m_msg_header.pObjType), name, NO_ARG_VALUE, NO_ARG_VALUE, sub_op);
-}
-
-cal_object_list cal_message::add_set_object(
-    const std::string& name, uint32_t set_op, uint16_t sid, uint32_t sub_op)
-{
-    return cal_object_list(static_cast<ObjList*>(m_msg_header.pObjType), name, set_op, sid, sub_op);
+    return cal_object_list(static_cast<ObjList *>(m_msg_header.pObjType), name, set_op, sid,
+                           sub_op);
 }
 
 cal_object_list::iterator cal_message::begin()
 {
-    ObjList* head = static_cast<ObjList*>(m_msg_header.pObjType);
+    ObjList *head = static_cast<ObjList *>(m_msg_header.pObjType);
     cal_object_list::iterator first(head, head, m_msg_header.unSubOper);
     return (++first);
 }
 
 cal_object_list::iterator cal_message::end()
 {
-    ObjList* head = static_cast<ObjList*>(m_msg_header.pObjType);
+    ObjList *head = static_cast<ObjList *>(m_msg_header.pObjType);
     return cal_object_list::iterator(head, head, m_msg_header.unSubOper);
 }
 
-cal_object_list cal_message::get_object_list()
-{
-    return (*begin());
-}
+cal_object_list cal_message::get_object_list() { return (*begin()); }
 
 } // namespace bpl
 } // namespace beerocks

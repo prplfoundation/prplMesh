@@ -11,11 +11,10 @@
 
 #include <nng/nng.h>
 
-namespace mapf
-{
+namespace mapf {
 
 struct msglib_socket {
-	nng_socket sd_;
+    nng_socket sd_;
 };
 
 } //namespace mapf

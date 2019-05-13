@@ -8,8 +8,8 @@
 
 #include <mapf/transport/ieee1905_transport.h>
 
-#include <unistd.h>
 #include <net/if.h>
+#include <unistd.h>
 
 MAPF_INITIALIZE_LOGGER
 

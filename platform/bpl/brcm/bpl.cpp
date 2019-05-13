@@ -27,4 +27,3 @@ void bpl_close()
 {
     // Do nothing
 }
-

@@ -150,28 +150,29 @@ std::string owner_to_string(uint32_t owner)
     return retv;
 }
 
-void debug_log(cal_message& msg, const std::string& context)
+void debug_log(cal_message &msg, const std::string &context)
 {
     int indent = 0;
 
     MAPF_INFO(context);
     indent += 2;
 
-    MAPF_INFO(std::string(indent, ' ') << "unMainOper: " << 
-              mainop_to_string(static_cast<MsgHeader*>(msg)->unMainOper));
+    MAPF_INFO(std::string(indent, ' ')
+              << "unMainOper: " << mainop_to_string(static_cast<MsgHeader *>(msg)->unMainOper));
 
-    MAPF_INFO(std::string(indent, ' ') << "unSubOper: " << 
-              subop_to_string(static_cast<MsgHeader*>(msg)->unSubOper));
+    MAPF_INFO(std::string(indent, ' ')
+              << "unSubOper: " << subop_to_string(static_cast<MsgHeader *>(msg)->unSubOper));
 
-    MAPF_INFO(std::string(indent, ' ') << "unOwner: " << 
-              owner_to_string(static_cast<MsgHeader*>(msg)->unOwner));
-    
-    MAPF_INFO(std::string(indent, ' ') << "unMsgSize: " << static_cast<MsgHeader*>(msg)->unMsgSize);
+    MAPF_INFO(std::string(indent, ' ') << "unOwner: "
+                                       << owner_to_string(static_cast<MsgHeader *>(msg)->unOwner));
 
-    for (auto& obj : msg) {
+    MAPF_INFO(std::string(indent, ' ') << "unMsgSize: "
+                                       << static_cast<MsgHeader *>(msg)->unMsgSize);
+
+    for (auto &obj : msg) {
         MAPF_INFO(std::string(indent, ' ') << "objectName: " << obj.get_name());
         indent += 2;
-        for (auto& param : obj.get_param_list()) {
+        for (auto &param : obj.get_param_list()) {
             MAPF_INFO(std::string(indent, ' ') << param.get_name() << " = " << param.get_value());
         }
         indent -= 2;

@@ -11,9 +11,9 @@
 
 #include <bpl_arp.h>
 
+#include <chrono>
 #include <list>
 #include <memory>
-#include <chrono>
 
 #include <linux/if_ether.h>
 
@@ -23,10 +23,9 @@ struct nl_sock;
 namespace beerocks {
 namespace bpl {
 
-class arp_monitor 
-{
+class arp_monitor {
 
-/*
+    /*
  * Public methdos:
  */
 public:
@@ -40,39 +39,33 @@ public:
     void stop();
 
     // Process data from the monitoring interface
-    bool process_mon(BPL_ARP_MON_ENTRY& sArpMonData);
+    bool process_mon(BPL_ARP_MON_ENTRY &sArpMonData);
 
     // Process data from the raw ARP socket
     // Returns the TaskID for the processed ARP (or -1 on error)
-    int process_arp(BPL_ARP_MON_ENTRY& sArpMonData);
+    int process_arp(BPL_ARP_MON_ENTRY &sArpMonData);
 
     // Send a unicast ARP message to the given client
-    bool probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN], const uint8_t ip[BPL_ARP_MON_IP_LEN], int iTaskID);
+    bool probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN], const uint8_t ip[BPL_ARP_MON_IP_LEN],
+               int iTaskID);
 
     // Query the ARP table for MAC/IP address
     // First arg is input, the second is output
     bool get_mac_for_ip(const uint8_t ip[BPL_ARP_MON_IP_LEN], uint8_t mac[BPL_ARP_MON_MAC_LEN]);
     bool get_ip_for_mac(const uint8_t mac[BPL_ARP_MON_MAC_LEN], uint8_t ip[BPL_ARP_MON_IP_LEN]);
 
-/*
+    /*
  * Public getters:
  */
 public:
+    int get_mon_fd() const { return (m_fdMonSocket); }
 
-    int get_mon_fd() const
-    { return (m_fdMonSocket); }
-
-    int get_arp_fd() const
-    { return (m_fdArpSocket); }
+    int get_arp_fd() const { return (m_fdArpSocket); }
 
     // TODO: TEMP!
     void print_arp_table();
 
-/*
- * Private data-members:
- */
 private:
-
     // Monitoring Netlink Socket
     int m_fdMonSocket;
 
@@ -84,7 +77,7 @@ private:
 
     struct SProbeEntry {
         int iTaskID;
-        uint8_t mac[BPL_ARP_MON_MAC_LEN]; 
+        uint8_t mac[BPL_ARP_MON_MAC_LEN];
         uint8_t ip[BPL_ARP_MON_IP_LEN];
         std::chrono::steady_clock::time_point tpTimeout;
     };
@@ -93,7 +86,6 @@ private:
 
     // Buffer for reading ARP packets
     char m_arrArpPacket[ETH_FRAME_LEN];
-
 };
 
 } // namespace bpl

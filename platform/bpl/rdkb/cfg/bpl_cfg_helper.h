@@ -21,7 +21,7 @@
  *
  * @return 0 on success or -1 on error.
  **/
-int bpl_cfg_get_index_from_interface(const std::string& inputIfName, int *nIndex);
+int bpl_cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex);
 
 /**
  * Returns the value of requested param from DB
@@ -32,7 +32,7 @@ int bpl_cfg_get_index_from_interface(const std::string& inputIfName, int *nIndex
  *
  * @return 0 on success or -1 on error.
  **/
-int bpl_cfg_get_beerocks_param(const std::string& param, char *buf, size_t buf_len);
+int bpl_cfg_get_beerocks_param(const std::string &param, char *buf, size_t buf_len);
 
 /**
  * Returns the value of requested integer type param from DB
@@ -42,7 +42,7 @@ int bpl_cfg_get_beerocks_param(const std::string& param, char *buf, size_t buf_l
  *
  * @return 0 on success or -1 on error.
  **/
-int bpl_cfg_get_beerocks_param_int(const std::string& param, int *buf);
+int bpl_cfg_get_beerocks_param_int(const std::string &param, int *buf);
 
 /**
  * Returns the value of ACS from DB
@@ -78,6 +78,8 @@ int bpl_cfg_get_wep_key(int index, int keyIndex, char *key);
  * 
  * @return 0 on success or -1 on error.
  **/
-int bpl_cfg_set_vap_credentials(int index, const char ssid[BPL_SSID_LEN], const char sec[BPL_SEC_LEN], const char key[BPL_PASS_LEN], const char psk[BPL_PASS_LEN]);
+int bpl_cfg_set_vap_credentials(int index, const char ssid[BPL_SSID_LEN],
+                                const char sec[BPL_SEC_LEN], const char key[BPL_PASS_LEN],
+                                const char psk[BPL_PASS_LEN]);
 
 #endif // _BPL_CFG_HELPER_H

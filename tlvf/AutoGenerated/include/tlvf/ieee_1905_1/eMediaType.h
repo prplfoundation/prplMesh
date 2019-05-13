@@ -19,23 +19,22 @@
 
 namespace ieee1905_1 {
 
-enum eMediaType: uint16_t {
-    IEEE_802_3U_FAST_ETHERNET = 0x0,
+enum eMediaType : uint16_t {
+    IEEE_802_3U_FAST_ETHERNET     = 0x0,
     IEEE_802_3AB_GIGABIT_ETHERNET = 0x1,
-    IEEE_802_11B_2_4_GHZ = 0x100,
-    IEEE_802_11G_2_4_GHZ = 0x101,
-    IEEE_802_11A_5_GHZ = 0x102,
-    IEEE_802_11N_2_4_GHZ = 0x103,
-    IEEE_802_11N_5_GHZ = 0x104,
-    IEEE_802_11AC_5_GHZ = 0x105,
-    IEEE_802_11AD_60_GHZ = 0x106,
-    IEEE_802_11AF = 0x107,
-    IEEE_1901_WAVELET = 0x200,
-    IEEE_1901_FFT = 0x201,
-    MOCA_V1_1 = 0x300,
-    UNKNONWN_MEDIA = 0xffff,
+    IEEE_802_11B_2_4_GHZ          = 0x100,
+    IEEE_802_11G_2_4_GHZ          = 0x101,
+    IEEE_802_11A_5_GHZ            = 0x102,
+    IEEE_802_11N_2_4_GHZ          = 0x103,
+    IEEE_802_11N_5_GHZ            = 0x104,
+    IEEE_802_11AC_5_GHZ           = 0x105,
+    IEEE_802_11AD_60_GHZ          = 0x106,
+    IEEE_802_11AF                 = 0x107,
+    IEEE_1901_WAVELET             = 0x200,
+    IEEE_1901_FFT                 = 0x201,
+    MOCA_V1_1                     = 0x300,
+    UNKNONWN_MEDIA                = 0xffff,
 };
-
 
 }; // close namespace: ieee1905_1
 
