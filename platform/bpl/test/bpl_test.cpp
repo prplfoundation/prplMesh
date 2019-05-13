@@ -95,6 +95,7 @@ int main()
             } else {
                 MAPF_INFO("STA start on interface " << inputInterface << " succeeded.\n");
             }
+            break;
         case 5:
             SKIP_IF_WLAN_NOT_READY
             printf("Interface : ");
