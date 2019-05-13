@@ -31,6 +31,14 @@ int wlanReady = -1;
         }                                                                                          \
     }
 
+void getString(char *s, int size)
+{
+    if (!fgets(s, size, stdin)) {
+        fprintf(stderr, "No input.\n");
+        exit(1);
+    }
+}
+
 int main()
 {
     int return_status;
@@ -43,7 +51,7 @@ int main()
                "Restore at interface level\n7. Restore at full scope\n8. Set WiFI credentials\n9. "
                "Get WiFi credentials\n10. AP post init handling\n11. Exit\n");
         fflush(stdin);
-        fgets(userInputS, 3, stdin);
+        getString(userInputS, 3);
         switch (atoi(userInputS)) {
         case 1:
             wlanReady = bpl_wlan_ready();
@@ -58,7 +66,7 @@ int main()
             SKIP_IF_WLAN_NOT_READY
             printf("Interface : ");
             fflush(stdin);
-            fgets(inputInterface, sizeof(inputInterface), stdin);
+            getString(inputInterface, sizeof(inputInterface));
             MAPF_DBG("Performing AP start on " << inputInterface << "\n");
             return_status = bpl_wlan_ap_start(inputInterface);
             if (return_status == 1) {
@@ -73,7 +81,7 @@ int main()
             SKIP_IF_WLAN_NOT_READY
             printf("Interface : ");
             fflush(stdin);
-            fgets(inputInterface, sizeof(inputInterface), stdin);
+            getString(inputInterface, sizeof(inputInterface));
             MAPF_DBG("Performing AP stop on " << inputInterface << "\n");
             return_status = bpl_wlan_ap_stop(inputInterface);
             if (return_status == 1) {
@@ -88,7 +96,7 @@ int main()
             SKIP_IF_WLAN_NOT_READY
             printf("Interface : ");
             fflush(stdin);
-            fgets(inputInterface, sizeof(inputInterface), stdin);
+            getString(inputInterface, sizeof(inputInterface));
             MAPF_DBG("Performing STA start on " << inputInterface << "\n");
             if (bpl_wlan_sta_start(inputInterface) != 0) {
                 MAPF_ERR("STA start on interface " << inputInterface << " failed.\n");
@@ -100,7 +108,7 @@ int main()
             SKIP_IF_WLAN_NOT_READY
             printf("Interface : ");
             fflush(stdin);
-            fgets(inputInterface, sizeof(inputInterface), stdin);
+            getString(inputInterface, sizeof(inputInterface));
             MAPF_DBG("Performing STA stop on " << inputInterface << "\n");
             if (bpl_wlan_sta_stop(inputInterface) != 0) {
                 MAPF_ERR("STA stop on interface " << inputInterface << " failed.\n");
@@ -112,7 +120,7 @@ int main()
             SKIP_IF_WLAN_NOT_READY
             printf("Interface : ");
             fflush(stdin);
-            fgets(inputInterface, sizeof(inputInterface), stdin);
+            getString(inputInterface, sizeof(inputInterface));
             MAPF_DBG("Performing recovery on " << inputInterface << "\n");
             if (bpl_wlan_restore(inputInterface) != 0) {
                 MAPF_ERR("Recovery on interface " << inputInterface << " failed.\n");
@@ -132,13 +140,13 @@ int main()
         case 8:
             printf("Interface : ");
             fflush(stdin);
-            fgets(inputInterface, sizeof(inputInterface), stdin);
+            getString(inputInterface, sizeof(inputInterface));
             printf("SSID: ");
             fflush(stdin);
-            fgets(ssid, sizeof(ssid), stdin);
+            getString(ssid, sizeof(ssid));
             printf("Password: ");
             fflush(stdin);
-            fgets(password, sizeof(password), stdin);
+            getString(password, sizeof(password));
             if (bpl_cfg_set_wifi_credentials(inputInterface, ssid, password, "WPA2-Personal") !=
                 0) {
                 MAPF_ERR("Failed to set WiFi credentials for " << inputInterface << "\n");
@@ -150,7 +158,7 @@ int main()
             memset(&wlan_params, 0, sizeof(wlan_params));
             printf("Interface : ");
             fflush(stdin);
-            fgets(inputInterface, sizeof(inputInterface), stdin);
+            getString(inputInterface, sizeof(inputInterface));
             if (bpl_cfg_get_wifi_params(inputInterface, &wlan_params) != 0) {
                 MAPF_ERR("Failed to retrieve WiFi params for " << inputInterface << "\n");
             } else {
