@@ -10,7 +10,7 @@ import time
 import filecmp
 
 logger = logging.getLogger("package")
-package_modules=['framework', 'common', 'controller', 'agent']
+package_modules=['framework', 'common', 'controller', 'agent', 'tools']
 license = os.path.realpath(os.path.dirname(os.path.realpath(__file__)) + '/../LICENSE')
 header_template = '''/* SPDX-License-Identifier: BSD-2-Clause-Patent
  *
