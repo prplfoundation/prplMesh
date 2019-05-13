@@ -1,0 +1,91 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceRoot}",
+                "/usr/include",
+                "/usr/local/include"
+            ],
+            "defines": [],
+            "browse": {
+                "path": [
+                    "/usr/include",
+                    "/usr/local/include",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "intelliSenseMode": "clang-x64",
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ]
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceRoot}/../**",
+                "/opt/ugw/toolchain/64bit/toolchain-mips_mips32_gcc-4.8-linaro_uClibc-0.9.33.2_linux_3_10/mips-openwrt-linux-uclibc/include",
+                "/opt/ugw/toolchain/64bit/toolchain-mips_mips32_gcc-4.8-linaro_uClibc-0.9.33.2_linux_3_10/mips-openwrt-linux-uclibc/include/c++/4.8.3",
+                "/usr/include",
+                "/usr/local/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "ELPP_FORCE_USE_STD_THREAD",
+                "ELPP_NO_DEFAULT_LOG_FILE",
+                "ELPP_THREAD_SAFE",
+                "USE_FAPI_DAEMON"
+            ],
+            "browse": {
+                "path": [
+                    "/usr/include",
+                    "/usr/local/include",
+                    "${workspaceRoot}/src/include/network",
+                    "${workspaceRoot}/src/include",
+                    "${workspaceRoot}/src/platform_manager",
+                    "${workspaceRoot}/src/backhaul_manager",
+                    "${workspaceRoot}/src/beerocks/bml/internal",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++11"
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceRoot}",
+                "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/*",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.10240.0/um",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.10240.0/ucrt",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.10240.0/shared",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.10240.0/winrt"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE"
+            ],
+            "browse": {
+                "path": [
+                    "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/*",
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.10240.0/um",
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.10240.0/ucrt",
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.10240.0/shared",
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.10240.0/winrt",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "intelliSenseMode": "msvc-x64"
+        }
+    ],
+    "version": 4
+}
