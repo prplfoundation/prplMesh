@@ -1212,8 +1212,9 @@ bool master_thread::handle_cmdu_control_message(
         if (notification == nullptr) {
             LOG(ERROR)
                 << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION failed";
-            break;
+            return false;
         }
+        break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
         auto notification =
