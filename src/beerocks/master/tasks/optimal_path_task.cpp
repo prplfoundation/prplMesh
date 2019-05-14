@@ -715,7 +715,6 @@ void optimal_path_task::work()
             }
         }
 
-
         // Check if hostapd has suitable ssid
         auto it = hostap_candidates.begin();
         while (it != hostap_candidates.end()) {
