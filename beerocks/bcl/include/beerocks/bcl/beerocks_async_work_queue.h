@@ -13,6 +13,7 @@
 #include "beerocks_thread_base.h"
 #include "beerocks_thread_safe_queue.h"
 
+#include <functional>
 #include <future>
 
 namespace beerocks {
