@@ -202,6 +202,7 @@ void optimal_path_task::work()
 
         iterator_element_counter = 1; // initialize counter value
         state                    = REQUEST_11K_MEASUREMENTS_BY_BSSID;
+        break;
     }
     case REQUEST_11K_MEASUREMENTS_BY_BSSID: {
 
@@ -620,6 +621,7 @@ void optimal_path_task::work()
         }
 
         state = REQUEST_CROSS_RSSI_MEASUREMENTS;
+        break;
     }
     case REQUEST_CROSS_RSSI_MEASUREMENTS: {
         if (!assert_original_parent()) {
@@ -712,7 +714,6 @@ void optimal_path_task::work()
                 hostap_candidates.push_back({sibling, true});
             }
         }
-
 
         // Check if hostapd has suitable ssid
         auto it = hostap_candidates.begin();
