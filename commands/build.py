@@ -54,9 +54,8 @@ class cmakebuilder(object):
     def make(self):
         cmd = ["cmake",
                "--build", self.build_path,
-               "--",
-               "install",
-               "-j" if not self.make_verbose else "VERBOSE=1"]
+               "--target", "install",
+               "-j" if not self.make_verbose else "-v"]
         logger.info("building & installing {}: {}".format(self.name, " ".join(cmd)))
         subprocess.check_call(cmd, env=self.env)
 
