@@ -10,7 +10,6 @@ find_package(btlvf REQUIRED)
 find_package(Tlvf REQUIRED)
 find_package(elpp REQUIRED)
 find_package(readline)
-find_package(ncurses REQUIRED)
 
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
@@ -18,7 +17,7 @@ set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 file(GLOB cli_sources ${MODULE_PATH}/*.cpp)
 
 # Module LIBS
-set(cli_libraries ncurses beerocks::bcl beerocks::btlvf bml)
+set(cli_libraries beerocks::bcl beerocks::btlvf bml)
 
 add_executable(${PROJECT_NAME} ${cli_sources} ${cli_extra_sources})
 target_link_libraries(${PROJECT_NAME} ${cli_libraries} tlvf elpp)

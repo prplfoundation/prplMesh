@@ -1,12 +1,16 @@
 find_library(READLINE_LIBRARY "readline")
 find_path(READLINE_INCLUDE_DIRS readline/readline.h)
 
+# readline is linked with ncurses, so find that library as well. It should
+# exist, otherwise something weird is going on with the readline installation.
+find_library(NCURSES_LIBRARY "ncurses")
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(readline DEFAULT_MSG 
-    READLINE_LIBRARY 
+    READLINE_LIBRARY NCURSES_LIBRARY
     READLINE_INCLUDE_DIRS)
 message("READLINE_LIBRARY: " ${READLINE_LIBRARY})
+message("NCURSES_LIBRARY: " ${NCURSES_LIBRARY})
 message("READLINE_INCLUDE_DIRS: " ${READLINE_INCLUDE_DIRS})
 
 if (readline_FOUND)
@@ -32,7 +36,8 @@ if (readline_FOUND)
     # Library
     set_target_properties(readline PROPERTIES
         IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
-        IMPORTED_LOCATION "${READLINE_LIBRARY}"
+        IMPORTED_LOCATION "${READLINE_LIBRARY}" 
+        INTERFACE_LINK_LIBRARIES ${NCURSES_LIBRARY}
     )
 
 endif()
