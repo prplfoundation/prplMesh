@@ -190,6 +190,7 @@ const char* ConfigurationTypeHelper::convertToString(ConfigurationType configura
   if (configurationType == ConfigurationType::Format) return "FORMAT";
   if (configurationType == ConfigurationType::ToFile) return "TO_FILE";
   if (configurationType == ConfigurationType::ToStandardOutput) return "TO_STANDARD_OUTPUT";
+  if (configurationType == ConfigurationType::ToSyslog) return "TO_SYSLOG";
   if (configurationType == ConfigurationType::SubsecondPrecision) return "SUBSECOND_PRECISION";
   if (configurationType == ConfigurationType::PerformanceTracking) return "PERFORMANCE_TRACKING";
   if (configurationType == ConfigurationType::MaxLogFileSize) return "MAX_LOG_FILE_SIZE";
@@ -206,6 +207,7 @@ static struct ConfigurationStringToTypeItem configStringToTypeMap[] = {
   { "enabled", ConfigurationType::Enabled },
   { "to_file", ConfigurationType::ToFile },
   { "to_standard_output", ConfigurationType::ToStandardOutput },
+  { "to_syslog", ConfigurationType::ToSyslog },
   { "format", ConfigurationType::Format },
   { "filename", ConfigurationType::Filename },
   { "subsecond_precision", ConfigurationType::SubsecondPrecision },
@@ -370,6 +372,7 @@ void Configurations::setToDefault(void) {
   setGlobally(ConfigurationType::ToFile, std::string("true"), true);
 #endif // defined(ELPP_NO_LOG_TO_FILE)
   setGlobally(ConfigurationType::ToStandardOutput, std::string("true"), true);
+  setGlobally(ConfigurationType::ToSyslog, std::string("false"), true);
   setGlobally(ConfigurationType::SubsecondPrecision, std::string("3"), true);
   setGlobally(ConfigurationType::PerformanceTracking, std::string("true"), true);
   setGlobally(ConfigurationType::MaxLogFileSize, std::string("0"), true);
@@ -394,6 +397,7 @@ void Configurations::setRemainingToDefault(void) {
 #endif // defined(ELPP_NO_LOG_TO_FILE)
   unsafeSetIfNotExist(Level::Global, ConfigurationType::Filename, std::string(base::consts::kDefaultLogFile));
   unsafeSetIfNotExist(Level::Global, ConfigurationType::ToStandardOutput, std::string("true"));
+  unsafeSetIfNotExist(Level::Global, ConfigurationType::ToSyslog, std::string("false"));
   unsafeSetIfNotExist(Level::Global, ConfigurationType::SubsecondPrecision, std::string("3"));
   unsafeSetIfNotExist(Level::Global, ConfigurationType::PerformanceTracking, std::string("true"));
   unsafeSetIfNotExist(Level::Global, ConfigurationType::MaxLogFileSize, std::string("0"));
@@ -1644,6 +1648,10 @@ bool TypedConfigurations::toStandardOutput(Level level) {
   return getConfigByVal<bool>(level, &m_toStandardOutputMap, "toStandardOutput");
 }
 
+bool TypedConfigurations::toSyslog(Level level) {
+  return getConfigByVal<bool>(level, &m_toSyslog, "toSyslog");
+}
+
 const base::LogFormat& TypedConfigurations::logFormat(Level level) {
   return getConfigByRef<base::LogFormat>(level, &m_logFormatMap, "logFormat");
 }
@@ -1692,6 +1700,8 @@ void TypedConfigurations::build(Configurations* configurations) {
       setValue(conf->level(), getBool(conf->value()), &m_toFileMap);
     } else if (conf->configurationType() == ConfigurationType::ToStandardOutput) {
       setValue(conf->level(), getBool(conf->value()), &m_toStandardOutputMap);
+    } else if (conf->configurationType() == ConfigurationType::ToSyslog) {
+      setValue(conf->level(), getBool(conf->value()), &m_toSyslog);
     } else if (conf->configurationType() == ConfigurationType::Filename) {
       // We do not yet configure filename but we will configure in another
       // loop. This is because if file cannot be created, we will force ToFile
@@ -2215,11 +2225,28 @@ void DefaultLogDispatchCallback::handle(const LogDispatchData* data) {
   base::threading::ScopedLock scopedLock(fileHandle(data));
 #endif
   m_data = data;
-  dispatch(m_data->logMessage()->logger()->logBuilder()->build(m_data->logMessage(),
-           m_data->dispatchAction() == base::DispatchAction::NormalLog));
+#if defined(ELPP_SYSLOG)
+  if (m_data->logMessage()->logger()->m_typedConfigurations->toSyslog(m_data->logMessage()->level()))
+  {
+	  LogDispatchData syslogData;
+	  syslogData.setDispatchAction(base::DispatchAction::SysLog);
+	  syslogData.setLogMessage(new LogMessage(data->logMessage()->level(), data->logMessage()->file(), data->logMessage()->line(),
+		data->logMessage()->func(), data->logMessage()->verboseLevel(), Loggers::getLogger(base::consts::kSysLogLoggerId), data->logMessage()->message()));
+
+	  dispatch(m_data->logMessage()->logger()->logBuilder()->build(m_data->logMessage(),
+			   m_data->dispatchAction() == base::DispatchAction::NormalLog), syslogData .logMessage()->logger()->logBuilder()->build(syslogData.logMessage(),
+			   syslogData.dispatchAction() == base::DispatchAction::NormalLog));
+  }
+  else
+#endif  // defined(ELPP_SYSLOG)
+  {
+	  dispatch(m_data->logMessage()->logger()->logBuilder()->build(m_data->logMessage(),
+			   m_data->dispatchAction() == base::DispatchAction::NormalLog), m_data->logMessage()->logger()->logBuilder()->build(m_data->logMessage(),
+			   m_data->dispatchAction() == base::DispatchAction::NormalLog));
+  }
 }
 
-void DefaultLogDispatchCallback::dispatch(base::type::string_t&& logLine) {
+void DefaultLogDispatchCallback::dispatch(base::type::string_t&& logLine, base::type::string_t&& syslogLine) {
   if (m_data->dispatchAction() == base::DispatchAction::NormalLog) {
     if (m_data->logMessage()->logger()->m_typedConfigurations->toFile(m_data->logMessage()->level())) {
       // Use shared_ptr to prevent file closing in the middle of operation
@@ -2250,7 +2277,7 @@ void DefaultLogDispatchCallback::dispatch(base::type::string_t&& logLine) {
     }
   }
 #if defined(ELPP_SYSLOG)
-  else if (m_data->dispatchAction() == base::DispatchAction::SysLog) {
+  if (m_data->dispatchAction() == base::DispatchAction::SysLog || m_data->logMessage()->logger()->m_typedConfigurations->toSyslog(m_data->logMessage()->level())) {
     // Determine syslog priority
     int sysLogPriority = 0;
     if (m_data->logMessage()->level() == Level::Fatal)
@@ -2266,11 +2293,11 @@ void DefaultLogDispatchCallback::dispatch(base::type::string_t&& logLine) {
     else
       sysLogPriority = LOG_NOTICE;
 #  if defined(ELPP_UNICODE)
-    char* line = base::utils::Str::wcharPtrToCharPtr(logLine.c_str());
+    char* line = base::utils::Str::wcharPtrToCharPtr(syslogLine.c_str());
     syslog(sysLogPriority, "%s", line);
     free(line);
 #  else
-    syslog(sysLogPriority, "%s", logLine.c_str());
+    syslog(sysLogPriority, "%s", syslogLine.c_str());
 #  endif
   }
 #endif  // defined(ELPP_SYSLOG)
@@ -2360,7 +2387,7 @@ void AsyncDispatchWorker::handle(AsyncLogItem* logItem) {
     }
   }
 #  if defined(ELPP_SYSLOG)
-  else if (data->dispatchAction() == base::DispatchAction::SysLog) {
+  if (data->dispatchAction() == base::DispatchAction::SysLog) {
     // Determine syslog priority
     int sysLogPriority = 0;
     if (logMessage->level() == Level::Fatal)
