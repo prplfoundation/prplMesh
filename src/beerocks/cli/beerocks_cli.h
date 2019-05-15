@@ -11,8 +11,6 @@
 
 #include <fstream>
 #include <map>
-#include <readline/history.h>
-#include <readline/readline.h>
 #include <stdio.h>
 
 #include <beerocks/tlvf/beerocks_message.h>

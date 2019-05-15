@@ -20,6 +20,9 @@
 
 #include <chrono>
 
+#include <readline/history.h>
+#include <readline/readline.h>
+
 INITIALIZE_EASYLOGGINGPP
 
 // Do not use this macro anywhere else in ire process
