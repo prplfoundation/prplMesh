@@ -29,10 +29,10 @@ INITIALIZE_EASYLOGGINGPP
 // It should only be there in one place in each executable module
 BEEROCKS_INIT_BEEROCKS_VERSION
 
-bool g_running       = true;
-bool g_loop_cmd_exec = false;
-long g_wait_time     = 0;
-std::vector<std::string> g_cli_cmds;
+static bool g_running       = true;
+static bool g_loop_cmd_exec = false;
+static long g_wait_time     = 0;
+static std::vector<std::string> g_cli_cmds;
 
 #define BML_PREFIX "bml_"
 
