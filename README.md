@@ -4,7 +4,6 @@ The directory hirerchy expected by maptools.py is as follows:
 
 ```
 multiap
-└───.repo
 └───framework
 └───common
 └───controller
@@ -16,7 +15,6 @@ multiap
 Building and installing create build and install directories:
 ```
 multiap
-└───.repo
 └───build
 |   └───install
 └───tools
