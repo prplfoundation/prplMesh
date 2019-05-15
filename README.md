@@ -65,6 +65,13 @@ Distclean (removes ../build folder):
 ./maptools.py build all -c distclean
 ```
 
+To build with ninja (need to install the ninja tool in your distro first):
+```
+./maptools.py build all -G Ninja
+```
+Other generators (eclipse, codeblocks, ...) are available as well. Use
+`cmake -G` to list them.
+
 ## Versioning
 <a name="ver"></a>
 1.4.0

@@ -11,7 +11,7 @@ build_targets=['prepare', 'clean', 'distclean', 'make']
 build_modules=['framework', 'common', 'controller', 'agent']
 
 class cmakebuilder(object):
-    def __init__(self, name, modules_dir, build_dir, install_dir, native_build=False, cmake_verbose=False, make_verbose=False, cmake_flags=[]):
+    def __init__(self, name, modules_dir, build_dir, install_dir, native_build=False, cmake_verbose=False, make_verbose=False, cmake_flags=[], generator=None):
         self.name = name
         self.native_build = native_build
         self.cmake_verbose = cmake_verbose
@@ -20,6 +20,7 @@ class cmakebuilder(object):
         self.src_path = "{}/{}".format(modules_dir, name)
         self.build_path = "{}/{}".format(build_dir, name)
         self.install_path = install_dir
+        self.generator = generator
         self.env = os.environ.copy()
         self.env["STAGING_DIR"] = ""
 
@@ -47,6 +48,8 @@ class cmakebuilder(object):
         cmd.extend(['-D%s' %f for f in self.cmake_flags])
         if self.cmake_verbose:
             cmd.append("--debug_output")
+        if self.generator:
+            cmd.extend(["-G", self.generator])
         logger.info("preparing {}: {}".format(self.name, " ".join(cmd)))
         subprocess.check_call(cmd, env=self.env)
         open("{}/.prepared".format(self.build_path), 'a').close()
@@ -76,7 +79,7 @@ class mapbuild(object):
         logger.debug("modules_dir={}, build_dir={}, install_dir={}".format(modules_dir, build_dir, install_dir))
 
         for name in modules:
-            builder = cmakebuilder(name, modules_dir, build_dir, install_dir, args.native, args.cmake_verbose, args.make_verbose, args.cmake_flags)
+            builder = cmakebuilder(name, modules_dir, build_dir, install_dir, args.native, args.cmake_verbose, args.make_verbose, args.cmake_flags, args.generator)
             logger.debug(builder)
             if 'clean' in commands:
                 builder.clean()
@@ -96,6 +99,7 @@ class mapbuild(object):
         parser.add_argument('-f', '--cmake-flags', nargs='+', default=[], help="extra cmake flags")
         parser.add_argument("--cmake-verbose", action="store_true", help="cmake verbosity on (pass --debug-output to cmake command)")
         parser.add_argument("--make-verbose", action="store_true", help="make verbosity on (pass VERBOSE=1 to make)")
+        parser.add_argument("--generator", "-G", help="Specify a build system generator (cfr. cmake -G)")
 
         return parser
 
