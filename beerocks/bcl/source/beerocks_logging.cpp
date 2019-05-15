@@ -289,11 +289,12 @@ bool log_levels::trace_enabled() { return (m_level_set.end() != m_level_set.find
 // logging
 //====================================================================================
 const std::string logging::format("%level %datetime{%H:%m:%s:%g} <%thread> %fbase[%line] --> %msg");
+const std::string logging::syslogFormat("[beerocks] <%thread> %fbase[%line] --> %msg");
 
 logging::logging(const std::string config_path, std::string module_name)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
-      m_netlog_host(""), m_netlog_port(0)
+      m_netlog_host(""), m_netlog_port(0), m_syslog_enabled("false")
 {
     bool found_settings = false;
 
@@ -314,7 +315,7 @@ logging::logging(const std::string config_path, std::string module_name)
 logging::logging(const settings_t &settings, bool cache_settings, std::string module_name)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
-      m_netlog_host(""), m_netlog_port(0)
+      m_netlog_host(""), m_netlog_port(0), m_syslog_enabled("false")
 {
     for (auto &setting : settings) {
         if (0 == setting.first.find("log_")) {
@@ -333,12 +334,17 @@ logging::logging(const beerocks::config_file::SConfigLog &settings, std::string 
                  bool cache_settings)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
-      m_netlog_host(""), m_netlog_port(0)
+      m_netlog_host(""), m_netlog_port(0), m_syslog_enabled("false")
 {
     m_settings_map.insert({"log_path", settings.path});
     m_settings_map.insert({"log_global_levels", settings.global_levels});
     m_settings_map.insert({"log_global_syslog_levels", settings.syslog_levels});
     m_settings_map.insert({"log_global_size", settings.global_size});
+    if (!settings.syslog_enabled.empty()) {
+        m_settings_map.insert({"log_syslog_enabled", settings.syslog_enabled});
+    } else {
+        m_settings_map.insert({"log_syslog_enabled", "false"});
+    }
     if (!settings.netlog_host.empty()) {
         m_settings_map.insert({"log_netlog_host", settings.netlog_host});
         m_settings_map.insert({"log_netlog_port", settings.netlog_port});
@@ -415,6 +421,8 @@ log_levels logging::get_log_levels() { return m_levels; }
 
 log_levels logging::get_syslog_levels() { return m_syslog_levels; }
 
+std::string logging::get_syslog_enabled() { return m_syslog_enabled; }
+
 void logging::set_log_level_state(const eLogLevel &log_level, const bool &new_state)
 {
     m_levels.set_log_level_state(log_level, new_state);
@@ -449,6 +457,7 @@ void logging::apply_settings()
     defaultConf.setGlobally(el::ConfigurationType::ToFile, "true");
     defaultConf.setGlobally(el::ConfigurationType::Filename, get_log_filepath().c_str());
     defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "false");
+    defaultConf.setGlobally(el::ConfigurationType::ToSyslog, get_syslog_enabled().c_str());
     defaultConf.setGlobally(el::ConfigurationType::MaxLogFileSize,
                             get_log_max_size_setting().c_str());
 
@@ -468,7 +477,7 @@ void logging::apply_settings()
     // configure syslog settings
     el::Configurations syslogConf;
     syslogConf.setToDefault();
-    syslogConf.setGlobally(el::ConfigurationType::Format, format);
+    syslogConf.setGlobally(el::ConfigurationType::Format, syslogFormat);
 
     syslogConf.set(el::Level::Fatal, el::ConfigurationType::Enabled,
                    string_utils::bool_str(m_syslog_levels.fatal_enabled()));
@@ -666,5 +675,18 @@ void logging::eval_settings()
     if (netlog_host_pair != m_settings_map.end() && netlog_port_pair != m_settings_map.end()) {
         m_netlog_host = netlog_host_pair->second;
         m_netlog_port = string_utils::stoi(netlog_port_pair->second);
+    }
+
+    //syslog_enabled
+    setting             = m_settings_map.find("log_syslog_enabled");
+    module_setting_name = std::string("log_") + m_module_name + std::string("_syslog_enabled");
+    module_setting      = m_settings_map.find(module_setting_name);
+
+    if (module_setting != m_settings_map.end()) {
+        m_syslog_enabled = module_setting->second;
+    } else if (setting != m_settings_map.end()) {
+        m_syslog_enabled = setting->second;
+    } else {
+        m_syslog_enabled = "false"; // If no module specific setting, accept a global, then default
     }
 }

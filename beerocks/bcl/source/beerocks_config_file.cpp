@@ -25,6 +25,7 @@ static bool read_log_section(std::string config_file_path, config_file::SConfigL
         std::make_tuple("log_global_levels=", &sLogConf.global_levels, mandatory),
         std::make_tuple("log_global_syslog_levels=", &sLogConf.syslog_levels, mandatory),
         std::make_tuple("log_global_size=", &sLogConf.global_size, mandatory),
+        std::make_tuple("log_syslog_enabled=", &sLogConf.syslog_enabled, optional),
         std::make_tuple("log_netlog_host=", &sLogConf.netlog_host, optional),
         std::make_tuple("log_netlog_port=", &sLogConf.netlog_port, optional)};
 
