@@ -20,8 +20,10 @@
 
 #include <chrono>
 
+#ifdef HAVE_READLINE
 #include <readline/history.h>
 #include <readline/readline.h>
+#endif
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -32,7 +34,10 @@ BEEROCKS_INIT_BEEROCKS_VERSION
 static bool g_running       = true;
 static bool g_loop_cmd_exec = false;
 static long g_wait_time     = 0;
+
+#ifdef HAVE_READLINE
 static std::vector<std::string> g_cli_cmds;
+#endif
 
 #define BML_PREFIX "bml_"
 
@@ -103,6 +108,7 @@ static void init_logger(bool to_standard_output, std::string logfile)
     el::Loggers::reconfigureAllLoggers(defaultConf);
 }
 
+#ifdef HAVE_READLINE
 static void *xmalloc(int alloc_size)
 {
     void *m = malloc(alloc_size);
@@ -161,6 +167,7 @@ static char **command_tab_completion(const char *text, int start, int end)
     }
     return (matches);
 }
+#endif
 
 static int repeated_cmd_parser(std::string &cmd)
 {
@@ -248,6 +255,33 @@ static int cli_non_interactive(std::string path, std::string tmp_path, std::stri
     return status_code;
 }
 
+static bool getline_interactive(std::string &strBuf)
+{
+    const char *prompt = ">>";
+
+#ifdef HAVE_READLINE
+    const char *buf = nullptr;
+    buf = readline(prompt);
+    if (buf) {
+        strBuf = buf;
+        return true;
+    } else {
+        return false;
+    }
+#else
+    if (!std::cin.good()) {
+        return false;
+    }
+    std::cout << prompt;
+    getline(std::cin, strBuf);
+    if (strBuf.empty() && !std::cin) {
+        return false;
+    } else {
+        return true;
+    }
+#endif
+}
+
 static void cli_interactive(std::string path, std::string tmp_path, std::string ip)
 {
     std::cout << "Welcome to BeeRocks CLI " << BEEROCKS_VERSION << " Build date "
@@ -277,6 +311,7 @@ static void cli_interactive(std::string path, std::string tmp_path, std::string 
         }
     }
 
+#ifdef HAVE_READLINE
     //read from history file
     std::string historyFileName = "/tmp/widan_cli_history.txt";
     read_history(historyFileName.c_str());
@@ -290,15 +325,15 @@ static void cli_interactive(std::string path, std::string tmp_path, std::string 
     //enable auto-complete
     rl_attempted_completion_function = command_tab_completion;
     rl_bind_key('\t', rl_complete);
+#endif
 
     //read user input and execute functions
-    char *buf         = nullptr;
     bool quit_request = false;
     std::string bml_prefix(BML_PREFIX);
+    std::string strBuf;
 
-    while (g_running && (buf = readline(">>"))) {
+    while (g_running && getline_interactive(strBuf)) {
         //parse and call function
-        std::string strBuf(buf);
         if (!strBuf.empty()) {
             int executions = repeated_cmd_parser(strBuf);
 
@@ -349,9 +384,9 @@ static void cli_interactive(std::string path, std::string tmp_path, std::string 
                     } while (g_running && g_loop_cmd_exec && executions);
                     g_loop_cmd_exec = false;
 
-#if defined(BEEROCKS_UGW) || defined(BEEROCKS_RDKB)
+#ifdef HAVE_READLINE
                     //add to history
-                    int idx = history_search_pos(buf, 0, 0);
+                    int idx = history_search_pos(strBuf.c_str(), 0, 0);
                     if (idx != -1) {
                         HIST_ENTRY *entry = remove_history(idx);
                         if (entry) {
@@ -359,13 +394,11 @@ static void cli_interactive(std::string path, std::string tmp_path, std::string 
                             free(entry);
                         }
                     }
-                    add_history(buf);
+                    add_history(strBuf.c_str());
 #endif
                 }
             }
         }
-
-        free(buf);
 
         if (quit_request) {
             break;
@@ -379,10 +412,12 @@ static void cli_interactive(std::string path, std::string tmp_path, std::string 
     cli_soc.disconnect();
     cli_bml.disconnect();
 
+#ifdef HAVE_READLINE
     //write to history file
     if (write_history(historyFileName.c_str())) {
         LOG(ERROR) << "failed to write to history file";
     }
+#endif
 }
 
 static void cli_tcp_proxy(std::string temp_path)
