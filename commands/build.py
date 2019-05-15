@@ -37,17 +37,28 @@ class cmakebuilder(object):
             logger.info("{} already prepared, skip cmake {}".format(self.build_path, self.name))
             return
 
-        cmd = "cmake -H{} -B{} -DSTANDALONE=ON {} -DCMAKE_INSTALL_PREFIX={} {} {}".format(self.src_path, self.build_path
-            , "" if self.native_build else "-DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake"
-            ,self.install_path, " ".join(['-D%s' %f for f in self.cmake_flags]) ,"" if not self.cmake_verbose else "--debug-output")
-        logger.info("preparing {}: {}".format(self.name, cmd))
-        subprocess.check_call(cmd, shell=True, env=self.env)
+        cmd = ["cmake",
+               "-H" + self.src_path,
+               "-B" + self.build_path,
+               "-DSTANDALONE=ON",
+               "-DCMAKE_INSTALL_PREFIX=" + self.install_path]
+        if not self.native_build:
+            cmd.append("-DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake")
+        cmd.extend(['-D%s' %f for f in self.cmake_flags])
+        if self.cmake_verbose:
+            cmd.append("--debug_output")
+        logger.info("preparing {}: {}".format(self.name, " ".join(cmd)))
+        subprocess.check_call(cmd, env=self.env)
         open("{}/.prepared".format(self.build_path), 'a').close()
     
     def make(self):
-        cmd = "cmake --build {} -- install {}".format(self.build_path, "-j" if not self.make_verbose else "VERBOSE=1")
-        logger.info("building & installing {}: {}".format(self.name, cmd))
-        subprocess.check_call(cmd, shell=True, env=self.env)
+        cmd = ["cmake",
+               "--build", self.build_path,
+               "--",
+               "install",
+               "-j" if not self.make_verbose else "VERBOSE=1"]
+        logger.info("building & installing {}: {}".format(self.name, " ".join(cmd)))
+        subprocess.check_call(cmd, env=self.env)
 
 class mapbuild(object):
     def __init__(self, args):
