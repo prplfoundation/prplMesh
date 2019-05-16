@@ -70,7 +70,8 @@ To build with ninja (need to install the ninja tool in your distro first):
 ./maptools.py build all -G Ninja
 ```
 Other generators (eclipse, codeblocks, ...) are available as well. Use
-`cmake -G` to list them.
+`cmake -G` to list them. Note that the `--make-verbose` option only works with
+the Unix Makefiles generator.
 
 ## Versioning
 <a name="ver"></a>
