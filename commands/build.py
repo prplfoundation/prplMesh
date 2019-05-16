@@ -5,6 +5,7 @@ import getpass
 import subprocess
 import collections
 import shutil
+import multiprocessing
 
 logger = logging.getLogger("build")
 build_targets=['prepare', 'clean', 'distclean', 'make']
@@ -57,8 +58,11 @@ class cmakebuilder(object):
     def make(self):
         cmd = ["cmake",
                "--build", self.build_path,
-               "--target", "install",
-               "-j" if not self.make_verbose else "-v"]
+               "--target", "install"]
+        if self.make_verbose:
+            cmd.extend(["--", "VERBOSE=1"])
+        else:
+            cmd.extend(["--", "-j", str(multiprocessing.cpu_count() + 1)])
         logger.info("building & installing {}: {}".format(self.name, " ".join(cmd)))
         subprocess.check_call(cmd, env=self.env)
 
