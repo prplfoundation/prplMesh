@@ -171,7 +171,7 @@ bool os_utils::touch_pid_file(std::string file_path)
 
 int os_utils::redirect_console_std(std::string log_file_name)
 {
-    int fd_log_file_std = open(log_file_name.c_str(), O_CREAT | O_APPEND | O_RDWR, S_IWUSR);
+    int fd_log_file_std = open(log_file_name.c_str(), O_CREAT | O_APPEND | O_RDWR, 0644);
     if (fd_log_file_std > 0) {
         std::ostringstream msg;
         msg << std::endl << "Start Log" << std::endl << std::endl;
