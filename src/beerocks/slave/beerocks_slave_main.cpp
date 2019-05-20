@@ -342,7 +342,8 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
                     std::chrono::seconds(beerocks::TOUCH_PID_TIMEOUT_SECONDS);
             }
 
-            if (son_slave_conf.stop_on_failure_attempts > 0) {
+            if (son_slave_conf.stop_on_failure_attempts > 0
+                && beerocks_slave_conf.enable_son_slaves_watchdog == "1") {
                 //son_slave_watchdog periodic check son_slave pids are running
                 son_slave_watchdog_time_elapsed_ms =
                     std::chrono::duration_cast<std::chrono::milliseconds>(

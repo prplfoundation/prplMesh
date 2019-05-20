@@ -17,6 +17,7 @@ enable_bpl_iface_status_notifications=@BEEROCKS_NOTIFY@
 bridge_iface=@BEEROCKS_BRIDGE_IFACE@
 stop_on_failure_attempts=@BEEROCKS_STOP_ON_FAILURE_ATTEMPTS@ # 0 - disabled, else num of attempts
 enable_system_hang_test=0 # 0 - disabled
+enable_son_slaves_watchdog=0 # 0 - disabled
 enable_credentials_automatic_unify=@BEEROCKS_AUTOMATIC_CREDENTIALS_UNIFY@
 debug_disable_arp=0
 
