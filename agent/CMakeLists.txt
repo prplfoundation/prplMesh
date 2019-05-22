@@ -1,0 +1,100 @@
+set(PROJECT AGENT)
+cmake_minimum_required(VERSION 2.8)
+include(GNUInstallDirs)
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+message(STATUS "Beerocks Build Type: ${CMAKE_BUILD_TYPE}")
+
+# Platform specific flags
+if (TARGET_PLATFORM STREQUAL "ugw")
+    add_definitions(-DBEEROCKS_UGW)
+    set(BEEROCKS_PLATFORM "GRX_350")
+    set(BEEROCKS_NOTIFY 1)
+    set(BEEROCKS_BRIDGE_IFACE "br-lan")
+    set(BEEROCKS_BH_WIRE_IFACE "eth1")
+    set(BEEROCKS_REPEATER_MODE 1)
+    set(BEEROCKS_AUTOMATIC_CREDENTIALS_UNIFY 1)
+    set(BEEROCKS_STOP_ON_FAILURE_ATTEMPTS 1)
+elseif (TARGET_PLATFORM STREQUAL "rdkb")
+    add_definitions(-DBEEROCKS_RDKB)
+    set(BEEROCKS_PLATFORM "GRX_750")
+    set(BEEROCKS_NOTIFY 0)
+    set(BEEROCKS_BRIDGE_IFACE "brlan0")
+    set(BEEROCKS_BH_WIRE_IFACE "nsgmii0")
+    set(BEEROCKS_REPEATER_MODE 0)
+    set(BEEROCKS_AUTOMATIC_CREDENTIALS_UNIFY 0)
+    set(BEEROCKS_STOP_ON_FAILURE_ATTEMPTS 1)
+endif()
+
+# Use beerocks intel ip patent
+option (BUILD_PATENTS "build with patents enabled" ON)
+if (BUILD_PATENTS)
+    add_definitions(-DBEEROCKS_PATENTS)
+endif()
+
+# Default Compiler flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pthread -std=c++11 -Wno-unused-parameter -Wno-missing-field-initializers -fpermissive")
+
+option(STANDALONE "Standalone build" OFF)
+
+# Search local cmake folder first
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
+# Add beerocks cmake modules to search paths
+list(APPEND CMAKE_PREFIX_PATH ${PLATFORM_STAGING_DIR}/usr/lib/cmake/beerocks)
+if (NOT STANDALONE)
+    message(STATUS "${BoldBlue}Building 'In-Tree'${ColourReset}")
+else()
+    message(STATUS "${BoldBlue}Building 'Standalone'${ColourReset}")
+    # Convert the install prefix into an absolute path
+    get_filename_component(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}"
+        REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
+    list(INSERT CMAKE_FIND_ROOT_PATH 0 ${CMAKE_INSTALL_PREFIX})
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/lib/cmake/beerocks)
+endif()
+
+# Update output directories for easy deployment
+set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/bin)
+
+message(STATUS "CMAKE_FIND_ROOT_PATH - ${CMAKE_FIND_ROOT_PATH}")
+message(STATUS "CMAKE_INSTALL_PREFIX - ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "CMAKE_MODULE_PATH - ${CMAKE_MODULE_PATH}")
+message(STATUS "CMAKE_PREFIX_PATH - ${CMAKE_PREFIX_PATH}")
+message(STATUS "CMAKE_MULTIAP_OUTPUT_DIRECTORY - ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}")
+
+# Add "strip" flags
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
+endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -Wl,-S -fPIE -fPIC")
+if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector-strong")
+else()
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector")
+endif()
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}")
+
+# Linker Options
+# Setting the "rpath-link" linker variable to help the linker resolve secondery dependecies
+# (Libraries that are not directly referenced by the executable, but a linked library)
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
+endif()
+
+include(multiap-helpers)
+add_definitions(-DBEEROCKS_VERSION="${${PROJECT}_VERSION_STRING}")
+add_definitions(-DBEEROCKS_BUILD_DATE="${${PROJECT}_BUILD_DATE}")
+add_definitions(-DBEEROCKS_REVISION="${${PROJECT}_REVISION}")
+add_definitions(-DBEEROCKS_PATH="/opt/beerocks/")
+# FIXME - better to use target_get_property for SOVERSION which is set in the bwl CMakeLists.txt, but for some reason it is not propogated correctly
+add_definitions(-DBWL_MODULE_NAME="libbwl.so.${${PROJECT}_VERSION_MAJOR}")
+add_definitions(-DBPL_MODULE_NAME="libbpl.so.${${PROJECT}_VERSION_MAJOR}")
+
+add_subdirectory("src/beerocks")
+add_subdirectory("config")
