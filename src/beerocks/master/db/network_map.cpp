@@ -755,11 +755,11 @@ std::ptrdiff_t network_map::fill_bml_node_statistics(db &database, std::shared_p
     case beerocks::TYPE_IRE_BACKHAUL: {
         if (database.is_node_wireless(n->mac)) {
             n_type = beerocks::TYPE_CLIENT;
-            // fall to case beerocks::TYPE_CLIENT
         } else {
             break;
         }
     }
+        [[fallthrough]];
     case beerocks::TYPE_CLIENT: {
         //LOG(DEBUG) << "fill TYPE_CLIENT";
 
