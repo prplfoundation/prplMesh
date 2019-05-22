@@ -1,0 +1,151 @@
+# Global gitignore. Based on GitHub template and WSS CHSS gitignore.
+
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.sdf
+*.lib
+*.pdb
+*.a
+*.bin
+*.sys
+*.inf
+*.obj
+*.pch
+*.tlog
+*.exp
+*.pyc
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+*.tar.gz
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+*.db
+
+# Certificate files #
+#####################
+*.cer
+*.key
+*.crt
+*.der
+*.pem
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temp Files #
+##############
+*~
+*.swp
+*.swo
+*.bak
+*.orig
+
+# Misc Files #
+##############
+filelist
+tags
+tests/config/clients.list.json
+tests/config/ires.list.json
+Net-Interface-1.012
+
+# Visual Studio files #
+#######################
+*.user
+*.suo
+*.opensdf
+*.sln
+*.vcxproj
+*.vcxproj.filters
+
+# eclipse specific files #
+##########################
+.cproject
+.project
+.settings/
+.metadata/
+bin/
+gen/
+
+# Source Insight #
+##################
+*.IAB
+*.IAD
+*.IMB
+*.IMD
+*.PFI
+*.PO
+*.PR
+*.PRI
+*.PS
+*.SearchResults
+*.WK3
+
+# Build directories and other outputs #
+#####################
+/out
+/build
+kwinject.out
+kw_tables
+kw_reports/*.tmp
+kw_reports/rdkb/*.tmp
+kw_reports/ugw/*.tmp
+
+poc/ptk_widan_poc
+external/iotivity-1.1.0
+Makefile_qmake
+
+# cscope databases
+cscope.*
+
+# external directories #
+########################
+/external/iotivity
+
+# auto generated test directories #
+###################################
+tests/*/*/auto/*
+
+# Qt Creator files
+###################################
+*.config
+*.creator
+*.files
+*.includes
+.qmake.stash
+
+# Build generated files
+version
+
+# UGW files
+.built*
+.configured_*
+.dep_files
+.prepared_*
+ipkg-*
