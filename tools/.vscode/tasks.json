@@ -1,0 +1,282 @@
+{
+    "version": "2.0.0",
+    "type": "process",
+    "presentation" : { "echo": true, },
+    "options": {
+        "cwd": "${workspaceRoot}"
+    },
+    "tasks": [
+        {
+            "label": "Configure",
+            "type": "shell",
+            "command": "./maptools.sh config --gui -g",
+            "options": {
+                "cwd": "${workspaceRoot}/"
+            },
+            "problemMatcher":"$tsc"
+        },
+        {
+            "label": "BuildAll",
+            "command": "python",
+            "args": ["./maptools.py", "build", "all"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "DeployAll",
+            "command": "python",
+            "args": ["./maptools.py", "deploy", "all"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "CleanAll",
+            "command": "python",
+            "args": ["./maptools.py", "build", "all", "-c", "clean"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "Distclean",
+            "command": "python",
+            "args": ["./maptools.py", "build", "all", "-c", "distclean"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "BuildFramework",
+            "command": "python",
+            "args": ["./maptools.py", "build", "framework"],
+            "options": {"cwd": "${workspaceRoot}/",},
+            "group": {"kind": "build", "isDefault": true},
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "DeployFramework",
+            "command": "python",
+            "args": ["./maptools.py", "deploy", "framework"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "CleanFramework",
+            "command": "python",
+            "args": ["./maptools.py", "build", "framework", "-c", "clean"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "BuildCommon",
+            "command": "python",
+            "args": ["./maptools.py", "build", "common"],
+            "options": {"cwd": "${workspaceRoot}/",},
+            "group": {"kind": "build", "isDefault": true},
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "DeployCommon",
+            "command": "python",
+            "args": ["./maptools.py", "deploy", "common"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "CleanCommon",
+            "command": "python",
+            "args": ["./maptools.py", "build", "common", "-c", "clean"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "BuildAgent",
+            "command": "python",
+            "args": ["./maptools.py", "build", "agent"],
+            "options": {"cwd": "${workspaceRoot}/",},
+            "group": {"kind": "build", "isDefault": true},
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "DeployAgent",
+            "command": "python",
+            "args": ["./maptools.py", "deploy", "agent"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "CleanAgent",
+            "command": "python",
+            "args": ["./maptools.py", "build", "agent", "-c", "clean"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "BuildController",
+            "command": "python",
+            "args": ["./maptools.py", "build", "controller"],
+            "options": {"cwd": "${workspaceRoot}/",},
+            "group": {"kind": "build", "isDefault": true},
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "DeployController",
+            "command": "python",
+            "args": ["./maptools.py", "deploy", "controller"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "CleanController",
+            "command": "python",
+            "args": ["./maptools.py", "build", "controller", "-c", "clean"],
+            "options": {
+                "cwd": "${workspaceRoot}/",
+            },
+            "problemMatcher":"$tsc",
+            "presentation": {
+                "focus": true
+            }
+        },
+        {
+            "label": "Klocwork",
+            "command": "./kw.sh",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceRoot}/klocwork/",
+            },
+            "presentation": {
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+
+    ]
+}
