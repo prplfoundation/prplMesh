@@ -255,7 +255,9 @@ int network_utils::get_iface_info(network_utils::iface_info &info, const std::st
     }
 
     if (info.mac.empty()) {
-        network_utils::linux_iface_get_mac(iface_name, info.mac);
+        if(!network_utils::linux_iface_get_mac(iface_name, info.mac)) {
+            return -1;
+        }
     }
 
     return 0;
