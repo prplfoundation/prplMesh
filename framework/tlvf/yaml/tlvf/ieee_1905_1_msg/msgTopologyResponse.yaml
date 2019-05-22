@@ -1,0 +1,20 @@
+#
+---
+_namespace: ieee1905_1
+
+msgTopologyResponse:
+  _type: class
+  header:
+    _type: cmduHeader
+    _setValue: { "messageType" : TOPOLOGY_RESPONSE_MESSAGE }
+  tlv_device_info: tlvDeviceInformation
+  tlv_device_bridging_capability:
+    _type: tlvDeviceBridgingCapability
+    _length: []
+  tlv_non_1905_neighbor_device_list: 
+    _type: tlvNon1905neighborDeviceList
+    _length: []
+  tlv_neighbor_device_list:
+    _type: tlv1905NeighborDevice
+    _length: []
+  tlv_eof: tlvEndOfMessage

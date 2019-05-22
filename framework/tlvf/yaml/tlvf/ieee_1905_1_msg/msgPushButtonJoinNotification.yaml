@@ -1,0 +1,12 @@
+#
+---
+_namespace: ieee1905_1
+
+msgPushButtonJoinNotification:
+  _type: class
+  header:
+    _type: cmduHeader
+    _setValue: { "messageType" : PUSH_BUTTON_JOIN_NOTIFICATION_MESSAGE }
+  tlv_al_mac_tlv: tlvAlMacAddressType
+  tlv_push_butt_join_notif: tlvPushButtonJoinNotification
+  tlv_eof: tlvEndOfMessage

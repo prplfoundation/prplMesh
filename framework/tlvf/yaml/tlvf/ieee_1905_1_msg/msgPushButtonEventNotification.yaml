@@ -1,0 +1,12 @@
+#
+---
+_namespace: ieee1905_1
+
+msgPushButtonEventNotification:
+  _type: class
+  header:
+    _type: cmduHeader
+    _setValue: { "messageType" : PUSH_BUTTON_EVENT_NOTIFICATION_MESSAGE }
+  tlv_al_mac_tlv: tlvAlMacAddressType
+  tlv_push_butt_event_notif: tlvPushButtonEventNotification
+  tlv_eof: tlvEndOfMessage

@@ -1,0 +1,43 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvApMetric:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_AP_METRIC 
+  length: uint16_t
+  bssid: sAddress
+  channel_utilization: uint8_t
+  number_of_stas_currently_associated: uint16_t
+  estimated_service_parameters: sEstimatedService
+  estimated_service_info_field_ac_be:
+    _type: uint8_t
+    _length: [ ]
+  estimated_service_info_field_ac_bk:
+    _type: uint8_t
+    _length: [ ]
+  estimated_service_info_field_ac_vo:
+    _type: uint8_t
+    _length: [ ]
+  estimated_service_info_field_ac_vi:
+    _type: uint8_t
+    _length: [ ]
+
+sEstimatedService:
+  _type: struct
+  _bit_field: uint8_t
+  include_ac_be:
+    _bit_range: [7,7]
+    _value: 1
+  include_ac_bk:
+    _bit_range: [6,6]
+  include_ac_vo:
+    _bit_range: [5,5]
+  include_ac_vi:
+    _bit_range: [4,4]
+  reserved:
+    _bit_range: [3,0]
+  

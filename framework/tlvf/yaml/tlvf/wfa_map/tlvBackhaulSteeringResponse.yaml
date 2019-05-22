@@ -1,0 +1,20 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvBackhaulSteeringResponse:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_BACKHAUL_STEERING_RESPONSE
+  length: uint16_t
+  backhaul_station_mac: sMacAddr
+  target_bssid: sMacAddr
+  result_code: eResultCode
+    
+eResultCode:
+  _type: enum
+  _enum_storage: uint8_t
+  SUCCESS: 0x00
+  FAILURE: 0x01

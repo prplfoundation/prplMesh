@@ -1,0 +1,43 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvSteeringPolicy:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_STEERING_POLICY
+  length: uint16_t
+  local_steering_disallowed_sta_list_length:
+    _type: uint8_t
+    _length_var: True
+  local_steering_disallowed_sta_list:
+    _type: sMacAddr
+    _length: [ local_steering_disallowed_sta_list_length ]
+  btm_steering_disallowed_sta_list_length:
+    _type: uint8_t
+    _length_var: True
+  btm_steering_disallowed_sta_list:
+    _type: sMacAddr
+    _length: [ btm_steering_disallowed_sta_list_length ]
+  radio_ap_control_policy_list_length:
+    _type: uint8_t
+    _length_var: True
+  radio_ap_control_policy_list:
+    _type: sRadioApControlPolicy
+    _length: [ radio_ap_control_policy_list_length ]
+
+sRadioApControlPolicy:
+  _type: struct
+  radio_ap_mac: sMacAddr
+  steering_policy: eSteeringPolicy
+  channel_utilization_threshold: uint8_t
+  rssi_steering_threshold: uint8_t
+
+eSteeringPolicy:
+  _type: enum
+  _enum_storage: uint8_t
+  AGENT_INITIATED_STEERING_DISALLOWED: 0x00
+  AGENT_INITIATED_RSSI_BASED_STEERING_MANDATED: 0x01
+  AGENT_INITIATED_RSSI_BASED_STEERING_ALLOWED: 0x02

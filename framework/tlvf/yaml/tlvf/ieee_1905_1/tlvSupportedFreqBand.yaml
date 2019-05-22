@@ -1,0 +1,19 @@
+#
+---
+_namespace: ieee1905_1
+_is_tlv_class : True
+
+tlvSupportedFreqBand:
+  _type: class  
+  type:
+    _type: eTlvType
+    _value_const: TLV_SUPPORTED_FREQ_BAND
+  length: uint16_t
+  value: eValue
+
+eValue:
+  _type: enum
+  _enum_storage: uint8_t
+  BAND_2_4G: 0x00
+  BAND_5G: 0x01
+  BAND_60G: 0x02

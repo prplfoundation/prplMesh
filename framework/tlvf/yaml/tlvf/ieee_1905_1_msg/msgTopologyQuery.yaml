@@ -1,0 +1,10 @@
+#
+---
+_namespace: ieee1905_1
+
+msgTopologyQuery:
+  _type: class
+  header:
+    _type: cmduHeader
+    _setValue: { "messageType" : TOPOLOGY_QUERY_MESSAGE }
+  tlv_eof: tlvEndOfMessage

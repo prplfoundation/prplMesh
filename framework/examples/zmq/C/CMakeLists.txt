@@ -1,0 +1,7 @@
+file(GLOB sources *.c)
+foreach(src ${sources})
+	get_filename_component(target ${src} NAME_WE)
+	add_executable(${target}_C ${src})
+	target_link_libraries(${target}_C ${libs})
+	install(TARGETS ${target}_C DESTINATION bin)
+endforeach(src ${sources})

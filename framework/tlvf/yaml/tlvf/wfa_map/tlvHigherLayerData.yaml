@@ -1,0 +1,20 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvHigherLayerData:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_HIGHER_LAYER_DATA
+  length: uint16_t
+  protocol: eProtocol
+  payload:
+    _type: uint8_t
+    _length: [ ]
+
+eProtocol:
+  _type: enum
+  _enum_storage: uint8_t
+  TR_181: 0x01

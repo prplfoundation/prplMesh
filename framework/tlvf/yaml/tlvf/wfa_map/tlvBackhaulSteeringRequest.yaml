@@ -1,0 +1,16 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvBackhaulSteeringRequest:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_BACKHAUL_STEERING_REQUEST
+  length: uint16_t
+  backhaul_station_mac: sMacAddr
+  target_bssid: sMacAddr
+  operating_class: uint8_t
+  target_channel_number: uint8_t
+  

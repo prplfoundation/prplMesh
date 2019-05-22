@@ -1,0 +1,38 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvRadioOperationRestriction:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_RADIO_OPERATION_RESTRICTION
+  length: uint16_t
+  radio_uid: sMacAddr
+  operating_classes_list_length:
+    _type: uint8_t
+    _length_var: True
+  operating_classes_list:
+    _type: sOperatingClasses
+    _length: [ operating_classes_list_length ]
+
+sOperatingClasses:
+  _type: struct
+  operating_class: uint8_t
+  channel_list_length:
+    _type: uint8_t
+    _length_var: True
+  channel_list:
+    _type: sChannelInfo
+    _length: [ channel_list_length ]
+
+sChannelInfo:
+  _type: struct
+  channel_number: uint8_t
+  minimum_frequency_separation:
+    _type: uint8_t
+    _comment: |
+      The minimum frequency separation (in multiples of 10 MHz) that this radio would require when operating on
+      the above channel number between the center frequency of that channel and the center operating frequency of
+      another radio (operating simultaneous TX/RX) of the Multi-AP Agent.

@@ -1,0 +1,13 @@
+#
+---
+_namespace: ieee1905_1
+
+msgApAutoConfigurationSearch:
+  _type: class
+  header:
+    _type: cmduHeader
+    _setValue: { "messageType" : AP_AUTOCONFIGURATION_SEARCH_MESSAGE }
+  tlv_al_mac_tlv: tlvAlMacAddressType
+  tlv_searched_role: tlvSearchedRole
+  tlv_auto_conf_freq_band: tlvAutoconfigFreqBand
+  tlv_eof: tlvEndOfMessage

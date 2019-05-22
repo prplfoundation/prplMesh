@@ -1,0 +1,25 @@
+{
+	"logging": {
+		"default": {
+			"level" : "INFO",
+			"syslog" : false,
+			"console" : false,
+			"file" : {
+				"enable" : true,
+				"path" : "@TMP_PATH@/mapf/logs/",
+				"size" : "1000000"
+			},
+			"flushthreshold" : 1
+		},
+		"transport" : {
+		},
+		"local_bus" : {
+		},
+		"discovery" : {
+		},
+		"wfa_ca": {
+		},
+		"cli": {
+		}
+	}
+}

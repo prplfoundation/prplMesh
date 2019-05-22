@@ -1,0 +1,60 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvSteeringRequest:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_STEERING_REQUEST
+  length: uint16_t
+  bssid: sMacAddr
+  request_flags: sRequestFlags
+  steering_opportunity_window_sec:
+    _type: uint16_t
+    _comment: |
+      Time period in seconds (from reception of the Steering Request message) for which the request is valid.
+      If Request Mode bit is 1, then this field is ignored 
+  btm_disassociation_timer:
+    _type: uint16_t
+    _comment: |
+      Time period in TUs of the disassociation timer in the BTM Request.
+  sta_list_length: uint8_t
+  sta_list:
+    _type: sMacAddr
+    _length: [ sta_list_length ]
+  target_bssid_list_length:
+    _type: uint8_t
+    _length_var: True
+  target_bssid_list:
+    _type: sTargetBssidInfo
+    _length: [ target_bssid_list_length ]
+
+sRequestFlags:
+  _type: struct
+  _bit_field: uint8_t
+  request_mode:
+    _bit_range: [7,7]
+    _comment: Use eRequestMode
+  btm_disassociation_imminent_bit:
+    _bit_range: [6,6]
+  btm_abridged_bit:
+    _bit_range: [5,5]
+  reserved:
+    _bit_range: [4,0]
+    _value: 0
+
+eRequestMode:
+  _type: enum
+  REQUEST_IS_A_STEERING_OPPORTUNITY: 0
+  REQUEST_IS_A_STEERING_MANDATE_TO_TRIGGER_STEERING: 1
+
+sTargetBssidInfo:
+  _type: struct
+  target_bssid:
+    _type: sMacAddr
+    _comment: |
+      Wildcard BSSID is represented by FF:FF:FF:FF:FF:FF.
+  target_bss_operating_class: uint8_t
+  target_bss_channel_number: uint8_t

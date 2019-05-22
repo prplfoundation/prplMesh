@@ -1,0 +1,27 @@
+#
+---
+_namespace: ieee1905_1
+
+eRole:
+  _type: enum
+  _enum_storage: uint8_t
+  AP: 0x00
+  NON_AP_NON_PCP_STA: 0x40
+  WI_FI_P2P_CLIENT: 0x80
+  WI_FI_P2P_GROUP_OWNER: 0x90
+  IEEE_802_11AD_PCP: 0xA0
+
+s802_11SpecificInformation:
+  _type: struct
+  network_membership: sMacAddress
+  role: eRole
+  ap_channel_band:
+    _type: uint8_t
+    _comment: Hex value of dot11CurrentChannelBandwidth
+  ap_channel_center_frequency_index1:
+    _type: uint8_t
+    _comment:  Hex value of dot11CurrentChannelCenterFrequencyIndex1
+  ap_channel_center_frequency_index2:
+    _type: uint8_t
+    _comment: Hex value of dot11CurrentChannelCenterFrequencyIndex2
+

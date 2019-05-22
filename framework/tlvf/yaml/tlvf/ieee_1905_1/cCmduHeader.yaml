@@ -1,0 +1,36 @@
+#
+---
+_namespace: ieee1905_1
+
+cCmduHeader:
+  _type: class
+  message_version:
+    _type: uint8_t
+    _value_const: 0
+  reserved:
+    _type: uint8_t
+    _value_const: 0
+  message_type:
+    _type: eMessageType
+  message_id:
+    _type: uint16_t
+    _value: 0
+  fragment_id:
+    _type: uint8_t
+    _value: 0
+  flags: sFlags
+
+sFlags:
+    _type: struct
+    _bit_field: uint8_t
+    last_fragment_indicator:
+      _bit_range: [7,7]
+      _value: 1
+    relay_indicator:
+      _bit_range: [6,6]
+      _value: 0
+    reserved:
+      _bit_range: [5,0]
+      _value: 0
+
+

@@ -1,0 +1,23 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvSupportedService:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_SUPPORTED_SERVICE
+  length: uint16_t
+  supported_service_list_length:
+    _type: uint8_t
+    _length_var: True
+  supported_service_list:
+    _type: eSupportedService
+    _length: [ supported_service_list_length ]
+
+eSupportedService:
+  _type: enum
+  _enum_storage: uint8_t
+  MULTI_AP_CONTROLLER: 0x00
+  MULTI_AP_AGENT: 0x01

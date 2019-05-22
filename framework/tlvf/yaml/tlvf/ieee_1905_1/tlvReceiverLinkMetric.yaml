@@ -1,0 +1,46 @@
+#
+---
+_namespace: ieee1905_1
+_is_tlv_class : True
+
+tlvReceiverLinkMetric:
+  _type: class
+  type:
+    _type: eTlvType
+    _value_const: TLV_RECEIVER_LINK_METRIC
+  length: uint16_t
+  al_mac_of_the_device_that_transmits: sMacAddress
+  al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv: sMacAddress
+  interface_pair_info:
+    _comment: |
+      The following fields shall be repeated for each connected interface pair between the
+      receiving 1905.1 AL and the neighbor 1905.1 AL.
+    _type: sInterfacePairInfo
+    _length: []
+
+sLinkMetricInfo:
+  _type: struct
+  intfType:
+    _type: eMediaType
+    _comment: The underlying network technology
+  packet_errors_received: uint32_t
+  packets_receiveds:
+    _type: uint32_t
+    _comment: |
+      Number of packets received at the
+      interface during the same measurement
+      period used to count packetErrors.
+  rssi_db:
+    _type: uint8_t
+    _value: 0xFF
+    _comment: |
+      If the media type of the link is IEEE 802.11 (8 MSB value of media
+      type as defined in Table 6-12, then this value is the estimated RSSI in dB at the
+      receive side of the Link expressed in dB; otherwise, it is set to 0xFF.    
+
+sInterfacePairInfo:
+  _type: struct
+  mac_of_an_interface_in_the_receiving_al: sMacAddress
+  mac_of_an_interface_in_the_neighbor_al: sMacAddress
+  link_metric_info: sLinkMetricInfo
+

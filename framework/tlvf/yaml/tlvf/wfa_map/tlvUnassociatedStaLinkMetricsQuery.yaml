@@ -1,0 +1,28 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvUnassociatedStaLinkMetricsQuery:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_UNASSOCIATED_STA_LINKMETRICS_QUERY
+  length: uint16_t
+  operating_class_of_channel_list: uint8_t
+  channel_list_length:
+    _type: uint8_t
+    _length_var: True
+  channel_list:
+    _type: sChannelPrameters
+    _length: [ channel_list_length ]
+
+sChannelPrameters:
+  _type: struct
+  channel_number: uint8_t
+  sta_list_length:
+    _type: uint8_t
+    _length_var: True
+  sta_list:
+    _type: sMacAddr
+    _length: [ sta_list_length ]

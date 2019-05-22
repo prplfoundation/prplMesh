@@ -1,0 +1,40 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvMetricReportingPolicy:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_METRIC_REPORTING_POLICY
+  length: uint16_t
+  metrics_reporting_interval_sec: 
+    _type: uint8_t
+    _comment: |
+      0 - Do not report AP Metric periodically
+      1-255 - AP Metrics reporting interval in seconds
+  metrics_reporting_conf_list_length:
+    _type: uint8_t
+    _length_var: True
+  metrics_reporting_conf_list: 
+    _type: sMetricsReportingConf
+    _length: [ metrics_reporting_conf_list_length ]
+
+sMetricsReportingConf:
+  _type: struct
+  radio_uid: sMacAddr
+  sta_rssi_threshold_dbm_enc: uint8_t
+  sta_rssi_hysteresis: uint8_t
+  ap_channel_utilization_reporting_threshold: uint8_t
+  policy: sPolicy
+
+sPolicy:
+  _type: struct
+  _bit_field: uint8_t
+  include_associated_sta_traffic_stats_tlv_in_ap_metrics_response:
+    _bit_range: [7,7]
+  include_associated_sta_link_metrics_tlv_in_ap_metrics_response:
+    _bit_range: [6,6]
+  reserved:
+    _bit_range: [5, 0]

@@ -1,0 +1,12 @@
+#
+---
+_namespace: ieee1905_1
+
+msgApAutoConfigurationResponse:
+  _type: class
+  header:
+    _type: cmduHeader
+    _setValue: { "messageType" : AP_AUTOCONFIGURATION_RESPONSE_MESSAGE }
+  tlv_supported_role: tlvSupportedRole
+  tlv_supported_freq_band: tlvSupportedFreqBand
+  tlv_eof: tlvEndOfMessage

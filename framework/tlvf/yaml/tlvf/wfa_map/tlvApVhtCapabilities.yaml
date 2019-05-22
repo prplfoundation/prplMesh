@@ -1,0 +1,43 @@
+#
+---
+_namespace: wfa_map
+_is_tlv_class : True
+
+tlvApVhtCapabilities:
+  _type: class
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_AP_VHT_CAPABILITIES
+  length: uint16_t
+  radio_uid: sMacAddr
+  supported_vht_tx_mcs: uint16_t #TODO add MCS eNum
+  supported_vht_rx_mcs: uint16_t
+  flags1: sFlags1
+  flags2: sFlags2
+
+sFalgs1:
+  _type: struct
+  _bit_field: uint8_t
+  max_num_of_supported_tx_spatial_streams:
+    _bit_range: [7,5]
+  max_num_of_supported_rx_spatial_streams:
+    _bit_range: [4,2]
+  short_gi_support_80mhz:
+    _bit_range: [1,1]
+  short_gi_support_160mhz_and_80_80mhz:
+    _bit_range: [0,0]
+
+sFalgs2:
+  _type: struct
+  _bit_field: uint8_t
+  vht_support_80_80mhz:
+    _bit_range: [7,7]
+  vht_support_160mhz:
+    _bit_range: [6,6]
+  su_beamformer_capable:
+    _bit_range: [5,5]
+  mu_beamformer_capable:
+    _bit_range: [4,4]
+  reserved:
+    _bit_range: [3,0]
+    _value: 0
