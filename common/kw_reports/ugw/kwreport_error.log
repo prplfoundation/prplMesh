@@ -1,0 +1,67 @@
+---------------------------------------------------------------------------
+18 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:73 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 70 may be lost here.
+  * beerocks_socket_thread.cpp:70: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:289: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:320: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:70: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:73: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+19 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:78 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 70 may be lost here.
+  * beerocks_socket_thread.cpp:69: port>0 is true
+  * beerocks_socket_thread.cpp:70: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:289: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:320: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:70: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:78: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+20 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:82 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 79 may be lost here.
+  * beerocks_socket_thread.cpp:79: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:252: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:275: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:79: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:82: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+21 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:92 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 79 may be lost here.
+  * beerocks_socket_thread.cpp:67: unix_socket_path.empty() is false
+  * beerocks_socket_thread.cpp:79: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:252: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:275: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:79: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:92: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+22 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:95 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 79 may be lost here.
+  * beerocks_socket_thread.cpp:67: unix_socket_path.empty() is false
+  * beerocks_socket_thread.cpp:79: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:252: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:275: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:79: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:95: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+23 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:97 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 79 may be lost here.
+  * beerocks_socket_thread.cpp:67: unix_socket_path.empty() is false
+  * beerocks_socket_thread.cpp:79: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:252: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:275: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:79: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:88: server_socket is false
+  * beerocks_socket_thread.cpp:97: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+Summary: 6 Local
+6 Total Issue(s)

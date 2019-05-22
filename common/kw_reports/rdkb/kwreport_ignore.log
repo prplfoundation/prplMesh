@@ -1,0 +1,57 @@
+---------------------------------------------------------------------------
+1 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:77 SV.CODE_INJECTION.SHELL_EXEC (3:Warning) Ignore
+function 'system' possibly accepts command line that may be influenced by user, causing execution of arbitrary code. Arbitrary commands can be executed by an attacker. Check the length and content of strings used for command execution.
+Current status 'Ignore' set by 'Captain Marvell' on '2019-03-25 15:06'
+
+---------------------------------------------------------------------------
+2 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:77 SV.FIU.PROCESS_VARIANTS (4:Review) Ignore
+It is easy to run arbitrary commands through environment variables.  Use fork, execve, and pipes instead.
+Current status 'Ignore' set by 'Captain Marvell' on '2019-03-25 15:06'
+
+---------------------------------------------------------------------------
+3 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:77 SV.USAGERULES.PROCESS_VARIANTS (4:Review) Ignore
+Use CreateProcess instead of system.  This function acts like CreateProcess(NULL,?) and should be avoided.
+Current status 'Ignore' set by 'Captain Marvell' on '2019-03-25 15:06'
+
+---------------------------------------------------------------------------
+4 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:390 SV.TOCTOU.FILE_ACCESS (4:Review) Ignore
+function 'access' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Ignore' set by 'Captain Marvell' on '2019-03-25 15:06'
+
+---------------------------------------------------------------------------
+5 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:475 SV.TOCTOU.FILE_ACCESS (4:Review) Ignore
+function 'rename' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Ignore' set by 'Captain Marvell' on '2019-03-25 15:06'
+
+---------------------------------------------------------------------------
+6 (Local) common/beerocks/bcl/source/network/socket.cpp:312 SV.BFC.USING_STRUCT (4:Review) Ignore
+Function call to 'bind' was made using variable '&addr' as sockaddr* parameter.  To protect yourself from server hijacking do not set the sin_addr.s_addr field of '&addr' to INADDR_ANY.
+Current status 'Ignore' set by 'Captain Marvell' on '2019-03-25 15:06'
+
+---------------------------------------------------------------------------
+7 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:88 SV.CODE_INJECTION.SHELL_EXEC (3:Warning) Ignore
+function 'system' possibly accepts command line that may be influenced by user, causing execution of arbitrary code. Arbitrary commands can be executed by an attacker. Check the length and content of strings used for command execution.
+Current status 'Ignore' set by 'Captain Marvell' on '2019-03-25 15:06'
+
+---------------------------------------------------------------------------
+8 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:88 SV.FIU.PROCESS_VARIANTS (4:Review) Ignore
+It is easy to run arbitrary commands through environment variables.  Use fork, execve, and pipes instead.
+Current status 'Ignore' set by 'Captain Marvell' on '2019-03-25 15:06'
+
+---------------------------------------------------------------------------
+9 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:88 SV.USAGERULES.PROCESS_VARIANTS (4:Review) Ignore
+Use CreateProcess instead of system.  This function acts like CreateProcess(NULL,?) and should be avoided.
+Current status 'Ignore' set by 'Captain Marvell' on '2019-03-25 15:06'
+
+---------------------------------------------------------------------------
+10 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:186 SV.TOCTOU.FILE_ACCESS (4:Review) Ignore
+function 'open' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Ignore' set by 'Captain Marvell' on '2019-03-25 15:06'
+
+---------------------------------------------------------------------------
+11 (Local) common/beerocks/bcl/source/network/network_utils.cpp:489 SV.TOCTOU.FILE_ACCESS (4:Review) Ignore
+function 'opendir' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Ignore' set by 'Captain Marvell' on '2019-03-25 15:06'
+
+Summary: 11 Local
+11 Total Issue(s)

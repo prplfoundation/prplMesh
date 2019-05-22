@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "type": "process",
+    "presentation" : { "echo": true, },
+    "options": {
+        "cwd": "${workspaceRoot}"
+    },
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "cmake -H. -B./build -DSTANDALONE=ON -DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake -DCMAKE_INSTALL_PREFIX:FILEPATH=../out && cmake --build ./build -- install -j",
+            "linux": {
+                "options": {
+                    "env": {
+                        "STAGING_DIR": "",
+                        // "VERBOSE": "1"
+                    }
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": [
+                    "absolute"
+                ],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "rm -rf build",
+            "problemMatcher": "$tsc"
+        }
+    ]
+}

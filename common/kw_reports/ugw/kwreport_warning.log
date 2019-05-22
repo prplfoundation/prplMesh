@@ -1,0 +1,40 @@
+---------------------------------------------------------------------------
+6 (Local) common/beerocks/bwl/dwpal/ap_wlan_hal_dwpal.cpp:210 UNREACH.GEN (3:Warning) Analyze
+Code is unreachable
+  * ap_wlan_hal_dwpal.cpp:212: Infeasible condition: 'i==0' cannot be false.
+    * ap_wlan_hal_dwpal.cpp:212: Inferred value 'i' is '== 0'
+    * ap_wlan_hal_dwpal.cpp:212: Result of expression 'i != 0' is '== 0'
+  * ap_wlan_hal_dwpal.cpp:210: The code is unreachable.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+9 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:88 SV.CODE_INJECTION.SHELL_EXEC (3:Warning) Analyze
+function 'system' possibly accepts command line that may be influenced by user, causing execution of arbitrary code. Arbitrary commands can be executed by an attacker. Check the length and content of strings used for command execution.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+15 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:198 SV.INCORRECT_RESOURCE_HANDLING.WRONG_STATUS (3:Warning) Analyze
+Handler status might be wrong here. Handler 'fd_log_file_std' is the result of call to 'open'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+16 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:201 SV.INCORRECT_RESOURCE_HANDLING.WRONG_STATUS (3:Warning) Analyze
+Handler status might be wrong here. Handler 'fd_log_file_std' is the result of call to 'open'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+17 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:202 SV.INCORRECT_RESOURCE_HANDLING.WRONG_STATUS (3:Warning) Analyze
+Handler status might be wrong here. Handler 'fd_log_file_std' is the result of call to 'open'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+26 (Local) common/beerocks/bwl/common/base_wlan_hal.cpp:74 UNREACH.GEN (3:Warning) Analyze
+Code is unreachable
+  * base_wlan_hal.cpp:73: Infeasible condition: '!m_queue_events.push(event_ptr)' cannot be true.
+    * base_wlan_hal.cpp:73: Inferred value '&(this->m_queue_events).push(&event_ptr, true)' is '== 1'
+    * base_wlan_hal.cpp:73: Result of expression '&(this->m_queue_events).push(&event_ptr, true) != false' is '== 1'
+  * base_wlan_hal.cpp:74: The code is unreachable.
+Current status 'Analyze'
+
+Summary: 6 Local
+6 Total Issue(s)

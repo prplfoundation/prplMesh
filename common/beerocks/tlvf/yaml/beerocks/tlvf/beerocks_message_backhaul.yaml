@@ -1,0 +1,104 @@
+#
+---
+_include: beerocks/tlvf/beerocks_message_common.h
+_namespace: beerocks_message
+_multi_class: True
+_multi_class_auto_insert:
+  action_op:
+    _type: eActionOp_BACKHAUL
+    _value_const: [_auto_value_by_name, 1]  
+    _class_const: True
+
+#################################################
+#################################################
+
+cACTION_BACKHAUL_REGISTER_REQUEST:
+  _type: class
+  sta_iface:
+    _type: char
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+  hostap_iface:
+    _type: char
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+  local_master: uint8_t
+  local_gw: uint8_t
+  sta_iface_filter_low: uint8_t
+  onboarding: uint8_t
+
+cACTION_BACKHAUL_REGISTER_RESPONSE:
+  _type: class
+  is_backhaul_manager: uint8_t
+
+cACTION_BACKHAUL_BUSY_NOTIFICATION:
+  _type: class
+
+cACTION_BACKHAUL_ENABLE:
+  _type: class
+  bridge_iface:
+    _type: char
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+  iface_mac: beerocks::net::sMacAddr
+  iface_is_5ghz: uint8_t
+  wire_iface:
+    _type: char
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+  sta_iface:
+    _type: char
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+  ap_iface:
+    _type: char
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+  ssid:
+    _type: char
+    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  pass:
+    _type: char
+    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+  security_type: uint32_t # bwl::sta_wlan_hal::Security
+  preferred_bssid: beerocks::net::sMacAddr
+  wire_iface_type: uint8_t  
+  wireless_iface_type: uint8_t  
+  wired_backhaul: uint8_t  
+
+cACTION_BACKHAUL_CONNECTED_NOTIFICATION:
+  _type: class
+  params: sBackhaulParams
+
+cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION:
+  _type: class
+  stopped: uint8_t
+
+cACTION_BACKHAUL_ROAM_REQUEST:
+  _type: class
+  params: sBackhaulRoam
+
+cACTION_BACKHAUL_ROAM_RESPONSE:
+  _type: class
+  connected: uint8_t 
+
+cACTION_BACKHAUL_RESET:
+  _type: class
+
+cACTION_BACKHAUL_4ADDR_CONNECTED:
+  _type: class
+  mac: beerocks::net::sMacAddr
+
+cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION:
+  _type: class
+  params: sBackhaulRssi
+
+cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST:
+  _type: class
+  attempts: uint32_t
+
+cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST:
+  _type: class
+  params: sNodeRssiMeasurementRequest
+
+cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE:
+  _type: class
+  params: sNodeRssiMeasurement
+
+cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE:
+  _type: class
+  mac: beerocks::net::sMacAddr

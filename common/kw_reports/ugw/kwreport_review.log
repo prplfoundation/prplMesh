@@ -1,0 +1,72 @@
+---------------------------------------------------------------------------
+1 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:64 SV.FIU.PROCESS_VARIANTS (4:Review) Analyze
+It is easy to run arbitrary commands through environment variables.  Use fork, execve, and pipes instead.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+2 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:64 SV.USAGERULES.PROCESS_VARIANTS (4:Review) Analyze
+Use CreateProcess instead of system.  This function acts like CreateProcess(NULL,?) and should be avoided.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+3 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:372 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'access' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+4 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:456 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'access' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+5 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:459 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'rename' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+7 (Local) common/beerocks/bcl/source/network/network_utils.cpp:352 SV.RVT.RETVAL_NOTTESTED (4:Review) Analyze
+Return value of 'recv' is not compared with 0
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+8 (Local) common/beerocks/bcl/source/network/network_utils.cpp:486 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'opendir' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+10 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:88 SV.FIU.PROCESS_VARIANTS (4:Review) Analyze
+It is easy to run arbitrary commands through environment variables.  Use fork, execve, and pipes instead.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+11 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:88 SV.USAGERULES.PROCESS_VARIANTS (4:Review) Analyze
+Use CreateProcess instead of system.  This function acts like CreateProcess(NULL,?) and should be avoided.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+12 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:126 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'open' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+13 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:176 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'open' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+14 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:194 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'open' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+24 (Local) common/beerocks/bcl/source/network/socket.cpp:313 SV.BFC.USING_STRUCT (4:Review) Analyze
+Function call to 'bind' was made using variable '&addr' as sockaddr* parameter.  To protect yourself from server hijacking do not set the sin_addr.s_addr field of '&addr' to INADDR_ANY.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+25 (Local) common/beerocks/bcl/source/network/socket.cpp:338 CWARN.CONSTCOND.IF (4:Review) Analyze
+The condition in 'if' statement is constant
+Current status 'Analyze'
+
+Summary: 14 Local
+14 Total Issue(s)

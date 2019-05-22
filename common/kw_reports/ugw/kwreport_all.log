@@ -1,0 +1,175 @@
+---------------------------------------------------------------------------
+1 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:64 SV.FIU.PROCESS_VARIANTS (4:Review) Analyze
+It is easy to run arbitrary commands through environment variables.  Use fork, execve, and pipes instead.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+2 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:64 SV.USAGERULES.PROCESS_VARIANTS (4:Review) Analyze
+Use CreateProcess instead of system.  This function acts like CreateProcess(NULL,?) and should be avoided.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+3 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:372 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'access' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+4 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:456 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'access' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+5 (Local) common/beerocks/bcl/source/beerocks_logging.cpp:459 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'rename' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+6 (Local) common/beerocks/bwl/dwpal/ap_wlan_hal_dwpal.cpp:210 UNREACH.GEN (3:Warning) Analyze
+Code is unreachable
+  * ap_wlan_hal_dwpal.cpp:212: Infeasible condition: 'i==0' cannot be false.
+    * ap_wlan_hal_dwpal.cpp:212: Inferred value 'i' is '== 0'
+    * ap_wlan_hal_dwpal.cpp:212: Result of expression 'i != 0' is '== 0'
+  * ap_wlan_hal_dwpal.cpp:210: The code is unreachable.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+7 (Local) common/beerocks/bcl/source/network/network_utils.cpp:352 SV.RVT.RETVAL_NOTTESTED (4:Review) Analyze
+Return value of 'recv' is not compared with 0
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+8 (Local) common/beerocks/bcl/source/network/network_utils.cpp:486 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'opendir' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+9 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:88 SV.CODE_INJECTION.SHELL_EXEC (3:Warning) Analyze
+function 'system' possibly accepts command line that may be influenced by user, causing execution of arbitrary code. Arbitrary commands can be executed by an attacker. Check the length and content of strings used for command execution.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+10 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:88 SV.FIU.PROCESS_VARIANTS (4:Review) Analyze
+It is easy to run arbitrary commands through environment variables.  Use fork, execve, and pipes instead.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+11 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:88 SV.USAGERULES.PROCESS_VARIANTS (4:Review) Analyze
+Use CreateProcess instead of system.  This function acts like CreateProcess(NULL,?) and should be avoided.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+12 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:126 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'open' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+13 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:176 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'open' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+14 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:194 SV.TOCTOU.FILE_ACCESS (4:Review) Analyze
+function 'open' operates on file names and is vulnerable to race conditions. Files can be manipulated by attackers between creation and access time.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+15 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:198 SV.INCORRECT_RESOURCE_HANDLING.WRONG_STATUS (3:Warning) Analyze
+Handler status might be wrong here. Handler 'fd_log_file_std' is the result of call to 'open'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+16 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:201 SV.INCORRECT_RESOURCE_HANDLING.WRONG_STATUS (3:Warning) Analyze
+Handler status might be wrong here. Handler 'fd_log_file_std' is the result of call to 'open'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+17 (Local) common/beerocks/bcl/source/beerocks_os_utils.cpp:202 SV.INCORRECT_RESOURCE_HANDLING.WRONG_STATUS (3:Warning) Analyze
+Handler status might be wrong here. Handler 'fd_log_file_std' is the result of call to 'open'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+18 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:73 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 70 may be lost here.
+  * beerocks_socket_thread.cpp:70: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:289: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:320: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:70: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:73: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+19 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:78 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 70 may be lost here.
+  * beerocks_socket_thread.cpp:69: port>0 is true
+  * beerocks_socket_thread.cpp:70: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:289: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:320: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:70: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:78: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+20 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:82 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 79 may be lost here.
+  * beerocks_socket_thread.cpp:79: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:252: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:275: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:79: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:82: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+21 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:92 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 79 may be lost here.
+  * beerocks_socket_thread.cpp:67: unix_socket_path.empty() is false
+  * beerocks_socket_thread.cpp:79: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:252: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:275: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:79: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:92: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+22 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:95 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 79 may be lost here.
+  * beerocks_socket_thread.cpp:67: unix_socket_path.empty() is false
+  * beerocks_socket_thread.cpp:79: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:252: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:275: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:79: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:95: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+23 (Local) common/beerocks/bcl/source/beerocks_socket_thread.cpp:97 RH.LEAK (2:Error) Analyze
+Resource acquired to 'new(sizeof(SocketServer))->m_socket' at line 79 may be lost here.
+  * beerocks_socket_thread.cpp:67: unix_socket_path.empty() is false
+  * beerocks_socket_thread.cpp:79: Resource is acquired: 'new(sizeof(SocketServer))->m_socket' in the call to 'SocketServer'
+    * socket.cpp:252: Resource is acquired: 'this->m_socket' in the call to 'socket'
+    * socket.cpp:275: Resource descriptor is returned: 'this->m_socket'
+  * beerocks_socket_thread.cpp:79: 'new(sizeof(SocketServer))->m_socket' might be changed
+  * beerocks_socket_thread.cpp:88: server_socket is false
+  * beerocks_socket_thread.cpp:97: Resource is lost: 'new(sizeof(SocketServer))->m_socket'
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+24 (Local) common/beerocks/bcl/source/network/socket.cpp:313 SV.BFC.USING_STRUCT (4:Review) Analyze
+Function call to 'bind' was made using variable '&addr' as sockaddr* parameter.  To protect yourself from server hijacking do not set the sin_addr.s_addr field of '&addr' to INADDR_ANY.
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+25 (Local) common/beerocks/bcl/source/network/socket.cpp:338 CWARN.CONSTCOND.IF (4:Review) Analyze
+The condition in 'if' statement is constant
+Current status 'Analyze'
+
+---------------------------------------------------------------------------
+26 (Local) common/beerocks/bwl/common/base_wlan_hal.cpp:74 UNREACH.GEN (3:Warning) Analyze
+Code is unreachable
+  * base_wlan_hal.cpp:73: Infeasible condition: '!m_queue_events.push(event_ptr)' cannot be true.
+    * base_wlan_hal.cpp:73: Inferred value '&(this->m_queue_events).push(&event_ptr, true)' is '== 1'
+    * base_wlan_hal.cpp:73: Result of expression '&(this->m_queue_events).push(&event_ptr, true) != false' is '== 1'
+  * base_wlan_hal.cpp:74: The code is unreachable.
+Current status 'Analyze'
+
+Summary: 26 Local
+26 Total Issue(s)

@@ -1,0 +1,31 @@
+#
+---
+_namespace: beerocks_message
+_include: {
+  beerocks/tlvf/beerocks_message_common.h,
+  beerocks/tlvf/beerocks_message_action.h,
+}
+
+cACTION_HEADER:
+  _type: class
+  magic:
+    _type: uint32_t
+    _value_const: "beerocks::message::MESSAGE_MAGIC"
+  version:
+    _type: uint8_t
+    _value_const: "beerocks::message::MESSAGE_VERSION"
+  action: eAction 
+  action_op:
+    _type: uint8_t
+    _comment: need to cast eActionOp_XXXX to uint8_t
+  direction: 
+    _type: uint8_t
+    _value: 1 #BEEROCKS_DIRECTION_AGENT
+  radio_mac: beerocks::net::sMacAddr
+  last:
+    _type: uint8_t
+    _value: 0
+  id: uint16_t
+  length:
+    _type: uint16_t
+    _value: 0

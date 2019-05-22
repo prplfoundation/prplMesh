@@ -1,0 +1,409 @@
+#
+---
+_include: beerocks/tlvf/beerocks_message_common.h
+_namespace: beerocks_message
+_multi_class: True
+_multi_class_auto_insert:
+  action_op:
+    _type: eActionOp_CONTROL
+    _value_const: [_auto_value_by_name, 1]  
+    _class_const: True
+
+#################################################
+#################################################
+
+#################################################
+# CONTROL_SLAVE
+#################################################
+
+cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION:
+  _type: class
+  slave_version:
+    _type: char
+    _length: [ "beerocks::message::VERSION_LENGTH" ]
+  platform_settings: sPlatformSettings
+  wlan_settings: sWlanSettings 
+  backhaul_params: sBackhaulParams 
+  hostap: sNodeHostap 
+  cs_params: sApChannelSwitch 
+  platform: uint8_t            # configuration, beerocks::ePlatform
+  low_pass_filter_on: uint8_t  # configuration
+  enable_repeater_mode: uint8_t 
+  radio_identifier: beerocks::net::sMacAddr
+  is_slave_reconf: uint8_t
+
+cACTION_CONTROL_SLAVE_JOINED_RESPONSE:
+  _type: class
+  master_version:
+    _type: char 
+    _length: [ "beerocks::message::VERSION_LENGTH" ]
+  err_code: uint8_t  #beerocks::eSlaveJoinResponseErrCode
+  config: sSonConfig 
+
+cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION:
+  _type: class
+  backhaul_iface_mac: beerocks::net::sMacAddr 
+  backhaul_ipv4: beerocks::net::sIpv4Addr 
+  bridge_iface_mac: beerocks::net::sMacAddr 
+  bridge_ipv4: beerocks::net::sIpv4Addr 
+  hostap: sNodeHostap 
+
+cACTION_CONTROL_SON_CONFIG_UPDATE:
+  _type: class
+  config: sSonConfig 
+
+cACTION_CONTROL_CONTROLLER_PING_REQUEST:
+  _type: class
+  total: uint16_t 
+  seq: uint16_t 
+  size: uint16_t 
+  data:
+    _type: uint8_t
+    _length: []
+
+cACTION_CONTROL_CONTROLLER_PING_RESPONSE:
+  _type: class
+  total: uint16_t 
+  seq: uint16_t 
+  size: uint16_t
+  data:
+    _type: uint8_t
+    _length: []
+
+cACTION_CONTROL_AGENT_PING_REQUEST:
+  _type: class
+  total: uint16_t 
+  seq: uint16_t 
+  size: uint16_t 
+  data:
+    _type: uint8_t
+    _length: []
+
+cACTION_CONTROL_AGENT_PING_RESPONSE:
+  _type: class
+  total: uint16_t 
+  seq: uint16_t 
+  size: uint16_t
+  data:
+    _type: uint8_t
+    _length: []
+
+cACTION_CONTROL_ARP_QUERY_REQUEST:
+  _type: class
+  params: sArpQuery 
+
+cACTION_CONTROL_ARP_QUERY_RESPONSE:
+  _type: class
+  params: sArpMonitorData 
+
+cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION:
+  _type: class
+  versions: sVersions 
+
+cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION:
+  _type: class
+  bridge_mac: beerocks::net::sMacAddr 
+  operational: uint8_t 
+
+cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION:
+  _type: class
+  params: sBackhaulRssi 
+
+cACTION_CONTROL_BACKHAUL_RESET:
+  _type: class
+
+cACTION_CONTROL_BACKHAUL_ROAM_REQUEST:
+  _type: class
+  params: sBackhaulRoam 
+
+cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL:
+  _type: class
+  params: sLoggingLevelChange 
+
+cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PREPARE_REQUEST:
+  _type: class
+  params: sWifiCredentials 
+
+cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PREPARE_RESPONSE:
+  _type: class
+  error_code: uint32_t 
+
+cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PRE_COMMIT_REQUEST:
+  _type: class
+
+cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PRE_COMMIT_RESPONSE:
+  _type: class
+  error_code: uint32_t 
+
+cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_COMMIT_REQUEST:
+  _type: class
+
+cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_ABORT_REQUEST:
+  _type: class
+
+#################################################
+# HOSTAP
+#################################################
+
+cACTION_CONTROL_HOSTAP_TX_ON_REQUEST:
+  _type: class
+
+cACTION_CONTROL_HOSTAP_TX_OFF_REQUEST:
+  _type: class
+
+cACTION_CONTROL_HOSTAP_TX_ON_RESPONSE:
+  _type: class
+
+cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION:
+  _type: class
+  cs_params: sApChannelSwitch 
+
+cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION:
+  _type: class
+  cs_params: sApChannelSwitch 
+
+cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION:
+  _type: class
+  cs_params: sApChannelSwitch 
+
+cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION:
+  _type: class
+  cs_params: sApChannelSwitch 
+  supported_channels:
+    _type: sWifiChannel
+    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+
+cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION:
+  _type: class
+  params: sDfsCacCompleted 
+
+cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION:
+  _type: class
+  params: sDfsChannelAvailable 
+
+cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST:
+  _type: class
+  params: sApSetRestrictedFailsafe 
+
+cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE:
+  _type: class
+  success: uint8_t 
+
+cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START:
+  _type: class
+  cs_params: sApChannelSwitch 
+
+cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST:
+  _type: class
+  attempts: uint32_t 
+
+cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER:
+  _type: class
+
+cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST:
+  _type: class
+  cs_params: sApChannelSwitch 
+
+cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST:
+  _type: class
+  sync: uint8_t 
+
+cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE:
+  _type: class
+  ap_stats: sApStatsParams
+  sta_stats_size:
+    _type: uint8_t
+    _length_var: True
+  sta_stats:
+    _type: sStaStatsParams
+    _length: [ sta_stats_size ]
+
+cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION:
+  _type: class
+  params: sApLoadNotificationParams 
+
+cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST:
+  _type: class
+  params: sNeighborSetParams11k 
+
+cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST:
+  _type: class
+  params: sNeighborRemoveParams11k 
+
+cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION:
+  _type: class
+  params: sApActivityNotificationParams 
+
+cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION:
+  _type: class
+  params: sVapsList 
+
+cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION:
+  _type: class
+  vap_id: int8_t
+
+cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION:
+  _type: class
+  vap_id: int8_t
+  vap_info: sVapInfo
+
+
+#################################################
+# CLIENT
+#################################################
+cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST:
+  _type: class
+  params: sClientMonitoringParams 
+
+cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST:
+  _type: class
+  mac: beerocks::net::sMacAddr 
+
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST:
+  _type: class
+  params: sNodeRssiMeasurementRequest 
+
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE:
+  _type: class
+  params: sNodeRssiMeasurement 
+
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION:
+  _type: class
+  mac: beerocks::net::sMacAddr
+
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE:
+  _type: class
+  mac: beerocks::net::sMacAddr 
+
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION:
+  _type: class
+  params: sNodeRssiMeasurement 
+
+cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION:
+  _type: class
+  mac: beerocks::net::sMacAddr 
+
+cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION:
+  _type: class
+  mac: beerocks::net::sMacAddr 
+
+cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION:
+  _type: class
+  params: sClientAssociationParams 
+
+cACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION:
+  _type: class
+  params: sClientDisconnectionParams 
+
+cACTION_CONTROL_CLIENT_DISALLOW_REQUEST:
+  _type: class
+  mac: beerocks::net::sMacAddr
+  reject_sta: uint8_t
+
+cACTION_CONTROL_CLIENT_ALLOW_REQUEST:
+  _type: class
+  mac: beerocks::net::sMacAddr 
+  ipv4: beerocks::net::sIpv4Addr 
+
+cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST:
+  _type: class
+  mac: beerocks::net::sMacAddr 
+  vap_id: int8_t
+  type: uint32_t
+  reason: uint32_t
+
+cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE:
+  _type: class
+  params: sClientDisconnectResponse
+
+cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST:
+  _type: class
+  params: sNodeBssSteerRequest 
+
+cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE:
+  _type: class
+  params: sNodeBssSteerResponse 
+
+cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION:
+  _type: class
+  mac: beerocks::net::sMacAddr 
+  ipv4: beerocks::net::sIpv4Addr 
+  name: 
+    _type: char 
+    _length: [ "beerocks::message::NODE_NAME_LENGTH" ]
+
+cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION:
+  _type: class
+  params: sArpMonitorData 
+
+cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST:
+  _type: class
+  params: sBeaconRequest11k 
+
+cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE:
+  _type: class
+  params: sBeaconResponse11k 
+
+cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST:
+  _type: class
+  params: sStaChannelLoadRequest11k 
+
+cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE:
+  _type: class
+  params: sStaChannelLoadResponse11k 
+
+cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST:
+  _type: class
+  params: sStatisticsRequest11k 
+
+cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE:
+  _type: class
+  params: sStatisticsResponse11k 
+
+cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST:
+  _type: class
+  mac: beerocks::net::sMacAddr 
+
+cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE:
+  _type: class
+  params: sLinkMeasurementsResponse11k
+
+#################################################
+# MONITOR RDKB CONFIGURATIONS
+#################################################
+cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST: 
+  _type: class
+  params: sSteeringSetGroupRequest
+
+cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE: 
+  _type: class
+  params: sSteeringSetGroupResponse
+
+cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST: 
+  _type: class
+  params: sSteeringClientSetRequest
+
+cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE: 
+  _type: class
+  params: sSteeringClientSetResponse
+################################################
+# MONITOR RDKB NOTIFICATIONS
+#################################################
+cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION:
+  _type: class
+  params: sSteeringEvActivity
+
+cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION:
+  _type: class 
+  params: sSteeringEvSnrXing
+
+################################################
+# AP_MANAGER RDKB NOTIFICATIONS(softblock)
+#################################################
+cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION:
+  _type: class 
+  params: sSteeringEvProbeReq
+
+cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION:
+  _type: class 
+  params: sSteeringEvAuthFail
