@@ -95,6 +95,7 @@ elseif(BWL_TYPE STREQUAL "DUMMY")
 
     file(GLOB bwl_platform_sources
         ${bwl_platform_sources}
+        ${MODULE_PATH}/dummy/mon_wlan_hal_dummy.cpp
         ${MODULE_PATH}/dummy/ap_wlan_hal_dummy.cpp
         ${MODULE_PATH}/dummy/base_wlan_hal_dummy.cpp
     )

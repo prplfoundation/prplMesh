@@ -93,60 +93,27 @@ base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, std::string iface_name, b
 
 base_wlan_hal_dummy::~base_wlan_hal_dummy() { detach(); }
 
-bool base_wlan_hal_dummy::fsm_setup()
-{
-    return true;
-}
+bool base_wlan_hal_dummy::fsm_setup() { return true; }
 
-HALState base_wlan_hal_dummy::attach(bool block)
-{
-    return (m_hal_state = HALState::Operational);
-}
+HALState base_wlan_hal_dummy::attach(bool block) { return (m_hal_state = HALState::Operational); }
 
-bool base_wlan_hal_dummy::detach()
-{
-    return true;
-}
+bool base_wlan_hal_dummy::detach() { return true; }
 
-bool base_wlan_hal_dummy::ping()
-{
-    return true;
-}
+bool base_wlan_hal_dummy::ping() { return true; }
 
-bool base_wlan_hal_dummy::dummy_send_cmd(const std::string &cmd)
-{
-    return false;
-}
+bool base_wlan_hal_dummy::dummy_send_cmd(const std::string &cmd) { return false; }
 
-bool base_wlan_hal_dummy::dummy_send_cmd(const std::string &cmd, char **reply)
-{
-    return false;
-}
+bool base_wlan_hal_dummy::dummy_send_cmd(const std::string &cmd, char **reply) { return false; }
 
-bool base_wlan_hal_dummy::refresh_radio_info()
-{
-    return true;
-}
+bool base_wlan_hal_dummy::refresh_radio_info() { return true; }
 
-bool base_wlan_hal_dummy::refresh_vap_info(int vap_id)
-{
-    return true;
-}
+bool base_wlan_hal_dummy::refresh_vap_info(int vap_id) { return true; }
 
-bool base_wlan_hal_dummy::refresh_vaps_info(int id)
-{
-    return true;
-}
+bool base_wlan_hal_dummy::refresh_vaps_info(int id) { return true; }
 
-bool base_wlan_hal_dummy::process_ext_events()
-{
-    return true;
-}
+bool base_wlan_hal_dummy::process_ext_events() { return true; }
 
-std::string base_wlan_hal_dummy::get_radio_mac()
-{
-    return std::string("DE:AD:BE:EF:DE:AD");
-}
+std::string base_wlan_hal_dummy::get_radio_mac() { return std::string("DE:AD:BE:EF:DE:AD"); }
 
 } // namespace dummy
 } // namespace bwl

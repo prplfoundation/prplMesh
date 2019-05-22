@@ -60,7 +60,6 @@ struct DUMMY_acs_report_get {
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -70,8 +69,7 @@ struct DUMMY_acs_report_get {
 ap_wlan_hal_dummy::ap_wlan_hal_dummy(std::string iface_name, bool acs_enabled,
                                      hal_event_cb_t callback)
     : base_wlan_hal(bwl::HALType::AccessPoint, iface_name, IfaceType::Intel, acs_enabled, callback),
-      base_wlan_hal_dummy(bwl::HALType::AccessPoint, iface_name, acs_enabled, callback,
-                          0)
+      base_wlan_hal_dummy(bwl::HALType::AccessPoint, iface_name, acs_enabled, callback, 0)
 {
 }
 
@@ -89,15 +87,9 @@ HALState ap_wlan_hal_dummy::attach(bool block)
     return state;
 }
 
-bool ap_wlan_hal_dummy::sta_allow(const std::string &mac)
-{
-    return true;
-}
+bool ap_wlan_hal_dummy::sta_allow(const std::string &mac) { return true; }
 
-bool ap_wlan_hal_dummy::sta_deny(const std::string &mac, int reject_sta)
-{
-    return true;
-}
+bool ap_wlan_hal_dummy::sta_deny(const std::string &mac, int reject_sta) { return true; }
 
 bool ap_wlan_hal_dummy::sta_disassoc(int8_t vap_id, const std::string &mac, uint32_t reason)
 {
@@ -138,75 +130,39 @@ bool ap_wlan_hal_dummy::sta_softblock_remove(const std::string &vap_name,
     return true;
 }
 
-bool ap_wlan_hal_dummy::switch_channel(int chan, int bw, int vht_center_frequency)
-{
-    return true;
-}
+bool ap_wlan_hal_dummy::switch_channel(int chan, int bw, int vht_center_frequency) { return true; }
 
-bool ap_wlan_hal_dummy::set_antenna_mode(AntMode mode)
-{
-    return true;
-}
+bool ap_wlan_hal_dummy::set_antenna_mode(AntMode mode) { return true; }
 
-bool ap_wlan_hal_dummy::wds_set_mode(WDSMode mode)
-{
-    return true;
-}
+bool ap_wlan_hal_dummy::wds_set_mode(WDSMode mode) { return true; }
 
-bool ap_wlan_hal_dummy::wds_add_sta(const std::string &mac)
-{
-    return true;
-}
+bool ap_wlan_hal_dummy::wds_add_sta(const std::string &mac) { return true; }
 
-bool ap_wlan_hal_dummy::wds_del_sta(const std::string &mac)
-{
-    return true;
-}
+bool ap_wlan_hal_dummy::wds_del_sta(const std::string &mac) { return true; }
 
-bool ap_wlan_hal_dummy::wds_clear_list()
-{
-    return true;
-}
+bool ap_wlan_hal_dummy::wds_clear_list() { return true; }
 
 bool ap_wlan_hal_dummy::failsafe_channel_set(int chan, int bw, int vht_center_frequency)
 {
     return true;
 }
 
-bool ap_wlan_hal_dummy::failsafe_channel_get(int &chan, int &bw)
-{
-    return false;
-}
+bool ap_wlan_hal_dummy::failsafe_channel_get(int &chan, int &bw) { return false; }
 
-bool ap_wlan_hal_dummy::restricted_channels_set(char *channel_list)
-{
-    return true;
-}
+bool ap_wlan_hal_dummy::restricted_channels_set(char *channel_list) { return true; }
 
-bool ap_wlan_hal_dummy::restricted_channels_get(char *channel_list)
-{
-    return false;
-}
+bool ap_wlan_hal_dummy::restricted_channels_get(char *channel_list) { return false; }
 
-bool ap_wlan_hal_dummy::read_acs_report()
-{
-    return true;
-}
+bool ap_wlan_hal_dummy::read_acs_report() { return true; }
 
 bool ap_wlan_hal_dummy::set_vap_enable(const std::string &iface_name, const bool enable)
 {
     return true;
 }
 
-bool ap_wlan_hal_dummy::get_vap_enable(const std::string &iface_name, bool &enable)
-{
-    return true;
-}
+bool ap_wlan_hal_dummy::get_vap_enable(const std::string &iface_name, bool &enable) { return true; }
 
-std::string ap_wlan_hal_dummy::get_radio_driver_version()
-{
-    return std::string("dummy");
-}
+std::string ap_wlan_hal_dummy::get_radio_driver_version() { return std::string("dummy"); }
 
 bool ap_wlan_hal_dummy::process_dummy_event(char *buffer, int bufLen, const std::string &opcode)
 {
