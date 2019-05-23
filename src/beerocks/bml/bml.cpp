@@ -14,7 +14,7 @@
 
 using namespace beerocks::net;
 
-int bml_connect(BML_CTX *ctx, const char *beerocks_path, void *user_data)
+int bml_connect(BML_CTX *ctx, const char *beerocks_conf_path, void *user_data)
 {
     if (!ctx) {
         LOG(ERROR) << "bml_connect - ctx is null!";
@@ -42,7 +42,7 @@ int bml_connect(BML_CTX *ctx, const char *beerocks_path, void *user_data)
 
     // Connect to the platform
     int iRet;
-    if ((iRet = pBML->connect(beerocks_path)) != BML_RET_OK) {
+    if ((iRet = pBML->connect(beerocks_conf_path)) != BML_RET_OK) {
 
         LOG(ERROR) << "bml_connect - pBML->connect failed";
 
