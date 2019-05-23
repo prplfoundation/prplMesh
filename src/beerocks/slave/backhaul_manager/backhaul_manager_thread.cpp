@@ -623,6 +623,7 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
         if (network_utils::get_iface_info(bridge_info, m_sConfig.bridge_iface) != 0) {
             LOG(ERROR) << "Failed reading addresses from the bridge!";
             platform_notify_error(BPL_ERR_BH_READING_DATA_FROM_THE_BRIDGE, "");
+            stop_on_failure_attempts--;
             FSM_MOVE_STATE(RESTART);
             break;
         }
