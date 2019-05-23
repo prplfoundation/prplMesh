@@ -1595,7 +1595,8 @@ bool main_thread::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return handle_1905_autoconfiguration_response(cmdu_rx, src_mac);
     }
     default: {
-        LOG(WARNING) << "Unknown 1905 message received. Ignoring";
+        // TODO add a warning once all vendor specific flows are replaced with EasyMesh
+        // flows, since we won't expect a 1905 message not handled in this function
         return false;
     }
     }
