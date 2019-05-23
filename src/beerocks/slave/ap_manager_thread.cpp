@@ -377,7 +377,7 @@ void ap_manager_thread::after_select(bool timeout)
             // A callback (hal_event_handler()) will invoked for pending events
             clear_ready(ap_hal_int_events);
             if (!ap_wlan_hal->process_int_events()) {
-                LOG(ERROR) << "process_ext_events() failed!";
+                LOG(ERROR) << "process_int_events() failed!";
                 thread_last_error_code = APMANAGER_THREAD_ERROR_REPORT_PROCESS_FAIL;
                 stop_ap_manager_thread();
                 return;
@@ -834,7 +834,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
 
     case Event::AP_Enabled: {
         if (!data) {
-            LOG(ERROR) << "AP_Disabled without data!";
+            LOG(ERROR) << "AP_Enabled without data!";
             return false;
         }
 
@@ -1264,10 +1264,9 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
     } break;
 
     // Unhandled events
-    default: {
+    default:
         LOG(ERROR) << "Unhandled event: " << int(event);
-        return false;
-    }
+        break;
     }
 
     return true;
