@@ -130,7 +130,15 @@ bool ap_wlan_hal_dummy::sta_softblock_remove(const std::string &vap_name,
     return true;
 }
 
-bool ap_wlan_hal_dummy::switch_channel(int chan, int bw, int vht_center_frequency) { return true; }
+bool ap_wlan_hal_dummy::switch_channel(int chan, int bw, int vht_center_frequency)
+{
+    LOG(DEBUG) << "Got channel switch, simulate ACS-STARTED;ACS-COMPLETED";
+    event_queue_push(Event::ACS_Started);
+    event_queue_push(Event::ACS_Completed);
+    event_queue_push(Event::CSA_Finished);
+
+    return true;
+}
 
 bool ap_wlan_hal_dummy::set_antenna_mode(AntMode mode) { return true; }
 
