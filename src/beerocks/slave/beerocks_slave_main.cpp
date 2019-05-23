@@ -189,7 +189,7 @@ static void son_slave_watchdog(beerocks::config_file::sConfigSlave &beerocks_sla
                 std::string file_name = "./" + std::string(BEEROCKS_AGENT);
                 if (access(file_name.c_str(), F_OK) == -1) //file does not exist in current location
                 {
-                    file_name = BEEROCKS_PATH + std::string(BEEROCKS_AGENT);
+                    file_name = BEEROCKS_BIN_PATH + std::string(BEEROCKS_AGENT);
                 }
                 std::string cmd = file_name + " -i " + beerocks_slave_conf.hostap_iface[slave_num];
                 LOG(DEBUG) << "son_slave_watchdog(): sending SYSTEM_CALL with cmd = " << cmd
@@ -465,7 +465,7 @@ int main(int argc, char *argv[])
     beerocks::config_file::sConfigSlave beerocks_slave_conf;
     if (!beerocks::config_file::read_slave_config_file(slave_config_file_path,
                                                        beerocks_slave_conf)) {
-        slave_config_file_path = BEEROCKS_PATH + std::string(BEEROCKS_AGENT) +
+        slave_config_file_path = BEEROCKS_CONF_PATH + std::string(BEEROCKS_AGENT) +
                                  ".conf"; // if not found, search in beerocks path
         if (!beerocks::config_file::read_slave_config_file(slave_config_file_path,
                                                            beerocks_slave_conf)) {
@@ -534,7 +534,7 @@ int main(int argc, char *argv[])
             std::string file_name = "./" + std::string(BEEROCKS_AGENT);
             if (access(file_name.c_str(), F_OK) == -1) //file does not exist in current location
             {
-                file_name = BEEROCKS_PATH + std::string(BEEROCKS_AGENT);
+                file_name = BEEROCKS_BIN_PATH + std::string(BEEROCKS_AGENT);
             }
             std::string cmd = file_name + " -i " + beerocks_slave_conf.hostap_iface[slave_num];
             beerocks::SYSTEM_CALL(cmd, 0, true);
