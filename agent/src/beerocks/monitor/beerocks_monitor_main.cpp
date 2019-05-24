@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     beerocks::config_file::sConfigSlave beerocks_slave_conf;
     if (!beerocks::config_file::read_slave_config_file(slave_config_file_path,
                                                        beerocks_slave_conf)) {
-        slave_config_file_path = BEEROCKS_PATH + std::string(BEEROCKS_AGENT) +
+        slave_config_file_path = BEEROCKS_CONF_PATH + std::string(BEEROCKS_AGENT) +
                                  ".conf"; // if not found, search in beerocks path
         if (!beerocks::config_file::read_slave_config_file(slave_config_file_path,
                                                            beerocks_slave_conf)) {

@@ -115,7 +115,7 @@ static bool fill_platform_settings(
 
     if (!platform_common_conf.conf_initialized) {
 
-        int back_vaps_buff_len =
+        const int back_vaps_buff_len =
             BPL_BACK_VAPS_GROUPS * BPL_BACK_VAPS_IN_GROUP * BPL_MAC_ADDR_OCTETS_LEN;
         char back_vaps[back_vaps_buff_len];
 
@@ -894,12 +894,14 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         add_slave_socket(sd, strIfaceName);
 
         work_queue.enqueue<void>([this, strIfaceName, sd]() {
-            // Response message (empty for now)
-            size_t buffer_size = message_com::get_vs_cmdu_size_on_buffer<
-                beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE>();
+            size_t headroom = sizeof(beerocks::message::sUdsHeader);
+            size_t buffer_size =
+                headroom + message_com::get_vs_cmdu_size_on_buffer<
+                               beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE>();
             uint8_t tx_buffer[buffer_size];
-            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer, sizeof(tx_buffer));
+            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
 
+            //Response message (empty for now)
             auto register_response = message_com::create_vs_message<
                 beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE>(cmdu_tx);
 
@@ -1023,10 +1025,13 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                 }
 
                 // Response message
-                size_t buffer_size = message_com::get_vs_cmdu_size_on_buffer<
-                    beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE>();
+                size_t headroom = sizeof(beerocks::message::sUdsHeader);
+                size_t buffer_size =
+                    headroom +
+                    message_com::get_vs_cmdu_size_on_buffer<
+                        beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE>();
                 uint8_t tx_buffer[buffer_size];
-                ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer, sizeof(tx_buffer));
+                ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
 
                 auto response = message_com::create_vs_message<
                     beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE>(
@@ -1101,14 +1106,12 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         // Add a job to the async work queue
         work_queue.enqueue<void>([this, sd]() {
-
-            // Build and send the response message
-            size_t buffer_size = message_com::get_vs_cmdu_size_on_buffer<
-                beerocks_message::cACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE>();
-
+            size_t headroom = sizeof(beerocks::message::sUdsHeader);
+            size_t buffer_size =
+                headroom + message_com::get_vs_cmdu_size_on_buffer<
+                               beerocks_message::cACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE>();
             uint8_t tx_buffer[buffer_size];
-
-            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer, sizeof(tx_buffer));
+            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE>(cmdu_tx);
@@ -1156,11 +1159,12 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                 success = set_iface_state(iface, iface_operation, is_iface_an_ap_iface);
             }
 
-            // Build and send the response message
-            size_t buffer_size = message_com::get_vs_cmdu_size_on_buffer<
-                beerocks_message::cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE>();
+            size_t headroom = sizeof(beerocks::message::sUdsHeader);
+            size_t buffer_size =
+                headroom + message_com::get_vs_cmdu_size_on_buffer<
+                               beerocks_message::cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE>();
             uint8_t tx_buffer[buffer_size];
-            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer, sizeof(tx_buffer));
+            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE>(cmdu_tx);
@@ -1204,11 +1208,12 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             int result = bpl_cfg_set_wifi_credentials(iface.c_str(), ssid.c_str(), pass.c_str(),
                                                       sec.c_str());
 
-            // Build and send the response message
-            size_t buffer_size = message_com::get_vs_cmdu_size_on_buffer<
-                beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE>();
+            size_t headroom = sizeof(beerocks::message::sUdsHeader);
+            size_t buffer_size =
+                headroom + message_com::get_vs_cmdu_size_on_buffer<
+                               beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE>();
             uint8_t tx_buffer[buffer_size];
-            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer, sizeof(tx_buffer));
+            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE>(cmdu_tx);
@@ -1244,11 +1249,12 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         // Add a job to the async work queue
         work_queue.enqueue<void>([this, iface, sd]() {
 
-            // Build and send the response message
-            size_t buffer_size = message_com::get_vs_cmdu_size_on_buffer<
-                beerocks_message::cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE>();
+            size_t headroom = sizeof(beerocks::message::sUdsHeader);
+            size_t buffer_size =
+                headroom + message_com::get_vs_cmdu_size_on_buffer<
+                               beerocks_message::cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE>();
             uint8_t tx_buffer[buffer_size];
-            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer, sizeof(tx_buffer));
+            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE>(cmdu_tx);
@@ -1304,10 +1310,13 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                 }
 
                 // Response message
-                size_t buffer_size = message_com::get_vs_cmdu_size_on_buffer<
-                    beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE>();
+                size_t headroom = sizeof(beerocks::message::sUdsHeader);
+                size_t buffer_size =
+                    headroom +
+                    message_com::get_vs_cmdu_size_on_buffer<
+                        beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE>();
                 uint8_t tx_buffer[buffer_size];
-                ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer, sizeof(tx_buffer));
+                ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
 
                 auto response = message_com::create_vs_message<
                     beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE>(
@@ -1459,11 +1468,13 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
             auto success = set_radio_state(iface, op);
 
-            // Build and send the response message
-            size_t buffer_size = message_com::get_vs_cmdu_size_on_buffer<
-                beerocks_message::cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE>();
+            size_t headroom = sizeof(beerocks::message::sUdsHeader);
+            size_t buffer_size =
+                headroom +
+                message_com::get_vs_cmdu_size_on_buffer<
+                    beerocks_message::cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE>();
             uint8_t tx_buffer[buffer_size];
-            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer, sizeof(tx_buffer));
+            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE>(cmdu_tx);

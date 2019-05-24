@@ -4078,7 +4078,7 @@ void slave_thread::monitor_start()
     std::string file_name = "./" + std::string(BEEROCKS_MONITOR);
     if (access(file_name.c_str(), F_OK) == -1) //file does not exist in current location
     {
-        file_name = BEEROCKS_PATH + std::string(BEEROCKS_MONITOR);
+        file_name = BEEROCKS_BIN_PATH + std::string(BEEROCKS_MONITOR);
     }
     std::string cmd = file_name + " -i " + config.hostap_iface;
     SYSTEM_CALL(cmd, 2, true);

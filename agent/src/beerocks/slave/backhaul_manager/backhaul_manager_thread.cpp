@@ -623,6 +623,7 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
         if (network_utils::get_iface_info(bridge_info, m_sConfig.bridge_iface) != 0) {
             LOG(ERROR) << "Failed reading addresses from the bridge!";
             platform_notify_error(BPL_ERR_BH_READING_DATA_FROM_THE_BRIDGE, "");
+            stop_on_failure_attempts--;
             FSM_MOVE_STATE(RESTART);
             break;
         }
@@ -1594,7 +1595,8 @@ bool main_thread::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return handle_1905_autoconfiguration_response(cmdu_rx, src_mac);
     }
     default: {
-        LOG(WARNING) << "Unknown 1905 message received. Ignoring";
+        // TODO add a warning once all vendor specific flows are replaced with EasyMesh
+        // flows, since we won't expect a 1905 message not handled in this function
         return false;
     }
     }

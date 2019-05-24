@@ -26,6 +26,15 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
     set(BEEROCKS_REPEATER_MODE 0)
     set(BEEROCKS_AUTOMATIC_CREDENTIALS_UNIFY 0)
     set(BEEROCKS_STOP_ON_FAILURE_ATTEMPTS 1)
+elseif (TARGET_PLATFORM STREQUAL "linux")
+    add_definitions(-DBEEROCKS_LINUX)
+    set(BEEROCKS_PLATFORM "linux")
+    set(BEEROCKS_NOTIFY 0)
+    set(BEEROCKS_BRIDGE_IFACE "br-lan")
+    set(BEEROCKS_BH_WIRE_IFACE "eth1")
+    set(BEEROCKS_REPEATER_MODE 0)
+    set(BEEROCKS_AUTOMATIC_CREDENTIALS_UNIFY 0)
+    set(BEEROCKS_STOP_ON_FAILURE_ATTEMPTS 1)
 endif()
 
 # Use beerocks intel ip patent
@@ -79,9 +88,11 @@ endif()
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}")
 
 # Linker Options
-# Setting the "rpath-link" linker variable to help the linker resolve secondery dependecies
-# (Libraries that are not directly referenced by the executable, but a linked library)
-SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
+# - Setting the "rpath-link" linker variable to help the linker resolve secondery dependecies
+#   (Libraries that are not directly referenced by the executable, but a linked library)
+# - Setting "rpath" linker to add the cmake installed library folder to the linker search path
+#   (Removes the need to set LD_LIBRARY_PATH manually when installing to a none standard location)
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
@@ -91,7 +102,14 @@ include(multiap-helpers)
 add_definitions(-DBEEROCKS_VERSION="${${PROJECT}_VERSION_STRING}")
 add_definitions(-DBEEROCKS_BUILD_DATE="${${PROJECT}_BUILD_DATE}")
 add_definitions(-DBEEROCKS_REVISION="${${PROJECT}_REVISION}")
-add_definitions(-DBEEROCKS_PATH="/opt/beerocks/")
+if(TARGET_PLATFORM STREQUAL "linux")
+add_definitions(-DBEEROCKS_BIN_PATH="${CMAKE_INSTALL_PREFIX}/bin/")
+add_definitions(-DBEEROCKS_CONF_PATH="${CMAKE_INSTALL_PREFIX}/config/")
+else()
+add_definitions(-DBEEROCKS_BIN_PATH="/opt/beerocks/")
+add_definitions(-DBEEROCKS_CONF_PATH="/opt/beerocks/")
+endif()
+
 # FIXME - better to use target_get_property for SOVERSION which is set in the bwl CMakeLists.txt, but for some reason it is not propogated correctly
 add_definitions(-DBWL_MODULE_NAME="libbwl.so.${${PROJECT}_VERSION_MAJOR}")
 add_definitions(-DBPL_MODULE_NAME="libbpl.so.${${PROJECT}_VERSION_MAJOR}")

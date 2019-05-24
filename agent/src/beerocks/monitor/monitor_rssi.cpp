@@ -55,7 +55,7 @@ bool monitor_rssi::start(monitor_db *mon_db_, Socket *slave_socket_)
     slave_socket = slave_socket_;
 
     if ((arp_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ARP))) < 0) {
-        LOG(ERROR) << "Opening ARP socket";
+        LOG(ERROR) << "Opening ARP socket: " << strerror(errno);
         return false;
     }
     arp_socket_class = new Socket(arp_socket);
