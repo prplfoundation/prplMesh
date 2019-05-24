@@ -1,51 +1,80 @@
 /* SPDX-License-Identifier: BSD-2-Clause-Patent
  *
- * Copyright (c) 2016-2019 Intel Corporation
+ * Copyright (c) 2019 Intel Corporation
  *
  * This code is subject to the terms of the BSD+Patent license.
  * See LICENSE file for more details.
  */
 
 #include "../include/bpl_cfg.h"
+#include "../common/utils/utils.h"
+#include "../common/utils/utils_net.h"
+#include "mapf/common/logger.h"
+
+using namespace mapf;
+
+using namespace beerocks::bpl;
 
 const char *s_error_strings[] = {FOREACH_ERROR_CODE(GENERATE_ERROR_STRING)};
 
-int bpl_cfg_is_enabled() { return -1; }
+int bpl_cfg_is_enabled() { return 1; }
 
-int bpl_cfg_is_master() { return -1; }
+int bpl_cfg_is_master() { return 1; }
 
-int bpl_cfg_get_operating_mode() { return -1; }
+int bpl_cfg_get_operating_mode() { return BPL_OPER_MODE_GATEWAY; }
 
-int bpl_cfg_is_onboarding() { return -1; }
+int bpl_cfg_is_onboarding() { return 0; }
 
-int bpl_cfg_is_wired_backhaul() { return -1; }
+int bpl_cfg_is_wired_backhaul() { return 0; }
 
 int bpl_cfg_get_rdkb_extensions() { return 0; }
 
-int bpl_cfg_get_band_steering() { return -1; }
+int bpl_cfg_get_band_steering() { return 0; }
 
-int bpl_cfg_get_dfs_reentry() { return 1; }
+int bpl_cfg_get_dfs_reentry() { return 0; }
 
 int bpl_cfg_get_passive_mode() { return 0; }
 
-int bpl_cfg_get_client_roaming() { return -1; }
+int bpl_cfg_get_client_roaming() { return 0; }
 
 int bpl_cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return -1; }
 
-int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params) { return -1; }
+int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params)
+{
+    if (!iface || !wlan_params) {
+        return -1;
+    }
+    wlan_params->enabled        = 1;
+    wlan_params->acs            = 1;
+    wlan_params->advertise_ssid = 1;
+    utils::copy_string(wlan_params->ssid, "test_ssid", BPL_SSID_LEN);
+    utils::copy_string(wlan_params->security, "None", BPL_SEC_LEN);
+
+    return 0;
+}
 
 int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefered_radio_band)
 {
-    return -1;
+    *max_vaps = 0;
+    *network_enabled = 0;
+    *prefered_radio_band = 0;
+    return 0;
 }
 
-int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len) { return -1; }
+int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len)
+{
+    memset(backhaul_vaps_buf, 0, buf_len);
+    return 0;
+}
+
 int bpl_cfg_set_wifi_advertise_ssid(const char *iface, int advertise_ssid) { return -1; }
 
 int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
                                      char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN])
 {
-    return -1;
+    utils::copy_string(ssid, "test_beerocks_ssid", BPL_SSID_LEN);
+    utils::copy_string(sec, "None", BPL_SEC_LEN);
+    return 0;
 }
 
 int bpl_cfg_set_wifi_credentials(const char iface[BPL_IFNAME_LEN], const char ssid[BPL_SSID_LEN],

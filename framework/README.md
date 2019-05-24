@@ -1,5 +1,5 @@
 # MultiAP Framework
-This project includes the implementation of the following MultiAP modules as defined in the [MultiAP low level architecture](https://polarion.imu.intel.com/polarion/#/project/IRE/wiki/Design/Intel%20MultiAP%20infrastructure%20HLD) - broker (local & global), MultiAP library, WFA-CA, discovery agent and the 1905 transport, platform agent core & PAL (the PAL links to platform specific library implementing the PAL for the platform - libplat.so).
+This project includes the implementation of the following MultiAP modules as defined in the MultiAP low level architecture - broker (local & global), MultiAP library, WFA-CA, discovery agent and the 1905 transport, platform agent core & PAL (the PAL links to platform specific library implementing the PAL for the platform - libplat.so).
 
 The MultiAP controller and agent are external to this project.
 
