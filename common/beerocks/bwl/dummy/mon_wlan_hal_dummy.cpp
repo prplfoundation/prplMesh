@@ -1,0 +1,117 @@
+/* SPDX-License-Identifier: BSD-2-Clause-Patent
+ *
+ * Copyright (c) 2016-2019 Intel Corporation
+ *
+ * This code is subject to the terms of the BSD+Patent license.
+ * See LICENSE file for more details.
+ */
+
+#include "mon_wlan_hal_dummy.h"
+
+#include <beerocks/bcl/beerocks_utils.h>
+#include <beerocks/bcl/network/network_utils.h>
+
+#include <easylogging++.h>
+
+#include <cmath>
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// DUMMY////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+namespace bwl {
+namespace dummy {
+
+//////////////////////////////////////////////////////////////////////////////
+////////////////////////// Local Module Definitions //////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+#define GET_OP_CLASS(channel) ((channel < 14) ? 4 : 5)
+#define BUFFER_SIZE 4096
+
+// Allocate a char array wrapped in a shared_ptr
+#define ALLOC_SMART_BUFFER(size)                                                                   \
+    std::shared_ptr<char>(new char[size], [](char *obj) {                                          \
+        if (obj)                                                                                   \
+            delete[] obj;                                                                          \
+    })
+
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////// Local Module Functions ///////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// Implementation ///////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+mon_wlan_hal_dummy::mon_wlan_hal_dummy(std::string iface_name, hal_event_cb_t callback)
+    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, false, callback),
+      base_wlan_hal_dummy(bwl::HALType::Monitor, iface_name, false, callback, BUFFER_SIZE)
+{
+}
+
+mon_wlan_hal_dummy::~mon_wlan_hal_dummy() {}
+
+bool mon_wlan_hal_dummy::update_radio_stats(SRadioStats &radio_stats)
+{
+    radio_stats = {};
+    return true;
+}
+
+bool mon_wlan_hal_dummy::update_vap_stats(const std::string vap_iface_name, SVapStats &vap_stats)
+{
+    vap_stats = {};
+    return true;
+}
+
+bool mon_wlan_hal_dummy::update_stations_stats(const std::string vap_iface_name,
+                                               const std::string sta_mac, SStaStats &sta_stats)
+{
+    sta_stats = {};
+    return true;
+}
+
+bool mon_wlan_hal_dummy::sta_channel_load_11k_request(const SStaChannelLoadRequest11k &req)
+{
+    LOG(TRACE) << __func__;
+    return true;
+}
+
+bool mon_wlan_hal_dummy::sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token)
+{
+    LOG(TRACE) << __func__;
+    return true;
+}
+
+bool mon_wlan_hal_dummy::sta_statistics_11k_request(const SStatisticsRequest11k &req)
+{
+    LOG(TRACE) << __func__;
+    return true;
+}
+
+bool mon_wlan_hal_dummy::sta_link_measurements_11k_request(const std::string &sta_mac)
+{
+    LOG(TRACE) << __func__;
+    return true;
+}
+
+bool mon_wlan_hal_dummy::process_dummy_event(char *buffer, int bufLen, const std::string &opcode)
+{
+    LOG(TRACE) << __func__ << " - opcode: |" << opcode << "|";
+    return true;
+}
+
+} // namespace dummy
+} // namespace bwl
+
+// AP dummy HAL Factory Functions
+extern "C" {
+
+bwl::mon_wlan_hal *mon_wlan_hal_create(std::string iface_name,
+                                       bwl::base_wlan_hal::hal_event_cb_t callback)
+{
+    return new bwl::dummy::mon_wlan_hal_dummy(iface_name, callback);
+}
+
+void mon_wlan_hal_destroy(bwl::mon_wlan_hal *obj) { delete obj; }
+}

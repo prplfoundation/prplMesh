@@ -35,6 +35,9 @@ elseif(TARGET_PLATFORM STREQUAL "rdkb")
     list(APPEND BWL_LIBS rt dl)
     # Extre directories
     include_directories(${PLATFORM_INCLUDE_DIR}/wav-dpal)
+elseif(TARGET_PLATFORM STREQUAL "linux")
+    set(BWL_TYPE "DUMMY")
+    # Extra libraries
 endif()
 
 ##########################################################################
@@ -87,6 +90,15 @@ elseif(BWL_TYPE STREQUAL "DWPAL")
     )
 
     list(APPEND BWL_LIBS dwpal)
+
+elseif(BWL_TYPE STREQUAL "DUMMY")
+
+    file(GLOB bwl_platform_sources
+        ${bwl_platform_sources}
+        ${MODULE_PATH}/dummy/mon_wlan_hal_dummy.cpp
+        ${MODULE_PATH}/dummy/ap_wlan_hal_dummy.cpp
+        ${MODULE_PATH}/dummy/base_wlan_hal_dummy.cpp
+    )
 
 endif()
 
