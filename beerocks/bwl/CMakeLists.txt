@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 set(PROJECT_NAME bwl)
 project(${PROJECT_NAME})
 
-message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} ${BWL_TYPE} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
-
 # Find required packages
 find_package(bcl REQUIRED)
 
@@ -36,9 +34,12 @@ elseif(TARGET_PLATFORM STREQUAL "rdkb")
     # Extre directories
     include_directories(${PLATFORM_INCLUDE_DIR}/wav-dpal)
 elseif(TARGET_PLATFORM STREQUAL "linux")
-    set(BWL_TYPE "DUMMY")
-    # Extra libraries
+    if (NOT BWL_TYPE)
+        set(BWL_TYPE "DUMMY")
+    endif()
 endif()
+
+message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} ${BWL_TYPE} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 ##########################################################################
 ##########################################################################
@@ -79,17 +80,13 @@ elseif(BWL_TYPE STREQUAL "WAV")
 
 elseif(BWL_TYPE STREQUAL "DWPAL")
 
-    include_directories(
-        ${HOSTAPD_DIR}/src/drivers
-        ${PLATFORM_BUILD_DIR}/iwlwav-iw-4.14
-    )
-
     file(GLOB bwl_platform_sources
         ${bwl_platform_sources}
         ${MODULE_PATH}/dwpal/*.c*
     )
 
-    list(APPEND BWL_LIBS dwpal)
+    find_package(dwpal REQUIRED)
+    list(APPEND BWL_LIBS dwpal::dwpal)
 
 elseif(BWL_TYPE STREQUAL "DUMMY")
 
