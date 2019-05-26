@@ -74,7 +74,7 @@ else() # Standalone build
     get_filename_component(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" 
         REALPATH BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
     # CMake search paths
-    # None for the framework - doesn't depend on others...
+    list(INSERT CMAKE_FIND_ROOT_PATH 0 ${CMAKE_INSTALL_PREFIX})
 endif()
 
 # Search local cmake folder first
