@@ -1,6 +1,3 @@
-# Add RPATH for mapf libraries for all executables in this directory and below
-set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-
 find_package(elpp REQUIRED)
 
 add_library(ieee1905_transport_lib SHARED ieee1905_transport.cpp ieee1905_transport_network.cpp ieee1905_transport_netlink.cpp ieee1905_transport_local_bus.cpp ieee1905_transport_packet_processing.cpp)

@@ -1,5 +1,4 @@
 if(BUILD_TESTS)
-    set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
     add_executable(ieee1905_transport_test ieee1905_transport_test.cpp)
     target_link_libraries(ieee1905_transport_test ieee1905_transport_lib ieee1905_transport_messages common mapf::elpp)
     install(TARGETS ieee1905_transport_test DESTINATION bin/tests)
