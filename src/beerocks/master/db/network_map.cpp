@@ -759,7 +759,7 @@ std::ptrdiff_t network_map::fill_bml_node_statistics(db &database, std::shared_p
             break;
         }
     }
-        [[fallthrough]];
+        FALLTHROUGH;
     case beerocks::TYPE_CLIENT: {
         //LOG(DEBUG) << "fill TYPE_CLIENT";
 
