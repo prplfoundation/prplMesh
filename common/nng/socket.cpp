@@ -39,14 +39,19 @@ Socket::~Socket()
 
 bool Socket::SyncRequired() { return false; }
 
-int Socket::Connect(const std::string &addr, bool retry)
+int Socket::Connect(const std::string &addr, int max_retries)
 {
     mapf_assert(!addr.empty());
-    int rc;
+    int rc, retries = 0;
     do {
         rc = nng_dial(sock->sd_, addr.c_str(), nullptr, 0);
-        MAPF_WARN_IF(rc, "nng_dial failed: " << nng_strerror(rc));
-    } while (retry && rc);
+        if (rc == 0)
+            break;
+        MAPF_DBG("nng_dial failed: " << nng_strerror(rc) << " retry #" << retries);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    } while (max_retries < 0 || retries++ < max_retries);
+
+    MAPF_ERR_IF(rc, "nng_dial failed");
     return rc;
 }
 
