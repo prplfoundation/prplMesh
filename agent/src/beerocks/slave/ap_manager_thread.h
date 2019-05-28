@@ -12,7 +12,7 @@
 #include <beerocks/bcl/beerocks_socket_thread.h>
 
 // AP HAL
-#include <beerocks/bwl/ap_wlan_hal.h>
+#include <ap_wlan_hal.h>
 
 #include <beerocks/tlvf/beerocks_message_apmanager.h>
 #include <list>

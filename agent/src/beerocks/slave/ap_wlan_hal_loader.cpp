@@ -7,7 +7,7 @@
  */
 
 // AP HAL
-#include <beerocks/bwl/ap_wlan_hal.h>
+#include <ap_wlan_hal.h>
 
 #include <dlfcn.h> // Dynamic loading
 

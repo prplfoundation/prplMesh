@@ -105,6 +105,7 @@ target_include_directories(${PROJECT_NAME}
         $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
         ${PLATFORM_INCLUDE_DIR}
     PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
         $<INSTALL_INTERFACE:include>
 )
 

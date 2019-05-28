@@ -7,7 +7,7 @@
  */
 
 // Monitor HAL
-#include <beerocks/bwl/sta_wlan_hal.h>
+#include <sta_wlan_hal.h>
 
 #include <dlfcn.h> // Dynamic loading
 
