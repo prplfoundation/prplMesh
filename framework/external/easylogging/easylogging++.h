@@ -222,7 +222,7 @@ ELPP_INTERNAL_DEBUGGING_OUT_INFO << ELPP_INTERNAL_DEBUGGING_MSG(internalInfoStre
 #define ELPP_UNUSED(x) (void)x
 #if ELPP_OS_UNIX
 // Log file permissions for unix-based systems
-#  define ELPP_LOG_PERMS S_IRUSR | S_IWUSR | S_IXUSR | S_IWGRP | S_IRGRP | S_IXGRP | S_IWOTH | S_IXOTH
+#  define ELPP_LOG_PERMS S_IRUSR | S_IWUSR | S_IXUSR | S_IWGRP | S_IRGRP | S_IXGRP | S_IWOTH | S_IXOTH | S_IROTH
 #endif  // ELPP_OS_UNIX
 #if defined(ELPP_AS_DLL) && ELPP_COMPILER_MSVC
 #  if defined(ELPP_EXPORT_SYMBOLS)
