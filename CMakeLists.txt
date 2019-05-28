@@ -110,11 +110,6 @@ elseif (TARGET_PLATFORM STREQUAL "linux")
     add_definitions(-DBEEROCKS_LINUX)
 endif()
 
-# Use beerocks intel ip patent
-option (BUILD_PATENTS "build with patents enabled" ON)
-if (BUILD_PATENTS)
-    add_definitions(-DBEEROCKS_PATENTS)
-endif()
 
 add_definitions(-DBEEROCKS_VERSION="${${PROJECT}_VERSION_STRING}")
 add_definitions(-DBEEROCKS_BUILD_DATE="${${PROJECT}_BUILD_DATE}")
