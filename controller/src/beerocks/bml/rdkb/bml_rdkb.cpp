@@ -15,7 +15,7 @@
 
 using namespace beerocks::net;
 
-int bml_rdkb_connect(BML_CTX *ctx, const char *beerocks_path, void *user_data)
+int bml_rdkb_connect(BML_CTX *ctx, const char *beerocks_conf_path, void *user_data)
 {
     LOG(DEBUG) << "bml_rdkb_connect entry";
     if (!ctx) {
@@ -45,7 +45,7 @@ int bml_rdkb_connect(BML_CTX *ctx, const char *beerocks_path, void *user_data)
 
     // Connect to the platform
     int iRet;
-    if ((iRet = pBML->connect(beerocks_path)) != BML_RET_OK) {
+    if ((iRet = pBML->connect(beerocks_conf_path)) != BML_RET_OK) {
 
         LOG(ERROR) << "bml_rdkb_connect - pBML->connect failed";
 

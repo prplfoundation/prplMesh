@@ -31,7 +31,7 @@ public:
     ~bml_internal();
 
     // Initialize and connect to platform/master
-    int connect(const std::string beerocks_path);
+    int connect(const std::string beerocks_conf_path);
 
     // Ping the master
     int ping();
@@ -187,7 +187,7 @@ protected:
     SocketClient *m_sockMaster = nullptr;
 
 private:
-    bool initialize(const std::string &beerocks_path);
+    bool initialize(const std::string &beerocks_conf_path);
     bool connect_to_platform();
 
     bool handle_nw_map_query_update(int elements_num, int last_node, void *data_buffer,
@@ -199,7 +199,7 @@ private:
     int send_bml_cmdu(int &result, uint8_t action_op);
 
 private:
-    std::string m_strBeerocksPath;
+    std::string m_strBeerocksConfPath;
     beerocks::config_file::sConfigSlave m_sConfig;
     bool m_fOnboarding   = false;
     bool m_fLocal_Master = false;

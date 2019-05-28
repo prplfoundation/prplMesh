@@ -19,13 +19,13 @@ extern "C" {
  * Initialize the BML library and connect to Beerocks.
  *
  * @param [out] ctx BML Context.
- * @param [in] beerocks_path Path to the beerocks folder (e.g. /opt/beerocks)
+ * @param [in] beerocks_conf_path Path to the beerocks configuration filesfolder (e.g. /opt/beerocks)
  * @param [in] user_data Pointer to some arbitrary user data to be 
  * stored within the BML context.
  *
  * @return BML_RET_OK on success.
  */
-int bml_connect(BML_CTX *ctx, const char *beerocks_path, void *user_data);
+int bml_connect(BML_CTX *ctx, const char *beerocks_conf_path, void *user_data);
 
 /**
  * Disconnect from Beerocks and purge the BML library context.
