@@ -23,8 +23,8 @@
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
 // BPL Error Codes
-#include <bpl/bpl_cfg.h>
-#include <bpl/bpl_err.h>
+#include <bpl_cfg.h>
+#include <bpl_err.h>
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// Local Module Functions ///////////////////////////

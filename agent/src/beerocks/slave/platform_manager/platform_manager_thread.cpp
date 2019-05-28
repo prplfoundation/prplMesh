@@ -14,8 +14,8 @@
 #include <beerocks/tlvf/beerocks_message.h>
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
-#include <bpl/bpl_dhcp.h>
-#include <bpl/bpl_wlan.h>
+#include <bpl_dhcp.h>
+#include <bpl_wlan.h>
 
 #include <net/if.h> // if_nametoindex
 

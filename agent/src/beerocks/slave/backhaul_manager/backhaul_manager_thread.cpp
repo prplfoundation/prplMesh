@@ -33,7 +33,7 @@
 #include <tlvf/wfa_map/tlvSupportedService.h>
 
 // BPL Error Codes
-#include <bpl/bpl_err.h>
+#include <bpl_err.h>
 
 using namespace beerocks::net;
 
