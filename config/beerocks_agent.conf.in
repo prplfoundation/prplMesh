@@ -10,7 +10,7 @@
 
 [global]
 platform=@BEEROCKS_PLATFORM@
-temp_path=/tmp/beerocks/
+temp_path=@BEEROCKS_TMP_PATH@
 enable_arp_monitor=1
 enable_keep_alive=1
 enable_bpl_iface_status_notifications=@BEEROCKS_NOTIFY@
@@ -51,7 +51,7 @@ enable_repeater_mode=0
 #sta_iface_filter_low=1
 
 [log]
-log_path=/tmp/beerocks/logs/
+log_path=@BEEROCKS_TMP_PATH@/logs/
 log_global_levels=error,info,warning,fatal,trace,debug
 log_global_syslog_levels=error,info,warning,fatal,trace,debug
 log_global_size=1000000
