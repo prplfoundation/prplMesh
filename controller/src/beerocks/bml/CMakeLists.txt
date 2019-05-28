@@ -5,9 +5,6 @@ project(${PROJECT_NAME})
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 # Dependecies
-find_package(bcl REQUIRED)
-find_package(Tlvf REQUIRED)
-find_package(btlvf REQUIRED)
 find_package(elpp REQUIRED)
 
 # Set the base path for the current module

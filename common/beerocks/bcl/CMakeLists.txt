@@ -7,7 +7,6 @@ project(${PROJECT_NAME})
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 find_package(PythonInterp REQUIRED)
-find_package(Tlvf REQUIRED)
 find_package(elpp REQUIRED)
 
 message(STATUS ${CMAKE_CURRENT_BINARY_DIR})

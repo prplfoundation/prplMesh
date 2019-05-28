@@ -4,21 +4,6 @@ set(PROJECT_NAME beerocks_agent)
 project (${PROJECT_NAME})
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
-# Use BPL package from mAP Framework
-find_package(bcl REQUIRED)
-find_package(bwl REQUIRED)
-find_package(btl REQUIRED)
-
-##############################################
-# There is an unresolved depenency of BPL in MapfCommon
-# The dependency was not resolved due to BPL is to be replaced by Platform Service
-# Both those find_package should be deleted as one.
-find_package(MapfCommon REQUIRED)
-find_package(bpl REQUIRED)
-#############################################
-
-find_package(Tlvf REQUIRED)
-find_package(btlvf REQUIRED)
 find_package(elpp REQUIRED)
 
 # Set the base path for the current module

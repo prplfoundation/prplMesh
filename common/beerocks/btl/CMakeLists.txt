@@ -5,12 +5,7 @@ project(${PROJECT_NAME})
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${BEEROCKS_TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 # Dependecies
-find_package(bcl REQUIRED)
-
-find_package(MapfCommon REQUIRED)
-find_package(MapfTransport QUIET)
-
-if(MapfTransport_FOUND)
+if(MSGLIB)
 message(STATUS "${BoldGreen}Using MultiAP Framework for BTL transport${ColourReset}")
 set(btl_sources btl.cpp btl_local_bus.cpp)
 else()
@@ -19,8 +14,6 @@ add_definitions(-DUDS_BUS)
 set(btl_sources btl.cpp btl_uds.cpp)
 endif()
 
-find_package(Tlvf REQUIRED)
-find_package(btlvf REQUIRED)
 find_package(elpp REQUIRED)
 
 # Set the base path for the current module
