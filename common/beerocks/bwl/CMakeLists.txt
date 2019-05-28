@@ -110,12 +110,7 @@ target_include_directories(${PROJECT_NAME}
 
 # Install
 install(
-    TARGETS ${PROJECT_NAME} EXPORT bwlConfig
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
-file(GLOB bwl_install_files ${MODULE_PATH}/common/*.h)
-install(FILES ${bwl_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/beerocks/${PROJECT_NAME})
-install(EXPORT bwlConfig NAMESPACE beerocks:: DESTINATION lib/cmake/beerocks/${PROJECT_NAME})

@@ -39,14 +39,7 @@ target_compile_definitions(${PROJECT_NAME}
 )
 
 # Make the library importable from the install directory
-install(TARGETS ${PROJECT_NAME} EXPORT bclConfig
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
-# Install external header files
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/beerocks/${PROJECT_NAME}/
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/beerocks/${PROJECT_NAME})
-
-install(EXPORT bclConfig NAMESPACE beerocks:: DESTINATION lib/cmake/beerocks/${PROJECT_NAME})

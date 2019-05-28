@@ -55,13 +55,9 @@ target_include_directories(tlvf
         $<INSTALL_INTERFACE:include>
     )
 
-install(TARGETS tlvf EXPORT TlvfConfig
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+install(TARGETS tlvf
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(DIRECTORY ${TLVF_OUT}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(EXPORT TlvfConfig DESTINATION lib/cmake/Tlvf)
-install(PROGRAMS ${TLVF_DIR}/tlvf.py DESTINATION host/bin)
 
 # add_subdirectory(test)
 message("-- Done")

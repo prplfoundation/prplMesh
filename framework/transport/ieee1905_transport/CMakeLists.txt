@@ -14,12 +14,8 @@ target_include_directories(ieee1905_transport_messages PUBLIC
     $<INSTALL_INTERFACE:include>
     )
 install(TARGETS ieee1905_transport_messages
-        EXPORT MapfTransportConfig
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(EXPORT MapfTransportConfig NAMESPACE mapf:: DESTINATION lib/cmake/MapfTransportConfig)
 
 add_executable(ieee1905_transport main.cpp)
 target_link_libraries(ieee1905_transport PUBLIC ieee1905_transport_lib PRIVATE mapf::elpp)

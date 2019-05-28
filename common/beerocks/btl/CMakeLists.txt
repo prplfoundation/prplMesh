@@ -38,15 +38,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${MODULE_PATH}
 
 # Install
 install(
-    TARGETS ${PROJECT_NAME} EXPORT btlConfig
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
-# Install external header files
-file(GLOB btl_install_files ${MODULE_PATH}/*.h)
-install(FILES ${btl_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/beerocks/${PROJECT_NAME})
-
-install(EXPORT btlConfig NAMESPACE beerocks:: DESTINATION lib/cmake/beerocks/${PROJECT_NAME})
-

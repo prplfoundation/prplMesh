@@ -52,9 +52,6 @@ target_include_directories(${PROJECT_NAME}
 # set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
 target_link_libraries(${PROJECT_NAME} PUBLIC beerocks::bcl tlvf)
 
-install(TARGETS ${PROJECT_NAME} EXPORT btlvfConfig
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+install(TARGETS ${PROJECT_NAME}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(DIRECTORY ${TLVF_OUT}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(EXPORT btlvfConfig NAMESPACE beerocks:: DESTINATION lib/cmake/beerocks/${PROJECT_NAME})
