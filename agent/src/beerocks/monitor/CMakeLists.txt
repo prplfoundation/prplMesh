@@ -37,11 +37,10 @@ endif()
 
 add_executable(${PROJECT_NAME} ${beerocks_monitor_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
-target_link_libraries(${PROJECT_NAME} bcl btlvf rt dl tlvf elpp ${LIBS})
+target_link_libraries(${PROJECT_NAME} bcl btlvf bwl rt dl tlvf elpp ${LIBS})
 target_include_directories(${PROJECT_NAME} PRIVATE 
     ${MODULE_PATH}/../../son/monitor
     ${MODULE_PATH}/../../../external
-    # $<TARGET_PROPERTY:beerocks::bwl,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 # Install
