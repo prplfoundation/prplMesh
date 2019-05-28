@@ -11,6 +11,13 @@ set(TMP_PATH "/tmp/${USER}")
 
 find_package(json-c REQUIRED)
 
+option(BUILD_EXAMPLES "build examples" OFF)
+option(BUILD_TESTS "build multiap unit tests" OFF)
+option(PASSIVE_MODE "build framework passive mode" OFF)
+if(PASSIVE_MODE)
+unset(MSGLIB)
+endif()
+
 add_subdirectory(platform)
 add_subdirectory(external)
 add_subdirectory(tlvf)

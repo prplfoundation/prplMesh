@@ -122,13 +122,6 @@ add_definitions(-DBEEROCKS_BIN_PATH="/opt/beerocks/")
 add_definitions(-DBEEROCKS_CONF_PATH="/opt/beerocks/")
 endif()
 
-option(BUILD_EXAMPLES "build examples" OFF)
-option(BUILD_TESTS "build multiap unit tests" OFF)
-option(PASSIVE_MODE "build framework passive mode" OFF)
-if(PASSIVE_MODE)
-unset(MSGLIB)
-endif()
-
 add_subdirectory(framework)
 add_subdirectory(common)
 add_subdirectory(agent)
