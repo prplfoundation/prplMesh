@@ -25,7 +25,7 @@ add_library(${PROJECT_NAME} SHARED ${btl_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
 if (MSGLIB)
      target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf btlvf
-         PRIVATE mapf::common mapf::ieee1905_transport_messages elpp)
+         PRIVATE common ieee1905_transport_messages elpp)
 else() # UDS Bus
     target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf elpp btlvf)
 endif()
