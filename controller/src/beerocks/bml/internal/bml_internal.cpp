@@ -143,13 +143,13 @@ bool bml_internal::init()
     return (true);
 }
 
-bool bml_internal::initialize(const std::string &beerocks_path)
+bool bml_internal::initialize(const std::string &beerocks_conf_path)
 {
     // Store the beerocks path
-    m_strBeerocksPath = beerocks_path + "/";
+    m_strBeerocksConfPath = beerocks_conf_path + "/";
 
     // Read the beerocks_agent config file
-    std::string config_file_path = m_strBeerocksPath + std::string(BEEROCKS_AGENT) + ".conf";
+    std::string config_file_path = m_strBeerocksConfPath + std::string(BEEROCKS_AGENT) + ".conf";
     if (!beerocks::config_file::read_slave_config_file(config_file_path, m_sConfig)) {
         LOG(ERROR) << "initialize - Failed reading configuration file: " << config_file_path;
         return (false);
@@ -171,11 +171,11 @@ bool bml_internal::initialize(const std::string &beerocks_path)
     return (true);
 }
 
-int bml_internal::connect(const std::string beerocks_path)
+int bml_internal::connect(const std::string beerocks_conf_path)
 {
     // Read the config file
-    if (!initialize(beerocks_path)) {
-        LOG(ERROR) << "connect - initialize " << beerocks_path << " failed!";
+    if (!initialize(beerocks_conf_path)) {
+        LOG(ERROR) << "connect - initialize " << beerocks_conf_path << " failed!";
         return (-BML_RET_INIT_FAIL);
     }
 

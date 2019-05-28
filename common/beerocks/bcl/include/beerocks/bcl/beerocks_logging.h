@@ -89,6 +89,7 @@ public:
     std::string get_log_max_size_setting();
     log_levels get_log_levels();
     log_levels get_syslog_levels();
+    std::string get_syslog_enabled();
 
     void set_log_level_state(const eLogLevel &log_level, const bool &new_state);
 
@@ -109,6 +110,7 @@ protected:
 
 private:
     static const std::string format;
+    static const std::string syslogFormat;
 
     std::string m_module_name;
 
@@ -119,6 +121,7 @@ private:
     log_levels m_syslog_levels;
     std::string m_netlog_host;
     uint16_t m_netlog_port;
+    std::string m_syslog_enabled;
 
     settings_t m_settings_map;
 };

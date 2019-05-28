@@ -26,6 +26,14 @@ namespace beerocks {
 #define BEEROCKS_PLAT_MGR_UDS "uds_platform_manager"
 #define BEEROCKS_BACKHAUL_MGR_UDS "uds_backhaul_manager"
 
+#if __GNUC__ > 4
+#define FALLTHROUGH [[fallthrough]]
+#else
+#define FALLTHROUGH                                                                                \
+    do {                                                                                           \
+    } while (0)
+#endif
+
 namespace message {
 
 enum eStructsConsts {

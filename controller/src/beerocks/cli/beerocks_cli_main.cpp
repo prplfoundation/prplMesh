@@ -486,7 +486,7 @@ int main(int argc, char *argv[])
     }
 
     //read slave config file
-    std::string config_file_path = BEEROCKS_PATH + std::string(BEEROCKS_AGENT) + ".conf";
+    std::string config_file_path = BEEROCKS_CONF_PATH + std::string(BEEROCKS_AGENT) + ".conf";
     beerocks::config_file::sConfigSlave beerocks_slave_conf;
     if (!beerocks::config_file::read_slave_config_file(config_file_path, beerocks_slave_conf)) {
         std::cout << "config file '" << config_file_path << "' args error." << std::endl;
@@ -500,13 +500,13 @@ int main(int argc, char *argv[])
     if (is_cli_proxy) {
         cli_tcp_proxy(beerocks_slave_conf.temp_path);
     } else if (!command_string.empty()) {
-        status_return =
-            cli_non_interactive(BEEROCKS_PATH, beerocks_slave_conf.temp_path, ip, command_string);
+        status_return = cli_non_interactive(BEEROCKS_CONF_PATH, beerocks_slave_conf.temp_path, ip,
+                                            command_string);
     } else if (is_cli_bml_analyzer) {
-        beerocks::cli_bml cli_bml(BEEROCKS_PATH);
+        beerocks::cli_bml cli_bml(BEEROCKS_CONF_PATH);
         cli_bml.analyzer_init(analyzer_ip);
     } else {
-        cli_interactive(BEEROCKS_PATH, beerocks_slave_conf.temp_path, ip);
+        cli_interactive(BEEROCKS_CONF_PATH, beerocks_slave_conf.temp_path, ip);
     }
 
     return status_return;

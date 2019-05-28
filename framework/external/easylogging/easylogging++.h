@@ -222,7 +222,7 @@ ELPP_INTERNAL_DEBUGGING_OUT_INFO << ELPP_INTERNAL_DEBUGGING_MSG(internalInfoStre
 #define ELPP_UNUSED(x) (void)x
 #if ELPP_OS_UNIX
 // Log file permissions for unix-based systems
-#  define ELPP_LOG_PERMS S_IRUSR | S_IWUSR | S_IXUSR | S_IWGRP | S_IRGRP | S_IXGRP | S_IWOTH | S_IXOTH
+#  define ELPP_LOG_PERMS S_IRUSR | S_IWUSR | S_IXUSR | S_IWGRP | S_IRGRP | S_IXGRP | S_IWOTH | S_IXOTH | S_IROTH
 #endif  // ELPP_OS_UNIX
 #if defined(ELPP_AS_DLL) && ELPP_COMPILER_MSVC
 #  if defined(ELPP_EXPORT_SYMBOLS)
@@ -657,6 +657,9 @@ enum class ConfigurationType : base::type::EnumType {
   MaxLogFileSize = 128,
   /// @brief Specifies number of log entries to hold until we flush pending log data
   LogFlushThreshold = 256,
+  /// @brief Whether or not to write corresponding level and
+  /// logger log to syslog.
+  ToSyslog = 512,
   /// @brief Represents unknown configuration
   Unknown = 1010
 };
@@ -1921,6 +1924,7 @@ class TypedConfigurations : public base::threading::ThreadSafe {
   bool toFile(Level level);
   const std::string& filename(Level level);
   bool toStandardOutput(Level level);
+  bool toSyslog(Level level);
   const base::LogFormat& logFormat(Level level);
   const base::SubsecondPrecision& subsecondPrecision(Level level = Level::Global);
   const base::MillisecondsWidth& millisecondsWidth(Level level = Level::Global);
@@ -1936,6 +1940,7 @@ class TypedConfigurations : public base::threading::ThreadSafe {
   std::unordered_map<Level, bool> m_toFileMap;
   std::unordered_map<Level, std::string> m_filenameMap;
   std::unordered_map<Level, bool> m_toStandardOutputMap;
+  std::unordered_map<Level, bool> m_toSyslog;
   std::unordered_map<Level, base::LogFormat> m_logFormatMap;
   std::unordered_map<Level, base::SubsecondPrecision> m_subsecondPrecisionMap;
   std::unordered_map<Level, bool> m_performanceTrackingMap;
@@ -2459,6 +2464,11 @@ class LogMessage {
     m_level(level), m_file(file), m_line(line), m_func(func),
     m_verboseLevel(verboseLevel), m_logger(logger), m_message(logger->stream().str()) {
   }
+  LogMessage(Level level, const std::string& file, base::type::LineNumber line, const std::string& func,
+             base::type::VerboseLevel verboseLevel, Logger* logger, const base::type::string_t& message) :
+    m_level(level), m_file(file), m_line(line), m_func(func),
+    m_verboseLevel(verboseLevel), m_logger(logger), m_message(message) {
+  }
   inline Level level(void) const {
     return m_level;
   }
@@ -2729,7 +2739,7 @@ class DefaultLogDispatchCallback : public LogDispatchCallback {
   void handle(const LogDispatchData* data);
  private:
   const LogDispatchData* m_data;
-  void dispatch(base::type::string_t&& logLine);
+  void dispatch(base::type::string_t&& logLine, base::type::string_t&& syslogLine);
 };
 #if ELPP_ASYNC_LOGGING
 class AsyncLogDispatchCallback : public LogDispatchCallback {

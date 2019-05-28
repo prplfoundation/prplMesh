@@ -502,10 +502,10 @@ static void steering_client_set_string_to_struct(const std::string &str_config,
 
 SocketClient *cli_bml::m_analyzer_socket = nullptr;
 
-cli_bml::cli_bml(std::string beerocks_path_)
+cli_bml::cli_bml(std::string beerocks_conf_path_)
 {
     setFunctionsMapAndArray();
-    beerocks_path = beerocks_path_;
+    beerocks_conf_path = beerocks_conf_path_;
 
     // Set BML easylogging context
     auto log_storage = el::Helpers::storage();
@@ -523,7 +523,7 @@ cli_bml::~cli_bml() { disconnect(); }
 bool cli_bml::connect()
 {
     disconnect(); // Disconnect if already connected
-    const char *c = beerocks_path.c_str();
+    const char *c = beerocks_conf_path.c_str();
     int ret       = bml_connect(&ctx, c, this);
     printBmlReturnVals("bml_connect", ret);
     return (ret == BML_RET_OK ? true : false);

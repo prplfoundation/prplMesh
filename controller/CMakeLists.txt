@@ -1,2 +1,18 @@
+# Platform specific flags
+if (TARGET_PLATFORM STREQUAL "ugw")
+    set(BEEROCKS_TMP_PATH "/tmp/beerocks")
+elseif(TARGET_PLATFORM STREQUAL "rdkb")
+    set(BEEROCKS_TMP_PATH "/tmp/beerocks")
+elseif (TARGET_PLATFORM STREQUAL "linux")
+    set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
+endif()
+
+if(TARGET_PLATFORM STREQUAL "linux")
+add_definitions(-DBEEROCKS_BIN_PATH="${CMAKE_INSTALL_PREFIX}/bin/")
+add_definitions(-DBEEROCKS_CONF_PATH="${CMAKE_INSTALL_PREFIX}/config/")
+else()
+add_definitions(-DBEEROCKS_BIN_PATH="/opt/beerocks/")
+add_definitions(-DBEEROCKS_CONF_PATH="/opt/beerocks/")
+endif()
 add_subdirectory("src/beerocks")
 add_subdirectory("config")

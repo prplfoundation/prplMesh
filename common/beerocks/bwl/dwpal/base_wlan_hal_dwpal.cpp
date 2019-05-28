@@ -16,7 +16,7 @@
 #include <easylogging++.h>
 
 extern "C" {
-#include <dwpal.h>
+#include <dwpal/dwpal.h>
 }
 
 #define UNHANDLED_EVENTS_LOGS 20

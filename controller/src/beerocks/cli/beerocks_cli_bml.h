@@ -64,7 +64,7 @@ public:
         } gw_ire;
     };
 
-    cli_bml(std::string beerocks_path_);
+    cli_bml(std::string beerocks_conf_path_);
     virtual ~cli_bml();
 
     bool connect();
@@ -191,7 +191,7 @@ private:
                                 const std::string &str_client_mac);
 #endif
     // Variable
-    std::string beerocks_path;
+    std::string beerocks_conf_path;
     BML_CTX ctx = nullptr;
     char print_buffer[PRINT_BUFFER_LENGTH];
     int is_onboarding;

@@ -6,7 +6,7 @@
 #############################################################################
 
 [controller]
-temp_path=/tmp/beerocks/
+temp_path=@BEEROCKS_TMP_PATH@
 
 # Features:
 #   DFS reentry feature:
@@ -73,7 +73,8 @@ fail_safe_5G_bw=80
 fail_safe_5G_vht_frequency=5210
 
 [log]
-log_path=/tmp/beerocks/logs/
+log_path=@BEEROCKS_TMP_PATH@/logs
 log_global_levels=error,info,warning,fatal,trace,debug
 log_global_syslog_levels=error,info,warning,fatal,trace,debug
 log_global_size=1000000
+log_syslog_enabled=false
