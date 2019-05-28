@@ -34,14 +34,19 @@ Socket::~Socket()
 
 bool Socket::SyncRequired() { return true; }
 
-int Socket::Connect(const std::string &addr, bool retry)
+int Socket::Connect(const std::string &addr, int max_retries)
 {
     mapf_assert(!addr.empty());
-    int rc;
+    int rc, retries = 0;
     do {
         rc = zmq_connect(sock->sd_, addr.c_str());
-        MAPF_WARN_IF(rc, "zmq_connect failed: " << strerror(zmq_errno()));
-    } while (retry && rc);
+        if (rc == 0)
+            break;
+        MAPF_DBG("zmq_connect failed: " << strerror(zmq_errno()) << " retry #" << retries);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    } while (max_retries < 0 || retries++ < max_retries);
+
+    MAPF_ERR_IF(rc, "nng_dial failed");
     return rc;
 }
 

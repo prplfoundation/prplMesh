@@ -27,7 +27,8 @@ public:
     Socket();
     virtual ~Socket();
 
-    int Connect(const std::string &addr, bool retry = true);
+    // -1 - endless, 0 - one shot, >0 - num of retries
+    int Connect(const std::string &addr, int max_retries = -1);
 
     void Close();
 

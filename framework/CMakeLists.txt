@@ -49,8 +49,14 @@ endif()
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}")
 
 if (TARGET_PLATFORM STREQUAL "rdkb")
-        set(CMAKE_SKIP_RPATH TRUE)
+    set(CMAKE_SKIP_RPATH TRUE)
 endif()
+
+list (FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
+if ("${isSystemDir}" STREQUAL "-1")
+    set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+endif ("${isSystemDir}" STREQUAL "-1")
+set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 set(MAPF_ROOT "/opt/multiap/framework")
 
@@ -74,7 +80,7 @@ else() # Standalone build
     get_filename_component(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" 
         REALPATH BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
     # CMake search paths
-    # None for the framework - doesn't depend on others...
+    list(INSERT CMAKE_FIND_ROOT_PATH 0 ${CMAKE_INSTALL_PREFIX})
 endif()
 
 # Search local cmake folder first
