@@ -10,9 +10,13 @@ message(STATUS "Beerocks Build Type: ${CMAKE_BUILD_TYPE}")
 # Platform specific flags
 if (TARGET_PLATFORM STREQUAL "ugw")
     add_definitions(-DBEEROCKS_UGW)
+    set(BEEROCKS_TMP_PATH "/tmp/beerocks")
 elseif(TARGET_PLATFORM STREQUAL "rdkb")
     add_definitions(-DBEEROCKS_RDKB)
+    set(BEEROCKS_TMP_PATH "/tmp/beerocks")
     set(CMAKE_SKIP_RPATH TRUE)
+elseif (TARGET_PLATFORM STREQUAL "linux")
+    set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
 endif()
 
 # Use beerocks intel ip patent
