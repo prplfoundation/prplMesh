@@ -1,4 +1,4 @@
-project (prplMesh LANGUAGES CXX)
+project (prplMesh LANGUAGES CXX C)
 cmake_minimum_required (VERSION 2.8)
 
 # Some CMakeLists.txt files still use the PROJECT variable TODO get rid of it.
