@@ -44,13 +44,13 @@ target_include_directories(${PROJECT_NAME}
         ${TLVF_OUT}/include
     PUBLIC
         $<TARGET_PROPERTY:tlvf,INTERFACE_INCLUDE_DIRECTORIES>
-        $<TARGET_PROPERTY:beerocks::bcl,INTERFACE_INCLUDE_DIRECTORIES>
+        $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
         $<BUILD_INTERFACE:${TLVF_OUT}/include>
         $<INSTALL_INTERFACE:include>
     )
 
 # set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
-target_link_libraries(${PROJECT_NAME} PUBLIC beerocks::bcl tlvf)
+target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf)
 
 install(TARGETS ${PROJECT_NAME}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}

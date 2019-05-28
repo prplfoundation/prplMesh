@@ -99,10 +99,10 @@ endif()
 # Build the library
 add_library(${PROJECT_NAME} SHARED ${bwl_common_sources} ${bwl_platform_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
-target_link_libraries(${PROJECT_NAME} beerocks::bcl ${BWL_LIBS})
+target_link_libraries(${PROJECT_NAME} bcl ${BWL_LIBS})
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-        $<TARGET_PROPERTY:beerocks::bcl,INTERFACE_INCLUDE_DIRECTORIES>
+        $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
         ${PLATFORM_INCLUDE_DIR}
     PUBLIC
         $<INSTALL_INTERFACE:include>

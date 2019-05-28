@@ -23,12 +23,12 @@ endif()
 add_executable(${PROJECT_NAME} ${controller_sources} ${controller_tasks_sources} ${controller_db_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
 
-target_link_libraries(${PROJECT_NAME} beerocks::bcl beerocks::btl tlvf elpp beerocks::btlvf)
+target_link_libraries(${PROJECT_NAME} bcl btl tlvf elpp btlvf)
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${MODULE_PATH}/../bml
     ${MODULE_PATH}/../../../external
-    $<TARGET_PROPERTY:beerocks::bcl,INTERFACE_INCLUDE_DIRECTORIES>
-    $<TARGET_PROPERTY:beerocks::btlvf,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:btlvf,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 # Install

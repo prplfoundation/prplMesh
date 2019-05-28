@@ -24,16 +24,16 @@ set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 add_library(${PROJECT_NAME} SHARED ${btl_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
 if (MapfTransport_FOUND)
-     target_link_libraries(${PROJECT_NAME} PUBLIC beerocks::bcl tlvf beerocks::btlvf
+     target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf btlvf
          PRIVATE mapf::common mapf::ieee1905_transport_messages elpp)
 else() # UDS Bus
-    target_link_libraries(${PROJECT_NAME} PUBLIC beerocks::bcl tlvf elpp beerocks::btlvf)
+    target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf elpp btlvf)
 endif()
 
 # Include paths
 target_include_directories(${PROJECT_NAME} PRIVATE ${MODULE_PATH} 
     ${MODULE_PATH}/../../../external
-    $<TARGET_PROPERTY:beerocks::bcl,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 # Install

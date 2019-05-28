@@ -14,7 +14,7 @@ set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 file(GLOB cli_sources ${MODULE_PATH}/*.cpp)
 
 # Module LIBS
-set(cli_libraries beerocks::bcl beerocks::btlvf bml)
+set(cli_libraries bcl btlvf bml)
 
 add_executable(${PROJECT_NAME} ${cli_sources} ${cli_extra_sources})
 target_link_libraries(${PROJECT_NAME} ${cli_libraries} tlvf elpp)
@@ -22,8 +22,8 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${MODULE_PATH}/../bml
         ${MODULE_PATH}/../../../external
-        $<TARGET_PROPERTY:beerocks::bcl,INTERFACE_INCLUDE_DIRECTORIES>
-        $<TARGET_PROPERTY:beerocks::btlvf,INTERFACE_INCLUDE_DIRECTORIES>
+        $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
+        $<TARGET_PROPERTY:btlvf,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 if (readline_FOUND)
