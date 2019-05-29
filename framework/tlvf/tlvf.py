@@ -287,6 +287,17 @@ class MetaData:
             ret_val = hex(value_const) if str(value_const).isdigit() else value_const
             ret_err = False
         return [ret_val, ret_err]
+    
+    @staticmethod
+    def getFormattedValue(param_value):
+        try:
+            retVal = hex(param_value)
+        except TypeError:
+            # If it's not an integer, assume it's an enum value or other constant that can be used directly as a string.
+            retVal = param_value
+        
+        return retVal
+
 
 
 class TlvF:
@@ -490,7 +501,7 @@ class TlvF:
                 if len(param_meta.bit_range) != 2: self.abort("%s.yaml --> bit_range error for: %s" % (self.yaml_fname, param_name) )
                 bits = param_meta.bit_range[0] - param_meta.bit_range[1] + 1
                 bit_field_type = param_meta.bit_field_enum if param_meta.bit_field_enum != None else obj_meta.bit_field
-                if param_meta.value != None: self.insertLineH(obj_meta.name, self.CODE_STRUCT_INIT_FUNC_INSERT, "%s = %s;" %  (param_name, hex(param_meta.value)) )
+                if param_meta.value != None: self.insertLineH(obj_meta.name, self.CODE_STRUCT_INIT_FUNC_INSERT, "%s = %s;" %  (param_name, MetaData.getFormattedValue(param_meta.value)) )
                 line = "%s %s : %d;" % (bit_field_type, param_name, bits)
             else:
                 bit_field_type = None
@@ -506,7 +517,7 @@ class TlvF:
                     if param_meta.value != None:
                         t_name = "%s[i]" % (param_name)
                         self.insertLineH(obj_meta.name, self.CODE_STRUCT_INIT_FUNC_INSERT, "%sfor (size_t i = 0; i < %s; i++) {" %  (self.getIndentation(1), str(param_meta.length)))
-                        self.insertLineH(obj_meta.name, self.CODE_STRUCT_INIT_FUNC_INSERT, "%s%s = %s;" %  (self.getIndentation(2), t_name, hex(param_meta.value)))
+                        self.insertLineH(obj_meta.name, self.CODE_STRUCT_INIT_FUNC_INSERT, "%s%s = %s;" %  (self.getIndentation(2), t_name, MetaData.getFormattedValue(param_meta.value)))
                         self.insertLineH(obj_meta.name, self.CODE_STRUCT_INIT_FUNC_INSERT, "%s}" %  (self.getIndentation(1)))
 
                     if param_type_info.swap_needed:
@@ -525,7 +536,7 @@ class TlvF:
                         t_name = ("&" if not param_type_info.swap_is_func else "") + param_name + ("." if param_type_info.swap_is_func else "")
                         swap_func_lines.append("%s%s%s;" % (param_type_info.swap_prefix, t_name, param_type_info.swap_suffix))
                     if param_meta.value != None: 
-                        self.insertLineH(obj_meta.name, self.CODE_STRUCT_INIT_FUNC_INSERT, "%s = %s;" %  (param_name, hex(param_meta.value)) )
+                        self.insertLineH(obj_meta.name, self.CODE_STRUCT_INIT_FUNC_INSERT, "%s = %s;" %  (param_name, MetaData.getFormattedValue(param_meta.value) ) )
                 self.insertLineH(obj_meta.name, self.CODE_STRUCT_INSERT, self.getCommentLines(param_meta.comment))
 
         # add defult value
@@ -535,12 +546,12 @@ class TlvF:
                 if ( param_meta.length_type == MetaData.LENGTH_TYPE_INT or
                      param_meta.length_type == MetaData.LENGTH_TYPE_CONST ):
                     lines_h.append( "for (size_t i = 0; i < %s; i++){" % str(param_meta.length) )
-                    lines_h.append( "%s%s[i] = %s;" %  (self.getIndentation(1), param_name, hex(param_meta.value)) )
+                    lines_h.append( "%s%s[i] = %s;" %  (self.getIndentation(1), param_name, MetaData.getFormattedValue(param_meta.value)) )
                     lines_h.append( "}")
                 else:
                     self.abort("%s.yaml --> seeting a value to a dynamic length array is not supported." % self.yaml_fname)
             else:
-                lines_h.append("%s = %s;" %  (param_name, hex(param_meta.value)) )
+                lines_h.append("%s = %s;" %  (param_name, MetaData.getFormattedValue(param_meta.value)) )
 
         if len(swap_func_lines) > 0: self.insertLineH(obj_meta.name, self.CODE_STRUCT_SWAP_FUNC_INSERT, swap_func_lines)
         if bit_field_type:
@@ -572,7 +583,7 @@ class TlvF:
             if param_meta.value_const != None:
                 [param_val_const, err] = MetaData.getConstValue(obj_meta.name, param_meta.value_const)
                 if err: self.abort("%s.yaml --> error in val_const=%s" % (self.yaml_fname, param_meta.value_const) )
-            if param_meta.value != None: param_val = hex(param_meta.value)
+            if param_meta.value != None: param_val = MetaData.getFormattedValue(param_meta.value)
             if param_meta.comment: param_comment_line = self.getCommentLines(param_meta.comment)
             param_length_type = param_meta.length_type
             param_length = param_meta.length
