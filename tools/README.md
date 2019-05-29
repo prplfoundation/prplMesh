@@ -50,6 +50,16 @@ build all (default):
 ./maptools.py build all
 ```
 
+build only map modules:
+```
+./maptools.py build map
+```
+
+build only dep modules(nng, safeclib, dwpal):
+```
+./maptools.py build dep -n
+```
+
 Build all with nng messaging library (needs to have nng installed):
 ```
 ./maptools.py build all -f MSGLIB=nng
