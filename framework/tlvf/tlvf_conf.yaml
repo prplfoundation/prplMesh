@@ -4,6 +4,7 @@
 include_yaml_path: {
   "tlvf/ieee_1905_1/",
   "tlvf/common/",
+  "tlvf/WSC/",
   #
   # "wfa_map/",
   "tlvf/wfa_map/eTlvTypeMap.yaml",
