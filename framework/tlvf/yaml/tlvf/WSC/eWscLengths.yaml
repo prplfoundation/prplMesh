@@ -1,0 +1,19 @@
+#
+---
+_namespace: WSC
+
+eWscLengths:
+  _type: enum
+  _enum_storage: uint16_t                                                                             
+  WSC_MAC_LENGTH: 6
+  WSC_NONCE_LENGTH: 16
+  WSC_UUID_LENGTH: 16
+  WSC_VENDOR_EXTENSIONS_LENGTH: 6
+  WSC_PRIMARY_DEV_TYPE_LENGTH: 8
+  WSC_PRIMARY_DEV_TYPE_OUI_LENGTH: 4
+  WSC_OS_VERSION_LENGTH: 4
+  WSC_MAX_NAME_LENGTH: 64
+  WSC_MAX_NETWORK_KEY_LENGTH: 64
+  WSC_PUBLIC_KEY_LENGTH: 192
+  WSC_KEY_WRAP_AUTH_LENGTH: 8
+  

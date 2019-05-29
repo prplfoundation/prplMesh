@@ -1,0 +1,10 @@
+#
+---
+_namespace: WSC
+
+eWscVendorId:
+  _type: enum
+  WSC_VENDOR_ID_WFA_1: 0x00
+  WSC_VENDOR_ID_WFA_2: 0x37
+  WSC_VENDOR_ID_WFA_3: 0x2A
+  

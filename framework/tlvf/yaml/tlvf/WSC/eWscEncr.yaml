@@ -1,0 +1,12 @@
+#
+---
+_namespace: WSC
+
+eWscEncr:
+  _type: enum
+  _enum_storage: uint16_t
+  WSC_ENCR_NONE: 0x0001
+  WSC_ENCR_WEP: 0x0002
+  WSC_ENCR_TKIP: 0x0004
+  WSC_ENCR_AES: 0x0008
+  

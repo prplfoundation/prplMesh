@@ -1,0 +1,12 @@
+#
+---
+_namespace: WSC
+
+eWscValues16:
+  _type: enum
+  _enum_storage: uint16_t
+  WSC_CONFIG_VIRT_PUSHBUTTON: 0x0280
+  WSC_CONFIG_PHY_PUSHBUTTON: 0x0480
+  DEV_PW_PUSHBUTTON: 0x0004
+  WSC_CFG_NO_ERROR: 0
+  

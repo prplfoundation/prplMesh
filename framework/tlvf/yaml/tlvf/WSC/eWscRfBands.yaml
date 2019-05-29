@@ -1,0 +1,11 @@
+#
+---
+_namespace: WSC
+
+eWscRfBands:
+  _type: enum
+  _enum_storage: uint8_t
+  WSC_RF_BAND_2GHZ: 0x01
+  WSC_RF_BAND_5GHZ: 0x02
+  WSC_RF_BAND_60GHZ: 0x04
+  

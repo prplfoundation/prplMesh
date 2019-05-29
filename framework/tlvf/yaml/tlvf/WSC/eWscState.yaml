@@ -1,0 +1,10 @@
+#
+---
+_namespace: WSC
+
+eWscState:
+  _type: enum
+  _enum_storage: uint8_t
+  WSC_STATE_NOT_CONFIGURED: 1
+  WSC_STATE_CONFIGURED: 2
+  

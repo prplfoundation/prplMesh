@@ -1,0 +1,10 @@
+#
+---
+_namespace: WSC
+
+eWscAssoc:
+  _type: enum
+  _enum_storage: uint8_t
+  WSC_ASSOC_NOT_ASSOC: 0
+  WSC_ASSOC_CONN_SUCCESS: 1
+  
