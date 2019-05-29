@@ -1,0 +1,10 @@
+#
+---
+_namespace: WSC
+
+eWscConn:
+  _type: enum
+  _enum_storage: uint8_t
+  WSC_CONN_ESS: 0x01
+  WSC_CONN_IBSS: 0x02
+  

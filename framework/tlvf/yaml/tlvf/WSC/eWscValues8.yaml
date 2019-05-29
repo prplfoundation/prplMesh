@@ -1,0 +1,10 @@
+#
+---
+_namespace: WSC
+
+eWscValues8:
+  _type: enum
+  _enum_storage: uint8_t
+  WSC_VERSION: 0x10
+  WFA_ELEM_VERSION2: 0x00
+  

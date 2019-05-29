@@ -1,0 +1,32 @@
+#
+---
+_include: tlvf/WSC/WSC_Attributes.h
+_namespace: WSC
+
+sM2:
+  _type: struct
+  version_attr: WSC::sWscAttrVersion
+  message_type_attr: WSC::sWscAttrMessageType
+  enrolee_nonce_attr: WSC::sWscAttrEnroleeNonce
+  registrar_nonce_attr: WSC::sWscAttrRegistrarNonce
+  uuid_r_attr: WSC::sWscAttrUuidR
+  public_key_attr: WSC::sWscAttrPublicKey
+  authentication_type_flags_attr: WSC::sWscAttrAuthenticationTypeFlags
+  encryption_type_flags_attr: WSC::sWscAttrEncryptionTypeFlags
+  connection_type_flags_attr: WSC::sWscAttrConnectionTypeFlags
+  configuration_methods_attr: WSC::sWscAttrConfigurationMethods
+  manufacturer_attr: WSC::sWscAttrManufacturer
+  model_name_attr: WSC::sWscAttrModelName
+  model_number_attr: WSC::sWscAttrModelNumber
+  serial_number_attr: WSC::sWscAttrSerialNumber
+  primary_device_type_attr: WSC::sWscAttrPrimaryDeviceType
+  rf_bands_attr: WSC::sWscAttrRfBands
+  association_state_attr: WSC::sWscAttrAssociationState
+  configuration_error_attr: WSC::sWscAttrConfigurationError
+  device_password_id_attr: WSC::sWscAttrDevicePasswordID
+  os_version_attr: WSC::sWscAttrOsVersion
+  vendor_extensions_attr: WSC::sWscAttrVersionExtension
+
+  #encrypted data
+  encrypted_settings_attr: sWscAttrEncryptedSettings
+  

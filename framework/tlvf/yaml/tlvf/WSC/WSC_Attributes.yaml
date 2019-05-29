@@ -1,0 +1,396 @@
+#
+---
+_include: {
+  tlvf/WSC/eWscLengths.h,
+  tlvf/common/sMacAddress.h,
+}
+_namespace: WSC
+
+sWscAttrVersion:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_VERSION
+  data_length:
+    _type: uint16_t
+    _value: 1
+  data:
+    _type: eWscValues8
+    _value: WSC_VERSION
+
+sWscAttrMessageType:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_MSG_TYPE
+  data_length:
+    _type: uint16_t
+    _value: 1
+  data:
+    _type: eWscMessageType
+    _value: WSC_MSG_TYPE_M1
+
+sWscAttrUuidE:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_UUID_E
+  data_length:
+    _type: uint16_t
+    _value: WSC_UUID_LENGTH
+  data:
+    _type: uint8_t
+    _length: [ WSC_UUID_LENGTH ]
+
+sWscAttrUuidR:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_UUID_E
+  data_length:
+    _type: uint16_t
+    _value: WSC_UUID_LENGTH
+  data:
+    _type: uint8_t
+    _length: [ WSC_UUID_LENGTH ]
+
+sWscAttrMac:
+  _type: struct
+  attribute_type: 
+    _type: eWscAttributes
+    _value: ATTR_MAC_ADDR
+  data_length:
+    _type: uint16_t
+    _value: WSC_MAC_LENGTH
+  data: sMacAddress
+
+sWscAttrEnroleeNonce:
+  _type: struct
+  attribute_type: 
+    _type: eWscAttributes
+    _value: ATTR_ENROLLEE_NONCE
+  data_length:
+    _type: uint16_t
+    _value: WSC_NONCE_LENGTH
+  data:
+    _type: uint8_t
+    _length: [ WSC_NONCE_LENGTH ]
+
+sWscAttrRegistrarNonce:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_REGISTRAR_NONCE
+  data_length:
+    _type: uint16_t
+    _value: WSC_NONCE_LENGTH
+  data:
+    _type: uint8_t
+    _length: [ WSC_NONCE_LENGTH ]
+
+sWscAttrPublicKey:
+  _type: struct
+  attribute_type: 
+    _type: eWscAttributes
+    _value: ATTR_PUBLIC_KEY
+  data_length:
+    _type: uint16_t
+    _value: WSC_PUBLIC_KEY_LENGTH
+  data:
+    _type: uint8_t
+    _length: [ WSC_PUBLIC_KEY_LENGTH ]
+
+sWscAttrAuthenticationTypeFlags:
+  _type: struct
+  attribute_type: 
+    _type: eWscAttributes
+    _value: ATTR_AUTH_TYPE_FLAGS
+  data_length: 
+    _type: uint16_t
+    _value: 2
+  data: 
+    _type: uint16_t
+
+sWscAttrEncryptionTypeFlags:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_ENCR_TYPE_FLAGS
+  data_length:
+    _type: uint16_t
+    _value: 2
+  data:
+    _type: uint16_t
+
+sWscAttrConnectionTypeFlags:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_CONN_TYPE_FLAGS
+  data_length:
+    _type: uint16_t
+    _value: 1
+  data:
+    _type: eWscConn
+    _value: WSC_CONN_ESS
+
+sWscAttrConfigurationMethods:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_CONFIG_METHODS
+  data_length:
+    _type: uint16_t
+    _value: 2
+  data:
+    _type: uint16_t
+    _value: (WSC_CONFIG_PHY_PUSHBUTTON | WSC_CONFIG_VIRT_PUSHBUTTON)
+
+sWscAttrWscState:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_WSC_STATE
+  data_length:
+    _type: uint16_t
+    _value: 1
+  data:
+    _type: eWscState
+    _value: WSC_STATE_NOT_CONFIGURED
+
+sWscAttrManufacturer:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_MANUFACTURER
+  data_length:
+    _type: uint16_t
+    _value: WSC_MAX_NAME_LENGTH
+  data:
+    _type: char
+    _length: [ WSC_MAX_NAME_LENGTH ]
+
+sWscAttrModelName:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_MODEL_NAME
+  data_length:
+    _type: uint16_t
+    _value: WSC_MAX_NAME_LENGTH
+  data:
+    _type: char
+    _length: [ WSC_MAX_NAME_LENGTH ]
+
+sWscAttrModelNumber:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_MODEL_NUMBER
+  data_length:
+    _type: uint16_t
+    _value: WSC_MAX_NAME_LENGTH
+  data:
+    _type: char
+    _length: [ WSC_MAX_NAME_LENGTH ]
+
+sWscAttrSerialNumber:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_SERIAL_NUMBER
+  data_length:
+    _type: uint16_t
+    _value: WSC_MAX_NAME_LENGTH
+  data:
+    _type: char
+    _length: [ WSC_MAX_NAME_LENGTH ]
+
+sWscAttrPrimaryDeviceType:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_PRIMARY_DEV_TYPE
+  data_length:
+    _type: uint16_t
+    _value: WSC_PRIMARY_DEV_TYPE_LENGTH
+  category_id:
+    _type: uint16_t 
+  oui:
+    _type: uint32_t
+  sub_category_id:
+    _type: uint16_t 
+
+sWscAttrDeviceName:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_DEV_NAME
+  data_length:
+    _type: uint16_t
+    _value: WSC_MAX_NAME_LENGTH
+  data:
+    _type: char
+    _length: [ WSC_MAX_NAME_LENGTH ]
+
+sWscAttrRfBands:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_RF_BANDS
+  data_length:
+    _type: uint16_t
+    _value: 1
+  data:
+    _type: eWscRfBands
+
+sWscAttrAssociationState:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_ASSOC_STATE
+  data_length:
+    _type: uint16_t
+    _value: 1
+  data:
+    _type: eWscAssoc
+    _value: WSC_ASSOC_NOT_ASSOC
+
+sWscAttrDevicePasswordID:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_DEV_PASSWORD_ID
+  data_length:
+    _type: uint16_t
+    _value: 2
+  data:
+    _type: eWscValues16
+    _value: DEV_PW_PUSHBUTTON
+
+sWscAttrConfigurationError:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_CONFIG_ERROR
+  data_length:
+    _type: uint16_t
+    _value: 2
+  data:
+    _type: eWscValues16
+    _value: WSC_CFG_NO_ERROR
+
+sWscAttrOsVersion:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_OS_VERSION
+  data_length:
+    _type: uint16_t
+    _value: WSC_OS_VERSION_LENGTH
+  data:
+    _type: uint32_t
+    _value: 0x80000001
+
+sWscAttrVersionExtension:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_VENDOR_EXTENSION
+  data_length:
+    _type: uint16_t
+    _value: WSC_VENDOR_EXTENSIONS_LENGTH
+  data:
+    _type: uint8_t
+    _length: [ WSC_VENDOR_EXTENSIONS_LENGTH ]
+
+sWscAttrKeyWrapAuthenticator:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_KEY_WRAP_AUTH
+  data_length:
+    _type: uint16_t
+    _value: WSC_KEY_WRAP_AUTH_LENGTH
+  data:
+    _type: uint8_t
+    _length: [ WSC_KEY_WRAP_AUTH_LENGTH ]
+
+#encrypted attributes
+
+sWscAttrSsid:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_SSID
+  data_length:
+    _type: uint16_t
+    _value: WSC_MAX_NAME_LENGTH
+  data:
+    _type: char
+    _length: [ WSC_MAX_NAME_LENGTH ]
+
+sWscAttrAuthenticationType:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_AUTH_TYPE
+  data_length:
+    _type: uint16_t
+    _value: 2
+  data:
+    _type: eWscAuth
+
+sWscAttrEncryptionType:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_ENCR_TYPE
+  data_length:
+    _type: uint16_t
+    _value: 2
+  data:
+    _type: eWscEncr
+
+sWscAttrNetworkKey:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_NETWORK_KEY
+  data_length:
+    _type: uint16_t
+    _value: WSC_MAX_NETWORK_KEY_LENGTH
+  data:
+    _type: char
+    _length: [ WSC_MAX_NETWORK_KEY_LENGTH ]
+
+sWscAttrBssid:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_MAC_ADDR
+  data_length:
+    _type: uint16_t
+    _value: WSC_MAC_LENGTH
+  data:
+    _type: sMacAddress
+
+sWscAttrEncryptedSettings:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_ENCR_SETTINGS
+  data_length:
+    _type: uint16_t
+    _comment: |
+      TODO the value of the data_length should be updated automatically
+      based on the inner tlvs attributes lengths.
+      This will be added after implementing the support in multiple dynamic lists.
+      This attribute's type will be changed into class (instead of struct) and that way 
+      it can contain _length_var that will be updated automatically.
+  ssid_attr: sWscAttrSsid
+  authentication_type_attr: sWscAttrAuthenticationType
+  encryption_type_attr: sWscAttrEncryptionType
+  network_key_attr: sWscAttrNetworkKey
+  bssid_attr: sWscAttrBssid
+  key_wrap_auth_attr: sWscAttrKeyWrapAuthenticator

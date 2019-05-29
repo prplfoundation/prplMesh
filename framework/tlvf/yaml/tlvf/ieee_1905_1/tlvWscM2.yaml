@@ -1,14 +1,13 @@
 #
 ---
+_include: tlvf/WSC/sM2.h
 _namespace: ieee1905_1
 _is_tlv_class : True
 
-tlvWSC:
+tlvWscM2:
   _type: class
   type:
     _type: eTlvType
     _value_const: TLV_WSC
   length: uint16_t
-  wsc_frame:
-    _type: uint8_t
-    _length: [] #TODO_OMER: how does the length of M1/M2 frames is set?
+  M2Frame: WSC::sM2
