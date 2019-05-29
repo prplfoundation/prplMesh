@@ -31,7 +31,7 @@ endif()
 
 add_executable(${PROJECT_NAME} ${beerocks_agent_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
-target_link_libraries(${PROJECT_NAME} rt dl bcl btl tlvf elpp btlvf bwl ${LIBS})
+target_link_libraries(${PROJECT_NAME} rt dl bcl btl tlvf elpp bpl btlvf bwl ${LIBS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${MODULE_PATH}/../../../external
