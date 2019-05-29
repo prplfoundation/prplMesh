@@ -10,8 +10,8 @@
  * See LICENSE file for more details.
  */
 
-#ifndef _TLVF_IEEE_1905_1_TLVWSC_H_
-#define _TLVF_IEEE_1905_1_TLVWSC_H_
+#ifndef _TLVF_IEEE_1905_1_TLVWSCM1_H_
+#define _TLVF_IEEE_1905_1_TLVWSCM1_H_
 
 #include <cstddef>
 #include <stdint.h>
@@ -20,22 +20,21 @@
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
-#include <tuple>
+#include "tlvf/WSC/sM1.h"
 
 namespace ieee1905_1 {
 
 
-class tlvWSC : public BaseClass
+class tlvWscM1 : public BaseClass
 {
     public:
-        tlvWSC(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvWSC(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~tlvWSC();
+        tlvWscM1(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        tlvWscM1(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~tlvWscM1();
 
         const eTlvType& type();
         const uint16_t& length();
-        std::tuple<bool, uint8_t&> wsc_frame(size_t idx);
-        bool alloc_wsc_frame(size_t count = 1);
+        WSC::sM1& M1Frame();
         void class_swap();
         static size_t get_initial_size();
 
@@ -43,10 +42,9 @@ class tlvWSC : public BaseClass
         bool init();
         eTlvType* m_type = nullptr;
         uint16_t* m_length = nullptr;
-        uint8_t* m_wsc_frame = nullptr;
-        size_t m_wsc_frame_idx__ = 0;
+        WSC::sM1* m_M1Frame = nullptr;
 };
 
 }; // close namespace: ieee1905_1
 
-#endif //_TLVF/IEEE_1905_1_TLVWSC_H_
+#endif //_TLVF/IEEE_1905_1_TLVWSCM1_H_
