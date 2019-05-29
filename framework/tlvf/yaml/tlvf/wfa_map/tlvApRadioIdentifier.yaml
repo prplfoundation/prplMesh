@@ -9,4 +9,5 @@ tlvApRadioIdentifier:
     _type: eTlvTypeMap
     _value_const: TLV_AP_RADIO_IDENTIFIER
   length: uint16_t
-  radio_uid: sMacAddr
+  radio_uid: sMacAddress
+  
