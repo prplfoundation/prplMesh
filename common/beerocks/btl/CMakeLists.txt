@@ -31,7 +31,9 @@ else() # UDS Bus
 endif()
 
 # Include paths
-target_include_directories(${PROJECT_NAME} PRIVATE ${MODULE_PATH} 
+target_include_directories(${PROJECT_NAME}
+    PUBLIC ${MODULE_PATH}
+    PRIVATE
     ${MODULE_PATH}/../../../external
     $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
 )
