@@ -72,7 +72,7 @@ class mapbuild(object):
         commands = args.commands
         modules = build_modules if 'all' in args.modules else [m for m in build_modules if m in args.modules]
         modules_dir = os.path.realpath(args.map_path)
-        build_dir = os.path.realpath(modules_dir + '/build')
+        build_dir = os.path.realpath(modules_dir + '/../build')
         install_dir = os.path.realpath(build_dir + '/install')
 
         if 'distclean' in commands and os.path.exists(build_dir):
