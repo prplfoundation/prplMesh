@@ -38,7 +38,6 @@ target_compile_definitions(${PROJECT_NAME}
         ELPP_THREAD_SAFE
 )
 
-# Make the library importable from the install directory
 install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
