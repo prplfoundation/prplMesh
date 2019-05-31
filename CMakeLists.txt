@@ -1,5 +1,5 @@
 project (prplMesh LANGUAGES CXX C)
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.3)
 
 # Some CMakeLists.txt files still use the PROJECT variable TODO get rid of it.
 set (PROJECT ${PROJECT_NAME})
