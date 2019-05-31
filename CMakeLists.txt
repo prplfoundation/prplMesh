@@ -68,26 +68,8 @@ endif()
 #   (Removes the need to set LD_LIBRARY_PATH manually when installing to a none standard location)
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
 
-option(STANDALONE "Standalone build" OFF)
-
 # Search local cmake folder first
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
-# Add beerocks cmake modules to search paths TODO should be removed
-list(APPEND CMAKE_PREFIX_PATH ${PLATFORM_STAGING_DIR}/usr/lib/cmake/beerocks)
-
-# Set the CMAKE modules path
-if (NOT STANDALONE)
-    message(STATUS "${BoldBlue}Building 'In-Tree'${ColourReset}")
-else() # Standalone build
-    message(STATUS "${BoldBlue}Building 'Standalone'${ColourReset}")
-    # Convert the install prefix into an absolute path
-    get_filename_component(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}"
-        REALPATH BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
-    # TODO should be removed?
-    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/lib/cmake/beerocks)
-    list(APPEND CMAKE_PROGRAM_PATH ${CMAKE_INSTALL_PREFIX}/host/bin)
-    list(APPEND CMAKE_PROGRAM_PATH ${PLATFORM_STAGING_DIR}/host/bin)
-endif()
 
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
