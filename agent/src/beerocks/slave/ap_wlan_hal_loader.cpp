@@ -51,6 +51,7 @@ bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bool acs_enabled,
         });
 
         if (!s_sharedLib) {
+            LOG(ERROR) << "Failed loading " << BWL_MODULE_NAME << " shared library using dlopen";
             return nullptr;
         }
 

@@ -9,19 +9,17 @@ import multiprocessing
 
 logger = logging.getLogger("build")
 build_targets=['prepare', 'clean', 'distclean', 'make']
-build_modules=['framework', 'common', 'controller', 'agent']
+map_modules=['framework', 'common', 'controller', 'agent']
+dep_modules=['nng', 'safeclib', 'dwpal']
 
-class cmakebuilder(object):
-    def __init__(self, name, modules_dir, build_dir, install_dir, native_build=False, cmake_verbose=False, make_verbose=False, cmake_flags=[], generator=None):
+class builder(object):
+    def __init__(self, name, modules_dir, build_dir, install_dir):
+        logger.debug("modules_dir={}, build_dir={}, install_dir={}".format(modules_dir, build_dir, install_dir))
+
         self.name = name
-        self.native_build = native_build
-        self.cmake_verbose = cmake_verbose
-        self.make_verbose = make_verbose
-        self.cmake_flags = cmake_flags
         self.src_path = "{}/{}".format(modules_dir, name)
         self.build_path = "{}/{}".format(build_dir, name)
         self.install_path = install_dir
-        self.generator = generator
         self.env = os.environ.copy()
         self.env["STAGING_DIR"] = ""
 
@@ -31,8 +29,32 @@ class cmakebuilder(object):
     def clean(self):
         if os.path.exists(self.build_path):
             logger.info("cleaning {}".format(self.name))
-            os.system("xargs rm < {}/install_manifest.txt".format(self.build_path))
             shutil.rmtree(self.build_path)
+
+    def distclean(self):
+        self.clean()
+        if os.path.exists(self.install_path):
+            shutil.rmtree(self.install_path)
+
+    def prepare(self):
+        raise NotImplementedError('prepare() function must be overrided')
+
+    def make(self):
+        raise NotImplementedError('make() function must be overrided')
+
+class cmakebuilder(builder):
+    def __init__(self, name, modules_dir, build_dir, install_dir, cmake_verbose=False, make_verbose=False, cmake_flags=[], generator=None):
+        self.cmake_verbose = cmake_verbose
+        self.make_verbose = make_verbose
+        self.cmake_flags = cmake_flags
+        self.generator = generator
+
+        super(cmakebuilder, self).__init__(name, modules_dir, build_dir, install_dir)
+
+    def clean(self):
+        if os.path.exists(self.build_path):
+            os.system("xargs rm < {}/install_manifest.txt".format(self.build_path))
+        super(cmakebuilder, self).clean()
 
     def prepare(self):
         if os.path.exists("{}/.prepared".format(self.build_path)):
@@ -42,10 +64,8 @@ class cmakebuilder(object):
         cmd = ["cmake",
                "-H" + self.src_path,
                "-B" + self.build_path,
-               "-DSTANDALONE=ON",
+               "-DBUILD_SHARED_LIBS=ON",
                "-DCMAKE_INSTALL_PREFIX=" + self.install_path]
-        if not self.native_build:
-            cmd.append("-DCMAKE_TOOLCHAIN_FILE=external_toolchain.cmake")
         cmd.extend(['-D%s' %f for f in self.cmake_flags])
         if self.cmake_verbose:
             cmd.append("--debug_output")
@@ -54,7 +74,7 @@ class cmakebuilder(object):
         logger.info("preparing {}: {}".format(self.name, " ".join(cmd)))
         subprocess.check_call(cmd, env=self.env)
         open("{}/.prepared".format(self.build_path), 'a').close()
-    
+
     def make(self):
         cmd = ["cmake",
                "--build", self.build_path,
@@ -66,37 +86,100 @@ class cmakebuilder(object):
         logger.info("building & installing {}: {}".format(self.name, " ".join(cmd)))
         subprocess.check_call(cmd, env=self.env)
 
+class acbuilder(builder):
+    def __init__(self, name, modules_dir, build_dir, install_dir, make_verbose=False):
+        self.make_verbose = make_verbose
+        super(acbuilder, self).__init__(name, modules_dir, build_dir, install_dir)
+
+    def clean(self):
+        if os.path.exists(self.build_path):
+            os.system("make -C {} uninstall".format(self.build_path))
+        super(acbuilder, self).clean()
+
+    def prepare(self):
+        os.chdir(self.src_path)
+        cmd = ["./build-tools/autogen.sh", "-f"]
+        logger.info("preparing {}: {}".format(self.name, " ".join(cmd)))
+        subprocess.check_call(cmd, env=self.env)
+
+        self.configure()
+
+    def configure(self):
+        try:
+            os.mkdir(self.build_path)
+        except OSError:
+            pass
+        os.chdir(self.build_path)
+
+        cmd = [self.src_path + "/configure",
+               "--prefix=" + self.install_path]
+        logger.info("configuring {}: {}".format(self.name, " ".join(cmd)))
+        subprocess.check_call(cmd, env=self.env)
+
+    def make(self):
+        cmd = ["make", '-C', self.build_path, "install"]
+        if self.make_verbose:
+            cmd.extend(["V=s"])
+        else:
+            cmd.extend(["-j", str(multiprocessing.cpu_count() + 1)])
+        logger.info("building & installing {}: {}".format(self.name, " ".join(cmd)))
+        subprocess.check_call(cmd, env=self.env)
+
 class mapbuild(object):
     def __init__(self, args):
         if args.verbose: logger.setLevel(logging.DEBUG)
+
         commands = args.commands
-        modules = build_modules if 'all' in args.modules else [m for m in build_modules if m in args.modules]
+        _map_modules = map_modules if 'all' in args.modules or 'map' in args.modules else [m for m in map_modules if m in args.modules]
+        _dep_modules = dep_modules if 'all' in args.modules or 'dep' in args.modules else [m for m in dep_modules if m in args.modules]
+
+        logger.info("{} {}".format(commands, _map_modules + _dep_modules))
+
+        build_dir = os.path.realpath(os.path.join(args.map_path, '..', 'build'))
+        install_dir = os.path.join(build_dir, 'install')
+
+        # build dep modules
+        modules_dir = os.path.join(os.path.realpath(args.map_path), "../3rdparty")
+        for name in _dep_modules:
+            if name == 'nng' or name == 'dwpal':
+                if name == 'dwpal':
+                    modules_dir = os.path.join(os.path.realpath(args.map_path), "../hostap")
+
+                builder = cmakebuilder(name, modules_dir, build_dir, install_dir, args.cmake_verbose, args.make_verbose,
+                    args.cmake_flags, args.generator)
+
+            if name == 'safeclib':
+                builder = acbuilder('safeclib', modules_dir, build_dir, install_dir, args.make_verbose)
+
+            self.run_command(builder, commands)
+
+        # build map modules
         modules_dir = os.path.realpath(args.map_path)
-        build_dir = os.path.realpath(modules_dir + '/build')
-        install_dir = os.path.realpath(build_dir + '/install')
 
-        if 'distclean' in commands and os.path.exists(build_dir):
-             logger.info("distclean - deleting {}".format(build_dir))
-             shutil.rmtree(build_dir)
+        map_cmake_flags = ["STANDALONE=ON"] + args.cmake_flags
+        if not args.native: map_cmake_flags += ["CMAKE_TOOLCHAIN_FILE=external_toolchain.cmake"]
+        for name in _map_modules:
+            builder = cmakebuilder(name, modules_dir, build_dir, install_dir, args.cmake_verbose, args.make_verbose,
+                map_cmake_flags, args.generator)
 
-        logger.info("{} {}".format(commands, modules))
-        logger.debug("modules_dir={}, build_dir={}, install_dir={}".format(modules_dir, build_dir, install_dir))
+            self.run_command(builder, commands)
 
-        for name in modules:
-            builder = cmakebuilder(name, modules_dir, build_dir, install_dir, args.native, args.cmake_verbose, args.make_verbose, args.cmake_flags, args.generator)
-            logger.debug(builder)
-            if 'clean' in commands:
-                builder.clean()
-            if 'prepare' in commands:
-                builder.prepare()
-            if 'make' in commands:
-                builder.prepare()
-                builder.make()
+    def run_command(self, builder, commands):
+        logger.debug(builder)
+        if 'distclean' in commands:
+            builder.distclean()
+        if 'clean' in commands:
+            builder.clean()
+        if 'prepare' in commands:
+            builder.prepare()
+        if 'make' in commands:
+            builder.prepare()
+            builder.make()
 
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='build')):
         parser.help = "multiap_sw standalone build module"
-        parser.add_argument('modules', choices=['all'] + build_modules, nargs='+', help='module[s] to build')
+        parser.add_argument('modules', choices=['all', 'map', 'dep'] + map_modules + dep_modules, nargs='+', help='module[s] to build')
         parser.add_argument('-c', '--commands', choices=build_targets, nargs='+', default=['make'], help="build command (default is clean+make)")
         parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
         parser.add_argument("--native", "-n", action="store_true", help="Build native (not cross compile - ignore external_toolchain.cfg)")
