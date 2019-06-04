@@ -18,7 +18,7 @@
 #include "tlvf/wfa_map/tlvApCapability.h"
 
 #include <mapf/common/logger.h>
-#include <mapf/transport/ieee1905_transport.h>
+#include <mapf/common/err.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
 
 #include <stdio.h>
@@ -33,20 +33,13 @@ using namespace mapf;
 int main(int argc, char *argv[])
 {
     mapf::Logger::Instance().LoggerInit("TLVF example");
+    uint8_t tx_buffer[256];
 
     //START BUILDING THE MESSAGE HERE
-    CmduTxMessage cmdu_tx_msg;
-
-    //setting metadata, not related to tlvf
-    memcpy(cmdu_tx_msg.metadata()->dst, "\x01\x80\xc2\x00\x00\x13", 6);
-    cmdu_tx_msg.metadata()->ether_type = ETH_P_1905_1;
-    cmdu_tx_msg.metadata()->msg_type   = 0x8019;
-    cmdu_tx_msg.metadata()->length =
-        256; //buffer size, needs to be bigger for longer messages, otherwise segfault or memory leak might occur
-    memset(cmdu_tx_msg.data(), 0x00, cmdu_tx_msg.metadata()->length);
+    memset(tx_buffer, 0, sizeof(tx_buffer));
 
     //creating cmdu message class and setting the header
-    CmduMessageTx msg = CmduMessageTx(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length);
+    CmduMessageTx msg = CmduMessageTx(tx_buffer, sizeof(tx_buffer));
 
     //create method initializes the buffer and returns shared pointer to the message header
     auto header = msg.create(0, eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE);
@@ -123,7 +116,7 @@ int main(int argc, char *argv[])
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
     uint8_t recv_buffer[256];
-    memcpy(recv_buffer, cmdu_tx_msg.data(), 256);
+    memcpy(recv_buffer, tx_buffer, 256);
 
     CmduMessageRx received_message;
     received_message.parse(recv_buffer, 256, true);
