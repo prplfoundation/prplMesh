@@ -32,6 +32,7 @@ using namespace mapf;
 
 int main(int argc, char *argv[])
 {
+    int errors = 0;
     mapf::Logger::Instance().LoggerInit("TLVF example");
     uint8_t tx_buffer[256];
 
@@ -47,7 +48,7 @@ int main(int argc, char *argv[])
     header->flags().relay_indicator         = 1;
 
     //NOTE: I used random TLVs for the example, don't expect a standard IEEE1905 message
-    MAPF_ERR("CLASS SIZE: " << sizeof(tlvNon1905neighborDeviceList));
+    MAPF_INFO("CLASS SIZE: " << sizeof(tlvNon1905neighborDeviceList));
     auto firstTlv           = msg.addClass<tlvNon1905neighborDeviceList>();
     bool allocation_succeed = firstTlv->alloc_mac_non_1905_device(
         3); //3 mac addresses for the example, can be any number, only limited by the buffer size
@@ -68,7 +69,7 @@ int main(int argc, char *argv[])
         address.mac[3] = 0x03;
         address.mac[4] = 0x04;
         address.mac[5] = 0x05;
-        MAPF_ERR("WRITE 1 : " << (int)address.mac[3]);
+        MAPF_INFO("WRITE 1 : " << (int)address.mac[3]);
     }
 
     auto second_mac = firstTlv->mac_non_1905_device(
@@ -84,7 +85,7 @@ int main(int argc, char *argv[])
         address.mac[3] = 0x05;
         address.mac[4] = 0x05;
         address.mac[5] = 0x05;
-        MAPF_ERR("WRITE 2 : " << (int)address.mac[3]);
+        MAPF_INFO("WRITE 2 : " << (int)address.mac[3]);
     }
 
     auto third_mac = firstTlv->mac_non_1905_device(
@@ -105,7 +106,7 @@ int main(int argc, char *argv[])
         (void)address;
     }
 
-    MAPF_ERR("TLV LENGTH START: " << firstTlv->length());
+    MAPF_INFO("TLV LENGTH START: " << firstTlv->length());
     auto secondTlv = msg.addClass<tlvLinkMetricQuery>(); // another tlv for the example
     auto metrics   = secondTlv->link_metrics();
     metrics        = tlvLinkMetricQuery::eLinkMetricsType::RX_LINK_METRICS_ONLY;
@@ -124,14 +125,14 @@ int main(int argc, char *argv[])
     eTlvType type;
     if (received_message.getNextTlvType(type) &&
         type == eTlvType::TLV_NON_1905_NEIGHBOR_DEVICE_LIST) {
-        MAPF_ERR("SUCCESS");
+        MAPF_INFO("SUCCESS");
     }
 
-    MAPF_ERR("size: " << received_message.getNextTlvLength());
+    MAPF_INFO("size: " << received_message.getNextTlvLength());
 
     auto tlv1 = received_message.addClass<tlvNon1905neighborDeviceList>();
     if (tlv1 != nullptr) {
-        MAPF_ERR("LENGTH AFTER INIT: " << tlv1->length());
+        MAPF_INFO("LENGTH AFTER INIT: " << tlv1->length());
         //tlv1->alloc_mac_non_1905_device(3);
 
         auto mac2 = tlv1->mac_non_1905_device(
@@ -151,16 +152,20 @@ int main(int argc, char *argv[])
             std::cout << "ADDRESS IS " << (int)address.mac[0] << std::endl;
         } else {
             MAPF_ERR("TLV DOES NOT EXIST");
+            errors++;
         }
     } else {
         MAPF_ERR("TLV1 IS NULL");
+        errors++;
     }
 
     if (received_message.getNextTlvType(type) && type == eTlvType::TLV_LINK_METRIC_QUERY) {
-        MAPF_ERR("SUCCESS");
+        MAPF_INFO("SUCCESS");
+    } else {
+        errors++;
     }
 
-    MAPF_ERR("size: " << received_message.getNextTlvLength());
+    MAPF_INFO("size: " << received_message.getNextTlvLength());
 
     int invalidBufferSize = 26;
     uint8_t invalidBuffer[invalidBufferSize];
@@ -169,16 +174,19 @@ int main(int argc, char *argv[])
     CmduMessageRx invmsg;
     auto invheader     = invmsg.parse(invalidBuffer, invalidBufferSize, false);
     if (invheader == nullptr) {
-        MAPF_ERR("HEADER PROTECTION SUCCESS");
+        MAPF_INFO("HEADER PROTECTION SUCCESS");
     }
 
     if (!received_message.getNextTlvType(type)) {
-        MAPF_ERR("TYPE PROTECTION SUCCESS");
+        MAPF_INFO("TYPE PROTECTION SUCCESS");
     }
     auto invptr = invmsg.addClass<tlv1905NeighborDevice>();
     if (invptr == nullptr) {
-        MAPF_ERR("PROTECTION SUCCESS");
+        MAPF_INFO("PROTECTION SUCCESS");
+    } else {
+        MAPF_ERR("PROTECTION FAILED");
+        errors++;
     }
 
-    return 0;
+    return errors;
 }
