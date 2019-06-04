@@ -62,6 +62,6 @@ install(DIRECTORY ${TLVF_OUT}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT TlvfConfig DESTINATION lib/cmake/Tlvf)
 install(PROGRAMS ${TLVF_DIR}/tlvf.py DESTINATION host/bin)
 
-# add_subdirectory(test)
+add_subdirectory(test)
 message("-- Done")
 

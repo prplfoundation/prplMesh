@@ -1,6 +1,6 @@
 if(BUILD_TESTS)
     add_executable(tlvf_test main.cpp)
-    target_link_libraries(tlvf_test common tlvf common ieee1905_transport_lib ieee1905_transport_messages)
+    target_link_libraries(tlvf_test mapf::elpp common tlvf common ieee1905_transport_lib ieee1905_transport_messages)
     install(TARGETS tlvf_test DESTINATION bin/tests)
     add_test(tlvf_test tlvf_test)
 endif()

@@ -6,11 +6,11 @@
  * See LICENSE file for more details.
  */
 
-#include "tlvf/CmduMessage.h"
+#include "tlvf/CmduMessageTx.h"
+#include "tlvf/CmduMessageRx.h"
 #include <cstring>
 #include <iostream>
 
-#include "tlvf/beerocks/beerocks_message_header.h"
 #include "tlvf/ieee_1905_1/tlv1905NeighborDevice.h"
 #include "tlvf/ieee_1905_1/tlvLinkMetricQuery.h"
 #include "tlvf/ieee_1905_1/tlvNon1905neighborDeviceList.h"
@@ -34,11 +34,6 @@ using namespace mapf;
 
 int main(int argc, char *argv[])
 {
-    size_t hlen = cCmduHeader::get_initial_size() + tlvVendorSpecific::get_initial_size() +
-                  beerocks_message::cACTION_HEADER::get_initial_size();
-    std::cout << "NON1905: " << tlvNon1905neighborDeviceList::get_initial_size() << std::endl;
-    std::cout << "HEADER: " << hlen << std::endl;
-
     mapf::Logger::Instance().LoggerInit("TLVF example");
 
     MAPF_INFO("initializing local bus interface");
@@ -57,12 +52,10 @@ int main(int argc, char *argv[])
     memset(cmdu_tx_msg.data(), 0x00, cmdu_tx_msg.metadata()->length);
 
     //creating cmdu message class and setting the header
-    CmduMessage msg;
-    msg = CmduMessage();
+    CmduMessageTx msg = CmduMessageTx(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length);
 
     //create method initializes the buffer and returns shared pointer to the message header
-    auto header = msg.create(cmdu_tx_msg.data(), cmdu_tx_msg.metadata()->length, 0,
-                             eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE);
+    auto header = msg.create(0, eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE);
     header->flags().last_fragment_indicator = 1;
     header->flags().relay_indicator         = 1;
 
@@ -134,7 +127,7 @@ int main(int argc, char *argv[])
     (void)metrics;
 
     //MANDATORY - swaps to little indian.
-    msg.finalize();
+    msg.finalize(true);
     uint8_t recv_buffer[256];
     memcpy(recv_buffer, cmdu_tx_msg.data(), 256);
     MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
@@ -142,7 +135,7 @@ int main(int argc, char *argv[])
 
     MAPF_INFO("DONE");
 
-    CmduMessage received_message = CmduMessage();
+    CmduMessageRx received_message;
     received_message.parse(recv_buffer, 256, true);
 
     eTlvType type;
@@ -190,7 +183,7 @@ int main(int argc, char *argv[])
     uint8_t invalidBuffer[invalidBufferSize];
     memcpy(invalidBuffer, recv_buffer, 26);
 
-    CmduMessage invmsg = CmduMessage();
+    CmduMessageRx invmsg;
     auto invheader     = invmsg.parse(invalidBuffer, invalidBufferSize, false);
     if (invheader == nullptr) {
         MAPF_ERR("HEADER PROTECTION SUCCESS");
