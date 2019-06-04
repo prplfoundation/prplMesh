@@ -18,8 +18,6 @@
 #include "tlvf/wfa_map/tlvApCapability.h"
 
 #include <mapf/common/logger.h>
-#include <mapf/common/poller.h>
-#include <mapf/local_bus.h>
 #include <mapf/transport/ieee1905_transport.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
 
@@ -35,10 +33,6 @@ using namespace mapf;
 int main(int argc, char *argv[])
 {
     mapf::Logger::Instance().LoggerInit("TLVF example");
-
-    MAPF_INFO("initializing local bus interface");
-    LocalBusInterface bus(Context::Instance());
-    bus.Init();
 
     //START BUILDING THE MESSAGE HERE
     CmduTxMessage cmdu_tx_msg;
@@ -130,10 +124,6 @@ int main(int argc, char *argv[])
     msg.finalize(true);
     uint8_t recv_buffer[256];
     memcpy(recv_buffer, cmdu_tx_msg.data(), 256);
-    MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
-    bus.publisher().Send(cmdu_tx_msg);
-
-    MAPF_INFO("DONE");
 
     CmduMessageRx received_message;
     received_message.parse(recv_buffer, 256, true);
