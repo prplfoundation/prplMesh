@@ -138,7 +138,7 @@ static bool get_sta_caps(SRadioCapabilitiesStrings &caps_strings,
     std::string item;
     uint8_t i = 0;
 
-    memset(&sta_caps, 0, sizeof(beerocks::message::sRadioCapabilities));
+    sta_caps = beerocks::message::sRadioCapabilities();
     sta_caps.ht_bw  = 0xFF;
     sta_caps.vht_bw = 0xFF;
 
@@ -1030,7 +1030,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         LOG_IF(!msg, FATAL) << "Memory allocation failed!";
         // Initialize the message
         memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION));
-        memset(&msg->params.capabilities, 0, sizeof(msg->params.capabilities));
+        msg->params.capabilities = beerocks::message::sRadioCapabilities();
 
         char VAP[SSID_MAX_SIZE]        = {0};
         char MACAddress[MAC_ADDR_SIZE] = {0};
