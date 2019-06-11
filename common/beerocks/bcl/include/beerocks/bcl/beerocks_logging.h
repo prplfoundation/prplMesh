@@ -37,6 +37,7 @@ public:
 
     log_levels()  = default;
     ~log_levels() = default;
+    log_levels(const log_levels&)  = default;
     log_levels(const std::set<std::string> &log_levels);
     log_levels(const std::string &log_level_str);
     log_levels &operator=(const log_levels &rhs);
