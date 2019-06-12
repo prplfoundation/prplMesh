@@ -30,7 +30,7 @@ Install dependencies listed in [requirements.txt](requirements.txt):
 pip install -r requirements.txt
 ```
 
-None sudo users cam add `--user` to the command 
+None sudo users can add `--user` to the command 
 
 ## maptools build & install
 By default, maptools build command uses ../build folder for building and installing.
