@@ -21,4 +21,4 @@ repo sync
 repo forall -p -c 'git checkout $REPO_RREV'
 ```
 ## Build Instructions
-Each component can be built with CMAKE, or use maptools.py build command - see [prplMesh-tools](https://github.com/prplfoundation/prplMesh-tools)
+Each component can be built with CMAKE, or use maptools.py build command - see [prplMesh-tools](https://github.com/prplfoundation/prplMesh/tree/master/tools)
