@@ -87,8 +87,9 @@ class cmakebuilder(builder):
         subprocess.check_call(cmd, env=self.env)
 
 class acbuilder(builder):
-    def __init__(self, name, modules_dir, build_dir, install_dir, make_verbose=False):
+    def __init__(self, name, modules_dir, build_dir, install_dir, make_verbose=False, extra_config_args=():
         self.make_verbose = make_verbose
+        self.extra_config_args = extra_config_args
         super(acbuilder, self).__init__(name, modules_dir, build_dir, install_dir)
 
     def clean(self):
@@ -113,6 +114,7 @@ class acbuilder(builder):
 
         cmd = [self.src_path + "/configure",
                "--prefix=" + self.install_path]
+        cmd.extend(self.extra_config_args)
         logger.info("configuring {}: {}".format(self.name, " ".join(cmd)))
         subprocess.check_call(cmd, env=self.env)
 
@@ -149,7 +151,8 @@ class mapbuild(object):
                     args.cmake_flags, args.generator)
 
             if name == 'safeclib':
-                builder = acbuilder('safeclib', modules_dir, build_dir, install_dir, args.make_verbose)
+                builder = acbuilder('safeclib', modules_dir, build_dir, install_dir, args.make_verbose,
+                                    ['--enable-strmax=65536'])
 
             self.run_command(builder, commands)
 
