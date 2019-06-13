@@ -10,8 +10,9 @@ import multiprocessing
 logger = logging.getLogger("build")
 build_targets=['prepare', 'clean', 'distclean', 'make']
 map_modules=['framework', 'common', 'controller', 'agent']
-dep_modules=['nng', 'safeclib', 'dwpal']
+dep_modules=['nng', 'safeclib', 'dwpal', 'hostapd', 'wpa_supplicant']
 
+# base builder class
 class builder(object):
     def __init__(self, name, modules_dir, build_dir, install_dir):
         logger.debug("modules_dir={}, build_dir={}, install_dir={}".format(modules_dir, build_dir, install_dir))
@@ -42,6 +43,7 @@ class builder(object):
     def make(self):
         raise NotImplementedError('make() function must be overrided')
 
+# cmake-based builder class
 class cmakebuilder(builder):
     def __init__(self, name, modules_dir, build_dir, install_dir, cmake_verbose=False, make_verbose=False, cmake_flags=[], generator=None):
         self.cmake_verbose = cmake_verbose
@@ -86,8 +88,9 @@ class cmakebuilder(builder):
         logger.info("building & installing {}: {}".format(self.name, " ".join(cmd)))
         subprocess.check_call(cmd, env=self.env)
 
+# automake-based builder class
 class acbuilder(builder):
-    def __init__(self, name, modules_dir, build_dir, install_dir, make_verbose=False, extra_config_args=():
+    def __init__(self, name, modules_dir, build_dir, install_dir, make_verbose=False, extra_config_args=()):
         self.make_verbose = make_verbose
         self.extra_config_args = extra_config_args
         super(acbuilder, self).__init__(name, modules_dir, build_dir, install_dir)
@@ -98,12 +101,14 @@ class acbuilder(builder):
         super(acbuilder, self).clean()
 
     def prepare(self):
+        tools_dir = os.getcwd()
         os.chdir(self.src_path)
         cmd = ["./build-tools/autogen.sh", "-f"]
         logger.info("preparing {}: {}".format(self.name, " ".join(cmd)))
         subprocess.check_call(cmd, env=self.env)
 
         self.configure()
+        os.chdir(tools_dir)
 
     def configure(self):
         try:
@@ -127,6 +132,40 @@ class acbuilder(builder):
         logger.info("building & installing {}: {}".format(self.name, " ".join(cmd)))
         subprocess.check_call(cmd, env=self.env)
 
+# hostap builder class
+class hostapbuilder(builder):
+    def __init__(self, name, modules_dir, install_dir, make_verbose=False):
+        self.make_verbose = make_verbose
+        super(hostapbuilder, self).__init__(name, modules_dir, modules_dir, install_dir)
+        self.config_src_fpath = os.path.abspath(os.path.join("config", name + ".config"))
+        self.config_dst_fpath = self.build_path + "/.config"
+
+    def clean(self):
+        os.system("make -C {} clean".format(self.build_path))
+        if os.path.exists(self.config_dst_fpath):
+            os.remove(self.config_dst_fpath)
+
+    def distclean(self):
+        self.clean()
+
+    def prepare(self):
+        logger.info("preparing {}".format(self.name))
+        shutil.copy2(self.config_src_fpath, self.config_dst_fpath)
+
+    def make(self):
+        bin_dir = "BINDIR=" + self.install_path + "/bin"
+        cmd = ["make", bin_dir, '-C', self.build_path, "install"]
+        if self.make_verbose:
+            cmd.extend(["V=s"])
+        else:
+            cmd.extend(["-j", str(multiprocessing.cpu_count() + 1)])
+        logger.info("building & installing {}: {}".format(self.name, " ".join(cmd)))
+        subprocess.check_call(cmd, env=self.env)
+
+        # it requires to do a clean because the another builder instance with different config
+        # may use pre-built object files while building
+        self.clean()
+
 class mapbuild(object):
     def __init__(self, args):
         if args.verbose: logger.setLevel(logging.DEBUG)
@@ -143,16 +182,19 @@ class mapbuild(object):
         # build dep modules
         modules_dir = os.path.join(os.path.realpath(args.map_path), "../3rdparty")
         for name in _dep_modules:
-            if name == 'nng' or name == 'dwpal':
-                if name == 'dwpal':
-                    modules_dir = os.path.join(os.path.realpath(args.map_path), "../hostap")
+            if name == 'dwpal' or name == 'hostapd' or name == 'wpa_supplicant':
+                modules_dir = os.path.join(os.path.realpath(args.map_path), "../hostap")
 
+            if name == 'nng' or name == 'dwpal':
                 builder = cmakebuilder(name, modules_dir, build_dir, install_dir, args.cmake_verbose, args.make_verbose,
                     args.cmake_flags, args.generator)
 
             if name == 'safeclib':
                 builder = acbuilder('safeclib', modules_dir, build_dir, install_dir, args.make_verbose,
                                     ['--enable-strmax=65536'])
+
+            if name == 'hostapd' or name == 'wpa_supplicant':
+                builder = hostapbuilder(name, modules_dir, install_dir, args.make_verbose)
 
             self.run_command(builder, commands)
 
