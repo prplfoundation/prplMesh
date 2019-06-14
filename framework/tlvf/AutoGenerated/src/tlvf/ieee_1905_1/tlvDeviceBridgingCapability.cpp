@@ -92,7 +92,6 @@ bool tlvDeviceBridgingCapability::add_bridging_tuples_list(std::shared_ptr<cMacL
 
 void tlvDeviceBridgingCapability::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     for (size_t i = 0; i < (size_t)*m_bridging_tuples_list_length; i++){
         std::get<1>(bridging_tuples_list(i)).class_swap();
@@ -117,10 +116,8 @@ bool tlvDeviceBridgingCapability::init()
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_DEVICE_BRIDGING_CAPABILITY;
     else {
-        eTlvType swapped_type = *m_type;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&swapped_type)); }
-            if (swapped_type != eTlvType::TLV_DEVICE_BRIDGING_CAPABILITY) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_DEVICE_BRIDGING_CAPABILITY) << ", received value: " << int(swapped_type);
+            if (*m_type != eTlvType::TLV_DEVICE_BRIDGING_CAPABILITY) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_DEVICE_BRIDGING_CAPABILITY) << ", received value: " << int(*m_type);
             return false;
         }
     }

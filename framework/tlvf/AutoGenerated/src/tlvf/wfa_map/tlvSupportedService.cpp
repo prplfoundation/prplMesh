@@ -66,7 +66,6 @@ bool tlvSupportedService::alloc_supported_service_list(size_t count) {
 
 void tlvSupportedService::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
 }
 
@@ -88,10 +87,8 @@ bool tlvSupportedService::init()
     m_type = (eTlvTypeMap*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_SUPPORTED_SERVICE;
     else {
-        eTlvTypeMap swapped_type = *m_type;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&swapped_type)); }
-            if (swapped_type != eTlvTypeMap::TLV_SUPPORTED_SERVICE) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_SUPPORTED_SERVICE) << ", received value: " << int(swapped_type);
+            if (*m_type != eTlvTypeMap::TLV_SUPPORTED_SERVICE) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_SUPPORTED_SERVICE) << ", received value: " << int(*m_type);
             return false;
         }
     }

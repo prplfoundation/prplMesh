@@ -35,7 +35,6 @@ const uint16_t& tlvEndOfMessage::length() {
 
 void tlvEndOfMessage::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
 }
 
@@ -56,10 +55,8 @@ bool tlvEndOfMessage::init()
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_END_OF_MESSAGE;
     else {
-        eTlvType swapped_type = *m_type;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&swapped_type)); }
-            if (swapped_type != eTlvType::TLV_END_OF_MESSAGE) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_END_OF_MESSAGE) << ", received value: " << int(swapped_type);
+            if (*m_type != eTlvType::TLV_END_OF_MESSAGE) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_END_OF_MESSAGE) << ", received value: " << int(*m_type);
             return false;
         }
     }

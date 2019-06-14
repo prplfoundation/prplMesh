@@ -19,7 +19,7 @@
 
 namespace wfa_map {
 
-enum eTlvTypeMap: uint16_t {
+enum eTlvTypeMap: uint8_t {
     TLV_SUPPORTED_SERVICE = 0x80,
     TLV_SEARCHED_SERVICE = 0x81,
     TLV_AP_RADIO_IDENTIFIER = 0x82,

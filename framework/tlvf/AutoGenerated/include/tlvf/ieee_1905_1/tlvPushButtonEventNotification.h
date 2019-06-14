@@ -44,7 +44,7 @@ class tlvPushButtonEventNotification : public BaseClass
             void struct_init(){
                 media_specific_information.struct_init();
             }
-        } sMediaType;
+        } __attribute__((packed)) sMediaType;
         
         const eTlvType& type();
         const uint16_t& length();

@@ -39,7 +39,6 @@ sMacAddress& tlvApRadioIdentifier::radio_uid() {
 
 void tlvApRadioIdentifier::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_radio_uid->struct_swap();
 }
@@ -62,10 +61,8 @@ bool tlvApRadioIdentifier::init()
     m_type = (eTlvTypeMap*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_AP_RADIO_IDENTIFIER;
     else {
-        eTlvTypeMap swapped_type = *m_type;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&swapped_type)); }
-            if (swapped_type != eTlvTypeMap::TLV_AP_RADIO_IDENTIFIER) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_AP_RADIO_IDENTIFIER) << ", received value: " << int(swapped_type);
+            if (*m_type != eTlvTypeMap::TLV_AP_RADIO_IDENTIFIER) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_AP_RADIO_IDENTIFIER) << ", received value: " << int(*m_type);
             return false;
         }
     }

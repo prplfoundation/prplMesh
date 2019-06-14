@@ -44,7 +44,6 @@ std::tuple<bool, uint8_t&> tlvMacAddress::mac(size_t idx) {
 
 void tlvMacAddress::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
 }
 
@@ -66,10 +65,8 @@ bool tlvMacAddress::init()
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_MAC_ADDRESS;
     else {
-        eTlvType swapped_type = *m_type;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&swapped_type)); }
-            if (swapped_type != eTlvType::TLV_MAC_ADDRESS) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_MAC_ADDRESS) << ", received value: " << int(swapped_type);
+            if (*m_type != eTlvType::TLV_MAC_ADDRESS) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_MAC_ADDRESS) << ", received value: " << int(*m_type);
             return false;
         }
     }

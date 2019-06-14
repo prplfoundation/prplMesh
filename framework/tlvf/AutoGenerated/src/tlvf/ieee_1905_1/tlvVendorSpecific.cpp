@@ -44,7 +44,6 @@ std::tuple<bool, uint8_t&> tlvVendorSpecific::vendor_oui(size_t idx) {
 
 void tlvVendorSpecific::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
 }
 

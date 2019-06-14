@@ -51,7 +51,7 @@ class tlvApCapability : public BaseClass
             void struct_init(){
                 reserved = 0x0;
             }
-        } sValue;
+        } __attribute__((packed)) sValue;
         
         const eTlvTypeMap& type();
         const uint16_t& length();

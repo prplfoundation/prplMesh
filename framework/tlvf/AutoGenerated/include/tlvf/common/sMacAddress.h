@@ -25,7 +25,7 @@ typedef struct sMacAddress {
                 mac[i] = 0x0;
             }
     }
-} sMacAddress;
+} __attribute__((packed)) sMacAddress;
 
 
 #endif //_TLVF/COMMON_SMACADDRESS_H_

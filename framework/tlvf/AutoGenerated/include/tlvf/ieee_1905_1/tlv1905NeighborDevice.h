@@ -47,7 +47,7 @@ class tlv1905NeighborDevice : public BaseClass
             void struct_init(){
                 mac.struct_init();
             }
-        } sMacAl1905Device;
+        } __attribute__((packed)) sMacAl1905Device;
         
         const eTlvType& type();
         const uint16_t& length();

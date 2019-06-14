@@ -51,7 +51,6 @@ sMacAddress& tlvPushButtonJoinNotification::iface_mac_of_new_device_joined() {
 
 void tlvPushButtonJoinNotification::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_al_mac_notification_src->struct_swap();
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_mid_of_the_notification));
@@ -80,10 +79,8 @@ bool tlvPushButtonJoinNotification::init()
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_PUSH_BUTTON_JOIN_NOTIFICATION;
     else {
-        eTlvType swapped_type = *m_type;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&swapped_type)); }
-            if (swapped_type != eTlvType::TLV_PUSH_BUTTON_JOIN_NOTIFICATION) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_PUSH_BUTTON_JOIN_NOTIFICATION) << ", received value: " << int(swapped_type);
+            if (*m_type != eTlvType::TLV_PUSH_BUTTON_JOIN_NOTIFICATION) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_PUSH_BUTTON_JOIN_NOTIFICATION) << ", received value: " << int(*m_type);
             return false;
         }
     }

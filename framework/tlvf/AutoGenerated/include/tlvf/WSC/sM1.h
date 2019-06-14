@@ -94,7 +94,7 @@ typedef struct sM1 {
         os_version_attr.struct_init();
         vendor_extensions_attr.struct_init();
     }
-} sM1;
+} __attribute__((packed)) sM1;
 
 
 }; // close namespace: WSC

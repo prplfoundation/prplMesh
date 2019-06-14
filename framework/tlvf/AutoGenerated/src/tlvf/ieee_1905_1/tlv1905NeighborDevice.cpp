@@ -68,7 +68,6 @@ bool tlv1905NeighborDevice::alloc_mac_al_1905_device(size_t count) {
 
 void tlv1905NeighborDevice::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_mac_local_iface->struct_swap();
     for (size_t i = 0; i < m_mac_al_1905_device_idx__; i++){
@@ -94,10 +93,8 @@ bool tlv1905NeighborDevice::init()
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_1905_NEIGHBOR_DEVICE;
     else {
-        eTlvType swapped_type = *m_type;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&swapped_type)); }
-            if (swapped_type != eTlvType::TLV_1905_NEIGHBOR_DEVICE) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_1905_NEIGHBOR_DEVICE) << ", received value: " << int(swapped_type);
+            if (*m_type != eTlvType::TLV_1905_NEIGHBOR_DEVICE) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_1905_NEIGHBOR_DEVICE) << ", received value: " << int(*m_type);
             return false;
         }
     }

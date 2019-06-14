@@ -44,7 +44,7 @@ typedef struct sWscAttrVersion {
         data_length = 0x1;
         data = WSC_VERSION;
     }
-} sWscAttrVersion;
+} __attribute__((packed)) sWscAttrVersion;
 
 typedef struct sWscAttrMessageType {
     eWscAttributes attribute_type;
@@ -59,7 +59,7 @@ typedef struct sWscAttrMessageType {
         data_length = 0x1;
         data = WSC_MSG_TYPE_M1;
     }
-} sWscAttrMessageType;
+} __attribute__((packed)) sWscAttrMessageType;
 
 typedef struct sWscAttrUuidE {
     eWscAttributes attribute_type;
@@ -73,7 +73,7 @@ typedef struct sWscAttrUuidE {
         attribute_type = ATTR_UUID_E;
         data_length = WSC_UUID_LENGTH;
     }
-} sWscAttrUuidE;
+} __attribute__((packed)) sWscAttrUuidE;
 
 typedef struct sWscAttrUuidR {
     eWscAttributes attribute_type;
@@ -87,7 +87,7 @@ typedef struct sWscAttrUuidR {
         attribute_type = ATTR_UUID_E;
         data_length = WSC_UUID_LENGTH;
     }
-} sWscAttrUuidR;
+} __attribute__((packed)) sWscAttrUuidR;
 
 typedef struct sWscAttrMac {
     eWscAttributes attribute_type;
@@ -103,7 +103,7 @@ typedef struct sWscAttrMac {
         data_length = WSC_MAC_LENGTH;
         data.struct_init();
     }
-} sWscAttrMac;
+} __attribute__((packed)) sWscAttrMac;
 
 typedef struct sWscAttrEnroleeNonce {
     eWscAttributes attribute_type;
@@ -117,7 +117,7 @@ typedef struct sWscAttrEnroleeNonce {
         attribute_type = ATTR_ENROLLEE_NONCE;
         data_length = WSC_NONCE_LENGTH;
     }
-} sWscAttrEnroleeNonce;
+} __attribute__((packed)) sWscAttrEnroleeNonce;
 
 typedef struct sWscAttrRegistrarNonce {
     eWscAttributes attribute_type;
@@ -131,7 +131,7 @@ typedef struct sWscAttrRegistrarNonce {
         attribute_type = ATTR_REGISTRAR_NONCE;
         data_length = WSC_NONCE_LENGTH;
     }
-} sWscAttrRegistrarNonce;
+} __attribute__((packed)) sWscAttrRegistrarNonce;
 
 typedef struct sWscAttrPublicKey {
     eWscAttributes attribute_type;
@@ -145,7 +145,7 @@ typedef struct sWscAttrPublicKey {
         attribute_type = ATTR_PUBLIC_KEY;
         data_length = WSC_PUBLIC_KEY_LENGTH;
     }
-} sWscAttrPublicKey;
+} __attribute__((packed)) sWscAttrPublicKey;
 
 typedef struct sWscAttrAuthenticationTypeFlags {
     eWscAttributes attribute_type;
@@ -160,7 +160,7 @@ typedef struct sWscAttrAuthenticationTypeFlags {
         attribute_type = ATTR_AUTH_TYPE_FLAGS;
         data_length = 0x2;
     }
-} sWscAttrAuthenticationTypeFlags;
+} __attribute__((packed)) sWscAttrAuthenticationTypeFlags;
 
 typedef struct sWscAttrEncryptionTypeFlags {
     eWscAttributes attribute_type;
@@ -175,7 +175,7 @@ typedef struct sWscAttrEncryptionTypeFlags {
         attribute_type = ATTR_ENCR_TYPE_FLAGS;
         data_length = 0x2;
     }
-} sWscAttrEncryptionTypeFlags;
+} __attribute__((packed)) sWscAttrEncryptionTypeFlags;
 
 typedef struct sWscAttrConnectionTypeFlags {
     eWscAttributes attribute_type;
@@ -190,7 +190,7 @@ typedef struct sWscAttrConnectionTypeFlags {
         data_length = 0x1;
         data = WSC_CONN_ESS;
     }
-} sWscAttrConnectionTypeFlags;
+} __attribute__((packed)) sWscAttrConnectionTypeFlags;
 
 typedef struct sWscAttrConfigurationMethods {
     eWscAttributes attribute_type;
@@ -206,7 +206,7 @@ typedef struct sWscAttrConfigurationMethods {
         data_length = 0x2;
         data = (WSC_CONFIG_PHY_PUSHBUTTON | WSC_CONFIG_VIRT_PUSHBUTTON);
     }
-} sWscAttrConfigurationMethods;
+} __attribute__((packed)) sWscAttrConfigurationMethods;
 
 typedef struct sWscAttrWscState {
     eWscAttributes attribute_type;
@@ -221,7 +221,7 @@ typedef struct sWscAttrWscState {
         data_length = 0x1;
         data = WSC_STATE_NOT_CONFIGURED;
     }
-} sWscAttrWscState;
+} __attribute__((packed)) sWscAttrWscState;
 
 typedef struct sWscAttrManufacturer {
     eWscAttributes attribute_type;
@@ -235,7 +235,7 @@ typedef struct sWscAttrManufacturer {
         attribute_type = ATTR_MANUFACTURER;
         data_length = WSC_MAX_NAME_LENGTH;
     }
-} sWscAttrManufacturer;
+} __attribute__((packed)) sWscAttrManufacturer;
 
 typedef struct sWscAttrModelName {
     eWscAttributes attribute_type;
@@ -249,7 +249,7 @@ typedef struct sWscAttrModelName {
         attribute_type = ATTR_MODEL_NAME;
         data_length = WSC_MAX_NAME_LENGTH;
     }
-} sWscAttrModelName;
+} __attribute__((packed)) sWscAttrModelName;
 
 typedef struct sWscAttrModelNumber {
     eWscAttributes attribute_type;
@@ -263,7 +263,7 @@ typedef struct sWscAttrModelNumber {
         attribute_type = ATTR_MODEL_NUMBER;
         data_length = WSC_MAX_NAME_LENGTH;
     }
-} sWscAttrModelNumber;
+} __attribute__((packed)) sWscAttrModelNumber;
 
 typedef struct sWscAttrSerialNumber {
     eWscAttributes attribute_type;
@@ -277,7 +277,7 @@ typedef struct sWscAttrSerialNumber {
         attribute_type = ATTR_SERIAL_NUMBER;
         data_length = WSC_MAX_NAME_LENGTH;
     }
-} sWscAttrSerialNumber;
+} __attribute__((packed)) sWscAttrSerialNumber;
 
 typedef struct sWscAttrPrimaryDeviceType {
     eWscAttributes attribute_type;
@@ -296,7 +296,7 @@ typedef struct sWscAttrPrimaryDeviceType {
         attribute_type = ATTR_PRIMARY_DEV_TYPE;
         data_length = WSC_PRIMARY_DEV_TYPE_LENGTH;
     }
-} sWscAttrPrimaryDeviceType;
+} __attribute__((packed)) sWscAttrPrimaryDeviceType;
 
 typedef struct sWscAttrDeviceName {
     eWscAttributes attribute_type;
@@ -310,7 +310,7 @@ typedef struct sWscAttrDeviceName {
         attribute_type = ATTR_DEV_NAME;
         data_length = WSC_MAX_NAME_LENGTH;
     }
-} sWscAttrDeviceName;
+} __attribute__((packed)) sWscAttrDeviceName;
 
 typedef struct sWscAttrRfBands {
     eWscAttributes attribute_type;
@@ -324,7 +324,7 @@ typedef struct sWscAttrRfBands {
         attribute_type = ATTR_RF_BANDS;
         data_length = 0x1;
     }
-} sWscAttrRfBands;
+} __attribute__((packed)) sWscAttrRfBands;
 
 typedef struct sWscAttrAssociationState {
     eWscAttributes attribute_type;
@@ -339,7 +339,7 @@ typedef struct sWscAttrAssociationState {
         data_length = 0x1;
         data = WSC_ASSOC_NOT_ASSOC;
     }
-} sWscAttrAssociationState;
+} __attribute__((packed)) sWscAttrAssociationState;
 
 typedef struct sWscAttrDevicePasswordID {
     eWscAttributes attribute_type;
@@ -355,7 +355,7 @@ typedef struct sWscAttrDevicePasswordID {
         data_length = 0x2;
         data = DEV_PW_PUSHBUTTON;
     }
-} sWscAttrDevicePasswordID;
+} __attribute__((packed)) sWscAttrDevicePasswordID;
 
 typedef struct sWscAttrConfigurationError {
     eWscAttributes attribute_type;
@@ -371,7 +371,7 @@ typedef struct sWscAttrConfigurationError {
         data_length = 0x2;
         data = WSC_CFG_NO_ERROR;
     }
-} sWscAttrConfigurationError;
+} __attribute__((packed)) sWscAttrConfigurationError;
 
 typedef struct sWscAttrOsVersion {
     eWscAttributes attribute_type;
@@ -387,7 +387,7 @@ typedef struct sWscAttrOsVersion {
         data_length = WSC_OS_VERSION_LENGTH;
         data = 0x80000001;
     }
-} sWscAttrOsVersion;
+} __attribute__((packed)) sWscAttrOsVersion;
 
 typedef struct sWscAttrVersionExtension {
     eWscAttributes attribute_type;
@@ -401,7 +401,7 @@ typedef struct sWscAttrVersionExtension {
         attribute_type = ATTR_VENDOR_EXTENSION;
         data_length = WSC_VENDOR_EXTENSIONS_LENGTH;
     }
-} sWscAttrVersionExtension;
+} __attribute__((packed)) sWscAttrVersionExtension;
 
 typedef struct sWscAttrKeyWrapAuthenticator {
     eWscAttributes attribute_type;
@@ -415,7 +415,7 @@ typedef struct sWscAttrKeyWrapAuthenticator {
         attribute_type = ATTR_KEY_WRAP_AUTH;
         data_length = WSC_KEY_WRAP_AUTH_LENGTH;
     }
-} sWscAttrKeyWrapAuthenticator;
+} __attribute__((packed)) sWscAttrKeyWrapAuthenticator;
 
 typedef struct sWscAttrSsid {
     eWscAttributes attribute_type;
@@ -429,7 +429,7 @@ typedef struct sWscAttrSsid {
         attribute_type = ATTR_SSID;
         data_length = WSC_MAX_NAME_LENGTH;
     }
-} sWscAttrSsid;
+} __attribute__((packed)) sWscAttrSsid;
 
 typedef struct sWscAttrAuthenticationType {
     eWscAttributes attribute_type;
@@ -444,7 +444,7 @@ typedef struct sWscAttrAuthenticationType {
         attribute_type = ATTR_AUTH_TYPE;
         data_length = 0x2;
     }
-} sWscAttrAuthenticationType;
+} __attribute__((packed)) sWscAttrAuthenticationType;
 
 typedef struct sWscAttrEncryptionType {
     eWscAttributes attribute_type;
@@ -459,7 +459,7 @@ typedef struct sWscAttrEncryptionType {
         attribute_type = ATTR_ENCR_TYPE;
         data_length = 0x2;
     }
-} sWscAttrEncryptionType;
+} __attribute__((packed)) sWscAttrEncryptionType;
 
 typedef struct sWscAttrNetworkKey {
     eWscAttributes attribute_type;
@@ -473,7 +473,7 @@ typedef struct sWscAttrNetworkKey {
         attribute_type = ATTR_NETWORK_KEY;
         data_length = WSC_MAX_NETWORK_KEY_LENGTH;
     }
-} sWscAttrNetworkKey;
+} __attribute__((packed)) sWscAttrNetworkKey;
 
 typedef struct sWscAttrBssid {
     eWscAttributes attribute_type;
@@ -488,7 +488,7 @@ typedef struct sWscAttrBssid {
         attribute_type = ATTR_MAC_ADDR;
         data_length = WSC_MAC_LENGTH;
     }
-} sWscAttrBssid;
+} __attribute__((packed)) sWscAttrBssid;
 
 typedef struct sWscAttrEncryptedSettings {
     eWscAttributes attribute_type;
@@ -523,7 +523,7 @@ typedef struct sWscAttrEncryptedSettings {
         bssid_attr.struct_init();
         key_wrap_auth_attr.struct_init();
     }
-} sWscAttrEncryptedSettings;
+} __attribute__((packed)) sWscAttrEncryptedSettings;
 
 
 }; // close namespace: WSC

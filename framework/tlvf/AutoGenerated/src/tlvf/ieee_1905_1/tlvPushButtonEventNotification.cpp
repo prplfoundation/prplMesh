@@ -69,7 +69,6 @@ bool tlvPushButtonEventNotification::alloc_media_type_list(size_t count) {
 
 void tlvPushButtonEventNotification::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     for (size_t i = 0; i < (size_t)*m_media_type_list_length; i++){
         m_media_type_list[i].struct_swap();
@@ -94,10 +93,8 @@ bool tlvPushButtonEventNotification::init()
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_PUSH_BUTTON_EVENT_NOTIFICATION;
     else {
-        eTlvType swapped_type = *m_type;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&swapped_type)); }
-            if (swapped_type != eTlvType::TLV_PUSH_BUTTON_EVENT_NOTIFICATION) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_PUSH_BUTTON_EVENT_NOTIFICATION) << ", received value: " << int(swapped_type);
+            if (*m_type != eTlvType::TLV_PUSH_BUTTON_EVENT_NOTIFICATION) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_PUSH_BUTTON_EVENT_NOTIFICATION) << ", received value: " << int(*m_type);
             return false;
         }
     }

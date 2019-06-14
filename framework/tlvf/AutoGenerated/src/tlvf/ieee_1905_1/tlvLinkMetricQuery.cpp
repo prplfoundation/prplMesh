@@ -47,7 +47,6 @@ tlvLinkMetricQuery::eLinkMetricsType& tlvLinkMetricQuery::link_metrics() {
 
 void tlvLinkMetricQuery::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_mac_al_1905_device->struct_swap();
 }
@@ -72,10 +71,8 @@ bool tlvLinkMetricQuery::init()
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_LINK_METRIC_QUERY;
     else {
-        eTlvType swapped_type = *m_type;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&swapped_type)); }
-            if (swapped_type != eTlvType::TLV_LINK_METRIC_QUERY) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_LINK_METRIC_QUERY) << ", received value: " << int(swapped_type);
+            if (*m_type != eTlvType::TLV_LINK_METRIC_QUERY) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_LINK_METRIC_QUERY) << ", received value: " << int(*m_type);
             return false;
         }
     }

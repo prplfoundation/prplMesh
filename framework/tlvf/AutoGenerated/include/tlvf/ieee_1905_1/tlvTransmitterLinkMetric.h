@@ -65,7 +65,7 @@ class tlvTransmitterLinkMetric : public BaseClass
             void struct_init(){
                 phy_rate = 0xffff;
             }
-        } sLinkMetricInfo;
+        } __attribute__((packed)) sLinkMetricInfo;
         
         typedef struct sInterfacePairInfo {
             sMacAddress mac_of_an_interface_in_the_receiving_al;
@@ -81,7 +81,7 @@ class tlvTransmitterLinkMetric : public BaseClass
                 mac_of_an_interface_in_the_neighbor_al.struct_init();
                 link_metric_info.struct_init();
             }
-        } sInterfacePairInfo;
+        } __attribute__((packed)) sInterfacePairInfo;
         
         const eTlvType& type();
         const uint16_t& length();
