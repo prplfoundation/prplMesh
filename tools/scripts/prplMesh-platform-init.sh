@@ -22,7 +22,7 @@ start_function() {
     run modprobe mac80211_hwsim radios=2
     sleep 2
     for netif in /sys/class/mac80211_hwsim/*/net/*; do
-        run nmcli d set ${netif##*/} managed no
+        nmcli d set ${netif##*/} managed no
     done
     sleep 1
     run $HOSTAPD -P /var/run/hostapd.pid -B $HOSTAPD_CONF
@@ -34,8 +34,8 @@ stop_function() {
         err "$0: This script must be run as root"
         exit 1
     fi
-    run killall hostapd
-    run rmmod mac80211_hwsim
+    killall hostapd
+    rmmod mac80211_hwsim
 }
 
 status_function() {
