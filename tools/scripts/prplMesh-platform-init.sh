@@ -19,13 +19,19 @@ start_function() {
         err "$0: This command must be run as root"
         exit 1
     fi
-    run modprobe mac80211_hwsim radios=2
+    run modprobe mac80211_hwsim radios=3
     sleep 2
     for netif in /sys/class/mac80211_hwsim/*/net/*; do
         nmcli d set ${netif##*/} managed no
     done
-    sleep 1
-    run $HOSTAPD -P /var/run/hostapd.pid -B $HOSTAPD_CONF
+    # bridge used by containers
+    run brctl addbr br-prplmesh
+    nmcli d set br-prplmesh managed no
+    run ip l set br-prplmesh up
+    if [ -n "$HOSTAPD" ]; then
+        sleep 1
+        run $HOSTAPD -P /var/run/hostapd.pid -B $HOSTAPD_CONF
+    fi
 }
 
 stop_function() {
@@ -36,6 +42,8 @@ stop_function() {
     fi
     killall hostapd
     rmmod mac80211_hwsim
+    ip l set br-prplmesh down
+    brctl delbr br-prplmesh
 }
 
 status_function() {

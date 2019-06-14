@@ -1,0 +1,32 @@
+#! /bin/sh
+
+scriptdir="$(cd "${0%/*}"; pwd)"
+topdir="${scriptdir%/*/*/*}"
+installdir="${topdir}/build/install"
+containerdir="${topdir}/build/container"
+
+rm -rf "${containerdir}"
+mkdir -p "${containerdir}/usr/bin" "${containerdir}/usr/lib"
+
+cp -dpr /lib/ld-* "${containerdir}/usr/lib"
+ln -s usr/lib "${containerdir}/lib"
+if [ -e /lib64 ]; then
+    cp --dereference /lib64/ld-* "${containerdir}/usr/lib"
+    ln -s lib "${containerdir}/usr/lib64"
+    ( cd "${installdir}"/lib64; ln -sf ../lib/*.so* . )
+fi
+
+ln -s "${installdir}" "${containerdir}/usr/install"
+
+
+cp --dereference /sbin/ip /sbin/brctl $(which busybox) /usr/bin/ldd /bin/bash "${containerdir}/usr/bin"
+"${containerdir}/usr/bin/busybox" --install "${containerdir}/usr/bin"
+
+find "${installdir}/bin" "${containerdir}/usr/bin" -type f -print0 | \
+    xargs -0 ldd | \
+    sed -n '/.*=> \(.*\)(.*)/s%%\1%p' | \
+    sort -u | \
+    grep -v "${installdir}" | \
+    while read lib; do
+        cp --dereference "$lib" "${containerdir}/usr/lib"
+    done

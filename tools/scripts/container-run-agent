@@ -1,0 +1,36 @@
+#! /bin/sh
+
+ln -sf ../run /var/run
+ln -sf usr/lib64 /lib64
+
+brctl addbr br-lan
+brctl addif br-lan host0
+ip l set br-lan up
+ip l set host0 up
+ip a add dev br-lan 10.11.12.2/24
+
+if [ -e /tmp/nsdir/nsstarted ]; then
+    echo started > "/tmp/nsdir/nsstarted"
+    read < "/tmp/nsdir/nsdone"
+fi
+
+# TODO this is a hack to make sure hostapd.conf is valid
+ip l set wlan1 name wlan0
+ip l set wlan2 name wlan0
+
+ip a
+
+if [ "${0%/*}" = /tmp ]; then
+  install=/usr/install
+else
+  install="${0%/*}/../../../build/install"
+fi
+
+$install/bin/hostapd -P /run/hostapd.pid -B -dd -f /var/log/hostapd.log /tmp/hostapd.conf
+
+cd $install/config
+../bin/local_bus &
+../bin/ieee1905_transport &
+
+echo Starting agent - interrupt to stop
+../bin/beerocks_agent

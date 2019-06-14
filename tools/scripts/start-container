@@ -1,0 +1,74 @@
+#! /bin/sh
+
+if [ $# != 1 ]; then
+    echo "Usage: $0 <container-script>"
+    exit 1
+fi
+
+script=$1
+
+scriptdir="$(cd "${0%/*}"; pwd)"
+topdir="${scriptdir%/*/*/*}"
+installdir="${topdir}/build/install"
+containerdir="${topdir}/build/container"
+logdir="${topdir}/build/log-${script}"
+runscript="${scriptdir}/container-run-${script}"
+
+if [ ! -d "${containerdir}/usr/bin" ]; then
+    echo "${containerdir}/usr/bin doesn't exist; make sure container is populated"
+    exit 1
+fi
+
+if [ ! -e "${runscript}" ]; then
+    echo "${runscript} doesn't exist"
+    exit 1
+fi
+
+if [ $(id -u) != 0 ]; then
+    SUDO=sudo
+fi
+
+install -d -m 6755 "${logdir}" "${logdir}/mapf" "${logdir}/beerocks"
+
+
+# TODO make handling of hostapd and wlan interfaces more flexible
+for p in /sys/class/mac80211_hwsim/*/ieee80211/phy*; do
+    phy=${p##*/}
+    break;
+done
+if [ -z "$phy" ]; then
+    echo "No phy found, can't start agent container"
+    exit 1
+fi
+hostapd_conf="${scriptdir}/hostapd.conf"
+touch "${logdir}/hostapd.log"
+
+nsdir=$(mktemp -d)
+trap "rm -rf '$nsdir'" EXIT
+mkfifo "${nsdir}/nsstarted"
+mkfifo "${nsdir}/nsdone"
+
+set_phy_ns() {
+    read < "${nsdir}/nsstarted"
+    $SUDO iw phy $phy set netns $(pidof -s -x "/tmp/${script}")
+    echo done > "${nsdir}/nsdone"
+}
+set_phy_ns &
+
+$SUDO systemd-nspawn \
+    --as-pid2 \
+    --directory="${containerdir}" \
+    --machine=prpl-${script} \
+    --private-network \
+    --network-bridge=br-prplmesh \
+    --capability=all \
+    --ephemeral \
+    --bind-ro="${installdir}" \
+    --bind="${logdir}:/var/log" \
+    --bind="${logdir}/mapf:/tmp/${USER}/mapf/logs" \
+    --bind="${logdir}/beerocks:/tmp/${USER}/beerocks/logs" \
+    --bind="${runscript}:/tmp/${script}" \
+    --bind-ro="${hostapd_conf}:/tmp/hostapd.conf" \
+    --bind="${nsdir}:/tmp/nsdir" \
+    $opts \
+    "/tmp/${script}"
