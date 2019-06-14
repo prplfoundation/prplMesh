@@ -87,7 +87,7 @@ protected:
     std::shared_ptr<cCmduHeader> m_cmdu_header;
     std::vector<std::shared_ptr<BaseClass>> m_class_vector;
     static const uint16_t kCmduHeaderLength = 8;
-    static const uint16_t kTlvHeaderLength  = 4;
+    static const uint16_t kTlvHeaderLength  = 3;
 };
 
 }; // close namespace: ieee1905_1

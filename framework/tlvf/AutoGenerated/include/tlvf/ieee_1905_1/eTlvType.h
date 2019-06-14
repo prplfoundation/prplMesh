@@ -19,7 +19,7 @@
 
 namespace ieee1905_1 {
 
-enum class eTlvType : uint16_t {
+enum class eTlvType : uint8_t {
     TLV_END_OF_MESSAGE = 0x0,
     TLV_AL_MAC_ADDRESS_TYPE = 0x1,
     TLV_MAC_ADDRESS = 0x2,
@@ -42,7 +42,7 @@ enum class eTlvType : uint16_t {
 };
 class eTlvTypeValidate {
 public:
-    static bool check(uint16_t value) {
+    static bool check(uint8_t value) {
         bool ret = false;
         switch (value) {
         case 0x0:

@@ -91,7 +91,7 @@ typedef struct sM2 {
         vendor_extensions_attr.struct_init();
         encrypted_settings_attr.struct_init();
     }
-} sM2;
+} __attribute__((packed)) sM2;
 
 
 }; // close namespace: WSC

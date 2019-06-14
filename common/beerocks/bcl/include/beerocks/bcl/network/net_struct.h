@@ -29,7 +29,7 @@ typedef struct sIpv4Addr {
             oct[i] = 0;
         }
     }
-} sIpv4Addr;
+} __attribute__((packed)) sIpv4Addr;
 
 typedef struct sMacAddr {
     uint8_t oct[MAC_ADDR_LEN];
@@ -44,7 +44,7 @@ typedef struct sMacAddr {
         channel = 0;
         rssi    = 0;
     }
-} sMacAddr;
+} __attribute__((packed)) sMacAddr;
 }
 }
 

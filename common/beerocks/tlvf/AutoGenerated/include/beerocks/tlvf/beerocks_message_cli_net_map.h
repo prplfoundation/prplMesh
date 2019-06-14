@@ -31,7 +31,7 @@ typedef struct sCliNetworkMapNodeAp {
     void struct_init(){
         mac.struct_init();
     }
-} sCliNetworkMapNodeAp;
+} __attribute__((packed)) sCliNetworkMapNodeAp;
 
 typedef struct sCliNetworkMapNodeSta {
     beerocks::net::sMacAddr mac;
@@ -43,7 +43,7 @@ typedef struct sCliNetworkMapNodeSta {
     void struct_init(){
         mac.struct_init();
     }
-} sCliNetworkMapNodeSta;
+} __attribute__((packed)) sCliNetworkMapNodeSta;
 
 typedef struct sCliNetworkMapsNodeInfo {
     beerocks::net::sMacAddr mac;
@@ -75,7 +75,7 @@ typedef struct sCliNetworkMapsNodeInfo {
         mac.struct_init();
         ipv4.struct_init();
     }
-} sCliNetworkMapsNodeInfo;
+} __attribute__((packed)) sCliNetworkMapsNodeInfo;
 
 
 }; // close namespace: beerocks_message

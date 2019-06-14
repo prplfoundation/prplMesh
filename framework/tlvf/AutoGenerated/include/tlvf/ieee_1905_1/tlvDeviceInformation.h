@@ -45,7 +45,7 @@ class tlvDeviceInformation : public BaseClass
             void struct_init(){
                 mac.struct_init();
             }
-        } sInfo;
+        } __attribute__((packed)) sInfo;
         
         const eTlvType& type();
         const uint16_t& length();

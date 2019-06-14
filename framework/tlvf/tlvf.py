@@ -626,10 +626,8 @@ class TlvF:
                     lines_cpp.append("if (!m_%s__) *m_%s = %s;" % ( self.MEMBER_PARSE, param_name, param_val_const) )
                     if self.is_tlv_class and param_name == MetaData.TLV_TYPE_TYPE:
                         lines_cpp.append( "else {" )
-                        lines_cpp.append( "%s%s swapped_type = *m_%s;" % ( self.getIndentation(1), param_type, param_name ) )
-                        lines_cpp.append( "%sif (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&swapped_type)); }" % self.getIndentation(1) )
-                        lines_cpp.append( "%sif (swapped_type != %s) {" % ( self.getIndentation(2), param_val_const ) )
-                        lines_cpp.append( '%sTLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(%s) << ", received value: " << int(swapped_type);' %  (self.getIndentation(2), param_val_const) )
+                        lines_cpp.append( "%sif (*m_type != %s) {" % ( self.getIndentation(2), param_val_const ) )
+                        lines_cpp.append( '%sTLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(%s) << ", received value: " << int(*m_type);' %  (self.getIndentation(2), param_val_const) )
                         lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                         lines_cpp.append( "%s}" % self.getIndentation(1) )
                         lines_cpp.append( "}" )
@@ -1127,7 +1125,7 @@ class TlvF:
         self.insertLineH(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(2), self.CODE_STRUCT_INIT_FUNC_INSERT, name))
         self.insertLineH(insert_name, insert_marker, "%s}" % (self.getIndentation(1)) )
 
-        self.insertLineH(insert_name, insert_marker, "} %s;" % (name))
+        self.insertLineH(insert_name, insert_marker, "} __attribute__((packed)) %s;" % (name))
         self.insertLineH(insert_name, insert_marker, "")
 
     def addEnumCode(self, insert_name, insert_marker, name, enum_storage):

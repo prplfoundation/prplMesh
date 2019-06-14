@@ -21,7 +21,7 @@ typedef struct {
     uint8_t src_bridge_mac[net::MAC_ADDR_LEN] = {};
     uint16_t length                           = 0;
     uint8_t swap_needed                       = 0;
-} sUdsHeader;
+} __attribute__((packed)) sUdsHeader;
 
 //////////////////// tlvf includes /////////////////////////////
 
@@ -91,7 +91,7 @@ typedef struct sRadioCapabilities {
         cell_capa            = 0;
         cap_flag             = 0;
     }
-} sRadioCapabilities;
+} __attribute__((packed)) sRadioCapabilities;
 
 //////////////////// tlvf includes - END/////////////////////////////
 

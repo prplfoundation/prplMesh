@@ -72,7 +72,6 @@ bool tlvTransmitterLinkMetric::alloc_interface_pair_info(size_t count) {
 
 void tlvTransmitterLinkMetric::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_al_mac_of_the_device_that_transmits->struct_swap();
     m_al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv->struct_swap();
@@ -100,10 +99,8 @@ bool tlvTransmitterLinkMetric::init()
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_TRANSMITTER_LINK_METRIC;
     else {
-        eTlvType swapped_type = *m_type;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&swapped_type)); }
-            if (swapped_type != eTlvType::TLV_TRANSMITTER_LINK_METRIC) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_TRANSMITTER_LINK_METRIC) << ", received value: " << int(swapped_type);
+            if (*m_type != eTlvType::TLV_TRANSMITTER_LINK_METRIC) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_TRANSMITTER_LINK_METRIC) << ", received value: " << int(*m_type);
             return false;
         }
     }

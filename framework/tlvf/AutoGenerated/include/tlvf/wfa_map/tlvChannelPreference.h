@@ -93,7 +93,7 @@ class cOperatingClasses : public BaseClass
             }
             void struct_init(){
             }
-        } sFlags;
+        } __attribute__((packed)) sFlags;
         
         uint8_t& operating_class();
         uint8_t& channel_list_length();

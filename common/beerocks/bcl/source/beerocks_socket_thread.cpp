@@ -18,9 +18,9 @@
 using namespace beerocks;
 
 typedef struct sTlvHeader {
-    uint16_t type;
+    uint8_t type;
     uint16_t length;
-} sTlvHeader;
+}  __attribute__((packed)) sTlvHeader;
 
 #define DEFAULT_MAX_SOCKET_CONNECTIONS 10
 #define TX_BUFFER_UDS (tx_buffer + sizeof(beerocks::message::sUdsHeader))
@@ -192,13 +192,12 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
 
     bool ret = true;
 
-    uint16_t type   = tlv->type;
+    uint8_t type   = tlv->type;
     uint16_t length = tlv->length;
 
     do {
 
         if (uds_header->swap_needed) {
-            swap_16(type);
             swap_16(length);
         }
 

@@ -51,7 +51,7 @@ class cCmduHeader : public BaseClass
                 relay_indicator = 0x0;
                 reserved = 0x0;
             }
-        } sFlags;
+        } __attribute__((packed)) sFlags;
         
         const uint8_t& message_version();
         const uint8_t& reserved();

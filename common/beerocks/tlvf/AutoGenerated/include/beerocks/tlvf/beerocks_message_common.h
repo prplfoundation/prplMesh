@@ -46,7 +46,7 @@ typedef struct sVapInfo {
     void struct_init(){
         mac.struct_init();
     }
-} sVapInfo;
+} __attribute__((packed)) sVapInfo;
 
 typedef struct sSonConfig {
     uint8_t monitor_total_ch_load_notification_lo_th_percent;
@@ -70,7 +70,7 @@ typedef struct sSonConfig {
     }
     void struct_init(){
     }
-} sSonConfig;
+} __attribute__((packed)) sSonConfig;
 
 typedef struct sPlatformSettings {
     char front_ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
@@ -107,7 +107,7 @@ typedef struct sPlatformSettings {
                 (backhaul_vaps_bssid[i]).struct_init();
             }
     }
-} sPlatformSettings;
+} __attribute__((packed)) sPlatformSettings;
 
 typedef struct sWlanSettings {
     uint8_t band_enabled;
@@ -120,7 +120,7 @@ typedef struct sWlanSettings {
     }
     void struct_init(){
     }
-} sWlanSettings;
+} __attribute__((packed)) sWlanSettings;
 
 typedef struct sApSetRestrictedFailsafe {
     uint8_t failsafe_channel;
@@ -132,7 +132,7 @@ typedef struct sApSetRestrictedFailsafe {
     }
     void struct_init(){
     }
-} sApSetRestrictedFailsafe;
+} __attribute__((packed)) sApSetRestrictedFailsafe;
 
 typedef struct sApChannelSwitch {
     uint8_t channel;
@@ -146,7 +146,7 @@ typedef struct sApChannelSwitch {
     }
     void struct_init(){
     }
-} sApChannelSwitch;
+} __attribute__((packed)) sApChannelSwitch;
 
 typedef struct sDfsCacCompleted {
     uint32_t timeout;
@@ -160,7 +160,7 @@ typedef struct sDfsCacCompleted {
     }
     void struct_init(){
     }
-} sDfsCacCompleted;
+} __attribute__((packed)) sDfsCacCompleted;
 
 typedef struct sDfsChannelAvailable {
     uint32_t frequency;
@@ -173,7 +173,7 @@ typedef struct sDfsChannelAvailable {
     }
     void struct_init(){
     }
-} sDfsChannelAvailable;
+} __attribute__((packed)) sDfsChannelAvailable;
 
 typedef struct sWifiChannel {
     uint8_t channel;
@@ -187,7 +187,7 @@ typedef struct sWifiChannel {
     }
     void struct_init(){
     }
-} sWifiChannel;
+} __attribute__((packed)) sWifiChannel;
 
 typedef struct sClientAssociationParams {
     beerocks::net::sMacAddr mac;
@@ -204,7 +204,7 @@ typedef struct sClientAssociationParams {
         bssid.struct_init();
         capabilities.struct_init();
     }
-} sClientAssociationParams;
+} __attribute__((packed)) sClientAssociationParams;
 
 typedef struct sClientDisconnectionParams {
     beerocks::net::sMacAddr mac;
@@ -221,7 +221,7 @@ typedef struct sClientDisconnectionParams {
         mac.struct_init();
         bssid.struct_init();
     }
-} sClientDisconnectionParams;
+} __attribute__((packed)) sClientDisconnectionParams;
 
 typedef struct sClientMonitoringParams {
     beerocks::net::sMacAddr mac;
@@ -240,7 +240,7 @@ typedef struct sClientMonitoringParams {
         bridge_4addr_mac.struct_init();
         ipv4.struct_init();
     }
-} sClientMonitoringParams;
+} __attribute__((packed)) sClientMonitoringParams;
 
 typedef struct sConfigVapInfo {
     uint8_t type;
@@ -255,7 +255,7 @@ typedef struct sConfigVapInfo {
     }
     void struct_init(){
     }
-} sConfigVapInfo;
+} __attribute__((packed)) sConfigVapInfo;
 
 typedef struct sStaStatsParams {
     beerocks::net::sMacAddr mac;
@@ -284,7 +284,7 @@ typedef struct sStaStatsParams {
     void struct_init(){
         mac.struct_init();
     }
-} sStaStatsParams;
+} __attribute__((packed)) sStaStatsParams;
 
 typedef struct sApStatsParams {
     uint32_t rx_packets;
@@ -313,7 +313,7 @@ typedef struct sApStatsParams {
     }
     void struct_init(){
     }
-} sApStatsParams;
+} __attribute__((packed)) sApStatsParams;
 
 typedef struct sApLoadNotificationParams {
     uint16_t stats_delta_ms;
@@ -327,7 +327,7 @@ typedef struct sApLoadNotificationParams {
     }
     void struct_init(){
     }
-} sApLoadNotificationParams;
+} __attribute__((packed)) sApLoadNotificationParams;
 
 typedef struct sApActivityNotificationParams {
     uint8_t ap_activity_mode;
@@ -335,7 +335,7 @@ typedef struct sApActivityNotificationParams {
     }
     void struct_init(){
     }
-} sApActivityNotificationParams;
+} __attribute__((packed)) sApActivityNotificationParams;
 
 typedef struct sNodeRssiMeasurementRequest {
     beerocks::net::sMacAddr mac;
@@ -355,7 +355,7 @@ typedef struct sNodeRssiMeasurementRequest {
         mac.struct_init();
         ipv4.struct_init();
     }
-} sNodeRssiMeasurementRequest;
+} __attribute__((packed)) sNodeRssiMeasurementRequest;
 
 typedef struct sNodeRssiMeasurement {
     beerocks::net::sMacAddr mac;
@@ -374,7 +374,7 @@ typedef struct sNodeRssiMeasurement {
     void struct_init(){
         mac.struct_init();
     }
-} sNodeRssiMeasurement;
+} __attribute__((packed)) sNodeRssiMeasurement;
 
 typedef struct sNodeHostap {
     char iface_name[beerocks::message::IFACE_NAME_LENGTH];
@@ -398,7 +398,7 @@ typedef struct sNodeHostap {
                 (supported_channels[i]).struct_init();
             }
     }
-} sNodeHostap;
+} __attribute__((packed)) sNodeHostap;
 
 typedef struct sVapsList {
     sVapInfo vaps[beerocks::IFACE_TOTAL_VAPS];
@@ -412,7 +412,7 @@ typedef struct sVapsList {
                 (vaps[i]).struct_init();
             }
     }
-} sVapsList;
+} __attribute__((packed)) sVapsList;
 
 typedef struct sArpMonitorData {
     beerocks::net::sMacAddr mac;
@@ -430,7 +430,7 @@ typedef struct sArpMonitorData {
         mac.struct_init();
         ipv4.struct_init();
     }
-} sArpMonitorData;
+} __attribute__((packed)) sArpMonitorData;
 
 typedef struct sArpQuery {
     beerocks::net::sMacAddr mac;
@@ -443,7 +443,7 @@ typedef struct sArpQuery {
         mac.struct_init();
         ipv4.struct_init();
     }
-} sArpQuery;
+} __attribute__((packed)) sArpQuery;
 
 typedef struct sNodeBssSteerTarget {
     beerocks::net::sMacAddr mac;
@@ -454,7 +454,7 @@ typedef struct sNodeBssSteerTarget {
     void struct_init(){
         mac.struct_init();
     }
-} sNodeBssSteerTarget;
+} __attribute__((packed)) sNodeBssSteerTarget;
 
 typedef struct sNodeBssSteerRequest {
     beerocks::net::sMacAddr mac;
@@ -470,7 +470,7 @@ typedef struct sNodeBssSteerRequest {
         mac.struct_init();
         bssid.struct_init();
     }
-} sNodeBssSteerRequest;
+} __attribute__((packed)) sNodeBssSteerRequest;
 
 typedef struct sNodeBssSteerResponse {
     beerocks::net::sMacAddr mac;
@@ -481,7 +481,7 @@ typedef struct sNodeBssSteerResponse {
     void struct_init(){
         mac.struct_init();
     }
-} sNodeBssSteerResponse;
+} __attribute__((packed)) sNodeBssSteerResponse;
 
 typedef struct sNeighborSetParams11k {
     beerocks::net::sMacAddr bssid;
@@ -510,7 +510,7 @@ typedef struct sNeighborSetParams11k {
     void struct_init(){
         bssid.struct_init();
     }
-} sNeighborSetParams11k;
+} __attribute__((packed)) sNeighborSetParams11k;
 
 typedef struct sNeighborRemoveParams11k {
     beerocks::net::sMacAddr bssid;
@@ -522,7 +522,7 @@ typedef struct sNeighborRemoveParams11k {
     void struct_init(){
         bssid.struct_init();
     }
-} sNeighborRemoveParams11k;
+} __attribute__((packed)) sNeighborRemoveParams11k;
 
 typedef struct sStaChannelLoadRequest11k {
     uint8_t channel;
@@ -555,7 +555,7 @@ typedef struct sStaChannelLoadRequest11k {
     void struct_init(){
         sta_mac.struct_init();
     }
-} sStaChannelLoadRequest11k;
+} __attribute__((packed)) sStaChannelLoadRequest11k;
 
 typedef struct sStaChannelLoadResponse11k {
     uint8_t channel;
@@ -582,7 +582,7 @@ typedef struct sStaChannelLoadResponse11k {
     void struct_init(){
         sta_mac.struct_init();
     }
-} sStaChannelLoadResponse11k;
+} __attribute__((packed)) sStaChannelLoadResponse11k;
 
 typedef struct sBeaconRequest11k {
     uint8_t measurement_mode;
@@ -624,7 +624,7 @@ typedef struct sBeaconRequest11k {
         sta_mac.struct_init();
         bssid.struct_init();
     }
-} sBeaconRequest11k;
+} __attribute__((packed)) sBeaconRequest11k;
 
 typedef struct sBeaconResponse11k {
     uint8_t channel;
@@ -660,7 +660,7 @@ typedef struct sBeaconResponse11k {
         sta_mac.struct_init();
         bssid.struct_init();
     }
-} sBeaconResponse11k;
+} __attribute__((packed)) sBeaconResponse11k;
 
 typedef struct sStatisticsRequest11k {
     beerocks::net::sMacAddr sta_mac;
@@ -718,7 +718,7 @@ typedef struct sStatisticsRequest11k {
         sta_mac.struct_init();
         peer_mac_addr.struct_init();
     }
-} sStatisticsRequest11k;
+} __attribute__((packed)) sStatisticsRequest11k;
 
 typedef struct sStatisticsResponse11k {
     uint8_t dialog_token;
@@ -744,7 +744,7 @@ typedef struct sStatisticsResponse11k {
     void struct_init(){
         sta_mac.struct_init();
     }
-} sStatisticsResponse11k;
+} __attribute__((packed)) sStatisticsResponse11k;
 
 typedef struct sLinkMeasurementsResponse11k {
     uint8_t dialog_token;
@@ -773,7 +773,7 @@ typedef struct sLinkMeasurementsResponse11k {
     void struct_init(){
         sta_mac.struct_init();
     }
-} sLinkMeasurementsResponse11k;
+} __attribute__((packed)) sLinkMeasurementsResponse11k;
 
 typedef struct sBackhaulParams {
     beerocks::net::sIpv4Addr gw_ipv4;
@@ -816,7 +816,7 @@ typedef struct sBackhaulParams {
                 (backhaul_scan_measurement_list[i]).struct_init();
             }
     }
-} sBackhaulParams;
+} __attribute__((packed)) sBackhaulParams;
 
 typedef struct sBackhaulRoam {
     beerocks::net::sMacAddr bssid;
@@ -827,7 +827,7 @@ typedef struct sBackhaulRoam {
     void struct_init(){
         bssid.struct_init();
     }
-} sBackhaulRoam;
+} __attribute__((packed)) sBackhaulRoam;
 
 typedef struct sBackhaulRssi {
     int8_t rssi;
@@ -835,7 +835,7 @@ typedef struct sBackhaulRssi {
     }
     void struct_init(){
     }
-} sBackhaulRssi;
+} __attribute__((packed)) sBackhaulRssi;
 
 typedef struct sLoggingLevelChange {
     beerocks::net::sMacAddr mac;
@@ -848,7 +848,7 @@ typedef struct sLoggingLevelChange {
     void struct_init(){
         mac.struct_init();
     }
-} sLoggingLevelChange;
+} __attribute__((packed)) sLoggingLevelChange;
 
 typedef struct sVersions {
     char master_version[beerocks::message::VERSION_LENGTH];
@@ -857,7 +857,7 @@ typedef struct sVersions {
     }
     void struct_init(){
     }
-} sVersions;
+} __attribute__((packed)) sVersions;
 
 typedef struct sWifiCredentials {
     eWiFiSec wifi_sec;
@@ -871,7 +871,7 @@ typedef struct sWifiCredentials {
     }
     void struct_init(){
     }
-} sWifiCredentials;
+} __attribute__((packed)) sWifiCredentials;
 
 typedef struct sOnboarding {
     uint8_t onboarding;
@@ -879,7 +879,7 @@ typedef struct sOnboarding {
     }
     void struct_init(){
     }
-} sOnboarding;
+} __attribute__((packed)) sOnboarding;
 
 typedef struct sAdminCredentials {
     char user_password[beerocks::message::USER_PASS_LEN];
@@ -887,7 +887,7 @@ typedef struct sAdminCredentials {
     }
     void struct_init(){
     }
-} sAdminCredentials;
+} __attribute__((packed)) sAdminCredentials;
 
 typedef struct sDeviceInfo {
     char manufacturer[beerocks::message::DEV_INFO_STR_MAX_LEN];
@@ -907,7 +907,7 @@ typedef struct sDeviceInfo {
     }
     void struct_init(){
     }
-} sDeviceInfo;
+} __attribute__((packed)) sDeviceInfo;
 
 typedef struct sRestrictedChannels {
     beerocks::net::sMacAddr hostap_mac;
@@ -919,7 +919,7 @@ typedef struct sRestrictedChannels {
     void struct_init(){
         hostap_mac.struct_init();
     }
-} sRestrictedChannels;
+} __attribute__((packed)) sRestrictedChannels;
 
 typedef struct sSteeringApConfig {
     beerocks::net::sMacAddr bssid;
@@ -937,7 +937,7 @@ typedef struct sSteeringApConfig {
     void struct_init(){
         bssid.struct_init();
     }
-} sSteeringApConfig;
+} __attribute__((packed)) sSteeringApConfig;
 
 typedef struct sSteeringClientConfig {
     uint32_t snrProbeHWM;
@@ -960,7 +960,7 @@ typedef struct sSteeringClientConfig {
     }
     void struct_init(){
     }
-} sSteeringClientConfig;
+} __attribute__((packed)) sSteeringClientConfig;
 
 typedef struct sSteeringSetGroupRequest {
     uint32_t steeringGroupIndex;
@@ -973,7 +973,7 @@ typedef struct sSteeringSetGroupRequest {
     void struct_init(){
         cfg.struct_init();
     }
-} sSteeringSetGroupRequest;
+} __attribute__((packed)) sSteeringSetGroupRequest;
 
 typedef struct sSteeringSetGroupResponse {
     int32_t error_code;
@@ -982,7 +982,7 @@ typedef struct sSteeringSetGroupResponse {
     }
     void struct_init(){
     }
-} sSteeringSetGroupResponse;
+} __attribute__((packed)) sSteeringSetGroupResponse;
 
 typedef struct sSteeringClientSetRequest {
     uint32_t steeringGroupIndex;
@@ -1001,7 +1001,7 @@ typedef struct sSteeringClientSetRequest {
         client_mac.struct_init();
         config.struct_init();
     }
-} sSteeringClientSetRequest;
+} __attribute__((packed)) sSteeringClientSetRequest;
 
 typedef struct sSteeringClientSetResponse {
     int32_t error_code;
@@ -1010,7 +1010,7 @@ typedef struct sSteeringClientSetResponse {
     }
     void struct_init(){
     }
-} sSteeringClientSetResponse;
+} __attribute__((packed)) sSteeringClientSetResponse;
 
 typedef struct sSteeringEvProbeReq {
     beerocks::net::sMacAddr client_mac;
@@ -1026,7 +1026,7 @@ typedef struct sSteeringEvProbeReq {
         client_mac.struct_init();
         bssid.struct_init();
     }
-} sSteeringEvProbeReq;
+} __attribute__((packed)) sSteeringEvProbeReq;
 
 typedef struct sSteeringEvAuthFail {
     beerocks::net::sMacAddr client_mac;
@@ -1043,7 +1043,7 @@ typedef struct sSteeringEvAuthFail {
         client_mac.struct_init();
         bssid.struct_init();
     }
-} sSteeringEvAuthFail;
+} __attribute__((packed)) sSteeringEvAuthFail;
 
 typedef struct sClientDisconnectResponse {
     int32_t error_code;
@@ -1052,7 +1052,7 @@ typedef struct sClientDisconnectResponse {
     }
     void struct_init(){
     }
-} sClientDisconnectResponse;
+} __attribute__((packed)) sClientDisconnectResponse;
 
 typedef struct sSteeringDatarateInfo {
     uint8_t maxChwidth;
@@ -1066,7 +1066,7 @@ typedef struct sSteeringDatarateInfo {
     }
     void struct_init(){
     }
-} sSteeringDatarateInfo;
+} __attribute__((packed)) sSteeringDatarateInfo;
 
 typedef struct sSteeringRrmCaps {
     uint8_t linkMeas;
@@ -1080,7 +1080,7 @@ typedef struct sSteeringRrmCaps {
     }
     void struct_init(){
     }
-} sSteeringRrmCaps;
+} __attribute__((packed)) sSteeringRrmCaps;
 
 enum eDisconnectSource: uint8_t {
     eDisconnect_Source_Unknown = 0x0,
@@ -1133,7 +1133,7 @@ typedef struct sSteeringEvConnect {
         datarateInfo.struct_init();
         rrmCaps.struct_init();
     }
-} sSteeringEvConnect;
+} __attribute__((packed)) sSteeringEvConnect;
 
 typedef struct sSteeringEvDisconnect {
     beerocks::net::sMacAddr client_mac;
@@ -1150,7 +1150,7 @@ typedef struct sSteeringEvDisconnect {
         client_mac.struct_init();
         bssid.struct_init();
     }
-} sSteeringEvDisconnect;
+} __attribute__((packed)) sSteeringEvDisconnect;
 
 typedef struct sSteeringEvActivity {
     beerocks::net::sMacAddr client_mac;
@@ -1164,7 +1164,7 @@ typedef struct sSteeringEvActivity {
         client_mac.struct_init();
         bssid.struct_init();
     }
-} sSteeringEvActivity;
+} __attribute__((packed)) sSteeringEvActivity;
 
 typedef struct sSteeringEvSnrXing {
     beerocks::net::sMacAddr client_mac;
@@ -1182,7 +1182,7 @@ typedef struct sSteeringEvSnrXing {
         client_mac.struct_init();
         bssid.struct_init();
     }
-} sSteeringEvSnrXing;
+} __attribute__((packed)) sSteeringEvSnrXing;
 
 typedef struct sSteeringEvSnr {
     beerocks::net::sMacAddr client_mac;
@@ -1197,7 +1197,7 @@ typedef struct sSteeringEvSnr {
         client_mac.struct_init();
         bssid.struct_init();
     }
-} sSteeringEvSnr;
+} __attribute__((packed)) sSteeringEvSnr;
 
 
 }; // close namespace: beerocks_message
