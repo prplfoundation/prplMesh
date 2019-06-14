@@ -65,6 +65,11 @@ public:
     static void copy_string(char *dst, const char *src, size_t dst_len);
 
     static std::vector<std::string> str_split(const std::string &s, char delim);
+    
+#ifndef __GCC__
+#define __builtin_FILE() __FILE__
+#define __builtin_LINE() __LINE__
+#endif
 
     static int64_t stoi(std::string str, const char *calling_file = __builtin_FILE(),
                         int calling_line = __builtin_LINE());
