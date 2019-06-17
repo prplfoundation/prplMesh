@@ -1,0 +1,297 @@
+@startuml monitor
+
+monitor_thread *-- mon_wlan_hal
+monitor_thread *-- monitor_db
+monitor_thread : after_select()
+
+monitor_thread : monitor_rssi
+monitor_thread : monitor_stats
+monitor_rssi : start()
+monitor_rssi : process()
+
+
+mon_wlan_hal : update_stations_stats()
+mon_wlan_hal : update_ap_stats()
+mon_wlan_hal o-- monitor_db
+
+monitor_db *-- monitor_rssi
+monitor_db *-- monitor_stats
+monitor_stats : start()
+monitor_stats : process()
+
+@enduml
+
+@startuml thread_base
+
+class thread_base {
+    +thread_base()
+    +~thread_base()
+    +start()
+    +stop()
+    #{abstract} init()
+    #{abstract} work()
+    -run()
+    -worker : std::thread
+}
+
+@enduml
+
+@startuml socket_thread
+
+class thread_base {
+    +thread_base()
+    +~thread_base()
+    +start()
+    +stop()
+    #{abstract} init()
+    #{abstract} work()
+    -run()
+    -worker : std::thread
+}
+
+class SocketSelect {
+    +addSocket()
+    +removeSocket()
+    +selectSocket()
+    +readReady()
+    +clearReady()
+    -sockets[]
+}
+
+class socket_thread {
+    +socket_thread()
+    +~socket_thread()
+    +init()
+    +work()
+    #{abstract} handle_cmdu()
+    #read_ready()
+    #before_select()
+    #after_select()
+    #add_socket()
+    #remove_socket()
+    -handle_cmdu_message_uds()
+    -unix_socket_path : string
+    -rx_buffer[]
+    -tx_buffer[]
+    -sockets[]
+    -server_socket
+    -select : SocketSelect
+}
+
+socket_thread --|> thread_base 
+socket_thread *-- SocketSelect
+
+
+@enduml
+
+@startuml btl
+
+class thread_base
+class socket_thread
+class LocalBusInterface
+class Poller
+
+class transport_socket_thread {
+    +transport_socket_thread()
+    +~transport_socket_thread()
+    +init() override
+    +work() override
+    #add_socket() override
+    #remove_socket() override
+    #read_ready() override
+    #configure_ieee1905_transport_interfaces()
+    #bus_subscribe()
+    #bus_connect()
+    #send_cmdu_to_bus()
+    -bus_init()
+    -bus_send()
+    -handle_cmdu_message_bus()
+    -bus : LocalBusInterface 
+    -poller : Poller
+}
+
+thread_base <|-- socket_thread
+socket_thread <|-- transport_socket_thread
+transport_socket_thread *-- Poller
+transport_socket_thread *-- LocalBusInterface
+
+@enduml
+
+@startuml bwl
+
+abstract class base_wlan_hal {
+    #base_wlan_hal()
+    +~base_wlan_hal()
+    +{abstract} attach()
+    +{abstract} detach()
+    +{abstract} refresh_radio_info()
+    +{abstract} ping()
+    +{abstract} refresh_vaps_info()
+    +{abstract} process_ext_events()
+    +process_int_events()
+    +get_ext_events_fd()
+    +get_int_events_fd()
+    +get_radio_info()
+    #event_queue_push()
+    
+    #m_fd_ext_events
+    -m_fd_int_events
+    -m_queue_events
+    -m_int_event_cb
+}
+
+abstract class ap_wlan_hal {
+    +~ap_wlan_hal()
+    +sta_allow()
+    +sta_deny()
+    +sta_disassoc()
+    +sta_bss_steer()
+    +switch_channel()
+    +failsafe_channel_set()
+    +restricted_channels_set()
+    +read_acs_report()
+}
+
+abstract class mon_wlan_hal {
+    +~mon_wlan_hal()
+    +update_radio_stats()
+    +update_vap_stats()
+    +sta_beacon_11k_request()
+}
+
+abstract class sta_wlan_hal {
+    +~sta_wlan_hal()
+    +set_4addr_mode()
+    +initiate_scan()
+    +get_scan_results()
+    +connect()
+    +get_channel()
+    +disconnect()
+}
+
+abstract class base_wlan_hal_dwpal {
+    +~base_wlan_hal_dwpal()
+    +detach()
+    +refresh_radio_info()
+    +ping()
+    +refresh_vaps_info()
+    +process_ext_events()
+    #base_wlan_hal_dwpal()
+    #process_dwpal_event()
+    #dwpal_send_cmd()
+    -refresh_vap_info()
+    
+    -m_dwpal_ctx
+    -m_wpa_ctrl_buffer
+}
+
+class ap_wlan_hal_dwpal {
+    +ap_wlan_hal_dwpal()
+    +~ap_wlan_hal_dwpal()
+    +sta_allow()
+    +sta_deny()
+    +sta_disassoc()
+    +sta_bss_steer()
+    +switch_channel()
+    +failsafe_channel_set()
+    +restricted_channels_set()
+    +read_acs_report()
+    #process_dwpal_event()
+}
+
+class mon_wlan_hal_dwpal {
+    +mon_wlan_hal_dwpal()
+    +~mon_wlan_hal_dwpal()
+    +update_radio_stats()
+    +update_vap_stats()
+    +sta_beacon_11k_request()
+    #process_dwpal_event()
+}
+
+class sta_wlan_hal_dwpal {
+    +sta_wlan_hal_dwpal()
+    +~sta_wlan_hal_dwpal()
+    +set_4addr_mode()
+    +initiate_scan()
+    +get_scan_results()
+    +connect()
+    +get_channel()
+    +disconnect()
+    #process_dwpal_event()
+
+    -m_active_ssid
+    -m_active_bssid
+    -m_active_channel
+    -m_active_network_id
+}
+
+base_wlan_hal <|-- ap_wlan_hal
+base_wlan_hal <|-- mon_wlan_hal
+base_wlan_hal <|-- sta_wlan_hal
+base_wlan_hal <|-- base_wlan_hal_dwpal
+
+base_wlan_hal_dwpal <|-- ap_wlan_hal_dwpal
+ap_wlan_hal <|-- ap_wlan_hal_dwpal
+
+base_wlan_hal_dwpal <|-- mon_wlan_hal_dwpal
+mon_wlan_hal <|-- mon_wlan_hal_dwpal
+
+base_wlan_hal_dwpal <|-- sta_wlan_hal_dwpal
+sta_wlan_hal <|-- sta_wlan_hal_dwpal
+
+@enduml
+
+@startuml bwl_attach_fsm
+
+skinparam state {
+    EndColor Red
+}
+
+[*] --> Delay : on attach
+Detach --> [*]
+Delay --> Delay : wait
+Delay --> Init
+Init : hostap_interface_attach()
+Init --> Detach : failure
+Init --> GetRadioInfo : success
+GetRadioInfo : test wifi_ctrl_enabled 
+GetRadioInfo --> Attached : success
+GetRadioInfo --> GetRadioInfo : fail
+GetRadioInfo --> Detach : timeout
+Attached --> Detach : on detach
+Attached --> Attached
+
+@enduml
+
+@startuml bwl_example
+box "Controller" #LightBlue
+participant son_master
+end box
+box "Agent"
+participant son_slave
+participant ap_manager
+participant bwl
+endbox
+participant hostapd
+
+== Attach FSM ==
+ap_manager -> bwl : attach
+activate bwl
+bwl -> ap_manager : success
+deactivate bwl
+== read acs report ==
+ap_manager -> bwl : ap_wlan_hal->read_acs_report()
+bwl -> hostapd : GET_ACS_REPORT
+hostapd -> bwl : reply
+bwl -> ap_manager : reply
+ap_manager -> son_slave : acs_report
+== Activate slave ==
+son_slave -> son_master : join
+...
+son_master -> son_slave : switch channel
+son_slave -> ap_manager : switch channel
+ap_manager -> bwl : ap_wlan_hal->switch_channel()
+bwl -> hostapd : CHAN_SWITCH
+
+
+@enduml

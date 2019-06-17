@@ -1,0 +1,18 @@
+@startuml
+(*) --> "Init"
+note right: Create server socket and selector
+-right-> before_select
+--> select
+note right: with timeout
+--> after_select
+note right: handle non cmdu sockets
+--> "Loop over CMDU sockets"
+if "socket ready" then
+  --> "handle_cmdu"
+else
+-> "Loop over CMDU sockets"
+endif
+
+--> before_select
+
+@enduml
