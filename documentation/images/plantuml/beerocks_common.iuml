@@ -1,0 +1,80 @@
+@startuml thread_base
+
+class thread_base {
+    +thread_base()
+    +~thread_base()
+    +start()
+    +stop()
+    #{abstract} init()
+    #{abstract} work()
+    -run()
+    -worker : std::thread
+}
+
+class SocketSelect {
+    +addSocket()
+    +removeSocket()
+    +selectSocket()
+    +readReady()
+    +clearReady()
+    -sockets[]
+}
+
+class socket_thread {
+    +socket_thread()
+    +~socket_thread()
+    +init()
+    +work()
+    #{abstract} handle_cmdu()
+    #read_ready()
+    #before_select()
+    #after_select()
+    #add_socket()
+    #remove_socket()
+    -handle_cmdu_message_uds()
+    -unix_socket_path : string
+    -rx_buffer[]
+    -tx_buffer[]
+    -sockets[]
+    -server_socket
+    -select : SocketSelect
+}
+
+thread_base --|> socket_thread
+socket_thread --* SocketSelect
+
+
+@enduml
+
+@startuml btl
+
+class thread_base
+class socket_thread
+class LocalBusInterface
+class Poller
+
+class transport_socket_thread {
+    +transport_socket_thread()
+    +~transport_socket_thread()
+    +init() override
+    +work() override
+    #add_socket() override
+    #remove_socket() override
+    #read_ready() override
+    #configure_ieee1905_transport_interfaces()
+    #bus_subscribe()
+    #bus_connect()
+    #send_cmdu_to_bus()
+    -bus_init()
+    -bus_send()
+    -handle_cmdu_message_bus()
+    -bus : LocalBusInterface 
+    -poller : Poller
+}
+
+thread_base --|> socket_thread
+socket_thread --|> transport_socket_thread
+transport_socket_thread --* Poller
+transport_socket_thread --* LocalBusInterface
+
+@enduml

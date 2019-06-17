@@ -1,0 +1,272 @@
+@startuml context
+
+class Context {
+-ctx
++Context()
++~Context()
+}
+@enduml
+
+@startuml message
+class Frame {
+-data
+-len
++Frame(len)
++Frame(len, data)
++~Frame()
+..getters / setters..
++len()
++get()
++set(data, len)
+}
+
+class Header {
++version : uint32_t
++len : uint32_t
+}
+
+Message *--Header
+Message *--Frame
+
+class Message {
+-topic : string
+-hdr : Header
+-data : Frame
+..getters / setters..
++version()
++len()
++data()
++topic()
+}
+
+@enduml
+
+@startuml socket
+
+class Context {
+-ctx
++Context()
++~Context()
+}
+
+enum SocketType {
+    PUB
+    SUB
+}
+
+Socket *--Context
+Socket *--SocketType
+
+class Socket {
+__members__
+-type_ : SocketType
+-socket_ : void*
+-fd_ : int
+__functions__
++Socket(context, type)
++Socket(fd)
++~Socket()
+..pub/sub iface..
++Connect(endpoint)
++Disconnect(endpoint)
++Subscribe(topic)
++Unsubscribe(topic)
++Send(message)
++Receive(message)
+-Close()
+..getters / setters..
++fd()
++set_fd()
++handle()
++type()
+}
+
+@enduml
+
+@startuml poller
+class Socket {
++type()
++handle()
++fd()
+}
+
+Poller *-- Socket
+
+class Poller {
+-items_ : zmq_pollitem_t[]
++Poller();
++~Poller();
++Add(socket, events)
++Modify(socket, events)
++Remove(socket)
++Poll(timeout)
++CheckEvents(socket)
+}
+
+@enduml
+
+@startuml BrokerConfig
+
+class BrokerConfig {
+-path : string
+-name : string
+-endpoints[] : string
+-security : BrokerSecurity
+}
+
+@enduml
+
+@startuml Broker
+
+Broker *-- BrokerConfig
+class Broker {
+-config_ : BrokerConfig
+-frontend_ : msglib_socket*
+-backend_ : msglib_socket*
++Broker(conf)
++~Broker()
++Bind(type, endpoint)
++Run()
++Init()
+}
+@enduml
+
+@startuml BrokerInterface
+
+class BrokerConfig {
+-path : string
+-name : string
+-endpoints[] : string
+-security : BrokerSecurity
+}
+
+class Broker {
+-ctx_ : void*
+-config_ : BrokerConfig
+-frontend_ : msglib_socket*
+-backend_ : msglib_socket*
++Broker()
++Broker(conf)
++~Broker()
++Bind(type, endpoint)
++Run()
+-Init()
+-Bind()
+}
+
+class BrokerInterface {
+#config_
+#sub_
+#pub_
+__
++BrokerInterface(context, conf)
++~BrokerInterface()
++Init()
+..getters / setters..
++subscriber()
++publisher()
+}
+
+Broker *-- BrokerConfig
+BrokerInterface *-- BrokerConfig
+
+@enduml
+
+@startuml local_bus
+
+class Poller #LightBlue {
+-items_ : msglib_pollitems*
++Add()
++Modify()
++Remove()
++Poll()
++CheckEvent()
+}
+
+class Socket {
+-sock_ : msglib_socket*
++fd()
+{abstract} +Pollable()
++Connect()
++Close()
+}
+
+class PubSocket {
++Send()
+}
+
+class SubSocket {
+-topics[]
++Receive()
++Subscribe()
++UnSubscribe()
+}
+
+Socket <|-- PubSocket
+Socket <|-- SubSocket
+Poller o-- Socket
+BrokerInterface *-- PubSocket
+BrokerInterface *-- SubSocket
+
+' Message *-- PubSocket
+' Message *-- SubSocket
+
+class Broker {
+-config_ : BrokerConfig
+-frontend_ : msglib_socket*
+-backend_ : msglib_socket*
++Broker()
++Broker(conf)
++Bind(type, endpoint)
++Run()
+-Bind()
+}
+
+class BrokerInterface {
+#config_
+#sub_
+#pub_
+__
++BrokerInterface(conf)
++Init()
+..getters / setters..
++subscriber()
++publisher()
+}
+
+LocalBus *-- LocalBusConfig
+LocalBusInterface *-- LocalBusConfig
+LocalBus <|-- Broker
+LocalBusInterface <|-- BrokerInterface
+
+class LocalBusConfig {
+-path : local_bus.conf
+-name : local_bus
+-endpoints[] : "ipc:~/~/~/publishers", "ipc:~/~/~/subscribers"
+-security : false
+}
+
+class LocalBusInterface #LightBlue {
+-conf
+}
+
+class Message #LightBlue{
+-topic
+-hdr
+-data
+}
+
+class LocalBus #LightBlue {
+-conf
+}
+
+class "Agent/Controller" #MediumPurple {
+    -bus : LocalBusInterface
+    -poller : Poller
+    -cmdu_tx : CmduMessageTx 
+}
+
+"Agent/Controller" *-- LocalBusInterface
+"Agent/Controller" *-- Poller
+
+@enduml

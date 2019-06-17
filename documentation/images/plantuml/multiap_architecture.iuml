@@ -1,0 +1,559 @@
+@startuml local_message_flow
+
+actor user
+box "Platform"
+    participant "WebUI" as web
+    participant "Platform Services" as plat_services
+    participant "Platform Agent" as plat_agent
+endbox
+box "MultiAP Framework" #LightBlue
+    participant "MultiAP Lib" as map_lib
+    participant "MultiAP Controller" as map_cont
+    participant "MultiAP Agent" as map_agent
+    participant "Local Bus" as lbus
+    participant "Network Bus" as nbus
+endbox
+
+== Initialization ==
+plat_agent -> map_lib: init
+map_lib -> lbus: subscribe
+note right
+plat**:**ssid_change**:**cmd
+map**:**ssid_change**:**rep
+endnote
+map_cont -> lbus: subscribe
+note right
+map**:**ssid_change**:**cmd
+endnote
+map_cont -> nbus: subscribe
+note right #LightGreen: ssid_change reply
+map_agent -> nbus: subscribe
+note right #LightGreen: ssid_change command
+
+== Message Flow ==
+autonumber
+
+user -> web: //**trigger ssid change**//
+activate user
+activate web
+web -->> plat_services: MultiAP ssid change
+activate plat_services
+plat_services -->> plat_agent: MultiAP ssid change
+activate plat_agent
+plat_agent -->> plat_services: in progress
+plat_services -->> web: in progress
+deactivate plat_services
+deactivate web
+plat_agent -> map_lib: << MultiAP ssid change >>
+deactivate plat_agent
+map_lib -[#Blue]> lbus: publish //"map**:**ssid_change**:**cmd"//
+activate lbus
+lbus -[#Blue]> map_cont: //"map**:**ssid_change**:**cmd"//
+deactivate lbus
+activate map_cont
+map_cont -[#Green]>]: << network ssid_change >>
+nbus -[#Green]> map_agent: << ssid change >>
+activate map_agent
+map_agent -[#Blue]> lbus: publish //"plat**:**ssid_change**:**cmd"//
+activate lbus
+lbus -[#Blue]> map_lib: //"plat**:**ssid_change**:**cmd"//
+deactivate lbus
+map_lib -> plat_agent: << Platform ssid change >>
+activate plat_agent
+plat_agent -->> plat_services: ssid change
+activate plat_services
+plat_services -->> plat_agent: Done
+deactivate plat_services
+plat_agent -> map_lib: << Done >>
+deactivate plat_agent
+map_lib --[#Blue]> lbus: publish //"plat**:**ssid_change**:**rep"//
+activate lbus
+lbus --[#Blue]> map_agent: //"plat**:**ssid_change**:**rep"//
+deactivate lbus
+map_agent --[#Green]> nbus: << ssid_change Done >>
+deactivate map_agent
+...
+map_cont<-[#Green]-]: << network ssid_change Done >>
+hnote over map_cont #LightGreen: network ssid_change compelted
+map_cont --[#Blue]> lbus: publish //"map**:**ssid_change**:**rep"//
+deactivate map_cont
+activate lbus
+lbus --[#Blue]> map_lib: //"map**:**ssid_change**:**rep"//
+deactivate lbus
+map_lib -> plat_agent: << MultiAP ssid change Done >>
+activate plat_agent
+plat_agent -->> plat_services: Done
+deactivate plat_agent
+activate plat_services
+plat_services -->> web: Done
+deactivate plat_services
+web -> user: //**Done**//
+
+legend bottom
+|= |= Legend |
+|<back:red>   </back>| Platform agent <=> MultiAP framework via MultiAP library|
+|<back:blue>   </back>| MultiAP messaging over the local bus) |
+|<back:green>   </back>| MultiAP messaging over the network bus|
+endlegend
+
+@enduml
+
+@startuml platform_agent_message_flow
+autonumber
+hide footbox
+box "UGW Platform"
+    participant "MultiAP SL" as map_sl
+    participant "wlan SL" as wlan_sl
+    participant "PA platform lib" as pa_plat_lib
+endbox
+box "Platform Agent" #LightSteelBlue
+    'participant "pa control lib" as pa_cont_lib
+    participant "pa PAL" as pa_pal
+    participant "pa core" as pa_core
+endbox
+box "MultiAP Framework" #LightBlue
+    participant "Local Bus library" as map_lib  
+endbox
+
+map_sl -> pa_plat_lib
+activate pa_plat_lib
+pa_plat_lib --> pa_pal
+activate pa_pal
+pa_pal -> pa_core
+activate pa_core
+pa_core -[#Blue]> map_lib: << MultiAP ssid change >>
+pa_core -> pa_pal: in progress
+deactivate pa_core
+pa_pal --> pa_plat_lib: in progress
+deactivate pa_pal
+pa_plat_lib -> map_sl: in progress
+deactivate pa_plat_lib
+deactivate map_sl
+...MultiAP Framework ssid change...
+map_lib -[#Blue]> pa_core: << Platform ssid change >>
+activate pa_core
+pa_core -> pa_pal: pal->ssid_change
+activate pa_pal
+pa_pal --> pa_plat_lib: << Plat SSID change >>
+activate pa_plat_lib
+pa_plat_lib -->> wlan_sl: cal set **ssid**
+activate wlan_sl
+wlan_sl -> wlan_sl: ssid change
+wlan_sl -->> pa_plat_lib: ugw_success
+deactivate wlan_sl
+pa_plat_lib -> pa_pal
+pa_pal -> pa_core: pal->ssid_change done
+deactivate pa_pal
+pa_core -[#Blue]> map_lib: << Done >>
+deactivate pa_core
+
+@enduml
+
+@startuml platform_ugw_message_flow
+'hide footbox
+
+actor user
+box "UGW Platform"
+    participant "WebUI" as web
+    participant "wlan SL" as wlan_sl
+    participant "MultiAP SL" as map_sl
+endbox
+box "Platform Agent" #LightSteelBlue
+    participant "pa library" as pa_lib #LightGray
+    participant "pa ugw PAL" as pa_pal
+    participant "pa core" as pa_core
+endbox
+box "MultiAP Framework" #LightBlue
+    participant "MultiAP Lib" as map_lib  
+endbox
+
+autonumber
+user -> web: //**trigger ssid change**//
+activate user
+activate web
+web -> map_sl: modify **ssid_tmp**
+activate map_sl
+map_sl -> pa_lib: palib ssid change
+pa_lib -> pa_core: core->ssid change
+activate pa_core
+pa_core -[#Blue]> map_lib: << MultiAP ssid change >>
+pa_core -> pa_lib: in progress
+deactivate pa_core
+pa_lib -> map_sl: in progress
+map_sl -> web: ugw_success
+deactivate web
+deactivate map_sl
+...MultiAP Framework ssid change...
+map_lib -[#Blue]> pa_core: << Platform ssid change >>
+activate pa_core
+pa_core -> pa_pal: pal->ssid_change
+activate pa_pal
+pa_pal -->> wlan_sl: cal set **ssid**
+activate wlan_sl
+wlan_sl -> wlan_sl: ssid change
+wlan_sl -->> pa_pal: ugw_success
+deactivate wlan_sl
+pa_pal -> pa_core: pal->ssid_change done
+deactivate pa_pal
+pa_core -[#Blue]> map_lib: << Done >>
+...MultiAP Framework ssid change...
+map_lib -[#Blue]> pa_core: << MultiAP ssid change Done >>
+pa_core -> pa_pal: core ssid_change done
+deactivate pa_core
+activate pa_pal
+pa_pal -->> map_sl: cal set **ssid**
+deactivate pa_pal
+activate map_sl
+map_sl -->> web: notify ssid change done
+deactivate map_sl
+activate web
+web -> user: **ssid change complete**
+deactivate web
+deactivate user
+
+
+@enduml
+
+@startuml local_message_format
+class local_message {
+__**topic**__
+<scope>**:**<cmd_name>**:**<cmd_type>
+__**data**__
+protobuf/TLV/binary
+__
+}
+
+class map_message {
+__**topic**__
+map**:**<cmd_name>**:**<cmd_type>
+__**data**__
+protobuf/TLV/binary
+__
+}
+
+class plat_message {
+__**topic**__
+plat**:**<cmd_name>**:**<cmd_type>
+__**data**__
+protobuf/TLV/binary
+__
+}
+
+local_message --|> map_message
+local_message --|> plat_message
+@enduml
+
+@startuml remote_message_format
+class cmdu_metadata {
+version
+tunnel
+msg_type
+src_mac
+dst_mac
+cookie
+initiator
+payload_length
+}
+
+class remote_message {
+__**topic**__
+<scope>**:**<msg_type>
+__**metadata**__
+cmdu metadata
+__**data**__
+cmdu
+__
+}
+
+class cmdu_tx {
+__**topic**__
+cmdu.tx**:**<msg_type>
+__**metadata**__
+cmdu metadata
+__**data**__
+cmdu
+__
+}
+
+class cmdu_rx {
+__**topic**__
+cmdu.rx**:**<msg_type>
+__**metadata**__
+cmdu metadata
+__**data**__
+cmdu
+__
+}
+
+remote_message --|> cmdu_rx
+remote_message --|> cmdu_tx
+
+@enduml
+
+@startuml remote_message_flow_definitions
+class ChannelPreference.query << (G, LightBlue)>> {
+__**topic**__
+cmdu.tx**:**8004
+__**metadata**__
+...
+tunnel = false
+msg_type = 0x8004
+src_mac = mac_gw
+dst_mac = bcast
+initiator = "map_cont"
+...
+__**data**__
+cmdu
+__
+}
+
+class ChannelPreference.report_local <<(G, LightBlue)>> {
+__**topic**__
+cmdu.tx**:**8005
+__**metadata**__
+...
+tunnel = false
+msg_type = 0x8005
+src_mac = mac_gw
+dst_mac = mac_gw
+initiator = "map_agent"
+...
+__**data**__
+cmdu
+__
+}
+
+class ChannelPreference.report_ext <<(E, LightGreen)>>{
+__**topic**__
+cmdu.tx**:**8005
+__**metadata**__
+...
+tunnel = false
+msg_type = 0x8005
+src_mac = mac_extender
+dst_mac = mac_gw
+initiator = "map_agent"
+...
+__**data**__
+cmdu
+__
+}
+ChannelPreference.query <|-- ChannelPreference.report_ext
+ChannelPreference.query <|-- ChannelPreference.report_local
+@enduml
+
+@startuml remote_message_flow
+'hide footbox
+
+box "MultiAP GW" #LightBlue
+    participant "MultiAP Controller" as gw_map_cont
+    participant "MultiAP Agent" as gw_map_agent
+    participant "Local Bus" as gw_bus
+    participant "1905 Transport" as gw_1905
+endbox
+box "MultiAP EXT" #NavajoWhite
+    participant "1905 Transport" as ire_1905  
+    participant "Local Bus" as ire_bus
+    participant "MultiAP Agent" as ire_map_agent
+endbox
+
+legend bottom
+|= |= Legend |
+|<back:red>   </back>| destination MAC broadcast|
+|<back:blue>   </back>| destination MAC unicast |
+endlegend
+
+== Initialization ==
+gw_map_cont -> gw_bus: subscribe "cmdu.rx**:**8005"
+'note right:  Channel Preferences Report Message
+gw_map_agent -> gw_bus: subscribe "cmdu.rx**:**8004"
+'note right:  Channel Preferences Query Message
+gw_1905 -> gw_bus: subscribe "cmdu.tx"
+ire_map_agent -> ire_bus: subscribe "cmdu.rx**:**8004"
+ire_1905 -> ire_bus: subscribe "cmdu.tx"
+
+== Message Flow ==
+autonumber
+gw_map_cont -[#Red]> gw_bus: publish "cmdu.tx**:**8004"
+note left
+**ChannelPreference query**
+dst_mac=bcast
+src_mac=GW
+endnote
+gw_bus -[#Red]> gw_1905: cmdu.tx**:**8004
+activate gw_1905
+gw_1905 --[#Blue]> gw_bus: publish "cmdu.rx**:**8004"
+gw_1905 -[#Red]> ire_1905: **transmit 1905 CMDU**
+deactivate gw_1905
+activate ire_1905
+gw_bus --[#Blue]> gw_map_agent: cmdu.rx**:**8004
+activate gw_map_agent
+gw_map_agent -[#Black]> gw_map_agent: generate report
+gw_map_agent -[#Blue]> gw_bus: publish "cmdu.tx**:**8005"
+deactivate gw_map_agent
+gw_bus -[#Blue]> gw_1905: cmdu.tx**:**8005
+activate gw_1905
+gw_1905 --[#Blue]> gw_bus: publish "cmdu.rx**:**8005"
+deactivate gw_1905
+gw_bus --[#Blue]> gw_map_cont: cmdu.rx**:**8005
+note left #LightSteelBlue
+**ChannelPreference report**
+dst_mac=GW
+src_mac=GW
+endnote
+...
+ire_1905 --[#Red]> ire_bus: publish "cmdu.rx**:**8004"
+deactivate ire_1905
+ire_bus --[#Red]> ire_map_agent: cmdu.rx**:**8004
+activate ire_map_agent
+ire_map_agent -[#Black]> ire_map_agent: generate report
+ire_map_agent -[#Blue]> ire_bus: publish "cmdu.tx**:**8005"
+deactivate ire_map_agent
+ire_bus -[#Blue]> ire_1905: cmdu.tx**:**8005
+activate ire_1905
+ire_1905 -[#Blue]> gw_1905: **transmit 1905 CMDU**
+deactivate ire_1905
+activate gw_1905
+gw_1905 --[#Blue]> gw_bus: publish "cmdu.rx**:**8005"
+deactivate gw_1905
+gw_bus --[#Blue]> gw_map_cont: cmdu.rx**:**8005
+note left #LightGreen
+**ChannelPreference report**
+dst_mac=GW
+src_mac=EXT
+endnote
+@enduml
+
+== Message Flow ==
+autonumber
+A_mAP_cont -[#Blue]> A_1905: ChannelPreference query
+activate A_mAP_cont
+A_1905 --[#Blue]> A_mAP_agent: ChannelPreference query
+A_1905 -[#Green]> B_1905: << ChannelPreference query **cmdu** >>
+A_mAP_agent --[#Blue]> A_mAP_cont: ChannelPreference report
+...
+B_1905 -[#Green]> B_mAP_agent: ChannelPreference query
+B_mAP_agent -[#Green]> B_1905: ChannelPreference report
+B_1905 --[#Green]> A_1905: << ChannelPreference report **cmdu**>>
+A_1905 --[#Green]> A_mAP_cont: ChannelPreference report
+deactivate A_mAP_cont
+
+legend bottom
+|= |= Legend |
+|<back:blue>   </back>| Node A MultiAP Controller <=> Node A MultiAP Agent via the 1905 transport loopback on local bus|
+|<back:green>   </back>| Node A MultiAP Controller <==> Node B MultiAP Agent via 1905 transport|
+endlegend
+
+@enduml
+
+@startuml 1905_tunneled_message_format
+class 1905_tunneled_message {
+__**topic**__
+cmdu.tx**:**8004
+__**data**__
++1905_message
+__
+}
+
+class 1905_message {
+__**topic**__
+cmdu.tx**:**8004
+__**metadata**__
+...
+-tunnel = true
+msg_type = 0x8004
+src_mac = mac_gw
+dst_mac = bcast
+initiator = "map_cont"
+...
+__**data**__
+cmdu
+__
+}
+
+1905_message <|-- 1905_tunneled_message
+@enduml
+
+@startuml remote_tunneled_message_flow
+'hide footbox
+
+box "MultiAP GW" #LightBlue
+    participant "MultiAP Controller" as gw_map_cont
+    participant "MultiAP Agent" as gw_map_agent
+    participant "Local Bus" as gw_bus
+    participant "1905 Transport" as gw_1905
+endbox
+participant "Network Bus" as network_bus
+box "MultiAP EXT" #NavajoWhite
+    participant "1905 Transport" as ire_1905  
+    participant "Local Bus" as ire_bus
+    participant "MultiAP Agent" as ire_map_agent
+endbox
+
+== Initialization ==
+gw_map_cont -> gw_bus: subscribe "cmdu.rx**:**8005"
+'note right:  Channel Preferences Report Message
+gw_map_agent -> gw_bus: subscribe "cmdu.rx**:**8004"
+'note right:  Channel Preferences Query Message
+gw_1905 -> gw_bus: subscribe "cmdu.tx"
+gw_1905 -> network_bus: subscribe "cmdu.tx"
+ire_map_agent -> ire_bus: subscribe "cmdu.rx**:**8004"
+ire_1905 -> ire_bus: subscribe "cmdu.tx"
+ire_1905 -> network_bus: subscribe "cmdu.tx"
+
+== Message Flow ==
+autonumber
+gw_map_cont -[#Red]> gw_bus: publish "cmdu.tx**:**8004"
+note left
+**ChannelPreference query**
+tunnel=true
+dst_mac=bcast
+src_mac=GW
+endnote
+gw_bus -[#Red]> gw_1905: cmdu.tx**:**8004
+activate gw_1905
+gw_1905 --[#Blue]> gw_bus: publish "cmdu.rx**:**8004"
+gw_1905 -[#Red]> network_bus: publish "cmdu.tx**:**8004"
+deactivate gw_1905
+network_bus -[#Red]> ire_1905: "cmdu.tx**:**8004"
+activate ire_1905
+gw_bus --[#Blue]> gw_map_agent: cmdu.rx**:**8004
+activate gw_map_agent
+gw_map_agent -[#Black]> gw_map_agent: generate report
+gw_map_agent -[#Blue]> gw_bus: publish "cmdu.tx**:**8005"
+deactivate gw_map_agent
+gw_bus -[#Blue]> gw_1905: cmdu.tx**:**8005
+activate gw_1905
+gw_1905 --[#Blue]> gw_bus: publish "cmdu.rx**:**8005"
+deactivate gw_1905
+gw_bus --[#Blue]> gw_map_cont: cmdu.rx**:**8005
+note left #LightSteelBlue
+**ChannelPreference report**
+tunnel=true
+dst_mac=GW
+src_mac=GW
+endnote
+...
+ire_1905 --[#Red]> ire_bus: publish "cmdu.rx**:**8004"
+deactivate ire_1905
+ire_bus --[#Red]> ire_map_agent: cmdu.rx**:**8004
+activate ire_map_agent
+ire_map_agent -[#Black]> ire_map_agent: generate report
+ire_map_agent -[#Blue]> ire_bus: publish "cmdu.tx**:**8005"
+deactivate ire_map_agent
+ire_bus -[#Blue]> ire_1905: cmdu.tx**:**8005
+activate ire_1905
+ire_1905 -[#Blue]> network_bus: publish "cmdu.tx**:**8005"
+deactivate ire_1905
+network_bus -[#Blue]> gw_1905: cmdu.tx**:**8005
+activate gw_1905
+gw_1905 --[#Blue]> gw_bus: publish "cmdu.rx**:**8005"
+deactivate gw_1905
+gw_bus --[#Blue]> gw_map_cont: cmdu.rx**:**8005
+note left #LightGreen
+**ChannelPreference report**
+tunnel=true
+dst_mac=GW
+src_mac=EXT
+endnote
+@enduml
