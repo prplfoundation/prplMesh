@@ -54,9 +54,11 @@ message::sUdsHeader *message_com::get_uds_header(ieee1905_1::CmduMessage &cmdu)
 bool message_com::intel_oui(
     std::shared_ptr<ieee1905_1::tlvVendorSpecific> tlv_vendor_specific_header)
 {
-    return ieee1905_1::tlvVendorSpecific::eVendorOUI(
-               uint32_t(std::get<1>(tlv_vendor_specific_header->vendor_oui(0))) && 0x00FFFFFF) ==
-           ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL;
+    // FIXME: https://github.com/prplfoundation/prplMesh/issues/33
+    // return ieee1905_1::tlvVendorSpecific::eVendorOUI(
+    //            uint32_t(std::get<1>(tlv_vendor_specific_header->vendor_oui(0))) & 0x00FFFFFF) ==
+    //        ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL;
+    return true;
 }
 
 std::shared_ptr<beerocks_message::cACTION_HEADER>

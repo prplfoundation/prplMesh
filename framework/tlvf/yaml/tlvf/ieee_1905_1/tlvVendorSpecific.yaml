@@ -19,7 +19,6 @@ tlvVendorSpecific:
 eVendorOUI:
   _type: enum
   _enum_storage: uint32_t
-  _comment: #TODO change OUI value for Intel
+  # FIXME: https://github.com/prplfoundation/prplMesh/issues/33
   OUI_BYTES: 3
-  OUI_INTEL: 0x000000
-  
+  OUI_INTEL: 0x470300

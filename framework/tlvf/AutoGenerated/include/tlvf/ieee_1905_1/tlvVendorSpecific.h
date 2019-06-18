@@ -34,12 +34,12 @@ class tlvVendorSpecific : public BaseClass
 
         enum eVendorOUI: uint32_t {
             OUI_BYTES = 0x3,
-            OUI_INTEL = 0x0,
+            OUI_INTEL = 0x470300,
         };
         
         const eTlvType& type();
         uint16_t& length();
-        //Use eVendorOUI
+        //Use eVendorOUI2
         std::tuple<bool, uint8_t&> vendor_oui(size_t idx);
         void class_swap();
         static size_t get_initial_size();
