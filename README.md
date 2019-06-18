@@ -23,4 +23,4 @@ repo forall -p -c 'git checkout $REPO_RREV'
 > **_NOTE:_**  DWPAL is currently private (will be public in a week's time), which will cause repo init to fail on fetch. To workaround that, `no-dwpal.xml` is provided - so use the following repo init command instead: `repo init -u https://github.com/prplfoundation/intel_multiap_manifest.git -m no-dwpal.xml`. Note that without DWPAL, only DUMMY mode is supported.
 
 ## Build Instructions
-Each component can be built with CMAKE, or use the [tools/maptools.py](tools/maptools.py) build command.
+Each component can be built with CMAKE, or use the [tools/maptools.py](tools/README.md) build command.
