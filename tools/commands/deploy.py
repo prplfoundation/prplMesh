@@ -6,7 +6,6 @@ import subprocess
 import collections
 import shutil
 import yaml
-import paramiko
 import glob
 import hashlib
 import errno
@@ -26,7 +25,8 @@ class mapconnect(object):
     
     def __connect__(self):
         ''' connect sftp and ssh clients '''
-       
+
+        import paramiko
         # start sftp connection
         t = paramiko.Transport((self.proxy['ip'], 22))
         t.connect(username=self.proxy['user'], password=self.proxy['pass'])
