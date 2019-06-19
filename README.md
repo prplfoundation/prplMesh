@@ -16,7 +16,7 @@ Optional - to avoid ssh keys and password reprompt, add the following to ~/.gitc
 ```
 Then run the following commands to fetch the code:
 ```
-repo init -u https://github.com/prplfoundation/intel_multiap_manifest.git
+repo init -u https://github.com/prplfoundation/prplMesh-manifest.git
 repo sync
 repo forall -p -c 'git checkout $REPO_RREV'
 ```
