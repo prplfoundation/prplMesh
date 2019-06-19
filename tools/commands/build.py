@@ -134,10 +134,10 @@ class acbuilder(builder):
 
 # hostap builder class
 class hostapbuilder(builder):
-    def __init__(self, name, modules_dir, install_dir, make_verbose=False):
+    def __init__(self, name, config_dir, modules_dir, install_dir, make_verbose=False):
         self.make_verbose = make_verbose
         super(hostapbuilder, self).__init__(name, modules_dir, modules_dir, install_dir)
-        self.config_src_fpath = os.path.abspath(os.path.join("config", name + ".config"))
+        self.config_src_fpath = os.path.abspath(os.path.join(config_dir, name + ".config"))
         self.config_dst_fpath = self.build_path + "/.config"
 
     def clean(self):
@@ -194,7 +194,8 @@ class mapbuild(object):
                                     ['--enable-strmax=65536'])
 
             if name == 'hostapd' or name == 'wpa_supplicant':
-                builder = hostapbuilder(name, modules_dir, install_dir, args.make_verbose)
+                builder = hostapbuilder(name, os.path.join(args.map_path, "tools", "config"),
+                                        modules_dir, install_dir, args.make_verbose)
 
             self.run_command(builder, commands)
 
