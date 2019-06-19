@@ -92,7 +92,7 @@ main() {
 
 VERBOSE=false
 HELP=false
-HOSTAPD=`which hostapd 2>/dev/null`
+HOSTAPD=$(realpath ${0%/*}/../../../build/install/bin/hostapd)
 HOSTAPD_CONF=$(realpath ${0%/*}/hostapd.conf)
 HOSTAPD_PID=/var/run/hostapd.pid
 
