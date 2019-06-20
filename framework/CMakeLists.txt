@@ -22,7 +22,7 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 message("-- prefix=${CMAKE_INSTALL_PREFIX}")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -pthread -Wall -Wextra -Werror -Wno-comment -Wno-unused-parameter -Wno-missing-field-initializers -fpermissive" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -pthread -Wall -Wextra -Werror -Wno-comment -Wno-unused-parameter -Wno-missing-field-initializers -Wno-address-of-packed-member -fpermissive" CACHE STRING "" FORCE)
 if(CMAKE_VERSION VERSION_LESS "3.1")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 else()

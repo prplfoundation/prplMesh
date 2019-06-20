@@ -47,7 +47,7 @@ if (BUILD_PATENTS)
 endif()
 
 # Default Compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pthread -std=c++11 -Wno-unused-parameter -Wno-missing-field-initializers -fpermissive")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pthread -std=c++11 -Wno-unused-parameter -Wno-missing-field-initializers -Wno-address-of-packed-member -fpermissive")
 
 option(STANDALONE "Standalone build" OFF)
 
