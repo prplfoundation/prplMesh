@@ -1,0 +1,13 @@
+
+sudo: required
+dist: xenial
+language: python2.7
+
+services:
+  - docker
+
+script:
+  - cd tools/docker/builder
+  - sudo ./image-build.sh
+  - sudo ./build.sh map -f MSGLIB=zmq BUILD_TESTS=ON
+
