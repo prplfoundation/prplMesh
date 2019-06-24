@@ -36,18 +36,16 @@ bool CmduMessage::getNextTlvType(eTlvType &tlvType) const
     }
 
     if (m_class_vector.size() == 0) {
-        tlvValue = *((uint16_t *)m_cmdu_header->getBuffPtr());
+        tlvValue = *m_cmdu_header->getBuffPtr();
     } else {
-        tlvValue = *((uint16_t *)m_class_vector.back()->getBuffPtr());
-    }
-    if (m_swap) {
-        swap_16((uint16_t &)tlvValue);
+        tlvValue = *m_class_vector.back()->getBuffPtr();
     }
     if (eTlvTypeValidate::check(tlvValue)) {
         tlvType = (eTlvType)tlvValue;
+        return true;
+    } else {
+        return false;
     }
-
-    return true;
 }
 
 uint16_t CmduMessage::getNextTlvLength() const
@@ -55,9 +53,9 @@ uint16_t CmduMessage::getNextTlvLength() const
     uint16_t tlvLength;
     if (m_cmdu_header && (m_cmdu_header->getBuffRemainingBytes() > kTlvHeaderLength)) {
         if (m_class_vector.size() == 0) {
-            tlvLength = *((uint16_t *)(m_cmdu_header->getBuffPtr() + sizeof(uint16_t)));
+            tlvLength = *((uint16_t *)(m_cmdu_header->getBuffPtr() + sizeof(uint8_t)));
         } else {
-            tlvLength = *((uint16_t *)(m_class_vector.back()->getBuffPtr() + sizeof(uint16_t)));
+            tlvLength = *((uint16_t *)(m_class_vector.back()->getBuffPtr() + sizeof(uint8_t)));
         }
 
         if (m_swap) {
