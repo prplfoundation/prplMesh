@@ -23,5 +23,9 @@ RUN apt-get update && apt-get install -y \
 	vim \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /root/prplMesh
-ENTRYPOINT ["/root/prplMesh/tools/maptools.py", "build"]
+ARG uid
+ARG topdir
+
+USER $uid
+WORKDIR $topdir
+ENTRYPOINT ["./prplMesh/tools/maptools.py", "build"]
