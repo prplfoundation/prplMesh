@@ -39,7 +39,7 @@ class tlvVendorSpecific : public BaseClass
         
         const eTlvType& type();
         uint16_t& length();
-        //Use eVendorOUI2
+        //Use eVendorOUI
         std::tuple<bool, uint8_t&> vendor_oui(size_t idx);
         void class_swap();
         static size_t get_initial_size();
