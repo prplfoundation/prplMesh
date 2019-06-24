@@ -1,4 +1,5 @@
 # prplMesh
+[![Build Status](https://travis-ci.com/prplfoundation/prplMesh.svg?branch=master)](https://travis-ci.org/prplfoundation/prplMesh)
 
 TODO describe this project
 
