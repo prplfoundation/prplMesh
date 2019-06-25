@@ -24,8 +24,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 ARG uid
+ARG gid
 ARG topdir
 
-USER $uid
+USER $uid:$gid
 WORKDIR $topdir
 ENTRYPOINT ["./prplMesh/tools/maptools.py", "build"]
