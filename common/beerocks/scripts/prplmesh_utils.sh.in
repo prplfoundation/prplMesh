@@ -1,0 +1,152 @@
+#!/bin/bash
+
+dbg() {
+    [ "$VERBOSE" = "true" ] && echo "$@"
+}
+
+err() {
+	echo -e '\033[1;31m'"$@"'\033[0m'
+}
+
+run() {
+    dbg "$*"
+    "$@" || exit $?
+}
+
+platform_init_dummy() {
+    echo "platform dummy mode init..."
+    run ip link add wlan0 type dummy
+    run ip link add wlan2 type dummy
+    run ip link add eth1 type dummy
+    run brctl addbr br-lan
+    run brctl addif br-lan eth1
+    run brctl addif br-lan wlan0
+    run brctl addif br-lan wlan2
+    run ip link set eth1 up
+    run ip link set wlan0 up
+    run ip link set wlan2 up
+    run ip link set br-lan up
+    echo "Done"
+}
+
+platform_deinit_dummy() {
+    echo "platform dummy mode de-init..."
+    ip link set br-lan down
+    brctl delbr br-lan
+    ip link set eth1 down
+    ip link set wlan0 down
+    ip link set wlan2 down
+    ip link del eth1
+    ip link del wlan0
+    ip link del wlan2
+    echo "Done"
+}
+
+prplmesh_framework_init() {
+    echo "prplmesh_framework_init - starting local_bus and ieee1905_transport processes..."
+    @CMAKE_INSTALL_PREFIX@/bin/local_bus &
+    @CMAKE_INSTALL_PREFIX@/bin/ieee1905_transport &
+}
+
+prplmesh_framework_deinit() {
+    echo "prplmesh_framework_init - killing local_bus and ieee1905_transport processes..."
+    killall local_bus ieee1905_transport
+}
+
+prplmesh_controller_start() {
+    echo "prplmesh_controller_start - start beerocks_controller process..."
+    @CMAKE_INSTALL_PREFIX@/bin/beerocks_controller &
+}
+
+prplmesh_controller_stop() {
+    echo "prplmesh_controller_stop - stopping beerocks_controller process..."
+    killall beerocks_controller
+}
+
+prplmesh_agent_start() {
+    echo "prplmesh_agent_start - start beerocks_agent process..."
+    @CMAKE_INSTALL_PREFIX@/bin/beerocks_agent &
+}
+
+prplmesh_agent_stop() {
+    echo "prplmesh_agent_stop - stopping beerocks_agent process..."
+    killall beerocks_agent
+}
+
+start_function() {
+    echo "$0: start"
+    if [ `id -u` -ne 0 ]; then
+        err "$0: This command must be run as root"
+        exit 1
+    fi
+    [ "@BWL_TYPE@" = "DUMMY" ] && platform_init_dummy
+    [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_init
+    [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "C" ] && prplmesh_controller_start
+    [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "A" ] && prplmesh_agent_start
+}
+
+stop_function() {
+    echo "$0: stop"
+    if [ `id -u` -ne 0 ]; then
+        err "$0: This script must be run as root"
+        exit 1
+    fi
+    [ "@BWL_TYPE@" = "DUMMY" ] && platform_deinit_dummy
+    [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_deinit
+    [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "C" ] && prplmesh_controller_stop
+    [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "A" ] && prplmesh_agent_stop
+}
+
+status_function() {
+    echo "$0: status"
+    ps -aux | grep beerocks
+    ps -aux | grep ieee1905_transport
+    ps -aux | grep local_bus
+}
+
+usage() {
+    echo "usage: $(basename $0) {start|stop|restart|status} [-hv]"
+}
+
+main() {
+    OPTS=`getopt -o 'hvm:' --long verbose,help,mode: -n 'parse-options' -- "$@"`
+
+    if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
+
+    eval set -- "$OPTS"
+
+    while true; do
+        case "$1" in
+            -v | --verbose)      VERBOSE=true; shift ;;
+            -h | --help)         usage; exit 0; shift ;;
+            -m | --mode)         PRPLMESH_MODE="$2"; shift; shift ;;
+            -- ) shift; break ;;
+            * ) err "unsupported argument $1"; usage; exit 1 ;;
+        esac
+    done
+
+    dbg VERBOSE=$VERBOSE
+
+    case $1 in
+        "start")
+            start_function
+            ;;
+        "stop")
+            stop_function
+            ;;
+        "restart")
+            stop_function
+            start_function
+            ;;
+        "status")
+            status_function
+            ;;
+        *)
+            err "unsupported argument \"$1\""; usage; exit 1 ;;
+    esac
+}
+
+VERBOSE=false
+PRPLMESH_MODE="CA" # CA = Controller & Agent, A = Agent only, C = Controller only
+
+main $@
