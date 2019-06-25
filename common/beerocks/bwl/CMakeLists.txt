@@ -17,7 +17,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
 # UGW
 if (TARGET_PLATFORM STREQUAL "ugw")
-    set(BWL_TYPE "DWPAL")
+
+    set(BWL_TYPE_DEFAULT "DWPAL")
     # Extra libraries
     list(APPEND BWL_LIBS rt fapiwlancommon dl helper ugwhelper blobmsg_json)
     # UGW platform libraries
@@ -28,16 +29,19 @@ if (TARGET_PLATFORM STREQUAL "ugw")
     set(HOSTAPD_DIR "${PLATFORM_BUILD_DIR}/iwlwav-hostap-2.6")
 # RDKB
 elseif(TARGET_PLATFORM STREQUAL "rdkb")
-    set(BWL_TYPE "DWPAL")
+
+    set(BWL_TYPE_DEFAULT "DWPAL")
     # Extra libraries
     list(APPEND BWL_LIBS rt dl)
     # Extre directories
     include_directories(${PLATFORM_INCLUDE_DIR}/wav-dpal)
+
+# Linux
 elseif(TARGET_PLATFORM STREQUAL "linux")
-    if (NOT BWL_TYPE)
-        set(BWL_TYPE "DUMMY")
-    endif()
+    set(BWL_TYPE_DEFAULT "DUMMY")
 endif()
+
+set(BWL_TYPE ${BWL_TYPE_DEFAULT} CACHE STRING "Which BWL backend to use")
 
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} ${BWL_TYPE} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
@@ -79,7 +83,7 @@ elseif(BWL_TYPE STREQUAL "WAV")
     )
 
 elseif(BWL_TYPE STREQUAL "DWPAL")
-
+    
     file(GLOB bwl_platform_sources
         ${bwl_platform_sources}
         ${MODULE_PATH}/dwpal/*.c*
