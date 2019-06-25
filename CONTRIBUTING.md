@@ -16,11 +16,9 @@ You can ask for an invite to anyone currently involved, e.g. by sending a messag
 The [prpl Foundation Code of Conduct](https://prplfoundation.org/about/code-of-conduct/) applies to all communication about prplMesh.
 If you encounter a problem with someone's conduct, contact the prpl Community Manager Mirko Lindner by emailing Mirko.Lindner [at] prplfoundation.org.
 
-
 ## Reporting bugs
 
 To report bugs, use the [github issues](https:issues/) entry form.
-
 
 ## Improving documentation
 
@@ -72,6 +70,7 @@ A commit message consists of a subject, a message body and a set of tags.
     Signed-off-by: The Other Author <email@address.com>
 
 The subject must be very short, it appears in the [short log](https:commits/master).
+
 * Write it in the imperative: "add support for X".
 * Start with a prefix that indicates the component: tlvf, common, documentation, bpl, bwl, bcl, bml, transport, topology, master, slave, monitor.
   Often, changes need to be made to multiple components, e.g. because of API change.
@@ -91,6 +90,7 @@ The subject must be very short, it appears in the [short log](https:commits/mast
 After the subject comes an empty line, followed by the extended description.
 There is no limit to the length of the description.
 It generally describes the "why" and "what" according to the following pattern:
+
 * the context (current situation);
 * the problem statement (why the current situation is not good);
 * possible solutions with their pros and cons;
@@ -130,6 +130,7 @@ For example, the commit that added this document only had the subject line "docu
 
 The extended description should be wrapped at 72 columns (because `git log` indents with a tab, so it still fits on an 80-character line).
 There are four exceptions:
+
 * Strings found in log files should be copied as is, to simplify searching through the history.
 * Similarly, for build failures, compilation output and error messages should be copied as is.
 * URLs should never be split, for obvious reasons.
@@ -145,7 +146,8 @@ Adding this tag can be done automatically by using `git commit -s`.
 If you are editing files and committing through GitHub, you must write your real name in the “Name” field in GitHub settings and the email used in the "Signed-off-by:" must be your primary github email.
 You must manually add the "Signed-off-by:" to the commit message that github requests.
 If you are editing files and committing on your local PC, set your name and email with:
-```shell
+
+```bash
 git config --global user.name "my name"
 git config --global user.email "my@email.address"
 ```
@@ -192,6 +194,7 @@ Force-push the branch and change the pull request state from "Draft" to "Ready f
 
 Other contributors will start reviewing your change and make suggestions for improvements.
 The review has the following goals:
+
 * Make sure maintainers stay aware of all the changes happening in the code.
 * Identify opportunities for refactoring, code reuse, optimisation, ...
 * Make sure the coding style and patterns stay consistent.
@@ -234,6 +237,7 @@ Note that there are a few cases where it is not possible to use fixup commits.
 In these cases, use rebase and create a clean series of commits again.
 Add a comment in the pull request why this was done.
 This is needed at least in the following cases:
+
 * If you need to pull in changes from master or another branch or pull request.
 * If you need to reorder the commits.
 * If you need to move a subset of the changes from one commit to another commit.
@@ -242,6 +246,7 @@ If you are working on a big feature, you often encounter something small that ne
 Such a change can be included as one of the first commits in the pull request.
 However, often it's useful to create a separate pull request for it, so it can be applied more quickly.
 The typical workflow for this is:
+
 * Make the fix and commit it with a proper commit message.
 * Check out a new branch `hotfix/<description>` based on master.
 * Cherry-pick the fix commit.
@@ -252,6 +257,7 @@ The typical workflow for this is:
 
 Before a pull request can be merged, it must be considered "Done".
 That means the following conditions must hold.
+
 * All commits have a Signed-off-by. Automatic with the DCO check.
 * At least one maintainer has reviewed and approvied.
 * Code builds on Ubuntu, with `MSGLIB=zmq` and `BWL_TYPE=DUMMY`. Automatic with Travis CI.
