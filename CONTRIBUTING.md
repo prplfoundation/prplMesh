@@ -160,13 +160,19 @@ This section describes the full workflow.
 For smaller contributions, you may take shortcuts.
 
 The workflow is explained in detail below. In summary, it consists of these steps.
+
 1. Create a branch
 2. Create a draft pull request
 3. Make the changes, commit with amend and rebase
 4. Push regularly
 5. Clean up the commits, push, and set pull request to "Ready for review"
-6. Review is done.
-7. Address review comments in additional fixup commits.
+6. Review starts - reviewer "Requests changes"
+7. Author addresses review comments in additional fixup commits.
+   * If no more fixes are needed
+     * Author rebases with `git rebase -i --autosquash master` to clean up the pull request.
+   * If more fixes are needed (suggested by reviewers or by the author himself)
+     * Author does rebase-force-push to squash fixup commits and asks for a followup review (this makes the next review iterations simpler)
+
 8. Review is approved by maintainers.
 9. Use `git rebase -i --autosquash master` to clean up the pull request.
 10. Pull request is merged by maintainers.
