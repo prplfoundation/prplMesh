@@ -6,47 +6,68 @@ TODO describe this project
 ## Requirements
 
 To build prplMesh, you need (on Ubuntu) the following packages:
-```
+
+```bash
 sudo apt install curl gcc cmake binutils git autoconf autogen libtool pkg-config \
     libreadline-dev libncurses-dev libssl-dev libjson-c-dev libnl-genl-3-dev libzmq3-dev \
-     python python-yaml python-paramiko
+     python python-yaml python-paramiko repo
 ```
 
 If you haven't done so already, set up your git configuration:
-```
+
+```bash
 git config --global user.email your@email.address
 git config --global user.name "Your Name"
 ```
 
 There are several dependencies for which we require a specific version. To ease
 deployment of these, they are collected in a google repo manifest file:
-```
-mkdir -p ~/bin
-curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
-chmod +x ~/bin/repo
-export PATH=$PATH:${HOME}/bin
 
-mkdir ~/prplMesh
-cd ~/prplMesh
+```bash
+mkdir prplmesh_root
+cd prplmesh_root
 repo init -u https://github.com/prplfoundation/prplMesh-manifest.git
 repo sync
 repo forall -p -c 'git checkout $REPO_RREV'
 ```
 
 ## Build Instructions
+
 Each component can be built with CMAKE, or use the [tools/maptools.py](tools/README.md) build command.
 
-To build everything the first time, with all features enabled, run
-```
-cd prplMesh/tools
-./maptools.py build all -n -f MSGLIB=zmq BWL_TYPE=DWPAL BUILD_TESTS=ON
+To build prplMesh in debug mode (for being able to debug with gdb), with all features and tests, run
+
+```bash
+./prplMesh/tools/maptools.py build map -n -f MSGLIB=zmq BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug
 ```
 
-Subsequent builds don't need to repeat all of these options. Also, you don't
-need to re-build the dependencies when you're developing prplMesh itself.
-```
-./maptools.py build map
+Subsequent builds don't need to repeat all of these options:
+
+```bash
+./prplMesh/tools/maptools.py build map
 ```
 
-Run `./maptools.py build --help` for more options.
+Run `./prplMesh/tools/maptools.py build --help` for more options.
 
+Note - to build with Docker, see provided [building with docker](tools/docker/builder/README.md)
+
+## Running Instructions
+
+Once built, prplMesh controller, agent and framework can be started using `prplmesh_utils.sh`:
+
+```bash
+cd <path/to/prplmesh_root>/build/install/scripts
+sudo ./prplmesh_utils.sh start
+```
+
+### Log files locations
+
+- framework `/tmp/$USER/mapf`
+- controller `/tmp/$USER/beerocks/logs/beerocks_controller.log`
+- main agent (platform manager & backhaul manager) `/tmp/$USER/beerocks/logs/beerocks_agent.log`
+- radio agent wlan0 (son_slave_thread & ap manager) `/tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log`
+- radio agent wlan2 (son_slave_thread & ap manager) `/tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log`
+
+### Checking status
+
+System is operational if you see `FSM: CONNECTED --> OPERATIONAL` in the main agent log. In the future there will be a bml cli command to verify operational state.
