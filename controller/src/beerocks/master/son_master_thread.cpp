@@ -207,7 +207,7 @@ void master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessa
         break;
     }
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE: {
-
+        LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE";
         break;
     }
     default: {
