@@ -60,14 +60,14 @@ set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 set(MAPF_ROOT "/opt/multiap/framework")
 
+set(TMP_PATH "/tmp/")
 if(TARGET_PLATFORM STREQUAL "linux")
+    option(SHARED_SERVER ON "Build for running prplMesh by multiple users on the same machine")
     set(MAPF_ROOT "${CMAKE_INSTALL_PREFIX}")
-    option(USE_USER_TMP_PATH "use /tmp/$USER instead of /tmp path" ON)
-    if(USE_USER_TMP_PATH)
-	    set(USER "$ENV{USER}")
+    if(SHARED_SERVER)
+	    set(TMP_PATH "/tmp/$ENV{USER}")
     endif()
 endif()
-set(TMP_PATH "/tmp/${USER}")
 
 option(STANDALONE "Standalone build" OFF)
 
