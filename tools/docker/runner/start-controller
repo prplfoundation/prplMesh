@@ -1,0 +1,3 @@
+./bin/local_bus &
+./bin/ieee1905_transport &
+./bin/beerocks_controller
