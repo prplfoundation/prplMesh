@@ -40,6 +40,7 @@
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
+#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 
 #define SOCKET_MAX_CONNECTIONS 20
 #define SOCKETS_SELECT_TIMEOUT_MSEC 50
@@ -205,6 +206,10 @@ void master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessa
         handle_cmdu_1905_autoconfiguration_search(sd, cmdu_rx);
         break;
     }
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE: {
+
+        break;
+    }
     default: {
         LOG(WARNING) << "Unknown 1905 message received. Ignoring";
         break;
@@ -349,6 +354,27 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
     LOG(DEBUG) << "sending autoconfig response message";
     son_actions::send_cmdu_to_agent(sd, cmdu_tx);
     LOG(DEBUG) << "sent";
+}
+
+void master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
+                                                              ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto tlvAp = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+    //process the rest of the class
+    //add and process M1
+
+    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
+    if (!beerocks_header) {
+        return; //not an intel radio
+    }
+
+    if (beerocks_header->action_op() ==
+        beerocks_message::ACTION_CONTROL_SLAVE_JOINED_NOTIFICATION) {
+        handle_slave_join(sd, beerocks_header,
+                                 cmdu_rx); // TODO to be removed once autoconfig is completed
+
+    //TODO: add warning message
+    }
 }
 
 bool master_thread::handle_slave_join(

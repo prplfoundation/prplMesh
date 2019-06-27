@@ -54,6 +54,7 @@ private:
 
     // 1905 messages handlers
     void handle_cmdu_1905_autoconfiguration_search(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    void handle_cmdu_1905_autoconfiguration_WSC(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 
     db &database;
     task_pool tasks;
