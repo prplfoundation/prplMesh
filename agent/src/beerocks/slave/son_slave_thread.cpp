@@ -22,6 +22,8 @@
 #include <beerocks/tlvf/beerocks_message_monitor.h>
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
+#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
+
 // BPL Error Codes
 #include <bpl/bpl_cfg.h>
 #include <bpl/bpl_err.h>
@@ -256,7 +258,7 @@ bool slave_thread::work()
     if (!monitor_heartbeat_check() || !ap_manager_heartbeat_check()) {
         slave_reset();
     }
-    /* 
+    /*
      * wait for all pending iface actions to complete
      * otherwise, continue to FSM
      * no FSM until all actions are successful
@@ -453,7 +455,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
 
     switch (cmdu_message_type) {
     /* For Example:
-        
+
         case ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE :
         {
             break;
@@ -2874,7 +2876,7 @@ bool slave_thread::handle_cmdu_monitor_message(
     }
     case beerocks_message::ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE: {
         /*
-             * the following code will break if the structure of 
+             * the following code will break if the structure of
              * message::sACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE
              * will be different from
              * message::sACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE
@@ -3789,7 +3791,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         break;
     }
     case STATE_JOIN_MASTER: {
-
+        LOG(ERROR) << "LIOR JOIN MASTER";
         if (master_socket == nullptr) {
             LOG(ERROR) << "master_socket == nullptr";
             platform_notify_error(BPL_ERR_SLAVE_INVALID_MASTER_SOCKET, "Invalid master socket");
@@ -3798,12 +3800,45 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             break;
         }
 
-        // CMDU Message
-        auto notification = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(cmdu_tx);
+        auto apconfHeader = cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE);
+        auto tlvAp = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+        if (tlvAp == nullptr) {
+            LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
+        }
+        for (int i=0; i<6; i++) {
+            tlvAp->radio_uid().mac[i] = network_utils::mac_from_string(config.radio_identifier).oct[i]; // TODO: put mac_from_string in variable
+        }
+        tlvAp->maximum_number_of_bsss_supported() = beerocks::IFACE_TOTAL_VAPS; //TODO: make sure this is the write value
+        for (int i=0; i<2; i++) { //TODO: foreach BSS
+            auto operationClassesInfo = tlvAp->create_operating_classes_info_list();
+            operationClassesInfo->operating_class() = 0; //TODO: take value from stats
+            operationClassesInfo->maximum_transmit_power_dbm() = 24; //TODO: take value from stats
+            for (int j = 0; j< 2; j++) {
+                if (operationClassesInfo->alloc_statically_non_operable_channels_list()) {
+                    std::get<1>(operationClassesInfo->statically_non_operable_channels_list(i)) = i+j+10; //TODO blah blah
+                }
+                else {
+                    LOG(ERROR) << "Allocation statically non operable channels list failed";
+                    return false;
+                }
+            }
+            if (!tlvAp->add_operating_classes_info_list(operationClassesInfo)) {
+                    LOG(ERROR) << "add_operating_classes_info_list failed";
+                    return false;
+            }
+        }
+        //TODO: add M1
+        auto tlvVendorSpecific = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
+        if (tlvVendorSpecific == nullptr) {
+            LOG(ERROR) << "Failed adding intel vendor specific TLV";
+            return false;
+        }
+
+        auto notification = message_com::add_intel_vs_data<
+            beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(cmdu_tx, tlvVendorSpecific);
 
         if (notification == nullptr) {
-            LOG(ERROR) << "Failed building message!";
+            LOG(ERROR) << "Failed building cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION!";
             return false;
         }
 
@@ -3875,6 +3910,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
 
         // Channel Selection Params
         notification->cs_params() = hostap_cs_params;
+
+        tlvVendorSpecific->length() += notification->getLen();
         send_cmdu_to_controller(cmdu_tx);
         LOG(DEBUG) << "send SLAVE_JOINED_NOTIFICATION Size=" << int(cmdu_tx.getMessageLength());
 
