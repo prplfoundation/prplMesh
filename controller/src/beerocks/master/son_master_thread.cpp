@@ -40,6 +40,9 @@
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
+#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
+#include <tlvf/wfa_map/tlvApRadioIdentifier.h>
+#include <tlvf/ieee_1905_1/tlvWscM1.h>
 
 #define SOCKET_MAX_CONNECTIONS 20
 #define SOCKETS_SELECT_TIMEOUT_MSEC 50
@@ -196,23 +199,26 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     return true;
 }
 
-void master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     LOG(DEBUG) << "handle_cmdu_1905_1_message " << int(cmdu_rx.getMessageType());
 
     switch (cmdu_rx.getMessageType()) {
-    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE: {
-        handle_cmdu_1905_autoconfiguration_search(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE:
+        LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_SEARCH_MESSAGE";
+        return handle_cmdu_1905_autoconfiguration_search(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE:
+        LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE";
+        return handle_cmdu_1905_autoconfiguration_WSC(sd, cmdu_rx);
+    default:
         break;
     }
-    default: {
-        LOG(WARNING) << "Unknown 1905 message received. Ignoring";
-        break;
-    }
-    }
+
+    LOG(WARNING) << "Unknown 1905 message received. Ignoring";
+    return true;
 }
 
-void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
+bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
                                                               ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     std::string al_mac;
@@ -224,7 +230,7 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
         LOG(DEBUG) << "mac=" << al_mac;
     } else {
         LOG(ERROR) << "tlvAlMacAddressType missing - ignoring autconfig search message";
-        return;
+        return false;
     }
 
     auto tlvSearchedRole = cmdu_rx.addClass<ieee1905_1::tlvSearchedRole>();
@@ -232,11 +238,11 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
         LOG(DEBUG) << "searched_role=" << int(tlvSearchedRole->value());
         if (tlvSearchedRole->value() != ieee1905_1::tlvSearchedRole::REGISTRAR) {
             LOG(ERROR) << "invalid tlvSearchedRole value";
-            return;
+            return false;
         }
     } else {
         LOG(ERROR) << "tlvSearchedRole missing - ignoring autconfig search message";
-        return;
+        return false;
     }
 
     auto tlvAutoconfigFreqBand = cmdu_rx.addClass<ieee1905_1::tlvAutoconfigFreqBand>();
@@ -249,7 +255,7 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
         LOG(DEBUG) << "band=" << int(auto_config_freq_band);
     } else {
         LOG(ERROR) << "tlvAutoconfigFreqBand missing - ignoring autconfig search message";
-        return;
+        return false;
     }
 
     auto tlvSupportedServiceIn = cmdu_rx.addClass<wfa_map::tlvSupportedService>();
@@ -258,7 +264,7 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
             auto supportedServiceTuple = tlvSupportedServiceIn->supported_service_list(i);
             if (!std::get<0>(supportedServiceTuple)) {
                 LOG(ERROR) << "Invalid tlvSupportedService";
-                return;
+                return false;
             }
             auto supportedService = std::get<1>(supportedServiceTuple);
             if (supportedService !=
@@ -266,12 +272,12 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
                 LOG(WARNING) << "Invalid tlvSupportedService - supported service is not "
                                 "MULTI_AP_AGENT. Received value: "
                              << std::hex << int(supportedService);
-                return;
+                return false;
             }
         }
     } else {
         LOG(ERROR) << "tlvSupportedService missing - ignoring autconfig search message";
-        return;
+        return false;
     }
 
     auto tlvSearchedService = cmdu_rx.addClass<wfa_map::tlvSearchedService>();
@@ -280,18 +286,18 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
             auto searchedServiceTuple = tlvSearchedService->searched_service_list(i);
             if (!std::get<0>(searchedServiceTuple)) {
                 LOG(ERROR) << "Invalid tlvSearchedService";
-                return;
+                return false;
             }
             if (std::get<1>(searchedServiceTuple) !=
                 wfa_map::tlvSearchedService::eSearchedService::MULTI_AP_CONTROLLER) {
                 LOG(WARNING)
                     << "Invalid tlvSearchedService - searched service is not MULTI_AP_CONTROLLER";
-                return;
+                return false;
             }
         }
     } else {
         LOG(ERROR) << "tlvSearchedService missing - ignoring autconfig search message";
-        return;
+        return false;
     }
 
     auto cmdu_header =
@@ -300,14 +306,14 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
     auto tlvSupportedRole = cmdu_tx.addClass<ieee1905_1::tlvSupportedRole>();
     if (!tlvSupportedRole) {
         LOG(ERROR) << "addClass ieee1905_1::tlvSupportedRole failed";
-        return;
+        return false;
     }
     tlvSupportedRole->value() = ieee1905_1::tlvSupportedRole::REGISTRAR;
 
     auto tlvSupportedFreqBand = cmdu_tx.addClass<ieee1905_1::tlvSupportedFreqBand>();
     if (!tlvSupportedFreqBand) {
         LOG(ERROR) << "addClass ieee1905_1::tlvSupportedFreqBand failed";
-        return;
+        return false;
     }
 
     switch (auto_config_freq_band) {
@@ -325,30 +331,77 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
     }
     default: {
         LOG(ERROR) << "unknown autoconfig freq band, value=" << int(auto_config_freq_band);
-        return;
+        return false;
     }
     }
 
     auto tlvSupportedServiceOut = cmdu_tx.addClass<wfa_map::tlvSupportedService>();
     if (!tlvSupportedServiceOut) {
         LOG(ERROR) << "addClass wfa_map::tlvSupportedService failed";
-        return;
+        return false;
     }
     if (!tlvSupportedServiceOut->alloc_supported_service_list()) {
         LOG(ERROR) << "alloc_supported_service_list failed";
-        return;
+        return false;
     }
     auto supportedServiceTuple = tlvSupportedServiceOut->supported_service_list(0);
     if (!std::get<0>(supportedServiceTuple)) {
         LOG(ERROR) << "Failed accessing supported_service_list";
-        return;
+        return false;
     }
     std::get<1>(supportedServiceTuple) =
         wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER;
 
     LOG(DEBUG) << "sending autoconfig response message";
-    son_actions::send_cmdu_to_agent(sd, cmdu_tx);
-    LOG(DEBUG) << "sent";
+    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+}
+
+bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
+                                                              ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto tlvAp = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+    // Check if this is a M2 message that we sent to the agent, which was just looped back.
+    // The M1 and M2 messages are both of CMDU type AP_Autoconfiguration_WSC. Thus,
+    // when we send the M2 to the local agent, it will be published back on the local bus because
+    // the destination is our AL-MAC, and the controller does listen to this CMDU.
+    // Ideally, we should use the message type attribute from the WSC payload to distinguish.
+    // Unfortunately, that is a bit complicated with the current tlv parser. However, there is another
+    // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
+    // while the M2 has the AP_Radio_Identifier TLV.
+    // If this is a looped back M2 CMDU, we can treat is as handled successfully.
+    if (tlvAp == nullptr) {
+        if (cmdu_rx.addClass<wfa_map::tlvApRadioIdentifier>()) {
+            return true;
+        }
+        LOG(DEBUG) << "Failed to get APRadioBasicCapabilities";
+        return false;
+    }
+
+    auto tlvWscM1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
+    if (tlvWscM1 == nullptr) {
+        LOG(ERROR) << "Error creating tlvWscM1";
+        return false;
+    }
+
+    //TODO autoconfig process the rest of the class
+    //TODO autoconfig add support for none intel agents
+    //TODO autoconfig Keep intel agent support only as intel enhancements
+    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
+    if (!beerocks_header) {
+        LOG(ERROR) << "Failed to parse intel vs message (not Intel?)";
+        return false;
+    }
+
+    if (beerocks_header->action_op() !=
+        beerocks_message::ACTION_CONTROL_SLAVE_JOINED_NOTIFICATION) {
+            LOG(ERROR) << "Unexpected Intel action op " << beerocks_header->action_op();
+            return false;
+    }
+
+    std::copy_n(tlvWscM1->M1Frame().mac_attr.data.mac, beerocks::net::MAC_ADDR_LEN, beerocks_header->radio_mac().oct);
+    LOG(INFO) << "Handle slave join, radio mac " <<
+        network_utils::mac_to_string(beerocks_header->radio_mac());
+    return handle_slave_join(sd, beerocks_header, cmdu_rx); // TODO to be removed once autoconfig is completed
 }
 
 bool master_thread::handle_slave_join(
@@ -458,7 +511,7 @@ bool master_thread::handle_slave_join(
             database.add_node(backhaul_mac, parent_bssid_mac, beerocks::TYPE_IRE_BACKHAUL);
         } else if (database.get_node_state(backhaul_mac) != beerocks::STATE_CONNECTED &&
                    database.get_node_state(backhaul_mac) != beerocks::STATE_CONNECTED_IP_UNKNOWN) {
-            /* if the backhaul node doesn't exist, or is not already marked as connected, 
+            /* if the backhaul node doesn't exist, or is not already marked as connected,
             * we assume it is connected to the GW's LAN switch
             */
             LOG(DEBUG) << "connected to the GW's LAN switch ";
@@ -1487,7 +1540,7 @@ bool master_thread::handle_cmdu_control_message(
 
         database.set_node_backhaul_iface_type(client_mac, beerocks::IFACE_TYPE_WIFI_UNSPECIFIED);
 
-        /* 
+        /*
              * notify existing steering task of completed connection
              */
         int prev_steering_task = database.get_steering_task_id(client_mac);
