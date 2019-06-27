@@ -8,7 +8,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/logging.conf" DESTINATION share)
 file(COPY "${CMAKE_CURRENT_BINARY_DIR}/logging.conf" DESTINATION "${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/share/")
 
 # Messaging
-if(NOT DEFINED MSGLIB)
+if(MSGLIB STREQUAL "None")
 
 message(STATUS "${BoldYellow}Messaging library - None${ColourReset}")
 set(sources logger.cpp)

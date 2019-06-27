@@ -1,4 +1,4 @@
-if(BUILD_TESTS AND MSGLIB)
+if(BUILD_TESTS AND NOT MSGLIB STREQUAL "None")
   add_subdirectory(messages)
 	file(GLOB tests *_test.cpp)
 	foreach(test ${tests})
