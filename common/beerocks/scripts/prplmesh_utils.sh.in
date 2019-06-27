@@ -75,11 +75,9 @@ prplmesh_agent_stop() {
 
 start_function() {
     echo "$0: start"
-    if [ `id -u` -ne 0 ]; then
-        err "$0: This command must be run as root"
-        exit 1
-    fi
-    [ "@BWL_TYPE@" = "DUMMY" ] && platform_init_dummy
+    [ `id -u` -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
+
+    [ "@BWL_TYPE@" = "DUMMY" ] && [ "$PLATFORM_INIT" == "true" ] && platform_init_dummy
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_init
     [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "C" ] && prplmesh_controller_start
     [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "A" ] && prplmesh_agent_start
@@ -87,11 +85,9 @@ start_function() {
 
 stop_function() {
     echo "$0: stop"
-    if [ `id -u` -ne 0 ]; then
-        err "$0: This script must be run as root"
-        exit 1
-    fi
-    [ "@BWL_TYPE@" = "DUMMY" ] && platform_deinit_dummy
+    [ `id -u` -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
+
+    [ "@BWL_TYPE@" = "DUMMY" ] && [ "$PLATFORM_INIT" == "true" ] && platform_deinit_dummy
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_deinit
     [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "C" ] && prplmesh_controller_stop
     [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "A" ] && prplmesh_agent_stop
@@ -105,11 +101,11 @@ status_function() {
 }
 
 usage() {
-    echo "usage: $(basename $0) {start|stop|restart|status} [-hv]"
+    echo "usage: $(basename $0) {start|stop|restart|status} [-hvsm]"
 }
 
 main() {
-    OPTS=`getopt -o 'hvm:' --long verbose,help,mode: -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvm:s' --long verbose,help,mode:skip-platform -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -117,15 +113,17 @@ main() {
 
     while true; do
         case "$1" in
-            -v | --verbose)      VERBOSE=true; shift ;;
-            -h | --help)         usage; exit 0; shift ;;
-            -m | --mode)         PRPLMESH_MODE="$2"; shift; shift ;;
+            -v | --verbose)       VERBOSE=true; shift ;;
+            -h | --help)          usage; exit 0; shift ;;
+            -m | --mode)          PRPLMESH_MODE="$2"; shift; shift ;;
+            -s | --skip-platform) PLATFORM_INIT=false; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
     done
 
     dbg VERBOSE=$VERBOSE
+    dbg PLATFORM_INIT=$PLATFORM_INIT
 
     case $1 in
         "start")
@@ -147,6 +145,7 @@ main() {
 }
 
 VERBOSE=false
+PLATFORM_INIT=true
 PRPLMESH_MODE="CA" # CA = Controller & Agent, A = Agent only, C = Controller only
 
 main $@
