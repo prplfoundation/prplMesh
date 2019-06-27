@@ -22,6 +22,9 @@
 #include <beerocks/tlvf/beerocks_message_monitor.h>
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
+#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
+#include <tlvf/ieee_1905_1/tlvWscM1.h>
+
 // BPL Error Codes
 #include <bpl/bpl_cfg.h>
 #include <bpl/bpl_err.h>
@@ -256,7 +259,7 @@ bool slave_thread::work()
     if (!monitor_heartbeat_check() || !ap_manager_heartbeat_check()) {
         slave_reset();
     }
-    /* 
+    /*
      * wait for all pending iface actions to complete
      * otherwise, continue to FSM
      * no FSM until all actions are successful
@@ -453,7 +456,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
 
     switch (cmdu_message_type) {
     /* For Example:
-        
+
         case ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE :
         {
             break;
@@ -475,9 +478,8 @@ bool slave_thread::handle_cmdu_control_message(
     // LOG(DEBUG) << "handle_cmdu_control_message(), INTEL_VS: action=" + std::to_string(beerocks_header->action()) + ", action_op=" + std::to_string(beerocks_header->action_op());
     // LOG(DEBUG) << "received radio_mac=" << network_utils::mac_to_string(beerocks_header->radio_mac()) << ", local radio_mac=" << network_utils::mac_to_string(hostap_params.iface_mac);
 
-    if (!std::equal(beerocks_header->radio_mac().oct,
-                    beerocks_header->radio_mac().oct + net::MAC_ADDR_LEN,
-                    hostap_params.iface_mac.oct)) {
+    // to me or not to me, this is the question...
+    if (beerocks_header->radio_mac() != hostap_params.iface_mac) {
         return true;
     }
 
@@ -2874,7 +2876,7 @@ bool slave_thread::handle_cmdu_monitor_message(
     }
     case beerocks_message::ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE: {
         /*
-             * the following code will break if the structure of 
+             * the following code will break if the structure of
              * message::sACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE
              * will be different from
              * message::sACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE
@@ -3798,12 +3800,77 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             break;
         }
 
-        // CMDU Message
-        auto notification = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(cmdu_tx);
+        auto apconfHeader = cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE);
+        auto tlvAp = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+        if (tlvAp == nullptr) {
+            LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
+            return false;
+        }
+        std::copy_n(network_utils::mac_from_string(config.radio_identifier).oct,
+                    beerocks::net::MAC_ADDR_LEN, tlvAp->radio_uid().mac);
+        tlvAp->maximum_number_of_bsss_supported() = beerocks::IFACE_TOTAL_VAPS; //TODO get maximum supported VAPs from DWPAL
+
+        // TODO: move WSC and M1 setters to seperate functions
+        // TODO: Currently sending dummy values, need to read them from DWPAL and use the correct WiFi
+        //      Parameters based on the regulatory domain
+        for (int i = 0; i < beerocks::IFACE_TOTAL_VAPS; i++) {
+            auto operationClassesInfo = tlvAp->create_operating_classes_info_list();
+            operationClassesInfo->operating_class() = 0; // dummy value
+            operationClassesInfo->maximum_transmit_power_dbm() = 1; // dummy value
+
+            // TODO - the number of statically non operable channels can be 0 - meaning it is
+            // an optional variable length list, this is not yet supported in tlvf according to issue #8
+            // for now - lets define only one.
+            if (!operationClassesInfo->alloc_statically_non_operable_channels_list(1)) {
+                LOG(ERROR) << "Allocation statically non operable channels list failed";
+                return false;
+            }
+            std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) = 1; // dummy value
+
+            if (!tlvAp->add_operating_classes_info_list(operationClassesInfo)) {
+                    LOG(ERROR) << "add_operating_classes_info_list failed";
+                    return false;
+            }
+        }
+
+        // All attributes which are not explicitely set below are set to
+        // default by the TLV factory, see WSC_Attributes.yml
+        auto tlvWscM1 = cmdu_tx.addClass<ieee1905_1::tlvWscM1>();
+        if (tlvWscM1 == nullptr) {
+            LOG(ERROR) << "Error creating tlvWscM1";
+            return false;
+        }
+
+        std::copy_n(hostap_params.iface_mac.oct,
+                    beerocks::net::MAC_ADDR_LEN, tlvWscM1->M1Frame().mac_attr.data.mac);
+        // TODO: read manufactured, name, model and device name from BPL
+        string_utils::copy_string(tlvWscM1->M1Frame().manufacturer_attr.data, "prpl", 5);
+        string_utils::copy_string(tlvWscM1->M1Frame().model_name_attr.data, "Ubuntu", 7);
+        string_utils::copy_string(tlvWscM1->M1Frame().model_number_attr.data, "18.04", 6);
+        string_utils::copy_string(tlvWscM1->M1Frame().device_name_attr.data, "prplMesh", 9);
+
+        // TODO M1 should also have values for:
+        // uuid_e_attr
+        // enrolee_nonce_attr -> to be added by encryption, but the TODO should be here already
+        // public_key_attr -> same
+        // authentication_type_flags_attr
+        // encryption_type_flags_attr
+        // serial_number_attr
+        // primary_device_type_attr -> We could actually add default values to the yaml
+        // rf_bands_attr -> This is essential and must correspond to the freqband in the search message
+        // vendor_extensions_attr -> this could also be done in the yaml file
+
+        auto tlvVendorSpecific = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
+        if (tlvVendorSpecific == nullptr) {
+            LOG(ERROR) << "Failed adding intel vendor specific TLV";
+            return false;
+        }
+
+        auto notification = message_com::add_intel_vs_data<
+            beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(cmdu_tx, tlvVendorSpecific);
 
         if (notification == nullptr) {
-            LOG(ERROR) << "Failed building message!";
+            LOG(ERROR) << "Failed building cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION!";
             return false;
         }
 
@@ -3875,6 +3942,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
 
         // Channel Selection Params
         notification->cs_params() = hostap_cs_params;
+
+        tlvVendorSpecific->length() += notification->getLen();
         send_cmdu_to_controller(cmdu_tx);
         LOG(DEBUG) << "send SLAVE_JOINED_NOTIFICATION Size=" << int(cmdu_tx.getMessageLength());
 
