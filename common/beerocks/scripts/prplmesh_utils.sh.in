@@ -104,8 +104,13 @@ status_function() {
     ps -aux | grep local_bus
 }
 
+check_function() {
+    echo "$0: check"
+    cat "/tmp/$USER/beerocks/logs/beerocks_agent.log" |grep 'CONNECTED --> OPERATIONAL'
+}
+
 usage() {
-    echo "usage: $(basename $0) {start|stop|restart|status} [-hv]"
+    echo "usage: $(basename $0) {start|stop|restart|status|check} [-hv]"
 }
 
 main() {
@@ -140,6 +145,9 @@ main() {
             ;;
         "status")
             status_function
+            ;;
+        "check")
+            check_function
             ;;
         *)
             err "unsupported argument \"$1\""; usage; exit 1 ;;
