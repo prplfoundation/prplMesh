@@ -40,22 +40,16 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType mes
     return m_cmdu_header;
 }
 
-std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, tlvVendorSpecific::eVendorOUI voui)
+std::shared_ptr<tlvVendorSpecific> CmduMessageTx::add_vs_tlv(tlvVendorSpecific::eVendorOUI voui)
 {
     if (!m_buff || !m_buff_len)
         return nullptr;
 
-    m_parse = false;
-    memset(m_buff, 0, m_buff_len);
-    reset();
-    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, m_buff_len);
     if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
         return nullptr;
     }
 
-    m_cmdu_header->message_type() = eMessageType::VENDOR_SPECIFIC_MESSAGE;
-    m_cmdu_header->message_id()   = id;
-    auto tlv                      = addClass<tlvVendorSpecific>();
+    auto tlv = addClass<tlvVendorSpecific>();
     if (!tlv) {
         m_cmdu_header.reset();
         m_cmdu_header = nullptr;
@@ -70,7 +64,7 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, tlvVendorSpecifi
         voui_uint32 >>= 8;
     }
 
-    return m_cmdu_header;
+    return tlv;
 }
 
 bool CmduMessageTx::finalize(bool swap_needed)
