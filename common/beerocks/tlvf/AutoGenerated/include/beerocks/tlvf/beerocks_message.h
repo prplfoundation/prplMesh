@@ -70,49 +70,71 @@ public:
     }
 
     template <class T>
-    static std::shared_ptr<T> create_vs_message(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
+    static std::shared_ptr<T> add_intel_vs_data(ieee1905_1::CmduMessageTx &cmdu_tx,
+                std::shared_ptr<ieee1905_1::tlvVendorSpecific> vs_tlv, uint16_t id = 0)
     {
         beerocks_message::eAction action;
         std::shared_ptr<T> p_class = nullptr;
-        auto p_cmdu_header =
-            cmdu_tx.create(id, ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
-        if (p_cmdu_header) {
-            auto p_action_header = cmdu_tx.addClass<beerocks_message::cACTION_HEADER>();
-            if (p_action_header) {
-                p_class = cmdu_tx.addClass<T>();
-                if (p_class) {
-                    auto action_op = p_class->get_action_op();
-                    if (typeid(action_op) == typeid(beerocks_message::eActionOp_CONTROL))
-                        action = beerocks_message::eAction::ACTION_CONTROL;
-                    else if (typeid(action_op) == typeid(beerocks_message::eActionOp_PLATFORM))
-                        action = beerocks_message::eAction::ACTION_PLATFORM;
-                    else if (typeid(action_op) == typeid(beerocks_message::eActionOp_BACKHAUL))
-                        action = beerocks_message::eAction::ACTION_BACKHAUL;
-                    else if (typeid(action_op) == typeid(beerocks_message::eActionOp_APMANAGER))
-                        action = beerocks_message::eAction::ACTION_APMANAGER;
-                    else if (typeid(action_op) == typeid(beerocks_message::eActionOp_MONITOR))
-                        action = beerocks_message::eAction::ACTION_MONITOR;
-                    else if (typeid(action_op) == typeid(beerocks_message::eActionOp_CLI))
-                        action = beerocks_message::eAction::ACTION_CLI;
-                    else if (typeid(action_op) == typeid(beerocks_message::eActionOp_BML))
-                        action = beerocks_message::eAction::ACTION_BML;
-                    else
-                        action = beerocks_message::eAction::ACTION_NONE;
-                    if (action != beerocks_message::eAction::ACTION_NONE) {
-                        p_action_header->action()    = (beerocks_message::eAction)action;
-                        p_action_header->action_op() = action_op;
-                        p_action_header->id()        = id;
-                        return p_class;
-                    } else {
-                        // LOG(ERROR) << "action != beerocks_message::eAction::ACTION_NONE -> This shouldn't happen";
-                    }
-                }
-            }
-        } else {
-            std::cout << "beerocks_message.h[ " << __LINE__ << "]: "
-                      << "create vs message failed!" << std::endl;
+
+        auto actionhdr = cmdu_tx.addClass<beerocks_message::cACTION_HEADER>();
+        if (!actionhdr) {
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            return nullptr;
         }
+        vs_tlv->length() += beerocks_message::cACTION_HEADER::get_initial_size();
+
+        p_class = cmdu_tx.addClass<T>();
+        if (!p_class) {
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            return nullptr;
+        }
+
+        auto action_op = p_class->get_action_op();
+        if (typeid(action_op) == typeid(beerocks_message::eActionOp_CONTROL))
+            action = beerocks_message::eAction::ACTION_CONTROL;
+        else if (typeid(action_op) == typeid(beerocks_message::eActionOp_PLATFORM))
+            action = beerocks_message::eAction::ACTION_PLATFORM;
+        else if (typeid(action_op) == typeid(beerocks_message::eActionOp_BACKHAUL))
+            action = beerocks_message::eAction::ACTION_BACKHAUL;
+        else if (typeid(action_op) == typeid(beerocks_message::eActionOp_APMANAGER))
+            action = beerocks_message::eAction::ACTION_APMANAGER;
+        else if (typeid(action_op) == typeid(beerocks_message::eActionOp_MONITOR))
+            action = beerocks_message::eAction::ACTION_MONITOR;
+        else if (typeid(action_op) == typeid(beerocks_message::eActionOp_CLI))
+            action = beerocks_message::eAction::ACTION_CLI;
+        else if (typeid(action_op) == typeid(beerocks_message::eActionOp_BML))
+            action = beerocks_message::eAction::ACTION_BML;
+        else
+            action = beerocks_message::eAction::ACTION_NONE;
+
+        if (action == beerocks_message::eAction::ACTION_NONE) {
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            return nullptr;
+        }
+
+        actionhdr->action()    = (beerocks_message::eAction)action;
+        actionhdr->action_op() = action_op;
+        actionhdr->id()        = id;
+
         return p_class;
+    }
+
+    template <class T>
+    static std::shared_ptr<T> create_vs_message(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
+    {
+        auto cmduhdr = cmdu_tx.create(id, ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE);
+        if (!cmduhdr) {
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            return nullptr;
+        }
+
+        auto tlvhdr = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
+        if (!tlvhdr) {
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            return nullptr;
+        }
+
+        return add_intel_vs_data<T>(cmdu_tx, tlvhdr, id);
     }
 
     typedef struct sCmduInfo {
