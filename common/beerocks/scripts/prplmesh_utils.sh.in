@@ -98,18 +98,16 @@ status_function() {
     ps -aux | grep beerocks
     ps -aux | grep ieee1905_transport
     ps -aux | grep local_bus
-}
 
-check_function() {
-    echo "$0: check"
-    if ! grep -q 'CONNECTED --> OPERATIONAL' "/tmp/$USER/beerocks/logs/beerocks_agent.log"; then
-        err "check failed"
+    # check for operational status
+    if ! grep -q 'CONNECTED --> OPERATIONAL' "@BEEROCKS_TMP_PATH@/logs/beerocks_agent.log"; then
+        err "Failed checking operational status"
         exit 1
     fi
 }
 
 usage() {
-    echo "usage: $(basename $0) {start|stop|restart|status|check} [-hv]"
+    echo "usage: $(basename $0) {start|stop|restart|status} [-hv]"
 }
 
 main() {
@@ -146,9 +144,6 @@ main() {
             ;;
         "status")
             status_function
-            ;;
-        "check")
-            check_function
             ;;
         *)
             err "unsupported argument \"$1\""; usage; exit 1 ;;

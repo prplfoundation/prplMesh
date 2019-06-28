@@ -12,11 +12,18 @@ endif()
 
 include(GNUInstallDirs)
 
+set(BEEROCKS_TMP_PATH "/tmp/beerocks")
 if (TARGET_PLATFORM STREQUAL "ugw")
     add_definitions(-DBEEROCKS_UGW)
 elseif (TARGET_PLATFORM STREQUAL "rdkb")
     add_definitions(-DBEEROCKS_RDKB)
     set(CMAKE_SKIP_RPATH TRUE)
+elseif (TARGET_PLATFORM STREQUAL "linux")
+    option(SHARED_SERVER ON "Build for running prplMesh by multiple users on the same machine")
+    add_definitions(-DBEEROCKS_LINUX)
+    if (SHARED_SERVER)
+        set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
+    endif()
 endif()
 
 list (FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
