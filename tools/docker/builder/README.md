@@ -4,6 +4,8 @@ This folder includes a Dockerfile which can be used to build prplMesh from a con
 
 It includes 2 helper scripts - one to generate the image `image-build.sh` and one to actually run `maptools.py build` from the container - `build.sh`.
 
+If `build.sh` is called without first calling `image-build.sh`, then the docker image will be built automatically.
+
 ## Usage
 
 Build the initial image (one time):
