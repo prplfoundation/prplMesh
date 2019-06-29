@@ -208,6 +208,7 @@ void master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessa
     }
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE: {
         LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE";
+        handle_cmdu_1905_autoconfiguration_WSC(sd, cmdu_rx);
         break;
     }
     default: {
@@ -356,25 +357,33 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
     LOG(DEBUG) << "sent";
 }
 
-void master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
+bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
                                                               ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto tlvAp = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
-    //process the rest of the class
-    //add and process M1
+    if (tlvAp == nullptr) {
+        LOG(ERROR) << "Failed to get APRadioBasicCapabilities";
+        return false;
+    }
 
+    //TODO autoconfig process the rest of the class
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
     if (!beerocks_header) {
-        return; //not an intel radio
+        LOG(ERROR) << "Failed to parse intel vs message (not Intel?)";
+        return false; //not an intel radio
     }
 
-    if (beerocks_header->action_op() ==
+    if (beerocks_header->action_op() != 
         beerocks_message::ACTION_CONTROL_SLAVE_JOINED_NOTIFICATION) {
-        handle_slave_join(sd, beerocks_header,
-                                 cmdu_rx); // TODO to be removed once autoconfig is completed
-
-    //TODO: add warning message
+            LOG(ERROR) << "Unexpected Intel action op " << beerocks_header->action_op();
+            return false;
     }
+    
+    // TODO autoconfig remove slave join
+    std::memcpy(beerocks_header->radio_mac().oct, tlvAp->radio_uid().mac, 6);
+    LOG(INFO) << "Handle slave join, radio identifier " <<
+        network_utils::mac_to_string(beerocks_header->radio_mac());
+    return handle_slave_join(sd, beerocks_header, cmdu_rx); // TODO to be removed once autoconfig is completed
 }
 
 bool master_thread::handle_slave_join(
