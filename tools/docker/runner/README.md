@@ -5,6 +5,8 @@ It relies on an already built prplMesh by mapping the `build/install` directory 
 
 It includes 2 helper scripts - one to generate the image `image-build.sh` and one to actually run the container - `run.sh`.
 
+If `run.sh` is called without first building the image with `image-build.sh`, then it will build the image automatically.
+
 ## Usage
 
 Using this Dockerfile, you can run 2 containers, one with a controller+agent, the
