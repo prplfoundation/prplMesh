@@ -61,6 +61,11 @@ main() {
         esac
     done
 
+    docker image inspect prplmesh-runner >/dev/null 2>&1 || {
+        dbg "Image prplmesh-runner does not exist, creating..."
+        run ${scriptdir}/image-build.sh
+    }
+
     docker network inspect ${NETWORK} >/dev/null 2>&1 || {
         dbg "Network $NETWORK does not exist, creating..."
         run docker network create ${NETWORK} >/dev/null 2>&1
