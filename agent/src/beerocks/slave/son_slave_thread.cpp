@@ -477,9 +477,9 @@ bool slave_thread::handle_cmdu_control_message(
     // LOG(DEBUG) << "handle_cmdu_control_message(), INTEL_VS: action=" + std::to_string(beerocks_header->action()) + ", action_op=" + std::to_string(beerocks_header->action_op());
     // LOG(DEBUG) << "received radio_mac=" << network_utils::mac_to_string(beerocks_header->radio_mac()) << ", local radio_mac=" << network_utils::mac_to_string(hostap_params.iface_mac);
 
-    if (!std::equal(beerocks_header->radio_mac().oct,
-                    beerocks_header->radio_mac().oct + net::MAC_ADDR_LEN,
-                    hostap_params.iface_mac.oct)) {
+    // to me or not to me, this is the question...
+    if ((network_utils::mac_to_string(beerocks_header->radio_mac()) !=
+        config.radio_identifier)) {
         return true;
     }
 
@@ -3791,7 +3791,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         break;
     }
     case STATE_JOIN_MASTER: {
-        LOG(ERROR) << "LIOR JOIN MASTER";
+
         if (master_socket == nullptr) {
             LOG(ERROR) << "master_socket == nullptr";
             platform_notify_error(BPL_ERR_SLAVE_INVALID_MASTER_SOCKET, "Invalid master socket");
@@ -3804,30 +3804,36 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         auto tlvAp = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
         if (tlvAp == nullptr) {
             LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
+            return false;
         }
-        for (int i=0; i<6; i++) {
-            tlvAp->radio_uid().mac[i] = network_utils::mac_from_string(config.radio_identifier).oct[i]; // TODO: put mac_from_string in variable
-        }
-        tlvAp->maximum_number_of_bsss_supported() = beerocks::IFACE_TOTAL_VAPS; //TODO: make sure this is the write value
-        for (int i=0; i<2; i++) { //TODO: foreach BSS
+        std::copy_n(network_utils::mac_from_string(config.radio_identifier).oct,
+                    beerocks::net::MAC_ADDR_LEN, tlvAp->radio_uid().mac);
+        tlvAp->maximum_number_of_bsss_supported() = beerocks::IFACE_TOTAL_VAPS; //TODO get maximum supported VAPs from DWPAL
+
+        //TODO: Currently sending dummy values, need to read them from DWPAL and use the correct WiFi
+        //      Parameters based on the regulatory domain
+        for (int i = 0; i < beerocks::IFACE_TOTAL_VAPS; i++) {
             auto operationClassesInfo = tlvAp->create_operating_classes_info_list();
-            operationClassesInfo->operating_class() = 0; //TODO: take value from stats
-            operationClassesInfo->maximum_transmit_power_dbm() = 24; //TODO: take value from stats
-            for (int j = 0; j< 2; j++) {
-                if (operationClassesInfo->alloc_statically_non_operable_channels_list()) {
-                    std::get<1>(operationClassesInfo->statically_non_operable_channels_list(i)) = i+j+10; //TODO blah blah
-                }
-                else {
-                    LOG(ERROR) << "Allocation statically non operable channels list failed";
-                    return false;
-                }
+            operationClassesInfo->operating_class() = 0; // dummy value
+            operationClassesInfo->maximum_transmit_power_dbm() = 1; // dummy value
+
+            // TODO - the number of statically non operable channels can be 0 - meaning it is
+            // an optional variable length list, this is not yet supported in tlvf according to issue #8
+            // for now - lets define only one.
+            if (!operationClassesInfo->alloc_statically_non_operable_channels_list(1)) {
+                LOG(ERROR) << "Allocation statically non operable channels list failed";
+                return false;
             }
+            std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) = 1; // dummy value
+
             if (!tlvAp->add_operating_classes_info_list(operationClassesInfo)) {
                     LOG(ERROR) << "add_operating_classes_info_list failed";
                     return false;
             }
         }
-        //TODO: add M1
+
+        //TODO: add WSC tlv with M1
+
         auto tlvVendorSpecific = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
         if (tlvVendorSpecific == nullptr) {
             LOG(ERROR) << "Failed adding intel vendor specific TLV";
