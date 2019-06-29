@@ -3,6 +3,7 @@ FROM $image
 
 # Update Software repository
 RUN apt-get update && apt-get install -y \
+	gdb \
 	binutils \
 	libreadline-dev \
 	libncurses-dev \
