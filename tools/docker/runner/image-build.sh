@@ -47,10 +47,8 @@ main() {
     ) || { err "Failed to read /etc/os-release, do not use -n flag"; usage; exit 1; }
 
     dbg IMAGE=$IMAGE
-    dbg installdir=$installdir
     run docker image build \
         --build-arg image=$IMAGE \
-        --build-arg installdir=$installdir \
         --tag prplmesh-runner \
         ${scriptdir}
 }

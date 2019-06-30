@@ -21,10 +21,8 @@ RUN apt-get update && apt-get install -y \
 	psmisc \
     && rm -rf /var/lib/apt/lists/*
 
-ARG installdir
 ARG bridgeip
 
-WORKDIR $installdir
 ADD entrypoint.sh /root/
 ADD start-controller /usr/bin
 ADD start-agent /usr/bin
