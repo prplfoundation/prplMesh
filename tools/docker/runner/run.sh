@@ -82,6 +82,7 @@ main() {
     dbg "NAME=${NAME}"
 
     DOCKEROPTS="-e USER=${SUDO_USER}
+                -e INSTALL_DIR=${installdir}
                 --privileged
                 --network ${NETWORK}
                 -v ${installdir}:${installdir}

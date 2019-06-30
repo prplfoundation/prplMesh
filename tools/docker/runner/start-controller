@@ -1,3 +1,3 @@
-./bin/local_bus &
-./bin/ieee1905_transport &
-./bin/beerocks_controller
+${INSTALL_DIR}/bin/local_bus &
+${INSTALL_DIR}./bin/ieee1905_transport &
+${INSTALL_DIR}./bin/beerocks_controller

@@ -15,7 +15,6 @@ run ifconfig eth0 0.0.0.0
 run ifconfig br-lan ${1} up
 
 shift
-echo $@
 
-#$@
+cd ${INSTALL_DIR}
 exec /bin/bash "$@"
