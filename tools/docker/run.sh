@@ -14,7 +14,7 @@ run() {
 }
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-installdir="${scriptdir%/*/*/*/*}/build/install"
+installdir="${scriptdir%/*/*/*}/build/install"
 
 usage() {
     echo "usage: $(basename $0) [-hvd] [-i ip] [-n name] [-N network]"
