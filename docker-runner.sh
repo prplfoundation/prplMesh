@@ -1,4 +1,4 @@
 #!/bin/sh
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-${scriptdir}/tools/docker/runner/run.sh "$@"
+${scriptdir}/tools/docker/run.sh "$@"

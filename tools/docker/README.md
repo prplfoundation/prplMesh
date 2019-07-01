@@ -11,13 +11,13 @@ Building the images should be done first prior to attempting to run the builder 
 
 ---
 
-If `./builder/build.sh` or `./runner/run.sh` are called without first calling `image-build.sh`, then the docker image will be built automatically.
+If `build.sh` or `run.sh` are called without first calling `image-build.sh`, then the docker image will be built automatically.
 
 ---
 
 ## Docker builder
 
-The docker builder image can be used to build prplMesh via `maptools.py build` command running in a prplmesh-build container via `builder/build.sh`.
+The docker builder image can be used to build prplMesh via `maptools.py build` command running in a prplmesh-build container via `build.sh`.
 
 Build prplMesh in container:
 
@@ -27,7 +27,7 @@ sudo ./builder/build.sh <maptools.py build arguments>
 
 ## Docker runner
 
-The docker runner image can be used to run prplMesh inside containers using `runner/run.sh`.
+The docker runner image can be used to run prplMesh inside containers using `run.sh`.
 
 The runner docker allows running multiple containers, for example one with a controller+agent, the other with an agent only:
 The 2 containers are connected using a docker network (bridge), so can

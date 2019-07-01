@@ -6,7 +6,7 @@ run() {
 }
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-topdir="${scriptdir%/*/*/*/*}"
+topdir="${scriptdir%/*/*/*}"
 
 main() {
     docker image inspect prplmesh-build >/dev/null 2>&1 || {
