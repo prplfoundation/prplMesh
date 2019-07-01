@@ -165,10 +165,10 @@ sWscAttrManufacturer:
     _value: ATTR_MANUFACTURER
   data_length:
     _type: uint16_t
-    _value: WSC_MAX_NAME_LENGTH
+    _value: WSC_MAX_MANUFACTURER_LENGTH
   data:
     _type: char
-    _length: [ WSC_MAX_NAME_LENGTH ]
+    _length: [ WSC_MAX_MANUFACTURER_LENGTH ]
 
 sWscAttrModelName:
   _type: struct
@@ -177,10 +177,10 @@ sWscAttrModelName:
     _value: ATTR_MODEL_NAME
   data_length:
     _type: uint16_t
-    _value: WSC_MAX_NAME_LENGTH
+    _value: WSC_MAX_MODEL_NAME_LENGTH
   data:
     _type: char
-    _length: [ WSC_MAX_NAME_LENGTH ]
+    _length: [ WSC_MAX_MODEL_NAME_LENGTH ]
 
 sWscAttrModelNumber:
   _type: struct
@@ -189,10 +189,10 @@ sWscAttrModelNumber:
     _value: ATTR_MODEL_NUMBER
   data_length:
     _type: uint16_t
-    _value: WSC_MAX_NAME_LENGTH
+    _value: WSC_MAX_MODEL_NUMBER_LENGTH
   data:
     _type: char
-    _length: [ WSC_MAX_NAME_LENGTH ]
+    _length: [ WSC_MAX_MODEL_NUMBER_LENGTH ]
 
 sWscAttrSerialNumber:
   _type: struct
@@ -201,10 +201,10 @@ sWscAttrSerialNumber:
     _value: ATTR_SERIAL_NUMBER
   data_length:
     _type: uint16_t
-    _value: WSC_MAX_NAME_LENGTH
+    _value: WSC_MAX_SERIAL_NUMBER_LENGTH
   data:
     _type: char
-    _length: [ WSC_MAX_NAME_LENGTH ]
+    _length: [ WSC_MAX_SERIAL_NUMBER_LENGTH ]
 
 sWscAttrPrimaryDeviceType:
   _type: struct
@@ -228,10 +228,10 @@ sWscAttrDeviceName:
     _value: ATTR_DEV_NAME
   data_length:
     _type: uint16_t
-    _value: WSC_MAX_NAME_LENGTH
+    _value: WSC_MAX_DEV_NAME_LENGTH
   data:
     _type: char
-    _length: [ WSC_MAX_NAME_LENGTH ]
+    _length: [ WSC_MAX_DEV_NAME_LENGTH ]
 
 sWscAttrRfBands:
   _type: struct
@@ -325,10 +325,10 @@ sWscAttrSsid:
     _value: ATTR_SSID
   data_length:
     _type: uint16_t
-    _value: WSC_MAX_NAME_LENGTH
+    _value: WSC_MAX_SSID_LENGTH
   data:
     _type: char
-    _length: [ WSC_MAX_NAME_LENGTH ]
+    _length: [ WSC_MAX_SSID_LENGTH ]
 
 sWscAttrAuthenticationType:
   _type: struct
