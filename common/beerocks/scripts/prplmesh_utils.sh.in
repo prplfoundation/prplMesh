@@ -115,14 +115,25 @@ status_function() {
     ps -aux | grep beerocks | grep -v grep
     ps -aux | grep ieee1905_transport | grep -v grep
     ps -aux | grep local_bus | grep -v grep
+
+    # check for operational status
+    if [ "$PRPLMESH_USER" != "" ]; then
+        BEEROCKS_AGENT_LOGPATH="/tmp/$PRPLMESH_USER/beerocks/logs/beerocks_agent.log"
+    else
+        BEEROCKS_AGENT_LOGPATH="@BEEROCKS_TMP_PATH@/logs/beerocks_agent.log"
+    fi
+    if ! grep -q 'CONNECTED --> OPERATIONAL' "$BEEROCKS_AGENT_LOGPATH"; then
+        err "Failed checking operational status"
+        exit 1
+    fi
 }
 
 usage() {
-    echo "usage: $(basename $0) {start|stop|restart|status} [-hvsm]"
+    echo "usage: $(basename $0) {start|stop|restart|status} [-hvsmu]"
 }
 
 main() {
-    OPTS=`getopt -o 'hvm:s' --long verbose,help,mode:skip-platform -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvm:u:s' --long verbose,help,mode:skip-platform -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -133,6 +144,7 @@ main() {
             -v | --verbose)       VERBOSE=true; shift ;;
             -h | --help)          usage; exit 0; shift ;;
             -m | --mode)          PRPLMESH_MODE="$2"; shift; shift ;;
+            -u | --user)          PRPLMESH_USER="$2"; shift; shift ;;
             -s | --skip-platform) PLATFORM_INIT=false; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;

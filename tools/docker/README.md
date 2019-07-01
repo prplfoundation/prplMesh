@@ -17,12 +17,12 @@ If `build.sh` or `run.sh` are called without first calling `image-build.sh`, the
 
 ## Docker builder
 
-The docker builder image can be used to build prplMesh via `maptools.py build` command running in a prplmesh-build container via `build.sh`.
+The docker builder image can be used to build prplMesh via `maptools.py` command running in a prplmesh-build container via `build.sh`.
 
 Build prplMesh in container:
 
 ```bash
-sudo ./builder/build.sh <maptools.py build arguments>
+sudo ./build.sh <maptools.py subcommand and arguments>
 ```
 
 ## Docker runner

@@ -9,6 +9,7 @@ from commands.config import mapcfg
 from commands.build import mapbuild
 from commands.package import mappackage
 from commands.deploy import mapdeploy, mapcopy
+from commands.test import maptest
 
 THIS_SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 logging.config.fileConfig(os.path.abspath(THIS_SCRIPT_PATH + "/logging.conf"))
@@ -42,11 +43,13 @@ class maptools(object):
         self.package_command = self.child_parser.add_parser('package')
         self.deploy_command = self.child_parser.add_parser('deploy')
         self.copy_command = self.child_parser.add_parser('copy')
+        self.test_command = self.child_parser.add_parser('test')
         mapcfg.configure_parser(self.config_command)
         mapbuild.configure_parser(self.build_command)
         mappackage.configure_parser(self.package_command)
         mapdeploy.configure_parser(self.deploy_command)
         mapcopy.configure_parser(self.copy_command)
+        maptest.configure_parser(self.test_command)
         
         self.args = self.parent_parser.parse_args()
         if self.args.verbose: self.logger.setLevel(logging.DEBUG)
@@ -69,13 +72,17 @@ class maptools(object):
     def __copy__(self):
         mapcopy(self.args)
 
+    def __test__(self):
+        maptest(self.args)
+
     def run(self):
         commands = {
             'config': self.__config__, 
             'build': self.__build__,
             'package': self.__package__,
             'deploy': self.__deploy__,
-            'copy': self.__copy__
+            'copy': self.__copy__,
+            'test': self.__test__,
         }
 
         try:
