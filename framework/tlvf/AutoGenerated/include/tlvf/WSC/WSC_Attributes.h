@@ -226,56 +226,56 @@ typedef struct sWscAttrWscState {
 typedef struct sWscAttrManufacturer {
     eWscAttributes attribute_type;
     uint16_t data_length;
-    char data[WSC_MAX_NAME_LENGTH];
+    char data[WSC_MAX_MANUFACTURER_LENGTH];
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
     }
     void struct_init(){
         attribute_type = ATTR_MANUFACTURER;
-        data_length = WSC_MAX_NAME_LENGTH;
+        data_length = WSC_MAX_MANUFACTURER_LENGTH;
     }
 } __attribute__((packed)) sWscAttrManufacturer;
 
 typedef struct sWscAttrModelName {
     eWscAttributes attribute_type;
     uint16_t data_length;
-    char data[WSC_MAX_NAME_LENGTH];
+    char data[WSC_MAX_MODEL_NAME_LENGTH];
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
     }
     void struct_init(){
         attribute_type = ATTR_MODEL_NAME;
-        data_length = WSC_MAX_NAME_LENGTH;
+        data_length = WSC_MAX_MODEL_NAME_LENGTH;
     }
 } __attribute__((packed)) sWscAttrModelName;
 
 typedef struct sWscAttrModelNumber {
     eWscAttributes attribute_type;
     uint16_t data_length;
-    char data[WSC_MAX_NAME_LENGTH];
+    char data[WSC_MAX_MODEL_NUMBER_LENGTH];
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
     }
     void struct_init(){
         attribute_type = ATTR_MODEL_NUMBER;
-        data_length = WSC_MAX_NAME_LENGTH;
+        data_length = WSC_MAX_MODEL_NUMBER_LENGTH;
     }
 } __attribute__((packed)) sWscAttrModelNumber;
 
 typedef struct sWscAttrSerialNumber {
     eWscAttributes attribute_type;
     uint16_t data_length;
-    char data[WSC_MAX_NAME_LENGTH];
+    char data[WSC_MAX_SERIAL_NUMBER_LENGTH];
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
     }
     void struct_init(){
         attribute_type = ATTR_SERIAL_NUMBER;
-        data_length = WSC_MAX_NAME_LENGTH;
+        data_length = WSC_MAX_SERIAL_NUMBER_LENGTH;
     }
 } __attribute__((packed)) sWscAttrSerialNumber;
 
@@ -301,14 +301,14 @@ typedef struct sWscAttrPrimaryDeviceType {
 typedef struct sWscAttrDeviceName {
     eWscAttributes attribute_type;
     uint16_t data_length;
-    char data[WSC_MAX_NAME_LENGTH];
+    char data[WSC_MAX_DEV_NAME_LENGTH];
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
     }
     void struct_init(){
         attribute_type = ATTR_DEV_NAME;
-        data_length = WSC_MAX_NAME_LENGTH;
+        data_length = WSC_MAX_DEV_NAME_LENGTH;
     }
 } __attribute__((packed)) sWscAttrDeviceName;
 
@@ -420,14 +420,14 @@ typedef struct sWscAttrKeyWrapAuthenticator {
 typedef struct sWscAttrSsid {
     eWscAttributes attribute_type;
     uint16_t data_length;
-    char data[WSC_MAX_NAME_LENGTH];
+    char data[WSC_MAX_SSID_LENGTH];
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
     }
     void struct_init(){
         attribute_type = ATTR_SSID;
-        data_length = WSC_MAX_NAME_LENGTH;
+        data_length = WSC_MAX_SSID_LENGTH;
     }
 } __attribute__((packed)) sWscAttrSsid;
 
