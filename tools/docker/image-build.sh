@@ -27,11 +27,11 @@ usage() {
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
-    echo "      -n|--native - Use the host OS's for the FROM image"
+    echo "      -b|--base-image - Base OS image to use (Dockerfile 'FROM') "
 }
 
 main() {
-    OPTS=`getopt -o 'hvn' --long verbose,help,native -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvb:' --long verbose,help,native -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -39,15 +39,15 @@ main() {
 
     while true; do
         case "$1" in
-            -v | --verbose) VERBOSE=true; shift ;;
-            -h | --help)    usage; exit 0; shift ;;
-            -n | --native)  NATIVE=true; shift ;;
+            -v | --verbose)     VERBOSE=true; shift ;;
+            -h | --help)        usage; exit 0; shift ;;
+            -b | --base-image)  IMAGE="$2"; shift ; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
     done
 
-     "$NATIVE" = "true" ] && IMAGE=$(
+    [ -z "$IMAGE" ] && IMAGE=$(
         . /etc/os-release
         echo "$(echo $NAME | awk '{print tolower($0)}'):$VERSION_ID"
     )
@@ -74,6 +74,6 @@ main() {
 
 VERBOSE=false
 NATIVE=false
-IMAGE=ubuntu:18.04
+IMAGE=
 
 main $@
