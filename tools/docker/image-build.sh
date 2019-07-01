@@ -1,11 +1,15 @@
 #!/bin/sh
 
 dbg() {
-    [ "$VERBOSE" = "true" ] && echo "$*"
+    [ "$VERBOSE" = "true" ] && echo "$(basename $0): $*"
 }
 
 err() {
-	echo -e '\033[1;31m'"$@"'\033[0m'
+	echo '\033[1;31m'"$(basename $0): $@"'\033[0m'
+}
+
+info() {
+	echo '\033[1;35m'"$(basename $0): $@"'\033[0m'
 }
 
 run() {
@@ -14,10 +18,12 @@ run() {
 }
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-topdir="${scriptdir%/*/*/*/*}"
+topdir="${scriptdir%/*/*/*}"
 
 usage() {
-    echo "usage: $(basename $0) [-hvn]"
+    echo "usage: $(basename $0) [-hvn] <type>"
+    echo "  mandatory:"
+    echo "      type - image type <runner/builder>"
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
@@ -41,20 +47,29 @@ main() {
         esac
     done
 
-    [ "$NATIVE" = "true" ] && {
-        . /etc/lsb-release
-        IMAGE=$(echo $DISTRIB_ID | awk '{print tolower($0)}'):$DISTRIB_RELEASE
-    }
+     "$NATIVE" = "true" ] && IMAGE=$(
+        . /etc/os-release
+        echo "$(echo $NAME | awk '{print tolower($0)}'):$VERSION_ID"
+    )
+
     dbg IMAGE=$IMAGE
     dbg topdir=$topdir
 
+    info "Base docker image $IMAGE"
+    info "Generating prplmesh-builder docker image"
     run docker image build \
         --build-arg image=$IMAGE \
         --build-arg topdir=$topdir \
         --build-arg uid=${SUDO_UID:-0} \
         --build-arg gid=${SUDO_GID:-0} \
         --tag prplmesh-build \
-        ${scriptdir}
+        ${scriptdir}/builder
+
+    info "Generating prplMesh-runner docker image"
+    run docker image build \
+        --build-arg image=$IMAGE \
+        --tag prplmesh-runner \
+        ${scriptdir}/runner
 }
 
 VERBOSE=false
