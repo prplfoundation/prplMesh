@@ -1,37 +1,53 @@
-# Docker runner image
+# prplMesh docker support
 
-This folder includes a Dockerfile and helper scripts which can be used to run prplMesh inside containers.
-It relies on an already built prplMesh by mapping the `build/install` directory to the container.
+prplMesh provides docker images and helper scripts for building and running prplMesh using docker.
 
-It includes 2 helper scripts - one to generate the image `image-build.sh` and one to actually run the container - `run.sh`.
+The `image-build.sh` supports building 2 images:
 
-If `run.sh` is called without first building the image with `image-build.sh`, then it will build the image automatically.
+- **builder image** for building prplMesh using docker
+- **runner image** for running prplMesh using docker
 
-## Usage
+Building the images should be done first prior to attempting to run the builder and runner helper scripts, as it fetches the base (FROM) image from the docker hub and generates local images - `prplmesh-builder` and `prplmesh-runner`.
 
-Using this Dockerfile, you can run 2 containers, one with a controller+agent, the
-other with an agent only.
+---
+
+If `./builder/build.sh` or `./runner/run.sh` are called without first calling `image-build.sh`, then the docker image will be built automatically.
+
+---
+
+## Docker builder
+
+The docker builder image can be used to build prplMesh via `maptools.py build` command running in a prplmesh-build container via `builder/build.sh`.
+
+Build prplMesh in container:
+
+```bash
+sudo ./builder/build.sh <maptools.py build arguments>
+```
+
+## Docker runner
+
+The docker runner image can be used to run prplMesh inside containers using `runner/run.sh`.
+
+The runner docker allows running multiple containers, for example one with a controller+agent, the other with an agent only:
 The 2 containers are connected using a docker network (bridge), so can
-communicate + sniffed by running wireshark / tcpdump on the bridge from the host to see 1905
-packets.
+communicate + sniffed by running `wireshark` / `tcpdump` on the bridge from the host to see 1905 packets.
 
 ### Prerequisites
 
-build prplMesh (build/install directory will be the only directory mapped to the
+Build prplMesh (build/install directory will be the only directory mapped to the
 containers).
 
 ```bash
 ./maptools.py build map -f MSGLIB=zmq BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug
 ```
 
-Next, build the docker image using `./image-build.sh`.
-
 ### Run the Containers
 
 Finally, run 2 containers - we will run one controller, naming it "controller", and one "agent".
 Naming is important to be able to attach to the container easily from other shells (for tailing the logs).
 
-Helper scripts for running controller and agent are provided in the image for running in detached mode.
+Helper scripts for running controller and agent are provided in the image for running in detached mode - `start-agent`, `start-controller`, `start-controller-agent`.
 In this mode, the container entry command is to run the prplMesh controller / agent / controller & agent.
 After running, we can connect to the container with a new shell using `docker container exec -it <name> bash`.
 
@@ -68,7 +84,7 @@ sudo ./run.sh -n <name>
 
 ---
 
-Notes
+**Notes**
 
 1. The script automatically selects an IP based on the network, but its not 100% full proof - it generates a random IP in the network subnet, except for the gateway. If more than one container is created on the same network **they might get the same IP** (very rare but keep in mind)
 2. List all running containers `sudo docker container ls`
@@ -78,8 +94,12 @@ Notes
 
 ---
 
----
+## Docker cheat-sheet
 
-Proxy settings - the recommended way to work with docker behind a proxy is by [configuring the docker client to pass proxy information to containers automatically](https://docs.docker.com/network/proxy/).
+Show all images - `sudo docker images`
 
----
+Delete all images - `sudo docker rmi $(sudo docker images -q)`
+
+Delete all containers - `sudo docker rm $(sudo docker ps -a -q)`
+
+Proxy - The recommended way to work with docker behind a proxy is by [configuring the docker client to pass proxy information to containers automatically](https://docs.docker.com/network/proxy/).
