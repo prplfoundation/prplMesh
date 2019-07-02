@@ -41,6 +41,7 @@
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
+#include <tlvf/ieee_1905_1/tlvWscM1.h>
 
 #define SOCKET_MAX_CONNECTIONS 20
 #define SOCKETS_SELECT_TIMEOUT_MSEC 50
@@ -366,6 +367,12 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
 
+    auto tlvWscM1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
+    if (tlvWscM1 == nullptr) {
+        LOG(ERROR) << "Error creating tlvWscM1";
+        return false;
+    }
+
     //TODO autoconfig process the rest of the class
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
     if (!beerocks_header) {
@@ -373,14 +380,14 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false; //not an intel radio
     }
 
-    if (beerocks_header->action_op() != 
+    if (beerocks_header->action_op() !=
         beerocks_message::ACTION_CONTROL_SLAVE_JOINED_NOTIFICATION) {
             LOG(ERROR) << "Unexpected Intel action op " << beerocks_header->action_op();
             return false;
     }
-    
+
     // TODO autoconfig remove slave join
-    std::memcpy(beerocks_header->radio_mac().oct, tlvAp->radio_uid().mac, 6);
+    std::copy_n(tlvAp->radio_uid().mac, beerocks::net::MAC_ADDR_LEN, beerocks_header->radio_mac().oct);
     LOG(INFO) << "Handle slave join, radio identifier " <<
         network_utils::mac_to_string(beerocks_header->radio_mac());
     return handle_slave_join(sd, beerocks_header, cmdu_rx); // TODO to be removed once autoconfig is completed
@@ -493,7 +500,7 @@ bool master_thread::handle_slave_join(
             database.add_node(backhaul_mac, parent_bssid_mac, beerocks::TYPE_IRE_BACKHAUL);
         } else if (database.get_node_state(backhaul_mac) != beerocks::STATE_CONNECTED &&
                    database.get_node_state(backhaul_mac) != beerocks::STATE_CONNECTED_IP_UNKNOWN) {
-            /* if the backhaul node doesn't exist, or is not already marked as connected, 
+            /* if the backhaul node doesn't exist, or is not already marked as connected,
             * we assume it is connected to the GW's LAN switch
             */
             LOG(DEBUG) << "connected to the GW's LAN switch ";
@@ -1522,7 +1529,7 @@ bool master_thread::handle_cmdu_control_message(
 
         database.set_node_backhaul_iface_type(client_mac, beerocks::IFACE_TYPE_WIFI_UNSPECIFIED);
 
-        /* 
+        /*
              * notify existing steering task of completed connection
              */
         int prev_steering_task = database.get_steering_task_id(client_mac);
