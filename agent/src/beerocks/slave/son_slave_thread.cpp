@@ -23,6 +23,7 @@
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
+#include <tlvf/ieee_1905_1/tlvWscM1.h>
 
 // BPL Error Codes
 #include <bpl/bpl_cfg.h>
@@ -3833,6 +3834,19 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         }
 
         //TODO: add WSC tlv with M1
+        auto tlvWscM1 = cmdu_tx.addClass<ieee1905_1::tlvWscM1>();
+        if (tlvWscM1 == nullptr) {
+            LOG(ERROR) << "Error creating tlvWscM1";
+            return false;
+        }
+
+        std::copy_n(hostap_params.iface_mac.oct,
+                    beerocks::net::MAC_ADDR_LEN, tlvWscM1->M1Frame().mac_attr.data.mac);
+        // TODO: read manufactured, name, model and device name from BPL
+        string_utils::copy_string(tlvWscM1->M1Frame().manufacturer_attr.data, "prpl", 5);
+        string_utils::copy_string(tlvWscM1->M1Frame().model_name_attr.data, "Ubuntu", 7);
+        string_utils::copy_string(tlvWscM1->M1Frame().model_number_attr.data, "18.04", 6);
+        string_utils::copy_string(tlvWscM1->M1Frame().device_name_attr.data, "prplMesh", 9);
 
         auto tlvVendorSpecific = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
         if (tlvVendorSpecific == nullptr) {
