@@ -38,7 +38,7 @@ Each component can be built with CMAKE, or use the [tools/maptools.py](tools/REA
 To build prplMesh in debug mode (for being able to debug with gdb), with all features and tests, run
 
 ```bash
-./prplMesh/tools/maptools.py build map -n -f MSGLIB=zmq BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug
+./prplMesh/tools/maptools.py build map -f MSGLIB=zmq BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug
 ```
 
 Subsequent builds don't need to repeat all of these options:
