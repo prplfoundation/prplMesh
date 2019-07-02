@@ -13,6 +13,7 @@
 #include <mapf/common/poller.h>
 #include <mapf/local_bus.h>
 
+#include <arpa/inet.h>
 #include <chrono>
 #include <linux/netlink.h>
 #include <map>
@@ -90,6 +91,22 @@ private:
         bool GetLastFragmentIndicator() { return (flags & 0x80); };
         void SetRelayIndicator(bool value) { flags = (flags & ~0x40) | (value ? 0x40 : 0x00); };
         bool GetRelayIndicator() { return (flags & 0x40); };
+    };
+#pragma pack(pop)
+
+    // packed TLV struct to help in the parsing of the packet
+#pragma pack(push, 1)
+    struct Tlv {
+    protected:
+        uint8_t tlvType;
+        uint16_t tlvLength;
+
+    public:
+        uint8_t &type() { return tlvType; }
+
+        Tlv *next() { return (Tlv *)((uint8_t *)this + size()); }
+
+        size_t size() { return sizeof(Tlv) + ntohs(tlvLength); }
     };
 #pragma pack(pop)
 
@@ -205,7 +222,7 @@ private:
         de_fragmentation_map_;
 
     static const int kIeee1905FragmentationThreashold =
-        1500; // IEEE1905 packets (CMDU) should be fragmented if larger than this threashold
+        1500 - sizeof(Tlv); // IEEE1905 packets (CMDU) should be fragmented if larger than this threashold
 
     //
     // NETWORK INTERFACE STUFF

@@ -271,28 +271,11 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
 
     // reuse most of the original packet metadata for all fragments (except for the payload iov)
     Packet fragment_packet = packet;
-
-    uint8_t buf[kIeee1905FragmentationThreashold];
+    uint8_t buf[kIeee1905FragmentationThreashold + sizeof(Tlv)] = {0}; // fragment size + TLV end of message size
 
     // copy the IEEE1905 header (will be reused by all fragments)
     std::copy_n((uint8_t *)packet.payload.iov_base, sizeof(Ieee1905CmduHeader), buf);
     int remainingPacketLength = packet.payload.iov_len - sizeof(Ieee1905CmduHeader);
-
-// packed TLV struct to help in the parsing of the packet
-#pragma pack(push, 1)
-    struct Tlv {
-    protected:
-        uint8_t tlvType;
-        uint16_t tlvLength;
-
-    public:
-        uint8_t &type() { return tlvType; }
-
-        Tlv *next() { return (Tlv *)((uint8_t *)this + size()); }
-
-        size_t size() { return sizeof(Tlv) + ntohs(tlvLength); }
-    };
-#pragma pack(pop)
 
     // points to the first TLV in the currently built fragment
     Tlv *firstTlvInFragment =
@@ -352,6 +335,10 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
 
         fragment_packet.payload.iov_base = buf;
         fragment_packet.payload.iov_len  = sizeof(Ieee1905CmduHeader) + fragmentTlvsLength;
+        if (remainingPacketLength) {
+            // add EOM tlv for all fragments but the last which already has it
+            fragment_packet.payload.iov_len += sizeof(Tlv);
+        }
 
         // send the fragment
         MAPF_DBG("sending fragment " << (int)fragmentId
