@@ -15,6 +15,7 @@ run() {
 
 scriptdir="$(cd "${0%/*}"; pwd)"
 installdir="${scriptdir%/*/*/*}/build/install"
+sourcesdir="${scriptdir%/*/*}"
 
 usage() {
     echo "usage: $(basename $0) [-hvd] [-i ip] [-n name] [-N network]"
@@ -86,6 +87,7 @@ main() {
                 --privileged
                 --network ${NETWORK}
                 -v ${installdir}:${installdir}
+                -v ${sourcesdir}:${sourcesdir}
                 --name ${NAME}"
 
     if [ "$DETACH" = "false" ]; then
