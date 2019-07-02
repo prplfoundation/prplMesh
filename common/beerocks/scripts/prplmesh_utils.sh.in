@@ -1,5 +1,8 @@
 #!/bin/bash
 
+SIG_TERM=-15
+SIG_KILL=-9
+
 dbg() {
     [ "$VERBOSE" = "true" ] && echo "$@"
 }
@@ -11,6 +14,19 @@ err() {
 run() {
     dbg "$*"
     "$@" || exit $?
+}
+
+killall_program() {
+    PROGRAM_NAME=$1
+    if [ "$#" -eq 2 ]; then
+        KILL_SIG=$2
+    else
+        KILL_SIG=$SIG_KILL
+    fi
+    for PID in $(ps -ef | grep $PROGRAM_NAME | grep -v grep | grep -v ${0} | grep -v vi | grep -v tail | awk '{print $2}'); do
+        echo "kill $KILL_SIG $PID $PROGRAM_NAME";
+        kill $KILL_SIG $PID > /dev/null 2>&1;
+    done
 }
 
 platform_init_dummy() {
@@ -50,7 +66,8 @@ prplmesh_framework_init() {
 
 prplmesh_framework_deinit() {
     echo "prplmesh_framework_init - killing local_bus and ieee1905_transport processes..."
-    killall local_bus ieee1905_transport
+    killall_program local_bus
+    killall_program ieee1905_transport
 }
 
 prplmesh_controller_start() {
@@ -60,7 +77,7 @@ prplmesh_controller_start() {
 
 prplmesh_controller_stop() {
     echo "prplmesh_controller_stop - stopping beerocks_controller process..."
-    killall beerocks_controller
+    killall_program beerocks_controller
 }
 
 prplmesh_agent_start() {
@@ -70,7 +87,7 @@ prplmesh_agent_start() {
 
 prplmesh_agent_stop() {
     echo "prplmesh_agent_stop - stopping beerocks_agent process..."
-    killall beerocks_agent
+    killall_program beerocks_agent
 }
 
 start_function() {
