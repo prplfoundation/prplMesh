@@ -112,9 +112,9 @@ stop_function() {
 
 status_function() {
     echo "$0: status"
-    ps -aux | grep beerocks
-    ps -aux | grep ieee1905_transport
-    ps -aux | grep local_bus
+    ps -aux | grep beerocks | grep -v grep
+    ps -aux | grep ieee1905_transport | grep -v grep
+    ps -aux | grep local_bus | grep -v grep
 }
 
 usage() {
