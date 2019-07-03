@@ -1521,6 +1521,28 @@ class cACTION_BML_STEERING_EVENTS_UPDATE : public BaseClass
         size_t m_buffer_idx__ = 0;
 };
 
+class cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST);
+        }
+        beerocks::net::sMacAddr& al_mac();
+        beerocks::net::sMacAddr& ruid();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        beerocks::net::sMacAddr* m_al_mac = nullptr;
+        beerocks::net::sMacAddr* m_ruid = nullptr;
+};
+
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_BML_H_
