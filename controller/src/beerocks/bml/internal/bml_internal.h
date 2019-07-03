@@ -150,6 +150,9 @@ public:
     // send wfca agent command
     int wfca_agent(const char *cmd, char *ret_buf, int ret_buf_size);
 
+    // triggers channel selection on specific Agent
+    int channel_selection(const char *al_mac, const char *ruid);
+
     //set and get vaps list
     int bml_set_vap_list_credentials(const BML_VAP_INFO *vaps, const uint8_t vaps_num);
     int bml_get_vap_list_credentials(BML_VAP_INFO *vaps, uint8_t &vaps_num);
