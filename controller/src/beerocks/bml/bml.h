@@ -513,6 +513,17 @@ int bml_wfca_controller(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf
 int bml_wfca_agent(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf_size);
 
 /**
+ * Trigger Channel Selection Task on a specific Agent.
+ *
+ * @param [in] ctx BML Context.
+ * @param [in] al_mac al_mac of the platform. 
+ * @param [in] ruid Agent radio identifier. 
+ * 
+ * @return BML_RET_OK on success.
+ */
+int bml_channel_selection(BML_CTX ctx, const char *al_mac, const char *ruid);
+
+/**
  * Set a VAP information list.
  *
  * @param [in] ctx BML Context.

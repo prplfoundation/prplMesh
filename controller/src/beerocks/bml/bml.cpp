@@ -548,3 +548,15 @@ int bml_wfca_agent(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf_size
 
     return (pBML->wfca_agent(cmd, ret_buf, ret_buf_size));
 }
+
+int bml_channel_selection(BML_CTX ctx, const char *al_mac, const char *ruid)
+{
+    // Validate input parameters
+    if (!ctx) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    bml_internal *pBML = (bml_internal *)ctx;
+
+    return (pBML->channel_selection(al_mac, ruid));
+}
