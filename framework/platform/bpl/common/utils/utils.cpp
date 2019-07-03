@@ -24,6 +24,24 @@ namespace beerocks {
 namespace bpl {
 namespace utils {
 
+static const std::string WHITESPACE_CHARS(" \t\n\r\f\v");
+
+void ltrim(std::string &str, std::string additional_chars)
+{
+    str.erase(0, str.find_first_not_of(WHITESPACE_CHARS + additional_chars));
+}
+
+void rtrim(std::string &str, std::string additional_chars)
+{
+    str.erase(str.find_last_not_of(WHITESPACE_CHARS + additional_chars) + 1);
+}
+
+void trim(std::string &str, std::string additional_chars)
+{
+    ltrim(str, additional_chars);
+    rtrim(str, additional_chars);
+}
+
 void copy_string(char *dst, const char *src, size_t dst_len)
 {
     const char *src_end = std::find((char *)src, ((char *)src) + dst_len, '\0');
