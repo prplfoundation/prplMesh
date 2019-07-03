@@ -2577,6 +2577,27 @@ int bml_internal::wfca_agent(const char *cmd, char *ret_buf, int ret_buf_size)
     return BML_RET_OK;
 }
 
+int bml_internal::channel_selection(const char *al_mac, const char *ruid)
+{
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST>(cmdu_tx);
+
+    if (request == nullptr) {
+        LOG(ERROR) << "Failed building cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->al_mac() = network_utils::mac_from_string(al_mac);
+    request->ruid()   = network_utils::mac_from_string(ruid);
+
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    return BML_RET_OK;
+}
+
 bool bml_internal::wake_up(uint8_t action_opcode, int value)
 {
     std::unique_lock<std::mutex> lock(m_mtxLock);
