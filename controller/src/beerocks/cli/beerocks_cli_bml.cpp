@@ -681,6 +681,15 @@ void cli_bml::setFunctionsMapAndArray()
         static_cast<pFunction>(&cli_bml::bml_wfca_controller_caller), 1, 1, STRING_ARG);
     insertCommandToMap("bml_wfca_agent", "<string_command>", "send wfca agent <string_command>",
                        static_cast<pFunction>(&cli_bml::bml_wfca_agent_caller), 1, 1, STRING_ARG);
+    insertCommandToMap(
+        "bml_trigger_channel_selection",                                // command name
+        "<al_mac (mac format)> <ruid(mac format)>",                     // command args list
+        "trigger channel selection procedure"                           // command description
+        "on agent 'agent_ruid'",
+        static_cast<pFunction>(&cli_bml::bml_channel_selection_caller), // caller function
+        2, 2,                                                           // min,max args number
+        STRING_ARG, STRING_ARG);                                        // args types
+
 #ifdef BEEROCKS_RDKB
     insertCommandToMap("bml_rdkb_steering_set_group", "<steeringGroupIndex> <cfg_2> <cfg_5>",
                        "cfg2/5 = <bssid>, <utilCheckIntervalSec>, <utilAvgCount>, "
@@ -1273,6 +1282,14 @@ int cli_bml::bml_wfca_agent_caller(int numOfArgs)
 {
     if (numOfArgs == 1) {
         return wfca_agent(args.stringArgs[0]);
+    }
+    return -1;
+}
+
+int cli_bml::bml_channel_selection_caller(int numOfArgs)
+{
+    if (numOfArgs == 2) {
+        return channel_selection(args.stringArgs[0], args.stringArgs[1]);
     }
     return -1;
 }

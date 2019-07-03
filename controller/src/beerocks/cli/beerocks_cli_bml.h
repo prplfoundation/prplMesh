@@ -135,6 +135,7 @@ private:
     int get_slave_restricted_channels_caller(int numOfArgs);
     int bml_wfca_controller_caller(int numOfArgs);
     int bml_wfca_agent_caller(int numOfArgs);
+    int bml_channel_selection_caller(int numOfArgs);
 #ifdef BEEROCKS_RDKB
     int bml_rdkb_steering_set_group_caller(int numOfArgs);
     int bml_rdkb_steering_client_set_caller(int numOfArgs);
