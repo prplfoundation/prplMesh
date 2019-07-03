@@ -15,17 +15,125 @@ using namespace mapf;
 
 using namespace beerocks::bpl;
 
+#ifndef PLATFORM_DB_PATH
+#error "PLATFORM_DB_PATH not defined!"
+#endif
+
+#ifndef PLATFORM_DB_PATH_TEMP
+#define PLATFORM_DB_PATH_TEMP "/tmp/prplmesh_platform_db"
+#endif
+
+#define RETURN_OK 0
+#define RETURN_ERR -1
+
 const char *s_error_strings[] = {FOREACH_ERROR_CODE(GENERATE_ERROR_STRING)};
+
+int bpl_cfg_get_param(const std::string &param, std::string &value) 
+{
+    std::ifstream in_conf_file;
+    std::string line;
+    in_conf_file.open(PLATFORM_DB_PATH_TEMP);
+    if (!in_conf_file.is_open()) {
+        in_conf_file.open(PLATFORM_DB_PATH);
+        if (!in_conf_file.is_open()) {
+            MAPF_ERR("Failed oppening file " << PLATFORM_DB_PATH);
+            return RETURN_ERR;
+        }
+    }
+
+    while (std::getline(in_conf_file, line)) {
+        utils::trim(line);
+        if (line.empty()) continue; // Empty line
+        if (line.at(0) == '#') continue; // Commented line
+        if (line.compare(0, param.size(), param) != 0) continue; // Not the param we look for
+        
+        std::string line_arg = line.substr(param.size(), line.size());
+        auto pos = line_arg.find("#");
+        if (pos != std::string::npos) {
+            line_arg.erase(pos, line_arg.size());
+            utils::rtrim(line_arg);
+        }
+        if (line_arg.size() >= 1) {
+            value.assign(line_arg);
+            return RETURN_OK;
+        }
+        break;
+    }
+
+    return RETURN_ERR;
+}
+
+int bpl_cfg_get_param_int(const std::string &param, int &value)
+{
+    std::string str_value;
+
+    if (bpl_cfg_get_param(param, str_value) < 0) {
+        MAPF_ERR("Failed reading param " << param);
+        return RETURN_ERR;
+    }
+
+    value = utils::stoi(str_value);
+
+    return RETURN_OK;
+}
 
 int bpl_cfg_is_enabled() { return 1; }
 
-int bpl_cfg_is_master() { return 1; }
+int bpl_cfg_is_master() 
+{ 
+    std::string mode_str;
+    if (bpl_cfg_get_param("management_mode=", mode_str) < 0) {
+        MAPF_ERR("bpl_cfg_is_master: Failed to read ManagementMode");
+        return RETURN_ERR;
+    } 
 
-int bpl_cfg_get_operating_mode() { return BPL_OPER_MODE_GATEWAY; }
+    if (mode_str == "Multi-AP-Controller-and-Agent" ||
+        mode_str == "Multi-AP-Controller")
+        return 1;
+    else if (mode_str == "Multi-AP-Agent")
+        return 0;
+    
+    MAPF_ERR("bpl_cfg_is_master: Unexpected management_mode " << mode_str);
+        
+    return RETURN_ERR;
+}
+
+int bpl_cfg_get_operating_mode() 
+{ 
+    int retVal = 0;
+    std::string op_mode;
+    if (bpl_cfg_get_param("operating_mode=", op_mode) < 0) {
+        MAPF_ERR("bpl_cfg_get_operating_mode: Failed to read operating_mode");
+        return -1;
+    }
+
+    if (op_mode == "Gateway") {
+        return BPL_OPER_MODE_GATEWAY;
+    } else if (op_mode == "Gateway-WISP") {
+        return BPL_OPER_MODE_GATEWAY_WISP;
+    } else if (op_mode == "WDS-Extender") {
+        return BPL_OPER_MODE_WDS_EXTENDER;
+    } else if (op_mode == "WDS-Repeater") {
+        return BPL_OPER_MODE_WDS_REPEATER;
+    } else if (op_mode == "L2NAT-Client") {
+        return BPL_OPER_MODE_L2NAT_CLIENT;
+    } 
+    
+    MAPF_ERR("bpl_cfg_get_operating_mode: Unexpected operating_mode");
+    return retVal;
+}
 
 int bpl_cfg_is_onboarding() { return 0; }
 
-int bpl_cfg_is_wired_backhaul() { return 0; }
+int bpl_cfg_is_wired_backhaul() 
+{ 
+    int retVal = 0;
+    if (bpl_cfg_get_param_int("wired_backhaul=", retVal) == RETURN_ERR) {
+        MAPF_ERR("bpl_cfg_is_wired_backhaul: Failed to read wired_backhaul");
+        return RETURN_ERR;
+    }
+    return retVal;
+}
 
 int bpl_cfg_get_rdkb_extensions() { return 0; }
 
