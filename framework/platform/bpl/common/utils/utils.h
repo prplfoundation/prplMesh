@@ -16,6 +16,10 @@ namespace beerocks {
 namespace bpl {
 namespace utils {
 
+void ltrim(std::string &str, std::string additional_chars = std::string());
+void rtrim(std::string &str, std::string additional_chars = std::string());
+void trim(std::string &str, std::string additional_chars = std::string());
+
 void copy_string(char *dst, const char *src, size_t dst_len);
 int64_t stoi(std::string str);
 std::string int_to_hex_string(const unsigned int integer, const uint8_t number_of_digits);
