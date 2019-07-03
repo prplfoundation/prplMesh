@@ -340,3 +340,8 @@ cACTION_BML_STEERING_EVENTS_UPDATE:
     _type: char
     _length: [ buffer_size ]
 
+
+cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST:
+  _type: class
+  al_mac: beerocks::net::sMacAddr
+  ruid: beerocks::net::sMacAddr
