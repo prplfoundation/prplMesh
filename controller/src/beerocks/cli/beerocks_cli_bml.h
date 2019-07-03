@@ -180,6 +180,7 @@ private:
     int get_slave_restricted_channels(const std::string &hostap_mac);
     int wfca_controller(const std::string &cmd);
     int wfca_agent(const std::string &cmd);
+    int channel_selection(const std::string &al_mac, const std::string &ruid);
 #ifdef BEEROCKS_RDKB
     int steering_set_group(uint32_t steeringGroupIndex, const std::string &str_cfg_2,
                            const std::string &str_cfg_5);
