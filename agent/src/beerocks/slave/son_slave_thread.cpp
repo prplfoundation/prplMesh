@@ -460,7 +460,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         }
         */
     default: {
-        LOG(ERROR) << "Unknown CMDU message type: " << int(cmdu_message_type);
+        LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
         return false;
     }
     }
