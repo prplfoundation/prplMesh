@@ -1720,6 +1720,41 @@ void son_management::handle_bml_message(
         break;
     }
 #endif //BEEROCKS_RDKB
+    case beerocks_message::ACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST: {
+
+        auto bml_request =
+            cmdu_rx.addClass<beerocks_message::cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST>();
+
+        if (bml_request == nullptr) {
+            LOG(ERROR) << "addClass cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST failed";
+            return;
+        }
+
+        std::string al_mac   = network_utils::mac_to_string(bml_request->al_mac());
+        std::string ruid_mac = network_utils::mac_to_string(bml_request->ruid());
+        std::string key      = database.get_ruid_key_from_parent_mac_and_ruid(al_mac, ruid_mac);
+        Socket *son_slave_sd = database.get_node_socket(key);
+
+        if (son_slave_sd == nullptr) {
+            LOG(ERROR) << "Could not find socket for al_mac=" << al_mac << ", ruid=" << ruid_mac;
+            return;
+        }
+
+        LOG(INFO) << "ACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST "
+                  << ", al_mac=" << al_mac 
+                  << ", ruid="   << ruid_mac;
+
+        auto cmdu_header =
+            cmdu_tx.create(0, ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE);
+
+        if (cmdu_header == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return;
+        }
+
+        son_actions::send_cmdu_to_agent(son_slave_sd, cmdu_tx);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unsupported BML action_op:" << int(beerocks_header->action_op());
         break;
