@@ -56,6 +56,9 @@ elseif (TARGET_PLATFORM STREQUAL "linux")
 
     file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
 
+    add_definitions(-DPLATFORM_DB_PATH="${CMAKE_INSTALL_PREFIX}/share/prplmesh_platform_db")
+    add_definitions(-DPLATFORM_DB_PATH_TEMP="/tmp/prplmesh_platform_db")
+    install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 else()
 
     message(WARNING "${BoldWhite}Skipping ${BoldGreen}${PROJECT_NAME}${BoldWhite} build for unsupported platform...${ColourReset}")
