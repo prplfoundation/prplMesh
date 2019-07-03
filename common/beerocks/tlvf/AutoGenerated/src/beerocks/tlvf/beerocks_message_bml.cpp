@@ -3335,4 +3335,56 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::init()
     return true;
 }
 
+cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::~cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST() {
+}
+beerocks::net::sMacAddr& cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::al_mac() {
+    return (beerocks::net::sMacAddr&)(*m_al_mac);
+}
+
+beerocks::net::sMacAddr& cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::ruid() {
+    return (beerocks::net::sMacAddr&)(*m_ruid);
+}
+
+void cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::class_swap()
+{
+    m_al_mac->struct_swap();
+    m_ruid->struct_swap();
+}
+
+size_t cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(beerocks::net::sMacAddr); // al_mac
+    class_size += sizeof(beerocks::net::sMacAddr); // ruid
+    return class_size;
+}
+
+bool cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_al_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    if (!m_parse__) { m_al_mac->struct_init(); }
+    m_ruid = (beerocks::net::sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    if (!m_parse__) { m_ruid->struct_init(); }
+    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
 
