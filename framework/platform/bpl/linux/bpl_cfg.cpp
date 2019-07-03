@@ -145,12 +145,12 @@ int bpl_cfg_get_passive_mode() { return 0; }
 
 int bpl_cfg_get_client_roaming() { return 0; }
 
-int bpl_cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return -1; }
+int bpl_cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return RETURN_ERR; }
 
 int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params)
 {
     if (!iface || !wlan_params) {
-        return -1;
+        return RETURN_ERR;
     }
     wlan_params->enabled        = 1;
     wlan_params->acs            = 1;
@@ -158,7 +158,7 @@ int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_para
     utils::copy_string(wlan_params->ssid, "test_ssid", BPL_SSID_LEN);
     utils::copy_string(wlan_params->security, "None", BPL_SEC_LEN);
 
-    return 0;
+    return RETURN_OK;
 }
 
 int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefered_radio_band)
@@ -166,57 +166,57 @@ int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefer
     *max_vaps = 0;
     *network_enabled = 0;
     *prefered_radio_band = 0;
-    return 0;
+    return RETURN_OK;
 }
 
 int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len)
 {
     memset(backhaul_vaps_buf, 0, buf_len);
-    return 0;
+    return RETURN_OK;
 }
 
-int bpl_cfg_set_wifi_advertise_ssid(const char *iface, int advertise_ssid) { return -1; }
+int bpl_cfg_set_wifi_advertise_ssid(const char *iface, int advertise_ssid) { return RETURN_ERR; }
 
 int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
                                      char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN])
 {
     utils::copy_string(ssid, "test_beerocks_ssid", BPL_SSID_LEN);
     utils::copy_string(sec, "None", BPL_SEC_LEN);
-    return 0;
+    return RETURN_OK;
 }
 
 int bpl_cfg_set_wifi_credentials(const char iface[BPL_IFNAME_LEN], const char ssid[BPL_SSID_LEN],
                                  const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])
 {
-    return -1;
+    return RETURN_ERR;
 }
 
 int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SSID_LEN],
                                      const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])
 {
-    return -1;
+    return RETURN_ERR;
 }
 
-int bpl_cfg_set_onboarding(int enable) { return -1; }
+int bpl_cfg_set_onboarding(int enable) { return RETURN_ERR; }
 
 int bpl_cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN],
                                         const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN],
                                         const char iface_name[BPL_IFNAME_LEN], const int success)
 {
-    return -1;
+    return RETURN_ERR;
 }
 
-int bpl_cfg_notify_fw_version_mismatch() { return -1; }
+int bpl_cfg_notify_fw_version_mismatch() { return RETURN_ERR; }
 
-int bpl_cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return -1; }
+int bpl_cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return RETURN_ERR; }
 
-int bpl_cfg_set_wifi_iface_state(const char iface[BPL_IFNAME_LEN], int op) { return -1; }
+int bpl_cfg_set_wifi_iface_state(const char iface[BPL_IFNAME_LEN], int op) { return RETURN_ERR; }
 
-int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable) { return -1; }
+int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable) { return RETURN_ERR; }
 
 int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif)
 {
-    return -1;
+    return RETURN_ERR;
 }
 
-int bpl_cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return -1; }
+int bpl_cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return RETURN_ERR; }
