@@ -226,6 +226,8 @@ public:
     std::set<std::string> get_node_siblings(std::string mac, int type = beerocks::TYPE_ANY);
     std::set<std::string> get_node_children(std::string mac, int type = beerocks::TYPE_ANY,
                                             int state = beerocks::STATE_ANY);
+    std::string get_ruid_key_from_parent_mac_and_ruid(std::string parent_mac,
+                                                      std::string radio_identifier);
 
     //
     // Capabilities
@@ -602,8 +604,6 @@ private:
                                                       int state              = beerocks::STATE_ANY,
                                                       std::string parent_mac = std::string());
     int get_node_bw_int(std::shared_ptr<node> &n);
-    std::string get_ruid_key_from_parent_mac_and_ruid(std::string parent_mac,
-                                                      std::string radio_identifier);
 
     void rewind();
     bool get_next_node(std::shared_ptr<node> &n, int &hierarchy);
