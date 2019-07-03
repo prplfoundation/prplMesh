@@ -1786,6 +1786,14 @@ int cli_bml::wfca_agent(const std::string &cmd)
 
     return 0;
 }
+
+int cli_bml::channel_selection(const std::string &al_mac, const std::string &ruid)
+{
+    int ret = bml_channel_selection(ctx, al_mac.c_str(), ruid.c_str());
+    printBmlReturnVals("channel_selection", ret);
+    return 0;
+}
+
 #ifdef BEEROCKS_RDKB
 int cli_bml::steering_set_group(uint32_t steeringGroupIndex, const std::string &str_cfg_2,
                                 const std::string &str_cfg_5)
