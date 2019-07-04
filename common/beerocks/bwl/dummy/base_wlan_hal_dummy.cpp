@@ -113,7 +113,14 @@ bool base_wlan_hal_dummy::refresh_vaps_info(int id) { return true; }
 
 bool base_wlan_hal_dummy::process_ext_events() { return true; }
 
-std::string base_wlan_hal_dummy::get_radio_mac() { return std::string("DE:AD:BE:EF:DE:AD"); }
+std::string base_wlan_hal_dummy::get_radio_mac()
+{
+    std::string mac;
+    if (!beerocks::net::network_utils::linux_iface_get_mac(m_radio_info.iface_name, mac)) {
+        LOG(ERROR) << "Failed to get radio mac from ifname " << m_radio_info.iface_name;
+    }
+    return mac;
+}
 
 } // namespace dummy
 } // namespace bwl
