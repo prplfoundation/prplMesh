@@ -226,8 +226,7 @@ public:
     std::set<std::string> get_node_siblings(std::string mac, int type = beerocks::TYPE_ANY);
     std::set<std::string> get_node_children(std::string mac, int type = beerocks::TYPE_ANY,
                                             int state = beerocks::STATE_ANY);
-    std::string get_ruid_key_from_parent_mac_and_ruid(std::string parent_mac,
-                                                      std::string radio_identifier);
+    std::string get_node_key(const std::string &al_mac, const std::string &ruid);
 
     //
     // Capabilities
