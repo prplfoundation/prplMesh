@@ -387,8 +387,8 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     }
 
     // TODO autoconfig remove slave join
-    std::copy_n(tlvAp->radio_uid().mac, beerocks::net::MAC_ADDR_LEN, beerocks_header->radio_mac().oct);
-    LOG(INFO) << "Handle slave join, radio identifier " <<
+    std::copy_n(tlvWscM1->M1Frame().mac_attr.data.mac, beerocks::net::MAC_ADDR_LEN, beerocks_header->radio_mac().oct);
+    LOG(INFO) << "Handle slave join, radio mac " <<
         network_utils::mac_to_string(beerocks_header->radio_mac());
     return handle_slave_join(sd, beerocks_header, cmdu_rx); // TODO to be removed once autoconfig is completed
 }
