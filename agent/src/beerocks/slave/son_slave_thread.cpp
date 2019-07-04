@@ -479,8 +479,8 @@ bool slave_thread::handle_cmdu_control_message(
     // LOG(DEBUG) << "received radio_mac=" << network_utils::mac_to_string(beerocks_header->radio_mac()) << ", local radio_mac=" << network_utils::mac_to_string(hostap_params.iface_mac);
 
     // to me or not to me, this is the question...
-    if ((network_utils::mac_to_string(beerocks_header->radio_mac()) !=
-        config.radio_identifier)) {
+    if (network_utils::mac_to_string(beerocks_header->radio_mac()) !=
+        network_utils::mac_to_string(hostap_params.iface_mac)) {
         return true;
     }
 
