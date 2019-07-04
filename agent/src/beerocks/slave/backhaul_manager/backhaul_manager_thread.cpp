@@ -613,7 +613,7 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
             if (m_sConfig.eType == SBackhaulConfig::EType::Wireless) {
                 FSM_MOVE_STATE(INIT_HAL);
             } else { // EType::Wired
-                FSM_MOVE_STATE(WIRED_BRIDGE_DHCP);
+                FSM_MOVE_STATE(MASTER_DISCOVERY);
             }
 
             skip_select = true;
@@ -874,52 +874,6 @@ bool main_thread::send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> 
 
 bool main_thread::backhaul_fsm_wired(bool &skip_select)
 {
-    switch (m_eFSMState) {
-    case EState::WIRED_BRIDGE_DHCP: {
-
-        // Clear ip on backhaul ifaces
-        if (!m_sConfig.wireless_iface.empty()) {
-            if (network_utils::linux_iface_is_up(m_sConfig.wireless_iface)) {
-                network_utils::linux_iface_ctrl(m_sConfig.wireless_iface, true); // clear ip
-            }
-        }
-
-        // Trigger the DHCP process on the bridge and apply the leased address
-        run_dhcp_client(m_ftDHCPRetCode, m_sConfig.bridge_iface, true);
-        FSM_MOVE_STATE(WIRED_BRIDGE_DHCP_WAIT);
-
-        break;
-    }
-    case EState::WIRED_BRIDGE_DHCP_WAIT: {
-        // As long as the future is NOT valid, the command DHCP
-        // command hasn't finished
-        if (!m_ftDHCPRetCode.valid())
-            break;
-
-        // DHCP Succeeded
-        if (m_ftDHCPRetCode.get() == 0) {
-            LOG(DEBUG) << "DHCP Succeeded";
-
-            // Attempt a connection to the master
-            FSM_MOVE_STATE(MASTER_DISCOVERY);
-
-            // DHCP Failed
-        } else {
-            LOG(ERROR) << "Failed obtaining DHCP on interface '" << m_sConfig.bridge_iface << "'";
-
-            platform_notify_error(BPL_ERR_BH_OBTAINING_DHCP_BRIDGE_INTERFACE,
-                                  "iface=" + m_sConfig.bridge_iface);
-            stop_on_failure_attempts--;
-            FSM_MOVE_STATE(RESTART);
-        }
-        break;
-    }
-    default: {
-        LOG(ERROR) << "backhaul_fsm_wired() Invalid state: " << int(m_eFSMState);
-        return (false);
-    }
-    }
-
     return (true);
 }
 
