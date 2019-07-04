@@ -29,30 +29,42 @@ killall_program() {
     done
 }
 
+prplmesh_platform_db_init() {
+    management_mode=${1-Multi-AP-Controller-and-Agent}
+    operating_mode=${2-Gateway}
+
+    mkdir -p @PLATFORM_DB_PATH_TEMP@/
+    {
+        echo -e "management_mode=${management_mode}"
+        echo -e "operating_mode=${operating_mode}"
+        echo -e "wired_backhaul=1"
+    } > @PLATFORM_DB_PATH_TEMP@/prplmesh_platform_db
+}
+
 platform_init_dummy() {
     echo "platform dummy mode init..."
     run ip link add wlan0 type dummy
     run ip link add wlan2 type dummy
-    run ip link add eth1 type dummy
-    run brctl addbr br-lan
-    run brctl addif br-lan eth1
-    run brctl addif br-lan wlan0
-    run brctl addif br-lan wlan2
-    run ip link set eth1 up
+    run ip link add @BEEROCKS_BH_WIRE_IFACE@ type dummy
+    run brctl addbr @BEEROCKS_BRIDGE_IFACE@
+    run brctl addif @BEEROCKS_BRIDGE_IFACE@ @BEEROCKS_BH_WIRE_IFACE@
+    run brctl addif @BEEROCKS_BRIDGE_IFACE@ wlan0
+    run brctl addif @BEEROCKS_BRIDGE_IFACE@ wlan2
+    run ip link set @BEEROCKS_BH_WIRE_IFACE@ up
     run ip link set wlan0 up
     run ip link set wlan2 up
-    run ip link set br-lan up
+    run ip link set @BEEROCKS_BRIDGE_IFACE@ up
     echo "Done"
 }
 
 platform_deinit_dummy() {
     echo "platform dummy mode de-init..."
-    ip link set br-lan down
-    brctl delbr br-lan
-    ip link set eth1 down
+    ip link set @BEEROCKS_BRIDGE_IFACE@ down
+    brctl delbr @BEEROCKS_BRIDGE_IFACE@
+    ip link set @BEEROCKS_BH_WIRE_IFACE@ down
     ip link set wlan0 down
     ip link set wlan2 down
-    ip link del eth1
+    ip link del @BEEROCKS_BH_WIRE_IFACE@
     ip link del wlan0
     ip link del wlan2
     echo "Done"
@@ -96,8 +108,22 @@ start_function() {
 
     [ "@BWL_TYPE@" = "DUMMY" ] && [ "$PLATFORM_INIT" == "true" ] && platform_init_dummy
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_init
-    [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "C" ] && prplmesh_controller_start
-    [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "A" ] && prplmesh_agent_start
+    case "$PRPLMESH_MODE" in
+        CA | ca)
+            prplmesh_platform_db_init "Multi-AP-Controller-and-Agent"
+            prplmesh_controller_start
+            prplmesh_agent_start
+            ;;
+        C | c)
+            prplmesh_platform_db_init "Multi-AP-Controller"
+            prplmesh_controller_start
+            ;;
+        A | a)
+            prplmesh_platform_db_init "Multi-AP-Agent" "WDS-Repeater"
+            prplmesh_agent_start
+            ;;
+        * ) err "unsupported mode: $PRPLMESH_MODE"; usage; exit 1 ;;
+    esac
 }
 
 stop_function() {
