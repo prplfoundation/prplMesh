@@ -101,7 +101,7 @@ bool db::add_node(std::string mac, std::string parent_mac, beerocks::eType type,
     nodes[new_hierarchy].insert(std::make_pair(mac, n));
 
     if (!radio_identifier.empty()) {
-        std::string ruid_key = get_ruid_key_from_parent_mac_and_ruid(parent_mac, radio_identifier);
+        std::string ruid_key = get_node_key(parent_mac, radio_identifier);
         if (ruid_key.empty()) {
             LOG(ERROR) << "can't insert node with empty RUID";
             return false;
@@ -122,8 +122,8 @@ bool db::remove_node(std::string mac)
     for (i = 0; i < HIERARCHY_MAX; i++) {
         auto it = nodes[i].find(mac);
         if (it != nodes[i].end()) {
-            std::string ruid_key = get_ruid_key_from_parent_mac_and_ruid(
-                it->second->parent_mac, it->second->radio_identifier);
+            std::string ruid_key =
+                get_node_key(it->second->parent_mac, it->second->radio_identifier);
             std::string node_mac = it->second->mac;
 
             if (last_accessed_node_mac == mac) {
@@ -2841,15 +2841,14 @@ int db::get_node_bw_int(std::string mac)
     return get_node_bw_int(n);
 }
 
-std::string db::get_ruid_key_from_parent_mac_and_ruid(std::string parent_mac,
-                                                      std::string radio_identifier)
+std::string db::get_node_key(const std::string &al_mac, const std::string &ruid)
 {
 
-    if (parent_mac.empty() || radio_identifier.empty()) {
+    if (al_mac.empty() || ruid.empty()) {
         return std::string();
     }
 
-    return parent_mac + "_" + radio_identifier;
+    return al_mac + "_" + ruid;
 }
 
 uint16_t db::get_hostap_vht_center_frequency(std::string mac)
