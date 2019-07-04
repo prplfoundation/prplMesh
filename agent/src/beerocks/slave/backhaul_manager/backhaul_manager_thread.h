@@ -222,8 +222,6 @@ private:
     STATE(ENABLED)                                                                                 \
                                                                                                    \
     STATE(_WIRED_START_)                                                                           \
-    STATE(WIRED_BRIDGE_DHCP)                                                                       \
-    STATE(WIRED_BRIDGE_DHCP_WAIT)                                                                  \
     STATE(_WIRED_END_)                                                                             \
                                                                                                    \
     STATE(_WIRELESS_START_)                                                                        \
