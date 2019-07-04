@@ -20,7 +20,6 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
     set(CMAKE_SKIP_RPATH TRUE)
     set(BEEROCKS_TMP_PATH "/tmp/beerocks")
 elseif (TARGET_PLATFORM STREQUAL "linux")
-    add_definitions(-DBEEROCKS_LINUX)
     set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
 endif()
 

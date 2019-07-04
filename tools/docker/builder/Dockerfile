@@ -21,12 +21,6 @@ RUN apt-get update && apt-get install -y \
 	libzmq3-dev \
 	python \
 	python-yaml \
-	net-tools \
-	iproute2 \
-	bridge-utils \
-	iputils-ping \
-	iproute2 \
-	psmisc \
 	vim \
     && rm -rf /var/lib/apt/lists/*
 
@@ -36,4 +30,4 @@ ARG topdir
 
 USER $uid:$gid
 WORKDIR $topdir
-ENTRYPOINT ["./prplMesh/tools/maptools.py"]
+ENTRYPOINT ["./prplMesh/tools/maptools.py", "build"]
