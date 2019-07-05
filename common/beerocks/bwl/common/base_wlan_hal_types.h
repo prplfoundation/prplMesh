@@ -98,7 +98,7 @@ struct RadioInfo {
 
 //sta_wlan_hal
 typedef struct {
-    beerocks::net::sMacAddr mac;
+    beerocks::net::sScanResult result;
     char iface_name[beerocks::message::IFACE_NAME_LENGTH];
     uint16_t rx_phy_rate_100kb;
     uint16_t tx_phy_rate_100kb;

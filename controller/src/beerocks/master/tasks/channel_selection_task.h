@@ -72,7 +72,7 @@ public:
         beerocks_message::sApChannelSwitch cs_params;
         beerocks_message::sWifiChannel
             supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
-        beerocks::net::sMacAddr
+        beerocks::net::sScanResult
             backhaul_scan_measurement_list[beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];
     } sSlaveJoined_event;
 

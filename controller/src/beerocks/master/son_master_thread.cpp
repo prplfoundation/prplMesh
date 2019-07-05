@@ -822,7 +822,7 @@ bool master_thread::handle_slave_join(
         for (unsigned int i = 0; i < message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
             if (cs_new_event->backhaul_scan_measurement_list[i].channel > 0) {
                 LOG(DEBUG) << "mac = " << network_utils::mac_to_string(
-                                              cs_new_event->backhaul_scan_measurement_list[i])
+                                              cs_new_event->backhaul_scan_measurement_list[i].mac)
                            << " channel = "
                            << int(cs_new_event->backhaul_scan_measurement_list[i].channel)
                            << " rssi = "
@@ -1225,7 +1225,7 @@ bool master_thread::handle_cmdu_control_message(
             return false;
         }
 
-        std::string client_mac = network_utils::mac_to_string(notification->params().mac);
+        std::string client_mac = network_utils::mac_to_string(notification->params().result.mac);
         std::string ap_mac     = hostap_mac;
         bool is_parent         = (database.get_node_parent(client_mac) ==
                           database.get_hostap_vap_mac(ap_mac, notification->params().vap_id));
@@ -1282,7 +1282,7 @@ bool master_thread::handle_cmdu_control_message(
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION failed";
             return false;
         }
-        std::string client_mac    = network_utils::mac_to_string(notification->params().mac);
+        std::string client_mac    = network_utils::mac_to_string(notification->params().result.mac);
         std::string client_parent = database.get_node_parent(client_mac);
         std::string ap_mac = database.get_hostap_vap_mac(hostap_mac, notification->params().vap_id);
         bool is_parent =
