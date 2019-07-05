@@ -5,7 +5,7 @@ dbg() {
 }
 
 err() {
-	echo -e '\033[1;31m'"$@"'\033[0m'
+	printf '\033[1;31m'"$@\n"'\033[0m'
 }
 
 run() {
@@ -25,6 +25,7 @@ usage() {
     echo "      -d|--detach - run in background"
     echo "      -i|--ipaddr - ipaddr for container br-lan (should be in network subnet)"
     echo "      -n|--name - container name (for later easy attach)"
+    echo "      -I|--image - docker network to which to attach the container"
     echo "      -N|--network - docker network to which to attach the container"
 }
 
@@ -43,7 +44,7 @@ generate_container_random_ip() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvdi:n:N:o:' --long verbose,help,detach,ipaddr:,name:,network:,options: -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvdi:n:N:o:t:' --long verbose,help,detach,ipaddr:,name:,network:,tag:,options: -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -51,19 +52,21 @@ main() {
 
     while true; do
         case "$1" in
-            -v | --verbose) VERBOSE=true; shift ;;
-            -h | --help)    usage; exit 0; shift ;;
-            -d | --detach)  DETACH=true; shift ;;
-            -i | --ipaddr)  IPADDR="$2"; shift; shift ;;
-            -n | --name)    NAME="$2"; shift; shift ;;
-            -N | --network) NETWORK="$2"; shift; shift ;;
+            -v | --verbose)     VERBOSE=true; shift ;;
+            -h | --help)        usage; exit 0; shift ;;
+            -d | --detach)      DETACH=true; shift ;;
+            -i | --ipaddr)      IPADDR="$2"; shift; shift ;;
+            -n | --name)        NAME="$2"; shift; shift ;;
+            -t | --tag)         TAG=":$2"; shift; shift ;;
+            -N | --network)     NETWORK="$2"; shift; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
     done
 
-    docker image inspect prplmesh-runner >/dev/null 2>&1 || {
-        dbg "Image prplmesh-runner does not exist, creating..."
+    docker image inspect prplmesh-runner$TAG >/dev/null 2>&1 || {
+        [ -n "$TAG" ] && { err "image prplmesh-runner$TAG doesn't exist, aborting"; exit 1; }
+        dbg "Image prplmesh-runner$TAG does not exist, creating..."
         run ${scriptdir}/image-build.sh
     }
 
@@ -79,6 +82,7 @@ main() {
     dbg "VERBOSE=${VERBOSE}"
     dbg "DETACH=${DETACH}"
     dbg "NETWORK=${NETWORK}"
+    dbg "IMAGE=prplmesh-runner$TAG"
     dbg "IPADDR=${IPADDR}"
     dbg "NAME=${NAME}"
 
@@ -96,7 +100,7 @@ main() {
         DOCKEROPTS="$DOCKEROPTS -d"
     fi
     
-    run docker container run ${DOCKEROPTS} prplmesh-runner $IPADDR "$@"
+    run docker container run ${DOCKEROPTS} prplmesh-runner$TAG $IPADDR "$@"
 }
 
 VERBOSE=false
@@ -104,5 +108,6 @@ DETACH=false
 NETWORK=prplMesh-net
 IPADDR=
 NAME=prplMesh
+IMAGE=prplmesh-runner
 
 main $@

@@ -14,7 +14,7 @@ main() {
         run ${scriptdir}/image-build.sh
     }
 
-    run docker container run -v ${topdir}:${topdir} --interactive --tty --rm prplmesh-build $@
+    run docker container run -v ${topdir}:${topdir} --interactive --tty --rm prplmesh-builder $@
 }
 
 main $@
