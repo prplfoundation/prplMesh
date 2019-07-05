@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
 	libssl-dev \
 	libjson-c-dev \
 	libnl-genl-3-dev \
+	libssl-dev \
 	libzmq3-dev \
 	python \
 	python-yaml \
