@@ -374,7 +374,7 @@ void channel_selection_task::work()
             if (slave_joined_event->backhaul_scan_measurement_list[i].channel > 0) {
                 TASK_LOG(DEBUG)
                     << "mac = " << network_utils::mac_to_string(
-                                       slave_joined_event->backhaul_scan_measurement_list[i])
+                                       slave_joined_event->backhaul_scan_measurement_list[i].mac)
                     << " channel = "
                     << int(slave_joined_event->backhaul_scan_measurement_list[i].channel)
                     << " rssi = "
@@ -1311,7 +1311,7 @@ void channel_selection_task::get_hostap_params()
         for (auto i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
             if (slave_joined_event->backhaul_scan_measurement_list[i].channel != 0) {
                 auto mac = network_utils::mac_to_string(
-                    slave_joined_event->backhaul_scan_measurement_list[i]);
+                    slave_joined_event->backhaul_scan_measurement_list[i].mac);
                 backhaul_scan_measurement_list[mac].channel =
                     slave_joined_event->backhaul_scan_measurement_list[i].channel;
                 backhaul_scan_measurement_list[mac].rssi =

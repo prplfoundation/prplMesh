@@ -194,7 +194,7 @@ private:
     std::string roam_selected_bssid;
     int roam_selected_bssid_channel;
     bool roam_flag = false;
-    std::unordered_map<std::string, net::sMacAddr> scan_measurement_list;
+    std::unordered_map<std::string, net::sScanResult> scan_measurement_list;
 
     const int RSSI_THRESHOLD_5GHZ       = -80;
     const int RSSI_BAND_DELTA_THRESHOLD = 5;

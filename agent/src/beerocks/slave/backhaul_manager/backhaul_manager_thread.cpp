@@ -422,8 +422,8 @@ bool main_thread::finalize_slaves_connect_state(bool fConnected,
             LOG(DEBUG) << "copy scan list to slaves = " << scan_measurement_entry.first
                        << " channel = " << int(scan_measurement_entry.second.channel)
                        << " rssi = " << int(scan_measurement_entry.second.rssi);
-            notification->params().backhaul_scan_measurement_list[i] =
-                scan_measurement_entry.second;
+            notification->params().backhaul_scan_measurement_list[i].mac =
+                scan_measurement_entry.second.mac;
             i++;
         }
 
@@ -1564,7 +1564,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
                               "message!";
                 break;
             }
-            response->params().mac        = request->params().mac;
+            response->params().result.mac        = request->params().mac;
             response->params().rx_rssi    = beerocks::RSSI_INVALID;
             response->params().rx_snr     = beerocks::SNR_INVALID;
             response->params().rx_packets = -1;
@@ -1899,17 +1899,17 @@ bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_pt
         auto msg = static_cast<bwl::sACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE *>(data);
 
         LOG(DEBUG) << "ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE for mac "
-                   << network_utils::mac_to_string(msg->params.mac)
+                   << network_utils::mac_to_string(msg->params.result.mac)
                    << " id = " << unassociated_rssi_measurement_header_id;
 
         if (unassociated_rssi_measurement_header_id > -1) {
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE>(cmdu_tx);
 
-            std::copy_n(msg->params.mac.oct, sizeof(msg->params.mac.oct),
-                        response->params().mac.oct);
-            response->params().mac.channel       = msg->params.mac.channel;
-            response->params().mac.rssi          = msg->params.mac.rssi;
+            std::copy_n(msg->params.result.mac.oct, sizeof(msg->params.result.mac.oct),
+                        response->params().result.mac.oct);
+            response->params().result.channel       = msg->params.result.channel;
+            response->params().result.rssi          = msg->params.result.rssi;
             response->params().rx_phy_rate_100kb = msg->params.rx_phy_rate_100kb;
             response->params().tx_phy_rate_100kb = msg->params.tx_phy_rate_100kb;
             response->params().rx_rssi           = msg->params.rx_rssi;
@@ -2178,7 +2178,9 @@ void main_thread::get_scan_measurement()
             LOG(DEBUG) << "get_scan_measurement: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface;
 
-            auto it = scan_measurement_list.find(bssid);
+            auto it = std::find_if(scan_measurement_list.begin(), scan_measurement_list.end(),
+                        [bssid](const std::pair<std::string, net::sScanResult> & t) -> bool
+                        { return t.second.mac == network_utils::mac_from_string(bssid); });
             if (it != scan_measurement_list.end()) {
                 //updating rssi if stronger
                 if (scan_result.rssi > it->second.rssi) {
@@ -2190,9 +2192,9 @@ void main_thread::get_scan_measurement()
                 }
             } else {
                 //insert new entry
-                sMacAddr scan_measurement;
+                sScanResult scan_measurement;
 
-                std::copy_n(scan_result.bssid, sizeof(sMacAddr::oct), scan_measurement.oct);
+                std::copy_n(scan_result.bssid, MAC_ADDR_LEN, scan_measurement.mac.oct);
                 scan_measurement.channel     = scan_result.channel;
                 scan_measurement.rssi        = scan_result.rssi;
                 scan_measurement_list[bssid] = scan_measurement;

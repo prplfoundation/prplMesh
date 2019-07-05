@@ -1572,7 +1572,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
             for (unsigned int i = 0; i < message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
                 if (backhaul_params.backhaul_scan_measurement_list[i].channel > 0) {
                     LOG(DEBUG) << "mac = " << network_utils::mac_to_string(
-                                                  backhaul_params.backhaul_scan_measurement_list[i])
+                                                  backhaul_params.backhaul_scan_measurement_list[i].mac)
                                << " channel = "
                                << int(backhaul_params.backhaul_scan_measurement_list[i].channel)
                                << " rssi = "
@@ -1667,7 +1667,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
         }
 
         LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE mac="
-                   << network_utils::mac_to_string(response_in->params().mac)
+                   << network_utils::mac_to_string(response_in->params().result.mac)
                    << " rx_rssi=" << int(response_in->params().rx_rssi)
                    << " id=" << int(beerocks_header->id());
 
@@ -2449,7 +2449,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
             return false;
         }
         LOG(INFO) << "APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE mac="
-                  << network_utils::mac_to_string(response_in->params().mac)
+                  << network_utils::mac_to_string(response_in->params().result.mac)
                   << " rx_rssi=" << int(response_in->params().rx_rssi)
                   << " id=" << int(beerocks_header->id());
 
@@ -2836,7 +2836,7 @@ bool slave_thread::handle_cmdu_monitor_message(
             break;
         }
         LOG(INFO) << "ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE mac="
-                  << network_utils::mac_to_string(response_in->params().mac)
+                  << network_utils::mac_to_string(response_in->params().result.mac)
                   << " rx_rssi=" << int(response_in->params().rx_rssi)
                   << " id=" << int(beerocks_header->id());
 
@@ -3910,7 +3910,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 LOG(DEBUG)
                     << "mac = "
                     << network_utils::mac_to_string(
-                           notification->backhaul_params().backhaul_scan_measurement_list[i].oct)
+                           notification->backhaul_params().backhaul_scan_measurement_list[i].mac.oct)
                     << " channel = " << int(notification->backhaul_params()
                                                 .backhaul_scan_measurement_list[i]
                                                 .channel)
