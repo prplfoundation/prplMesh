@@ -11,14 +11,14 @@ file(COPY "${CMAKE_CURRENT_BINARY_DIR}/logging.conf" DESTINATION "${CMAKE_MULTIA
 if(MSGLIB STREQUAL "None")
 
 message(STATUS "${BoldYellow}Messaging library - None${ColourReset}")
-set(sources logger.cpp)
+set(sources logger.cpp encryption.cpp)
 
 else()
 
 message(STATUS "${BoldGreen}Messaging library - ${MSGLIB}${ColourReset}")
 find_package(${MSGLIB} REQUIRED)
 set(MSGLIB_TARGET ${MSGLIB}::${MSGLIB})
-set(sources logger.cpp message_factory.cpp broker_config.cpp broker_interface.cpp ${MSGLIB}/broker.cpp ${MSGLIB}/socket.cpp ${MSGLIB}/context.cpp ${MSGLIB}/poller.cpp )
+set(sources logger.cpp encryption.cpp message_factory.cpp broker_config.cpp broker_interface.cpp ${MSGLIB}/broker.cpp ${MSGLIB}/socket.cpp ${MSGLIB}/context.cpp ${MSGLIB}/poller.cpp )
 
 add_executable(version ${MSGLIB}/version.cpp)
 target_link_libraries(version common mapf::elpp ${MSGLIB_TARGET})
@@ -42,6 +42,10 @@ add_library(common SHARED ${sources})
 set_target_properties(common PROPERTIES PREFIX "mapf" VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
 target_link_libraries(common PRIVATE ${MSGLIB_TARGET} mapf::elpp json-c)
 target_include_directories(common PUBLIC ${PLATFORM_INCLUDE_DIR})
+
+# Encryption - we use OpenSSL 1.1.x API
+find_package(OpenSSL 1.1 REQUIRED)
+target_link_libraries(common PRIVATE OpenSSL::SSL)
 
 configure_file(
 	"${CMAKE_CURRENT_SOURCE_DIR}/mapf_config.h.in"
