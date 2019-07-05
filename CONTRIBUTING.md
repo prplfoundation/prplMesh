@@ -274,7 +274,7 @@ That means the following conditions must hold.
 
 ### Coding style
 
-TODO
+See [the separate coding style document](CODINGSTYLE.md).
 
 <a id="developers-certificate-of-origin"></a>
 ## Developer's Certificate of Origin 1.1
