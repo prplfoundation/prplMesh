@@ -376,10 +376,12 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     }
 
     //TODO autoconfig process the rest of the class
+    //TODO autoconfig add support for none intel agents
+    //TODO autoconfig Keep intel agent support only as intel enhancements
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
     if (!beerocks_header) {
         LOG(ERROR) << "Failed to parse intel vs message (not Intel?)";
-        return false; //not an intel radio
+        return false;
     }
 
     if (beerocks_header->action_op() !=
@@ -388,7 +390,6 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
             return false;
     }
 
-    // TODO autoconfig remove slave join
     std::copy_n(tlvWscM1->M1Frame().mac_attr.data.mac, beerocks::net::MAC_ADDR_LEN, beerocks_header->radio_mac().oct);
     LOG(INFO) << "Handle slave join, radio mac " <<
         network_utils::mac_to_string(beerocks_header->radio_mac());
