@@ -41,6 +41,7 @@
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
+#include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
 
 #define SOCKET_MAX_CONNECTIONS 20
@@ -360,7 +361,11 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
 {
     auto tlvAp = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
     if (tlvAp == nullptr) {
-        LOG(ERROR) << "Failed to get APRadioBasicCapabilities";
+        // Check if this a message we sent to the agent which was just looped back
+        if (cmdu_rx.addClass<wfa_map::tlvApRadioIdentifier>()) {
+            return true;
+        }
+        LOG(DEBUG) << "Failed to get APRadioBasicCapabilities";
         return false;
     }
 
