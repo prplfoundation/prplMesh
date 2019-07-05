@@ -3810,7 +3810,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                     beerocks::net::MAC_ADDR_LEN, tlvAp->radio_uid().mac);
         tlvAp->maximum_number_of_bsss_supported() = beerocks::IFACE_TOTAL_VAPS; //TODO get maximum supported VAPs from DWPAL
 
-        //TODO: Currently sending dummy values, need to read them from DWPAL and use the correct WiFi
+        // TODO: move WSC and M1 setters to seperate functions
+        // TODO: Currently sending dummy values, need to read them from DWPAL and use the correct WiFi
         //      Parameters based on the regulatory domain
         for (int i = 0; i < beerocks::IFACE_TOTAL_VAPS; i++) {
             auto operationClassesInfo = tlvAp->create_operating_classes_info_list();
@@ -3832,7 +3833,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             }
         }
 
-        //TODO: add WSC tlv with M1
+        // All attributes which are not explicitely set below are set to
+        // default by the TLV factory, see WSC_Attributes.yml
         auto tlvWscM1 = cmdu_tx.addClass<ieee1905_1::tlvWscM1>();
         if (tlvWscM1 == nullptr) {
             LOG(ERROR) << "Error creating tlvWscM1";
@@ -3846,6 +3848,17 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         string_utils::copy_string(tlvWscM1->M1Frame().model_name_attr.data, "Ubuntu", 7);
         string_utils::copy_string(tlvWscM1->M1Frame().model_number_attr.data, "18.04", 6);
         string_utils::copy_string(tlvWscM1->M1Frame().device_name_attr.data, "prplMesh", 9);
+
+        // TODO M1 should also have values for:
+        // uuid_e_attr
+        // enrolee_nonce_attr -> to be added by encryption, but the TODO should be here already
+        // public_key_attr -> same
+        // authentication_type_flags_attr
+        // encryption_type_flags_attr
+        // serial_number_attr
+        // primary_device_type_attr -> We could actually add default values to the yaml
+        // rf_bands_attr -> This is essential and must correspond to the freqband in the search message
+        // vendor_extensions_attr -> this could also be done in the yaml file
 
         auto tlvVendorSpecific = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
         if (tlvVendorSpecific == nullptr) {
