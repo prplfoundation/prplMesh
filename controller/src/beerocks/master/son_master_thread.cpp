@@ -198,28 +198,26 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     return true;
 }
 
-void master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     LOG(DEBUG) << "handle_cmdu_1905_1_message " << int(cmdu_rx.getMessageType());
 
     switch (cmdu_rx.getMessageType()) {
-    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE: {
-        handle_cmdu_1905_autoconfiguration_search(sd, cmdu_rx);
-        break;
-    }
-    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE: {
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE:
+        LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_SEARCH_MESSAGE";
+        return handle_cmdu_1905_autoconfiguration_search(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE:
         LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE";
-        handle_cmdu_1905_autoconfiguration_WSC(sd, cmdu_rx);
+        return handle_cmdu_1905_autoconfiguration_WSC(sd, cmdu_rx);
+    default:
         break;
     }
-    default: {
-        LOG(WARNING) << "Unknown 1905 message received. Ignoring";
-        break;
-    }
-    }
+
+    LOG(WARNING) << "Unknown 1905 message received. Ignoring";
+    return true;
 }
 
-void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
+bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
                                                               ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     std::string al_mac;
@@ -231,7 +229,7 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
         LOG(DEBUG) << "mac=" << al_mac;
     } else {
         LOG(ERROR) << "tlvAlMacAddressType missing - ignoring autconfig search message";
-        return;
+        return false;
     }
 
     auto tlvSearchedRole = cmdu_rx.addClass<ieee1905_1::tlvSearchedRole>();
@@ -239,11 +237,11 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
         LOG(DEBUG) << "searched_role=" << int(tlvSearchedRole->value());
         if (tlvSearchedRole->value() != ieee1905_1::tlvSearchedRole::REGISTRAR) {
             LOG(ERROR) << "invalid tlvSearchedRole value";
-            return;
+            return false;
         }
     } else {
         LOG(ERROR) << "tlvSearchedRole missing - ignoring autconfig search message";
-        return;
+        return false;
     }
 
     auto tlvAutoconfigFreqBand = cmdu_rx.addClass<ieee1905_1::tlvAutoconfigFreqBand>();
@@ -256,7 +254,7 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
         LOG(DEBUG) << "band=" << int(auto_config_freq_band);
     } else {
         LOG(ERROR) << "tlvAutoconfigFreqBand missing - ignoring autconfig search message";
-        return;
+        return false;
     }
 
     auto tlvSupportedServiceIn = cmdu_rx.addClass<wfa_map::tlvSupportedService>();
@@ -265,7 +263,7 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
             auto supportedServiceTuple = tlvSupportedServiceIn->supported_service_list(i);
             if (!std::get<0>(supportedServiceTuple)) {
                 LOG(ERROR) << "Invalid tlvSupportedService";
-                return;
+                return false;
             }
             auto supportedService = std::get<1>(supportedServiceTuple);
             if (supportedService !=
@@ -273,12 +271,12 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
                 LOG(WARNING) << "Invalid tlvSupportedService - supported service is not "
                                 "MULTI_AP_AGENT. Received value: "
                              << std::hex << int(supportedService);
-                return;
+                return false;
             }
         }
     } else {
         LOG(ERROR) << "tlvSupportedService missing - ignoring autconfig search message";
-        return;
+        return false;
     }
 
     auto tlvSearchedService = cmdu_rx.addClass<wfa_map::tlvSearchedService>();
@@ -287,18 +285,18 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
             auto searchedServiceTuple = tlvSearchedService->searched_service_list(i);
             if (!std::get<0>(searchedServiceTuple)) {
                 LOG(ERROR) << "Invalid tlvSearchedService";
-                return;
+                return false;
             }
             if (std::get<1>(searchedServiceTuple) !=
                 wfa_map::tlvSearchedService::eSearchedService::MULTI_AP_CONTROLLER) {
                 LOG(WARNING)
                     << "Invalid tlvSearchedService - searched service is not MULTI_AP_CONTROLLER";
-                return;
+                return false;
             }
         }
     } else {
         LOG(ERROR) << "tlvSearchedService missing - ignoring autconfig search message";
-        return;
+        return false;
     }
 
     auto cmdu_header =
@@ -307,14 +305,14 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
     auto tlvSupportedRole = cmdu_tx.addClass<ieee1905_1::tlvSupportedRole>();
     if (!tlvSupportedRole) {
         LOG(ERROR) << "addClass ieee1905_1::tlvSupportedRole failed";
-        return;
+        return false;
     }
     tlvSupportedRole->value() = ieee1905_1::tlvSupportedRole::REGISTRAR;
 
     auto tlvSupportedFreqBand = cmdu_tx.addClass<ieee1905_1::tlvSupportedFreqBand>();
     if (!tlvSupportedFreqBand) {
         LOG(ERROR) << "addClass ieee1905_1::tlvSupportedFreqBand failed";
-        return;
+        return false;
     }
 
     switch (auto_config_freq_band) {
@@ -332,30 +330,29 @@ void master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
     }
     default: {
         LOG(ERROR) << "unknown autoconfig freq band, value=" << int(auto_config_freq_band);
-        return;
+        return false;
     }
     }
 
     auto tlvSupportedServiceOut = cmdu_tx.addClass<wfa_map::tlvSupportedService>();
     if (!tlvSupportedServiceOut) {
         LOG(ERROR) << "addClass wfa_map::tlvSupportedService failed";
-        return;
+        return false;
     }
     if (!tlvSupportedServiceOut->alloc_supported_service_list()) {
         LOG(ERROR) << "alloc_supported_service_list failed";
-        return;
+        return false;
     }
     auto supportedServiceTuple = tlvSupportedServiceOut->supported_service_list(0);
     if (!std::get<0>(supportedServiceTuple)) {
         LOG(ERROR) << "Failed accessing supported_service_list";
-        return;
+        return false;
     }
     std::get<1>(supportedServiceTuple) =
         wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER;
 
     LOG(DEBUG) << "sending autoconfig response message";
-    son_actions::send_cmdu_to_agent(sd, cmdu_tx);
-    LOG(DEBUG) << "sent";
+    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
 }
 
 bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
