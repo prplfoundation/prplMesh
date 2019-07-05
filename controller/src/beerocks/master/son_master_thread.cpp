@@ -360,8 +360,16 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
                                                               ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto tlvAp = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+    // Check if this is a M2 message that we sent to the agent, which was just looped back.
+    // The M1 and M2 messages are both of CMDU type AP_Autoconfiguration_WSC. Thus,
+    // when we send the M2 to the local agent, it will be published back on the local bus because
+    // the destination is our AL-MAC, and the controller does listen to this CMDU.
+    // Ideally, we should use the message type attribute from the WSC payload to distinguish.
+    // Unfortunately, that is a bit complicated with the current tlv parser. However, there is another
+    // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
+    // while the M2 has the AP_Radio_Identifier TLV.
+    // If this is a looped back M2 CMDU, we can treat is as handled successfully.
     if (tlvAp == nullptr) {
-        // Check if this a message we sent to the agent which was just looped back
         if (cmdu_rx.addClass<wfa_map::tlvApRadioIdentifier>()) {
             return true;
         }
