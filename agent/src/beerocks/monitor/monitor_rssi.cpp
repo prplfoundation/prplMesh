@@ -228,7 +228,7 @@ void monitor_rssi::process()
                         break;
                     }
 
-                    notification->params().mac        = network_utils::mac_from_string(sta_mac);
+                    notification->params().result.mac        = network_utils::mac_from_string(sta_mac);
                     notification->params().rx_rssi    = sta_stats.rx_rssi_curr;
                     notification->params().rx_snr     = sta_stats.rx_snr_curr;
                     notification->params().rx_packets = 100; //dummy value
@@ -366,7 +366,7 @@ void monitor_rssi::send_rssi_measurement_response(std::string &sta_mac, monitor_
             break;
         }
 
-        response->params().mac               = network_utils::mac_from_string(sta_mac);
+        response->params().result.mac               = network_utils::mac_from_string(sta_mac);
         response->params().rx_rssi           = sta_stats.rx_rssi_curr;
         response->params().rx_snr            = sta_stats.rx_snr_curr;
         response->params().rx_packets        = rx_packets;

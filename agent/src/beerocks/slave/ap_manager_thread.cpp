@@ -696,7 +696,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 LOG(ERROR) << "Failed building message!";
                 return false;
             }
-            response->params().mac        = request->params().mac;
+            response->params().result.mac        = request->params().mac;
             response->params().rx_rssi    = beerocks::RSSI_INVALID;
             response->params().rx_snr     = beerocks::SNR_INVALID;
             response->params().rx_packets = -1;
@@ -1049,7 +1049,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
         auto msg = static_cast<bwl::sACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE *>(data);
 
         LOG(INFO) << "CLIENT_RX_RSSI_MEASUREMENT_RESPONSE for mac "
-                  << network_utils::mac_to_string(msg->params.mac)
+                  << network_utils::mac_to_string(msg->params.result.mac)
                   << " id=" << sta_unassociated_rssi_measurement_header_id;
 
         if (sta_unassociated_rssi_measurement_header_id > -1) {
@@ -1063,7 +1063,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
                 break;
             }
 
-            response->params().mac               = msg->params.mac;
+            response->params().result.mac               = msg->params.result.mac;
             response->params().rx_phy_rate_100kb = msg->params.rx_phy_rate_100kb;
             response->params().tx_phy_rate_100kb = msg->params.tx_phy_rate_100kb;
             response->params().rx_rssi           = msg->params.rx_rssi;

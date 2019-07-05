@@ -358,7 +358,7 @@ typedef struct sNodeRssiMeasurementRequest {
 } __attribute__((packed)) sNodeRssiMeasurementRequest;
 
 typedef struct sNodeRssiMeasurement {
-    beerocks::net::sMacAddr mac;
+    beerocks::net::sScanResult result;
     uint16_t rx_phy_rate_100kb;
     uint16_t tx_phy_rate_100kb;
     int8_t rx_rssi;
@@ -367,12 +367,12 @@ typedef struct sNodeRssiMeasurement {
     uint8_t src_module;
     int8_t vap_id;
     void struct_swap(){
-        mac.struct_swap();
+        result.struct_swap();
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&rx_phy_rate_100kb));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&tx_phy_rate_100kb));
     }
     void struct_init(){
-        mac.struct_init();
+        result.struct_init();
     }
 } __attribute__((packed)) sNodeRssiMeasurement;
 
@@ -789,7 +789,7 @@ typedef struct sBackhaulParams {
     uint8_t backhaul_iface_type;
     uint8_t is_backhaul_manager;
     uint8_t gw_manage_type;
-    beerocks::net::sMacAddr backhaul_scan_measurement_list[beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];
+    beerocks::net::sScanResult backhaul_scan_measurement_list[beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];
     void struct_swap(){
         gw_ipv4.struct_swap();
         gw_bridge_mac.struct_swap();

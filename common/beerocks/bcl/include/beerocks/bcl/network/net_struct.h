@@ -11,6 +11,7 @@
 
 #include <cstring>
 #include <stdint.h>
+#include <string>
 
 namespace beerocks {
 namespace net {
@@ -23,28 +24,44 @@ enum eNetworkStructsConsts {
 typedef struct sIpv4Addr {
     uint8_t oct[IP_ADDR_LEN];
     void struct_swap() {}
-    void struct_init()
+    void struct_init() { std::memset(oct, 0, IP_ADDR_LEN); }
+    bool operator==(sIpv4Addr const & rhs) const
     {
-        for (size_t i = 0; i < IP_ADDR_LEN; i++) {
-            oct[i] = 0;
-        }
+        return (0 == std::memcmp(this->oct, rhs.oct, IP_ADDR_LEN));
     }
+    bool operator!=(sIpv4Addr const & rhs) const { return !(rhs == *this); }
 } __attribute__((packed)) sIpv4Addr;
 
 typedef struct sMacAddr {
     uint8_t oct[MAC_ADDR_LEN];
+
+    void struct_swap() {}
+    void struct_init() { std::memset(oct, 0 ,MAC_ADDR_LEN); }
+    bool operator==(sMacAddr const & rhs) const
+    {
+        return (0 == std::memcmp(this->oct, rhs.oct, MAC_ADDR_LEN));
+    }
+    bool operator!=(sMacAddr const & rhs) const { return !(rhs == *this); }
+} __attribute__((packed)) sMacAddr;
+
+typedef struct sScanResult {
+    sMacAddr mac;
     uint8_t channel;
     int8_t rssi;
     void struct_swap() {}
     void struct_init()
     {
-        for (size_t i = 0; i < MAC_ADDR_LEN; i++) {
-            oct[i] = 0;
-        }
+        mac.struct_init();
         channel = 0;
         rssi    = 0;
     }
-} __attribute__((packed)) sMacAddr;
+    bool operator==(sScanResult const & rhs) const
+    {
+        return (channel == rhs.channel && rssi == rhs.rssi && mac == rhs.mac);
+    }
+    bool operator!=(sScanResult const & rhs) const { return !(rhs == *this); }
+} __attribute__((packed)) sScanResult;
+
 }
 }
 
