@@ -261,7 +261,7 @@ sNodeRssiMeasurementRequest:
 
 sNodeRssiMeasurement:
   _type: struct
-  mac: beerocks::net::sMacAddr
+  result: beerocks::net::sScanResult
   rx_phy_rate_100kb: uint16_t
   tx_phy_rate_100kb: uint16_t
   rx_rssi: int8_t
@@ -593,7 +593,7 @@ sBackhaulParams:
   is_backhaul_manager: uint8_t 
   gw_manage_type: uint8_t 
   backhaul_scan_measurement_list:
-    _type: beerocks::net::sMacAddr  
+    _type: beerocks::net::sScanResult  
     _length: [ "beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH" ]
 
 sBackhaulRoam:
