@@ -347,15 +347,8 @@ sWscAttrAuthenticator:
     _type: char
     _length: [ WSC_AUTHENTICATOR_LENGTH ]
 
-cWscAttrEncryptedSettings:
+cConfigData:
   _type: class
-  _is_tlv_class : True
-  type:
-    _type: eWscAttributes
-    _value_const: ATTR_ENCR_SETTINGS
-  length:
-    _type: uint16_t
-    _length_var: True
   ssid_type:
     _type: eWscAttributes
     _value: ATTR_SSID
@@ -370,3 +363,19 @@ cWscAttrEncryptedSettings:
   network_key_attr: sWscAttrNetworkKey
   bssid_attr: sWscAttrBssid
   key_wrap_auth_attr: sWscAttrKeyWrapAuthenticator
+
+cWscAttrEncryptedSettings:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value_const: ATTR_ENCR_SETTINGS
+  length:
+    _type: uint16_t
+    _length_var: True
+  iv:
+    _type: char
+    _length: [WSC_ENCRYPTED_SETTINGS_IV_LENGTH]
+  encrypted_settings:
+    _type: char
+    _length: []

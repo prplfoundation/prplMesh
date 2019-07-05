@@ -1,6 +1,8 @@
 /* SPDX-License-Identifier: BSD-2-Clause-Patent
  *
+ * Copyright (c) 2017, Broadband Forum
  * Copyright (c) 2019 Arnout Vandecappelle (Essensium/Mind)
+ * Copyright (c) 2019 Tomer Eliyahu (Intel)
  *
  * This code is subject to the terms of the BSD+Patent license.
  * See LICENSE file for more details.
@@ -11,6 +13,10 @@
 
 #include <openssl/bn.h>
 #include <openssl/dh.h>
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
+
+#include <arpa/inet.h> // htonl()
 
 namespace mapf {
 namespace encryption {
@@ -73,7 +79,7 @@ diffie_hellman::~diffie_hellman()
 }
 
 bool diffie_hellman::compute_key(uint8_t *key, unsigned &key_length, const uint8_t *remote_pubkey,
-                                 unsigned remote_pubkey_length)
+                                 unsigned remote_pubkey_length) const
 {
     if (!m_pubkey) {
         return false;
@@ -101,6 +107,289 @@ bool diffie_hellman::compute_key(uint8_t *key, unsigned &key_length, const uint8
         return false;
     }
     key_length = (unsigned)ret;
+    return true;
+}
+
+bool create_nonce(uint8_t *nonce, unsigned nonce_length)
+{
+    std::ifstream urandom("/dev/urandom");
+    urandom.read(reinterpret_cast<char *>(nonce), nonce_length);
+    return urandom.good();
+}
+
+class sha256 {
+public:
+    sha256();
+    ~sha256();
+
+    bool update(const uint8_t *message, size_t message_length);
+
+    /**
+     * @brief Calculate and return the sha256 digest
+     * @param[out] digest Output buffer, must be 32 bytes
+     * @return
+     */
+    bool digest(uint8_t *digest);
+
+private:
+    EVP_MD_CTX *m_ctx;
+};
+
+sha256::sha256() : m_ctx(EVP_MD_CTX_new())
+{
+    if (!EVP_DigestInit_ex(m_ctx, EVP_sha256(), NULL)) {
+        MAPF_ERR("Failed to create sha256");
+        EVP_MD_CTX_free(m_ctx);
+        m_ctx = nullptr;
+    }
+}
+
+sha256::~sha256() { EVP_MD_CTX_free(m_ctx); }
+
+bool sha256::update(const uint8_t *message, size_t message_length)
+{
+    if (m_ctx == nullptr) {
+        return false;
+    }
+    return EVP_DigestUpdate(m_ctx, message, message_length);
+}
+
+bool sha256::digest(uint8_t *digest)
+{
+    if (m_ctx == nullptr) {
+        return false;
+    }
+    unsigned int digest_length = 32;
+    return EVP_DigestFinal(m_ctx, digest, &digest_length);
+}
+
+class hmac {
+public:
+    hmac(const uint8_t *key, unsigned key_length);
+    ~hmac();
+
+    bool update(const uint8_t *message, size_t message_length);
+
+    /**
+     * @brief Calculate and return the hmac digest
+     * @param[out] digest Output buffer, must be 32 bytes
+     * @return
+     */
+    bool digest(uint8_t *digest);
+
+private:
+    HMAC_CTX *m_ctx;
+};
+
+hmac::hmac(const uint8_t *key, unsigned key_length) : m_ctx(HMAC_CTX_new())
+{
+    if (!HMAC_Init_ex(m_ctx, key, key_length, EVP_sha256(), NULL)) {
+        MAPF_ERR("Failed to create hmac");
+        HMAC_CTX_free(m_ctx);
+        m_ctx = nullptr;
+    }
+}
+
+hmac::~hmac() { HMAC_CTX_free(m_ctx); }
+
+bool hmac::update(const uint8_t *message, size_t message_length)
+{
+    if (m_ctx == nullptr) {
+        return false;
+    }
+    return HMAC_Update(m_ctx, message, message_length);
+}
+
+bool hmac::digest(uint8_t *digest)
+{
+    if (m_ctx == nullptr) {
+        return false;
+    }
+    unsigned int digest_length = 32;
+    return HMAC_Final(m_ctx, digest, &digest_length);
+}
+
+/**
+ * @brief
+ *
+ * @param key
+ * @param[in] iv random 128bit input vector
+ * @param data
+ * @param data_len
+ * @return true on success, false on error
+ */
+bool aes_encrypt(const uint8_t *key, const uint8_t *iv, uint8_t *data, uint32_t data_len)
+{
+    EVP_CIPHER_CTX *ctx;
+
+    int clen, len;
+    uint8_t buf[128];
+
+    ctx = EVP_CIPHER_CTX_new();
+    if (NULL == ctx) {
+        return false;
+    }
+    if (EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, iv) != 1) {
+        return false;
+    }
+    EVP_CIPHER_CTX_set_padding(ctx, 0);
+
+    clen = data_len;
+    if (EVP_EncryptUpdate(ctx, data, &clen, data, data_len) != 1 || clen != (int)data_len) {
+        return false;
+    }
+
+    len = sizeof(buf);
+    if (EVP_EncryptFinal_ex(ctx, buf, &len) != 1 || len != 0) {
+        return false;
+    }
+    EVP_CIPHER_CTX_free(ctx);
+
+    return true;
+}
+
+/**
+ * @brief
+ *
+ * @param key
+ * @param iv 128bit input vector
+ * @param data
+ * @param data_len
+ * @return true on success, false on error
+ */
+bool aes_decrypt(const uint8_t *key, const uint8_t *iv, uint8_t *data, uint32_t data_len)
+{
+    EVP_CIPHER_CTX *ctx;
+
+    int plen, len;
+    uint8_t buf[128];
+
+    ctx = EVP_CIPHER_CTX_new();
+    if (NULL == ctx) {
+        return false;
+    }
+    if (EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, iv) != 1) {
+        return false;
+    }
+    EVP_CIPHER_CTX_set_padding(ctx, 0);
+
+    plen = data_len;
+    if (EVP_DecryptUpdate(ctx, data, &plen, data, data_len) != 1 || plen != (int)data_len) {
+        return false;
+    }
+
+    len = sizeof(buf);
+    if (EVP_DecryptFinal_ex(ctx, buf, &len) != 1 || len != 0) {
+        return false;
+    }
+    EVP_CIPHER_CTX_free(ctx);
+
+    return true;
+}
+
+/**
+ * @brief
+ *
+ * @param[in] dh diffie helman 
+ * @param[in] remote_pubkey
+ * @param[in] remote_pubkey_length
+ * @param[in] m1_nonce WSC M1 TLV enrollee nonce attribute
+ * @param[in] mac WSC M1 TLV mac attribute
+ * @param[in] m2_nonce WSC M2 TLV registrar nonce attribute
+ * @param[out] authkey calculated 256 bit authentication key
+ * @param[out] keywrapkey calculated 128 bit keywrapkey
+ * @return true on success, false on error
+ */
+bool wps_calculate_keys(const diffie_hellman &dh, const uint8_t *remote_pubkey,
+                        unsigned remote_pubkey_length, const uint8_t *m1_nonce, const uint8_t *mac,
+                        const uint8_t *m2_nonce, uint8_t *authkey, uint8_t *keywrapkey)
+{
+    uint8_t shared_secret[192];
+    unsigned shared_secret_length = sizeof(shared_secret);
+
+    dh.compute_key(shared_secret, shared_secret_length, remote_pubkey, remote_pubkey_length);
+    // Zero pad the remaining part
+    std::fill(shared_secret + shared_secret_length, shared_secret + sizeof(shared_secret), 0);
+
+    sha256 sha;
+    sha.update(shared_secret, shared_secret_length);
+
+    uint8_t key[32];
+    sha.digest(key);
+
+    hmac hmac_kdk(key, sizeof(key));
+    hmac_kdk.update(m1_nonce, 16);
+    hmac_kdk.update(mac, 6);
+    hmac_kdk.update(m2_nonce, 16);
+
+    uint8_t kdk[32];
+    hmac_kdk.digest(kdk);
+
+    // Finally, take "kdk" and using a function provided in the "Wi-Fi
+    // simple configuration" standard, obtain THREE KEYS that we will use
+    // later ("authkey", "keywrapkey" and "emsk")
+    union {
+        struct {
+            uint8_t authkey[32];
+            uint8_t keywrapkey[16];
+            uint8_t emsk[32];
+        } keys;
+        uint8_t buf[3][32];
+    } keys;
+
+    // This is the key derivation function used in the WPS standard to obtain a
+    // final hash that is later used for encryption.
+    //
+    // The output is stored in the memory buffer pointed by 'res', which must be
+    // "SHA256_MAC_LEN" bytes long (ie. 're_len' must always be "SHA256_MAC_LEN",
+    // even if it is an input argument)
+    //
+    union {
+        uint32_t i;
+        uint8_t buf[4];
+    } kdf_iter, kdf_key_length;
+
+    kdf_key_length.i = htonl(sizeof(keys.keys) * 8);
+
+    std::string personalization_string("Wi-Fi Easy and Secure Key Derivation");
+    for (unsigned iter = 1; iter < sizeof(keys) / 32; iter++) {
+        kdf_iter.i = htonl(iter);
+
+        hmac hmac_iter(kdk, sizeof(kdk));
+        hmac_iter.update(kdf_iter.buf, sizeof(kdf_iter.buf));
+        hmac_iter.update(reinterpret_cast<const uint8_t *>(personalization_string.data()),
+                         personalization_string.length());
+        hmac_iter.update(kdf_key_length.buf, sizeof(kdf_key_length.buf));
+        static_assert(sizeof(keys.buf[1]) == 32, "Correct size");
+        hmac_iter.digest(keys.buf[iter - 1]);
+    }
+    std::copy(keys.keys.authkey, keys.keys.authkey + sizeof(keys.keys.authkey), authkey);
+    std::copy(keys.keys.keywrapkey, keys.keys.keywrapkey + sizeof(keys.keys.keywrapkey),
+              keywrapkey);
+    return true;
+}
+
+/**
+ * @brief Compute KWA (Key Wrap Attribute)
+ *        KWA = 1st 64 Bits of HMAC(authkey, DataToEncrypt)
+ *        See section 7.5 in WiFi Simple configuration technical specification v2.0.6
+ * 
+ * @param[in] authkey 32 bytes authkey, calculated using wps_calculate_keys()
+ * @param[in] data ConfigData before encryption
+ * @param[in] data_len ConfigData length in bytes
+ * @param[out] kwa 8 bytes calculated Key Wrap attribute (64 bits of HMAC(ConfigData))
+ * @return true on success
+ * @return false on failure
+ */
+bool kwa_compute(const uint8_t *authkey, uint8_t *data, uint32_t data_len, uint8_t *kwa)
+{
+    uint8_t hmac_[32];
+    hmac hmac_kwa(authkey, 32);
+    if (!hmac_kwa.update(data, data_len))
+        return false;
+    if (!hmac_kwa.digest(hmac_))
+        return false;
+    std::copy_n(hmac_, 8, kwa);
     return true;
 }
 

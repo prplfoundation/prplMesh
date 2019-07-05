@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: BSD-2-Clause-Patent
  *
  * Copyright (c) 2019 Arnout Vandecappelle (Essensium/Mind)
+ * Copyright (c) 2019 Tomer Eliyahu (Intel)
  *
  * This code is subject to the terms of the BSD+Patent license.
  * See LICENSE file for more details.
@@ -48,17 +49,17 @@ public:
      * @return true if successful, false if not.
      */
     bool compute_key(uint8_t *key, unsigned &key_length, const uint8_t *remote_pubkey,
-                     unsigned remote_pubkey_length);
+                     unsigned remote_pubkey_length) const;
 
     /**
      * @brief Get the public key
      */
-    const uint8_t *pubkey() { return m_pubkey; }
+    const uint8_t *pubkey() const { return m_pubkey; }
 
     /**
      * @brief Get the length of pubkey().
      */
-    unsigned pubkey_length() { return m_pubkey_length; }
+    unsigned pubkey_length() const { return m_pubkey_length; }
 
 private:
     /**
@@ -72,6 +73,14 @@ private:
     uint8_t *m_pubkey;
     unsigned m_pubkey_length;
 };
+
+bool create_nonce(uint8_t *nonce, unsigned nonce_length);
+bool kwa_compute(const uint8_t *key, uint8_t *data, uint32_t data_len, uint8_t *kwa);
+bool aes_encrypt(const uint8_t *key, const uint8_t *iv, uint8_t *data, uint32_t data_len);
+bool aes_decrypt(const uint8_t *key, const uint8_t *iv, uint8_t *data, uint32_t data_len);
+bool wps_calculate_keys(const diffie_hellman &dh, const uint8_t *remote_pubkey,
+                        unsigned remote_pubkey_length, const uint8_t *m1_nonce, const uint8_t *mac,
+                        const uint8_t *m2_nonce, uint8_t *authkey, uint8_t *keywrapkey);
 
 } // namespace encryption
 } // namespace mapf

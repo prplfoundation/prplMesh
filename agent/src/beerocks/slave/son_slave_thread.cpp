@@ -431,6 +431,8 @@ bool slave_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
         }
     } else { // IEEE 1905.1 message
+        LOG(DEBUG) << "handle_cmdu_control_ieee1905_1_message " << std::hex
+                   << int(cmdu_rx.getMessageType());
         return handle_cmdu_control_ieee1905_1_message(sd, cmdu_rx);
     }
     return true;
@@ -446,7 +448,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
     auto cmdu_message_type = cmdu_rx.getMessageType();
 
     if (master_socket == nullptr) {
-        // LOG(WARNING) << "master_socket == nullptr";
+        LOG(WARNING) << "master_socket == nullptr";
         return true;
     } else if (master_socket != sd) {
         LOG(WARNING) << "Unknown socket, cmdu message type: " << int(cmdu_message_type);
@@ -454,6 +456,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
     }
 
     if (slave_state == STATE_STOPPED) {
+        LOG(WARNING) << "slave_state == STATE_STOPPED";
         return true;
     }
 
@@ -3694,8 +3697,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
         radio_basic_caps->radio_uid() = network_utils::mac_from_string(config.radio_identifier);
-        radio_basic_caps->maximum_number_of_bsss_supported() =
-            4; //TODO get maximum supported VAPs from DWPAL
+        //TODO get maximum supported VAPs from DWPAL
+        radio_basic_caps->maximum_number_of_bsss_supported() = 1;
 
         // TODO: move WSC and M1 setters to separate functions
         // TODO: Currently sending dummy values, need to read them from DWPAL and use the correct WiFi
@@ -4266,6 +4269,55 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
                                   backhaul_params.bridge_mac);
 }
 
+#include <iomanip>
+void dump_buffer(char *buf, size_t len)
+{
+    std::stringstream ss;
+    for (size_t i = 0; i < len; i++) {
+        if (i % 16 == 0)
+            ss << std::endl;
+        ss << std::hex << std::setw(2) << std::setfill('0') << int((uint8_t)buf[i]) << " ";
+    }
+    ss << std::endl;
+    LOG(ERROR) << ss.str();
+}
+
+/**
+ * @brief Diffie-Hellman public key exchange keys calculation
+ *        class member params authkey and keywrapauth are computed
+ *        on success.
+ *
+ * @param m1 WSC M1 TLV received from the radio agent
+ * @return true on success
+ * @return false on failure
+ */
+bool slave_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlvWscM2> m2)
+{
+    auto mac = network_utils::mac_from_string(backhaul_params.bridge_mac);
+    if (!mapf::encryption::wps_calculate_keys(
+            dh, m2->public_key_attr().data, m2->public_key_attr().data_length,
+            m2->enrolee_nonce_attr().data, mac.oct, m2->registrar_nonce_attr().data, authkey,
+            keywrapkey)) {
+        LOG(ERROR) << "Failed to calculate WPS keys";
+        return false;
+    }
+    //TODO REMOVE!!!
+    LOG(DEBUG) << "M1 pubkey:";
+    dump_buffer((char *)dh.pubkey(), dh.pubkey_length());
+    LOG(DEBUG) << "M2 pubkey:";
+    dump_buffer((char *)m2->public_key_attr().data, m2->public_key_attr().data_length);
+    LOG(DEBUG) << "Enrolee nonce:";
+    dump_buffer((char *)m2->enrolee_nonce_attr().data, m2->enrolee_nonce_attr().data_length);
+    LOG(DEBUG) << "Registrar nonce:";
+    dump_buffer((char *)m2->registrar_nonce_attr().data, m2->registrar_nonce_attr().data_length);
+    LOG(DEBUG) << "MAC: " << network_utils::mac_to_string(mac.oct);
+    LOG(DEBUG) << "Calculated authkey:";
+    dump_buffer((char *)authkey, sizeof(authkey));
+    LOG(DEBUG) << "Calculated keywrapkey:";
+    dump_buffer((char *)keywrapkey, sizeof(keywrapkey));
+    return true;
+}
+
 bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     // Check if this is a M1 message that we sent to the controller, which was just looped back.
@@ -4276,9 +4328,11 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     // Unfortunately, that is a bit complicated with the current tlv parser. However, there is another
     // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
     // while the M2 has the AP_Radio_Identifier TLV.
-    // If this is a looped back M2 CMDU, we can treat is as handled successfully.
-    if (cmdu_rx.getNextTlvType() == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES))
+    // If this is a looped back M1 CMDU, we can treat is as handled successfully.
+    if (cmdu_rx.getNextTlvType() == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES)) {
+        LOG(DEBUG) << "looped back M1 CMDU";
         return true;
+    }
 
     /**
     * @brief Parse AP-Autoconfiguration WSC which should include one AP Radio Identifier
@@ -4291,8 +4345,11 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     }
 
     // Check if the message is for this radio agent by comparing the ruid
-    if (!config.radio_identifier.compare(network_utils::mac_to_string(ruid->radio_uid())))
+    if (network_utils::mac_from_string(config.radio_identifier) != ruid->radio_uid()) {
+        LOG(DEBUG) << "not to me - ruid " << config.radio_identifier
+                   << " != " << network_utils::mac_to_string(ruid->radio_uid());
         return true;
+    }
 
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
     // parse all M2 TLVs
@@ -4315,11 +4372,33 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     }
 
     for (auto tlvWscM2 : m2_list) {
+        if (!autoconfig_wsc_calculate_keys(tlvWscM2))
+            return false;
+        LOG(DEBUG) << "M2 Parse: calculate keys";
         auto encrypted_settings = tlvWscM2->encrypted_settings();
-        auto ssid  = std::string(encrypted_settings->ssid(), encrypted_settings->ssid_length());
-        auto bssid = network_utils::mac_to_string(encrypted_settings->bssid_attr().data);
-        auto authentication_type = encrypted_settings->authentication_type_attr().data;
-        auto encryption_type     = encrypted_settings->encryption_type_attr().data;
+        uint8_t *iv             = reinterpret_cast<uint8_t *>(encrypted_settings->iv());
+        LOG(DEBUG) << "M2 Parse: aes decrypt";
+        mapf::encryption::aes_decrypt(keywrapkey, iv,
+                                      (uint8_t *)encrypted_settings->encrypted_settings(),
+                                      encrypted_settings->encrypted_settings_length());
+
+        // TODO authenticate encrypted settings
+        // before passing to the config_data constructor
+        uint8_t buf[encrypted_settings->encrypted_settings_length()];
+        std::copy_n(encrypted_settings->encrypted_settings(),
+                    encrypted_settings->encrypted_settings_length(), buf);
+        LOG(DEBUG) << "M2 Parse: parse config_data, len = " << sizeof(buf);
+        WSC::cConfigData config_data(buf, sizeof(buf), true, true);
+
+        auto ssid                = std::string(config_data.ssid(), config_data.ssid_length());
+        auto bssid               = network_utils::mac_to_string(config_data.bssid_attr().data);
+        auto authentication_type = config_data.authentication_type_attr().data;
+        auto encryption_type     = config_data.encryption_type_attr().data;
+        LOG(DEBUG) << "authenticator type:" << tlvWscM2->authenticator().attribute_type;
+        LOG(DEBUG) << "authenticator length:" << tlvWscM2->authenticator().data_length;
+        LOG(DEBUG) << "authenticator buffer:";
+        dump_buffer(tlvWscM2->authenticator().data, tlvWscM2->authenticator().data_length);
+
         // TODO - finish with decryption and authentication
         // https://github.com/prplfoundation/prplMesh/pull/91
         // char network_key[WSC::WSC_MAX_NETWORK_KEY_LENGTH];
@@ -4758,16 +4837,23 @@ bool slave_thread::autoconfig_wsc_add_m1()
     if (!tlvWscM1->set_device_name("prplMesh-agent"))
         return false;
     std::memset(tlvWscM1->uuid_e_attr().data, 0xff, tlvWscM1->uuid_e_attr().data_length);
-    tlvWscM1->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2;
-    tlvWscM1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_NONE;
     tlvWscM1->rf_bands_attr().data =
         hostap_params.iface_is_5ghz ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
     // Simulate that this radio supports both fronthaul and backhaul BSS
     tlvWscM1->vendor_extensions_attr().subelement_value  = WSC::FRONTHAUL_BSS | WSC::BACKHAUL_BSS;
     tlvWscM1->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_AP;
-    // TODO: M1 should also have values for:
-    // enrolee_nonce_attr -> to be added by encryption
-    // public_key_attr -> to be added by encryption
+
+    // encryption support - diffie-helman key-exchange
+    std::copy(dh.pubkey(), dh.pubkey() + dh.pubkey_length(), tlvWscM1->public_key_attr().data);
+    LOG(DEBUG) << "M1 pubkey:";
+    dump_buffer((char *)tlvWscM1->public_key_attr().data, tlvWscM1->public_key_attr().data_length);
+    mapf::encryption::create_nonce(tlvWscM1->enrolee_nonce_attr().data,
+                                   tlvWscM1->enrolee_nonce_attr().data_length);
+    LOG(DEBUG) << "M1 enrolee nonce: ";
+    dump_buffer((char *)tlvWscM1->enrolee_nonce_attr().data,
+                tlvWscM1->enrolee_nonce_attr().data_length);
+    tlvWscM1->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2;
+    tlvWscM1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_AES;
 
     return true;
 }
