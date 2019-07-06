@@ -384,7 +384,7 @@ bool sta_wlan_hal_fapi::initiate_scan()
     return true;
 }
 
-int sta_wlan_hal_fapi::get_scan_results(const std::string &ssid, SScanResult *list, int size)
+int sta_wlan_hal_fapi::get_scan_results(const std::string &ssid, net::sScanResult *list, int size)
 {
     // Validate input parameters
     if (!list || !size) {
