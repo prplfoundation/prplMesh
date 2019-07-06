@@ -21,17 +21,18 @@ scriptdir="$(cd "${0%/*}"; pwd)"
 topdir="${scriptdir%/*/*/*}"
 
 usage() {
-    echo "usage: $(basename $0) [-hvn] <type>"
+    echo "usage: $(basename $0) [-hvbt]"
     echo "  mandatory:"
     echo "      type - image type <runner/builder>"
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
-    echo "      -b|--base-image - Base OS image to use (Dockerfile 'FROM') "
+    echo "      -b|--base-image - Base OS image to use (Dockerfile 'FROM')"
+    echo "      -t|--tag - tag to add to prplmesh-builder and prplmesh-runner images"
 }
 
 main() {
-    OPTS=`getopt -o 'hvb:' --long verbose,help,native -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvb:t:' --long verbose,help,base-image,tag -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -39,9 +40,10 @@ main() {
 
     while true; do
         case "$1" in
-            -v | --verbose)     VERBOSE=true; shift ;;
-            -h | --help)        usage; exit 0; shift ;;
-            -b | --base-image)  IMAGE="$2"; shift ; shift ;;
+            -v | --verbose)         VERBOSE=true; shift ;;
+            -h | --help)            usage; exit 0; shift ;;
+            -b | --base-image)      IMAGE="$2"; shift ; shift ;;
+            -t | --tag)             TAG=":$2"; shift ; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
@@ -53,22 +55,23 @@ main() {
     )
 
     dbg IMAGE=$IMAGE
+    dbg TAG=$TAG
     dbg topdir=$topdir
 
     info "Base docker image $IMAGE"
-    info "Generating prplmesh-builder docker image"
+    info "Generating builder docker image (prplmesh-builder$TAG)"
     run docker image build \
         --build-arg image=$IMAGE \
         --build-arg topdir=$topdir \
         --build-arg uid=${SUDO_UID:-0} \
         --build-arg gid=${SUDO_GID:-0} \
-        --tag prplmesh-build \
+        --tag prplmesh-builder$TAG \
         ${scriptdir}/builder
 
-    info "Generating prplMesh-runner docker image"
+    info "Generating runner docker image (prplmesh-runner$TAG)"
     run docker image build \
         --build-arg image=$IMAGE \
-        --tag prplmesh-runner \
+        --tag prplmesh-runner$TAG \
         ${scriptdir}/runner
 }
 
