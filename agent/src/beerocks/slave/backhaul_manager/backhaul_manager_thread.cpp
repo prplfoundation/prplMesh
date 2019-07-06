@@ -2178,9 +2178,7 @@ void main_thread::get_scan_measurement()
             LOG(DEBUG) << "get_scan_measurement: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface;
 
-            auto it = std::find_if(scan_measurement_list.begin(), scan_measurement_list.end(),
-                        [bssid](const std::pair<std::string, net::sScanResult> & t) -> bool
-                        { return t.second.mac == network_utils::mac_from_string(bssid); });
+            auto it = scan_measurement_list.find(bssid);
             if (it != scan_measurement_list.end()) {
                 //updating rssi if stronger
                 if (scan_result.rssi > it->second.rssi) {
