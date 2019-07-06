@@ -33,7 +33,7 @@ public:
     virtual bool detach() override;
 
     virtual bool initiate_scan() override;
-    virtual int get_scan_results(const std::string &ssid, SScanResult *list, int size) override;
+    virtual int get_scan_results(const std::string &ssid, net::sScanResult *list, int size) override;
 
     virtual bool connect(const std::string &ssid, const std::string &pass, WiFiSec sec,
                          const std::string &bssid, uint8_t channel, bool hidden_ssid) override;

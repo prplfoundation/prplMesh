@@ -326,7 +326,7 @@ bool sta_wlan_hal_dwpal::initiate_scan()
     return true;
 }
 
-int sta_wlan_hal_dwpal::get_scan_results(const std::string &ssid, SScanResult *list, int size)
+int sta_wlan_hal_dwpal::get_scan_results(const std::string &ssid, net::sScanResult *list, int size)
 {
 #if 0
         // Validate input parameters
