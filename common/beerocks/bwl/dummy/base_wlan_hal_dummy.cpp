@@ -121,7 +121,6 @@ std::string base_wlan_hal_dummy::get_radio_mac()
     }
     return mac;
 }
-//std::string base_wlan_hal_dummy::get_radio_mac() { return std::string("DE:AD:BE:EF:DE:AD"); }
 
 } // namespace dummy
 } // namespace bwl
