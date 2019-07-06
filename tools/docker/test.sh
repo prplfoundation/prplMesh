@@ -31,7 +31,7 @@ main() {
 
     while true; do
         case "$1" in
-            -v | --verbose) VERBOSE=true; shift ;;
+            -v | --verbose) VERBOSE=true; OPT="-v"; shift ;;
             -h | --help)    usage; exit 0; shift ;;
             -n | --name)    NAME="$2"; shift; shift ;;
             -- ) shift; break ;;
@@ -39,7 +39,7 @@ main() {
         esac
     done
 
-    run docker container exec -it ${NAME} ${topdir}/build/install/scripts/prplmesh_utils.sh status
+    run docker container exec -it ${NAME} ${topdir}/build/install/scripts/prplmesh_utils.sh status $OPT
 }
 
 VERBOSE=false
