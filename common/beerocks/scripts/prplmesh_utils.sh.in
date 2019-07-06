@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 SIG_TERM=-15
 SIG_KILL=-9
@@ -8,7 +8,11 @@ dbg() {
 }
 
 err() {
-	echo -e '\033[1;31m'"$@"'\033[0m'
+    printf '\033[1;31m'"$@\n"'\033[0m'
+}
+
+success() {
+    printf '\033[1;32m'"$@\n"'\033[0m'
 }
 
 run() {
@@ -33,12 +37,12 @@ prplmesh_platform_db_init() {
     management_mode=${1-Multi-AP-Controller-and-Agent}
     operating_mode=${2-Gateway}
 
-    mkdir -p @PLATFORM_DB_PATH_TEMP@/
+    mkdir -p /tmp/
     {
-        echo -e "management_mode=${management_mode}"
-        echo -e "operating_mode=${operating_mode}"
-        echo -e "wired_backhaul=1"
-    } > @PLATFORM_DB_PATH_TEMP@/prplmesh_platform_db
+        echo "management_mode=${management_mode}"
+        echo "operating_mode=${operating_mode}"
+        echo "wired_backhaul=1"
+    } > /tmp/prplmesh_platform_db
 }
 
 platform_init_dummy() {
@@ -106,7 +110,7 @@ start_function() {
     echo "$0: start"
     [ `id -u` -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
 
-    [ "@BWL_TYPE@" = "DUMMY" ] && [ "$PLATFORM_INIT" == "true" ] && platform_init_dummy
+    [ "@BWL_TYPE@" = "DUMMY" -a "$PLATFORM_INIT" = "true" ] && platform_init_dummy
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_init
     case "$PRPLMESH_MODE" in
         CA | ca)
@@ -130,17 +134,54 @@ stop_function() {
     echo "$0: stop"
     [ `id -u` -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
 
-    [ "@BWL_TYPE@" = "DUMMY" ] && [ "$PLATFORM_INIT" == "true" ] && platform_deinit_dummy
+    [ "@BWL_TYPE@" = "DUMMY" -a "$PLATFORM_INIT" = "true" ] && platform_deinit_dummy
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_deinit
     [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "C" ] && prplmesh_controller_stop
     [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "A" ] && prplmesh_agent_stop
 }
 
+main_agent_operational() {
+    ps -aux | grep beerocks_agent | grep -v wlan | grep -v grep > /dev/null 2>&1 || return 1
+    grep -q 'CONNECTED --> OPERATIONAL' "$1/beerocks_agent.log"
+}
+
+radio_agent_operational() {
+    ps -aux | grep beerocks_agent | grep $2 | grep -v grep > /dev/null 2>&1 || return 1
+    grep -q 'CSA' "$1/beerocks_agent_$2.log"
+}
+
+report() {
+    msg="$1"; shift
+    if "$@"; then
+        success "OK $msg"
+    else
+        err "FAIL $msg"
+        error=1
+    fi
+}
+
 status_function() {
     echo "$0: status"
+
     ps -aux | grep beerocks | grep -v grep
     ps -aux | grep ieee1905_transport | grep -v grep
     ps -aux | grep local_bus | grep -v grep
+
+    # check for operational status
+    LOGS_PATH=@BEEROCKS_TMP_PATH@/logs/
+
+    error=0
+    report "Main agent operational" main_agent_operational $LOGS_PATH
+    report "wlan0 radio agent operational" radio_agent_operational $LOGS_PATH wlan0
+    report "wlan2 radio agent operational" radio_agent_operational $LOGS_PATH wlan2
+
+    [ "$VERBOSE" = "true" -a $error = 1 ] && {
+        cat $LOGS_PATH/beerocks_agent.log
+        cat $LOGS_PATH/beerocks_agent_wlan0.log
+        cat $LOGS_PATH/beerocks_agent_wlan2.log
+    }
+
+    return $error
 }
 
 usage() {
