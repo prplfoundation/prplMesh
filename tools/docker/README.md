@@ -22,7 +22,7 @@ The docker builder image can be used to build prplMesh via `maptools.py build` c
 Build prplMesh in container:
 
 ```bash
-sudo ./builder/build.sh <maptools.py build arguments>
+sudo ./build.sh <maptools.py build arguments>
 ```
 
 ## Docker runner
@@ -32,6 +32,10 @@ The docker runner image can be used to run prplMesh inside containers using `run
 The runner docker allows running multiple containers, for example one with a controller+agent, the other with an agent only:
 The 2 containers are connected using a docker network (bridge), so can
 communicate + sniffed by running `wireshark` / `tcpdump` on the bridge from the host to see 1905 packets.
+
+## Docker tester
+
+A simple wrapper which calls `sudo docker exec <container name> -it <path/to>/build/install/scripts/prplmesh_utils.sh status` which prints the prplMesh operational status of the main and radio agents.
 
 ### Prerequisites
 
