@@ -8,7 +8,7 @@ run() {
 run ip link add br-lan type bridge
 run ip link add wlan0 type dummy
 run ip link add wlan2 type dummy
-run ip link add sim-eth0 type dummy up
+run ip link add sim-eth0 type dummy
 run ip link set sim-eth0 master br-lan
 run ip link set eth0 master br-lan
 run ip link set wlan0 master br-lan
