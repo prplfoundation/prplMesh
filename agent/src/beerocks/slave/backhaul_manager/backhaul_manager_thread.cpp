@@ -1908,7 +1908,7 @@ bool main_thread::select_bssid()
     std::string best_24_sta_iface, best_5_high_sta_iface, best_5_low_sta_iface, best_5_sta_iface;
 
     // Support up to 256 scan results
-    bwl::SScanResult scan_results[256];
+    net::sScanResult scan_results[256];
 
     LOG(DEBUG) << "select_bssid: SSID = " << m_sConfig.ssid;
 
@@ -1928,7 +1928,7 @@ bool main_thread::select_bssid()
         for (int i = 0; i < num_of_results; i++) {
             auto &scan_result = scan_results[i];
 
-            auto bssid = network_utils::mac_to_string(scan_result.bssid);
+            auto bssid = network_utils::mac_to_string(scan_result.mac);
             LOG(DEBUG) << "select_bssid: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface
                        << ", rssi=" << int(scan_result.rssi);
@@ -2104,7 +2104,7 @@ void main_thread::get_scan_measurement()
 {
 
     // Support up to 256 scan results
-    bwl::SScanResult scan_results[256];
+    net::sScanResult scan_results[256];
 
     LOG(DEBUG) << "get_scan_measurement: SSID = " << m_sConfig.ssid;
     scan_measurement_list.clear();
@@ -2129,7 +2129,7 @@ void main_thread::get_scan_measurement()
         for (int i = 0; i < num_of_results; i++) {
             auto &scan_result = scan_results[i];
 
-            auto bssid = network_utils::mac_to_string(scan_result.bssid);
+            auto bssid = network_utils::mac_to_string(scan_result.mac);
             LOG(DEBUG) << "get_scan_measurement: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface;
 
@@ -2147,7 +2147,7 @@ void main_thread::get_scan_measurement()
                 //insert new entry
                 sScanResult scan_measurement;
 
-                std::copy_n(scan_result.bssid, MAC_ADDR_LEN, scan_measurement.mac.oct);
+                std::copy_n(scan_result.mac.oct, MAC_ADDR_LEN, scan_measurement.mac.oct);
                 scan_measurement.channel     = scan_result.channel;
                 scan_measurement.rssi        = scan_result.rssi;
                 scan_measurement_list[bssid] = scan_measurement;
