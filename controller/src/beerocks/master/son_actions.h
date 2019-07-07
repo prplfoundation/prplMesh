@@ -57,5 +57,5 @@ private:
                               std::string mac); // note: there isn't a word - "activability"
 };
 
-} // namespace son;
+} // namespace son
 #endif

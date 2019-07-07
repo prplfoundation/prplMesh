@@ -20,7 +20,7 @@ class Message;
 
 class MessageMakerBase {
 public:
-    virtual std::unique_ptr<Message> Create(const std::string &topic) const = 0;
+    virtual std::unique_ptr<Message> Create(const std::string &topic) const                     = 0;
     virtual std::unique_ptr<Message> Create(const std::string &topic,
                                             std::initializer_list<Message::Frame> frames) const = 0;
     virtual const std::string &topic_prefix() const                                             = 0;

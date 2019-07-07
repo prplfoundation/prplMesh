@@ -57,7 +57,7 @@ public:
     }
 };
 const std::string MessageTest2::kTopicPrefix = "test2.";
-}
+} // namespace mapf
 
 void test1()
 {

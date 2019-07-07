@@ -343,6 +343,6 @@ public:
     virtual const std::string topic_prefix() const { return kTopicPrefix; }
 };
 
-}; //namespace
+}; // namespace mapf
 
 #endif // MAP_IEEE1905_TRANSPORT_MESSAGES_H_

@@ -132,8 +132,8 @@ private:
         uint8_t dst[ETH_ALEN]     = {0}; // destination mac address
         uint8_t src[ETH_ALEN]     = {0}; // source mac address
         uint16_t ether_type       = 0x0000;
-        struct iovec header = {.iov_base = NULL, .iov_len = 0};
-        struct iovec payload = {.iov_base = NULL, .iov_len = 0};
+        struct iovec header       = {.iov_base = NULL, .iov_len = 0};
+        struct iovec payload      = {.iov_base = NULL, .iov_len = 0};
 
         virtual std::ostream &print(std::ostream &os) const;
     };
@@ -222,7 +222,8 @@ private:
         de_fragmentation_map_;
 
     static const int kIeee1905FragmentationThreashold =
-        1500 - sizeof(Tlv); // IEEE1905 packets (CMDU) should be fragmented if larger than this threashold
+        1500 -
+        sizeof(Tlv); // IEEE1905 packets (CMDU) should be fragmented if larger than this threashold
 
     //
     // NETWORK INTERFACE STUFF

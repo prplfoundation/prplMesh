@@ -20,7 +20,7 @@ using namespace beerocks;
 typedef struct sTlvHeader {
     uint8_t type;
     uint16_t length;
-}  __attribute__((packed)) sTlvHeader;
+} __attribute__((packed)) sTlvHeader;
 
 #define DEFAULT_MAX_SOCKET_CONNECTIONS 10
 #define TX_BUFFER_UDS (tx_buffer + sizeof(beerocks::message::sUdsHeader))
@@ -192,7 +192,7 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
 
     bool ret = true;
 
-    uint8_t type   = tlv->type;
+    uint8_t type    = tlv->type;
     uint16_t length = tlv->length;
 
     do {
@@ -204,23 +204,23 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
         if (static_cast<ieee1905_1::eTlvType>(type) == ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC) {
             auto tlv_vendor_specific = ieee1905_1::tlvVendorSpecific((uint8_t *)tlv, length, true,
                                                                      uds_header->swap_needed);
-            // FIXME: https://github.com/prplfoundation/prplMesh/issues/33                                                         
+            // FIXME: https://github.com/prplfoundation/prplMesh/issues/33
             // auto oui = ieee1905_1::tlvVendorSpecific::eVendorOUI(
             //     uint32_t(std::get<1>(tlv_vendor_specific.vendor_oui(0))) & 0x00FFFFFF);
             //if (oui == ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL) {
-                // assuming that the magic is the first data on the beerocks header
-                auto beerocks_magic = *(
-                    uint32_t *)((uint8_t *)tlv + ieee1905_1::tlvVendorSpecific::get_initial_size());
-                if (uds_header->swap_needed) {
-                    swap_32(beerocks_magic);
-                }
+            // assuming that the magic is the first data on the beerocks header
+            auto beerocks_magic =
+                *(uint32_t *)((uint8_t *)tlv + ieee1905_1::tlvVendorSpecific::get_initial_size());
+            if (uds_header->swap_needed) {
+                swap_32(beerocks_magic);
+            }
 
-                if (beerocks_magic != message::MESSAGE_MAGIC) {
-                    THREAD_LOG(WARNING) << "mismatch magic " << std::hex << int(beerocks_magic)
-                                        << " != " << int(message::MESSAGE_MAGIC) << std::dec;
-                    ret = false;
-                    break;
-                }
+            if (beerocks_magic != message::MESSAGE_MAGIC) {
+                THREAD_LOG(WARNING) << "mismatch magic " << std::hex << int(beerocks_magic)
+                                    << " != " << int(message::MESSAGE_MAGIC) << std::dec;
+                ret = false;
+                break;
+            }
 
             //} else {
             //    THREAD_LOG(WARNING) << "Not Intels VS message!";
@@ -302,8 +302,8 @@ bool socket_thread::work()
             if (read_ready(select.at(i))) {
                 Socket *sd = select.at(i);
                 if (!sd) {
-                    THREAD_LOG(WARNING) << "sd at select with index i=" << int(i)
-                                        << " is nullptr, skipping";
+                    THREAD_LOG(WARNING)
+                        << "sd at select with index i=" << int(i) << " is nullptr, skipping";
                     continue;
                 }
 

@@ -44,7 +44,7 @@ uint16_t LOGLEVEL = LOG_LEVEL + 1;
 #ifndef LOG_TYPE
 uint16_t LOGTYPE = SYS_LOG_TYPE_FILE;
 #else
-uint16_t LOGTYPE = LOG_TYPE;
+uint16_t LOGTYPE  = LOG_TYPE;
 #endif
 
 namespace bwl {
@@ -372,7 +372,6 @@ bool fapi_attach_fsm::setup()
 
         .on(fapi_fsm_event::Attach, {fapi_fsm_state::Attach, fapi_fsm_state::Detach},
             [&](TTransition &transition, const void *args) -> bool {
-
                 // Attempt to read radio info
                 if (!refresh_radio_info()) {
                     return (transition.change_destination(fapi_fsm_state::Detach));
@@ -443,7 +442,6 @@ bool fapi_attach_fsm::setup()
             [&](TTransition &transition, const void *args) -> bool {
 
 #ifdef USE_FAPI_DAEMON
-
                 // Attach to the control interface for receiving events
                 if (fapi_wlan_hostapd_event_attach(m_radio_info.iface_name.c_str()) ==
                     UGW_SUCCESS) {
@@ -459,7 +457,6 @@ bool fapi_attach_fsm::setup()
                 }
 
 #else
-
                 // Get the hostapd control interface socket
                 if ((fapi_wlan_hostapd_socket_get(m_radio_info.iface_name.c_str(),
                                                   (void **)&m_wpa_ctrl) == UGW_FAILURE) ||
@@ -485,7 +482,6 @@ bool fapi_attach_fsm::setup()
                         m_radio_info.iface_name.c_str(),
                         [](char *opcode, const char *ifname, ObjList *wlObj, unsigned int flags,
                            void *context) {
-
                             if (!strncmp(opcode, "OP_CODE_NOT_SUPPORTED", 21)) {
                                 return UGW_SUCCESS;
                             }
@@ -498,7 +494,6 @@ bool fapi_attach_fsm::setup()
                             // Pass the event to the HAL
                             pThis->inject_fapi_event(opcode, wlObj);
                             return UGW_SUCCESS;
-
                         },
                         this) == UGW_FAILURE) {
 
@@ -754,5 +749,5 @@ std::string fapi_attach_fsm::state_enum_to_string(fapi_fsm_state state)
     return os.str();
 }
 
-} // namespace bwl
 } // namespace wav_fapi
+} // namespace bwl

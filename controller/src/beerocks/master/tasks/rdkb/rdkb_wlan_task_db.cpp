@@ -253,6 +253,5 @@ void rdkb_wlan_task_db::print_db()
                     LOG(DEBUG) << "                 authRejectReason "
                                << int(client_entry.second->get_client_config()->authRejectReason);
                 });
-
         });
 }

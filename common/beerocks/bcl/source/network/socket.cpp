@@ -328,7 +328,7 @@ Socket *SocketServer::acceptConnections()
             m_error = std::string("accept() failed: ") + strerror(errno);
         }
 #else
-        m_error  = std::string("accept() failed: ") + strerror(errno);
+        m_error = std::string("accept() failed: ") + strerror(errno);
 #endif
     } else {
         socket_ret = new Socket(s, std::string(inet_ntoa(addr.sin_addr)), int(addr.sin_port));

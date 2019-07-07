@@ -133,7 +133,6 @@ bool base_wlan_hal_dwpal::fsm_setup()
         .on(dwpal_fsm_event::Attach,
             {dwpal_fsm_state::Attach, dwpal_fsm_state::Detach, dwpal_fsm_state::GetRadioInfo},
             [&](TTransition &transition, const void *args) -> bool {
-
                 // Open and attach a control interface to wpa_supplicant/hostapd.
                 // Check if not exist before
                 bool attached = false;
@@ -192,7 +191,6 @@ bool base_wlan_hal_dwpal::fsm_setup()
 
         .on(dwpal_fsm_event::Attach, {dwpal_fsm_state::Attach, dwpal_fsm_state::Detach},
             [&](TTransition &transition, const void *args) -> bool {
-
                 // Attempt to read radio info
                 if (!refresh_radio_info()) {
                     return (transition.change_destination(dwpal_fsm_state::Detach));
@@ -262,7 +260,6 @@ bool base_wlan_hal_dwpal::fsm_setup()
         .on(dwpal_fsm_event::Attach,
             {dwpal_fsm_state::Operational, dwpal_fsm_state::Delay, dwpal_fsm_state::Detach},
             [&](TTransition &transition, const void *args) -> bool {
-
                 // Get the wpa_supplicant/hostapd event interface file descriptor
                 if (m_dwpal_ctx != nullptr) {
                     if (dwpal_hostap_event_fd_get(m_dwpal_ctx, &m_fd_ext_events)) {
@@ -470,15 +467,15 @@ bool base_wlan_hal_dwpal::refresh_radio_info()
         size_t numOfValidArgs[7]      = {0};
         FieldsToParse fieldsToParse[] = {
             {(void *)&m_radio_info.ant_num, &numOfValidArgs[0], DWPAL_INT_PARAM, "TxAntennas=", 0},
-            {(void *)&m_radio_info.conducted_power, &numOfValidArgs[1], DWPAL_INT_PARAM, "TxPower=",
-             0},
+            {(void *)&m_radio_info.conducted_power, &numOfValidArgs[1], DWPAL_INT_PARAM,
+             "TxPower=", 0},
             {(void *)&m_radio_info.bandwidth, &numOfValidArgs[2], DWPAL_INT_PARAM,
              "OperatingChannelBandwidt=", 0},
             {(void *)&m_radio_info.vht_center_freq, &numOfValidArgs[3], DWPAL_INT_PARAM, "Cf1=", 0},
             {(void *)&m_radio_info.wifi_ctrl_enabled, &numOfValidArgs[4], DWPAL_INT_PARAM,
              "HostapdEnabled=", 0},
-            {(void *)&m_radio_info.tx_enabled, &numOfValidArgs[5], DWPAL_BOOL_PARAM, "TxEnabled=",
-             0},
+            {(void *)&m_radio_info.tx_enabled, &numOfValidArgs[5], DWPAL_BOOL_PARAM,
+             "TxEnabled=", 0},
             {(void *)&m_radio_info.channel, &numOfValidArgs[6], DWPAL_INT_PARAM, "Channel=", 0},
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
@@ -625,16 +622,16 @@ bool base_wlan_hal_dwpal::process_ext_events()
 
     /* Silencing unhandled multiple events */
     if (!strncmp(opCode, "WPS-ENROLLEE-SEEN", sizeof(opCode))) {
-        LOG_EVERY_N(UNHANDLED_EVENTS_LOGS, DEBUG) << "DWPAL unhandled event opcode recieved: "
-                                                  << opCode;
+        LOG_EVERY_N(UNHANDLED_EVENTS_LOGS, DEBUG)
+            << "DWPAL unhandled event opcode recieved: " << opCode;
         return true;
     } else if (!strncmp(opCode, "AP-PROBE-REQ-RECEIVED", sizeof(opCode))) {
-        LOG_EVERY_N(UNHANDLED_EVENTS_LOGS, DEBUG) << "DWPAL unhandled event opcode recieved: "
-                                                  << opCode;
+        LOG_EVERY_N(UNHANDLED_EVENTS_LOGS, DEBUG)
+            << "DWPAL unhandled event opcode recieved: " << opCode;
         return true;
     } else if (!strncmp(opCode, "BEACON-REQ-TX-STATUS", sizeof(opCode))) {
-        LOG_EVERY_N(UNHANDLED_EVENTS_LOGS, DEBUG) << "DWPAL unhandled event opcode recieved: "
-                                                  << opCode;
+        LOG_EVERY_N(UNHANDLED_EVENTS_LOGS, DEBUG)
+            << "DWPAL unhandled event opcode recieved: " << opCode;
         return true;
     }
 

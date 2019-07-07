@@ -37,5 +37,5 @@ private:
     const std::string name_;
 };
 
-} /* namespace multiap */
+} // namespace mapf
 #endif /* __MAPF_BROKER_MONITOR_H__ */

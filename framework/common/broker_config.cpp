@@ -89,4 +89,4 @@ int BrokerConfig::Parse()
     return 0;
 }
 
-} /* namespace multiap */
+} // namespace mapf

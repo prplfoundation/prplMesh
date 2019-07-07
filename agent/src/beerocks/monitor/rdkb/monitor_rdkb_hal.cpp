@@ -421,8 +421,8 @@ void rdkb_hal_sta_config::setState(client_state_t new_state)
 
 std::string rdkb_hal_sta_config::printStats()
 {
-    return " total packets: " + std::to_string(getAccumulatedPackets()) + " sample_packets: " +
-           std::to_string(getSamplePackets()) + " mac: " + getMac();
+    return " total packets: " + std::to_string(getAccumulatedPackets()) +
+           " sample_packets: " + std::to_string(getSamplePackets()) + " mac: " + getMac();
 }
 
 std::ostream &operator<<(std::ostream &ost, rdkb_hal_sta_config &sta)

@@ -148,8 +148,8 @@ bool transport_socket_thread::work()
             if (read_ready(select.at(i))) {
                 Socket *sd = select.at(i);
                 if (!sd) {
-                    THREAD_LOG(WARNING) << "sd at select with index i=" << int(i)
-                                        << " is nullptr, skipping";
+                    THREAD_LOG(WARNING)
+                        << "sd at select with index i=" << int(i) << " is nullptr, skipping";
                     continue;
                 }
 

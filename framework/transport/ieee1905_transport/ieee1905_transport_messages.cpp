@@ -19,4 +19,4 @@ const std::string InterfaceConfigurationQueryMessage::kTopicPrefix      = "if_co
 const std::string InterfaceConfigurationRequestMessage::kTopicPrefix    = "if_config.req.";
 const std::string InterfaceConfigurationIndicationMessage::kTopicPrefix = "if_config.ind.";
 
-}; //namespace
+}; // namespace mapf

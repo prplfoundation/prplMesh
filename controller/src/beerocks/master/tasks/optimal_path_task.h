@@ -113,6 +113,6 @@ private:
     int calculate_measurement_delay_count = 0;
 };
 
-} // namespace son;
+} // namespace son
 
 #endif

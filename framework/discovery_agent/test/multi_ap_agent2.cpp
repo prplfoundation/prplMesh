@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
     msg1.metadata()->if_index   = if_nametoindex("eth1_w3");
     msg1.metadata()->msg_type   = 0x0002;
     uint8_t ieee1905_header1[]  = {0x00, 0x00, 0x00, 0x02,
-                                  0x00, 0x00, 0x00, 0x80};  // neighbor multicast - relay bit is 0
-    msg1.metadata()->length = sizeof(ieee1905_header1) + 3; // end of message tlv : 3
+                                  0x00, 0x00, 0x00, 0x80}; // neighbor multicast - relay bit is 0
+    msg1.metadata()->length     = sizeof(ieee1905_header1) + 3; // end of message tlv : 3
     memcpy(msg1.data(), ieee1905_header1, sizeof(ieee1905_header1));
     memset(msg1.data() + sizeof(ieee1905_header1), 0, 3);
     bus.publisher().Send(msg1);
@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
     // send higher layer query
     msg1.metadata()->msg_type  = 0x000D;
     uint8_t ieee1905_header2[] = {0x00, 0x00, 0x00, 0x0D,
-                                  0x00, 0x00, 0x00, 0x80};  // neighbor multicast - relay bit is 0
-    msg1.metadata()->length = sizeof(ieee1905_header2) + 3; // end of message tlv : 3
+                                  0x00, 0x00, 0x00, 0x80}; // neighbor multicast - relay bit is 0
+    msg1.metadata()->length    = sizeof(ieee1905_header2) + 3; // end of message tlv : 3
     memcpy(msg1.data(), ieee1905_header2, sizeof(ieee1905_header2));
     memset(msg1.data() + sizeof(ieee1905_header2), 0, 3);
     bus.publisher().Send(msg1);

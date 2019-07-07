@@ -1741,8 +1741,7 @@ void son_management::handle_bml_message(
         }
 
         LOG(INFO) << "ACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST "
-                  << ", al_mac=" << al_mac 
-                  << ", ruid="   << ruid_mac;
+                  << ", al_mac=" << al_mac << ", ruid=" << ruid_mac;
 
         auto cmdu_header =
             cmdu_tx.create(0, ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE);

@@ -292,7 +292,6 @@ bool base_wlan_hal_wav::fsm_setup()
         .on(wav_fsm_event::Attach,
             {wav_fsm_state::Attach, wav_fsm_state::Detach, wav_fsm_state::GetRadioInfo},
             [&](TTransition &transition, const void *args) -> bool {
-
                 // Open a control interface to wpa_supplicant/hostapd.
                 if ((m_wpa_ctrl_cmd = wpa_ctrl_open(ctrl_path.c_str()))) {
                     if (get_type() != HALType::Station) {
@@ -331,7 +330,6 @@ bool base_wlan_hal_wav::fsm_setup()
 
         .on(wav_fsm_event::Attach, {wav_fsm_state::Attach, wav_fsm_state::Detach},
             [&](TTransition &transition, const void *args) -> bool {
-
                 // Attempt to read radio info
                 if (!refresh_radio_info()) {
                     return (transition.change_destination(wav_fsm_state::Detach));
@@ -400,7 +398,6 @@ bool base_wlan_hal_wav::fsm_setup()
 
         .on(wav_fsm_event::Attach, {wav_fsm_state::Operational, wav_fsm_state::Delay},
             [&](TTransition &transition, const void *args) -> bool {
-
                 // Open a event interface to wpa_supplicant/hostapd.
                 if (!(m_wpa_ctrl_event = wpa_ctrl_open(ctrl_path.c_str()))) {
                     LOG(DEBUG) << "wpa_ctrl_open() failed, ctrl_iface_path: " << ctrl_path;

@@ -66,7 +66,7 @@ public:
 };
 
 bool MultiApController::kStop = false;
-};
+}; // namespace mapf
 
 void signal_handler(int signum)
 {

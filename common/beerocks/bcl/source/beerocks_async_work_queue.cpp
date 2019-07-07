@@ -33,4 +33,4 @@ void async_work_queue::before_stop()
     // Unblock the worker thread
     queue.unblock();
 }
-}
+} // namespace beerocks

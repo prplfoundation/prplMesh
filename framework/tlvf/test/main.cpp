@@ -6,8 +6,8 @@
  * See LICENSE file for more details.
  */
 
-#include "tlvf/CmduMessageTx.h"
 #include "tlvf/CmduMessageRx.h"
+#include "tlvf/CmduMessageTx.h"
 #include <cstring>
 #include <iostream>
 
@@ -18,8 +18,8 @@
 #include "tlvf/ieee_1905_1/tlvWscM2.h"
 #include "tlvf/wfa_map/tlvApCapability.h"
 
-#include <mapf/common/logger.h>
 #include <mapf/common/err.h>
+#include <mapf/common/logger.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
 
 #include <stdio.h>
@@ -108,24 +108,23 @@ int main(int argc, char *argv[])
     }
 
     MAPF_INFO("TLV LENGTH START: " << firstTlv->length());
-    auto secondTlv = msg.addClass<tlvLinkMetricQuery>(); // another tlv for the example
+    auto secondTlv            = msg.addClass<tlvLinkMetricQuery>(); // another tlv for the example
     secondTlv->link_metrics() = tlvLinkMetricQuery::eLinkMetricsType::RX_LINK_METRICS_ONLY;
 
     auto thirdTlv = msg.addClass<tlvWscM2>();
-    WSC::sM2& m2 = thirdTlv->M2Frame();
+    WSC::sM2 &m2  = thirdTlv->M2Frame();
     // All attributes have been initialized to default.
     memcpy(m2.encrypted_settings_attr.ssid_attr.data, "test", 4);
 
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
-    
+
     // Temporary for checking correctness
     std::cout << "TX: " << std::endl;
     for (size_t i = 0; i < msg.getMessageLength(); i++) {
         if (i % 16 == 0)
             std::cout << std::endl;
-        std::cout << std::hex << std::setw(2) << std::setfill('0')
-                  << (unsigned)tx_buffer[i] << " ";
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (unsigned)tx_buffer[i] << " ";
     }
     std::cout << std::endl;
 
@@ -187,7 +186,7 @@ int main(int argc, char *argv[])
         MAPF_ERR("TLV2 IS NULL");
         errors++;
     }
-    
+
     auto tlv3 = received_message.addClass<tlvWscM2>();
     if (tlv3 != nullptr) {
         MAPF_INFO("TLV3 LENGTH AFTER INIT: " << tlv3->length());
@@ -195,13 +194,13 @@ int main(int argc, char *argv[])
         MAPF_ERR("TLV3 IS NULL");
         errors++;
     }
-    
+
     int invalidBufferSize = 26;
     uint8_t invalidBuffer[invalidBufferSize];
     memcpy(invalidBuffer, recv_buffer, 26);
 
     CmduMessageRx invmsg;
-    auto invheader     = invmsg.parse(invalidBuffer, invalidBufferSize, false);
+    auto invheader = invmsg.parse(invalidBuffer, invalidBufferSize, false);
     if (invheader == nullptr) {
         MAPF_INFO("HEADER PROTECTION SUCCESS");
     }

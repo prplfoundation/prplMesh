@@ -43,6 +43,6 @@ private:
     std::thread worker;
     bool worker_is_running;
 };
-}
+} // namespace beerocks
 
 #endif // _BEEROCKS_THREAD_BASE_H_

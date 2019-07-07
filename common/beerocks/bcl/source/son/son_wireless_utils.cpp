@@ -325,9 +325,8 @@ wireless_utils::split_channel_to_20MHz(int channel, beerocks::eWiFiBandwidth bw,
               << " channel_ext_above_secondary = " << int(channel_ext_above_secondary)
               << " channel_ext_above_primary = " << int(channel_ext_above_primary);
     auto start_of_band_channel =
-        channel -
-        channel_step_5g *
-            (channel_step_multiply(channel_ext_above_secondary, channel_ext_above_primary));
+        channel - channel_step_5g * (channel_step_multiply(channel_ext_above_secondary,
+                                                           channel_ext_above_primary));
 
     if (bw == beerocks::BANDWIDTH_20) {
         LOG(INFO) << "ret.push_back( {channel, beerocks::CH_PRIMARY} ); = " << int(channel)

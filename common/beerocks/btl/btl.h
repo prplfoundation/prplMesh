@@ -20,7 +20,7 @@ namespace mapf {
 class Poller;
 class LocalBusInterface;
 class SubSocket;
-}
+} // namespace mapf
 
 namespace beerocks {
 namespace btl {

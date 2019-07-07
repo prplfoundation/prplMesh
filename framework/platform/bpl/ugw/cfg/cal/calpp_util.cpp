@@ -163,11 +163,11 @@ void debug_log(cal_message &msg, const std::string &context)
     MAPF_INFO(std::string(indent, ' ')
               << "unSubOper: " << subop_to_string(static_cast<MsgHeader *>(msg)->unSubOper));
 
-    MAPF_INFO(std::string(indent, ' ') << "unOwner: "
-                                       << owner_to_string(static_cast<MsgHeader *>(msg)->unOwner));
+    MAPF_INFO(std::string(indent, ' ')
+              << "unOwner: " << owner_to_string(static_cast<MsgHeader *>(msg)->unOwner));
 
-    MAPF_INFO(std::string(indent, ' ') << "unMsgSize: "
-                                       << static_cast<MsgHeader *>(msg)->unMsgSize);
+    MAPF_INFO(std::string(indent, ' ')
+              << "unMsgSize: " << static_cast<MsgHeader *>(msg)->unMsgSize);
 
     for (auto &obj : msg) {
         MAPF_INFO(std::string(indent, ' ') << "objectName: " << obj.get_name());

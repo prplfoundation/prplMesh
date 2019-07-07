@@ -800,8 +800,8 @@ void optimal_path_task::work()
                 }
 
                 if (rx_packets < 0) {
-                    TASK_LOG(DEBUG) << "hostap is busy (rx_packets=" << int(rx_packets)
-                                    << "), restart task;";
+                    TASK_LOG(DEBUG)
+                        << "hostap is busy (rx_packets=" << int(rx_packets) << "), restart task;";
                     //FIXME TODO --> need to restart task
                 }
 
@@ -1025,8 +1025,8 @@ void optimal_path_task::work()
              * task should die before actually reaching this state
              * unless steering fails for some reason
              */
-        LOG_CLI(DEBUG, "optimal_path_task: steering for " << sta_mac
-                                                          << " timed out, finishing task");
+        LOG_CLI(DEBUG,
+                "optimal_path_task: steering for " << sta_mac << " timed out, finishing task");
         finish();
         break;
     }
@@ -1163,10 +1163,12 @@ void optimal_path_task::handle_response(std::string mac,
                    << std::endl
                    << "measurement_rep_mode: " << (int)response->params().rep_mode << std::endl
                    << "op_class: " << (int)response->params().op_class << std::endl
-                   << "channel: " << (int)response->params().channel
+                   << "channel: "
+                   << (int)response->params().channel
                    //<< std::endl << "start_time: "           << (int)response->params.start_time
                    << std::endl
-                   << "duration: " << (int)response->params().duration
+                   << "duration: "
+                   << (int)response->params().duration
                    //<< std::endl << "phy_type: "             << (int)response->params.phy_type
                    //<< std::endl << "frame_type: "           << (int)response->params.frame_type
                    << std::endl

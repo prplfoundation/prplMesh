@@ -68,7 +68,7 @@ public:
 };
 
 bool MultiApAgent::kStop = false;
-};
+}; // namespace mapf
 
 void signal_handler(int signum)
 {

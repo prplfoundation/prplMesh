@@ -785,7 +785,7 @@ bool sta_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
     }
 #endif
 
-} // namespace ugw
+} // namespace dwpal
 } // namespace bwl
 
 // AP FAPI HAL Factory Functions

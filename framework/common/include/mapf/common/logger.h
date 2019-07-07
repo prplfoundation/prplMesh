@@ -85,6 +85,6 @@ private:
     Logger(const Logger &) = delete;
     void operator=(const Logger &) = delete;
 };
-}
+} // namespace mapf
 
 #endif /* #ifndef __MAPF_COMMON_LOGGER_H__ */

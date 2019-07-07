@@ -63,9 +63,10 @@ std::ostream &operator<<(std::ostream &os, const node &n)
            << " Supports5ghz: " << bool(n.supports_5ghz) << std::endl
            << " Supports24ghz: " << bool(n.supports_24ghz) << std::endl
            << " Statistics:" << std::endl
-           << "   LastUpdate: " << float((std::chrono::duration_cast<std::chrono::duration<double>>(
-                                              tCurrTime - n.stats_info->timestamp))
-                                             .count())
+           << "   LastUpdate: "
+           << float((std::chrono::duration_cast<std::chrono::duration<double>>(
+                         tCurrTime - n.stats_info->timestamp))
+                        .count())
            << "[sec]" << std::endl
            << "   StatsDelta: " << float(n.stats_info->stats_delta_ms) / 1000.0 << "[sec]"
            << std::endl
@@ -99,9 +100,10 @@ std::ostream &operator<<(std::ostream &os, const node &n)
         }
 
         os << "]" << std::endl
-           << "   LastSeen: " << float((std::chrono::duration_cast<std::chrono::duration<double>>(
-                                            tCurrTime - n.last_seen))
-                                           .count())
+           << "   LastSeen: "
+           << float((std::chrono::duration_cast<std::chrono::duration<double>>(tCurrTime -
+                                                                               n.last_seen))
+                        .count())
            << "[sec]" << std::endl
            << "   LastStateChange: "
            << float((std::chrono::duration_cast<std::chrono::duration<double>>(tCurrTime -
@@ -148,9 +150,10 @@ std::ostream &operator<<(std::ostream &os, const node &n)
            << " ConductedPower: " << int(n.hostap->conducted_power) << std::endl
            << " AntNum: " << int(n.capabilities.ant_num) << std::endl
            << " Statistics:" << std::endl
-           << "   LastUpdate: " << float((std::chrono::duration_cast<std::chrono::duration<double>>(
-                                              tCurrTime - n.hostap->stats_info->timestamp))
-                                             .count())
+           << "   LastUpdate: "
+           << float((std::chrono::duration_cast<std::chrono::duration<double>>(
+                         tCurrTime - n.hostap->stats_info->timestamp))
+                        .count())
            << "[sec]" << std::endl
            << "   StatsDelta: " << float(n.hostap->stats_info->stats_delta_ms) / 1000.0 << "[sec]"
            << std::endl
@@ -206,7 +209,7 @@ std::ostream &operator<<(std::ostream &os, const node &n)
 
 std::ostream &operator<<(std::ostream &os, const node *n) { return (os << (const node &)(*n)); }
 
-} //namespace beerocks
+} // namespace son
 
 bool node::get_beacon_measurement(std::string ap_mac_, int8_t &rcpi, uint8_t &rsni)
 {
