@@ -256,6 +256,8 @@ private:
     beerocks::eRadioStatus iface_status_bh_wired_prev = beerocks::eRadioStatus::INVALID;
     bool iface_status_operational_state               = false;
     bool iface_status_operational_state_prev          = false;
+
+    void handle_channel_preference_query_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 };
 
 } // namespace son
