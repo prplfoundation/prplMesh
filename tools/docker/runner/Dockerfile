@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
 	iputils-ping \
 	iproute2 \
 	psmisc \
+	clang-format \
     && rm -rf /var/lib/apt/lists/*
 
 ARG bridgeip
