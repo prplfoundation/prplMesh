@@ -145,4 +145,4 @@ void TopologyDiscoveryAgentLocalDB::ShowNeighborList(
     }
 }
 
-} // namespace mapf::DiscAgent
+} // namespace mapf

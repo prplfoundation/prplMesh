@@ -127,4 +127,4 @@ void Broker::Run()
     zmq_proxy(frontend_->sd_, backend_->sd_, nullptr);
 }
 
-} /* namespace multiap */
+} // namespace mapf

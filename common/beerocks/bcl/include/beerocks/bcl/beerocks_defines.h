@@ -451,6 +451,6 @@ enum eWifiIfaceOperation {
     WIFI_IFACE_OPER_RESTART   = 3,
     WIFI_IFACE_OPER_INVALID
 };
-}
+} // namespace beerocks
 
 #endif //_BEEROCKS_DEFINES_H_

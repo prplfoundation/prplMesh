@@ -116,6 +116,6 @@ protected:
     int UpdateNeighborEntry(int index, uint8_t *mac, uint8_t *neigh_mac, int type, int oper);
     void ShowNeighborList(std::list<struct interface_list_item>::iterator it);
 };
-};
+}; // namespace mapf
 
 #endif // ifndef _MAP_DISCOVERY_AGENT_LOCALDB_H_

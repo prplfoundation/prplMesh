@@ -305,7 +305,7 @@ bool ap_wlan_hal_brcm::read_acs_report()
 
             if (channel_idx < beerocks::message::SUPPORTED_CHANNELS_LENGTH) {
                 if (channel > 14)
-                    m_radio_info.is_5ghz                                 = 1;
+                    m_radio_info.is_5ghz = 1;
                 m_radio_info.supported_channels[channel_idx].channel     = channel;
                 m_radio_info.supported_channels[channel_idx].noise       = 0;
                 m_radio_info.supported_channels[channel_idx].bss_overlap = 0;

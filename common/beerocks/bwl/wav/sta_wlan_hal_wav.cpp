@@ -786,7 +786,7 @@ bool sta_wlan_hal_wav::process_wav_event(parsed_obj_map_t &parsed_obj) { return 
     }
 #endif
 
-} // namespace ugw
+} // namespace wav
 } // namespace bwl
 
 // AP FAPI HAL Factory Functions

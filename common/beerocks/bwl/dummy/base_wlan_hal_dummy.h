@@ -71,7 +71,7 @@ private:
     size_t m_wpa_ctrl_buffer_size = 0;
 };
 
-} // namespace bwl
 } // namespace dummy
+} // namespace bwl
 
 #endif // _BWL_BASE_WLAN_HAL_DUMMY_H_

@@ -32,6 +32,6 @@ public:
         std::cout << "Destroying Dummy2Message, prefix=" << kTopicPrefix << std::endl;
     }
 };
-}
+} // namespace mapf
 
 #endif //#ifndef __MAPF_COMMON_TEST_MESSAGES_DUMMY2_H__

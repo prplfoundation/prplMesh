@@ -69,5 +69,5 @@ public:
         std::string hostap_mac, uint8_t cac_completed);
 };
 
-} // namespace son;
+} // namespace son
 #endif

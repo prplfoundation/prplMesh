@@ -40,7 +40,7 @@ protected:
     char wl_ioctl_buf[8192];
 };
 
-} // namespace bwl
 } // namespace brcm
+} // namespace bwl
 
 #endif // _BWL_BASE_WLAN_HAL_BRCM_H_

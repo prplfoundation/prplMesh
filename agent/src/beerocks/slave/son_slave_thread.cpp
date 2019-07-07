@@ -22,8 +22,8 @@
 #include <beerocks/tlvf/beerocks_message_monitor.h>
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
-#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
+#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 
 // BPL Error Codes
 #include <bpl/bpl_cfg.h>
@@ -826,9 +826,9 @@ bool slave_thread::handle_cmdu_control_message(
         LOG(INFO) << "rx_rssi measurement request for client mac="
                   << network_utils::mac_to_string(request_in->params().mac)
                   << " ip=" << network_utils::ipv4_to_string(request_in->params().ipv4)
-                  << " channel=" << int(request_in->params().channel)
-                  << " bandwidth=" << utils::convert_bandwidth_to_int(
-                                          (beerocks::eWiFiBandwidth)request_in->params().bandwidth)
+                  << " channel=" << int(request_in->params().channel) << " bandwidth="
+                  << utils::convert_bandwidth_to_int(
+                         (beerocks::eWiFiBandwidth)request_in->params().bandwidth)
                   << " cross=" << int(request_in->params().cross)
                   << " id=" << int(beerocks_header->id());
         break;
@@ -1570,8 +1570,9 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 
             for (unsigned int i = 0; i < message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
                 if (backhaul_params.backhaul_scan_measurement_list[i].channel > 0) {
-                    LOG(DEBUG) << "mac = " << network_utils::mac_to_string(
-                                                  backhaul_params.backhaul_scan_measurement_list[i].mac)
+                    LOG(DEBUG) << "mac = "
+                               << network_utils::mac_to_string(
+                                      backhaul_params.backhaul_scan_measurement_list[i].mac)
                                << " channel = "
                                << int(backhaul_params.backhaul_scan_measurement_list[i].channel)
                                << " rssi = "
@@ -3800,7 +3801,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             break;
         }
 
-        auto apconfHeader = cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE);
+        auto apconfHeader = cmdu_tx.create(
+            0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE);
         auto tlvAp = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
         if (tlvAp == nullptr) {
             LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
@@ -3808,14 +3810,15 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         }
         std::copy_n(network_utils::mac_from_string(config.radio_identifier).oct,
                     beerocks::net::MAC_ADDR_LEN, tlvAp->radio_uid().mac);
-        tlvAp->maximum_number_of_bsss_supported() = beerocks::IFACE_TOTAL_VAPS; //TODO get maximum supported VAPs from DWPAL
+        tlvAp->maximum_number_of_bsss_supported() =
+            beerocks::IFACE_TOTAL_VAPS; //TODO get maximum supported VAPs from DWPAL
 
         // TODO: move WSC and M1 setters to seperate functions
         // TODO: Currently sending dummy values, need to read them from DWPAL and use the correct WiFi
         //      Parameters based on the regulatory domain
         for (int i = 0; i < beerocks::IFACE_TOTAL_VAPS; i++) {
-            auto operationClassesInfo = tlvAp->create_operating_classes_info_list();
-            operationClassesInfo->operating_class() = 0; // dummy value
+            auto operationClassesInfo               = tlvAp->create_operating_classes_info_list();
+            operationClassesInfo->operating_class() = 0;            // dummy value
             operationClassesInfo->maximum_transmit_power_dbm() = 1; // dummy value
 
             // TODO - the number of statically non operable channels can be 0 - meaning it is
@@ -3825,11 +3828,12 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 LOG(ERROR) << "Allocation statically non operable channels list failed";
                 return false;
             }
-            std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) = 1; // dummy value
+            std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) =
+                1; // dummy value
 
             if (!tlvAp->add_operating_classes_info_list(operationClassesInfo)) {
-                    LOG(ERROR) << "add_operating_classes_info_list failed";
-                    return false;
+                LOG(ERROR) << "add_operating_classes_info_list failed";
+                return false;
             }
         }
 
@@ -3841,8 +3845,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        std::copy_n(hostap_params.iface_mac.oct,
-                    beerocks::net::MAC_ADDR_LEN, tlvWscM1->M1Frame().mac_attr.data.mac);
+        std::copy_n(hostap_params.iface_mac.oct, beerocks::net::MAC_ADDR_LEN,
+                    tlvWscM1->M1Frame().mac_attr.data.mac);
         // TODO: read manufactured, name, model and device name from BPL
         string_utils::copy_string(tlvWscM1->M1Frame().manufacturer_attr.data, "prpl", 5);
         string_utils::copy_string(tlvWscM1->M1Frame().model_name_attr.data, "Ubuntu", 7);
@@ -3860,14 +3864,16 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         // rf_bands_attr -> This is essential and must correspond to the freqband in the search message
         // vendor_extensions_attr -> this could also be done in the yaml file
 
-        auto tlvVendorSpecific = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
+        auto tlvVendorSpecific =
+            cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
         if (tlvVendorSpecific == nullptr) {
             LOG(ERROR) << "Failed adding intel vendor specific TLV";
             return false;
         }
 
         auto notification = message_com::add_intel_vs_data<
-            beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(cmdu_tx, tlvVendorSpecific);
+            beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(cmdu_tx,
+                                                                         tlvVendorSpecific);
 
         if (notification == nullptr) {
             LOG(ERROR) << "Failed building cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION!";
@@ -3921,11 +3927,13 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             if (notification->backhaul_params().backhaul_scan_measurement_list[i].channel > 0) {
                 LOG(DEBUG)
                     << "mac = "
-                    << network_utils::mac_to_string(
-                           notification->backhaul_params().backhaul_scan_measurement_list[i].mac.oct)
-                    << " channel = " << int(notification->backhaul_params()
-                                                .backhaul_scan_measurement_list[i]
-                                                .channel)
+                    << network_utils::mac_to_string(notification->backhaul_params()
+                                                        .backhaul_scan_measurement_list[i]
+                                                        .mac.oct)
+                    << " channel = "
+                    << int(notification->backhaul_params()
+                               .backhaul_scan_measurement_list[i]
+                               .channel)
                     << " rssi = "
                     << int(notification->backhaul_params().backhaul_scan_measurement_list[i].rssi);
             }

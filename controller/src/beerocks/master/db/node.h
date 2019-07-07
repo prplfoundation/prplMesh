@@ -230,5 +230,5 @@ private:
     std::unordered_map<std::string, std::shared_ptr<beacon_measurement>> beacon_measurements;
     std::unordered_map<std::string, std::shared_ptr<rssi_measurement>> cross_rx_rssi;
 };
-}
+} // namespace son
 #endif

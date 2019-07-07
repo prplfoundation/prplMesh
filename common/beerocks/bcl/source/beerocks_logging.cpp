@@ -11,7 +11,6 @@
 #include "../include/beerocks/bcl/network/socket.h"
 
 #include <algorithm>
-#include <algorithm>
 #include <iostream>
 #include <linux/limits.h>
 #include <unistd.h>
@@ -168,7 +167,7 @@ const log_levels LOG_LEVELS_GLOBAL_DEFAULT =
 const log_levels LOG_LEVELS_MODULE_DEFAULT =
     log_levels(log_levels::set_t({"debug", "error", "fatal", "info", "trace", "warning"}));
 const log_levels LOG_LEVELS_SYSLOG_DEFAULT = log_levels(log_levels::set_t({"error", "fatal"}));
-}
+} // namespace beerocks
 
 using namespace beerocks;
 

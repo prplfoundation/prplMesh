@@ -264,10 +264,12 @@ void association_handling_task::handle_response(std::string mac,
                    << std::endl
                    << "measurement_rep_mode: " << (int)response->params().rep_mode << std::endl
                    << "op_class: " << (int)response->params().op_class << std::endl
-                   << "channel: " << (int)response->params().channel
+                   << "channel: "
+                   << (int)response->params().channel
                    //<< std::endl << "start_time: "           << (int)response->params.start_time
                    << std::endl
-                   << "duration: " << (int)response->params().duration
+                   << "duration: "
+                   << (int)response->params().duration
                    //<< std::endl << "phy_type: "             << (int)response->params.phy_type
                    //<< std::endl << "frame_type: "           << (int)response->params.frame_type
                    << std::endl

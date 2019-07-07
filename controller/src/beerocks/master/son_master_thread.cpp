@@ -38,11 +38,11 @@
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
-#include <tlvf/wfa_map/tlvSearchedService.h>
-#include <tlvf/wfa_map/tlvSupportedService.h>
+#include <tlvf/ieee_1905_1/tlvWscM1.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
-#include <tlvf/ieee_1905_1/tlvWscM1.h>
+#include <tlvf/wfa_map/tlvSearchedService.h>
+#include <tlvf/wfa_map/tlvSupportedService.h>
 
 #define SOCKET_MAX_CONNECTIONS 20
 #define SOCKETS_SELECT_TIMEOUT_MSEC 50
@@ -357,7 +357,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
 }
 
 bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
-                                                              ieee1905_1::CmduMessageRx &cmdu_rx)
+                                                           ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto tlvAp = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
     // Check if this is a M2 message that we sent to the agent, which was just looped back.
@@ -394,14 +394,16 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
 
     if (beerocks_header->action_op() !=
         beerocks_message::ACTION_CONTROL_SLAVE_JOINED_NOTIFICATION) {
-            LOG(ERROR) << "Unexpected Intel action op " << beerocks_header->action_op();
-            return false;
+        LOG(ERROR) << "Unexpected Intel action op " << beerocks_header->action_op();
+        return false;
     }
 
-    std::copy_n(tlvWscM1->M1Frame().mac_attr.data.mac, beerocks::net::MAC_ADDR_LEN, beerocks_header->radio_mac().oct);
-    LOG(INFO) << "Handle slave join, radio mac " <<
-        network_utils::mac_to_string(beerocks_header->radio_mac());
-    return handle_slave_join(sd, beerocks_header, cmdu_rx); // TODO to be removed once autoconfig is completed
+    std::copy_n(tlvWscM1->M1Frame().mac_attr.data.mac, beerocks::net::MAC_ADDR_LEN,
+                beerocks_header->radio_mac().oct);
+    LOG(INFO) << "Handle slave join, radio mac "
+              << network_utils::mac_to_string(beerocks_header->radio_mac());
+    return handle_slave_join(sd, beerocks_header,
+                             cmdu_rx); // TODO to be removed once autoconfig is completed
 }
 
 bool master_thread::handle_slave_join(
@@ -874,8 +876,9 @@ bool master_thread::handle_slave_join(
 
         for (unsigned int i = 0; i < message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
             if (cs_new_event->backhaul_scan_measurement_list[i].channel > 0) {
-                LOG(DEBUG) << "mac = " << network_utils::mac_to_string(
-                                              cs_new_event->backhaul_scan_measurement_list[i].mac)
+                LOG(DEBUG) << "mac = "
+                           << network_utils::mac_to_string(
+                                  cs_new_event->backhaul_scan_measurement_list[i].mac)
                            << " channel = "
                            << int(cs_new_event->backhaul_scan_measurement_list[i].channel)
                            << " rssi = "
@@ -1088,9 +1091,9 @@ bool master_thread::handle_cmdu_control_message(
                 vaps_info[vap_id].ssid =
                     std::string((char *)notification->params().vaps[vap_id].ssid);
                 vaps_info[vap_id].backhaul_vap = notification->params().vaps[vap_id].backhaul_vap;
-                vaps_list += ("    vap_id=" + std::to_string(vap_id) + ", vap_mac=" +
-                              (vaps_info[vap_id]).mac + " , ssid=" + (vaps_info[vap_id]).ssid +
-                              std::string("\n"));
+                vaps_list += ("    vap_id=" + std::to_string(vap_id) +
+                              ", vap_mac=" + (vaps_info[vap_id]).mac +
+                              " , ssid=" + (vaps_info[vap_id]).ssid + std::string("\n"));
             }
         }
 
@@ -1780,10 +1783,12 @@ bool master_thread::handle_cmdu_control_message(
                 << std::endl
                 << "measurement_rep_mode: " << (int)response->params().rep_mode << std::endl
                 << "op_class: " << (int)response->params().op_class << std::endl
-                << "channel: " << (int)response->params().channel
+                << "channel: "
+                << (int)response->params().channel
                 //<< std::endl << "start_time: "           << (int)response->params.start_time
                 << std::endl
-                << "duration: " << (int)response->params().duration
+                << "duration: "
+                << (int)response->params().duration
                 //<< std::endl << "phy_type: "             << (int)response->params.phy_type
                 //<< std::endl << "frame_type: "           << (int)response->params.frame_type
                 << std::endl
@@ -1795,7 +1800,7 @@ bool master_thread::handle_cmdu_control_message(
             //<< std::endl << "new_ch_width: "                         << (int)response->params.new_ch_width
             //<< std::endl << "new_ch_center_freq_seg_0: "             << (int)response->params.new_ch_center_freq_seg_0
             //<< std::endl << "new_ch_center_freq_seg_1: "             << (int)response->params.new_ch_center_freq_seg_1
-            );
+        );
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE: {

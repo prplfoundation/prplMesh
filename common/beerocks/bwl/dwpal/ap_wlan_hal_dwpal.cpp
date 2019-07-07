@@ -138,7 +138,7 @@ static bool get_sta_caps(SRadioCapabilitiesStrings &caps_strings,
     std::string item;
     uint8_t i = 0;
 
-    sta_caps = beerocks::message::sRadioCapabilities();
+    sta_caps        = beerocks::message::sRadioCapabilities();
     sta_caps.ht_bw  = 0xFF;
     sta_caps.vht_bw = 0xFF;
 
@@ -278,55 +278,52 @@ static bool get_sta_caps(SRadioCapabilitiesStrings &caps_strings,
         sta_caps.wifi_standard = STANDARD_B | STANDARD_G;
     }
 
-    LOG(DEBUG) << std::endl
-               << " sta HT_CAPS:" << std::endl
-               << "bw20 short gi = " << (sta_caps.ht_low_bw_short_gi ? "true" : "false")
-               << std::endl
-               << "bw40 short gi = " << (sta_caps.ht_high_bw_short_gi ? "true" : "false")
-               << std::endl
-               << "ht_mcs = " << ((int(sta_caps.ht_mcs)) ? std::to_string(sta_caps.ht_mcs) : "n/a")
-               << std::endl
-               << "ht_ss = " << ((int(sta_caps.ht_ss)) ? std::to_string(sta_caps.ht_ss) : "n/a")
-               << std::endl
-               << "ht_bw = " << ((sta_caps.ht_bw != 0xFF)
-                                     ? std::to_string(beerocks::utils::convert_bandwidth_to_int(
+    LOG(DEBUG)
+        << std::endl
+        << " sta HT_CAPS:" << std::endl
+        << "bw20 short gi = " << (sta_caps.ht_low_bw_short_gi ? "true" : "false") << std::endl
+        << "bw40 short gi = " << (sta_caps.ht_high_bw_short_gi ? "true" : "false") << std::endl
+        << "ht_mcs = " << ((int(sta_caps.ht_mcs)) ? std::to_string(sta_caps.ht_mcs) : "n/a")
+        << std::endl
+        << "ht_ss = " << ((int(sta_caps.ht_ss)) ? std::to_string(sta_caps.ht_ss) : "n/a")
+        << std::endl
+        << "ht_bw = "
+        << ((sta_caps.ht_bw != 0xFF) ? std::to_string(beerocks::utils::convert_bandwidth_to_int(
                                            beerocks::eWiFiBandwidth(sta_caps.ht_bw)))
                                      : "n/a")
-               << std::endl
-               << "ht_sm_power_save = " << (sta_caps.ht_sm_power_save ? "true" : "false")
+        << std::endl
+        << "ht_sm_power_save = " << (sta_caps.ht_sm_power_save ? "true" : "false")
 
-               << std::endl
-               << "\n sta VHT_CAPS:" << std::endl
-               << "bw80 short gi = " << (sta_caps.vht_low_bw_short_gi ? "true" : "false")
-               << std::endl
-               << "bw160 short gi = " << (sta_caps.vht_high_bw_short_gi ? "true" : "false")
-               << std::endl
-               << "vht_mcs = "
-               << ((int(sta_caps.vht_mcs)) ? std::to_string(sta_caps.vht_mcs) : "n/a") << std::endl
-               << "vht_ss = " << ((int(sta_caps.vht_ss)) ? std::to_string(sta_caps.vht_ss) : "n/a")
-               << std::endl
-               << "vht_bw = " << ((sta_caps.vht_bw != 0xFF)
-                                      ? std::to_string(beerocks::utils::convert_bandwidth_to_int(
+        << std::endl
+        << "\n sta VHT_CAPS:" << std::endl
+        << "bw80 short gi = " << (sta_caps.vht_low_bw_short_gi ? "true" : "false") << std::endl
+        << "bw160 short gi = " << (sta_caps.vht_high_bw_short_gi ? "true" : "false") << std::endl
+        << "vht_mcs = " << ((int(sta_caps.vht_mcs)) ? std::to_string(sta_caps.vht_mcs) : "n/a")
+        << std::endl
+        << "vht_ss = " << ((int(sta_caps.vht_ss)) ? std::to_string(sta_caps.vht_ss) : "n/a")
+        << std::endl
+        << "vht_bw = "
+        << ((sta_caps.vht_bw != 0xFF) ? std::to_string(beerocks::utils::convert_bandwidth_to_int(
                                             beerocks::eWiFiBandwidth(sta_caps.vht_bw)))
                                       : "n/a")
 
-               << std::endl
-               << "\n sta DEFAULT_CAPS:" << std::endl
-               << "default_mcs = " << int(sta_caps.default_mcs) << std::endl
-               << "default_short_gi = " << int(sta_caps.default_short_gi)
+        << std::endl
+        << "\n sta DEFAULT_CAPS:" << std::endl
+        << "default_mcs = " << int(sta_caps.default_mcs) << std::endl
+        << "default_short_gi = " << int(sta_caps.default_short_gi)
 
-               << std::endl
-               << "\n sta OTHER_CAPS:" << std::endl
-               << "wifi_standard [enum] = " << int(sta_caps.wifi_standard) << std::endl
-               << "btm_supported = " << (sta_caps.btm_supported ? "true" : "false") << std::endl
-               << "nr_enabled = " << (sta_caps.nr_enabled ? "true" : "false") << std::endl
-               << "cell_capa = " << int(sta_caps.cell_capa) << std::endl
-               << "link_meas = " << int(sta_caps.link_meas) << std::endl
-               << "beacon_report_passive = " << int(sta_caps.beacon_report_passive) << std::endl
-               << "beacon_report_active = " << int(sta_caps.beacon_report_active) << std::endl
-               << "beacon_report_table = " << int(sta_caps.beacon_report_table) << std::endl
-               << "lci_meas = " << int(sta_caps.lci_meas) << std::endl
-               << "fmt_range_report = " << int(sta_caps.fmt_range_report);
+        << std::endl
+        << "\n sta OTHER_CAPS:" << std::endl
+        << "wifi_standard [enum] = " << int(sta_caps.wifi_standard) << std::endl
+        << "btm_supported = " << (sta_caps.btm_supported ? "true" : "false") << std::endl
+        << "nr_enabled = " << (sta_caps.nr_enabled ? "true" : "false") << std::endl
+        << "cell_capa = " << int(sta_caps.cell_capa) << std::endl
+        << "link_meas = " << int(sta_caps.link_meas) << std::endl
+        << "beacon_report_passive = " << int(sta_caps.beacon_report_passive) << std::endl
+        << "beacon_report_active = " << int(sta_caps.beacon_report_active) << std::endl
+        << "beacon_report_table = " << int(sta_caps.beacon_report_table) << std::endl
+        << "lci_meas = " << int(sta_caps.lci_meas) << std::endl
+        << "fmt_range_report = " << int(sta_caps.fmt_range_report);
 
     return true;
 }
@@ -437,15 +434,16 @@ bool ap_wlan_hal_dwpal::sta_bss_steer(const std::string &mac, const std::string 
     // Build command string
     std::string cmd =
         // Set the STA MAC address
-        "BSS_TM_REQ " + mac
+        "BSS_TM_REQ " +
+        mac
 
         // Transition management parameters
         + " dialog_token=" + "0" + " Mode=" + "0" + " pref=" + "1" + " abridged=" + "1" +
         " neighbor=" + bssid + ",0,0," + std::to_string(chan) + ",0,255";
 
     if (disassoc_timer) {
-        cmd += std::string() + " disassoc_imminent=" + "1" + " disassoc_timer=" +
-               std::to_string(disassoc_timer);
+        cmd += std::string() + " disassoc_imminent=" + "1" +
+               " disassoc_timer=" + std::to_string(disassoc_timer);
     }
 
     if (valid_int) {
@@ -471,8 +469,8 @@ bool ap_wlan_hal_dwpal::sta_unassoc_rssi_measurement(const std::string &mac, int
     std::string waveVhtCenterFreq = std::to_string(vht_center_frequency);
 
     // Build command string
-    std::string cmd = "UNCONNECTED_STA_RSSI " + mac + " " + centerFreq + " center_freq1=" +
-                      waveVhtCenterFreq + " bandwidth=" + chanBandwidth;
+    std::string cmd = "UNCONNECTED_STA_RSSI " + mac + " " + centerFreq +
+                      " center_freq1=" + waveVhtCenterFreq + " bandwidth=" + chanBandwidth;
 
     // Delay the first measurement...
     UTILS_SLEEP_MSEC(delay);
@@ -499,11 +497,11 @@ bool ap_wlan_hal_dwpal::sta_softblock_add(const std::string &vap_name,
 {
     // Build command string
     std::string cmd = "STA_SOFTBLOCK " + vap_name + " " + client_mac + " remove=0" +
-                      " reject_sta=" + std::to_string(reject_error_code) + " snrProbeHWM=" +
-                      std::to_string(probe_snr_threshold_hi) + " snrProbeLWM=" +
-                      std::to_string(probe_snr_threshold_lo) + " snrAuthHWM=" +
-                      std::to_string(authetication_snr_threshold_hi) + " snrAuthLWM=" +
-                      std::to_string(authetication_snr_threshold_lo);
+                      " reject_sta=" + std::to_string(reject_error_code) +
+                      " snrProbeHWM=" + std::to_string(probe_snr_threshold_hi) +
+                      " snrProbeLWM=" + std::to_string(probe_snr_threshold_lo) +
+                      " snrAuthHWM=" + std::to_string(authetication_snr_threshold_hi) +
+                      " snrAuthLWM=" + std::to_string(authetication_snr_threshold_lo);
 
     // Trigger a measurement
     if (!dwpal_send_cmd(cmd)) {
@@ -1045,8 +1043,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             {NULL /*opCode*/, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0},
             {(void *)VAP, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL, sizeof(VAP)},
             {(void *)MACAddress, &numOfValidArgs[2], DWPAL_STR_PARAM, NULL, sizeof(MACAddress)},
-            {(void *)supportedRates, &numOfValidArgs[3], DWPAL_STR_PARAM, "SupportedRates=",
-             sizeof(supportedRates)},
+            {(void *)supportedRates, &numOfValidArgs[3], DWPAL_STR_PARAM,
+             "SupportedRates=", sizeof(supportedRates)},
             {(void *)HT_CAP, &numOfValidArgs[4], DWPAL_STR_PARAM, "HT_CAP=", sizeof(HT_CAP)},
             {(void *)HT_MCS, &numOfValidArgs[5], DWPAL_STR_PARAM, "HT_MCS=", sizeof(HT_MCS)},
             {(void *)VHT_CAP, &numOfValidArgs[6], DWPAL_STR_PARAM, "VHT_CAP=", sizeof(VHT_CAP)},
@@ -1343,21 +1341,30 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
 
             FieldsToParse fieldsToParse[] = {
                 {(void *)vap_name, &numOfValidArgs[0], DWPAL_STR_PARAM, "VAP=", sizeof(vap_name)},
-                {(void *)vap_bssid, &numOfValidArgs[1], DWPAL_STR_PARAM, "VAP_BSSID=",
-                 sizeof(vap_bssid)},
-                {(void *)client_mac, &numOfValidArgs[2], DWPAL_STR_PARAM, "addr=",
-                 sizeof(client_mac)},
+                {(void *)vap_bssid, &numOfValidArgs[1], DWPAL_STR_PARAM,
+                 "VAP_BSSID=", sizeof(vap_bssid)},
+                {(void *)client_mac, &numOfValidArgs[2], DWPAL_STR_PARAM,
+                 "addr=", sizeof(client_mac)},
                 {
-                    (void *)&msg->params.rx_snr, &numOfValidArgs[3], DWPAL_UNSIGNED_CHAR_PARAM,
-                    "snr=", 0,
+                    (void *)&msg->params.rx_snr,
+                    &numOfValidArgs[3],
+                    DWPAL_UNSIGNED_CHAR_PARAM,
+                    "snr=",
+                    0,
                 },
                 {
-                    (void *)&msg->params.blocked, &numOfValidArgs[4], DWPAL_UNSIGNED_CHAR_PARAM,
-                    "blocked=", 0,
+                    (void *)&msg->params.blocked,
+                    &numOfValidArgs[4],
+                    DWPAL_UNSIGNED_CHAR_PARAM,
+                    "blocked=",
+                    0,
                 },
                 {
-                    (void *)&msg->params.broadcast, &numOfValidArgs[5], DWPAL_UNSIGNED_CHAR_PARAM,
-                    "broadcast=", 0,
+                    (void *)&msg->params.broadcast,
+                    &numOfValidArgs[5],
+                    DWPAL_UNSIGNED_CHAR_PARAM,
+                    "broadcast=",
+                    0,
                 },
                 /* Must be at the end */
                 {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
@@ -1406,25 +1413,37 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
 
             FieldsToParse fieldsToParse[] = {
                 {(void *)vap_name, &numOfValidArgs[0], DWPAL_STR_PARAM, "VAP=", sizeof(vap_name)},
-                {(void *)vap_bssid, &numOfValidArgs[1], DWPAL_STR_PARAM, "VAP_BSSID=",
-                 sizeof(vap_bssid)},
-                {(void *)client_mac, &numOfValidArgs[2], DWPAL_STR_PARAM, "addr=",
-                 sizeof(client_mac)},
+                {(void *)vap_bssid, &numOfValidArgs[1], DWPAL_STR_PARAM,
+                 "VAP_BSSID=", sizeof(vap_bssid)},
+                {(void *)client_mac, &numOfValidArgs[2], DWPAL_STR_PARAM,
+                 "addr=", sizeof(client_mac)},
                 {
-                    (void *)&msg->params.rx_snr, &numOfValidArgs[3], DWPAL_UNSIGNED_CHAR_PARAM,
-                    "snr=", 0,
+                    (void *)&msg->params.rx_snr,
+                    &numOfValidArgs[3],
+                    DWPAL_UNSIGNED_CHAR_PARAM,
+                    "snr=",
+                    0,
                 },
                 {
-                    (void *)&msg->params.blocked, &numOfValidArgs[4], DWPAL_UNSIGNED_CHAR_PARAM,
-                    "blocked=", 0,
+                    (void *)&msg->params.blocked,
+                    &numOfValidArgs[4],
+                    DWPAL_UNSIGNED_CHAR_PARAM,
+                    "blocked=",
+                    0,
                 },
                 {
-                    (void *)&msg->params.reject, &numOfValidArgs[5], DWPAL_UNSIGNED_CHAR_PARAM,
-                    "rejected=", 0,
+                    (void *)&msg->params.reject,
+                    &numOfValidArgs[5],
+                    DWPAL_UNSIGNED_CHAR_PARAM,
+                    "rejected=",
+                    0,
                 },
                 {
-                    (void *)&msg->params.reason, &numOfValidArgs[6], DWPAL_UNSIGNED_CHAR_PARAM,
-                    "reason=", 0,
+                    (void *)&msg->params.reason,
+                    &numOfValidArgs[6],
+                    DWPAL_UNSIGNED_CHAR_PARAM,
+                    "reason=",
+                    0,
                 },
                 /* Must be at the end */
                 {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};

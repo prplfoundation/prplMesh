@@ -44,7 +44,7 @@ std::ostream &operator<<(std::ostream &ost, monitor_radio_node *radio_node)
 {
     return (ost << (monitor_radio_node &)(*radio_node));
 }
-}
+} // namespace son
 
 double monitor_radio_node::get_rx_bit_rate()
 {
@@ -101,7 +101,7 @@ std::ostream &operator<<(std::ostream &ost, monitor_vap_node *vap_node)
 {
     return (ost << (monitor_vap_node &)(*vap_node));
 }
-}
+} // namespace son
 
 std::string monitor_vap_node::get_ipv4()
 {
@@ -164,7 +164,7 @@ std::ostream &operator<<(std::ostream &ost, monitor_sta_node *sta_node)
 {
     return (ost << (monitor_sta_node &)(*sta_node));
 }
-}
+} // namespace son
 
 double monitor_sta_node::get_load_rx_phy_rate()
 {

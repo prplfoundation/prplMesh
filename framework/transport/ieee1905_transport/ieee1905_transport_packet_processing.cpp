@@ -275,8 +275,9 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
     }
 
     // reuse most of the original packet metadata for all fragments (except for the payload iov)
-    Packet fragment_packet = packet;
-    uint8_t buf[kIeee1905FragmentationThreashold + sizeof(Tlv)] = {0}; // fragment size + TLV end of message size
+    Packet fragment_packet                                      = packet;
+    uint8_t buf[kIeee1905FragmentationThreashold + sizeof(Tlv)] = {
+        0}; // fragment size + TLV end of message size
 
     // copy the IEEE1905 header (will be reused by all fragments)
     std::copy_n((uint8_t *)packet.payload.iov_base, sizeof(Ieee1905CmduHeader), buf);

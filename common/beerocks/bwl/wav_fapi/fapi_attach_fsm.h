@@ -89,5 +89,5 @@ private:
     fapi_event_cb_t m_fapi_event_cb;
 };
 
-} // namespace bwl
 } // namespace wav_fapi
+} // namespace bwl

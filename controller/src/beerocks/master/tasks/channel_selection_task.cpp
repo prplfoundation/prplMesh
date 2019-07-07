@@ -373,8 +373,9 @@ void channel_selection_task::work()
         for (int i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
             if (slave_joined_event->backhaul_scan_measurement_list[i].channel > 0) {
                 TASK_LOG(DEBUG)
-                    << "mac = " << network_utils::mac_to_string(
-                                       slave_joined_event->backhaul_scan_measurement_list[i].mac)
+                    << "mac = "
+                    << network_utils::mac_to_string(
+                           slave_joined_event->backhaul_scan_measurement_list[i].mac)
                     << " channel = "
                     << int(slave_joined_event->backhaul_scan_measurement_list[i].channel)
                     << " rssi = "
@@ -401,7 +402,7 @@ void channel_selection_task::work()
         bool is_bh_manager_wireless_slave = (hostap_params.backhaul_is_wireless &&
                                              database.is_hostap_backhaul_manager(hostap_mac) &&
                                              !(is_2G_channel(hostap_params.backhaul_channel)));
-        bool is_bh_2g = is_2G_channel(hostap_params.backhaul_channel);
+        bool is_bh_2g                     = is_2G_channel(hostap_params.backhaul_channel);
         TASK_LOG(DEBUG) << "hostap_params.low_pass_filter_on = "
                         << int(hostap_params.low_pass_filter_on)
                         << " is_2G_channel(hostap_params.backhaul_channel) = " << int(is_bh_2g)
@@ -822,8 +823,8 @@ void channel_selection_task::work()
                             database.set_hostap_on_dfs_reentry(hostap_mac, false);
                             FSM_MOVE_STATE(STEER_STA_BACK_AFTER_DFS_REENTRY);
                         } else {
-                            TASK_LOG(DEBUG) << "hostap_mac - " << hostap_mac
-                                            << " cac completed pending";
+                            TASK_LOG(DEBUG)
+                                << "hostap_mac - " << hostap_mac << " cac completed pending";
                             FSM_MOVE_STATE(GOTO_IDLE);
                         }
                         break;
@@ -837,8 +838,8 @@ void channel_selection_task::work()
                         FSM_MOVE_STATE(STEER_STA_BACK_AFTER_DFS_REENTRY);
                         break;
                     }
-                    TASK_LOG(DEBUG) << "hostap_mac - " << hostap_mac
-                                    << " non DFS not a reentry flow";
+                    TASK_LOG(DEBUG)
+                        << "hostap_mac - " << hostap_mac << " non DFS not a reentry flow";
                 }
             } else {
                 TASK_LOG(DEBUG) << "2G AP ignore";

@@ -25,23 +25,23 @@ typedef struct sIpv4Addr {
     uint8_t oct[IP_ADDR_LEN];
     void struct_swap() {}
     void struct_init() { std::memset(oct, 0, IP_ADDR_LEN); }
-    bool operator==(sIpv4Addr const & rhs) const
+    bool operator==(sIpv4Addr const &rhs) const
     {
         return (0 == std::memcmp(this->oct, rhs.oct, IP_ADDR_LEN));
     }
-    bool operator!=(sIpv4Addr const & rhs) const { return !(rhs == *this); }
+    bool operator!=(sIpv4Addr const &rhs) const { return !(rhs == *this); }
 } __attribute__((packed)) sIpv4Addr;
 
 typedef struct sMacAddr {
     uint8_t oct[MAC_ADDR_LEN];
 
     void struct_swap() {}
-    void struct_init() { std::memset(oct, 0 ,MAC_ADDR_LEN); }
-    bool operator==(sMacAddr const & rhs) const
+    void struct_init() { std::memset(oct, 0, MAC_ADDR_LEN); }
+    bool operator==(sMacAddr const &rhs) const
     {
         return (0 == std::memcmp(this->oct, rhs.oct, MAC_ADDR_LEN));
     }
-    bool operator!=(sMacAddr const & rhs) const { return !(rhs == *this); }
+    bool operator!=(sMacAddr const &rhs) const { return !(rhs == *this); }
 } __attribute__((packed)) sMacAddr;
 
 typedef struct sScanResult {
@@ -55,14 +55,14 @@ typedef struct sScanResult {
         channel = 0;
         rssi    = 0;
     }
-    bool operator==(sScanResult const & rhs) const
+    bool operator==(sScanResult const &rhs) const
     {
         return (channel == rhs.channel && rssi == rhs.rssi && mac == rhs.mac);
     }
-    bool operator!=(sScanResult const & rhs) const { return !(rhs == *this); }
+    bool operator!=(sScanResult const &rhs) const { return !(rhs == *this); }
 } __attribute__((packed)) sScanResult;
 
-}
-}
+} // namespace net
+} // namespace beerocks
 
 #endif

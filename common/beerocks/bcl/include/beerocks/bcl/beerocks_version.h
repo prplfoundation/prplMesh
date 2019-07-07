@@ -92,6 +92,6 @@ private:
         beerocks_version_map_t;
     static beerocks_version_map_t s_beerocks_version_map;
 };
-}
+} // namespace beerocks
 
 #endif // _BEEROCKS_VERSION_H_

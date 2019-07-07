@@ -95,7 +95,7 @@ private:
     std::string ctrl_path;
 };
 
-} // namespace bwl
 } // namespace wav
+} // namespace bwl
 
 #endif // _BWL_BASE_WLAN_HAL_WAV_H_

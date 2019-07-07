@@ -108,4 +108,4 @@ void Broker::Run()
     }
 }
 
-} /* namespace multiap */
+} // namespace mapf

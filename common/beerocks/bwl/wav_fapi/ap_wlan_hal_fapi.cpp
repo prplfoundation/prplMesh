@@ -47,7 +47,7 @@ uint16_t LOGLEVEL = LOG_LEVEL + 1;
 #ifndef LOG_TYPE
 uint16_t LOGTYPE = SYS_LOG_TYPE_FILE;
 #else
-uint16_t LOGTYPE = LOG_TYPE;
+uint16_t LOGTYPE  = LOG_TYPE;
 #endif
 
 extern ObjList *mapperObjPtr;
@@ -296,47 +296,44 @@ static bool get_sta_caps(SRadioCapabilitiesStrings &caps_strings, sRadioCapabili
         sta_caps.wifi_standard = STANDARD_B | STANDARD_G;
     }
 
-    LOG(DEBUG) << std::endl
-               << " sta HT_CAPS:" << std::endl
-               << "bw20 short gi = " << (sta_caps.ht_low_bw_short_gi ? "true" : "false")
-               << std::endl
-               << "bw40 short gi = " << (sta_caps.ht_high_bw_short_gi ? "true" : "false")
-               << std::endl
-               << "ht_mcs = " << ((int(sta_caps.ht_mcs)) ? std::to_string(sta_caps.ht_mcs) : "n/a")
-               << std::endl
-               << "ht_ss = " << ((int(sta_caps.ht_ss)) ? std::to_string(sta_caps.ht_ss) : "n/a")
-               << std::endl
-               << "ht_bw = " << ((sta_caps.ht_bw != 0xFF)
-                                     ? std::to_string(beerocks::utils::convert_bandwidth_to_int(
+    LOG(DEBUG)
+        << std::endl
+        << " sta HT_CAPS:" << std::endl
+        << "bw20 short gi = " << (sta_caps.ht_low_bw_short_gi ? "true" : "false") << std::endl
+        << "bw40 short gi = " << (sta_caps.ht_high_bw_short_gi ? "true" : "false") << std::endl
+        << "ht_mcs = " << ((int(sta_caps.ht_mcs)) ? std::to_string(sta_caps.ht_mcs) : "n/a")
+        << std::endl
+        << "ht_ss = " << ((int(sta_caps.ht_ss)) ? std::to_string(sta_caps.ht_ss) : "n/a")
+        << std::endl
+        << "ht_bw = "
+        << ((sta_caps.ht_bw != 0xFF) ? std::to_string(beerocks::utils::convert_bandwidth_to_int(
                                            beerocks::eWiFiBandwidth(sta_caps.ht_bw)))
                                      : "n/a")
 
-               << std::endl
-               << "\n sta VHT_CAPS:" << std::endl
-               << "bw80 short gi = " << (sta_caps.vht_low_bw_short_gi ? "true" : "false")
-               << std::endl
-               << "bw160 short gi = " << (sta_caps.vht_high_bw_short_gi ? "true" : "false")
-               << std::endl
-               << "vht_mcs = "
-               << ((int(sta_caps.vht_mcs)) ? std::to_string(sta_caps.vht_mcs) : "n/a") << std::endl
-               << "vht_ss = " << ((int(sta_caps.vht_ss)) ? std::to_string(sta_caps.vht_ss) : "n/a")
-               << std::endl
-               << "vht_bw = " << ((sta_caps.vht_bw != 0xFF)
-                                      ? std::to_string(beerocks::utils::convert_bandwidth_to_int(
+        << std::endl
+        << "\n sta VHT_CAPS:" << std::endl
+        << "bw80 short gi = " << (sta_caps.vht_low_bw_short_gi ? "true" : "false") << std::endl
+        << "bw160 short gi = " << (sta_caps.vht_high_bw_short_gi ? "true" : "false") << std::endl
+        << "vht_mcs = " << ((int(sta_caps.vht_mcs)) ? std::to_string(sta_caps.vht_mcs) : "n/a")
+        << std::endl
+        << "vht_ss = " << ((int(sta_caps.vht_ss)) ? std::to_string(sta_caps.vht_ss) : "n/a")
+        << std::endl
+        << "vht_bw = "
+        << ((sta_caps.vht_bw != 0xFF) ? std::to_string(beerocks::utils::convert_bandwidth_to_int(
                                             beerocks::eWiFiBandwidth(sta_caps.vht_bw)))
                                       : "n/a")
 
-               << std::endl
-               << "\n sta DEFAULT_CAPS:" << std::endl
-               << "default_mcs = " << int(sta_caps.default_mcs) << std::endl
-               << "default_short_gi = " << int(sta_caps.default_short_gi)
+        << std::endl
+        << "\n sta DEFAULT_CAPS:" << std::endl
+        << "default_mcs = " << int(sta_caps.default_mcs) << std::endl
+        << "default_short_gi = " << int(sta_caps.default_short_gi)
 
-               << std::endl
-               << "\n sta OTHER_CAPS:" << std::endl
-               << "wifi_standard [enum] = " << int(sta_caps.wifi_standard) << std::endl
-               << "btm_supported = " << (sta_caps.btm_supported ? "true" : "false") << std::endl
-               << "nr_enabled = " << (sta_caps.nr_enabled ? "true" : "false") << std::endl
-               << "cell_capa = " << int(sta_caps.cell_capa);
+        << std::endl
+        << "\n sta OTHER_CAPS:" << std::endl
+        << "wifi_standard [enum] = " << int(sta_caps.wifi_standard) << std::endl
+        << "btm_supported = " << (sta_caps.btm_supported ? "true" : "false") << std::endl
+        << "nr_enabled = " << (sta_caps.nr_enabled ? "true" : "false") << std::endl
+        << "cell_capa = " << int(sta_caps.cell_capa);
 
     return true;
 }

@@ -19,7 +19,6 @@
 #include <mapf/transport/ieee1905_transport.h>
 #include <mapf/transport/ieee1905_transport_messages.h>
 #include <net/if.h>
-#include <net/if.h>
 #include <netinet/ether.h>
 #include <signal.h>
 #include <sys/ioctl.h>
@@ -253,6 +252,6 @@ protected:
     int HandleLocalBusInterfaceIndication(
         mapf::InterfaceConfigurationIndicationMessage::Metadata *interface_metadata);
 };
-}
+} // namespace mapf
 
 #endif // #ifndef _MAP_DISCOVERY_AGENT_H_

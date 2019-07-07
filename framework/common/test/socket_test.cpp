@@ -34,7 +34,7 @@ public:
     {
         if (cfg)
             cfg_ = SocketTestConfig(*cfg);
-        int rc   = pub_.Connect(kPubAddr);
+        int rc = pub_.Connect(kPubAddr);
         mapf_assert(rc == 0);
         rc = sub_.Connect(kSubAddr);
         mapf_assert(rc == 0);

@@ -27,5 +27,5 @@ public:
                        db &database, task_pool &tasks);
 };
 
-} // namespace son;
+} // namespace son
 #endif

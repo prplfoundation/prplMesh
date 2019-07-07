@@ -589,9 +589,10 @@ void cli_bml::setFunctionsMapAndArray()
                        "Registers a callback function to periodic statistics update from the "
                        "beerocks platform, call with 'x' to unregister the callback ",
                        static_cast<pFunction>(&cli_bml::stat_register_cb_caller), 0, 1, STRING_ARG);
-    insertCommandToMap("bml_events_register_cb", "[<x>]", "Registers a callback function to events "
-                                                          "update from the beerocks platform, call "
-                                                          "with 'x' to unregister the callback ",
+    insertCommandToMap("bml_events_register_cb", "[<x>]",
+                       "Registers a callback function to events "
+                       "update from the beerocks platform, call "
+                       "with 'x' to unregister the callback ",
                        static_cast<pFunction>(&cli_bml::events_register_cb_caller), 0, 1,
                        STRING_ARG);
     insertCommandToMap(
@@ -682,9 +683,9 @@ void cli_bml::setFunctionsMapAndArray()
     insertCommandToMap("bml_wfca_agent", "<string_command>", "send wfca agent <string_command>",
                        static_cast<pFunction>(&cli_bml::bml_wfca_agent_caller), 1, 1, STRING_ARG);
     insertCommandToMap(
-        "bml_trigger_channel_selection",                                // command name
-        "<al_mac (mac format)> <ruid(mac format)>",                     // command args list
-        "trigger channel selection procedure"                           // command description
+        "bml_trigger_channel_selection",            // command name
+        "<al_mac (mac format)> <ruid(mac format)>", // command args list
+        "trigger channel selection procedure"       // command description
         "on agent 'agent_ruid'",
         static_cast<pFunction>(&cli_bml::bml_channel_selection_caller), // caller function
         2, 2,                                                           // min,max args number

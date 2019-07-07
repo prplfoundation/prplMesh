@@ -61,5 +61,5 @@ protected:
     LocalBusInterface bus_;
     Poller poller_;
 };
-};
+}; // namespace mapf
 #endif

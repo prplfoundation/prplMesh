@@ -99,7 +99,7 @@ struct SStaChannelLoadRequest11k {
     uint16_t
         repeats; // '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
     uint16_t
-        rand_ival;     // random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
+        rand_ival; // random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
     uint16_t duration; // measurement duration, expressed in units of TUs [=1024usec]
     SMacAddr sta_mac;
 
@@ -165,7 +165,7 @@ struct SBeaconRequest11k {
     uint16_t
         repeats; // '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
     uint16_t
-        rand_ival;     // random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
+        rand_ival; // random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
     uint16_t duration; // measurement duration, expressed in units of TUs [=1024usec]
     uint16_t reserved1;
     SMacAddr sta_mac;
@@ -252,7 +252,7 @@ struct SStatisticsRequest11k {
         repeats; // '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
 
     uint16_t
-        rand_ival;     // random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
+        rand_ival; // random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
     uint16_t duration; // measurement duration, expressed in units of TUs [=1024usec]
 
     // Optional:

@@ -65,7 +65,6 @@ static void run_dhcp_client(std::future<int> &future, std::string strIface, bool
     // Trigger the DHCP process on the interface
     LOG(DEBUG) << "Running DHCP client on '" << strIface << "'...";
     future = std::async(std::launch::async, [=]() -> int {
-
         std::string strCmd("/sbin/udhcpc -i " + strIface + " -f -n -q");
 
         if (fApplyLease)
@@ -872,10 +871,7 @@ bool main_thread::send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> 
     return send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
 }
 
-bool main_thread::backhaul_fsm_wired(bool &skip_select)
-{
-    return (true);
-}
+bool main_thread::backhaul_fsm_wired(bool &skip_select) { return (true); }
 
 bool main_thread::backhaul_fsm_wireless(bool &skip_select)
 {
@@ -1201,8 +1197,8 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
         if (state_attempts == MAX_FAILED_DHCP_ATTEMPTS) {
             stop_on_failure_attempts--;
             platform_notify_error(BPL_ERR_BH_OBTAINING_DHCP_BRIDGE_INTERFACE_MAX_ATTEMPTS,
-                                  "iface=" + m_sConfig.bridge_iface + ", attempts=" +
-                                      std::to_string(MAX_FAILED_DHCP_ATTEMPTS));
+                                  "iface=" + m_sConfig.bridge_iface +
+                                      ", attempts=" + std::to_string(MAX_FAILED_DHCP_ATTEMPTS));
             stop_on_failure_attempts--;
             FSM_MOVE_STATE(RESTART);
         }
@@ -1363,9 +1359,9 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
             return false;
         }
 
-        std::string mac = network_utils::mac_to_string(request->iface_mac());
-        soc->radio_mac  = mac;
-        soc->freq_type  = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
+        std::string mac            = network_utils::mac_to_string(request->iface_mac());
+        soc->radio_mac             = mac;
+        soc->freq_type             = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
                                                    : beerocks::eFreqType::FREQ_24G);
         soc->controller_discovered = false;
 
@@ -1519,7 +1515,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
                               "message!";
                 break;
             }
-            response->params().result.mac        = request->params().mac;
+            response->params().result.mac = request->params().mac;
             response->params().rx_rssi    = beerocks::RSSI_INVALID;
             response->params().rx_snr     = beerocks::SNR_INVALID;
             response->params().rx_packets = -1;
@@ -1863,8 +1859,8 @@ bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_pt
 
             std::copy_n(msg->params.result.mac.oct, sizeof(msg->params.result.mac.oct),
                         response->params().result.mac.oct);
-            response->params().result.channel       = msg->params.result.channel;
-            response->params().result.rssi          = msg->params.result.rssi;
+            response->params().result.channel    = msg->params.result.channel;
+            response->params().result.rssi       = msg->params.result.rssi;
             response->params().rx_phy_rate_100kb = msg->params.rx_phy_rate_100kb;
             response->params().tx_phy_rate_100kb = msg->params.tx_phy_rate_100kb;
             response->params().rx_rssi           = msg->params.rx_rssi;
@@ -2174,5 +2170,5 @@ std::shared_ptr<bwl::sta_wlan_hal> main_thread::get_wireless_hal(std::string ifa
     return slave_sk->second->sta_wlan_hal;
 }
 
+} // namespace backhaul_manager
 } // namespace beerocks
-} //namespace backhaul_manager

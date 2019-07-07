@@ -287,8 +287,8 @@ void Ieee1905Transport::handle_interface_pollin_event(int fd)
     std::copy_n(eh->ether_dhost, ETH_ALEN, packet.dst);
     std::copy_n(eh->ether_shost, ETH_ALEN, packet.src);
     packet.ether_type = ntohs(eh->ether_type);
-    packet.header = {.iov_base = buf, .iov_len = sizeof(struct ether_header)};
-    packet.payload = {.iov_base = buf + sizeof(struct ether_header),
+    packet.header     = {.iov_base = buf, .iov_len = sizeof(struct ether_header)};
+    packet.payload    = {.iov_base = buf + sizeof(struct ether_header),
                       .iov_len  = len - sizeof(struct ether_header)};
 
     counters_[CounterId::INCOMMING_NETWORK_PACKETS]++;

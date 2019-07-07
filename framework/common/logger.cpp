@@ -222,4 +222,4 @@ std::string Logger::Config::ToEasyLoggingString()
 
     return settings;
 }
-}
+} // namespace mapf

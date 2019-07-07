@@ -35,9 +35,9 @@ class log_levels {
 public:
     typedef std::set<std::string> set_t;
 
-    log_levels()  = default;
-    ~log_levels() = default;
-    log_levels(const log_levels&)  = default;
+    log_levels()                   = default;
+    ~log_levels()                  = default;
+    log_levels(const log_levels &) = default;
     log_levels(const std::set<std::string> &log_levels);
     log_levels(const std::string &log_level_str);
     log_levels &operator=(const log_levels &rhs);
@@ -79,7 +79,7 @@ public:
             std::string module_name = BEEROCKS_LOGGING_MODULE_NAME);
     logging(const beerocks::config_file::SConfigLog &settings, std::string module_name,
             bool cache_settings = false);
-    ~logging()                  = default;
+    ~logging() = default;
 
     void apply_settings();
 

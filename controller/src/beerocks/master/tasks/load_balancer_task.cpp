@@ -354,7 +354,7 @@ void load_balancer_task::work()
                 confine                         = ((!hostap_params.is_5ghz) && sta_is_5ghz);
             }
 
-/*
+            /*
                 auto clients = database.get_node_children(hostap);
 
                 if(clients.size() < most_loaded_hostap_clients.size()){

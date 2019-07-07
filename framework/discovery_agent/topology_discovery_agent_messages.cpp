@@ -704,4 +704,4 @@ int DiscAgent::HandleTopologyNotify(struct topology_notification_format *topolog
     return return_value;
 }
 
-} // namespace mapf::DiscAgent
+} // namespace mapf

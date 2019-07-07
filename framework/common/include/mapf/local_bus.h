@@ -21,6 +21,6 @@ public:
     LocalBusInterface(Context &ctx) : BrokerInterface(ctx, kLocalBusConf) {}
     ~LocalBusInterface() {}
 };
-}
+} // namespace mapf
 
 #endif /* __MAPF_LOCAL_BUS_API_H__ */

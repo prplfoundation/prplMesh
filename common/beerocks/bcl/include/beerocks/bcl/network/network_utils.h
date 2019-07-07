@@ -124,7 +124,7 @@ public:
     static uint16_t icmp_checksum(uint16_t *buf, int32_t len);
 #endif
 };
-}
-}
+} // namespace net
+} // namespace beerocks
 
 #endif //_NETWORK_UTILS_H_

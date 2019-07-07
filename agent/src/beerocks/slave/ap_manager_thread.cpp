@@ -696,7 +696,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 LOG(ERROR) << "Failed building message!";
                 return false;
             }
-            response->params().result.mac        = request->params().mac;
+            response->params().result.mac = request->params().mac;
             response->params().rx_rssi    = beerocks::RSSI_INVALID;
             response->params().rx_snr     = beerocks::SNR_INVALID;
             response->params().rx_packets = -1;
@@ -1063,7 +1063,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
                 break;
             }
 
-            response->params().result.mac               = msg->params.result.mac;
+            response->params().result.mac        = msg->params.result.mac;
             response->params().rx_phy_rate_100kb = msg->params.rx_phy_rate_100kb;
             response->params().tx_phy_rate_100kb = msg->params.tx_phy_rate_100kb;
             response->params().rx_rssi           = msg->params.rx_rssi;
@@ -1186,9 +1186,9 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
         auto msg =
             static_cast<bwl::sACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION *>(data);
         LOG(INFO) << "DFS_EVENT_NOP_FINISHED "
-                  << " channel = " << int(msg->params.channel)
-                  << " bw = " << beerocks::utils::convert_bandwidth_to_int(
-                                     (beerocks::eWiFiBandwidth)msg->params.bandwidth)
+                  << " channel = " << int(msg->params.channel) << " bw = "
+                  << beerocks::utils::convert_bandwidth_to_int(
+                         (beerocks::eWiFiBandwidth)msg->params.bandwidth)
                   << " vht_center_frequency = " << int(msg->params.vht_center_frequency);
 
         auto response = message_com::create_vs_message<

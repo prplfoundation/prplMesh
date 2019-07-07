@@ -141,9 +141,10 @@ int bml_utils_node_to_string(const struct BML_NODE *node, char *buffer, int buff
                 ss << "  Radio[" << std::to_string(i) << "]:"
                    << " Interface: " << node->data.gw_ire.radio[i].iface_name
                    << ", Vendor: " << radio_vendor_to_string(node->data.gw_ire.radio[i].vendor)
-                   << ", Channel: " << (node->data.gw_ire.radio[i].channel != 255
-                                            ? std::to_string(node->data.gw_ire.radio[i].channel)
-                                            : std::string("N/A"))
+                   << ", Channel: "
+                   << (node->data.gw_ire.radio[i].channel != 255
+                           ? std::to_string(node->data.gw_ire.radio[i].channel)
+                           : std::string("N/A"))
                    << ", Bandwidth: "
                    << beerocks::utils::convert_bandwidth_to_int(
                           beerocks::eWiFiBandwidth(node->data.gw_ire.radio[i].bw))
@@ -160,10 +161,10 @@ int bml_utils_node_to_string(const struct BML_NODE *node, char *buffer, int buff
                         network_utils::mac_to_string(node->data.gw_ire.radio[i].vap[j].bssid);
                     if (bssid != network_utils::ZERO_MAC_STRING) {
                         ss << "    VAP[" << std::to_string(j) << "]: "
-                           << "BSSID: " << bssid
-                           << ", SSID: " << ((node->data.gw_ire.radio[i].vap[j].ssid[0])
-                                                 ? node->data.gw_ire.radio[i].vap[j].ssid
-                                                 : std::string("N/A"));
+                           << "BSSID: " << bssid << ", SSID: "
+                           << ((node->data.gw_ire.radio[i].vap[j].ssid[0])
+                                   ? node->data.gw_ire.radio[i].vap[j].ssid
+                                   : std::string("N/A"));
 
                         // New line
                         ss << std::endl;
@@ -188,8 +189,9 @@ int bml_utils_stats_to_string(const struct BML_STATS *stats, char *buffer, int b
 {
     std::stringstream ss;
 
-    ss << "Type: " << node_type_to_string(stats->type) << " (" << int(stats->type) << ")"
-                                                                                      ", MAC: "
+    ss << "Type: " << node_type_to_string(stats->type) << " (" << int(stats->type)
+       << ")"
+          ", MAC: "
        << network_utils::mac_to_string(stats->mac)
        << ", measurement_window_msec: " << std::to_string(stats->measurement_window_msec);
 
@@ -218,8 +220,9 @@ int bml_utils_stats_to_string(const struct BML_STATS *stats, char *buffer, int b
     } else if (stats->type == BML_STAT_TYPE_CLIENT) {
         ss << std::endl
            << "       last_data_uplink_rate: " << std::fixed << std::setprecision(1)
-           << (double(stats->uType.client.last_data_uplink_rate) / 1000000) << " MBit/s"
-                                                                               ", retransmissions: "
+           << (double(stats->uType.client.last_data_uplink_rate) / 1000000)
+           << " MBit/s"
+              ", retransmissions: "
            << std::to_string(stats->uType.client.retransmissions);
     }
 

@@ -17,5 +17,5 @@ template <typename T, typename... Args> std::unique_ptr<T> make_unique(Args &&..
 {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
-}
+} // namespace std
 #endif // _BEEROCKS_BACKPORT_H_

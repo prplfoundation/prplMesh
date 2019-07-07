@@ -45,7 +45,7 @@ uint16_t LOGLEVEL = LOG_LEVEL + 1;
 #ifndef LOG_TYPE
 uint16_t LOGTYPE = SYS_LOG_TYPE_FILE;
 #else
-uint16_t LOGTYPE = LOG_TYPE;
+uint16_t LOGTYPE  = LOG_TYPE;
 #endif
 
 extern ObjList *mapperObjPtr;

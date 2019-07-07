@@ -723,8 +723,9 @@ bool main_thread::wlan_params_changed_check()
         }
         if (std::string(elm.second->security_type).compare(std::string(params.security))) {
             LOG(DEBUG) << "security_type changed, cached=" << std::string(elm.second->security_type)
-                       << ", new=" << std::string(params.security,
-                                                  beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
+                       << ", new="
+                       << std::string(params.security,
+                                      beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
             string_utils::copy_string(elm.second->security_type, params.security,
                                       beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
             wlan_params_changed = true;
@@ -1010,7 +1011,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         // Perform the operation asynchronously
         work_queue.enqueue<void>(
             [this, sd](uint16_t header_id, beerocks_message::sWifiCredentials request) {
-
                 bool fError = false;
 
                 // Apply the SSID & Password locally
@@ -1031,7 +1031,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                     message_com::get_vs_cmdu_size_on_buffer<
                         beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE>();
                 uint8_t tx_buffer[buffer_size];
-                ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
+                ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom,
+                                                  sizeof(tx_buffer) - headroom);
 
                 auto response = message_com::create_vs_message<
                     beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE>(
@@ -1147,7 +1148,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         // Add a job to the async work queue
         work_queue.enqueue<void>([this, iface, iface_operation, sd]() {
-
             bool success = true;
 
             bool is_iface_an_ap_iface = false;
@@ -1204,7 +1204,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         // Add a job to the async work queue
         work_queue.enqueue<void>([this, iface, ssid, pass, sec, sd]() {
-
             int result = bpl_cfg_set_wifi_credentials(iface.c_str(), ssid.c_str(), pass.c_str(),
                                                       sec.c_str());
 
@@ -1248,7 +1247,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         // Add a job to the async work queue
         work_queue.enqueue<void>([this, iface, sd]() {
-
             size_t headroom = sizeof(beerocks::message::sUdsHeader);
             size_t buffer_size =
                 headroom + message_com::get_vs_cmdu_size_on_buffer<
@@ -1292,7 +1290,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         // Perform the operation asynchronously
         work_queue.enqueue<void>(
             [this](uint16_t header_id, bool flag, Socket *sd) {
-
                 bool fError = false;
 
                 std::string iface = get_hostap_iface_name_from_slave_socket(sd);
@@ -1316,7 +1313,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                     message_com::get_vs_cmdu_size_on_buffer<
                         beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE>();
                 uint8_t tx_buffer[buffer_size];
-                ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
+                ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom,
+                                                  sizeof(tx_buffer) - headroom);
 
                 auto response = message_com::create_vs_message<
                     beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE>(
@@ -1465,7 +1463,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         // Add a job to the async work queue
         work_queue.enqueue<void>([this, iface, op, sd]() {
-
             auto success = set_radio_state(iface, op);
 
             size_t headroom = sizeof(beerocks::message::sUdsHeader);

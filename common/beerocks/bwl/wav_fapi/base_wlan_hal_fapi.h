@@ -53,7 +53,7 @@ private:
     fapi_fsm_state m_last_attach_state = fapi_fsm_state::Detach;
 };
 
-} // namespace bwl
 } // namespace wav_fapi
+} // namespace bwl
 
 #endif // _BWL_BASE_WLAN_HAL_FAPI_H_

@@ -183,7 +183,7 @@ bool config_file::read_slave_config_file(std::string config_file_path, sConfigSl
 
     for (int slave_num = 0; slave_num < IRE_MAX_SLAVES; slave_num++) {
         if (slave_num > 0)
-            mandatory_slave     = 0;
+            mandatory_slave = 0;
         tConfig slave_conf_args = {
             std::make_tuple("radio_identifier=", &conf.radio_identifier[slave_num],
                             mandatory_slave),

@@ -261,7 +261,7 @@ static bool getline_interactive(std::string &strBuf)
 
 #ifdef HAVE_READLINE
     const char *buf = nullptr;
-    buf = readline(prompt);
+    buf             = readline(prompt);
     if (buf) {
         strBuf = buf;
         return true;
