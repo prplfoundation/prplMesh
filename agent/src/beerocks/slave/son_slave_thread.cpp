@@ -24,6 +24,7 @@
 
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
+#include <tlvf/wfa_map/tlvChannelPreference.h>
 
 // BPL Error Codes
 #include <bpl/bpl_cfg.h>
@@ -455,13 +456,10 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
     keep_alive_retries = 0;
 
     switch (cmdu_message_type) {
-    /* For Example:
-
-        case ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE :
-        {
-            break;
-        }
-        */
+    case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE: {
+        handle_channel_preference_query_message(sd, cmdu_rx);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
         return false;
@@ -4398,4 +4396,67 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
     }
     return message_com::send_cmdu(master_socket, cmdu_tx, backhaul_params.controller_bridge_mac,
                                   backhaul_params.bridge_mac);
+}
+
+void slave_thread::handle_channel_preference_query_message(Socket *sd,
+                                                           ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    LOG(INFO) << "received CHANNEL_PREFERENCE_QUERY_MESSAGE";
+
+    auto mid = cmdu_rx.getMessageId();
+
+    // build channel preference report
+    auto cmdu_tx_header =
+        cmdu_tx.create(mid, ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE);
+
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type CHANNEL_PREFERENCE_REPORT_MESSAGE, has failed";
+        return;
+    }
+
+    auto channel_preference_tlv = cmdu_tx.addClass<wfa_map::tlvChannelPreference>();
+    if (!channel_preference_tlv) {
+        LOG(ERROR) << "addClass ieee1905_1::tlvChannelPreference has failed";
+        return;
+    }
+
+    channel_preference_tlv->radio_uid() = network_utils::mac_from_string(config.radio_identifier);
+
+    // Create operating class object
+    auto op_class_channels = channel_preference_tlv->create_operating_classes_list();
+    if (!op_class_channels) {
+        LOG(ERROR) << "create_operating_classes_list() has failed!";
+        return;
+    }
+
+    // Fill operating class object
+    op_class_channels->operating_class() = 80; // random operating class for test purpose
+
+    // Fill up channels list in operating class object, with test values
+    for (uint8_t ch = 36; ch < 50; ch += 2) {
+        // allocate 1 channel
+        if (!op_class_channels->alloc_channel_list()) {
+            LOG(ERROR) << "alloc_channel_list() has failed!";
+        }
+        auto channel_idx   = op_class_channels->channel_list_length();
+        auto channel_tuple = op_class_channels->channel_list(channel_idx - 1);
+        if (!std::get<0>(channel_tuple)) {
+            LOG(ERROR) << "getting channel entry has failed!";
+            return;
+        }
+        auto &channel = std::get<1>(channel_tuple);
+        channel       = ch;
+    }
+
+    // Update channel list flags
+    op_class_channels->flags().preference  = 15; // channels preference
+    op_class_channels->flags().reason_code = wfa_map::cOperatingClasses::eReasonCode::UNSPECIFIED;
+
+    // Push operating class object to the list of operating class objects
+    if (!channel_preference_tlv->add_operating_classes_list(op_class_channels)) {
+        LOG(ERROR) << "add_operating_classes_list() has failed!";
+        return;
+    }
+
+    send_cmdu_to_controller(cmdu_tx);
 }
