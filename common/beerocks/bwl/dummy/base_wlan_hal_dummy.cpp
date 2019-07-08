@@ -105,7 +105,13 @@ bool base_wlan_hal_dummy::dummy_send_cmd(const std::string &cmd) { return false;
 
 bool base_wlan_hal_dummy::dummy_send_cmd(const std::string &cmd, char **reply) { return false; }
 
-bool base_wlan_hal_dummy::refresh_radio_info() { return true; }
+bool base_wlan_hal_dummy::refresh_radio_info()
+{
+    if (get_iface_name() == "wlan2") {
+        m_radio_info.is_5ghz = true;
+    }
+    return true;
+}
 
 bool base_wlan_hal_dummy::refresh_vap_info(int vap_id) { return true; }
 
