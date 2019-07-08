@@ -132,3 +132,14 @@ eMessageType CmduMessage::getMessageType()
 
     return (eMessageType)msgValue;
 }
+
+uint16_t CmduMessage::getMessageId()
+{
+    uint16_t mid = getCmduHeader()->message_id();
+
+    if (m_swap && !m_swapped) {
+        swap_16((uint16_t &)mid);
+    }
+
+    return mid;
+}

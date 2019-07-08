@@ -70,6 +70,7 @@ public:
     bool is_finalized() const { return m_finalized; };
     bool is_swapped() const { return m_swapped; };
     eMessageType getMessageType();
+    uint16_t getMessageId();
 
 protected:
     void reset();
