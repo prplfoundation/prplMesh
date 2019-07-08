@@ -229,9 +229,10 @@ bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std:
     net::network_utils::mac_from_string(msg.metadata()->src, src_mac);
     net::network_utils::mac_from_string(msg.metadata()->dst, dst_mac);
 
-    msg.metadata()->ether_type = ETH_P_1905_1;
-    msg.metadata()->length     = length;
-    msg.metadata()->msg_type   = static_cast<uint16_t>(cmdu.getMessageType());
+    msg.metadata()->ether_type        = ETH_P_1905_1;
+    msg.metadata()->length            = length;
+    msg.metadata()->msg_type          = static_cast<uint16_t>(cmdu.getMessageType());
+    msg.metadata()->preset_message_id = cmdu.getMessageId() ? 1 : 0;
 
     std::copy_n((uint8_t *)cmdu.getMessageBuff(), msg.metadata()->length, (uint8_t *)msg.data());
     return bus->publisher().Send(msg);
