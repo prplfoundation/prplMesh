@@ -15,8 +15,8 @@ _multi_class_auto_insert:
 ###FIXME temp###
 cACTION_APMANAGER_4ADDR_STA_JOINED:
   _type: class
-  src_mac: beerocks::net::sMacAddr
-  dst_mac: beerocks::net::sMacAddr
+  src_mac: sMacAddr
+  dst_mac: sMacAddr
 ################
  
 cACTION_APMANAGER_JOINED_NOTIFICATION:
@@ -84,11 +84,11 @@ cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION:
 
 cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
 
 cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
 
 cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST:
   _type: class
@@ -108,7 +108,7 @@ cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION:
 
 cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   vap_id: int8_t
   type: uint32_t
   reason: uint32_t
@@ -119,12 +119,12 @@ cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE:
 
 cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   reject_sta: uint8_t
 
 cACTION_APMANAGER_CLIENT_ALLOW_REQUEST:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   ipv4: beerocks::net::sIpv4Addr
 
 cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST:
@@ -137,7 +137,7 @@ cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE:
 
 cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
 
 cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST:
   _type: class
@@ -149,7 +149,7 @@ cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE:
 
 cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
 
 cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST:
   _type: class

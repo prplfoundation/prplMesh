@@ -16,7 +16,7 @@
 #include <cstddef>
 #include <stdint.h>
 #include <tlvf/swap.h>
-#include "tlvf/common/sMacAddress.h"
+#include "tlvf/common/sMacAddr.h"
 
 namespace ieee1905_1 {
 
@@ -29,7 +29,7 @@ enum eRole: uint8_t {
 };
 
 typedef struct s802_11SpecificInformation {
-    sMacAddress network_membership;
+    sMacAddr network_membership;
     eRole role;
     //Hex value of dot11CurrentChannelBandwidth
     uint8_t ap_channel_band;

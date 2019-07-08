@@ -53,7 +53,7 @@ cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION:
   _type: class
   dhcp_op: eDHCPOp
   op: uint32_t 
-  mac: beerocks::net::sMacAddr 
+  mac: sMacAddr 
   ipv4: beerocks::net::sIpv4Addr 
   hostname: 
     _type: char 

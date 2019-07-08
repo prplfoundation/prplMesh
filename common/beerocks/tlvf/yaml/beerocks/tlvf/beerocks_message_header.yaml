@@ -21,7 +21,7 @@ cACTION_HEADER:
   direction: 
     _type: uint8_t
     _value: 1 #BEEROCKS_DIRECTION_AGENT
-  radio_mac: beerocks::net::sMacAddr
+  radio_mac: sMacAddr
   last:
     _type: uint8_t
     _value: 0

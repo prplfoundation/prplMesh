@@ -58,50 +58,50 @@ int main(int argc, char *argv[])
         true); //false is returned in case that there isn't enough space on the buffer for the allocation
 
     auto first_mac = firstTlv->mac_non_1905_device(
-        0); //get the first mac address struct in this tlv. returns a <bool,sMacAddress&> collection.
+        0); //get the first mac address struct in this tlv. returns a <bool,sMacAddr&> collection.
     bool isExist = std::get<0>(
         first_mac); //checking the first parameter, boolean, if the address in this index exists
     if (isExist) {
         auto &address =
             std::get<1>(first_mac); //knowing that the address exists, get the address struct
-        address.mac[0] = 0x00;
-        address.mac[1] = 0x01;
-        address.mac[2] = 0x02;
-        address.mac[3] = 0x03;
-        address.mac[4] = 0x04;
-        address.mac[5] = 0x05;
-        MAPF_INFO("WRITE 1 : " << (int)address.mac[3]);
+        address.oct[0] = 0x00;
+        address.oct[1] = 0x01;
+        address.oct[2] = 0x02;
+        address.oct[3] = 0x03;
+        address.oct[4] = 0x04;
+        address.oct[5] = 0x05;
+        MAPF_INFO("WRITE 1 : " << (int)address.oct[3]);
     }
 
     auto second_mac = firstTlv->mac_non_1905_device(
-        1); //get the second mac address struct in this tlv. returns a bool-sMacAddress& collection.
+        1); //get the second mac address struct in this tlv. returns a bool-sMacAddr& collection.
     isExist = std::get<0>(
         second_mac); //checking the first parameter, boolean, if the address in this index exists
     if (isExist) {
         auto &address =
             std::get<1>(second_mac); //knowing that the address exists, get the address struct
-        address.mac[0] = 0x05;
-        address.mac[1] = 0x05;
-        address.mac[2] = 0x05;
-        address.mac[3] = 0x05;
-        address.mac[4] = 0x05;
-        address.mac[5] = 0x05;
-        MAPF_INFO("WRITE 2 : " << (int)address.mac[3]);
+        address.oct[0] = 0x05;
+        address.oct[1] = 0x05;
+        address.oct[2] = 0x05;
+        address.oct[3] = 0x05;
+        address.oct[4] = 0x05;
+        address.oct[5] = 0x05;
+        MAPF_INFO("WRITE 2 : " << (int)address.oct[3]);
     }
 
     auto third_mac = firstTlv->mac_non_1905_device(
-        2); //get the third mac address struct in this tlv. returns a bool-sMacAddress& collection.
+        2); //get the third mac address struct in this tlv. returns a bool-sMacAddr& collection.
     isExist = std::get<0>(
         third_mac); //checking the first parameter, boolean, if the address in this index exists
     if (isExist) {
         auto &address =
             std::get<1>(third_mac); //knowing that the address exists, get the address struct
-        address.mac[0] = 0xFF;
-        address.mac[1] = 0xFF;
-        address.mac[2] = 0xFF;
-        address.mac[3] = 0xFF;
-        address.mac[4] = 0xFF;
-        address.mac[5] = 0xFF;
+        address.oct[0] = 0xFF;
+        address.oct[1] = 0xFF;
+        address.oct[2] = 0xFF;
+        address.oct[3] = 0xFF;
+        address.oct[4] = 0xFF;
+        address.oct[5] = 0xFF;
 
         // Remove "unused variable" warning
         (void)address;
@@ -148,20 +148,20 @@ int main(int argc, char *argv[])
         //tlv1->alloc_mac_non_1905_device(3);
 
         auto mac2 = tlv1->mac_non_1905_device(
-            2); //get the second mac address struct in this tlv. returns a bool-sMacAddress& collection.
+            2); //get the second mac address struct in this tlv. returns a bool-sMacAddr& collection.
         isExist = std::get<0>(
             mac2); //checking the first parameter, boolean, if the address in this index exists
         if (isExist) {
             auto address =
                 std::get<1>(mac2); //knowing that the address exists, get the address struct
-                                   /*       address.mac[0] = 0x05;
-            address.mac[1] = 0x05;
-            address.mac[2] = 0x05;
-            address.mac[3] = 0x05;
-            address.mac[4] = 0x05;
-            address.mac[5] = 0x05;*/
+                                   /*       address.oct[0] = 0x05;
+            address.oct[1] = 0x05;
+            address.oct[2] = 0x05;
+            address.oct[3] = 0x05;
+            address.oct[4] = 0x05;
+            address.oct[5] = 0x05;*/
 
-            std::cout << "ADDRESS IS " << (int)address.mac[0] << std::endl;
+            std::cout << "ADDRESS IS " << (int)address.oct[0] << std::endl;
         } else {
             MAPF_ERR("TLV DOES NOT EXIST");
             errors++;

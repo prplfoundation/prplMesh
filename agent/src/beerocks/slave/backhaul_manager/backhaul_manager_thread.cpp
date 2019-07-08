@@ -817,7 +817,7 @@ bool main_thread::send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> 
         LOG(ERROR) << "addClass ieee1905_1::tlvAlMacAddressType failed";
         return false;
     }
-    network_utils::mac_from_string(tlvAlMacAddressType->mac().mac, bridge_info.mac);
+    network_utils::mac_from_string(tlvAlMacAddressType->mac().oct, bridge_info.mac);
 
     auto tlvSearchedRole = cmdu_tx.addClass<ieee1905_1::tlvSearchedRole>();
     if (!tlvSearchedRole) {

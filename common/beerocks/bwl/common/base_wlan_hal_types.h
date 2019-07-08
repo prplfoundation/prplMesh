@@ -111,7 +111,7 @@ typedef struct {
 
 typedef struct {
     uint32_t disconnect_reason;
-    beerocks::net::sMacAddr bssid;
+    sMacAddr bssid;
 } sACTION_BACKHAUL_DISCONNECT_REASON_NOTIFICATION;
 
 typedef struct {
@@ -157,8 +157,8 @@ typedef struct {
 } sACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE;
 
 typedef struct {
-    beerocks::net::sMacAddr client_mac;
-    beerocks::net::sMacAddr bssid;
+    sMacAddr client_mac;
+    sMacAddr bssid;
     uint8_t rx_snr;
     uint8_t blocked;   // True if response blocked.
     uint8_t broadcast; // True if broadcast probe.
@@ -169,8 +169,8 @@ typedef struct {
 } sACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION;
 
 typedef struct {
-    beerocks::net::sMacAddr client_mac;
-    beerocks::net::sMacAddr bssid;
+    sMacAddr client_mac;
+    sMacAddr bssid;
     uint8_t rx_snr;
     uint8_t reason;
     uint8_t blocked; // True if response blocked.
@@ -182,7 +182,7 @@ typedef struct {
 } sACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION;
 
 typedef struct {
-    beerocks::net::sMacAddr mac;
+    sMacAddr mac;
     beerocks::message::sRadioCapabilities capabilities;
     int8_t vap_id;
     uint8_t reserved1;
@@ -191,7 +191,7 @@ typedef struct {
 } sClientAssociationParams;
 
 typedef struct {
-    beerocks::net::sMacAddr mac;
+    sMacAddr mac;
     int8_t vap_id;
     uint8_t reason;
     uint8_t source;
@@ -207,7 +207,7 @@ typedef struct {
 } sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION;
 
 typedef struct {
-    beerocks::net::sMacAddr mac;
+    sMacAddr mac;
     uint8_t status_code;
     uint8_t reserved1;
     uint8_t reserved2;

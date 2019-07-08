@@ -281,8 +281,8 @@ bool cACTION_BACKHAUL_ENABLE::set_bridge_iface(char str[], size_t size) {
     m_bridge_iface[size] = '\0';
     return true;
 }
-beerocks::net::sMacAddr& cACTION_BACKHAUL_ENABLE::iface_mac() {
-    return (beerocks::net::sMacAddr&)(*m_iface_mac);
+sMacAddr& cACTION_BACKHAUL_ENABLE::iface_mac() {
+    return (sMacAddr&)(*m_iface_mac);
 }
 
 uint8_t& cACTION_BACKHAUL_ENABLE::iface_is_5ghz() {
@@ -478,8 +478,8 @@ uint32_t& cACTION_BACKHAUL_ENABLE::security_type() {
     return (uint32_t&)(*m_security_type);
 }
 
-beerocks::net::sMacAddr& cACTION_BACKHAUL_ENABLE::preferred_bssid() {
-    return (beerocks::net::sMacAddr&)(*m_preferred_bssid);
+sMacAddr& cACTION_BACKHAUL_ENABLE::preferred_bssid() {
+    return (sMacAddr&)(*m_preferred_bssid);
 }
 
 uint8_t& cACTION_BACKHAUL_ENABLE::wire_iface_type() {
@@ -505,7 +505,7 @@ size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
 {
     size_t class_size = 0;
     class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // bridge_iface
-    class_size += sizeof(beerocks::net::sMacAddr); // iface_mac
+    class_size += sizeof(sMacAddr); // iface_mac
     class_size += sizeof(uint8_t); // iface_is_5ghz
     class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // wire_iface
     class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // sta_iface
@@ -513,7 +513,7 @@ size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
     class_size += beerocks::message::WIFI_SSID_MAX_LENGTH * sizeof(char); // ssid
     class_size += beerocks::message::WIFI_PASS_MAX_LENGTH * sizeof(char); // pass
     class_size += sizeof(uint32_t); // security_type
-    class_size += sizeof(beerocks::net::sMacAddr); // preferred_bssid
+    class_size += sizeof(sMacAddr); // preferred_bssid
     class_size += sizeof(uint8_t); // wire_iface_type
     class_size += sizeof(uint8_t); // wireless_iface_type
     class_size += sizeof(uint8_t); // wired_backhaul
@@ -529,8 +529,8 @@ bool cACTION_BACKHAUL_ENABLE::init()
     m_bridge_iface = (char*)m_buff_ptr__;
     m_buff_ptr__ += (sizeof(char) * beerocks::message::IFACE_NAME_LENGTH);
     m_bridge_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
-    m_iface_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_iface_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_iface_mac->struct_init(); }
     m_iface_is_5ghz = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
@@ -551,8 +551,8 @@ bool cACTION_BACKHAUL_ENABLE::init()
     m_pass_idx__  = beerocks::message::WIFI_PASS_MAX_LENGTH;
     m_security_type = (uint32_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
-    m_preferred_bssid = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_preferred_bssid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_preferred_bssid->struct_init(); }
     m_wire_iface_type = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
@@ -780,8 +780,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_BACKHAUL_4ADDR_CONNECTED::~cACTION_BACKHAUL_4ADDR_CONNECTED() {
 }
-beerocks::net::sMacAddr& cACTION_BACKHAUL_4ADDR_CONNECTED::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_BACKHAUL_4ADDR_CONNECTED::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void cACTION_BACKHAUL_4ADDR_CONNECTED::class_swap()
@@ -792,7 +792,7 @@ void cACTION_BACKHAUL_4ADDR_CONNECTED::class_swap()
 size_t cACTION_BACKHAUL_4ADDR_CONNECTED::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -802,8 +802,8 @@ bool cACTION_BACKHAUL_4ADDR_CONNECTED::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -994,8 +994,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::~cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE() {
 }
-beerocks::net::sMacAddr& cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::class_swap()
@@ -1006,7 +1006,7 @@ void cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::class_swap()
 size_t cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -1016,8 +1016,8 @@ bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

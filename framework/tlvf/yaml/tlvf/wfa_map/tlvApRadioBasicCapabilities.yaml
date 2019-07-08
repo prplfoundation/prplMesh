@@ -9,7 +9,7 @@ tlvApRadioBasicCapabilities:
     _type: eTlvTypeMap
     _value_const: TLV_AP_RADIO_BASIC_CAPABILITIES
   length: uint16_t
-  radio_uid: sMacAddress
+  radio_uid: sMacAddr
   maximum_number_of_bsss_supported: uint8_t
   operating_classes_info_list_length:
     _type: uint8_t

@@ -226,7 +226,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
     auto tlvAlMacAddressType = cmdu_rx.addClass<ieee1905_1::tlvAlMacAddressType>();
     if (tlvAlMacAddressType) {
         al_mac =
-            network_utils::mac_to_string((const unsigned char *)tlvAlMacAddressType->mac().mac);
+            network_utils::mac_to_string((const unsigned char *)tlvAlMacAddressType->mac().oct);
         LOG(DEBUG) << "mac=" << al_mac;
     } else {
         LOG(ERROR) << "tlvAlMacAddressType missing - ignoring autconfig search message";
@@ -398,7 +398,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
 
-    std::copy_n(tlvWscM1->M1Frame().mac_attr.data.mac, beerocks::net::MAC_ADDR_LEN,
+    std::copy_n(tlvWscM1->M1Frame().mac_attr.data.oct, beerocks::net::MAC_ADDR_LEN,
                 beerocks_header->radio_mac().oct);
     LOG(INFO) << "Handle slave join, radio mac "
               << network_utils::mac_to_string(beerocks_header->radio_mac());

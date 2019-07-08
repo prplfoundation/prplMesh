@@ -33,8 +33,8 @@ const uint16_t& tlvAlMacAddressType::length() {
     return (const uint16_t&)(*m_length);
 }
 
-sMacAddress& tlvAlMacAddressType::mac() {
-    return (sMacAddress&)(*m_mac);
+sMacAddr& tlvAlMacAddressType::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void tlvAlMacAddressType::class_swap()
@@ -48,7 +48,7 @@ size_t tlvAlMacAddressType::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(eTlvType); // type
     class_size += sizeof(uint16_t); // length
-    class_size += sizeof(sMacAddress); // mac
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -70,9 +70,9 @@ bool tlvAlMacAddressType::init()
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
-    m_mac = (sMacAddress*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddress) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddress); }
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

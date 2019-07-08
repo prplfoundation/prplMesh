@@ -20,7 +20,7 @@
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
-#include "tlvf/common/sMacAddress.h"
+#include "tlvf/common/sMacAddr.h"
 #include <tuple>
 
 namespace ieee1905_1 {
@@ -35,8 +35,8 @@ class tlvNon1905neighborDeviceList : public BaseClass
 
         const eTlvType& type();
         const uint16_t& length();
-        sMacAddress& mac_local_iface();
-        std::tuple<bool, sMacAddress&> mac_non_1905_device(size_t idx);
+        sMacAddr& mac_local_iface();
+        std::tuple<bool, sMacAddr&> mac_non_1905_device(size_t idx);
         bool alloc_mac_non_1905_device(size_t count = 1);
         void class_swap();
         static size_t get_initial_size();
@@ -45,8 +45,8 @@ class tlvNon1905neighborDeviceList : public BaseClass
         bool init();
         eTlvType* m_type = nullptr;
         uint16_t* m_length = nullptr;
-        sMacAddress* m_mac_local_iface = nullptr;
-        sMacAddress* m_mac_non_1905_device = nullptr;
+        sMacAddr* m_mac_local_iface = nullptr;
+        sMacAddr* m_mac_non_1905_device = nullptr;
         size_t m_mac_non_1905_device_idx__ = 0;
 };
 

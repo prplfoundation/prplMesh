@@ -37,7 +37,7 @@ cACTION_BACKHAUL_ENABLE:
   bridge_iface:
     _type: char
     _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
-  iface_mac: beerocks::net::sMacAddr
+  iface_mac: sMacAddr
   iface_is_5ghz: uint8_t
   wire_iface:
     _type: char
@@ -55,7 +55,7 @@ cACTION_BACKHAUL_ENABLE:
     _type: char
     _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
   security_type: uint32_t # bwl::sta_wlan_hal::Security
-  preferred_bssid: beerocks::net::sMacAddr
+  preferred_bssid: sMacAddr
   wire_iface_type: uint8_t  
   wireless_iface_type: uint8_t  
   wired_backhaul: uint8_t  
@@ -81,7 +81,7 @@ cACTION_BACKHAUL_RESET:
 
 cACTION_BACKHAUL_4ADDR_CONNECTED:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
 
 cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION:
   _type: class
@@ -101,4 +101,4 @@ cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE:
 
 cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr

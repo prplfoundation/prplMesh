@@ -159,7 +159,7 @@ uint8_t& cMacList::mac_list_length() {
     return (uint8_t&)(*m_mac_list_length);
 }
 
-std::tuple<bool, sMacAddress&> cMacList::mac_list(size_t idx) {
+std::tuple<bool, sMacAddr&> cMacList::mac_list(size_t idx) {
     bool ret_success = ( (m_mac_list_idx__ > 0) && (m_mac_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
     if (!ret_success) {
@@ -173,7 +173,7 @@ bool cMacList::alloc_mac_list(size_t count) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
-    size_t len = sizeof(sMacAddress) * count;
+    size_t len = sizeof(sMacAddr) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
@@ -211,9 +211,9 @@ bool cMacList::init()
     m_mac_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_mac_list_length = 0;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
-    m_mac_list = (sMacAddress*)m_buff_ptr__;
+    m_mac_list = (sMacAddr*)m_buff_ptr__;
     m_mac_list_idx__ = *m_mac_list_length;
-    m_buff_ptr__ += sizeof(sMacAddress)*(*m_mac_list_length);
+    m_buff_ptr__ += sizeof(sMacAddr)*(*m_mac_list_length);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;

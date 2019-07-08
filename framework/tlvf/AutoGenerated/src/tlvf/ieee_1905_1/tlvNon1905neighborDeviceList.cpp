@@ -33,11 +33,11 @@ const uint16_t& tlvNon1905neighborDeviceList::length() {
     return (const uint16_t&)(*m_length);
 }
 
-sMacAddress& tlvNon1905neighborDeviceList::mac_local_iface() {
-    return (sMacAddress&)(*m_mac_local_iface);
+sMacAddr& tlvNon1905neighborDeviceList::mac_local_iface() {
+    return (sMacAddr&)(*m_mac_local_iface);
 }
 
-std::tuple<bool, sMacAddress&> tlvNon1905neighborDeviceList::mac_non_1905_device(size_t idx) {
+std::tuple<bool, sMacAddr&> tlvNon1905neighborDeviceList::mac_non_1905_device(size_t idx) {
     bool ret_success = ( (m_mac_non_1905_device_idx__ > 0) && (m_mac_non_1905_device_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
     if (!ret_success) {
@@ -51,7 +51,7 @@ bool tlvNon1905neighborDeviceList::alloc_mac_non_1905_device(size_t count) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
-    size_t len = sizeof(sMacAddress) * count;
+    size_t len = sizeof(sMacAddr) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
@@ -80,7 +80,7 @@ size_t tlvNon1905neighborDeviceList::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(eTlvType); // type
     class_size += sizeof(uint16_t); // length
-    class_size += sizeof(sMacAddress); // mac_local_iface
+    class_size += sizeof(sMacAddr); // mac_local_iface
     return class_size;
 }
 
@@ -102,16 +102,16 @@ bool tlvNon1905neighborDeviceList::init()
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
-    m_mac_local_iface = (sMacAddress*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddress) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddress); }
+    m_mac_local_iface = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_mac_local_iface->struct_init(); }
-    m_mac_non_1905_device = (sMacAddress*)m_buff_ptr__;
+    m_mac_non_1905_device = (sMacAddr*)m_buff_ptr__;
     if (m_length && m_parse__) {
         size_t len = *m_length;
         if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
         len -= (m_buff_ptr__ - kMinimumLength - m_buff__);
-        m_mac_non_1905_device_idx__ = len/sizeof(sMacAddress);
+        m_mac_non_1905_device_idx__ = len/sizeof(sMacAddr);
         m_buff_ptr__ += len;
     }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {

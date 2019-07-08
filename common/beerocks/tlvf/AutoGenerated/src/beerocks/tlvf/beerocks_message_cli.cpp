@@ -332,12 +332,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::~cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::hostap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_hostap_mac);
+sMacAddr& cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::hostap_mac() {
+    return (sMacAddr&)(*m_hostap_mac);
 }
 
 uint16_t& cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::center_frequency() {
@@ -354,8 +354,8 @@ void cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::class_swap()
 size_t cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // hostap_mac
+    class_size += sizeof(sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // hostap_mac
     class_size += sizeof(uint16_t); // center_frequency
     return class_size;
 }
@@ -366,11 +366,11 @@ bool cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
-    m_hostap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_hostap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_hostap_mac->struct_init(); }
     m_center_frequency = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_center_frequency = 0x0;
@@ -393,8 +393,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_OPTIMAL_PATH_TASK::~cACTION_CLI_OPTIMAL_PATH_TASK() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_OPTIMAL_PATH_TASK::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_CLI_OPTIMAL_PATH_TASK::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
 void cACTION_CLI_OPTIMAL_PATH_TASK::class_swap()
@@ -405,7 +405,7 @@ void cACTION_CLI_OPTIMAL_PATH_TASK::class_swap()
 size_t cACTION_CLI_OPTIMAL_PATH_TASK::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // client_mac
     return class_size;
 }
 
@@ -415,8 +415,8 @@ bool cACTION_CLI_OPTIMAL_PATH_TASK::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -436,8 +436,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_LOAD_BALANCER_TASK::~cACTION_CLI_LOAD_BALANCER_TASK() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_LOAD_BALANCER_TASK::ap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_ap_mac);
+sMacAddr& cACTION_CLI_LOAD_BALANCER_TASK::ap_mac() {
+    return (sMacAddr&)(*m_ap_mac);
 }
 
 void cACTION_CLI_LOAD_BALANCER_TASK::class_swap()
@@ -448,7 +448,7 @@ void cACTION_CLI_LOAD_BALANCER_TASK::class_swap()
 size_t cACTION_CLI_LOAD_BALANCER_TASK::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // ap_mac
+    class_size += sizeof(sMacAddr); // ap_mac
     return class_size;
 }
 
@@ -458,8 +458,8 @@ bool cACTION_CLI_LOAD_BALANCER_TASK::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_ap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_ap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_ap_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -513,8 +513,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_DUMP_NODE_INFO::~cACTION_CLI_DUMP_NODE_INFO() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_DUMP_NODE_INFO::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_CLI_DUMP_NODE_INFO::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void cACTION_CLI_DUMP_NODE_INFO::class_swap()
@@ -525,7 +525,7 @@ void cACTION_CLI_DUMP_NODE_INFO::class_swap()
 size_t cACTION_CLI_DUMP_NODE_INFO::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -535,8 +535,8 @@ bool cACTION_CLI_DUMP_NODE_INFO::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -556,8 +556,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_PING_SLAVE_REQUEST::~cACTION_CLI_PING_SLAVE_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_PING_SLAVE_REQUEST::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_CLI_PING_SLAVE_REQUEST::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 uint16_t& cACTION_CLI_PING_SLAVE_REQUEST::num_of_req() {
@@ -578,7 +578,7 @@ void cACTION_CLI_PING_SLAVE_REQUEST::class_swap()
 size_t cACTION_CLI_PING_SLAVE_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     class_size += sizeof(uint16_t); // num_of_req
     class_size += sizeof(uint16_t); // size
     return class_size;
@@ -590,8 +590,8 @@ bool cACTION_CLI_PING_SLAVE_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     m_num_of_req = (uint16_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
@@ -665,8 +665,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_BACKHAUL_SCAN_RESULTS::~cACTION_CLI_BACKHAUL_SCAN_RESULTS() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_BACKHAUL_SCAN_RESULTS::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_CLI_BACKHAUL_SCAN_RESULTS::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void cACTION_CLI_BACKHAUL_SCAN_RESULTS::class_swap()
@@ -677,7 +677,7 @@ void cACTION_CLI_BACKHAUL_SCAN_RESULTS::class_swap()
 size_t cACTION_CLI_BACKHAUL_SCAN_RESULTS::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -687,8 +687,8 @@ bool cACTION_CLI_BACKHAUL_SCAN_RESULTS::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -708,12 +708,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_BACKHAUL_ROAM_REQUEST::~cACTION_CLI_BACKHAUL_ROAM_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_BACKHAUL_ROAM_REQUEST::slave_mac() {
-    return (beerocks::net::sMacAddr&)(*m_slave_mac);
+sMacAddr& cACTION_CLI_BACKHAUL_ROAM_REQUEST::slave_mac() {
+    return (sMacAddr&)(*m_slave_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_BACKHAUL_ROAM_REQUEST::bssid() {
-    return (beerocks::net::sMacAddr&)(*m_bssid);
+sMacAddr& cACTION_CLI_BACKHAUL_ROAM_REQUEST::bssid() {
+    return (sMacAddr&)(*m_bssid);
 }
 
 void cACTION_CLI_BACKHAUL_ROAM_REQUEST::class_swap()
@@ -725,8 +725,8 @@ void cACTION_CLI_BACKHAUL_ROAM_REQUEST::class_swap()
 size_t cACTION_CLI_BACKHAUL_ROAM_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // slave_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // bssid
+    class_size += sizeof(sMacAddr); // slave_mac
+    class_size += sizeof(sMacAddr); // bssid
     return class_size;
 }
 
@@ -736,11 +736,11 @@ bool cACTION_CLI_BACKHAUL_ROAM_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_slave_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_slave_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_slave_mac->struct_init(); }
-    m_bssid = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_bssid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_bssid->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -760,12 +760,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_CLIENT_ALLOW_REQUEST::~cACTION_CLI_CLIENT_ALLOW_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_ALLOW_REQUEST::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_CLI_CLIENT_ALLOW_REQUEST::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_ALLOW_REQUEST::hostap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_hostap_mac);
+sMacAddr& cACTION_CLI_CLIENT_ALLOW_REQUEST::hostap_mac() {
+    return (sMacAddr&)(*m_hostap_mac);
 }
 
 void cACTION_CLI_CLIENT_ALLOW_REQUEST::class_swap()
@@ -777,8 +777,8 @@ void cACTION_CLI_CLIENT_ALLOW_REQUEST::class_swap()
 size_t cACTION_CLI_CLIENT_ALLOW_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // hostap_mac
+    class_size += sizeof(sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // hostap_mac
     return class_size;
 }
 
@@ -788,11 +788,11 @@ bool cACTION_CLI_CLIENT_ALLOW_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
-    m_hostap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_hostap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_hostap_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -812,12 +812,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_CLIENT_DISALLOW_REQUEST::~cACTION_CLI_CLIENT_DISALLOW_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_DISALLOW_REQUEST::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_CLI_CLIENT_DISALLOW_REQUEST::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_DISALLOW_REQUEST::hostap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_hostap_mac);
+sMacAddr& cACTION_CLI_CLIENT_DISALLOW_REQUEST::hostap_mac() {
+    return (sMacAddr&)(*m_hostap_mac);
 }
 
 void cACTION_CLI_CLIENT_DISALLOW_REQUEST::class_swap()
@@ -829,8 +829,8 @@ void cACTION_CLI_CLIENT_DISALLOW_REQUEST::class_swap()
 size_t cACTION_CLI_CLIENT_DISALLOW_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // hostap_mac
+    class_size += sizeof(sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // hostap_mac
     return class_size;
 }
 
@@ -840,11 +840,11 @@ bool cACTION_CLI_CLIENT_DISALLOW_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
-    m_hostap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_hostap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_hostap_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -864,8 +864,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_CLIENT_DISCONNECT_REQUEST::~cACTION_CLI_CLIENT_DISCONNECT_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
 uint32_t& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::type() {
@@ -886,7 +886,7 @@ void cACTION_CLI_CLIENT_DISCONNECT_REQUEST::class_swap()
 size_t cACTION_CLI_CLIENT_DISCONNECT_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // client_mac
     class_size += sizeof(uint32_t); // type
     class_size += sizeof(uint32_t); // reason
     return class_size;
@@ -898,8 +898,8 @@ bool cACTION_CLI_CLIENT_DISCONNECT_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
     m_type = (uint32_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
@@ -923,12 +923,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_CLIENT_BSS_STEER_REQUEST::~cACTION_CLI_CLIENT_BSS_STEER_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_BSS_STEER_REQUEST::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_CLI_CLIENT_BSS_STEER_REQUEST::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_BSS_STEER_REQUEST::bssid() {
-    return (beerocks::net::sMacAddr&)(*m_bssid);
+sMacAddr& cACTION_CLI_CLIENT_BSS_STEER_REQUEST::bssid() {
+    return (sMacAddr&)(*m_bssid);
 }
 
 uint32_t& cACTION_CLI_CLIENT_BSS_STEER_REQUEST::disassoc_timer() {
@@ -945,8 +945,8 @@ void cACTION_CLI_CLIENT_BSS_STEER_REQUEST::class_swap()
 size_t cACTION_CLI_CLIENT_BSS_STEER_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // bssid
+    class_size += sizeof(sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // bssid
     class_size += sizeof(uint32_t); // disassoc_timer
     return class_size;
 }
@@ -957,11 +957,11 @@ bool cACTION_CLI_CLIENT_BSS_STEER_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
-    m_bssid = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_bssid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_bssid->struct_init(); }
     m_disassoc_timer = (uint32_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
@@ -983,12 +983,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::~cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::hostap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_hostap_mac);
+sMacAddr& cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::hostap_mac() {
+    return (sMacAddr&)(*m_hostap_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
 void cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::class_swap()
@@ -1000,8 +1000,8 @@ void cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::class_swap()
 size_t cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // hostap_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // hostap_mac
+    class_size += sizeof(sMacAddr); // client_mac
     return class_size;
 }
 
@@ -1011,11 +1011,11 @@ bool cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_hostap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_hostap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_hostap_mac->struct_init(); }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -1035,12 +1035,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::~cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::hostap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_hostap_mac);
+sMacAddr& cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::hostap_mac() {
+    return (sMacAddr&)(*m_hostap_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
 uint8_t& cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::channel() {
@@ -1056,8 +1056,8 @@ void cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::class_swap()
 size_t cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // hostap_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // hostap_mac
+    class_size += sizeof(sMacAddr); // client_mac
     class_size += sizeof(uint8_t); // channel
     return class_size;
 }
@@ -1068,11 +1068,11 @@ bool cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_hostap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_hostap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_hostap_mac->struct_init(); }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
     m_channel = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
@@ -1094,12 +1094,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_CLIENT_BEACON_11K_REQUEST::~cACTION_CLI_CLIENT_BEACON_11K_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_BEACON_11K_REQUEST::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_CLI_CLIENT_BEACON_11K_REQUEST::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_BEACON_11K_REQUEST::bssid() {
-    return (beerocks::net::sMacAddr&)(*m_bssid);
+sMacAddr& cACTION_CLI_CLIENT_BEACON_11K_REQUEST::bssid() {
+    return (sMacAddr&)(*m_bssid);
 }
 
 std::tuple<bool, uint8_t&> cACTION_CLI_CLIENT_BEACON_11K_REQUEST::ssid(size_t idx) {
@@ -1152,8 +1152,8 @@ void cACTION_CLI_CLIENT_BEACON_11K_REQUEST::class_swap()
 size_t cACTION_CLI_CLIENT_BEACON_11K_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // bssid
+    class_size += sizeof(sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // bssid
     class_size += beerocks::message::WIFI_SSID_MAX_LENGTH * sizeof(uint8_t); // ssid
     class_size += sizeof(uint8_t); // use_optional_ssid
     class_size += sizeof(uint8_t); // channel
@@ -1171,11 +1171,11 @@ bool cACTION_CLI_CLIENT_BEACON_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
-    m_bssid = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_bssid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_bssid->struct_init(); }
     m_ssid = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += (sizeof(uint8_t) * beerocks::message::WIFI_SSID_MAX_LENGTH);
@@ -1212,16 +1212,16 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::~cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::hostap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_hostap_mac);
+sMacAddr& cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::hostap_mac() {
+    return (sMacAddr&)(*m_hostap_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::peer_mac() {
-    return (beerocks::net::sMacAddr&)(*m_peer_mac);
+sMacAddr& cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::peer_mac() {
+    return (sMacAddr&)(*m_peer_mac);
 }
 
 uint8_t& cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::group_identity() {
@@ -1238,9 +1238,9 @@ void cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::class_swap()
 size_t cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // hostap_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // peer_mac
+    class_size += sizeof(sMacAddr); // hostap_mac
+    class_size += sizeof(sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // peer_mac
     class_size += sizeof(uint8_t); // group_identity
     return class_size;
 }
@@ -1251,14 +1251,14 @@ bool cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_hostap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_hostap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_hostap_mac->struct_init(); }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
-    m_peer_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_peer_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_peer_mac->struct_init(); }
     m_group_identity = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
@@ -1280,8 +1280,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::~cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 sApChannelSwitch& cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::cs_params() {
@@ -1297,7 +1297,7 @@ void cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::class_swap()
 size_t cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     class_size += sizeof(sApChannelSwitch); // cs_params
     return class_size;
 }
@@ -1308,8 +1308,8 @@ bool cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
@@ -1332,8 +1332,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_HOSTAP_TX_ON_REQUEST::~cACTION_CLI_HOSTAP_TX_ON_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_HOSTAP_TX_ON_REQUEST::ap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_ap_mac);
+sMacAddr& cACTION_CLI_HOSTAP_TX_ON_REQUEST::ap_mac() {
+    return (sMacAddr&)(*m_ap_mac);
 }
 
 void cACTION_CLI_HOSTAP_TX_ON_REQUEST::class_swap()
@@ -1344,7 +1344,7 @@ void cACTION_CLI_HOSTAP_TX_ON_REQUEST::class_swap()
 size_t cACTION_CLI_HOSTAP_TX_ON_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // ap_mac
+    class_size += sizeof(sMacAddr); // ap_mac
     return class_size;
 }
 
@@ -1354,8 +1354,8 @@ bool cACTION_CLI_HOSTAP_TX_ON_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_ap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_ap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_ap_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -1375,8 +1375,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_HOSTAP_TX_OFF_REQUEST::~cACTION_CLI_HOSTAP_TX_OFF_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_HOSTAP_TX_OFF_REQUEST::ap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_ap_mac);
+sMacAddr& cACTION_CLI_HOSTAP_TX_OFF_REQUEST::ap_mac() {
+    return (sMacAddr&)(*m_ap_mac);
 }
 
 void cACTION_CLI_HOSTAP_TX_OFF_REQUEST::class_swap()
@@ -1387,7 +1387,7 @@ void cACTION_CLI_HOSTAP_TX_OFF_REQUEST::class_swap()
 size_t cACTION_CLI_HOSTAP_TX_OFF_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // ap_mac
+    class_size += sizeof(sMacAddr); // ap_mac
     return class_size;
 }
 
@@ -1397,8 +1397,8 @@ bool cACTION_CLI_HOSTAP_TX_OFF_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_ap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_ap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_ap_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -1418,12 +1418,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::~cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::ap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_ap_mac);
+sMacAddr& cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::ap_mac() {
+    return (sMacAddr&)(*m_ap_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::bssid() {
-    return (beerocks::net::sMacAddr&)(*m_bssid);
+sMacAddr& cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::bssid() {
+    return (sMacAddr&)(*m_bssid);
 }
 
 uint8_t& cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::channel() {
@@ -1443,8 +1443,8 @@ void cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::class_swap()
 size_t cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // ap_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // bssid
+    class_size += sizeof(sMacAddr); // ap_mac
+    class_size += sizeof(sMacAddr); // bssid
     class_size += sizeof(uint8_t); // channel
     class_size += sizeof(int8_t); // vap_id
     return class_size;
@@ -1456,11 +1456,11 @@ bool cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_ap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_ap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_ap_mac->struct_init(); }
-    m_bssid = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_bssid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_bssid->struct_init(); }
     m_channel = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
@@ -1484,12 +1484,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::~cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::ap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_ap_mac);
+sMacAddr& cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::ap_mac() {
+    return (sMacAddr&)(*m_ap_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::bssid() {
-    return (beerocks::net::sMacAddr&)(*m_bssid);
+sMacAddr& cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::bssid() {
+    return (sMacAddr&)(*m_bssid);
 }
 
 int8_t& cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::vap_id() {
@@ -1505,8 +1505,8 @@ void cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::class_swap()
 size_t cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // ap_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // bssid
+    class_size += sizeof(sMacAddr); // ap_mac
+    class_size += sizeof(sMacAddr); // bssid
     class_size += sizeof(int8_t); // vap_id
     return class_size;
 }
@@ -1517,11 +1517,11 @@ bool cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_ap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_ap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_ap_mac->struct_init(); }
-    m_bssid = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_bssid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_bssid->struct_init(); }
     m_vap_id = (int8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(int8_t) * 1;
@@ -1543,8 +1543,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CLI_HOSTAP_STATS_MEASUREMENT::~cACTION_CLI_HOSTAP_STATS_MEASUREMENT() {
 }
-beerocks::net::sMacAddr& cACTION_CLI_HOSTAP_STATS_MEASUREMENT::ap_mac() {
-    return (beerocks::net::sMacAddr&)(*m_ap_mac);
+sMacAddr& cACTION_CLI_HOSTAP_STATS_MEASUREMENT::ap_mac() {
+    return (sMacAddr&)(*m_ap_mac);
 }
 
 void cACTION_CLI_HOSTAP_STATS_MEASUREMENT::class_swap()
@@ -1555,7 +1555,7 @@ void cACTION_CLI_HOSTAP_STATS_MEASUREMENT::class_swap()
 size_t cACTION_CLI_HOSTAP_STATS_MEASUREMENT::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // ap_mac
+    class_size += sizeof(sMacAddr); // ap_mac
     return class_size;
 }
 
@@ -1565,8 +1565,8 @@ bool cACTION_CLI_HOSTAP_STATS_MEASUREMENT::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_ap_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_ap_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_ap_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

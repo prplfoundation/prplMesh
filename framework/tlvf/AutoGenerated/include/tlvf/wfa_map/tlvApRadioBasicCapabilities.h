@@ -20,7 +20,7 @@
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
-#include "tlvf/common/sMacAddress.h"
+#include "tlvf/common/sMacAddr.h"
 #include <tuple>
 #include <vector>
 
@@ -37,7 +37,7 @@ class tlvApRadioBasicCapabilities : public BaseClass
 
         const eTlvTypeMap& type();
         const uint16_t& length();
-        sMacAddress& radio_uid();
+        sMacAddr& radio_uid();
         uint8_t& maximum_number_of_bsss_supported();
         uint8_t& operating_classes_info_list_length();
         std::tuple<bool, cOperatingClassesInfo&> operating_classes_info_list(size_t idx);
@@ -50,7 +50,7 @@ class tlvApRadioBasicCapabilities : public BaseClass
         bool init();
         eTlvTypeMap* m_type = nullptr;
         uint16_t* m_length = nullptr;
-        sMacAddress* m_radio_uid = nullptr;
+        sMacAddr* m_radio_uid = nullptr;
         uint8_t* m_maximum_number_of_bsss_supported = nullptr;
         uint8_t* m_operating_classes_info_list_length = nullptr;
         cOperatingClassesInfo* m_operating_classes_info_list = nullptr;

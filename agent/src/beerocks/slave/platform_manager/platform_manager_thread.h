@@ -74,7 +74,7 @@ private:
 
     Socket *get_backhaul_socket();
     void load_iface_params(const std::string &strIface, beerocks::eArpSource eType);
-    std::string bridge_iface_from_mac(const net::sMacAddr &sMac);
+    std::string bridge_iface_from_mac(const sMacAddr &sMac);
     void send_dhcp_notification(std::string op, std::string mac, std::string ip,
                                 std::string hostname);
     void arp_entries_cleanup();

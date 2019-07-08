@@ -13,6 +13,15 @@
 #include <stdint.h>
 #include <string>
 
+#include <tlvf/common/sMacAddr.h>
+
+inline bool operator==(sMacAddr const &lhs, sMacAddr const &rhs)
+{
+    return (0 == std::memcmp(lhs.oct, rhs.oct, sizeof(sMacAddr)));
+}
+
+inline bool operator!=(sMacAddr const &lhs, sMacAddr const &rhs) { return !(rhs == lhs); }
+
 namespace beerocks {
 namespace net {
 
@@ -31,18 +40,6 @@ typedef struct sIpv4Addr {
     }
     bool operator!=(sIpv4Addr const &rhs) const { return !(rhs == *this); }
 } __attribute__((packed)) sIpv4Addr;
-
-typedef struct sMacAddr {
-    uint8_t oct[MAC_ADDR_LEN];
-
-    void struct_swap() {}
-    void struct_init() { std::memset(oct, 0, MAC_ADDR_LEN); }
-    bool operator==(sMacAddr const &rhs) const
-    {
-        return (0 == std::memcmp(this->oct, rhs.oct, MAC_ADDR_LEN));
-    }
-    bool operator!=(sMacAddr const &rhs) const { return !(rhs == *this); }
-} __attribute__((packed)) sMacAddr;
 
 typedef struct sScanResult {
     sMacAddr mac;

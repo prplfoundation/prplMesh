@@ -9,15 +9,15 @@ tlvPushButtonJoinNotification:
     _type: eTlvType
     _value_const: TLV_PUSH_BUTTON_JOIN_NOTIFICATION
   length: uint16_t
-  al_mac_notification_src: sMacAddress
+  al_mac_notification_src: sMacAddr
   mid_of_the_notification: uint16_t
   transmitter_iface_mac_of_new_device_joined:
-    _type: sMacAddress  
+    _type: sMacAddr  
     _comment: |
       Interface-specific MAC address of the interface of the transmitting device
       belonging to the medium on which a new device joined.
   iface_mac_of_new_device_joined:
-    _type: sMacAddress
+    _type: sMacAddr
     _comment: |
       Interface-specific MAC address of the interface of the new device that was
       joined to the network as a result of the push button configuration sequence.

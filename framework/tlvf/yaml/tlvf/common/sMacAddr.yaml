@@ -1,9 +1,9 @@
 #
 ---
 
-sMacAddress:
+sMacAddr:
   _type: struct
-  mac:
+  oct:
     _type: uint8_t
     _length: [ 6 ]
     _value: 0

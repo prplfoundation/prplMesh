@@ -10,7 +10,7 @@ tlv1905NeighborDevice:
     _value_const: TLV_1905_NEIGHBOR_DEVICE
   length:
     _type: uint16_t
-  mac_local_iface: sMacAddress
+  mac_local_iface: sMacAddr
   mac_al_1905_device:
     _type: sMacAl1905Device
     _length: []
@@ -23,6 +23,6 @@ eBridgesExist:
 
 sMacAl1905Device:
   _type: struct
-  mac: sMacAddress
+  mac: sMacAddr
   bridges_exist: eBridgesExist
 

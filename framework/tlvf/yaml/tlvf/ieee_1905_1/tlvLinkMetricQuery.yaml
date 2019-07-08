@@ -11,7 +11,7 @@ tlvLinkMetricQuery:
   length: uint16_t
   neighbor_type: eNeighborType
   mac_al_1905_device:
-    _type: sMacAddress
+    _type: sMacAddr
     _optional: true
   link_metrics: eLinkMetricsType
 

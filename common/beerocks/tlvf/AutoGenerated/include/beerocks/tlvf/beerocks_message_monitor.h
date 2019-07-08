@@ -189,14 +189,14 @@ class cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST : public BaseClass
         static eActionOp_MONITOR get_action_op(){
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_MONITOR* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
@@ -229,7 +229,7 @@ class cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST : public BaseClass
         static eActionOp_MONITOR get_action_op(){
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_DISCONNECT_REQUEST);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         beerocks::net::sIpv4Addr& ipv4();
         uint8_t& channel();
         void class_swap();
@@ -238,7 +238,7 @@ class cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_MONITOR* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
         beerocks::net::sIpv4Addr* m_ipv4 = nullptr;
         uint8_t* m_channel = nullptr;
 };
@@ -293,14 +293,14 @@ class cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION : public BaseClass
         static eActionOp_MONITOR get_action_op(){
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_MONITOR* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION : public BaseClass
@@ -313,14 +313,14 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION : public Bas
         static eActionOp_MONITOR get_action_op(){
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_MONITOR* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseClass
@@ -333,14 +333,14 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseClass
         static eActionOp_MONITOR get_action_op(){
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_MONITOR* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION : public BaseClass
@@ -353,14 +353,14 @@ class cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION : public BaseClass
         static eActionOp_MONITOR get_action_op(){
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_MONITOR* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION : public BaseClass
@@ -601,14 +601,14 @@ class cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
         static eActionOp_MONITOR get_action_op(){
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_MONITOR* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE : public BaseClass

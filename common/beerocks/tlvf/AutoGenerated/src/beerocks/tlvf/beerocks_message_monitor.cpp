@@ -339,8 +339,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::~cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::class_swap()
@@ -351,7 +351,7 @@ void cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::class_swap()
 size_t cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -361,8 +361,8 @@ bool cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -425,8 +425,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::~cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 beerocks::net::sIpv4Addr& cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::ipv4() {
@@ -446,7 +446,7 @@ void cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::class_swap()
 size_t cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     class_size += sizeof(beerocks::net::sIpv4Addr); // ipv4
     class_size += sizeof(uint8_t); // channel
     return class_size;
@@ -458,8 +458,8 @@ bool cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sIpv4Addr) * 1;
@@ -570,8 +570,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::~cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION() {
 }
-beerocks::net::sMacAddr& cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::class_swap()
@@ -582,7 +582,7 @@ void cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::class_swap()
 size_t cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -592,8 +592,8 @@ bool cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -613,8 +613,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION() {
 }
-beerocks::net::sMacAddr& cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::class_swap()
@@ -625,7 +625,7 @@ void cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::class_swap()
 size_t cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -635,8 +635,8 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -656,8 +656,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE() {
 }
-beerocks::net::sMacAddr& cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::class_swap()
@@ -668,7 +668,7 @@ void cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::class_swap()
 size_t cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -678,8 +678,8 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -699,8 +699,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::~cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION() {
 }
-beerocks::net::sMacAddr& cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::class_swap()
@@ -711,7 +711,7 @@ void cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::class_swap()
 size_t cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -721,8 +721,8 @@ bool cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -1261,8 +1261,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::~cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::class_swap()
@@ -1273,7 +1273,7 @@ void cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::class_swap()
 size_t cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -1283,8 +1283,8 @@ bool cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

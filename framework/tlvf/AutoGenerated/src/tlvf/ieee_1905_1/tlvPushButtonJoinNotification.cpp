@@ -33,20 +33,20 @@ const uint16_t& tlvPushButtonJoinNotification::length() {
     return (const uint16_t&)(*m_length);
 }
 
-sMacAddress& tlvPushButtonJoinNotification::al_mac_notification_src() {
-    return (sMacAddress&)(*m_al_mac_notification_src);
+sMacAddr& tlvPushButtonJoinNotification::al_mac_notification_src() {
+    return (sMacAddr&)(*m_al_mac_notification_src);
 }
 
 uint16_t& tlvPushButtonJoinNotification::mid_of_the_notification() {
     return (uint16_t&)(*m_mid_of_the_notification);
 }
 
-sMacAddress& tlvPushButtonJoinNotification::transmitter_iface_mac_of_new_device_joined() {
-    return (sMacAddress&)(*m_transmitter_iface_mac_of_new_device_joined);
+sMacAddr& tlvPushButtonJoinNotification::transmitter_iface_mac_of_new_device_joined() {
+    return (sMacAddr&)(*m_transmitter_iface_mac_of_new_device_joined);
 }
 
-sMacAddress& tlvPushButtonJoinNotification::iface_mac_of_new_device_joined() {
-    return (sMacAddress&)(*m_iface_mac_of_new_device_joined);
+sMacAddr& tlvPushButtonJoinNotification::iface_mac_of_new_device_joined() {
+    return (sMacAddr&)(*m_iface_mac_of_new_device_joined);
 }
 
 void tlvPushButtonJoinNotification::class_swap()
@@ -63,10 +63,10 @@ size_t tlvPushButtonJoinNotification::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(eTlvType); // type
     class_size += sizeof(uint16_t); // length
-    class_size += sizeof(sMacAddress); // al_mac_notification_src
+    class_size += sizeof(sMacAddr); // al_mac_notification_src
     class_size += sizeof(uint16_t); // mid_of_the_notification
-    class_size += sizeof(sMacAddress); // transmitter_iface_mac_of_new_device_joined
-    class_size += sizeof(sMacAddress); // iface_mac_of_new_device_joined
+    class_size += sizeof(sMacAddr); // transmitter_iface_mac_of_new_device_joined
+    class_size += sizeof(sMacAddr); // iface_mac_of_new_device_joined
     return class_size;
 }
 
@@ -88,20 +88,20 @@ bool tlvPushButtonJoinNotification::init()
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
-    m_al_mac_notification_src = (sMacAddress*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddress) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddress); }
+    m_al_mac_notification_src = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_al_mac_notification_src->struct_init(); }
     m_mid_of_the_notification = (uint16_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
-    m_transmitter_iface_mac_of_new_device_joined = (sMacAddress*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddress) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddress); }
+    m_transmitter_iface_mac_of_new_device_joined = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_transmitter_iface_mac_of_new_device_joined->struct_init(); }
-    m_iface_mac_of_new_device_joined = (sMacAddress*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddress) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddress); }
+    m_iface_mac_of_new_device_joined = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_iface_mac_of_new_device_joined->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

@@ -33,30 +33,30 @@ public:
     virtual ~channel_selection_task() {}
 
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
     } sHostapChannelRequest_event;
 
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
         uint8_t success;
     } sRestrictedChannelResponse_event;
 
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
         beerocks_message::sApChannelSwitch cs_params;
     } sCsa_event;
 
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
         beerocks_message::sDfsCacCompleted params;
     } sCacCompleted_event;
 
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
         beerocks_message::sDfsChannelAvailable params;
     } sDfsChannelAvailable_event;
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
         beerocks_message::sApChannelSwitch cs_params;
 
         beerocks_message::sWifiChannel
@@ -64,7 +64,7 @@ public:
     } sAcsResponse_event;
 
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
         bool low_pass_filter_on;
         bool backhaul_is_wireless;
         uint8_t backhaul_channel;
@@ -77,27 +77,27 @@ public:
     } sSlaveJoined_event;
 
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
     } sTxOnResponse_event;
 
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
     } sApActivityIdle_event;
 
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
         std::chrono::steady_clock::time_point timestamp;
         bool timeout_expired;
     } sDfsReEntrySampleSteeredClients_event;
 
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
         std::chrono::steady_clock::time_point timestamp;
         bool timeout_expired;
     } sDfsCacPendinghostap_event;
 
     typedef struct {
-        beerocks::net::sMacAddr hostap_mac;
+        sMacAddr hostap_mac;
         uint8_t restricted_channels[beerocks::message::RESTRICTED_CHANNEL_LENGTH];
     } sConfiguredRestrictedChannels_event;
 

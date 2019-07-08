@@ -29,7 +29,7 @@ cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION:
   platform: uint8_t            # configuration, beerocks::ePlatform
   low_pass_filter_on: uint8_t  # configuration
   enable_repeater_mode: uint8_t 
-  radio_identifier: beerocks::net::sMacAddr
+  radio_identifier: sMacAddr
   is_slave_reconf: uint8_t
 
 cACTION_CONTROL_SLAVE_JOINED_RESPONSE:
@@ -42,9 +42,9 @@ cACTION_CONTROL_SLAVE_JOINED_RESPONSE:
 
 cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION:
   _type: class
-  backhaul_iface_mac: beerocks::net::sMacAddr 
+  backhaul_iface_mac: sMacAddr 
   backhaul_ipv4: beerocks::net::sIpv4Addr 
-  bridge_iface_mac: beerocks::net::sMacAddr 
+  bridge_iface_mac: sMacAddr 
   bridge_ipv4: beerocks::net::sIpv4Addr 
   hostap: sNodeHostap 
 
@@ -102,7 +102,7 @@ cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION:
 
 cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION:
   _type: class
-  bridge_mac: beerocks::net::sMacAddr 
+  bridge_mac: sMacAddr 
   operational: uint8_t 
 
 cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION:
@@ -257,7 +257,7 @@ cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST:
 
 cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST:
   _type: class
-  mac: beerocks::net::sMacAddr 
+  mac: sMacAddr 
 
 cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST:
   _type: class
@@ -269,11 +269,11 @@ cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE:
 
 cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
 
 cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE:
   _type: class
-  mac: beerocks::net::sMacAddr 
+  mac: sMacAddr 
 
 cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION:
   _type: class
@@ -281,11 +281,11 @@ cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION:
 
 cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION:
   _type: class
-  mac: beerocks::net::sMacAddr 
+  mac: sMacAddr 
 
 cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION:
   _type: class
-  mac: beerocks::net::sMacAddr 
+  mac: sMacAddr 
 
 cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION:
   _type: class
@@ -297,17 +297,17 @@ cACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION:
 
 cACTION_CONTROL_CLIENT_DISALLOW_REQUEST:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   reject_sta: uint8_t
 
 cACTION_CONTROL_CLIENT_ALLOW_REQUEST:
   _type: class
-  mac: beerocks::net::sMacAddr 
+  mac: sMacAddr 
   ipv4: beerocks::net::sIpv4Addr 
 
 cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST:
   _type: class
-  mac: beerocks::net::sMacAddr 
+  mac: sMacAddr 
   vap_id: int8_t
   type: uint32_t
   reason: uint32_t
@@ -326,7 +326,7 @@ cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE:
 
 cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION:
   _type: class
-  mac: beerocks::net::sMacAddr 
+  mac: sMacAddr 
   ipv4: beerocks::net::sIpv4Addr 
   name: 
     _type: char 
@@ -362,7 +362,7 @@ cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE:
 
 cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST:
   _type: class
-  mac: beerocks::net::sMacAddr 
+  mac: sMacAddr 
 
 cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE:
   _type: class

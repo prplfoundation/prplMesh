@@ -166,8 +166,8 @@ class cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_CROSS_RX_RSSI_MEASUREMENT);
         }
-        beerocks::net::sMacAddr& client_mac();
-        beerocks::net::sMacAddr& hostap_mac();
+        sMacAddr& client_mac();
+        sMacAddr& hostap_mac();
         uint16_t& center_frequency();
         void class_swap();
         static size_t get_initial_size();
@@ -175,8 +175,8 @@ class cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT : public BaseClass
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
-        beerocks::net::sMacAddr* m_hostap_mac = nullptr;
+        sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_hostap_mac = nullptr;
         uint16_t* m_center_frequency = nullptr;
 };
 
@@ -190,14 +190,14 @@ class cACTION_CLI_OPTIMAL_PATH_TASK : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_OPTIMAL_PATH_TASK);
         }
-        beerocks::net::sMacAddr& client_mac();
+        sMacAddr& client_mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_client_mac = nullptr;
 };
 
 class cACTION_CLI_LOAD_BALANCER_TASK : public BaseClass
@@ -210,14 +210,14 @@ class cACTION_CLI_LOAD_BALANCER_TASK : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_LOAD_BALANCER_TASK);
         }
-        beerocks::net::sMacAddr& ap_mac();
+        sMacAddr& ap_mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_ap_mac = nullptr;
+        sMacAddr* m_ap_mac = nullptr;
 };
 
 class cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK : public BaseClass
@@ -248,14 +248,14 @@ class cACTION_CLI_DUMP_NODE_INFO : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_DUMP_NODE_INFO);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_CLI_PING_SLAVE_REQUEST : public BaseClass
@@ -268,7 +268,7 @@ class cACTION_CLI_PING_SLAVE_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_PING_SLAVE_REQUEST);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         uint16_t& num_of_req();
         uint16_t& size();
         void class_swap();
@@ -277,7 +277,7 @@ class cACTION_CLI_PING_SLAVE_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
         uint16_t* m_num_of_req = nullptr;
         uint16_t* m_size = nullptr;
 };
@@ -314,14 +314,14 @@ class cACTION_CLI_BACKHAUL_SCAN_RESULTS : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_BACKHAUL_SCAN_RESULTS);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_CLI_BACKHAUL_ROAM_REQUEST : public BaseClass
@@ -334,16 +334,16 @@ class cACTION_CLI_BACKHAUL_ROAM_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_BACKHAUL_ROAM_REQUEST);
         }
-        beerocks::net::sMacAddr& slave_mac();
-        beerocks::net::sMacAddr& bssid();
+        sMacAddr& slave_mac();
+        sMacAddr& bssid();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_slave_mac = nullptr;
-        beerocks::net::sMacAddr* m_bssid = nullptr;
+        sMacAddr* m_slave_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
 };
 
 class cACTION_CLI_CLIENT_ALLOW_REQUEST : public BaseClass
@@ -356,16 +356,16 @@ class cACTION_CLI_CLIENT_ALLOW_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_CLIENT_ALLOW_REQUEST);
         }
-        beerocks::net::sMacAddr& client_mac();
-        beerocks::net::sMacAddr& hostap_mac();
+        sMacAddr& client_mac();
+        sMacAddr& hostap_mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
-        beerocks::net::sMacAddr* m_hostap_mac = nullptr;
+        sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_hostap_mac = nullptr;
 };
 
 class cACTION_CLI_CLIENT_DISALLOW_REQUEST : public BaseClass
@@ -378,16 +378,16 @@ class cACTION_CLI_CLIENT_DISALLOW_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_CLIENT_DISALLOW_REQUEST);
         }
-        beerocks::net::sMacAddr& client_mac();
-        beerocks::net::sMacAddr& hostap_mac();
+        sMacAddr& client_mac();
+        sMacAddr& hostap_mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
-        beerocks::net::sMacAddr* m_hostap_mac = nullptr;
+        sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_hostap_mac = nullptr;
 };
 
 class cACTION_CLI_CLIENT_DISCONNECT_REQUEST : public BaseClass
@@ -400,7 +400,7 @@ class cACTION_CLI_CLIENT_DISCONNECT_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_CLIENT_DISCONNECT_REQUEST);
         }
-        beerocks::net::sMacAddr& client_mac();
+        sMacAddr& client_mac();
         uint32_t& type();
         uint32_t& reason();
         void class_swap();
@@ -409,7 +409,7 @@ class cACTION_CLI_CLIENT_DISCONNECT_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_client_mac = nullptr;
         uint32_t* m_type = nullptr;
         uint32_t* m_reason = nullptr;
 };
@@ -424,8 +424,8 @@ class cACTION_CLI_CLIENT_BSS_STEER_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_CLIENT_BSS_STEER_REQUEST);
         }
-        beerocks::net::sMacAddr& client_mac();
-        beerocks::net::sMacAddr& bssid();
+        sMacAddr& client_mac();
+        sMacAddr& bssid();
         uint32_t& disassoc_timer();
         void class_swap();
         static size_t get_initial_size();
@@ -433,8 +433,8 @@ class cACTION_CLI_CLIENT_BSS_STEER_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
-        beerocks::net::sMacAddr* m_bssid = nullptr;
+        sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
         uint32_t* m_disassoc_timer = nullptr;
 };
 
@@ -448,16 +448,16 @@ class cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST);
         }
-        beerocks::net::sMacAddr& hostap_mac();
-        beerocks::net::sMacAddr& client_mac();
+        sMacAddr& hostap_mac();
+        sMacAddr& client_mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_hostap_mac = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_hostap_mac = nullptr;
+        sMacAddr* m_client_mac = nullptr;
 };
 
 class cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
@@ -470,8 +470,8 @@ class cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST);
         }
-        beerocks::net::sMacAddr& hostap_mac();
-        beerocks::net::sMacAddr& client_mac();
+        sMacAddr& hostap_mac();
+        sMacAddr& client_mac();
         uint8_t& channel();
         void class_swap();
         static size_t get_initial_size();
@@ -479,8 +479,8 @@ class cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_hostap_mac = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_hostap_mac = nullptr;
+        sMacAddr* m_client_mac = nullptr;
         uint8_t* m_channel = nullptr;
 };
 
@@ -494,8 +494,8 @@ class cACTION_CLI_CLIENT_BEACON_11K_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_CLIENT_BEACON_11K_REQUEST);
         }
-        beerocks::net::sMacAddr& client_mac();
-        beerocks::net::sMacAddr& bssid();
+        sMacAddr& client_mac();
+        sMacAddr& bssid();
         std::tuple<bool, uint8_t&> ssid(size_t idx);
         uint8_t& use_optional_ssid();
         uint8_t& channel();
@@ -510,8 +510,8 @@ class cACTION_CLI_CLIENT_BEACON_11K_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
-        beerocks::net::sMacAddr* m_bssid = nullptr;
+        sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
         uint8_t* m_ssid = nullptr;
         size_t m_ssid_idx__ = 0;
         uint8_t* m_use_optional_ssid = nullptr;
@@ -533,9 +533,9 @@ class cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_CLIENT_STATISTICS_11K_REQUEST);
         }
-        beerocks::net::sMacAddr& hostap_mac();
-        beerocks::net::sMacAddr& client_mac();
-        beerocks::net::sMacAddr& peer_mac();
+        sMacAddr& hostap_mac();
+        sMacAddr& client_mac();
+        sMacAddr& peer_mac();
         uint8_t& group_identity();
         void class_swap();
         static size_t get_initial_size();
@@ -543,9 +543,9 @@ class cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_hostap_mac = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
-        beerocks::net::sMacAddr* m_peer_mac = nullptr;
+        sMacAddr* m_hostap_mac = nullptr;
+        sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_peer_mac = nullptr;
         uint8_t* m_group_identity = nullptr;
 };
 
@@ -559,7 +559,7 @@ class cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         sApChannelSwitch& cs_params();
         void class_swap();
         static size_t get_initial_size();
@@ -567,7 +567,7 @@ class cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
         sApChannelSwitch* m_cs_params = nullptr;
 };
 
@@ -581,14 +581,14 @@ class cACTION_CLI_HOSTAP_TX_ON_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_HOSTAP_TX_ON_REQUEST);
         }
-        beerocks::net::sMacAddr& ap_mac();
+        sMacAddr& ap_mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_ap_mac = nullptr;
+        sMacAddr* m_ap_mac = nullptr;
 };
 
 class cACTION_CLI_HOSTAP_TX_OFF_REQUEST : public BaseClass
@@ -601,14 +601,14 @@ class cACTION_CLI_HOSTAP_TX_OFF_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_HOSTAP_TX_OFF_REQUEST);
         }
-        beerocks::net::sMacAddr& ap_mac();
+        sMacAddr& ap_mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_ap_mac = nullptr;
+        sMacAddr* m_ap_mac = nullptr;
 };
 
 class cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST : public BaseClass
@@ -621,8 +621,8 @@ class cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST);
         }
-        beerocks::net::sMacAddr& ap_mac();
-        beerocks::net::sMacAddr& bssid();
+        sMacAddr& ap_mac();
+        sMacAddr& bssid();
         uint8_t& channel();
         int8_t& vap_id();
         void class_swap();
@@ -631,8 +631,8 @@ class cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_ap_mac = nullptr;
-        beerocks::net::sMacAddr* m_bssid = nullptr;
+        sMacAddr* m_ap_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
         uint8_t* m_channel = nullptr;
         int8_t* m_vap_id = nullptr;
 };
@@ -647,8 +647,8 @@ class cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST);
         }
-        beerocks::net::sMacAddr& ap_mac();
-        beerocks::net::sMacAddr& bssid();
+        sMacAddr& ap_mac();
+        sMacAddr& bssid();
         int8_t& vap_id();
         void class_swap();
         static size_t get_initial_size();
@@ -656,8 +656,8 @@ class cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_ap_mac = nullptr;
-        beerocks::net::sMacAddr* m_bssid = nullptr;
+        sMacAddr* m_ap_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
         int8_t* m_vap_id = nullptr;
 };
 
@@ -671,14 +671,14 @@ class cACTION_CLI_HOSTAP_STATS_MEASUREMENT : public BaseClass
         static eActionOp_CLI get_action_op(){
             return (eActionOp_CLI)(ACTION_CLI_HOSTAP_STATS_MEASUREMENT);
         }
-        beerocks::net::sMacAddr& ap_mac();
+        sMacAddr& ap_mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_ap_mac = nullptr;
+        sMacAddr* m_ap_mac = nullptr;
 };
 
 }; // close namespace: beerocks_message

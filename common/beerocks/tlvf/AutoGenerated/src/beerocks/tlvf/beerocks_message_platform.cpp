@@ -411,8 +411,8 @@ uint32_t& cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::op() {
     return (uint32_t&)(*m_op);
 }
 
-beerocks::net::sMacAddr& cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::mac() {
-    return (beerocks::net::sMacAddr&)(*m_mac);
+sMacAddr& cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 beerocks::net::sIpv4Addr& cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::ipv4() {
@@ -468,7 +468,7 @@ size_t cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(eDHCPOp); // dhcp_op
     class_size += sizeof(uint32_t); // op
-    class_size += sizeof(beerocks::net::sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // mac
     class_size += sizeof(beerocks::net::sIpv4Addr); // ipv4
     class_size += beerocks::message::NODE_NAME_LENGTH * sizeof(char); // hostname
     return class_size;
@@ -484,8 +484,8 @@ bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::init()
     m_buff_ptr__ += sizeof(eDHCPOp) * 1;
     m_op = (uint32_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
-    m_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_mac->struct_init(); }
     m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(beerocks::net::sIpv4Addr) * 1;

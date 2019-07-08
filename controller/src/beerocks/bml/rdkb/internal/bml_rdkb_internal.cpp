@@ -49,13 +49,13 @@ int bml_rdkb_internal::steering_set_group(uint32_t steeringGroupIndex,
     if (cfg_2 && cfg_5) {
         request->remove() = 0;
 
-        std::copy_n(cfg_2->bssid, sizeof(beerocks::net::sMacAddr::oct), request->cfg_2().bssid.oct);
+        std::copy_n(cfg_2->bssid, sizeof(sMacAddr::oct), request->cfg_2().bssid.oct);
         request->cfg_2().utilCheckIntervalSec   = cfg_2->utilCheckIntervalSec;
         request->cfg_2().utilAvgCount           = cfg_2->utilAvgCount;
         request->cfg_2().inactCheckIntervalSec  = cfg_2->inactCheckIntervalSec;
         request->cfg_2().inactCheckThresholdSec = cfg_2->inactCheckThresholdSec;
 
-        std::copy_n(cfg_5->bssid, sizeof(beerocks::net::sMacAddr::oct), request->cfg_5().bssid.oct);
+        std::copy_n(cfg_5->bssid, sizeof(sMacAddr::oct), request->cfg_5().bssid.oct);
         request->cfg_5().utilCheckIntervalSec   = cfg_5->utilCheckIntervalSec;
         request->cfg_5().utilAvgCount           = cfg_5->utilAvgCount;
         request->cfg_5().inactCheckIntervalSec  = cfg_5->inactCheckIntervalSec;
@@ -120,8 +120,8 @@ int bml_rdkb_internal::steering_client_set(uint32_t steeringGroupIndex, const BM
     }
 
     request->steeringGroupIndex() = steeringGroupIndex;
-    std::copy_n(bssid, sizeof(beerocks::net::sMacAddr::oct), request->bssid().oct);
-    std::copy_n(client_mac, sizeof(beerocks::net::sMacAddr::oct), request->client_mac().oct);
+    std::copy_n(bssid, sizeof(sMacAddr::oct), request->bssid().oct);
+    std::copy_n(client_mac, sizeof(sMacAddr::oct), request->client_mac().oct);
     request->remove() = 1;
     if (config) {
         request->config().snrProbeHWM      = config->snrProbeHWM;
@@ -248,7 +248,7 @@ int bml_rdkb_internal::steering_client_measure(uint32_t steeringGroupIndex,
 
     std::copy_n(client_mac, BML_MAC_ADDR_LEN, request->client_mac().oct);
     request->steeringGroupIndex() = steeringGroupIndex;
-    std::copy_n(bssid, sizeof(beerocks::net::sMacAddr::oct), request->bssid().oct);
+    std::copy_n(bssid, sizeof(sMacAddr::oct), request->bssid().oct);
 
     if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
         LOG(ERROR) << "Failed sending cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST message!";
@@ -298,7 +298,7 @@ int bml_rdkb_internal::steering_client_disconnect(uint32_t steeringGroupIndex,
 
     std::copy_n(client_mac, BML_MAC_ADDR_LEN, request->client_mac().oct);
     request->steeringGroupIndex() = steeringGroupIndex;
-    std::copy_n(bssid, sizeof(beerocks::net::sMacAddr::oct), request->bssid().oct);
+    std::copy_n(bssid, sizeof(sMacAddr::oct), request->bssid().oct);
     request->type()   = beerocks_message::eDisconnectType(type);
     request->reason() = reason;
 

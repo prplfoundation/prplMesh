@@ -1325,8 +1325,8 @@ class cACTION_BML_STEERING_CLIENT_SET_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_STEERING_CLIENT_SET_REQUEST);
         }
         uint32_t& steeringGroupIndex();
-        beerocks::net::sMacAddr& bssid();
-        beerocks::net::sMacAddr& client_mac();
+        sMacAddr& bssid();
+        sMacAddr& client_mac();
         sSteeringClientConfig& config();
         uint8_t& remove();
         void class_swap();
@@ -1336,8 +1336,8 @@ class cACTION_BML_STEERING_CLIENT_SET_REQUEST : public BaseClass
         bool init();
         eActionOp_BML* m_action_op = nullptr;
         uint32_t* m_steeringGroupIndex = nullptr;
-        beerocks::net::sMacAddr* m_bssid = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
+        sMacAddr* m_client_mac = nullptr;
         sSteeringClientConfig* m_config = nullptr;
         uint8_t* m_remove = nullptr;
 };
@@ -1413,8 +1413,8 @@ class cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST);
         }
         uint32_t& steeringGroupIndex();
-        beerocks::net::sMacAddr& bssid();
-        beerocks::net::sMacAddr& client_mac();
+        sMacAddr& bssid();
+        sMacAddr& client_mac();
         eDisconnectType& type();
         uint32_t& reason();
         void class_swap();
@@ -1424,8 +1424,8 @@ class cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST : public BaseClass
         bool init();
         eActionOp_BML* m_action_op = nullptr;
         uint32_t* m_steeringGroupIndex = nullptr;
-        beerocks::net::sMacAddr* m_bssid = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
+        sMacAddr* m_client_mac = nullptr;
         eDisconnectType* m_type = nullptr;
         uint32_t* m_reason = nullptr;
 };
@@ -1461,8 +1461,8 @@ class cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_STEERING_CLIENT_MEASURE_REQUEST);
         }
         uint32_t& steeringGroupIndex();
-        beerocks::net::sMacAddr& bssid();
-        beerocks::net::sMacAddr& client_mac();
+        sMacAddr& bssid();
+        sMacAddr& client_mac();
         void class_swap();
         static size_t get_initial_size();
 
@@ -1470,8 +1470,8 @@ class cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST : public BaseClass
         bool init();
         eActionOp_BML* m_action_op = nullptr;
         uint32_t* m_steeringGroupIndex = nullptr;
-        beerocks::net::sMacAddr* m_bssid = nullptr;
-        beerocks::net::sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
+        sMacAddr* m_client_mac = nullptr;
 };
 
 class cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE : public BaseClass
@@ -1531,16 +1531,16 @@ class cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST);
         }
-        beerocks::net::sMacAddr& al_mac();
-        beerocks::net::sMacAddr& ruid();
+        sMacAddr& al_mac();
+        sMacAddr& ruid();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_BML* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_al_mac = nullptr;
-        beerocks::net::sMacAddr* m_ruid = nullptr;
+        sMacAddr* m_al_mac = nullptr;
+        sMacAddr* m_ruid = nullptr;
 };
 
 }; // close namespace: beerocks_message
