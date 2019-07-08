@@ -1,3 +1,9 @@
 #!/bin/sh
+###############################################################
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+# Copyright (c) 2019 Tomer Eliyahu (Intel)
+# This code is subject to the terms of the BSD+Patent license.
+# See LICENSE file for more details.
+###############################################################
 ${INSTALL_DIR}/scripts/prplmesh_utils.sh start -s
 tail -f /dev/null # hack so the script will not exit forcing the container to stop
