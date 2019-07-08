@@ -116,7 +116,7 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         bool set_bridge_iface(std::string& str);
         bool set_bridge_iface(const std::string& str);
         bool set_bridge_iface(char buffer[], size_t size);
-        beerocks::net::sMacAddr& iface_mac();
+        sMacAddr& iface_mac();
         uint8_t& iface_is_5ghz();
         char* wire_iface(size_t length = 0);
         bool set_wire_iface(std::string& str);
@@ -139,7 +139,7 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         bool set_pass(const std::string& str);
         bool set_pass(char buffer[], size_t size);
         uint32_t& security_type();
-        beerocks::net::sMacAddr& preferred_bssid();
+        sMacAddr& preferred_bssid();
         uint8_t& wire_iface_type();
         uint8_t& wireless_iface_type();
         uint8_t& wired_backhaul();
@@ -151,7 +151,7 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         eActionOp_BACKHAUL* m_action_op = nullptr;
         char* m_bridge_iface = nullptr;
         size_t m_bridge_iface_idx__ = 0;
-        beerocks::net::sMacAddr* m_iface_mac = nullptr;
+        sMacAddr* m_iface_mac = nullptr;
         uint8_t* m_iface_is_5ghz = nullptr;
         char* m_wire_iface = nullptr;
         size_t m_wire_iface_idx__ = 0;
@@ -164,7 +164,7 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         char* m_pass = nullptr;
         size_t m_pass_idx__ = 0;
         uint32_t* m_security_type = nullptr;
-        beerocks::net::sMacAddr* m_preferred_bssid = nullptr;
+        sMacAddr* m_preferred_bssid = nullptr;
         uint8_t* m_wire_iface_type = nullptr;
         uint8_t* m_wireless_iface_type = nullptr;
         uint8_t* m_wired_backhaul = nullptr;
@@ -278,14 +278,14 @@ class cACTION_BACKHAUL_4ADDR_CONNECTED : public BaseClass
         static eActionOp_BACKHAUL get_action_op(){
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_4ADDR_CONNECTED);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_BACKHAUL* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION : public BaseClass
@@ -378,14 +378,14 @@ class cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseClas
         static eActionOp_BACKHAUL get_action_op(){
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_BACKHAUL* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 }; // close namespace: beerocks_message

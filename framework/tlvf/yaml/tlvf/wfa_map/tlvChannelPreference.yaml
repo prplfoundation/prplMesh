@@ -9,7 +9,7 @@ tlvChannelPreference:
     _type: eTlvTypeMap
     _value_const: TLV_CHANNEL_PREFERENCE
   length: uint16_t
-  radio_uid: sMacAddress
+  radio_uid: sMacAddr
   operating_classes_list_length:
     _type: uint8_t
     _length_var: True

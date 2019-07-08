@@ -33,8 +33,8 @@ const uint16_t& tlvDeviceInformation::length() {
     return (const uint16_t&)(*m_length);
 }
 
-sMacAddress& tlvDeviceInformation::mac() {
-    return (sMacAddress&)(*m_mac);
+sMacAddr& tlvDeviceInformation::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 uint8_t& tlvDeviceInformation::info_length() {
@@ -85,7 +85,7 @@ size_t tlvDeviceInformation::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(eTlvType); // type
     class_size += sizeof(uint16_t); // length
-    class_size += sizeof(sMacAddress); // mac
+    class_size += sizeof(sMacAddr); // mac
     class_size += sizeof(uint8_t); // info_length
     return class_size;
 }
@@ -108,9 +108,9 @@ bool tlvDeviceInformation::init()
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
-    m_mac = (sMacAddress*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddress) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddress); }
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_mac->struct_init(); }
     m_info_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_info_length = 0;

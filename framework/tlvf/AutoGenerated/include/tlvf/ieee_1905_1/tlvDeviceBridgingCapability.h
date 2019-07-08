@@ -22,7 +22,7 @@
 #include "tlvf/ieee_1905_1/eTlvType.h"
 #include <tuple>
 #include <vector>
-#include "tlvf/common/sMacAddress.h"
+#include "tlvf/common/sMacAddr.h"
 
 namespace ieee1905_1 {
 
@@ -63,7 +63,7 @@ class cMacList : public BaseClass
         ~cMacList();
 
         uint8_t& mac_list_length();
-        std::tuple<bool, sMacAddress&> mac_list(size_t idx);
+        std::tuple<bool, sMacAddr&> mac_list(size_t idx);
         bool alloc_mac_list(size_t count = 1);
         void class_swap();
         static size_t get_initial_size();
@@ -71,7 +71,7 @@ class cMacList : public BaseClass
     private:
         bool init();
         uint8_t* m_mac_list_length = nullptr;
-        sMacAddress* m_mac_list = nullptr;
+        sMacAddr* m_mac_list = nullptr;
         size_t m_mac_list_idx__ = 0;
 };
 

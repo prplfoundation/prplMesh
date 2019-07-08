@@ -289,8 +289,8 @@ cACTION_BML_STEERING_SET_GROUP_RESPONSE:
 cACTION_BML_STEERING_CLIENT_SET_REQUEST:
   _type: class
   steeringGroupIndex: uint32_t
-  bssid: beerocks::net::sMacAddr
-  client_mac: beerocks::net::sMacAddr
+  bssid: sMacAddr
+  client_mac: sMacAddr
   config: sSteeringClientConfig
   remove: uint8_t
 
@@ -309,8 +309,8 @@ cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE:
 cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST:
   _type: class
   steeringGroupIndex: uint32_t
-  bssid: beerocks::net::sMacAddr
-  client_mac: beerocks::net::sMacAddr
+  bssid: sMacAddr
+  client_mac: sMacAddr
   type: eDisconnectType
   reason: uint32_t
 
@@ -321,8 +321,8 @@ cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE:
 cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST:
   _type: class
   steeringGroupIndex: uint32_t
-  bssid: beerocks::net::sMacAddr
-  client_mac: beerocks::net::sMacAddr
+  bssid: sMacAddr
+  client_mac: sMacAddr
 
 cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE:
   _type: class  
@@ -343,5 +343,5 @@ cACTION_BML_STEERING_EVENTS_UPDATE:
 
 cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST:
   _type: class
-  al_mac: beerocks::net::sMacAddr
-  ruid: beerocks::net::sMacAddr
+  al_mac: sMacAddr
+  ruid: sMacAddr

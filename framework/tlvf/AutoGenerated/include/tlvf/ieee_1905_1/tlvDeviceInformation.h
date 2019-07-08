@@ -20,7 +20,7 @@
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
-#include "tlvf/common/sMacAddress.h"
+#include "tlvf/common/sMacAddr.h"
 #include <tuple>
 #include "tlvf/ieee_1905_1/eMediaType.h"
 
@@ -35,7 +35,7 @@ class tlvDeviceInformation : public BaseClass
         ~tlvDeviceInformation();
 
         typedef struct sInfo {
-            sMacAddress mac;
+            sMacAddr mac;
             eMediaType media_type;
             uint8_t media_info_length;
             eMediaType media_info;
@@ -49,7 +49,7 @@ class tlvDeviceInformation : public BaseClass
         
         const eTlvType& type();
         const uint16_t& length();
-        sMacAddress& mac();
+        sMacAddr& mac();
         uint8_t& info_length();
         std::tuple<bool, sInfo&> info(size_t idx);
         bool alloc_info(size_t count = 1);
@@ -60,7 +60,7 @@ class tlvDeviceInformation : public BaseClass
         bool init();
         eTlvType* m_type = nullptr;
         uint16_t* m_length = nullptr;
-        sMacAddress* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
         uint8_t* m_info_length = nullptr;
         sInfo* m_info = nullptr;
         size_t m_info_idx__ = 0;

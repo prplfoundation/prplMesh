@@ -33,8 +33,8 @@ const uint16_t& tlvApRadioIdentifier::length() {
     return (const uint16_t&)(*m_length);
 }
 
-sMacAddress& tlvApRadioIdentifier::radio_uid() {
-    return (sMacAddress&)(*m_radio_uid);
+sMacAddr& tlvApRadioIdentifier::radio_uid() {
+    return (sMacAddr&)(*m_radio_uid);
 }
 
 void tlvApRadioIdentifier::class_swap()
@@ -48,7 +48,7 @@ size_t tlvApRadioIdentifier::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(eTlvTypeMap); // type
     class_size += sizeof(uint16_t); // length
-    class_size += sizeof(sMacAddress); // radio_uid
+    class_size += sizeof(sMacAddr); // radio_uid
     return class_size;
 }
 
@@ -70,9 +70,9 @@ bool tlvApRadioIdentifier::init()
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
-    m_radio_uid = (sMacAddress*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddress) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddress); }
+    m_radio_uid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_radio_uid->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

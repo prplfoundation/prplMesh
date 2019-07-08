@@ -37,8 +37,8 @@ tlvLinkMetricQuery::eNeighborType& tlvLinkMetricQuery::neighbor_type() {
     return (eNeighborType&)(*m_neighbor_type);
 }
 
-sMacAddress& tlvLinkMetricQuery::mac_al_1905_device() {
-    return (sMacAddress&)(*m_mac_al_1905_device);
+sMacAddr& tlvLinkMetricQuery::mac_al_1905_device() {
+    return (sMacAddr&)(*m_mac_al_1905_device);
 }
 
 tlvLinkMetricQuery::eLinkMetricsType& tlvLinkMetricQuery::link_metrics() {
@@ -57,7 +57,7 @@ size_t tlvLinkMetricQuery::get_initial_size()
     class_size += sizeof(eTlvType); // type
     class_size += sizeof(uint16_t); // length
     class_size += sizeof(eNeighborType); // neighbor_type
-    class_size += sizeof(sMacAddress); // mac_al_1905_device
+    class_size += sizeof(sMacAddr); // mac_al_1905_device
     class_size += sizeof(eLinkMetricsType); // link_metrics
     return class_size;
 }
@@ -83,9 +83,9 @@ bool tlvLinkMetricQuery::init()
     m_neighbor_type = (eNeighborType*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(eNeighborType) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(eNeighborType); }
-    m_mac_al_1905_device = (sMacAddress*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddress) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddress); }
+    m_mac_al_1905_device = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_mac_al_1905_device->struct_init(); }
     m_link_metrics = (eLinkMetricsType*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(eLinkMetricsType) * 1;

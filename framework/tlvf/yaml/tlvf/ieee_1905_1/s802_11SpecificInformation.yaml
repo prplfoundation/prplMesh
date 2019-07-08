@@ -13,7 +13,7 @@ eRole:
 
 s802_11SpecificInformation:
   _type: struct
-  network_membership: sMacAddress
+  network_membership: sMacAddr
   role: eRole
   ap_channel_band:
     _type: uint8_t

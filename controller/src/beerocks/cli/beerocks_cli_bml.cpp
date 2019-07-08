@@ -453,10 +453,10 @@ static void steering_set_group_string_to_struct(const std::string &str_cfg_2,
     cfg2.inactCheckThresholdSec = string_utils::stoi(v_str_cfg_2[4]);
     cfg5.inactCheckThresholdSec = string_utils::stoi(v_str_cfg_5[4]);
 
-    beerocks::net::sMacAddr bssid2;
-    beerocks::net::sMacAddr bssid5;
-    std::copy_n(cfg2.bssid, sizeof(beerocks::net::sMacAddr::oct), bssid2.oct);
-    std::copy_n(cfg5.bssid, sizeof(beerocks::net::sMacAddr::oct), bssid5.oct);
+    sMacAddr bssid2;
+    sMacAddr bssid5;
+    std::copy_n(cfg2.bssid, sizeof(sMacAddr::oct), bssid2.oct);
+    std::copy_n(cfg5.bssid, sizeof(sMacAddr::oct), bssid5.oct);
 
     std::cout << "cfg2.bssid = " << network_utils::mac_to_string(bssid2) << std::endl
               << "cfg2.utilCheckIntervalSec = " << cfg2.utilCheckIntervalSec << std::endl

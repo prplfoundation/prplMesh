@@ -26,7 +26,7 @@ eDHCPOp:
 
 sVapInfo:
   _type: struct
-  mac: beerocks::net::sMacAddr 
+  mac: sMacAddr 
   ssid: 
     _type: char 
     _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
@@ -93,7 +93,7 @@ sPlatformSettings:
   backhaul_network_enabled: uint8_t 
   backhaul_prefered_radio_band: uint8_t 
   backhaul_vaps_bssid:
-    _type: beerocks::net::sMacAddr 
+    _type: sMacAddr 
     _length: [ 12 ]
     _comment: # 4 groups of 3 bssid in each group
 
@@ -158,15 +158,15 @@ sWifiChannel:
 
 sClientAssociationParams:
   _type: struct
-  mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr
+  mac: sMacAddr
+  bssid: sMacAddr
   capabilities: beerocks::message::sRadioCapabilities
   vap_id: int8_t
 
 sClientDisconnectionParams:
   _type: struct
-  mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr
+  mac: sMacAddr
+  bssid: sMacAddr
   vap_id: int8_t
   reason: uint8_t
   source: uint8_t
@@ -174,8 +174,8 @@ sClientDisconnectionParams:
 
 sClientMonitoringParams:
   _type: struct
-  mac: beerocks::net::sMacAddr
-  bridge_4addr_mac: beerocks::net::sMacAddr
+  mac: sMacAddr
+  bridge_4addr_mac: sMacAddr
   ipv4: beerocks::net::sIpv4Addr
   channel: uint8_t 
   vap_id: int8_t
@@ -205,7 +205,7 @@ sConfigVapInfo:
 
 sStaStatsParams:
   _type: struct
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   rx_packets: uint32_t
   tx_packets: uint32_t
   tx_bytes: uint32_t
@@ -250,7 +250,7 @@ sApActivityNotificationParams:
 
 sNodeRssiMeasurementRequest:
   _type: struct
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   ipv4: beerocks::net::sIpv4Addr
   channel: uint8_t 
   cross: uint8_t 
@@ -276,7 +276,7 @@ sNodeHostap:
     _type: char  
     _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
   iface_type: uint8_t    #beerocks::eIfaceType
-  iface_mac: beerocks::net::sMacAddr
+  iface_mac: sMacAddr
   iface_is_5ghz: uint8_t
   ant_num: uint8_t 
   ant_gain: uint8_t 
@@ -296,7 +296,7 @@ sVapsList:
 
 sArpMonitorData:
   _type: struct
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   ipv4: beerocks::net::sIpv4Addr
   iface_idx: uint32_t
   state: uint8_t 
@@ -305,29 +305,29 @@ sArpMonitorData:
 
 sArpQuery:
   _type: struct
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   ipv4: beerocks::net::sIpv4Addr
 
 sNodeBssSteerTarget:
   _type: struct
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   channel: uint8_t 
 
 sNodeBssSteerRequest:
   _type: struct
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   disassoc_timer: uint16_t
   disassoc_imminent: uint8_t 
   bssid: sNodeBssSteerTarget 
 
 sNodeBssSteerResponse:
   _type: struct
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   status_code: uint8_t 
 
 sNeighborSetParams11k:
   _type: struct
-  bssid: beerocks::net::sMacAddr   #ap mac
+  bssid: sMacAddr   #ap mac
   ssid:
     _type: char
     _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
@@ -354,7 +354,7 @@ sNeighborSetParams11k:
 
 sNeighborRemoveParams11k:
   _type: struct
-  bssid: beerocks::net::sMacAddr     #ap mac
+  bssid: sMacAddr     #ap mac
   ssid:
     _type: char 
     _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
@@ -367,7 +367,7 @@ sStaChannelLoadRequest11k:
   repeats: uint16_t   # '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
   rand_ival: uint16_t # random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
   duration: uint16_t  # measurement duration, expressed in units of TUs [=1024usec]
-  sta_mac: beerocks::net::sMacAddr
+  sta_mac: sMacAddr
 
   # Measurement request mode booleans:
   parallel: uint8_t            # (for multiple requests)'0' - measurements are to be performed in sequence, 
@@ -398,7 +398,7 @@ sStaChannelLoadResponse11k:
   measurement_token: uint8_t 
   duration: uint16_t    # measurement duration, expressed in units of TUs [=1024usec]
   start_time: uint64_t 
-  sta_mac: beerocks::net::sMacAddr
+  sta_mac: sMacAddr
 
   # Optinal fields:
   use_optional_wide_band_ch_switch: uint8_t    # bool
@@ -415,8 +415,8 @@ sBeaconRequest11k:
   repeats: uint16_t         # '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
   rand_ival: uint16_t         # random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
   duration: uint16_t          # measurement duration, expressed in units of TUs [=1024usec]
-  sta_mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr             # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
+  sta_mac: sMacAddr
+  bssid: sMacAddr             # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
 
   # Measurement request mode booleans:
   parallel: uint8_t            # (for multiple requests)'0' - measurements are to be performed in sequence, 
@@ -464,8 +464,8 @@ sBeaconResponse11k:
   duration: uint16_t      # measurement duration, expressed in units of TUs [=1024usec]
   parent_tsf: uint32_t           # see IEEE part11, page 42
   start_time: uint64_t
-  sta_mac: beerocks::net::sMacAddr       # mac to send response
-  bssid: beerocks::net::sMacAddr      # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
+  sta_mac: sMacAddr       # mac to send response
+  bssid: sMacAddr      # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
 
   #optional:
   new_ch_width: uint32_t                      # not sure if this type is most fit
@@ -475,8 +475,8 @@ sBeaconResponse11k:
 
 sStatisticsRequest11k:
   _type: struct
-  sta_mac: beerocks::net::sMacAddr
-  peer_mac_addr: beerocks::net::sMacAddr # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
+  sta_mac: sMacAddr
+  peer_mac_addr: sMacAddr # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
 
   group_identity: uint8_t 
 
@@ -543,7 +543,7 @@ sStatisticsResponse11k:
   statistics_group_data:
     _type: uint32_t 
     _length: [ 13 ] # different data for each group identity, 4 octets counters with commas between them
-  sta_mac: beerocks::net::sMacAddr             # mac to send the request to
+  sta_mac: sMacAddr             # mac to send the request to
   
   # Optional:
   use_optional_rep_reason: uint8_t 
@@ -562,7 +562,7 @@ sLinkMeasurementsResponse11k:
   rsni: uint8_t 
   transmit_power: uint8_t 
   link_margin: uint8_t 
-  sta_mac: beerocks::net::sMacAddr  # mac to send the request to
+  sta_mac: sMacAddr  # mac to send the request to
 
   #Optional:
   use_optional_dmg_link_margin: uint8_t            # bool
@@ -579,13 +579,13 @@ sLinkMeasurementsResponse11k:
 sBackhaulParams:
   _type: struct
   gw_ipv4: beerocks::net::sIpv4Addr
-  gw_bridge_mac: beerocks::net::sMacAddr
-  controller_bridge_mac: beerocks::net::sMacAddr
-  bridge_mac: beerocks::net::sMacAddr
+  gw_bridge_mac: sMacAddr
+  controller_bridge_mac: sMacAddr
+  bridge_mac: sMacAddr
   bridge_ipv4: beerocks::net::sIpv4Addr
-  backhaul_mac: beerocks::net::sMacAddr
+  backhaul_mac: sMacAddr
   backhaul_ipv4: beerocks::net::sIpv4Addr
-  backhaul_bssid: beerocks::net::sMacAddr
+  backhaul_bssid: sMacAddr
   # uint32_t  backhaul_freq # HACK temp disabled because of a bug on endian converter
   backhaul_channel: uint8_t 
   backhaul_is_wireless: uint8_t 
@@ -598,7 +598,7 @@ sBackhaulParams:
 
 sBackhaulRoam:
   _type: struct
-  bssid: beerocks::net::sMacAddr
+  bssid: sMacAddr
   channel: uint8_t 
 
 sBackhaulRssi:
@@ -607,7 +607,7 @@ sBackhaulRssi:
 
 sLoggingLevelChange:
   _type: struct
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   module_name: uint8_t  # beerocks::eBeeRocksModules
   log_level: uint8_t    # beerocks::eLogLevel
   enable: uint8_t 
@@ -672,7 +672,7 @@ sDeviceInfo:
 
 sRestrictedChannels:
   _type: struct
-  hostap_mac: beerocks::net::sMacAddr
+  hostap_mac: sMacAddr
   restricted_channels:
     _type: uint8_t 
     _length: [ "beerocks::message::RESTRICTED_CHANNEL_LENGTH" ]
@@ -680,7 +680,7 @@ sRestrictedChannels:
 
 sSteeringApConfig:
   _type: struct
-  bssid: beerocks::net::sMacAddr
+  bssid: sMacAddr
   utilCheckIntervalSec: uint32_t
   utilAvgCount: uint32_t
   inactCheckIntervalSec: uint32_t 
@@ -710,8 +710,8 @@ sSteeringSetGroupResponse:
 sSteeringClientSetRequest:
   _type: struct
   steeringGroupIndex: uint32_t
-  bssid: beerocks::net::sMacAddr
-  client_mac: beerocks::net::sMacAddr
+  bssid: sMacAddr
+  client_mac: sMacAddr
   config: sSteeringClientConfig
   remove : uint8_t
 
@@ -721,16 +721,16 @@ sSteeringClientSetResponse:
 
 sSteeringEvProbeReq:
   _type: struct
-  client_mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr
+  client_mac: sMacAddr
+  bssid: sMacAddr
   rx_snr: uint8_t
   blocked: uint8_t
   broadcast: uint8_t
 
 sSteeringEvAuthFail:
   _type: struct
-  client_mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr
+  client_mac: sMacAddr
+  bssid: sMacAddr
   rx_snr: uint8_t
   blocked: uint8_t
   reject: uint8_t
@@ -796,8 +796,8 @@ eSteeringEventType:
 
 sSteeringEvConnect:
   _type: struct
-  client_mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr
+  client_mac: sMacAddr
+  bssid: sMacAddr
   isBTMSupported: uint32_t 
   isRRMSupported: uint32_t
   bandCap2G: uint8_t
@@ -807,22 +807,22 @@ sSteeringEvConnect:
 
 sSteeringEvDisconnect:
   _type: struct
-  client_mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr
+  client_mac: sMacAddr
+  bssid: sMacAddr
   reason: uint32_t
   source: eDisconnectSource
   type: eDisconnectType
 
 sSteeringEvActivity:
   _type: struct
-  client_mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr
+  client_mac: sMacAddr
+  bssid: sMacAddr
   active: uint8_t 
 
 sSteeringEvSnrXing:
  _type: struct
- client_mac: beerocks::net::sMacAddr
- bssid: beerocks::net::sMacAddr
+ client_mac: sMacAddr
+ bssid: sMacAddr
  snr: uint32_t
  inactveXing: eSteeringSnrChange
  highXing: eSteeringSnrChange
@@ -830,7 +830,7 @@ sSteeringEvSnrXing:
 
 sSteeringEvSnr:
  _type: struct
- client_mac: beerocks::net::sMacAddr
- bssid: beerocks::net::sMacAddr
+ client_mac: sMacAddr
+ bssid: sMacAddr
  snr: uint32_t
                 

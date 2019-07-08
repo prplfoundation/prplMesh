@@ -3808,8 +3808,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
             return false;
         }
-        std::copy_n(network_utils::mac_from_string(config.radio_identifier).oct,
-                    beerocks::net::MAC_ADDR_LEN, tlvAp->radio_uid().mac);
+        std::copy_n(network_utils::mac_from_string(config.radio_identifier).oct, sizeof(sMacAddr),
+                    tlvAp->radio_uid().oct);
         tlvAp->maximum_number_of_bsss_supported() =
             beerocks::IFACE_TOTAL_VAPS; //TODO get maximum supported VAPs from DWPAL
 
@@ -3845,8 +3845,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        std::copy_n(hostap_params.iface_mac.oct, beerocks::net::MAC_ADDR_LEN,
-                    tlvWscM1->M1Frame().mac_attr.data.mac);
+        std::copy_n(hostap_params.iface_mac.oct, sizeof(sMacAddr),
+                    tlvWscM1->M1Frame().mac_attr.data.oct);
         // TODO: read manufactured, name, model and device name from BPL
         string_utils::copy_string(tlvWscM1->M1Frame().manufacturer_attr.data, "prpl", 5);
         string_utils::copy_string(tlvWscM1->M1Frame().model_name_attr.data, "Ubuntu", 7);

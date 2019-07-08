@@ -2835,12 +2835,12 @@ uint32_t& cACTION_BML_STEERING_CLIENT_SET_REQUEST::steeringGroupIndex() {
     return (uint32_t&)(*m_steeringGroupIndex);
 }
 
-beerocks::net::sMacAddr& cACTION_BML_STEERING_CLIENT_SET_REQUEST::bssid() {
-    return (beerocks::net::sMacAddr&)(*m_bssid);
+sMacAddr& cACTION_BML_STEERING_CLIENT_SET_REQUEST::bssid() {
+    return (sMacAddr&)(*m_bssid);
 }
 
-beerocks::net::sMacAddr& cACTION_BML_STEERING_CLIENT_SET_REQUEST::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_BML_STEERING_CLIENT_SET_REQUEST::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
 sSteeringClientConfig& cACTION_BML_STEERING_CLIENT_SET_REQUEST::config() {
@@ -2863,8 +2863,8 @@ size_t cACTION_BML_STEERING_CLIENT_SET_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(uint32_t); // steeringGroupIndex
-    class_size += sizeof(beerocks::net::sMacAddr); // bssid
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // bssid
+    class_size += sizeof(sMacAddr); // client_mac
     class_size += sizeof(sSteeringClientConfig); // config
     class_size += sizeof(uint8_t); // remove
     return class_size;
@@ -2878,11 +2878,11 @@ bool cACTION_BML_STEERING_CLIENT_SET_REQUEST::init()
     }
     m_steeringGroupIndex = (uint32_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
-    m_bssid = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_bssid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_bssid->struct_init(); }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
     m_config = (sSteeringClientConfig*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sSteeringClientConfig) * 1;
@@ -3036,12 +3036,12 @@ uint32_t& cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::steeringGroupIndex() {
     return (uint32_t&)(*m_steeringGroupIndex);
 }
 
-beerocks::net::sMacAddr& cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::bssid() {
-    return (beerocks::net::sMacAddr&)(*m_bssid);
+sMacAddr& cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::bssid() {
+    return (sMacAddr&)(*m_bssid);
 }
 
-beerocks::net::sMacAddr& cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
 eDisconnectType& cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::type() {
@@ -3064,8 +3064,8 @@ size_t cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(uint32_t); // steeringGroupIndex
-    class_size += sizeof(beerocks::net::sMacAddr); // bssid
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // bssid
+    class_size += sizeof(sMacAddr); // client_mac
     class_size += sizeof(eDisconnectType); // type
     class_size += sizeof(uint32_t); // reason
     return class_size;
@@ -3079,11 +3079,11 @@ bool cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::init()
     }
     m_steeringGroupIndex = (uint32_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
-    m_bssid = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_bssid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_bssid->struct_init(); }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
     m_type = (eDisconnectType*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(eDisconnectType) * 1;
@@ -3153,12 +3153,12 @@ uint32_t& cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::steeringGroupIndex() {
     return (uint32_t&)(*m_steeringGroupIndex);
 }
 
-beerocks::net::sMacAddr& cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::bssid() {
-    return (beerocks::net::sMacAddr&)(*m_bssid);
+sMacAddr& cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::bssid() {
+    return (sMacAddr&)(*m_bssid);
 }
 
-beerocks::net::sMacAddr& cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::client_mac() {
-    return (beerocks::net::sMacAddr&)(*m_client_mac);
+sMacAddr& cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::client_mac() {
+    return (sMacAddr&)(*m_client_mac);
 }
 
 void cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::class_swap()
@@ -3172,8 +3172,8 @@ size_t cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(uint32_t); // steeringGroupIndex
-    class_size += sizeof(beerocks::net::sMacAddr); // bssid
-    class_size += sizeof(beerocks::net::sMacAddr); // client_mac
+    class_size += sizeof(sMacAddr); // bssid
+    class_size += sizeof(sMacAddr); // client_mac
     return class_size;
 }
 
@@ -3185,11 +3185,11 @@ bool cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::init()
     }
     m_steeringGroupIndex = (uint32_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
-    m_bssid = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_bssid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_bssid->struct_init(); }
-    m_client_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_client_mac->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -3345,12 +3345,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::~cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST() {
 }
-beerocks::net::sMacAddr& cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::al_mac() {
-    return (beerocks::net::sMacAddr&)(*m_al_mac);
+sMacAddr& cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::al_mac() {
+    return (sMacAddr&)(*m_al_mac);
 }
 
-beerocks::net::sMacAddr& cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::ruid() {
-    return (beerocks::net::sMacAddr&)(*m_ruid);
+sMacAddr& cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::ruid() {
+    return (sMacAddr&)(*m_ruid);
 }
 
 void cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::class_swap()
@@ -3362,8 +3362,8 @@ void cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::class_swap()
 size_t cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(beerocks::net::sMacAddr); // al_mac
-    class_size += sizeof(beerocks::net::sMacAddr); // ruid
+    class_size += sizeof(sMacAddr); // al_mac
+    class_size += sizeof(sMacAddr); // ruid
     return class_size;
 }
 
@@ -3373,11 +3373,11 @@ bool cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_al_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_al_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_al_mac->struct_init(); }
-    m_ruid = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_ruid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_ruid->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

@@ -27,7 +27,7 @@
 #include "tlvf/WSC/eWscAuth.h"
 #include "tlvf/WSC/eWscEncr.h"
 #include "tlvf/WSC/eWscLengths.h"
-#include "tlvf/common/sMacAddress.h"
+#include "tlvf/common/sMacAddr.h"
 
 namespace WSC {
 
@@ -92,7 +92,7 @@ typedef struct sWscAttrUuidR {
 typedef struct sWscAttrMac {
     eWscAttributes attribute_type;
     uint16_t data_length;
-    sMacAddress data;
+    sMacAddr data;
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
@@ -478,7 +478,7 @@ typedef struct sWscAttrNetworkKey {
 typedef struct sWscAttrBssid {
     eWscAttributes attribute_type;
     uint16_t data_length;
-    sMacAddress data;
+    sMacAddr data;
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));

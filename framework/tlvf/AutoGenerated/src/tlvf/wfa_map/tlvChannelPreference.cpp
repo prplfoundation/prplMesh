@@ -33,8 +33,8 @@ const uint16_t& tlvChannelPreference::length() {
     return (const uint16_t&)(*m_length);
 }
 
-sMacAddress& tlvChannelPreference::radio_uid() {
-    return (sMacAddress&)(*m_radio_uid);
+sMacAddr& tlvChannelPreference::radio_uid() {
+    return (sMacAddr&)(*m_radio_uid);
 }
 
 uint8_t& tlvChannelPreference::operating_classes_list_length() {
@@ -108,7 +108,7 @@ size_t tlvChannelPreference::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(eTlvTypeMap); // type
     class_size += sizeof(uint16_t); // length
-    class_size += sizeof(sMacAddress); // radio_uid
+    class_size += sizeof(sMacAddr); // radio_uid
     class_size += sizeof(uint8_t); // operating_classes_list_length
     return class_size;
 }
@@ -131,9 +131,9 @@ bool tlvChannelPreference::init()
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
-    m_radio_uid = (sMacAddress*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddress) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddress); }
+    m_radio_uid = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_radio_uid->struct_init(); }
     m_operating_classes_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_operating_classes_list_length = 0;

@@ -20,7 +20,7 @@
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
-#include "tlvf/common/sMacAddress.h"
+#include "tlvf/common/sMacAddr.h"
 #include <tuple>
 #include "tlvf/ieee_1905_1/eMediaType.h"
 
@@ -68,8 +68,8 @@ class tlvTransmitterLinkMetric : public BaseClass
         } __attribute__((packed)) sLinkMetricInfo;
         
         typedef struct sInterfacePairInfo {
-            sMacAddress mac_of_an_interface_in_the_receiving_al;
-            sMacAddress mac_of_an_interface_in_the_neighbor_al;
+            sMacAddr mac_of_an_interface_in_the_receiving_al;
+            sMacAddr mac_of_an_interface_in_the_neighbor_al;
             sLinkMetricInfo link_metric_info;
             void struct_swap(){
                 mac_of_an_interface_in_the_receiving_al.struct_swap();
@@ -85,8 +85,8 @@ class tlvTransmitterLinkMetric : public BaseClass
         
         const eTlvType& type();
         const uint16_t& length();
-        sMacAddress& al_mac_of_the_device_that_transmits();
-        sMacAddress& al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv();
+        sMacAddr& al_mac_of_the_device_that_transmits();
+        sMacAddr& al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv();
         //The fields shall be repeated for each connected interface pair between the receiving
         //905.1 AL and the neighbor 1905.1 AL.
         std::tuple<bool, sInterfacePairInfo&> interface_pair_info(size_t idx);
@@ -98,8 +98,8 @@ class tlvTransmitterLinkMetric : public BaseClass
         bool init();
         eTlvType* m_type = nullptr;
         uint16_t* m_length = nullptr;
-        sMacAddress* m_al_mac_of_the_device_that_transmits = nullptr;
-        sMacAddress* m_al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv = nullptr;
+        sMacAddr* m_al_mac_of_the_device_that_transmits = nullptr;
+        sMacAddr* m_al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv = nullptr;
         sInterfacePairInfo* m_interface_pair_info = nullptr;
         size_t m_interface_pair_info_idx__ = 0;
 };

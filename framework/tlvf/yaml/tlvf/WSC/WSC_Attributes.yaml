@@ -2,7 +2,7 @@
 ---
 _include: {
   tlvf/WSC/eWscLengths.h,
-  tlvf/common/sMacAddress.h,
+  tlvf/common/sMacAddr.h,
 }
 _namespace: WSC
 
@@ -62,7 +62,7 @@ sWscAttrMac:
   data_length:
     _type: uint16_t
     _value: WSC_MAC_LENGTH
-  data: sMacAddress
+  data: sMacAddr
 
 sWscAttrEnroleeNonce:
   _type: struct
@@ -373,7 +373,7 @@ sWscAttrBssid:
     _type: uint16_t
     _value: WSC_MAC_LENGTH
   data:
-    _type: sMacAddress
+    _type: sMacAddr
 
 sWscAttrEncryptedSettings:
   _type: struct

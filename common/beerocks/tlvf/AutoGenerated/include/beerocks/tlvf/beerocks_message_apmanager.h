@@ -35,16 +35,16 @@ class cACTION_APMANAGER_4ADDR_STA_JOINED : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_4ADDR_STA_JOINED);
         }
-        beerocks::net::sMacAddr& src_mac();
-        beerocks::net::sMacAddr& dst_mac();
+        sMacAddr& src_mac();
+        sMacAddr& dst_mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_src_mac = nullptr;
-        beerocks::net::sMacAddr* m_dst_mac = nullptr;
+        sMacAddr* m_src_mac = nullptr;
+        sMacAddr* m_dst_mac = nullptr;
 };
 
 class cACTION_APMANAGER_JOINED_NOTIFICATION : public BaseClass
@@ -360,14 +360,14 @@ class cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE : public BaseClass
@@ -380,14 +380,14 @@ class cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST : public BaseClass
@@ -480,7 +480,7 @@ class cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         int8_t& vap_id();
         uint32_t& type();
         uint32_t& reason();
@@ -490,7 +490,7 @@ class cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
         int8_t* m_vap_id = nullptr;
         uint32_t* m_type = nullptr;
         uint32_t* m_reason = nullptr;
@@ -526,7 +526,7 @@ class cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_DISALLOW_REQUEST);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         uint8_t& reject_sta();
         void class_swap();
         static size_t get_initial_size();
@@ -534,7 +534,7 @@ class cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
         uint8_t* m_reject_sta = nullptr;
 };
 
@@ -548,7 +548,7 @@ class cACTION_APMANAGER_CLIENT_ALLOW_REQUEST : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_ALLOW_REQUEST);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         beerocks::net::sIpv4Addr& ipv4();
         void class_swap();
         static size_t get_initial_size();
@@ -556,7 +556,7 @@ class cACTION_APMANAGER_CLIENT_ALLOW_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
         beerocks::net::sIpv4Addr* m_ipv4 = nullptr;
 };
 
@@ -610,14 +610,14 @@ class cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST : public BaseClass
@@ -670,14 +670,14 @@ class cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseCla
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE);
         }
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST : public BaseClass

@@ -190,7 +190,7 @@ class cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION : public BaseClass
         }
         eDHCPOp& dhcp_op();
         uint32_t& op();
-        beerocks::net::sMacAddr& mac();
+        sMacAddr& mac();
         beerocks::net::sIpv4Addr& ipv4();
         char* hostname(size_t length = 0);
         bool set_hostname(std::string& str);
@@ -204,7 +204,7 @@ class cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION : public BaseClass
         eActionOp_PLATFORM* m_action_op = nullptr;
         eDHCPOp* m_dhcp_op = nullptr;
         uint32_t* m_op = nullptr;
-        beerocks::net::sMacAddr* m_mac = nullptr;
+        sMacAddr* m_mac = nullptr;
         beerocks::net::sIpv4Addr* m_ipv4 = nullptr;
         char* m_hostname = nullptr;
         size_t m_hostname_idx__ = 0;

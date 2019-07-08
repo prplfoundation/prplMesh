@@ -20,7 +20,7 @@
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
-#include "tlvf/common/sMacAddress.h"
+#include "tlvf/common/sMacAddr.h"
 
 namespace ieee1905_1 {
 
@@ -34,14 +34,14 @@ class tlvPushButtonJoinNotification : public BaseClass
 
         const eTlvType& type();
         const uint16_t& length();
-        sMacAddress& al_mac_notification_src();
+        sMacAddr& al_mac_notification_src();
         uint16_t& mid_of_the_notification();
         //Interface-specific MAC address of the interface of the transmitting device
         //belonging to the medium on which a new device joined.
-        sMacAddress& transmitter_iface_mac_of_new_device_joined();
+        sMacAddr& transmitter_iface_mac_of_new_device_joined();
         //Interface-specific MAC address of the interface of the new device that was
         //joined to the network as a result of the push button configuration sequence.
-        sMacAddress& iface_mac_of_new_device_joined();
+        sMacAddr& iface_mac_of_new_device_joined();
         void class_swap();
         static size_t get_initial_size();
 
@@ -49,10 +49,10 @@ class tlvPushButtonJoinNotification : public BaseClass
         bool init();
         eTlvType* m_type = nullptr;
         uint16_t* m_length = nullptr;
-        sMacAddress* m_al_mac_notification_src = nullptr;
+        sMacAddr* m_al_mac_notification_src = nullptr;
         uint16_t* m_mid_of_the_notification = nullptr;
-        sMacAddress* m_transmitter_iface_mac_of_new_device_joined = nullptr;
-        sMacAddress* m_iface_mac_of_new_device_joined = nullptr;
+        sMacAddr* m_transmitter_iface_mac_of_new_device_joined = nullptr;
+        sMacAddr* m_iface_mac_of_new_device_joined = nullptr;
 };
 
 }; // close namespace: ieee1905_1

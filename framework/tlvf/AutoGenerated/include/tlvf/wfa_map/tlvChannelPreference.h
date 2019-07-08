@@ -20,7 +20,7 @@
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
-#include "tlvf/common/sMacAddress.h"
+#include "tlvf/common/sMacAddr.h"
 #include <tuple>
 #include <vector>
 #include <asm/byteorder.h>
@@ -38,7 +38,7 @@ class tlvChannelPreference : public BaseClass
 
         const eTlvTypeMap& type();
         const uint16_t& length();
-        sMacAddress& radio_uid();
+        sMacAddr& radio_uid();
         uint8_t& operating_classes_list_length();
         std::tuple<bool, cOperatingClasses&> operating_classes_list(size_t idx);
         std::shared_ptr<cOperatingClasses> create_operating_classes_list();
@@ -50,7 +50,7 @@ class tlvChannelPreference : public BaseClass
         bool init();
         eTlvTypeMap* m_type = nullptr;
         uint16_t* m_length = nullptr;
-        sMacAddress* m_radio_uid = nullptr;
+        sMacAddr* m_radio_uid = nullptr;
         uint8_t* m_operating_classes_list_length = nullptr;
         cOperatingClasses* m_operating_classes_list = nullptr;
         size_t m_operating_classes_list_idx__ = 0;

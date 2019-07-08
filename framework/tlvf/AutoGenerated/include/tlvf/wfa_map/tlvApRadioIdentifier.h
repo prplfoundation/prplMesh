@@ -20,7 +20,7 @@
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
-#include "tlvf/common/sMacAddress.h"
+#include "tlvf/common/sMacAddr.h"
 
 namespace wfa_map {
 
@@ -34,7 +34,7 @@ class tlvApRadioIdentifier : public BaseClass
 
         const eTlvTypeMap& type();
         const uint16_t& length();
-        sMacAddress& radio_uid();
+        sMacAddr& radio_uid();
         void class_swap();
         static size_t get_initial_size();
 
@@ -42,7 +42,7 @@ class tlvApRadioIdentifier : public BaseClass
         bool init();
         eTlvTypeMap* m_type = nullptr;
         uint16_t* m_length = nullptr;
-        sMacAddress* m_radio_uid = nullptr;
+        sMacAddr* m_radio_uid = nullptr;
 };
 
 }; // close namespace: wfa_map

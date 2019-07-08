@@ -22,7 +22,7 @@ cMacList:
     _type: uint8_t
     _length_var: True
   mac_list:
-    _type: sMacAddress
+    _type: sMacAddr
     _length: [ mac_list_length ]
 
   

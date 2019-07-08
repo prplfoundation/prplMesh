@@ -47,30 +47,30 @@ cACTION_CLI_RESPONSE_STR:
 
 cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT:
   _type: class
-  client_mac: beerocks::net::sMacAddr
-  hostap_mac: beerocks::net::sMacAddr
+  client_mac: sMacAddr
+  hostap_mac: sMacAddr
   center_frequency:
     _type: uint16_t
     _value: 0
 
 cACTION_CLI_OPTIMAL_PATH_TASK:
   _type: class
-  client_mac: beerocks::net::sMacAddr
+  client_mac: sMacAddr
 
 cACTION_CLI_LOAD_BALANCER_TASK:
   _type: class
-  ap_mac: beerocks::net::sMacAddr
+  ap_mac: sMacAddr
 
 cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK:
   _type: class
 
 cACTION_CLI_DUMP_NODE_INFO:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
 
 cACTION_CLI_PING_SLAVE_REQUEST:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   num_of_req: uint16_t
   size: uint16_t
 
@@ -81,12 +81,12 @@ cACTION_CLI_PING_ALL_SLAVES_REQUEST:
 
 cACTION_CLI_BACKHAUL_SCAN_RESULTS:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
 
 cACTION_CLI_BACKHAUL_ROAM_REQUEST:
   _type: class
-  slave_mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr
+  slave_mac: sMacAddr
+  bssid: sMacAddr
 
 #################################################
 # CLIENT
@@ -94,41 +94,41 @@ cACTION_CLI_BACKHAUL_ROAM_REQUEST:
 
 cACTION_CLI_CLIENT_ALLOW_REQUEST:
   _type: class
-  client_mac: beerocks::net::sMacAddr
-  hostap_mac: beerocks::net::sMacAddr
+  client_mac: sMacAddr
+  hostap_mac: sMacAddr
 
 cACTION_CLI_CLIENT_DISALLOW_REQUEST:
   _type: class
-  client_mac: beerocks::net::sMacAddr
-  hostap_mac: beerocks::net::sMacAddr
+  client_mac: sMacAddr
+  hostap_mac: sMacAddr
 
 cACTION_CLI_CLIENT_DISCONNECT_REQUEST:
   _type: class
-  client_mac: beerocks::net::sMacAddr
+  client_mac: sMacAddr
   type: uint32_t
   reason: uint32_t
 
 cACTION_CLI_CLIENT_BSS_STEER_REQUEST:
   _type: class
-  client_mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr
+  client_mac: sMacAddr
+  bssid: sMacAddr
   disassoc_timer: uint32_t
 
 cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST:
   _type: class
-  hostap_mac: beerocks::net::sMacAddr
-  client_mac: beerocks::net::sMacAddr
+  hostap_mac: sMacAddr
+  client_mac: sMacAddr
 
 cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST:
   _type: class
-  hostap_mac: beerocks::net::sMacAddr
-  client_mac: beerocks::net::sMacAddr
+  hostap_mac: sMacAddr
+  client_mac: sMacAddr
   channel: uint8_t
 
 cACTION_CLI_CLIENT_BEACON_11K_REQUEST:
   _type: class
-  client_mac: beerocks::net::sMacAddr 
-  bssid: beerocks::net::sMacAddr 
+  client_mac: sMacAddr 
+  bssid: sMacAddr 
   ssid:
     _type: uint8_t 
     _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
@@ -142,9 +142,9 @@ cACTION_CLI_CLIENT_BEACON_11K_REQUEST:
 
 cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST:
   _type: class
-  hostap_mac: beerocks::net::sMacAddr 
-  client_mac: beerocks::net::sMacAddr
-  peer_mac: beerocks::net::sMacAddr
+  hostap_mac: sMacAddr 
+  client_mac: sMacAddr
+  peer_mac: sMacAddr
   group_identity: uint8_t
 
 #################################################
@@ -153,30 +153,30 @@ cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST:
 
 cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST:
   _type: class
-  mac: beerocks::net::sMacAddr
+  mac: sMacAddr
   cs_params: sApChannelSwitch
 
 cACTION_CLI_HOSTAP_TX_ON_REQUEST:
   _type: class
-  ap_mac: beerocks::net::sMacAddr
+  ap_mac: sMacAddr
 
 cACTION_CLI_HOSTAP_TX_OFF_REQUEST:
   _type: class
-  ap_mac: beerocks::net::sMacAddr
+  ap_mac: sMacAddr
 
 cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST:
   _type: class
-  ap_mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr
+  ap_mac: sMacAddr
+  bssid: sMacAddr
   channel: uint8_t
   vap_id: int8_t
 
 cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST:
   _type: class
-  ap_mac: beerocks::net::sMacAddr
-  bssid: beerocks::net::sMacAddr
+  ap_mac: sMacAddr
+  bssid: sMacAddr
   vap_id: int8_t
 
 cACTION_CLI_HOSTAP_STATS_MEASUREMENT:
   _type: class
-  ap_mac: beerocks::net::sMacAddr
+  ap_mac: sMacAddr

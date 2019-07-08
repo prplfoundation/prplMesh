@@ -39,7 +39,7 @@ public:
         Socket *sd;
         uint32_t steeringGroupIndex;
         std::string bssid;
-        beerocks::net::sMacAddr client_mac;
+        sMacAddr client_mac;
         beerocks_message::sSteeringClientConfig config;
         uint8_t remove;
     };
@@ -62,7 +62,7 @@ public:
         Socket *sd;
         uint32_t steeringGroupIndex;
         std::string bssid;
-        beerocks::net::sMacAddr client_mac;
+        sMacAddr client_mac;
         beerocks_message::eDisconnectType type;
         uint32_t reason;
     };

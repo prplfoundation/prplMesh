@@ -20,7 +20,7 @@
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
-#include "tlvf/common/sMacAddress.h"
+#include "tlvf/common/sMacAddr.h"
 
 namespace ieee1905_1 {
 
@@ -46,7 +46,7 @@ class tlvLinkMetricQuery : public BaseClass
         const eTlvType& type();
         const uint16_t& length();
         eNeighborType& neighbor_type();
-        sMacAddress& mac_al_1905_device();
+        sMacAddr& mac_al_1905_device();
         eLinkMetricsType& link_metrics();
         void class_swap();
         static size_t get_initial_size();
@@ -56,7 +56,7 @@ class tlvLinkMetricQuery : public BaseClass
         eTlvType* m_type = nullptr;
         uint16_t* m_length = nullptr;
         eNeighborType* m_neighbor_type = nullptr;
-        sMacAddress* m_mac_al_1905_device = nullptr;
+        sMacAddr* m_mac_al_1905_device = nullptr;
         eLinkMetricsType* m_link_metrics = nullptr;
 };
 

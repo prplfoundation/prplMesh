@@ -21,7 +21,7 @@
 namespace beerocks_message {
 
 typedef struct sCliNetworkMapNodeAp {
-    beerocks::net::sMacAddr mac;
+    sMacAddr mac;
     uint16_t length;
     uint8_t hierarchy;
     void struct_swap(){
@@ -34,7 +34,7 @@ typedef struct sCliNetworkMapNodeAp {
 } __attribute__((packed)) sCliNetworkMapNodeAp;
 
 typedef struct sCliNetworkMapNodeSta {
-    beerocks::net::sMacAddr mac;
+    sMacAddr mac;
     uint8_t type;
     int8_t rx_rssi;
     void struct_swap(){
@@ -46,7 +46,7 @@ typedef struct sCliNetworkMapNodeSta {
 } __attribute__((packed)) sCliNetworkMapNodeSta;
 
 typedef struct sCliNetworkMapsNodeInfo {
-    beerocks::net::sMacAddr mac;
+    sMacAddr mac;
     beerocks::net::sIpv4Addr ipv4;
     char name[beerocks::message::NODE_NAME_LENGTH];
     uint8_t type;

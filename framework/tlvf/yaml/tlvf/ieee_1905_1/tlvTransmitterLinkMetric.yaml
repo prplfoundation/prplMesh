@@ -9,8 +9,8 @@ tlvTransmitterLinkMetric:
     _type: eTlvType
     _value_const: TLV_TRANSMITTER_LINK_METRIC
   length: uint16_t
-  al_mac_of_the_device_that_transmits: sMacAddress
-  al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv: sMacAddress
+  al_mac_of_the_device_that_transmits: sMacAddr
+  al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv: sMacAddr
   interface_pair_info:
     _type: sInterfacePairInfo
     _length: []
@@ -51,6 +51,6 @@ sLinkMetricInfo:
 
 sInterfacePairInfo:
   _type: struct
-  mac_of_an_interface_in_the_receiving_al: sMacAddress
-  mac_of_an_interface_in_the_neighbor_al: sMacAddress
+  mac_of_an_interface_in_the_receiving_al: sMacAddr
+  mac_of_an_interface_in_the_neighbor_al: sMacAddr
   link_metric_info: sLinkMetricInfo

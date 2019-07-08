@@ -33,8 +33,8 @@ const uint16_t& tlv1905NeighborDevice::length() {
     return (const uint16_t&)(*m_length);
 }
 
-sMacAddress& tlv1905NeighborDevice::mac_local_iface() {
-    return (sMacAddress&)(*m_mac_local_iface);
+sMacAddr& tlv1905NeighborDevice::mac_local_iface() {
+    return (sMacAddr&)(*m_mac_local_iface);
 }
 
 std::tuple<bool, tlv1905NeighborDevice::sMacAl1905Device&> tlv1905NeighborDevice::mac_al_1905_device(size_t idx) {
@@ -80,7 +80,7 @@ size_t tlv1905NeighborDevice::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(eTlvType); // type
     class_size += sizeof(uint16_t); // length
-    class_size += sizeof(sMacAddress); // mac_local_iface
+    class_size += sizeof(sMacAddr); // mac_local_iface
     return class_size;
 }
 
@@ -102,9 +102,9 @@ bool tlv1905NeighborDevice::init()
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
-    m_mac_local_iface = (sMacAddress*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddress) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddress); }
+    m_mac_local_iface = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_mac_local_iface->struct_init(); }
     m_mac_al_1905_device = (sMacAl1905Device*)m_buff_ptr__;
     if (m_length && m_parse__) {

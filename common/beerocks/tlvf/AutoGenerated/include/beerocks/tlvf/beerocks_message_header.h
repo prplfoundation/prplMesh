@@ -38,7 +38,7 @@ class cACTION_HEADER : public BaseClass
         //need to cast eActionOp_XXXX to uint8_t
         uint8_t& action_op();
         uint8_t& direction();
-        beerocks::net::sMacAddr& radio_mac();
+        sMacAddr& radio_mac();
         uint8_t& last();
         uint16_t& id();
         uint16_t& length();
@@ -52,7 +52,7 @@ class cACTION_HEADER : public BaseClass
         eAction* m_action = nullptr;
         uint8_t* m_action_op = nullptr;
         uint8_t* m_direction = nullptr;
-        beerocks::net::sMacAddr* m_radio_mac = nullptr;
+        sMacAddr* m_radio_mac = nullptr;
         uint8_t* m_last = nullptr;
         uint16_t* m_id = nullptr;
         uint16_t* m_length = nullptr;

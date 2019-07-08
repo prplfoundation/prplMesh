@@ -45,8 +45,8 @@ uint8_t& cACTION_HEADER::direction() {
     return (uint8_t&)(*m_direction);
 }
 
-beerocks::net::sMacAddr& cACTION_HEADER::radio_mac() {
-    return (beerocks::net::sMacAddr&)(*m_radio_mac);
+sMacAddr& cACTION_HEADER::radio_mac() {
+    return (sMacAddr&)(*m_radio_mac);
 }
 
 uint8_t& cACTION_HEADER::last() {
@@ -77,7 +77,7 @@ size_t cACTION_HEADER::get_initial_size()
     class_size += sizeof(eAction); // action
     class_size += sizeof(uint8_t); // action_op
     class_size += sizeof(uint8_t); // direction
-    class_size += sizeof(beerocks::net::sMacAddr); // radio_mac
+    class_size += sizeof(sMacAddr); // radio_mac
     class_size += sizeof(uint8_t); // last
     class_size += sizeof(uint16_t); // id
     class_size += sizeof(uint16_t); // length
@@ -103,8 +103,8 @@ bool cACTION_HEADER::init()
     m_direction = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_direction = 0x1;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
-    m_radio_mac = (beerocks::net::sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sMacAddr) * 1;
+    m_radio_mac = (sMacAddr*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sMacAddr) * 1;
     if (!m_parse__) { m_radio_mac->struct_init(); }
     m_last = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_last = 0x0;
