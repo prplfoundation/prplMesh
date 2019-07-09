@@ -15,6 +15,14 @@ If `build.sh` or `run.sh` are called without first calling `image-build.sh`, the
 
 ---
 
+## Docker post-installation
+To remove the need of using `sudo` before each docker command, please refer to the next guide:
+https://docs.docker.com/install/linux/linux-postinstall/
+
+Note that if you choose not to follow the guide, you should add `sudo` before each command.
+
+---
+
 ## Docker builder
 
 The docker builder image can be used to build prplMesh via `maptools.py build` command running in a prplmesh-build container via `build.sh`.
@@ -22,7 +30,7 @@ The docker builder image can be used to build prplMesh via `maptools.py build` c
 Build prplMesh in container:
 
 ```bash
-sudo ./build.sh <maptools.py build arguments>
+./build.sh <maptools.py build arguments>
 ```
 
 ## Docker runner
@@ -35,7 +43,7 @@ communicate + sniffed by running `wireshark` / `tcpdump` on the bridge from the 
 
 ## Docker tester
 
-A simple wrapper which calls `sudo docker exec <container name> -it <path/to>/build/install/scripts/prplmesh_utils.sh status` which prints the prplMesh operational status of the main and radio agents.
+A simple wrapper which calls `docker exec <container name> -it <path/to>/build/install/scripts/prplmesh_utils.sh status` which prints the prplMesh operational status of the main and radio agents.
 
 ### Prerequisites
 
@@ -59,9 +67,9 @@ After running, we can connect to the container with a new shell using `docker co
 
 ```bash
 # start controller+agent in a new container named 'controller' in detached mode
-sudo ./run.sh -n controller -d start-controller-agent
+./run.sh -n controller -d start-controller-agent
 # attach the controller container and open new bash shell
-sudo docker container exec -it controller bash
+docker container exec -it controller bash
 # Now we are inside the container and can tail the controller log
 tail -F /tmp/beerocks/logs/beerocks_controller.log
 ```
@@ -70,9 +78,9 @@ tail -F /tmp/beerocks/logs/beerocks_controller.log
 
 ```bash
 # start agent in a new container named 'agent' in detached mode
-sudo ./run.sh -n agent -d start-agent
+./run.sh -n agent -d start-agent
 # attach the agent container and open new bash shell
-sudo docker container exec -it agent bash
+docker container exec -it agent bash
 # Now we are inside the container and can tail the agent log
 tail -F /tmp/beerocks/logs/beerocks_agent.log
 ```
@@ -83,7 +91,7 @@ If needed, run the container interactively without specifying the daemon to run:
 
 ```bash
 # start container named <name> and start interactive session using bash (supplied by the image)
-sudo ./run.sh -n <name>
+./run.sh -n <name>
 ```
 
 ---
@@ -91,19 +99,19 @@ sudo ./run.sh -n <name>
 **Notes**
 
 1. The script automatically selects an IP based on the network, but its not 100% full proof - it generates a random IP in the network subnet, except for the gateway. If more than one container is created on the same network **they might get the same IP** (very rare but keep in mind)
-2. List all running containers `sudo docker container ls`
-3. Connect to any running container using `sudo docker container attach <name>`
+2. List all running containers `docker container ls`
+3. Connect to any running container using `docker container attach <name>`
 4. Connect to any running container opening a new shell using `docker container exec -it <name> bash`
-5. Kill all containers (running and stopped) `sudo docker rm -f $(sudo docker ps -a -q)` 
+5. Kill all containers (running and stopped) `docker rm -f $(docker ps -a -q)` 
 
 ---
 
 ## Docker cheat-sheet
 
-Show all images - `sudo docker images`
+Show all images - `docker images`
 
-Delete all images - `sudo docker rmi $(sudo docker images -q)`
+Delete all images - `docker rmi $(docker images -q)`
 
-Delete all containers - `sudo docker rm $(sudo docker ps -a -q)`
+Delete all containers - `docker rm $(docker ps -a -q)`
 
 Proxy - The recommended way to work with docker behind a proxy is by [configuring the docker client to pass proxy information to containers automatically](https://docs.docker.com/network/proxy/).
