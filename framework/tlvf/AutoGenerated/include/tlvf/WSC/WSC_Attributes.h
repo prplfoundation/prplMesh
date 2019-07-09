@@ -27,6 +27,7 @@
 #include "tlvf/WSC/eWscAuth.h"
 #include "tlvf/WSC/eWscEncr.h"
 #include "tlvf/WSC/eWscLengths.h"
+#include "tlvf/WSC/eWscVendorId.h"
 #include "tlvf/common/sMacAddr.h"
 
 namespace WSC {
@@ -389,7 +390,7 @@ typedef struct sWscAttrOsVersion {
     }
 } __attribute__((packed)) sWscAttrOsVersion;
 
-typedef struct sWscAttrVersionExtension {
+typedef struct sWscAttrVendorExtension {
     eWscAttributes attribute_type;
     uint16_t data_length;
     uint8_t data[WSC_VENDOR_EXTENSIONS_LENGTH];
@@ -401,7 +402,7 @@ typedef struct sWscAttrVersionExtension {
         attribute_type = ATTR_VENDOR_EXTENSION;
         data_length = WSC_VENDOR_EXTENSIONS_LENGTH;
     }
-} __attribute__((packed)) sWscAttrVersionExtension;
+} __attribute__((packed)) sWscAttrVendorExtension;
 
 typedef struct sWscAttrKeyWrapAuthenticator {
     eWscAttributes attribute_type;

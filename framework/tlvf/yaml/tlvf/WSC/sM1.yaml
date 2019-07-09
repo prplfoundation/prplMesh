@@ -27,5 +27,5 @@ sM1:
   device_password_id_attr: sWscAttrDevicePasswordID
   configuration_error_attr: sWscAttrConfigurationError
   os_version_attr: sWscAttrOsVersion
-  vendor_extensions_attr: sWscAttrVersionExtension
+  vendor_extensions_attr: sWscAttrVendorExtension
   

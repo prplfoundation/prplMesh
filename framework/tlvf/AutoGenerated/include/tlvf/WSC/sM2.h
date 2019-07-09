@@ -41,7 +41,7 @@ typedef struct sM2 {
     WSC::sWscAttrConfigurationError configuration_error_attr;
     WSC::sWscAttrDevicePasswordID device_password_id_attr;
     WSC::sWscAttrOsVersion os_version_attr;
-    WSC::sWscAttrVersionExtension vendor_extensions_attr;
+    WSC::sWscAttrVendorExtension vendor_extensions_attr;
     sWscAttrEncryptedSettings encrypted_settings_attr;
     void struct_swap(){
         version_attr.struct_swap();

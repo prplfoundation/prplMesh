@@ -2,6 +2,7 @@
 ---
 _include: {
   tlvf/WSC/eWscLengths.h,
+  tlvf/WSC/eWscVendorId.h,
   tlvf/common/sMacAddr.h,
 }
 _namespace: WSC
@@ -292,7 +293,7 @@ sWscAttrOsVersion:
     _type: uint32_t
     _value: 0x80000001
 
-sWscAttrVersionExtension:
+sWscAttrVendorExtension:
   _type: struct
   attribute_type:
     _type: eWscAttributes
