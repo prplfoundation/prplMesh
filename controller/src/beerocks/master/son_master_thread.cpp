@@ -39,6 +39,7 @@
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
+#include <tlvf/ieee_1905_1/tlvWscM2.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
@@ -205,10 +206,8 @@ bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessa
 
     switch (cmdu_rx.getMessageType()) {
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE:
-        LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_SEARCH_MESSAGE";
         return handle_cmdu_1905_autoconfiguration_search(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE:
-        LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE";
         return handle_cmdu_1905_autoconfiguration_WSC(sd, cmdu_rx);
     default:
         break;
@@ -223,6 +222,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
 {
     std::string al_mac;
 
+    LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_SEARCH_MESSAGE";
     auto tlvAlMacAddressType = cmdu_rx.addClass<ieee1905_1::tlvAlMacAddressType>();
     if (tlvAlMacAddressType) {
         al_mac =
@@ -359,7 +359,6 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
 bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
                                                            ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    auto tlvAp = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
     // Check if this is a M2 message that we sent to the agent, which was just looped back.
     // The M1 and M2 messages are both of CMDU type AP_Autoconfiguration_WSC. Thus,
     // when we send the M2 to the local agent, it will be published back on the local bus because
@@ -369,16 +368,23 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
     // while the M2 has the AP_Radio_Identifier TLV.
     // If this is a looped back M2 CMDU, we can treat is as handled successfully.
-    if (tlvAp == nullptr) {
-        if (cmdu_rx.addClass<wfa_map::tlvApRadioIdentifier>()) {
-            return true;
-        }
-        LOG(DEBUG) << "Failed to get APRadioBasicCapabilities";
+    if (cmdu_rx.getNextTlvType() == wfa_map::TLV_AP_RADIO_IDENTIFIER)
+        return true;
+
+    LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE";
+    /**
+    * @brief Parse AP-Autoconfiguration WSC which should include one AP Radio Basic Capabilities
+    * TLV and one WSC TLV containing M1
+    */
+    auto ap = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+    if (ap == nullptr) {
+        LOG(ERROR) << "Failed to get APRadioBasicCapabilities";
         return false;
     }
 
-    auto tlvWscM1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
-    if (tlvWscM1 == nullptr) {
+    // Parse M1 TLV
+    auto m1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
+    if (m1 == nullptr) {
         LOG(ERROR) << "Error creating tlvWscM1";
         return false;
     }
@@ -386,6 +392,68 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     //TODO autoconfig process the rest of the class
     //TODO autoconfig add support for none intel agents
     //TODO autoconfig Keep intel agent support only as intel enhancements
+    /**
+     * @brief Reply with AP-Autoconfiguration WSC with a single AP Radio Identifier TLV
+     * and one (TODO do we need more?) WSC TLV containing M2.
+     */
+    auto c = cmdu_tx.create(
+        0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE);
+    if (!c) {
+        LOG(ERROR) << "Create AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE response";
+        return false;
+    }
+    // All attributes which are not explicitely set below are set to
+    // default by the TLV factory, see WSC_Attributes.yml
+    auto ruid = cmdu_tx.addClass<wfa_map::tlvApRadioIdentifier>();
+    if (!ruid) {
+        LOG(ERROR) << "error creating tlvApRadioIdentifier TLV";
+        return false;
+    }
+    // Let the Agent keep its Radio Identifier
+    ruid->radio_uid() = ap->radio_uid();
+
+    auto m2 = cmdu_tx.addClass<ieee1905_1::tlvWscM2>();
+    if (m2 == nullptr) {
+        LOG(ERROR) << "Error creating tlvWscM1";
+        return false;
+    }
+
+    m2->M2Frame().message_type_attr.data = WSC::WSC_MSG_TYPE_M2;
+    string_utils::copy_string(m2->M2Frame().manufacturer_attr.data, "Intel",
+                              m2->M2Frame().manufacturer_attr.data_length);
+    string_utils::copy_string(m2->M2Frame().model_name_attr.data, "Ubuntu",
+                              m2->M2Frame().model_name_attr.data_length);
+    string_utils::copy_string(m2->M2Frame().model_number_attr.data, "18.04",
+                              m2->M2Frame().model_number_attr.data_length);
+    std::string manufacturer = std::string(m1->M1Frame().manufacturer_attr.data,
+                                           m1->M1Frame().manufacturer_attr.data_length);
+
+    if (!manufacturer.compare("Intel")) {
+        //TODO add support for none Intel agents
+        LOG(ERROR) << "None Intel radio agent " << manufacturer << " , dropping M1 message";
+        return false;
+    }
+
+    auto radio_mac = network_utils::mac_to_string(m1->M1Frame().mac_attr.data.oct);
+    LOG(INFO) << "Intel radio agent " << radio_mac << " join";
+    if (!handle_intel_slave_join(sd, cmdu_rx, cmdu_tx, radio_mac)) {
+        LOG(ERROR) << "Not an Intel agent " << radio_mac << " (" << manufacturer << ")";
+        return false;
+    }
+
+    return true;
+}
+
+bool master_thread::handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx,
+                                            ieee1905_1::CmduMessageTx &cmdu_tx,
+                                            const std::string &radio_mac)
+{
+    auto tlv_vs = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
+    if (!tlv_vs) {
+        LOG(ERROR) << "Failed adding intel vendor specific TLV";
+        return false;
+    }
+
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
     if (!beerocks_header) {
         LOG(ERROR) << "Failed to parse intel vs message (not Intel?)";
@@ -398,19 +466,6 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
 
-    std::copy_n(tlvWscM1->M1Frame().mac_attr.data.oct, beerocks::net::MAC_ADDR_LEN,
-                beerocks_header->radio_mac().oct);
-    LOG(INFO) << "Handle slave join, radio mac "
-              << network_utils::mac_to_string(beerocks_header->radio_mac());
-    return handle_slave_join(sd, beerocks_header,
-                             cmdu_rx); // TODO to be removed once autoconfig is completed
-}
-
-bool master_thread::handle_slave_join(
-    Socket *sd, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
-    ieee1905_1::CmduMessageRx &cmdu_rx)
-{
-    std::string radio_mac = network_utils::mac_to_string(beerocks_header->radio_mac());
     auto notification =
         cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>();
     if (notification == nullptr) {
@@ -483,15 +538,16 @@ bool master_thread::handle_slave_join(
             LOG(DEBUG) << "sending back join reject!";
             LOG(DEBUG) << "reject_debug: parent_bssid_has_node="
                        << (int)(database.has_node(parent_bssid_mac));
-            auto joined_response = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>(cmdu_tx);
-            if (joined_response == nullptr) {
+            auto response = message_com::add_intel_vs_data<
+                beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>(cmdu_tx, tlv_vs);
+
+            if (response == nullptr) {
                 LOG(ERROR) << "Failed building message!";
                 return false;
             }
-            joined_response->err_code() = beerocks::JOIN_RESP_REJECT;
-            son_actions::send_cmdu_to_agent(sd, cmdu_tx, radio_mac);
-            return true;
+            response->err_code() = beerocks::JOIN_RESP_REJECT;
+            tlv_vs->length() += response->getLen();
+            return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
         }
 
         // sending to BML listeners, client disconnect notification on ire backhaul before changing it type from TYPE_CLIENT to TYPE_IRE_BACKHAUL
@@ -639,17 +695,19 @@ bool master_thread::handle_slave_join(
           (slave_version_s.build_number > master_version_s.build_number)))) {
         LOG(INFO) << "slave_version > master_version, sending "
                      "ACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION";
-        auto version_notification = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION>(cmdu_tx);
-        if (version_notification == nullptr) {
+        auto response = message_com::add_intel_vs_data<
+            beerocks_message::cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION>(cmdu_tx, tlv_vs);
+        if (response == nullptr) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
-        string_utils::copy_string(version_notification->versions().master_version, BEEROCKS_VERSION,
+
+        string_utils::copy_string(response->versions().master_version, BEEROCKS_VERSION,
                                   message::VERSION_LENGTH);
-        string_utils::copy_string(version_notification->versions().slave_version,
-                                  slave_version.c_str(), message::VERSION_LENGTH);
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, radio_mac);
+        string_utils::copy_string(response->versions().slave_version, slave_version.c_str(),
+                                  message::VERSION_LENGTH);
+        tlv_vs->length() += response->getLen();
+        return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
     }
 
     // check if fatal mismatch
@@ -659,18 +717,19 @@ bool master_thread::handle_slave_join(
                   << std::string(slave_version)
                   << " master_version=" << std::string(BEEROCKS_VERSION);
         LOG(INFO) << " bridge_mac=" << bridge_mac << " bridge_ipv4=" << bridge_ipv4;
-        auto joined_response =
-            message_com::create_vs_message<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>(
-                cmdu_tx);
-        if (joined_response == nullptr) {
+        auto response =
+            message_com::add_intel_vs_data<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>(
+                cmdu_tx, tlv_vs);
+        if (response == nullptr) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
-        joined_response->err_code() = beerocks::JOIN_RESP_VERSION_MISMATCH;
-        string_utils::copy_string(joined_response->master_version(message::VERSION_LENGTH),
+
+        response->err_code() = beerocks::JOIN_RESP_VERSION_MISMATCH;
+        string_utils::copy_string(response->master_version(message::VERSION_LENGTH),
                                   BEEROCKS_VERSION, message::VERSION_LENGTH);
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, radio_mac);
-        return true; //do not activate slave
+        tlv_vs->length() += response->getLen();
+        return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
     }
 
     beerocks::eIfaceType hostap_iface_type =
@@ -799,12 +858,13 @@ bool master_thread::handle_slave_join(
     // send JOINED_RESPONSE with son config
     {
         auto joined_response =
-            message_com::create_vs_message<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>(
-                cmdu_tx);
+            message_com::add_intel_vs_data<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>(
+                cmdu_tx, tlv_vs);
         if (joined_response == nullptr) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
+
         string_utils::copy_string(joined_response->master_version(message::VERSION_LENGTH),
                                   BEEROCKS_VERSION, message::VERSION_LENGTH);
         joined_response->config().monitor_total_ch_load_notification_hi_th_percent =
@@ -837,7 +897,8 @@ bool master_thread::handle_slave_join(
             database.config.ire_rssi_report_rate_sec;
 
         LOG(DEBUG) << "send SLAVE_JOINED_RESPONSE";
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, radio_mac);
+        tlv_vs->length() += joined_response->getLen();
+        son_actions::send_cmdu_to_agent(sd, cmdu_tx);
     }
 
     // calling this function to update arp monitor with new ip addr (bridge ip), which is diffrent from the ip received from, dhcp on the backhaul
@@ -923,12 +984,6 @@ bool master_thread::handle_cmdu_control_message(
 
     if (beerocks_header->direction() == beerocks::BEEROCKS_DIRECTION_AGENT) {
         return true;
-    }
-
-    if (beerocks_header->action_op() ==
-        beerocks_message::ACTION_CONTROL_SLAVE_JOINED_NOTIFICATION) {
-        return handle_slave_join(sd, beerocks_header,
-                                 cmdu_rx); // TODO to be removed once autoconfig is completed
     }
 
     //Update all (Slaves) last seen timestamp

@@ -23,7 +23,9 @@
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
+#include <tlvf/ieee_1905_1/tlvWscM2.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
+#include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 
 // BPL Error Codes
@@ -456,14 +458,13 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
     keep_alive_retries = 0;
 
     switch (cmdu_message_type) {
-    case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE: {
-        handle_channel_preference_query_message(sd, cmdu_rx);
-        break;
-    }
-    default: {
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE:
+        return handle_autoconfiguration_wsc(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
+        return handle_channel_preference_query(sd, cmdu_rx);
+    default:
         LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
         return false;
-    }
     }
 
     return true;
@@ -502,128 +503,6 @@ bool slave_thread::handle_cmdu_control_message(
     keep_alive_retries = 0;
 
     switch (beerocks_header->action_op()) {
-    case beerocks_message::ACTION_CONTROL_SLAVE_JOINED_RESPONSE: {
-        LOG(DEBUG) << "ACTION_CONTROL_SLAVE_JOINED_RESPONSE sd=" << intptr_t(sd);
-        if (slave_state == STATE_WAIT_FOR_JOINED_RESPONSE) {
-
-            auto joined_response =
-                cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>();
-            if (joined_response == nullptr) {
-                LOG(ERROR) << "addClass cACTION_CONTROL_SLAVE_JOINED_RESPONSE failed";
-                return false;
-            }
-
-            // check master rejection
-            if (joined_response->err_code() == beerocks::JOIN_RESP_REJECT) {
-                slave_state_timer =
-                    std::chrono::steady_clock::now() +
-                    std::chrono::seconds(WAIT_BEFORE_SEND_SLAVE_JOINED_NOTIFICATION_SEC);
-                LOG(DEBUG) << "STATE_WAIT_FOR_JOINED_RESPONSE: join rejected!";
-                LOG(DEBUG) << "goto STATE_WAIT_BEFORE_JOIN_MASTER";
-                slave_state = STATE_WAIT_BEFORE_JOIN_MASTER;
-                break;
-            }
-
-            // request the current vap list from ap_manager
-            auto request = message_com::create_vs_message<
-                beerocks_message::cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST>(cmdu_tx);
-            if (request == nullptr) {
-                LOG(ERROR)
-                    << "Failed building cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST message!";
-                return false;
-            }
-            message_com::send_cmdu(ap_manager_socket, cmdu_tx);
-
-            // send all pending_client_association notifications
-            for (auto notify : pending_client_association_cmdu) {
-                auto notification = message_com::create_vs_message<
-                    beerocks_message::cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
-                if (notification == nullptr) {
-                    LOG(ERROR) << "Failed building message!";
-                    return false;
-                }
-                notification->params() = notify.second;
-                send_cmdu_to_controller(cmdu_tx);
-            }
-            pending_client_association_cmdu.clear();
-
-            master_version.assign(joined_response->master_version(message::VERSION_LENGTH));
-
-            LOG(DEBUG) << "Version (Master/Slave): " << master_version << "/" << BEEROCKS_VERSION;
-            auto slave_version_s  = version::version_from_string(BEEROCKS_VERSION);
-            auto master_version_s = version::version_from_string(master_version);
-
-            // check if mismatch notification is needed
-            if ((master_version_s.major > slave_version_s.major) ||
-                ((master_version_s.major == slave_version_s.major) &&
-                 (master_version_s.minor > slave_version_s.minor)) ||
-                ((master_version_s.major == slave_version_s.major) &&
-                 (master_version_s.minor == slave_version_s.minor) &&
-                 (master_version_s.build_number > slave_version_s.build_number))) {
-                LOG(INFO) << "master_version > slave_version, sending "
-                             "ACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION";
-                auto notification = message_com::create_vs_message<
-                    beerocks_message::cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION>(cmdu_tx);
-                if (notification == nullptr) {
-                    LOG(ERROR) << "Failed building message!";
-                    return false;
-                }
-
-                string_utils::copy_string(notification->versions().master_version,
-                                          master_version.c_str(),
-                                          sizeof(beerocks_message::sVersions::master_version));
-                string_utils::copy_string(notification->versions().slave_version, BEEROCKS_VERSION,
-                                          sizeof(beerocks_message::sVersions::slave_version));
-                message_com::send_cmdu(platform_manager_socket, cmdu_tx);
-            }
-
-            // check if fatal mismatch
-            if (joined_response->err_code() == beerocks::JOIN_RESP_VERSION_MISMATCH) {
-                LOG(ERROR) << "Mismatch version! slave_version=" << std::string(BEEROCKS_VERSION)
-                           << " master_version=" << master_version;
-                LOG(DEBUG) << "goto STATE_VERSION_MISMATCH";
-                slave_state = STATE_VERSION_MISMATCH;
-            } else if (joined_response->err_code() == beerocks::JOIN_RESP_SSID_MISMATCH) {
-                LOG(ERROR) << "Mismatch SSID!";
-                LOG(DEBUG) << "goto STATE_SSID_MISMATCH";
-                slave_state = STATE_SSID_MISMATCH;
-            } else if (joined_response->err_code() ==
-                       beerocks::JOIN_RESP_ADVERTISE_SSID_FLAG_MISMATCH) {
-                LOG(INFO) << "advertise SSID flag mismatch";
-                auto notification = message_com::create_vs_message<
-                    beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST>(cmdu_tx);
-                if (notification == nullptr) {
-                    LOG(ERROR) << "Failed building message!";
-                    return false;
-                }
-                notification->flag() = (wlan_settings.advertise_ssid ? 0 : 1);
-                message_com::send_cmdu(platform_manager_socket, cmdu_tx);
-            } else {
-                //Send master version + slave version to platform manager
-                auto notification = message_com::create_vs_message<
-                    beerocks_message::cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION>(cmdu_tx);
-                if (notification == nullptr) {
-                    LOG(ERROR) << "Failed building message!";
-                    return false;
-                }
-                string_utils::copy_string(notification->versions().master_version,
-                                          master_version.c_str(),
-                                          sizeof(beerocks_message::sVersions::master_version));
-                string_utils::copy_string(notification->versions().slave_version, BEEROCKS_VERSION,
-                                          sizeof(beerocks_message::sVersions::slave_version));
-                message_com::send_cmdu(platform_manager_socket, cmdu_tx);
-                LOG(DEBUG) << "send ACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION";
-
-                son_config = joined_response->config();
-                log_son_config();
-
-                slave_state = STATE_UPDATE_MONITOR_SON_CONFIG;
-            }
-        } else {
-            LOG(ERROR) << "slave_state != STATE_WAIT_FOR_JOINED_RESPONSE";
-        }
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_ARP_QUERY_REQUEST: {
         LOG(TRACE) << "ACTION_CONTROL_ARP_QUERY_REQUEST";
         auto request_in = cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_ARP_QUERY_REQUEST>();
@@ -3846,10 +3725,14 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         std::copy_n(hostap_params.iface_mac.oct, sizeof(sMacAddr),
                     tlvWscM1->M1Frame().mac_attr.data.oct);
         // TODO: read manufactured, name, model and device name from BPL
-        string_utils::copy_string(tlvWscM1->M1Frame().manufacturer_attr.data, "prpl", 5);
-        string_utils::copy_string(tlvWscM1->M1Frame().model_name_attr.data, "Ubuntu", 7);
-        string_utils::copy_string(tlvWscM1->M1Frame().model_number_attr.data, "18.04", 6);
-        string_utils::copy_string(tlvWscM1->M1Frame().device_name_attr.data, "prplMesh", 9);
+        string_utils::copy_string(tlvWscM1->M1Frame().manufacturer_attr.data, "Intel",
+                                  tlvWscM1->M1Frame().manufacturer_attr.data_length);
+        string_utils::copy_string(tlvWscM1->M1Frame().model_name_attr.data, "Ubuntu",
+                                  tlvWscM1->M1Frame().model_name_attr.data_length);
+        string_utils::copy_string(tlvWscM1->M1Frame().model_number_attr.data, "18.04",
+                                  tlvWscM1->M1Frame().model_number_attr.data_length);
+        string_utils::copy_string(tlvWscM1->M1Frame().device_name_attr.data, "prplMesh",
+                                  tlvWscM1->M1Frame().device_name_attr.data_length);
 
         // TODO M1 should also have values for:
         // uuid_e_attr
@@ -4398,10 +4281,212 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
                                   backhaul_params.bridge_mac);
 }
 
-void slave_thread::handle_channel_preference_query_message(Socket *sd,
-                                                           ieee1905_1::CmduMessageRx &cmdu_rx)
+bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    LOG(INFO) << "received CHANNEL_PREFERENCE_QUERY_MESSAGE";
+    // Check if this is a M1 message that we sent to the controller, which was just looped back.
+    // The M1 and M2 messages are both of CMDU type AP_Autoconfiguration_WSC. Thus,
+    // when we send the M2 to the local agent, it will be published back on the local bus because
+    // the destination is our AL-MAC, and the controller does listen to this CMDU.
+    // Ideally, we should use the message type attribute from the WSC payload to distinguish.
+    // Unfortunately, that is a bit complicated with the current tlv parser. However, there is another
+    // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
+    // while the M2 has the AP_Radio_Identifier TLV.
+    // If this is a looped back M2 CMDU, we can treat is as handled successfully.
+    if (cmdu_rx.getNextTlvType() == wfa_map::TLV_AP_RADIO_BASIC_CAPABILITIES)
+        return true;
+
+    /**
+    * @brief Parse AP-Autoconfiguration WSC which should include one AP Radio Identifier
+    * TLV and one or more WSC TLV containing M2
+    */
+    auto ruid = cmdu_rx.addClass<wfa_map::tlvApRadioIdentifier>();
+    if (!ruid) {
+        LOG(ERROR) << "Failed to get tlvApRadioIdentifier TLV";
+        return false;
+    }
+
+    // Check if the message is for this radio agent by comparing the ruid
+    if (!config.radio_identifier.compare(network_utils::mac_to_string(ruid->radio_uid())))
+        return true;
+
+    LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE";
+    // parse all M2 TLVs
+    std::vector<std::shared_ptr<ieee1905_1::tlvWscM2>> m2_list;
+    while (1) {
+        if (cmdu_rx.getNextTlvType() != uint8_t(ieee1905_1::eTlvType::TLV_WSC))
+            break;
+
+        auto m2 = cmdu_rx.addClass<ieee1905_1::tlvWscM2>();
+        if (!m2) {
+            LOG(ERROR) << "Not an WSC M2 TLV!";
+            return false;
+        }
+        m2_list.push_back(m2);
+    }
+
+    if (m2_list.empty()) {
+        LOG(ERROR) << "No M2 TLVs present";
+        return false;
+    }
+
+    for (auto m2 : m2_list) {
+        std::string manufacturer = std::string(m2->M2Frame().manufacturer_attr.data,
+                                               m2->M2Frame().manufacturer_attr.data_length);
+        if (!manufacturer.compare("Intel")) {
+            //TODO add support for none Intel agents
+            LOG(ERROR) << "None Intel controller " << manufacturer << " , dropping message";
+            return false;
+        }
+    }
+
+    if (cmdu_rx.getNextTlvType() != uint8_t(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
+        LOG(ERROR) << "Not vendor specific TLV (not Intel?)";
+        return false;
+    }
+
+    LOG(INFO) << "Intel controller join response";
+    if (!parse_intel_join_response(sd, cmdu_rx)) {
+        LOG(ERROR) << "Parse join response failed";
+        return false;
+    }
+
+    return true;
+}
+
+bool slave_thread::parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    LOG(DEBUG) << "ACTION_CONTROL_SLAVE_JOINED_RESPONSE sd=" << intptr_t(sd);
+    if (slave_state != STATE_WAIT_FOR_JOINED_RESPONSE) {
+        LOG(ERROR) << "slave_state != STATE_WAIT_FOR_JOINED_RESPONSE";
+        return false;
+    }
+
+    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
+    if (!beerocks_header) {
+        LOG(ERROR) << "Failed to parse intel vs message (not Intel?)";
+        return false;
+    }
+
+    if (beerocks_header->action_op() != beerocks_message::ACTION_CONTROL_SLAVE_JOINED_RESPONSE) {
+        LOG(ERROR) << "Unexpected Intel action op " << beerocks_header->action_op();
+        return false;
+    }
+
+    auto joined_response =
+        cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>();
+    if (joined_response == nullptr) {
+        LOG(ERROR) << "addClass cACTION_CONTROL_SLAVE_JOINED_RESPONSE failed";
+        return false;
+    }
+
+    // check master rejection
+    if (joined_response->err_code() == beerocks::JOIN_RESP_REJECT) {
+        slave_state_timer = std::chrono::steady_clock::now() +
+                            std::chrono::seconds(WAIT_BEFORE_SEND_SLAVE_JOINED_NOTIFICATION_SEC);
+        LOG(DEBUG) << "STATE_WAIT_FOR_JOINED_RESPONSE: join rejected!";
+        LOG(DEBUG) << "goto STATE_WAIT_BEFORE_JOIN_MASTER";
+        slave_state = STATE_WAIT_BEFORE_JOIN_MASTER;
+        return true;
+    }
+
+    // request the current vap list from ap_manager
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST>(cmdu_tx);
+    if (request == nullptr) {
+        LOG(ERROR) << "Failed building cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST message!";
+        return false;
+    }
+    message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+
+    // send all pending_client_association notifications
+    for (auto notify : pending_client_association_cmdu) {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
+        if (notification == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        notification->params() = notify.second;
+        send_cmdu_to_controller(cmdu_tx);
+    }
+    pending_client_association_cmdu.clear();
+
+    master_version.assign(joined_response->master_version(message::VERSION_LENGTH));
+
+    LOG(DEBUG) << "Version (Master/Slave): " << master_version << "/" << BEEROCKS_VERSION;
+    auto slave_version_s  = version::version_from_string(BEEROCKS_VERSION);
+    auto master_version_s = version::version_from_string(master_version);
+
+    // check if mismatch notification is needed
+    if ((master_version_s.major > slave_version_s.major) ||
+        ((master_version_s.major == slave_version_s.major) &&
+         (master_version_s.minor > slave_version_s.minor)) ||
+        ((master_version_s.major == slave_version_s.major) &&
+         (master_version_s.minor == slave_version_s.minor) &&
+         (master_version_s.build_number > slave_version_s.build_number))) {
+        LOG(INFO) << "master_version > slave_version, sending "
+                     "ACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION";
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION>(cmdu_tx);
+        if (notification == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+
+        string_utils::copy_string(notification->versions().master_version, master_version.c_str(),
+                                  sizeof(beerocks_message::sVersions::master_version));
+        string_utils::copy_string(notification->versions().slave_version, BEEROCKS_VERSION,
+                                  sizeof(beerocks_message::sVersions::slave_version));
+        message_com::send_cmdu(platform_manager_socket, cmdu_tx);
+    }
+
+    // check if fatal mismatch
+    if (joined_response->err_code() == beerocks::JOIN_RESP_VERSION_MISMATCH) {
+        LOG(ERROR) << "Mismatch version! slave_version=" << std::string(BEEROCKS_VERSION)
+                   << " master_version=" << master_version;
+        LOG(DEBUG) << "goto STATE_VERSION_MISMATCH";
+        slave_state = STATE_VERSION_MISMATCH;
+    } else if (joined_response->err_code() == beerocks::JOIN_RESP_SSID_MISMATCH) {
+        LOG(ERROR) << "Mismatch SSID!";
+        LOG(DEBUG) << "goto STATE_SSID_MISMATCH";
+        slave_state = STATE_SSID_MISMATCH;
+    } else if (joined_response->err_code() == beerocks::JOIN_RESP_ADVERTISE_SSID_FLAG_MISMATCH) {
+        LOG(INFO) << "advertise SSID flag mismatch";
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST>(cmdu_tx);
+        if (notification == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        notification->flag() = (wlan_settings.advertise_ssid ? 0 : 1);
+        message_com::send_cmdu(platform_manager_socket, cmdu_tx);
+    } else {
+        //Send master version + slave version to platform manager
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION>(cmdu_tx);
+        if (notification == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        string_utils::copy_string(notification->versions().master_version, master_version.c_str(),
+                                  sizeof(beerocks_message::sVersions::master_version));
+        string_utils::copy_string(notification->versions().slave_version, BEEROCKS_VERSION,
+                                  sizeof(beerocks_message::sVersions::slave_version));
+        message_com::send_cmdu(platform_manager_socket, cmdu_tx);
+        LOG(DEBUG) << "send ACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION";
+
+        son_config = joined_response->config();
+        log_son_config();
+
+        slave_state = STATE_UPDATE_MONITOR_SON_CONFIG;
+    }
+
+    return true;
+}
+
+bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    LOG(DEBUG) << "Received CHANNEL_PREFERENCE_QUERY_MESSAGE";
 
     auto mid = cmdu_rx.getMessageId();
 
@@ -4411,13 +4496,13 @@ void slave_thread::handle_channel_preference_query_message(Socket *sd,
 
     if (!cmdu_tx_header) {
         LOG(ERROR) << "cmdu creation of type CHANNEL_PREFERENCE_REPORT_MESSAGE, has failed";
-        return;
+        return false;
     }
 
     auto channel_preference_tlv = cmdu_tx.addClass<wfa_map::tlvChannelPreference>();
     if (!channel_preference_tlv) {
         LOG(ERROR) << "addClass ieee1905_1::tlvChannelPreference has failed";
-        return;
+        return false;
     }
 
     channel_preference_tlv->radio_uid() = network_utils::mac_from_string(config.radio_identifier);
@@ -4426,7 +4511,7 @@ void slave_thread::handle_channel_preference_query_message(Socket *sd,
     auto op_class_channels = channel_preference_tlv->create_operating_classes_list();
     if (!op_class_channels) {
         LOG(ERROR) << "create_operating_classes_list() has failed!";
-        return;
+        return false;
     }
 
     // Fill operating class object
@@ -4442,7 +4527,7 @@ void slave_thread::handle_channel_preference_query_message(Socket *sd,
         auto channel_tuple = op_class_channels->channel_list(channel_idx - 1);
         if (!std::get<0>(channel_tuple)) {
             LOG(ERROR) << "getting channel entry has failed!";
-            return;
+            return false;
         }
         auto &channel = std::get<1>(channel_tuple);
         channel       = ch;
@@ -4455,8 +4540,8 @@ void slave_thread::handle_channel_preference_query_message(Socket *sd,
     // Push operating class object to the list of operating class objects
     if (!channel_preference_tlv->add_operating_classes_list(op_class_channels)) {
         LOG(ERROR) << "add_operating_classes_list() has failed!";
-        return;
+        return false;
     }
 
-    send_cmdu_to_controller(cmdu_tx);
+    return send_cmdu_to_controller(cmdu_tx);
 }
