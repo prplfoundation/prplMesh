@@ -257,7 +257,9 @@ private:
     bool iface_status_operational_state               = false;
     bool iface_status_operational_state_prev          = false;
 
-    void handle_channel_preference_query_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_channel_preference_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 };
 
 } // namespace son
