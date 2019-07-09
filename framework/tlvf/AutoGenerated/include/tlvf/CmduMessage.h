@@ -68,6 +68,7 @@ public:
     size_t getMessageBuffLength() const;
     uint8_t *getMessageBuff() const;
     bool getNextTlvType(eTlvType &tlvType) const;
+    int getNextTlvType() const;
     uint16_t getNextTlvLength() const;
     void swap();
     bool is_finalized() const { return m_finalized; };
