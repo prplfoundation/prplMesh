@@ -123,7 +123,7 @@ bool main_thread::init()
     if (!bus_subscribe(std::vector<ieee1905_1::eMessageType>{
             ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE,
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RESPONSE_MESSAGE,
-            ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE,
+            ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE})) {
         LOG(ERROR) << "Failed to init mapf_bus";
         return false;

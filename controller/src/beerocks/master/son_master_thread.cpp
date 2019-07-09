@@ -207,7 +207,7 @@ bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessa
     switch (cmdu_rx.getMessageType()) {
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE:
         return handle_cmdu_1905_autoconfiguration_search(sd, cmdu_rx);
-    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE:
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE:
         return handle_cmdu_1905_autoconfiguration_WSC(sd, cmdu_rx);
     default:
         break;
@@ -371,7 +371,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     if (cmdu_rx.getNextTlvType() == wfa_map::TLV_AP_RADIO_IDENTIFIER)
         return true;
 
-    LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE";
+    LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
     /**
     * @brief Parse AP-Autoconfiguration WSC which should include one AP Radio Basic Capabilities
     * TLV and one WSC TLV containing M1
@@ -396,10 +396,9 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
      * @brief Reply with AP-Autoconfiguration WSC with a single AP Radio Identifier TLV
      * and one (TODO do we need more?) WSC TLV containing M2.
      */
-    auto c = cmdu_tx.create(
-        0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE);
+    auto c = cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE);
     if (!c) {
-        LOG(ERROR) << "Create AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE response";
+        LOG(ERROR) << "Create AP_AUTOCONFIGURATION_WSC_MESSAGE response";
         return false;
     }
     // All attributes which are not explicitely set below are set to
