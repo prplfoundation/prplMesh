@@ -458,7 +458,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
     keep_alive_retries = 0;
 
     switch (cmdu_message_type) {
-    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE:
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE:
         return handle_autoconfiguration_wsc(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
         return handle_channel_preference_query(sd, cmdu_rx);
@@ -3678,8 +3678,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             break;
         }
 
-        auto apconfHeader = cmdu_tx.create(
-            0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE);
+        auto apconfHeader =
+            cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE);
         auto tlvAp = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
         if (tlvAp == nullptr) {
             LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
@@ -4309,7 +4309,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     if (!config.radio_identifier.compare(network_utils::mac_to_string(ruid->radio_uid())))
         return true;
 
-    LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE";
+    LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
     // parse all M2 TLVs
     std::vector<std::shared_ptr<ieee1905_1::tlvWscM2>> m2_list;
     while (1) {

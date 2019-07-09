@@ -52,7 +52,7 @@ bool master_mrouter::init()
     return (bus_subscribe(std::vector<ieee1905_1::eMessageType>{
         ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE,
         ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE,
-        ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WIFI_SIMPLE_CONFIGURATION_MESSAGE,
+        ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE,
         ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE,
     }));
 }
