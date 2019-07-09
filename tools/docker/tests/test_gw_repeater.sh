@@ -73,21 +73,21 @@ main() {
     dbg DELAY=$DELAY
 
     status "Start GW (Controller + local Agent)"
-    sudo ${scriptdir}/../run.sh start-controller-agent -d -n ${GW_NAME}
+    ${scriptdir}/../run.sh start-controller-agent -d -n ${GW_NAME}
     status "Start Repeater (Remote Agent)"
-    sudo ${scriptdir}/../run.sh start-agent -d -n ${REPEATER_NAME}
+    ${scriptdir}/../run.sh start-agent -d -n ${REPEATER_NAME}
     
     status "Delay ${DELAY} seconds..."
     sleep ${DELAY}
     
     error=0
     report "GW operational" \
-        sudo ${scriptdir}/../test.sh ${OPT} -n ${GW_NAME}
+        ${scriptdir}/../test.sh ${OPT} -n ${GW_NAME}
     report "Repeater operational" \
-        sudo ${scriptdir}/../test.sh ${OPT} -n ${REPEATER_NAME}
+        ${scriptdir}/../test.sh ${OPT} -n ${REPEATER_NAME}
     [ "$REMOVE" = "true" ] && {
         status "Deleting containers ${GW_NAME}, ${REPEATER_NAME}"
-        sudo docker rm -f ${GW_NAME} ${REPEATER_NAME} >/dev/null 2>&1
+        docker rm -f ${GW_NAME} ${REPEATER_NAME} >/dev/null 2>&1
     }
 
     return $error
