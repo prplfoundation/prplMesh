@@ -25,7 +25,7 @@ sM2:
   configuration_error_attr: WSC::sWscAttrConfigurationError
   device_password_id_attr: WSC::sWscAttrDevicePasswordID
   os_version_attr: WSC::sWscAttrOsVersion
-  vendor_extensions_attr: WSC::sWscAttrVersionExtension
+  vendor_extensions_attr: WSC::sWscAttrVendorExtension
 
   #encrypted data
   encrypted_settings_attr: sWscAttrEncryptedSettings

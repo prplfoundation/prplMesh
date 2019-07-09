@@ -43,7 +43,7 @@ typedef struct sM1 {
     sWscAttrDevicePasswordID device_password_id_attr;
     sWscAttrConfigurationError configuration_error_attr;
     sWscAttrOsVersion os_version_attr;
-    sWscAttrVersionExtension vendor_extensions_attr;
+    sWscAttrVendorExtension vendor_extensions_attr;
     void struct_swap(){
         version_attr.struct_swap();
         message_type_attr.struct_swap();
