@@ -28,6 +28,22 @@ std::shared_ptr<BaseClass> CmduMessage::getClass(size_t idx) const
     }
 }
 
+int CmduMessage::getNextTlvType() const
+{
+    uint8_t tlvValue = 0;
+    if (!m_cmdu_header && (m_cmdu_header->getBuffRemainingBytes() < kTlvHeaderLength)) {
+        return -1;
+    }
+
+    if (m_class_vector.size() == 0) {
+        tlvValue = *m_cmdu_header->getBuffPtr();
+    } else {
+        tlvValue = *m_class_vector.back()->getBuffPtr();
+    }
+    
+    return int(tlvValue);
+}
+
 bool CmduMessage::getNextTlvType(eTlvType &tlvType) const
 {
     uint16_t tlvValue = 0;
