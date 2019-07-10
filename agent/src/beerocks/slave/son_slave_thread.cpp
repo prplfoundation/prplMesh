@@ -21,6 +21,7 @@
 #include <beerocks/tlvf/beerocks_message_control.h>
 #include <beerocks/tlvf/beerocks_message_monitor.h>
 #include <beerocks/tlvf/beerocks_message_platform.h>
+#include <beerocks/tlvf/beerocks_wsc.h>
 
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
 #include <tlvf/ieee_1905_1/tlvWscM2.h>
@@ -3678,24 +3679,26 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             break;
         }
 
-        auto apconfHeader =
-            cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE);
-        auto tlvAp = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
-        if (tlvAp == nullptr) {
+        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE)) {
+            LOG(ERROR) << "Failed creating AP_AUTOCONFIGURATION_WSC_MESSAGE";
+            return false;
+        }
+
+        auto radio_basic_caps = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+        if (!radio_basic_caps) {
             LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
             return false;
         }
-        std::copy_n(network_utils::mac_from_string(config.radio_identifier).oct, sizeof(sMacAddr),
-                    tlvAp->radio_uid().oct);
-        tlvAp->maximum_number_of_bsss_supported() =
-            beerocks::IFACE_TOTAL_VAPS; //TODO get maximum supported VAPs from DWPAL
+        radio_basic_caps->radio_uid() = network_utils::mac_from_string(config.radio_identifier);
+        radio_basic_caps->maximum_number_of_bsss_supported() =
+            4; //TODO get maximum supported VAPs from DWPAL
 
-        // TODO: move WSC and M1 setters to seperate functions
+        // TODO: move WSC and M1 setters to separate functions
         // TODO: Currently sending dummy values, need to read them from DWPAL and use the correct WiFi
         //      Parameters based on the regulatory domain
-        for (int i = 0; i < beerocks::IFACE_TOTAL_VAPS; i++) {
-            auto operationClassesInfo               = tlvAp->create_operating_classes_info_list();
-            operationClassesInfo->operating_class() = 0;            // dummy value
+        for (int i = 0; i < radio_basic_caps->maximum_number_of_bsss_supported(); i++) {
+            auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
+            operationClassesInfo->operating_class()            = 0; // dummy value
             operationClassesInfo->maximum_transmit_power_dbm() = 1; // dummy value
 
             // TODO - the number of statically non operable channels can be 0 - meaning it is
@@ -3705,10 +3708,10 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 LOG(ERROR) << "Allocation statically non operable channels list failed";
                 return false;
             }
-            std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) =
-                1; // dummy value
+            // Set Dummy value for non operable channel list
+            std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) = 1;
 
-            if (!tlvAp->add_operating_classes_info_list(operationClassesInfo)) {
+            if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
                 LOG(ERROR) << "add_operating_classes_info_list failed";
                 return false;
             }
@@ -3716,47 +3719,21 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
 
         // All attributes which are not explicitely set below are set to
         // default by the TLV factory, see WSC_Attributes.yml
-        auto tlvWscM1 = cmdu_tx.addClass<ieee1905_1::tlvWscM1>();
-        if (tlvWscM1 == nullptr) {
-            LOG(ERROR) << "Error creating tlvWscM1";
+        if (!autoconfig_wsc_add_m1()) {
+            LOG(ERROR) << "Failed adding WSC M1 TLV";
             return false;
         }
 
-        std::copy_n(hostap_params.iface_mac.oct, sizeof(sMacAddr),
-                    tlvWscM1->M1Frame().mac_attr.data.oct);
-        // TODO: read manufactured, name, model and device name from BPL
-        string_utils::copy_string(tlvWscM1->M1Frame().manufacturer_attr.data, "Intel",
-                                  tlvWscM1->M1Frame().manufacturer_attr.data_length);
-        string_utils::copy_string(tlvWscM1->M1Frame().model_name_attr.data, "Ubuntu",
-                                  tlvWscM1->M1Frame().model_name_attr.data_length);
-        string_utils::copy_string(tlvWscM1->M1Frame().model_number_attr.data, "18.04",
-                                  tlvWscM1->M1Frame().model_number_attr.data_length);
-        string_utils::copy_string(tlvWscM1->M1Frame().device_name_attr.data, "prplMesh",
-                                  tlvWscM1->M1Frame().device_name_attr.data_length);
-
-        // TODO M1 should also have values for:
-        // uuid_e_attr
-        // enrolee_nonce_attr -> to be added by encryption, but the TODO should be here already
-        // public_key_attr -> same
-        // authentication_type_flags_attr
-        // encryption_type_flags_attr
-        // serial_number_attr
-        // primary_device_type_attr -> We could actually add default values to the yaml
-        // rf_bands_attr -> This is essential and must correspond to the freqband in the search message
-        // vendor_extensions_attr -> this could also be done in the yaml file
-
-        auto tlvVendorSpecific =
-            cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
-        if (tlvVendorSpecific == nullptr) {
+        auto vs = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
+        if (!vs) {
             LOG(ERROR) << "Failed adding intel vendor specific TLV";
             return false;
         }
 
         auto notification = message_com::add_intel_vs_data<
-            beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(cmdu_tx,
-                                                                         tlvVendorSpecific);
+            beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(cmdu_tx, vs);
 
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "Failed building cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION!";
             return false;
         }
@@ -3832,7 +3809,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         // Channel Selection Params
         notification->cs_params() = hostap_cs_params;
 
-        tlvVendorSpecific->length() += notification->getLen();
+        vs->length() += notification->getLen();
         send_cmdu_to_controller(cmdu_tx);
         LOG(DEBUG) << "send SLAVE_JOINED_NOTIFICATION Size=" << int(cmdu_tx.getMessageLength());
 
@@ -4544,4 +4521,41 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
     }
 
     return send_cmdu_to_controller(cmdu_tx);
+}
+
+bool slave_thread::autoconfig_wsc_add_m1()
+{
+    auto m1 = cmdu_tx.addClass<ieee1905_1::tlvWscM1>();
+    if (m1 == nullptr) {
+        LOG(ERROR) << "Error creating tlvWscM1";
+        return false;
+    }
+
+    std::copy_n(hostap_params.iface_mac.oct, sizeof(sMacAddr), m1->M1Frame().mac_attr.data.oct);
+    // TODO: read manufactured, name, model and device name from BPL
+    string_utils::copy_string(m1->M1Frame().manufacturer_attr.data, "Intel",
+                              m1->M1Frame().manufacturer_attr.data_length);
+    string_utils::copy_string(m1->M1Frame().model_name_attr.data, "Ubuntu",
+                              m1->M1Frame().model_name_attr.data_length);
+    string_utils::copy_string(m1->M1Frame().model_number_attr.data, "18.04",
+                              m1->M1Frame().model_number_attr.data_length);
+    string_utils::copy_string(m1->M1Frame().device_name_attr.data, "prplMesh-agent",
+                              m1->M1Frame().device_name_attr.data_length);
+    string_utils::copy_string(m1->M1Frame().serial_number_attr.data, "prpl12345",
+                              m1->M1Frame().serial_number_attr.data_length);
+    std::memset(m1->M1Frame().uuid_e_attr.data, 0xff, m1->M1Frame().uuid_e_attr.data_length);
+    m1->M1Frame().authentication_type_flags_attr.data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2;
+    m1->M1Frame().encryption_type_flags_attr.data     = WSC::WSC_ENCR_NONE;
+    m1->M1Frame().rf_bands_attr.data =
+        hostap_params.iface_is_5ghz ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
+    // Simulate that this radio supports both fronthaul and backhaul BSS
+    WSC::set_vendor_extentions_bss_type(m1->M1Frame().vendor_extensions_attr,
+                                        WSC::FRONTHAUL_BSS | WSC::BACKHAUL_BSS);
+    WSC::set_primary_device_type(m1->M1Frame().primary_device_type_attr,
+                                 WSC::WSC_DEV_NETWORK_INFRA_AP);
+    // TODO: M1 should also have values for:
+    // enrolee_nonce_attr -> to be added by encryption
+    // public_key_attr -> to be added by encryption
+
+    return true;
 }
