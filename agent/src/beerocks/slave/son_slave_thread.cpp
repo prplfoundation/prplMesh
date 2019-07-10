@@ -4499,6 +4499,7 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
         // allocate 1 channel
         if (!op_class_channels->alloc_channel_list()) {
             LOG(ERROR) << "alloc_channel_list() has failed!";
+            return false;
         }
         auto channel_idx   = op_class_channels->channel_list_length();
         auto channel_tuple = op_class_channels->channel_list(channel_idx - 1);
