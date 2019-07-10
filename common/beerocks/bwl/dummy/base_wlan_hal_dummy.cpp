@@ -95,7 +95,11 @@ base_wlan_hal_dummy::~base_wlan_hal_dummy() { detach(); }
 
 bool base_wlan_hal_dummy::fsm_setup() { return true; }
 
-HALState base_wlan_hal_dummy::attach(bool block) { return (m_hal_state = HALState::Operational); }
+HALState base_wlan_hal_dummy::attach(bool block)
+{
+    refresh_radio_info();
+    return (m_hal_state = HALState::Operational);
+}
 
 bool base_wlan_hal_dummy::detach() { return true; }
 
