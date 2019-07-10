@@ -9,13 +9,7 @@ include_yaml_path: {
 include_source_path: {
   "src/beerocks_message.cpp",
   "include/beerocks/tlvf/beerocks_message.h",
-  # "include/beerocks/tlvf/beerocks_message.h",
-  # "include/tlvf/BaseClass.h",
-  # "src/BaseClass.cpp",
-  # "include/tlvf/CmduMessage.h",
-  # "src/CmduMessage.cpp",
-  # "include/tlvf/beerocks/beerocks_message.h",
-  # "src/beerocks/beerocks_message.cpp",
+  "include/beerocks/tlvf/beerocks_wsc.h",
 }
 
 # Relative to tlvf.py src_path variable
