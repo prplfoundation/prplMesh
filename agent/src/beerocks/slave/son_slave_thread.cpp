@@ -4491,6 +4491,11 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
         return false;
     }
 
+    // TODO: check that the data is parsed properly after fixing the following bug:
+    // Since sFlags is defined after dynamic list cPreferenceOperatingClasses it cause data override
+    // on the first channel on the list and sFlags itself.
+    // See: https://github.com/prplfoundation/prplMesh/issues/8
+
     // Fill operating class object
     op_class_channels->operating_class() = 80; // random operating class for test purpose
 
