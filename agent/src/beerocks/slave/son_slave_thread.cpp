@@ -4269,7 +4269,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
     // while the M2 has the AP_Radio_Identifier TLV.
     // If this is a looped back M2 CMDU, we can treat is as handled successfully.
-    if (cmdu_rx.getNextTlvType() == wfa_map::TLV_AP_RADIO_BASIC_CAPABILITIES)
+    if (cmdu_rx.getNextTlvType() == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES))
         return true;
 
     /**
