@@ -453,14 +453,19 @@ bool main_thread::finalize_slaves_connect_state(bool fConnected,
         // Send the message(s)
         for (auto sc : slaves_sockets) {
 
+            LOG(DEBUG) << "Iterating on slave " << sc->hostap_iface;
             //if no controller was discovered for that slave's band, skip
             if (!sc->controller_discovered) {
+                LOG(DEBUG) << "controller not discovered, skipping...";
                 continue;
             }
 
             // If the notification should be sent to a specific socket, skip all other
-            if (pSocket != nullptr && pSocket != sc)
+            if (pSocket != nullptr && pSocket != sc) {
+                LOG(DEBUG) << "notification should be sent to slave " << pSocket->hostap_iface
+                           << " skipping " << sc->hostap_iface;
                 continue;
+            }
             if (sc->slave == nullptr) {
                 LOG(ERROR) << "slave " << sc->hostap_iface << " socket is nullptr!";
                 continue;
@@ -1333,6 +1338,8 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
 
         soc->sta_iface.assign(request->sta_iface(message::IFACE_NAME_LENGTH));
         soc->hostap_iface.assign(request->hostap_iface(message::IFACE_NAME_LENGTH));
+        soc->operational_on_registration =
+            FSM_IS_IN_STATE(OPERATIONAL) || FSM_IS_IN_STATE(CONNECTED);
         soc->sta_iface_filter_low = request->sta_iface_filter_low();
         local_master              = request->local_master();
         local_gw                  = request->local_gw();
@@ -1595,7 +1602,10 @@ bool main_thread::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessage
                         LOG(DEBUG) << FSM_CURR_STATE_STR;
                         soc->controller_discovered = true;
                         controller_bridge_mac      = src_mac;
-                        if (FSM_IS_IN_STATE(OPERATIONAL) || FSM_IS_IN_STATE(CONNECTED)) {
+                        // the backhaul was operational on slave registration.
+                        // This means that it was restarted and sending backhaul connected event
+                        // is required so that the slave will re-join the controller.
+                        if (soc->operational_on_registration) {
                             finalize_slaves_connect_state(true, soc);
                         }
                     }
@@ -1612,7 +1622,10 @@ bool main_thread::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessage
                         LOG(DEBUG) << FSM_CURR_STATE_STR;
                         soc->controller_discovered = true;
                         controller_bridge_mac      = src_mac;
-                        if (FSM_IS_IN_STATE(OPERATIONAL) || FSM_IS_IN_STATE(CONNECTED)) {
+                        // the backhaul was operational on slave registration.
+                        // This means that it was restarted and sending backhaul connected event
+                        // is required so that the slave will re-join the controller.
+                        if (soc->operational_on_registration) {
                             finalize_slaves_connect_state(true, soc);
                         }
                     }

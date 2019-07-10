@@ -87,11 +87,12 @@ private:
         std::string radio_mac;
         std::string hostap_iface;
         std::string sta_iface;
-        beerocks::eFreqType freq_type  = beerocks::eFreqType::FREQ_UNKNOWN;
-        bool sta_iface_filter_low      = false;
-        bool slave_is_backhaul_manager = false;
-        bool controller_discovered     = false;
-        beerocks::eIfaceType slave_iface_type;
+        eFreqType freq_type              = eFreqType::FREQ_UNKNOWN;
+        bool sta_iface_filter_low        = false;
+        bool slave_is_backhaul_manager   = false;
+        bool controller_discovered       = false;
+        bool operational_on_registration = false;
+        eIfaceType slave_iface_type;
 
         std::shared_ptr<bwl::sta_wlan_hal> sta_wlan_hal;
         Socket *sta_hal_ext_events = nullptr;
