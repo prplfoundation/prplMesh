@@ -27,7 +27,7 @@
 
 namespace wfa_map {
 
-class cOperatingClasses;
+class cPreferenceOperatingClasses;
 
 class tlvChannelPreference : public BaseClass
 {
@@ -40,9 +40,9 @@ class tlvChannelPreference : public BaseClass
         const uint16_t& length();
         sMacAddr& radio_uid();
         uint8_t& operating_classes_list_length();
-        std::tuple<bool, cOperatingClasses&> operating_classes_list(size_t idx);
-        std::shared_ptr<cOperatingClasses> create_operating_classes_list();
-        bool add_operating_classes_list(std::shared_ptr<cOperatingClasses> ptr);
+        std::tuple<bool, cPreferenceOperatingClasses&> operating_classes_list(size_t idx);
+        std::shared_ptr<cPreferenceOperatingClasses> create_operating_classes_list();
+        bool add_operating_classes_list(std::shared_ptr<cPreferenceOperatingClasses> ptr);
         void class_swap();
         static size_t get_initial_size();
 
@@ -52,18 +52,18 @@ class tlvChannelPreference : public BaseClass
         uint16_t* m_length = nullptr;
         sMacAddr* m_radio_uid = nullptr;
         uint8_t* m_operating_classes_list_length = nullptr;
-        cOperatingClasses* m_operating_classes_list = nullptr;
+        cPreferenceOperatingClasses* m_operating_classes_list = nullptr;
         size_t m_operating_classes_list_idx__ = 0;
-        std::vector<std::shared_ptr<cOperatingClasses>> m_operating_classes_list_vector;
+        std::vector<std::shared_ptr<cPreferenceOperatingClasses>> m_operating_classes_list_vector;
         bool m_lock_allocation__ = false;
 };
 
-class cOperatingClasses : public BaseClass
+class cPreferenceOperatingClasses : public BaseClass
 {
     public:
-        cOperatingClasses(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cOperatingClasses(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cOperatingClasses();
+        cPreferenceOperatingClasses(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cPreferenceOperatingClasses(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cPreferenceOperatingClasses();
 
         enum eReasonCode {
             UNSPECIFIED = 0x0,

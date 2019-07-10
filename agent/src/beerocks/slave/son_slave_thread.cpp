@@ -4511,8 +4511,9 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
     }
 
     // Update channel list flags
-    op_class_channels->flags().preference  = 15; // channels preference
-    op_class_channels->flags().reason_code = wfa_map::cOperatingClasses::eReasonCode::UNSPECIFIED;
+    op_class_channels->flags().preference = 15; // channels preference
+    op_class_channels->flags().reason_code =
+        wfa_map::cPreferenceOperatingClasses::eReasonCode::UNSPECIFIED;
 
     // Push operating class object to the list of operating class objects
     if (!channel_preference_tlv->add_operating_classes_list(op_class_channels)) {

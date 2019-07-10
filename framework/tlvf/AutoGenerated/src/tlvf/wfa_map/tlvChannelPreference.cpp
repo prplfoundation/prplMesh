@@ -41,7 +41,7 @@ uint8_t& tlvChannelPreference::operating_classes_list_length() {
     return (uint8_t&)(*m_operating_classes_list_length);
 }
 
-std::tuple<bool, cOperatingClasses&> tlvChannelPreference::operating_classes_list(size_t idx) {
+std::tuple<bool, cPreferenceOperatingClasses&> tlvChannelPreference::operating_classes_list(size_t idx) {
     bool ret_success = ( (m_operating_classes_list_idx__ > 0) && (m_operating_classes_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
     if (!ret_success) {
@@ -55,17 +55,17 @@ std::tuple<bool, cOperatingClasses&> tlvChannelPreference::operating_classes_lis
     }
 }
 
-std::shared_ptr<cOperatingClasses> tlvChannelPreference::create_operating_classes_list() {
-    size_t len = cOperatingClasses::get_initial_size();
+std::shared_ptr<cPreferenceOperatingClasses> tlvChannelPreference::create_operating_classes_list() {
+    size_t len = cPreferenceOperatingClasses::get_initial_size();
     if (m_lock_allocation__ || getBuffRemainingBytes() < len) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return nullptr;
     }
     m_lock_allocation__ = true;
-    return std::make_shared<cOperatingClasses>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
+    return std::make_shared<cPreferenceOperatingClasses>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
 }
 
-bool tlvChannelPreference::add_operating_classes_list(std::shared_ptr<cOperatingClasses> ptr) {
+bool tlvChannelPreference::add_operating_classes_list(std::shared_ptr<cPreferenceOperatingClasses> ptr) {
     if (ptr == nullptr) {
         TLVF_LOG(ERROR) << "Received entry is nullptr";
         return false;
@@ -139,7 +139,7 @@ bool tlvChannelPreference::init()
     if (!m_parse__) *m_operating_classes_list_length = 0;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_operating_classes_list = (cOperatingClasses*)m_buff_ptr__;
+    m_operating_classes_list = (cPreferenceOperatingClasses*)m_buff_ptr__;
     m_operating_classes_list_idx__ = *m_operating_classes_list_length;
     for (size_t i = 0; i < *m_operating_classes_list_length; i++) {
         if (!add_operating_classes_list(create_operating_classes_list())) { 
@@ -155,25 +155,25 @@ bool tlvChannelPreference::init()
     return true;
 }
 
-cOperatingClasses::cOperatingClasses(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+cPreferenceOperatingClasses::cPreferenceOperatingClasses(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
     BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
 }
-cOperatingClasses::cOperatingClasses(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+cPreferenceOperatingClasses::cPreferenceOperatingClasses(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
 BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
     m_init_succeeded = init();
 }
-cOperatingClasses::~cOperatingClasses() {
+cPreferenceOperatingClasses::~cPreferenceOperatingClasses() {
 }
-uint8_t& cOperatingClasses::operating_class() {
+uint8_t& cPreferenceOperatingClasses::operating_class() {
     return (uint8_t&)(*m_operating_class);
 }
 
-uint8_t& cOperatingClasses::channel_list_length() {
+uint8_t& cPreferenceOperatingClasses::channel_list_length() {
     return (uint8_t&)(*m_channel_list_length);
 }
 
-std::tuple<bool, uint8_t&> cOperatingClasses::channel_list(size_t idx) {
+std::tuple<bool, uint8_t&> cPreferenceOperatingClasses::channel_list(size_t idx) {
     bool ret_success = ( (m_channel_list_idx__ > 0) && (m_channel_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
     if (!ret_success) {
@@ -182,7 +182,7 @@ std::tuple<bool, uint8_t&> cOperatingClasses::channel_list(size_t idx) {
     return std::forward_as_tuple(ret_success, m_channel_list[ret_idx]);
 }
 
-bool cOperatingClasses::alloc_channel_list(size_t count) {
+bool cPreferenceOperatingClasses::alloc_channel_list(size_t count) {
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -199,16 +199,16 @@ bool cOperatingClasses::alloc_channel_list(size_t count) {
     return true;
 }
 
-cOperatingClasses::sFlags& cOperatingClasses::flags() {
+cPreferenceOperatingClasses::sFlags& cPreferenceOperatingClasses::flags() {
     return (sFlags&)(*m_flags);
 }
 
-void cOperatingClasses::class_swap()
+void cPreferenceOperatingClasses::class_swap()
 {
     m_flags->struct_swap();
 }
 
-size_t cOperatingClasses::get_initial_size()
+size_t cPreferenceOperatingClasses::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(uint8_t); // operating_class
@@ -217,7 +217,7 @@ size_t cOperatingClasses::get_initial_size()
     return class_size;
 }
 
-bool cOperatingClasses::init()
+bool cPreferenceOperatingClasses::init()
 {
     if (getBuffRemainingBytes() < kMinimumLength) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
