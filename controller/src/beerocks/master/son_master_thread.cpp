@@ -30,7 +30,7 @@
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message_control.h>
-
+#include <beerocks/tlvf/beerocks_wsc.h>
 #include <tlvf/ieee_1905_1/eMessageType.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
@@ -356,6 +356,52 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
     return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
 }
 
+bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> m1)
+{
+    if (!m1) {
+        LOG(ERROR) << "Invalid M1";
+        return false;
+    }
+
+    int bss_type = vendor_extentions_bss_type(m1->M1Frame().vendor_extensions_attr);
+    if (bss_type < 0) {
+        LOG(ERROR) << "Failed to get bss type from M1 vendor extensions";
+        return false;
+    }
+
+    auto m2 = cmdu_tx.addClass<ieee1905_1::tlvWscM2>();
+    if (!m2) {
+        LOG(ERROR) << "Failed creating tlvWscM2";
+        return false;
+    }
+
+    m2->M2Frame().message_type_attr.data = WSC::WSC_MSG_TYPE_M2;
+    string_utils::copy_string(m2->M2Frame().manufacturer_attr.data, "Intel",
+                              m2->M2Frame().manufacturer_attr.data_length);
+    string_utils::copy_string(m2->M2Frame().model_name_attr.data, "Ubuntu",
+                              m2->M2Frame().model_name_attr.data_length);
+    string_utils::copy_string(m2->M2Frame().model_number_attr.data, "18.04",
+                              m2->M2Frame().model_number_attr.data_length);
+    string_utils::copy_string(m2->M2Frame().serial_number_attr.data, "prpl12345",
+                              m2->M2Frame().serial_number_attr.data_length);
+    std::memset(m2->M2Frame().uuid_r_attr.data, 0xee, m2->M2Frame().uuid_r_attr.data_length);
+    m2->M2Frame().authentication_type_flags_attr.data =
+        m1->M1Frame().authentication_type_flags_attr.data;
+    m2->M2Frame().encryption_type_flags_attr.data = m1->M1Frame().encryption_type_flags_attr.data;
+    m2->M2Frame().rf_bands_attr.data = (m1->M1Frame().rf_bands_attr.data & WSC::WSC_RF_BAND_5GHZ)
+                                           ? WSC::WSC_RF_BAND_5GHZ
+                                           : WSC::WSC_RF_BAND_2GHZ;
+    WSC::set_vendor_extentions_bss_type(m2->M2Frame().vendor_extensions_attr,
+                                        bss_type & WSC::FRONTHAUL_BSS
+                                            ? WSC::FRONTHAUL_BSS
+                                            : bss_type & WSC::BACKHAUL_BSS ? WSC::BACKHAUL_BSS
+                                                                           : WSC::TEARDOWN);
+    WSC::set_primary_device_type(m2->M2Frame().primary_device_type_attr,
+                                 WSC::WSC_DEV_NETWORK_INFRA_GATEWAY);
+    // TODO: Finalize with encryption
+    return true;
+}
+
 bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
                                                            ieee1905_1::CmduMessageRx &cmdu_rx)
 {
@@ -376,8 +422,8 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     * @brief Parse AP-Autoconfiguration WSC which should include one AP Radio Basic Capabilities
     * TLV and one WSC TLV containing M1
     */
-    auto ap = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
-    if (ap == nullptr) {
+    auto radio_basic_caps = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+    if (radio_basic_caps == nullptr) {
         LOG(ERROR) << "Failed to get APRadioBasicCapabilities";
         return false;
     }
@@ -396,8 +442,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
      * @brief Reply with AP-Autoconfiguration WSC with a single AP Radio Identifier TLV
      * and one (TODO do we need more?) WSC TLV containing M2.
      */
-    auto c = cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE);
-    if (!c) {
+    if (!cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE)) {
         LOG(ERROR) << "Create AP_AUTOCONFIGURATION_WSC_MESSAGE response";
         return false;
     }
@@ -409,24 +454,17 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
     // Let the Agent keep its Radio Identifier
-    ruid->radio_uid() = ap->radio_uid();
+    ruid->radio_uid() = radio_basic_caps->radio_uid();
 
-    auto m2 = cmdu_tx.addClass<ieee1905_1::tlvWscM2>();
-    if (m2 == nullptr) {
-        LOG(ERROR) << "Error creating tlvWscM1";
-        return false;
+    for (int i = 0; i < radio_basic_caps->maximum_number_of_bsss_supported(); i++) {
+        if (!autoconfig_wsc_add_m2(m1)) {
+            LOG(ERROR) << "Failed setting M2 attributes";
+            return false;
+        }
     }
 
-    m2->M2Frame().message_type_attr.data = WSC::WSC_MSG_TYPE_M2;
-    string_utils::copy_string(m2->M2Frame().manufacturer_attr.data, "Intel",
-                              m2->M2Frame().manufacturer_attr.data_length);
-    string_utils::copy_string(m2->M2Frame().model_name_attr.data, "Ubuntu",
-                              m2->M2Frame().model_name_attr.data_length);
-    string_utils::copy_string(m2->M2Frame().model_number_attr.data, "18.04",
-                              m2->M2Frame().model_number_attr.data_length);
     std::string manufacturer = std::string(m1->M1Frame().manufacturer_attr.data,
                                            m1->M1Frame().manufacturer_attr.data_length);
-
     if (!manufacturer.compare("Intel")) {
         //TODO add support for none Intel agents
         LOG(ERROR) << "None Intel radio agent " << manufacturer << " , dropping M1 message";
