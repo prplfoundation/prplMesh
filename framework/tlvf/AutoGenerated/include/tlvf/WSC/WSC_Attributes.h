@@ -28,6 +28,7 @@
 #include "tlvf/WSC/eWscEncr.h"
 #include "tlvf/WSC/eWscLengths.h"
 #include "tlvf/WSC/eWscVendorId.h"
+#include "tlvf/WSC/eWscDev.h"
 #include "tlvf/common/sMacAddr.h"
 
 namespace WSC {
