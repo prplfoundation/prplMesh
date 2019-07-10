@@ -14,11 +14,11 @@ tlvRadioOperationRestriction:
     _type: uint8_t
     _length_var: True
   operating_classes_list:
-    _type: sOperatingClasses
+    _type: cRestrictedOperatingClasses
     _length: [ operating_classes_list_length ]
 
-sOperatingClasses:
-  _type: struct
+cRestrictedOperatingClasses:
+  _type: class
   operating_class: uint8_t
   channel_list_length:
     _type: uint8_t
