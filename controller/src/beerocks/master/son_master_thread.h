@@ -23,6 +23,10 @@
 #include <ctime>
 #include <stdint.h>
 
+namespace ieee1905_1 {
+class tlvWscM1;
+}
+
 namespace son {
 class master_thread : public beerocks::socket_thread {
 
@@ -54,6 +58,7 @@ private:
     // 1905 messages handlers
     bool handle_cmdu_1905_autoconfiguration_search(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_autoconfiguration_WSC(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> m1);
 
     db &database;
     task_pool tasks;
