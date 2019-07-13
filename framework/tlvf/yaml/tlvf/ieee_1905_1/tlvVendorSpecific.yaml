@@ -12,9 +12,7 @@ tlvVendorSpecific:
     _value: 3
     _length_var: True
   vendor_oui:
-    _type: uint8_t
-    _length: [ 3 ]
-    _comment: Use eVendorOUI
+    _type: sVendorOUI
 
 eVendorOUI:
   _type: enum
