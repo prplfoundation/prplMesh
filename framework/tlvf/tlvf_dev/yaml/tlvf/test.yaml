@@ -1,0 +1,42 @@
+#
+---
+_namespace: ieee1905_1
+
+tlvVendorSpecific:
+  _type: class  
+  type:
+    _type: uint8_t
+    _value_const: 1
+  length:
+    _type: uint16_t
+    _value: 3
+    _length_var: True
+  test_length:
+    _type: uint16_t
+    _length_var: True
+  test_list:
+    _type: uint8_t
+    _length: [test_length]
+  test_uint16:
+    _type: uint16_t
+    _value: 14
+  test2_length:
+    _type: uint16_t
+    _length_var: True
+  test2_list:
+    _type: uint8_t
+    _length: [test2_length]
+  test_uint32:
+    _type: uint32_t
+    _value: 10
+  vendor_oui:
+    _type: uint8_t
+    _length: [ 3 ]
+    _comment: Use eVendorOUI
+
+# eVendorOUI:
+#   _type: enum
+#   _enum_storage: uint32_t
+#   # FIXME: https://github.com/prplfoundation/prplMesh/issues/33
+#   OUI_BYTES: 3
+#   OUI_INTEL: 0x470300

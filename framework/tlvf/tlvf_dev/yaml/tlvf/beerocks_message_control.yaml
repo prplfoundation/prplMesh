@@ -1,0 +1,8 @@
+cACTION_CONTROL_AGENT_PING_RESPONSE:
+  _type: class
+  total: uint16_t 
+  seq: uint16_t 
+  size: uint16_t
+  data:
+    _type: uint8_t
+    _length: []
