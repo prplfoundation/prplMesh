@@ -20,7 +20,7 @@
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
-#include <tuple>
+#include "tlvf/ieee_1905_1/sVendorOUI.h"
 
 namespace ieee1905_1 {
 
@@ -39,8 +39,7 @@ class tlvVendorSpecific : public BaseClass
         
         const eTlvType& type();
         uint16_t& length();
-        //Use eVendorOUI
-        std::tuple<bool, uint8_t&> vendor_oui(size_t idx);
+        sVendorOUI& vendor_oui();
         void class_swap();
         static size_t get_initial_size();
 
@@ -48,9 +47,7 @@ class tlvVendorSpecific : public BaseClass
         bool init();
         eTlvType* m_type = nullptr;
         uint16_t* m_length = nullptr;
-        uint8_t* m_vendor_oui = nullptr;
-        size_t m_vendor_oui_idx__ = 0;
-        int m_lock_order_counter__ = 0;
+        sVendorOUI* m_vendor_oui = nullptr;
 };
 
 }; // close namespace: ieee1905_1
