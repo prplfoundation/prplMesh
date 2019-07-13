@@ -33,18 +33,14 @@ uint16_t& tlvVendorSpecific::length() {
     return (uint16_t&)(*m_length);
 }
 
-std::tuple<bool, uint8_t&> tlvVendorSpecific::vendor_oui(size_t idx) {
-    bool ret_success = ( (m_vendor_oui_idx__ > 0) && (m_vendor_oui_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
-        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
-    }
-    return std::forward_as_tuple(ret_success, m_vendor_oui[ret_idx]);
+sVendorOUI& tlvVendorSpecific::vendor_oui() {
+    return (sVendorOUI&)(*m_vendor_oui);
 }
 
 void tlvVendorSpecific::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
+    m_vendor_oui->struct_swap();
 }
 
 size_t tlvVendorSpecific::get_initial_size()
@@ -52,7 +48,7 @@ size_t tlvVendorSpecific::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(eTlvType); // type
     class_size += sizeof(uint16_t); // length
-    class_size += 3 * sizeof(uint8_t); // vendor_oui
+    class_size += sizeof(sVendorOUI); // vendor_oui
     return class_size;
 }
 
@@ -68,9 +64,9 @@ bool tlvVendorSpecific::init()
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0x3;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
-    m_vendor_oui = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += (sizeof(uint8_t) * 3);
-    m_vendor_oui_idx__  = 3;
+    m_vendor_oui = (sVendorOUI*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sVendorOUI) * 1;
+    if (!m_parse__) { m_vendor_oui->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
