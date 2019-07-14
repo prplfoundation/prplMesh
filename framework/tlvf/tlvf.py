@@ -909,8 +909,8 @@ class TlvF:
                     else:
                         marker_start = "%s_%s_%s" %(self.CODE_CLASS_ALLOC_START, obj_meta.name, param_name)
                         marker_insert = "%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, param_name)
-                        self.insertLineCpp("", self.CODE_END_INSERT, marker_start)
-                        self.insertLineCpp("", self.CODE_END_INSERT, marker_insert)
+                        self.insertLineCpp(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, marker_start)
+                        self.insertLineCpp(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, marker_insert)
                         self.insertLineCpp("", marker_insert, "%sstd::memmove(m_%s__ + len, m_%s__, len);" %(self.getIndentation(1), self.MEMBER_BUFF_PTR, self.MEMBER_BUFF_PTR))
                     lines_h.append( "bool alloc_%s(size_t count = 1);" % (param_name) )
                     self.insertLineCpp("", marker_start, "bool %s::alloc_%s(size_t count) {" % (obj_meta.name, param_name) )
