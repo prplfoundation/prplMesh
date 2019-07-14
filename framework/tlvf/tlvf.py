@@ -200,6 +200,7 @@ class MetaData:
         self.optional = False
         self.constractor_h_lines = []
         self.constractor_cpp_lines = []
+        self.alloc_list = []
         self.fillMetaData(dict)
         self.errorCheck(dict)
         
@@ -604,13 +605,10 @@ class TlvF:
         is_dynamic_len = (param_length_type == MetaData.LENGTH_TYPE_DYNAMIC)
 
         # TOMER DEBUG START
-        # Update this member pointer in all alloc functions
-        marker_prefix = "%s_%s" %(self.CODE_CLASS_ALLOC_START, obj_meta.name)
-        for line in list(self.code_template_cpp):
-            if marker_prefix in line.strip():
-                lines_cpp = []
-                lines_cpp.append("%sm_%s = (%s *)((uint8_t *)(m_%s) + len);" %(self.getIndentation(1), param_name, param_type, param_name))
-                self.insertLineCpp("", line.strip(), lines_cpp)
+        #Update this member pointer in all alloc functions
+        for marker in obj_meta.alloc_list:
+            line = "%sm_%s = (%s *)((uint8_t *)(m_%s) + len);" %(self.getIndentation(1), param_name, param_type, param_name)
+            self.insertLineCpp("", marker.strip(), line)
         # TOMER DEBUG END
 
         if param_length_type == None:
@@ -909,6 +907,7 @@ class TlvF:
                     else:
                         marker_start = "%s_%s_%s" %(self.CODE_CLASS_ALLOC_START, obj_meta.name, param_name)
                         marker_insert = "%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, param_name)
+                        obj_meta.alloc_list.append(marker_start)
                         self.insertLineCpp(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, marker_start)
                         self.insertLineCpp(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, marker_insert)
                         self.insertLineCpp("", marker_insert, "%sstd::memmove(m_%s__ + len, m_%s__, len);" %(self.getIndentation(1), self.MEMBER_BUFF_PTR, self.MEMBER_BUFF_PTR))
