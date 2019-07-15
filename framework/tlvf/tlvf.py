@@ -958,7 +958,8 @@ class TlvF:
         if param_meta.length_type == MetaData.LENGTH_TYPE_VAR:
             marker = "%s_%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, func_name, param_meta.name)
             obj_meta.alloc_list.append(marker)
-            lines_cpp.append("%sstd::memmove(m_%s__ + len, m_%s__, len);" %(self.getIndentation(1), self.MEMBER_BUFF_PTR, self.MEMBER_BUFF_PTR))
+            lines_cpp.append("%sif (!m_parse__)" %self.getIndentation(1))
+            lines_cpp.append("%sstd::memmove(m_%s__ + len, m_%s__, getBuffRemainingBytes() - len);" %(self.getIndentation(2), self.MEMBER_BUFF_PTR, self.MEMBER_BUFF_PTR))
             lines_cpp.append(marker)
 
         return lines_cpp
