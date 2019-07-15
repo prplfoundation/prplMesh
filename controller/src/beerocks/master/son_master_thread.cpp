@@ -204,7 +204,7 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
 bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    LOG(DEBUG) << "handle_cmdu_1905_1_message " << int(cmdu_rx.getMessageType());
+    LOG(DEBUG) << "handle_cmdu_1905_1_message " << std::hex << int(cmdu_rx.getMessageType());
 
     switch (cmdu_rx.getMessageType()) {
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE:
@@ -613,6 +613,13 @@ bool master_thread::handle_cmdu_1905_channel_preference_report_message(
                     channel_tx       = channel_rx;
 
                     op_class_channels_tx->flags() = op_class_channels_rx.flags();
+
+                    // Push operating class object to the list of operating class objects
+                    if (!channel_preference_tlv_tx->add_operating_classes_list(
+                            op_class_channels_tx)) {
+                        LOG(ERROR) << "add_operating_classes_list() has failed!";
+                        return false;
+                    }
                 }
                 LOG(DEBUG) << ss.str();
             }
