@@ -176,7 +176,8 @@ bool cACTION_BML_NW_MAP_RESPONSE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;
@@ -278,7 +279,8 @@ bool cACTION_BML_NW_MAP_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;
@@ -380,7 +382,8 @@ bool cACTION_BML_STATS_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;
@@ -478,7 +481,8 @@ bool cACTION_BML_EVENTS_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;
@@ -2495,7 +2499,8 @@ bool cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::alloc_vap_list(size_t count) 
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_vap_list_idx__ += count;
     *m_vap_list_size += count;
     m_buff_ptr__ += len;
@@ -2622,7 +2627,8 @@ bool cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::alloc_vap_list(size_t count)
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_vap_list_idx__ += count;
     *m_vap_list_size += count;
     m_buff_ptr__ += len;
@@ -3296,7 +3302,8 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;

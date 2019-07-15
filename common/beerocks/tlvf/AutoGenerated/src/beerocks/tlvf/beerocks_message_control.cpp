@@ -426,7 +426,6 @@ bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::alloc_data(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;
@@ -510,7 +509,6 @@ bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::alloc_data(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;
@@ -594,7 +592,6 @@ bool cACTION_CONTROL_AGENT_PING_REQUEST::alloc_data(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;
@@ -678,7 +675,6 @@ bool cACTION_CONTROL_AGENT_PING_RESPONSE::alloc_data(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;
@@ -1995,7 +1991,8 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_sta_stats_idx__ += count;
     *m_sta_stats_size += count;
     m_buff_ptr__ += len;

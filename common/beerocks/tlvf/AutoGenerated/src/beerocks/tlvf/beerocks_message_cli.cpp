@@ -283,7 +283,8 @@ bool cACTION_CLI_RESPONSE_STR::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;

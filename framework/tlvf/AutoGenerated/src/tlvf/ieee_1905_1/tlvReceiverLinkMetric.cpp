@@ -60,7 +60,6 @@ bool tlvReceiverLinkMetric::alloc_interface_pair_info(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
     m_interface_pair_info_idx__ += count;
     m_buff_ptr__ += len;
     if(m_length){ (*m_length) += len; }

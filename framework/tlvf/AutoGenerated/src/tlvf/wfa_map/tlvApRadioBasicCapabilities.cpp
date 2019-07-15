@@ -66,6 +66,8 @@ std::shared_ptr<cOperatingClassesInfo> tlvApRadioBasicCapabilities::create_opera
         return nullptr;
     }
     m_lock_allocation__ = true;
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     return std::make_shared<cOperatingClassesInfo>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
 }
 
@@ -91,6 +93,8 @@ bool tlvApRadioBasicCapabilities::add_operating_classes_info_list(std::shared_pt
         (*m_operating_classes_info_list_length)++;
     }
     size_t len = ptr->getLen();
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_operating_classes_info_list_vector.push_back(ptr);
     m_buff_ptr__ += len;
     if(m_length){ (*m_length) += len; }
@@ -204,7 +208,8 @@ bool cOperatingClassesInfo::alloc_statically_non_operable_channels_list(size_t c
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__)
+        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_statically_non_operable_channels_list_idx__ += count;
     *m_statically_non_operable_channels_list_length += count;
     m_buff_ptr__ += len;
