@@ -17,7 +17,7 @@ tlvOperatingChannelReport:
     _type: sOperatingClasses
     _length: [ operating_classes_list_length ]
   current_transmit_power:
-    _type: uint8_t
+    _type: int8_t
     _comment: |
       Current Transmit Power EIRP representing the current nominal transmit power.
       The field is coded as a 2's complement signed integer in units of decibels relative to 1 mW (dBm).

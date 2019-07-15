@@ -15,6 +15,9 @@ include_yaml_path: {
   "tlvf/wfa_map/tlvApRadioBasicCapabilities.yaml",
   "tlvf/wfa_map/tlvApRadioIdentifier.yaml",
   "tlvf/wfa_map/tlvRadioOperationRestriction.yaml",
+  "tlvf/wfa_map/tlvChannelSelectionResponse.yaml",
+  "tlvf/wfa_map/tlvTransmitPowerLimit.yaml",
+  "tlvf/wfa_map/tlvOperatingChannelReport.yaml",
 }
 
 # Relative to tlvf.py src_path variable
