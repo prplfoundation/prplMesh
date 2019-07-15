@@ -36,6 +36,15 @@ uint16_t& cInnerClass::list1_length() {
     return (uint16_t&)(*m_list1_length);
 }
 
+std::tuple<bool, uint8_t&> cInnerClass::list1(size_t idx) {
+    bool ret_success = ( (m_list1_idx__ > 0) && (m_list1_idx__ > idx) );
+    size_t ret_idx = ret_success ? idx : 0;
+    if (!ret_success) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+    }
+    return std::forward_as_tuple(ret_success, m_list1[ret_idx]);
+}
+
 bool cInnerClass::alloc_list1(size_t count) {
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
@@ -46,27 +55,17 @@ bool cInnerClass::alloc_list1(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    std::memmove(m_buff_ptr__ + len, m_buff_ptr__, len);
     m_var2 = (uint16_t *)((uint8_t *)(m_var2) + len);
     m_list2_length = (uint16_t *)((uint8_t *)(m_list2_length) + len);
     m_list2 = (uint8_t *)((uint8_t *)(m_list2) + len);
     m_var3 = (uint32_t *)((uint8_t *)(m_var3) + len);
     m_var4 = (uint8_t *)((uint8_t *)(m_var4) + len);
-//~class_alloc_func_start_cInnerClass_list1
-    std::memmove(m_buff_ptr__ + len, m_buff_ptr__, len);
+//~class_alloc_func_insert_cInnerClass_alloc_list1
     m_list1_idx__ += count;
     *m_list1_length += count;
     m_buff_ptr__ += len;
     return true;
-}
-
-//~class_alloc_func_insert_cInnerClass_list1
-std::tuple<bool, uint8_t&> cInnerClass::list1(size_t idx) {
-    bool ret_success = ( (m_list1_idx__ > 0) && (m_list1_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
-        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
-    }
-    return std::forward_as_tuple(ret_success, m_list1[ret_idx]);
 }
 
 uint16_t& cInnerClass::var2() {
@@ -75,6 +74,15 @@ uint16_t& cInnerClass::var2() {
 
 uint16_t& cInnerClass::list2_length() {
     return (uint16_t&)(*m_list2_length);
+}
+
+std::tuple<bool, uint8_t&> cInnerClass::list2(size_t idx) {
+    bool ret_success = ( (m_list2_idx__ > 0) && (m_list2_idx__ > idx) );
+    size_t ret_idx = ret_success ? idx : 0;
+    if (!ret_success) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+    }
+    return std::forward_as_tuple(ret_success, m_list2[ret_idx]);
 }
 
 bool cInnerClass::alloc_list2(size_t count) {
@@ -87,24 +95,14 @@ bool cInnerClass::alloc_list2(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    std::memmove(m_buff_ptr__ + len, m_buff_ptr__, len);
     m_var3 = (uint32_t *)((uint8_t *)(m_var3) + len);
     m_var4 = (uint8_t *)((uint8_t *)(m_var4) + len);
-//~class_alloc_func_start_cInnerClass_list2
-    std::memmove(m_buff_ptr__ + len, m_buff_ptr__, len);
+//~class_alloc_func_insert_cInnerClass_alloc_list2
     m_list2_idx__ += count;
     *m_test2_length += count;
     m_buff_ptr__ += len;
     return true;
-}
-
-//~class_alloc_func_insert_cInnerClass_list2
-std::tuple<bool, uint8_t&> cInnerClass::list2(size_t idx) {
-    bool ret_success = ( (m_list2_idx__ > 0) && (m_list2_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
-        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
-    }
-    return std::forward_as_tuple(ret_success, m_list2[ret_idx]);
 }
 
 uint32_t& cInnerClass::var3() {
@@ -224,6 +222,11 @@ std::shared_ptr<cInnerClass> cOuterClass::create_var2_list() {
         return nullptr;
     }
     m_lock_allocation__ = true;
+    std::memmove(m_buff_ptr__ + len, m_buff_ptr__, len);
+    m_var3_length = (uint16_t *)((uint8_t *)(m_var3_length) + len);
+    m_var3_list = (uint8_t *)((uint8_t *)(m_var3_list) + len);
+    m_list_dynamic = (char *)((uint8_t *)(m_list_dynamic) + len);
+//~class_alloc_func_insert_cOuterClass_create_var2_list
     return std::make_shared<cInnerClass>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
 }
 
@@ -249,6 +252,11 @@ bool cOuterClass::add_var2_list(std::shared_ptr<cInnerClass> ptr) {
         (*m_var2_length)++;
     }
     size_t len = ptr->getLen();
+    std::memmove(m_buff_ptr__ + len, m_buff_ptr__, len);
+    m_var3_length = (uint16_t *)((uint8_t *)(m_var3_length) + len);
+    m_var3_list = (uint8_t *)((uint8_t *)(m_var3_list) + len);
+    m_list_dynamic = (char *)((uint8_t *)(m_list_dynamic) + len);
+//~class_alloc_func_insert_cOuterClass_add_var2_list
     m_var2_list_vector.push_back(ptr);
     m_buff_ptr__ += len;
     m_lock_allocation__ = false;
@@ -257,6 +265,15 @@ bool cOuterClass::add_var2_list(std::shared_ptr<cInnerClass> ptr) {
 
 uint16_t& cOuterClass::var3_length() {
     return (uint16_t&)(*m_var3_length);
+}
+
+std::tuple<bool, uint8_t&> cOuterClass::var3_list(size_t idx) {
+    bool ret_success = ( (m_var3_list_idx__ > 0) && (m_var3_list_idx__ > idx) );
+    size_t ret_idx = ret_success ? idx : 0;
+    if (!ret_success) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+    }
+    return std::forward_as_tuple(ret_success, m_var3_list[ret_idx]);
 }
 
 bool cOuterClass::alloc_var3_list(size_t count) {
@@ -269,36 +286,11 @@ bool cOuterClass::alloc_var3_list(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-    m_list_dynamic = (char *)((uint8_t *)(m_list_dynamic) + len);
-//~class_alloc_func_start_cOuterClass_var3_list
     std::memmove(m_buff_ptr__ + len, m_buff_ptr__, len);
+    m_list_dynamic = (char *)((uint8_t *)(m_list_dynamic) + len);
+//~class_alloc_func_insert_cOuterClass_alloc_var3_list
     m_var3_list_idx__ += count;
     *m_var3_length += count;
-    m_buff_ptr__ += len;
-    return true;
-}
-
-//~class_alloc_func_insert_cOuterClass_var3_list
-std::tuple<bool, uint8_t&> cOuterClass::var3_list(size_t idx) {
-    bool ret_success = ( (m_var3_list_idx__ > 0) && (m_var3_list_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
-        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
-    }
-    return std::forward_as_tuple(ret_success, m_var3_list[ret_idx]);
-}
-
-bool cOuterClass::alloc_list_dynamic(size_t count) {
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
-    size_t len = sizeof(char) * count;
-    if(getBuffRemainingBytes() < len )  {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
-        return false;
-    }
-    m_list_dynamic_idx__ += count;
     m_buff_ptr__ += len;
     return true;
 }
@@ -334,6 +326,21 @@ bool cOuterClass::set_list_dynamic(char str[], size_t size) {
     m_list_dynamic[size] = '\0';
     return true;
 }
+bool cOuterClass::alloc_list_dynamic(size_t count) {
+    if (count == 0) {
+        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_list_dynamic_idx__ += count;
+    m_buff_ptr__ += len;
+    return true;
+}
+
 //~class_public_func_insert_cOuterClass
 void cOuterClass::class_swap()
 {
