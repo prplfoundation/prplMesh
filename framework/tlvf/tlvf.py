@@ -900,45 +900,51 @@ class TlvF:
                     lines_cpp.append( "}" )
                     lines_cpp.append( "" )
                 else: #simple list
-                    # TOMER DEBUG START
-                    if is_dynamic_len:
-                        marker_start = self.CODE_CLASS_PUBLIC_FUNC_INSERT + "_" + obj_meta.name
-                        marker_insert = self.CODE_CLASS_PUBLIC_FUNC_INSERT + "_" + obj_meta.name
-                    else:
-                        marker_start = "%s_%s_%s" %(self.CODE_CLASS_ALLOC_START, obj_meta.name, param_name)
-                        marker_insert = "%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, param_name)
-                        obj_meta.alloc_list.append(marker_start)
-                        self.insertLineCpp(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, marker_start)
-                        self.insertLineCpp(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, marker_insert)
-                        self.insertLineCpp("", marker_insert, "%sstd::memmove(m_%s__ + len, m_%s__, len);" %(self.getIndentation(1), self.MEMBER_BUFF_PTR, self.MEMBER_BUFF_PTR))
                     lines_h.append( "bool alloc_%s(size_t count = 1);" % (param_name) )
-                    self.insertLineCpp("", marker_start, "bool %s::alloc_%s(size_t count) {" % (obj_meta.name, param_name) )
-                    self.insertLineCpp("", marker_start, "%sif (count == 0) {" % (self.getIndentation(1)) )
-                    self.insertLineCpp("", marker_start, '%sTLVF_LOG(WARNING) << "can\'t allocate 0 bytes";' %  self.getIndentation(2) )
-                    self.insertLineCpp("", marker_start, "%sreturn false;" % self.getIndentation(2))
-                    self.insertLineCpp("", marker_start, "%s}" % self.getIndentation(1) )
-                    self.insertLineCpp("", marker_start, "%ssize_t len = sizeof(%s) * count;" % (self.getIndentation(1), param_type) )
-                    self.insertLineCpp("", marker_start, "%sif(getBuffRemainingBytes() < len )  {" % (self.getIndentation(1)) )
-                    self.insertLineCpp("", marker_start, '%sTLVF_LOG(ERROR) << "Not enough available space on buffer - can\'t allocate";' %  self.getIndentation(2) )
-                    self.insertLineCpp("", marker_start, "%sreturn false;" % self.getIndentation(2))
-                    self.insertLineCpp("", marker_start, "%s}" % self.getIndentation(1) )
-                    #self.insertLineCpp(param_name, self.CODE_CLASS_ALLOC_INSERT, "%smemmove(&m_%s[m_%s_idx__], &m_%s[m_%s_idx__ + count], len);" % (self.getIndentation(1), param_name, param_name, param_name, param_name) )
-                    self.insertLineCpp("", marker_insert, "%sm_%s_idx__ += count;" % (self.getIndentation(1), param_name) )
+                    lines_cpp.append("bool %s::alloc_%s(size_t count) {" % (obj_meta.name, param_name))
+                    lines_cpp.append("%sif (count == 0) {" % (self.getIndentation(1)))
+                    lines_cpp.append('%sTLVF_LOG(WARNING) << "can\'t allocate 0 bytes";' %  self.getIndentation(2))
+                    lines_cpp.append("%sreturn false;" % self.getIndentation(2))
+                    lines_cpp.append("%s}" % self.getIndentation(1))
+                    lines_cpp.append("%ssize_t len = sizeof(%s) * count;" % (self.getIndentation(1), param_type))
+                    lines_cpp.append("%sif(getBuffRemainingBytes() < len )  {" % (self.getIndentation(1)))
+                    lines_cpp.append('%sTLVF_LOG(ERROR) << "Not enough available space on buffer - can\'t allocate";' %  self.getIndentation(2))
+                    lines_cpp.append("%sreturn false;" % self.getIndentation(2))
+                    lines_cpp.append("%s}" % self.getIndentation(1))
+
+                    #########################################################################
+                    # Variable length lists support
+                    #
+                    # If this is a variable length list alloc, add a call to std::memmove to
+                    # move the contents of the buffer with the allocation size.
+                    # Then, we need to add a marker so that on following members we will
+                    # update their pointers accordingly.
+                    #
+                    # Note - dynamic length lists are lists without a size parameter (list[])
+                    # which can only be the last member of each class, therefore no action is
+                    # needed for them.
+                    ##########################################################################
+                    if not is_dynamic_len:
+                        marker = "%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, param_name)
+                        obj_meta.alloc_list.append(marker)
+                        lines_cpp.append("%sstd::memmove(m_%s__ + len, m_%s__, len);" %(self.getIndentation(1), self.MEMBER_BUFF_PTR, self.MEMBER_BUFF_PTR))
+                        lines_cpp.append(marker)
+
+                    lines_cpp.append("%sm_%s_idx__ += count;" % (self.getIndentation(1), param_name))
                     if is_var_len:
-                        self.insertLineCpp("", marker_insert, "%s*m_%s += count;" % (self.getIndentation(1), param_length) )
-                    self.insertLineCpp("", marker_insert, "%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR) )
+                        lines_cpp.append("%s*m_%s += count;" % (self.getIndentation(1), param_length))
+                    lines_cpp.append("%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR))
                     if self.is_tlv_class and obj_meta.fname == obj_meta.name:
-                        self.insertLineCpp("", marker_insert, "%sif(m_length){ (*m_length) += len; }" % (self.getIndentation(1)))
+                        lines_cpp.append("%sif(m_length){ (*m_length) += len; }" % (self.getIndentation(1)))
                     if TypeInfo(param_type).type == TypeInfo.STRUCT:
-                        self.insertLineCpp("", marker_insert, "%sif (!m_%s__) { " % (self.getIndentation(1), self.MEMBER_PARSE))
-                        self.insertLineCpp("", marker_insert, "%sfor (size_t i = m_%s_idx__ - count; i < m_%s_idx__; i++) { m_%s[i].struct_init(); }" % (self.getIndentation(2), param_name, param_name, param_name))
-                        self.insertLineCpp("", marker_insert, "%s}" % (self.getIndentation(1)))
+                        lines_cpp.append("%sif (!m_%s__) { " % (self.getIndentation(1), self.MEMBER_PARSE))
+                        lines_cpp.append("%sfor (size_t i = m_%s_idx__ - count; i < m_%s_idx__; i++) { m_%s[i].struct_init(); }" % (self.getIndentation(2), param_name, param_name, param_name))
+                        lines_cpp.append("%s}" % (self.getIndentation(1)))
 
-                    self.insertLineCpp("", marker_insert, "%sreturn true;" % (self.getIndentation(1)) )
-                    self.insertLineCpp("", marker_insert, "}" )
-                    self.insertLineCpp("", marker_insert, "" )
+                    lines_cpp.append("%sreturn true;" % (self.getIndentation(1)))
+                    lines_cpp.append("}")
+                    lines_cpp.append("")
                     # TOMER DEBUG END
-
 
         else:
             self.abort("%s.yaml --> unsupported length type: %r, param_name=%s" % (self.yaml_fname, param_length_type, param_name))
