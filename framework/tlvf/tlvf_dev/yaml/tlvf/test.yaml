@@ -2,37 +2,53 @@
 ---
 _namespace: ieee1905_1
 
-tlvVendorSpecific:
+cInnerClass:
   _type: class  
-  type:
+  var1:
     _type: uint8_t
     _value_const: 1
-  length:
-    _type: uint16_t
-    _value: 3
-    _length_var: True
-  test_length:
+  list1_length:
     _type: uint16_t
     _length_var: True
-  test_list:
+  list1:
     _type: uint8_t
-    _length: [test_length]
-  test_uint16:
+    _length: [list1_length]
+  var2:
     _type: uint16_t
     _value: 14
-  test2_length:
+  list2_length:
     _type: uint16_t
     _length_var: True
-  test2_list:
+  list2:
     _type: uint8_t
     _length: [test2_length]
-  test_uint32:
+  var3:
     _type: uint32_t
     _value: 10
-  vendor_oui:
+  var4:
     _type: uint8_t
     _length: [ 3 ]
-    _comment: Use eVendorOUI
+
+cOuterClass:
+  _type: class
+  var1:
+    _type: uint32_t
+    _value_const: 8
+  var2_length:
+    _type: uint16_t
+    _length_var: True
+  var2_list:
+    _type: cInnerClass
+    _length: [var2_length]
+  var3_length:
+    _type: uint16_t
+    _length_var: True
+  var3_list:
+    _type: uint8_t
+    _length: [var3_length]
+  list_dynamic:
+    _type: char
+    _length: []
 
 # eVendorOUI:
 #   _type: enum
