@@ -488,7 +488,8 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
 bool master_thread::handle_cmdu_1905_channel_preference_report_message(
     Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    LOG(INFO) << "Received CHANNEL_PREFERENCE_REPORT_MESSAGE";
+    auto mid = cmdu_rx.getMessageId();
+    LOG(INFO) << "Received CHANNEL_PREFERENCE_REPORT_MESSAGE, mid=" << std::dec << int(mid);
 
     // TODO: in actual channel selection task, it is important to validate that rx mid is identical
     // to the mid sent in channel preference request message
@@ -567,7 +568,7 @@ bool master_thread::handle_cmdu_1905_channel_preference_report_message(
                     }
 
                     LOG(INFO) << "ruid=" << network_utils::mac_to_string(ruid);
-                    LOG(INFO) << "selected_operating_class=" << int(operating_class);
+                    LOG(INFO) << "selected_operating_class=" << std::dec << int(operating_class);
                     LOG(INFO) << "selected_channel=" << int(channel_rx);
 
                     ruid_list.push_back(ruid);

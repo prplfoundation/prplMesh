@@ -261,6 +261,7 @@ private:
     bool handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool autoconfig_wsc_add_m1();
     bool handle_channel_preference_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_channel_selection_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 };
 
 } // namespace son
