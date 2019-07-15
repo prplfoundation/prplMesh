@@ -28,6 +28,9 @@
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
+#include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
+#include <tlvf/wfa_map/tlvOperatingChannelReport.h>
+#include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
 // BPL Error Codes
 #include <bpl/bpl_cfg.h>
@@ -463,6 +466,8 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_autoconfiguration_wsc(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
         return handle_channel_preference_query(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
+        return handle_channel_selection_request(sd, cmdu_rx);
     default:
         LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
         return false;
@@ -4463,9 +4468,8 @@ bool slave_thread::parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessage
 
 bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    LOG(DEBUG) << "Received CHANNEL_PREFERENCE_QUERY_MESSAGE";
-
-    auto mid = cmdu_rx.getMessageId();
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received CHANNEL_PREFERENCE_QUERY_MESSAGE, mid=" << std::dec << int(mid);
 
     // build channel preference report
     auto cmdu_tx_header =
@@ -4526,6 +4530,181 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
         LOG(ERROR) << "add_operating_classes_list() has failed!";
         return false;
     }
+
+    LOG(DEBUG) << "sending channel preference report for ruid=" << config.radio_identifier;
+
+    return send_cmdu_to_controller(cmdu_tx);
+}
+
+bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received CHANNEL_SELECTION_REQUEST_MESSAGE, mid=" << std::dec << int(mid);
+
+    uint8_t selected_channel         = 0;
+    uint8_t selected_operating_class = 0;
+    // parse all tlvs in cmdu
+    int tlvType;
+    while ((tlvType = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
+
+        if (tlvType < 0) {
+            LOG(ERROR) << "getNextTlvType has failed";
+            return false;
+        }
+
+        if (tlvType == int(wfa_map::eTlvTypeMap::TLV_CHANNEL_PREFERENCE)) {
+
+            // parse channel preference report message
+            auto channel_preference_tlv = cmdu_rx.addClass<wfa_map::tlvChannelPreference>();
+            if (!channel_preference_tlv) {
+                LOG(ERROR) << "addClass wfa_map::tlvChannelPreference has failed";
+                return false;
+            }
+
+            const auto &ruid = channel_preference_tlv->radio_uid();
+            if (network_utils::mac_to_string(ruid) != config.radio_identifier) {
+                LOG(DEBUG) << "ruid_rx=" << network_utils::mac_to_string(ruid)
+                           << ", son_slave_ruid=" << config.radio_identifier;
+                continue;
+            }
+
+            // read all operating class list
+            auto operating_classes_list_length =
+                channel_preference_tlv->operating_classes_list_length();
+
+            for (int oc_idx = 0; oc_idx < operating_classes_list_length; oc_idx++) {
+                std::stringstream ss;
+                auto operating_class_tuple = channel_preference_tlv->operating_classes_list(oc_idx);
+                if (!std::get<0>(operating_class_tuple)) {
+                    LOG(ERROR) << "getting operating class entry has failed!";
+                    return false;
+                }
+                auto &op_class_channels = std::get<1>(operating_class_tuple);
+                auto operating_class    = op_class_channels.operating_class();
+                ss << "operating class=" << int(operating_class);
+
+                const auto &flags = op_class_channels.flags();
+                auto preference   = flags.preference;
+                auto reason_code  = flags.reason_code;
+                ss << ", preference=" << int(preference) << ", reason=" << int(reason_code);
+                ss << ", channel_list={";
+
+                auto channel_list_length = op_class_channels.channel_list_length();
+                for (int ch_idx = 0; ch_idx < channel_list_length; ch_idx++) {
+                    auto channel_tuple = op_class_channels.channel_list(ch_idx);
+                    if (!std::get<0>(channel_tuple)) {
+                        LOG(ERROR) << "getting channel entry has failed!";
+                        return false;
+                    }
+
+                    auto channel = std::get<1>(channel_tuple);
+                    ss << int(channel);
+
+                    // add comma if not last channel in the list, else close list by add curl brackets
+                    ss << (((ch_idx + 1) != channel_list_length) ? "," : "}");
+
+                    // mark first supported non-dfs channel as selected channel
+                    // TODO: need to check that selected channel does not violate radio restriction
+                    if (preference == 0 || wireless_utils::is_dfs_channel(channel)) {
+                        continue;
+                    }
+
+                    LOG(INFO) << "selected_operating_class=" << int(operating_class);
+                    LOG(INFO) << "selected_channel=" << int(channel);
+                    selected_channel         = channel;
+                    selected_operating_class = operating_class;
+
+                    // TODO: check that the data is parsed properly after fixing the following bug:
+                    // Since sFlags is defined after dynamic list cPreferenceOperatingClasses it cause data override
+                    // on the first channel on the list and sFlags itself.
+                    // See: https://github.com/prplfoundation/prplMesh/issues/8
+                }
+                LOG(DEBUG) << ss.str();
+            }
+        } else if (tlvType == int(wfa_map::eTlvTypeMap::TLV_TRANSMIT_POWER_LIMIT)) {
+            // parse radio operation restriction tlv
+            auto tlvTransmitPowerLimit = cmdu_rx.addClass<wfa_map::tlvTransmitPowerLimit>();
+            if (!tlvTransmitPowerLimit) {
+                LOG(ERROR) << "addClass wfa_map::tlvTransmitPowerLimit has failed";
+                return false;
+            }
+
+            // TODO: continute to parse this tlv
+            // This TLV contains power Tx power limit that must be considered in channel selection
+            // request message. Since this is a dummy message, this TLV is ignored.
+            // Full implemtation will be as part of channel selection agent certification task.
+            // See: https://github.com/prplfoundation/prplMesh/issues/62
+
+        } else {
+            LOG(ERROR) << "Unexpected tlv type in CHANNEL_SELECTION_REQUEST_MESSAGE, type="
+                       << int(tlvType);
+            // TODO: replace return statement with function that skip s unexpected tlv
+            // See: https://github.com/prplfoundation/prplMesh/issues/107
+
+            return false;
+        } // close if (tlvType == some_tlv_type)
+
+    } //close while (cmdu_rx.getNextTlvType(tlvType))
+
+    // build and send channel response message
+    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type CHANNEL_SELECTION_RESPONSE_MESSAGE, has failed";
+        return false;
+    }
+
+    auto channel_selection_response_tlv = cmdu_tx.addClass<wfa_map::tlvChannelSelectionResponse>();
+    if (!channel_selection_response_tlv) {
+        LOG(ERROR) << "addClass ieee1905_1::tlvChannelSelectionResponse has failed";
+        return false;
+    }
+
+    channel_selection_response_tlv->radio_uid() =
+        network_utils::mac_from_string(config.radio_identifier);
+    channel_selection_response_tlv->response_code() =
+        wfa_map::tlvChannelSelectionResponse::eResponseCode::ACCEPT;
+
+    if (!send_cmdu_to_controller(cmdu_tx)) {
+        LOG(ERROR) << "failed to send CHANNEL_SELECTION_RESPONSE_MESSAGE";
+        return false;
+    }
+
+    // build and send operating channel report message
+    if (!cmdu_tx.create(0, ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type OPERATING_CHANNEL_REPORT_MESSAGE, has failed";
+        return false;
+    }
+
+    auto operating_channel_report_tlv = cmdu_tx.addClass<wfa_map::tlvOperatingChannelReport>();
+    if (!operating_channel_report_tlv) {
+        LOG(ERROR) << "addClass ieee1905_1::operating_channel_report_tlv has failed";
+        return false;
+    }
+
+    operating_channel_report_tlv->radio_uid() =
+        network_utils::mac_from_string(config.radio_identifier);
+
+    auto op_classes_list = operating_channel_report_tlv->alloc_operating_classes_list();
+    if (!op_classes_list) {
+        LOG(ERROR) << "alloc_operating_classes_list() has failed!";
+        return false;
+    }
+
+    auto operating_class_entry_tuple = operating_channel_report_tlv->operating_classes_list(0);
+    if (!std::get<0>(operating_class_entry_tuple)) {
+        LOG(ERROR) << "getting operating class entry has failed!";
+        return false;
+    }
+
+    auto &operating_class_entry = std::get<1>(operating_class_entry_tuple);
+    if (selected_channel) {
+        operating_class_entry.operating_class = selected_operating_class;
+        operating_class_entry.channel_number  = selected_channel;
+    } else {
+        operating_class_entry.operating_class = 80;
+        operating_class_entry.channel_number  = 36;
+    }
+
+    operating_channel_report_tlv->current_transmit_power() = -50;
 
     return send_cmdu_to_controller(cmdu_tx);
 }
