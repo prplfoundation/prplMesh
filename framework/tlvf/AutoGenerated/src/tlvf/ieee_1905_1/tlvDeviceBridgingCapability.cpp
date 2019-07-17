@@ -58,6 +58,12 @@ std::shared_ptr<cMacList> tlvDeviceBridgingCapability::create_bridging_tuples_li
         return nullptr;
     }
     m_lock_allocation__ = true;
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_bridging_tuples_list;
+        uint8_t *dst = (uint8_t *)m_bridging_tuples_list + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     return std::make_shared<cMacList>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
 }
 
@@ -130,8 +136,9 @@ bool tlvDeviceBridgingCapability::init()
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_bridging_tuples_list = (cMacList*)m_buff_ptr__;
-    m_bridging_tuples_list_idx__ = *m_bridging_tuples_list_length;
-    for (size_t i = 0; i < *m_bridging_tuples_list_length; i++) {
+    uint8_t bridging_tuples_list_length = *m_bridging_tuples_list_length;
+    m_bridging_tuples_list_idx__ = bridging_tuples_list_length;
+    for (size_t i = 0; i < bridging_tuples_list_length; i++) {
         if (!add_bridging_tuples_list(create_bridging_tuples_list())) { 
             TLVF_LOG(ERROR) << "Failed adding bridging_tuples_list entry.";
             return false;
@@ -178,7 +185,12 @@ bool cMacList::alloc_mac_list(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_mac_list;
+        uint8_t *dst = (uint8_t *)m_mac_list + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_mac_list_idx__ += count;
     *m_mac_list_length += count;
     m_buff_ptr__ += len;
@@ -212,8 +224,9 @@ bool cMacList::init()
     if (!m_parse__) *m_mac_list_length = 0;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     m_mac_list = (sMacAddr*)m_buff_ptr__;
-    m_mac_list_idx__ = *m_mac_list_length;
-    m_buff_ptr__ += sizeof(sMacAddr)*(*m_mac_list_length);
+    uint8_t mac_list_length = *m_mac_list_length;
+    m_mac_list_idx__ = mac_list_length;
+    m_buff_ptr__ += sizeof(sMacAddr)*(mac_list_length);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;

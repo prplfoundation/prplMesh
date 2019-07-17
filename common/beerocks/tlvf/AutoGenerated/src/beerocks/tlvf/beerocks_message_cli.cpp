@@ -283,7 +283,12 @@ bool cACTION_CLI_RESPONSE_STR::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_buffer;
+        uint8_t *dst = (uint8_t *)m_buffer + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;
@@ -312,8 +317,10 @@ bool cACTION_CLI_RESPONSE_STR::init()
     if (!m_parse__) *m_buffer_size = 0;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     m_buffer = (char*)m_buff_ptr__;
-    m_buffer_idx__ = *m_buffer_size;
-    m_buff_ptr__ += sizeof(char)*(*m_buffer_size);
+    uint32_t buffer_size = *m_buffer_size;
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size));
+    m_buffer_idx__ = buffer_size;
+    m_buff_ptr__ += sizeof(char)*(buffer_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;

@@ -176,7 +176,12 @@ bool cACTION_BML_NW_MAP_RESPONSE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_buffer;
+        uint8_t *dst = (uint8_t *)m_buffer + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;
@@ -209,8 +214,10 @@ bool cACTION_BML_NW_MAP_RESPONSE::init()
     if (!m_parse__) *m_buffer_size = 0;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     m_buffer = (char*)m_buff_ptr__;
-    m_buffer_idx__ = *m_buffer_size;
-    m_buff_ptr__ += sizeof(char)*(*m_buffer_size);
+    uint32_t buffer_size = *m_buffer_size;
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size));
+    m_buffer_idx__ = buffer_size;
+    m_buff_ptr__ += sizeof(char)*(buffer_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
@@ -278,7 +285,12 @@ bool cACTION_BML_NW_MAP_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_buffer;
+        uint8_t *dst = (uint8_t *)m_buffer + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;
@@ -311,8 +323,10 @@ bool cACTION_BML_NW_MAP_UPDATE::init()
     if (!m_parse__) *m_buffer_size = 0;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     m_buffer = (char*)m_buff_ptr__;
-    m_buffer_idx__ = *m_buffer_size;
-    m_buff_ptr__ += sizeof(char)*(*m_buffer_size);
+    uint32_t buffer_size = *m_buffer_size;
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size));
+    m_buffer_idx__ = buffer_size;
+    m_buff_ptr__ += sizeof(char)*(buffer_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
@@ -380,7 +394,12 @@ bool cACTION_BML_STATS_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_buffer;
+        uint8_t *dst = (uint8_t *)m_buffer + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;
@@ -413,8 +432,10 @@ bool cACTION_BML_STATS_UPDATE::init()
     if (!m_parse__) *m_buffer_size = 0;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     m_buffer = (char*)m_buff_ptr__;
-    m_buffer_idx__ = *m_buffer_size;
-    m_buff_ptr__ += sizeof(char)*(*m_buffer_size);
+    uint32_t buffer_size = *m_buffer_size;
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size));
+    m_buffer_idx__ = buffer_size;
+    m_buff_ptr__ += sizeof(char)*(buffer_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
@@ -478,7 +499,12 @@ bool cACTION_BML_EVENTS_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_buffer;
+        uint8_t *dst = (uint8_t *)m_buffer + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;
@@ -507,8 +533,10 @@ bool cACTION_BML_EVENTS_UPDATE::init()
     if (!m_parse__) *m_buffer_size = 0;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     m_buffer = (char*)m_buff_ptr__;
-    m_buffer_idx__ = *m_buffer_size;
-    m_buff_ptr__ += sizeof(char)*(*m_buffer_size);
+    uint32_t buffer_size = *m_buffer_size;
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size));
+    m_buffer_idx__ = buffer_size;
+    m_buff_ptr__ += sizeof(char)*(buffer_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
@@ -2495,7 +2523,12 @@ bool cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::alloc_vap_list(size_t count) 
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_vap_list;
+        uint8_t *dst = (uint8_t *)m_vap_list + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_vap_list_idx__ += count;
     *m_vap_list_size += count;
     m_buff_ptr__ += len;
@@ -2533,8 +2566,9 @@ bool cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::init()
     if (!m_parse__) *m_vap_list_size = 0;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     m_vap_list = (sConfigVapInfo*)m_buff_ptr__;
-    m_vap_list_idx__ = *m_vap_list_size;
-    m_buff_ptr__ += sizeof(sConfigVapInfo)*(*m_vap_list_size);
+    uint8_t vap_list_size = *m_vap_list_size;
+    m_vap_list_idx__ = vap_list_size;
+    m_buff_ptr__ += sizeof(sConfigVapInfo)*(vap_list_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
@@ -2622,7 +2656,12 @@ bool cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::alloc_vap_list(size_t count)
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_vap_list;
+        uint8_t *dst = (uint8_t *)m_vap_list + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_vap_list_idx__ += count;
     *m_vap_list_size += count;
     m_buff_ptr__ += len;
@@ -2660,8 +2699,9 @@ bool cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::init()
     if (!m_parse__) *m_vap_list_size = 0;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     m_vap_list = (sConfigVapInfo*)m_buff_ptr__;
-    m_vap_list_idx__ = *m_vap_list_size;
-    m_buff_ptr__ += sizeof(sConfigVapInfo)*(*m_vap_list_size);
+    uint8_t vap_list_size = *m_vap_list_size;
+    m_vap_list_idx__ = vap_list_size;
+    m_buff_ptr__ += sizeof(sConfigVapInfo)*(vap_list_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
@@ -3296,7 +3336,12 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_buffer;
+        uint8_t *dst = (uint8_t *)m_buffer + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_buffer_idx__ += count;
     *m_buffer_size += count;
     m_buff_ptr__ += len;
@@ -3325,8 +3370,10 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::init()
     if (!m_parse__) *m_buffer_size = 0;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     m_buffer = (char*)m_buff_ptr__;
-    m_buffer_idx__ = *m_buffer_size;
-    m_buff_ptr__ += sizeof(char)*(*m_buffer_size);
+    uint32_t buffer_size = *m_buffer_size;
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size));
+    m_buffer_idx__ = buffer_size;
+    m_buff_ptr__ += sizeof(char)*(buffer_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
