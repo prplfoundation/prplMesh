@@ -112,9 +112,8 @@ int main(int argc, char *argv[])
     secondTlv->link_metrics() = tlvLinkMetricQuery::eLinkMetricsType::RX_LINK_METRICS_ONLY;
 
     auto thirdTlv = msg.addClass<tlvWscM2>();
-    WSC::sM2 &m2  = thirdTlv->M2Frame();
     // All attributes have been initialized to default.
-    memcpy(m2.encrypted_settings_attr.ssid_attr.data, "test", 4);
+    memcpy(thirdTlv->encrypted_settings_attr().ssid_attr.data, "test", 4);
 
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
