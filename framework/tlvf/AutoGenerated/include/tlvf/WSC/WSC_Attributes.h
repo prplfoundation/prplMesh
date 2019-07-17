@@ -28,6 +28,7 @@
 #include "tlvf/WSC/eWscEncr.h"
 #include "tlvf/WSC/eWscLengths.h"
 #include "tlvf/WSC/eWscVendorId.h"
+#include "tlvf/WSC/eWscVendorExt.h"
 #include "tlvf/WSC/eWscDev.h"
 #include "tlvf/common/sMacAddr.h"
 
@@ -225,62 +226,6 @@ typedef struct sWscAttrWscState {
     }
 } __attribute__((packed)) sWscAttrWscState;
 
-typedef struct sWscAttrManufacturer {
-    eWscAttributes attribute_type;
-    uint16_t data_length;
-    char data[WSC_MAX_MANUFACTURER_LENGTH];
-    void struct_swap(){
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
-    }
-    void struct_init(){
-        attribute_type = ATTR_MANUFACTURER;
-        data_length = WSC_MAX_MANUFACTURER_LENGTH;
-    }
-} __attribute__((packed)) sWscAttrManufacturer;
-
-typedef struct sWscAttrModelName {
-    eWscAttributes attribute_type;
-    uint16_t data_length;
-    char data[WSC_MAX_MODEL_NAME_LENGTH];
-    void struct_swap(){
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
-    }
-    void struct_init(){
-        attribute_type = ATTR_MODEL_NAME;
-        data_length = WSC_MAX_MODEL_NAME_LENGTH;
-    }
-} __attribute__((packed)) sWscAttrModelName;
-
-typedef struct sWscAttrModelNumber {
-    eWscAttributes attribute_type;
-    uint16_t data_length;
-    char data[WSC_MAX_MODEL_NUMBER_LENGTH];
-    void struct_swap(){
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
-    }
-    void struct_init(){
-        attribute_type = ATTR_MODEL_NUMBER;
-        data_length = WSC_MAX_MODEL_NUMBER_LENGTH;
-    }
-} __attribute__((packed)) sWscAttrModelNumber;
-
-typedef struct sWscAttrSerialNumber {
-    eWscAttributes attribute_type;
-    uint16_t data_length;
-    char data[WSC_MAX_SERIAL_NUMBER_LENGTH];
-    void struct_swap(){
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
-    }
-    void struct_init(){
-        attribute_type = ATTR_SERIAL_NUMBER;
-        data_length = WSC_MAX_SERIAL_NUMBER_LENGTH;
-    }
-} __attribute__((packed)) sWscAttrSerialNumber;
-
 typedef struct sWscAttrPrimaryDeviceType {
     eWscAttributes attribute_type;
     uint16_t data_length;
@@ -297,22 +242,10 @@ typedef struct sWscAttrPrimaryDeviceType {
     void struct_init(){
         attribute_type = ATTR_PRIMARY_DEV_TYPE;
         data_length = WSC_PRIMARY_DEV_TYPE_LENGTH;
+        category_id = WSC_DEV_NETWORK_INFRA;
+        oui = 0x50f204;
     }
 } __attribute__((packed)) sWscAttrPrimaryDeviceType;
-
-typedef struct sWscAttrDeviceName {
-    eWscAttributes attribute_type;
-    uint16_t data_length;
-    char data[WSC_MAX_DEV_NAME_LENGTH];
-    void struct_swap(){
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
-    }
-    void struct_init(){
-        attribute_type = ATTR_DEV_NAME;
-        data_length = WSC_MAX_DEV_NAME_LENGTH;
-    }
-} __attribute__((packed)) sWscAttrDeviceName;
 
 typedef struct sWscAttrRfBands {
     eWscAttributes attribute_type;
@@ -394,7 +327,12 @@ typedef struct sWscAttrOsVersion {
 typedef struct sWscAttrVendorExtension {
     eWscAttributes attribute_type;
     uint16_t data_length;
-    uint8_t data[WSC_VENDOR_EXTENSIONS_LENGTH];
+    uint8_t vendor_id_0;
+    uint8_t vendor_id_1;
+    uint8_t vendor_id_2;
+    uint8_t subelement_id;
+    uint8_t subelement_length;
+    uint8_t subelement_value;
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
@@ -402,6 +340,12 @@ typedef struct sWscAttrVendorExtension {
     void struct_init(){
         attribute_type = ATTR_VENDOR_EXTENSION;
         data_length = WSC_VENDOR_EXTENSIONS_LENGTH;
+        vendor_id_0 = WSC_VENDOR_ID_WFA_1;
+        vendor_id_1 = WSC_VENDOR_ID_WFA_2;
+        vendor_id_2 = WSC_VENDOR_ID_WFA_3;
+        subelement_id = 0x6;
+        subelement_length = 0x1;
+        subelement_value = TEARDOWN;
     }
 } __attribute__((packed)) sWscAttrVendorExtension;
 
