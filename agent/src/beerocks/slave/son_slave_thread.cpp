@@ -4310,8 +4310,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     }
 
     for (auto m2 : m2_list) {
-        std::string manufacturer = std::string(m2->M2Frame().manufacturer_attr.data,
-                                               m2->M2Frame().manufacturer_attr.data_length);
+        std::string manufacturer = std::string(m2->manufacturer(), m2->manufacturer_length());
         if (!manufacturer.compare("Intel")) {
             //TODO add support for none Intel agents
             LOG(ERROR) << "None Intel controller " << manufacturer << " , dropping message";
@@ -4541,8 +4540,8 @@ bool slave_thread::autoconfig_wsc_add_m1()
         return false;
     }
 
-    //m1->mac_attr().data = hostap_params.iface_mac;
-    std::copy_n(hostap_params.iface_mac.oct, sizeof(sMacAddr), m1->mac_attr().data.oct);
+    //std::copy_n(hostap_params.iface_mac.oct, sizeof(sMacAddr), m1->mac_attr().data.oct);
+    m1->mac_attr().data = hostap_params.iface_mac;
     // TODO: read manufactured, name, model and device name from BPL
     m1->set_manufacturer("Intel");
     m1->set_model_name("Ubuntu");

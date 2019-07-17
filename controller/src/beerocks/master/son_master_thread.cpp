@@ -378,26 +378,21 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
         return false;
     }
 
-    m2->M2Frame().message_type_attr.data = WSC::WSC_MSG_TYPE_M2;
-    string_utils::copy_string(m2->M2Frame().manufacturer_attr.data, "Intel",
-                              m2->M2Frame().manufacturer_attr.data_length);
-    string_utils::copy_string(m2->M2Frame().model_name_attr.data, "Ubuntu",
-                              m2->M2Frame().model_name_attr.data_length);
-    string_utils::copy_string(m2->M2Frame().model_number_attr.data, "18.04",
-                              m2->M2Frame().model_number_attr.data_length);
-    string_utils::copy_string(m2->M2Frame().serial_number_attr.data, "prpl12345",
-                              m2->M2Frame().serial_number_attr.data_length);
-    std::memset(m2->M2Frame().uuid_r_attr.data, 0xee, m2->M2Frame().uuid_r_attr.data_length);
-    m2->M2Frame().authentication_type_flags_attr.data =
-        m1->authentication_type_flags_attr().data;
-    m2->M2Frame().encryption_type_flags_attr.data = m1->encryption_type_flags_attr().data;
-    m2->M2Frame().rf_bands_attr.data = (m1->rf_bands_attr().data & WSC::WSC_RF_BAND_5GHZ)
+    m2->message_type_attr().data = WSC::WSC_MSG_TYPE_M2;
+    m2->set_manufacturer("Intel");
+    m2->set_model_name("Ubuntu");
+    m2->set_model_number("18.04");
+    m2->set_serial_number("prpl12345");
+    std::memset(m2->uuid_r_attr().data, 0xee, m2->uuid_r_attr().data_length);
+    m2->authentication_type_flags_attr().data = m1->authentication_type_flags_attr().data;
+    m2->encryption_type_flags_attr().data = m1->encryption_type_flags_attr().data;
+    m2->rf_bands_attr().data = (m1->rf_bands_attr().data & WSC::WSC_RF_BAND_5GHZ)
                                            ? WSC::WSC_RF_BAND_5GHZ
                                            : WSC::WSC_RF_BAND_2GHZ;
-    m2->M2Frame().vendor_extensions_attr.subelement_value = bss_type & WSC::FRONTHAUL_BSS ?
+    m2->vendor_extensions_attr().subelement_value = bss_type & WSC::FRONTHAUL_BSS ?
                                         WSC::FRONTHAUL_BSS : (bss_type & WSC::BACKHAUL_BSS ?
                                         WSC::BACKHAUL_BSS : WSC::TEARDOWN);
-    m2->M2Frame().primary_device_type_attr.sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
+    m2->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
     // TODO: Finalize with encryption
     return true;
 }

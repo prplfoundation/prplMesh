@@ -77,7 +77,8 @@
 			"utility": "cpp",
 			"atomic": "cpp",
 			"codecvt": "cpp",
-			"memory": "cpp"
+			"memory": "cpp",
+			"string_view": "cpp"
 		}
 	}
 }
