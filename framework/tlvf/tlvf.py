@@ -199,8 +199,10 @@ class MetaData:
         self.optional = False
         self.constractor_h_lines = []
         self.constractor_cpp_lines = []
+        self.alloc_list = []
         self.fillMetaData(dict)
         self.errorCheck(dict)
+        self.children_types = {}
         
     def errPrefix(self):
         return "%s.yaml, param name=%s --> " % (self.fname, self.name)
@@ -320,6 +322,7 @@ class TlvF:
         self.CODE_CLASS_PUBLIC_VARS_INSERT          = "//~class_public_vars_insert"
         self.CODE_CLASS_PUBLIC_VARS_END_INSERT      = "//~class_public_vars_end_insert"
         self.CODE_CLASS_PRIVATE_VARS_INSERT         = "//~class_private_vars_insert"
+        self.CODE_CLASS_ALLOC_INSERT                = "//~class_alloc_func_insert"
         self.CODE_CLASS_PUBLIC_FUNC_INSERT          = "//~class_public_func_insert"
         self.CODE_CLASS_PRIVATE_FUNC_INSERT         = "//~class_private_func_insert"
         self.CODE_CLASS_INIT_FUNC_INSERT            = "//~class_init_func_insert"
@@ -460,6 +463,8 @@ class TlvF:
                 param_type = param_dict
                 param_meta = None
                 param_type_info = TypeInfo(param_type)
+
+            obj_meta.children_types[param_name] = param_type_info
 
             if param_type != None:
                 if param_type_info.type == TypeInfo.ERROR: self.abort("%s.yaml --> bad type: %s" % (self.yaml_fname, param_type))
@@ -604,6 +609,19 @@ class TlvF:
         is_const_len = (param_length_type == MetaData.LENGTH_TYPE_CONST)
         is_dynamic_len = (param_length_type == MetaData.LENGTH_TYPE_DYNAMIC)
 
+        ##############################################################################################
+        # variable length list support
+        #
+        # If the yaml file contains variable length lists, we already added allocation functions
+        # (alloc for lists of simple types, create and add for lists of classes).
+        # In each allocation function we added a call to std::memmove which copies the buffer after
+        # the list by the allocation size, and added a marker - which is used here to update
+        # all the class member pointers which come after the list member.
+        ##############################################################################################
+        for marker in obj_meta.alloc_list:
+            line = "%sm_%s = (%s *)((uint8_t *)(m_%s) + len);" %(self.getIndentation(1), param_name, param_type, param_name)
+            self.insertLineCpp("", marker.strip(), line)
+
         if param_length_type == None:
             # add private pointer
             line = "%s* m_%s = nullptr;" % (param_type, param_name)
@@ -612,7 +630,7 @@ class TlvF:
             lines_h = []
             lines_cpp = []
 
-            
+
             if param_class_const:
                 [ret_const_val, ret_err] = MetaData.getConstValue(param_name, param_val_const)
                 if ret_err: self.abort("%s.yaml --> can't get const val for param_name=%s" % (self.yaml_fname, param_name) )
@@ -702,16 +720,21 @@ class TlvF:
                 lines_cpp.append("%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR))
                 lines_cpp.append("}")
             if is_var_len:
-                lines_cpp.append("m_%s_idx__ = *m_%s;" % (param_name, param_length))
+                # variable length list support - swap length value for calculating list size
+                length_type = obj_meta.children_types[param_length]
+                lines_cpp.append("%s %s = *m_%s;" %(length_type.type_str, param_length, param_length))
+                if length_type.swap_needed:
+                    lines_cpp.append("%s&%s%s;" %(length_type.swap_prefix, param_length, length_type.swap_suffix))
+                lines_cpp.append("m_%s_idx__ = %s;" % (param_name, param_length))
                 if TypeInfo(param_type).type == TypeInfo.CLASS: #TODO:only if it's the last list member of the class
-                    lines_cpp.append("for (size_t i = 0; i < *m_%s; i++) {" % (param_length))
+                    lines_cpp.append("for (size_t i = 0; i < %s; i++) {" % (param_length))
                     lines_cpp.append("%sif (!add_%s(create_%s())) { " % (self.getIndentation(1), param_name, param_name))
                     lines_cpp.append( '%sTLVF_LOG(ERROR) << "Failed adding %s entry.";' %  (self.getIndentation(2), param_name) )
                     lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                     lines_cpp.append( "%s}" % self.getIndentation(1) )
                     lines_cpp.append("}")
                 else:
-                    lines_cpp.append("m_%s__ += sizeof(%s)*(*m_%s);" % (self.MEMBER_BUFF_PTR, param_type, param_length))
+                    lines_cpp.append("m_%s__ += sizeof(%s)*(%s);" % (self.MEMBER_BUFF_PTR, param_type, param_length))
             if is_int_len or is_const_len:
                 lines_cpp.append( "m_%s__ += (sizeof(%s) * %s);" % (self.MEMBER_BUFF_PTR, param_type, param_length) )
                 lines_cpp.append("m_%s_idx__  = %s;" % (param_name, param_length))
@@ -853,6 +876,7 @@ class TlvF:
                     lines_cpp.append( "%sreturn nullptr;" % self.getIndentation(2))
                     lines_cpp.append( "%s}" % self.getIndentation(1) )
                     lines_cpp.append( "%sm_%s__ = true;" % (self.getIndentation(1), self.MEMBER_LOCK_ALLOCATION) )
+                    lines_cpp.extend(self.addAllocationMarkers(obj_meta, "create", param_meta)) # Variable length lists support
                     lines_cpp.append( "%sreturn std::make_shared<%s>(getBuffPtr(), getBuffRemainingBytes(), m_%s__, m_%s__);" % (self.getIndentation(1), param_type, self.MEMBER_PARSE, self.MEMBER_SWAP) )
                     lines_cpp.append( "}" )
                     lines_cpp.append( "" )
@@ -906,8 +930,7 @@ class TlvF:
                     lines_cpp.append( '%sTLVF_LOG(ERROR) << "Not enough available space on buffer - can\'t allocate";' %  self.getIndentation(2) )
                     lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                     lines_cpp.append( "%s}" % self.getIndentation(1) )
-                    lines_cpp.append( "//TLVF_TODO: enable call to memmove")
-                    # lines_cpp.append( "%smemmove(&m_%s[m_%s_idx__], &m_%s[m_%s_idx__ + count], len);" % (self.getIndentation(1), param_name, param_name, param_name, param_name) )
+                    lines_cpp.extend( self.addAllocationMarkers(obj_meta, "alloc", param_meta) ) # Variable length lists support
                     lines_cpp.append( "%sm_%s_idx__ += count;" % (self.getIndentation(1), param_name) )
                     if is_var_len:
                         lines_cpp.append( "%s*m_%s += count;" % (self.getIndentation(1), param_length) )
@@ -930,6 +953,35 @@ class TlvF:
         if len(swap_func_lines) > 0: self.insertLineCpp(obj_meta.name, self.CODE_CLASS_SWAP_FUNC_INSERT, swap_func_lines)
         self.insertLineH(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, lines_h)
         self.insertLineCpp(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, lines_cpp)
+
+    #########################################################################
+    # variable length list support
+    #
+    # If this is a variable length list alloc, add a call to std::memmove to
+    # move the contents of the buffer starting at the current list entry pointer
+    # till the new list pointer (ptr + allocation size). The number of bytes we
+    # move is the the calculated as END of buffer - current list pointer.
+    # Then, we need to add a marker so that on following members we will
+    # update their pointers accordingly.
+    #
+    # Note - dynamic "unknown" length lists are lists without a size parameter
+    # (list[]) which can only be the last member of each class, therefore no
+    # action is needed for these lists.
+    ##########################################################################
+    def addAllocationMarkers(self, obj_meta, func_name, param_meta):
+        lines_cpp = []
+        if param_meta.length_type == MetaData.LENGTH_TYPE_VAR:
+            marker = "%s_%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, func_name, param_meta.name)
+            obj_meta.alloc_list.append(marker)
+            lines_cpp.append("%sif (!m_parse__) {" %self.getIndentation(1))
+            lines_cpp.append("%suint8_t *src = (uint8_t *)m_%s;" %(self.getIndentation(2), param_meta.name))
+            lines_cpp.append("%suint8_t *dst = (uint8_t *)m_%s + len;" %(self.getIndentation(2), param_meta.name))
+            lines_cpp.append("%ssize_t move_length = getBuffRemainingBytes(src) - len;" %self.getIndentation(2))
+            lines_cpp.append("%sstd::memmove(dst, src, move_length);" %self.getIndentation(2))
+            lines_cpp.append("%s}" %self.getIndentation(1))
+            lines_cpp.append(marker)
+
+        return lines_cpp
 
     def getCommentLines(self, comment):
         ret = []
