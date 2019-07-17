@@ -62,6 +62,12 @@ std::shared_ptr<cRestrictedOperatingClasses> tlvRadioOperationRestriction::creat
         return nullptr;
     }
     m_lock_allocation__ = true;
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_operating_classes_list;
+        uint8_t *dst = (uint8_t *)m_operating_classes_list + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     return std::make_shared<cRestrictedOperatingClasses>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
 }
 
@@ -140,8 +146,9 @@ bool tlvRadioOperationRestriction::init()
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_operating_classes_list = (cRestrictedOperatingClasses*)m_buff_ptr__;
-    m_operating_classes_list_idx__ = *m_operating_classes_list_length;
-    for (size_t i = 0; i < *m_operating_classes_list_length; i++) {
+    uint8_t operating_classes_list_length = *m_operating_classes_list_length;
+    m_operating_classes_list_idx__ = operating_classes_list_length;
+    for (size_t i = 0; i < operating_classes_list_length; i++) {
         if (!add_operating_classes_list(create_operating_classes_list())) { 
             TLVF_LOG(ERROR) << "Failed adding operating_classes_list entry.";
             return false;
@@ -192,7 +199,12 @@ bool cRestrictedOperatingClasses::alloc_channel_list(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_channel_list;
+        uint8_t *dst = (uint8_t *)m_channel_list + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_channel_list_idx__ += count;
     *m_channel_list_length += count;
     m_buff_ptr__ += len;
@@ -229,8 +241,9 @@ bool cRestrictedOperatingClasses::init()
     if (!m_parse__) *m_channel_list_length = 0;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     m_channel_list = (sChannelInfo*)m_buff_ptr__;
-    m_channel_list_idx__ = *m_channel_list_length;
-    m_buff_ptr__ += sizeof(sChannelInfo)*(*m_channel_list_length);
+    uint8_t channel_list_length = *m_channel_list_length;
+    m_channel_list_idx__ = channel_list_length;
+    m_buff_ptr__ += sizeof(sChannelInfo)*(channel_list_length);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;

@@ -60,7 +60,12 @@ bool tlvDeviceInformation::alloc_info(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_info;
+        uint8_t *dst = (uint8_t *)m_info + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_info_idx__ += count;
     *m_info_length += count;
     m_buff_ptr__ += len;
@@ -117,8 +122,9 @@ bool tlvDeviceInformation::init()
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_info = (sInfo*)m_buff_ptr__;
-    m_info_idx__ = *m_info_length;
-    m_buff_ptr__ += sizeof(sInfo)*(*m_info_length);
+    uint8_t info_length = *m_info_length;
+    m_info_idx__ = info_length;
+    m_buff_ptr__ += sizeof(sInfo)*(info_length);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
