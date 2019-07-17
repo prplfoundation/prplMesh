@@ -23,7 +23,7 @@ protected:
 public:
     uint8_t *getBuffPtr();
     uint8_t *getStartBuffPtr();
-    size_t getBuffRemainingBytes();
+    size_t getBuffRemainingBytes(void *start = nullptr);
     size_t getLen();
     bool isInitialized();
     virtual void class_swap() = 0;
