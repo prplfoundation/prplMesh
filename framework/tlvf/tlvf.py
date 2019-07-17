@@ -445,12 +445,16 @@ class TlvF:
                 if param_meta.error: self.abort(param_meta.error)
                 param_type = param_meta.type
                 param_type_info = param_meta.type_info
-                if param_type and param_type.startswith("e"):
-                    try: value = self.db_enum_storage_type[(self.yaml_fname, param_type)]
-                    except: value = self.db_enum_storage_type[(param_type, param_type)]
+                param_type_real = TypeInfo(param_type)
+                if param_type_real.type == TypeInfo.ENUM:
+                    try:
+                        value = self.db_enum_storage_type[(self.yaml_fname, param_type_real.type_str)]
+                    except:
+                        value = self.db_enum_storage_type[(param_type_real.type_str, param_type_real.type_str)]
                     param_type_info = TypeInfo(value[MetaData.KEY_ENUM_STORAGE])
                     param_type_info.type = param_meta.type_info.type
-                    self.include_list.append('"' + self.yaml_path + "/" + param_type + ".h" + '"')
+                    if param_meta.type == param_type_real.type_str:
+                        self.include_list.append('"' + self.yaml_path + "/" + param_type + ".h" + '"')
 
             else:
                 param_type = param_dict
