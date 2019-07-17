@@ -367,7 +367,7 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
         return false;
     }
 
-    int bss_type = vendor_extentions_bss_type(m1->M1Frame().vendor_extensions_attr);
+    int bss_type = vendor_extentions_bss_type(m1->vendor_extensions_attr());
     if (bss_type < 0) {
         LOG(ERROR) << "Failed to get bss type from M1 vendor extensions";
         return false;
@@ -390,9 +390,9 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
                               m2->M2Frame().serial_number_attr.data_length);
     std::memset(m2->M2Frame().uuid_r_attr.data, 0xee, m2->M2Frame().uuid_r_attr.data_length);
     m2->M2Frame().authentication_type_flags_attr.data =
-        m1->M1Frame().authentication_type_flags_attr.data;
-    m2->M2Frame().encryption_type_flags_attr.data = m1->M1Frame().encryption_type_flags_attr.data;
-    m2->M2Frame().rf_bands_attr.data = (m1->M1Frame().rf_bands_attr.data & WSC::WSC_RF_BAND_5GHZ)
+        m1->authentication_type_flags_attr().data;
+    m2->M2Frame().encryption_type_flags_attr.data = m1->encryption_type_flags_attr().data;
+    m2->M2Frame().rf_bands_attr.data = (m1->rf_bands_attr().data & WSC::WSC_RF_BAND_5GHZ)
                                            ? WSC::WSC_RF_BAND_5GHZ
                                            : WSC::WSC_RF_BAND_2GHZ;
     WSC::set_vendor_extentions_bss_type(m2->M2Frame().vendor_extensions_attr,
@@ -467,15 +467,14 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         }
     }
 
-    std::string manufacturer = std::string(m1->M1Frame().manufacturer_attr.data,
-                                           m1->M1Frame().manufacturer_attr.data_length);
+    std::string manufacturer = std::string(m1->manufacturer(), m1->manufacturer_length());
     if (!manufacturer.compare("Intel")) {
         //TODO add support for none Intel agents
         LOG(ERROR) << "None Intel radio agent " << manufacturer << " , dropping M1 message";
         return false;
     }
 
-    auto radio_mac = network_utils::mac_to_string(m1->M1Frame().mac_attr.data.oct);
+    auto radio_mac = network_utils::mac_to_string(m1->mac_attr().data.oct);
     LOG(INFO) << "Intel radio agent " << radio_mac << " join";
     if (!handle_intel_slave_join(sd, cmdu_rx, cmdu_tx, radio_mac)) {
         LOG(ERROR) << "Not an Intel agent " << radio_mac << " (" << manufacturer << ")";

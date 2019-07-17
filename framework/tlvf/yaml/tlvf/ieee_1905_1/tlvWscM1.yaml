@@ -10,4 +10,36 @@ tlvWscM1:
     _type: eTlvType
     _value_const: TLV_WSC
   length: uint16_t
-  M1Frame: WSC::sM1
+  #M1Frame: WSC::sM1
+  version_attr: WSC::sWscAttrVersion
+  message_type_attr: WSC::sWscAttrMessageType
+  uuid_e_attr: WSC::sWscAttrUuidE
+  mac_attr: WSC::sWscAttrMac
+  enrolee_nonce_attr: WSC::sWscAttrEnroleeNonce
+  public_key_attr: WSC::sWscAttrPublicKey
+  authentication_type_flags_attr: WSC::sWscAttrAuthenticationTypeFlags
+  encryption_type_flags_attr: WSC::sWscAttrEncryptionTypeFlags
+  connection_type_flags_attr: WSC::sWscAttrConnectionTypeFlags
+  configuration_methods_attr: WSC::sWscAttrConfigurationMethods
+  wsc_state_attr: WSC::sWscAttrWscState
+  manufacturer_type:
+    _type: WSC::eWscAttributes
+    _value: WSC::ATTR_MANUFACTURER
+  manufacturer_length:
+    _type: uint16_t
+    _length_var: True
+  manufacturer:
+    _type: char
+    _length: [ manufacturer_length ]
+
+  model_name_attr: WSC::sWscAttrModelName
+  model_number_attr: WSC::sWscAttrModelNumber
+  serial_number_attr: WSC::sWscAttrSerialNumber
+  primary_device_type_attr: WSC::sWscAttrPrimaryDeviceType
+  device_name_attr: WSC::sWscAttrDeviceName
+  rf_bands_attr: WSC::sWscAttrRfBands
+  association_state_attr: WSC::sWscAttrAssociationState
+  device_password_id_attr: WSC::sWscAttrDevicePasswordID
+  configuration_error_attr: WSC::sWscAttrConfigurationError
+  os_version_attr: WSC::sWscAttrOsVersion
+  vendor_extensions_attr: WSC::sWscAttrVendorExtension

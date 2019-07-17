@@ -3698,8 +3698,12 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         //      Parameters based on the regulatory domain
         for (int i = 0; i < radio_basic_caps->maximum_number_of_bsss_supported(); i++) {
             auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
-            operationClassesInfo->operating_class()            = 0; // dummy value
-            operationClassesInfo->maximum_transmit_power_dbm() = 1; // dummy value
+            if (!operationClassesInfo) {
+                LOG(ERROR) << "Failed creating operating classes info list";
+                return false;
+            }
+            operationClassesInfo->operating_class()            = i; // dummy value
+            operationClassesInfo->maximum_transmit_power_dbm() = i + 1; // dummy value
 
             // TODO - the number of statically non operable channels can be 0 - meaning it is
             // an optional variable length list, this is not yet supported in tlvf according to issue #8
@@ -3709,7 +3713,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 return false;
             }
             // Set Dummy value for non operable channel list
-            std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) = 1;
+            std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) = i;
 
             if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
                 LOG(ERROR) << "add_operating_classes_info_list failed";
@@ -4538,27 +4542,27 @@ bool slave_thread::autoconfig_wsc_add_m1()
         return false;
     }
 
-    std::copy_n(hostap_params.iface_mac.oct, sizeof(sMacAddr), m1->M1Frame().mac_attr.data.oct);
+    //m1->mac_attr().data = hostap_params.iface_mac;
+    std::copy_n(hostap_params.iface_mac.oct, sizeof(sMacAddr), m1->mac_attr().data.oct);
     // TODO: read manufactured, name, model and device name from BPL
-    string_utils::copy_string(m1->M1Frame().manufacturer_attr.data, "Intel",
-                              m1->M1Frame().manufacturer_attr.data_length);
-    string_utils::copy_string(m1->M1Frame().model_name_attr.data, "Ubuntu",
-                              m1->M1Frame().model_name_attr.data_length);
-    string_utils::copy_string(m1->M1Frame().model_number_attr.data, "18.04",
-                              m1->M1Frame().model_number_attr.data_length);
-    string_utils::copy_string(m1->M1Frame().device_name_attr.data, "prplMesh-agent",
-                              m1->M1Frame().device_name_attr.data_length);
-    string_utils::copy_string(m1->M1Frame().serial_number_attr.data, "prpl12345",
-                              m1->M1Frame().serial_number_attr.data_length);
-    std::memset(m1->M1Frame().uuid_e_attr.data, 0xff, m1->M1Frame().uuid_e_attr.data_length);
-    m1->M1Frame().authentication_type_flags_attr.data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2;
-    m1->M1Frame().encryption_type_flags_attr.data     = WSC::WSC_ENCR_NONE;
-    m1->M1Frame().rf_bands_attr.data =
+    m1->set_manufacturer("Intel");
+    string_utils::copy_string(m1->model_name_attr().data, "Ubuntu",
+                              m1->model_name_attr().data_length);
+    string_utils::copy_string(m1->model_number_attr().data, "18.04",
+                              m1->model_number_attr().data_length);
+    string_utils::copy_string(m1->device_name_attr().data, "prplMesh-agent",
+                              m1->device_name_attr().data_length);
+    string_utils::copy_string(m1->serial_number_attr().data, "prpl12345",
+                              m1->serial_number_attr().data_length);
+    std::memset(m1->uuid_e_attr().data, 0xff, m1->uuid_e_attr().data_length);
+    m1->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2;
+    m1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_NONE;
+    m1->rf_bands_attr().data =
         hostap_params.iface_is_5ghz ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
     // Simulate that this radio supports both fronthaul and backhaul BSS
-    WSC::set_vendor_extentions_bss_type(m1->M1Frame().vendor_extensions_attr,
+    WSC::set_vendor_extentions_bss_type(m1->vendor_extensions_attr(),
                                         WSC::FRONTHAUL_BSS | WSC::BACKHAUL_BSS);
-    WSC::set_primary_device_type(m1->M1Frame().primary_device_type_attr,
+    WSC::set_primary_device_type(m1->primary_device_type_attr(),
                                  WSC::WSC_DEV_NETWORK_INFRA_AP);
     // TODO: M1 should also have values for:
     // enrolee_nonce_attr -> to be added by encryption

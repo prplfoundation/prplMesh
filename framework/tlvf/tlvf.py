@@ -203,6 +203,7 @@ class MetaData:
         self.alloc_list = []
         self.fillMetaData(dict)
         self.errorCheck(dict)
+        self.children_types = {}
         
     def errPrefix(self):
         return "%s.yaml, param name=%s --> " % (self.fname, self.name)
@@ -448,17 +449,31 @@ class TlvF:
                 if param_meta.error: self.abort(param_meta.error)
                 param_type = param_meta.type
                 param_type_info = param_meta.type_info
+                # if param_type and '::' in param_type:
+                #     param_type = param_type.split('::')[-1]
+                is_enum_type = False
                 if param_type and param_type.startswith("e"):
-                    try: value = self.db_enum_storage_type[(self.yaml_fname, param_type)]
-                    except: value = self.db_enum_storage_type[(param_type, param_type)]
+                    is_enum_type = True
+                    param_type_real = param_type
+                if param_type and '::' in param_type and param_type.split('::')[-1].startswith("e"):
+                    is_enum_type = True
+                    param_type_real = param_type.split('::')[-1]
+                if is_enum_type:
+                    try:
+                        value = self.db_enum_storage_type[(self.yaml_fname, param_type_real)]
+                    except:
+                        value = self.db_enum_storage_type[(param_type_real, param_type_real)]
                     param_type_info = TypeInfo(value[MetaData.KEY_ENUM_STORAGE])
                     param_type_info.type = param_meta.type_info.type
-                    self.include_list.append('"' + self.yaml_path + "/" + param_type + ".h" + '"')
+                    if param_meta.type == param_type_real:
+                        self.include_list.append('"' + self.yaml_path + "/" + param_type + ".h" + '"')
 
             else:
                 param_type = param_dict
                 param_meta = None
                 param_type_info = TypeInfo(param_type)
+            
+            obj_meta.children_types[param_name] = param_type_info
 
             if param_type != None:
                 if param_type_info.type == TypeInfo.ERROR: self.abort("%s.yaml --> bad type: %s" % (self.yaml_fname, param_type))
@@ -712,16 +727,21 @@ class TlvF:
                 lines_cpp.append("%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR))
                 lines_cpp.append("}")
             if is_var_len:
-                lines_cpp.append("m_%s_idx__ = *m_%s;" % (param_name, param_length))
+                # variable length list support - swap length value for calculating list size
+                length_type = obj_meta.children_types[param_length]
+                lines_cpp.append("%s %s = *m_%s;" %(length_type.type_str, param_length, param_length))
+                if length_type.swap_needed:
+                    lines_cpp.append("%s&%s%s;" %(length_type.swap_prefix, param_length, length_type.swap_suffix))
+                lines_cpp.append("m_%s_idx__ = %s;" % (param_name, param_length))
                 if TypeInfo(param_type).type == TypeInfo.CLASS: #TODO:only if it's the last list member of the class
-                    lines_cpp.append("for (size_t i = 0; i < *m_%s; i++) {" % (param_length))
+                    lines_cpp.append("for (size_t i = 0; i < %s; i++) {" % (param_length))
                     lines_cpp.append("%sif (!add_%s(create_%s())) { " % (self.getIndentation(1), param_name, param_name))
                     lines_cpp.append( '%sTLVF_LOG(ERROR) << "Failed adding %s entry.";' %  (self.getIndentation(2), param_name) )
                     lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                     lines_cpp.append( "%s}" % self.getIndentation(1) )
                     lines_cpp.append("}")
                 else:
-                    lines_cpp.append("m_%s__ += sizeof(%s)*(*m_%s);" % (self.MEMBER_BUFF_PTR, param_type, param_length))
+                    lines_cpp.append("m_%s__ += sizeof(%s)*(%s);" % (self.MEMBER_BUFF_PTR, param_type, param_length))
             if is_int_len or is_const_len:
                 lines_cpp.append( "m_%s__ += (sizeof(%s) * %s);" % (self.MEMBER_BUFF_PTR, param_type, param_length) )
                 lines_cpp.append("m_%s_idx__  = %s;" % (param_name, param_length))
@@ -897,7 +917,6 @@ class TlvF:
                         lines_cpp.append( "%s(*m_%s)++;" % (self.getIndentation(2), param_length) )
                     lines_cpp.append( "%s}" % (self.getIndentation(1)) )
                     lines_cpp.append( "%ssize_t len = ptr->getLen();" % (self.getIndentation(1) ))
-                    lines_cpp.extend(self.addAllocationMarkers(obj_meta, "add", param_meta)) # Variable length lists support
                     lines_cpp.append( "%sm_%s_vector.push_back(ptr);" % (self.getIndentation(1), param_name ))
                     lines_cpp.append( "%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR) )
                     if self.is_tlv_class:
@@ -958,8 +977,12 @@ class TlvF:
         if param_meta.length_type == MetaData.LENGTH_TYPE_VAR:
             marker = "%s_%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, func_name, param_meta.name)
             obj_meta.alloc_list.append(marker)
-            lines_cpp.append("%sif (!m_parse__)" %self.getIndentation(1))
-            lines_cpp.append("%sstd::memmove(m_%s__ + len, m_%s__, getBuffRemainingBytes() - len);" %(self.getIndentation(2), self.MEMBER_BUFF_PTR, self.MEMBER_BUFF_PTR))
+            lines_cpp.append("%sif (!m_parse__) {" %self.getIndentation(1))
+            lines_cpp.append("%suint8_t *src = (uint8_t *)m_%s;" %(self.getIndentation(2), param_meta.name))
+            lines_cpp.append("%suint8_t *dst = (uint8_t *)m_%s + len;" %(self.getIndentation(2), param_meta.name))
+            lines_cpp.append("%ssize_t move_length = getBuffRemainingBytes(src) - len;" %self.getIndentation(2))
+            lines_cpp.append("%sstd::memmove(dst, src, move_length);" %self.getIndentation(2))
+            lines_cpp.append("%s}" %self.getIndentation(1))
             lines_cpp.append(marker)
 
         return lines_cpp

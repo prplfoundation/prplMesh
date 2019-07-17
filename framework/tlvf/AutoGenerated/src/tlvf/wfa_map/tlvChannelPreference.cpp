@@ -62,8 +62,12 @@ std::shared_ptr<cPreferenceOperatingClasses> tlvChannelPreference::create_operat
         return nullptr;
     }
     m_lock_allocation__ = true;
-    if (!m_parse__)
-        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_operating_classes_list;
+        uint8_t *dst = (uint8_t *)m_operating_classes_list + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     return std::make_shared<cPreferenceOperatingClasses>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
 }
 
@@ -89,8 +93,6 @@ bool tlvChannelPreference::add_operating_classes_list(std::shared_ptr<cPreferenc
         (*m_operating_classes_list_length)++;
     }
     size_t len = ptr->getLen();
-    if (!m_parse__)
-        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
     m_operating_classes_list_vector.push_back(ptr);
     m_buff_ptr__ += len;
     if(m_length){ (*m_length) += len; }
@@ -144,8 +146,9 @@ bool tlvChannelPreference::init()
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_operating_classes_list = (cPreferenceOperatingClasses*)m_buff_ptr__;
-    m_operating_classes_list_idx__ = *m_operating_classes_list_length;
-    for (size_t i = 0; i < *m_operating_classes_list_length; i++) {
+    uint8_t operating_classes_list_length = *m_operating_classes_list_length;
+    m_operating_classes_list_idx__ = operating_classes_list_length;
+    for (size_t i = 0; i < operating_classes_list_length; i++) {
         if (!add_operating_classes_list(create_operating_classes_list())) { 
             TLVF_LOG(ERROR) << "Failed adding operating_classes_list entry.";
             return false;
@@ -196,8 +199,12 @@ bool cPreferenceOperatingClasses::alloc_channel_list(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-    if (!m_parse__)
-        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_channel_list;
+        uint8_t *dst = (uint8_t *)m_channel_list + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_flags = (sFlags *)((uint8_t *)(m_flags) + len);
     m_channel_list_idx__ += count;
     *m_channel_list_length += count;
@@ -235,8 +242,9 @@ bool cPreferenceOperatingClasses::init()
     if (!m_parse__) *m_channel_list_length = 0;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     m_channel_list = (uint8_t*)m_buff_ptr__;
-    m_channel_list_idx__ = *m_channel_list_length;
-    m_buff_ptr__ += sizeof(uint8_t)*(*m_channel_list_length);
+    uint8_t channel_list_length = *m_channel_list_length;
+    m_channel_list_idx__ = channel_list_length;
+    m_buff_ptr__ += sizeof(uint8_t)*(channel_list_length);
     m_flags = (sFlags*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sFlags) * 1;
     if (!m_parse__) { m_flags->struct_init(); }

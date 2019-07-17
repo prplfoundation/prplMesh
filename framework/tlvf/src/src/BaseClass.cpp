@@ -17,9 +17,9 @@ BaseClass::~BaseClass() {}
 
 uint8_t *BaseClass::getBuffPtr() { return m_buff_ptr__; }
 uint8_t *BaseClass::getStartBuffPtr() { return m_buff__; }
-size_t BaseClass::getBuffRemainingBytes()
+size_t BaseClass::getBuffRemainingBytes(void *start)
 {
-    return (m_buff_len__ - (size_t)(((uint8_t *)m_buff_ptr__) - ((uint8_t *)m_buff__)));
+    return (m_buff_len__ - (size_t)(((uint8_t *)(start ? start : m_buff_ptr__)) - ((uint8_t *)m_buff__)));
 }
 size_t BaseClass::getLen() { return (size_t)((uint8_t *)m_buff_ptr__ - (uint8_t *)m_buff__); }
 

@@ -1991,8 +1991,12 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-    if (!m_parse__)
-        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_sta_stats;
+        uint8_t *dst = (uint8_t *)m_sta_stats + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_sta_stats_idx__ += count;
     *m_sta_stats_size += count;
     m_buff_ptr__ += len;
@@ -2031,8 +2035,9 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::init()
     if (!m_parse__) *m_sta_stats_size = 0;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     m_sta_stats = (sStaStatsParams*)m_buff_ptr__;
-    m_sta_stats_idx__ = *m_sta_stats_size;
-    m_buff_ptr__ += sizeof(sStaStatsParams)*(*m_sta_stats_size);
+    uint8_t sta_stats_size = *m_sta_stats_size;
+    m_sta_stats_idx__ = sta_stats_size;
+    m_buff_ptr__ += sizeof(sStaStatsParams)*(sta_stats_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;

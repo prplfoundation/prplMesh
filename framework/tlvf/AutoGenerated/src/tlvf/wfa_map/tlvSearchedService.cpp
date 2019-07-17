@@ -56,8 +56,12 @@ bool tlvSearchedService::alloc_searched_service_list(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-    if (!m_parse__)
-        std::memmove(m_buff_ptr__ + len, m_buff_ptr__, getBuffRemainingBytes() - len);
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_searched_service_list;
+        uint8_t *dst = (uint8_t *)m_searched_service_list + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
     m_searched_service_list_idx__ += count;
     *m_searched_service_list_length += count;
     m_buff_ptr__ += len;
@@ -102,8 +106,9 @@ bool tlvSearchedService::init()
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_searched_service_list = (eSearchedService*)m_buff_ptr__;
-    m_searched_service_list_idx__ = *m_searched_service_list_length;
-    m_buff_ptr__ += sizeof(eSearchedService)*(*m_searched_service_list_length);
+    uint8_t searched_service_list_length = *m_searched_service_list_length;
+    m_searched_service_list_idx__ = searched_service_list_length;
+    m_buff_ptr__ += sizeof(eSearchedService)*(searched_service_list_length);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
