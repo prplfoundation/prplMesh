@@ -1,0 +1,11 @@
+#
+---
+_namespace: WSC
+
+eWscVendorExtSubelementBssType:
+  _type: enum
+  BACKHAUL_STA: 0x80
+  BACKHAUL_BSS: 0x40
+  FRONTHAUL_BSS: 0x20
+  TEARDOWN: 0x10
+  

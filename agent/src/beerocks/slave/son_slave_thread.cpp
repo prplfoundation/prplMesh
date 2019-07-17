@@ -21,7 +21,6 @@
 #include <beerocks/tlvf/beerocks_message_control.h>
 #include <beerocks/tlvf/beerocks_message_monitor.h>
 #include <beerocks/tlvf/beerocks_message_platform.h>
-#include <beerocks/tlvf/beerocks_wsc.h>
 
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
 #include <tlvf/ieee_1905_1/tlvWscM2.h>
@@ -4546,24 +4545,18 @@ bool slave_thread::autoconfig_wsc_add_m1()
     std::copy_n(hostap_params.iface_mac.oct, sizeof(sMacAddr), m1->mac_attr().data.oct);
     // TODO: read manufactured, name, model and device name from BPL
     m1->set_manufacturer("Intel");
-    string_utils::copy_string(m1->model_name_attr().data, "Ubuntu",
-                              m1->model_name_attr().data_length);
-    string_utils::copy_string(m1->model_number_attr().data, "18.04",
-                              m1->model_number_attr().data_length);
-    string_utils::copy_string(m1->device_name_attr().data, "prplMesh-agent",
-                              m1->device_name_attr().data_length);
-    string_utils::copy_string(m1->serial_number_attr().data, "prpl12345",
-                              m1->serial_number_attr().data_length);
+    m1->set_model_name("Ubuntu");
+    m1->set_model_number("18.04");
+    m1->set_device_name("prplMesh-agent");
+    m1->set_serial_number("prpl12345");
     std::memset(m1->uuid_e_attr().data, 0xff, m1->uuid_e_attr().data_length);
     m1->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2;
     m1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_NONE;
     m1->rf_bands_attr().data =
         hostap_params.iface_is_5ghz ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
     // Simulate that this radio supports both fronthaul and backhaul BSS
-    WSC::set_vendor_extentions_bss_type(m1->vendor_extensions_attr(),
-                                        WSC::FRONTHAUL_BSS | WSC::BACKHAUL_BSS);
-    WSC::set_primary_device_type(m1->primary_device_type_attr(),
-                                 WSC::WSC_DEV_NETWORK_INFRA_AP);
+    m1->vendor_extensions_attr().subelement_value = WSC::FRONTHAUL_BSS | WSC::BACKHAUL_BSS;
+    m1->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_AP;
     // TODO: M1 should also have values for:
     // enrolee_nonce_attr -> to be added by encryption
     // public_key_attr -> to be added by encryption

@@ -30,7 +30,6 @@
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message_control.h>
-#include <beerocks/tlvf/beerocks_wsc.h>
 #include <tlvf/ieee_1905_1/eMessageType.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
@@ -367,7 +366,7 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
         return false;
     }
 
-    int bss_type = vendor_extentions_bss_type(m1->vendor_extensions_attr());
+    int bss_type = m1->vendor_extensions_attr().subelement_value;
     if (bss_type < 0) {
         LOG(ERROR) << "Failed to get bss type from M1 vendor extensions";
         return false;
@@ -395,13 +394,10 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
     m2->M2Frame().rf_bands_attr.data = (m1->rf_bands_attr().data & WSC::WSC_RF_BAND_5GHZ)
                                            ? WSC::WSC_RF_BAND_5GHZ
                                            : WSC::WSC_RF_BAND_2GHZ;
-    WSC::set_vendor_extentions_bss_type(m2->M2Frame().vendor_extensions_attr,
-                                        bss_type & WSC::FRONTHAUL_BSS
-                                            ? WSC::FRONTHAUL_BSS
-                                            : bss_type & WSC::BACKHAUL_BSS ? WSC::BACKHAUL_BSS
-                                                                           : WSC::TEARDOWN);
-    WSC::set_primary_device_type(m2->M2Frame().primary_device_type_attr,
-                                 WSC::WSC_DEV_NETWORK_INFRA_GATEWAY);
+    m2->M2Frame().vendor_extensions_attr.subelement_value = bss_type & WSC::FRONTHAUL_BSS ?
+                                        WSC::FRONTHAUL_BSS : (bss_type & WSC::BACKHAUL_BSS ?
+                                        WSC::BACKHAUL_BSS : WSC::TEARDOWN);
+    m2->M2Frame().primary_device_type_attr.sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
     // TODO: Finalize with encryption
     return true;
 }

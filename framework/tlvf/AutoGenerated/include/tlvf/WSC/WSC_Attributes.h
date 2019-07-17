@@ -28,6 +28,7 @@
 #include "tlvf/WSC/eWscEncr.h"
 #include "tlvf/WSC/eWscLengths.h"
 #include "tlvf/WSC/eWscVendorId.h"
+#include "tlvf/WSC/eWscVendorExt.h"
 #include "tlvf/WSC/eWscDev.h"
 #include "tlvf/common/sMacAddr.h"
 
@@ -297,6 +298,8 @@ typedef struct sWscAttrPrimaryDeviceType {
     void struct_init(){
         attribute_type = ATTR_PRIMARY_DEV_TYPE;
         data_length = WSC_PRIMARY_DEV_TYPE_LENGTH;
+        category_id = WSC_DEV_NETWORK_INFRA;
+        oui = 0x50f204;
     }
 } __attribute__((packed)) sWscAttrPrimaryDeviceType;
 
@@ -394,7 +397,12 @@ typedef struct sWscAttrOsVersion {
 typedef struct sWscAttrVendorExtension {
     eWscAttributes attribute_type;
     uint16_t data_length;
-    uint8_t data[WSC_VENDOR_EXTENSIONS_LENGTH];
+    uint8_t vendor_id_0;
+    uint8_t vendor_id_1;
+    uint8_t vendor_id_2;
+    uint8_t subelement_id;
+    uint8_t subelement_length;
+    uint8_t subelement_value;
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
@@ -402,6 +410,12 @@ typedef struct sWscAttrVendorExtension {
     void struct_init(){
         attribute_type = ATTR_VENDOR_EXTENSION;
         data_length = WSC_VENDOR_EXTENSIONS_LENGTH;
+        vendor_id_0 = WSC_VENDOR_ID_WFA_1;
+        vendor_id_1 = WSC_VENDOR_ID_WFA_2;
+        vendor_id_2 = WSC_VENDOR_ID_WFA_3;
+        subelement_id = 0x6;
+        subelement_length = 0x1;
+        subelement_value = TEARDOWN;
     }
 } __attribute__((packed)) sWscAttrVendorExtension;
 
