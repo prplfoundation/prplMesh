@@ -3,6 +3,7 @@
 _include: {
   tlvf/WSC/eWscLengths.h,
   tlvf/WSC/eWscVendorId.h,
+  tlvf/WSC/eWscVendorExt.h,
   tlvf/WSC/eWscDev.h,
   tlvf/common/sMacAddr.h,
 }
@@ -160,54 +161,6 @@ sWscAttrWscState:
     _type: eWscState
     _value: WSC_STATE_NOT_CONFIGURED
 
-sWscAttrManufacturer:
-  _type: struct
-  attribute_type:
-    _type: eWscAttributes
-    _value: ATTR_MANUFACTURER
-  data_length:
-    _type: uint16_t
-    _value: WSC_MAX_MANUFACTURER_LENGTH
-  data:
-    _type: char
-    _length: [ WSC_MAX_MANUFACTURER_LENGTH ]
-
-sWscAttrModelName:
-  _type: struct
-  attribute_type:
-    _type: eWscAttributes
-    _value: ATTR_MODEL_NAME
-  data_length:
-    _type: uint16_t
-    _value: WSC_MAX_MODEL_NAME_LENGTH
-  data:
-    _type: char
-    _length: [ WSC_MAX_MODEL_NAME_LENGTH ]
-
-sWscAttrModelNumber:
-  _type: struct
-  attribute_type:
-    _type: eWscAttributes
-    _value: ATTR_MODEL_NUMBER
-  data_length:
-    _type: uint16_t
-    _value: WSC_MAX_MODEL_NUMBER_LENGTH
-  data:
-    _type: char
-    _length: [ WSC_MAX_MODEL_NUMBER_LENGTH ]
-
-sWscAttrSerialNumber:
-  _type: struct
-  attribute_type:
-    _type: eWscAttributes
-    _value: ATTR_SERIAL_NUMBER
-  data_length:
-    _type: uint16_t
-    _value: WSC_MAX_SERIAL_NUMBER_LENGTH
-  data:
-    _type: char
-    _length: [ WSC_MAX_SERIAL_NUMBER_LENGTH ]
-
 sWscAttrPrimaryDeviceType:
   _type: struct
   attribute_type:
@@ -218,22 +171,12 @@ sWscAttrPrimaryDeviceType:
     _value: WSC_PRIMARY_DEV_TYPE_LENGTH
   category_id:
     _type: uint16_t 
+    _value: WSC_DEV_NETWORK_INFRA
   oui:
     _type: uint32_t
+    _value: 0x0050F204
   sub_category_id:
     _type: uint16_t 
-
-sWscAttrDeviceName:
-  _type: struct
-  attribute_type:
-    _type: eWscAttributes
-    _value: ATTR_DEV_NAME
-  data_length:
-    _type: uint16_t
-    _value: WSC_MAX_DEV_NAME_LENGTH
-  data:
-    _type: char
-    _length: [ WSC_MAX_DEV_NAME_LENGTH ]
 
 sWscAttrRfBands:
   _type: struct
@@ -302,9 +245,24 @@ sWscAttrVendorExtension:
   data_length:
     _type: uint16_t
     _value: WSC_VENDOR_EXTENSIONS_LENGTH
-  data:
+  vendor_id_0:
     _type: uint8_t
-    _length: [ WSC_VENDOR_EXTENSIONS_LENGTH ]
+    _value: WSC_VENDOR_ID_WFA_1
+  vendor_id_1:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_2
+  vendor_id_2:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_3
+  subelement_id:
+    _type: uint8_t
+    _value: 0x6
+  subelement_length:
+    _type: uint8_t
+    _value: 0x1
+  subelement_value:
+    _type: uint8_t
+    _value: TEARDOWN
 
 sWscAttrKeyWrapAuthenticator:
   _type: struct

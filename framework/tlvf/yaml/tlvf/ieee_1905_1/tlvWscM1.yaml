@@ -1,6 +1,6 @@
 #
 ---
-_include: tlvf/WSC/sM1.h
+_include: tlvf/WSC/WSC_Attributes.h
 _namespace: ieee1905_1
 _is_tlv_class : True
 
@@ -10,4 +10,83 @@ tlvWscM1:
     _type: eTlvType
     _value_const: TLV_WSC
   length: uint16_t
-  M1Frame: WSC::sM1
+
+  # M1 attributes
+  #
+  # all attributes which are of static length type
+  # are defined as simple structs in WSC_Attributes.yaml
+  # Attributes which are variable length in nature are defined here
+  # as variable length params.
+  # The reason they are not defined as classes is because TLVF currently
+  # does not support class inside class unless the inner class contains
+  # a variable length list.
+  version_attr: WSC::sWscAttrVersion
+  message_type_attr: WSC::sWscAttrMessageType
+  uuid_e_attr: WSC::sWscAttrUuidE
+  mac_attr: WSC::sWscAttrMac
+  enrolee_nonce_attr: WSC::sWscAttrEnroleeNonce
+  public_key_attr: WSC::sWscAttrPublicKey
+  authentication_type_flags_attr: WSC::sWscAttrAuthenticationTypeFlags
+  encryption_type_flags_attr: WSC::sWscAttrEncryptionTypeFlags
+  connection_type_flags_attr: WSC::sWscAttrConnectionTypeFlags
+  configuration_methods_attr: WSC::sWscAttrConfigurationMethods
+  wsc_state_attr: WSC::sWscAttrWscState
+
+  manufacturer_type:
+    _type: WSC::eWscAttributes
+    _value: WSC::ATTR_MANUFACTURER
+  manufacturer_length:
+    _type: uint16_t
+    _length_var: True
+  manufacturer:
+    _type: char
+    _length: [ manufacturer_length ]
+
+  model_name_type:
+    _type: WSC::eWscAttributes
+    _value: WSC::ATTR_MODEL_NAME
+  model_name_length:
+    _type: uint16_t
+    _length_var: True
+  model_name:
+    _type: char
+    _length: [ model_name_length ]
+
+  model_number_type:
+    _type: WSC::eWscAttributes
+    _value: WSC::ATTR_MODEL_NUMBER
+  model_number_length:
+    _type: uint16_t
+    _length_var: True
+  model_number:
+    _type: char
+    _length: [ model_number_length ]
+
+  serial_number_type:
+    _type: WSC::eWscAttributes
+    _value: WSC::ATTR_SERIAL_NUMBER
+  serial_number_length:
+    _type: uint16_t
+    _length_var: True
+  serial_number:
+    _type: char
+    _length: [ serial_number_length ]
+
+  primary_device_type_attr: WSC::sWscAttrPrimaryDeviceType
+
+  device_name_type:
+    _type: WSC::eWscAttributes
+    _value: WSC::ATTR_DEV_NAME
+  device_name_length:
+    _type: uint16_t
+    _length_var: True
+  device_name:
+    _type: char
+    _length: [ device_name_length ]
+
+  rf_bands_attr: WSC::sWscAttrRfBands
+  association_state_attr: WSC::sWscAttrAssociationState
+  device_password_id_attr: WSC::sWscAttrDevicePasswordID
+  configuration_error_attr: WSC::sWscAttrConfigurationError
+  os_version_attr: WSC::sWscAttrOsVersion
+  vendor_extensions_attr: WSC::sWscAttrVendorExtension
