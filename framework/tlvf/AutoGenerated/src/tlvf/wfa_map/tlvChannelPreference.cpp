@@ -66,7 +66,7 @@ std::shared_ptr<cPreferenceOperatingClasses> tlvChannelPreference::create_operat
         uint8_t *src = (uint8_t *)m_operating_classes_list;
         uint8_t *dst = (uint8_t *)m_operating_classes_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     return std::make_shared<cPreferenceOperatingClasses>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
 }
@@ -203,7 +203,7 @@ bool cPreferenceOperatingClasses::alloc_channel_list(size_t count) {
         uint8_t *src = (uint8_t *)m_channel_list;
         uint8_t *dst = (uint8_t *)m_channel_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_flags = (sFlags *)((uint8_t *)(m_flags) + len);
     m_channel_list_idx__ += count;

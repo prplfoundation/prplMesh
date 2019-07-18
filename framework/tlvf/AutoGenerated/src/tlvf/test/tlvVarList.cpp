@@ -62,7 +62,7 @@ bool tlvTestVarList::alloc_simple_list(size_t count) {
         uint8_t *src = (uint8_t *)m_simple_list;
         uint8_t *dst = (uint8_t *)m_simple_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_complex_list_length = (uint16_t *)((uint8_t *)(m_complex_list_length) + len);
     m_complex_list = (cInner *)((uint8_t *)(m_complex_list) + len);
@@ -102,7 +102,7 @@ std::shared_ptr<cInner> tlvTestVarList::create_complex_list() {
         uint8_t *src = (uint8_t *)m_complex_list;
         uint8_t *dst = (uint8_t *)m_complex_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     return std::make_shared<cInner>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
 }
@@ -254,7 +254,7 @@ bool cInner::alloc_list(size_t count) {
         uint8_t *src = (uint8_t *)m_list;
         uint8_t *dst = (uint8_t *)m_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_var1 = (uint32_t *)((uint8_t *)(m_var1) + len);
     m_list_idx__ += count;

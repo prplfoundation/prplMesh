@@ -60,7 +60,7 @@ bool tlvPushButtonEventNotification::alloc_media_type_list(size_t count) {
         uint8_t *src = (uint8_t *)m_media_type_list;
         uint8_t *dst = (uint8_t *)m_media_type_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_media_type_list_idx__ += count;
     *m_media_type_list_length += count;
