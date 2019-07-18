@@ -60,7 +60,13 @@ bool tlvOperatingChannelReport::alloc_operating_classes_list(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-//TLVF_TODO: enable call to memmove
+    if (!m_parse__) {
+        uint8_t *src = (uint8_t *)m_operating_classes_list;
+        uint8_t *dst = (uint8_t *)m_operating_classes_list + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::memmove(dst, src, move_length);
+    }
+    m_current_transmit_power = (int8_t *)((uint8_t *)(m_current_transmit_power) + len);
     m_operating_classes_list_idx__ += count;
     *m_operating_classes_list_length += count;
     m_buff_ptr__ += len;
@@ -122,8 +128,9 @@ bool tlvOperatingChannelReport::init()
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_operating_classes_list = (sOperatingClasses*)m_buff_ptr__;
-    m_operating_classes_list_idx__ = *m_operating_classes_list_length;
-    m_buff_ptr__ += sizeof(sOperatingClasses)*(*m_operating_classes_list_length);
+    uint8_t operating_classes_list_length = *m_operating_classes_list_length;
+    m_operating_classes_list_idx__ = operating_classes_list_length;
+    m_buff_ptr__ += sizeof(sOperatingClasses)*(operating_classes_list_length);
     m_current_transmit_power = (int8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(int8_t) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(int8_t); }
