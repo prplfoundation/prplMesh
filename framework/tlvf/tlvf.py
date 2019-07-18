@@ -772,7 +772,7 @@ class TlvF:
                 elif is_var_len: t_length = ("(size_t)*m_" + param_meta.length) 
                 else: t_length = str(param_meta.length)
                 swap_func_lines.append( "for (size_t i = 0; i < %s; i++){" % (t_length) )
-                swap_func_lines.append( "%s%s%s;" % (self.getIndentation(1), t_name, param_type_info.swap_suffix))
+                swap_func_lines.append( "%s%s%s%s;" % (self.getIndentation(1), param_type_info.swap_prefix, t_name, param_type_info.swap_suffix))
                 swap_func_lines.append( "}")
 
             lines_h = []
