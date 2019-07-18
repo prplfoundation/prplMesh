@@ -22,6 +22,10 @@ tlvTestVarList:
 
   var1: uint16_t
 
+  unknown_length_list:
+    _type: uint16_t
+    _length: []
+
 cInner:
   _type: class
   list_length: uint16_t
