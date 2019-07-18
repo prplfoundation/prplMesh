@@ -47,6 +47,10 @@ std::tuple<bool, sMacAddr&> tlvNon1905neighborDeviceList::mac_non_1905_device(si
 }
 
 bool tlvNon1905neighborDeviceList::alloc_mac_non_1905_device(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list mac_non_1905_device, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -56,6 +60,7 @@ bool tlvNon1905neighborDeviceList::alloc_mac_non_1905_device(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     m_mac_non_1905_device_idx__ += count;
     m_buff_ptr__ += len;
     if(m_length){ (*m_length) += len; }

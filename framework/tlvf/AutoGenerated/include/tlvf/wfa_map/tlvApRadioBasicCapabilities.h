@@ -57,6 +57,7 @@ class tlvApRadioBasicCapabilities : public BaseClass
         size_t m_operating_classes_info_list_idx__ = 0;
         std::vector<std::shared_ptr<cOperatingClassesInfo>> m_operating_classes_info_list_vector;
         bool m_lock_allocation__ = false;
+        int m_lock_order_counter__ = 0;
 };
 
 class cOperatingClassesInfo : public BaseClass
@@ -81,6 +82,7 @@ class cOperatingClassesInfo : public BaseClass
         uint8_t* m_statically_non_operable_channels_list_length = nullptr;
         uint8_t* m_statically_non_operable_channels_list = nullptr;
         size_t m_statically_non_operable_channels_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 }; // close namespace: wfa_map

@@ -56,6 +56,7 @@ class tlvChannelPreference : public BaseClass
         size_t m_operating_classes_list_idx__ = 0;
         std::vector<std::shared_ptr<cPreferenceOperatingClasses>> m_operating_classes_list_vector;
         bool m_lock_allocation__ = false;
+        int m_lock_order_counter__ = 0;
 };
 
 class cPreferenceOperatingClasses : public BaseClass
@@ -109,6 +110,7 @@ class cPreferenceOperatingClasses : public BaseClass
         uint8_t* m_channel_list_length = nullptr;
         uint8_t* m_channel_list = nullptr;
         size_t m_channel_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         sFlags* m_flags = nullptr;
 };
 

@@ -274,6 +274,10 @@ bool cACTION_CLI_RESPONSE_STR::set_buffer(char str[], size_t size) {
     return true;
 }
 bool cACTION_CLI_RESPONSE_STR::alloc_buffer(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -283,11 +287,12 @@ bool cACTION_CLI_RESPONSE_STR::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_buffer;
         uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_buffer_idx__ += count;
     *m_buffer_size += count;

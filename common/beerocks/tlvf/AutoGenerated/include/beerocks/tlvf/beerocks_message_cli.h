@@ -154,6 +154,7 @@ class cACTION_CLI_RESPONSE_STR : public BaseClass
         uint32_t* m_buffer_size = nullptr;
         char* m_buffer = nullptr;
         size_t m_buffer_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT : public BaseClass
@@ -514,6 +515,7 @@ class cACTION_CLI_CLIENT_BEACON_11K_REQUEST : public BaseClass
         sMacAddr* m_bssid = nullptr;
         uint8_t* m_ssid = nullptr;
         size_t m_ssid_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         uint8_t* m_use_optional_ssid = nullptr;
         uint8_t* m_channel = nullptr;
         uint8_t* m_measurement_mode = nullptr;

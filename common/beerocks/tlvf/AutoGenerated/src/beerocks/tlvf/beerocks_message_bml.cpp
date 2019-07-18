@@ -167,6 +167,10 @@ bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(char str[], size_t size) {
     return true;
 }
 bool cACTION_BML_NW_MAP_RESPONSE::alloc_buffer(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -176,11 +180,12 @@ bool cACTION_BML_NW_MAP_RESPONSE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_buffer;
         uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_buffer_idx__ += count;
     *m_buffer_size += count;
@@ -276,6 +281,10 @@ bool cACTION_BML_NW_MAP_UPDATE::set_buffer(char str[], size_t size) {
     return true;
 }
 bool cACTION_BML_NW_MAP_UPDATE::alloc_buffer(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -285,11 +294,12 @@ bool cACTION_BML_NW_MAP_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_buffer;
         uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_buffer_idx__ += count;
     *m_buffer_size += count;
@@ -385,6 +395,10 @@ bool cACTION_BML_STATS_UPDATE::set_buffer(char str[], size_t size) {
     return true;
 }
 bool cACTION_BML_STATS_UPDATE::alloc_buffer(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -394,11 +408,12 @@ bool cACTION_BML_STATS_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_buffer;
         uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_buffer_idx__ += count;
     *m_buffer_size += count;
@@ -490,6 +505,10 @@ bool cACTION_BML_EVENTS_UPDATE::set_buffer(char str[], size_t size) {
     return true;
 }
 bool cACTION_BML_EVENTS_UPDATE::alloc_buffer(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -499,11 +518,12 @@ bool cACTION_BML_EVENTS_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_buffer;
         uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_buffer_idx__ += count;
     *m_buffer_size += count;
@@ -2514,6 +2534,10 @@ std::tuple<bool, sConfigVapInfo&> cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::
 }
 
 bool cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::alloc_vap_list(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list vap_list, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -2523,11 +2547,12 @@ bool cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::alloc_vap_list(size_t count) 
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_vap_list;
         uint8_t *dst = (uint8_t *)m_vap_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_vap_list_idx__ += count;
     *m_vap_list_size += count;
@@ -2647,6 +2672,10 @@ std::tuple<bool, sConfigVapInfo&> cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE:
 }
 
 bool cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::alloc_vap_list(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list vap_list, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -2656,11 +2685,12 @@ bool cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::alloc_vap_list(size_t count)
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_vap_list;
         uint8_t *dst = (uint8_t *)m_vap_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_vap_list_idx__ += count;
     *m_vap_list_size += count;
@@ -3327,6 +3357,10 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(char str[], size_t size) {
     return true;
 }
 bool cACTION_BML_STEERING_EVENTS_UPDATE::alloc_buffer(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -3336,11 +3370,12 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::alloc_buffer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_buffer;
         uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_buffer_idx__ += count;
     *m_buffer_size += count;

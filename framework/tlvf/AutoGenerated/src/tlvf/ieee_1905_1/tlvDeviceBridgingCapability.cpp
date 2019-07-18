@@ -52,11 +52,16 @@ std::tuple<bool, cMacList&> tlvDeviceBridgingCapability::bridging_tuples_list(si
 }
 
 std::shared_ptr<cMacList> tlvDeviceBridgingCapability::create_bridging_tuples_list() {
+    if (m_lock_order_counter__ > 0) {
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list bridging_tuples_list, abort!";
+        return nullptr;
+    }
     size_t len = cMacList::get_initial_size();
     if (m_lock_allocation__ || getBuffRemainingBytes() < len) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return nullptr;
     }
+    m_lock_order_counter__ = 0;
     m_lock_allocation__ = true;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_bridging_tuples_list;
@@ -176,6 +181,10 @@ std::tuple<bool, sMacAddr&> cMacList::mac_list(size_t idx) {
 }
 
 bool cMacList::alloc_mac_list(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list mac_list, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -185,6 +194,7 @@ bool cMacList::alloc_mac_list(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_mac_list;
         uint8_t *dst = (uint8_t *)m_mac_list + len;

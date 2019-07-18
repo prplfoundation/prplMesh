@@ -449,6 +449,7 @@ class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE : public BaseClass
         uint8_t* m_sta_stats_size = nullptr;
         sStaStatsParams* m_sta_stats = nullptr;
         size_t m_sta_stats_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION : public BaseClass

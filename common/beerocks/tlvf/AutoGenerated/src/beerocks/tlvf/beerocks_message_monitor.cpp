@@ -892,6 +892,10 @@ std::tuple<bool, sStaStatsParams&> cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESP
 }
 
 bool cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list sta_stats, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -901,11 +905,12 @@ bool cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_sta_stats;
         uint8_t *dst = (uint8_t *)m_sta_stats + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_sta_stats_idx__ += count;
     *m_sta_stats_size += count;

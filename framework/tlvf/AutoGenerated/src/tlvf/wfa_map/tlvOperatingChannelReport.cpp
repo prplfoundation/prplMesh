@@ -51,6 +51,10 @@ std::tuple<bool, tlvOperatingChannelReport::sOperatingClasses&> tlvOperatingChan
 }
 
 bool tlvOperatingChannelReport::alloc_operating_classes_list(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list operating_classes_list, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -60,6 +64,7 @@ bool tlvOperatingChannelReport::alloc_operating_classes_list(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_operating_classes_list;
         uint8_t *dst = (uint8_t *)m_operating_classes_list + len;

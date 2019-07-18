@@ -102,6 +102,7 @@ class tlvTransmitterLinkMetric : public BaseClass
         sMacAddr* m_al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv = nullptr;
         sInterfacePairInfo* m_interface_pair_info = nullptr;
         size_t m_interface_pair_info_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 }; // close namespace: ieee1905_1

@@ -53,6 +53,7 @@ class tlvDeviceBridgingCapability : public BaseClass
         size_t m_bridging_tuples_list_idx__ = 0;
         std::vector<std::shared_ptr<cMacList>> m_bridging_tuples_list_vector;
         bool m_lock_allocation__ = false;
+        int m_lock_order_counter__ = 0;
 };
 
 class cMacList : public BaseClass
@@ -73,6 +74,7 @@ class cMacList : public BaseClass
         uint8_t* m_mac_list_length = nullptr;
         sMacAddr* m_mac_list = nullptr;
         size_t m_mac_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 }; // close namespace: ieee1905_1

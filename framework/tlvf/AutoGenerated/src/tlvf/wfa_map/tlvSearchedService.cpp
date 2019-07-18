@@ -47,6 +47,10 @@ std::tuple<bool, tlvSearchedService::eSearchedService&> tlvSearchedService::sear
 }
 
 bool tlvSearchedService::alloc_searched_service_list(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list searched_service_list, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -56,6 +60,7 @@ bool tlvSearchedService::alloc_searched_service_list(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_searched_service_list;
         uint8_t *dst = (uint8_t *)m_searched_service_list + len;

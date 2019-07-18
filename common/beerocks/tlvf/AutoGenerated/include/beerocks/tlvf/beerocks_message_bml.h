@@ -107,6 +107,7 @@ class cACTION_BML_NW_MAP_RESPONSE : public BaseClass
         uint32_t* m_buffer_size = nullptr;
         char* m_buffer = nullptr;
         size_t m_buffer_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_BML_NW_MAP_UPDATE : public BaseClass
@@ -136,6 +137,7 @@ class cACTION_BML_NW_MAP_UPDATE : public BaseClass
         uint32_t* m_buffer_size = nullptr;
         char* m_buffer = nullptr;
         size_t m_buffer_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_BML_STATS_UPDATE : public BaseClass
@@ -165,6 +167,7 @@ class cACTION_BML_STATS_UPDATE : public BaseClass
         uint32_t* m_buffer_size = nullptr;
         char* m_buffer = nullptr;
         size_t m_buffer_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_BML_EVENTS_UPDATE : public BaseClass
@@ -192,6 +195,7 @@ class cACTION_BML_EVENTS_UPDATE : public BaseClass
         uint32_t* m_buffer_size = nullptr;
         char* m_buffer = nullptr;
         size_t m_buffer_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST : public BaseClass
@@ -1200,6 +1204,7 @@ class cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST : public BaseClass
         uint8_t* m_vap_list_size = nullptr;
         sConfigVapInfo* m_vap_list = nullptr;
         size_t m_vap_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE : public BaseClass
@@ -1246,6 +1251,7 @@ class cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE : public BaseClass
         uint8_t* m_vap_list_size = nullptr;
         sConfigVapInfo* m_vap_list = nullptr;
         size_t m_vap_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST : public BaseClass
@@ -1519,6 +1525,7 @@ class cACTION_BML_STEERING_EVENTS_UPDATE : public BaseClass
         uint32_t* m_buffer_size = nullptr;
         char* m_buffer = nullptr;
         size_t m_buffer_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST : public BaseClass

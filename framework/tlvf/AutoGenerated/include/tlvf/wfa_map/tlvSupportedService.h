@@ -52,6 +52,7 @@ class tlvSupportedService : public BaseClass
         uint8_t* m_supported_service_list_length = nullptr;
         eSupportedService* m_supported_service_list = nullptr;
         size_t m_supported_service_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 }; // close namespace: wfa_map
