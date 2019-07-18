@@ -48,6 +48,7 @@ class tlvNon1905neighborDeviceList : public BaseClass
         sMacAddr* m_mac_local_iface = nullptr;
         sMacAddr* m_mac_non_1905_device = nullptr;
         size_t m_mac_non_1905_device_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 }; // close namespace: ieee1905_1

@@ -44,6 +44,7 @@ class tlvMacAddress : public BaseClass
         uint16_t* m_length = nullptr;
         uint8_t* m_mac = nullptr;
         size_t m_mac_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 }; // close namespace: ieee1905_1

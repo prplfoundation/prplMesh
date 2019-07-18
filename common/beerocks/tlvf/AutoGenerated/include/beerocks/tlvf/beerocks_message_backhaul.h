@@ -56,6 +56,7 @@ class cACTION_BACKHAUL_REGISTER_REQUEST : public BaseClass
         eActionOp_BACKHAUL* m_action_op = nullptr;
         char* m_sta_iface = nullptr;
         size_t m_sta_iface_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         char* m_hostap_iface = nullptr;
         size_t m_hostap_iface_idx__ = 0;
         uint8_t* m_local_master = nullptr;
@@ -151,6 +152,7 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         eActionOp_BACKHAUL* m_action_op = nullptr;
         char* m_bridge_iface = nullptr;
         size_t m_bridge_iface_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         sMacAddr* m_iface_mac = nullptr;
         uint8_t* m_iface_is_5ghz = nullptr;
         char* m_wire_iface = nullptr;

@@ -308,6 +308,7 @@ class cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION : public BaseClass
         sApChannelSwitch* m_cs_params = nullptr;
         sWifiChannel* m_supported_channels_list = nullptr;
         size_t m_supported_channels_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION : public BaseClass

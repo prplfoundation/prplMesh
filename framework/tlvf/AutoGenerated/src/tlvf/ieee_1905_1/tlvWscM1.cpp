@@ -117,6 +117,10 @@ bool tlvWscM1::set_manufacturer(char str[], size_t size) {
     return true;
 }
 bool tlvWscM1::alloc_manufacturer(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list manufacturer, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -126,6 +130,7 @@ bool tlvWscM1::alloc_manufacturer(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_manufacturer;
         uint8_t *dst = (uint8_t *)m_manufacturer + len;
@@ -198,6 +203,10 @@ bool tlvWscM1::set_model_name(char str[], size_t size) {
     return true;
 }
 bool tlvWscM1::alloc_model_name(size_t count) {
+    if (m_lock_order_counter__ > 1) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list model_name, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -207,6 +216,7 @@ bool tlvWscM1::alloc_model_name(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 1;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_model_name;
         uint8_t *dst = (uint8_t *)m_model_name + len;
@@ -276,6 +286,10 @@ bool tlvWscM1::set_model_number(char str[], size_t size) {
     return true;
 }
 bool tlvWscM1::alloc_model_number(size_t count) {
+    if (m_lock_order_counter__ > 2) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list model_number, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -285,6 +299,7 @@ bool tlvWscM1::alloc_model_number(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 2;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_model_number;
         uint8_t *dst = (uint8_t *)m_model_number + len;
@@ -351,6 +366,10 @@ bool tlvWscM1::set_serial_number(char str[], size_t size) {
     return true;
 }
 bool tlvWscM1::alloc_serial_number(size_t count) {
+    if (m_lock_order_counter__ > 3) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list serial_number, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -360,6 +379,7 @@ bool tlvWscM1::alloc_serial_number(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 3;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_serial_number;
         uint8_t *dst = (uint8_t *)m_serial_number + len;
@@ -427,6 +447,10 @@ bool tlvWscM1::set_device_name(char str[], size_t size) {
     return true;
 }
 bool tlvWscM1::alloc_device_name(size_t count) {
+    if (m_lock_order_counter__ > 4) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list device_name, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -436,6 +460,7 @@ bool tlvWscM1::alloc_device_name(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 4;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_device_name;
         uint8_t *dst = (uint8_t *)m_device_name + len;

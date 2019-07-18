@@ -68,6 +68,7 @@ class cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST : public BaseClass
         eActionOp_PLATFORM* m_action_op = nullptr;
         char* m_iface_name = nullptr;
         size_t m_iface_name_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE : public BaseClass
@@ -116,6 +117,7 @@ class cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST : public BaseClass
         eActionOp_PLATFORM* m_action_op = nullptr;
         char* m_iface_name = nullptr;
         size_t m_iface_name_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE : public BaseClass
@@ -208,6 +210,7 @@ class cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION : public BaseClass
         beerocks::net::sIpv4Addr* m_ipv4 = nullptr;
         char* m_hostname = nullptr;
         size_t m_hostname_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL : public BaseClass
@@ -350,6 +353,7 @@ class cACTION_PLATFORM_WPS_ONBOARDING_REQUEST : public BaseClass
         eActionOp_PLATFORM* m_action_op = nullptr;
         char* m_iface_name = nullptr;
         size_t m_iface_name_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST : public BaseClass
@@ -426,6 +430,7 @@ class cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST : public BaseClass
         eActionOp_PLATFORM* m_action_op = nullptr;
         char* m_iface_name = nullptr;
         size_t m_iface_name_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         char* m_ssid = nullptr;
         size_t m_ssid_idx__ = 0;
         char* m_pass = nullptr;
@@ -457,6 +462,7 @@ class cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE : public BaseClass
         eActionOp_PLATFORM* m_action_op = nullptr;
         char* m_iface_name = nullptr;
         size_t m_iface_name_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         uint8_t* m_success = nullptr;
 };
 
@@ -723,6 +729,7 @@ class cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST : public BaseClass
         eActionOp_PLATFORM* m_action_op = nullptr;
         char* m_iface_name = nullptr;
         size_t m_iface_name_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         int8_t* m_iface_operation = nullptr;
 };
 
@@ -750,6 +757,7 @@ class cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE : public BaseClass
         eActionOp_PLATFORM* m_action_op = nullptr;
         char* m_iface_name = nullptr;
         size_t m_iface_name_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         int8_t* m_iface_operation = nullptr;
         uint8_t* m_success = nullptr;
 };
@@ -777,6 +785,7 @@ class cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST : public BaseClass
         eActionOp_PLATFORM* m_action_op = nullptr;
         char* m_iface_name = nullptr;
         size_t m_iface_name_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         uint8_t* m_enable = nullptr;
 };
 
@@ -804,6 +813,7 @@ class cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE : public BaseClass
         eActionOp_PLATFORM* m_action_op = nullptr;
         char* m_iface_name = nullptr;
         size_t m_iface_name_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         uint8_t* m_enable = nullptr;
         uint8_t* m_success = nullptr;
 };
@@ -912,6 +922,7 @@ class cACTION_PLATFORM_ERROR_NOTIFICATION : public BaseClass
         uint32_t* m_code = nullptr;
         char* m_data = nullptr;
         size_t m_data_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION : public BaseClass
@@ -945,6 +956,7 @@ class cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION : public BaseClass
         eActionOp_PLATFORM* m_action_op = nullptr;
         char* m_iface_name_ap = nullptr;
         size_t m_iface_name_ap_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         char* m_iface_name_bh = nullptr;
         size_t m_iface_name_bh_idx__ = 0;
         uint8_t* m_status_ap = nullptr;

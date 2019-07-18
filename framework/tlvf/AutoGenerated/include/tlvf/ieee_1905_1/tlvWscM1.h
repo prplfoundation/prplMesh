@@ -111,6 +111,7 @@ class tlvWscM1 : public BaseClass
         uint16_t* m_manufacturer_length = nullptr;
         char* m_manufacturer = nullptr;
         size_t m_manufacturer_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         WSC::eWscAttributes* m_model_name_type = nullptr;
         uint16_t* m_model_name_length = nullptr;
         char* m_model_name = nullptr;

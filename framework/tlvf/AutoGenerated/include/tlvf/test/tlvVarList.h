@@ -41,6 +41,8 @@ class tlvTestVarList : public BaseClass
         std::shared_ptr<cInner> create_complex_list();
         bool add_complex_list(std::shared_ptr<cInner> ptr);
         uint16_t& var1();
+        std::tuple<bool, uint16_t&> unknown_length_list(size_t idx);
+        bool alloc_unknown_length_list(size_t count = 1);
         void class_swap();
         static size_t get_initial_size();
 
@@ -52,12 +54,15 @@ class tlvTestVarList : public BaseClass
         uint16_t* m_simple_list_length = nullptr;
         uint16_t* m_simple_list = nullptr;
         size_t m_simple_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         uint16_t* m_complex_list_length = nullptr;
         cInner* m_complex_list = nullptr;
         size_t m_complex_list_idx__ = 0;
         std::vector<std::shared_ptr<cInner>> m_complex_list_vector;
         bool m_lock_allocation__ = false;
         uint16_t* m_var1 = nullptr;
+        uint16_t* m_unknown_length_list = nullptr;
+        size_t m_unknown_length_list_idx__ = 0;
 };
 
 class cInner : public BaseClass
@@ -79,6 +84,7 @@ class cInner : public BaseClass
         uint16_t* m_list_length = nullptr;
         uint8_t* m_list = nullptr;
         size_t m_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         uint32_t* m_var1 = nullptr;
 };
 

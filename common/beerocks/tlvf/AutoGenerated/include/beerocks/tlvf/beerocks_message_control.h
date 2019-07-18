@@ -58,6 +58,7 @@ class cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION : public BaseClass
         eActionOp_CONTROL* m_action_op = nullptr;
         char* m_slave_version = nullptr;
         size_t m_slave_version_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         sPlatformSettings* m_platform_settings = nullptr;
         sWlanSettings* m_wlan_settings = nullptr;
         sBackhaulParams* m_backhaul_params = nullptr;
@@ -94,6 +95,7 @@ class cACTION_CONTROL_SLAVE_JOINED_RESPONSE : public BaseClass
         eActionOp_CONTROL* m_action_op = nullptr;
         char* m_master_version = nullptr;
         size_t m_master_version_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         uint8_t* m_err_code = nullptr;
         sSonConfig* m_config = nullptr;
 };
@@ -172,6 +174,7 @@ class cACTION_CONTROL_CONTROLLER_PING_REQUEST : public BaseClass
         uint16_t* m_size = nullptr;
         uint8_t* m_data = nullptr;
         size_t m_data_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_CONTROL_CONTROLLER_PING_RESPONSE : public BaseClass
@@ -200,6 +203,7 @@ class cACTION_CONTROL_CONTROLLER_PING_RESPONSE : public BaseClass
         uint16_t* m_size = nullptr;
         uint8_t* m_data = nullptr;
         size_t m_data_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_CONTROL_AGENT_PING_REQUEST : public BaseClass
@@ -228,6 +232,7 @@ class cACTION_CONTROL_AGENT_PING_REQUEST : public BaseClass
         uint16_t* m_size = nullptr;
         uint8_t* m_data = nullptr;
         size_t m_data_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_CONTROL_AGENT_PING_RESPONSE : public BaseClass
@@ -256,6 +261,7 @@ class cACTION_CONTROL_AGENT_PING_RESPONSE : public BaseClass
         uint16_t* m_size = nullptr;
         uint8_t* m_data = nullptr;
         size_t m_data_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_CONTROL_ARP_QUERY_REQUEST : public BaseClass
@@ -667,6 +673,7 @@ class cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION : public BaseClass
         sApChannelSwitch* m_cs_params = nullptr;
         sWifiChannel* m_supported_channels = nullptr;
         size_t m_supported_channels_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION : public BaseClass
@@ -871,6 +878,7 @@ class cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE : public BaseClass
         uint8_t* m_sta_stats_size = nullptr;
         sStaStatsParams* m_sta_stats = nullptr;
         size_t m_sta_stats_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION : public BaseClass
@@ -1391,6 +1399,7 @@ class cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION : public BaseClass
         beerocks::net::sIpv4Addr* m_ipv4 = nullptr;
         char* m_name = nullptr;
         size_t m_name_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION : public BaseClass

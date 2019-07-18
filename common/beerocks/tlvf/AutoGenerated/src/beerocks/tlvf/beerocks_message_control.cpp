@@ -417,6 +417,10 @@ std::tuple<bool, uint8_t&> cACTION_CONTROL_CONTROLLER_PING_REQUEST::data(size_t 
 }
 
 bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::alloc_data(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -426,6 +430,7 @@ bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::alloc_data(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;
@@ -500,6 +505,10 @@ std::tuple<bool, uint8_t&> cACTION_CONTROL_CONTROLLER_PING_RESPONSE::data(size_t
 }
 
 bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::alloc_data(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -509,6 +518,7 @@ bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::alloc_data(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;
@@ -583,6 +593,10 @@ std::tuple<bool, uint8_t&> cACTION_CONTROL_AGENT_PING_REQUEST::data(size_t idx) 
 }
 
 bool cACTION_CONTROL_AGENT_PING_REQUEST::alloc_data(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -592,6 +606,7 @@ bool cACTION_CONTROL_AGENT_PING_REQUEST::alloc_data(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;
@@ -666,6 +681,10 @@ std::tuple<bool, uint8_t&> cACTION_CONTROL_AGENT_PING_RESPONSE::data(size_t idx)
 }
 
 bool cACTION_CONTROL_AGENT_PING_RESPONSE::alloc_data(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -675,6 +694,7 @@ bool cACTION_CONTROL_AGENT_PING_RESPONSE::alloc_data(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;
@@ -1982,6 +2002,10 @@ std::tuple<bool, sStaStatsParams&> cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESP
 }
 
 bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list sta_stats, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -1991,11 +2015,12 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_sta_stats;
         uint8_t *dst = (uint8_t *)m_sta_stats + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_sta_stats_idx__ += count;
     *m_sta_stats_size += count;

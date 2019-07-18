@@ -56,11 +56,16 @@ std::tuple<bool, cRestrictedOperatingClasses&> tlvRadioOperationRestriction::ope
 }
 
 std::shared_ptr<cRestrictedOperatingClasses> tlvRadioOperationRestriction::create_operating_classes_list() {
+    if (m_lock_order_counter__ > 0) {
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list operating_classes_list, abort!";
+        return nullptr;
+    }
     size_t len = cRestrictedOperatingClasses::get_initial_size();
     if (m_lock_allocation__ || getBuffRemainingBytes() < len) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return nullptr;
     }
+    m_lock_order_counter__ = 0;
     m_lock_allocation__ = true;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_operating_classes_list;
@@ -190,6 +195,10 @@ std::tuple<bool, cRestrictedOperatingClasses::sChannelInfo&> cRestrictedOperatin
 }
 
 bool cRestrictedOperatingClasses::alloc_channel_list(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list channel_list, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -199,6 +208,7 @@ bool cRestrictedOperatingClasses::alloc_channel_list(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     if (!m_parse__) {
         uint8_t *src = (uint8_t *)m_channel_list;
         uint8_t *dst = (uint8_t *)m_channel_list + len;

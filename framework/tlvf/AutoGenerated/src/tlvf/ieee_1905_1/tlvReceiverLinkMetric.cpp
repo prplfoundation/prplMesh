@@ -51,6 +51,10 @@ std::tuple<bool, tlvReceiverLinkMetric::sInterfacePairInfo&> tlvReceiverLinkMetr
 }
 
 bool tlvReceiverLinkMetric::alloc_interface_pair_info(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list interface_pair_info, abort!";
+        return false;
+    }
     if (count == 0) {
         TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
@@ -60,6 +64,7 @@ bool tlvReceiverLinkMetric::alloc_interface_pair_info(size_t count) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
+    m_lock_order_counter__ = 0;
     m_interface_pair_info_idx__ += count;
     m_buff_ptr__ += len;
     if(m_length){ (*m_length) += len; }
