@@ -962,7 +962,7 @@ class TlvF:
     #########################################################################
     # variable length list support
     #
-    # If this is a variable length list alloc, add a call to std::memmove to
+    # If this is a variable length list alloc, add a call to std::copy_n to
     # move the contents of the buffer starting at the current list entry pointer
     # till the new list pointer (ptr + allocation size). The number of bytes we
     # move is the the calculated as END of buffer - current list pointer.
@@ -981,7 +981,7 @@ class TlvF:
                 lines_cpp.append("%suint8_t *src = (uint8_t *)m_%s;" %(self.getIndentation(2), param_meta.name))
                 lines_cpp.append("%suint8_t *dst = (uint8_t *)m_%s + len;" %(self.getIndentation(2), param_meta.name))
                 lines_cpp.append("%ssize_t move_length = getBuffRemainingBytes(src) - len;" %self.getIndentation(2))
-                lines_cpp.append("%sstd::memmove(dst, src, move_length);" %self.getIndentation(2))
+                lines_cpp.append("%sstd::copy_n(src, move_length, dst);" %self.getIndentation(2))
                 lines_cpp.append("%s}" %self.getIndentation(1))
             if marker:
                 marker = "%s_%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, func_name, param_meta.name)
