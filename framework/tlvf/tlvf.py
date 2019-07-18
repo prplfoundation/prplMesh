@@ -203,6 +203,7 @@ class MetaData:
         self.fillMetaData(dict)
         self.errorCheck(dict)
         self.children_types = {}
+        self.list_index = 0
         
     def errPrefix(self):
         return "%s.yaml, param name=%s --> " % (self.fname, self.name)
@@ -339,6 +340,7 @@ class TlvF:
         self.MEMBER_PARSE           = "parse"
         self.MEMBER_SWAP            = "swap"
         self.MEMBER_LOCK_ALLOCATION = "lock_allocation"
+        self.MEMBER_LOCK_ORDER_COUNTER = "lock_order_counter"
         self.MEMBER_BUFF = "buff"
         self.MEMBER_BUFF_PTR = "buff_ptr"
         self.MEMBER_CONST_MINIMUM_LENGTH = "kMinimumLength"
@@ -708,6 +710,9 @@ class TlvF:
                 self.include_list.append("<vector>")
                 var_lines.append("std::vector<std::shared_ptr<%s>> m_%s_vector;" % (param_type, param_name))
                 var_lines.append("bool m_%s__ = false;" % self.MEMBER_LOCK_ALLOCATION)
+            if not obj_meta.lock_order_member_added:
+                var_lines.append("int m_%s__ = 0;" % self.MEMBER_LOCK_ORDER_COUNTER)
+                obj_meta.lock_order_member_added = True
             self.insertLineH(obj_meta.name, self.CODE_CLASS_PRIVATE_VARS_INSERT, var_lines)
 
             lines_h = []
@@ -723,6 +728,9 @@ class TlvF:
                 lines_cpp.append("%sm_%s_idx__ = len/sizeof(%s);" % (self.getIndentation(1), param_name, param_type))
                 lines_cpp.append("%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR))
                 lines_cpp.append("}")
+            if is_var_len or is_dynamic_len:
+                param_meta.list_index = obj_meta.list_index
+                obj_meta.list_index = obj_meta.list_index + 1
             if is_var_len:
                 # variable length list support - swap length value for calculating list size
                 length_type = obj_meta.children_types[param_length]
@@ -874,11 +882,16 @@ class TlvF:
                 if TypeInfo(param_type).type == TypeInfo.CLASS: #TODO:only if it's the last member of the class
                     lines_h.append( "std::shared_ptr<%s> create_%s();" % (param_type, param_name) ) #TODO: maybe change to 'create' and add '_entry' postfix
                     lines_cpp.append( "std::shared_ptr<%s> %s::create_%s() {" % (param_type, obj_meta.name, param_name) )
+                    lines_cpp.append( "%sif (m_%s__ > %s) {" %(self.getIndentation(1), self.MEMBER_LOCK_ORDER_COUNTER, param_meta.list_index) )
+                    lines_cpp.append( "%sTLVF_LOG(ERROR) << \"Out of order allocation for variable length list %s, abort!\";" %(self.getIndentation(2), param_name) )
+                    lines_cpp.append( "%sreturn nullptr;" %self.getIndentation(2))
+                    lines_cpp.append( "%s}" %self.getIndentation(1))
                     lines_cpp.append( "%ssize_t len = %s::get_initial_size();" % (self.getIndentation(1), param_type) )
                     lines_cpp.append( "%sif (m_%s__ || getBuffRemainingBytes() < len) {" % (self.getIndentation(1), self.MEMBER_LOCK_ALLOCATION) )
                     lines_cpp.append( '%sTLVF_LOG(ERROR) << "Not enough available space on buffer";' %  self.getIndentation(2) )
                     lines_cpp.append( "%sreturn nullptr;" % self.getIndentation(2))
                     lines_cpp.append( "%s}" % self.getIndentation(1) )
+                    lines_cpp.append( "%sm_%s__ = %s;" %(self.getIndentation(1), self.MEMBER_LOCK_ORDER_COUNTER, param_meta.list_index) )
                     lines_cpp.append( "%sm_%s__ = true;" % (self.getIndentation(1), self.MEMBER_LOCK_ALLOCATION) )
                     lines_cpp.extend(self.addAllocationMarkers(obj_meta, "create", param_meta, False, True)) # Variable length lists support
                     lines_cpp.append( "%sreturn std::make_shared<%s>(getBuffPtr(), getBuffRemainingBytes(), m_%s__, m_%s__);" % (self.getIndentation(1), param_type, self.MEMBER_PARSE, self.MEMBER_SWAP) )
@@ -926,6 +939,10 @@ class TlvF:
                 else: #simple list
                     lines_h.append( "bool alloc_%s(size_t count = 1);" % (param_name) )
                     lines_cpp.append( "bool %s::alloc_%s(size_t count) {" % (obj_meta.name, param_name) )
+                    lines_cpp.append( "%sif (m_%s__ > %s) {;" %(self.getIndentation(1), self.MEMBER_LOCK_ORDER_COUNTER, param_meta.list_index) )
+                    lines_cpp.append( "%sTLVF_LOG(ERROR) << \"Out of order allocation for variable length list %s, abort!\";" %(self.getIndentation(2), param_name) )
+                    lines_cpp.append( "%sreturn false;" %self.getIndentation(2))
+                    lines_cpp.append( "%s}" %self.getIndentation(1))
                     lines_cpp.append( "%sif (count == 0) {" % (self.getIndentation(1)) )
                     lines_cpp.append( '%sTLVF_LOG(WARNING) << "can\'t allocate 0 bytes";' %  self.getIndentation(2) )
                     lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
@@ -935,6 +952,7 @@ class TlvF:
                     lines_cpp.append( '%sTLVF_LOG(ERROR) << "Not enough available space on buffer - can\'t allocate";' %  self.getIndentation(2) )
                     lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                     lines_cpp.append( "%s}" % self.getIndentation(1) )
+                    lines_cpp.append( "%sm_%s__ = %s;" %(self.getIndentation(1), self.MEMBER_LOCK_ORDER_COUNTER, param_meta.list_index) )
                     lines_cpp.extend( self.addAllocationMarkers(obj_meta, "alloc", param_meta, True, True) ) # Variable length lists support
                     lines_cpp.append( "%sm_%s_idx__ += count;" % (self.getIndentation(1), param_name) )
                     if is_var_len:
@@ -1129,6 +1147,7 @@ class TlvF:
 
         if obj_meta.type == MetaData.TYPE_CLASS:
             self.addClassCode(insert_name, insert_marker, name)
+            obj_meta.lock_order_member_added = False
 
             if self.multi_class_auto_insert != None:
                 for param_name, param_dict in self.multi_class_auto_insert.items():
