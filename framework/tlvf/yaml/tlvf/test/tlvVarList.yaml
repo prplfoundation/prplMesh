@@ -10,22 +10,22 @@ tlvTestVarList:
   var0: uint16_t
   length: uint16_t
 
-  # simple_list_length: uint16_t
-  # simple_list:
-  #   _type: uint16_t
-  #   _length: [ simple_list_length ]
+  simple_list_length: uint16_t
+  simple_list:
+    _type: uint16_t
+    _length: [ simple_list_length ]
 
-  # complex_list_length: uint16_t
-  # complex_list:
-  #   _type: cInner
-  #   _length: [ complex_list_length ]
+  complex_list_length: uint16_t
+  complex_list:
+    _type: cInner
+    _length: [ complex_list_length ]
 
   var1: uint16_t
 
-# cInner:
-#   _type: class
-#   list_length: uint16_t
-#   list:
-#     _type: uint8_t
-#     _length: [ list_length ]
-#   var1: uint32_t
+cInner:
+  _type: class
+  list_length: uint16_t
+  list:
+    _type: uint8_t
+    _length: [ list_length ]
+  var1: uint32_t
