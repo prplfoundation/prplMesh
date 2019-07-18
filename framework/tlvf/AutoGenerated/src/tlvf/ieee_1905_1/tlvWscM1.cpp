@@ -130,7 +130,7 @@ bool tlvWscM1::alloc_manufacturer(size_t count) {
         uint8_t *src = (uint8_t *)m_manufacturer;
         uint8_t *dst = (uint8_t *)m_manufacturer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_model_name_type = (WSC::eWscAttributes *)((uint8_t *)(m_model_name_type) + len);
     m_model_name_length = (uint16_t *)((uint8_t *)(m_model_name_length) + len);
@@ -211,7 +211,7 @@ bool tlvWscM1::alloc_model_name(size_t count) {
         uint8_t *src = (uint8_t *)m_model_name;
         uint8_t *dst = (uint8_t *)m_model_name + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_model_number_type = (WSC::eWscAttributes *)((uint8_t *)(m_model_number_type) + len);
     m_model_number_length = (uint16_t *)((uint8_t *)(m_model_number_length) + len);
@@ -289,7 +289,7 @@ bool tlvWscM1::alloc_model_number(size_t count) {
         uint8_t *src = (uint8_t *)m_model_number;
         uint8_t *dst = (uint8_t *)m_model_number + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_serial_number_type = (WSC::eWscAttributes *)((uint8_t *)(m_serial_number_type) + len);
     m_serial_number_length = (uint16_t *)((uint8_t *)(m_serial_number_length) + len);
@@ -364,7 +364,7 @@ bool tlvWscM1::alloc_serial_number(size_t count) {
         uint8_t *src = (uint8_t *)m_serial_number;
         uint8_t *dst = (uint8_t *)m_serial_number + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_primary_device_type_attr = (WSC::sWscAttrPrimaryDeviceType *)((uint8_t *)(m_primary_device_type_attr) + len);
     m_device_name_type = (WSC::eWscAttributes *)((uint8_t *)(m_device_name_type) + len);
@@ -440,7 +440,7 @@ bool tlvWscM1::alloc_device_name(size_t count) {
         uint8_t *src = (uint8_t *)m_device_name;
         uint8_t *dst = (uint8_t *)m_device_name + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_rf_bands_attr = (WSC::sWscAttrRfBands *)((uint8_t *)(m_rf_bands_attr) + len);
     m_association_state_attr = (WSC::sWscAttrAssociationState *)((uint8_t *)(m_association_state_attr) + len);

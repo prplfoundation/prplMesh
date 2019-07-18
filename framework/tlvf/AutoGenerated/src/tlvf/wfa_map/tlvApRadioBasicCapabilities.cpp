@@ -70,7 +70,7 @@ std::shared_ptr<cOperatingClassesInfo> tlvApRadioBasicCapabilities::create_opera
         uint8_t *src = (uint8_t *)m_operating_classes_info_list;
         uint8_t *dst = (uint8_t *)m_operating_classes_info_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     return std::make_shared<cOperatingClassesInfo>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
 }
@@ -215,7 +215,7 @@ bool cOperatingClassesInfo::alloc_statically_non_operable_channels_list(size_t c
         uint8_t *src = (uint8_t *)m_statically_non_operable_channels_list;
         uint8_t *dst = (uint8_t *)m_statically_non_operable_channels_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_statically_non_operable_channels_list_idx__ += count;
     *m_statically_non_operable_channels_list_length += count;

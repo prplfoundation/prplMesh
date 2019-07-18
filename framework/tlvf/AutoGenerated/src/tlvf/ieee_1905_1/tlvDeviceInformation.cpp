@@ -64,7 +64,7 @@ bool tlvDeviceInformation::alloc_info(size_t count) {
         uint8_t *src = (uint8_t *)m_info;
         uint8_t *dst = (uint8_t *)m_info + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
-        std::memmove(dst, src, move_length);
+        std::copy_n(src, move_length, dst);
     }
     m_info_idx__ += count;
     *m_info_length += count;
