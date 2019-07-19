@@ -374,10 +374,14 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
     }
 
     m2->message_type_attr().data = WSC::WSC_MSG_TYPE_M2;
-    m2->set_manufacturer("Intel");
-    m2->set_model_name("Ubuntu");
-    m2->set_model_number("18.04");
-    m2->set_serial_number("prpl12345");
+    if (!m2->set_manufacturer("Intel"))
+        return false;
+    if (!m2->set_model_name("Ubuntu"))
+        return false;
+    if (!m2->set_model_number("18.04"))
+        return false;
+    if (!m2->set_serial_number("prpl12345"))
+        return false;
     std::memset(m2->uuid_r_attr().data, 0xee, m2->uuid_r_attr().data_length);
     m2->authentication_type_flags_attr().data = m1->authentication_type_flags_attr().data;
     m2->encryption_type_flags_attr().data     = m1->encryption_type_flags_attr().data;
