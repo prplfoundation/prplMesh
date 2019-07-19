@@ -4721,11 +4721,16 @@ bool slave_thread::autoconfig_wsc_add_m1()
 
     m1->mac_attr().data = hostap_params.iface_mac;
     // TODO: read manufactured, name, model and device name from BPL
-    m1->set_manufacturer("Intel");
-    m1->set_model_name("Ubuntu");
-    m1->set_model_number("18.04");
-    m1->set_device_name("prplMesh-agent");
-    m1->set_serial_number("prpl12345");
+    if (!m1->set_manufacturer("Intel"))
+        return false;
+    if (!m1->set_model_name("Ubuntu"))
+        return false;
+    if (!m1->set_model_number("18.04"))
+        return false;
+    if (!m1->set_serial_number("prpl12345"))
+        return false;
+    if (!m1->set_device_name("prplMesh-agent"))
+        return false;
     std::memset(m1->uuid_e_attr().data, 0xff, m1->uuid_e_attr().data_length);
     m1->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2;
     m1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_NONE;
