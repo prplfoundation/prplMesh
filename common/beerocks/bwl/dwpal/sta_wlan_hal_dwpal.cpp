@@ -82,7 +82,7 @@ struct ConnectionStatus {
             case WiFiSec::WPA_WPA2_PSK:  return "WPA-WPA2-Personal";
 
             default: return "INVALID";
-        }    
+        }
     }
 
     static int fapi_str_to_int(char* str, bool ignore_unknown = true)
@@ -122,7 +122,7 @@ struct ConnectionStatus {
     }
 
     // Update network parameters
-    static bool set_network(const std::string& iface, const std::string& network_id, const std::string& ssid, 
+    static bool set_network(const std::string& iface, const std::string& network_id, const std::string& ssid,
             const std::string& bssid, WiFiSec sec, const std::string& pass, bool hidden_ssid)
     {
         LOG(TRACE) << __func__ << ": iface = " << iface << ", network_id = " << network_id;
@@ -139,7 +139,7 @@ struct ConnectionStatus {
         UGW_OBJLIST_ADD(wlObj, "Device.WiFi.EndPoint.Profile");
         if (ssid.length() > 0) {
             std::string fapi_ssid = "\"" + ssid + "\"";
-            UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.EndPoint.Profile", "SSID", 
+            UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.EndPoint.Profile", "SSID",
                     std::string("\"" + ssid + "\"").c_str(), 0, 0);
         }
 
@@ -162,7 +162,7 @@ struct ConnectionStatus {
             // WEP
             case WiFiSec::WEP_64:
             case WiFiSec::WEP_128: {
-                UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.EndPoint.Profile.Security", "WEPKey", 
+                UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.EndPoint.Profile.Security", "WEPKey",
                         std::string("\"" + pass + "\"").c_str(), 0, 0);
             } break;
 
@@ -170,7 +170,7 @@ struct ConnectionStatus {
             case WiFiSec::WPA_PSK:
             case WiFiSec::WPA2_PSK:
             case WiFiSec::WPA_WPA2_PSK: {
-                UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.EndPoint.Profile.Security", "KeyPassphrase", 
+                UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.EndPoint.Profile.Security", "KeyPassphrase",
                         std::string("\"" + pass + "\"").c_str(), 0, 0);
             } break;
 
@@ -326,7 +326,8 @@ bool sta_wlan_hal_dwpal::initiate_scan()
     return true;
 }
 
-int sta_wlan_hal_dwpal::get_scan_results(const std::string &ssid, net::sScanResult *list, int size)
+int sta_wlan_hal_dwpal::get_scan_results(const std::string &ssid, beerocks::net::sScanResult *list,
+                                         int size)
 {
 #if 0
         // Validate input parameters
@@ -365,13 +366,13 @@ bool sta_wlan_hal_dwpal::connect(const std::string &ssid, const std::string &pas
                                  const std::string &bssid, uint8_t channel, bool hidden_ssid)
 {
     /*
-        LOG(DEBUG) << __func__ << ": iface " << get_iface_name() << " to SSID = " << ssid 
-            << ", BSSID = " << bssid << ", Channel = " << int(channel) 
+        LOG(DEBUG) << __func__ << ": iface " << get_iface_name() << " to SSID = " << ssid
+            << ", BSSID = " << bssid << ", Channel = " << int(channel)
             << ", Sec = " << fapi_security_val(sec);
 
         // First disconnect (or do nothing if not connected)
-        if (!disconnect()) { 
-            LOG(WARNING) << "connect - Failed disconnecting"; 
+        if (!disconnect()) {
+            LOG(WARNING) << "connect - Failed disconnecting";
             return false;
         }
 
@@ -413,8 +414,8 @@ bool sta_wlan_hal_dwpal::disconnect()
 
         // Return gracefully if no network is connected
         if (m_active_network_id < 0) {
-            LOG(DEBUG) << "Active network does not exist"; 
-            return true; 
+            LOG(DEBUG) << "Active network does not exist";
+            return true;
         }
 
         // Allocate a new FAPI object
@@ -423,13 +424,13 @@ bool sta_wlan_hal_dwpal::disconnect()
 
         // Network ID
         UGW_OBJLIST_ADD(wlObj, "Device.WiFi.EndPoint");
-        UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.EndPoint", "X_LANTIQ_COM_Vendor_NetworkId", 
+        UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.EndPoint", "X_LANTIQ_COM_Vendor_NetworkId",
                 std::to_string(m_active_network_id).c_str(), 0, 0);
 
         //FAPI_DEBUG_OBJ("client_mode_network_remove", wlObj.get());
 
         // if (fapi_wlan_client_mode_network_remove(get_iface_name().c_str(), wlObj.get(), 0) == UGW_FAILURE) {
-        //     LOG(ERROR) << "disconnect - fapi_wlan_client_mode_network_remove failed for network_id = " 
+        //     LOG(ERROR) << "disconnect - fapi_wlan_client_mode_network_remove failed for network_id = "
         //                << m_active_network_id << " on interface: " << get_iface_name();
 
         //     return false;
@@ -438,7 +439,7 @@ bool sta_wlan_hal_dwpal::disconnect()
         bool res = fapi_wlan_client_mode_network_remove(get_iface_name().c_str(), wlObj.get(), 0);
 
         if (res == UGW_FAILURE) {
-            LOG(ERROR) << "disconnect - fapi_wlan_client_mode_network_remove failed for network_id = " 
+            LOG(ERROR) << "disconnect - fapi_wlan_client_mode_network_remove failed for network_id = "
                 << m_active_network_id << " on interface: " << get_iface_name();
         }
 
@@ -509,7 +510,7 @@ bool sta_wlan_hal_dwpal::get_4addr_mode()
             LOG(ERROR) << "Failed parsing FAPI object!";
             return false;
         }
-        
+
         return (!std::string(tmpBuff).compare("4_ADDRESS_MODE"));
         */
     return true;
@@ -526,7 +527,7 @@ bool sta_wlan_hal_dwpal::set_4addr_mode(bool enable)
 
         // Network ID
         UGW_OBJLIST_ADD(wlObj, "Device.WiFi.EndPoint.Profile");
-        UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.EndPoint.Profile", "X_LANTIQ_COM_Vendor_RoutingMode", 
+        UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.EndPoint.Profile", "X_LANTIQ_COM_Vendor_RoutingMode",
                 ((enable) ? "4_ADDRESS_MODE" : "3_ADDRESS_MODE"), 0, 0);
 
         // Set the routing mode
@@ -543,8 +544,8 @@ bool sta_wlan_hal_dwpal::unassoc_rssi_measurement(const std::string &mac, int ch
                                                   int window_size)
 {
     /*
-        LOG(TRACE) << __func__ << " mac: " << mac << ", channel: " << chan 
-            << ", bw: " << bw << ", vht_center_frequency: " << vht_center_frequency 
+        LOG(TRACE) << __func__ << " mac: " << mac << ", channel: " << chan
+            << ", bw: " << bw << ", vht_center_frequency: " << vht_center_frequency
             << ", delay: " << delay;
 
         // Convert values to strings
@@ -649,7 +650,7 @@ bool sta_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
                     return false;
                 }
 
-                LOG(DEBUG) << get_iface_name() << " - Connected: bssid = " << connection_status.bssid 
+                LOG(DEBUG) << get_iface_name() << " - Connected: bssid = " << connection_status.bssid
                     << ", freq = " << connection_status.freq;
 
                 m_active_bssid.assign(connection_status.bssid);
@@ -751,7 +752,7 @@ bool sta_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
 
                 // Measurement succeeded
                 if ((rssi_cnt > 0) && (msg->params.rx_packets > 1)) {
-                    rssi_watt = (rssi_watt / float(rssi_cnt)); 
+                    rssi_watt = (rssi_watt / float(rssi_cnt));
                     msg->params.rx_rssi = int(10 * log10(rssi_watt));
 
                     auto measurement_recv_timestamp = std::chrono::steady_clock::now();
@@ -766,7 +767,7 @@ bool sta_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
 
                     if (temp_sum_delay > m_unassoc_measure_window_size) {
                         LOG(ERROR) << "event_obj->params.rx_packets = -2 , delay = " << int(temp_sum_delay);
-                        msg->params.rx_packets = -2; // means the actual measurment started later then aspected 
+                        msg->params.rx_packets = -2; // means the actual measurment started later then aspected
                     }
                 }
 

@@ -34,7 +34,7 @@ public:
     virtual bool detach() override;
 
     virtual bool initiate_scan() override;
-    virtual int get_scan_results(const std::string &ssid, net::sScanResult *list,
+    virtual int get_scan_results(const std::string &ssid, beerocks::net::sScanResult *list,
                                  int size) override;
 
     virtual bool connect(const std::string &ssid, const std::string &pass, WiFiSec sec,
