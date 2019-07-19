@@ -1234,9 +1234,9 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             }
         }
 
-        msg->params.rx_rssi = beerocks::RSSI_INVALID;
-        msg->params.rx_snr  = beerocks::SNR_INVALID;
-        msg->params.mac     = beerocks::net::network_utils::mac_from_string(MACAddress);
+        msg->params.rx_rssi    = beerocks::RSSI_INVALID;
+        msg->params.rx_snr     = beerocks::SNR_INVALID;
+        msg->params.result.mac = beerocks::net::network_utils::mac_from_string(MACAddress);
 
         // Split the RSSI values
         auto rssiVec = beerocks::string_utils::str_split(rssi, ' ');
