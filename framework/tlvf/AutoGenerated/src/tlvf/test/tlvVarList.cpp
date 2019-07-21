@@ -115,6 +115,8 @@ std::shared_ptr<cInner> tlvTestVarList::create_complex_list() {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
+    m_var1 = (uint16_t *)((uint8_t *)(m_var1) + len);
+    m_unknown_length_list = (uint16_t *)((uint8_t *)(m_unknown_length_list) + len);
     return std::make_shared<cInner>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
 }
 
@@ -140,8 +142,8 @@ bool tlvTestVarList::add_complex_list(std::shared_ptr<cInner> ptr) {
         (*m_complex_list_length)++;
     }
     size_t len = ptr->getLen();
-    m_var1 = (uint16_t *)((uint8_t *)(m_var1) + len);
-    m_unknown_length_list = (uint16_t *)((uint8_t *)(m_unknown_length_list) + len);
+    m_var1 = (uint16_t *)((uint8_t *)(m_var1) + len - ptr->get_initial_size());
+    m_unknown_length_list = (uint16_t *)((uint8_t *)(m_unknown_length_list) + len - ptr->get_initial_size());
     m_complex_list_vector.push_back(ptr);
     m_buff_ptr__ += len;
     if(m_length){ (*m_length) += len; }
