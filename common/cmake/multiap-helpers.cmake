@@ -9,3 +9,8 @@ execute_process(COMMAND "date" "+%F %T" OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_
 message(STATUS "MultiAP ${PROJECT} Version: ${PROJECT}_VERSION_STRING")
 message(STATUS "MultiAP ${PROJECT} Build Date: ${${PROJECT}_BUILD_DATE}")
 message(STATUS "MultiAP ${PROJECT} Revision: ${${PROJECT}_REVISION}")
+
+find_package(MapfCommon REQUIRED)
+find_package(bcl REQUIRED)
+find_package(Tlvf REQUIRED)
+find_package(elpp REQUIRED)
