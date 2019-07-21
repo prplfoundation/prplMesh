@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 set(PROJECT_NAME bwl)
 project(${PROJECT_NAME})
 
-# Find required packages
-find_package(bcl REQUIRED)
-
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 

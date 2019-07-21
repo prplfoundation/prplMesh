@@ -4,10 +4,6 @@ set(PROJECT_NAME btl)
 project(${PROJECT_NAME})
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${BEEROCKS_TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
-# Dependecies
-find_package(bcl REQUIRED)
-
-find_package(MapfCommon REQUIRED)
 find_package(MapfTransport QUIET)
 
 if(MapfTransport_FOUND)
@@ -28,15 +24,12 @@ find_package(elpp REQUIRED)
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
-
 # Build the library
 add_library(${PROJECT_NAME} SHARED ${btl_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
+target_link_libraries(${PROJECT_NAME} PUBLIC beerocks::bcl tlvf elpp beerocks::btlvf mapf::common)
 if (MapfTransport_FOUND)
-     target_link_libraries(${PROJECT_NAME} PUBLIC beerocks::bcl tlvf beerocks::btlvf
-         PRIVATE mapf::common mapf::ieee1905_transport_messages elpp)
-else() # UDS Bus
-    target_link_libraries(${PROJECT_NAME} PUBLIC beerocks::bcl tlvf elpp beerocks::btlvf)
+     target_link_libraries(${PROJECT_NAME} PRIVATE mapf::ieee1905_transport_messages)
 endif()
 
 # Include paths

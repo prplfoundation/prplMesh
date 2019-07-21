@@ -4,8 +4,6 @@ set(PROJECT_NAME btlvf)
 project(${PROJECT_NAME})
 
 find_package(PythonInterp REQUIRED)
-find_package(bcl REQUIRED)
-find_package(Tlvf REQUIRED)
 find_program(PythonTlvf NAMES tlvf.py)
 
 if (NOT PythonTlvf)
