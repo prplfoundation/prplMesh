@@ -42,9 +42,12 @@
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
+#include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
+#include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvRadioOperationRestriction.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
+#include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
 #define SOCKET_MAX_CONNECTIONS 20
 #define SOCKETS_SELECT_TIMEOUT_MSEC 50
@@ -211,7 +214,11 @@ bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessa
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE:
         return handle_cmdu_1905_autoconfiguration_WSC(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE:
-        return handle_cmdu_1905_channel_preference_report_message(sd, cmdu_rx);
+        return handle_cmdu_1905_channel_preference_report(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_channel_selection_response(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE:
+        return handle_cmdu_1905_operating_channel_report(sd, cmdu_rx);
     default:
         break;
     }
@@ -472,18 +479,25 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
 
+    // trigger channel selection
+    if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE)) {
+        LOG(ERROR) << "Failed building message!";
+        return false;
+    }
+
+    son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+
     return true;
 }
 
-bool master_thread::handle_cmdu_1905_channel_preference_report_message(
-    Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+bool master_thread::handle_cmdu_1905_channel_preference_report(Socket *sd,
+                                                               ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
     LOG(INFO) << "Received CHANNEL_PREFERENCE_REPORT_MESSAGE, mid=" << std::dec << int(mid);
 
     // TODO: in actual channel selection task, it is important to validate that rx mid is identical
     // to the mid sent in channel preference request message
-    // auto mid = cmdu_rx.getMessageId();
 
     // build channel request message
     if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE)) {
@@ -638,6 +652,102 @@ bool master_thread::handle_cmdu_1905_channel_preference_report_message(
         } // close if (tlvType == some_tlv_type)
 
     } //close while (cmdu_rx.getNextTlvType(tlvType))
+
+    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+}
+
+bool master_thread::handle_cmdu_1905_channel_selection_response(Socket *sd,
+                                                                ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(INFO) << "Received CHANNEL_SELECTION_RESPONSE_MESSAGE, mid=" << std::dec << int(mid);
+    do {
+        auto channel_selection_response_tlv =
+            cmdu_rx.addClass<wfa_map::tlvChannelSelectionResponse>();
+        if (!channel_selection_response_tlv) {
+            LOG(ERROR) << "addClass ieee1905_1::tlvChannelSelectionResponse has failed";
+            return false;
+        }
+
+        auto &ruid         = channel_selection_response_tlv->radio_uid();
+        auto response_code = channel_selection_response_tlv->response_code();
+
+        LOG(DEBUG)
+            << "channel selection response from ruid=" << network_utils::mac_to_string(ruid)
+            << ", response_code="
+            << ([](const wfa_map::tlvChannelSelectionResponse::eResponseCode &response_code) {
+                   std::string ret_str;
+                   switch (response_code) {
+                   case wfa_map::tlvChannelSelectionResponse::eResponseCode::ACCEPT:
+                       ret_str.assign("ACCEPT");
+                       break;
+                   case wfa_map::tlvChannelSelectionResponse::eResponseCode::
+                       DECLINE_VIOLATES_CURRENT_PREFERENCES:
+                       ret_str.assign("DECLINE_VIOLATES_CURRENT_PREFERENCES");
+                       break;
+                   case wfa_map::tlvChannelSelectionResponse::eResponseCode::
+                       DECLINE_VIOLATES_MOST_RECENTLY_REPORTED_PREFERENCES:
+                       ret_str.assign("DECLINE_VIOLATES_MOST_RECENTLY_REPORTED_PREFERENCES");
+                       break;
+                   case wfa_map::tlvChannelSelectionResponse::eResponseCode::
+                       DECLINE_PREVENT_OPERATION_OF_BACKHAUL_LINK:
+                       ret_str.assign("DECLINE_PREVENT_OPERATION_OF_BACKHAUL_LINK");
+                       break;
+                   default:
+                       ret_str.assign("ERROR:UNFAMILIAR_RESPONSE_CODE");
+                       break;
+                   }
+                   return ret_str;
+               })(response_code);
+
+    } while (cmdu_rx.getNextTlvType() != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE));
+
+    return true;
+}
+
+bool master_thread::handle_cmdu_1905_operating_channel_report(Socket *sd,
+                                                              ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(INFO) << "Received OPERATING_CHANNEL_REPORT_MESSAGE, mid=" << std::dec << int(mid);
+
+    do {
+        auto operating_channel_report_tlv = cmdu_rx.addClass<wfa_map::tlvOperatingChannelReport>();
+        if (!operating_channel_report_tlv) {
+            LOG(ERROR) << "addClass ieee1905_1::operating_channel_report_tlv has failed";
+            return false;
+        }
+
+        auto &ruid    = operating_channel_report_tlv->radio_uid();
+        auto tx_power = operating_channel_report_tlv->current_transmit_power();
+
+        LOG(INFO) << "operating channel report, ruid=" << network_utils::mac_to_string(ruid)
+                  << ", tx_power=" << std::dec << int(tx_power);
+
+        auto operating_classes_list_length =
+            operating_channel_report_tlv->operating_classes_list_length();
+
+        for (uint8_t oc = 0; oc < operating_classes_list_length; oc++) {
+            auto operating_class_tuple = operating_channel_report_tlv->operating_classes_list(oc);
+            if (!std::get<0>(operating_class_tuple)) {
+                LOG(ERROR) << "getting operating class entry has failed!";
+                return false;
+            }
+
+            auto &operating_class_struct = std::get<1>(operating_class_tuple);
+            auto operating_class         = operating_class_struct.operating_class;
+            auto channel                 = operating_class_struct.channel_number;
+            LOG(INFO) << "operating_class=" << int(operating_class)
+                      << ", operating_channel=" << int(channel);
+        }
+
+    } while (cmdu_rx.getNextTlvType() != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE));
+
+    // send ACK_MESSAGE back to the Agent
+    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
 
     return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
 }

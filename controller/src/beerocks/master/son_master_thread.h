@@ -59,8 +59,10 @@ private:
     bool handle_cmdu_1905_autoconfiguration_search(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_autoconfiguration_WSC(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> m1);
-    bool handle_cmdu_1905_channel_preference_report_message(Socket *sd,
-                                                            ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_1905_channel_preference_report(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_1905_channel_selection_response(Socket *sd,
+                                                     ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_1905_operating_channel_report(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 
     db &database;
     task_pool tasks;
