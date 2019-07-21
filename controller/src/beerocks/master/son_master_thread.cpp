@@ -366,40 +366,41 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
     return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
 }
 
-bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> m1)
+bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> tlvWscM1)
 {
-    if (!m1) {
+    if (!tlvWscM1) {
         LOG(ERROR) << "Invalid M1";
         return false;
     }
 
-    int bss_type = m1->vendor_extensions_attr().subelement_value;
-    auto m2      = cmdu_tx.addClass<ieee1905_1::tlvWscM2>();
-    if (!m2) {
+    int bss_type  = tlvWscM1->vendor_extensions_attr().subelement_value;
+    auto tlvWscM2 = cmdu_tx.addClass<ieee1905_1::tlvWscM2>();
+    if (!tlvWscM2) {
         LOG(ERROR) << "Failed creating tlvWscM2";
         return false;
     }
 
-    m2->message_type_attr().data = WSC::WSC_MSG_TYPE_M2;
-    if (!m2->set_manufacturer("Intel"))
+    tlvWscM2->message_type_attr().data = WSC::WSC_MSG_TYPE_M2;
+    if (!tlvWscM2->set_manufacturer("Intel"))
         return false;
-    if (!m2->set_model_name("Ubuntu"))
+    if (!tlvWscM2->set_model_name("Ubuntu"))
         return false;
-    if (!m2->set_model_number("18.04"))
+    if (!tlvWscM2->set_model_number("18.04"))
         return false;
-    if (!m2->set_serial_number("prpl12345"))
+    if (!tlvWscM2->set_serial_number("prpl12345"))
         return false;
-    std::memset(m2->uuid_r_attr().data, 0xee, m2->uuid_r_attr().data_length);
-    m2->authentication_type_flags_attr().data = m1->authentication_type_flags_attr().data;
-    m2->encryption_type_flags_attr().data     = m1->encryption_type_flags_attr().data;
-    m2->rf_bands_attr().data                  = (m1->rf_bands_attr().data & WSC::WSC_RF_BAND_5GHZ)
-                                   ? WSC::WSC_RF_BAND_5GHZ
-                                   : WSC::WSC_RF_BAND_2GHZ;
-    m2->vendor_extensions_attr().subelement_value =
+    std::memset(tlvWscM2->uuid_r_attr().data, 0xee, tlvWscM2->uuid_r_attr().data_length);
+    tlvWscM2->authentication_type_flags_attr().data =
+        tlvWscM1->authentication_type_flags_attr().data;
+    tlvWscM2->encryption_type_flags_attr().data = tlvWscM1->encryption_type_flags_attr().data;
+    tlvWscM2->rf_bands_attr().data = (tlvWscM1->rf_bands_attr().data & WSC::WSC_RF_BAND_5GHZ)
+                                         ? WSC::WSC_RF_BAND_5GHZ
+                                         : WSC::WSC_RF_BAND_2GHZ;
+    tlvWscM2->vendor_extensions_attr().subelement_value =
         bss_type & WSC::FRONTHAUL_BSS
             ? WSC::FRONTHAUL_BSS
             : (bss_type & WSC::BACKHAUL_BSS ? WSC::BACKHAUL_BSS : WSC::TEARDOWN);
-    m2->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
+    tlvWscM2->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
     // TODO: Finalize with encryption
     return true;
 }
@@ -430,9 +431,9 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
 
-    // Parse M1 TLV
-    auto m1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
-    if (m1 == nullptr) {
+    // Parse WSC M1 TLV
+    auto tlvwscM1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
+    if (tlvwscM1 == nullptr) {
         LOG(ERROR) << "Error creating tlvWscM1";
         return false;
     }
@@ -450,32 +451,34 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     }
     // All attributes which are not explicitely set below are set to
     // default by the TLV factory, see WSC_Attributes.yml
-    auto ruid = cmdu_tx.addClass<wfa_map::tlvApRadioIdentifier>();
-    if (!ruid) {
+    auto tlvRuid = cmdu_tx.addClass<wfa_map::tlvApRadioIdentifier>();
+    if (!tlvRuid) {
         LOG(ERROR) << "error creating tlvApRadioIdentifier TLV";
         return false;
     }
-    // Let the Agent keep its Radio Identifier
-    ruid->radio_uid() = radio_basic_caps->radio_uid();
+
+    tlvRuid->radio_uid() = radio_basic_caps->radio_uid();
 
     for (int i = 0; i < radio_basic_caps->maximum_number_of_bsss_supported(); i++) {
-        if (!autoconfig_wsc_add_m2(m1)) {
+        if (!autoconfig_wsc_add_m2(tlvwscM1)) {
             LOG(ERROR) << "Failed setting M2 attributes";
             return false;
         }
     }
 
-    std::string manufacturer = std::string(m1->manufacturer(), m1->manufacturer_length());
+    std::string manufacturer =
+        std::string(tlvwscM1->manufacturer(), tlvwscM1->manufacturer_length());
     if (!manufacturer.compare("Intel")) {
         //TODO add support for none Intel agents
-        LOG(ERROR) << "None Intel radio agent " << manufacturer << " , dropping M1 message";
+        LOG(ERROR) << "None Intel radio agent " << manufacturer << " , dropping WSC M1 message";
         return false;
     }
 
-    auto radio_mac = network_utils::mac_to_string(m1->mac_attr().data.oct);
-    LOG(INFO) << "Intel radio agent " << radio_mac << " join";
-    if (!handle_intel_slave_join(sd, cmdu_rx, cmdu_tx, radio_mac)) {
-        LOG(ERROR) << "Not an Intel agent " << radio_mac << " (" << manufacturer << ")";
+    auto al_mac = network_utils::mac_to_string(tlvwscM1->mac_attr().data.oct);
+    auto ruid   = network_utils::mac_to_string(tlvRuid->radio_uid());
+    LOG(INFO) << "Intel radio agent join (al_mac=" << al_mac << " ruid=" << ruid;
+    if (!handle_intel_slave_join(sd, cmdu_rx, cmdu_tx)) {
+        LOG(ERROR) << "Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid;
         return false;
     }
 
@@ -753,8 +756,7 @@ bool master_thread::handle_cmdu_1905_operating_channel_report(Socket *sd,
 }
 
 bool master_thread::handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx,
-                                            ieee1905_1::CmduMessageTx &cmdu_tx,
-                                            const std::string &radio_mac)
+                                            ieee1905_1::CmduMessageTx &cmdu_tx)
 {
     auto tlv_vs = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
     if (!tlv_vs) {
@@ -782,6 +784,7 @@ bool master_thread::handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageR
     }
 
     std::string slave_version = std::string(notification->slave_version(message::VERSION_LENGTH));
+    std::string radio_mac     = network_utils::mac_to_string(notification->hostap().iface_mac);
     std::string gw_ipv4 = network_utils::ipv4_to_string(notification->backhaul_params().gw_ipv4);
     std::string gw_bridge_mac =
         network_utils::mac_to_string(notification->backhaul_params().gw_bridge_mac);

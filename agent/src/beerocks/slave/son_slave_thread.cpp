@@ -4301,12 +4301,12 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         if (cmdu_rx.getNextTlvType() != uint8_t(ieee1905_1::eTlvType::TLV_WSC))
             break;
 
-        auto m2 = cmdu_rx.addClass<ieee1905_1::tlvWscM2>();
-        if (!m2) {
+        auto tlvWscM2 = cmdu_rx.addClass<ieee1905_1::tlvWscM2>();
+        if (!tlvWscM2) {
             LOG(ERROR) << "Not an WSC M2 TLV!";
             return false;
         }
-        m2_list.push_back(m2);
+        m2_list.push_back(tlvWscM2);
     }
 
     if (m2_list.empty()) {
@@ -4314,8 +4314,9 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         return false;
     }
 
-    for (auto m2 : m2_list) {
-        std::string manufacturer = std::string(m2->manufacturer(), m2->manufacturer_length());
+    for (auto tlvWscM2 : m2_list) {
+        std::string manufacturer =
+            std::string(tlvWscM2->manufacturer(), tlvWscM2->manufacturer_length());
         if (!manufacturer.compare("Intel")) {
             //TODO add support for none Intel agents
             LOG(ERROR) << "None Intel controller " << manufacturer << " , dropping message";
@@ -4713,32 +4714,32 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
 
 bool slave_thread::autoconfig_wsc_add_m1()
 {
-    auto m1 = cmdu_tx.addClass<ieee1905_1::tlvWscM1>();
-    if (m1 == nullptr) {
+    auto tlvWscM1 = cmdu_tx.addClass<ieee1905_1::tlvWscM1>();
+    if (tlvWscM1 == nullptr) {
         LOG(ERROR) << "Error creating tlvWscM1";
         return false;
     }
 
-    m1->mac_attr().data = hostap_params.iface_mac;
+    tlvWscM1->mac_attr().data = network_utils::mac_from_string(backhaul_params.bridge_mac);
     // TODO: read manufactured, name, model and device name from BPL
-    if (!m1->set_manufacturer("Intel"))
+    if (!tlvWscM1->set_manufacturer("Intel"))
         return false;
-    if (!m1->set_model_name("Ubuntu"))
+    if (!tlvWscM1->set_model_name("Ubuntu"))
         return false;
-    if (!m1->set_model_number("18.04"))
+    if (!tlvWscM1->set_model_number("18.04"))
         return false;
-    if (!m1->set_serial_number("prpl12345"))
+    if (!tlvWscM1->set_serial_number("prpl12345"))
         return false;
-    if (!m1->set_device_name("prplMesh-agent"))
+    if (!tlvWscM1->set_device_name("prplMesh-agent"))
         return false;
-    std::memset(m1->uuid_e_attr().data, 0xff, m1->uuid_e_attr().data_length);
-    m1->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2;
-    m1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_NONE;
-    m1->rf_bands_attr().data =
+    std::memset(tlvWscM1->uuid_e_attr().data, 0xff, tlvWscM1->uuid_e_attr().data_length);
+    tlvWscM1->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2;
+    tlvWscM1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_NONE;
+    tlvWscM1->rf_bands_attr().data =
         hostap_params.iface_is_5ghz ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
     // Simulate that this radio supports both fronthaul and backhaul BSS
-    m1->vendor_extensions_attr().subelement_value  = WSC::FRONTHAUL_BSS | WSC::BACKHAUL_BSS;
-    m1->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_AP;
+    tlvWscM1->vendor_extensions_attr().subelement_value  = WSC::FRONTHAUL_BSS | WSC::BACKHAUL_BSS;
+    tlvWscM1->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_AP;
     // TODO: M1 should also have values for:
     // enrolee_nonce_attr -> to be added by encryption
     // public_key_attr -> to be added by encryption
