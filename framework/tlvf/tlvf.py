@@ -620,8 +620,12 @@ class TlvF:
         # the list by the allocation size, and added a marker - which is used here to update
         # all the class member pointers which come after the list member.
         ##############################################################################################
-        for marker in obj_meta.alloc_list:
-            line = "%sm_%s = (%s *)((uint8_t *)(m_%s) + len);" %(self.getIndentation(1), param_name, param_type, param_name)
+        for (marker, func) in obj_meta.alloc_list:
+            if func == "add":
+                length_str = "len - ptr->get_initial_size()"
+            else:
+                length_str = "len"
+            line = "%sm_%s = (%s *)((uint8_t *)(m_%s) + %s);" %(self.getIndentation(1), param_name, param_type, param_name, length_str)
             self.insertLineCpp("", marker.strip(), line)
 
         if param_length_type == None:
@@ -687,10 +691,6 @@ class TlvF:
                 const = "const " if param_val_const != None or (self.is_tlv_class and param_name == MetaData.TLV_TYPE_LENGTH) else ""
                 lines_h.append( "%s%s& %s();" % (const, param_type, param_name) ) #const
                 lines_cpp.append( "%s%s& %s::%s() {" % (const, param_type_full, obj_meta.name, param_name) )
-                # if (obj_meta.alloc_list):
-                #     lines_cpp.append("%sif (m_lock_allocation__) {" %self.getIndentation(1))
-                #     lines_cpp.append("%sLOG(ERROR) << \"lock allocation taken, %s points to invalid buffer location. Be warned!\";" %(self.getIndentation(2), param_name))
-                #     lines_cpp.append("%s}" %self.getIndentation(1))
                 lines_cpp.append( "%sreturn (%s%s&)(*m_%s);" % (self.getIndentation(1), const, param_type, param_name) )
                 lines_cpp.append( "}" )
                 lines_cpp.append( "" )
@@ -893,7 +893,7 @@ class TlvF:
                     lines_cpp.append( "%s}" % self.getIndentation(1) )
                     lines_cpp.append( "%sm_%s__ = %s;" %(self.getIndentation(1), self.MEMBER_LOCK_ORDER_COUNTER, param_meta.list_index) )
                     lines_cpp.append( "%sm_%s__ = true;" % (self.getIndentation(1), self.MEMBER_LOCK_ALLOCATION) )
-                    lines_cpp.extend(self.addAllocationMarkers(obj_meta, "create", param_meta, False, True)) # Variable length lists support
+                    lines_cpp.extend(self.addAllocationMarkers(obj_meta, "create", param_meta, True)) # Variable length lists support
                     lines_cpp.append( "%sreturn std::make_shared<%s>(getBuffPtr(), getBuffRemainingBytes(), m_%s__, m_%s__);" % (self.getIndentation(1), param_type, self.MEMBER_PARSE, self.MEMBER_SWAP) )
                     lines_cpp.append( "}" )
                     lines_cpp.append( "" )
@@ -927,7 +927,7 @@ class TlvF:
                         lines_cpp.append( "%s(*m_%s)++;" % (self.getIndentation(2), param_length) )
                     lines_cpp.append( "%s}" % (self.getIndentation(1)) )
                     lines_cpp.append( "%ssize_t len = ptr->getLen();" % (self.getIndentation(1) ))
-                    lines_cpp.extend(self.addAllocationMarkers(obj_meta, "add", param_meta, True, False)) # Variable length lists support
+                    lines_cpp.extend(self.addAllocationMarkers(obj_meta, "add", param_meta, False)) # Variable length lists support
                     lines_cpp.append( "%sm_%s_vector.push_back(ptr);" % (self.getIndentation(1), param_name ))
                     lines_cpp.append( "%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR) )
                     if self.is_tlv_class:
@@ -953,7 +953,7 @@ class TlvF:
                     lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                     lines_cpp.append( "%s}" % self.getIndentation(1) )
                     lines_cpp.append( "%sm_%s__ = %s;" %(self.getIndentation(1), self.MEMBER_LOCK_ORDER_COUNTER, param_meta.list_index) )
-                    lines_cpp.extend( self.addAllocationMarkers(obj_meta, "alloc", param_meta, True, True) ) # Variable length lists support
+                    lines_cpp.extend( self.addAllocationMarkers(obj_meta, "alloc", param_meta, True) ) # Variable length lists support
                     lines_cpp.append( "%sm_%s_idx__ += count;" % (self.getIndentation(1), param_name) )
                     if is_var_len:
                         lines_cpp.append( "%s*m_%s += count;" % (self.getIndentation(1), param_length) )
@@ -991,7 +991,7 @@ class TlvF:
     # (list[]) which can only be the last member of each class, therefore no
     # action is needed for these lists.
     ##########################################################################
-    def addAllocationMarkers(self, obj_meta, func_name, param_meta, marker, memmove):
+    def addAllocationMarkers(self, obj_meta, func_name, param_meta, memmove):
         lines_cpp = []
         if param_meta.length_type == MetaData.LENGTH_TYPE_VAR:
             if memmove:
@@ -1001,10 +1001,10 @@ class TlvF:
                 lines_cpp.append("%ssize_t move_length = getBuffRemainingBytes(src) - len;" %self.getIndentation(2))
                 lines_cpp.append("%sstd::copy_n(src, move_length, dst);" %self.getIndentation(2))
                 lines_cpp.append("%s}" %self.getIndentation(1))
-            if marker:
-                marker = "%s_%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, func_name, param_meta.name)
-                obj_meta.alloc_list.append(marker)
-                lines_cpp.append(marker)
+
+            marker = "%s_%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, func_name, param_meta.name)
+            obj_meta.alloc_list.append((marker, func_name))
+            lines_cpp.append(marker)
 
         return lines_cpp
 
