@@ -3585,10 +3585,6 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::~cACTION_BML_WFA_CA_CONTROLLER_RESPONSE() {
 }
-uint8_t& cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::pending_additional_response() {
-    return (uint8_t&)(*m_pending_additional_response);
-}
-
 uint16_t& cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::reply_length() {
     return (uint16_t&)(*m_reply_length);
 }
@@ -3659,7 +3655,6 @@ void cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::class_swap()
 size_t cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(uint8_t); // pending_additional_response
     class_size += sizeof(uint16_t); // reply_length
     return class_size;
 }
@@ -3670,8 +3665,6 @@ bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_pending_additional_response = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
     m_reply_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_reply_length = 0;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
