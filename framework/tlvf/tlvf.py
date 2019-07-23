@@ -736,7 +736,7 @@ class TlvF:
                 length_type = obj_meta.children_types[param_length]
                 lines_cpp.append("%s %s = *m_%s;" %(length_type.type_str, param_length, param_length))
                 if length_type.swap_needed:
-                    lines_cpp.append("%s&%s%s;" %(length_type.swap_prefix, param_length, length_type.swap_suffix))
+                    lines_cpp.append("if (m_%s__ && m_%s__) {  %s&%s%s; }" %(self.MEMBER_PARSE, self.MEMBER_SWAP, length_type.swap_prefix, param_length, length_type.swap_suffix))
                 lines_cpp.append("m_%s_idx__ = %s;" % (param_name, param_length))
                 if TypeInfo(param_type).type == TypeInfo.CLASS: #TODO:only if it's the last list member of the class
                     lines_cpp.append("for (size_t i = 0; i < %s; i++) {" % (param_length))
