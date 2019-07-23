@@ -17,9 +17,4 @@ script:
   - git update-index -q --refresh
   - git diff-index --exit-code HEAD
   # Start controller & agent node detached and check status
-  - sudo ./run.sh start-controller-agent -d -n controller-agent
-  - sudo ./run.sh start-agent -d -n agent
-  - sleep 5
-  - sudo ./test.sh -v -n controller-agent
-  # Remote agent doesn't get to operational YET, so don't fail the build on that
-  - sudo ./test.sh -v -n agent || true
+  - sudo ./tests/test_gw_repeater.sh --rm || true
