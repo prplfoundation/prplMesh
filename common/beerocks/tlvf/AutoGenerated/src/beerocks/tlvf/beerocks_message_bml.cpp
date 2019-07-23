@@ -220,7 +220,7 @@ bool cACTION_BML_NW_MAP_RESPONSE::init()
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     m_buffer = (char*)m_buff_ptr__;
     uint32_t buffer_size = *m_buffer_size;
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size));
+    if (m_parse__ && m_swap__) {  tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size)); }
     m_buffer_idx__ = buffer_size;
     m_buff_ptr__ += sizeof(char)*(buffer_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
@@ -334,7 +334,7 @@ bool cACTION_BML_NW_MAP_UPDATE::init()
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     m_buffer = (char*)m_buff_ptr__;
     uint32_t buffer_size = *m_buffer_size;
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size));
+    if (m_parse__ && m_swap__) {  tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size)); }
     m_buffer_idx__ = buffer_size;
     m_buff_ptr__ += sizeof(char)*(buffer_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
@@ -448,7 +448,7 @@ bool cACTION_BML_STATS_UPDATE::init()
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     m_buffer = (char*)m_buff_ptr__;
     uint32_t buffer_size = *m_buffer_size;
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size));
+    if (m_parse__ && m_swap__) {  tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size)); }
     m_buffer_idx__ = buffer_size;
     m_buff_ptr__ += sizeof(char)*(buffer_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
@@ -554,7 +554,7 @@ bool cACTION_BML_EVENTS_UPDATE::init()
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     m_buffer = (char*)m_buff_ptr__;
     uint32_t buffer_size = *m_buffer_size;
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size));
+    if (m_parse__ && m_swap__) {  tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size)); }
     m_buffer_idx__ = buffer_size;
     m_buff_ptr__ += sizeof(char)*(buffer_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
@@ -3406,7 +3406,7 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::init()
     m_buff_ptr__ += sizeof(uint32_t) * 1;
     m_buffer = (char*)m_buff_ptr__;
     uint32_t buffer_size = *m_buffer_size;
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size));
+    if (m_parse__ && m_swap__) {  tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size)); }
     m_buffer_idx__ = buffer_size;
     m_buff_ptr__ += sizeof(char)*(buffer_size);
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {

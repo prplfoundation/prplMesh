@@ -556,7 +556,7 @@ bool tlvWscM2::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_manufacturer = (char*)m_buff_ptr__;
     uint16_t manufacturer_length = *m_manufacturer_length;
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(&manufacturer_length));
+    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&manufacturer_length)); }
     m_manufacturer_idx__ = manufacturer_length;
     m_buff_ptr__ += sizeof(char)*(manufacturer_length);
     m_model_name_type = (WSC::eWscAttributes*)m_buff_ptr__;
@@ -569,7 +569,7 @@ bool tlvWscM2::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_model_name = (char*)m_buff_ptr__;
     uint16_t model_name_length = *m_model_name_length;
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(&model_name_length));
+    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&model_name_length)); }
     m_model_name_idx__ = model_name_length;
     m_buff_ptr__ += sizeof(char)*(model_name_length);
     m_model_number_type = (WSC::eWscAttributes*)m_buff_ptr__;
@@ -582,7 +582,7 @@ bool tlvWscM2::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_model_number = (char*)m_buff_ptr__;
     uint16_t model_number_length = *m_model_number_length;
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(&model_number_length));
+    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&model_number_length)); }
     m_model_number_idx__ = model_number_length;
     m_buff_ptr__ += sizeof(char)*(model_number_length);
     m_serial_number_type = (WSC::eWscAttributes*)m_buff_ptr__;
@@ -595,7 +595,7 @@ bool tlvWscM2::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_serial_number = (char*)m_buff_ptr__;
     uint16_t serial_number_length = *m_serial_number_length;
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(&serial_number_length));
+    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&serial_number_length)); }
     m_serial_number_idx__ = serial_number_length;
     m_buff_ptr__ += sizeof(char)*(serial_number_length);
     m_primary_device_type_attr = (WSC::sWscAttrPrimaryDeviceType*)m_buff_ptr__;

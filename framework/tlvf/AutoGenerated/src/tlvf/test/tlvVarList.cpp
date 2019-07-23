@@ -238,14 +238,14 @@ bool tlvTestVarList::init()
     m_buff_ptr__ += sizeof(uint16_t) * 1;
     m_simple_list = (uint16_t*)m_buff_ptr__;
     uint16_t simple_list_length = *m_simple_list_length;
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(&simple_list_length));
+    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&simple_list_length)); }
     m_simple_list_idx__ = simple_list_length;
     m_buff_ptr__ += sizeof(uint16_t)*(simple_list_length);
     m_complex_list_length = (uint16_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
     m_complex_list = (cInner*)m_buff_ptr__;
     uint16_t complex_list_length = *m_complex_list_length;
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(&complex_list_length));
+    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&complex_list_length)); }
     m_complex_list_idx__ = complex_list_length;
     for (size_t i = 0; i < complex_list_length; i++) {
         if (!add_complex_list(create_complex_list())) { 
@@ -350,7 +350,7 @@ bool cInner::init()
     m_buff_ptr__ += sizeof(uint16_t) * 1;
     m_list = (uint8_t*)m_buff_ptr__;
     uint16_t list_length = *m_list_length;
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(&list_length));
+    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&list_length)); }
     m_list_idx__ = list_length;
     m_buff_ptr__ += sizeof(uint8_t)*(list_length);
     m_var1 = (uint32_t*)m_buff_ptr__;
