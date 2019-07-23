@@ -515,6 +515,13 @@ int bml_wfa_ca_controller(BML_CTX ctx, const char *command, int command_len,
 int bml_wfa_ca_agent(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf_size);
 
 /**
+ * Trigger Topology Discovery Task.
+ *
+ * @return BML_RET_OK on success.
+ */
+int bml_topology_discovery(void);
+
+/**
  * Trigger Channel Selection Task on a specific Agent.
  *
  * @param [in] ctx BML Context.

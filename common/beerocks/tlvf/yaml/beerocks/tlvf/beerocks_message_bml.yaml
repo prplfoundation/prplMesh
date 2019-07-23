@@ -340,6 +340,9 @@ cACTION_BML_STEERING_EVENTS_UPDATE:
     _type: char
     _length: [ buffer_size ]
 
+cACTION_BML_TRIGGER_TOPOLOGY_QUERY:
+  _type: class
+  al_mac: sMacAddr
 
 cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST:
   _type: class

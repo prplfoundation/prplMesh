@@ -1528,6 +1528,26 @@ class cACTION_BML_STEERING_EVENTS_UPDATE : public BaseClass
         int m_lock_order_counter__ = 0;
 };
 
+class cACTION_BML_TRIGGER_TOPOLOGY_QUERY : public BaseClass
+{
+    public:
+        cACTION_BML_TRIGGER_TOPOLOGY_QUERY(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_BML_TRIGGER_TOPOLOGY_QUERY(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_BML_TRIGGER_TOPOLOGY_QUERY();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_TRIGGER_TOPOLOGY_QUERY);
+        }
+        sMacAddr& al_mac();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        sMacAddr* m_al_mac = nullptr;
+};
+
 class cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST : public BaseClass
 {
     public:
