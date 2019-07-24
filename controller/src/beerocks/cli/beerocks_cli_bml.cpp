@@ -465,10 +465,10 @@ void cli_bml::setFunctionsMapAndArray()
         "bml_restricted_channels_get_slave", "<mac>", "Get restricted channels from slave 'mac'",
         static_cast<pFunction>(&cli_bml::get_slave_restricted_channels_caller), 1, 1, STRING_ARG);
     insertCommandToMap(
-        "bml_wfca_controller", "<string_command>", "send wfca controller<string_command>",
-        static_cast<pFunction>(&cli_bml::bml_wfca_controller_caller), 1, 1, STRING_ARG);
-    insertCommandToMap("bml_wfca_agent", "<string_command>", "send wfca agent <string_command>",
-                       static_cast<pFunction>(&cli_bml::bml_wfca_agent_caller), 1, 1, STRING_ARG);
+        "bml_wfa_ca_controller", "<string_command>", "send wfa_ca controller<string_command>",
+        static_cast<pFunction>(&cli_bml::bml_wfa_ca_controller_caller), 1, 1, STRING_ARG);
+    insertCommandToMap("bml_wfa_ca_agent", "<string_command>", "send wfa_ca agent <string_command>",
+                       static_cast<pFunction>(&cli_bml::bml_wfa_ca_agent_caller), 1, 1, STRING_ARG);
     insertCommandToMap(
         "bml_trigger_channel_selection",            // command name
         "<al_mac (mac format)> <ruid(mac format)>", // command args list
@@ -1060,18 +1060,18 @@ int cli_bml::get_slave_restricted_channels_caller(int numOfArgs)
     return -1;
 }
 
-int cli_bml::bml_wfca_controller_caller(int numOfArgs)
+int cli_bml::bml_wfa_ca_controller_caller(int numOfArgs)
 {
     if (numOfArgs == 1) {
-        return wfca_controller(args.stringArgs[0]);
+        return wfa_ca_controller(args.stringArgs[0]);
     }
     return -1;
 }
 
-int cli_bml::bml_wfca_agent_caller(int numOfArgs)
+int cli_bml::bml_wfa_ca_agent_caller(int numOfArgs)
 {
     if (numOfArgs == 1) {
-        return wfca_agent(args.stringArgs[0]);
+        return wfa_ca_agent(args.stringArgs[0]);
     }
     return -1;
 }
@@ -1570,19 +1570,19 @@ int cli_bml::get_slave_restricted_channels(const std::string &hostap_mac)
     return 0;
 }
 
-int cli_bml::wfca_controller(const std::string &cmd)
+int cli_bml::wfa_ca_controller(const std::string &cmd)
 {
     int ret = bml_wfa_ca_controller(ctx, cmd.c_str(), cmd.size() + 1, wfa_ca_reply_to_console_cb);
 
     // print error message only on error
     if (ret != BML_RET_OK) {
-        printBmlReturnVals("wfca_controller", ret);
+        printBmlReturnVals("wfa_ca_controller", ret);
     }
 
     return 0;
 }
 
-int cli_bml::wfca_agent(const std::string &cmd)
+int cli_bml::wfa_ca_agent(const std::string &cmd)
 {
     // TODO
     return 0;

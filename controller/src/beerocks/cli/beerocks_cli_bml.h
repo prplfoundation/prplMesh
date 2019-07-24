@@ -134,8 +134,8 @@ private:
     int get_global_restricted_channels_caller(int numOfArgs);
     int set_slave_restricted_channels_caller(int numOfArgs);
     int get_slave_restricted_channels_caller(int numOfArgs);
-    int bml_wfca_controller_caller(int numOfArgs);
-    int bml_wfca_agent_caller(int numOfArgs);
+    int bml_wfa_ca_controller_caller(int numOfArgs);
+    int bml_wfa_ca_agent_caller(int numOfArgs);
     int bml_channel_selection_caller(int numOfArgs);
 #ifdef BEEROCKS_RDKB
     int bml_rdkb_steering_set_group_caller(int numOfArgs);
@@ -180,8 +180,8 @@ private:
     int set_slave_restricted_channels(const std::string &restricted_channels,
                                       const std::string &hostap_mac);
     int get_slave_restricted_channels(const std::string &hostap_mac);
-    int wfca_controller(const std::string &cmd);
-    int wfca_agent(const std::string &cmd);
+    int wfa_ca_controller(const std::string &cmd);
+    int wfa_ca_agent(const std::string &cmd);
     int channel_selection(const std::string &al_mac, const std::string &ruid);
 #ifdef BEEROCKS_RDKB
     int steering_set_group(uint32_t steeringGroupIndex, const std::string &str_cfg_2,

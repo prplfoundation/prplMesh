@@ -2625,7 +2625,7 @@ int bml_internal::wfa_ca_controller(BML_CTX ctx, const char *command, int comman
     return BML_RET_OK;
 }
 
-int bml_internal::wfca_agent(const char *cmd, char *ret_buf, int ret_buf_size)
+int bml_internal::wfa_ca_agent(const char *cmd, char *ret_buf, int ret_buf_size)
 {
     // TODO: implement function
     return BML_RET_OK;

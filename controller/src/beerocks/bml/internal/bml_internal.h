@@ -148,8 +148,8 @@ public:
     int wfa_ca_controller(BML_CTX ctx, const char *command, int command_len,
                           BML_WFA_CA_CB reply_cb);
 
-    // send wfca agent command
-    int wfca_agent(const char *cmd, char *ret_buf, int ret_buf_size);
+    // send wfa_ca agent command
+    int wfa_ca_agent(const char *cmd, char *ret_buf, int ret_buf_size);
 
     // triggers channel selection on specific Agent
     int channel_selection(const char *al_mac, const char *ruid);

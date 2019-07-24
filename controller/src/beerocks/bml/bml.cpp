@@ -539,7 +539,7 @@ int bml_wfa_ca_controller(BML_CTX ctx, const char *command, int command_len, BML
     return (pBML->wfa_ca_controller(ctx, command, command_len, reply_cb));
 }
 
-int bml_wfca_agent(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf_size)
+int bml_wfa_ca_agent(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf_size)
 {
     // Validate input parameters
     if (!ctx || !cmd)
@@ -547,7 +547,7 @@ int bml_wfca_agent(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf_size
 
     bml_internal *pBML = (bml_internal *)ctx;
 
-    return (pBML->wfca_agent(cmd, ret_buf, ret_buf_size));
+    return (pBML->wfa_ca_agent(cmd, ret_buf, ret_buf_size));
 }
 
 int bml_channel_selection(BML_CTX ctx, const char *al_mac, const char *ruid)

@@ -21,6 +21,31 @@ public:
                           std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
                           ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx,
                           db &database, task_pool &tasks);
+
+private:
+    enum class eWfaCaStatus : uint8_t { RUNNING, INVALID, ERROR, COMPLETE };
+    static std::string wfa_ca_status_to_string(eWfaCaStatus status);
+
+    enum class eWfaCaCommand : uint8_t {
+        CA_GET_VERSION,
+        DEV_CONFIGURE_IE,
+        DEV_GET_FRAME_INFO,
+        DEVICE_GET_INFO,
+        DEV_GET_PARAMETER,
+        DEV_EXEC_ACTION,
+        DEV_RESET_DEFAULT,
+        DEV_SEND_1905,
+        DEV_SEND_FRAME,
+        DEV_SET_CONFIG,
+        WFA_CA_COMMAND_MAX
+    };
+    static eWfaCaCommand wfa_ca_command_from_string(std::string command);
+
+    static bool reply_invalid_error(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
+                                    eWfaCaStatus status, const std::string &description);
+
+    static bool reply(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
+                      const std::string &reply_string);
 };
 
 #endif
