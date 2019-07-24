@@ -647,8 +647,8 @@ class TlvF:
                 # add default value to init func
                 lines_cpp.append("m_%s = (%s*)m_%s__;" % ( param_name, param_type, self.MEMBER_BUFF_PTR))
                 if self.is_tlv_class and param_name == MetaData.TLV_TYPE_LENGTH:
-                        lines_cpp.append("if (!m_%s__) *m_%s = 0;" % (self.MEMBER_PARSE, param_name) )
-                if param_val_const != None:
+                    lines_cpp.append("if (!m_%s__) *m_%s = 0;" % (self.MEMBER_PARSE, param_name) )
+                elif param_val_const != None:
                     if (param_type_info.type == TypeInfo.ENUM or param_type_info.type == TypeInfo.ENUM_CLASS):
                         param_val_const = param_type + "::" + param_val_const
                     lines_cpp.append("if (!m_%s__) *m_%s = %s;" % ( self.MEMBER_PARSE, param_name, param_val_const) )
