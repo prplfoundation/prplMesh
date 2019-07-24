@@ -327,6 +327,7 @@ class TlvF:
         self.CODE_CLASS_PUBLIC_FUNC_INSERT          = "//~class_public_func_insert"
         self.CODE_CLASS_PRIVATE_FUNC_INSERT         = "//~class_private_func_insert"
         self.CODE_CLASS_INIT_FUNC_INSERT            = "//~class_init_func_insert"
+        self.CODE_CLASS_INIT_FUNC_SWAP_INSERT            = "//~class_init_func_swap_insert"
         self.CODE_CLASS_SWAP_FUNC_INSERT            = "//~class_swap_func_insert"
         self.CODE_CLASS_SIZE_FUNC_INSERT            = "//~class_size_func_insert"
         self.CODE_ENUM_INSERT                       = "//~enum_insert"
@@ -652,13 +653,6 @@ class TlvF:
                     if (param_type_info.type == TypeInfo.ENUM or param_type_info.type == TypeInfo.ENUM_CLASS):
                         param_val_const = param_type + "::" + param_val_const
                     lines_cpp.append("if (!m_%s__) *m_%s = %s;" % ( self.MEMBER_PARSE, param_name, param_val_const) )
-                    if self.is_tlv_class and param_name == MetaData.TLV_TYPE_TYPE:
-                        lines_cpp.append( "else {" )
-                        lines_cpp.append( "%sif (*m_type != %s) {" % ( self.getIndentation(2), param_val_const ) )
-                        lines_cpp.append( '%sTLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(%s) << ", received value: " << int(*m_type);' %  (self.getIndentation(2), param_val_const) )
-                        lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
-                        lines_cpp.append( "%s}" % self.getIndentation(1) )
-                        lines_cpp.append( "}" )
                 elif param_val != None: lines_cpp.append("if (!m_%s__) *m_%s = %s;" % ( self.MEMBER_PARSE, param_name, param_val) )
                 elif param_length_var:  lines_cpp.append("if (!m_%s__) *m_%s = 0;" % ( self.MEMBER_PARSE, param_name) )
                 lines_cpp.append( "m_%s__ += sizeof(%s) * 1;" % ( self.MEMBER_BUFF_PTR, param_type) )
@@ -668,10 +662,17 @@ class TlvF:
                 if TypeInfo(param_type).type == TypeInfo.STRUCT:
                         lines_cpp.append("if (!m_%s__) { m_%s->struct_init(); }" % (self.MEMBER_PARSE, param_name))
                 self.insertLineCpp(obj_meta.name, self.CODE_CLASS_INIT_FUNC_INSERT, lines_cpp)
-
-                if TypeInfo(param_type).type == TypeInfo.STRUCT:
-                        lines_cpp.append("if (!m_%s__) { m_%s->struct_init(); }" % (self.MEMBER_PARSE, param_name))
-
+                
+                # Add type checking
+                lines_cpp = []
+                if self.is_tlv_class and param_name == MetaData.TLV_TYPE_TYPE:
+                    lines_cpp.append("if (m_%s__) {" % (self.MEMBER_PARSE))
+                    lines_cpp.append( "%sif (*m_type != %s) {" % ( self.getIndentation(1), param_val_const ) )
+                    lines_cpp.append( '%sTLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(%s) << ", received value: " << int(*m_type);' %  (self.getIndentation(2), param_val_const) )
+                    lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
+                    lines_cpp.append( "%s}" % self.getIndentation(1) )
+                    lines_cpp.append( "}" )
+                    self.insertLineCpp(obj_meta.name, self.CODE_CLASS_INIT_FUNC_SWAP_INSERT, lines_cpp)
 
                 lines_h   = []
                 lines_cpp = []
@@ -1277,6 +1278,7 @@ class TlvF:
         self.insertLineCpp(insert_name, insert_marker, "%sreturn false;" % self.getIndentation(2))
         self.insertLineCpp(insert_name, insert_marker, "%s}" % self.getIndentation(1) )
         self.insertLineCpp(insert_name, insert_marker, "%sif (m_%s__ && m_%s__) { class_swap(); }" % (self.getIndentation(1), self.MEMBER_PARSE, self.MEMBER_SWAP))
+        self.insertLineCpp(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(1), self.CODE_CLASS_INIT_FUNC_SWAP_INSERT, name))
         self.insertLineCpp(insert_name, insert_marker, "%sreturn true;" % (self.getIndentation(1)))
         self.insertLineCpp(insert_name, insert_marker, "}")
         self.insertLineCpp(insert_name, insert_marker, "")
