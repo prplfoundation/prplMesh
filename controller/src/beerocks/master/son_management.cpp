@@ -9,6 +9,7 @@
 #include "son_management.h"
 #include "son_actions.h"
 #include "tasks/bml_task.h"
+#include "wfa_ca.h"
 #ifdef BEEROCKS_RDKB
 #include "tasks/rdkb/rdkb_wlan_task.h"
 #endif
@@ -1752,6 +1753,11 @@ void son_management::handle_bml_message(
         }
 
         son_actions::send_cmdu_to_agent(son_slave_sd, cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_BML_WFA_CA_CONTROLLER_REQUEST: {
+
+        wfa_ca::handle_wfa_ca_message(sd, beerocks_header, cmdu_rx, cmdu_tx, database, tasks);
         break;
     }
     default: {

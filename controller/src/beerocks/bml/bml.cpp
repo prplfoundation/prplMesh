@@ -527,15 +527,16 @@ int bml_get_slave_restricted_channels(BML_CTX ctx, uint8_t *restricted_channels,
     return (pBML->get_restricted_channels(restricted_channels, mac, 0));
 }
 
-int bml_wfca_controller(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf_size)
+int bml_wfa_ca_controller(BML_CTX ctx, const char *command, int command_len, BML_WFA_CA_CB reply_cb)
 {
     // Validate input parameters
-    if (!ctx || !cmd)
+    if (!ctx || !command) {
         return (-BML_RET_INVALID_ARGS);
+    }
 
     bml_internal *pBML = (bml_internal *)ctx;
 
-    return (pBML->wfca_controller(cmd, ret_buf, ret_buf_size));
+    return (pBML->wfa_ca_controller(ctx, command, command_len, reply_cb));
 }
 
 int bml_wfca_agent(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf_size)

@@ -144,8 +144,9 @@ public:
     int get_restricted_channels(uint8_t *restricted_channels, const std::string mac,
                                 uint8_t is_global);
 
-    // send wfca controller command
-    int wfca_controller(const char *cmd, char *ret_buf, int ret_buf_size);
+    // send wfa_ca controller command
+    int wfa_ca_controller(BML_CTX ctx, const char *command, int command_len,
+                          BML_WFA_CA_CB reply_cb);
 
     // send wfca agent command
     int wfca_agent(const char *cmd, char *ret_buf, int ret_buf_size);
@@ -232,6 +233,7 @@ private:
     BML_NW_MAP_QUERY_CB m_cbNetMapUpdate = nullptr;
     BML_STATS_UPDATE_CB m_cbStatsUpdate  = nullptr;
     BML_EVENT_CB m_cbEvent               = nullptr;
+    BML_WFA_CA_CB m_cbWfaCaReply         = nullptr;
 
     beerocks_message::sDeviceInfo *m_device_info                 = nullptr;
     beerocks_message::sWifiCredentials *m_wifi_credentials       = nullptr;
@@ -241,6 +243,7 @@ private:
     BML_VAP_INFO *m_vaps                                         = nullptr;
     uint8_t *m_pvaps_list_size                                   = nullptr;
     uint16_t id                                                  = 0;
+
     static bool s_fExtLogContext;
 };
 
