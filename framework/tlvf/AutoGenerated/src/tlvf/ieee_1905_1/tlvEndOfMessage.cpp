@@ -63,7 +63,6 @@ bool tlvEndOfMessage::init()
     m_buff_ptr__ += sizeof(eTlvType) * 1;
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!m_parse__) *m_length = 0x0;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
