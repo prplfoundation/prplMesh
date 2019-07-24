@@ -222,12 +222,6 @@ bool tlvTestVarList::init()
     }
     m_type = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_type = 0x1;
-    else {
-            if (*m_type != 0x1) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(0x1) << ", received value: " << int(*m_type);
-            return false;
-        }
-    }
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     m_var0 = (uint16_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
@@ -268,6 +262,12 @@ bool tlvTestVarList::init()
         return false;
     }
     if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) {
+        if (*m_type != 0x1) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(0x1) << ", received value: " << int(*m_type);
+            return false;
+        }
+    }
     return true;
 }
 

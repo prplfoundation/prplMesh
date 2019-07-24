@@ -78,12 +78,6 @@ bool tlvPushButtonJoinNotification::init()
     }
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_PUSH_BUTTON_JOIN_NOTIFICATION;
-    else {
-            if (*m_type != eTlvType::TLV_PUSH_BUTTON_JOIN_NOTIFICATION) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_PUSH_BUTTON_JOIN_NOTIFICATION) << ", received value: " << int(*m_type);
-            return false;
-        }
-    }
     m_buff_ptr__ += sizeof(eTlvType) * 1;
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
@@ -108,6 +102,12 @@ bool tlvPushButtonJoinNotification::init()
         return false;
     }
     if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) {
+        if (*m_type != eTlvType::TLV_PUSH_BUTTON_JOIN_NOTIFICATION) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_PUSH_BUTTON_JOIN_NOTIFICATION) << ", received value: " << int(*m_type);
+            return false;
+        }
+    }
     return true;
 }
 

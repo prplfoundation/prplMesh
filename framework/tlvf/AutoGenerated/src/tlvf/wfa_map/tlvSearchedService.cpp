@@ -96,12 +96,6 @@ bool tlvSearchedService::init()
     }
     m_type = (eTlvTypeMap*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_SEARCHED_SERVICE;
-    else {
-            if (*m_type != eTlvTypeMap::TLV_SEARCHED_SERVICE) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_SEARCHED_SERVICE) << ", received value: " << int(*m_type);
-            return false;
-        }
-    }
     m_buff_ptr__ += sizeof(eTlvTypeMap) * 1;
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
@@ -119,6 +113,12 @@ bool tlvSearchedService::init()
         return false;
     }
     if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) {
+        if (*m_type != eTlvTypeMap::TLV_SEARCHED_SERVICE) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_SEARCHED_SERVICE) << ", received value: " << int(*m_type);
+            return false;
+        }
+    }
     return true;
 }
 
