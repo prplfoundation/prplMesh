@@ -47,7 +47,7 @@ usage() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvd:g:r:' --long help,verbose,rm,delay:,gateway:,repeater: -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvd:g:r:' --long help,verbose,rm,gateway-only,delay:,gateway:,repeater: -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -61,21 +61,26 @@ main() {
             -g | --gateway)       GW_NAME="$2"; shift; shift ;;
             -r | --repeater)      REPEATER_NAME="$2"; shift; shift ;;
             --rm)                 REMOVE=true; shift ;;
+            --gateway-only)       GATEWAY_ONLY=true; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
     done
 
-    status "Starting GW+Repeater test"
+    [ -z $GATEWAY_ONLY ] && status "Starting GW+Repeater test" || status "Starting GW only test"
+
     dbg REMOVE=$REMOVE
     dbg GW_NAME=$GW_NAME
-    dbg REPEATER_NAME=$REPEATER_NAME
+    dbg GATEWAY_ONLY=$GATEWAY_ONLY
+    [ -z $GATEWAY_ONLY ] && dbg REPEATER_NAME=$REPEATER_NAME
     dbg DELAY=$DELAY
 
     status "Start GW (Controller + local Agent)"
     ${scriptdir}/../run.sh start-controller-agent -d -n ${GW_NAME}
-    status "Start Repeater (Remote Agent)"
-    ${scriptdir}/../run.sh start-agent -d -n ${REPEATER_NAME}
+    [ -z $GATEWAY_ONLY ] && {
+        status "Start Repeater (Remote Agent)"
+        ${scriptdir}/../run.sh start-agent -d -n ${REPEATER_NAME}
+    }
     
     status "Delay ${DELAY} seconds..."
     sleep ${DELAY}
@@ -83,8 +88,10 @@ main() {
     error=0
     report "GW operational" \
         ${scriptdir}/../test.sh ${OPT} -n ${GW_NAME}
-    report "Repeater operational" \
-        ${scriptdir}/../test.sh ${OPT} -n ${REPEATER_NAME}
+    [ -z $GATEWAY_ONLY ] && {
+        report "Repeater operational" \
+            ${scriptdir}/../test.sh ${OPT} -n ${REPEATER_NAME}
+    }
     [ "$REMOVE" = "true" ] && {
         status "Deleting containers ${GW_NAME}, ${REPEATER_NAME}"
         docker rm -f ${GW_NAME} ${REPEATER_NAME} >/dev/null 2>&1
