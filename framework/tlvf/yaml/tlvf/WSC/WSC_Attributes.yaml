@@ -354,3 +354,15 @@ sWscAttrEncryptedSettings:
   network_key_attr: sWscAttrNetworkKey
   bssid_attr: sWscAttrBssid
   key_wrap_auth_attr: sWscAttrKeyWrapAuthenticator
+  
+sWscAttrAuthenticator:
+  _type: struct
+  attribute_type:
+    _type: eWscAttributes
+    _value: ATTR_AUTHENTICATOR
+  data_length:
+    _type: uint16_t
+    _value: WSC_AUTHENTICATOR_LENGTH
+  data:
+    _type: char
+    _length: [ WSC_AUTHENTICATOR_LENGTH ]

@@ -36,6 +36,7 @@ enum eWscLengths: uint16_t {
     WSC_MAX_NETWORK_KEY_LENGTH = 0x40,
     WSC_PUBLIC_KEY_LENGTH = 0xc0,
     WSC_KEY_WRAP_AUTH_LENGTH = 0x8,
+    WSC_AUTHENTICATOR_LENGTH = 0x8,
 };
 
 

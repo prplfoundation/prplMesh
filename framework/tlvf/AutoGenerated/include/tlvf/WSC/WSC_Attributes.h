@@ -471,6 +471,20 @@ typedef struct sWscAttrEncryptedSettings {
     }
 } __attribute__((packed)) sWscAttrEncryptedSettings;
 
+typedef struct sWscAttrAuthenticator {
+    eWscAttributes attribute_type;
+    uint16_t data_length;
+    char data[WSC_AUTHENTICATOR_LENGTH];
+    void struct_swap(){
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
+    }
+    void struct_init(){
+        attribute_type = ATTR_AUTHENTICATOR;
+        data_length = WSC_AUTHENTICATOR_LENGTH;
+    }
+} __attribute__((packed)) sWscAttrAuthenticator;
+
 
 }; // close namespace: WSC
 
