@@ -2,10 +2,10 @@
 ---
 _include: tlvf/WSC/WSC_Attributes.h
 _namespace: ieee1905_1
-_is_tlv_class : True
 
 tlvWscM2:
   _type: class
+  _is_tlv_class : True
   type:
     _type: eTlvType
     _value_const: TLV_WSC

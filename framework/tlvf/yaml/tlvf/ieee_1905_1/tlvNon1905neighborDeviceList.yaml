@@ -2,9 +2,9 @@
 ---
 _namespace: ieee1905_1
 
-_is_tlv_class: True
 tlvNon1905neighborDeviceList:
   _type: class
+  _is_tlv_class: True
   type:
     _type: eTlvType
     _value_const: TLV_NON_1905_NEIGHBOR_DEVICE_LIST

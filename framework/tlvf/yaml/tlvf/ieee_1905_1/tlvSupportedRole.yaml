@@ -1,10 +1,10 @@
 #
 ---
 _namespace: ieee1905_1
-_is_tlv_class : True
 
 tlvSupportedRole:
   _type: class  
+  _is_tlv_class : True
   type:
     _type: eTlvType
     _value_const: TLV_SUPPORTED_ROLE

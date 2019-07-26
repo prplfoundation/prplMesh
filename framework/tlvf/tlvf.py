@@ -197,6 +197,7 @@ class MetaData:
         self.length_var_tlv = False
         self.comment = None
         self.optional = False
+        self.is_tlv_class = False
         self.constractor_h_lines = []
         self.constractor_cpp_lines = []
         self.alloc_list = []
@@ -222,6 +223,8 @@ class MetaData:
                             self.error = self.errPrefix() + "bad type %s in dict=%s" % (value, str(dict))
                         else:
                             self.type = value
+                elif key == MetaData.DECELERATION_IS_TLV_CLASS:
+                    self.is_tlv_class = True
                 elif key == MetaData.KEY_ENUM_STORAGE:
                     self.enum_storage = value
                     self.type_info = TypeInfo(value)
@@ -696,7 +699,7 @@ class TlvF:
                 else:
                     # add default value to init func
                     lines_cpp.append("m_%s = (%s*)m_%s__;" % ( param_name, param_type, self.MEMBER_BUFF_PTR))
-                    if self.is_tlv_class and param_name == MetaData.TLV_TYPE_LENGTH:
+                    if obj_meta.is_tlv_class and param_name == MetaData.TLV_TYPE_LENGTH:
                         lines_cpp.append("if (!m_%s__) *m_%s = 0;" % (self.MEMBER_PARSE, param_name) )
                     elif param_val_const != None:
                         if (param_type_info.type == TypeInfo.ENUM or param_type_info.type == TypeInfo.ENUM_CLASS):
@@ -705,7 +708,7 @@ class TlvF:
                     elif param_val != None: lines_cpp.append("if (!m_%s__) *m_%s = %s;" % ( self.MEMBER_PARSE, param_name, param_val) )
                     elif param_length_var:  lines_cpp.append("if (!m_%s__) *m_%s = 0;" % ( self.MEMBER_PARSE, param_name) )
                     lines_cpp.append( "m_%s__ += sizeof(%s) * 1;" % ( self.MEMBER_BUFF_PTR, param_type) )
-                    if self.is_tlv_class and param_name != MetaData.TLV_TYPE_TYPE and param_name != MetaData.TLV_TYPE_LENGTH and obj_meta.fname == obj_meta.name:
+                    if obj_meta.is_tlv_class and param_name != MetaData.TLV_TYPE_TYPE and param_name != MetaData.TLV_TYPE_LENGTH:
                         lines_cpp.append( "if(m_length && !m_%s__){ (*m_length) += sizeof(%s); }" % ( self.MEMBER_PARSE, param_type) )
 
                     if TypeInfo(param_type).type == TypeInfo.STRUCT:
@@ -714,7 +717,7 @@ class TlvF:
                     
                     # Add type checking
                     lines_cpp = []
-                    if self.is_tlv_class and param_name == MetaData.TLV_TYPE_TYPE:
+                    if obj_meta.is_tlv_class and param_name == MetaData.TLV_TYPE_TYPE:
                         lines_cpp.append("if (m_%s__) {" % (self.MEMBER_PARSE))
                         lines_cpp.append( "%sif (*m_type != %s) {" % ( self.getIndentation(1), param_val_const ) )
                         lines_cpp.append( '%sTLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(%s) << ", received value: " << int(*m_type);' %  (self.getIndentation(2), param_val_const) )
@@ -740,7 +743,7 @@ class TlvF:
                     lines_h.extend(param_comment_line)
 
                     # add function to return reference
-                    const = "const " if param_val_const != None or (self.is_tlv_class and param_name == MetaData.TLV_TYPE_LENGTH) else ""
+                    const = "const " if param_val_const != None or obj_meta.is_tlv_class and param_name == MetaData.TLV_TYPE_LENGTH else ""
                     lines_h.append( "%s%s& %s();" % (const, param_type, param_name) ) #const
                     lines_cpp.append( "%s%s& %s::%s() {" % (const, param_type_full, obj_meta.name, param_name) )
                     lines_cpp.append( "%sreturn (%s%s&)(*m_%s);" % (self.getIndentation(1), const, param_type, param_name) )
@@ -772,7 +775,7 @@ class TlvF:
 
             # add default value to init func
             lines_cpp.append("m_%s = (%s*)m_%s__;" % (param_name, param_type, self.MEMBER_BUFF_PTR) )
-            if is_dynamic_len and self.is_tlv_class:
+            if is_dynamic_len and obj_meta.is_tlv_class:
                 lines_cpp.append("if (m_length && m_%s__) {" % self.MEMBER_PARSE)
                 lines_cpp.append("%ssize_t len = *m_length;" % (self.getIndentation(1)))
                 lines_cpp.append("%sif (m_%s__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }" % (self.getIndentation(1), self.MEMBER_SWAP))
@@ -823,7 +826,7 @@ class TlvF:
             if is_int_len or is_const_len:
                 lines_cpp.append( "m_%s__ += (sizeof(%s) * %s);" % (self.MEMBER_BUFF_PTR, param_type, param_length) )
                 lines_cpp.append("m_%s_idx__  = %s;" % (param_name, param_length))
-                if self.is_tlv_class:
+                if obj_meta.is_tlv_class:
                     lines_cpp.append( "if(m_length){ (*m_length) += (sizeof(%s) * %s); }" % ( param_type, param_length) )
                 if TypeInfo(param_type).type == TypeInfo.STRUCT:
                         lines_cpp.append("%sif (!m_%s__) { " % (self.getIndentation(1), self.MEMBER_PARSE))
@@ -1023,7 +1026,7 @@ class TlvF:
             else:
                 lines_cpp.append( "%sm_%s_ptr = ptr;" % (self.getIndentation(1), param_name ))
             lines_cpp.append( "%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR) )
-            if self.is_tlv_class:
+            if obj_meta.is_tlv_class:
                 lines_cpp.append( "%sif(!m_parse__ && m_length){ (*m_length) += len; }" % (self.getIndentation(1)))
             lines_cpp.append( "%sm_%s__ = false;" % (self.getIndentation(1), self.MEMBER_LOCK_ALLOCATION))
             lines_cpp.append( "%sreturn true;" % (self.getIndentation(1)) )
@@ -1051,7 +1054,7 @@ class TlvF:
             if is_var_len:
                 lines_cpp.append( "%s*m_%s += count;" % (self.getIndentation(1), param_length) )
             lines_cpp.append( "%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR) )
-            if self.is_tlv_class and obj_meta.fname == obj_meta.name:
+            if obj_meta.is_tlv_class:
                 lines_cpp.append( "%sif(m_length){ (*m_length) += len; }" % (self.getIndentation(1)))
             if TypeInfo(param_type).type == TypeInfo.STRUCT:
                 lines_cpp.append("%sif (!m_%s__) { " % (self.getIndentation(1), self.MEMBER_PARSE))

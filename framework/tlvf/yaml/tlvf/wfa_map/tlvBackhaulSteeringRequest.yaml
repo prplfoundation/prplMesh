@@ -1,9 +1,9 @@
 #
 ---
 _namespace: wfa_map
-_is_tlv_class : True
 
 tlvBackhaulSteeringRequest:
+  _is_tlv_class : True
   _type: class
   type:
     _type: eTlvTypeMap
