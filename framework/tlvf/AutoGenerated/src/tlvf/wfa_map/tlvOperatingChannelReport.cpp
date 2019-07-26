@@ -65,9 +65,9 @@ bool tlvOperatingChannelReport::alloc_operating_classes_list(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_operating_classes_list;
+    uint8_t *dst = (uint8_t *)m_operating_classes_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_operating_classes_list;
-        uint8_t *dst = (uint8_t *)m_operating_classes_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }

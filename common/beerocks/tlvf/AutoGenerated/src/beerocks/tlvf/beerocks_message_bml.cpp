@@ -181,9 +181,9 @@ bool cACTION_BML_NW_MAP_RESPONSE::alloc_buffer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_buffer;
+    uint8_t *dst = (uint8_t *)m_buffer + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_buffer;
-        uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -295,9 +295,9 @@ bool cACTION_BML_NW_MAP_UPDATE::alloc_buffer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_buffer;
+    uint8_t *dst = (uint8_t *)m_buffer + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_buffer;
-        uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -409,9 +409,9 @@ bool cACTION_BML_STATS_UPDATE::alloc_buffer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_buffer;
+    uint8_t *dst = (uint8_t *)m_buffer + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_buffer;
-        uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -519,9 +519,9 @@ bool cACTION_BML_EVENTS_UPDATE::alloc_buffer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_buffer;
+    uint8_t *dst = (uint8_t *)m_buffer + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_buffer;
-        uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -2548,9 +2548,9 @@ bool cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::alloc_vap_list(size_t count) 
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_vap_list;
+    uint8_t *dst = (uint8_t *)m_vap_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_vap_list;
-        uint8_t *dst = (uint8_t *)m_vap_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -2686,9 +2686,9 @@ bool cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::alloc_vap_list(size_t count)
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_vap_list;
+    uint8_t *dst = (uint8_t *)m_vap_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_vap_list;
-        uint8_t *dst = (uint8_t *)m_vap_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -3371,9 +3371,9 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::alloc_buffer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_buffer;
+    uint8_t *dst = (uint8_t *)m_buffer + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_buffer;
-        uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }

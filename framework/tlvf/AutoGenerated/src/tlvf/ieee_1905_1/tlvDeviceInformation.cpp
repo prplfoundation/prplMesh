@@ -65,9 +65,9 @@ bool tlvDeviceInformation::alloc_info(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_info;
+    uint8_t *dst = (uint8_t *)m_info + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_info;
-        uint8_t *dst = (uint8_t *)m_info + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }

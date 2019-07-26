@@ -288,9 +288,9 @@ bool cACTION_CLI_RESPONSE_STR::alloc_buffer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_buffer;
+    uint8_t *dst = (uint8_t *)m_buffer + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_buffer;
-        uint8_t *dst = (uint8_t *)m_buffer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }

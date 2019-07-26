@@ -2016,9 +2016,9 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_sta_stats;
+    uint8_t *dst = (uint8_t *)m_sta_stats + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_sta_stats;
-        uint8_t *dst = (uint8_t *)m_sta_stats + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }

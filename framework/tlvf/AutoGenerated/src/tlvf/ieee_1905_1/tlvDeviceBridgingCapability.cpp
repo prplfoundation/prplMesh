@@ -63,13 +63,13 @@ std::shared_ptr<cMacList> tlvDeviceBridgingCapability::create_bridging_tuples_li
     }
     m_lock_order_counter__ = 0;
     m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_bridging_tuples_list;
+    uint8_t *dst = (uint8_t *)m_bridging_tuples_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_bridging_tuples_list;
-        uint8_t *dst = (uint8_t *)m_bridging_tuples_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
-    return std::make_shared<cMacList>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
+    return std::make_shared<cMacList>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
 }
 
 bool tlvDeviceBridgingCapability::add_bridging_tuples_list(std::shared_ptr<cMacList> ptr) {
@@ -81,11 +81,11 @@ bool tlvDeviceBridgingCapability::add_bridging_tuples_list(std::shared_ptr<cMacL
         TLVF_LOG(ERROR) << "No call to create_bridging_tuples_list was called before add_bridging_tuples_list";
         return false;
     }
-    if (ptr->getStartBuffPtr() != getBuffPtr()) {
+    if (ptr->getStartBuffPtr() != (uint8_t *)m_bridging_tuples_list) {
         TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
         return false;
     }
-    if (ptr->getLen() > getBuffRemainingBytes()) {;
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return false;
     }
@@ -195,9 +195,9 @@ bool cMacList::alloc_mac_list(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_mac_list;
+    uint8_t *dst = (uint8_t *)m_mac_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_mac_list;
-        uint8_t *dst = (uint8_t *)m_mac_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }

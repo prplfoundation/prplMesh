@@ -67,13 +67,13 @@ std::shared_ptr<cPreferenceOperatingClasses> tlvChannelPreference::create_operat
     }
     m_lock_order_counter__ = 0;
     m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_operating_classes_list;
+    uint8_t *dst = (uint8_t *)m_operating_classes_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_operating_classes_list;
-        uint8_t *dst = (uint8_t *)m_operating_classes_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
-    return std::make_shared<cPreferenceOperatingClasses>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
+    return std::make_shared<cPreferenceOperatingClasses>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
 }
 
 bool tlvChannelPreference::add_operating_classes_list(std::shared_ptr<cPreferenceOperatingClasses> ptr) {
@@ -85,11 +85,11 @@ bool tlvChannelPreference::add_operating_classes_list(std::shared_ptr<cPreferenc
         TLVF_LOG(ERROR) << "No call to create_operating_classes_list was called before add_operating_classes_list";
         return false;
     }
-    if (ptr->getStartBuffPtr() != getBuffPtr()) {
+    if (ptr->getStartBuffPtr() != (uint8_t *)m_operating_classes_list) {
         TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
         return false;
     }
-    if (ptr->getLen() > getBuffRemainingBytes()) {;
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return false;
     }
@@ -209,9 +209,9 @@ bool cPreferenceOperatingClasses::alloc_channel_list(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_channel_list;
+    uint8_t *dst = (uint8_t *)m_channel_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_channel_list;
-        uint8_t *dst = (uint8_t *)m_channel_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
