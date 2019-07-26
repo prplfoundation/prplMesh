@@ -26,6 +26,11 @@
 #include "tlvf/WSC/eWscValues16.h"
 #include "tlvf/WSC/eWscAuth.h"
 #include "tlvf/WSC/eWscEncr.h"
+#include <string.h>
+#include <memory>
+#include <tlvf/BaseClass.h>
+#include <tuple>
+#include <tlvf/tlvfutils.h>
 #include "tlvf/WSC/eWscLengths.h"
 #include "tlvf/WSC/eWscVendorId.h"
 #include "tlvf/WSC/eWscVendorExt.h"
@@ -436,41 +441,6 @@ typedef struct sWscAttrBssid {
     }
 } __attribute__((packed)) sWscAttrBssid;
 
-typedef struct sWscAttrEncryptedSettings {
-    eWscAttributes attribute_type;
-    //TODO the value of the data_length should be updated automatically
-    //based on the inner tlvs attributes lengths.
-    //This will be added after implementing the support in multiple dynamic lists.
-    //This attribute's type will be changed into class (instead of struct) and that way 
-    //it can contain _length_var that will be updated automatically.
-    uint16_t data_length;
-    sWscAttrSsid ssid_attr;
-    sWscAttrAuthenticationType authentication_type_attr;
-    sWscAttrEncryptionType encryption_type_attr;
-    sWscAttrNetworkKey network_key_attr;
-    sWscAttrBssid bssid_attr;
-    sWscAttrKeyWrapAuthenticator key_wrap_auth_attr;
-    void struct_swap(){
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
-        ssid_attr.struct_swap();
-        authentication_type_attr.struct_swap();
-        encryption_type_attr.struct_swap();
-        network_key_attr.struct_swap();
-        bssid_attr.struct_swap();
-        key_wrap_auth_attr.struct_swap();
-    }
-    void struct_init(){
-        attribute_type = ATTR_ENCR_SETTINGS;
-        ssid_attr.struct_init();
-        authentication_type_attr.struct_init();
-        encryption_type_attr.struct_init();
-        network_key_attr.struct_init();
-        bssid_attr.struct_init();
-        key_wrap_auth_attr.struct_init();
-    }
-} __attribute__((packed)) sWscAttrEncryptedSettings;
-
 typedef struct sWscAttrAuthenticator {
     eWscAttributes attribute_type;
     uint16_t data_length;
@@ -485,6 +455,46 @@ typedef struct sWscAttrAuthenticator {
     }
 } __attribute__((packed)) sWscAttrAuthenticator;
 
+
+class cWscAttrEncryptedSettings : public BaseClass
+{
+    public:
+        cWscAttrEncryptedSettings(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cWscAttrEncryptedSettings(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cWscAttrEncryptedSettings();
+
+        const eWscAttributes& type();
+        const uint16_t& length();
+        eWscAttributes& ssid_type();
+        uint16_t& ssid_length();
+        char* ssid(size_t length = 0);
+        bool set_ssid(std::string& str);
+        bool set_ssid(const std::string& str);
+        bool set_ssid(char buffer[], size_t size);
+        bool alloc_ssid(size_t count = 1);
+        sWscAttrAuthenticationType& authentication_type_attr();
+        sWscAttrEncryptionType& encryption_type_attr();
+        sWscAttrNetworkKey& network_key_attr();
+        sWscAttrBssid& bssid_attr();
+        sWscAttrKeyWrapAuthenticator& key_wrap_auth_attr();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        eWscAttributes* m_ssid_type = nullptr;
+        uint16_t* m_ssid_length = nullptr;
+        char* m_ssid = nullptr;
+        size_t m_ssid_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+        sWscAttrAuthenticationType* m_authentication_type_attr = nullptr;
+        sWscAttrEncryptionType* m_encryption_type_attr = nullptr;
+        sWscAttrNetworkKey* m_network_key_attr = nullptr;
+        sWscAttrBssid* m_bssid_attr = nullptr;
+        sWscAttrKeyWrapAuthenticator* m_key_wrap_auth_attr = nullptr;
+};
 
 }; // close namespace: WSC
 

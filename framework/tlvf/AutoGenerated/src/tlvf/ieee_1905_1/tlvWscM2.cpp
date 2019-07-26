@@ -149,7 +149,8 @@ bool tlvWscM2::alloc_manufacturer(size_t count) {
     m_device_password_id_attr = (WSC::sWscAttrDevicePasswordID *)((uint8_t *)(m_device_password_id_attr) + len);
     m_os_version_attr = (WSC::sWscAttrOsVersion *)((uint8_t *)(m_os_version_attr) + len);
     m_vendor_extensions_attr = (WSC::sWscAttrVendorExtension *)((uint8_t *)(m_vendor_extensions_attr) + len);
-    m_encrypted_settings_attr = (WSC::sWscAttrEncryptedSettings *)((uint8_t *)(m_encrypted_settings_attr) + len);
+    m_encrypted_settings = (WSC::cWscAttrEncryptedSettings *)((uint8_t *)(m_encrypted_settings) + len);
+    m_authenticator = (WSC::sWscAttrAuthenticator *)((uint8_t *)(m_authenticator) + len);
     m_manufacturer_idx__ += count;
     *m_manufacturer_length += count;
     m_buff_ptr__ += len;
@@ -230,7 +231,8 @@ bool tlvWscM2::alloc_model_name(size_t count) {
     m_device_password_id_attr = (WSC::sWscAttrDevicePasswordID *)((uint8_t *)(m_device_password_id_attr) + len);
     m_os_version_attr = (WSC::sWscAttrOsVersion *)((uint8_t *)(m_os_version_attr) + len);
     m_vendor_extensions_attr = (WSC::sWscAttrVendorExtension *)((uint8_t *)(m_vendor_extensions_attr) + len);
-    m_encrypted_settings_attr = (WSC::sWscAttrEncryptedSettings *)((uint8_t *)(m_encrypted_settings_attr) + len);
+    m_encrypted_settings = (WSC::cWscAttrEncryptedSettings *)((uint8_t *)(m_encrypted_settings) + len);
+    m_authenticator = (WSC::sWscAttrAuthenticator *)((uint8_t *)(m_authenticator) + len);
     m_model_name_idx__ += count;
     *m_model_name_length += count;
     m_buff_ptr__ += len;
@@ -308,7 +310,8 @@ bool tlvWscM2::alloc_model_number(size_t count) {
     m_device_password_id_attr = (WSC::sWscAttrDevicePasswordID *)((uint8_t *)(m_device_password_id_attr) + len);
     m_os_version_attr = (WSC::sWscAttrOsVersion *)((uint8_t *)(m_os_version_attr) + len);
     m_vendor_extensions_attr = (WSC::sWscAttrVendorExtension *)((uint8_t *)(m_vendor_extensions_attr) + len);
-    m_encrypted_settings_attr = (WSC::sWscAttrEncryptedSettings *)((uint8_t *)(m_encrypted_settings_attr) + len);
+    m_encrypted_settings = (WSC::cWscAttrEncryptedSettings *)((uint8_t *)(m_encrypted_settings) + len);
+    m_authenticator = (WSC::sWscAttrAuthenticator *)((uint8_t *)(m_authenticator) + len);
     m_model_number_idx__ += count;
     *m_model_number_length += count;
     m_buff_ptr__ += len;
@@ -383,7 +386,8 @@ bool tlvWscM2::alloc_serial_number(size_t count) {
     m_device_password_id_attr = (WSC::sWscAttrDevicePasswordID *)((uint8_t *)(m_device_password_id_attr) + len);
     m_os_version_attr = (WSC::sWscAttrOsVersion *)((uint8_t *)(m_os_version_attr) + len);
     m_vendor_extensions_attr = (WSC::sWscAttrVendorExtension *)((uint8_t *)(m_vendor_extensions_attr) + len);
-    m_encrypted_settings_attr = (WSC::sWscAttrEncryptedSettings *)((uint8_t *)(m_encrypted_settings_attr) + len);
+    m_encrypted_settings = (WSC::cWscAttrEncryptedSettings *)((uint8_t *)(m_encrypted_settings) + len);
+    m_authenticator = (WSC::sWscAttrAuthenticator *)((uint8_t *)(m_authenticator) + len);
     m_serial_number_idx__ += count;
     *m_serial_number_length += count;
     m_buff_ptr__ += len;
@@ -419,8 +423,56 @@ WSC::sWscAttrVendorExtension& tlvWscM2::vendor_extensions_attr() {
     return (WSC::sWscAttrVendorExtension&)(*m_vendor_extensions_attr);
 }
 
-WSC::sWscAttrEncryptedSettings& tlvWscM2::encrypted_settings_attr() {
-    return (WSC::sWscAttrEncryptedSettings&)(*m_encrypted_settings_attr);
+std::shared_ptr<WSC::cWscAttrEncryptedSettings> tlvWscM2::create_encrypted_settings() {
+    if (m_lock_order_counter__ > 4) {
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list encrypted_settings, abort!";
+        return nullptr;
+    }
+    size_t len = WSC::cWscAttrEncryptedSettings::get_initial_size();
+    if (m_lock_allocation__ || getBuffRemainingBytes() < len) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return nullptr;
+    }
+    m_lock_order_counter__ = 4;
+    m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_encrypted_settings;
+    uint8_t *dst = (uint8_t *)m_encrypted_settings + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_authenticator = (WSC::sWscAttrAuthenticator *)((uint8_t *)(m_authenticator) + len);
+    return std::make_shared<WSC::cWscAttrEncryptedSettings>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
+}
+
+bool tlvWscM2::add_encrypted_settings(std::shared_ptr<WSC::cWscAttrEncryptedSettings> ptr) {
+    if (ptr == nullptr) {
+        TLVF_LOG(ERROR) << "Received entry is nullptr";
+        return false;
+    }
+    if (m_lock_allocation__ == false) {
+        TLVF_LOG(ERROR) << "No call to create_encrypted_settings was called before add_encrypted_settings";
+        return false;
+    }
+    if (ptr->getStartBuffPtr() != (uint8_t *)m_encrypted_settings) {
+        TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
+        return false;
+    }
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return false;
+    }
+    size_t len = ptr->getLen();
+    m_authenticator = (WSC::sWscAttrAuthenticator *)((uint8_t *)(m_authenticator) + len - ptr->get_initial_size());
+    m_encrypted_settings_ptr = ptr;
+    m_buff_ptr__ += len;
+    if(!m_parse__ && m_length){ (*m_length) += len; }
+    m_lock_allocation__ = false;
+    return true;
+}
+
+WSC::sWscAttrAuthenticator& tlvWscM2::authenticator() {
+    return (WSC::sWscAttrAuthenticator&)(*m_authenticator);
 }
 
 void tlvWscM2::class_swap()
@@ -451,7 +503,8 @@ void tlvWscM2::class_swap()
     m_device_password_id_attr->struct_swap();
     m_os_version_attr->struct_swap();
     m_vendor_extensions_attr->struct_swap();
-    m_encrypted_settings_attr->struct_swap();
+    if (m_encrypted_settings) { m_encrypted_settings_ptr->class_swap(); }
+    m_authenticator->struct_swap();
 }
 
 size_t tlvWscM2::get_initial_size()
@@ -484,7 +537,7 @@ size_t tlvWscM2::get_initial_size()
     class_size += sizeof(WSC::sWscAttrDevicePasswordID); // device_password_id_attr
     class_size += sizeof(WSC::sWscAttrOsVersion); // os_version_attr
     class_size += sizeof(WSC::sWscAttrVendorExtension); // vendor_extensions_attr
-    class_size += sizeof(WSC::sWscAttrEncryptedSettings); // encrypted_settings_attr
+    class_size += sizeof(WSC::sWscAttrAuthenticator); // authenticator
     return class_size;
 }
 
@@ -620,10 +673,24 @@ bool tlvWscM2::init()
     m_buff_ptr__ += sizeof(WSC::sWscAttrVendorExtension) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(WSC::sWscAttrVendorExtension); }
     if (!m_parse__) { m_vendor_extensions_attr->struct_init(); }
-    m_encrypted_settings_attr = (WSC::sWscAttrEncryptedSettings*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(WSC::sWscAttrEncryptedSettings) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(WSC::sWscAttrEncryptedSettings); }
-    if (!m_parse__) { m_encrypted_settings_attr->struct_init(); }
+    m_encrypted_settings = (WSC::cWscAttrEncryptedSettings*)m_buff_ptr__;
+    if (m_parse__) {
+        auto encrypted_settings = create_encrypted_settings();
+        if (!encrypted_settings) {
+            TLVF_LOG(ERROR) << "create_encrypted_settings() failed";
+            return false;
+        }
+        if (!add_encrypted_settings(encrypted_settings)) {
+            TLVF_LOG(ERROR) << "add_encrypted_settings() failed";
+            return false;
+        }
+        // swap back since encrypted_settings will be swapped as part of the whole class swap
+        encrypted_settings->class_swap();
+    }
+    m_authenticator = (WSC::sWscAttrAuthenticator*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(WSC::sWscAttrAuthenticator) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(WSC::sWscAttrAuthenticator); }
+    if (!m_parse__) { m_authenticator->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;

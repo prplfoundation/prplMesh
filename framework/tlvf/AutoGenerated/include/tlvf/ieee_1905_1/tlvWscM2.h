@@ -81,7 +81,10 @@ class tlvWscM2 : public BaseClass
         WSC::sWscAttrDevicePasswordID& device_password_id_attr();
         WSC::sWscAttrOsVersion& os_version_attr();
         WSC::sWscAttrVendorExtension& vendor_extensions_attr();
-        WSC::sWscAttrEncryptedSettings& encrypted_settings_attr();
+        std::shared_ptr<WSC::cWscAttrEncryptedSettings> create_encrypted_settings();
+        bool add_encrypted_settings(std::shared_ptr<WSC::cWscAttrEncryptedSettings> ptr);
+        std::shared_ptr<WSC::cWscAttrEncryptedSettings> encrypted_settings() { return m_encrypted_settings_ptr; }
+        WSC::sWscAttrAuthenticator& authenticator();
         void class_swap();
         static size_t get_initial_size();
 
@@ -123,7 +126,10 @@ class tlvWscM2 : public BaseClass
         WSC::sWscAttrDevicePasswordID* m_device_password_id_attr = nullptr;
         WSC::sWscAttrOsVersion* m_os_version_attr = nullptr;
         WSC::sWscAttrVendorExtension* m_vendor_extensions_attr = nullptr;
-        WSC::sWscAttrEncryptedSettings* m_encrypted_settings_attr = nullptr;
+        WSC::cWscAttrEncryptedSettings *m_encrypted_settings = nullptr;
+        std::shared_ptr<WSC::cWscAttrEncryptedSettings> m_encrypted_settings_ptr = nullptr;
+        bool m_lock_allocation__ = false;
+        WSC::sWscAttrAuthenticator* m_authenticator = nullptr;
 };
 
 }; // close namespace: ieee1905_1
