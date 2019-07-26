@@ -401,7 +401,31 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
             ? WSC::FRONTHAUL_BSS
             : (bss_type & WSC::BACKHAUL_BSS ? WSC::BACKHAUL_BSS : WSC::TEARDOWN);
     tlvWscM2->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
-    // TODO: Finalize with encryption
+    // Encrypted settings
+    auto encrypted_settings = tlvWscM2->create_encrypted_settings();
+    if (!encrypted_settings) {
+        LOG(ERROR) << "Failed to create encrypted settings";
+        return false;
+    }
+    // TODO - actually encrypt the data
+    encrypted_settings->set_ssid("prplMesh_ssid");
+    encrypted_settings->authentication_type_attr().data = WSC::WSC_AUTH_WPA2; //DUMMY
+    encrypted_settings->encryption_type_attr().data     = WSC::WSC_ENCR_AES;
+    std::fill(encrypted_settings->network_key_attr().data,
+              encrypted_settings->network_key_attr().data +
+                  encrypted_settings->network_key_attr().data_length,
+              0xaa); //DUMMY
+    encrypted_settings->bssid_attr().data = tlvWscM1->mac_attr().data;
+    std::fill(encrypted_settings->key_wrap_auth_attr().data,
+              encrypted_settings->key_wrap_auth_attr().data +
+                  encrypted_settings->key_wrap_auth_attr().data_length,
+              0xff); //DUMMY
+
+    if (!tlvWscM2->add_encrypted_settings(encrypted_settings)) {
+        LOG(ERROR) << "Failed to add encrypted settings";
+        return false;
+    }
+
     return true;
 }
 

@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 {
     int errors = 0;
     mapf::Logger::Instance().LoggerInit("TLVF example");
-    uint8_t tx_buffer[1000];
+    uint8_t tx_buffer[4096];
 
     //START BUILDING THE MESSAGE HERE
     memset(tx_buffer, 0, sizeof(tx_buffer));
@@ -111,9 +111,45 @@ int main(int argc, char *argv[])
     auto secondTlv            = msg.addClass<tlvLinkMetricQuery>(); // another tlv for the example
     secondTlv->link_metrics() = tlvLinkMetricQuery::eLinkMetricsType::RX_LINK_METRICS_ONLY;
 
+    LOG(DEBUG) << "Start WSC M2";
     auto thirdTlv = msg.addClass<tlvWscM2>();
+
+    thirdTlv->message_type_attr().data = WSC::WSC_MSG_TYPE_M2;
+    if (!thirdTlv->set_manufacturer("Intel"))
+        return false;
+
     // All attributes have been initialized to default.
-    memcpy(thirdTlv->encrypted_settings_attr().ssid_attr.data, "test", 4);
+    LOG(DEBUG) << "Create WSC M2 encrypted settings";
+    auto encrypted_settings_tx = thirdTlv->create_encrypted_settings();
+    if (!encrypted_settings_tx) {
+        LOG(ERROR) << "Failed to create encrypted settings";
+        return false;
+    }
+
+    encrypted_settings_tx->set_ssid("test_ssid");
+    encrypted_settings_tx->authentication_type_attr().data = WSC::WSC_AUTH_WPA2; //DUMMY
+    encrypted_settings_tx->encryption_type_attr().data     = WSC::WSC_ENCR_AES;
+    std::fill(encrypted_settings_tx->network_key_attr().data,
+              encrypted_settings_tx->network_key_attr().data +
+                  encrypted_settings_tx->network_key_attr().data_length,
+              0xaa); //DUMMY
+    std::fill(encrypted_settings_tx->key_wrap_auth_attr().data,
+              encrypted_settings_tx->key_wrap_auth_attr().data +
+                  encrypted_settings_tx->key_wrap_auth_attr().data_length,
+              0xff); //DUMMY
+    LOG(DEBUG) << "WSC encrypted_settings_tx:" << std::endl
+               << "     ssid: " << encrypted_settings_tx->ssid() << std::endl
+               << "     authentication_type: "
+               << encrypted_settings_tx->authentication_type_attr().data << std::endl
+               << "     encryption_type: " << encrypted_settings_tx->encryption_type_attr().data
+               << std::endl;
+    LOG(DEBUG) << "Add WSC M2 encrypted settings";
+    if (!thirdTlv->add_encrypted_settings(encrypted_settings_tx)) {
+        LOG(ERROR) << "Failed to add encrypted settings";
+        return false;
+    }
+    LOG(DEBUG) << "Done (WSC M2)";
+    MAPF_INFO("TLV LENGTH WSC M2: " << thirdTlv->length());
 
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
@@ -186,6 +222,12 @@ int main(int argc, char *argv[])
         errors++;
     }
 
+    if (received_message.getNextTlvType(type) && type == eTlvType::TLV_WSC) {
+        MAPF_INFO("SUCCESS");
+    } else {
+        errors++;
+    }
+
     auto tlv3 = received_message.addClass<tlvWscM2>();
     if (tlv3 != nullptr) {
         MAPF_INFO("TLV3 LENGTH AFTER INIT: " << tlv3->length());
@@ -193,6 +235,14 @@ int main(int argc, char *argv[])
         MAPF_ERR("TLV3 IS NULL");
         errors++;
     }
+    auto encrypted_settings_rx = tlv3->encrypted_settings();
+    auto ssid = std::string(encrypted_settings_rx->ssid(), encrypted_settings_rx->ssid_length());
+    auto authentication_type = encrypted_settings_rx->authentication_type_attr().data;
+    auto encryption_type     = encrypted_settings_rx->encryption_type_attr().data;
+    LOG(DEBUG) << "WSC encrypted_settings_rx:" << std::endl
+               << "     ssid: " << ssid << std::endl
+               << "     authentication_type: " << authentication_type << std::endl
+               << "     encryption_type: " << encryption_type << std::endl;
 
     int invalidBufferSize = 26;
     uint8_t invalidBuffer[invalidBufferSize];
