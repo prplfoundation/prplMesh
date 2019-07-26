@@ -335,26 +335,6 @@ sWscAttrBssid:
   data:
     _type: sMacAddr
 
-sWscAttrEncryptedSettings:
-  _type: struct
-  attribute_type:
-    _type: eWscAttributes
-    _value: ATTR_ENCR_SETTINGS
-  data_length:
-    _type: uint16_t
-    _comment: |
-      TODO the value of the data_length should be updated automatically
-      based on the inner tlvs attributes lengths.
-      This will be added after implementing the support in multiple dynamic lists.
-      This attribute's type will be changed into class (instead of struct) and that way 
-      it can contain _length_var that will be updated automatically.
-  ssid_attr: sWscAttrSsid
-  authentication_type_attr: sWscAttrAuthenticationType
-  encryption_type_attr: sWscAttrEncryptionType
-  network_key_attr: sWscAttrNetworkKey
-  bssid_attr: sWscAttrBssid
-  key_wrap_auth_attr: sWscAttrKeyWrapAuthenticator
-  
 sWscAttrAuthenticator:
   _type: struct
   attribute_type:
@@ -366,3 +346,27 @@ sWscAttrAuthenticator:
   data:
     _type: char
     _length: [ WSC_AUTHENTICATOR_LENGTH ]
+
+cWscAttrEncryptedSettings:
+  _type: class
+  _is_tlv_class : True
+  type:
+    _type: eWscAttributes
+    _value_const: ATTR_ENCR_SETTINGS
+  length:
+    _type: uint16_t
+    _length_var: True
+  ssid_type:
+    _type: eWscAttributes
+    _value: ATTR_SSID
+  ssid_length:
+    _type: uint16_t
+    _length_var: True
+  ssid:
+    _type: char
+    _length: [ ssid_length ]
+  authentication_type_attr: sWscAttrAuthenticationType
+  encryption_type_attr: sWscAttrEncryptionType
+  network_key_attr: sWscAttrNetworkKey
+  bssid_attr: sWscAttrBssid
+  key_wrap_auth_attr: sWscAttrKeyWrapAuthenticator

@@ -4315,10 +4315,35 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     }
 
     for (auto tlvWscM2 : m2_list) {
+        auto encrypted_settings = tlvWscM2->encrypted_settings();
+        auto ssid  = std::string(encrypted_settings->ssid(), encrypted_settings->ssid_length());
+        auto bssid = network_utils::mac_to_string(encrypted_settings->bssid_attr().data);
+        auto authentication_type = encrypted_settings->authentication_type_attr().data;
+        auto encryption_type     = encrypted_settings->encryption_type_attr().data;
+        // TODO - finish with decryption and authentication
+        // https://github.com/prplfoundation/prplMesh/pull/91
+        // char network_key[WSC::WSC_MAX_NETWORK_KEY_LENGTH];
+        // std::copy_n(encrypted_settings.network_key_attr().data,
+        //             encrypted_settings.network_key_attr().data_length,
+        //             network_key);
+        // char key_wrap_auth[WSC::WSC_KEY_WRAP_AUTH_LENGTH];
+        // std::copy_n(encrypted_settings.key_wrap_auth_attr().data,
+        //             encrypted_settings.key_wrap_auth_attr().data_length,
+        //             network_key);
         std::string manufacturer =
             std::string(tlvWscM2->manufacturer(), tlvWscM2->manufacturer_length());
+        // ONLY FOR DEBUG!!!
+        // TODO - remove this print, it is showing the encrypted settings in the logs!
+        LOG(DEBUG) << "Controller configuration (WSC M2 Encrypted Settings)" << std::endl
+                   << "     Manufacturer: " << manufacturer << std::endl
+                   << "     ssid: " << ssid << std::endl
+                   << "     bssid: " << bssid << std::endl
+                   << "     authentication_type: " << authentication_type << std::endl
+                   << "     encryption_type: " << encryption_type << std::endl;
+
         if (!manufacturer.compare("Intel")) {
-            //TODO add support for none Intel agents
+            // TODO add support for none Intel agents
+            // https://github.com/prplfoundation/prplMesh/issues/134
             LOG(ERROR) << "None Intel controller " << manufacturer << " , dropping message";
             return false;
         }
