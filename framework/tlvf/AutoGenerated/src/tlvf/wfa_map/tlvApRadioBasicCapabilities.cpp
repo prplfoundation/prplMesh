@@ -71,13 +71,13 @@ std::shared_ptr<cOperatingClassesInfo> tlvApRadioBasicCapabilities::create_opera
     }
     m_lock_order_counter__ = 0;
     m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_operating_classes_info_list;
+    uint8_t *dst = (uint8_t *)m_operating_classes_info_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_operating_classes_info_list;
-        uint8_t *dst = (uint8_t *)m_operating_classes_info_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
-    return std::make_shared<cOperatingClassesInfo>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
+    return std::make_shared<cOperatingClassesInfo>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
 }
 
 bool tlvApRadioBasicCapabilities::add_operating_classes_info_list(std::shared_ptr<cOperatingClassesInfo> ptr) {
@@ -89,11 +89,11 @@ bool tlvApRadioBasicCapabilities::add_operating_classes_info_list(std::shared_pt
         TLVF_LOG(ERROR) << "No call to create_operating_classes_info_list was called before add_operating_classes_info_list";
         return false;
     }
-    if (ptr->getStartBuffPtr() != getBuffPtr()) {
+    if (ptr->getStartBuffPtr() != (uint8_t *)m_operating_classes_info_list) {
         TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
         return false;
     }
-    if (ptr->getLen() > getBuffRemainingBytes()) {;
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return false;
     }
@@ -221,9 +221,9 @@ bool cOperatingClassesInfo::alloc_statically_non_operable_channels_list(size_t c
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_statically_non_operable_channels_list;
+    uint8_t *dst = (uint8_t *)m_statically_non_operable_channels_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_statically_non_operable_channels_list;
-        uint8_t *dst = (uint8_t *)m_statically_non_operable_channels_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }

@@ -127,9 +127,9 @@ bool tlvWscM2::alloc_manufacturer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_manufacturer;
+    uint8_t *dst = (uint8_t *)m_manufacturer + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_manufacturer;
-        uint8_t *dst = (uint8_t *)m_manufacturer + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -211,9 +211,9 @@ bool tlvWscM2::alloc_model_name(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 1;
+    uint8_t *src = (uint8_t *)m_model_name;
+    uint8_t *dst = (uint8_t *)m_model_name + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_model_name;
-        uint8_t *dst = (uint8_t *)m_model_name + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -292,9 +292,9 @@ bool tlvWscM2::alloc_model_number(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 2;
+    uint8_t *src = (uint8_t *)m_model_number;
+    uint8_t *dst = (uint8_t *)m_model_number + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_model_number;
-        uint8_t *dst = (uint8_t *)m_model_number + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -370,9 +370,9 @@ bool tlvWscM2::alloc_serial_number(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 3;
+    uint8_t *src = (uint8_t *)m_serial_number;
+    uint8_t *dst = (uint8_t *)m_serial_number + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_serial_number;
-        uint8_t *dst = (uint8_t *)m_serial_number + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }

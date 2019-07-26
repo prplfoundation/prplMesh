@@ -63,9 +63,9 @@ bool tlvTestVarList::alloc_simple_list(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_simple_list;
+    uint8_t *dst = (uint8_t *)m_simple_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_simple_list;
-        uint8_t *dst = (uint8_t *)m_simple_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -109,15 +109,15 @@ std::shared_ptr<cInner> tlvTestVarList::create_complex_list() {
     }
     m_lock_order_counter__ = 1;
     m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_complex_list;
+    uint8_t *dst = (uint8_t *)m_complex_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_complex_list;
-        uint8_t *dst = (uint8_t *)m_complex_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
     m_var1 = (uint16_t *)((uint8_t *)(m_var1) + len);
     m_unknown_length_list = (uint16_t *)((uint8_t *)(m_unknown_length_list) + len);
-    return std::make_shared<cInner>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
+    return std::make_shared<cInner>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
 }
 
 bool tlvTestVarList::add_complex_list(std::shared_ptr<cInner> ptr) {
@@ -129,11 +129,11 @@ bool tlvTestVarList::add_complex_list(std::shared_ptr<cInner> ptr) {
         TLVF_LOG(ERROR) << "No call to create_complex_list was called before add_complex_list";
         return false;
     }
-    if (ptr->getStartBuffPtr() != getBuffPtr()) {
+    if (ptr->getStartBuffPtr() != (uint8_t *)m_complex_list) {
         TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
         return false;
     }
-    if (ptr->getLen() > getBuffRemainingBytes()) {;
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return false;
     }
@@ -309,9 +309,9 @@ bool cInner::alloc_list(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_list;
+    uint8_t *dst = (uint8_t *)m_list + len;
     if (!m_parse__) {
-        uint8_t *src = (uint8_t *)m_list;
-        uint8_t *dst = (uint8_t *)m_list + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
