@@ -678,8 +678,10 @@ class TlvF:
                 lines_cpp = []
                 
                 # add class size calculation
-                #TODO: adapt when adding class types
-                lines_cpp.append( "class_size += sizeof(%s); // %s" % ( param_type, param_name) )
+                if TypeInfo(param_type).type == TypeInfo.CLASS:
+                    lines_cpp.append( "class_size += %s::get_initial_size(); // %s" % ( param_type, param_name) )
+                else:
+                    lines_cpp.append( "class_size += sizeof(%s); // %s" % ( param_type, param_name) )
                 self.insertLineCpp(obj_meta.name, self.CODE_CLASS_SIZE_FUNC_INSERT, lines_cpp)
  
                 lines_h   = []
@@ -726,8 +728,29 @@ class TlvF:
                 lines_cpp.append("%ssize_t len = *m_length;" % (self.getIndentation(1)))
                 lines_cpp.append("%sif (m_%s__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }" % (self.getIndentation(1), self.MEMBER_SWAP))
                 lines_cpp.append("%slen -= (m_%s__ - %s - m_%s__);" % (self.getIndentation(1), self.MEMBER_BUFF_PTR, self.MEMBER_CONST_MINIMUM_LENGTH, self.MEMBER_BUFF))
-                lines_cpp.append("%sm_%s_idx__ = len/sizeof(%s);" % (self.getIndentation(1), param_name, param_type))
-                lines_cpp.append("%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR))
+                if TypeInfo(param_type).type == TypeInfo.CLASS:
+                    lines_cpp.append("%swhile (len > 0) {" % (self.getIndentation(1)))
+                    lines_cpp.append("%sif (len < %s::get_initial_size()) {" %(self.getIndentation(2), param_type))
+                    lines_cpp.append("%sTLVF_LOG(ERROR) << \"Invalid length (%s)\";" %(self.getIndentation(3), param_name))
+                    lines_cpp.append("%sreturn false;" %(self.getIndentation(3)))
+                    lines_cpp.append("%s}" %(self.getIndentation(2)))
+                    lines_cpp.append("%sauto %s = create_%s();" %( self.getIndentation(2), param_name, param_name))
+                    lines_cpp.append("%sif (!%s) {" %(self.getIndentation(2), param_name))
+                    lines_cpp.append("%sTLVF_LOG(ERROR) << \"create_%s() failed\";" %(self.getIndentation(3), param_name))
+                    lines_cpp.append("%sreturn false;" %(self.getIndentation(3)))
+                    lines_cpp.append("%s}" %(self.getIndentation(2)))
+                    lines_cpp.append("%sif (!add_%s(%s)) {" %(self.getIndentation(2), param_name, param_name))
+                    lines_cpp.append("%sTLVF_LOG(ERROR) << \"add_%s() failed\";" %(self.getIndentation(3), param_name))
+                    lines_cpp.append("%sreturn false;" %(self.getIndentation(3)))
+                    lines_cpp.append("%s}" %(self.getIndentation(2)))
+                    lines_cpp.append("%s// swap back since %s will be swapped as part of the whole class swap" %(self.getIndentation(2), param_name))
+                    lines_cpp.append("%s%s->class_swap();" %(self.getIndentation(2), param_name))
+                    lines_cpp.append("%sm_%s_idx__++;" %(self.getIndentation(2), param_name))
+                    lines_cpp.append("%slen -= %s->getLen();" %(self.getIndentation(2), param_name))
+                    lines_cpp.append("%s}" %(self.getIndentation(1)))
+                else:
+                    lines_cpp.append("%sm_%s_idx__ = len/sizeof(%s);" % (self.getIndentation(1), param_name, param_type))
+                    lines_cpp.append("%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR))
                 lines_cpp.append("}")
             if is_var_len or is_dynamic_len:
                 param_meta.list_index = obj_meta.list_index
@@ -932,7 +955,7 @@ class TlvF:
                     lines_cpp.append( "%sm_%s_vector.push_back(ptr);" % (self.getIndentation(1), param_name ))
                     lines_cpp.append( "%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR) )
                     if self.is_tlv_class:
-                        lines_cpp.append( "%sif(m_length){ (*m_length) += len; }" % (self.getIndentation(1)))
+                        lines_cpp.append( "%sif(!m_parse__ && m_length){ (*m_length) += len; }" % (self.getIndentation(1)))
                     lines_cpp.append( "%sm_%s__ = false;" % (self.getIndentation(1), self.MEMBER_LOCK_ALLOCATION))
                     lines_cpp.append( "%sreturn true;" % (self.getIndentation(1)) )
                     lines_cpp.append( "}" )
