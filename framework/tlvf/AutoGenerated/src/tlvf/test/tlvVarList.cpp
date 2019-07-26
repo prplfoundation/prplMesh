@@ -146,7 +146,7 @@ bool tlvTestVarList::add_complex_list(std::shared_ptr<cInner> ptr) {
     m_unknown_length_list = (uint16_t *)((uint8_t *)(m_unknown_length_list) + len - ptr->get_initial_size());
     m_complex_list_vector.push_back(ptr);
     m_buff_ptr__ += len;
-    if(m_length){ (*m_length) += len; }
+    if(!m_parse__ && m_length){ (*m_length) += len; }
     m_lock_allocation__ = false;
     return true;
 }

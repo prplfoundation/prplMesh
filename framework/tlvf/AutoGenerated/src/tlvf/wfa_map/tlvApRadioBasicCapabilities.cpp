@@ -104,7 +104,7 @@ bool tlvApRadioBasicCapabilities::add_operating_classes_info_list(std::shared_pt
     size_t len = ptr->getLen();
     m_operating_classes_info_list_vector.push_back(ptr);
     m_buff_ptr__ += len;
-    if(m_length){ (*m_length) += len; }
+    if(!m_parse__ && m_length){ (*m_length) += len; }
     m_lock_allocation__ = false;
     return true;
 }

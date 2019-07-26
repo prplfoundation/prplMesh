@@ -96,7 +96,7 @@ bool tlvDeviceBridgingCapability::add_bridging_tuples_list(std::shared_ptr<cMacL
     size_t len = ptr->getLen();
     m_bridging_tuples_list_vector.push_back(ptr);
     m_buff_ptr__ += len;
-    if(m_length){ (*m_length) += len; }
+    if(!m_parse__ && m_length){ (*m_length) += len; }
     m_lock_allocation__ = false;
     return true;
 }

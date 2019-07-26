@@ -100,7 +100,7 @@ bool tlvRadioOperationRestriction::add_operating_classes_list(std::shared_ptr<cR
     size_t len = ptr->getLen();
     m_operating_classes_list_vector.push_back(ptr);
     m_buff_ptr__ += len;
-    if(m_length){ (*m_length) += len; }
+    if(!m_parse__ && m_length){ (*m_length) += len; }
     m_lock_allocation__ = false;
     return true;
 }
