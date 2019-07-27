@@ -47,12 +47,7 @@ std::tuple<bool, cRestrictedOperatingClasses&> tlvRadioOperationRestriction::ope
     if (!ret_success) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
     }
-    if (*m_operating_classes_list_length > 0) {
-        return std::forward_as_tuple(ret_success, *(m_operating_classes_list_vector[ret_idx]));
-    }
-    else {
-        return std::forward_as_tuple(ret_success, *(m_operating_classes_list));
-    }
+    return std::forward_as_tuple(ret_success, *(m_operating_classes_list_vector[ret_idx]));
 }
 
 std::shared_ptr<cRestrictedOperatingClasses> tlvRadioOperationRestriction::create_operating_classes_list() {

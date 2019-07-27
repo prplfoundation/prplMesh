@@ -205,6 +205,8 @@ class MetaData:
         self.errorCheck(dict)
         self.children_types = {}
         self.list_index = 0
+        self.lock_allocation_member_added = False
+        self.lock_order_member_added = False
         
     def errPrefix(self):
         return "%s.yaml, param name=%s --> " % (self.fname, self.name)
@@ -638,7 +640,9 @@ class TlvF:
             if TypeInfo(param_type).type == TypeInfo.CLASS:                
                 lines_h.append("%s *m_%s = nullptr;" % (param_type, param_name))
                 lines_h.append("std::shared_ptr<%s> m_%s_ptr = nullptr;" % (param_type, param_name))
-                lines_h.append("bool m_%s__ = false;" % self.MEMBER_LOCK_ALLOCATION)
+                if not obj_meta.lock_allocation_member_added:
+                    lines_h.append("bool m_%s__ = false;" % self.MEMBER_LOCK_ALLOCATION)
+                    obj_meta.lock_allocation_member_added = True
 
                 if not obj_meta.lock_order_member_added:
                     lines_h.append("int m_%s__ = 0;" % self.MEMBER_LOCK_ORDER_COUNTER)
@@ -658,7 +662,7 @@ class TlvF:
                 swap_func_lines = ["if (m_%s) { m_%s_ptr->class_swap(); }" %(param_name, param_name)]
 
                 # Add allocation methods
-                self.addClassVarLenMethods(obj_meta, param_type, param_name, param_meta, param_length, False)
+                self.addClassVarLenMethods(obj_meta, param_type, param_name, param_meta, param_length, False, False)
 
                 # Add function to return pointer
                 lines_h.append("std::shared_ptr<%s> %s() { return m_%s_ptr; }" % (param_type, param_name, param_name))
@@ -764,7 +768,9 @@ class TlvF:
             if (is_var_len or is_dynamic_len ) and TypeInfo(param_type).type == TypeInfo.CLASS:
                 self.include_list.append("<vector>")
                 var_lines.append("std::vector<std::shared_ptr<%s>> m_%s_vector;" % (param_type, param_name))
-                var_lines.append("bool m_%s__ = false;" % self.MEMBER_LOCK_ALLOCATION)
+                if not obj_meta.lock_allocation_member_added:
+                    var_lines.append("bool m_%s__ = false;" % self.MEMBER_LOCK_ALLOCATION)
+                    obj_meta.lock_allocation_member_added = True
             if not obj_meta.lock_order_member_added:
                 var_lines.append("int m_%s__ = 0;" % self.MEMBER_LOCK_ORDER_COUNTER)
                 obj_meta.lock_order_member_added = True
@@ -941,12 +947,7 @@ class TlvF:
                 lines_cpp.append( '%sTLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";' %  self.getIndentation(2) )
                 lines_cpp.append( "%s}" % self.getIndentation(1) )
                 if TypeInfo(param_type).type == TypeInfo.CLASS: #TODO:only if it's the last member of the class
-                    lines_cpp.append( "%sif (*m_%s_length > 0) {" % (self.getIndentation(1), param_name) )
-                    lines_cpp.append( "%sreturn std::forward_as_tuple(ret_success, *(m_%s_vector[ret_idx]));" % (self.getIndentation(2), param_name) )
-                    lines_cpp.append( "%s}" % self.getIndentation(1) )
-                    lines_cpp.append( "%selse {" % (self.getIndentation(1)) )
-                    lines_cpp.append( "%sreturn std::forward_as_tuple(ret_success, *(m_%s));" % (self.getIndentation(2), param_name) )
-                    lines_cpp.append( "%s}" % self.getIndentation(1) )
+                    lines_cpp.append( "%sreturn std::forward_as_tuple(ret_success, *(m_%s_vector[ret_idx]));" % (self.getIndentation(1), param_name) )
                 else:
                     lines_cpp.append( "%sreturn std::forward_as_tuple(ret_success, m_%s[ret_idx]);" % (self.getIndentation(1), param_name) )
                 lines_cpp.append( "}" )
@@ -959,8 +960,7 @@ class TlvF:
 
             #add function to allocate memory
             if is_var_len or is_dynamic_len:
-                #TODO: take out to seperated method(s)
-                self.addClassVarLenMethods(obj_meta, param_type, param_name, param_meta, param_length, is_var_len)
+                self.addClassVarLenMethods(obj_meta, param_type, param_name, param_meta, param_length, is_var_len, is_dynamic_len)
         else:
             self.abort("%s.yaml --> unsupported length type: %r, param_name=%s" % (self.yaml_fname, param_length_type, param_name))
 
@@ -968,7 +968,7 @@ class TlvF:
         self.insertLineH(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, lines_h)
         self.insertLineCpp(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, lines_cpp)
 
-    def addClassVarLenMethods(self, obj_meta, param_type, param_name, param_meta, param_length, is_var_len):
+    def addClassVarLenMethods(self, obj_meta, param_type, param_name, param_meta, param_length, is_var_len, is_dynamic_len):
         lines_cpp = []
         lines_h = []
         if TypeInfo(param_type).type == TypeInfo.CLASS:
@@ -986,7 +986,10 @@ class TlvF:
             lines_cpp.append( "%sm_%s__ = %s;" %(self.getIndentation(1), self.MEMBER_LOCK_ORDER_COUNTER, param_meta.list_index) )
             lines_cpp.append( "%sm_%s__ = true;" % (self.getIndentation(1), self.MEMBER_LOCK_ALLOCATION) )
             lines_cpp.extend(self.addAllocationMarkers(obj_meta, "create", param_meta, param_length, True)) # Variable length lists support
-            lines_cpp.append( "%sreturn std::make_shared<%s>(src, getBuffRemainingBytes(src), m_%s__, m_%s__);" % (self.getIndentation(1), param_type, self.MEMBER_PARSE, self.MEMBER_SWAP) )
+            if is_dynamic_len:
+                lines_cpp.append( "%sreturn std::make_shared<%s>(getBuffPtr(), getBuffRemainingBytes(), m_%s__, m_%s__);" % (self.getIndentation(1), param_type, self.MEMBER_PARSE, self.MEMBER_SWAP) )
+            else:
+                lines_cpp.append( "%sreturn std::make_shared<%s>(src, getBuffRemainingBytes(src), m_%s__, m_%s__);" % (self.getIndentation(1), param_type, self.MEMBER_PARSE, self.MEMBER_SWAP) )
             lines_cpp.append( "}" )
             lines_cpp.append( "" )
 
@@ -1013,7 +1016,7 @@ class TlvF:
             lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
             lines_cpp.append( "%s}" % self.getIndentation(1) )
 
-            if param_length:
+            if param_length or is_dynamic_len:
                 lines_cpp.append( "%sif (!m_%s__) {" % (self.getIndentation(1), self.MEMBER_PARSE) )
                 lines_cpp.append( "%sm_%s_idx__++;" % (self.getIndentation(2), param_name) )
                 if is_var_len:
@@ -1021,7 +1024,7 @@ class TlvF:
                 lines_cpp.append( "%s}" % (self.getIndentation(1)) )
             lines_cpp.append( "%ssize_t len = ptr->getLen();" % (self.getIndentation(1) ))
             lines_cpp.extend(self.addAllocationMarkers(obj_meta, "add", param_meta, param_length, False)) # Variable length lists support
-            if param_length:
+            if param_length or is_dynamic_len:
                 lines_cpp.append( "%sm_%s_vector.push_back(ptr);" % (self.getIndentation(1), param_name ))
             else:
                 lines_cpp.append( "%sm_%s_ptr = ptr;" % (self.getIndentation(1), param_name ))

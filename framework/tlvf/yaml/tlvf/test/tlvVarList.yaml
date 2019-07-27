@@ -20,10 +20,10 @@ tlvTestVarList:
     _type: cInner
     _length: [ complex_list_length ]
 
-  var1: uint16_t
+  var1: cInner
 
   unknown_length_list:
-    _type: uint16_t
+    _type: cInner
     _length: []
 
 cInner:
