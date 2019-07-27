@@ -40,9 +40,12 @@ class tlvTestVarList : public BaseClass
         std::tuple<bool, cInner&> complex_list(size_t idx);
         std::shared_ptr<cInner> create_complex_list();
         bool add_complex_list(std::shared_ptr<cInner> ptr);
-        uint16_t& var1();
-        std::tuple<bool, uint16_t&> unknown_length_list(size_t idx);
-        bool alloc_unknown_length_list(size_t count = 1);
+        std::shared_ptr<cInner> create_var1();
+        bool add_var1(std::shared_ptr<cInner> ptr);
+        std::shared_ptr<cInner> var1() { return m_var1_ptr; }
+        std::tuple<bool, cInner&> unknown_length_list(size_t idx);
+        std::shared_ptr<cInner> create_unknown_length_list();
+        bool add_unknown_length_list(std::shared_ptr<cInner> ptr);
         void class_swap();
         static size_t get_initial_size();
 
@@ -60,9 +63,11 @@ class tlvTestVarList : public BaseClass
         size_t m_complex_list_idx__ = 0;
         std::vector<std::shared_ptr<cInner>> m_complex_list_vector;
         bool m_lock_allocation__ = false;
-        uint16_t* m_var1 = nullptr;
-        uint16_t* m_unknown_length_list = nullptr;
+        cInner *m_var1 = nullptr;
+        std::shared_ptr<cInner> m_var1_ptr = nullptr;
+        cInner* m_unknown_length_list = nullptr;
         size_t m_unknown_length_list_idx__ = 0;
+        std::vector<std::shared_ptr<cInner>> m_unknown_length_list_vector;
 };
 
 class cInner : public BaseClass

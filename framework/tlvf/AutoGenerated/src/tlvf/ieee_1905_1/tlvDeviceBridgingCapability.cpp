@@ -43,12 +43,7 @@ std::tuple<bool, cMacList&> tlvDeviceBridgingCapability::bridging_tuples_list(si
     if (!ret_success) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
     }
-    if (*m_bridging_tuples_list_length > 0) {
-        return std::forward_as_tuple(ret_success, *(m_bridging_tuples_list_vector[ret_idx]));
-    }
-    else {
-        return std::forward_as_tuple(ret_success, *(m_bridging_tuples_list));
-    }
+    return std::forward_as_tuple(ret_success, *(m_bridging_tuples_list_vector[ret_idx]));
 }
 
 std::shared_ptr<cMacList> tlvDeviceBridgingCapability::create_bridging_tuples_list() {

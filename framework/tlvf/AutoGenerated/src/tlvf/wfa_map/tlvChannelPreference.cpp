@@ -47,12 +47,7 @@ std::tuple<bool, cPreferenceOperatingClasses&> tlvChannelPreference::operating_c
     if (!ret_success) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
     }
-    if (*m_operating_classes_list_length > 0) {
-        return std::forward_as_tuple(ret_success, *(m_operating_classes_list_vector[ret_idx]));
-    }
-    else {
-        return std::forward_as_tuple(ret_success, *(m_operating_classes_list));
-    }
+    return std::forward_as_tuple(ret_success, *(m_operating_classes_list_vector[ret_idx]));
 }
 
 std::shared_ptr<cPreferenceOperatingClasses> tlvChannelPreference::create_operating_classes_list() {

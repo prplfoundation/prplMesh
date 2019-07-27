@@ -51,12 +51,7 @@ std::tuple<bool, cOperatingClassesInfo&> tlvApRadioBasicCapabilities::operating_
     if (!ret_success) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
     }
-    if (*m_operating_classes_info_list_length > 0) {
-        return std::forward_as_tuple(ret_success, *(m_operating_classes_info_list_vector[ret_idx]));
-    }
-    else {
-        return std::forward_as_tuple(ret_success, *(m_operating_classes_info_list));
-    }
+    return std::forward_as_tuple(ret_success, *(m_operating_classes_info_list_vector[ret_idx]));
 }
 
 std::shared_ptr<cOperatingClassesInfo> tlvApRadioBasicCapabilities::create_operating_classes_info_list() {
