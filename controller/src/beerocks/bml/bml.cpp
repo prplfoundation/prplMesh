@@ -565,6 +565,18 @@ int bml_wfa_ca_agent(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf_si
     return (pBML->wfa_ca_agent(cmd, ret_buf, ret_buf_size));
 }
 
+int bml_trigger_topology_discovery(BML_CTX ctx, const char *al_mac)
+{
+    // Validate input parameter
+    if (!ctx) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    bml_internal *pBML = (bml_internal *)ctx;
+
+    return (pBML->topology_discovery(al_mac));
+}
+
 int bml_channel_selection(BML_CTX ctx, const char *al_mac, const char *ruid)
 {
     // Validate input parameters

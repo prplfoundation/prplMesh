@@ -152,7 +152,7 @@ public:
     int wfa_ca_agent(const char *cmd, char *ret_buf, int ret_buf_size);
 
     // triggers topology discovery
-    int topology_discovery(void);
+    int topology_discovery(const char *al_mac);
 
     // triggers channel selection on specific Agent
     int channel_selection(const char *al_mac, const char *ruid);
