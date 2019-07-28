@@ -71,11 +71,12 @@ bool tlvMacAddress::init()
     m_mac = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += (sizeof(uint8_t) * 6);
     m_mac_idx__  = 6;
-    if(m_length){ (*m_length) += (sizeof(uint8_t) * 6); }
-    for (size_t i = 0; i < 6; i++){
-        m_mac[i] = 0x0;
+    if (!m_parse__) {
+        if (m_length) { (*m_length) += (sizeof(uint8_t) * 6); }
+        for (size_t i = 0; i < 6; i++){
+            m_mac[i] = 0x0;
+        }
     }
-    
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
