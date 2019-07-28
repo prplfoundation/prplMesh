@@ -840,22 +840,22 @@ class TlvF:
             if is_int_len or is_const_len:
                 lines_cpp.append( "m_%s__ += (sizeof(%s) * %s);" % (self.MEMBER_BUFF_PTR, param_type, param_length) )
                 lines_cpp.append("m_%s_idx__  = %s;" % (param_name, param_length))
+                if obj_meta.is_tlv_class or TypeInfo(param_type).type == TypeInfo.STRUCT:
+                    lines_cpp.append("if (!m_parse__) {")
                 if obj_meta.is_tlv_class:
-                    lines_cpp.append( "if(m_length){ (*m_length) += (sizeof(%s) * %s); }" % ( param_type, param_length) )
+                    lines_cpp.append( "%sif (m_length) { (*m_length) += (sizeof(%s) * %s); }" % (self.getIndentation(1), param_type, param_length) )
                 if TypeInfo(param_type).type == TypeInfo.STRUCT:
-                        lines_cpp.append("%sif (!m_%s__) { " % (self.getIndentation(1), self.MEMBER_PARSE))
-                        lines_cpp.append("%sfor (size_t i = 0; i < %s; i++) { m_%s->struct_init(); }" % (self.getIndentation(2), param_length, param_name))
-                        lines_cpp.append("%s}" % (self.getIndentation(1)))
-
+                    lines_cpp.append("%sfor (size_t i = 0; i < %s; i++) { m_%s->struct_init(); }" % (self.getIndentation(1), param_length, param_name))
+                elif (param_val_const or param_val):
+                    if param_type_info.type != TypeInfo.STD: self.abort("%s.yaml --> only std types are allowed in val / val_const" % self.yaml_fname)
+                    lines_cpp += ["%sfor (size_t i = 0; i < %s; i++){" % (self.getIndentation(1), str(param_length)),
+                                 "%sm_%s[i] = %s;"% (self.getIndentation(2), param_name, str(param_val) if param_val != None else str(param_val_const)),
+                                 "%s}" % (self.getIndentation(1))]
+                if obj_meta.is_tlv_class or TypeInfo(param_type).type == TypeInfo.STRUCT:
+                    lines_cpp.append("}")
 
             if (param_val_const or param_val):
-                if is_int_len or is_const_len:
-                    if param_type_info.type != TypeInfo.STD: self.abort("%s.yaml --> only std types are allowed in val / val_const" % self.yaml_fname)
-                    lines_cpp += ["for (size_t i = 0; i < %s; i++){" % (str(param_length)),
-                                 "%sm_%s[i] = %s;"% (self.getIndentation(1), param_name, str(param_val) if param_val != None else str(param_val_const)),
-                                 "}",
-                                 ""]
-                else:
+                if not (is_int_len or is_const_len):
                     self.abort("%s.yaml --> val / val_const are not supported for variable length types" % self.yaml_fname)
 
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_INIT_FUNC_INSERT, lines_cpp)

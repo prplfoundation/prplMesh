@@ -628,9 +628,9 @@ bool cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::init()
     m_supported_channels_list = (sWifiChannel*)m_buff_ptr__;
     m_buff_ptr__ += (sizeof(sWifiChannel) * beerocks::message::SUPPORTED_CHANNELS_LENGTH);
     m_supported_channels_list_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
-        if (!m_parse__) { 
-            for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
-        }
+    if (!m_parse__) {
+        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
+    }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
