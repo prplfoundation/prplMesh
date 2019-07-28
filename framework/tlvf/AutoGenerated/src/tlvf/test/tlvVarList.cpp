@@ -283,7 +283,7 @@ void tlvTestVarList::class_swap()
     for (size_t i = 0; i < (size_t)*m_complex_list_length; i++){
         std::get<1>(complex_list(i)).class_swap();
     }
-    if (m_var1) { m_var1_ptr->class_swap(); }
+    if (m_var1_ptr) { m_var1_ptr->class_swap(); }
     for (size_t i = 0; i < m_unknown_length_list_idx__; i++){
         std::get<1>(unknown_length_list(i)).class_swap();
     }
