@@ -2631,6 +2631,27 @@ int bml_internal::wfa_ca_agent(const char *cmd, char *ret_buf, int ret_buf_size)
     return BML_RET_OK;
 }
 
+int bml_internal::topology_discovery(const char *al_mac)
+{
+    auto request =
+        message_com::create_vs_message<beerocks_message::cACTION_BML_TRIGGER_TOPOLOGY_QUERY>(
+            cmdu_tx);
+
+    if (request == nullptr) {
+        LOG(ERROR) << "Failed building cACTION_BML_TRIGGER_TOPOLOGY_QUERY message";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->al_mac() = network_utils::mac_from_string(al_mac);
+
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending CMDU TRIGGER_TOPOLOGY_QUERY message";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    return BML_RET_OK;
+}
+
 int bml_internal::channel_selection(const char *al_mac, const char *ruid)
 {
     auto request = message_com::create_vs_message<

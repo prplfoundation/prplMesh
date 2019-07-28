@@ -469,6 +469,10 @@ void cli_bml::setFunctionsMapAndArray()
         static_cast<pFunction>(&cli_bml::bml_wfa_ca_controller_caller), 1, 1, STRING_ARG);
     insertCommandToMap("bml_wfa_ca_agent", "<string_command>", "send wfa_ca agent <string_command>",
                        static_cast<pFunction>(&cli_bml::bml_wfa_ca_agent_caller), 1, 1, STRING_ARG);
+    insertCommandToMap("bml_trigger_topology_discovery", "<al_mac (mac format)>",
+                       "trigger topology query towards 'al_mac'",
+                       static_cast<pFunction>(&cli_bml::bml_trigger_topology_discovery_caller), 1,
+                       1, STRING_ARG);
     insertCommandToMap(
         "bml_trigger_channel_selection",            // command name
         "<al_mac (mac format)> <ruid(mac format)>", // command args list
@@ -1076,6 +1080,14 @@ int cli_bml::bml_wfa_ca_agent_caller(int numOfArgs)
     return -1;
 }
 
+int cli_bml::bml_trigger_topology_discovery_caller(int numOfArgs)
+{
+    if (numOfArgs == 1) {
+        return topology_discovery(args.stringArgs[0]);
+    }
+    return -1;
+}
+
 int cli_bml::bml_channel_selection_caller(int numOfArgs)
 {
     if (numOfArgs == 2) {
@@ -1584,6 +1596,13 @@ int cli_bml::wfa_ca_controller(const std::string &cmd)
 int cli_bml::wfa_ca_agent(const std::string &cmd)
 {
     //TODO
+    return 0;
+}
+
+int cli_bml::topology_discovery(const std::string &al_mac)
+{
+    int ret = bml_trigger_topology_discovery(ctx, al_mac.c_str());
+    printBmlReturnVals("topology discovery", ret);
     return 0;
 }
 
