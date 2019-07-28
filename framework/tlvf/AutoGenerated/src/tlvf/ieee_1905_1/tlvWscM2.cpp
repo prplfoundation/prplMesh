@@ -504,7 +504,7 @@ void tlvWscM2::class_swap()
     m_device_password_id_attr->struct_swap();
     m_os_version_attr->struct_swap();
     m_vendor_extensions_attr->struct_swap();
-    if (m_encrypted_settings) { m_encrypted_settings_ptr->class_swap(); }
+    if (m_encrypted_settings_ptr) { m_encrypted_settings_ptr->class_swap(); }
     m_authenticator->struct_swap();
 }
 

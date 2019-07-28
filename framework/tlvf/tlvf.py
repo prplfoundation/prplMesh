@@ -659,7 +659,7 @@ class TlvF:
                 obj_meta.list_index = obj_meta.list_index + 1
 
                 # Add param to swap list
-                swap_func_lines = ["if (m_%s) { m_%s_ptr->class_swap(); }" %(param_name, param_name)]
+                swap_func_lines = ["if (m_%s_ptr) { m_%s_ptr->class_swap(); }" %(param_name, param_name)]
 
                 # Add allocation methods
                 self.addClassVarLenMethods(obj_meta, param_type, param_name, param_meta, param_length, False, False)
