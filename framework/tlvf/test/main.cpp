@@ -18,6 +18,7 @@
 #include "tlvf/ieee_1905_1/tlvVendorSpecific.h"
 #include "tlvf/ieee_1905_1/tlvWscM2.h"
 #include "tlvf/wfa_map/tlvApCapability.h"
+#include <tlvf/test/tlvVarList.h>
 
 #include <mapf/common/err.h>
 #include <mapf/common/logger.h>
@@ -152,6 +153,49 @@ int main(int argc, char *argv[])
     LOG(DEBUG) << "Done (WSC M2)";
     MAPF_INFO("TLV LENGTH WSC M2: " << thirdTlv->length());
 
+    auto fourthTlv     = msg.addClass<tlvTestVarList>();
+    fourthTlv->var0()  = 0xa0;
+    allocation_succeed = fourthTlv->alloc_simple_list(2);
+    mapf_assert(allocation_succeed);
+    std::get<1>(fourthTlv->simple_list(0)) = 0x0bb0;
+    std::get<1>(fourthTlv->simple_list(1)) = 0x0bb1;
+
+    auto cmplx = fourthTlv->create_complex_list();
+    cmplx->alloc_list(3);
+    std::get<1>(cmplx->list(0)) = 0xc0;
+    std::get<1>(cmplx->list(1)) = 0xc1;
+    std::get<1>(cmplx->list(2)) = 0xc2;
+    cmplx->var1()               = 0xd00d;
+    if (!fourthTlv->add_complex_list(cmplx)) {
+        LOG(ERROR) << "Failed to add complex list";
+        errors++;
+    }
+
+    cmplx         = fourthTlv->create_complex_list();
+    cmplx->var1() = 0xd11d;
+    if (!fourthTlv->add_complex_list(cmplx)) {
+        LOG(ERROR) << "Failed to add complex list";
+        errors++;
+    }
+    if (fourthTlv->add_complex_list(cmplx)) {
+        LOG(ERROR) << "Could add complex list a second time";
+        errors++;
+    }
+
+    cmplx         = fourthTlv->create_var1();
+    cmplx->var1() = 0xeeee;
+    if (!fourthTlv->add_var1(cmplx)) {
+        LOG(ERROR) << "Failed to add var1";
+        errors++;
+    }
+    if (fourthTlv->add_var1(cmplx)) {
+        LOG(ERROR) << "Could add var1 a second time";
+        errors++;
+    }
+
+    LOG(INFO) << "TLV 4 length " << fourthTlv->length();
+
+    LOG(INFO) << "Finalize";
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
 
@@ -244,6 +288,105 @@ int main(int argc, char *argv[])
                << "     ssid: " << ssid << std::endl
                << "     authentication_type: " << authentication_type << std::endl
                << "     encryption_type: " << encryption_type << std::endl;
+
+    auto tlv4 = received_message.addClass<tlvTestVarList>();
+    if (tlv4 == nullptr) {
+        MAPF_ERR("TLV4 is NULL");
+        errors++;
+    } else {
+        if (tlv4->var0() != 0xa0) {
+            MAPF_ERR("TLV4 var0 is 0x" << std::hex << tlv4->var0() << " instead of 0xa0");
+            errors++;
+        }
+
+        if (tlv4->simple_list_length() != 2) {
+            MAPF_ERR("TLV4 simple list length is " << tlv4->simple_list_length()
+                                                   << " instead of 2");
+            errors++;
+        }
+        for (size_t list_idx = 0; list_idx < tlv4->simple_list_length(); list_idx++) {
+            uint16_t expected = 0x0bb0;
+            if (!std::get<0>(tlv4->simple_list(list_idx))) {
+                MAPF_ERR("TLV4 has no simple " << list_idx);
+                errors++;
+            } else {
+                auto value = std::get<1>(tlv4->simple_list(list_idx));
+                if (value != expected + list_idx) {
+                    MAPF_ERR("TLV4 simple ") << list_idx << " has value " << std::hex << value
+                                             << " instead of " << std::hex << expected + list_idx;
+                    errors++;
+                }
+            }
+        }
+
+        if (tlv4->complex_list_length() != 2) {
+            MAPF_ERR("TLV4 complex list length is " << tlv4->complex_list_length()
+                                                    << " instead of 2");
+            errors++;
+        }
+        if (!std::get<0>(tlv4->complex_list(0))) {
+            MAPF_ERR("TLV4 has no complex 0");
+            errors++;
+        } else {
+            auto cmplx = std::get<1>(tlv4->complex_list(0));
+            if (cmplx.list_length() != 3) {
+                MAPF_ERR("TLV4 complex 0 list length is " << cmplx.list_length()
+                                                          << " instead of 3");
+                errors++;
+            }
+            uint8_t expected = 0xc0;
+            for (size_t list_idx = 0; list_idx < cmplx.list_length(); list_idx++) {
+                if (!std::get<0>(cmplx.list(list_idx))) {
+                    MAPF_ERR("TLV4 complex 0 has no list[" << list_idx << "]");
+                    errors++;
+                } else {
+                    auto value = std::get<1>(cmplx.list(list_idx));
+                    if (value != expected + list_idx) {
+                        MAPF_ERR("TLV4 complex 0 list ")
+                            << list_idx << " has value " << std::hex << value << " instead of "
+                            << std::hex << expected + list_idx;
+                        errors++;
+                    }
+                }
+            }
+
+            if (cmplx.var1() != 0xd00d) {
+                MAPF_ERR("TLV4 complex 0 var1 is " << std::hex << cmplx.var1()
+                                                   << " instead of 0xd00d");
+                errors++;
+            }
+        }
+        if (!std::get<0>(tlv4->complex_list(1))) {
+            MAPF_ERR("TLV4 has no complex 1");
+            errors++;
+        } else {
+            auto cmplx = std::get<1>(tlv4->complex_list(1));
+            if (cmplx.list_length() != 0) {
+                MAPF_ERR("TLV4 complex 1 list length is " << cmplx.list_length()
+                                                          << " instead of 0");
+                errors++;
+            }
+            if (cmplx.var1() != 0xd11d) {
+                MAPF_ERR("TLV4 complex 1 var1 is " << std::hex << cmplx.var1()
+                                                   << " instead of 0xd11d");
+                errors++;
+            }
+        }
+
+        auto var1 = tlv4->var1();
+        if (!var1) {
+            MAPF_ERR("TLV4 var1 is not set");
+        } else {
+            if (var1->list_length() != 0) {
+                MAPF_ERR("TLV4 var1 list length is " << var1->list_length() << " instead of 0");
+                errors++;
+            }
+            if (var1->var1() != 0xeeee) {
+                MAPF_ERR("TLV4 var1 var1 is " << std::hex << var1->var1() << " instead of 0xeeee");
+                errors++;
+            }
+        }
+    }
 
     int invalidBufferSize = 26;
     uint8_t invalidBuffer[invalidBufferSize];
