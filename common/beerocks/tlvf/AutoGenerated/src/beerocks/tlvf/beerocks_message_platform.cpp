@@ -90,7 +90,7 @@ bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::set_iface_name(const std::stri
     tlvf_copy_string(m_iface_name, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::set_iface_name(char str[], size_t size) {
+bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::set_iface_name(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
@@ -225,7 +225,7 @@ bool cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST::set_iface_name(const std::string
     tlvf_copy_string(m_iface_name, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST::set_iface_name(char str[], size_t size) {
+bool cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST::set_iface_name(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
@@ -443,7 +443,7 @@ bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::set_hostname(const std::string&
     tlvf_copy_string(m_hostname, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::set_hostname(char str[], size_t size) {
+bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::set_hostname(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_hostname received an empty string.";
         return false;
@@ -784,7 +784,7 @@ bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::set_iface_name(const std::string& 
     tlvf_copy_string(m_iface_name, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::set_iface_name(char str[], size_t size) {
+bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::set_iface_name(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
@@ -944,7 +944,7 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_iface_name(const std::st
     tlvf_copy_string(m_iface_name, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_iface_name(char str[], size_t size) {
+bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_iface_name(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
@@ -981,7 +981,7 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_ssid(const std::string& 
     tlvf_copy_string(m_ssid, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_ssid(char str[], size_t size) {
+bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_ssid(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_ssid received an empty string.";
         return false;
@@ -1018,7 +1018,7 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_pass(const std::string& 
     tlvf_copy_string(m_pass, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_pass(char str[], size_t size) {
+bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_pass(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_pass received an empty string.";
         return false;
@@ -1055,7 +1055,7 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_security_type(const std:
     tlvf_copy_string(m_security_type, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_security_type(char str[], size_t size) {
+bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_security_type(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_security_type received an empty string.";
         return false;
@@ -1142,7 +1142,7 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE::set_iface_name(const std::s
     tlvf_copy_string(m_iface_name, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE::set_iface_name(char str[], size_t size) {
+bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE::set_iface_name(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
@@ -1729,7 +1729,7 @@ bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST::set_iface_name(const std::st
     tlvf_copy_string(m_iface_name, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST::set_iface_name(char str[], size_t size) {
+bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST::set_iface_name(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
@@ -1811,7 +1811,7 @@ bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE::set_iface_name(const std::s
     tlvf_copy_string(m_iface_name, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE::set_iface_name(char str[], size_t size) {
+bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE::set_iface_name(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
@@ -1900,7 +1900,7 @@ bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST::set_iface_name(const std:
     tlvf_copy_string(m_iface_name, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST::set_iface_name(char str[], size_t size) {
+bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST::set_iface_name(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
@@ -1982,7 +1982,7 @@ bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE::set_iface_name(const std
     tlvf_copy_string(m_iface_name, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE::set_iface_name(char str[], size_t size) {
+bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE::set_iface_name(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
         return false;
@@ -2246,7 +2246,7 @@ bool cACTION_PLATFORM_ERROR_NOTIFICATION::set_data(const std::string& str) {
     tlvf_copy_string(m_data, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_ERROR_NOTIFICATION::set_data(char str[], size_t size) {
+bool cACTION_PLATFORM_ERROR_NOTIFICATION::set_data(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_data received an empty string.";
         return false;
@@ -2325,7 +2325,7 @@ bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_ap(cons
     tlvf_copy_string(m_iface_name_ap, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_ap(char str[], size_t size) {
+bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_ap(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_iface_name_ap received an empty string.";
         return false;
@@ -2362,7 +2362,7 @@ bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_bh(cons
     tlvf_copy_string(m_iface_name_bh, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_bh(char str[], size_t size) {
+bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_bh(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_iface_name_bh received an empty string.";
         return false;

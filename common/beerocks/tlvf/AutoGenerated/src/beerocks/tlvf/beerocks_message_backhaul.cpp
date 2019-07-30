@@ -49,7 +49,7 @@ bool cACTION_BACKHAUL_REGISTER_REQUEST::set_sta_iface(const std::string& str) {
     tlvf_copy_string(m_sta_iface, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BACKHAUL_REGISTER_REQUEST::set_sta_iface(char str[], size_t size) {
+bool cACTION_BACKHAUL_REGISTER_REQUEST::set_sta_iface(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_sta_iface received an empty string.";
         return false;
@@ -86,7 +86,7 @@ bool cACTION_BACKHAUL_REGISTER_REQUEST::set_hostap_iface(const std::string& str)
     tlvf_copy_string(m_hostap_iface, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BACKHAUL_REGISTER_REQUEST::set_hostap_iface(char str[], size_t size) {
+bool cACTION_BACKHAUL_REGISTER_REQUEST::set_hostap_iface(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_hostap_iface received an empty string.";
         return false;
@@ -268,7 +268,7 @@ bool cACTION_BACKHAUL_ENABLE::set_bridge_iface(const std::string& str) {
     tlvf_copy_string(m_bridge_iface, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BACKHAUL_ENABLE::set_bridge_iface(char str[], size_t size) {
+bool cACTION_BACKHAUL_ENABLE::set_bridge_iface(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_bridge_iface received an empty string.";
         return false;
@@ -313,7 +313,7 @@ bool cACTION_BACKHAUL_ENABLE::set_wire_iface(const std::string& str) {
     tlvf_copy_string(m_wire_iface, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BACKHAUL_ENABLE::set_wire_iface(char str[], size_t size) {
+bool cACTION_BACKHAUL_ENABLE::set_wire_iface(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_wire_iface received an empty string.";
         return false;
@@ -350,7 +350,7 @@ bool cACTION_BACKHAUL_ENABLE::set_sta_iface(const std::string& str) {
     tlvf_copy_string(m_sta_iface, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BACKHAUL_ENABLE::set_sta_iface(char str[], size_t size) {
+bool cACTION_BACKHAUL_ENABLE::set_sta_iface(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_sta_iface received an empty string.";
         return false;
@@ -387,7 +387,7 @@ bool cACTION_BACKHAUL_ENABLE::set_ap_iface(const std::string& str) {
     tlvf_copy_string(m_ap_iface, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BACKHAUL_ENABLE::set_ap_iface(char str[], size_t size) {
+bool cACTION_BACKHAUL_ENABLE::set_ap_iface(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_ap_iface received an empty string.";
         return false;
@@ -424,7 +424,7 @@ bool cACTION_BACKHAUL_ENABLE::set_ssid(const std::string& str) {
     tlvf_copy_string(m_ssid, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BACKHAUL_ENABLE::set_ssid(char str[], size_t size) {
+bool cACTION_BACKHAUL_ENABLE::set_ssid(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_ssid received an empty string.";
         return false;
@@ -461,7 +461,7 @@ bool cACTION_BACKHAUL_ENABLE::set_pass(const std::string& str) {
     tlvf_copy_string(m_pass, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BACKHAUL_ENABLE::set_pass(char str[], size_t size) {
+bool cACTION_BACKHAUL_ENABLE::set_pass(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_pass received an empty string.";
         return false;

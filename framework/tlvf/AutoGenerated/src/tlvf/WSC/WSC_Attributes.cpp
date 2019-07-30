@@ -62,7 +62,7 @@ bool cWscAttrEncryptedSettings::set_ssid(const std::string& str) {
     tlvf_copy_string(m_ssid, str.c_str(), str_size + 1);
     return true;
 }
-bool cWscAttrEncryptedSettings::set_ssid(char str[], size_t size) {
+bool cWscAttrEncryptedSettings::set_ssid(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_ssid received an empty string.";
         return false;
