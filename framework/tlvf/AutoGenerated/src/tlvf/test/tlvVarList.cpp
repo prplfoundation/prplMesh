@@ -253,7 +253,7 @@ void tlvTestVarList::class_swap()
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_var0));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_simple_list_length));
     for (size_t i = 0; i < (size_t)*m_simple_list_length; i++){
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(m_simple_list[i]));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&m_simple_list[i]));
     }
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_complex_list_length));
     for (size_t i = 0; i < (size_t)*m_complex_list_length; i++){

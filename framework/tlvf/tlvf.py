@@ -855,9 +855,9 @@ class TlvF:
             # add var to swap list
             if param_type_info.swap_needed:
                 if (param_type_info.type == TypeInfo.CLASS):
-                    t_name = ("std::get<1>(%s(i))" % param_name) + ("." if param_type_info.swap_is_func else "")
+                    t_name = ("&" if not param_type_info.swap_is_func else "") + ("std::get<1>(%s(i))" % param_name) + ("." if param_type_info.swap_is_func else "")
                 else:
-                    t_name = ("m_%s[i]" % param_name) + ("." if param_type_info.swap_is_func else "")
+                    t_name = ("&" if not param_type_info.swap_is_func else "") + ("m_%s[i]" % param_name) + ("." if param_type_info.swap_is_func else "")
                 if is_dynamic_len: t_length = ("m_" + param_name + "_idx__")
                 elif is_var_len: t_length = ("(size_t)*m_" + param_meta.length) 
                 else: t_length = str(param_meta.length)
