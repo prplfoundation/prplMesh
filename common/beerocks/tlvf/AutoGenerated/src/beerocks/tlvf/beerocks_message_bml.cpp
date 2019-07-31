@@ -3469,4 +3469,216 @@ bool cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::init()
     return true;
 }
 
+cACTION_BML_WFA_CA_CONTROLLER_REQUEST::cACTION_BML_WFA_CA_CONTROLLER_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_BML_WFA_CA_CONTROLLER_REQUEST::cACTION_BML_WFA_CA_CONTROLLER_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_BML_WFA_CA_CONTROLLER_REQUEST::~cACTION_BML_WFA_CA_CONTROLLER_REQUEST() {
+}
+uint16_t& cACTION_BML_WFA_CA_CONTROLLER_REQUEST::command_length() {
+    return (uint16_t&)(*m_command_length);
+}
+
+char* cACTION_BML_WFA_CA_CONTROLLER_REQUEST::command(size_t length) {
+    if( (m_command_idx__ <= 0) || (m_command_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "command length is smaller than requested length";
+        return nullptr;
+    }
+    return ((char*)m_command);
+}
+
+bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::set_command(std::string& str) {
+    return set_command(const_cast<std::string&>(str));
+}
+bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::set_command(const std::string& str) {
+    size_t str_size = str.size();
+    if (str_size == 0) {
+        TLVF_LOG(WARNING) << "set_command received an empty string.";
+        return false;
+    }
+    if (!alloc_command(str_size + 1)) { return false; } // +1 for null terminator
+    tlvf_copy_string(m_command, str.c_str(), str_size + 1);
+    return true;
+}
+bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::set_command(const char str[], size_t size) {
+    if (str == nullptr || size == 0) { 
+        TLVF_LOG(WARNING) << "set_command received an empty string.";
+        return false;
+    }
+    if (!alloc_command(size + 1)) { return false; } // +1 for null terminator
+    tlvf_copy_string(m_command, str, size + 1);
+    m_command[size] = '\0';
+    return true;
+}
+bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::alloc_command(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list command, abort!";
+        return false;
+    }
+    if (count == 0) {
+        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_command;
+    uint8_t *dst = (uint8_t *)m_command + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_command_idx__ += count;
+    *m_command_length += count;
+    m_buff_ptr__ += len;
+    return true;
+}
+
+void cACTION_BML_WFA_CA_CONTROLLER_REQUEST::class_swap()
+{
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_command_length));
+}
+
+size_t cACTION_BML_WFA_CA_CONTROLLER_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint16_t); // command_length
+    return class_size;
+}
+
+bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_command_length = (uint16_t*)m_buff_ptr__;
+    if (!m_parse__) *m_command_length = 0;
+    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    m_command = (char*)m_buff_ptr__;
+    uint16_t command_length = *m_command_length;
+    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&command_length)); }
+    m_command_idx__ = command_length;
+    m_buff_ptr__ += sizeof(char)*(command_length);
+    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::cACTION_BML_WFA_CA_CONTROLLER_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::cACTION_BML_WFA_CA_CONTROLLER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::~cACTION_BML_WFA_CA_CONTROLLER_RESPONSE() {
+}
+uint16_t& cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::reply_length() {
+    return (uint16_t&)(*m_reply_length);
+}
+
+char* cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::reply(size_t length) {
+    if( (m_reply_idx__ <= 0) || (m_reply_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "reply length is smaller than requested length";
+        return nullptr;
+    }
+    return ((char*)m_reply);
+}
+
+bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::set_reply(std::string& str) {
+    return set_reply(const_cast<std::string&>(str));
+}
+bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::set_reply(const std::string& str) {
+    size_t str_size = str.size();
+    if (str_size == 0) {
+        TLVF_LOG(WARNING) << "set_reply received an empty string.";
+        return false;
+    }
+    if (!alloc_reply(str_size + 1)) { return false; } // +1 for null terminator
+    tlvf_copy_string(m_reply, str.c_str(), str_size + 1);
+    return true;
+}
+bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::set_reply(const char str[], size_t size) {
+    if (str == nullptr || size == 0) { 
+        TLVF_LOG(WARNING) << "set_reply received an empty string.";
+        return false;
+    }
+    if (!alloc_reply(size + 1)) { return false; } // +1 for null terminator
+    tlvf_copy_string(m_reply, str, size + 1);
+    m_reply[size] = '\0';
+    return true;
+}
+bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::alloc_reply(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list reply, abort!";
+        return false;
+    }
+    if (count == 0) {
+        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_reply;
+    uint8_t *dst = (uint8_t *)m_reply + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_reply_idx__ += count;
+    *m_reply_length += count;
+    m_buff_ptr__ += len;
+    return true;
+}
+
+void cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::class_swap()
+{
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_reply_length));
+}
+
+size_t cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint16_t); // reply_length
+    return class_size;
+}
+
+bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_reply_length = (uint16_t*)m_buff_ptr__;
+    if (!m_parse__) *m_reply_length = 0;
+    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    m_reply = (char*)m_buff_ptr__;
+    uint16_t reply_length = *m_reply_length;
+    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&reply_length)); }
+    m_reply_idx__ = reply_length;
+    m_buff_ptr__ += sizeof(char)*(reply_length);
+    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
 
