@@ -785,7 +785,7 @@ class TlvF:
                 lines_cpp.append("if (m_length && m_%s__) {" % self.MEMBER_PARSE)
                 lines_cpp.append("%ssize_t len = *m_length;" % (self.getIndentation(1)))
                 lines_cpp.append("%sif (m_%s__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }" % (self.getIndentation(1), self.MEMBER_SWAP))
-                lines_cpp.append("%slen -= (m_%s__ - %s - m_%s__);" % (self.getIndentation(1), self.MEMBER_BUFF_PTR, self.MEMBER_CONST_MINIMUM_LENGTH, self.MEMBER_BUFF))
+                lines_cpp.append("%slen -= (m_%s__ - sizeof(*m_type) - sizeof(*m_length) - m_%s__);" % (self.getIndentation(1), self.MEMBER_BUFF_PTR, self.MEMBER_BUFF))
                 if TypeInfo(param_type).type == TypeInfo.CLASS:
                     lines_cpp.append("%swhile (len > 0) {" % (self.getIndentation(1)))
                     lines_cpp.append("%sif (len < %s::get_initial_size()) {" %(self.getIndentation(2), param_type))
