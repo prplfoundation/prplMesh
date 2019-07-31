@@ -27,12 +27,12 @@ const uint8_t& tlvTestVarList::type() {
     return (const uint8_t&)(*m_type);
 }
 
-uint16_t& tlvTestVarList::var0() {
-    return (uint16_t&)(*m_var0);
-}
-
 const uint16_t& tlvTestVarList::length() {
     return (const uint16_t&)(*m_length);
+}
+
+uint16_t& tlvTestVarList::var0() {
+    return (uint16_t&)(*m_var0);
 }
 
 uint16_t& tlvTestVarList::simple_list_length() {
@@ -249,8 +249,8 @@ bool tlvTestVarList::add_unknown_length_list(std::shared_ptr<cInner> ptr) {
 
 void tlvTestVarList::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_var0));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_var0));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_simple_list_length));
     for (size_t i = 0; i < (size_t)*m_simple_list_length; i++){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(m_simple_list[i]));
@@ -269,8 +269,8 @@ size_t tlvTestVarList::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(uint8_t); // type
-    class_size += sizeof(uint16_t); // var0
     class_size += sizeof(uint16_t); // length
+    class_size += sizeof(uint16_t); // var0
     class_size += sizeof(uint16_t); // simple_list_length
     class_size += sizeof(uint16_t); // complex_list_length
     return class_size;
@@ -285,12 +285,12 @@ bool tlvTestVarList::init()
     m_type = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_type = 0x1;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
-    m_var0 = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
-    if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
+    m_var0 = (uint16_t*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_simple_list_length = (uint16_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint16_t) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }

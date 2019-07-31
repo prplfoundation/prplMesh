@@ -31,8 +31,8 @@ class tlvTestVarList : public BaseClass
         ~tlvTestVarList();
 
         const uint8_t& type();
-        uint16_t& var0();
         const uint16_t& length();
+        uint16_t& var0();
         uint16_t& simple_list_length();
         std::tuple<bool, uint16_t&> simple_list(size_t idx);
         bool alloc_simple_list(size_t count = 1);
@@ -52,8 +52,8 @@ class tlvTestVarList : public BaseClass
     private:
         bool init();
         uint8_t* m_type = nullptr;
-        uint16_t* m_var0 = nullptr;
         uint16_t* m_length = nullptr;
+        uint16_t* m_var0 = nullptr;
         uint16_t* m_simple_list_length = nullptr;
         uint16_t* m_simple_list = nullptr;
         size_t m_simple_list_idx__ = 0;
