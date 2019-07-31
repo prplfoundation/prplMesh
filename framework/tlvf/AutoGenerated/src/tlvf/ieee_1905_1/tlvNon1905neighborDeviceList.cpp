@@ -108,7 +108,7 @@ bool tlvNon1905neighborDeviceList::init()
     if (m_length && m_parse__) {
         size_t len = *m_length;
         if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
-        len -= (m_buff_ptr__ - kMinimumLength - m_buff__);
+        len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_mac_non_1905_device_idx__ = len/sizeof(sMacAddr);
         m_buff_ptr__ += len;
     }
