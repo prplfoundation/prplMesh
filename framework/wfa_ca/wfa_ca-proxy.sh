@@ -31,8 +31,8 @@ DEFAULT_IFS=$IFS
 COMMANDS="ca_get_version,device_get_info,dev_reset_default,dev_set_config,dev_get_parameter,dev_send_1905,start_wps_registration"
 list_capi_controller_api="dev_reset_default,dev_set_config,dev_get_parameter,dev_send_1905,start_wps_registration"
 list_capi_agent_api="dev_set_config"
-controller_resp="wfca_controller: return value is: BML_RET_OK,"
-agent_resp="wfca_agent: return value is: BML_RET_OK,"
+controller_resp="wfa_ca_controller: return value is: BML_RET_OK,"
+agent_resp="wfa_ca_agent: return value is: BML_RET_OK,"
 USE_BML=1 #1=direct call to bml 0=use mapfcli
 CLI_PATH="/opt/beerocks/beerocks_cli"
 CA_VERSION="multiap-capi-$CA_VER_NUM"
@@ -173,7 +173,7 @@ capi_controller_api()
     send_running
 	if [ $USE_BML == "1" ];
 	then
-    	bmlResult=`$CLI_PATH -c "bml_wfca_controller $*"`
+    	bmlResult=`$CLI_PATH -c "bml_wfa_ca_controller $*"`
         status=`echo "$bmlResult"|tr '\n' ' '|grep "$controller_resp"`
     	if [[ -n "$status" ]];
 	    then
@@ -192,7 +192,7 @@ capi_agent_api()
     send_running
 	if [ $USE_BML == "1" ];
 	then
-    	bmlResult=`$CLI_PATH -c "bml_wfca_agent $*"`
+    	bmlResult=`$CLI_PATH -c "bml_wfa_ca_agent $*"`
 	    status=`echo "$bmlResult"|tr '\n' ' '|grep "$agent_resp"`
     	if [[ -n "$status" ]];
 	    then
@@ -373,7 +373,7 @@ dev_get_parameter()
 	    send_running
 	    #Change paramlist to comma seperated insync with bml
 	    paramlist=`echo $* | tr " " ","` 
-	    bmlResult=`$CLI_PATH -c "bml_wfca_controller dev_get_parameter,$paramlist"`
+	    bmlResult=`$CLI_PATH -c "bml_wfa_ca_controller dev_get_parameter,$paramlist"`
 	    status=`echo "$bmlResult"|tr '\n' ' '|grep "$controller_resp"`
 	    if [[ -n "$status" ]];
 	        then
@@ -405,7 +405,7 @@ dev_send_1905()
 {
 	if [ $USE_BML == "1" ];
 	then
-    	bmlResult=`$CLI_PATH -c "bml_wfca_controller $*"`
+    	bmlResult=`$CLI_PATH -c "bml_wfa_ca_controller $*"`
 	    status=`echo "$bmlResult"|tr '\n' ' '|grep "$controller_resp"`
     	if [[ -n "$status" ]];
 	    then

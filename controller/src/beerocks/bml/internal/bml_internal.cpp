@@ -2565,13 +2565,13 @@ int bml_internal::get_restricted_channels(uint8_t *restricted_channels, const st
     return (iRet);
 }
 
-int bml_internal::wfca_controller(const char *cmd, char *ret_buf, int ret_buf_size)
+int bml_internal::wfa_ca_controller(const char *cmd, char *ret_buf, int ret_buf_size)
 {
     // TODO: implement function
     return BML_RET_OK;
 }
 
-int bml_internal::wfca_agent(const char *cmd, char *ret_buf, int ret_buf_size)
+int bml_internal::wfa_ca_agent(const char *cmd, char *ret_buf, int ret_buf_size)
 {
     // TODO: implement function
     return BML_RET_OK;
