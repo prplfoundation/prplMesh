@@ -300,11 +300,11 @@ int main(int argc, char *argv[])
         }
 
         if (tlv4->simple_list_length() != 2) {
-            MAPF_ERR("TLV4 simple list length is " << tlv4->simple_list_length()
+            MAPF_ERR("TLV4 simple list length is " << unsigned(tlv4->simple_list_length())
                                                    << " instead of 2");
             errors++;
         }
-        for (size_t list_idx = 0; list_idx < tlv4->simple_list_length(); list_idx++) {
+        for (uint8_t list_idx = 0; list_idx < tlv4->simple_list_length(); list_idx++) {
             uint16_t expected = 0x0bb0;
             if (!std::get<0>(tlv4->simple_list(list_idx))) {
                 MAPF_ERR("TLV4 has no simple " << list_idx);
@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
         }
 
         if (tlv4->complex_list_length() != 2) {
-            MAPF_ERR("TLV4 complex list length is " << tlv4->complex_list_length()
+            MAPF_ERR("TLV4 complex list length is " << unsigned(tlv4->complex_list_length())
                                                     << " instead of 2");
             errors++;
         }
@@ -330,12 +330,12 @@ int main(int argc, char *argv[])
         } else {
             auto cmplx = std::get<1>(tlv4->complex_list(0));
             if (cmplx.list_length() != 3) {
-                MAPF_ERR("TLV4 complex 0 list length is " << cmplx.list_length()
+                MAPF_ERR("TLV4 complex 0 list length is " << unsigned(cmplx.list_length())
                                                           << " instead of 3");
                 errors++;
             }
             uint8_t expected = 0xc0;
-            for (size_t list_idx = 0; list_idx < cmplx.list_length(); list_idx++) {
+            for (uint8_t list_idx = 0; list_idx < cmplx.list_length(); list_idx++) {
                 if (!std::get<0>(cmplx.list(list_idx))) {
                     MAPF_ERR("TLV4 complex 0 has no list[" << list_idx << "]");
                     errors++;
@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
         } else {
             auto cmplx = std::get<1>(tlv4->complex_list(1));
             if (cmplx.list_length() != 0) {
-                MAPF_ERR("TLV4 complex 1 list length is " << cmplx.list_length()
+                MAPF_ERR("TLV4 complex 1 list length is " << unsigned(cmplx.list_length())
                                                           << " instead of 0");
                 errors++;
             }
@@ -378,7 +378,7 @@ int main(int argc, char *argv[])
             MAPF_ERR("TLV4 var1 is not set");
         } else {
             if (var1->list_length() != 0) {
-                MAPF_ERR("TLV4 var1 list length is " << var1->list_length() << " instead of 0");
+                MAPF_ERR("TLV4 var1 list length is " << unsigned(var1->list_length()) << " instead of 0");
                 errors++;
             }
             if (var1->var1() != 0xeeee) {
