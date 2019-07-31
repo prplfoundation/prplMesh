@@ -118,7 +118,7 @@ bool tlvTransmitterLinkMetric::init()
     if (m_length && m_parse__) {
         size_t len = *m_length;
         if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
-        len -= (m_buff_ptr__ - kMinimumLength - m_buff__);
+        len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_interface_pair_info_idx__ = len/sizeof(sInterfacePairInfo);
         m_buff_ptr__ += len;
     }
