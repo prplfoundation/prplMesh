@@ -214,8 +214,8 @@ static void bml_utils_dump_conn_map(
     }
 }
 
-static void print_bml_wfca_ret_val(const std::string &func_name, int ret_val,
-                                   const std::string &ret_str)
+static void print_bml_wfa_ca_ret_val(const std::string &func_name, int ret_val,
+                                     const std::string &ret_str)
 {
     std::cout << func_name << ": ";
     if (ret_val == BML_RET_OK) {
@@ -230,7 +230,7 @@ static void print_bml_wfca_ret_val(const std::string &func_name, int ret_val,
     }
 }
 
-static bool wfca_dummy_ret_val_gen(const std::string &cmd, std::string &ret_str)
+static bool wfa_ca_dummy_ret_val_gen(const std::string &cmd, std::string &ret_str)
 {
     enum eWfcaCommand : uint8_t {
         WFCA_CMD_DEV_GET_PARAM = 0,
@@ -238,23 +238,23 @@ static bool wfca_dummy_ret_val_gen(const std::string &cmd, std::string &ret_str)
         WFCA_CMD_DEV_RESET_DEFAULT,
         WFCA_CMD_DEV_START_WPS,
         WFCA_CMD_UNDEFINED,
-    } wfca_cmd = WFCA_CMD_UNDEFINED;
+    } wfa_ca_cmd = WFCA_CMD_UNDEFINED;
 
     auto cmd_vec       = string_utils::str_split(cmd, ',');
     bool program_param = false;
 
     if (cmd_vec.size() > 1) {
         if (cmd_vec[0] == "dev_get_parameter") {
-            wfca_cmd      = WFCA_CMD_DEV_GET_PARAM;
+            wfa_ca_cmd    = WFCA_CMD_DEV_GET_PARAM;
             program_param = true;
         } else if (cmd_vec[0] == "dev_set_config") {
-            wfca_cmd      = WFCA_CMD_DEV_SET_CONFIG;
+            wfa_ca_cmd    = WFCA_CMD_DEV_SET_CONFIG;
             program_param = true;
         } else if (cmd_vec[0] == "dev_reset_default") {
-            wfca_cmd      = WFCA_CMD_DEV_RESET_DEFAULT;
+            wfa_ca_cmd    = WFCA_CMD_DEV_RESET_DEFAULT;
             program_param = true;
         } else if (cmd_vec[0] == "start_wps_registration") {
-            wfca_cmd = WFCA_CMD_DEV_START_WPS;
+            wfa_ca_cmd = WFCA_CMD_DEV_START_WPS;
         } else {
             return false;
         }
@@ -270,7 +270,7 @@ static bool wfca_dummy_ret_val_gen(const std::string &cmd, std::string &ret_str)
         cmd_vec.erase(it, std::next(it));
     }
 
-    if (wfca_cmd == WFCA_CMD_DEV_GET_PARAM) {
+    if (wfa_ca_cmd == WFCA_CMD_DEV_GET_PARAM) {
         auto it = std::find(cmd_vec.begin(), cmd_vec.end(), "parameter");
         if (it == cmd_vec.end())
             return false;
@@ -332,7 +332,7 @@ static bool wfca_dummy_ret_val_gen(const std::string &cmd, std::string &ret_str)
         } else {
             return false;
         }
-    } else if (wfca_cmd == WFCA_CMD_DEV_SET_CONFIG) {
+    } else if (wfa_ca_cmd == WFCA_CMD_DEV_SET_CONFIG) {
         auto it = std::find(cmd_vec.begin(), cmd_vec.end(), "backhaul");
 
         if (it != cmd_vec.end()) {
@@ -367,7 +367,7 @@ static bool wfca_dummy_ret_val_gen(const std::string &cmd, std::string &ret_str)
         }
         ret_str = "Return=success";
 
-    } else if (wfca_cmd == WFCA_CMD_DEV_RESET_DEFAULT) {
+    } else if (wfa_ca_cmd == WFCA_CMD_DEV_RESET_DEFAULT) {
 
         // get name
         auto it = std::find(cmd_vec.begin(), cmd_vec.end(), "name");
@@ -393,7 +393,7 @@ static bool wfca_dummy_ret_val_gen(const std::string &cmd, std::string &ret_str)
 
         ret_str = "Return=success";
 
-    } else if (wfca_cmd == WFCA_CMD_DEV_START_WPS) {
+    } else if (wfa_ca_cmd == WFCA_CMD_DEV_START_WPS) {
 
         // get band (controller/agent)
         auto it = std::find(cmd_vec.begin(), cmd_vec.end(), "band");
@@ -678,10 +678,10 @@ void cli_bml::setFunctionsMapAndArray()
         "bml_restricted_channels_get_slave", "<mac>", "Get restricted channels from slave 'mac'",
         static_cast<pFunction>(&cli_bml::get_slave_restricted_channels_caller), 1, 1, STRING_ARG);
     insertCommandToMap(
-        "bml_wfca_controller", "<string_command>", "send wfca controller<string_command>",
-        static_cast<pFunction>(&cli_bml::bml_wfca_controller_caller), 1, 1, STRING_ARG);
-    insertCommandToMap("bml_wfca_agent", "<string_command>", "send wfca agent <string_command>",
-                       static_cast<pFunction>(&cli_bml::bml_wfca_agent_caller), 1, 1, STRING_ARG);
+        "bml_wfa_ca_controller", "<string_command>", "send wfa_ca controller<string_command>",
+        static_cast<pFunction>(&cli_bml::bml_wfa_ca_controller_caller), 1, 1, STRING_ARG);
+    insertCommandToMap("bml_wfa_ca_agent", "<string_command>", "send wfa_ca agent <string_command>",
+                       static_cast<pFunction>(&cli_bml::bml_wfa_ca_agent_caller), 1, 1, STRING_ARG);
     insertCommandToMap(
         "bml_trigger_channel_selection",            // command name
         "<al_mac (mac format)> <ruid(mac format)>", // command args list
@@ -1271,18 +1271,18 @@ int cli_bml::get_slave_restricted_channels_caller(int numOfArgs)
     return -1;
 }
 
-int cli_bml::bml_wfca_controller_caller(int numOfArgs)
+int cli_bml::bml_wfa_ca_controller_caller(int numOfArgs)
 {
     if (numOfArgs == 1) {
-        return wfca_controller(args.stringArgs[0]);
+        return wfa_ca_controller(args.stringArgs[0]);
     }
     return -1;
 }
 
-int cli_bml::bml_wfca_agent_caller(int numOfArgs)
+int cli_bml::bml_wfa_ca_agent_caller(int numOfArgs)
 {
     if (numOfArgs == 1) {
-        return wfca_agent(args.stringArgs[0]);
+        return wfa_ca_agent(args.stringArgs[0]);
     }
     return -1;
 }
@@ -1781,26 +1781,26 @@ int cli_bml::get_slave_restricted_channels(const std::string &hostap_mac)
     return 0;
 }
 
-int cli_bml::wfca_controller(const std::string &cmd)
+int cli_bml::wfa_ca_controller(const std::string &cmd)
 {
-    int ret = bml_wfca_controller(ctx, cmd.c_str(), print_buffer, sizeof(print_buffer));
+    int ret = bml_wfa_ca_controller(ctx, cmd.c_str(), print_buffer, sizeof(print_buffer));
     std::string ret_str;
-    if (!wfca_dummy_ret_val_gen(cmd, ret_str)) {
+    if (!wfa_ca_dummy_ret_val_gen(cmd, ret_str)) {
         ret = BML_RET_INVALID_ARGS;
     }
-    print_bml_wfca_ret_val("wfca_controller", ret, ret_str);
+    print_bml_wfa_ca_ret_val("wfa_ca_controller", ret, ret_str);
 
     return 0;
 }
 
-int cli_bml::wfca_agent(const std::string &cmd)
+int cli_bml::wfa_ca_agent(const std::string &cmd)
 {
-    int ret = bml_wfca_controller(ctx, cmd.c_str(), print_buffer, sizeof(print_buffer));
+    int ret = bml_wfa_ca_controller(ctx, cmd.c_str(), print_buffer, sizeof(print_buffer));
     std::string ret_str;
-    if (!wfca_dummy_ret_val_gen(cmd, ret_str)) {
+    if (!wfa_ca_dummy_ret_val_gen(cmd, ret_str)) {
         ret = BML_RET_INVALID_ARGS;
     }
-    print_bml_wfca_ret_val("wfca_agent", ret, ret_str);
+    print_bml_wfa_ca_ret_val("wfa_ca_agent", ret, ret_str);
 
     return 0;
 }

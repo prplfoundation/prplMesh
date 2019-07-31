@@ -144,11 +144,11 @@ public:
     int get_restricted_channels(uint8_t *restricted_channels, const std::string mac,
                                 uint8_t is_global);
 
-    // send wfca controller command
-    int wfca_controller(const char *cmd, char *ret_buf, int ret_buf_size);
+    // send wfa-ca controller command
+    int wfa_ca_controller(const char *cmd, char *ret_buf, int ret_buf_size);
 
-    // send wfca agent command
-    int wfca_agent(const char *cmd, char *ret_buf, int ret_buf_size);
+    // send wfa-ca agent command
+    int wfa_ca_agent(const char *cmd, char *ret_buf, int ret_buf_size);
 
     // triggers channel selection on specific Agent
     int channel_selection(const char *al_mac, const char *ruid);
