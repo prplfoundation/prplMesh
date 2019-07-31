@@ -470,7 +470,7 @@ class cWscAttrEncryptedSettings : public BaseClass
         char* ssid(size_t length = 0);
         bool set_ssid(std::string& str);
         bool set_ssid(const std::string& str);
-        bool set_ssid(char buffer[], size_t size);
+        bool set_ssid(const char buffer[], size_t size);
         bool alloc_ssid(size_t count = 1);
         sWscAttrAuthenticationType& authentication_type_attr();
         sWscAttrEncryptionType& encryption_type_attr();

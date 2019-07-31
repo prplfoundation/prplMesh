@@ -143,7 +143,7 @@ class cACTION_CLI_RESPONSE_STR : public BaseClass
         char* buffer(size_t length = 0);
         bool set_buffer(std::string& str);
         bool set_buffer(const std::string& str);
-        bool set_buffer(char buffer[], size_t size);
+        bool set_buffer(const char buffer[], size_t size);
         bool alloc_buffer(size_t count = 1);
         void class_swap();
         static size_t get_initial_size();

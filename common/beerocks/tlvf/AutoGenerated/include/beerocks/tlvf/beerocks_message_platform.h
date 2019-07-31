@@ -59,7 +59,7 @@ class cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST : public BaseClass
         char* iface_name(size_t length = 0);
         bool set_iface_name(std::string& str);
         bool set_iface_name(const std::string& str);
-        bool set_iface_name(char buffer[], size_t size);
+        bool set_iface_name(const char buffer[], size_t size);
         void class_swap();
         static size_t get_initial_size();
 
@@ -108,7 +108,7 @@ class cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST : public BaseClass
         char* iface_name(size_t length = 0);
         bool set_iface_name(std::string& str);
         bool set_iface_name(const std::string& str);
-        bool set_iface_name(char buffer[], size_t size);
+        bool set_iface_name(const char buffer[], size_t size);
         void class_swap();
         static size_t get_initial_size();
 
@@ -197,7 +197,7 @@ class cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION : public BaseClass
         char* hostname(size_t length = 0);
         bool set_hostname(std::string& str);
         bool set_hostname(const std::string& str);
-        bool set_hostname(char buffer[], size_t size);
+        bool set_hostname(const char buffer[], size_t size);
         void class_swap();
         static size_t get_initial_size();
 
@@ -344,7 +344,7 @@ class cACTION_PLATFORM_WPS_ONBOARDING_REQUEST : public BaseClass
         char* iface_name(size_t length = 0);
         bool set_iface_name(std::string& str);
         bool set_iface_name(const std::string& str);
-        bool set_iface_name(char buffer[], size_t size);
+        bool set_iface_name(const char buffer[], size_t size);
         void class_swap();
         static size_t get_initial_size();
 
@@ -409,19 +409,19 @@ class cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST : public BaseClass
         char* iface_name(size_t length = 0);
         bool set_iface_name(std::string& str);
         bool set_iface_name(const std::string& str);
-        bool set_iface_name(char buffer[], size_t size);
+        bool set_iface_name(const char buffer[], size_t size);
         char* ssid(size_t length = 0);
         bool set_ssid(std::string& str);
         bool set_ssid(const std::string& str);
-        bool set_ssid(char buffer[], size_t size);
+        bool set_ssid(const char buffer[], size_t size);
         char* pass(size_t length = 0);
         bool set_pass(std::string& str);
         bool set_pass(const std::string& str);
-        bool set_pass(char buffer[], size_t size);
+        bool set_pass(const char buffer[], size_t size);
         char* security_type(size_t length = 0);
         bool set_security_type(std::string& str);
         bool set_security_type(const std::string& str);
-        bool set_security_type(char buffer[], size_t size);
+        bool set_security_type(const char buffer[], size_t size);
         void class_swap();
         static size_t get_initial_size();
 
@@ -452,7 +452,7 @@ class cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE : public BaseClass
         char* iface_name(size_t length = 0);
         bool set_iface_name(std::string& str);
         bool set_iface_name(const std::string& str);
-        bool set_iface_name(char buffer[], size_t size);
+        bool set_iface_name(const char buffer[], size_t size);
         uint8_t& success();
         void class_swap();
         static size_t get_initial_size();
@@ -719,7 +719,7 @@ class cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST : public BaseClass
         char* iface_name(size_t length = 0);
         bool set_iface_name(std::string& str);
         bool set_iface_name(const std::string& str);
-        bool set_iface_name(char buffer[], size_t size);
+        bool set_iface_name(const char buffer[], size_t size);
         int8_t& iface_operation();
         void class_swap();
         static size_t get_initial_size();
@@ -746,7 +746,7 @@ class cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE : public BaseClass
         char* iface_name(size_t length = 0);
         bool set_iface_name(std::string& str);
         bool set_iface_name(const std::string& str);
-        bool set_iface_name(char buffer[], size_t size);
+        bool set_iface_name(const char buffer[], size_t size);
         int8_t& iface_operation();
         uint8_t& success();
         void class_swap();
@@ -775,7 +775,7 @@ class cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST : public BaseClass
         char* iface_name(size_t length = 0);
         bool set_iface_name(std::string& str);
         bool set_iface_name(const std::string& str);
-        bool set_iface_name(char buffer[], size_t size);
+        bool set_iface_name(const char buffer[], size_t size);
         uint8_t& enable();
         void class_swap();
         static size_t get_initial_size();
@@ -802,7 +802,7 @@ class cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE : public BaseClass
         char* iface_name(size_t length = 0);
         bool set_iface_name(std::string& str);
         bool set_iface_name(const std::string& str);
-        bool set_iface_name(char buffer[], size_t size);
+        bool set_iface_name(const char buffer[], size_t size);
         uint8_t& enable();
         uint8_t& success();
         void class_swap();
@@ -912,7 +912,7 @@ class cACTION_PLATFORM_ERROR_NOTIFICATION : public BaseClass
         char* data(size_t length = 0);
         bool set_data(std::string& str);
         bool set_data(const std::string& str);
-        bool set_data(char buffer[], size_t size);
+        bool set_data(const char buffer[], size_t size);
         void class_swap();
         static size_t get_initial_size();
 
@@ -938,11 +938,11 @@ class cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION : public BaseClass
         char* iface_name_ap(size_t length = 0);
         bool set_iface_name_ap(std::string& str);
         bool set_iface_name_ap(const std::string& str);
-        bool set_iface_name_ap(char buffer[], size_t size);
+        bool set_iface_name_ap(const char buffer[], size_t size);
         char* iface_name_bh(size_t length = 0);
         bool set_iface_name_bh(std::string& str);
         bool set_iface_name_bh(const std::string& str);
-        bool set_iface_name_bh(char buffer[], size_t size);
+        bool set_iface_name_bh(const char buffer[], size_t size);
         uint8_t& status_ap();
         uint8_t& status_bh();
         uint8_t& status_bh_wired();
