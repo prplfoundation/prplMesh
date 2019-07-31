@@ -49,7 +49,7 @@ bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const std::str
     tlvf_copy_string(m_slave_version, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(char str[], size_t size) {
+bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_slave_version received an empty string.";
         return false;
@@ -206,7 +206,7 @@ bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const std::string
     tlvf_copy_string(m_master_version, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(char str[], size_t size) {
+bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_master_version received an empty string.";
         return false;
@@ -3189,7 +3189,7 @@ bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const std::stri
     tlvf_copy_string(m_name, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(char str[], size_t size) {
+bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_name received an empty string.";
         return false;

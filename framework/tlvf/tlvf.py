@@ -919,8 +919,8 @@ class TlvF:
                 lines_cpp.append( "%sreturn true;" % (self.getIndentation(1)))
                 lines_cpp.append( "}")
 
-                lines_h.append( "bool set_%s(char buffer[], size_t size);" % (param_name) )
-                lines_cpp.append( "bool %s::set_%s(char str[], size_t size) {" % (obj_meta.name, param_name) )
+                lines_h.append( "bool set_%s(const char buffer[], size_t size);" % (param_name) )
+                lines_cpp.append( "bool %s::set_%s(const char str[], size_t size) {" % (obj_meta.name, param_name) )
                 lines_cpp.append( "%sif (str == nullptr || size == 0) { " % self.getIndentation(1))
                 lines_cpp.append( '%sTLVF_LOG(WARNING) << "set_%s received an empty string.";' %  (self.getIndentation(2), param_name) )
                 lines_cpp.append( "%sreturn false;" % self.getIndentation(2))

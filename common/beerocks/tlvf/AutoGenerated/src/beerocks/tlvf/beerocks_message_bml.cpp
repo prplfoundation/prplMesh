@@ -156,7 +156,7 @@ bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const std::string& str) {
     tlvf_copy_string(m_buffer, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(char str[], size_t size) {
+bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_buffer received an empty string.";
         return false;
@@ -270,7 +270,7 @@ bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const std::string& str) {
     tlvf_copy_string(m_buffer, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BML_NW_MAP_UPDATE::set_buffer(char str[], size_t size) {
+bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_buffer received an empty string.";
         return false;
@@ -384,7 +384,7 @@ bool cACTION_BML_STATS_UPDATE::set_buffer(const std::string& str) {
     tlvf_copy_string(m_buffer, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BML_STATS_UPDATE::set_buffer(char str[], size_t size) {
+bool cACTION_BML_STATS_UPDATE::set_buffer(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_buffer received an empty string.";
         return false;
@@ -494,7 +494,7 @@ bool cACTION_BML_EVENTS_UPDATE::set_buffer(const std::string& str) {
     tlvf_copy_string(m_buffer, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BML_EVENTS_UPDATE::set_buffer(char str[], size_t size) {
+bool cACTION_BML_EVENTS_UPDATE::set_buffer(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_buffer received an empty string.";
         return false;
@@ -3346,7 +3346,7 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const std::string& str) {
     tlvf_copy_string(m_buffer, str.c_str(), str_size + 1);
     return true;
 }
-bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(char str[], size_t size) {
+bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_buffer received an empty string.";
         return false;

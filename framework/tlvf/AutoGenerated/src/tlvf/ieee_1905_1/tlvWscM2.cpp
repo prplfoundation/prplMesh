@@ -102,7 +102,7 @@ bool tlvWscM2::set_manufacturer(const std::string& str) {
     tlvf_copy_string(m_manufacturer, str.c_str(), str_size + 1);
     return true;
 }
-bool tlvWscM2::set_manufacturer(char str[], size_t size) {
+bool tlvWscM2::set_manufacturer(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_manufacturer received an empty string.";
         return false;
@@ -187,7 +187,7 @@ bool tlvWscM2::set_model_name(const std::string& str) {
     tlvf_copy_string(m_model_name, str.c_str(), str_size + 1);
     return true;
 }
-bool tlvWscM2::set_model_name(char str[], size_t size) {
+bool tlvWscM2::set_model_name(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_model_name received an empty string.";
         return false;
@@ -269,7 +269,7 @@ bool tlvWscM2::set_model_number(const std::string& str) {
     tlvf_copy_string(m_model_number, str.c_str(), str_size + 1);
     return true;
 }
-bool tlvWscM2::set_model_number(char str[], size_t size) {
+bool tlvWscM2::set_model_number(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_model_number received an empty string.";
         return false;
@@ -348,7 +348,7 @@ bool tlvWscM2::set_serial_number(const std::string& str) {
     tlvf_copy_string(m_serial_number, str.c_str(), str_size + 1);
     return true;
 }
-bool tlvWscM2::set_serial_number(char str[], size_t size) {
+bool tlvWscM2::set_serial_number(const char str[], size_t size) {
     if (str == nullptr || size == 0) { 
         TLVF_LOG(WARNING) << "set_serial_number received an empty string.";
         return false;
