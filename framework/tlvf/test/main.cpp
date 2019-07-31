@@ -10,6 +10,7 @@
 #include "tlvf/CmduMessageTx.h"
 #include <cstring>
 #include <iostream>
+#include <sstream>
 
 #include "tlvf/ieee_1905_1/tlv1905NeighborDevice.h"
 #include "tlvf/ieee_1905_1/tlvLinkMetricQuery.h"
@@ -154,14 +155,14 @@ int main(int argc, char *argv[])
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
 
-    // Temporary for checking correctness
-    std::cout << "TX: " << std::endl;
-    for (size_t i = 0; i < msg.getMessageLength(); i++) {
-        if (i % 16 == 0)
-            std::cout << std::endl;
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (unsigned)tx_buffer[i] << " ";
+    LOG(INFO) << "TX:";
+    for (size_t i = 0; i < msg.getMessageLength(); i += 16) {
+        std::ostringstream hexdump;
+        for (size_t j = i; j < msg.getMessageLength() && j < i + 16; j++)
+            hexdump << std::hex << std::setw(2) << std::setfill('0') << (unsigned)tx_buffer[j]
+                    << " ";
+        LOG(INFO) << hexdump.str();
     }
-    std::cout << std::endl;
 
     uint8_t recv_buffer[sizeof(tx_buffer)];
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
@@ -196,7 +197,7 @@ int main(int argc, char *argv[])
             address.oct[4] = 0x05;
             address.oct[5] = 0x05;*/
 
-            std::cout << "ADDRESS IS " << (int)address.oct[0] << std::endl;
+            LOG(INFO) << "ADDRESS IS " << (int)address.oct[0];
         } else {
             MAPF_ERR("TLV DOES NOT EXIST");
             errors++;
