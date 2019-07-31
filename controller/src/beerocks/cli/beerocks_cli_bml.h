@@ -97,6 +97,7 @@ private:
     static void events_update_cb(const struct BML_EVENT *event, bool to_console);
     static void events_update_to_console_cb(const struct BML_EVENT *event);
     static void events_update_to_socket_cb(const struct BML_EVENT *event);
+    static void wfa_ca_reply_to_console_cb(const char *buffer);
 
     // Caller functions
     int connect_caller(int numOfArgs);

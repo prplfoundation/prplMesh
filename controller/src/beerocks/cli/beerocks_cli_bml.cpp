@@ -214,219 +214,6 @@ static void bml_utils_dump_conn_map(
     }
 }
 
-static void print_bml_wfa_ca_ret_val(const std::string &func_name, int ret_val,
-                                     const std::string &ret_str)
-{
-    std::cout << func_name << ": ";
-    if (ret_val == BML_RET_OK) {
-        std::cout << "return value is: BML_RET_OK, " << ret_str << std::endl;
-
-    } else if (ret_val == BML_RET_OP_FAILED) {
-        std::cout << "return value is: BML_RET_OP_FAILED" << std::endl;
-    } else if (ret_val == BML_RET_INVALID_ARGS) {
-        std::cout << "return value is: BML_RET_INVALID_ARGS" << std::endl;
-    } else {
-        std::cout << "return value is: UNKNOWN" << std::endl;
-    }
-}
-
-static bool wfa_ca_dummy_ret_val_gen(const std::string &cmd, std::string &ret_str)
-{
-    enum eWfcaCommand : uint8_t {
-        WFCA_CMD_DEV_GET_PARAM = 0,
-        WFCA_CMD_DEV_SET_CONFIG,
-        WFCA_CMD_DEV_RESET_DEFAULT,
-        WFCA_CMD_DEV_START_WPS,
-        WFCA_CMD_UNDEFINED,
-    } wfa_ca_cmd = WFCA_CMD_UNDEFINED;
-
-    auto cmd_vec       = string_utils::str_split(cmd, ',');
-    bool program_param = false;
-
-    if (cmd_vec.size() > 1) {
-        if (cmd_vec[0] == "dev_get_parameter") {
-            wfa_ca_cmd    = WFCA_CMD_DEV_GET_PARAM;
-            program_param = true;
-        } else if (cmd_vec[0] == "dev_set_config") {
-            wfa_ca_cmd    = WFCA_CMD_DEV_SET_CONFIG;
-            program_param = true;
-        } else if (cmd_vec[0] == "dev_reset_default") {
-            wfa_ca_cmd    = WFCA_CMD_DEV_RESET_DEFAULT;
-            program_param = true;
-        } else if (cmd_vec[0] == "start_wps_registration") {
-            wfa_ca_cmd = WFCA_CMD_DEV_START_WPS;
-        } else {
-            return false;
-        }
-
-        cmd_vec.erase(cmd_vec.begin());
-    }
-
-    if (program_param) {
-        // common and meaningless parameters to erase
-        auto it = std::find(cmd_vec.begin(), cmd_vec.end(), "program");
-        if (it == cmd_vec.end() && *std::next(it) != "map")
-            return false;
-        cmd_vec.erase(it, std::next(it));
-    }
-
-    if (wfa_ca_cmd == WFCA_CMD_DEV_GET_PARAM) {
-        auto it = std::find(cmd_vec.begin(), cmd_vec.end(), "parameter");
-        if (it == cmd_vec.end())
-            return false;
-        auto param = std::next(it);
-
-        if (*param == "macaddr") {
-            // Mac address of VAP iface which belong to ruid # (radio id), and has specific ssid
-
-            // get ruid
-            it = std::find(cmd_vec.begin(), cmd_vec.end(), "ruid");
-            if (it == cmd_vec.end())
-                return false;
-            //auto ruid = string_utils::stoi(*std::next(it)); // not necessary for dummy function
-
-            // get ssid
-            it = std::find(cmd_vec.begin(), cmd_vec.end(), "ssid");
-            if (it == cmd_vec.end())
-                return false;
-            //auto ssid = *std::next(it); // not necessary for dummy function
-
-            ret_str = *param + "=aa:aa:aa:aa:aa:aa";
-
-        } else if (*param == "bssid") {
-            // same as "macaddr"
-            // Mac address of VAP iface which belong to ruid # (radio id), and has specific ssid
-
-            // get ruid
-            it = std::find(cmd_vec.begin(), cmd_vec.end(), "ruid");
-            if (it == cmd_vec.end())
-                return false;
-            //auto ruid = string_utils::stoi(*std::next(it)); // not necessary for dummy function
-
-            // get ssid
-            it = std::find(cmd_vec.begin(), cmd_vec.end(), "ssid");
-            if (it == cmd_vec.end())
-                return false;
-            //auto ssid = *std::next(it); // not necessary for dummy function
-
-            ret_str = *param + "=aa:aa:aa:aa:aa:aa";
-
-        } else if (*param == "ALid") {
-            // Platform bridge mac addr
-            ret_str = *param + "=bb:bb:bb:bb:bb:bb";
-
-        } else if (*param == "fronthaulradio") {
-            // The ruid (radio id) of the on "band" 2.4G or 5G
-            it = std::find(cmd_vec.begin(), cmd_vec.end(), "band");
-            if (it == cmd_vec.end())
-                return false;
-            auto band = std::next(it);
-            if (*band == "24g") {
-                ret_str = *param + "=2";
-            } else if (*band == "5g") {
-                ret_str = *param + "=5";
-            } else {
-                return false;
-            }
-
-        } else {
-            return false;
-        }
-    } else if (wfa_ca_cmd == WFCA_CMD_DEV_SET_CONFIG) {
-        auto it = std::find(cmd_vec.begin(), cmd_vec.end(), "backhaul");
-
-        if (it != cmd_vec.end()) {
-            // Backhaul connection switch request (between wifi/eth)
-            auto param = std::next(it);
-
-            if (*param == "eth") {
-                // Set agent to ETH backhaul connection
-            } else {
-                // Set agent to Wireless backhaul connection of some ruid (radio id)
-                //int ruid = string_utils::stoi(*param);
-            }
-
-        } else {
-            // bssinfo config command
-            const std::string bssinfo_str("bssinfo");
-            std::vector<std::string> bss_info_vec;
-
-            while (true) {
-                auto it = std::find_if(cmd_vec.begin(), cmd_vec.end(),
-                                       [&](const std::string &vec_element) {
-                                           if (vec_element.find(bssinfo_str) != std::string::npos) {
-                                               return true;
-                                           }
-                                           return false;
-                                       });
-                if (it == cmd_vec.end())
-                    break;
-                bss_info_vec = string_utils::str_split(*std::next(it), ' ');
-                cmd_vec.erase(it, std::next(it));
-            }
-        }
-        ret_str = "Return=success";
-
-    } else if (wfa_ca_cmd == WFCA_CMD_DEV_RESET_DEFAULT) {
-
-        // get name
-        auto it = std::find(cmd_vec.begin(), cmd_vec.end(), "name");
-        if (it == cmd_vec.end())
-            return false;
-        // auto name = *std::next(it);
-
-        // get devrole (controller/agent)
-        it = std::find(cmd_vec.begin(), cmd_vec.end(), "devrole");
-        if (it == cmd_vec.end())
-            return false;
-        auto devrole = *std::next(it);
-        if (devrole != "controller" && devrole != "agent")
-            return false;
-
-        // get type ("testbed"/"DUT")
-        it = std::find(cmd_vec.begin(), cmd_vec.end(), "type");
-        if (it == cmd_vec.end())
-            return false;
-        auto type = *std::next(it);
-        if (type != "testbed" && type != "DUT")
-            return false;
-
-        ret_str = "Return=success";
-
-    } else if (wfa_ca_cmd == WFCA_CMD_DEV_START_WPS) {
-
-        // get band (controller/agent)
-        auto it = std::find(cmd_vec.begin(), cmd_vec.end(), "band");
-        if (it == cmd_vec.end())
-            return false;
-        auto band_str = *std::next(it);
-        if (band_str != "24G") {
-
-        } else if (band_str != "5GH") {
-
-        } else if (band_str != "5GL") {
-
-        } else if (band_str != "NA") {
-
-        } else
-            return false;
-
-        // get wps config method
-        it = std::find(cmd_vec.begin(), cmd_vec.end(), "WpsConfigMethod");
-        if (it == cmd_vec.end())
-            return false;
-        auto wps_config_method = *std::next(it);
-        if (wps_config_method != "PBC")
-            return false;
-
-        ret_str = "Return=success";
-
-    } else {
-        return false;
-    }
-
-    return true;
-}
 #ifdef BEEROCKS_RDKB
 static void steering_set_group_string_to_struct(const std::string &str_cfg_2,
                                                 const std::string &str_cfg_5,
@@ -1017,6 +804,8 @@ void cli_bml::events_update_to_socket_cb(const struct BML_EVENT *event)
 {
     cli_bml::events_update_cb(event, false);
 }
+
+void cli_bml::wfa_ca_reply_to_console_cb(const char *buffer) { std::cout << buffer << std::endl; }
 
 //
 // Caller functions
@@ -1783,25 +1572,18 @@ int cli_bml::get_slave_restricted_channels(const std::string &hostap_mac)
 
 int cli_bml::wfa_ca_controller(const std::string &cmd)
 {
-    int ret = bml_wfa_ca_controller(ctx, cmd.c_str(), print_buffer, sizeof(print_buffer));
-    std::string ret_str;
-    if (!wfa_ca_dummy_ret_val_gen(cmd, ret_str)) {
-        ret = BML_RET_INVALID_ARGS;
-    }
-    print_bml_wfa_ca_ret_val("wfa_ca_controller", ret, ret_str);
+    int ret = bml_wfa_ca_controller(ctx, cmd.c_str(), cmd.size() + 1, wfa_ca_reply_to_console_cb);
 
+    // print error message only on error
+    if (ret != BML_RET_OK) {
+        printBmlReturnVals("wfca_controller", ret);
+    }
     return 0;
 }
 
 int cli_bml::wfa_ca_agent(const std::string &cmd)
 {
-    int ret = bml_wfa_ca_controller(ctx, cmd.c_str(), print_buffer, sizeof(print_buffer));
-    std::string ret_str;
-    if (!wfa_ca_dummy_ret_val_gen(cmd, ret_str)) {
-        ret = BML_RET_INVALID_ARGS;
-    }
-    print_bml_wfa_ca_ret_val("wfa_ca_agent", ret, ret_str);
-
+    //TODO
     return 0;
 }
 
