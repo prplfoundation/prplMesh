@@ -61,8 +61,8 @@ bool tlvPushButtonEventNotification::alloc_media_type_list(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_media_type_list;
-    uint8_t *dst = (uint8_t *)m_media_type_list + len;
+    uint8_t *src = (uint8_t *)&m_media_type_list[*m_media_type_list_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);

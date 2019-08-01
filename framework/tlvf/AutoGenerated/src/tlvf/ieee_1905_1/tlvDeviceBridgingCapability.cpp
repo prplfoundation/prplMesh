@@ -59,8 +59,11 @@ std::shared_ptr<cMacList> tlvDeviceBridgingCapability::create_bridging_tuples_li
     m_lock_order_counter__ = 0;
     m_lock_allocation__ = true;
     uint8_t *src = (uint8_t *)m_bridging_tuples_list;
-    uint8_t *dst = (uint8_t *)m_bridging_tuples_list + len;
     if (!m_parse__) {
+        if (m_bridging_tuples_list_idx__ > 0) {
+            src = (uint8_t *)m_bridging_tuples_list_vector[m_bridging_tuples_list_idx__ - 1]->getBuffPtr();
+        }
+        uint8_t *dst = src + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -76,7 +79,13 @@ bool tlvDeviceBridgingCapability::add_bridging_tuples_list(std::shared_ptr<cMacL
         TLVF_LOG(ERROR) << "No call to create_bridging_tuples_list was called before add_bridging_tuples_list";
         return false;
     }
-    if (ptr->getStartBuffPtr() != (uint8_t *)m_bridging_tuples_list) {
+    uint8_t *src = (uint8_t *)m_bridging_tuples_list;
+    if (!m_parse__) {
+        if (m_bridging_tuples_list_idx__ > 0) {
+            src = (uint8_t *)m_bridging_tuples_list_vector[m_bridging_tuples_list_idx__ - 1]->getBuffPtr();
+        }
+    }
+    if (ptr->getStartBuffPtr() != src) {
         TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
         return false;
     }
@@ -190,8 +199,8 @@ bool cMacList::alloc_mac_list(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_mac_list;
-    uint8_t *dst = (uint8_t *)m_mac_list + len;
+    uint8_t *src = (uint8_t *)&m_mac_list[*m_mac_list_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);

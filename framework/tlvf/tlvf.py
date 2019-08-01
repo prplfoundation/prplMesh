@@ -985,7 +985,7 @@ class TlvF:
             lines_cpp.append( "%s}" % self.getIndentation(1) )
             lines_cpp.append( "%sm_%s__ = %s;" %(self.getIndentation(1), self.MEMBER_LOCK_ORDER_COUNTER, param_meta.list_index) )
             lines_cpp.append( "%sm_%s__ = true;" % (self.getIndentation(1), self.MEMBER_LOCK_ALLOCATION) )
-            lines_cpp.extend(self.addAllocationMarkers(obj_meta, "create", param_meta, param_length, True)) # Variable length lists support
+            lines_cpp.extend(self.addAllocationMarkersCreate(obj_meta, param_meta, param_length, True)) # Variable length lists support
             if is_dynamic_len:
                 lines_cpp.append( "%sreturn std::make_shared<%s>(getBuffPtr(), getBuffRemainingBytes(), m_%s__, m_%s__);" % (self.getIndentation(1), param_type, self.MEMBER_PARSE, self.MEMBER_SWAP) )
             else:
@@ -1006,7 +1006,16 @@ class TlvF:
             lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
             lines_cpp.append( "%s}" % self.getIndentation(1) )
 
-            lines_cpp.append( "%sif (ptr->getStartBuffPtr() != (uint8_t *)m_%s) {" % (self.getIndentation(1), param_name) )
+            lines_cpp.append("%suint8_t *src = (uint8_t *)m_%s;" % (self.getIndentation(1), param_meta.name))
+            if param_length != None:
+                lines_cpp.append("%sif (!m_parse__) {" %self.getIndentation(1))
+                lines_cpp.append("%sif (m_%s_idx__ > 0) {" % (self.getIndentation(2), param_name))
+                ptr = "(uint8_t *)m_%s_vector[m_%s_idx__ - 1]->getBuffPtr()" %(param_meta.name,param_name)
+                lines_cpp.append("%ssrc = %s;" %(self.getIndentation(3), ptr))                    
+                lines_cpp.append("%s}" %self.getIndentation(2))
+                lines_cpp.append("%s}" %self.getIndentation(1))
+
+            lines_cpp.append( "%sif (ptr->getStartBuffPtr() != src) {" % (self.getIndentation(1)) )
             lines_cpp.append( '%sTLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";' %  self.getIndentation(2) )
             lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
             lines_cpp.append( "%s}" % self.getIndentation(1) )
@@ -1023,7 +1032,7 @@ class TlvF:
                     lines_cpp.append( "%s(*m_%s)++;" % (self.getIndentation(2), param_length) )
                 lines_cpp.append( "%s}" % (self.getIndentation(1)) )
             lines_cpp.append( "%ssize_t len = ptr->getLen();" % (self.getIndentation(1) ))
-            lines_cpp.extend(self.addAllocationMarkers(obj_meta, "add", param_meta, param_length, False)) # Variable length lists support
+            lines_cpp.extend(self.addAllocationMarkersAdd(obj_meta, param_meta, param_length, False)) # Variable length lists support
             if param_length or is_dynamic_len:
                 lines_cpp.append( "%sm_%s_vector.push_back(ptr);" % (self.getIndentation(1), param_name ))
             else:
@@ -1052,7 +1061,7 @@ class TlvF:
             lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
             lines_cpp.append( "%s}" % self.getIndentation(1) )
             lines_cpp.append( "%sm_%s__ = %s;" %(self.getIndentation(1), self.MEMBER_LOCK_ORDER_COUNTER, param_meta.list_index) )
-            lines_cpp.extend( self.addAllocationMarkers(obj_meta, "alloc", param_meta, param_length, True) ) # Variable length lists support
+            lines_cpp.extend( self.addAllocationMarkersAlloc(obj_meta, param_meta, param_length, True) ) # Variable length lists support
             lines_cpp.append( "%sm_%s_idx__ += count;" % (self.getIndentation(1), param_name) )
             if is_var_len:
                 lines_cpp.append( "%s*m_%s += count;" % (self.getIndentation(1), param_length) )
@@ -1085,20 +1094,52 @@ class TlvF:
     # (list[]) which can only be the last member of each class, therefore no
     # action is needed for these lists.
     ##########################################################################
-    def addAllocationMarkers(self, obj_meta, func_name, param_meta, param_length, memmove):
+    def addAllocationMarkersCreate(self, obj_meta, param_meta, param_length, memmove):
+        lines_cpp = []
+        if param_meta.length_type == MetaData.LENGTH_TYPE_VAR or param_meta.length_type == MetaData.LENGTH_TYPE_DYNAMIC:
+            if memmove:
+                lines_cpp.append("%suint8_t *src = (uint8_t *)m_%s;" % (self.getIndentation(1), param_meta.name))
+                lines_cpp.append("%sif (!m_parse__) {" %self.getIndentation(1))
+                # Since list of classes does not have length parameter like list of native type, 
+                # taking the buffer pointer from classes vector last element  
+                if param_length != None:
+                    lines_cpp.append("%sif (m_%s_idx__ > 0) {" % (self.getIndentation(2), param_meta.name))
+                    ptr = "(uint8_t *)m_%s_vector[m_%s_idx__ - 1]->getBuffPtr()" %(param_meta.name,param_meta.name)
+                    lines_cpp.append("%ssrc = %s;" %(self.getIndentation(3), ptr))                    
+                    lines_cpp.append("%s}" %self.getIndentation(2))
+                lines_cpp.append("%suint8_t *dst = src + len;" %(self.getIndentation(2)))
+                lines_cpp.append("%ssize_t move_length = getBuffRemainingBytes(src) - len;" %self.getIndentation(2))
+                lines_cpp.append("%sstd::copy_n(src, move_length, dst);" %self.getIndentation(2))
+                lines_cpp.append("%s}" %self.getIndentation(1))
+
+            marker = "%s_%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, "create", param_meta.name)
+            obj_meta.alloc_list.append((marker, "create"))
+            lines_cpp.append(marker)
+
+        return lines_cpp
+
+    def addAllocationMarkersAlloc(self, obj_meta, param_meta, param_length, memmove):
         lines_cpp = []
         if param_meta.length_type == MetaData.LENGTH_TYPE_VAR:
             if memmove:
-                ptr = "(uint8_t *)m_%s" %(param_meta.name)# if param_length else "getBuffPtr()"
-                lines_cpp.append("%suint8_t *src = %s;" %(self.getIndentation(1), ptr))
-                lines_cpp.append("%suint8_t *dst = %s + len;" %(self.getIndentation(1), ptr))
+                lines_cpp.append("%suint8_t *src = (uint8_t *)&m_%s[*m_%s];" % (self.getIndentation(1), param_meta.name, param_length))
+                lines_cpp.append("%suint8_t *dst = src + len;" %(self.getIndentation(1)))
                 lines_cpp.append("%sif (!m_parse__) {" %self.getIndentation(1))                
                 lines_cpp.append("%ssize_t move_length = getBuffRemainingBytes(src) - len;" %self.getIndentation(2))
                 lines_cpp.append("%sstd::copy_n(src, move_length, dst);" %self.getIndentation(2))
                 lines_cpp.append("%s}" %self.getIndentation(1))
 
-            marker = "%s_%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, func_name, param_meta.name)
-            obj_meta.alloc_list.append((marker, func_name))
+            marker = "%s_%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, "alloc", param_meta.name)
+            obj_meta.alloc_list.append((marker, "alloc"))
+            lines_cpp.append(marker)
+
+        return lines_cpp
+
+    def addAllocationMarkersAdd(self, obj_meta, param_meta, param_length, memmove):
+        lines_cpp = []
+        if param_meta.length_type == MetaData.LENGTH_TYPE_VAR:
+            marker = "%s_%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, "add", param_meta.name)
+            obj_meta.alloc_list.append((marker, "add"))
             lines_cpp.append(marker)
 
         return lines_cpp

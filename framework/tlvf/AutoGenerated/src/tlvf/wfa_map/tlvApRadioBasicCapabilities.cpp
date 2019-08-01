@@ -67,8 +67,11 @@ std::shared_ptr<cOperatingClassesInfo> tlvApRadioBasicCapabilities::create_opera
     m_lock_order_counter__ = 0;
     m_lock_allocation__ = true;
     uint8_t *src = (uint8_t *)m_operating_classes_info_list;
-    uint8_t *dst = (uint8_t *)m_operating_classes_info_list + len;
     if (!m_parse__) {
+        if (m_operating_classes_info_list_idx__ > 0) {
+            src = (uint8_t *)m_operating_classes_info_list_vector[m_operating_classes_info_list_idx__ - 1]->getBuffPtr();
+        }
+        uint8_t *dst = src + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -84,7 +87,13 @@ bool tlvApRadioBasicCapabilities::add_operating_classes_info_list(std::shared_pt
         TLVF_LOG(ERROR) << "No call to create_operating_classes_info_list was called before add_operating_classes_info_list";
         return false;
     }
-    if (ptr->getStartBuffPtr() != (uint8_t *)m_operating_classes_info_list) {
+    uint8_t *src = (uint8_t *)m_operating_classes_info_list;
+    if (!m_parse__) {
+        if (m_operating_classes_info_list_idx__ > 0) {
+            src = (uint8_t *)m_operating_classes_info_list_vector[m_operating_classes_info_list_idx__ - 1]->getBuffPtr();
+        }
+    }
+    if (ptr->getStartBuffPtr() != src) {
         TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
         return false;
     }
@@ -216,8 +225,8 @@ bool cOperatingClassesInfo::alloc_statically_non_operable_channels_list(size_t c
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_statically_non_operable_channels_list;
-    uint8_t *dst = (uint8_t *)m_statically_non_operable_channels_list + len;
+    uint8_t *src = (uint8_t *)&m_statically_non_operable_channels_list[*m_statically_non_operable_channels_list_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);

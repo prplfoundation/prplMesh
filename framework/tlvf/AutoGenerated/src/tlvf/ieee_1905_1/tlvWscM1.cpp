@@ -131,8 +131,8 @@ bool tlvWscM1::alloc_manufacturer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_manufacturer;
-    uint8_t *dst = (uint8_t *)m_manufacturer + len;
+    uint8_t *src = (uint8_t *)&m_manufacturer[*m_manufacturer_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -217,8 +217,8 @@ bool tlvWscM1::alloc_model_name(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 1;
-    uint8_t *src = (uint8_t *)m_model_name;
-    uint8_t *dst = (uint8_t *)m_model_name + len;
+    uint8_t *src = (uint8_t *)&m_model_name[*m_model_name_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -300,8 +300,8 @@ bool tlvWscM1::alloc_model_number(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 2;
-    uint8_t *src = (uint8_t *)m_model_number;
-    uint8_t *dst = (uint8_t *)m_model_number + len;
+    uint8_t *src = (uint8_t *)&m_model_number[*m_model_number_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -380,8 +380,8 @@ bool tlvWscM1::alloc_serial_number(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 3;
-    uint8_t *src = (uint8_t *)m_serial_number;
-    uint8_t *dst = (uint8_t *)m_serial_number + len;
+    uint8_t *src = (uint8_t *)&m_serial_number[*m_serial_number_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -461,8 +461,8 @@ bool tlvWscM1::alloc_device_name(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 4;
-    uint8_t *src = (uint8_t *)m_device_name;
-    uint8_t *dst = (uint8_t *)m_device_name + len;
+    uint8_t *src = (uint8_t *)&m_device_name[*m_device_name_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
