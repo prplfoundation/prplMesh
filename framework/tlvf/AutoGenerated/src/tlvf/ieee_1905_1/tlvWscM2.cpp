@@ -127,8 +127,8 @@ bool tlvWscM2::alloc_manufacturer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_manufacturer;
-    uint8_t *dst = (uint8_t *)m_manufacturer + len;
+    uint8_t *src = (uint8_t *)&m_manufacturer[*m_manufacturer_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -212,8 +212,8 @@ bool tlvWscM2::alloc_model_name(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 1;
-    uint8_t *src = (uint8_t *)m_model_name;
-    uint8_t *dst = (uint8_t *)m_model_name + len;
+    uint8_t *src = (uint8_t *)&m_model_name[*m_model_name_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -294,8 +294,8 @@ bool tlvWscM2::alloc_model_number(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 2;
-    uint8_t *src = (uint8_t *)m_model_number;
-    uint8_t *dst = (uint8_t *)m_model_number + len;
+    uint8_t *src = (uint8_t *)&m_model_number[*m_model_number_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -373,8 +373,8 @@ bool tlvWscM2::alloc_serial_number(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 3;
-    uint8_t *src = (uint8_t *)m_serial_number;
-    uint8_t *dst = (uint8_t *)m_serial_number + len;
+    uint8_t *src = (uint8_t *)&m_serial_number[*m_serial_number_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -436,8 +436,8 @@ std::shared_ptr<WSC::cWscAttrEncryptedSettings> tlvWscM2::create_encrypted_setti
     m_lock_order_counter__ = 4;
     m_lock_allocation__ = true;
     uint8_t *src = (uint8_t *)m_encrypted_settings;
-    uint8_t *dst = (uint8_t *)m_encrypted_settings + len;
     if (!m_parse__) {
+        uint8_t *dst = src + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -454,7 +454,8 @@ bool tlvWscM2::add_encrypted_settings(std::shared_ptr<WSC::cWscAttrEncryptedSett
         TLVF_LOG(ERROR) << "No call to create_encrypted_settings was called before add_encrypted_settings";
         return false;
     }
-    if (ptr->getStartBuffPtr() != (uint8_t *)m_encrypted_settings) {
+    uint8_t *src = (uint8_t *)m_encrypted_settings;
+    if (ptr->getStartBuffPtr() != src) {
         TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
         return false;
     }

@@ -181,8 +181,8 @@ bool cACTION_BML_NW_MAP_RESPONSE::alloc_buffer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_buffer;
-    uint8_t *dst = (uint8_t *)m_buffer + len;
+    uint8_t *src = (uint8_t *)&m_buffer[*m_buffer_size];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -295,8 +295,8 @@ bool cACTION_BML_NW_MAP_UPDATE::alloc_buffer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_buffer;
-    uint8_t *dst = (uint8_t *)m_buffer + len;
+    uint8_t *src = (uint8_t *)&m_buffer[*m_buffer_size];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -409,8 +409,8 @@ bool cACTION_BML_STATS_UPDATE::alloc_buffer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_buffer;
-    uint8_t *dst = (uint8_t *)m_buffer + len;
+    uint8_t *src = (uint8_t *)&m_buffer[*m_buffer_size];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -519,8 +519,8 @@ bool cACTION_BML_EVENTS_UPDATE::alloc_buffer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_buffer;
-    uint8_t *dst = (uint8_t *)m_buffer + len;
+    uint8_t *src = (uint8_t *)&m_buffer[*m_buffer_size];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -2548,8 +2548,8 @@ bool cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::alloc_vap_list(size_t count) 
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_vap_list;
-    uint8_t *dst = (uint8_t *)m_vap_list + len;
+    uint8_t *src = (uint8_t *)&m_vap_list[*m_vap_list_size];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -2686,8 +2686,8 @@ bool cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::alloc_vap_list(size_t count)
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_vap_list;
-    uint8_t *dst = (uint8_t *)m_vap_list + len;
+    uint8_t *src = (uint8_t *)&m_vap_list[*m_vap_list_size];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -3371,8 +3371,8 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::alloc_buffer(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_buffer;
-    uint8_t *dst = (uint8_t *)m_buffer + len;
+    uint8_t *src = (uint8_t *)&m_buffer[*m_buffer_size];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -3529,8 +3529,8 @@ bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::alloc_command(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_command;
-    uint8_t *dst = (uint8_t *)m_command + len;
+    uint8_t *src = (uint8_t *)&m_command[*m_command_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -3635,8 +3635,8 @@ bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::alloc_reply(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_reply;
-    uint8_t *dst = (uint8_t *)m_reply + len;
+    uint8_t *src = (uint8_t *)&m_reply[*m_reply_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);

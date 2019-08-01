@@ -63,8 +63,8 @@ bool tlvTestVarList::alloc_simple_list(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_simple_list;
-    uint8_t *dst = (uint8_t *)m_simple_list + len;
+    uint8_t *src = (uint8_t *)&m_simple_list[*m_simple_list_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -106,8 +106,11 @@ std::shared_ptr<cInner> tlvTestVarList::create_complex_list() {
     m_lock_order_counter__ = 1;
     m_lock_allocation__ = true;
     uint8_t *src = (uint8_t *)m_complex_list;
-    uint8_t *dst = (uint8_t *)m_complex_list + len;
     if (!m_parse__) {
+        if (m_complex_list_idx__ > 0) {
+            src = (uint8_t *)m_complex_list_vector[m_complex_list_idx__ - 1]->getBuffPtr();
+        }
+        uint8_t *dst = src + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -125,7 +128,13 @@ bool tlvTestVarList::add_complex_list(std::shared_ptr<cInner> ptr) {
         TLVF_LOG(ERROR) << "No call to create_complex_list was called before add_complex_list";
         return false;
     }
-    if (ptr->getStartBuffPtr() != (uint8_t *)m_complex_list) {
+    uint8_t *src = (uint8_t *)m_complex_list;
+    if (!m_parse__) {
+        if (m_complex_list_idx__ > 0) {
+            src = (uint8_t *)m_complex_list_vector[m_complex_list_idx__ - 1]->getBuffPtr();
+        }
+    }
+    if (ptr->getStartBuffPtr() != src) {
         TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
         return false;
     }
@@ -160,8 +169,8 @@ std::shared_ptr<cInner> tlvTestVarList::create_var1() {
     m_lock_order_counter__ = 2;
     m_lock_allocation__ = true;
     uint8_t *src = (uint8_t *)m_var1;
-    uint8_t *dst = (uint8_t *)m_var1 + len;
     if (!m_parse__) {
+        uint8_t *dst = src + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
@@ -178,7 +187,8 @@ bool tlvTestVarList::add_var1(std::shared_ptr<cInner> ptr) {
         TLVF_LOG(ERROR) << "No call to create_var1 was called before add_var1";
         return false;
     }
-    if (ptr->getStartBuffPtr() != (uint8_t *)m_var1) {
+    uint8_t *src = (uint8_t *)m_var1;
+    if (ptr->getStartBuffPtr() != src) {
         TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
         return false;
     }
@@ -216,6 +226,15 @@ std::shared_ptr<cInner> tlvTestVarList::create_unknown_length_list() {
     }
     m_lock_order_counter__ = 3;
     m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_unknown_length_list;
+    if (!m_parse__) {
+        if (m_unknown_length_list_idx__ > 0) {
+            src = (uint8_t *)m_unknown_length_list_vector[m_unknown_length_list_idx__ - 1]->getBuffPtr();
+        }
+        uint8_t *dst = src + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
     return std::make_shared<cInner>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
 }
 
@@ -228,7 +247,13 @@ bool tlvTestVarList::add_unknown_length_list(std::shared_ptr<cInner> ptr) {
         TLVF_LOG(ERROR) << "No call to create_unknown_length_list was called before add_unknown_length_list";
         return false;
     }
-    if (ptr->getStartBuffPtr() != (uint8_t *)m_unknown_length_list) {
+    uint8_t *src = (uint8_t *)m_unknown_length_list;
+    if (!m_parse__) {
+        if (m_unknown_length_list_idx__ > 0) {
+            src = (uint8_t *)m_unknown_length_list_vector[m_unknown_length_list_idx__ - 1]->getBuffPtr();
+        }
+    }
+    if (ptr->getStartBuffPtr() != src) {
         TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
         return false;
     }
@@ -400,8 +425,8 @@ bool cInner::alloc_list(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)m_list;
-    uint8_t *dst = (uint8_t *)m_list + len;
+    uint8_t *src = (uint8_t *)&m_list[*m_list_length];
+    uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
