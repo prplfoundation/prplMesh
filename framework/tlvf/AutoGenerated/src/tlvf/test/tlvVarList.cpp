@@ -205,6 +205,15 @@ bool tlvTestVarList::add_var1(std::shared_ptr<cInner> ptr) {
     return true;
 }
 
+size_t tlvTestVarList::unknown_length_list_length()
+{
+    size_t len = 0;
+    for (size_t i = 0; i < m_unknown_length_list_idx__; i++) {
+        len += m_unknown_length_list_vector[i]->getLen();
+    }
+    return len;
+}
+
 std::tuple<bool, cInner&> tlvTestVarList::unknown_length_list(size_t idx) {
     bool ret_success = ( (m_unknown_length_list_idx__ > 0) && (m_unknown_length_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;

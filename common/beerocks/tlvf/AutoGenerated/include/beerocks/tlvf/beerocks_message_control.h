@@ -161,6 +161,7 @@ class cACTION_CONTROL_CONTROLLER_PING_REQUEST : public BaseClass
         uint16_t& total();
         uint16_t& seq();
         uint16_t& size();
+        size_t data_length() { return m_data_idx__ * sizeof(uint8_t); }
         std::tuple<bool, uint8_t&> data(size_t idx);
         bool alloc_data(size_t count = 1);
         void class_swap();
@@ -190,6 +191,7 @@ class cACTION_CONTROL_CONTROLLER_PING_RESPONSE : public BaseClass
         uint16_t& total();
         uint16_t& seq();
         uint16_t& size();
+        size_t data_length() { return m_data_idx__ * sizeof(uint8_t); }
         std::tuple<bool, uint8_t&> data(size_t idx);
         bool alloc_data(size_t count = 1);
         void class_swap();
@@ -219,6 +221,7 @@ class cACTION_CONTROL_AGENT_PING_REQUEST : public BaseClass
         uint16_t& total();
         uint16_t& seq();
         uint16_t& size();
+        size_t data_length() { return m_data_idx__ * sizeof(uint8_t); }
         std::tuple<bool, uint8_t&> data(size_t idx);
         bool alloc_data(size_t count = 1);
         void class_swap();
@@ -248,6 +251,7 @@ class cACTION_CONTROL_AGENT_PING_RESPONSE : public BaseClass
         uint16_t& total();
         uint16_t& seq();
         uint16_t& size();
+        size_t data_length() { return m_data_idx__ * sizeof(uint8_t); }
         std::tuple<bool, uint8_t&> data(size_t idx);
         bool alloc_data(size_t count = 1);
         void class_swap();

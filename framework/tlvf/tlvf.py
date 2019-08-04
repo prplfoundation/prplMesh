@@ -888,6 +888,20 @@ class TlvF:
 
             # add comment
             lines_h.extend(param_comment_line)
+            if is_dynamic_len:
+                if param_type_info.type == TypeInfo.CLASS:
+                    lines_h.append("size_t %s_length();" %(param_name))
+                    lines_cpp.append("size_t %s::%s_length()" %(obj_meta.name, param_name))
+                    lines_cpp.append("{")
+                    lines_cpp.append("%ssize_t len = 0;" %(self.getIndentation(1)))
+                    lines_cpp.append("%sfor (size_t i = 0; i < m_%s_idx__; i++) {" %(self.getIndentation(1), param_name))
+                    lines_cpp.append("%slen += m_%s_vector[i]->getLen();" %(self.getIndentation(2), param_name))
+                    lines_cpp.append("%s}" %(self.getIndentation(1)))
+                    lines_cpp.append("%sreturn len;" %(self.getIndentation(1)))
+                    lines_cpp.append("}")
+                    lines_cpp.append("")
+                else:
+                    lines_h.append("size_t %s_length() { return m_%s_idx__ * sizeof(%s); }" % (param_name, param_name, param_type_full))
 
             #add function to get char pointer
             if param_type_info.type == TypeInfo.CHAR:

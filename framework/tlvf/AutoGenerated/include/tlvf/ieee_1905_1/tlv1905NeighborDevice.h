@@ -52,6 +52,7 @@ class tlv1905NeighborDevice : public BaseClass
         const eTlvType& type();
         const uint16_t& length();
         sMacAddr& mac_local_iface();
+        size_t mac_al_1905_device_length() { return m_mac_al_1905_device_idx__ * sizeof(tlv1905NeighborDevice::sMacAl1905Device); }
         std::tuple<bool, sMacAl1905Device&> mac_al_1905_device(size_t idx);
         bool alloc_mac_al_1905_device(size_t count = 1);
         void class_swap();
