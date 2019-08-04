@@ -91,8 +91,16 @@ bool cli::parsedCommandArgumentsLinux(std::string line)
         resetArguments();
         return false;
     }
+
     const commandInfo &info = commandIt->second;
     commandNumOfArgs        = commandTokens.size() - 1;
+
+    bool late_processing = false;
+    auto first_arg       = std::next(commandTokens.begin());
+    if (first_arg != commandTokens.end() && (*first_arg)[0] == '"') {
+        late_processing  = true;
+        commandNumOfArgs = 1;
+    }
 
     if (commandNumOfArgs < info.minNumOfArgs) {
         std::cout << "Error, Entered less than minimum number of arguments required." << std::endl;
@@ -105,13 +113,7 @@ bool cli::parsedCommandArgumentsLinux(std::string line)
         return false;
     }
 
-    int i                = 0;
-    bool late_processing = false;
-    auto first_arg       = std::next(commandTokens.begin());
-    if (first_arg != commandTokens.end() && (*first_arg)[0] == '"') {
-        late_processing = true;
-    }
-
+    int i = 0;
     for (std::vector<std::string>::iterator it = commandTokens.begin(); it != commandTokens.end();
          it++) {
         if (it == commandTokens.begin())
