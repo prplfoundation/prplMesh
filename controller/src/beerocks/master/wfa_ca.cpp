@@ -229,28 +229,123 @@ void wfa_ca::handle_wfa_ca_message(
     auto command_type      = wfa_ca_command_from_string(command_type_str);
 
     switch (command_type) {
-    case eWfaCaCommand::CA_GET_VERSION:
+    case eWfaCaCommand::CA_GET_VERSION: {
         // TODO
         break;
-    case eWfaCaCommand::DEVICE_GET_INFO:
+    }
+    case eWfaCaCommand::DEVICE_GET_INFO: {
         // TODO
         break;
-    case eWfaCaCommand::DEV_GET_PARAMETER:
+    }
+    case eWfaCaCommand::DEV_GET_PARAMETER: {
         // TODO
         break;
-    case eWfaCaCommand::DEV_RESET_DEFAULT:
+    }
+    case eWfaCaCommand::DEV_RESET_DEFAULT: {
+
+        /* 
+        * This command is used to reset the device to its default program specific configuration, 
+        * as well as remove any cached profiles, keys and credentials.
+        *
+        * Parameters:
+        * 
+        * Param Name    | Values                        | Description
+        * ----------------------------------------------------------------------------------------
+        * "devrole"     | string ("controller"/"agent") | Device role    
+        * "name"        | string                        | Device name    
+        * "program"     | string ("map")                | Program name
+        * "type"        | string ("test bed"/"dut")     | Type of the device
+        * 
+        * Return Values: 
+        *   None.
+        *
+        * Example:
+        *   UCC: dev_reset_default,
+        *   CA:status,RUNNING
+        *   CA:status,COMPLETE
+        * 
+        *   UCC: dev_reset_default,
+        *   CA:status,RUNNING
+        *   CA:status,COMPLETE
+        */
+
+        // NOTE: Note sure this parameters are actually needed. There is a controversial
+        // between TestPlan and CAPI specification regarding if these params are required.
+        static std::unordered_map<std::string, std::string> params{
+            // {"name", std::string()},
+            // {"program", std::string()},
+            // {"devrole", std::string()},
+            // {"type", std::string()}
+        };
+
+        if (!parse_params(cmd_tokens_vec, params, err_string)) {
+            LOG(ERROR) << err_string;
+            reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+            break;
+        }
+
+        // Input check
+        if (params.find("devrole") != params.end()) {
+            if (params["devrole"] != "controller" && params["devrole"] != "agent") {
+                err_string = "invalid param value '" + params["devrole"] +
+                             "' for param name 'devrole', accepted values can be only 'controller'"
+                             " or 'agent";
+                LOG(ERROR) << err_string;
+                reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+                break;
+            }
+        }
+
+        if (params.find("program") != params.end()) {
+            if (params["program"] != "map") {
+                err_string = "invalid param value '" + params["map"] +
+                             "' for param name 'program', accepted value can be only 'map'";
+                LOG(ERROR) << err_string;
+                reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+                break;
+            }
+        }
+
+        if (params.find("type") != params.end()) {
+            if (params["type"] != "test bed" && params["type"] != "dut") {
+                err_string = "invalid param value '" + params["type"] +
+                             "' for param name 'type', accepted values can be only 'test bed' or"
+                             " 'dut'";
+                LOG(ERROR) << err_string;
+                reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+                break;
+            }
+        }
+
+        // TODO: Find out what to do with value of param "name".
+
+        // send back first reply
+        if (!reply(sd, cmdu_tx, eWfaCaStatus::RUNNING)) {
+            LOG(ERROR) << "failed to send reply";
+            break;
+        }
+
+        // TODO: Perfrom reset to "name". Currently not needed.
+        // NOTE: This action is an asynchronous procedure and will be required to be executed
+        //       from task infrastructure.
+
+        // Send back second reply
+        reply(sd, cmdu_tx, eWfaCaStatus::COMPLETE);
+
+        break;
+    }
+    case eWfaCaCommand::DEV_SEND_1905: {
+        //TODO
+    }
+    case eWfaCaCommand::DEV_SET_CONFIG: {
         // TODO
         break;
-    case eWfaCaCommand::DEV_SEND_1905:
-        // TODO
-        break;
-    case eWfaCaCommand::DEV_SET_CONFIG:
-        // TODO
-        break;
-    default:
+    }
+    default: {
         auto err_description = "Invalid WFA-CA command type: '" + command_type_str + "'";
         LOG(ERROR) << err_description;
         reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_description);
         break;
+    }
     }
 }
