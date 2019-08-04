@@ -3045,6 +3045,25 @@ void db::lock() { db_mutex.lock(); }
 void db::unlock() { db_mutex.unlock(); }
 
 //
+// certification
+//
+
+void db::setting_certification_mode(bool en)
+{
+    if (!en) {
+        remove_certification_tx_buffer();
+        config.certification_mode = false;
+        return;
+    }
+    if (!allocate_certification_tx_buffer()) {
+        config.certification_mode = false;
+        LOG(DEBUG) << "failed to allocate certification_tx_buffer";
+    }
+
+    config.certification_mode = true;
+}
+
+//
 // PRIVATE FUNCTIONS
 //   must be used from a thread safe context
 //
