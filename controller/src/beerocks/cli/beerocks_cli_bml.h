@@ -129,6 +129,7 @@ private:
     int enable_load_balancer_caller(int numOfArgs);
     int enable_service_fairness_caller(int numOfArgs);
     int enable_dfs_reentry_caller(int numOfArgs);
+    int enable_certification_mode_caller(int numOfArgs);
     int set_log_level_caller(int numOfArgs);
     int set_global_restricted_channels_caller(int numOfArgs);
     int get_global_restricted_channels_caller(int numOfArgs);
@@ -174,6 +175,7 @@ private:
     int enable_load_balancer(int8_t isEnable = -1);
     int enable_service_fairness(int8_t isEnable = -1);
     int enable_dfs_reentry(int8_t isEnable = -1);
+    int enable_certification_mode(int8_t isEnable = -1);
     int set_log_level(const std::string &module_name, const std::string &log_level, uint8_t on,
                       const std::string &mac = net::network_utils::WILD_MAC_STRING);
     int set_global_restricted_channels(const std::string &restricted_channels);

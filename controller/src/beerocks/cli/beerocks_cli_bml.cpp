@@ -444,6 +444,11 @@ void cli_bml::setFunctionsMapAndArray()
     insertCommandToMap("bml_enable_dfs_reentry", "[<1 or 0>]",
                        "if input was given - enable/disable service fairness, prints current value",
                        static_cast<pFunction>(&cli_bml::enable_dfs_reentry_caller), 0, 1, INT_ARG);
+    insertCommandToMap("bml_certification_mode", "[<1 or 0>]",
+                       "if input was given - enable/disable certification mode, "
+                       " else prints current value",
+                       static_cast<pFunction>(&cli_bml::enable_certification_mode_caller), 0, 1,
+                       INT_ARG);
     insertCommandToMap("bml_set_log_level", "<module_name> <log_level> <1 or 0> [<mac>]",
                        "turn 'on/off' (1 or 0) 'log_level' ('i'- info, 'd' - debug, 'e' - error, "
                        "'f' - fatal, 't' - trace, 'w' - warning, 'a' - all) on 'module_name' "
@@ -1020,6 +1025,15 @@ int cli_bml::enable_dfs_reentry_caller(int numOfArgs)
     return enable_dfs_reentry(args.intArgs[0]);
 }
 
+int cli_bml::enable_certification_mode_caller(int numOfArgs)
+{
+    if (numOfArgs < 0)
+        return -1;
+    else if (numOfArgs == 0)
+        return enable_certification_mode();
+    return enable_certification_mode(args.intArgs[0]);
+}
+
 int cli_bml::set_log_level_caller(int numOfArgs)
 {
     if (numOfArgs == 3) {
@@ -1427,6 +1441,17 @@ int cli_bml::enable_dfs_reentry(int8_t isEnable)
     printBmlReturnVals("bml_enable_dfs_reentry", ret);
     if (isEnable < 0 && ret == BML_RET_OK)
         std::cout << "service_dfs_reentry = " << result << std::endl;
+    return 0;
+}
+
+int cli_bml::enable_certification_mode(int8_t isEnable)
+{
+    int result;
+    int ret = (isEnable < 0) ? bml_get_certification_mode(ctx, &result)
+                             : bml_set_certification_mode(ctx, isEnable);
+    printBmlReturnVals("bml_enable_certification_mode", ret);
+    if (isEnable < 0 && ret == BML_RET_OK)
+        std::cout << "enable_certification_mode = " << result << std::endl;
     return 0;
 }
 

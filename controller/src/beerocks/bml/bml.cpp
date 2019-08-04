@@ -445,6 +445,26 @@ int bml_get_dfs_reentry(BML_CTX ctx, int *res)
     return (pBML->get_dfs_reentry(*res));
 }
 
+int bml_set_certification_mode(BML_CTX ctx, int enable)
+{
+    // Validate input parameters
+    if (!ctx)
+        return (-BML_RET_INVALID_ARGS);
+
+    bml_internal *pBML = (bml_internal *)ctx;
+    return (pBML->set_certification_mode(enable));
+}
+
+int bml_get_certification_mode(BML_CTX ctx, int *res)
+{
+    // Validate input parameters
+    if (!ctx || !res)
+        return (-BML_RET_INVALID_ARGS);
+
+    bml_internal *pBML = (bml_internal *)ctx;
+    return (pBML->get_certification_mode(*res));
+}
+
 int bml_set_log_level(BML_CTX ctx, const char *module_name, const char *log_level, uint8_t on,
                       const char *mac)
 {

@@ -400,6 +400,26 @@ int bml_set_dfs_reentry(BML_CTX ctx, int enable);
 int bml_get_dfs_reentry(BML_CTX ctx, int *res);
 
 /**
+ * Enables or disables certification mode.
+ *
+ * @param [in] ctx BML Context.
+ * @param [in] enable 1 to enable or 0 to disable.
+ *
+ * @return BML_RET_OK on success.
+ */
+int bml_set_certification_mode(BML_CTX ctx, int enable);
+
+/**
+ * Returns certification mode enable.
+ *
+ * @param [in] ctx BML Context.
+ * @param [in] res A reference for the result to be stored in.
+ *
+ * @return BML_RET_OK on success.
+ */
+int bml_get_certification_mode(BML_CTX ctx, int *res);
+
+/**
  * Set beerocks modules log level.
  *
  * @param [in] ctx BML Context.

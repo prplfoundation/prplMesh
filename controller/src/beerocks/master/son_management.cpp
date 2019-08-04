@@ -1355,6 +1355,43 @@ void son_management::handle_bml_message(
         message_com::send_cmdu(sd, cmdu_tx);
     } break;
 
+    case beerocks_message::ACTION_BML_SET_CERTIFICATION_MODE_REQUEST: {
+        auto request =
+            cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_CERTIFICATION_MODE_REQUEST>();
+        if (request == nullptr) {
+            LOG(ERROR) << "addClass cACTION_BML_SET_CERTIFICATION_MODE_REQUEST failed";
+            break;
+        }
+
+        database.setting_certification_mode(request->isEnable());
+        LOG(INFO) << "BML setting_certification_mode changed to "
+                  << int(database.settings_dfs_reentry());
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE>(cmdu_tx);
+
+        if (response == nullptr) {
+            LOG(ERROR) << "Failed building cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE message!";
+            break;
+        }
+
+        message_com::send_cmdu(sd, cmdu_tx);
+    } break;
+
+    case beerocks_message::ACTION_BML_GET_CERTIFICATION_MODE_REQUEST: {
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE>(cmdu_tx);
+
+        if (response == nullptr) {
+            LOG(ERROR) << "Failed building cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE message!";
+            break;
+        }
+
+        response->isEnable() = database.setting_certification_mode();
+
+        message_com::send_cmdu(sd, cmdu_tx);
+    } break;
+
     case beerocks_message::ACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST: {
         LOG(TRACE) << "ACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST";
 
