@@ -11,8 +11,38 @@
 
 #include <algorithm>
 
+#define FORBIDDEN_CHARS "$#&*()[]{};/\\<>?|`~=+"
+
 using namespace beerocks;
 
+static uint16_t g_mid = UINT16_MAX / 2 + 1;
+
+/* Common Error Messages */
+static const std::string err_internal = "Internal error";
+
+/**
+ * @brief Checks for forbidden characters inside WFA-CA command
+ * 
+ * @param[in] str WFA-CA command.
+ * @return String containing all the forbidden characters the have been found.
+ */
+static std::string check_forbidden_chars(const std::string &str)
+{
+    std::string forbidden_chars_found;
+    auto found = str.find_first_of(FORBIDDEN_CHARS);
+    while (found != std::string::npos) {
+        forbidden_chars_found += str[found];
+        found = str.find_first_of(FORBIDDEN_CHARS, found + 1);
+    }
+    return forbidden_chars_found;
+}
+
+/**
+ * @brief Convert enum of WFA-CA status to string.
+ * 
+ * @param[in] status Enum of WFA-CA status. 
+ * @return Status as string. 
+ */
 const std::string wfa_ca::wfa_ca_status_to_string(eWfaCaStatus status)
 {
     switch (status) {
@@ -31,6 +61,12 @@ const std::string wfa_ca::wfa_ca_status_to_string(eWfaCaStatus status)
     return std::string();
 }
 
+/**
+ * @brief Convert string of WFA-CA command into enum
+ * 
+ * @param[in] command String of WFA-CA command.
+ * @return Command enum. If command is not recognized returns eWfaCaCommand::WFA_CA_COMMAND_MAX.
+ */
 wfa_ca::eWfaCaCommand wfa_ca::wfa_ca_command_from_string(std::string command)
 {
     std::transform(command.begin(), command.end(), command.begin(), ::toupper);
@@ -50,22 +86,28 @@ wfa_ca::eWfaCaCommand wfa_ca::wfa_ca_command_from_string(std::string command)
     return eWfaCaCommand::WFA_CA_COMMAND_MAX;
 }
 
-void wfa_ca::reply_invalid_error(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
-                                 eWfaCaStatus status, const std::string &description)
+/**
+ * @brief Generate WFA-CA reply message and send it.
+ * 
+ * @param[in] sd Socket to send the reply to.
+ * @param[in] cmdu_tx CmduTx message object to create the message with.
+ * @param[in] status Status of the reply.
+ * @param[in] description Optional, Description to add to the reply.
+ * @return true if successful, false if not.
+ */
+bool wfa_ca::reply(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx, eWfaCaStatus status,
+                            const std::string &description)
 {
-    if (status != eWfaCaStatus::INVALID || status != eWfaCaStatus::ERROR) {
-        LOG(WARNING) << "function misuse, status is not INVALID or ERROR";
-        return;
+    std::string reply_string = "status," + wfa_ca_status_to_string(status);
+
+    if (!description.empty()) {
+        reply_string += ",";
+        if (status == eWfaCaStatus::INVALID || status == eWfaCaStatus::ERROR) {
+            reply_string += "errorCode,";
     }
-
-    std::string reply_string =
-        "status," + wfa_ca_status_to_string(status) + ",errorCode," + description;
-
-    reply(sd, cmdu_tx, reply_string);
+        reply_string += description;
 }
 
-bool wfa_ca::reply(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx, const std::string &reply_string)
-{
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_BML_WFA_CA_CONTROLLER_RESPONSE>(
             cmdu_tx);
@@ -83,6 +125,70 @@ bool wfa_ca::reply(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx, const std::st
     return message_com::send_cmdu(sd, cmdu_tx);
 }
 
+/**
+ * @brief Parse the strings vector which containing parameter names, and values into unordered map
+ * which will contain the parameter name as a map key, and paramaeter value as map value.
+ * The function receives as an input unordered map of parameters that are mandatory, which will
+ * include non-mandatory parameters as output.
+ * 
+ * @param[in] command_tokens A vector containing commands parameters name and values.
+ * @param[in,out] params An unordered map containing mandatory parameters on input, and parsed 
+ * command as output.
+ * @param[out] err_string Contains an error description if the function fails.
+ * @return true if successful, false if not.
+ */
+bool wfa_ca::parse_params(const std::vector<std::string> &command_tokens,
+                          std::unordered_map<std::string, std::string> &params,
+                          std::string &err_string)
+{
+    // create a copy of all mandatory param names
+    std::list<std::string> mandatory_params;
+    for (const auto &param_name : params) {
+        mandatory_params.push_back(param_name.first);
+    }
+
+    size_t mandatory_params_cnt = 0;
+    for (auto it = std::next(command_tokens.begin()); it != command_tokens.end(); it++) {
+        std::string param_name = *it;
+        std::transform(param_name.begin(), param_name.end(), param_name.begin(), ::tolower);
+        if (params.find(param_name) != params.end()) {
+            mandatory_params_cnt++;
+        }
+
+        if (std::next(it) == command_tokens.end()) {
+            err_string = "missing param value for param '" + param_name + "'";
+            return false;
+        }
+
+        params[param_name] = *std::next(it);
+        it++;
+    }
+
+    if (mandatory_params_cnt == mandatory_params.size()) {
+        return true;
+    }
+
+    // Generate an err string if missing mandatory param
+    err_string = "missing mandatory params: ";
+    for (const std::string &param_name : mandatory_params) {
+        if ((params.find(param_name))->second.empty()) {
+            err_string += "'" + param_name + "', ";
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @brief Receives WFA-CA command, preform it and returns a reply to the sender.
+ * 
+ * @param[in] sd Socket of the sender.
+ * @param[in] beerocks_header Beerocks message header.
+ * @param[in] cmdu_rx CmduRx Message object, containing the command request.
+ * @param[in] cmdu_tx CmduTx Message object of the controller, to be used when replying.
+ * @param[in] database Controllers database 
+ * @param[in] tasks Controlles tasks pool.
+ */
 void wfa_ca::handle_wfa_ca_message(
     Socket *sd, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
@@ -95,20 +201,32 @@ void wfa_ca::handle_wfa_ca_message(
         return;
     }
 
-    const char *command_ptr = request->command();
+    std::string command_str(request->command());
 
-    LOG(DEBUG) << "Received ACTION_BML_WFA_CA_CONTROLLER_REQUEST, command=" << command_ptr;
+    LOG(DEBUG) << "Received ACTION_BML_WFA_CA_CONTROLLER_REQUEST, command=\"" << command_str
+               << "\"";
 
-    auto cmd_tokens_vec = string_utils::str_split(command_ptr, ',');
+    std::string err_string;
 
-    if (cmd_tokens_vec.size() < 1) {
-        LOG(ERROR) << "Invalid WFA-CA command";
-        reply_invalid_error(sd, cmdu_tx, eWfaCaStatus::INVALID, "empty command");
+    auto forbidden_chars = check_forbidden_chars(command_str);
+    if (!forbidden_chars.empty()) {
+        err_string = "command contain illegal chars";
+        LOG(ERROR) << err_string << ": " << forbidden_chars;
+        reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+        return;
     }
 
-    auto &command_type_str = cmd_tokens_vec[0];
+    auto cmd_tokens_vec = string_utils::str_split(command_str, ',');
+
+    if (cmd_tokens_vec.empty()) {
+        err_string = "empty command";
+        LOG(ERROR) << err_string;
+        reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+        return;
+    }
+
+    auto &command_type_str = *cmd_tokens_vec.begin();
     auto command_type      = wfa_ca_command_from_string(command_type_str);
-    cmd_tokens_vec.erase(cmd_tokens_vec.begin()); // erase command token
 
     switch (command_type) {
     case eWfaCaCommand::CA_GET_VERSION:
@@ -132,7 +250,7 @@ void wfa_ca::handle_wfa_ca_message(
     default:
         auto err_description = "Invalid WFA-CA command type: '" + command_type_str + "'";
         LOG(ERROR) << err_description;
-        reply_invalid_error(sd, cmdu_tx, eWfaCaStatus::INVALID, err_description);
+        reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_description);
         break;
     }
 }
