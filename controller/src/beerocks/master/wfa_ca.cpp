@@ -1,11 +1,17 @@
 
 #include "wfa_ca.h"
 
+#include "son_actions.h"
+
 #include <beerocks/bcl/beerocks_string_utils.h>
 #include <beerocks/bcl/network/network_utils.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
 #include <beerocks/tlvf/beerocks_message_bml.h>
+
+#include <tlvf/wfa_map/eTlvTypeMap.h>
+#include <tlvf/wfa_map/tlvChannelPreference.h>
+#include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
 #include <easylogging++.h>
 
@@ -335,7 +341,136 @@ void wfa_ca::handle_wfa_ca_message(
         break;
     }
     case eWfaCaCommand::DEV_SEND_1905: {
-        //TODO
+        /*
+        * This command is used to send a 1905 message with the relevant TLVs between the devices 
+        * (triggered by Wi-Fi Test Suit). If multiple TLVs, tlv_type, tlv_length, and tlv_value 
+        * parameters will be indexed (e.g. tlv_type1, tlv_length1, tlv_value1).
+        * 
+        * Parameters:
+        * 
+        * Param Name            | Values                        | Description
+        * ----------------------------------------------------------------------------------------
+        * "DestALID"            | string:                       | The destination ALID. 
+        *                       |  ex: 11:22:33:44:55:66        | 
+        *                       |                               |
+        * "MessageTypeValue"    | hex value:                    | The Multi-AP message type value in
+        *                       |    ex: 0x8009                 | hex.
+        *                       |                               | 
+        * "TLV_Type"            | hex value:                    | 
+        *                       |    ex: 0x90                   |
+        *                       |                               |
+        * "TLV_Length"          | hex value:                    | 
+        *                       |    ex: 0x000C                 | 
+        *                       |                               |
+        * "TLV_Value"           | hex value:                    | TLV value is separated by curly 
+        *                       |   ex: {11:22:33:44:55:66      | bracket and space for each field 
+        *                       |       aa:bb:cc:dd:ee:f0}      | and subfield. The field value
+        *                       |                               | should be in hex format.
+        * 
+        * Return values:
+        *   MID: Returns 1905 message ID Hex value: Ex: 0xb242
+        * 
+        * 
+        * Example:
+        * UCC: dev_send_1905,DestALid,00:90:4C:2A:21:C2,MessageTypeValue,0x8006,tlv_type1,0x8B,
+        * tlv_length1,0x004C,tlv_value1,{0x00904C2A11C2 0x14 {0x51 {0x00 0x00}} {0x52 {0x00 0x00}} 
+        * {0x53 {0x00 0x00}} {0x54 {0x00 0x00}} {0x73 0x03 {0x28 0x2C 0x30} 0x00} {0x74 0x01 {0x2C}
+        * 0x00} {0x75 {0x00 0x00}} {0x76 {0x00 0x00}} {0x77 {0x00 0x00}} {0x78 {0x00 0x00}} {0x79 
+        * {0x00 0x00}} {0x7A {0x00 0x00}} {0x7B {0x00 0x00}} {0x7C {0x00 0x00}} {0x7D {0x00 0x00}} 
+        * {0x7E {0x00 0x00}} {0x7F {0x00 0x00}} {0x80 0x05 {0x3A 0x6A 0x7A 0x8A 0x9B} 0x00} {0x81 
+        * {0x00 0x00}} {0x82 {0x00 0x00}}},tlv_type2,0x8D,tlv_length2,0x0007,tlv_value2,
+        * {0x00904C2A11C2 0x14}
+        * CA:status,RUNNING
+        * CA:status,COMPLETE,MID,0xb242
+        * 
+        * UCC:
+        * dev_send_1905,DestALid,00:90:4C:2A:21:B7,MessageTypeValue,0x0002
+        * CA:status,RUNNING
+        * CA: status,COMPLETE,MID,0xb3c9
+        */
+
+        static std::unordered_map<std::string, std::string> params{
+            {"destalid", std::string()}, {"messagetypevalue", std::string()}};
+
+        const auto mandatory_params_num = params.size();
+
+        if (!parse_params(cmd_tokens_vec, params, err_string)) {
+            LOG(ERROR) << err_string;
+            reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+            break;
+        }
+
+        // Input check
+        auto &dest_alid = params["destalid"];
+        std::transform(dest_alid.begin(), dest_alid.end(), dest_alid.begin(), ::tolower);
+        Socket *agent_sd = database.get_node_socket(dest_alid);
+
+        if (agent_sd == nullptr) {
+            err_string = "invalid param value '" + params["destalid"] +
+                         "' for param name 'DestALID', agent not found";
+            LOG(ERROR) << err_string;
+            reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+            break;
+        }
+
+        auto &message_type_str = params["messagetypevalue"];
+        auto message_type      = (uint16_t)(std::stoul(message_type_str, nullptr, 16));
+        if (!ieee1905_1::eMessageTypeValidate::check(message_type)) {
+            err_string = "invalid param value '0x" + message_type_str +
+                         "' for param name 'MessageTypeValue', message type not found";
+            LOG(ERROR) << err_string;
+            reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+            break;
+        }
+
+        // Send back first reply
+        if (!reply(sd, cmdu_tx, eWfaCaStatus::RUNNING)) {
+            LOG(ERROR) << "failed to send reply";
+            break;
+        }
+
+        // Check if additional tlvs were added to command. If yes, then needs to parse the tlv and
+        // send it as it.
+        if (mandatory_params_num < params.size()) {
+
+            if (!cmdu_tx.create(g_mid, ieee1905_1::eMessageType(message_type))) {
+                LOG(ERROR) << "cmdu creation of type 0x" << message_type_str << ", has failed";
+                reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
+                break;
+            }
+
+            // TODO: Add the TLVs from the command
+
+            son_actions::send_cmdu_to_agent(agent_sd, cmdu_tx);
+
+            // If not using TLVs from the command, create CMDU from existing buffer
+        } else {
+            auto certification_tx_buffer = database.get_certification_tx_buffer();
+            if (!certification_tx_buffer) {
+                LOG(ERROR) << "certification_tx_buffer is not allocated";
+            }
+            ieee1905_1::CmduMessageTx certification_cmdu_tx(
+                certification_tx_buffer.get() + sizeof(beerocks::message::sUdsHeader),
+                message::MESSAGE_BUFFER_LENGTH - sizeof(beerocks::message::sUdsHeader));
+
+            if (!create_cmdu(certification_cmdu_tx, ieee1905_1::eMessageType(message_type))) {
+                LOG(ERROR) << "Failed to create CMDU";
+                reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
+                break;
+            }
+
+            if (!son_actions::send_cmdu_to_agent(agent_sd, certification_cmdu_tx)) {
+                LOG(ERROR) << "Failed to send CMDU";
+                reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
+                break;
+            }
+        }
+
+        std::string description = "mid,0x" + string_utils::int_to_hex_string(g_mid++, 4);
+
+        // Send back second reply
+        reply(sd, cmdu_tx, eWfaCaStatus::COMPLETE, description);
+        break;
     }
     case eWfaCaCommand::DEV_SET_CONFIG: {
         /*
@@ -433,4 +568,70 @@ void wfa_ca::handle_wfa_ca_message(
         break;
     }
     }
+}
+
+/**
+ * @brief Create CMDU to send when receiving WFA-CA command "DEV_SEND_1905".
+ * This function may create the CMDU from scratch or use the certification buffer which loaded with
+ * preperared from advance.
+ * 
+ * @param[in,out] cmdu_tx CmduTx message object created from certification_tx_buffer.
+ * @param[in] message_type: CMDU message type to create. 
+ * @return true if successful, false if not.
+ */
+bool wfa_ca::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx, ieee1905_1::eMessageType message_type)
+{
+    std::shared_ptr<ieee1905_1::cCmduHeader> cmdu_header;
+
+    int tlv_type;
+
+    switch (message_type) {
+    case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE: {
+
+        cmdu_header =
+            cmdu_tx.create(g_mid, ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE);
+        if (!cmdu_header) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        break;
+    }
+    case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE: {
+
+        cmdu_header = cmdu_tx.load();
+        if (!cmdu_header) {
+            LOG(ERROR) << "load cmdu has failed";
+            return false;
+        }
+
+        tlv_type = cmdu_tx.getNextTlvType();
+        while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
+            if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_CHANNEL_PREFERENCE)) {
+                if (!cmdu_tx.addClass<wfa_map::tlvChannelPreference>()) {
+                    LOG(ERROR) << "addClass tlvChannelPreference has failed";
+                    return false;
+                }
+            } else if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_TRANSMIT_POWER_LIMIT)) {
+                if (!cmdu_tx.addClass<wfa_map::tlvTransmitPowerLimit>()) {
+                    LOG(ERROR) << "addClass tlvTransmitPowerLimit has failed";
+                    return false;
+                }
+            }
+            tlv_type = cmdu_tx.getNextTlvType();
+        }
+        break;
+    }
+    default:
+        LOG(ERROR) << "Missing handler for message_type=" << std::hex << int(message_type);
+        break;
+    }
+
+    if (!cmdu_header) {
+        return false;
+    }
+
+    // Force mid
+    cmdu_header->message_id() = g_mid;
+
+    return true;
 }
