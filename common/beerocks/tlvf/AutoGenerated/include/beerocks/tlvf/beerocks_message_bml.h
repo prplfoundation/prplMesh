@@ -1180,6 +1180,82 @@ class cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE : public BaseClass
         sRestrictedChannels* m_params = nullptr;
 };
 
+class cACTION_BML_SET_CERTIFICATION_MODE_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BML_SET_CERTIFICATION_MODE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_BML_SET_CERTIFICATION_MODE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_BML_SET_CERTIFICATION_MODE_REQUEST();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_SET_CERTIFICATION_MODE_REQUEST);
+        }
+        uint8_t& isEnable();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        uint8_t* m_isEnable = nullptr;
+};
+
+class cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_SET_CERTIFICATION_MODE_RESPONSE);
+        }
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+};
+
+class cACTION_BML_GET_CERTIFICATION_MODE_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BML_GET_CERTIFICATION_MODE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_BML_GET_CERTIFICATION_MODE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_BML_GET_CERTIFICATION_MODE_REQUEST();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_GET_CERTIFICATION_MODE_REQUEST);
+        }
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+};
+
+class cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_GET_CERTIFICATION_MODE_RESPONSE);
+        }
+        uint8_t& isEnable();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        uint8_t* m_isEnable = nullptr;
+};
+
 class cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST : public BaseClass
 {
     public:

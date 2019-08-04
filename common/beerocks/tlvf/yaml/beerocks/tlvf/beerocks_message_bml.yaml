@@ -239,6 +239,20 @@ cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE:
   _type: class
   params: sRestrictedChannels
 
+cACTION_BML_SET_CERTIFICATION_MODE_REQUEST:
+  _type: class
+  isEnable: uint8_t
+
+cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE:
+  _type: class
+
+cACTION_BML_GET_CERTIFICATION_MODE_REQUEST:
+  _type: class
+
+cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE:
+  _type: class
+  isEnable: uint8_t
+
 cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST:
   _type: class 
   result:
