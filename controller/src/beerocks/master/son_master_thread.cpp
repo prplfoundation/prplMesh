@@ -89,6 +89,13 @@ bool master_thread::init()
         LOG(DEBUG) << "Health check is DISABLED!";
     }
 
+    if (database.setting_certification_mode()) {
+        if (!database.allocate_certification_tx_buffer()) {
+            LOG(ERROR) << "failed to allocate certification_tx_buffer";
+            return false;
+        }
+    }
+
     return socket_thread::init();
 }
 
@@ -512,9 +519,8 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
             LOG(ERROR) << "Failed building message!";
             return false;
         }
+        son_actions::send_cmdu_to_agent(sd, cmdu_tx);
     }
-
-    son_actions::send_cmdu_to_agent(sd, cmdu_tx);
 
     return true;
 }
@@ -681,6 +687,16 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(Socket *sd,
         } // close if (tlvType == some_tlv_type)
 
     } //close while (cmdu_rx.getNextTlvType(tlvType))
+
+    if (database.setting_certification_mode()) {
+        auto certification_tx_buffer = database.get_certification_tx_buffer();
+        if (!certification_tx_buffer) {
+            LOG(ERROR) << "certification_tx_buffer is not allocated!";
+            return false;
+        }
+        database.fill_certification_tx_buffer(cmdu_tx);
+        return true;
+    }
 
     return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
 }
