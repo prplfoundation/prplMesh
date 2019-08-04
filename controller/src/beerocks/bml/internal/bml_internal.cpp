@@ -695,6 +695,24 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
                                 "is waiting...";
             }
         } break;
+        case beerocks_message::ACTION_BML_SET_CERTIFICATION_MODE_RESPONSE: {
+            //Signal any waiting threads
+            if (!wake_up(beerocks_message::ACTION_BML_SET_CERTIFICATION_MODE_REQUEST, 0)) {
+                LOG(WARNING) << "Received ACTION_BML_SET_CERTIFICATION_MODE_RESPONSE response, "
+                                " but no one is waiting...";
+            }
+        } break;
+        case beerocks_message::ACTION_BML_GET_CERTIFICATION_MODE_RESPONSE: {
+            auto response =
+                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE>();
+
+            //Signal any waiting threads
+            if (!wake_up(beerocks_message::ACTION_BML_GET_CERTIFICATION_MODE_REQUEST,
+                         response->isEnable())) {
+                LOG(WARNING) << "Received cACTION_BML_GET_DFS_REENTRY_RESPONSE response, "
+                                " but no one is waiting...";
+            }
+        } break;
         case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE: {
             auto response =
                 cmdu_rx.addClass<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE>();
@@ -2309,6 +2327,41 @@ int bml_internal::set_dfs_reentry(bool enable)
 
     if (request == nullptr) {
         LOG(ERROR) << "Failed building cACTION_BML_SET_DFS_REENTRY_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->isEnable() = enable;
+
+    int result;
+    int iRet = send_bml_cmdu(result, request->get_action_op());
+
+    return (iRet);
+}
+
+int bml_internal::get_certification_mode(int &result)
+{
+    //CMDU message
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_GET_CERTIFICATION_MODE_REQUEST>(cmdu_tx);
+
+    if (request == nullptr) {
+        LOG(ERROR) << "Failed building cACTION_BML_GET_CERTIFICATION_MODE_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    int iRet = send_bml_cmdu(result, request->get_action_op());
+
+    return (iRet);
+}
+
+int bml_internal::set_certification_mode(bool enable)
+{
+    //CMDU message
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_SET_CERTIFICATION_MODE_REQUEST>(cmdu_tx);
+
+    if (request == nullptr) {
+        LOG(ERROR) << "Failed building cACTION_BML_SET_CERTIFICATION_MODE_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
 

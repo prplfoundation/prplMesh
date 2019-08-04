@@ -130,6 +130,12 @@ public:
     // Return service_fairness status (in res)
     int get_dfs_reentry(int &res);
 
+    // Enable/Disable certification mode
+    int set_certification_mode(bool enable);
+
+    // Return certification mode enable (in res)
+    int get_certification_mode(int &res);
+
     // Set log level
     int set_log_level(const std::string module_name, const std::string log_level, uint8_t on,
                       const std::string mac);
