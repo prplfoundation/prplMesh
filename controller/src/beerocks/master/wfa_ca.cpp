@@ -96,7 +96,7 @@ wfa_ca::eWfaCaCommand wfa_ca::wfa_ca_command_from_string(std::string command)
  * @return true if successful, false if not.
  */
 bool wfa_ca::reply(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx, eWfaCaStatus status,
-                            const std::string &description)
+                   const std::string &description)
 {
     std::string reply_string = "status," + wfa_ca_status_to_string(status);
 
@@ -104,9 +104,9 @@ bool wfa_ca::reply(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx, eWfaCaStatus 
         reply_string += ",";
         if (status == eWfaCaStatus::INVALID || status == eWfaCaStatus::ERROR) {
             reply_string += "errorCode,";
-    }
+        }
         reply_string += description;
-}
+    }
 
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_BML_WFA_CA_CONTROLLER_RESPONSE>(
@@ -338,7 +338,92 @@ void wfa_ca::handle_wfa_ca_message(
         //TODO
     }
     case eWfaCaCommand::DEV_SET_CONFIG: {
-        // TODO
+        /*
+        * This command is used to configure the device with its configuration parameters.
+        * 
+        * Parameters:
+        * 
+        * Param Name    | Values                        | Description
+        * ----------------------------------------------------------------------------------------
+        * "backhaul"    | string:                       | Set a single backhual interface to 
+        *               |  ruid (ex: 11:22:33:44:55:66) | Ethernet or Wi-Fi. For Wi-Fi, a RUID 
+        *               |  eth                          | associated with its frequency band 
+        *               |                               | (2.4GHz, 5GHz Low, 5GHz High) is provided.
+        *               |                               | For Ethernet, the device should return 
+        *               |                               | status,COMPLETE until it completes 
+        *               |                               | Ethernet onboarding.  
+        *               |                               |
+        * "bss_info1"   | string:                       | BSS initialization data used by controller
+        *               |   WTS_REPLACE_DEST_ALID       | to configure agent's fronthaul radio.
+        *               |   8x Multi-AP-2G-1 0x0020     | The value is a list of fields separated by
+        *               |   0x0008 maprocks1 0 1        | space that stands for:
+        *               |                               | WTS_REPLACE_DEST_ALID, operating class,
+        *               |                               | SSID, authentication type (WPA2-PSK),
+        *               |                               | encryption type(AES-CCMP), network key, 
+        *               |                               | bit 6 of Multi-AP IE's extension
+        *               |                               | attribute, bit 5 of Multi-AP IE's,
+        *               |                               | bit 5 of Multi-AP IE's extension
+        *               |                               | attribute. To clear the BSS info stored
+        *               |                               | a specific operating class, only the
+        *               |                               | device ALID and operating class are 
+        *               |                               | retained.
+        *               |                               |
+        * "bss_info2"   | string                        |  
+        * "bss_infoN"   | string                        |  
+        * "name"        | string (ex: "dev1")           | Device name
+        * "program"     | string ("map)                 | Program name
+        * 
+        * Return values:
+        *   None.
+        * 
+        * 
+        * Example:
+        *   UCC: dev_set_config,name,agt1,program,map,backhaul,0x00904C2A11B7
+        *   CA:status,RUNNING
+        *   CA:status,COMPLETE
+        */
+
+        // NOTE: Note sure this parameters are actually needed. There is a controversial
+        // between TestPlan and CAPI specification regarding if these params are required.
+        static std::unordered_map<std::string, std::string> params{
+            // {"name", std::string()},
+            // {"program", std::string()},
+        };
+
+        // NOTE: Uncertainty if param names: "backhaul", "bss_info{1..N}" are mandatory
+
+        if (!parse_params(cmd_tokens_vec, params, err_string)) {
+            LOG(ERROR) << err_string;
+            reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+            break;
+        }
+
+        // Input check
+        if (params.find("program") != params.end()) {
+            if (params["program"] != "map") {
+                err_string = "invalid param value '" + params["map"] +
+                             "' for param name 'program', accepted value can be only 'map'";
+                LOG(ERROR) << err_string;
+                reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+                break;
+            }
+        }
+
+        // TODO: Find out what to do with value of params: "backhaul", bss_info{1..N}, "name".
+
+        // Send back first reply
+        if (!reply(sd, cmdu_tx, eWfaCaStatus::RUNNING)) {
+            LOG(ERROR) << "failed to send reply";
+            break;
+        }
+
+        // TODO: Configure device "name". Currently not needed.
+        // NOTE: This action is an asynchronous procedure and will be required to be executed
+        //       from task infrastructure.
+
+        // Send back second reply
+        reply(sd, cmdu_tx, eWfaCaStatus::COMPLETE);
+
         break;
     }
     default: {
