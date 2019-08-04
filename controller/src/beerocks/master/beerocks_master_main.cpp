@@ -136,6 +136,7 @@ static void fill_master_config(son::db::sDbMasterConfig &master_conf,
     master_conf.load_front_measurements    = (main_master_conf.load_front_measurements == "1");
     master_conf.load_health_check          = (main_master_conf.load_health_check == "1");
     master_conf.load_monitor_on_vaps       = (main_master_conf.load_monitor_on_vaps == "1");
+    master_conf.certification_mode         = (main_master_conf.certification_mode == "1");
     master_conf.diagnostics_measurements_polling_rate_sec =
         beerocks::string_utils::stoi(main_master_conf.diagnostics_measurements_polling_rate_sec);
     master_conf.ire_rssi_report_rate_sec =

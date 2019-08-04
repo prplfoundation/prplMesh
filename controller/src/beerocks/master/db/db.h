@@ -59,6 +59,7 @@ public:
         bool load_front_measurements;
         bool load_health_check;
         bool load_monitor_on_vaps;
+        bool certification_mode;
         int roaming_5ghz_failed_attemps_threshold;
         int roaming_24ghz_failed_attemps_threshold;
         int roaming_11v_failed_attemps_threshold;
@@ -464,6 +465,24 @@ public:
     uint16_t get_hostap_vht_center_frequency(std::string mac);
 
     //
+    // certification
+    //
+    std::shared_ptr<uint8_t> &get_certification_tx_buffer() { return certification_tx_buffer; };
+    std::shared_ptr<uint8_t> &allocate_certification_tx_buffer()
+    {
+        return (certification_tx_buffer =
+                    std::shared_ptr<uint8_t>(new uint8_t[beerocks::message::MESSAGE_BUFFER_LENGTH],
+                                             std::default_delete<uint8_t[]>()));
+    };
+    void remove_certification_tx_buffer() { certification_tx_buffer.reset(); };
+    void fill_certification_tx_buffer(ieee1905_1::CmduMessageTx &cmdu_tx)
+    {
+        std::copy_n(cmdu_tx.getMessageBuff() - sizeof(beerocks::message::sUdsHeader),
+                    cmdu_tx.getMessageBuffLength() + sizeof(beerocks::message::sUdsHeader),
+                    certification_tx_buffer.get());
+    };
+
+    //
     // tasks
     //
     bool assign_association_handling_task_id(std::string mac, int new_task_id);
@@ -577,6 +596,10 @@ public:
     bool settings_rdkb_extensions() { return settings.rdkb_extensions; }
 
     // Params
+    void setting_certification_mode(bool en);
+
+    bool setting_certification_mode() { return config.certification_mode; }
+
     void settings_client_optimal_path_roaming_prefer_signal_strength(bool en)
     {
         settings.client_optimal_path_roaming_prefer_signal_strength = en;
@@ -643,6 +666,9 @@ private:
     friend class network_map;
 
     std::shared_ptr<vaps_list_t> m_vap_list;
+
+    // certification
+    std::shared_ptr<uint8_t> certification_tx_buffer;
 };
 
 } // namespace son

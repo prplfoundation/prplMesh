@@ -39,6 +39,9 @@ load_service_fairness=0
 #RDKB extensions
 load_rdkb_extensions=1
 
+# certification
+certification_mode=1
+
 # Config Parameters
 diagnostics_measurements_polling_rate_sec=1
 ire_rssi_report_rate_sec=30

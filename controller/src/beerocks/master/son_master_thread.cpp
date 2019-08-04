@@ -506,10 +506,12 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
 
-    // trigger channel selection
-    if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE)) {
-        LOG(ERROR) << "Failed building message!";
-        return false;
+    if (!database.setting_certification_mode()) {
+        // trigger channel selection
+        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE)) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
     }
 
     son_actions::send_cmdu_to_agent(sd, cmdu_tx);
