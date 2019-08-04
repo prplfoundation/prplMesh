@@ -205,6 +205,15 @@ bool tlvTestVarList::add_var1(std::shared_ptr<cInner> ptr) {
     return true;
 }
 
+size_t tlvTestVarList::unknown_length_list_length()
+{
+    size_t len = 0;
+    for (size_t i = 0; i < m_unknown_length_list_idx__; i++) {
+        len += m_unknown_length_list_vector[i]->getLen();
+    }
+    return len;
+}
+
 std::tuple<bool, cInner&> tlvTestVarList::unknown_length_list(size_t idx) {
     bool ret_success = ( (m_unknown_length_list_idx__ > 0) && (m_unknown_length_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
@@ -439,6 +448,7 @@ bool cInner::alloc_list(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_var1 = (uint32_t *)((uint8_t *)(m_var1) + len);
+    m_unknown_length_list = (uint8_t *)((uint8_t *)(m_unknown_length_list) + len);
     m_list_idx__ += count;
     *m_list_length += count;
     m_buff_ptr__ += len;
@@ -447,6 +457,35 @@ bool cInner::alloc_list(size_t count) {
 
 uint32_t& cInner::var1() {
     return (uint32_t&)(*m_var1);
+}
+
+std::tuple<bool, uint8_t&> cInner::unknown_length_list(size_t idx) {
+    bool ret_success = ( (m_unknown_length_list_idx__ > 0) && (m_unknown_length_list_idx__ > idx) );
+    size_t ret_idx = ret_success ? idx : 0;
+    if (!ret_success) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+    }
+    return std::forward_as_tuple(ret_success, m_unknown_length_list[ret_idx]);
+}
+
+bool cInner::alloc_unknown_length_list(size_t count) {
+    if (m_lock_order_counter__ > 1) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list unknown_length_list, abort!";
+        return false;
+    }
+    if (count == 0) {
+        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
+        return false;
+    }
+    size_t len = sizeof(uint8_t) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 1;
+    m_unknown_length_list_idx__ += count;
+    m_buff_ptr__ += len;
+    return true;
 }
 
 void cInner::class_swap()
@@ -476,6 +515,7 @@ bool cInner::init()
     m_buff_ptr__ += sizeof(uint8_t)*(list_length);
     m_var1 = (uint32_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
+    m_unknown_length_list = (uint8_t*)m_buff_ptr__;
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;

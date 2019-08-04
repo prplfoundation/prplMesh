@@ -357,6 +357,12 @@ int test_all()
     }
 
     LOG(INFO) << "TLV 4 length " << fourthTlv->length();
+    auto unknown = fourthTlv->create_unknown_length_list();
+    unknown->alloc_unknown_length_list(10);
+    fourthTlv->add_unknown_length_list(unknown);
+    LOG(INFO) << "Unknown list size: " << unknown->getLen();
+    LOG(INFO) << "Total unknown Length: " << fourthTlv->unknown_length_list_length();
+    LOG(INFO) << "TLV 4 length " << fourthTlv->length();
 
     LOG(INFO) << "Finalize";
     //MANDATORY - swaps to little indian.
@@ -482,6 +488,8 @@ int test_all()
             }
         }
 
+        LOG(INFO) << "Total unknown Length: " << tlv4->unknown_length_list_length();
+        LOG(INFO) << "TLV 4 length " << tlv4->length();
         // TODO the complex list doesn't work at the moment if it has more than one element
         // Cfr. #137
         //        if (tlv4->complex_list_length() != 2) {

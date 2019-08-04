@@ -89,6 +89,7 @@ class tlvTransmitterLinkMetric : public BaseClass
         sMacAddr& al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv();
         //The fields shall be repeated for each connected interface pair between the receiving
         //905.1 AL and the neighbor 1905.1 AL.
+        size_t interface_pair_info_length() { return m_interface_pair_info_idx__ * sizeof(tlvTransmitterLinkMetric::sInterfacePairInfo); }
         std::tuple<bool, sInterfacePairInfo&> interface_pair_info(size_t idx);
         bool alloc_interface_pair_info(size_t count = 1);
         void class_swap();

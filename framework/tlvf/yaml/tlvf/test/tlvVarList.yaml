@@ -38,3 +38,7 @@ cInner:
     _type: uint8_t
     _length: [ list_length ]
   var1: uint32_t
+  unknown_length_list:
+    _type: uint8_t
+    _length: []
+
