@@ -23,6 +23,7 @@ public:
 
 public:
     std::shared_ptr<cCmduHeader> create(uint16_t id, eMessageType message_type);
+    std::shared_ptr<cCmduHeader> load();
     std::shared_ptr<tlvVendorSpecific> add_vs_tlv(tlvVendorSpecific::eVendorOUI voui);
 
     bool finalize(bool swap_needed);
