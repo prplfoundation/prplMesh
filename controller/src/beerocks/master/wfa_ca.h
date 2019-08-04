@@ -12,6 +12,8 @@
 #include "db/db.h"
 #include "tasks/task_pool.h"
 
+#include <unordered_map>
+
 using namespace son;
 
 class wfa_ca {
@@ -37,11 +39,12 @@ private:
     };
     static eWfaCaCommand wfa_ca_command_from_string(std::string command);
 
-    static void reply_invalid_error(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
-                                    eWfaCaStatus status, const std::string &description);
+    static bool reply(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx, eWfaCaStatus status,
+                               const std::string &description = std::string());
 
-    static bool reply(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
-                      const std::string &reply_string);
+    static bool parse_params(const std::vector<std::string> &command_tokens,
+                             std::unordered_map<std::string, std::string> &params,
+                             std::string &err_string);
 };
 
 #endif
