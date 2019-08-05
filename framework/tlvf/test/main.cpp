@@ -33,7 +33,111 @@ MAPF_INITIALIZE_LOGGER
 
 using namespace mapf;
 
-int main(int argc, char *argv[])
+int test_complex_list()
+{
+    int errors                     = 0;
+    const int complex_list_entries = 3;
+    mapf::Logger::Instance().LoggerInit("TLVF example");
+    uint8_t tx_buffer[4096];
+
+    MAPF_INFO(__FUNCTION__ << " start");
+
+    //START BUILDING THE MESSAGE HERE
+    memset(tx_buffer, 0, sizeof(tx_buffer));
+
+    //creating cmdu message class and setting the header
+    CmduMessageTx msg = CmduMessageTx(tx_buffer, sizeof(tx_buffer));
+    //create method initializes the buffer and returns shared pointer to the message header
+    auto header = msg.create(0, eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE);
+    header->flags().last_fragment_indicator = 1;
+    header->flags().relay_indicator         = 1;
+
+    auto fourthTlv    = msg.addClass<tlvTestVarList>();
+    fourthTlv->var0() = 0xa0;
+    if (!fourthTlv->alloc_simple_list(2)) {
+        MAPF_ERR("Failed to allocate simple list");
+        ++errors;
+    }
+    std::get<1>(fourthTlv->simple_list(0)) = 0x0bb0;
+    std::get<1>(fourthTlv->simple_list(1)) = 0x0bb1;
+
+    for (int i = 0; i < complex_list_entries; i++) {
+        auto cmplx    = fourthTlv->create_complex_list();
+        cmplx->var1() = 0xbbbbaaaa;
+        cmplx->alloc_list(3);
+        std::get<1>(cmplx->list(0)) = 0xc0;
+        std::get<1>(cmplx->list(1)) = 0xc1;
+        std::get<1>(cmplx->list(2)) = 0xc2;
+        if (!fourthTlv->add_complex_list(cmplx)) {
+            LOG(ERROR) << "Failed to add complex list";
+            ++errors;
+        }
+        //test multiple add (should Fail!)
+        if (fourthTlv->add_complex_list(cmplx)) {
+            LOG(ERROR) << "Could add complex list a second time";
+            ++errors;
+        }
+    }
+
+    auto cmplx    = fourthTlv->create_var1();
+    cmplx->var1() = 0xb11b;
+    if (!fourthTlv->add_var1(cmplx)) {
+        LOG(ERROR) << "Failed to add var1";
+        ++errors;
+    }
+    // Test multiple add - should fail
+    if (fourthTlv->add_var1(cmplx)) {
+        LOG(ERROR) << "Could add var1 a second time";
+        errors++;
+    }
+    LOG(INFO) << "TLV 4 length " << fourthTlv->length();
+
+    LOG(INFO) << "Finalize";
+    //MANDATORY - swaps to little indian.
+    msg.finalize(true);
+
+    LOG(INFO) << "TX:";
+    for (size_t i = 0; i < msg.getMessageLength(); i += 16) {
+        std::ostringstream hexdump;
+        for (size_t j = i; j < msg.getMessageLength() && j < i + 16; j++)
+            hexdump << std::hex << std::setw(2) << std::setfill('0') << (unsigned)tx_buffer[j]
+                    << " ";
+        LOG(INFO) << hexdump.str();
+    }
+
+    uint8_t recv_buffer[sizeof(tx_buffer)];
+    memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
+
+    CmduMessageRx received_message;
+    received_message.parse(recv_buffer, sizeof(recv_buffer), true);
+
+    auto tlv4 = received_message.addClass<tlvTestVarList>();
+    if (tlv4 == nullptr) {
+        MAPF_ERR("TLV4 is NULL");
+        return ++errors;
+    }
+    if (tlv4->complex_list_length() != complex_list_entries) {
+        MAPF_ERR("Invalid complex list num of entries" << tlv4->complex_list_length());
+        return ++errors;
+    }
+    for (int i = 0; i < complex_list_entries; i++) {
+        auto cmplx = std::get<1>(tlv4->complex_list(i));
+        if (cmplx.var1() != 0xbbbbaaaa) {
+            MAPF_ERR("wrong value for cmplx->var1 " << std::hex << cmplx.var1());
+            ++errors;
+        }
+    }
+
+    if (tlv4->var1()->var1() != 0xb11b) {
+        MAPF_ERR("Unexpected var1 value" << tlv4->var1()->var1());
+        ++errors;
+    }
+
+    MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
+    return errors;
+}
+
+int test_all()
 {
     int errors = 0;
     mapf::Logger::Instance().LoggerInit("TLVF example");
@@ -413,6 +517,16 @@ int main(int argc, char *argv[])
         MAPF_ERR("PROTECTION FAILED");
         errors++;
     }
+
+    return errors;
+}
+
+int main(int argc, char *argv[])
+{
+    int errors = 0;
+
+    errors += test_complex_list();
+    errors += test_all();
 
     return errors;
 }
