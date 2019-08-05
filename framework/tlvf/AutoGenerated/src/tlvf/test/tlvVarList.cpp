@@ -329,10 +329,17 @@ bool tlvTestVarList::init()
     uint8_t complex_list_length = *m_complex_list_length;
     m_complex_list_idx__ = complex_list_length;
     for (size_t i = 0; i < complex_list_length; i++) {
-        if (!add_complex_list(create_complex_list())) { 
-            TLVF_LOG(ERROR) << "Failed adding complex_list entry.";
+        auto complex_list = create_complex_list();
+        if (!complex_list) {
+            TLVF_LOG(ERROR) << "create_complex_list() failed";
             return false;
         }
+        if (!add_complex_list(complex_list)) {
+            TLVF_LOG(ERROR) << "add_complex_list() failed";
+            return false;
+        }
+        // swap back since complex_list will be swapped as part of the whole class swap
+        complex_list->class_swap();
     }
     m_var1 = (cInner*)m_buff_ptr__;
     if (m_parse__) {

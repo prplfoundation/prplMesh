@@ -142,10 +142,17 @@ bool tlvDeviceBridgingCapability::init()
     uint8_t bridging_tuples_list_length = *m_bridging_tuples_list_length;
     m_bridging_tuples_list_idx__ = bridging_tuples_list_length;
     for (size_t i = 0; i < bridging_tuples_list_length; i++) {
-        if (!add_bridging_tuples_list(create_bridging_tuples_list())) { 
-            TLVF_LOG(ERROR) << "Failed adding bridging_tuples_list entry.";
+        auto bridging_tuples_list = create_bridging_tuples_list();
+        if (!bridging_tuples_list) {
+            TLVF_LOG(ERROR) << "create_bridging_tuples_list() failed";
             return false;
         }
+        if (!add_bridging_tuples_list(bridging_tuples_list)) {
+            TLVF_LOG(ERROR) << "add_bridging_tuples_list() failed";
+            return false;
+        }
+        // swap back since bridging_tuples_list will be swapped as part of the whole class swap
+        bridging_tuples_list->class_swap();
     }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

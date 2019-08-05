@@ -152,10 +152,17 @@ bool tlvChannelPreference::init()
     uint8_t operating_classes_list_length = *m_operating_classes_list_length;
     m_operating_classes_list_idx__ = operating_classes_list_length;
     for (size_t i = 0; i < operating_classes_list_length; i++) {
-        if (!add_operating_classes_list(create_operating_classes_list())) { 
-            TLVF_LOG(ERROR) << "Failed adding operating_classes_list entry.";
+        auto operating_classes_list = create_operating_classes_list();
+        if (!operating_classes_list) {
+            TLVF_LOG(ERROR) << "create_operating_classes_list() failed";
             return false;
         }
+        if (!add_operating_classes_list(operating_classes_list)) {
+            TLVF_LOG(ERROR) << "add_operating_classes_list() failed";
+            return false;
+        }
+        // swap back since operating_classes_list will be swapped as part of the whole class swap
+        operating_classes_list->class_swap();
     }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
