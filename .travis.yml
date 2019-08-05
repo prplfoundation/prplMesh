@@ -8,7 +8,7 @@ services:
 
 script:
   - cd tools/docker
-  - sudo ./image-build.sh -b ubuntu:18.04
+  - sudo ./image-build.sh
   # Run clang-format and check there are no modified files by checking git status
   - sudo ./clang-format.sh
   - git diff-index --exit-code HEAD
