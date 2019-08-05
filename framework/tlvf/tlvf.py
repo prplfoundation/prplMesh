@@ -820,12 +820,20 @@ class TlvF:
                 if length_type.swap_needed:
                     lines_cpp.append("if (m_%s__ && m_%s__) {  %s&%s%s; }" %(self.MEMBER_PARSE, self.MEMBER_SWAP, length_type.swap_prefix, param_length, length_type.swap_suffix))
                 lines_cpp.append("m_%s_idx__ = %s;" % (param_name, param_length))
-                if TypeInfo(param_type).type == TypeInfo.CLASS: #TODO:only if it's the last list member of the class
+                if TypeInfo(param_type).type == TypeInfo.CLASS:
                     lines_cpp.append("for (size_t i = 0; i < %s; i++) {" % (param_length))
-                    lines_cpp.append("%sif (!add_%s(create_%s())) { " % (self.getIndentation(1), param_name, param_name))
-                    lines_cpp.append( '%sTLVF_LOG(ERROR) << "Failed adding %s entry.";' %  (self.getIndentation(2), param_name) )
-                    lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
-                    lines_cpp.append( "%s}" % self.getIndentation(1) )
+                    # Add param handling to init function
+                    lines_cpp.append("%sauto %s = create_%s();" %( self.getIndentation(1), param_name, param_name))
+                    lines_cpp.append("%sif (!%s) {" %(self.getIndentation(1), param_name))
+                    lines_cpp.append("%sTLVF_LOG(ERROR) << \"create_%s() failed\";" %(self.getIndentation(2), param_name))
+                    lines_cpp.append("%sreturn false;" %(self.getIndentation(2)))
+                    lines_cpp.append("%s}" %(self.getIndentation(1)))
+                    lines_cpp.append("%sif (!add_%s(%s)) {" %(self.getIndentation(1), param_name, param_name))
+                    lines_cpp.append("%sTLVF_LOG(ERROR) << \"add_%s() failed\";" %(self.getIndentation(2), param_name))
+                    lines_cpp.append("%sreturn false;" %(self.getIndentation(2)))
+                    lines_cpp.append("%s}" %(self.getIndentation(1)))
+                    lines_cpp.append("%s// swap back since %s will be swapped as part of the whole class swap" %(self.getIndentation(1), param_name))
+                    lines_cpp.append("%s%s->class_swap();" %(self.getIndentation(1), param_name))
                     lines_cpp.append("}")
                 else:
                     lines_cpp.append("m_%s__ += sizeof(%s)*(%s);" % (self.MEMBER_BUFF_PTR, param_type, param_length))
