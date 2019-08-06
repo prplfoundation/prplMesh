@@ -106,10 +106,10 @@ std::shared_ptr<cInner> tlvTestVarList::create_complex_list() {
     m_lock_order_counter__ = 1;
     m_lock_allocation__ = true;
     uint8_t *src = (uint8_t *)m_complex_list;
+    if (m_complex_list_idx__ > 0) {
+        src = (uint8_t *)m_complex_list_vector[m_complex_list_idx__ - 1]->getBuffPtr();
+    }
     if (!m_parse__) {
-        if (m_complex_list_idx__ > 0) {
-            src = (uint8_t *)m_complex_list_vector[m_complex_list_idx__ - 1]->getBuffPtr();
-        }
         uint8_t *dst = src + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -129,23 +129,19 @@ bool tlvTestVarList::add_complex_list(std::shared_ptr<cInner> ptr) {
         return false;
     }
     uint8_t *src = (uint8_t *)m_complex_list;
-    if (!m_parse__) {
-        if (m_complex_list_idx__ > 0) {
-            src = (uint8_t *)m_complex_list_vector[m_complex_list_idx__ - 1]->getBuffPtr();
-        }
+    if (m_complex_list_idx__ > 0) {
+        src = (uint8_t *)m_complex_list_vector[m_complex_list_idx__ - 1]->getBuffPtr();
     }
     if (ptr->getStartBuffPtr() != src) {
-        TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
         return false;
     }
     if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return false;
     }
-    if (!m_parse__) {
-        m_complex_list_idx__++;
-        (*m_complex_list_length)++;
-    }
+    m_complex_list_idx__++;
+    if (!m_parse__) { (*m_complex_list_length)++; }
     size_t len = ptr->getLen();
     m_var1 = (cInner *)((uint8_t *)(m_var1) + len - ptr->get_initial_size());
     m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len - ptr->get_initial_size());
@@ -189,7 +185,7 @@ bool tlvTestVarList::add_var1(std::shared_ptr<cInner> ptr) {
     }
     uint8_t *src = (uint8_t *)m_var1;
     if (ptr->getStartBuffPtr() != src) {
-        TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
         return false;
     }
     if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
@@ -236,10 +232,10 @@ std::shared_ptr<cInner> tlvTestVarList::create_unknown_length_list() {
     m_lock_order_counter__ = 3;
     m_lock_allocation__ = true;
     uint8_t *src = (uint8_t *)m_unknown_length_list;
+    if (m_unknown_length_list_idx__ > 0) {
+        src = (uint8_t *)m_unknown_length_list_vector[m_unknown_length_list_idx__ - 1]->getBuffPtr();
+    }
     if (!m_parse__) {
-        if (m_unknown_length_list_idx__ > 0) {
-            src = (uint8_t *)m_unknown_length_list_vector[m_unknown_length_list_idx__ - 1]->getBuffPtr();
-        }
         uint8_t *dst = src + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -257,22 +253,18 @@ bool tlvTestVarList::add_unknown_length_list(std::shared_ptr<cInner> ptr) {
         return false;
     }
     uint8_t *src = (uint8_t *)m_unknown_length_list;
-    if (!m_parse__) {
-        if (m_unknown_length_list_idx__ > 0) {
-            src = (uint8_t *)m_unknown_length_list_vector[m_unknown_length_list_idx__ - 1]->getBuffPtr();
-        }
+    if (m_unknown_length_list_idx__ > 0) {
+        src = (uint8_t *)m_unknown_length_list_vector[m_unknown_length_list_idx__ - 1]->getBuffPtr();
     }
     if (ptr->getStartBuffPtr() != src) {
-        TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
         return false;
     }
     if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return false;
     }
-    if (!m_parse__) {
-        m_unknown_length_list_idx__++;
-    }
+    m_unknown_length_list_idx__++;
     size_t len = ptr->getLen();
     m_unknown_length_list_vector.push_back(ptr);
     m_buff_ptr__ += len;
@@ -336,7 +328,7 @@ bool tlvTestVarList::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_complex_list = (cInner*)m_buff_ptr__;
     uint8_t complex_list_length = *m_complex_list_length;
-    m_complex_list_idx__ = complex_list_length;
+    m_complex_list_idx__ = 0;
     for (size_t i = 0; i < complex_list_length; i++) {
         auto complex_list = create_complex_list();
         if (!complex_list) {
@@ -385,7 +377,6 @@ bool tlvTestVarList::init()
             }
             // swap back since unknown_length_list will be swapped as part of the whole class swap
             unknown_length_list->class_swap();
-            m_unknown_length_list_idx__++;
             len -= unknown_length_list->getLen();
         }
     }

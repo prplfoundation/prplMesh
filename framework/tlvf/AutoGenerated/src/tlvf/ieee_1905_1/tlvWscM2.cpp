@@ -444,7 +444,7 @@ bool tlvWscM2::add_encrypted_settings(std::shared_ptr<WSC::cWscAttrEncryptedSett
     }
     uint8_t *src = (uint8_t *)m_encrypted_settings;
     if (ptr->getStartBuffPtr() != src) {
-        TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
         return false;
     }
     if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
