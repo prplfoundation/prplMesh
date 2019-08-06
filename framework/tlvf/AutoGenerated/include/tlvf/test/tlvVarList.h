@@ -21,6 +21,7 @@
 #include <tlvf/BaseClass.h>
 #include <tuple>
 #include <vector>
+#include <tlvf/tlvfutils.h>
 class cInner;
 
 class tlvTestVarList : public BaseClass
@@ -43,6 +44,7 @@ class tlvTestVarList : public BaseClass
         std::shared_ptr<cInner> create_var1();
         bool add_var1(std::shared_ptr<cInner> ptr);
         std::shared_ptr<cInner> var1() { return m_var1_ptr; }
+        uint32_t& var2();
         size_t unknown_length_list_length();
         std::tuple<bool, cInner&> unknown_length_list(size_t idx);
         std::shared_ptr<cInner> create_unknown_length_list();
@@ -66,6 +68,7 @@ class tlvTestVarList : public BaseClass
         bool m_lock_allocation__ = false;
         cInner *m_var1 = nullptr;
         std::shared_ptr<cInner> m_var1_ptr = nullptr;
+        uint32_t* m_var2 = nullptr;
         cInner* m_unknown_length_list = nullptr;
         size_t m_unknown_length_list_idx__ = 0;
         std::vector<std::shared_ptr<cInner>> m_unknown_length_list_vector;
@@ -78,20 +81,31 @@ class cInner : public BaseClass
         cInner(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
         ~cInner();
 
+        const uint16_t& type();
+        const uint16_t& length();
         uint8_t& list_length();
         std::tuple<bool, uint8_t&> list(size_t idx);
         bool alloc_list(size_t count = 1);
         uint32_t& var1();
+        size_t unknown_length_list_inner_length() { return m_unknown_length_list_inner_idx__ * sizeof(char); }
+        char* unknown_length_list_inner(size_t length = 0);
+        bool set_unknown_length_list_inner(const std::string& str);
+        bool set_unknown_length_list_inner(const char buffer[], size_t size);
+        bool alloc_unknown_length_list_inner(size_t count = 1);
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
+        uint16_t* m_type = nullptr;
+        uint16_t* m_length = nullptr;
         uint8_t* m_list_length = nullptr;
         uint8_t* m_list = nullptr;
         size_t m_list_idx__ = 0;
         int m_lock_order_counter__ = 0;
         uint32_t* m_var1 = nullptr;
+        char* m_unknown_length_list_inner = nullptr;
+        size_t m_unknown_length_list_inner_idx__ = 0;
 };
 
 #endif //_TLVF/TEST_TLVVARLIST_H_

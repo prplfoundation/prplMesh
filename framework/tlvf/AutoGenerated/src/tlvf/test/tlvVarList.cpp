@@ -72,6 +72,7 @@ bool tlvTestVarList::alloc_simple_list(size_t count) {
     m_complex_list_length = (uint8_t *)((uint8_t *)(m_complex_list_length) + len);
     m_complex_list = (cInner *)((uint8_t *)(m_complex_list) + len);
     m_var1 = (cInner *)((uint8_t *)(m_var1) + len);
+    m_var2 = (uint32_t *)((uint8_t *)(m_var2) + len);
     m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len);
     m_simple_list_idx__ += count;
     *m_simple_list_length += count;
@@ -115,6 +116,7 @@ std::shared_ptr<cInner> tlvTestVarList::create_complex_list() {
         std::copy_n(src, move_length, dst);
     }
     m_var1 = (cInner *)((uint8_t *)(m_var1) + len);
+    m_var2 = (uint32_t *)((uint8_t *)(m_var2) + len);
     m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len);
     return std::make_shared<cInner>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
 }
@@ -144,6 +146,7 @@ bool tlvTestVarList::add_complex_list(std::shared_ptr<cInner> ptr) {
     if (!m_parse__) { (*m_complex_list_length)++; }
     size_t len = ptr->getLen();
     m_var1 = (cInner *)((uint8_t *)(m_var1) + len - ptr->get_initial_size());
+    m_var2 = (uint32_t *)((uint8_t *)(m_var2) + len - ptr->get_initial_size());
     m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len - ptr->get_initial_size());
     m_complex_list_vector.push_back(ptr);
     m_buff_ptr__ += len;
@@ -170,6 +173,7 @@ std::shared_ptr<cInner> tlvTestVarList::create_var1() {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
+    m_var2 = (uint32_t *)((uint8_t *)(m_var2) + len);
     m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len);
     return std::make_shared<cInner>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
 }
@@ -193,12 +197,17 @@ bool tlvTestVarList::add_var1(std::shared_ptr<cInner> ptr) {
         return false;
     }
     size_t len = ptr->getLen();
+    m_var2 = (uint32_t *)((uint8_t *)(m_var2) + len - ptr->get_initial_size());
     m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len - ptr->get_initial_size());
     m_var1_ptr = ptr;
     m_buff_ptr__ += len;
     if(!m_parse__ && m_length){ (*m_length) += len; }
     m_lock_allocation__ = false;
     return true;
+}
+
+uint32_t& tlvTestVarList::var2() {
+    return (uint32_t&)(*m_var2);
 }
 
 size_t tlvTestVarList::unknown_length_list_length()
@@ -285,6 +294,7 @@ void tlvTestVarList::class_swap()
         std::get<1>(complex_list(i)).class_swap();
     }
     if (m_var1_ptr) { m_var1_ptr->class_swap(); }
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_var2));
     for (size_t i = 0; i < m_unknown_length_list_idx__; i++){
         std::get<1>(unknown_length_list(i)).class_swap();
     }
@@ -298,6 +308,7 @@ size_t tlvTestVarList::get_initial_size()
     class_size += sizeof(uint16_t); // var0
     class_size += sizeof(uint8_t); // simple_list_length
     class_size += sizeof(uint8_t); // complex_list_length
+    class_size += sizeof(uint32_t); // var2
     return class_size;
 }
 
@@ -356,6 +367,9 @@ bool tlvTestVarList::init()
         // swap back since var1 will be swapped as part of the whole class swap
         var1->class_swap();
     }
+    m_var2 = (uint32_t*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(uint32_t) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint32_t); }
     m_unknown_length_list = (cInner*)m_buff_ptr__;
     if (m_length && m_parse__) {
         size_t len = *m_length;
@@ -404,6 +418,14 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cInner::~cInner() {
 }
+const uint16_t& cInner::type() {
+    return (const uint16_t&)(*m_type);
+}
+
+const uint16_t& cInner::length() {
+    return (const uint16_t&)(*m_length);
+}
+
 uint8_t& cInner::list_length() {
     return (uint8_t&)(*m_list_length);
 }
@@ -439,9 +461,11 @@ bool cInner::alloc_list(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_var1 = (uint32_t *)((uint8_t *)(m_var1) + len);
+    m_unknown_length_list_inner = (char *)((uint8_t *)(m_unknown_length_list_inner) + len);
     m_list_idx__ += count;
     *m_list_length += count;
     m_buff_ptr__ += len;
+    if(m_length){ (*m_length) += len; }
     return true;
 }
 
@@ -449,14 +473,73 @@ uint32_t& cInner::var1() {
     return (uint32_t&)(*m_var1);
 }
 
+char* cInner::unknown_length_list_inner(size_t length) {
+    if( (m_unknown_length_list_inner_idx__ <= 0) || (m_unknown_length_list_inner_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "unknown_length_list_inner length is smaller than requested length";
+        return nullptr;
+    }
+    return ((char*)m_unknown_length_list_inner);
+}
+
+bool cInner::set_unknown_length_list_inner(const std::string& str) {
+    size_t str_size = str.size();
+    if (str_size == 0) {
+        TLVF_LOG(WARNING) << "set_unknown_length_list_inner received an empty string.";
+        return false;
+    }
+    if (!alloc_unknown_length_list_inner(str_size + 1)) { return false; } // +1 for null terminator
+    tlvf_copy_string(m_unknown_length_list_inner, str.c_str(), str_size + 1);
+    return true;
+}
+bool cInner::set_unknown_length_list_inner(const char str[], size_t size) {
+    if (str == nullptr || size == 0) { 
+        TLVF_LOG(WARNING) << "set_unknown_length_list_inner received an empty string.";
+        return false;
+    }
+    if (!alloc_unknown_length_list_inner(size + 1)) { return false; } // +1 for null terminator
+    tlvf_copy_string(m_unknown_length_list_inner, str, size + 1);
+    m_unknown_length_list_inner[size] = '\0';
+    return true;
+}
+bool cInner::alloc_unknown_length_list_inner(size_t count) {
+    if (m_lock_order_counter__ > 1) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list unknown_length_list_inner, abort!";
+        return false;
+    }
+    if (count == 0) {
+        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 1;
+    uint8_t *src = (uint8_t *)m_unknown_length_list_inner;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_unknown_length_list_inner_idx__ += count;
+    m_buff_ptr__ += len;
+    if(m_length){ (*m_length) += len; }
+    return true;
+}
+
 void cInner::class_swap()
 {
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_var1));
 }
 
 size_t cInner::get_initial_size()
 {
     size_t class_size = 0;
+    class_size += sizeof(uint16_t); // type
+    class_size += sizeof(uint16_t); // length
     class_size += sizeof(uint8_t); // list_length
     class_size += sizeof(uint32_t); // var1
     return class_size;
@@ -468,19 +551,41 @@ bool cInner::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
+    m_type = (uint16_t*)m_buff_ptr__;
+    if (!m_parse__) *m_type = 0x1;
+    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    m_length = (uint16_t*)m_buff_ptr__;
+    if (!m_parse__) *m_length = 0;
+    m_buff_ptr__ += sizeof(uint16_t) * 1;
     m_list_length = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_list = (uint8_t*)m_buff_ptr__;
     uint8_t list_length = *m_list_length;
     m_list_idx__ = list_length;
     m_buff_ptr__ += sizeof(uint8_t)*(list_length);
     m_var1 = (uint32_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint32_t) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint32_t); }
+    m_unknown_length_list_inner = (char*)m_buff_ptr__;
+    if (m_length && m_parse__) {
+        size_t len = *m_length;
+        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
+        len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
+        m_unknown_length_list_inner_idx__ = len/sizeof(char);
+        m_buff_ptr__ += len;
+    }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
     if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) {
+        if (*m_type != 0x1) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(0x1) << ", received value: " << int(*m_type);
+            return false;
+        }
+    }
     return true;
 }
 
