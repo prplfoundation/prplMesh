@@ -24,6 +24,8 @@
 #include <mapf/common/logger.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
 
+#include <algorithm>
+#include <iterator>
 #include <stdio.h>
 
 using namespace ieee1905_1;
@@ -33,11 +35,20 @@ MAPF_INITIALIZE_LOGGER
 
 using namespace mapf;
 
+std::string dump_buffer(uint8_t *buffer, size_t len)
+{
+    std::ostringstream hexdump;
+    for (size_t i = 0; i < len; i += 16) {
+        for (size_t j = i; j < len && j < i + 16; j++)
+            hexdump << std::hex << std::setw(2) << std::setfill('0') << (unsigned)buffer[j] << " ";
+        hexdump << std::endl;
+    }
+    return hexdump.str();
+}
 int test_complex_list()
 {
     int errors                     = 0;
     const int complex_list_entries = 3;
-    mapf::Logger::Instance().LoggerInit("TLVF example");
     uint8_t tx_buffer[4096];
 
     MAPF_INFO(__FUNCTION__ << " start");
@@ -96,14 +107,7 @@ int test_complex_list()
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
 
-    LOG(INFO) << "TX:";
-    for (size_t i = 0; i < msg.getMessageLength(); i += 16) {
-        std::ostringstream hexdump;
-        for (size_t j = i; j < msg.getMessageLength() && j < i + 16; j++)
-            hexdump << std::hex << std::setw(2) << std::setfill('0') << (unsigned)tx_buffer[j]
-                    << " ";
-        LOG(INFO) << hexdump.str();
-    }
+    LOG(INFO) << "TX: " << std::endl << dump_buffer(tx_buffer, msg.getMessageLength());
 
     uint8_t recv_buffer[sizeof(tx_buffer)];
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
@@ -140,7 +144,6 @@ int test_complex_list()
 int test_all()
 {
     int errors = 0;
-    mapf::Logger::Instance().LoggerInit("TLVF example");
     uint8_t tx_buffer[4096];
 
     //START BUILDING THE MESSAGE HERE
@@ -305,14 +308,7 @@ int test_all()
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
 
-    LOG(INFO) << "TX:";
-    for (size_t i = 0; i < msg.getMessageLength(); i += 16) {
-        std::ostringstream hexdump;
-        for (size_t j = i; j < msg.getMessageLength() && j < i + 16; j++)
-            hexdump << std::hex << std::setw(2) << std::setfill('0') << (unsigned)tx_buffer[j]
-                    << " ";
-        LOG(INFO) << hexdump.str();
-    }
+    LOG(INFO) << "TX: " << std::endl << dump_buffer(tx_buffer, msg.getMessageLength());
 
     uint8_t recv_buffer[sizeof(tx_buffer)];
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
@@ -523,6 +519,7 @@ int test_all()
 
 int main(int argc, char *argv[])
 {
+    mapf::Logger::Instance().LoggerInit("tlvf_test");
     int errors = 0;
 
     errors += test_complex_list();
