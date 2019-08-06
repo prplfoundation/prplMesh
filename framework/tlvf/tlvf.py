@@ -1031,7 +1031,7 @@ class TlvF:
 
             lines_cpp.append("%suint8_t *src = (uint8_t *)m_%s;" % (self.getIndentation(1), param_meta.name))
             if param_length != None:
-                lines_cpp.append("%sif (!m_parse__) {" %self.getIndentation(1))
+                lines_cpp.append("%sif (%s) {" %(self.getIndentation(1), "1" if is_dynamic_len else "!m_parse__"))
                 lines_cpp.append("%sif (m_%s_idx__ > 0) {" % (self.getIndentation(2), param_name))
                 ptr = "(uint8_t *)m_%s_vector[m_%s_idx__ - 1]->getBuffPtr()" %(param_meta.name,param_name)
                 lines_cpp.append("%ssrc = %s;" %(self.getIndentation(3), ptr))                    

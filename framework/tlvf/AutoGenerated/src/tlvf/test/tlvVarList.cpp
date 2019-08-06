@@ -257,7 +257,7 @@ bool tlvTestVarList::add_unknown_length_list(std::shared_ptr<cInner> ptr) {
         return false;
     }
     uint8_t *src = (uint8_t *)m_unknown_length_list;
-    if (!m_parse__) {
+    if (1) {
         if (m_unknown_length_list_idx__ > 0) {
             src = (uint8_t *)m_unknown_length_list_vector[m_unknown_length_list_idx__ - 1]->getBuffPtr();
         }
