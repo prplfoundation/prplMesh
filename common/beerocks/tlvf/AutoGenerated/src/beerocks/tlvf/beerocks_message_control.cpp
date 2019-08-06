@@ -425,6 +425,12 @@ bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::alloc_data(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_data;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;
@@ -513,6 +519,12 @@ bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::alloc_data(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_data;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;
@@ -601,6 +613,12 @@ bool cACTION_CONTROL_AGENT_PING_REQUEST::alloc_data(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_data;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;
@@ -689,6 +707,12 @@ bool cACTION_CONTROL_AGENT_PING_RESPONSE::alloc_data(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_data;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
     m_data_idx__ += count;
     m_buff_ptr__ += len;
     return true;

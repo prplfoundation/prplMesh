@@ -61,6 +61,12 @@ bool tlv1905NeighborDevice::alloc_mac_al_1905_device(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_mac_al_1905_device;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
     m_mac_al_1905_device_idx__ += count;
     m_buff_ptr__ += len;
     if(m_length){ (*m_length) += len; }

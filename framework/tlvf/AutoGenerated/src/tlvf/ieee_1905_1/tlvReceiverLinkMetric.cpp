@@ -65,6 +65,12 @@ bool tlvReceiverLinkMetric::alloc_interface_pair_info(size_t count) {
         return false;
     }
     m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_interface_pair_info;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
     m_interface_pair_info_idx__ += count;
     m_buff_ptr__ += len;
     if(m_length){ (*m_length) += len; }
