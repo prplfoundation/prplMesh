@@ -124,8 +124,10 @@ int test_complex_list()
         }
     }
 
-    auto cmplx    = fourthTlv->create_var1();
-    cmplx->var1() = 0xb11b;
+    fourthTlv->var2() = 0xabababab;
+    auto cmplx        = fourthTlv->create_var1();
+    cmplx->var1()     = 0xb11b;
+    cmplx->set_unknown_length_list_inner("prplMesh");
     if (!fourthTlv->add_var1(cmplx)) {
         LOG(ERROR) << "Failed to add var1";
         ++errors;
@@ -167,8 +169,20 @@ int test_complex_list()
     }
 
     if (tlv4->var1()->var1() != 0xb11b) {
-        MAPF_ERR("Unexpected var1 value" << tlv4->var1()->var1());
+        MAPF_ERR("Unexpected var1 value " << tlv4->var1()->var1());
         ++errors;
+    }
+
+    if (tlv4->var2() != 0xabababab) {
+        MAPF_ERR("Unexpected var2 value " << tlv4->var2());
+        ++errors;
+    }
+
+    auto str = std::string(tlv4->var1()->unknown_length_list_inner(),
+                           tlv4->var1()->unknown_length_list_inner_length());
+    if (!str.compare("prplMesh")) {
+        MAPF_ERR("unknown length list failure - expected \"prplMesh\", received " << str);
+        errors++;
     }
 
     MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
