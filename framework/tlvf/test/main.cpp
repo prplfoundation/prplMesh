@@ -14,6 +14,7 @@
 
 #include "tlvf/ieee_1905_1/tlv1905NeighborDevice.h"
 #include "tlvf/ieee_1905_1/tlvLinkMetricQuery.h"
+#include "tlvf/ieee_1905_1/tlvMacAddress.h"
 #include "tlvf/ieee_1905_1/tlvNon1905neighborDeviceList.h"
 #include "tlvf/ieee_1905_1/tlvVendorSpecific.h"
 #include "tlvf/ieee_1905_1/tlvWscM2.h"
@@ -45,6 +46,39 @@ std::string dump_buffer(uint8_t *buffer, size_t len)
     }
     return hexdump.str();
 }
+
+int test_int_len_list()
+{
+    int errors = 0;
+    uint8_t tx_buffer[1024];
+    const uint8_t gTlvMacAddress[6] = {0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+
+    MAPF_INFO(__FUNCTION__ << " start");
+    memset(tx_buffer, 0, sizeof(tx_buffer));
+    {
+        auto tlv = tlvMacAddress(tx_buffer, sizeof(tx_buffer), false, true);
+        auto mac = &std::get<1>(tlv.mac(0));
+        std::copy_n(gTlvMacAddress, 6, mac);
+        tlv.class_swap(); //finalize
+        LOG(DEBUG) << "TX: " << std::endl << dump_buffer(tx_buffer, tlv.getLen());
+    }
+
+    uint8_t rx_buffer[sizeof(tx_buffer)];
+    memcpy(rx_buffer, tx_buffer, sizeof(rx_buffer));
+    {
+        auto tlv = tlvMacAddress(tx_buffer, sizeof(tx_buffer), true, true);
+        auto mac = &std::get<1>(tlv.mac(0));
+        if (!std::equal(mac, mac + 6, gTlvMacAddress)) {
+            MAPF_ERR("MAC address in received TLV does not match expected result");
+            errors++;
+        }
+        LOG(DEBUG) << "RX: " << std::endl << dump_buffer(rx_buffer, tlv.getLen());
+    }
+
+    MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
+    return errors;
+}
+
 int test_complex_list()
 {
     int errors                     = 0;
@@ -522,6 +556,7 @@ int main(int argc, char *argv[])
     mapf::Logger::Instance().LoggerInit("tlvf_test");
     int errors = 0;
 
+    errors += test_int_len_list();
     errors += test_complex_list();
     errors += test_all();
 
