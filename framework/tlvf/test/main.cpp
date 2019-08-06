@@ -17,6 +17,7 @@
 #include "tlvf/ieee_1905_1/tlvNon1905neighborDeviceList.h"
 #include "tlvf/ieee_1905_1/tlvVendorSpecific.h"
 #include "tlvf/ieee_1905_1/tlvWscM2.h"
+#include "tlvf/ieee_1905_1/tlvMacAddress.h"
 #include "tlvf/wfa_map/tlvApCapability.h"
 #include <tlvf/test/tlvVarList.h>
 
@@ -25,6 +26,8 @@
 #include <tlvf/wfa_map/tlvApCapability.h>
 
 #include <stdio.h>
+#include <algorithm>
+#include <iterator>
 
 using namespace ieee1905_1;
 using namespace wfa_map;
@@ -33,11 +36,66 @@ MAPF_INITIALIZE_LOGGER
 
 using namespace mapf;
 
+void dump_buffer(uint8_t *buffer, size_t len)
+{
+    for (size_t i = 0; i < len; i += 16) {
+        std::ostringstream hexdump;
+        for (size_t j = i; j < len && j < i + 16; j++)
+            hexdump << std::hex << std::setw(2) << std::setfill('0') << (unsigned)buffer[j]
+                    << " ";
+        LOG(INFO) << hexdump.str();
+    }
+}
+
+int test_int_len_list()
+{
+    int errors                     = 0;
+    uint8_t tx_buffer[4096];
+    const uint8_t gTlvMacAddress[6] = {0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+
+    MAPF_INFO(__FUNCTION__ << " start");
+    memset(tx_buffer, 0, sizeof(tx_buffer));
+    CmduMessageTx msg = CmduMessageTx(tx_buffer, sizeof(tx_buffer));
+    auto header = msg.create(0, eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE); //DUMMY Message type
+    header->flags().last_fragment_indicator = 1;
+
+    {
+        auto tlv = msg.addClass<tlvMacAddress>();
+        auto mac = &std::get<1>(tlv->mac(0));
+        std::copy_n(gTlvMacAddress, 6, mac);
+    }
+
+    msg.finalize(true);
+    LOG(INFO) << "TX Buffer (after finalize):";
+    dump_buffer(tx_buffer, msg.getMessageLength());
+
+    uint8_t recv_buffer[sizeof(tx_buffer)];
+    memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
+
+    CmduMessageRx received_message;
+    received_message.parse(recv_buffer, sizeof(recv_buffer), true);
+
+    {
+        auto tlv = received_message.addClass<tlvMacAddress>();
+        if (tlv == nullptr) {
+            MAPF_ERR("TLV is NULL");
+            errors++;
+        }
+        auto mac = &std::get<1>(tlv->mac(0));
+        if (!std::equal(mac, mac + 6, gTlvMacAddress)) {
+            MAPF_ERR("MAC address in received TLV does not match expected result");
+            errors++;
+        }
+    }
+    
+    MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
+    return errors;
+}
+
 int test_complex_list()
 {
     int errors                     = 0;
     const int complex_list_entries = 3;
-    mapf::Logger::Instance().LoggerInit("TLVF example");
     uint8_t tx_buffer[4096];
 
     MAPF_INFO(__FUNCTION__ << " start");
@@ -140,7 +198,6 @@ int test_complex_list()
 int test_all()
 {
     int errors = 0;
-    mapf::Logger::Instance().LoggerInit("TLVF example");
     uint8_t tx_buffer[4096];
 
     //START BUILDING THE MESSAGE HERE
@@ -523,8 +580,10 @@ int test_all()
 
 int main(int argc, char *argv[])
 {
+    mapf::Logger::Instance().LoggerInit("tlvf_test");
     int errors = 0;
 
+    errors += test_int_len_list();
     errors += test_complex_list();
     errors += test_all();
 
