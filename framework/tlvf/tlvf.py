@@ -1134,9 +1134,12 @@ class TlvF:
 
     def addAllocationMarkersAlloc(self, obj_meta, param_meta, param_length, memmove):
         lines_cpp = []
-        if param_meta.length_type == MetaData.LENGTH_TYPE_VAR:
+        if param_meta.length_type == MetaData.LENGTH_TYPE_VAR or MetaData.LENGTH_TYPE_DYNAMIC:
             if memmove:
-                lines_cpp.append("%suint8_t *src = (uint8_t *)&m_%s[*m_%s];" % (self.getIndentation(1), param_meta.name, param_length))
+                if param_meta.length_type == MetaData.LENGTH_TYPE_VAR:
+                    lines_cpp.append("%suint8_t *src = (uint8_t *)&m_%s[*m_%s];" % (self.getIndentation(1), param_meta.name, param_length))
+                else:
+                    lines_cpp.append("%suint8_t *src = (uint8_t *)m_%s;" % (self.getIndentation(1), param_meta.name))
                 lines_cpp.append("%suint8_t *dst = src + len;" %(self.getIndentation(1)))
                 lines_cpp.append("%sif (!m_parse__) {" %self.getIndentation(1))                
                 lines_cpp.append("%ssize_t move_length = getBuffRemainingBytes(src) - len;" %self.getIndentation(2))
