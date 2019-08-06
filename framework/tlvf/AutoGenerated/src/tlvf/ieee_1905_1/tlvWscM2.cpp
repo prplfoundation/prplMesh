@@ -454,11 +454,6 @@ bool tlvWscM2::add_encrypted_settings(std::shared_ptr<WSC::cWscAttrEncryptedSett
         TLVF_LOG(ERROR) << "No call to create_encrypted_settings was called before add_encrypted_settings";
         return false;
     }
-    uint8_t *src = (uint8_t *)m_encrypted_settings;
-    if (ptr->getStartBuffPtr() != src) {
-        TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
-        return false;
-    }
     if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return false;
