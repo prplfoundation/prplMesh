@@ -67,10 +67,10 @@ std::shared_ptr<cOperatingClassesInfo> tlvApRadioBasicCapabilities::create_opera
     m_lock_order_counter__ = 0;
     m_lock_allocation__ = true;
     uint8_t *src = (uint8_t *)m_operating_classes_info_list;
+    if (m_operating_classes_info_list_idx__ > 0) {
+        src = (uint8_t *)m_operating_classes_info_list_vector[m_operating_classes_info_list_idx__ - 1]->getBuffPtr();
+    }
     if (!m_parse__) {
-        if (m_operating_classes_info_list_idx__ > 0) {
-            src = (uint8_t *)m_operating_classes_info_list_vector[m_operating_classes_info_list_idx__ - 1]->getBuffPtr();
-        }
         uint8_t *dst = src + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
@@ -88,23 +88,19 @@ bool tlvApRadioBasicCapabilities::add_operating_classes_info_list(std::shared_pt
         return false;
     }
     uint8_t *src = (uint8_t *)m_operating_classes_info_list;
-    if (!m_parse__) {
-        if (m_operating_classes_info_list_idx__ > 0) {
-            src = (uint8_t *)m_operating_classes_info_list_vector[m_operating_classes_info_list_idx__ - 1]->getBuffPtr();
-        }
+    if (m_operating_classes_info_list_idx__ > 0) {
+        src = (uint8_t *)m_operating_classes_info_list_vector[m_operating_classes_info_list_idx__ - 1]->getBuffPtr();
     }
     if (ptr->getStartBuffPtr() != src) {
-        TLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
         return false;
     }
     if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return false;
     }
-    if (!m_parse__) {
-        m_operating_classes_info_list_idx__++;
-        (*m_operating_classes_info_list_length)++;
-    }
+    m_operating_classes_info_list_idx__++;
+    if (!m_parse__) { (*m_operating_classes_info_list_length)++; }
     size_t len = ptr->getLen();
     m_operating_classes_info_list_vector.push_back(ptr);
     m_buff_ptr__ += len;
@@ -158,7 +154,7 @@ bool tlvApRadioBasicCapabilities::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_operating_classes_info_list = (cOperatingClassesInfo*)m_buff_ptr__;
     uint8_t operating_classes_info_list_length = *m_operating_classes_info_list_length;
-    m_operating_classes_info_list_idx__ = operating_classes_info_list_length;
+    m_operating_classes_info_list_idx__ = 0;
     for (size_t i = 0; i < operating_classes_info_list_length; i++) {
         auto operating_classes_info_list = create_operating_classes_info_list();
         if (!operating_classes_info_list) {

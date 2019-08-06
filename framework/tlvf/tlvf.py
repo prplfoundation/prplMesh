@@ -803,7 +803,6 @@ class TlvF:
                     lines_cpp.append("%s}" %(self.getIndentation(2)))
                     lines_cpp.append("%s// swap back since %s will be swapped as part of the whole class swap" %(self.getIndentation(2), param_name))
                     lines_cpp.append("%s%s->class_swap();" %(self.getIndentation(2), param_name))
-                    lines_cpp.append("%sm_%s_idx__++;" %(self.getIndentation(2), param_name))
                     lines_cpp.append("%slen -= %s->getLen();" %(self.getIndentation(2), param_name))
                     lines_cpp.append("%s}" %(self.getIndentation(1)))
                 else:
@@ -819,8 +818,8 @@ class TlvF:
                 lines_cpp.append("%s %s = *m_%s;" %(length_type.type_str, param_length, param_length))
                 if length_type.swap_needed:
                     lines_cpp.append("if (m_%s__ && m_%s__) {  %s&%s%s; }" %(self.MEMBER_PARSE, self.MEMBER_SWAP, length_type.swap_prefix, param_length, length_type.swap_suffix))
-                lines_cpp.append("m_%s_idx__ = %s;" % (param_name, param_length))
                 if TypeInfo(param_type).type == TypeInfo.CLASS:
+                    lines_cpp.append("m_%s_idx__ = 0;" % (param_name))
                     lines_cpp.append("for (size_t i = 0; i < %s; i++) {" % (param_length))
                     # Add param handling to init function
                     lines_cpp.append("%sauto %s = create_%s();" %( self.getIndentation(1), param_name, param_name))
@@ -836,6 +835,7 @@ class TlvF:
                     lines_cpp.append("%s%s->class_swap();" %(self.getIndentation(1), param_name))
                     lines_cpp.append("}")
                 else:
+                    lines_cpp.append("m_%s_idx__ = %s;" % (param_name, param_length))
                     lines_cpp.append("m_%s__ += sizeof(%s)*(%s);" % (self.MEMBER_BUFF_PTR, param_type, param_length))
             if is_int_len or is_const_len:
                 lines_cpp.append( "m_%s__ += (sizeof(%s) * %s);" % (self.MEMBER_BUFF_PTR, param_type, param_length) )
@@ -1025,15 +1025,13 @@ class TlvF:
 
             lines_cpp.append("%suint8_t *src = (uint8_t *)m_%s;" % (self.getIndentation(1), param_meta.name))
             if param_length != None:
-                lines_cpp.append("%sif (!m_parse__) {" %self.getIndentation(1))
-                lines_cpp.append("%sif (m_%s_idx__ > 0) {" % (self.getIndentation(2), param_name))
+                lines_cpp.append("%sif (m_%s_idx__ > 0) {" % (self.getIndentation(1), param_name))
                 ptr = "(uint8_t *)m_%s_vector[m_%s_idx__ - 1]->getBuffPtr()" %(param_meta.name,param_name)
-                lines_cpp.append("%ssrc = %s;" %(self.getIndentation(3), ptr))                    
-                lines_cpp.append("%s}" %self.getIndentation(2))
+                lines_cpp.append("%ssrc = %s;" %(self.getIndentation(2), ptr))                    
                 lines_cpp.append("%s}" %self.getIndentation(1))
 
             lines_cpp.append( "%sif (ptr->getStartBuffPtr() != src) {" % (self.getIndentation(1)) )
-            lines_cpp.append( '%sTLVF_LOG(ERROR) << "Received to entry pointer is different than expected (excepting the same pointer returned from add method)";' %  self.getIndentation(2) )
+            lines_cpp.append( '%sTLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";' %  self.getIndentation(2) )
             lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
             lines_cpp.append( "%s}" % self.getIndentation(1) )
 
@@ -1043,11 +1041,9 @@ class TlvF:
             lines_cpp.append( "%s}" % self.getIndentation(1) )
 
             if param_length or is_dynamic_len:
-                lines_cpp.append( "%sif (!m_%s__) {" % (self.getIndentation(1), self.MEMBER_PARSE) )
-                lines_cpp.append( "%sm_%s_idx__++;" % (self.getIndentation(2), param_name) )
+                lines_cpp.append( "%sm_%s_idx__++;" % (self.getIndentation(1), param_name) )
                 if is_var_len:
-                    lines_cpp.append( "%s(*m_%s)++;" % (self.getIndentation(2), param_length) )
-                lines_cpp.append( "%s}" % (self.getIndentation(1)) )
+                    lines_cpp.append( "%sif (!m_parse__) { (*m_%s)++; }" % (self.getIndentation(1), param_length) )
             lines_cpp.append( "%ssize_t len = ptr->getLen();" % (self.getIndentation(1) ))
             lines_cpp.extend(self.addAllocationMarkersAdd(obj_meta, param_meta, param_length, False)) # Variable length lists support
             if param_length or is_dynamic_len:
@@ -1116,14 +1112,15 @@ class TlvF:
         if param_meta.length_type == MetaData.LENGTH_TYPE_VAR or param_meta.length_type == MetaData.LENGTH_TYPE_DYNAMIC:
             if memmove:
                 lines_cpp.append("%suint8_t *src = (uint8_t *)m_%s;" % (self.getIndentation(1), param_meta.name))
-                lines_cpp.append("%sif (!m_parse__) {" %self.getIndentation(1))
                 # Since list of classes does not have length parameter like list of native type, 
                 # taking the buffer pointer from classes vector last element  
                 if param_length != None:
-                    lines_cpp.append("%sif (m_%s_idx__ > 0) {" % (self.getIndentation(2), param_meta.name))
+                    lines_cpp.append("%sif (m_%s_idx__ > 0) {" % (self.getIndentation(1), param_meta.name))
                     ptr = "(uint8_t *)m_%s_vector[m_%s_idx__ - 1]->getBuffPtr()" %(param_meta.name,param_meta.name)
-                    lines_cpp.append("%ssrc = %s;" %(self.getIndentation(3), ptr))                    
-                    lines_cpp.append("%s}" %self.getIndentation(2))
+                    lines_cpp.append("%ssrc = %s;" %(self.getIndentation(2), ptr))                    
+                    lines_cpp.append("%s}" %self.getIndentation(1))
+
+                lines_cpp.append("%sif (!m_parse__) {" %self.getIndentation(1))
                 lines_cpp.append("%suint8_t *dst = src + len;" %(self.getIndentation(2)))
                 lines_cpp.append("%ssize_t move_length = getBuffRemainingBytes(src) - len;" %self.getIndentation(2))
                 lines_cpp.append("%sstd::copy_n(src, move_length, dst);" %self.getIndentation(2))
