@@ -33,6 +33,7 @@ usage() {
     echo "      -n|--name - container name (for later easy attach)"
     echo "      -I|--image - docker network to which to attach the container"
     echo "      -N|--network - docker network to which to attach the container"
+    echo "      --entrypoint - use a different entrypoint for the container"
 }
 
 iprand(){
@@ -50,7 +51,7 @@ generate_container_random_ip() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvdi:n:N:o:t:' --long verbose,help,detach,ipaddr:,name:,network:,tag:,options: -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvdi:n:N:o:t:' --long verbose,help,detach,ipaddr:,name:,network:,entrypoint:,tag:,options: -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -65,6 +66,7 @@ main() {
             -n | --name)        NAME="$2"; shift; shift ;;
             -t | --tag)         TAG=":$2"; shift; shift ;;
             -N | --network)     NETWORK="$2"; shift; shift ;;
+            --entrypoint)       ENTRYPOINT="$2"; shift; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
@@ -100,6 +102,7 @@ main() {
                 -v ${sourcesdir}:${sourcesdir}
                 --name ${NAME}"
 
+    [ -n "$ENTRYPOINT" ] && DOCKEROPTS="$DOCKEROPTS --entrypoint $ENTRYPOINT"
     if [ "$DETACH" = "false" ]; then
         DOCKEROPTS="$DOCKEROPTS --interactive --tty --rm"
     else
@@ -114,5 +117,6 @@ DETACH=false
 NETWORK=prplMesh-net
 IPADDR=
 NAME=prplMesh
+ENTRYPOINT=
 
 main $@
