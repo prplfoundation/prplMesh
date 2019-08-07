@@ -602,14 +602,6 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         }
     }
 
-    std::string manufacturer =
-        std::string(tlvwscM1->manufacturer(), tlvwscM1->manufacturer_length());
-    if (!manufacturer.compare("Intel")) {
-        //TODO add support for none Intel agents
-        LOG(ERROR) << "None Intel radio agent " << manufacturer << " , dropping WSC M1 message";
-        return false;
-    }
-
     if (database.setting_certification_mode() ||
         cmdu_rx.getNextTlvType() == int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
         LOG(INFO) << "Intel radio agent join (al_mac=" << al_mac << " ruid=" << ruid;
