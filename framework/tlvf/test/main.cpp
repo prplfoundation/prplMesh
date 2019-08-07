@@ -101,7 +101,7 @@ int test_complex_list()
     fourthTlv->var0() = 0xa0;
     if (!fourthTlv->alloc_simple_list(2)) {
         MAPF_ERR("Failed to allocate simple list");
-        ++errors;
+        errors++;
     }
     std::get<1>(fourthTlv->simple_list(0)) = 0x0bb0;
     std::get<1>(fourthTlv->simple_list(1)) = 0x0bb1;
@@ -115,12 +115,12 @@ int test_complex_list()
         std::get<1>(cmplx->list(2)) = 0xc2;
         if (!fourthTlv->add_complex_list(cmplx)) {
             LOG(ERROR) << "Failed to add complex list";
-            ++errors;
+            errors++;
         }
         //test multiple add (should Fail!)
         if (fourthTlv->add_complex_list(cmplx)) {
             LOG(ERROR) << "Could add complex list a second time";
-            ++errors;
+            errors++;
         }
     }
 
@@ -130,20 +130,20 @@ int test_complex_list()
     cmplx->set_unknown_length_list_inner("prplMesh");
     if (!fourthTlv->add_var1(cmplx)) {
         LOG(ERROR) << "Failed to add var1";
-        ++errors;
+        errors++;
     }
     // Test multiple add - should fail
     if (fourthTlv->add_var1(cmplx)) {
         LOG(ERROR) << "Could add var1 a second time";
         errors++;
     }
-    LOG(INFO) << "TLV 4 length " << fourthTlv->length();
+    LOG(DEBUG) << "TLV 4 length " << fourthTlv->length();
 
-    LOG(INFO) << "Finalize";
+    LOG(DEBUG) << "Finalize";
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
 
-    LOG(INFO) << "TX: " << std::endl << dump_buffer(tx_buffer, msg.getMessageLength());
+    LOG(DEBUG) << "TX: " << std::endl << dump_buffer(tx_buffer, msg.getMessageLength());
 
     uint8_t recv_buffer[sizeof(tx_buffer)];
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
@@ -164,18 +164,18 @@ int test_complex_list()
         auto cmplx = std::get<1>(tlv4->complex_list(i));
         if (cmplx.var1() != 0xbbbbaaaa) {
             MAPF_ERR("wrong value for cmplx->var1 " << std::hex << cmplx.var1());
-            ++errors;
+            errors++;
         }
     }
 
     if (tlv4->var1()->var1() != 0xb11b) {
         MAPF_ERR("Unexpected var1 value " << tlv4->var1()->var1());
-        ++errors;
+        errors++;
     }
 
     if (tlv4->var2() != 0xabababab) {
         MAPF_ERR("Unexpected var2 value " << tlv4->var2());
-        ++errors;
+        errors++;
     }
 
     auto str = std::string(tlv4->var1()->unknown_length_list_inner(),
@@ -194,6 +194,7 @@ int test_all()
     int errors = 0;
     uint8_t tx_buffer[4096];
 
+    MAPF_INFO(__FUNCTION__ << " start");
     //START BUILDING THE MESSAGE HERE
     memset(tx_buffer, 0, sizeof(tx_buffer));
 
@@ -206,7 +207,7 @@ int test_all()
     header->flags().relay_indicator         = 1;
 
     //NOTE: I used random TLVs for the example, don't expect a standard IEEE1905 message
-    MAPF_INFO("CLASS SIZE: " << sizeof(tlvNon1905neighborDeviceList));
+    MAPF_DBG("CLASS SIZE: " << sizeof(tlvNon1905neighborDeviceList));
     auto firstTlv           = msg.addClass<tlvNon1905neighborDeviceList>();
     bool allocation_succeed = firstTlv->alloc_mac_non_1905_device(
         3); //3 mac addresses for the example, can be any number, only limited by the buffer size
@@ -227,7 +228,7 @@ int test_all()
         address.oct[3] = 0x03;
         address.oct[4] = 0x04;
         address.oct[5] = 0x05;
-        MAPF_INFO("WRITE 1 : " << (int)address.oct[3]);
+        MAPF_DBG("WRITE 1 : " << (int)address.oct[3]);
     }
 
     auto second_mac = firstTlv->mac_non_1905_device(
@@ -243,7 +244,7 @@ int test_all()
         address.oct[3] = 0x05;
         address.oct[4] = 0x05;
         address.oct[5] = 0x05;
-        MAPF_INFO("WRITE 2 : " << (int)address.oct[3]);
+        MAPF_DBG("WRITE 2 : " << (int)address.oct[3]);
     }
 
     auto third_mac = firstTlv->mac_non_1905_device(
@@ -264,7 +265,7 @@ int test_all()
         (void)address;
     }
 
-    MAPF_INFO("TLV LENGTH START: " << firstTlv->length());
+    MAPF_DBG("TLV LENGTH START: " << firstTlv->length());
     auto secondTlv            = msg.addClass<tlvLinkMetricQuery>(); // another tlv for the example
     secondTlv->link_metrics() = tlvLinkMetricQuery::eLinkMetricsType::RX_LINK_METRICS_ONLY;
 
@@ -306,7 +307,7 @@ int test_all()
         return false;
     }
     LOG(DEBUG) << "Done (WSC M2)";
-    MAPF_INFO("TLV LENGTH WSC M2: " << thirdTlv->length());
+    MAPF_DBG("TLV LENGTH WSC M2: " << thirdTlv->length());
 
     auto fourthTlv     = msg.addClass<tlvTestVarList>();
     fourthTlv->var0()  = 0xa0;
@@ -355,21 +356,21 @@ int test_all()
         errors++;
     }
 
-    LOG(INFO) << "TLV 4 length " << fourthTlv->length();
+    LOG(DEBUG) << "TLV 4 length " << fourthTlv->length();
     auto unknown    = fourthTlv->create_unknown_length_list();
     unknown->var1() = 0xbbbbaaaa;
     fourthTlv->add_unknown_length_list(unknown);
-    LOG(INFO) << "Unknown list size: " << unknown->getLen();
-    LOG(INFO) << "Total unknown Length: " << fourthTlv->unknown_length_list_length();
-    LOG(INFO) << "TLV 4 length " << fourthTlv->length();
+    LOG(DEBUG) << "Unknown list size: " << unknown->getLen();
+    LOG(DEBUG) << "Total unknown Length: " << fourthTlv->unknown_length_list_length();
+    LOG(DEBUG) << "TLV 4 length " << fourthTlv->length();
 
     LOG(DEBUG) << "Total Message length=" << int(msg.getMessageLength());
 
-    LOG(INFO) << "Finalize";
+    LOG(DEBUG) << "Finalize";
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
 
-    LOG(INFO) << "TX: " << std::endl << dump_buffer(tx_buffer, msg.getMessageLength());
+    LOG(DEBUG) << "TX: " << std::endl << dump_buffer(tx_buffer, msg.getMessageLength());
 
     uint8_t recv_buffer[sizeof(tx_buffer)];
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
@@ -380,14 +381,14 @@ int test_all()
     eTlvType type;
     if (received_message.getNextTlvType(type) &&
         type == eTlvType::TLV_NON_1905_NEIGHBOR_DEVICE_LIST) {
-        MAPF_INFO("SUCCESS");
+        MAPF_DBG("SUCCESS");
     }
 
-    MAPF_INFO("size: " << received_message.getNextTlvLength());
+    MAPF_DBG("size: " << received_message.getNextTlvLength());
 
     auto tlv1 = received_message.addClass<tlvNon1905neighborDeviceList>();
     if (tlv1 != nullptr) {
-        MAPF_INFO("LENGTH AFTER INIT: " << tlv1->length());
+        MAPF_DBG("LENGTH AFTER INIT: " << tlv1->length());
         //tlv1->alloc_mac_non_1905_device(3);
 
         auto mac2 = tlv1->mac_non_1905_device(
@@ -404,7 +405,7 @@ int test_all()
             address.oct[4] = 0x05;
             address.oct[5] = 0x05;*/
 
-            LOG(INFO) << "ADDRESS IS " << (int)address.oct[0];
+            LOG(DEBUG) << "ADDRESS IS " << (int)address.oct[0];
         } else {
             MAPF_ERR("TLV DOES NOT EXIST");
             errors++;
@@ -415,30 +416,30 @@ int test_all()
     }
 
     if (received_message.getNextTlvType(type) && type == eTlvType::TLV_LINK_METRIC_QUERY) {
-        MAPF_INFO("SUCCESS");
+        MAPF_DBG("SUCCESS");
     } else {
         errors++;
     }
 
-    MAPF_INFO("size: " << received_message.getNextTlvLength());
+    MAPF_DBG("size: " << received_message.getNextTlvLength());
 
     auto tlv2 = received_message.addClass<tlvLinkMetricQuery>();
     if (tlv2 != nullptr) {
-        MAPF_INFO("TLV2 LENGTH AFTER INIT: " << tlv2->length());
+        MAPF_DBG("TLV2 LENGTH AFTER INIT: " << tlv2->length());
     } else {
         MAPF_ERR("TLV2 IS NULL");
         errors++;
     }
 
     if (received_message.getNextTlvType(type) && type == eTlvType::TLV_WSC) {
-        MAPF_INFO("SUCCESS");
+        MAPF_DBG("SUCCESS");
     } else {
         errors++;
     }
 
     auto tlv3 = received_message.addClass<tlvWscM2>();
     if (tlv3 != nullptr) {
-        MAPF_INFO("TLV3 LENGTH AFTER INIT: " << tlv3->length());
+        MAPF_DBG("TLV3 LENGTH AFTER INIT: " << tlv3->length());
     } else {
         MAPF_ERR("TLV3 IS NULL");
         errors++;
@@ -488,7 +489,7 @@ int test_all()
             errors++;
         }
 
-        LOG(INFO) << "TLV 4 length " << tlv4->length();
+        LOG(DEBUG) << "TLV 4 length " << tlv4->length();
         // TODO the complex list doesn't work at the moment if it has more than one element
         // Cfr. #137
         if (tlv4->complex_list_length() != 2) {
@@ -569,20 +570,21 @@ int test_all()
     CmduMessageRx invmsg;
     auto invheader = invmsg.parse(invalidBuffer, invalidBufferSize, false);
     if (invheader == nullptr) {
-        MAPF_INFO("HEADER PROTECTION SUCCESS");
+        MAPF_DBG("HEADER PROTECTION SUCCESS");
     }
 
     if (!received_message.getNextTlvType(type)) {
-        MAPF_INFO("TYPE PROTECTION SUCCESS");
+        MAPF_DBG("TYPE PROTECTION SUCCESS");
     }
     auto invptr = invmsg.addClass<tlv1905NeighborDevice>();
     if (invptr == nullptr) {
-        MAPF_INFO("PROTECTION SUCCESS");
+        MAPF_DBG("PROTECTION SUCCESS");
     } else {
         MAPF_ERR("PROTECTION FAILED");
         errors++;
     }
 
+    MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
     return errors;
 }
 
@@ -591,9 +593,10 @@ int main(int argc, char *argv[])
     mapf::Logger::Instance().LoggerInit("tlvf_test");
     int errors = 0;
 
+    MAPF_INFO(__FUNCTION__ << " Starting tests");
     errors += test_int_len_list();
     errors += test_complex_list();
     errors += test_all();
-
+    MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
     return errors;
 }
