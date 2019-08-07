@@ -4388,13 +4388,6 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
                    << "     bssid: " << bssid << std::endl
                    << "     authentication_type: " << authentication_type << std::endl
                    << "     encryption_type: " << encryption_type << std::endl;
-
-        if (!manufacturer.compare("Intel")) {
-            // TODO add support for none Intel agents
-            // https://github.com/prplfoundation/prplMesh/issues/134
-            LOG(ERROR) << "None Intel controller " << manufacturer << " , dropping message";
-            return false;
-        }
     }
 
     if (slave_state != STATE_WAIT_FOR_JOINED_RESPONSE) {
