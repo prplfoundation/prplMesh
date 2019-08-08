@@ -78,6 +78,7 @@ main() {
     status "Start GW (Controller + local Agent)"
     ${scriptdir}/../run.sh start-controller-agent -d -n ${GW_NAME}
     [ -z $GATEWAY_ONLY ] && {
+        sleep ${DELAY}
         status "Start Repeater (Remote Agent)"
         ${scriptdir}/../run.sh start-agent -d -n ${REPEATER_NAME}
     }
