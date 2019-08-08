@@ -143,9 +143,6 @@ char* cACTION_BML_NW_MAP_RESPONSE::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(std::string& str) {
-    return set_buffer(const_cast<std::string&>(str));
-}
 bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -257,9 +254,6 @@ char* cACTION_BML_NW_MAP_UPDATE::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_BML_NW_MAP_UPDATE::set_buffer(std::string& str) {
-    return set_buffer(const_cast<std::string&>(str));
-}
 bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -371,9 +365,6 @@ char* cACTION_BML_STATS_UPDATE::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_BML_STATS_UPDATE::set_buffer(std::string& str) {
-    return set_buffer(const_cast<std::string&>(str));
-}
 bool cACTION_BML_STATS_UPDATE::set_buffer(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -481,9 +472,6 @@ char* cACTION_BML_EVENTS_UPDATE::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_BML_EVENTS_UPDATE::set_buffer(std::string& str) {
-    return set_buffer(const_cast<std::string&>(str));
-}
 bool cACTION_BML_EVENTS_UPDATE::set_buffer(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -3483,9 +3471,6 @@ char* cACTION_BML_STEERING_EVENTS_UPDATE::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(std::string& str) {
-    return set_buffer(const_cast<std::string&>(str));
-}
 bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -3684,9 +3669,6 @@ char* cACTION_BML_WFA_CA_CONTROLLER_REQUEST::command(size_t length) {
     return ((char*)m_command);
 }
 
-bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::set_command(std::string& str) {
-    return set_command(const_cast<std::string&>(str));
-}
 bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::set_command(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -3790,9 +3772,6 @@ char* cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::reply(size_t length) {
     return ((char*)m_reply);
 }
 
-bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::set_reply(std::string& str) {
-    return set_reply(const_cast<std::string&>(str));
-}
 bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::set_reply(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {

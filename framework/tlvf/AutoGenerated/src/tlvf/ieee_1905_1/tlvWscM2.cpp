@@ -89,9 +89,6 @@ char* tlvWscM2::manufacturer(size_t length) {
     return ((char*)m_manufacturer);
 }
 
-bool tlvWscM2::set_manufacturer(std::string& str) {
-    return set_manufacturer(const_cast<std::string&>(str));
-}
 bool tlvWscM2::set_manufacturer(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -174,9 +171,6 @@ char* tlvWscM2::model_name(size_t length) {
     return ((char*)m_model_name);
 }
 
-bool tlvWscM2::set_model_name(std::string& str) {
-    return set_model_name(const_cast<std::string&>(str));
-}
 bool tlvWscM2::set_model_name(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -256,9 +250,6 @@ char* tlvWscM2::model_number(size_t length) {
     return ((char*)m_model_number);
 }
 
-bool tlvWscM2::set_model_number(std::string& str) {
-    return set_model_number(const_cast<std::string&>(str));
-}
 bool tlvWscM2::set_model_number(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -335,9 +326,6 @@ char* tlvWscM2::serial_number(size_t length) {
     return ((char*)m_serial_number);
 }
 
-bool tlvWscM2::set_serial_number(std::string& str) {
-    return set_serial_number(const_cast<std::string&>(str));
-}
 bool tlvWscM2::set_serial_number(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {

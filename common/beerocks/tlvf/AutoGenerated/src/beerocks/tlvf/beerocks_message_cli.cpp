@@ -250,9 +250,6 @@ char* cACTION_CLI_RESPONSE_STR::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_CLI_RESPONSE_STR::set_buffer(std::string& str) {
-    return set_buffer(const_cast<std::string&>(str));
-}
 bool cACTION_CLI_RESPONSE_STR::set_buffer(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {

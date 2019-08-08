@@ -468,7 +468,6 @@ class cWscAttrEncryptedSettings : public BaseClass
         eWscAttributes& ssid_type();
         uint16_t& ssid_length();
         char* ssid(size_t length = 0);
-        bool set_ssid(std::string& str);
         bool set_ssid(const std::string& str);
         bool set_ssid(const char buffer[], size_t size);
         bool alloc_ssid(size_t count = 1);

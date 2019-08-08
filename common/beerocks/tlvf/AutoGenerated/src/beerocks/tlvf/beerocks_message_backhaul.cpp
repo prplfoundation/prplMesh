@@ -33,9 +33,6 @@ char* cACTION_BACKHAUL_REGISTER_REQUEST::sta_iface(size_t length) {
     return ((char*)m_sta_iface);
 }
 
-bool cACTION_BACKHAUL_REGISTER_REQUEST::set_sta_iface(std::string& str) {
-    return set_sta_iface(const_cast<std::string&>(str));
-}
 bool cACTION_BACKHAUL_REGISTER_REQUEST::set_sta_iface(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -70,9 +67,6 @@ char* cACTION_BACKHAUL_REGISTER_REQUEST::hostap_iface(size_t length) {
     return ((char*)m_hostap_iface);
 }
 
-bool cACTION_BACKHAUL_REGISTER_REQUEST::set_hostap_iface(std::string& str) {
-    return set_hostap_iface(const_cast<std::string&>(str));
-}
 bool cACTION_BACKHAUL_REGISTER_REQUEST::set_hostap_iface(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -252,9 +246,6 @@ char* cACTION_BACKHAUL_ENABLE::bridge_iface(size_t length) {
     return ((char*)m_bridge_iface);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_bridge_iface(std::string& str) {
-    return set_bridge_iface(const_cast<std::string&>(str));
-}
 bool cACTION_BACKHAUL_ENABLE::set_bridge_iface(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -297,9 +288,6 @@ char* cACTION_BACKHAUL_ENABLE::wire_iface(size_t length) {
     return ((char*)m_wire_iface);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_wire_iface(std::string& str) {
-    return set_wire_iface(const_cast<std::string&>(str));
-}
 bool cACTION_BACKHAUL_ENABLE::set_wire_iface(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -334,9 +322,6 @@ char* cACTION_BACKHAUL_ENABLE::sta_iface(size_t length) {
     return ((char*)m_sta_iface);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_sta_iface(std::string& str) {
-    return set_sta_iface(const_cast<std::string&>(str));
-}
 bool cACTION_BACKHAUL_ENABLE::set_sta_iface(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -371,9 +356,6 @@ char* cACTION_BACKHAUL_ENABLE::ap_iface(size_t length) {
     return ((char*)m_ap_iface);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_ap_iface(std::string& str) {
-    return set_ap_iface(const_cast<std::string&>(str));
-}
 bool cACTION_BACKHAUL_ENABLE::set_ap_iface(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -408,9 +390,6 @@ char* cACTION_BACKHAUL_ENABLE::ssid(size_t length) {
     return ((char*)m_ssid);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_ssid(std::string& str) {
-    return set_ssid(const_cast<std::string&>(str));
-}
 bool cACTION_BACKHAUL_ENABLE::set_ssid(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -445,9 +424,6 @@ char* cACTION_BACKHAUL_ENABLE::pass(size_t length) {
     return ((char*)m_pass);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_pass(std::string& str) {
-    return set_pass(const_cast<std::string&>(str));
-}
 bool cACTION_BACKHAUL_ENABLE::set_pass(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {

@@ -918,11 +918,6 @@ class TlvF:
                 lines_cpp.append( "}" )
                 lines_cpp.append( "" )
 
-                lines_h.append( "bool set_%s(std::string& str);" % (param_name) )
-                lines_cpp.append( "bool %s::set_%s(std::string& str) {" % (obj_meta.name, param_name) )
-                lines_cpp.append( "%sreturn set_%s(const_cast<std::string&>(str));" % (self.getIndentation(1), param_name) )
-                lines_cpp.append( "}")
-
                 lines_h.append( "bool set_%s(const std::string& str);" % (param_name) )
                 lines_cpp.append( "bool %s::set_%s(const std::string& str) {" % (obj_meta.name, param_name) )
                 lines_cpp.append( "%ssize_t str_size = str.size();" % (self.getIndentation(1)))

@@ -37,11 +37,9 @@ class cACTION_BACKHAUL_REGISTER_REQUEST : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_REGISTER_REQUEST);
         }
         char* sta_iface(size_t length = 0);
-        bool set_sta_iface(std::string& str);
         bool set_sta_iface(const std::string& str);
         bool set_sta_iface(const char buffer[], size_t size);
         char* hostap_iface(size_t length = 0);
-        bool set_hostap_iface(std::string& str);
         bool set_hostap_iface(const std::string& str);
         bool set_hostap_iface(const char buffer[], size_t size);
         uint8_t& local_master();
@@ -114,29 +112,23 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_ENABLE);
         }
         char* bridge_iface(size_t length = 0);
-        bool set_bridge_iface(std::string& str);
         bool set_bridge_iface(const std::string& str);
         bool set_bridge_iface(const char buffer[], size_t size);
         sMacAddr& iface_mac();
         uint8_t& iface_is_5ghz();
         char* wire_iface(size_t length = 0);
-        bool set_wire_iface(std::string& str);
         bool set_wire_iface(const std::string& str);
         bool set_wire_iface(const char buffer[], size_t size);
         char* sta_iface(size_t length = 0);
-        bool set_sta_iface(std::string& str);
         bool set_sta_iface(const std::string& str);
         bool set_sta_iface(const char buffer[], size_t size);
         char* ap_iface(size_t length = 0);
-        bool set_ap_iface(std::string& str);
         bool set_ap_iface(const std::string& str);
         bool set_ap_iface(const char buffer[], size_t size);
         char* ssid(size_t length = 0);
-        bool set_ssid(std::string& str);
         bool set_ssid(const std::string& str);
         bool set_ssid(const char buffer[], size_t size);
         char* pass(size_t length = 0);
-        bool set_pass(std::string& str);
         bool set_pass(const std::string& str);
         bool set_pass(const char buffer[], size_t size);
         uint32_t& security_type();

@@ -74,9 +74,6 @@ char* cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::iface_name(size_t length) {
     return ((char*)m_iface_name);
 }
 
-bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::set_iface_name(std::string& str) {
-    return set_iface_name(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::set_iface_name(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -209,9 +206,6 @@ char* cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST::iface_name(size_t length) {
     return ((char*)m_iface_name);
 }
 
-bool cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST::set_iface_name(std::string& str) {
-    return set_iface_name(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST::set_iface_name(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -427,9 +421,6 @@ char* cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::hostname(size_t length) {
     return ((char*)m_hostname);
 }
 
-bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::set_hostname(std::string& str) {
-    return set_hostname(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::set_hostname(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -768,9 +759,6 @@ char* cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::iface_name(size_t length) {
     return ((char*)m_iface_name);
 }
 
-bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::set_iface_name(std::string& str) {
-    return set_iface_name(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::set_iface_name(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -928,9 +916,6 @@ char* cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::iface_name(size_t length) {
     return ((char*)m_iface_name);
 }
 
-bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_iface_name(std::string& str) {
-    return set_iface_name(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_iface_name(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -965,9 +950,6 @@ char* cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::ssid(size_t length) {
     return ((char*)m_ssid);
 }
 
-bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_ssid(std::string& str) {
-    return set_ssid(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_ssid(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -1002,9 +984,6 @@ char* cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::pass(size_t length) {
     return ((char*)m_pass);
 }
 
-bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_pass(std::string& str) {
-    return set_pass(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_pass(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -1039,9 +1018,6 @@ char* cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::security_type(size_t length
     return ((char*)m_security_type);
 }
 
-bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_security_type(std::string& str) {
-    return set_security_type(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_security_type(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -1126,9 +1102,6 @@ char* cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE::iface_name(size_t length) 
     return ((char*)m_iface_name);
 }
 
-bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE::set_iface_name(std::string& str) {
-    return set_iface_name(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE::set_iface_name(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -1713,9 +1686,6 @@ char* cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST::iface_name(size_t length) {
     return ((char*)m_iface_name);
 }
 
-bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST::set_iface_name(std::string& str) {
-    return set_iface_name(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST::set_iface_name(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -1795,9 +1765,6 @@ char* cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE::iface_name(size_t length) 
     return ((char*)m_iface_name);
 }
 
-bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE::set_iface_name(std::string& str) {
-    return set_iface_name(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE::set_iface_name(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -1884,9 +1851,6 @@ char* cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST::iface_name(size_t length
     return ((char*)m_iface_name);
 }
 
-bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST::set_iface_name(std::string& str) {
-    return set_iface_name(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST::set_iface_name(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -1966,9 +1930,6 @@ char* cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE::iface_name(size_t lengt
     return ((char*)m_iface_name);
 }
 
-bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE::set_iface_name(std::string& str) {
-    return set_iface_name(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE::set_iface_name(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -2230,9 +2191,6 @@ char* cACTION_PLATFORM_ERROR_NOTIFICATION::data(size_t length) {
     return ((char*)m_data);
 }
 
-bool cACTION_PLATFORM_ERROR_NOTIFICATION::set_data(std::string& str) {
-    return set_data(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_ERROR_NOTIFICATION::set_data(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -2309,9 +2267,6 @@ char* cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_ap(size_t 
     return ((char*)m_iface_name_ap);
 }
 
-bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_ap(std::string& str) {
-    return set_iface_name_ap(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_ap(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -2346,9 +2301,6 @@ char* cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_bh(size_t 
     return ((char*)m_iface_name_bh);
 }
 
-bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_bh(std::string& str) {
-    return set_iface_name_bh(const_cast<std::string&>(str));
-}
 bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_bh(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {

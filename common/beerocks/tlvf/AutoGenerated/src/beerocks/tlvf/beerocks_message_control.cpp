@@ -33,9 +33,6 @@ char* cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::slave_version(size_t length) {
     return ((char*)m_slave_version);
 }
 
-bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(std::string& str) {
-    return set_slave_version(const_cast<std::string&>(str));
-}
 bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -190,9 +187,6 @@ char* cACTION_CONTROL_SLAVE_JOINED_RESPONSE::master_version(size_t length) {
     return ((char*)m_master_version);
 }
 
-bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(std::string& str) {
-    return set_master_version(const_cast<std::string&>(str));
-}
 bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
@@ -3173,9 +3167,6 @@ char* cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::name(size_t length) {
     return ((char*)m_name);
 }
 
-bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(std::string& str) {
-    return set_name(const_cast<std::string&>(str));
-}
 bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {
