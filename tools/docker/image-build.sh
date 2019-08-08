@@ -39,7 +39,7 @@ usage() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvb:t:' --long verbose,help,base-image,tag -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hnvb:t:' --long verbose,help,base-image,native,tag -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -54,7 +54,7 @@ main() {
                                         . /etc/os-release
                                         distro="$(echo $NAME | awk '{print tolower($0)}')"
                                         echo "$distro:$VERSION_ID"
-                                    ) ;;
+                                    ); shift ;;
             -t | --tag)             TAG=":$2"; shift ; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
