@@ -20,7 +20,8 @@ main() {
         run ${scriptdir}/image-build.sh
     }
 
-    run docker container run -v ${topdir}:${topdir} --interactive --tty --rm prplmesh-builder $@
+    run docker container run --workdir=$topdir --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)} \
+        -v ${topdir}:${topdir} --interactive --tty --rm prplmesh-builder $@
 }
 
 main $@
