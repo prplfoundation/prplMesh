@@ -30,6 +30,7 @@ usage() {
     echo "      -v|--verbose - verbosity on"
     echo "      -d|--detach - run in background"
     echo "      -i|--ipaddr - ipaddr for container br-lan (should be in network subnet)"
+    echo "      -m|--mac - base MAC address for interfaces in the container"
     echo "      -n|--name - container name (for later easy attach)"
     echo "      -I|--image - docker network to which to attach the container"
     echo "      -N|--network - docker network to which to attach the container"
@@ -51,7 +52,7 @@ generate_container_random_ip() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvdi:n:N:o:t:' --long verbose,help,detach,ipaddr:,name:,network:,entrypoint:,tag:,options: -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvdi:m:n:N:o:t:' --long verbose,help,detach,ipaddr:,mac:,name:,network:,entrypoint:,tag:,options: -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -63,6 +64,7 @@ main() {
             -h | --help)        usage; exit 0; shift ;;
             -d | --detach)      DETACH=true; shift ;;
             -i | --ipaddr)      IPADDR="$2"; shift; shift ;;
+            -m | --mac)         BASE_MAC="$2"; shift; shift ;;
             -n | --name)        NAME="$2"; shift; shift ;;
             -t | --tag)         TAG=":$2"; shift; shift ;;
             -N | --network)     NETWORK="$2"; shift; shift ;;
@@ -92,6 +94,7 @@ main() {
     dbg "NETWORK=${NETWORK}"
     dbg "IMAGE=prplmesh-runner$TAG"
     dbg "IPADDR=${IPADDR}"
+    dbg "BASE_MAC=${BASE_MAC}"
     dbg "NAME=${NAME}"
 
     DOCKEROPTS="-e USER=${SUDO_USER}
@@ -109,7 +112,7 @@ main() {
         DOCKEROPTS="$DOCKEROPTS -d"
     fi
     
-    run docker container run ${DOCKEROPTS} prplmesh-runner$TAG $IPADDR "$@"
+    run docker container run ${DOCKEROPTS} prplmesh-runner$TAG $IPADDR "$BASE_MAC" "$@"
 }
 
 VERBOSE=false
@@ -118,5 +121,6 @@ NETWORK=prplMesh-net
 IPADDR=
 NAME=prplMesh
 ENTRYPOINT=
+BASE_MAC=44:55:66:77
 
 main $@
