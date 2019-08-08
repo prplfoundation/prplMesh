@@ -93,7 +93,6 @@ class cACTION_BML_NW_MAP_RESPONSE : public BaseClass
         uint32_t& node_num();
         uint32_t& buffer_size();
         char* buffer(size_t length = 0);
-        bool set_buffer(std::string& str);
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
         bool alloc_buffer(size_t count = 1);
@@ -123,7 +122,6 @@ class cACTION_BML_NW_MAP_UPDATE : public BaseClass
         uint32_t& node_num();
         uint32_t& buffer_size();
         char* buffer(size_t length = 0);
-        bool set_buffer(std::string& str);
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
         bool alloc_buffer(size_t count = 1);
@@ -153,7 +151,6 @@ class cACTION_BML_STATS_UPDATE : public BaseClass
         uint32_t& num_of_stats_bulks();
         uint32_t& buffer_size();
         char* buffer(size_t length = 0);
-        bool set_buffer(std::string& str);
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
         bool alloc_buffer(size_t count = 1);
@@ -182,7 +179,6 @@ class cACTION_BML_EVENTS_UPDATE : public BaseClass
         }
         uint32_t& buffer_size();
         char* buffer(size_t length = 0);
-        bool set_buffer(std::string& str);
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
         bool alloc_buffer(size_t count = 1);
@@ -1588,7 +1584,6 @@ class cACTION_BML_STEERING_EVENTS_UPDATE : public BaseClass
         }
         uint32_t& buffer_size();
         char* buffer(size_t length = 0);
-        bool set_buffer(std::string& str);
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
         bool alloc_buffer(size_t count = 1);
@@ -1658,7 +1653,6 @@ class cACTION_BML_WFA_CA_CONTROLLER_REQUEST : public BaseClass
         }
         uint16_t& command_length();
         char* command(size_t length = 0);
-        bool set_command(std::string& str);
         bool set_command(const std::string& str);
         bool set_command(const char buffer[], size_t size);
         bool alloc_command(size_t count = 1);
@@ -1686,7 +1680,6 @@ class cACTION_BML_WFA_CA_CONTROLLER_RESPONSE : public BaseClass
         }
         uint16_t& reply_length();
         char* reply(size_t length = 0);
-        bool set_reply(std::string& str);
         bool set_reply(const std::string& str);
         bool set_reply(const char buffer[], size_t size);
         bool alloc_reply(size_t count = 1);

@@ -49,9 +49,6 @@ char* cWscAttrEncryptedSettings::ssid(size_t length) {
     return ((char*)m_ssid);
 }
 
-bool cWscAttrEncryptedSettings::set_ssid(std::string& str) {
-    return set_ssid(const_cast<std::string&>(str));
-}
 bool cWscAttrEncryptedSettings::set_ssid(const std::string& str) {
     size_t str_size = str.size();
     if (str_size == 0) {

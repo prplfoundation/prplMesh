@@ -37,7 +37,6 @@ class cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION : public BaseClass
             return (eActionOp_CONTROL)(ACTION_CONTROL_SLAVE_JOINED_NOTIFICATION);
         }
         char* slave_version(size_t length = 0);
-        bool set_slave_version(std::string& str);
         bool set_slave_version(const std::string& str);
         bool set_slave_version(const char buffer[], size_t size);
         sPlatformSettings& platform_settings();
@@ -82,7 +81,6 @@ class cACTION_CONTROL_SLAVE_JOINED_RESPONSE : public BaseClass
             return (eActionOp_CONTROL)(ACTION_CONTROL_SLAVE_JOINED_RESPONSE);
         }
         char* master_version(size_t length = 0);
-        bool set_master_version(std::string& str);
         bool set_master_version(const std::string& str);
         bool set_master_version(const char buffer[], size_t size);
         uint8_t& err_code();
@@ -1390,7 +1388,6 @@ class cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION : public BaseClass
         sMacAddr& mac();
         beerocks::net::sIpv4Addr& ipv4();
         char* name(size_t length = 0);
-        bool set_name(std::string& str);
         bool set_name(const std::string& str);
         bool set_name(const char buffer[], size_t size);
         void class_swap();
