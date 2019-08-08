@@ -11,6 +11,8 @@ run() {
     "$@" || exit $?
 }
 
+bridge_ip="$1"; shift
+
 run ip link add br-lan type bridge
 run ip link add wlan0 type dummy
 run ip link add wlan2 type dummy
@@ -23,10 +25,8 @@ run ip address flush dev eth0
 run ip link set dev sim-eth0 up
 run ip link set dev wlan0 up
 run ip link set dev wlan2 up
-run ip address add dev br-lan ${1}
+run ip address add dev br-lan "$bridge_ip"
 run ip link set dev br-lan up
-
-shift
 
 cd ${INSTALL_DIR}
 exec /bin/bash "$@"
