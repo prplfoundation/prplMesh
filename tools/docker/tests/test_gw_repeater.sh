@@ -76,11 +76,11 @@ main() {
     dbg DELAY=$DELAY
 
     status "Start GW (Controller + local Agent)"
-    ${scriptdir}/../run.sh start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33
+    ${scriptdir}/../run.sh ${OPT} start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33
     [ -z $GATEWAY_ONLY ] && {
         sleep ${DELAY}
         status "Start Repeater (Remote Agent)"
-        ${scriptdir}/../run.sh start-agent -d -n ${REPEATER_NAME} -m aa:bb:cc:dd
+        ${scriptdir}/../run.sh ${OPT} start-agent -d -n ${REPEATER_NAME} -m aa:bb:cc:dd
     }
     
     status "Delay ${DELAY} seconds..."
