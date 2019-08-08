@@ -69,9 +69,6 @@ main() {
     info "Generating builder docker image (prplmesh-builder$TAG)"
     run docker image build \
         --build-arg image=$IMAGE \
-        --build-arg topdir=$topdir \
-        --build-arg uid=${SUDO_UID:-0} \
-        --build-arg gid=${SUDO_GID:-0} \
         --tag prplmesh-builder$TAG \
         ${scriptdir}/builder
 

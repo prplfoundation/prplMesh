@@ -32,10 +32,4 @@ RUN apt-get update && apt-get install -y \
 	vim \
     && rm -rf /var/lib/apt/lists/*
 
-ARG uid
-ARG gid
-ARG topdir
-
-USER $uid:$gid
-WORKDIR $topdir
 ENTRYPOINT ["./prplMesh/tools/maptools.py", "build"]
