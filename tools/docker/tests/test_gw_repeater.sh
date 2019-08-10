@@ -39,11 +39,11 @@ usage() {
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
-    echo "      -d|--delay - delay between starting the containers 
+    echo "      -d|--delay - delay between starting the containers
     and testing their status (default %DELAY seconds"
     echo "      -g|--gateway - gateway container name"
     echo "      -r|--repeater - repeater container name"
-    echo "      --rm - remove containers after test completes" 
+    echo "      --rm - remove containers after test completes"
 }
 
 main() {
@@ -76,16 +76,16 @@ main() {
     dbg DELAY=$DELAY
 
     status "Start GW (Controller + local Agent)"
-    ${scriptdir}/../run.sh ${OPT} start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33
+    ${scriptdir}/../run.sh ${OPT} start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33 "$@"
     [ -z $GATEWAY_ONLY ] && {
         sleep ${DELAY}
         status "Start Repeater (Remote Agent)"
-        ${scriptdir}/../run.sh ${OPT} start-agent -d -n ${REPEATER_NAME} -m aa:bb:cc:dd
+        ${scriptdir}/../run.sh ${OPT} start-agent -d -n ${REPEATER_NAME} -m aa:bb:cc:dd "$@"
     }
-    
+
     status "Delay ${DELAY} seconds..."
     sleep ${DELAY}
-    
+
     error=0
     report "GW operational" \
         ${scriptdir}/../test.sh ${OPT} -n ${GW_NAME}
