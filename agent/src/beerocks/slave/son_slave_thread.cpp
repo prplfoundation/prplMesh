@@ -4318,6 +4318,59 @@ bool slave_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlv
     return true;
 }
 
+bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
+    std::shared_ptr<ieee1905_1::tlvWscM2> m2, std::string &ssid, std::string &bssid,
+    WSC::eWscAuth &auth_type, WSC::eWscEncr &encr_type)
+{
+    auto encrypted_settings = m2->encrypted_settings();
+    uint8_t *iv             = reinterpret_cast<uint8_t *>(encrypted_settings->iv());
+    LOG(DEBUG) << "M2 Parse: aes decrypt";
+    mapf::encryption::aes_decrypt(keywrapkey, iv,
+                                  (uint8_t *)encrypted_settings->encrypted_settings(),
+                                  encrypted_settings->encrypted_settings_length());
+
+    uint8_t buf[encrypted_settings->encrypted_settings_length()];
+    std::copy_n(encrypted_settings->encrypted_settings(),
+                encrypted_settings->encrypted_settings_length(), buf);
+    LOG(DEBUG) << "M2 Parse: parse config_data, len = " << sizeof(buf);
+    // Need to convert to host byte order to get config data length,
+    // which is needed for computing the KWA (1st 64 bits of HMAC)
+    // However, the KWA is computed on the finalized version of the config
+    // data, hence the class_swap.
+    // Finally, once authentication succeeds, swap back to host byte order.
+    // Theoretically, this can be avoided by not passing swap_needed=True to
+    // cConfigData constructor, but then parsing will fail since the length
+    // will be calculated wrong. TLVF does not support parsing network byte order
+    // without full swap, so keep this workaround for now (another future TLVF V2 feature)
+    WSC::cConfigData config_data(buf, sizeof(buf), true, true);
+
+    // get length of config_data for KWA authentication
+    size_t len = config_data.getLen();
+
+    // Swap to network byte order for KWA HMAC calculation
+    config_data.class_swap();
+
+    uint8_t kwa[8];
+    // Compute KWA based on decrypted settings
+    if (!mapf::encryption::kwa_compute(authkey, buf, len, kwa)) {
+        LOG(ERROR) << "kwa compute";
+        return false;
+    }
+    if (!std::equal(kwa, kwa + sizeof(kwa), (uint8_t *)m2->authenticator().data)) {
+        LOG(ERROR) << "Authentication failure";
+        return false;
+    }
+
+    // Swap back to host byte order to read and use config_data
+    config_data.class_swap();
+    ssid      = std::string(config_data.ssid(), config_data.ssid_length());
+    bssid     = network_utils::mac_to_string(config_data.bssid_attr().data);
+    auth_type = config_data.authentication_type_attr().data;
+    encr_type = config_data.encryption_type_attr().data;
+
+    return true;
+}
+
 bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     // Check if this is a M1 message that we sent to the controller, which was just looped back.
@@ -4374,41 +4427,12 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     for (auto tlvWscM2 : m2_list) {
         if (!autoconfig_wsc_calculate_keys(tlvWscM2))
             return false;
-        LOG(DEBUG) << "M2 Parse: calculate keys";
-        auto encrypted_settings = tlvWscM2->encrypted_settings();
-        uint8_t *iv             = reinterpret_cast<uint8_t *>(encrypted_settings->iv());
-        LOG(DEBUG) << "M2 Parse: aes decrypt";
-        mapf::encryption::aes_decrypt(keywrapkey, iv,
-                                      (uint8_t *)encrypted_settings->encrypted_settings(),
-                                      encrypted_settings->encrypted_settings_length());
+        std::string ssid, bssid;
+        WSC::eWscAuth authtype;
+        WSC::eWscEncr enctype;
+        if (!autoconfig_wsc_parse_m2_encrypted_settings(tlvWscM2, ssid, bssid, authtype, enctype))
+            return false;
 
-        // TODO authenticate encrypted settings
-        // before passing to the config_data constructor
-        uint8_t buf[encrypted_settings->encrypted_settings_length()];
-        std::copy_n(encrypted_settings->encrypted_settings(),
-                    encrypted_settings->encrypted_settings_length(), buf);
-        LOG(DEBUG) << "M2 Parse: parse config_data, len = " << sizeof(buf);
-        WSC::cConfigData config_data(buf, sizeof(buf), true, true);
-
-        auto ssid                = std::string(config_data.ssid(), config_data.ssid_length());
-        auto bssid               = network_utils::mac_to_string(config_data.bssid_attr().data);
-        auto authentication_type = config_data.authentication_type_attr().data;
-        auto encryption_type     = config_data.encryption_type_attr().data;
-        LOG(DEBUG) << "authenticator type:" << tlvWscM2->authenticator().attribute_type;
-        LOG(DEBUG) << "authenticator length:" << tlvWscM2->authenticator().data_length;
-        LOG(DEBUG) << "authenticator buffer:";
-        dump_buffer(tlvWscM2->authenticator().data, tlvWscM2->authenticator().data_length);
-
-        // TODO - finish with decryption and authentication
-        // https://github.com/prplfoundation/prplMesh/pull/91
-        // char network_key[WSC::WSC_MAX_NETWORK_KEY_LENGTH];
-        // std::copy_n(encrypted_settings.network_key_attr().data,
-        //             encrypted_settings.network_key_attr().data_length,
-        //             network_key);
-        // char key_wrap_auth[WSC::WSC_KEY_WRAP_AUTH_LENGTH];
-        // std::copy_n(encrypted_settings.key_wrap_auth_attr().data,
-        //             encrypted_settings.key_wrap_auth_attr().data_length,
-        //             network_key);
         std::string manufacturer =
             std::string(tlvWscM2->manufacturer(), tlvWscM2->manufacturer_length());
         // ONLY FOR DEBUG!!!
@@ -4417,8 +4441,8 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
                    << "     Manufacturer: " << manufacturer << std::endl
                    << "     ssid: " << ssid << std::endl
                    << "     bssid: " << bssid << std::endl
-                   << "     authentication_type: " << authentication_type << std::endl
-                   << "     encryption_type: " << encryption_type << std::endl;
+                   << "     authentication_type: " << authtype << std::endl
+                   << "     encryption_type: " << enctype << std::endl;
 
         if (!manufacturer.compare("Intel")) {
             // TODO add support for none Intel agents

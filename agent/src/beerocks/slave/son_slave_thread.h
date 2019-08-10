@@ -263,6 +263,10 @@ private:
 
     // Encryption support - move to common library
     bool autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlvWscM2> m2);
+    bool autoconfig_wsc_parse_m2_encrypted_settings(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
+                                                    std::string &ssid, std::string &bssid,
+                                                    WSC::eWscAuth &auth_type,
+                                                    WSC::eWscEncr &encr_type);
     mapf::encryption::diffie_hellman dh;
     uint8_t authkey[32];
     uint8_t keywrapkey[16];

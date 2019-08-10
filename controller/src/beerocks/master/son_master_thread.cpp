@@ -385,7 +385,9 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
 bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
     std::shared_ptr<ieee1905_1::tlvWscM2> m2, WSC::cConfigData &config_data)
 {
-    size_t len             = (config_data.getLen() + 16) & ~0xFU; // Align to 16 bytes boundary
+    // Calculate length of data to encrypt
+    // (= plaintext length + 32 bits HMAC aligned to 16 bytes boundary)
+    size_t len             = (config_data.getLen() + 8 + 16) & ~0xFU;
     uint8_t encrypted[len] = {0};
 
     auto encrypted_settings = m2->create_encrypted_settings();
@@ -397,6 +399,12 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
         return false;
 
     std::copy_n(config_data.getStartBuffPtr(), config_data.getLen(), encrypted);
+    uint8_t *kwa = &encrypted[config_data.getLen()];
+    // Add KWA which is the 1st 64 bits of HMAC of config_data using AuthKey
+    if (!mapf::encryption::kwa_compute(authkey, encrypted, config_data.getLen(), kwa))
+        return false;
+    std::copy_n(kwa, m2->authenticator().data_length, m2->authenticator().data);
+
     uint8_t *iv = reinterpret_cast<uint8_t *>(m2->encrypted_settings()->iv());
 
     if (!mapf::encryption::create_nonce(iv, WSC::WSC_ENCRYPTED_SETTINGS_IV_LENGTH))
@@ -550,10 +558,6 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
 
     if (!autoconfig_wsc_add_m2_encrypted_settings(tlvWscM2, config_data))
         return false;
-
-    // TODO - add HMAC and authenticator
-    std::fill(tlvWscM2->authenticator().data,
-              tlvWscM2->authenticator().data + tlvWscM2->authenticator().data_length, 0xbb);
 
     return true;
 }
