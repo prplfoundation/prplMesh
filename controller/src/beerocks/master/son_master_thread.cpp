@@ -373,6 +373,97 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
     return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
 }
 
+/**
+ * @brief Encrypt the config data using AES and add to the WSC M2 TLV
+ *        The encrypted data length is the config data length padded to 16 bytes boundary.
+ *
+ * @param[in] m2 WSC M2 TLV
+ * @param[in] config_data config data in network byte order (swapped)
+ * @param[in] authkey 32 bytes calculated authentication key
+ * @param[in] keywrapkey 16 bytes calculated key wrap key
+ * @return true on success
+ * @return false on failure
+ */
+bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
+    std::shared_ptr<ieee1905_1::tlvWscM2> m2, WSC::cConfigData &config_data, uint8_t authkey[32],
+    uint8_t keywrapkey[16])
+{
+    size_t len = (config_data.getLen() + 15) & ~0xFU; // Align to 16 bytes boundary
+
+    auto encrypted_settings = m2->create_encrypted_settings();
+    if (!encrypted_settings)
+        return false;
+    if (!encrypted_settings->alloc_encrypted_settings(len))
+        return false;
+    if (!m2->add_encrypted_settings(encrypted_settings))
+        return false;
+
+    std::copy_n(config_data.getStartBuffPtr(), config_data.getLen(),
+                encrypted_settings->encrypted_settings());
+    uint8_t *iv = reinterpret_cast<uint8_t *>(m2->encrypted_settings()->iv());
+
+    if (!mapf::encryption::create_iv(iv, WSC::WSC_ENCRYPTED_SETTINGS_IV_LENGTH))
+        return false;
+
+    if (!mapf::encryption::aes_encrypt(
+            keywrapkey, iv, reinterpret_cast<uint8_t *>(encrypted_settings->encrypted_settings()),
+            encrypted_settings->encrypted_settings_length())) {
+        LOG(DEBUG) << "aes encrypt";
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Calculate keys and update M2 attributes.
+ *
+ * @param[in] m1 WSC M1 TLV received from the radio agent
+ * @param[in] m2 WSC M2 TLV to be sent to the radio agent
+ * @param[in] dh diffie helman key exchange class containing the keypair
+ * @param[out] authkey 32 bytes calculated authentication key
+ * @param[out] keywrapkey 16 bytes calculated key wrap key
+ * @return true on success
+ * @return false on failure
+ */
+bool master_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlvWscM1> m1,
+                                                  std::shared_ptr<ieee1905_1::tlvWscM2> m2,
+                                                  const mapf::encryption::diffie_hellman &dh,
+                                                  uint8_t authkey[32], uint8_t keywrapkey[16])
+{
+    m2->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2PSK;
+    m2->encryption_type_flags_attr().data     = WSC::WSC_ENCR_NONE | WSC::WSC_ENCR_AES;
+    std::copy_n(m1->enrolee_nonce_attr().data, m1->enrolee_nonce_attr().data_length,
+                m2->enrolee_nonce_attr().data);
+    std::copy_n(dh.nonce(), dh.nonce_length(), m2->registrar_nonce_attr().data);
+    if (!mapf::encryption::wps_calculate_keys(
+            dh, m1->public_key_attr().data, m1->public_key_attr().data_length,
+            m1->enrolee_nonce_attr().data, m1->mac_attr().data.oct, m2->registrar_nonce_attr().data,
+            authkey, keywrapkey)) {
+        LOG(ERROR) << "Failed to calculate WPS keys";
+        return false;
+    }
+    std::copy(dh.pubkey(), dh.pubkey() + dh.pubkey_length(), m2->public_key_attr().data);
+
+    return true;
+}
+
+/**
+ * @brief add WSC M2 TLV to the current CMDU
+ *
+ *        the config_data contains the secret ssid, authentication and encryption types,
+ *        the network key, bssid and the key_wrap_auth attribute.
+ *        It does encryption using the keywrapkey and HMAC with the authkey generated
+ *        in the WSC keys calculation from the M1 and M2 nonce values, the radio agent's
+ *        mac, and a random initialization vector.
+ *        The encrypted config_data blob is copied to the encrypted_data attribute
+ *        in the M2 TLV, which marks the WSC M2 TLV ready to be sent to the agent.
+ *
+ * @param tlvWscM1 WSC M1 TLV received from the radio agent as part of the WSC autoconfiguration
+ *        CMDU
+ * @return true on success
+ * @return false on failure
+ */
 bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> tlvWscM1)
 {
     if (!tlvWscM1) {
@@ -397,9 +488,6 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
     if (!tlvWscM2->set_serial_number("prpl12345"))
         return false;
     std::memset(tlvWscM2->uuid_r_attr().data, 0xee, tlvWscM2->uuid_r_attr().data_length);
-    tlvWscM2->authentication_type_flags_attr().data =
-        tlvWscM1->authentication_type_flags_attr().data;
-    tlvWscM2->encryption_type_flags_attr().data = tlvWscM1->encryption_type_flags_attr().data;
     tlvWscM2->rf_bands_attr().data = (tlvWscM1->rf_bands_attr().data & WSC::WSC_RF_BAND_5GHZ)
                                          ? WSC::WSC_RF_BAND_5GHZ
                                          : WSC::WSC_RF_BAND_2GHZ;
@@ -408,30 +496,45 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
             ? WSC::FRONTHAUL_BSS
             : (bss_type & WSC::BACKHAUL_BSS ? WSC::BACKHAUL_BSS : WSC::TEARDOWN);
     tlvWscM2->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
-    // Encrypted settings
-    auto encrypted_settings = tlvWscM2->create_encrypted_settings();
-    if (!encrypted_settings) {
-        LOG(ERROR) << "Failed to create encrypted settings";
-        return false;
-    }
-    // TODO - actually encrypt the data
-    encrypted_settings->set_ssid("prplMesh_ssid");
-    encrypted_settings->authentication_type_attr().data = WSC::WSC_AUTH_WPA2; //DUMMY
-    encrypted_settings->encryption_type_attr().data     = WSC::WSC_ENCR_AES;
-    std::fill(encrypted_settings->network_key_attr().data,
-              encrypted_settings->network_key_attr().data +
-                  encrypted_settings->network_key_attr().data_length,
-              0xaa); //DUMMY
-    encrypted_settings->bssid_attr().data = tlvWscM1->mac_attr().data;
-    std::fill(encrypted_settings->key_wrap_auth_attr().data,
-              encrypted_settings->key_wrap_auth_attr().data +
-                  encrypted_settings->key_wrap_auth_attr().data_length,
-              0xff); //DUMMY
 
-    if (!tlvWscM2->add_encrypted_settings(encrypted_settings)) {
-        LOG(ERROR) << "Failed to add encrypted settings";
+    ///////////////////////////////
+    // @brief encryption support //
+    ///////////////////////////////
+    mapf::encryption::diffie_hellman dh;
+    uint8_t authkey[32];
+    uint8_t keywrapkey[16];
+    if (!autoconfig_wsc_calculate_keys(tlvWscM1, tlvWscM2, dh, authkey, keywrapkey))
         return false;
-    }
+
+    // Encrypted settings
+    // Encrypted settings are the ConfigData + IV. First create the ConfigData,
+    // Then copy it to the encrypted data, add an IV and encrypt.
+    // Finally, add HMAC
+
+    // Create ConfigData
+    uint8_t buf[1024];
+    WSC::cConfigData config_data(buf, sizeof(buf), false, true);
+    config_data.set_ssid("prplMesh-ssid");
+    config_data.authentication_type_attr().data = WSC::WSC_AUTH_WPA2;
+    config_data.encryption_type_attr().data     = WSC::WSC_ENCR_AES;
+    std::fill(config_data.network_key_attr().data,
+              config_data.network_key_attr().data + config_data.network_key_attr().data_length,
+              0xaa); //DUMMY
+
+    LOG(DEBUG) << "WSC config_data:" << std::endl
+               << "     ssid: " << config_data.ssid() << std::endl
+               << "     authentication_type: " << config_data.authentication_type_attr().data
+               << std::endl
+               << "     encryption_type: " << config_data.encryption_type_attr().data << std::endl;
+
+    config_data.class_swap();
+
+    if (!autoconfig_wsc_add_m2_encrypted_settings(tlvWscM2, config_data, authkey, keywrapkey))
+        return false;
+
+    // TODO - add HMAC and authenticator
+    std::fill(tlvWscM2->authenticator().data,
+              tlvWscM2->authenticator().data + tlvWscM2->authenticator().data_length, 0xbb);
 
     return true;
 }
@@ -488,7 +591,10 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
 
+    auto al_mac          = network_utils::mac_to_string(tlvwscM1->mac_attr().data.oct);
+    auto ruid            = network_utils::mac_to_string(tlvRuid->radio_uid());
     tlvRuid->radio_uid() = radio_basic_caps->radio_uid();
+    LOG(INFO) << "radio agent join (al_mac=" << al_mac << " ruid=" << ruid << " enrolee_nonce: ";
 
     for (int i = 0; i < radio_basic_caps->maximum_number_of_bsss_supported(); i++) {
         if (!autoconfig_wsc_add_m2(tlvwscM1)) {
@@ -505,9 +611,6 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
 
-    auto al_mac = network_utils::mac_to_string(tlvwscM1->mac_attr().data.oct);
-    auto ruid   = network_utils::mac_to_string(tlvRuid->radio_uid());
-    LOG(INFO) << "Intel radio agent join (al_mac=" << al_mac << " ruid=" << ruid;
     if (!handle_intel_slave_join(sd, cmdu_rx, cmdu_tx)) {
         LOG(ERROR) << "Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid;
         return false;

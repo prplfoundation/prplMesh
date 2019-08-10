@@ -19,13 +19,13 @@
 #include <beerocks/bcl/beerocks_socket_thread.h>
 #include <beerocks/bcl/network/network_utils.h>
 
+#include <mapf/common/encryption.h>
+#include <tlvf/ieee_1905_1/tlvWscM1.h>
+#include <tlvf/ieee_1905_1/tlvWscM2.h>
+
 #include <cstddef>
 #include <ctime>
 #include <stdint.h>
-
-namespace ieee1905_1 {
-class tlvWscM1;
-}
 
 namespace son {
 class master_thread : public beerocks::socket_thread {
@@ -58,11 +58,20 @@ private:
     // 1905 messages handlers
     bool handle_cmdu_1905_autoconfiguration_search(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_autoconfiguration_WSC(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
-    bool autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> m1);
     bool handle_cmdu_1905_channel_preference_report(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_channel_selection_response(Socket *sd,
                                                      ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_operating_channel_report(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+
+    // Autoconfig encryption support
+    bool autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> m1);
+    bool autoconfig_wsc_add_m2_encrypted_settings(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
+                                                  WSC::cConfigData &config_data,
+                                                  uint8_t authkey[32], uint8_t keywrapkey[16]);
+    bool autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlvWscM1> m1,
+                                       std::shared_ptr<ieee1905_1::tlvWscM2> m2,
+                                       const mapf::encryption::diffie_hellman &dh,
+                                       uint8_t authkey[32], uint8_t keywrapkey[16]);
 
     db &database;
     task_pool tasks;

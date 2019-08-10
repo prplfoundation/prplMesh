@@ -39,6 +39,7 @@
 
 namespace WSC {
 
+class cWscAttrEncryptedSettings;
 typedef struct sWscAttrVersion {
     eWscAttributes attribute_type;
     uint16_t data_length;
@@ -456,15 +457,13 @@ typedef struct sWscAttrAuthenticator {
 } __attribute__((packed)) sWscAttrAuthenticator;
 
 
-class cWscAttrEncryptedSettings : public BaseClass
+class cConfigData : public BaseClass
 {
     public:
-        cWscAttrEncryptedSettings(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cWscAttrEncryptedSettings(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cWscAttrEncryptedSettings();
+        cConfigData(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cConfigData(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cConfigData();
 
-        const eWscAttributes& type();
-        const uint16_t& length();
         eWscAttributes& ssid_type();
         uint16_t& ssid_length();
         char* ssid(size_t length = 0);
@@ -475,14 +474,11 @@ class cWscAttrEncryptedSettings : public BaseClass
         sWscAttrEncryptionType& encryption_type_attr();
         sWscAttrNetworkKey& network_key_attr();
         sWscAttrBssid& bssid_attr();
-        sWscAttrKeyWrapAuthenticator& key_wrap_auth_attr();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
-        eWscAttributes* m_type = nullptr;
-        uint16_t* m_length = nullptr;
         eWscAttributes* m_ssid_type = nullptr;
         uint16_t* m_ssid_length = nullptr;
         char* m_ssid = nullptr;
@@ -492,7 +488,37 @@ class cWscAttrEncryptedSettings : public BaseClass
         sWscAttrEncryptionType* m_encryption_type_attr = nullptr;
         sWscAttrNetworkKey* m_network_key_attr = nullptr;
         sWscAttrBssid* m_bssid_attr = nullptr;
-        sWscAttrKeyWrapAuthenticator* m_key_wrap_auth_attr = nullptr;
+};
+
+class cWscAttrEncryptedSettings : public BaseClass
+{
+    public:
+        cWscAttrEncryptedSettings(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cWscAttrEncryptedSettings(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cWscAttrEncryptedSettings();
+
+        const eWscAttributes& type();
+        const uint16_t& length();
+        char* iv(size_t length = 0);
+        bool set_iv(const std::string& str);
+        bool set_iv(const char buffer[], size_t size);
+        size_t encrypted_settings_length() { return m_encrypted_settings_idx__ * sizeof(char); }
+        char* encrypted_settings(size_t length = 0);
+        bool set_encrypted_settings(const std::string& str);
+        bool set_encrypted_settings(const char buffer[], size_t size);
+        bool alloc_encrypted_settings(size_t count = 1);
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        char* m_iv = nullptr;
+        size_t m_iv_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+        char* m_encrypted_settings = nullptr;
+        size_t m_encrypted_settings_idx__ = 0;
 };
 
 }; // close namespace: WSC

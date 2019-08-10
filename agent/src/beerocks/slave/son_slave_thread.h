@@ -11,10 +11,15 @@
 
 #include "ap_manager_thread.h"
 
+#include <beerocks/bcl/beerocks_backport.h>
 #include <beerocks/bcl/beerocks_logging.h>
 #include <beerocks/bcl/beerocks_socket_thread.h>
 
 #include <beerocks/tlvf/beerocks_message_header.h>
+
+#include <mapf/common/encryption.h>
+#include <tlvf/ieee_1905_1/tlvWscM1.h>
+#include <tlvf/ieee_1905_1/tlvWscM2.h>
 
 namespace son {
 class slave_thread : public beerocks::socket_thread {
@@ -256,6 +261,17 @@ private:
     beerocks::eRadioStatus iface_status_bh_wired_prev = beerocks::eRadioStatus::INVALID;
     bool iface_status_operational_state               = false;
     bool iface_status_operational_state_prev          = false;
+
+    // Encryption support - move to common library
+    bool autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
+                                       uint8_t authkey[32], uint8_t keywrapkey[16]);
+    bool autoconfig_wsc_parse_m2_encrypted_settings(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
+                                                    uint8_t authkey[32], uint8_t keywrapkey[16],
+                                                    std::string &ssid, sMacAddr &bssid,
+                                                    WSC::eWscAuth &auth_type,
+                                                    WSC::eWscEncr &encr_type);
+
+    std::unique_ptr<mapf::encryption::diffie_hellman> dh = nullptr;
 
     bool parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
