@@ -66,7 +66,7 @@ main() {
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
     done
-
+  
     [ -z $GATEWAY_ONLY ] && status "Starting GW+Repeater test" || status "Starting GW only test"
 
     dbg REMOVE=$REMOVE
@@ -76,11 +76,11 @@ main() {
     dbg DELAY=$DELAY
 
     status "Start GW (Controller + local Agent)"
-    ${scriptdir}/../run.sh ${OPT} start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33
+    ${scriptdir}/../run.sh ${OPT} start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33 $@
     [ -z $GATEWAY_ONLY ] && {
         sleep ${DELAY}
         status "Start Repeater (Remote Agent)"
-        ${scriptdir}/../run.sh ${OPT} start-agent -d -n ${REPEATER_NAME} -m aa:bb:cc:dd
+        ${scriptdir}/../run.sh ${OPT} start-agent -d -n ${REPEATER_NAME} -m aa:bb:cc:dd $@
     }
     
     status "Delay ${DELAY} seconds..."
@@ -88,13 +88,13 @@ main() {
     
     error=0
     report "GW operational" \
-        ${scriptdir}/../test.sh ${OPT} -n ${GW_NAME}
+        ${scriptdir}/../test.sh ${OPT} -n ${GW_NAME} $@
     [ -z $GATEWAY_ONLY ] && {
         report "Repeater operational" \
-            ${scriptdir}/../test.sh ${OPT} -n ${REPEATER_NAME}
+            ${scriptdir}/../test.sh ${OPT} -n ${REPEATER_NAME} $@
     }
     [ "$REMOVE" = "true" ] && {
-        status "Deleting containers ${GW_NAME}, ${REPEATER_NAME}"
+        status "Deleting containers ${GW_NAME}, ${REPEATER_NAME}" $@
         docker rm -f ${GW_NAME} ${REPEATER_NAME} >/dev/null 2>&1
     }
 
