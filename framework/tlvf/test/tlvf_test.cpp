@@ -190,7 +190,8 @@ int test_complex_list()
     return errors;
 }
 
-bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, uint8_t *iv)
+bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, uint8_t *authkey,
+                            uint8_t *iv)
 {
     // Encrypted settings
     // Encrypted settings are the ConfigData + IV. First create the ConfigData,
@@ -214,22 +215,28 @@ bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, u
                << "     encryption_type: " << config_data.encryption_type_attr().data << std::endl;
     config_data.class_swap();
 
-    size_t len             = (config_data.getLen() + 16) & ~0xFU;
+    // Calculate length of data to encrypt
+    // (= plaintext length + 32 bits HMAC aligned to 16 bytes boundary)
+    size_t len             = (config_data.getLen() + 8 + 16) & ~0xFU;
     uint8_t encrypted[len] = {0};
     std::copy_n(config_data.getStartBuffPtr(), config_data.getLen(), encrypted);
-    if (!mapf::encryption::aes_encrypt(keywrapkey, iv, encrypted, sizeof(encrypted))) {
-        LOG(DEBUG) << "aes encrypt";
+    uint8_t *kwa = &encrypted[config_data.getLen()];
+    // Add KWA which is the 1st 64 bits of HMAC of config_data using AuthKey
+    if (!mapf::encryption::kwa_compute(authkey, encrypted, config_data.getLen(), kwa)) {
+        LOG(ERROR) << "kwa_compute";
         return false;
     }
-
-    std::fill(m2->authenticator().data, m2->authenticator().data + m2->authenticator().data_length,
-              0xbb);
-
+    std::copy_n(kwa, 8, m2->authenticator().data);
+    if (!mapf::encryption::aes_encrypt(keywrapkey, iv, encrypted, sizeof(encrypted))) {
+        LOG(ERROR) << "aes encrypt";
+        return false;
+    }
     auto encrypted_settings = m2->create_encrypted_settings();
     encrypted_settings->alloc_encrypted_settings(len);
     m2->add_encrypted_settings(encrypted_settings);
     std::copy_n(encrypted, sizeof(encrypted), encrypted_settings->encrypted_settings());
     std::copy_n(iv, sizeof(iv), encrypted_settings->iv());
+    LOG(DEBUG) << "encrypted settings type: " << encrypted_settings->type();
     LOG(DEBUG) << "encrypted settings length: " << encrypted_settings->getLen();
     LOG(DEBUG) << "encrypted settings buffer: " << std::endl
                << dump_buffer((uint8_t *)encrypted_settings->encrypted_settings(),
@@ -243,13 +250,14 @@ bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, u
     return true;
 }
 
-bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, uint8_t *iv)
+bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, uint8_t *authkey,
+                              uint8_t *iv)
 {
     auto encrypted_settings = m2->encrypted_settings();
     mapf::encryption::aes_decrypt(keywrapkey, iv,
                                   (uint8_t *)encrypted_settings->encrypted_settings(),
                                   encrypted_settings->encrypted_settings_length());
-    LOG(DEBUG) << "type: " << encrypted_settings->type();
+    LOG(DEBUG) << "encrypted settings type: " << encrypted_settings->type();
     LOG(DEBUG) << "encrypted settings length: " << encrypted_settings->getLen();
     LOG(DEBUG) << "encrypted settings buffer: " << std::endl
                << dump_buffer((uint8_t *)encrypted_settings->encrypted_settings(),
@@ -258,8 +266,37 @@ bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey,
     uint8_t buf[encrypted_settings->encrypted_settings_length()];
     std::copy_n(encrypted_settings->encrypted_settings(),
                 encrypted_settings->encrypted_settings_length(), buf);
+
+    // Need to convert to host byte order to get config data length,
+    // which is needed for computing the KWA (1st 64 bits of HMAC)
+    // However, the KWA is computed on the finalized version of the config
+    // data, hence the class_swap.
+    // Finally, once authentication succeeds, swap back to host byte order.
+    // Theoretically, this can be avoided by not passing swap_needed=True to
+    // cConfigData constructor, but then parsing will fail since the length
+    // will be calculated wrong. TLVF does not support parsing network byte order
+    // without full swap, so keep this workaround for now (another future TLVF V2 feature)
     WSC::cConfigData config_data(buf, sizeof(buf), true, true);
 
+    // get length of config_data for KWA authentication
+    size_t len = config_data.getLen();
+
+    // Swap to network byte order for KWA HMAC calculation
+    config_data.class_swap();
+
+    uint8_t kwa[8];
+    // Compute KWA based on decrypted settings
+    if (!mapf::encryption::kwa_compute(authkey, buf, len, kwa)) {
+        LOG(ERROR) << "kwa compute";
+        return false;
+    }
+    if (!std::equal(kwa, kwa + sizeof(kwa), (uint8_t *)m2->authenticator().data)) {
+        LOG(ERROR) << "KWA Authentication failure";
+        return false;
+    }
+
+    // Swap back to host byte order to read and use config_data
+    config_data.class_swap();
     LOG(DEBUG) << "WSC config_data:" << std::endl
                << "     ssid: " << config_data.ssid() << std::endl
                << "     authentication_type: " << config_data.authentication_type_attr().data
@@ -269,6 +306,7 @@ bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey,
     LOG(DEBUG) << "authenticator length:" << m2->authenticator().data_length;
     LOG(DEBUG) << "authenticator buffer: " << std::endl
                << dump_buffer((uint8_t *)m2->authenticator().data, m2->authenticator().data_length);
+
     return true;
 }
 
@@ -385,7 +423,7 @@ int test_all()
     uint8_t iv[16];
     mapf::encryption::create_nonce(iv, sizeof(iv));
     wps_calculate_keys(m1, key1, key1_length, m1_nonce, mac, m2_nonce, authkey, keywrapkey);
-    if (!add_encrypted_settings(thirdTlv, keywrapkey, iv)) {
+    if (!add_encrypted_settings(thirdTlv, keywrapkey, authkey, iv)) {
         MAPF_ERR("add encrypted settings failed");
         return false;
     }
@@ -527,7 +565,7 @@ int test_all()
         MAPF_ERR("TLV3 IS NULL");
         errors++;
     }
-    if (!parse_encrypted_settings(tlv3, keywrapkey, iv)) {
+    if (!parse_encrypted_settings(tlv3, keywrapkey, authkey, iv)) {
         MAPF_ERR("TLV3 parse encrypted settings failed");
         errors++;
     }
