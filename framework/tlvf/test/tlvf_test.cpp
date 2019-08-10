@@ -21,6 +21,7 @@
 #include "tlvf/wfa_map/tlvApCapability.h"
 #include <tlvf/test/tlvVarList.h>
 
+#include <mapf/common/encryption.h>
 #include <mapf/common/err.h>
 #include <mapf/common/logger.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
@@ -189,6 +190,86 @@ int test_complex_list()
     return errors;
 }
 
+bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, uint8_t *iv)
+{
+    // Encrypted settings
+    // Encrypted settings are the ConfigData + IV. First create the ConfigData,
+    // Then copy it to the encrypted data, add an IV and encrypt.
+    // Finally, add HMAC
+    uint8_t buf[1024];
+    WSC::cConfigData config_data(buf, sizeof(buf), false, true);
+    config_data.set_ssid("test_ssid");
+    config_data.authentication_type_attr().data = WSC::WSC_AUTH_WPA2; //DUMMY
+    config_data.encryption_type_attr().data     = WSC::WSC_ENCR_AES;
+    std::fill(config_data.network_key_attr().data,
+              config_data.network_key_attr().data + config_data.network_key_attr().data_length,
+              0xaa); //DUMMY
+
+    LOG(DEBUG) << "WSC config_data:" << std::endl
+               << "     ssid: " << config_data.ssid() << std::endl
+               << "     authentication_type: " << config_data.authentication_type_attr().data
+               << std::endl
+               << "     encryption_type: " << config_data.encryption_type_attr().data << std::endl;
+    config_data.class_swap();
+
+    size_t len             = (config_data.getLen() + 16) & ~0xFU;
+    uint8_t encrypted[len] = {0};
+    std::copy_n(config_data.getStartBuffPtr(), config_data.getLen(), encrypted);
+    if (!mapf::encryption::aes_encrypt(keywrapkey, iv, encrypted, sizeof(encrypted))) {
+        LOG(DEBUG) << "aes encrypt";
+        return false;
+    }
+
+    std::fill(m2->authenticator().data, m2->authenticator().data + m2->authenticator().data_length,
+              0xbb);
+
+    auto encrypted_settings = m2->create_encrypted_settings();
+    encrypted_settings->alloc_encrypted_settings(len);
+    m2->add_encrypted_settings(encrypted_settings);
+    std::copy_n(encrypted, sizeof(encrypted), encrypted_settings->encrypted_settings());
+    std::copy_n(iv, sizeof(iv), encrypted_settings->iv());
+    LOG(DEBUG) << "encrypted settings length: " << encrypted_settings->getLen();
+    LOG(DEBUG) << "encrypted settings buffer: " << std::endl
+               << dump_buffer((uint8_t *)encrypted_settings->encrypted_settings(),
+                              encrypted_settings->encrypted_settings_length());
+
+    LOG(DEBUG) << "authenticator type:" << m2->authenticator().attribute_type;
+    LOG(DEBUG) << "authenticator length: " << m2->authenticator().data_length;
+    LOG(DEBUG) << "authenticator buffer: " << std::endl
+               << dump_buffer((uint8_t *)m2->authenticator().data, m2->authenticator().data_length);
+
+    return true;
+}
+
+bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, uint8_t *iv)
+{
+    auto encrypted_settings = m2->encrypted_settings();
+    mapf::encryption::aes_decrypt(keywrapkey, iv,
+                                  (uint8_t *)encrypted_settings->encrypted_settings(),
+                                  encrypted_settings->encrypted_settings_length());
+    LOG(DEBUG) << "type: " << encrypted_settings->type();
+    LOG(DEBUG) << "encrypted settings length: " << encrypted_settings->getLen();
+    LOG(DEBUG) << "encrypted settings buffer: " << std::endl
+               << dump_buffer((uint8_t *)encrypted_settings->encrypted_settings(),
+                              encrypted_settings->encrypted_settings_length());
+
+    uint8_t buf[encrypted_settings->encrypted_settings_length()];
+    std::copy_n(encrypted_settings->encrypted_settings(),
+                encrypted_settings->encrypted_settings_length(), buf);
+    WSC::cConfigData config_data(buf, sizeof(buf), true, true);
+
+    LOG(DEBUG) << "WSC config_data:" << std::endl
+               << "     ssid: " << config_data.ssid() << std::endl
+               << "     authentication_type: " << config_data.authentication_type_attr().data
+               << std::endl
+               << "     encryption_type: " << config_data.encryption_type_attr().data << std::endl;
+    LOG(DEBUG) << "authenticator type:" << m2->authenticator().attribute_type;
+    LOG(DEBUG) << "authenticator length:" << m2->authenticator().data_length;
+    LOG(DEBUG) << "authenticator buffer: " << std::endl
+               << dump_buffer((uint8_t *)m2->authenticator().data, m2->authenticator().data_length);
+    return true;
+}
+
 int test_all()
 {
     int errors = 0;
@@ -276,34 +357,30 @@ int test_all()
     if (!thirdTlv->set_manufacturer("Intel"))
         return false;
 
-    // All attributes have been initialized to default.
-    LOG(DEBUG) << "Create WSC M2 encrypted settings";
-    auto encrypted_settings_tx = thirdTlv->create_encrypted_settings();
-    if (!encrypted_settings_tx) {
-        LOG(ERROR) << "Failed to create encrypted settings";
-        return false;
-    }
-
-    encrypted_settings_tx->set_ssid("test_ssid");
-    encrypted_settings_tx->authentication_type_attr().data = WSC::WSC_AUTH_WPA2; //DUMMY
-    encrypted_settings_tx->encryption_type_attr().data     = WSC::WSC_ENCR_AES;
-    std::fill(encrypted_settings_tx->network_key_attr().data,
-              encrypted_settings_tx->network_key_attr().data +
-                  encrypted_settings_tx->network_key_attr().data_length,
-              0xaa); //DUMMY
-    std::fill(encrypted_settings_tx->key_wrap_auth_attr().data,
-              encrypted_settings_tx->key_wrap_auth_attr().data +
-                  encrypted_settings_tx->key_wrap_auth_attr().data_length,
-              0xff); //DUMMY
-    LOG(DEBUG) << "WSC encrypted_settings_tx:" << std::endl
-               << "     ssid: " << encrypted_settings_tx->ssid() << std::endl
-               << "     authentication_type: "
-               << encrypted_settings_tx->authentication_type_attr().data << std::endl
-               << "     encryption_type: " << encrypted_settings_tx->encryption_type_attr().data
-               << std::endl;
-    LOG(DEBUG) << "Add WSC M2 encrypted settings";
-    if (!thirdTlv->add_encrypted_settings(encrypted_settings_tx)) {
-        LOG(ERROR) << "Failed to add encrypted settings";
+    /**
+     * @brief Diffie helman key exchange
+     * 
+     */
+    uint8_t key1[192];
+    uint8_t key2[192];
+    unsigned key1_length = sizeof(key1);
+    unsigned key2_length = sizeof(key2);
+    std::fill(key1, key1 + key1_length, 1);
+    std::fill(key2, key2 + key2_length, 2);
+    mapf::encryption::diffie_hellman m1;
+    mapf::encryption::diffie_hellman m2;
+    // diffie-helman key-exchange
+    m1.compute_key(key1, key1_length, m2.pubkey(), m2.pubkey_length());
+    m2.compute_key(key2, key2_length, m1.pubkey(), m1.pubkey_length());
+    key1_length    = sizeof(key1);
+    uint8_t mac[6] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
+    uint8_t authkey[32];
+    uint8_t keywrapkey[16];
+    uint8_t iv[16];
+    mapf::encryption::create_iv(iv, sizeof(iv));
+    wps_calculate_keys(m1, key1, key1_length, m1.nonce(), mac, m2.nonce(), authkey, keywrapkey);
+    if (!add_encrypted_settings(thirdTlv, keywrapkey, iv)) {
+        MAPF_ERR("add encrypted settings failed");
         return false;
     }
     LOG(DEBUG) << "Done (WSC M2)";
@@ -444,14 +521,10 @@ int test_all()
         MAPF_ERR("TLV3 IS NULL");
         errors++;
     }
-    auto encrypted_settings_rx = tlv3->encrypted_settings();
-    auto ssid = std::string(encrypted_settings_rx->ssid(), encrypted_settings_rx->ssid_length());
-    auto authentication_type = encrypted_settings_rx->authentication_type_attr().data;
-    auto encryption_type     = encrypted_settings_rx->encryption_type_attr().data;
-    LOG(DEBUG) << "WSC encrypted_settings_rx:" << std::endl
-               << "     ssid: " << ssid << std::endl
-               << "     authentication_type: " << authentication_type << std::endl
-               << "     encryption_type: " << encryption_type << std::endl;
+    if (!parse_encrypted_settings(tlv3, keywrapkey, iv)) {
+        MAPF_ERR("TLV3 parse encrypted settings failed");
+        errors++;
+    }
 
     auto tlv4 = received_message.addClass<tlvTestVarList>();
     if (tlv4 == nullptr) {

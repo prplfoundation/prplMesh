@@ -4269,6 +4269,35 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
                                   backhaul_params.bridge_mac);
 }
 
+/**
+ * @brief Diffie-Hellman public key exchange keys calculation
+ *        class member params authkey and keywrapauth are computed
+ *        on success.
+ *
+ * @param[in] m1 WSC M1 TLV received from the radio agent
+ * @param[out] authkey 32 bytes calculated authentication key
+ * @param[out] keywrapkey 16 bytes calculated key wrap key
+ * @return true on success
+ * @return false on failure
+ */
+bool slave_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
+                                                 uint8_t authkey[32], uint8_t keywrapkey[16])
+{
+    auto mac = network_utils::mac_from_string(backhaul_params.bridge_mac);
+    if (!dh) {
+        LOG(ERROR) << "diffie hellman member not initialized";
+        return false;
+    }
+    if (!mapf::encryption::wps_calculate_keys(
+            *dh, m2->public_key_attr().data, m2->public_key_attr().data_length, dh->nonce(),
+            mac.oct, m2->registrar_nonce_attr().data, authkey, keywrapkey)) {
+        LOG(ERROR) << "Failed to calculate WPS keys";
+        return false;
+    }
+
+    return true;
+}
+
 bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     // Check if this is a M1 message that we sent to the controller, which was just looped back.
@@ -4323,21 +4352,32 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     }
 
     for (auto tlvWscM2 : m2_list) {
+        uint8_t authkey[32];
+        uint8_t keywrapkey[16];
+        LOG(DEBUG) << "M2 Parse: calculate keys";
+        if (!autoconfig_wsc_calculate_keys(tlvWscM2, authkey, keywrapkey))
+            return false;
+
         auto encrypted_settings = tlvWscM2->encrypted_settings();
-        auto ssid  = std::string(encrypted_settings->ssid(), encrypted_settings->ssid_length());
-        auto bssid = network_utils::mac_to_string(encrypted_settings->bssid_attr().data);
-        auto authentication_type = encrypted_settings->authentication_type_attr().data;
-        auto encryption_type     = encrypted_settings->encryption_type_attr().data;
-        // TODO - finish with decryption and authentication
-        // https://github.com/prplfoundation/prplMesh/pull/91
-        // char network_key[WSC::WSC_MAX_NETWORK_KEY_LENGTH];
-        // std::copy_n(encrypted_settings.network_key_attr().data,
-        //             encrypted_settings.network_key_attr().data_length,
-        //             network_key);
-        // char key_wrap_auth[WSC::WSC_KEY_WRAP_AUTH_LENGTH];
-        // std::copy_n(encrypted_settings.key_wrap_auth_attr().data,
-        //             encrypted_settings.key_wrap_auth_attr().data_length,
-        //             network_key);
+        uint8_t *iv             = reinterpret_cast<uint8_t *>(encrypted_settings->iv());
+        LOG(DEBUG) << "M2 Parse: aes decrypt";
+        mapf::encryption::aes_decrypt(keywrapkey, iv,
+                                      (uint8_t *)encrypted_settings->encrypted_settings(),
+                                      encrypted_settings->encrypted_settings_length());
+
+        // TODO authenticate encrypted settings
+        // before passing to the config_data constructor
+        LOG(DEBUG) << "M2 Parse: parse config_data, len = "
+                   << sizeof(encrypted_settings->encrypted_settings_length());
+        WSC::cConfigData config_data(
+            reinterpret_cast<uint8_t *>(encrypted_settings->encrypted_settings()),
+            encrypted_settings->encrypted_settings_length(), true, true);
+
+        auto ssid                = std::string(config_data.ssid(), config_data.ssid_length());
+        auto bssid               = network_utils::mac_to_string(config_data.bssid_attr().data);
+        auto authentication_type = config_data.authentication_type_attr().data;
+        auto encryption_type     = config_data.encryption_type_attr().data;
+
         std::string manufacturer =
             std::string(tlvWscM2->manufacturer(), tlvWscM2->manufacturer_length());
         // ONLY FOR DEBUG!!!
@@ -4766,16 +4806,18 @@ bool slave_thread::autoconfig_wsc_add_m1()
     if (!tlvWscM1->set_device_name("prplMesh-agent"))
         return false;
     std::memset(tlvWscM1->uuid_e_attr().data, 0xff, tlvWscM1->uuid_e_attr().data_length);
-    tlvWscM1->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2;
-    tlvWscM1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_NONE;
     tlvWscM1->rf_bands_attr().data =
         hostap_params.iface_is_5ghz ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
     // Simulate that this radio supports both fronthaul and backhaul BSS
     tlvWscM1->vendor_extensions_attr().subelement_value  = WSC::FRONTHAUL_BSS | WSC::BACKHAUL_BSS;
     tlvWscM1->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_AP;
-    // TODO: M1 should also have values for:
-    // enrolee_nonce_attr -> to be added by encryption
-    // public_key_attr -> to be added by encryption
+
+    // encryption support - diffie-helman key-exchange
+    dh = std::make_unique<mapf::encryption::diffie_hellman>();
+    std::copy(dh->pubkey(), dh->pubkey() + dh->pubkey_length(), tlvWscM1->public_key_attr().data);
+    std::copy(dh->nonce(), dh->nonce() + dh->nonce_length(), tlvWscM1->enrolee_nonce_attr().data);
+    tlvWscM1->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2PSK;
+    tlvWscM1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_AES;
 
     return true;
 }
