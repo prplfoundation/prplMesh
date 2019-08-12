@@ -6,13 +6,10 @@
 # See LICENSE file for more details.
 ###############################################################
 
-run() {
-    echo "$*"
-    "$@" || exit $?
-}
-
 scriptdir="$(cd "${0%/*}"; pwd)"
 topdir="${scriptdir%/*/*/*}"
+
+. ${topdir}/prplMesh/tools/docker/functions.sh
 
 main() {
     docker image inspect prplmesh-builder >/dev/null 2>&1 || {

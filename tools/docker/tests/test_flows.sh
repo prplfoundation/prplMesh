@@ -1,6 +1,6 @@
 ###############################################################
 # SPDX-License-Identifier: BSD-2-Clause-Patent
-# Copyright (c) 2019 Gal Wiener (Intel)
+# Copyright (c) 2019 Gal Wiener (Intel), Tomer Eliyahu (Intel)
 # This code is subject to the terms of the BSD+Patent license.
 # See LICENSE file for more details.
 ###############################################################
@@ -11,39 +11,11 @@ ALL_TESTS="topology initial_ap_config ap_config_renew ap_config_bss_tear_down ch
            layer_data_payload_trigger layer_data_payload"
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-installdir="${scriptdir%/*/*/*/*}/build/install"
+topdir="${scriptdir%/*/*/*/*}"
+
+. ${topdir}/prplMesh/tools/docker/functions.sh
+
 redirect="> /dev/null 2>&1"
-
-dbg() {
-    [ "$VERBOSE" = "true" ] && echo "$@"
-}
-
-status() {
-	printf '\033[1;35m'"$@\n"'\033[0m'
-}
-
-err() {
-    printf '\033[1;31m'"$@\n"'\033[0m'
-}
-
-success() {
-    printf '\033[1;32m'"$@\n"'\033[0m'
-}
-
-run() {
-    dbg "$*"
-    "$@" || exit $?
-}
-
-report() {
-    msg="$1"; shift
-    if "$@"; then
-        success "OK $msg"
-    else
-        err "FAIL $msg"
-        error=1
-    fi
-}
 
 start_gw_repeater() {
     dbg "delete running containers before starting test"

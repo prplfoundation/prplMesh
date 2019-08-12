@@ -7,32 +7,9 @@
 ###############################################################
 
 scriptdir="$(cd "${0%/*}"; pwd)"
+topdir="${scriptdir%/*/*/*/*}"
 
-dbg() {
-    [ "$VERBOSE" = "true" ] && echo "$*"
-}
-
-status() {
-	printf '\033[1;35m'"$@\n"'\033[0m'
-}
-
-err() {
-    printf '\033[1;31m'"$@\n"'\033[0m'
-}
-
-success() {
-    printf '\033[1;36m'"$@\n"'\033[0m'
-}
-
-report() {
-    msg="$1"; shift
-    if "$@"; then
-        success "OK $msg"
-    else
-        err "FAIL $msg"
-        error=1
-    fi
-}
+. ${topdir}/prplMesh/tools/docker/functions.sh
 
 usage() {
     echo "usage: $(basename $0) [-hv] [-d delay]"

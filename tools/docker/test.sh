@@ -6,21 +6,10 @@
 # See LICENSE file for more details.
 ###############################################################
 
-dbg() {
-    [ "$VERBOSE" = "true" ] && echo "$*"
-}
-
-err() {
-	printf '\033[1;31m'"$@\n"'\033[0m'
-}
-
-run() {
-    echo "$*"
-    "$@" || exit $?
-}
-
 scriptdir="$(cd "${0%/*}"; pwd)"
 topdir="${scriptdir%/*/*/*}"
+
+. ${topdir}/prplMesh/tools/docker/functions.sh
 
 usage() {
     echo "usage: $(basename $0) [-hv] [-n name]"
