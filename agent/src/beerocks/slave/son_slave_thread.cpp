@@ -431,6 +431,8 @@ bool slave_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
         }
     } else { // IEEE 1905.1 message
+        LOG(DEBUG) << "handle_cmdu_control_ieee1905_1_message " << std::hex
+                   << int(cmdu_rx.getMessageType());
         return handle_cmdu_control_ieee1905_1_message(sd, cmdu_rx);
     }
     return true;
@@ -446,7 +448,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
     auto cmdu_message_type = cmdu_rx.getMessageType();
 
     if (master_socket == nullptr) {
-        // LOG(WARNING) << "master_socket == nullptr";
+        LOG(WARNING) << "master_socket == nullptr";
         return true;
     } else if (master_socket != sd) {
         LOG(WARNING) << "Unknown socket, cmdu message type: " << int(cmdu_message_type);
@@ -454,6 +456,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
     }
 
     if (slave_state == STATE_STOPPED) {
+        LOG(WARNING) << "slave_state == STATE_STOPPED";
         return true;
     }
 
@@ -4276,9 +4279,11 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     // Unfortunately, that is a bit complicated with the current tlv parser. However, there is another
     // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
     // while the M2 has the AP_Radio_Identifier TLV.
-    // If this is a looped back M2 CMDU, we can treat is as handled successfully.
-    if (cmdu_rx.getNextTlvType() == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES))
+    // If this is a looped back M1 CMDU, we can treat is as handled successfully.
+    if (cmdu_rx.getNextTlvType() == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES)) {
+        LOG(DEBUG) << "looped back M1 CMDU";
         return true;
+    }
 
     /**
     * @brief Parse AP-Autoconfiguration WSC which should include one AP Radio Identifier
@@ -4291,8 +4296,11 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     }
 
     // Check if the message is for this radio agent by comparing the ruid
-    if (!config.radio_identifier.compare(network_utils::mac_to_string(ruid->radio_uid())))
+    if (network_utils::mac_from_string(config.radio_identifier) != ruid->radio_uid()) {
+        LOG(DEBUG) << "not to me - ruid " << config.radio_identifier
+                   << " != " << network_utils::mac_to_string(ruid->radio_uid());
         return true;
+    }
 
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
     // parse all M2 TLVs
