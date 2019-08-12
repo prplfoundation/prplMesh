@@ -268,7 +268,7 @@ That means the following conditions must hold.
 * At least one maintainer has reviewed and approvied.
 * Code builds on Ubuntu, with `MSGLIB=zmq` and `BWL_TYPE=DUMMY`. Automatic with Travis CI.
 * Unit tests run successfully. Automatic with Travis CI.
-* Controller and agent go to operational. Manual, by starting `local_bus`, `ieee1905_transport`, `beerocks_controller` and `beerocks_agent` and verifying that the agent log reports OPERATIONAL.
+* For each new flow being added, `tools/docker/tests/test_flows.sh` and `.travis.yaml` must be updated accordingly to test the new flow.
 * Run clang-format.sh. If it fixes lines you did not change, commit that separately. TODO handle this in Travis CI.
 * TODO valgrind / klockwork / clang-tidy / etc
 
