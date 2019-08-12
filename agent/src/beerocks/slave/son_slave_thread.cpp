@@ -3694,8 +3694,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
         radio_basic_caps->radio_uid() = network_utils::mac_from_string(config.radio_identifier);
-        radio_basic_caps->maximum_number_of_bsss_supported() =
-            4; //TODO get maximum supported VAPs from DWPAL
+        //TODO get maximum supported VAPs from DWPAL
+        radio_basic_caps->maximum_number_of_bsss_supported() = 1;
 
         // TODO: move WSC and M1 setters to separate functions
         // TODO: Currently sending dummy values, need to read them from DWPAL and use the correct WiFi
