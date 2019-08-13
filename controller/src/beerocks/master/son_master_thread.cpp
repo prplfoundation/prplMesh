@@ -573,7 +573,6 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     }
 
     //TODO autoconfig process the rest of the class
-    //TODO autoconfig add support for none intel agents
     //TODO autoconfig Keep intel agent support only as intel enhancements
     /**
      * @brief Reply with AP-Autoconfiguration WSC with a single AP Radio Identifier TLV
@@ -611,9 +610,24 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
 
-    if (!handle_intel_slave_join(sd, cmdu_rx, cmdu_tx)) {
-        LOG(ERROR) << "Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid;
-        return false;
+    if (database.setting_certification_mode() ||
+        cmdu_rx.getNextTlvType() == int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
+        LOG(INFO) << "Intel radio agent join (al_mac=" << al_mac << " ruid=" << ruid;
+        if (!handle_intel_slave_join(sd, cmdu_rx, cmdu_tx)) {
+            LOG(ERROR) << "Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid
+                       << ")";
+            return false;
+        }
+    } else {
+        LOG(INFO) << "Non-Intel radio agent join (al_mac=" << al_mac << " ruid=" << ruid << ")";
+        // Multi-AP Agent doesn't say anything about the bridge, so we have to rely on Intel Slave Join for that.
+        // We'll use AL-MAC as the bridge
+        // TODO convert source address into AL-MAC address
+        if (!handle_non_intel_slave_join(sd, tlvwscM1, al_mac, ruid, cmdu_tx)) {
+            LOG(ERROR) << "Non-Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid
+                       << ")";
+            return false;
+        }
     }
 
     if (!database.setting_certification_mode()) {
@@ -1421,6 +1435,87 @@ bool master_thread::handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageR
     if (database.get_node_type(radio_mac) == beerocks::TYPE_SLAVE) {
         database.update_node_last_seen(radio_mac);
     }
+
+    return true;
+}
+
+bool master_thread::handle_non_intel_slave_join(Socket *sd,
+                                                std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1,
+                                                std::string bridge_mac, std::string radio_mac,
+                                                ieee1905_1::CmduMessageTx &cmdu_tx)
+{
+    // TODO backhaul handling.
+    // Multi-AP Agent doesn't say anything about the backhaul, so we have to rely on Intel Slave Join for that.
+    std::string backhaul_mac = "";
+
+    // TODO bridge handling.
+    // Assume repeater
+    beerocks::eType ire_type = beerocks::TYPE_IRE;
+
+    // bridge_mac node may have been created from DHCP/ARP event, if so delete it
+    // this may only occur once
+    if (database.has_node(bridge_mac) && (database.get_node_type(bridge_mac) != ire_type)) {
+        database.remove_node(bridge_mac);
+    }
+    // add new GW/IRE bridge_mac
+    LOG(DEBUG) << "adding node " << bridge_mac << " under " << backhaul_mac << ", and mark as type "
+               << ire_type;
+    database.add_node(bridge_mac, backhaul_mac, ire_type);
+    database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
+
+    // Controller expects backhaul which contains bridge which contains radio, but we only get radio...
+
+    // Update existing node, or add a new one
+    if (database.has_node(radio_mac)) {
+        if (database.get_node_type(radio_mac) != beerocks::TYPE_SLAVE) {
+            database.set_node_type(radio_mac, beerocks::TYPE_SLAVE);
+            LOG(ERROR) << "Existing mac node is not TYPE_SLAVE";
+        }
+        database.clear_hostap_stats_info(radio_mac);
+    } else {
+        // TODO Intel Slave Join has separate radio MAC and UID; we use radio_mac for both.
+        database.add_node(radio_mac, bridge_mac, beerocks::TYPE_SLAVE, radio_mac);
+    }
+    database.set_hostap_is_acs_enabled(radio_mac, false);
+
+    // TODO Assume repeater mode
+    database.set_hostap_repeater_mode_flag(radio_mac, true);
+    // TODO Assume no backhaul manager
+    database.set_hostap_backhaul_manager(radio_mac, false);
+
+    database.set_node_state(radio_mac, beerocks::STATE_CONNECTED);
+    database.set_node_backhaul_iface_type(radio_mac, beerocks::IFACE_TYPE_BRIDGE);
+    // TODO iface_name will not be set
+    // TODO driver_version will not be set
+    database.set_hostap_iface_type(radio_mac, IFACE_TYPE_WIFI_UNSPECIFIED);
+
+    // TODO number of antennas comes from HT/VHT capabilities (implicit from NxM)
+    // TODO ant_gain and conducted_power will not be set
+    database.set_node_name(radio_mac, tlvwscM1->model_name());
+    // TODO ipv4 will not be set
+
+    // sd is assigned to src bridge mac
+    sd->setPeerMac(bridge_mac);
+
+    // TODO database.set_hostap_supported_channels from radio_basic_caps->operating_classes_info_list
+    // TODO assume SSIDs are not hidden
+    database.set_hostap_advertise_ssid_flag(radio_mac, true);
+
+    // TODO
+    //        if (database.get_node_5ghz_support(radio_mac)) {
+    //            if (notification->low_pass_filter_on()) {
+    //                database.set_hostap_band_capability(radio_mac, beerocks::LOW_SUBBAND_ONLY);
+    //            } else {
+    //                database.set_hostap_band_capability(radio_mac, beerocks::BOTH_SUBBAND);
+    //            }
+    //        } else {
+    database.set_hostap_band_capability(radio_mac, beerocks::SUBBAND_CAPABILITY_UNKNOWN);
+    //        }
+
+    LOG(DEBUG) << "send AP_AUTOCONFIG_WSC M2";
+    son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+
+    // TODO update BML listeners
 
     return true;
 }
