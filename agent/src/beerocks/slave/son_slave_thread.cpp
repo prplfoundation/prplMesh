@@ -4397,15 +4397,23 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         }
     }
 
-    if (cmdu_rx.getNextTlvType() != uint8_t(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
-        LOG(ERROR) << "Not vendor specific TLV (not Intel?)";
+    if (slave_state != STATE_WAIT_FOR_JOINED_RESPONSE) {
+        LOG(ERROR) << "slave_state != STATE_WAIT_FOR_JOINED_RESPONSE";
         return false;
     }
 
-    LOG(INFO) << "Intel controller join response";
-    if (!parse_intel_join_response(sd, cmdu_rx)) {
-        LOG(ERROR) << "Parse join response failed";
-        return false;
+    if (cmdu_rx.getNextTlvType() == uint8_t(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
+        LOG(INFO) << "Intel controller join response";
+        if (!parse_intel_join_response(sd, cmdu_rx)) {
+            LOG(ERROR) << "Parse join response failed";
+            return false;
+        }
+    } else {
+        LOG(INFO) << "Non-Intel controller join response";
+        if (!parse_non_intel_join_response(sd)) {
+            LOG(ERROR) << "Parse join response failed";
+            return false;
+        }
     }
 
     return true;
@@ -4538,6 +4546,54 @@ bool slave_thread::parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessage
 
         slave_state = STATE_UPDATE_MONITOR_SON_CONFIG;
     }
+
+    return true;
+}
+
+bool slave_thread::parse_non_intel_join_response(Socket *sd)
+{
+    // request the current vap list from ap_manager
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST>(cmdu_tx);
+    if (request == nullptr) {
+        LOG(ERROR) << "Failed building cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST message!";
+        return false;
+    }
+    message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+
+    // send all pending_client_association notifications
+    for (auto notify : pending_client_association_cmdu) {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
+        if (notification == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        notification->params() = notify.second;
+        send_cmdu_to_controller(cmdu_tx);
+    }
+    pending_client_association_cmdu.clear();
+
+    // No version checking for non-Intel controller
+
+    // TODO
+    //        auto notification = message_com::create_vs_message<
+    //            beerocks_message::cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION>(cmdu_tx);
+    //        if (notification == nullptr) {
+    //            LOG(ERROR) << "Failed building message!";
+    //            return false;
+    //        }
+    //        string_utils::copy_string(notification->versions().master_version, master_version.c_str(),
+    //                                  sizeof(beerocks_message::sVersions::master_version));
+    //        string_utils::copy_string(notification->versions().slave_version, BEEROCKS_VERSION,
+    //                                  sizeof(beerocks_message::sVersions::slave_version));
+    //        message_com::send_cmdu(platform_manager_socket, cmdu_tx);
+    //        LOG(DEBUG) << "send ACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION";
+
+    // TODO set son_config
+    log_son_config();
+
+    slave_state = STATE_UPDATE_MONITOR_SON_CONFIG;
 
     return true;
 }

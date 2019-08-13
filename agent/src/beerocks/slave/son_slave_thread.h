@@ -274,6 +274,7 @@ private:
     std::unique_ptr<mapf::encryption::diffie_hellman> dh = nullptr;
 
     bool parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool parse_non_intel_join_response(Socket *sd);
     bool handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool autoconfig_wsc_add_m1();
     bool handle_channel_preference_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
