@@ -247,9 +247,8 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
                       << print_cmdu_types(uds_header);
 
     std::ptrdiff_t available_bytes = uds_header->length + sizeof(message::sUdsHeader);
-    utils::hex_dump(
-        std::string("hex_dump (" + std::to_string(available_bytes) + " bytes):").c_str(),
-        (uint8_t *)uds_header, available_bytes);
+    LOG(DEBUG) << "hex_dump (" + std::to_string(available_bytes) + " bytes):" << std::endl
+               << utils::dump_buffer((uint8_t *)uds_header, available_bytes);
     return ret;
 }
 

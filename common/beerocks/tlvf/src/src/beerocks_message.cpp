@@ -141,10 +141,10 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
 
     if (!cmdu_tx.finalize(swap)) {
         LOG(ERROR) << "finalize failed -> " << print_cmdu_types(uds_header);
-        utils::hex_dump(
-            std::string("hex_dump(" + std::to_string(cmdu_tx.getMessageLength()) + "):").c_str(),
-            (uint8_t *)(cmdu_tx.getMessageBuff() - sizeof(message::sUdsHeader)),
-            cmdu_tx.getMessageLength() + sizeof(message::sUdsHeader));
+        LOG(DEBUG) << "hex_dump(" + std::to_string(cmdu_tx.getMessageLength()) + "):" << std::endl
+                   << utils::dump_buffer((uint8_t *)(cmdu_tx.getMessageBuff()
+                                         - sizeof(message::sUdsHeader)),
+                                         cmdu_tx.getMessageLength() + sizeof(message::sUdsHeader));
         return false;
     }
 

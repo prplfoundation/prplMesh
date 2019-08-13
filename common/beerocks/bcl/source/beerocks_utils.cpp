@@ -8,8 +8,8 @@
 
 #include "../include/beerocks/bcl/beerocks_utils.h"
 #include "../include/beerocks/bcl/beerocks_string_utils.h"
-
 #include <easylogging++.h>
+#include <iomanip>
 
 using namespace beerocks;
 
@@ -298,6 +298,17 @@ void utils::merge_list(std::vector<uint8_t> &ret, std::vector<uint8_t> &list)
             ret.push_back(*it);
         }
     }
+}
+
+std::string utils::dump_buffer(uint8_t *buffer, size_t len)
+{
+    std::ostringstream hexdump;
+    for (size_t i = 0; i < len; i += 16) {
+        for (size_t j = i; j < len && j < i + 16; j++)
+            hexdump << std::hex << std::setw(2) << std::setfill('0') << (unsigned)buffer[j] << " ";
+        hexdump << std::endl;
+    }
+    return hexdump.str();
 }
 
 void utils::hex_dump(const std::string &description, uint8_t *addr, int len,
