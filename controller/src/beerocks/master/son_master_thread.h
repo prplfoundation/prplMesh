@@ -54,6 +54,9 @@ private:
     void handle_cmdu_control_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx,
                                  ieee1905_1::CmduMessageTx &cmdu_tx);
+    bool handle_non_intel_slave_join(Socket *sd, std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1,
+                                     std::string bridge_mac, std::string radio_mac,
+                                     ieee1905_1::CmduMessageTx &cmdu_tx);
 
     // 1905 messages handlers
     bool handle_cmdu_1905_autoconfiguration_search(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
