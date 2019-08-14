@@ -1783,6 +1783,31 @@ void son_management::handle_bml_message(
         son_actions::send_cmdu_to_agent(agent_sd, cmdu_tx);
     } break;
 
+    case beerocks_message::ACTION_BML_TRIGGER_AP_CAPABILITY_QUERY: {
+
+        auto bml_request =
+            cmdu_rx.addClass<beerocks_message::cACTION_BML_TRIGGER_AP_CAPABILITY_QUERY>();
+
+        auto al_mac = network_utils::mac_to_string(bml_request->al_mac());
+
+        auto cmdu_header = cmdu_tx.create(0, ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE);
+
+        LOG(INFO) << "cACTION_BML_TRIGGER_AP_CAPABILITY_QUERY al_mac:" << al_mac;
+
+        if (cmdu_header == nullptr) {
+            LOG(ERROR) << "Failed building IEEE1905 AP_CAPABILITY_QUERY_MESSAGE";
+            return;
+        }
+
+        auto agent_sd = database.get_node_socket(al_mac);
+        if (!agent_sd) {
+            LOG(ERROR) << "Failed to get node socket for al_mac " << al_mac;
+            return;
+        }
+
+        son_actions::send_cmdu_to_agent(agent_sd, cmdu_tx);
+    } break;
+
     case beerocks_message::ACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST: {
 
         auto bml_request =
