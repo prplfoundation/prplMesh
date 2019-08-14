@@ -10,6 +10,7 @@
 #include "beerocks_cli_bml.h"
 #include "beerocks_cli_proxy.h"
 #include "beerocks_cli_socket.h"
+#include "beerocks_cli_ucc_listener.h"
 
 #include <beerocks/bcl/beerocks_config_file.h>
 #include <beerocks/bcl/beerocks_defines.h>
@@ -437,21 +438,43 @@ static void cli_tcp_proxy(std::string temp_path)
     cli_proxy_thread.stop();
 }
 
+static void cli_ucc_listener(const std::string &path, uint16_t port)
+{
+    beerocks::cli_ucc_listener ucc_listener(path, port);
+
+    if (!ucc_listener.init()) {
+        LOG(DEBUG) << "cli_ucc_listener init failed!";
+    }
+
+    while (g_running) {
+        ucc_listener.work();
+    }
+
+    std::cout << "beerocks_cli exit..." << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
     init_signals();
 
     int opt;
-    bool is_cli_proxy        = false;
-    bool is_cli_bml_analyzer = false;
+    enum {
+        CLI_PROXY,
+        CLI_ANALYZER,
+        CLI_NON_INTERACTIVE,
+        CLI_UCC_LISTENER,
+        CLI_INTERACTIVE,
+    } cli_role = CLI_INTERACTIVE;
+
     std::string analyzer_ip;
     std::string ip;
     std::string command_string;
+    uint16_t port = 0;
 
-    while ((opt = getopt(argc, argv, "pi:c:w:a:")) != -1) {
+    while ((opt = getopt(argc, argv, "pi:c:w:a:u:")) != -1) {
         switch (opt) {
         case 'p': {
-            is_cli_proxy = true;
+            cli_role = CLI_PROXY;
             break;
         }
         case 'i': {
@@ -460,6 +483,7 @@ int main(int argc, char *argv[])
         }
         case 'c': {
             command_string = std::string(optarg);
+            cli_role       = CLI_NON_INTERACTIVE;
             break;
         }
         case 'w': {
@@ -467,8 +491,13 @@ int main(int argc, char *argv[])
             break;
         }
         case 'a': {
-            is_cli_bml_analyzer = true;
-            analyzer_ip         = std::string(optarg);
+            cli_role    = CLI_ANALYZER;
+            analyzer_ip = std::string(optarg);
+            break;
+        }
+        case 'u': {
+            cli_role = CLI_UCC_LISTENER;
+            port     = beerocks::string_utils::stoi(optarg);
             break;
         }
         default: { /* '?' */
@@ -496,17 +525,29 @@ int main(int argc, char *argv[])
     int status_return = 0;
 
     std::string log_file = beerocks_slave_conf.sLog.path + std::string(BEEROCKS_CLI) + ".log";
-    init_logger(is_cli_proxy ? false : true, log_file);
-    if (is_cli_proxy) {
+    init_logger(cli_role == CLI_PROXY, log_file);
+    switch (cli_role) {
+    case CLI_PROXY: {
         cli_tcp_proxy(beerocks_slave_conf.temp_path);
-    } else if (!command_string.empty()) {
+        break;
+    }
+    case CLI_NON_INTERACTIVE: {
         status_return = cli_non_interactive(BEEROCKS_CONF_PATH, beerocks_slave_conf.temp_path, ip,
                                             command_string);
-    } else if (is_cli_bml_analyzer) {
+        break;
+    }
+    case CLI_ANALYZER: {
         beerocks::cli_bml cli_bml(BEEROCKS_CONF_PATH);
         cli_bml.analyzer_init(analyzer_ip);
-    } else {
+        break;
+    }
+    case CLI_UCC_LISTENER: {
+        cli_ucc_listener(BEEROCKS_CONF_PATH, port);
+        break;
+    }
+    default: // CLI_INTERACTIVE
         cli_interactive(BEEROCKS_CONF_PATH, beerocks_slave_conf.temp_path, ip);
+        break;
     }
 
     return status_return;
