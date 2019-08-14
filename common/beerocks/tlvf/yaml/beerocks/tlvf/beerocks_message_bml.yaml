@@ -358,6 +358,10 @@ cACTION_BML_TRIGGER_TOPOLOGY_QUERY:
   _type: class
   al_mac: sMacAddr
 
+cACTION_BML_TRIGGER_AP_CAPABILITY_QUERY:
+  _type: class
+  al_mac: sMacAddr
+
 cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST:
   _type: class
   al_mac: sMacAddr
