@@ -6,7 +6,7 @@
 ###############################################################
 
 ALL_TESTS="topology initial_ap_config ap_config_renew ap_config_bss_tear_down channel_selection
-           ap_capability_info_reporting client_capability_info_reporting link_metric_collection
+           ap_capability_query client_capability_query link_metric_collection
            steering_mandate_opportunity client_steering client_association backhaul_optimization
            layer_data_payload_trigger layer_data_payload"
 
@@ -49,12 +49,13 @@ test_channel_selection() {
     return 1
 }
 
-test_ap_capability_info_reporting() {
-    #TODO: Implement
-    return 1
+test_ap_capability_query() {
+    dbg "sending ap capability query message"
+    eval send_bml_command "bml_trigger_ap_capability" $AL_MAC $redirect
+    docker exec -it repeater sh -c 'grep -i -q "AP Capability" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 }
 
-test_client_capability_info_reporting() {
+test_client_capability_query() {
     #TODO: Implement
     return 1
 }
@@ -98,7 +99,7 @@ test_topology() {
     status "test topology query"
     eval send_bml_command "bml_trigger_topology_discovery $AL_MAC" $redirect
     dbg "Confirming topology query was received"
-    docker exec -it repeater sh -c 'grep -i -q "Topology Query" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+    docker exec -it repeater sh -c 'grep -i -q "Topology Discovery Query" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 }
 
 test_init() {
@@ -122,8 +123,8 @@ usage() {
     echo "      ap_config_renew - AP configuration renew test"
     echo "      ap_config_bss_tear_down - AP configuration BSS Tear Down test"
     echo "      channel_selection - Channel Selection test"
-    echo "      ap_capability_info_reporting - AP Capability info reporting test"
-    echo "      client_capability_info_reporting - Capability info reporting test"
+    echo "      ap_capability_query - AP Capability query test"
+    echo "      client_capability_query - Client Capability info reporting test"
     echo "      link_metric_collection - Link metric collection test"
     echo "      steering_mandate_opportunity - Client Steering for Steering Mandate and Steering Opportunity test"
     echo "      client_steering - Setting Client Steering Policy test"
