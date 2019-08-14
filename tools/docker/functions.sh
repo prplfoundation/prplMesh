@@ -33,12 +33,21 @@ run() {
     "$@" || exit $?
 }
 
+check() {
+    if "$@"; then
+        dbg "OK $@"
+    else
+        err "FAIL $@"
+        check_error=$((check_error+1))
+    fi
+}
+
 report() {
     msg="$1"; shift
     if "$@"; then
         success "OK $msg"
     else
         err "FAIL $msg"
-        error=1
+        error=$((error+1))
     fi
 }
