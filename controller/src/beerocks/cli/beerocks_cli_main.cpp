@@ -239,8 +239,8 @@ static int cli_non_interactive(std::string path, std::string tmp_path, std::stri
 
     UTILS_SLEEP_MSEC(1000 * g_wait_time);
 
-    // This mechanism (cli_bml.is_pending_response() ) is only implemented for "bml_nw_map_query"
-    auto timeout = std::chrono::steady_clock::now() + std::chrono::seconds(3);
+    // Max timeout according to CAPI specifications is 120 seconds
+    auto timeout = std::chrono::steady_clock::now() + std::chrono::seconds(120);
     while (cli_bml.is_pending_response()) {
         if (std::chrono::steady_clock::now() > timeout) {
             break;
