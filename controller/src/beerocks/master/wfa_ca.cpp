@@ -241,14 +241,17 @@ void wfa_ca::handle_wfa_ca_message(
     switch (command_type) {
     case eWfaCaCommand::CA_GET_VERSION: {
         // TODO
+        reply(sd, cmdu_tx, eWfaCaStatus::INVALID, "unimplemented command");
         break;
     }
     case eWfaCaCommand::DEVICE_GET_INFO: {
         // TODO
+        reply(sd, cmdu_tx, eWfaCaStatus::INVALID, "unimplemented command");
         break;
     }
     case eWfaCaCommand::DEV_GET_PARAMETER: {
         // TODO
+        reply(sd, cmdu_tx, eWfaCaStatus::INVALID, "unimplemented command");
         break;
     }
     case eWfaCaCommand::DEV_RESET_DEFAULT: {
