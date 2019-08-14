@@ -200,6 +200,25 @@ std::string db::get_node_ipv4(std::string mac)
     return n->ipv4;
 }
 
+bool db::set_node_manufacturer(std::string mac, std::string manufacturer)
+{
+    auto n = get_node(mac);
+    if (!n) {
+        return false;
+    }
+    n->manufacturer = manufacturer;
+    return true;
+}
+
+std::string db::get_node_manufacturer(std::string mac)
+{
+    auto n = get_node(mac);
+    if (!n) {
+        return std::string();
+    }
+    return n->manufacturer;
+}
+
 int db::get_node_channel(std::string mac)
 {
     auto n = get_node(mac);
