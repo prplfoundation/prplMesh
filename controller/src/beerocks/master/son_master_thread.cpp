@@ -572,6 +572,12 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
 
+    auto al_mac = network_utils::mac_to_string(tlvwscM1->mac_attr().data.oct);
+    auto ruid   = network_utils::mac_to_string(radio_basic_caps->radio_uid());
+    LOG(INFO) << "AP_AUTOCONFIGURATION_WSC M1 al_mac=" << al_mac << " ruid=" << ruid;
+    LOG(DEBUG) << "   device " << tlvwscM1->manufacturer() << " " << tlvwscM1->model_name() << " "
+               << tlvwscM1->device_name() << " " << tlvwscM1->serial_number();
+
     //TODO autoconfig process the rest of the class
     //TODO autoconfig Keep intel agent support only as intel enhancements
     /**
@@ -590,10 +596,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         return false;
     }
 
-    auto al_mac          = network_utils::mac_to_string(tlvwscM1->mac_attr().data.oct);
-    auto ruid            = network_utils::mac_to_string(tlvRuid->radio_uid());
-    tlvRuid->radio_uid() = radio_basic_caps->radio_uid();
-    LOG(INFO) << "radio agent join (al_mac=" << al_mac << " ruid=" << ruid << " enrolee_nonce: ";
+    tlvRuid->radio_uid() = network_utils::mac_from_string(ruid);
 
     for (int i = 0; i < radio_basic_caps->maximum_number_of_bsss_supported(); i++) {
         if (!autoconfig_wsc_add_m2(tlvwscM1)) {
