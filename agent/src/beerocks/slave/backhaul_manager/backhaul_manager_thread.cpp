@@ -126,8 +126,8 @@ bool main_thread::init()
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE,
-            ieee1905_1::eMessageType::ACK_MESSAGE,
-            ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE})) {
+            ieee1905_1::eMessageType::ACK_MESSAGE, ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE,
+            ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE})) {
         LOG(ERROR) << "Failed to init mapf_bus";
         return false;
     }
@@ -1560,6 +1560,9 @@ bool main_thread::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return handle_1905_discovery_query(cmdu_rx);
         //LOG(INFO) << "I got the Topology Query message!";
     }
+    case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE: {
+        return handle_1905_ap_capability_query(cmdu_rx);
+    }
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
@@ -1576,9 +1579,23 @@ bool main_thread::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
  */
 bool main_thread::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    LOG(DEBUG) << "Received Topology Query message";
+    LOG(DEBUG) << "Received Topology Discovery Query message";
+
     //TODO - this should be part of the discovery agent, will be done as part of
     //       agent certification
+    return true;
+}
+
+/**
+ * @brief Handles 1905 AP Capability Query message
+ * @param cmdu_rx
+ * @return true on success
+ * @return false on failure
+ */
+bool main_thread::handle_1905_ap_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    LOG(DEBUG) << "Received AP Capability Query message";
+    //TODO - will be done as part of agent certification
     return true;
 }
 
