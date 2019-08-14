@@ -388,7 +388,10 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
     std::shared_ptr<ieee1905_1::tlvWscM2> m2, WSC::cConfigData &config_data, uint8_t authkey[32],
     uint8_t keywrapkey[16])
 {
-    size_t len = (config_data.getLen() + 15) & ~0xFU; // Align to 16 bytes boundary
+    // Calculate length of data to encrypt
+    // (= plaintext length + 64 bits HMAC aligned to 16 bytes boundary)
+    // The Key Wrap Authenticator is 96 bits long
+    size_t len = (config_data.getLen() + sizeof(WSC::sWscAttrKeyWrapAuthenticator) + 15) & ~0xFU;
 
     auto encrypted_settings = m2->create_encrypted_settings();
     if (!encrypted_settings)
@@ -398,16 +401,24 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
     if (!m2->add_encrypted_settings(encrypted_settings))
         return false;
 
-    std::copy_n(config_data.getStartBuffPtr(), config_data.getLen(),
-                encrypted_settings->encrypted_settings());
+    auto buf = reinterpret_cast<uint8_t *>(encrypted_settings->encrypted_settings());
+    std::copy_n(config_data.getStartBuffPtr(), config_data.getLen(), buf);
+    WSC::sWscAttrKeyWrapAuthenticator keywrapauth;
+    keywrapauth.struct_init();
+    keywrapauth.struct_swap();
+    uint8_t *kwa = reinterpret_cast<uint8_t *>(keywrapauth.data);
+    // Add KWA which is the 1st 64 bits of HMAC of config_data using AuthKey
+    if (!mapf::encryption::kwa_compute(authkey, buf, config_data.getLen(), kwa))
+        return false;
+
+    std::copy_n(reinterpret_cast<uint8_t *>(&keywrapauth), sizeof(keywrapauth),
+                &buf[config_data.getLen()]);
     uint8_t *iv = reinterpret_cast<uint8_t *>(m2->encrypted_settings()->iv());
 
     if (!mapf::encryption::create_iv(iv, WSC::WSC_ENCRYPTED_SETTINGS_IV_LENGTH))
         return false;
 
-    if (!mapf::encryption::aes_encrypt(
-            keywrapkey, iv, reinterpret_cast<uint8_t *>(encrypted_settings->encrypted_settings()),
-            encrypted_settings->encrypted_settings_length())) {
+    if (!mapf::encryption::aes_encrypt(keywrapkey, iv, buf, len)) {
         LOG(DEBUG) << "aes encrypt";
         return false;
     }
@@ -444,6 +455,45 @@ bool master_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tl
         return false;
     }
     std::copy(dh.pubkey(), dh.pubkey() + dh.pubkey_length(), m2->public_key_attr().data);
+
+    return true;
+}
+
+/**
+ * @brief autoconfig global authenticator attribute calculation
+ * 
+ * Calculate authentication on the Full M1 || M2* whereas M2* = M2 without the authenticator
+ * attribute.
+ * 
+ * @param m1 WSC M1 TLV
+ * @param m2 WSC M2 TLV
+ * @param authkey authentication key
+ * @return true on success
+ * @return false on failure
+ */
+bool master_thread::autoconfig_wsc_authentication(std::shared_ptr<ieee1905_1::tlvWscM1> m1,
+                                                  std::shared_ptr<ieee1905_1::tlvWscM2> m2,
+                                                  uint8_t authkey[32])
+{
+    // Authentication on Full M1 || M2* (without the authenticator attribute)
+    // authentication is done on swapped data, so first swap the m1 and m2, calculate authenticator, then swap back
+    // since finalize will do the swapping.
+    m1->class_swap();
+    m2->class_swap();
+    uint8_t buf[m1->getLen() + m2->getLen() - sizeof(WSC::sWscAttrAuthenticator)];
+    auto next = std::copy_n(m1->getStartBuffPtr(), m1->getLen(), buf);
+    std::copy_n(m2->getStartBuffPtr(), m2->getLen() - sizeof(WSC::sWscAttrAuthenticator), next);
+    LOG(DEBUG) << "m1 buf:" << std::endl << utils::dump_buffer(m1->getStartBuffPtr(), m1->getLen());
+    LOG(DEBUG) << "m2 buf:" << std::endl << utils::dump_buffer(m2->getStartBuffPtr(), m2->getLen());
+    // swap back
+    m1->class_swap();
+    m2->class_swap();
+    uint8_t *kwa = reinterpret_cast<uint8_t *>(m2->authenticator().data);
+    // Add KWA which is the 1st 64 bits of HMAC of config_data using AuthKey
+    if (!mapf::encryption::kwa_compute(authkey, buf, sizeof(buf), kwa)) {
+        LOG(ERROR) << "kwa_compute failure";
+        return false;
+    }
 
     return true;
 }
@@ -532,9 +582,8 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
     if (!autoconfig_wsc_add_m2_encrypted_settings(tlvWscM2, config_data, authkey, keywrapkey))
         return false;
 
-    // TODO - add HMAC and authenticator
-    std::fill(tlvWscM2->authenticator().data,
-              tlvWscM2->authenticator().data + tlvWscM2->authenticator().data_length, 0xbb);
+    if (!autoconfig_wsc_authentication(tlvWscM1, tlvWscM2, authkey))
+        return false;
 
     return true;
 }
