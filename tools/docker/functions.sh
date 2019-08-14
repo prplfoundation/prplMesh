@@ -12,7 +12,7 @@ dbg() {
     [ "$VERBOSE" = "true" ] && echo "$(basename $0): $*"
 }
 
-status() {
+success() {
 	printf '\033[1;35m'"$@\n"'\033[0m'
 }
 
@@ -24,7 +24,7 @@ info() {
 	printf '\033[1;35m'"$(basename $0): $@"'\033[0m\n'
 }
 
-success() {
+status() {
     printf '\033[1;36m'"$@\n"'\033[0m'
 }
 
