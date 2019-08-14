@@ -305,11 +305,15 @@ bool socket_thread::work()
                     continue;
                 }
 
-                auto ret = socket_disconnected_uds(
-                    sd); // '0' - socket not disconnected (bytes to read), '1' - socket disconnected, '-1' - error
+                // '0' - socket not disconnected (bytes to read), '1' - socket disconnected, '-1' - error
+                auto ret = socket_disconnected_uds(sd);
                 if (ret != 0) {
                     // breaking instead of continue because socket_disconnected_uds() may erase element from Select Socket Vector while iterating it
                     break;
+                }
+
+                if (custom_message_handler(sd, rx_buffer, sizeof(rx_buffer))) {
+                    continue;
                 }
 
                 if (!handle_cmdu_message_uds(sd)) {
