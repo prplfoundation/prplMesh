@@ -36,6 +36,10 @@ public:
 
 protected:
     virtual bool handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx) = 0;
+    virtual bool custom_message_handler(Socket *sd, uint8_t *rx_buffer, size_t rx_buffer_size)
+    {
+        return false;
+    }
     virtual std::string print_cmdu_types(const message::sUdsHeader *cmdu_header)
     {
         return std::string();
