@@ -178,9 +178,13 @@ bool wfa_ca::parse_params(const std::vector<std::string> &command_tokens,
     err_string = "missing mandatory params: ";
     for (const std::string &param_name : mandatory_params) {
         if ((params.find(param_name))->second.empty()) {
-            err_string += "'" + param_name + "', ";
+            err_string += param_name + ", ";
         }
     }
+
+    // Remove last comma and space
+    err_string.pop_back();
+    err_string.pop_back();
 
     return false;
 }
