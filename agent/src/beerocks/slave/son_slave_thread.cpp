@@ -465,7 +465,13 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
 
     switch (cmdu_message_type) {
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE:
-        return handle_autoconfiguration_wsc(sd, cmdu_rx);
+        if (!handle_autoconfiguration_wsc(sd, cmdu_rx)) {
+            LOG(ERROR) << "Autoconfiguration WSC failure, slave reset";
+            stop_on_failure_attempts--;
+            slave_reset();
+            return false;
+        }
+        return true;
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
         return handle_channel_preference_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
@@ -4298,6 +4304,115 @@ bool slave_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlv
     return true;
 }
 
+/**
+ * @brief autoconfig global authenticator attribute calculation
+ * 
+ * Calculate authentication on the Full M1 || M2* whereas M2* = M2 without the authenticator
+ * attribute. M1 is a saved buffer of the swapped M1 sent in the WSC autoconfig sent by the agent.
+ * 
+ * @param m2 WSC M2 TLV
+ * @param authkey authentication key
+ * @return true on success
+ * @return false on failure
+ */
+bool slave_thread::autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
+                                               uint8_t authkey[32])
+{
+    if (!m1_auth_buf) {
+        LOG(ERROR) << "Invalid M1";
+        return false;
+    }
+
+    uint8_t buf[m1_auth_buf_len + m2->getLen() - sizeof(WSC::sWscAttrKeyWrapAuthenticator)];
+    auto next = std::copy_n(m1_auth_buf, m1_auth_buf_len, buf);
+    m2->class_swap(); //swap to get network byte order
+    std::copy_n(m2->getStartBuffPtr(), m2->getLen() - sizeof(WSC::sWscAttrKeyWrapAuthenticator),
+                next);
+    m2->class_swap(); //swap back
+
+    uint8_t kwa[WSC::WSC_AUTHENTICATOR_LENGTH];
+    // Add KWA which is the 1st 64 bits of HMAC of config_data using AuthKey
+    if (!mapf::encryption::kwa_compute(authkey, buf, sizeof(buf), kwa)) {
+        LOG(ERROR) << "kwa_compute failure";
+        return false;
+    }
+
+    if (!std::equal(kwa, kwa + sizeof(kwa),
+                    reinterpret_cast<uint8_t *>(m2->authenticator().data))) {
+        return false;
+    }
+
+    LOG(DEBUG) << "WSC Global authentication success";
+    return true;
+}
+
+bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
+    std::shared_ptr<ieee1905_1::tlvWscM2> m2, uint8_t authkey[32], uint8_t keywrapkey[16],
+    std::string &ssid, sMacAddr &bssid, WSC::eWscAuth &auth_type, WSC::eWscEncr &encr_type)
+{
+    auto encrypted_settings = m2->encrypted_settings();
+    uint8_t *iv             = reinterpret_cast<uint8_t *>(encrypted_settings->iv());
+    auto buf                = reinterpret_cast<uint8_t *>(encrypted_settings->encrypted_settings());
+
+    LOG(DEBUG) << "M2 Parse: aes decrypt";
+    mapf::encryption::aes_decrypt(keywrapkey, iv, buf,
+                                  encrypted_settings->encrypted_settings_length());
+
+    LOG(DEBUG) << "M2 Parse: parse config_data, len = "
+               << encrypted_settings->encrypted_settings_length();
+    // Need to convert to host byte order to get config data length,
+    // which is needed for computing the KWA (1st 64 bits of HMAC)
+    // However, the KWA is computed on the finalized version of the config
+    // data, hence the class_swap.
+    // Finally, once authentication succeeds, swap back to host byte order.
+    // Theoretically, this can be avoided by not passing swap_needed=True to
+    // cConfigData constructor, but then parsing will fail since the length
+    // will be calculated wrong. TLVF does not support parsing network byte order
+    // without full swap, so keep this workaround for now (another future TLVF V2 feature)
+    WSC::cConfigData config_data(buf, encrypted_settings->encrypted_settings_length(), true, true);
+
+    // get length of config_data for KWA authentication
+    size_t len = config_data.getLen();
+
+    // Swap to network byte order for KWA HMAC calculation
+    config_data.class_swap();
+
+    uint8_t kwa[WSC::WSC_AUTHENTICATOR_LENGTH];
+    // Compute KWA based on decrypted settings
+    if (!mapf::encryption::kwa_compute(authkey, buf, len, kwa)) {
+        LOG(ERROR) << "kwa compute";
+        return false;
+    }
+
+    // Basically, the keywrap authenticator is part of the config_data (last member of the
+    // config_data to be precise).
+    // However, since we need to calculate it over the part of config_data without the keywrap
+    // authenticator, and since it is anyway going to be encrypted so config_data is not a
+    // substructure of encrypted_settings, it is easier to define it separately and just append to
+    // config_data.
+    WSC::sWscAttrKeyWrapAuthenticator *keywrapauth =
+        reinterpret_cast<WSC::sWscAttrKeyWrapAuthenticator *>(&buf[len]);
+    keywrapauth->struct_swap();
+    if ((keywrapauth->attribute_type != WSC::ATTR_KEY_WRAP_AUTH) ||
+        (keywrapauth->data_length != WSC::WSC_KEY_WRAP_AUTH_LENGTH) ||
+        !std::equal(kwa, kwa + sizeof(kwa), reinterpret_cast<uint8_t *>(keywrapauth->data))) {
+        LOG(ERROR) << "WSC KWA (Key Wrap Auth) failure" << std::endl
+                   << "type: " << std::hex << int(keywrapauth->attribute_type)
+                   << "length: " << std::hex << int(keywrapauth->data_length);
+        return false;
+    }
+
+    // Swap back to host byte order to read and use config_data
+    config_data.class_swap();
+    ssid      = std::string(config_data.ssid(), config_data.ssid_length());
+    bssid     = config_data.bssid_attr().data;
+    auth_type = config_data.authentication_type_attr().data;
+    encr_type = config_data.encryption_type_attr().data;
+    LOG(DEBUG) << "KWA (Key Wrap Auth) success";
+
+    return true;
+}
+
 bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     // Check if this is a M1 message that we sent to the controller, which was just looped back.
@@ -4358,36 +4473,26 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         if (!autoconfig_wsc_calculate_keys(tlvWscM2, authkey, keywrapkey))
             return false;
 
-        auto encrypted_settings = tlvWscM2->encrypted_settings();
-        uint8_t *iv             = reinterpret_cast<uint8_t *>(encrypted_settings->iv());
-        LOG(DEBUG) << "M2 Parse: aes decrypt";
-        mapf::encryption::aes_decrypt(keywrapkey, iv,
-                                      (uint8_t *)encrypted_settings->encrypted_settings(),
-                                      encrypted_settings->encrypted_settings_length());
+        if (!autoconfig_wsc_authenticate(tlvWscM2, authkey))
+            return false;
 
-        // TODO authenticate encrypted settings
-        // before passing to the config_data constructor
-        LOG(DEBUG) << "M2 Parse: parse config_data, len = "
-                   << sizeof(encrypted_settings->encrypted_settings_length());
-        WSC::cConfigData config_data(
-            reinterpret_cast<uint8_t *>(encrypted_settings->encrypted_settings()),
-            encrypted_settings->encrypted_settings_length(), true, true);
-
-        auto ssid                = std::string(config_data.ssid(), config_data.ssid_length());
-        auto bssid               = network_utils::mac_to_string(config_data.bssid_attr().data);
-        auto authentication_type = config_data.authentication_type_attr().data;
-        auto encryption_type     = config_data.encryption_type_attr().data;
+        std::string ssid;
+        sMacAddr bssid;
+        WSC::eWscAuth authtype;
+        WSC::eWscEncr enctype;
+        if (!autoconfig_wsc_parse_m2_encrypted_settings(tlvWscM2, authkey, keywrapkey, ssid, bssid,
+                                                        authtype, enctype))
+            return false;
 
         std::string manufacturer =
             std::string(tlvWscM2->manufacturer(), tlvWscM2->manufacturer_length());
-        // ONLY FOR DEBUG!!!
-        // TODO - remove this print, it is showing the encrypted settings in the logs!
+
         LOG(DEBUG) << "Controller configuration (WSC M2 Encrypted Settings)" << std::endl
                    << "     Manufacturer: " << manufacturer << std::endl
                    << "     ssid: " << ssid << std::endl
-                   << "     bssid: " << bssid << std::endl
-                   << "     authentication_type: " << authentication_type << std::endl
-                   << "     encryption_type: " << encryption_type << std::endl;
+                   << "     bssid: " << network_utils::mac_to_string(bssid) << std::endl
+                   << "     authentication_type: " << authtype << std::endl
+                   << "     encryption_type: " << enctype << std::endl;
     }
 
     if (slave_state != STATE_WAIT_FOR_JOINED_RESPONSE) {
@@ -4867,6 +4972,15 @@ bool slave_thread::autoconfig_wsc_add_m1()
     std::copy(dh->nonce(), dh->nonce() + dh->nonce_length(), tlvWscM1->enrolee_nonce_attr().data);
     tlvWscM1->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2PSK;
     tlvWscM1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_AES;
+
+    // Authentication support - store swapped M1 for later M1 || M2* authentication
+    if (m1_auth_buf)
+        delete[] m1_auth_buf;
+    m1_auth_buf     = new uint8_t[tlvWscM1->getLen()];
+    m1_auth_buf_len = tlvWscM1->getLen();
+    tlvWscM1->class_swap(); //swap before store
+    std::copy_n(tlvWscM1->getStartBuffPtr(), tlvWscM1->getLen(), m1_auth_buf);
+    tlvWscM1->class_swap(); //swap after store (will be swapped in Finalize)
 
     return true;
 }

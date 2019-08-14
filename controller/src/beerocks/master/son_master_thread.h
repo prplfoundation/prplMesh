@@ -71,6 +71,9 @@ private:
     bool autoconfig_wsc_add_m2_encrypted_settings(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
                                                   WSC::cConfigData &config_data,
                                                   uint8_t authkey[32], uint8_t keywrapkey[16]);
+    bool autoconfig_wsc_authentication(std::shared_ptr<ieee1905_1::tlvWscM1> m1,
+                                       std::shared_ptr<ieee1905_1::tlvWscM2> m2,
+                                       uint8_t authkey[32]);
     bool autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlvWscM1> m1,
                                        std::shared_ptr<ieee1905_1::tlvWscM2> m2,
                                        const mapf::encryption::diffie_hellman &dh,

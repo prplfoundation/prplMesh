@@ -270,8 +270,12 @@ private:
                                                     std::string &ssid, sMacAddr &bssid,
                                                     WSC::eWscAuth &auth_type,
                                                     WSC::eWscEncr &encr_type);
+    bool autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWscM2> m2, uint8_t authkey[32]);
 
     std::unique_ptr<mapf::encryption::diffie_hellman> dh = nullptr;
+    //copy of M1 message used for authentication
+    uint8_t *m1_auth_buf   = nullptr;
+    size_t m1_auth_buf_len = 0;
 
     bool parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool parse_non_intel_join_response(Socket *sd);
