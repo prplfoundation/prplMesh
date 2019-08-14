@@ -814,7 +814,22 @@ void cli_bml::events_update_to_socket_cb(const struct BML_EVENT *event)
     cli_bml::events_update_cb(event, false);
 }
 
-void cli_bml::wfa_ca_reply_to_console_cb(const char *buffer) { std::cout << buffer << std::endl; }
+void cli_bml::wfa_ca_reply_to_console_cb(BML_CTX ctx, const char *buffer)
+{
+    cli_bml *pThis = reinterpret_cast<cli_bml *>(bml_get_user_data(ctx));
+    if (!pThis) {
+        std::cout << "ERROR: Internal error - invalid context!" << std::endl;
+        return;
+    }
+
+    static const std::string ref("status,RUNNING");
+    std::string reply(buffer);
+    // Check if the reply string start with "status,RUNNING" to update 'pending_response' accordingly
+    pThis->pending_response =
+        ((reply.size() >= ref.size()) && (reply.substr(0, ref.size()) == ref)) ? true : false;
+
+    std::cout << reply << std::endl << std::flush;
+}
 
 //
 // Caller functions
@@ -1615,6 +1630,8 @@ int cli_bml::wfa_ca_controller(const std::string &cmd)
     if (ret != BML_RET_OK) {
         printBmlReturnVals("wfca_controller", ret);
     }
+
+    pending_response = true;
     return 0;
 }
 
