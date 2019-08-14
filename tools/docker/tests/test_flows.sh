@@ -16,6 +16,7 @@ topdir="${scriptdir%/*/*/*/*}"
 . ${topdir}/prplMesh/tools/docker/functions.sh
 
 redirect="> /dev/null 2>&1"
+error=0
 
 start_gw_repeater() {
     dbg "delete running containers before starting test"
@@ -152,7 +153,14 @@ main() {
     test_init
     for test in $@; do
        report "test_${test}" test_${test}
+       count=$((count+1))
     done
+
+    if [ $error -gt 0 ]; then
+        err "$error / $count tests failed"
+    else
+        success "$count / $count tests passed"
+    fi
 
     exit $error
 }
