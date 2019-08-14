@@ -478,6 +478,10 @@ void cli_bml::setFunctionsMapAndArray()
                        "trigger topology query towards 'al_mac'",
                        static_cast<pFunction>(&cli_bml::bml_trigger_topology_discovery_caller), 1,
                        1, STRING_ARG);
+    insertCommandToMap("bml_trigger_ap_capability", "<al_mac (mac format)>",
+                       "trigger ap capability query towards 'al_mac'",
+                       static_cast<pFunction>(&cli_bml::bml_trigger_ap_capability_caller), 1, 1,
+                       STRING_ARG);
     insertCommandToMap(
         "bml_trigger_channel_selection",            // command name
         "<al_mac (mac format)> <ruid(mac format)>", // command args list
@@ -1101,6 +1105,13 @@ int cli_bml::bml_trigger_topology_discovery_caller(int numOfArgs)
     }
     return -1;
 }
+int cli_bml::bml_trigger_ap_capability_caller(int numOfArgs)
+{
+    if (numOfArgs == 1) {
+        return ap_capability(args.stringArgs[0]);
+    }
+    return -1;
+}
 
 int cli_bml::bml_channel_selection_caller(int numOfArgs)
 {
@@ -1628,6 +1639,13 @@ int cli_bml::topology_discovery(const std::string &al_mac)
 {
     int ret = bml_trigger_topology_discovery(ctx, al_mac.c_str());
     printBmlReturnVals("topology discovery", ret);
+    return 0;
+}
+
+int cli_bml::ap_capability(const std::string &al_mac)
+{
+    int ret = bml_trigger_ap_capability(ctx, al_mac.c_str());
+    printBmlReturnVals("ap capability", ret);
     return 0;
 }
 

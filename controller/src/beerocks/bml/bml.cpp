@@ -597,6 +597,18 @@ int bml_trigger_topology_discovery(BML_CTX ctx, const char *al_mac)
     return (pBML->topology_discovery(al_mac));
 }
 
+int bml_trigger_ap_capability(BML_CTX ctx, const char *al_mac)
+{
+    // Validate input parameter
+    if (!ctx) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    bml_internal *pBML = (bml_internal *)ctx;
+
+    return (pBML->ap_capability(al_mac));
+}
+
 int bml_channel_selection(BML_CTX ctx, const char *al_mac, const char *ruid)
 {
     // Validate input parameters

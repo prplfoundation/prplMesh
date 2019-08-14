@@ -160,6 +160,9 @@ public:
     // triggers topology discovery
     int topology_discovery(const char *al_mac);
 
+    //triggers ap capability query on controller
+    int ap_capability(const char *al_mac);
+
     // triggers channel selection on specific Agent
     int channel_selection(const char *al_mac, const char *ruid);
 
