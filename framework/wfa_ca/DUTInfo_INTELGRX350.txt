@@ -1,2 +1,0 @@
-vendor=INTEL
-model=GRX350
