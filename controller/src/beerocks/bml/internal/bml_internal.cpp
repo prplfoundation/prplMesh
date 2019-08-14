@@ -865,7 +865,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
                 return (-BML_RET_OP_NOT_SUPPORTED);
             }
 
-            m_cbWfaCaReply(reply_ptr);
+            m_cbWfaCaReply(this, reply_ptr);
 
         } break;
         default: {
