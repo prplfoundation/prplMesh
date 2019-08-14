@@ -31,8 +31,23 @@ send_bml_command() {
 }
 
 test_initial_ap_config() {
-    #TODO: Implement
-    return 1
+    status "test initial autoconfig"
+
+    check_error=0
+    check docker exec -it repeater sh -c \
+        'grep -i -q "WSC Global authentication success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater sh -c \
+        'grep -i -q "WSC Global authentication success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+    check docker exec -it repeater sh -c \
+        'grep -i -q "KWA (Key Wrap Auth) success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater sh -c \
+        'grep -i -q "KWA (Key Wrap Auth) success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+    check docker exec -it repeater sh -c \
+        'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater sh -c \
+        'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+
+    return $check_error
 }
 
 test_ap_config_renew() {
