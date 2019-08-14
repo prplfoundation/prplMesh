@@ -42,6 +42,7 @@ std::ostream &operator<<(std::ostream &os, const node &n)
            << " Name: " << n.name << std::endl
            << " Mac: " << n.mac << std::endl
            << " Ipv4: " << n.ipv4 << std::endl
+           << " Manufacturer: " << n.manufacturer << std::endl
            << " ParentMac: " << n.parent_mac << std::endl
            << " PreviousParentMac: " << n.previous_parent_mac << std::endl
            << " Channel: " << int(n.channel) << std::endl
@@ -127,6 +128,7 @@ std::ostream &operator<<(std::ostream &os, const node &n)
            << " State: " << n.state << std::endl
            << " Active: " << bool(n.hostap->active) << std::endl
            << " Is backhual manager: " << n.hostap->is_backhaul_manager << std::endl
+           << " Manufacturer: " << n.manufacturer << std::endl
            << " Channel: " << int(n.channel) << std::endl
            << " ChannelBandwidth: " << int(n.bandwidth) << std::endl
            << " ChannelExtAboveSecondary: " << bool(n.channel_ext_above_secondary) << std::endl

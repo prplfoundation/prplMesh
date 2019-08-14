@@ -1098,6 +1098,8 @@ bool master_thread::handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageR
 
         database.set_node_ipv4(backhaul_mac, bridge_ipv4);
         database.set_node_ipv4(bridge_mac, bridge_ipv4);
+        database.set_node_manufacturer(backhaul_mac, "Intel");
+        database.set_node_manufacturer(bridge_mac, "Intel");
 
         database.set_node_type(backhaul_mac, beerocks::TYPE_IRE_BACKHAUL);
 
@@ -1113,6 +1115,7 @@ bool master_thread::handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageR
         database.set_node_state(eth_switch_mac, beerocks::STATE_CONNECTED);
         database.set_node_name(eth_switch_mac, slave_name + "_ETH");
         database.set_node_ipv4(eth_switch_mac, bridge_ipv4);
+        database.set_node_manufacturer(eth_switch_mac, "Intel");
 
         //run locating task on ire
         if (!database.is_node_wireless(backhaul_mac)) {
@@ -1298,6 +1301,7 @@ bool master_thread::handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageR
 
     database.set_node_name(radio_mac, slave_name + "_AP");
     database.set_node_ipv4(radio_mac, bridge_ipv4);
+    database.set_node_manufacturer(radio_mac, "Intel");
 
     // sd is assigned to src bridge mac
     sd->setPeerMac(bridge_mac);
@@ -1454,6 +1458,7 @@ bool master_thread::handle_non_intel_slave_join(Socket *sd,
                << ire_type;
     database.add_node(bridge_mac, backhaul_mac, ire_type);
     database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
+    database.set_node_manufacturer(bridge_mac, tlvwscM1->manufacturer());
 
     // Controller expects backhaul which contains bridge which contains radio, but we only get radio...
 
@@ -1484,6 +1489,7 @@ bool master_thread::handle_non_intel_slave_join(Socket *sd,
     // TODO number of antennas comes from HT/VHT capabilities (implicit from NxM)
     // TODO ant_gain and conducted_power will not be set
     database.set_node_name(radio_mac, tlvwscM1->model_name());
+    database.set_node_manufacturer(radio_mac, tlvwscM1->manufacturer());
     // TODO ipv4 will not be set
 
     // sd is assigned to src bridge mac

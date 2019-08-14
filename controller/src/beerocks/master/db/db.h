@@ -146,6 +146,9 @@ public:
     bool set_node_ipv4(std::string mac, std::string ipv4);
     std::string get_node_ipv4(std::string mac);
 
+    bool set_node_manufacturer(std::string mac, std::string manufacturer);
+    std::string get_node_manufacturer(std::string mac);
+
     int get_node_channel(std::string mac);
 
     bool set_node_vap_id(std::string mac, int8_t vap_id);
