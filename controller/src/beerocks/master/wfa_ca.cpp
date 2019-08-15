@@ -240,8 +240,35 @@ void wfa_ca::handle_wfa_ca_message(
 
     switch (command_type) {
     case eWfaCaCommand::CA_GET_VERSION: {
-        // TODO
-        reply(sd, cmdu_tx, eWfaCaStatus::INVALID, "unimplemented command");
+
+        /*
+         * This command is used to obtain the version of the Control Agent software. The command
+         * does not attempt to perform any action on the DUT itself. This command may be used to
+         * verify basic connectivity to the Control Agent.
+         *
+         * Parameters:
+         *   None
+         *
+         * Return Values:
+         *
+         * Param Name    | Values                        | Description
+         * ----------------------------------------------------------------------------------------
+         * "version"     | string                        | Control Agent software version
+         *
+         * Example:
+         * UCC: CA_GET_VERSION
+         * CA: status,RUNNING
+         * CA: status,COMPLETE,version,1.0
+         */
+
+        // send back first reply
+        if (!reply(sd, cmdu_tx, eWfaCaStatus::RUNNING)) {
+            LOG(ERROR) << "failed to send reply";
+            break;
+        }
+
+        // Send back second reply
+        reply(sd, cmdu_tx, eWfaCaStatus::COMPLETE, std::string("version,") + BEEROCKS_VERSION);
         break;
     }
     case eWfaCaCommand::DEVICE_GET_INFO: {
