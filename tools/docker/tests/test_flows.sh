@@ -61,8 +61,35 @@ test_ap_config_bss_tear_down() {
 }
 
 test_channel_selection() {
-    #TODO: Implement
-    return 1
+    status "test channel selection"
+    
+    check_error=0
+    dbg "Send channel preference query"
+    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x8004\"" $redirect
+    sleep 1
+    dbg "Confirming channel preference query has been received on agent"
+    check docker exec -it repeater sh -c \
+        'grep -i -q "CHANNEL_PREFERENCE_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater sh -c \
+        'grep -i -q "CHANNEL_PREFERENCE_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+    
+    dbg "Send channel selection request"
+    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x8006\"" $redirect
+    sleep 1
+    dbg "Confirming channel selection request has been received on agent"
+    check docker exec -it repeater sh -c \
+        'grep -i -q "CHANNEL_SELECTION_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater sh -c \
+        'grep -i -q "CHANNEL_SELECTION_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+    
+    dbg "Confirming 1905.1 Ack Message request was received on agent"
+    # TODO: When creating handler for the ACK message on the agent, replace lookup of this string
+    check docker exec -it repeater sh -c \
+        'grep -i -q "handle_cmdu_control_ieee1905_1_message 8000" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater sh -c \
+        'grep -i -q "handle_cmdu_control_ieee1905_1_message 8000" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+
+    return $check_error
 }
 
 test_ap_capability_info_reporting() {
