@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-#define FORBIDDEN_CHARS "$#&*()[]{};/\\<>?|`~=+"
+#define FORBIDDEN_CHARS "$#&*()[];/\\<>?|`~=+"
 
 using namespace beerocks;
 
