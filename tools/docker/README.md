@@ -41,6 +41,24 @@ The runner docker allows running multiple containers, for example one with a con
 The 2 containers are connected using a docker network (bridge), so can
 communicate + sniffed by running `wireshark` / `tcpdump` on the bridge from the host to see 1905 packets.
 
+## Docker all
+
+The all docker allows building and running prplMesh inside containers. It includes all the tools used for building and running prplMesh, and is mainly used for running prplMesh on Windows at the moment.
+
+Build this image:
+
+```bash
+cd tools/docker/all
+docker image build --tag prplmesh-all .
+```
+
+The current use case for using the `all` image is to run prplMesh on a Windows host for connecting to the WiFi TestSuite wts application (UCC).
+This is done by running the container (mapping the sources or cloning them from within the container) in priviliged mode on port X which is set in the UCC as the DUT port:
+
+```bash
+docker container run -v //c/Users/prplMesh/dev1/:/work/dev1 --privileged -p 5000:5000 --expose 5000 --name gateway -d --user=0:0 --interactive --tty --entrypoint bash --rm prplmesh-windows
+```
+
 ## Docker tester
 
 A simple wrapper which calls `docker exec <container name> -it <path/to>/build/install/scripts/prplmesh_utils.sh status` which prints the prplMesh operational status of the main and radio agents.
