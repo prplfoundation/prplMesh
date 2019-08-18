@@ -347,7 +347,7 @@ void wfa_ca::handle_wfa_ca_message(
         }
 
         if (params.find("type") != params.end()) {
-            if (params["type"] != "test bed" && params["type"] != "dut") {
+            if (params["type"] != "test bed" && params["type"] != "DUT") {
                 err_string = "invalid param value '" + params["type"] +
                              "' for param name 'type', accepted values can be only 'test bed' or"
                              " 'dut'";
