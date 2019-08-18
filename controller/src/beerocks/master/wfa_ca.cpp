@@ -272,8 +272,17 @@ void wfa_ca::handle_wfa_ca_message(
         break;
     }
     case eWfaCaCommand::DEVICE_GET_INFO: {
-        // TODO
-        reply(sd, cmdu_tx, eWfaCaStatus::INVALID, "unimplemented command");
+
+        // send back first reply
+        if (!reply(sd, cmdu_tx, eWfaCaStatus::RUNNING)) {
+            LOG(ERROR) << "failed to send reply";
+            break;
+        }
+
+        // Send back second reply
+        reply(sd, cmdu_tx, eWfaCaStatus::COMPLETE,
+              std::string("vendor,") + database.settings_vendor() + std::string(",model,") +
+                  database.settings_model() + std::string(",version,") + BEEROCKS_VERSION);
         break;
     }
     case eWfaCaCommand::DEV_GET_PARAMETER: {
