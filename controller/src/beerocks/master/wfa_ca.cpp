@@ -277,7 +277,7 @@ void wfa_ca::handle_wfa_ca_message(
 
         // NOTE: Note sure this parameters are actually needed. There is a controversial
         // between TestPlan and CAPI specification regarding if these params are required.
-        static std::unordered_map<std::string, std::string> params{
+        std::unordered_map<std::string, std::string> params{
             // {"name", std::string()},
             // {"program", std::string()},
             // {"devrole", std::string()},
@@ -389,8 +389,8 @@ void wfa_ca::handle_wfa_ca_message(
         * CA: status,COMPLETE,MID,0xb3c9
         */
 
-        static std::unordered_map<std::string, std::string> params{
-            {"destalid", std::string()}, {"messagetypevalue", std::string()}};
+        std::unordered_map<std::string, std::string> params{{"destalid", std::string()},
+                                                            {"messagetypevalue", std::string()}};
 
         const auto mandatory_params_num = params.size();
 
@@ -520,7 +520,7 @@ void wfa_ca::handle_wfa_ca_message(
 
         // NOTE: Note sure this parameters are actually needed. There is a controversial
         // between TestPlan and CAPI specification regarding if these params are required.
-        static std::unordered_map<std::string, std::string> params{
+        std::unordered_map<std::string, std::string> params{
             // {"name", std::string()},
             // {"program", std::string()},
         };
