@@ -642,6 +642,14 @@ bool wfa_ca::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx, ieee1905_1::eMessag
     int tlv_type;
 
     switch (message_type) {
+    case ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE: {
+        cmdu_header = cmdu_tx.create(g_mid, ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE);
+        if (!cmdu_header) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        break;
+    }
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE: {
 
         cmdu_header =
