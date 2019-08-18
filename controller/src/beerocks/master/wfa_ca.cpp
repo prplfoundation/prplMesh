@@ -87,6 +87,8 @@ wfa_ca::eWfaCaCommand wfa_ca::wfa_ca_command_from_string(std::string command)
         return eWfaCaCommand::DEV_SEND_1905;
     } else if (command == "DEV_SET_CONFIG") {
         return eWfaCaCommand::DEV_SET_CONFIG;
+    } else if (command == "DEV_GET_PARAMETER") {
+        return eWfaCaCommand::DEV_GET_PARAMETER;
     }
 
     return eWfaCaCommand::WFA_CA_COMMAND_MAX;
@@ -286,8 +288,19 @@ void wfa_ca::handle_wfa_ca_message(
         break;
     }
     case eWfaCaCommand::DEV_GET_PARAMETER: {
-        // TODO
-        reply(sd, cmdu_tx, eWfaCaStatus::INVALID, "unimplemented command");
+
+        // For controller certification, the following command is received to get the ALid:
+        // DUT (127.0.0.1:5000) ---> dev_get_parameter,program,map,parameter,ALid
+
+        if (!reply(sd, cmdu_tx, eWfaCaStatus::RUNNING)) {
+            LOG(ERROR) << "failed to send reply";
+            break;
+        }
+
+        std::string alid;
+        if (!net::network_utils::linux_iface_get_mac("br-lan", alid))
+            reply(sd, cmdu_tx, eWfaCaStatus::INVALID, "FAIL");
+        reply(sd, cmdu_tx, eWfaCaStatus::COMPLETE, std::string("aLid,") + alid);
         break;
     }
     case eWfaCaCommand::DEV_RESET_DEFAULT: {
