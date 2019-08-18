@@ -27,7 +27,7 @@ if(NOT WIN32)
 endif()
 
 # Check if "external_toolchain.cfg" file exists
-if (EXISTS "${CMAKE_SOURCE_DIR}/external_toolchain.cfg")
+if (EXISTS "${CMAKE_SOURCE_DIR}/external_toolchain.cfg" AND IS_SYMLINK "${CMAKE_SOURCE_DIR}/external_toolchain.cfg")
     file(STRINGS "external_toolchain.cfg" ConfigContents)
     foreach(NameAndValue ${ConfigContents})
         # Strip leading spaces
