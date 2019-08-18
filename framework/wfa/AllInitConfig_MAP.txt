@@ -1,0 +1,128 @@
+
+#$! File Name: AllInitConfig_MAP.txt
+#
+# Copyright (c) 2017 Wi-Fi Alliance
+# 
+# 
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES 
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF 
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY 
+# SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER 
+# RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+# NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
+# USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+#
+#   Description  : Hold all set up data need to be updated for your MultiAP test 
+#                  bed 
+#   Program      : MAP
+#   Version      : 1.0.0  first release with MultiAP project
+#   Release date : Aug. 25, 2017
+#  
+############################################################################ZZZ
+
+define!$CNTLR1_control_agent!0!
+define!$AGT1_control_agent!0!
+define!$AGT2_control_agent!0!
+define!$CNTLR1_Model_Number!0!
+define!$CNTLR1_Firmware_Version!0!
+define!$AGT1_Model_Number!0!
+define!$AGT1_Firmware_Version!0!
+define!$AGT2_Model_Number!0!
+define!$AGT2_Firmware_Version!0!
+
+### ===============  General set up ===========================================
+### Test bed qualification mode ###
+define!$TestQualMode!1!
+
+### Onboarding supported (0 - manual, 1 - automated for WiFi or Ethernet backhaul) ###
+define!$OnboardingSupported!1!
+
+###########Sniffer capture Upload#####################
+#0- No sniffer capture upload
+#1- upload sniffer capture to UCC
+define!$SnferCapUpld!0!
+
+######### DUT (Device Under Test) Information #########################
+## DUT can be either MAUT or MCUT
+define!$DUT!MAUT!
+
+### DUT Control Agent
+wfa_control_agent_dut!ipaddr=127.0.0.1,port=5000!
+dut_wireless_ip!192.165.100.140!
+define!$DUT_Name!BroadcomCTTDUT!
+
+########### Testbed Controller ################################
+wfa_control_agent_broadcomcntlr_cntlr!ipaddr=127.0.0.1,port=7001!
+define!$broadcomcntlr_cntlr_wireless_ip!192.165.100.140!
+
+wfa_control_agent_marvellcntlr_cntlr!ipaddr=127.0.0.1,port=7002!
+define!$marvellcntlr_cntlr_wireless_ip!192.165.100.201!
+
+wfa_control_agent_mediatekcntlr_cntlr!ipaddr=127.0.0.1,port=7003!
+define!$mediatekcntlr_cntlr_wireless_ip!192.165.100.102!
+
+wfa_control_agent_qualcommcntlr_cntlr!ipaddr=127.0.0.1,port=7004!
+define!$qualcommcntlr_cntlr_wireless_ip!192.165.100.123!
+
+########### Testbed MBO AP ################################
+# AP1
+wfa_control_agent_qualcommap_ap!ipaddr=127.0.0.1,port=7005!
+define!AP1IPAddress!192.165.100.223!
+
+########### Testbed Agent ################################
+wfa_control_agent_broadcomagt_agt!ipaddr=127.0.0.1,port=7006!
+define!AGT1IPAddress!192.165.100.140!
+
+wfa_control_agent_marvellagt_agt!ipaddr=127.0.0.1,port=7007!
+define!AGT1IPAddress!192.165.100.201!
+
+wfa_control_agent_mediatekagt_agt!ipaddr=127.0.0.1,port=7008!
+define!AGT1IPAddress!192.165.100.102!
+
+wfa_control_agent_qualcommagt_agt!ipaddr=127.0.0.1,port=7009!
+define!AGT1IPAddress!192.165.100.123!
+
+########### Testbed STAs ################################
+#STA1 (MBO certified)
+wfa_control_agent_marvellsta_sta!ipaddr=127.0.0.1,port=7010!
+define!$STA1_wifi_ip!192.165.100.64!
+
+################# Sniffer agent for wireless capture ########################
+#wfa_control_agent_capture_sta!ipaddr=127.0.0.1,port=7011!
+
+#################### Sniffer agent for Ethernet capture ##################################
+#wfa_sniffer!ipaddr=127.0.0.1,port=7012!
+
+# To enable the sniffing during all the test execution,set this variable to 1.
+# NOTE - Sniffer logs occupy large disk space. So make sure to clean the logs on
+#        Snifffer machine if choose to enable this option
+
+define!$sniffer_enable!0
+
+############################################################################
+### Static test data
+wfa_test_commands_init!DefaultTestData.txt!
+
+############################################################################
+### Static setting, no change in general
+wfa_test_commands_init!Non-WTS-DUT-Input.txt!
+
+
+##################Display Names#########################
+#Loading Display Names
+wfa_test_commands_init!DisplayNames.txt!
+
+
+### =============== Traffic parameters setting ================================
+define!$MaxHtRate!25000!
+
+### =============== Multicast IP Address  =====================================
+define!$multicast_ip_addr!224.0.0.5!
+
+#Test Network Netmask
+define!$netmask!255.255.0.0!
+
+
+
+
