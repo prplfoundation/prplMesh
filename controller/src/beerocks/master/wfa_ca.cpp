@@ -67,6 +67,12 @@ const std::string wfa_ca::wfa_ca_status_to_string(eWfaCaStatus status)
     return std::string();
 }
 
+static bool is_hex_notation(const std::string &s)
+{
+    return s.compare(0, 2, "0x") == 0 && s.size() > 2 &&
+           s.find_first_not_of("0123456789abcdefABCDEF", 2) == std::string::npos;
+}
+
 /**
  * @brief Convert string of WFA-CA command into enum
  * 
@@ -162,12 +168,56 @@ bool wfa_ca::parse_params(const std::vector<std::string> &command_tokens,
         if (params.find(param_name) != params.end()) {
             mandatory_params_cnt++;
         }
-
         if (std::next(it) == command_tokens.end()) {
             err_string = "missing param value for param '" + param_name + "'";
             return false;
         }
-
+        if ((*std::next(it))[0] == '{') {
+            int len_command_str     = (*std::next(it)).length();
+            bool prev_space         = false;
+            bool prev_curly_bracket = false;
+            int count_open_brackets = 0;
+            std::string command_str = *std::next(it);
+            for (int i = 0; i < len_command_str; i++) {
+                auto c = command_str[i];
+                if (c == '{') {
+                    prev_curly_bracket = true;
+                    prev_space         = false;
+                    count_open_brackets++;
+                    continue;
+                }
+                if (count_open_brackets == 0) {
+                    err_string = "Unbalanced curly brackets in value of param " + param_name + "'";
+                    return false;
+                } else if (c == '}') {
+                    count_open_brackets--;
+                    if (count_open_brackets < 0) {
+                        err_string =
+                            "Unbalanced curly brackets in value of param " + param_name + "'";
+                        return false;
+                    }
+                    prev_space         = false;
+                    prev_curly_bracket = false;
+                } else if (c == ' ') {
+                    prev_space         = true;
+                    prev_curly_bracket = false;
+                } else {
+                    if (prev_space || prev_curly_bracket) {
+                        auto token = command_str.substr(i, command_str.find_first_of(" }", i) - i);
+                        token.pop_back();
+                        //Check if a given string conforms to hex notation.
+                        if (is_hex_notation(token) == false) {
+                            err_string =
+                                "hex notation test failed in value of param " + param_name + "'";
+                            return false;
+                        }
+                        i                  = i + token.length() - 1;
+                        prev_space         = false;
+                        prev_curly_bracket = false;
+                    }
+                }
+            }
+        }
         params[param_name] = *std::next(it);
         it++;
     }
