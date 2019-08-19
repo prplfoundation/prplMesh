@@ -5,6 +5,52 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(gdb) Attach to prplMesh Cotroller",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/../build/install/bin/beerocks_controller",
+            "processId": "${command:pickProcess}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true //TODO: pretty printing doesn't seem to work
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Attach to prplMesh Agent",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/../build/install/bin/beerocks_agent",
+            "processId": "${command:pickProcess}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Attach to prplMesh CLI",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/../build/install/bin/beerocks_cli",
+            "processId": "${command:pickProcess}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        
+        {
             "name": "(gdb) Launch beerocks_controller",
             "type": "cppdbg",
             "request": "launch",
@@ -44,6 +90,14 @@
         },
         {
             "name": "Python: Current File (Integrated Terminal)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": []
+        },
+        {
+            "name": "Python: prplMesh tlvf",
             "type": "python",
             "request": "launch",
             "program": "${file}",
