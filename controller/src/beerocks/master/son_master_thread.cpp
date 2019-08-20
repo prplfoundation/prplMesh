@@ -240,6 +240,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
     std::string al_mac;
 
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_SEARCH_MESSAGE";
+
     auto tlvAlMacAddressType = cmdu_rx.addClass<ieee1905_1::tlvAlMacAddressType>();
     if (tlvAlMacAddressType) {
         al_mac =
@@ -317,8 +318,8 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
         return false;
     }
 
-    auto cmdu_header =
-        cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RESPONSE_MESSAGE);
+    auto cmdu_header = cmdu_tx.create(
+        cmdu_rx.getMessageId(), ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RESPONSE_MESSAGE);
 
     auto tlvSupportedRole = cmdu_tx.addClass<ieee1905_1::tlvSupportedRole>();
     if (!tlvSupportedRole) {
