@@ -31,6 +31,7 @@
 
 #include <beerocks/tlvf/beerocks_message_control.h>
 #include <tlvf/ieee_1905_1/eMessageType.h>
+#include <tlvf/ieee_1905_1/eTlvType.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
@@ -591,7 +592,7 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
 bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
                                                            ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    // Check if this is a M2 message that we sent to the agent, which was just looped back.
+    // Check if this is a M2 message that we sent to the agent, which was just looped back,
     // The M1 and M2 messages are both of CMDU type AP_Autoconfiguration_WSC. Thus,
     // when we send the M2 to the local agent, it will be published back on the local bus because
     // the destination is our AL-MAC, and the controller does listen to this CMDU.
@@ -608,16 +609,30 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     * @brief Parse AP-Autoconfiguration WSC which should include one AP Radio Basic Capabilities
     * TLV and one WSC TLV containing M1
     */
-    auto radio_basic_caps = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+    static const int num_tlvs                                              = 2;
+    std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_basic_caps = nullptr;
+    std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1                         = nullptr;
+    for (int i = 0; i < num_tlvs; i++) {
+        int type = cmdu_rx.getNextTlvType();
+        if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES)) {
+            LOG(DEBUG) << "Found TLV_AP_RADIO_BASIC_CAPABILITIES TLV";
+            radio_basic_caps = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+        } else if (type == int(ieee1905_1::eTlvType::TLV_WSC)) {
+            LOG(DEBUG) << "Found TLV_WSC TLV (assuming M1)";
+            tlvwscM1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
+        } else {
+            LOG(ERROR) << "Unexpected TLV " << type;
+            return false;
+        }
+    }
+
     if (radio_basic_caps == nullptr) {
-        LOG(ERROR) << "Failed to get APRadioBasicCapabilities";
+        LOG(ERROR) << "Failed to get APRadioBasicCapabilities TLV";
         return false;
     }
 
-    // Parse WSC M1 TLV
-    auto tlvwscM1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
     if (tlvwscM1 == nullptr) {
-        LOG(ERROR) << "Error creating tlvWscM1";
+        LOG(ERROR) << "Failed to get TLV_WSC M1 TLV";
         return false;
     }
 
