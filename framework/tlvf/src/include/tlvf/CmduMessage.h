@@ -66,6 +66,7 @@ public:
     uint8_t *getMessageBuff() const;
     bool getNextTlvType(eTlvType &tlvType) const;
     int getNextTlvType() const;
+    bool hasTlv(uint8_t tlvType) const;
     uint16_t getNextTlvLength() const;
     void swap();
     bool is_finalized() const { return m_finalized; };
@@ -75,6 +76,21 @@ public:
 
 protected:
     void reset();
+    // packed TLV struct to help in the parsing of the packet
+#pragma pack(push, 1)
+    struct Tlv {
+    protected:
+        uint8_t tlvType;
+        uint16_t tlvLength;
+
+    public:
+        uint8_t &type() { return tlvType; }
+
+        Tlv *next() { return (Tlv *)((uint8_t *)this + size()); }
+
+        size_t size() { return sizeof(Tlv) + ntohs(tlvLength); }
+    };
+#pragma pack(pop)
 
     size_t m_buff_len            = 0;
     bool m_finalized             = false;
