@@ -126,8 +126,8 @@ bool main_thread::init()
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE,
-            ieee1905_1::eMessageType::ACK_MESSAGE,
-            ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE})) {
+            ieee1905_1::eMessageType::ACK_MESSAGE, ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE,
+            ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE})) {
         LOG(ERROR) << "Failed to init mapf_bus";
         return false;
     }
