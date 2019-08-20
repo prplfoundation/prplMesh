@@ -44,6 +44,32 @@ static std::string check_forbidden_chars(const std::string &str)
 }
 
 /**
+ * @brief Checks that the given string is in a hex notation
+ * 
+ * @param[in] str String to check hex notation.
+ * @return true if string is valid hex notation, else false.
+ */
+static bool validate_hex_notation(const std::string &str)
+{
+    // Each value must start with 0x
+    if (str.substr(0, 2) != "0x") {
+        return false;
+    }
+
+    // The number of digits must be even
+    if (str.size() % 2 != 0) {
+        return false;
+    }
+
+    // Check if string has non-hex character
+    if (str.find_first_not_of("0123456789abcdefABCDEF", 2) != std::string::npos) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * @brief Convert enum of WFA-CA status to string.
  * 
  * @param[in] status Enum of WFA-CA status. 
@@ -383,6 +409,14 @@ void wfa_ca::handle_wfa_ca_message(
             break;
         }
 
+        // TLV check
+        std::list<tlv_hex_t> tlv_hex_list;
+        if (!get_send_1905_1_tlv_hex_list(tlv_hex_list, params, err_string)) {
+            LOG(ERROR) << err_string;
+            reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+            break;
+        }
+
         // Send back first reply
         if (!reply(sd, cmdu_tx, eWfaCaStatus::RUNNING)) {
             LOG(ERROR) << "failed to send reply";
@@ -392,16 +426,37 @@ void wfa_ca::handle_wfa_ca_message(
         // Check if additional tlvs were added to command. If yes, then needs to parse the tlv and
         // send it as it.
         if (mandatory_params_num < params.size()) {
-
             if (!cmdu_tx.create(g_mid, ieee1905_1::eMessageType(message_type))) {
                 LOG(ERROR) << "cmdu creation of type 0x" << message_type_str << ", has failed";
                 reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
                 break;
             }
 
-            // TODO: Add the TLVs from the command
+            // We need to fill in CmduMessage's class vector. However, we really don't care about
+            // the classes, and we don't want any swapping to be done. Still, we need something
+            // to make sure the length of the tlvs is taken into account.
+            // Therefore, use the tlvPrefilledData class, which can update the end pointer.
+            auto tlvs = cmdu_tx.addClass<tlvPrefilledData>();
+            if (!tlvs) {
+                LOG(ERROR) << "addClass tlvPrefilledData has failed";
+                reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
+                break;
+            }
 
-            son_actions::send_cmdu_to_agent(agent_sd, cmdu_tx);
+            if (!tlvs->add_tlvs_from_list(tlv_hex_list, err_string)) {
+                LOG(ERROR) << err_string;
+                reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_string);
+                break;
+            }
+
+            LOG(INFO) << "Send TLV CMDU " << message_type << " with " << tlv_hex_list.size()
+                      << " TLVs, length " << cmdu_tx.getMessageLength();
+
+            if (!son_actions::send_cmdu_to_agent(agent_sd, cmdu_tx)) {
+                LOG(ERROR) << "Failed to send CMDU";
+                reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
+                break;
+            }
 
             // If not using TLVs from the command, create CMDU from existing buffer
         } else {
@@ -409,17 +464,17 @@ void wfa_ca::handle_wfa_ca_message(
             if (!certification_tx_buffer) {
                 LOG(ERROR) << "certification_tx_buffer is not allocated";
             }
-            ieee1905_1::CmduMessageTx certification_cmdu_tx(
+            ieee1905_1::CmduMessageTx external_cmdu_tx(
                 certification_tx_buffer.get() + sizeof(beerocks::message::sUdsHeader),
                 message::MESSAGE_BUFFER_LENGTH - sizeof(beerocks::message::sUdsHeader));
 
-            if (!create_cmdu(certification_cmdu_tx, ieee1905_1::eMessageType(message_type))) {
+            if (!create_cmdu(external_cmdu_tx, ieee1905_1::eMessageType(message_type))) {
                 LOG(ERROR) << "Failed to create CMDU";
                 reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
                 break;
             }
 
-            if (!son_actions::send_cmdu_to_agent(agent_sd, certification_cmdu_tx)) {
+            if (!son_actions::send_cmdu_to_agent(agent_sd, external_cmdu_tx)) {
                 LOG(ERROR) << "Failed to send CMDU";
                 reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
                 break;
@@ -491,7 +546,7 @@ void wfa_ca::handle_wfa_ca_message(
  * preperared from advance.
  * 
  * @param[in,out] cmdu_tx CmduTx message object created from certification_tx_buffer.
- * @param[in] message_type: CMDU message type to create. 
+ * @param[in] message_type CMDU message type to create. 
  * @return true if successful, false if not.
  */
 bool wfa_ca::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx, ieee1905_1::eMessageType message_type)
@@ -556,5 +611,162 @@ bool wfa_ca::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx, ieee1905_1::eMessag
     // Force mid
     cmdu_header->message_id() = g_mid;
 
+    return true;
+}
+
+/**
+ * @brief Parse command "DEV_SEND_1905" TLVs parameters into an ordered list of TLV structure
+ * "tlv_hex_t", and does data validation.
+ * 
+ * @param[in,out] tlv_hex_list An ordered list of TLVs of type "tlv_hex_t".
+ * @param[in] params An unordered map containing parsed parameters of a CAPI command. 
+ * @param[out] err_string Contains an error description if the function fails.
+ * @return true if successful, false if not.
+ */
+bool wfa_ca::get_send_1905_1_tlv_hex_list(std::list<tlv_hex_t> &tlv_hex_list,
+                                          std::unordered_map<std::string, std::string> &params,
+                                          std::string &err_string)
+{
+    static const int max_tlv                          = 256; // Magic number
+    size_t tlv_idx                                    = 0;
+    bool skip                                         = false;
+    bool finish                                       = false;
+    static const std::vector<std::string> tlv_members = {"tlv_type", "tlv_length", "tlv_value"};
+
+    do {
+        tlv_hex_t tlv_hex;
+        for (size_t tlv_member_idx = 0; tlv_member_idx < tlv_members.size(); tlv_member_idx++) {
+            std::string lookup_str =
+                tlv_members[tlv_member_idx] + (tlv_idx > 0 ? std::to_string(tlv_idx) : "");
+            auto it = params.find(lookup_str);
+            if (it == params.end()) {
+                if (tlv_idx == 0 && tlv_member_idx == 0) {
+                    // Skipping TLV with no index (index 0), checking TLV index 1
+                    skip = true;
+                    break;
+                } else if (tlv_idx > 0 && tlv_member_idx == 0) {
+                    // No indexed TLVs found, finish
+                    finish = true;
+                    break;
+                } else {
+                    err_string = "missing param name '" + lookup_str + "'";
+                    return false;
+                }
+            }
+
+            // Type
+            if (tlv_member_idx == 0) {
+                tlv_hex.type = &it->second;
+
+                // Length
+            } else if (tlv_member_idx == 1) {
+                tlv_hex.length = &it->second;
+
+                // Value
+            } else if (tlv_member_idx == 2) {
+                // The hex values contains '{' and '}' delimiters, but we don't care about them.
+                it->second.erase(std::remove(it->second.begin(), it->second.end(), '{'),
+                                 it->second.end());
+                it->second.erase(std::remove(it->second.begin(), it->second.end(), '}'),
+                                 it->second.end());
+                tlv_hex.value = &it->second;
+            } else {
+                LOG(ERROR) << "Illegal tlv_member_idx value: " << int(tlv_member_idx);
+                err_string = err_internal;
+                return false;
+            }
+
+            // Validate hex notation on value or list of values separated by space
+            auto values = string_utils::str_split(it->second, ' ');
+            for (auto value : values) {
+                if (!validate_hex_notation(value)) {
+                    err_string = "param name '" + lookup_str + "' has invalid hex notation value";
+                    return false;
+                }
+
+                // Type and Length fields must have fixed size:
+
+                // Type
+                if (tlv_member_idx == 0 && value.size() != 4) {
+                    err_string = "type field is too large: " + value;
+                    return false;
+
+                    // Length
+                } else if (tlv_member_idx == 1 && value.size() != 6) {
+                    err_string = "length field is too large: " + value;
+                    return false;
+                }
+            }
+        }
+
+        if (finish) {
+            return true;
+        }
+
+        tlv_idx++;
+
+        if (skip) {
+            skip = false;
+            continue;
+        }
+
+        tlv_hex_list.push_back(tlv_hex);
+
+    } while (tlv_idx < max_tlv);
+
+    LOG(ERROR) << "Reached stop condition";
+    err_string = err_internal;
+    return false;
+}
+
+/**
+ * @brief Writes TLVs from TLVs list 'tlv_hex_list' into the class buffer.
+ * 
+ * @param[in] tlv_hex_list An ordered list of TLVs of type "tlv_hex_t".
+ * @param[out] err_string Contains an error description if the function fails.
+ * @return true if successful, false if not.
+ */
+bool tlvPrefilledData::add_tlvs_from_list(std::list<wfa_ca::tlv_hex_t> &tlv_hex_list,
+                                          std::string &err_string)
+{
+    for (const auto &tlv : tlv_hex_list) {
+
+        uint8_t type = std::stoi(*tlv.type, nullptr, 16);
+
+        uint16_t length = std::stoi(*tlv.length, nullptr, 16);
+
+        // "+3" = size of type and length fields
+        if (getBuffRemainingBytes() < unsigned(length + 3)) {
+            err_string = "not enough space on buffer";
+            return false;
+        }
+
+        *m_buff_ptr__ = type;
+        m_buff_ptr__++;
+        *m_buff_ptr__ = uint8_t(length >> 8);
+        m_buff_ptr__++;
+        *m_buff_ptr__ = uint8_t(length);
+        m_buff_ptr__++;
+
+        auto values = string_utils::str_split(*tlv.value, ' ');
+        for (auto value : values) {
+            // iterate every to chars (1 octet) and write it to buffer
+            // start with char_idx = 2 to skip "0x"
+            for (size_t char_idx = 2; char_idx < value.size(); char_idx += 2) {
+                if (length == 0) {
+                    err_string = "length smaller than data";
+                    return false;
+                }
+                *m_buff_ptr__ = std::stoi(value.substr(char_idx, 2), nullptr, 16);
+                m_buff_ptr__++;
+                length--;
+            }
+        }
+
+        if (length != 0) {
+            err_string = "data smaller than length";
+            return false;
+        }
+    }
     return true;
 }

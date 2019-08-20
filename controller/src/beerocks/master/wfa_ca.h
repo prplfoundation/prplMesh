@@ -48,6 +48,38 @@ private:
 
     static bool create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx,
                             ieee1905_1::eMessageType message_type);
+
+    struct tlv_hex_t {
+        std::string *type   = nullptr;
+        std::string *length = nullptr;
+        std::string *value  = nullptr;
+    };
+    static bool get_send_1905_1_tlv_hex_list(std::list<tlv_hex_t> &tlv_hex_list,
+                                             std::unordered_map<std::string, std::string> &params,
+                                             std::string &err_string);
+
+    friend class tlvPrefilledData;
+};
+
+class tlvPrefilledData : public BaseClass {
+public:
+    tlvPrefilledData(uint8_t *buff, size_t buff_len, bool parse = false, bool swap_needed = false)
+        : BaseClass(buff, buff_len, parse, swap_needed)
+    {
+        m_init_succeeded = true;
+    };
+    tlvPrefilledData(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false)
+        : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
+    {
+        m_init_succeeded = true;
+    };
+    ~tlvPrefilledData(){};
+
+    // No swapping is needed for a prefilled TLV list
+    void class_swap(){};
+    static size_t get_initial_size() { return 0; };
+
+    bool add_tlvs_from_list(std::list<wfa_ca::tlv_hex_t> &tlv_hex_list, std::string &err_string);
 };
 
 #endif
