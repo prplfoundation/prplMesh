@@ -3697,6 +3697,13 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
+        // All attributes which are not explicitely set below are set to
+        // default by the TLV factory, see WSC_Attributes.yml
+        if (!autoconfig_wsc_add_m1()) {
+            LOG(ERROR) << "Failed adding WSC M1 TLV";
+            return false;
+        }
+
         auto radio_basic_caps = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
         if (!radio_basic_caps) {
             LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
@@ -3732,13 +3739,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 LOG(ERROR) << "add_operating_classes_info_list failed";
                 return false;
             }
-        }
-
-        // All attributes which are not explicitely set below are set to
-        // default by the TLV factory, see WSC_Attributes.yml
-        if (!autoconfig_wsc_add_m1()) {
-            LOG(ERROR) << "Failed adding WSC M1 TLV";
-            return false;
         }
 
         auto vs = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
@@ -4424,8 +4424,8 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
     // while the M2 has the AP_Radio_Identifier TLV.
     // If this is a looped back M1 CMDU, we can treat is as handled successfully.
-    if (cmdu_rx.getNextTlvType() == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES)) {
-        LOG(DEBUG) << "looped back M1 CMDU";
+    if (cmdu_rx.hasTlv(uint8_t(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES))) {
+        LOG(DEBUG) << "agent M1 CMDU, ignore";
         return true;
     }
 

@@ -601,8 +601,10 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
     // while the M2 has the AP_Radio_Identifier TLV.
     // If this is a looped back M2 CMDU, we can treat is as handled successfully.
-    if (cmdu_rx.getNextTlvType() == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_IDENTIFIER))
+    if (cmdu_rx.hasTlv(uint8_t(wfa_map::eTlvTypeMap::TLV_AP_RADIO_IDENTIFIER))) {
+        LOG(DEBUG) << "CMDU contains radio identifier TLV, ignore (looped back WSC M2 CMDU)";
         return true;
+    }
 
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
     /**
