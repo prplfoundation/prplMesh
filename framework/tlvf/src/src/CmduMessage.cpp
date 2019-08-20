@@ -25,6 +25,36 @@ std::shared_ptr<BaseClass> CmduMessage::getClass(size_t idx) const
     }
 }
 
+bool CmduMessage::hasTlv(uint8_t tlvType) const
+{
+    uint8_t type = 0;
+    Tlv *tlvhdr;
+
+    // for already parsed TLVs, check the class vector (no need for endianess conversion)
+    for (size_t idx = 0; idx < m_class_vector.size(); idx++) {
+        type = *m_class_vector.at(idx).get()->getBuffPtr();
+        if (type == tlvType)
+            return true;
+    }
+
+    // for TLVs not yet parsed, go through the rest till EOM or the type which is searched
+    if (m_class_vector.size() == 0) {
+        tlvhdr = reinterpret_cast<Tlv *>(m_cmdu_header->getBuffPtr());
+    } else {
+        tlvhdr = reinterpret_cast<Tlv *>(m_class_vector.back()->getBuffPtr());
+    }
+
+    size_t len = getMessageLength();
+    do {
+        if (tlvhdr->type() == tlvType)
+            return true;
+        len += tlvhdr->size();
+        tlvhdr = tlvhdr->next();
+    } while (len < getMessageBuffLength() && tlvhdr->type() != 0);
+
+    return false;
+}
+
 int CmduMessage::getNextTlvType() const
 {
     uint8_t tlvValue = 0;
