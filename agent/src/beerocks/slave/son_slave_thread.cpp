@@ -476,6 +476,9 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_channel_preference_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
         return handle_channel_selection_request(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE: {
+        return handle_client_capability_query(sd, cmdu_rx);
+    }
     default:
         LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
         return false;
@@ -4693,6 +4696,13 @@ bool slave_thread::parse_non_intel_join_response(Socket *sd)
 
     slave_state = STATE_UPDATE_MONITOR_SON_CONFIG;
 
+    return true;
+}
+
+bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received CLIENT_CAPABILITY_QUERY_MESSAGE, mid=" << std::dec << int(mid);
     return true;
 }
 
