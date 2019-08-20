@@ -31,6 +31,7 @@
 
 #include <beerocks/tlvf/beerocks_message_control.h>
 #include <tlvf/ieee_1905_1/eMessageType.h>
+#include <tlvf/ieee_1905_1/eTlvType.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
@@ -608,14 +609,22 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     * @brief Parse AP-Autoconfiguration WSC which should include one AP Radio Basic Capabilities
     * TLV and one WSC TLV containing M1
     */
-    auto radio_basic_caps = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+    static const int num_tlvs = 2;
+    std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_basic_caps = nullptr;
+    std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1 = nullptr;
+    for (int i = 0; i < num_tlvs; i ++) {
+        int type = cmdu_rx.getNextTlvType();
+        if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES))
+            radio_basic_caps = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+        else if (type == int(ieee1905_1::eTlvType::TLV_WSC))
+            tlvwscM1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
+    }
+
     if (radio_basic_caps == nullptr) {
         LOG(ERROR) << "Failed to get APRadioBasicCapabilities";
         return false;
     }
 
-    // Parse WSC M1 TLV
-    auto tlvwscM1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
     if (tlvwscM1 == nullptr) {
         LOG(ERROR) << "Error creating tlvWscM1";
         return false;
