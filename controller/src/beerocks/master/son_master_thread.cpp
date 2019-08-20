@@ -614,10 +614,16 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1 = nullptr;
     for (int i = 0; i < num_tlvs; i ++) {
         int type = cmdu_rx.getNextTlvType();
-        if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES))
+        if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES)) {
+            LOG(DEBUG) << "addClass TLV_AP_RADIO_BASIC_CAPABILITIES";
             radio_basic_caps = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
-        else if (type == int(ieee1905_1::eTlvType::TLV_WSC))
+        } else if (type == int(ieee1905_1::eTlvType::TLV_WSC)) {
+            LOG(DEBUG) << "addClass TLV_WSC";
             tlvwscM1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
+        } else {
+            LOG(ERROR) << "Unknown TLV type " << std::hex << type;
+            return false;
+        }
     }
 
     if (radio_basic_caps == nullptr) {
