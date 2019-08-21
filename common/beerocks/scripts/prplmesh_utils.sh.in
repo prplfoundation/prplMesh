@@ -39,6 +39,44 @@ killall_program() {
     done
 }
 
+platform_init() {
+    echo "platform init..."
+    base_mac=46:55:66:77
+    bridge_ip=192.168.100.140
+    control_ip=192.168.250.140
+    
+    ip link add @BEEROCKS_BRIDGE_IFACE@ address "${base_mac}:00:00" type bridge
+    ip link add @BEEROCKS_BH_WIRE_IFACE@ type dummy
+    ip link add wlan0 address "${base_mac}:00:10" type dummy
+    ip link add wlan2 address "${base_mac}:00:20" type dummy
+    ip link set dev wlan0 up
+    ip link set dev wlan2 up
+    for iface in wlan0 wlan2 @BEEROCKS_BH_WIRE_IFACE@ $DATA_IFACE
+    do
+        echo "add $iface to @BEEROCKS_BRIDGE_IFACE@"
+        nmcli d set "$iface" managed no
+        ip link set dev "$iface" master @BEEROCKS_BRIDGE_IFACE@
+        ip addr flush "$iface"
+    done
+    ip addr add "$control_ip"/24 dev "$CONTROL_IFACE"
+    ip addr add "$bridge_ip"/24 dev @BEEROCKS_BRIDGE_IFACE@
+    ip link set @BEEROCKS_BRIDGE_IFACE@ up
+}
+
+platform_deinit() {
+    echo "platform deinit"
+    for iface in wlan0 wlan2 @BEEROCKS_BH_WIRE_IFACE@ $DATA_IFACE
+    do
+        echo "remove $iface from @BEEROCKS_BRIDGE_IFACE@"
+        ip link set dev "$iface" nomaster
+        nmcli d set "$iface" managed yes
+    done
+    ip link del wlan0
+    ip link del wlan2
+    ip link del @BEEROCKS_BH_WIRE_IFACE@
+    ip link del @BEEROCKS_BRIDGE_IFACE@
+}
+
 prplmesh_platform_db_init() {
     management_mode=${1-Multi-AP-Controller-and-Agent}
     operating_mode=${2-Gateway}
@@ -49,35 +87,6 @@ prplmesh_platform_db_init() {
         echo "operating_mode=${operating_mode}"
         echo "wired_backhaul=1"
     } > /tmp/prplmesh_platform_db
-}
-
-platform_init_dummy() {
-    echo "platform dummy mode init..."
-    run ip link add wlan0 type dummy
-    run ip link add wlan2 type dummy
-    run ip link add @BEEROCKS_BH_WIRE_IFACE@ type dummy
-    run brctl addbr @BEEROCKS_BRIDGE_IFACE@
-    run brctl addif @BEEROCKS_BRIDGE_IFACE@ @BEEROCKS_BH_WIRE_IFACE@
-    run brctl addif @BEEROCKS_BRIDGE_IFACE@ wlan0
-    run brctl addif @BEEROCKS_BRIDGE_IFACE@ wlan2
-    run ip link set @BEEROCKS_BH_WIRE_IFACE@ up
-    run ip link set wlan0 up
-    run ip link set wlan2 up
-    run ip link set @BEEROCKS_BRIDGE_IFACE@ up
-    echo "Done"
-}
-
-platform_deinit_dummy() {
-    echo "platform dummy mode de-init..."
-    ip link set @BEEROCKS_BRIDGE_IFACE@ down
-    brctl delbr @BEEROCKS_BRIDGE_IFACE@
-    ip link set @BEEROCKS_BH_WIRE_IFACE@ down
-    ip link set wlan0 down
-    ip link set wlan2 down
-    ip link del @BEEROCKS_BH_WIRE_IFACE@
-    ip link del wlan0
-    ip link del wlan2
-    echo "Done"
 }
 
 prplmesh_framework_init() {
@@ -112,11 +121,17 @@ prplmesh_agent_stop() {
     killall_program beerocks_agent
 }
 
+prplmesh_delete_logs() {
+    echo "deleting logs"
+    rm -rf /tmp/beerocks/logs
+    rm -rf /tmp/${SUDO_USER:-${USER}}/beerocks/logs
+}
+
 start_function() {
     echo "$0: start"
     [ `id -u` -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
 
-    [ "@BWL_TYPE@" = "DUMMY" -a "$PLATFORM_INIT" = "true" ] && platform_init_dummy
+    [ "@BWL_TYPE@" = "DUMMY" -a "$PLATFORM_INIT" = "true" ] && platform_init
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_init
     case "$PRPLMESH_MODE" in
         CA | ca)
@@ -140,10 +155,11 @@ stop_function() {
     echo "$0: stop"
     [ `id -u` -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
 
-    [ "@BWL_TYPE@" = "DUMMY" -a "$PLATFORM_INIT" = "true" ] && platform_deinit_dummy
+    [ "@BWL_TYPE@" = "DUMMY" -a "$PLATFORM_INIT" = "true" ] && platform_deinit
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_deinit
     [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "C" ] && prplmesh_controller_stop
     [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "A" ] && prplmesh_agent_stop
+    [ "$DELETE_LOGS" = "true" ] && prplmesh_delete_logs
 }
 
 main_agent_operational() {
@@ -191,11 +207,11 @@ status_function() {
 }
 
 usage() {
-    echo "usage: $(basename $0) {start|stop|restart|status} [-hvsm]"
+    echo "usage: $(basename $0) {start|stop|restart|status} [-hvsmdCD]"
 }
 
 main() {
-    OPTS=`getopt -o 'hvm:s' --long verbose,help,mode:skip-platform -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvm:sdC:D:' --long verbose,help,mode:skip-platform,delete-logs,iface-ctrl,iface-data -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -207,6 +223,9 @@ main() {
             -h | --help)          usage; exit 0; shift ;;
             -m | --mode)          PRPLMESH_MODE="$2"; shift; shift ;;
             -s | --skip-platform) PLATFORM_INIT=false; shift ;;
+            -d | --delete-logs)   DELETE_LOGS=true; shift ;;
+            -C | --iface-ctrl)    CONTROL_IFACE="$2"; shift; shift ;;
+            -D | --iface-data)    DATA_IFACE="$2"; shift; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
@@ -214,6 +233,7 @@ main() {
 
     dbg VERBOSE=$VERBOSE
     dbg PLATFORM_INIT=$PLATFORM_INIT
+    dbg DELETE_LOGS=$DELETE_LOGS
 
     case $1 in
         "start")
@@ -236,6 +256,9 @@ main() {
 
 VERBOSE=false
 PLATFORM_INIT=true
+DELETE_LOGS=false
+CONTROL_IFACE=enp0s25
+DATA_IFACE=enx00ee22aa28ef
 PRPLMESH_MODE="CA" # CA = Controller & Agent, A = Agent only, C = Controller only
 
 main $@
