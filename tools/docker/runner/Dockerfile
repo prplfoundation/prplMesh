@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y \
 	iproute2 \
 	psmisc \
 	clang-format \
+	nc \
     && rm -rf /var/lib/apt/lists/*
 
 ARG bridgeip
