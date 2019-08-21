@@ -47,6 +47,8 @@ bool config_file::read_master_config_file(std::string config_file_path, sConfigM
     //                      file string  config string  type mandatory
     tConfig master_conf_args = {
         std::make_tuple("temp_path=", &conf.temp_path, mandatory_master),
+        std::make_tuple("vendor=", &conf.vendor, mandatory_master),
+        std::make_tuple("model=", &conf.model, mandatory_master),
         std::make_tuple("load_dfs_reentry=", &conf.load_dfs_reentry, 0),
         std::make_tuple("load_client_band_steering=", &conf.load_client_band_steering,
                         mandatory_master),

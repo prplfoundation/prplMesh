@@ -8,6 +8,9 @@
 [controller]
 temp_path=@BEEROCKS_TMP_PATH@
 
+vendor=Intel
+model=prplMesh
+
 # Features:
 #   DFS reentry feature:
 load_dfs_reentry=1
