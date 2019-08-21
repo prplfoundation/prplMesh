@@ -103,6 +103,11 @@ main() {
     else
         DOCKEROPTS="$DOCKEROPTS -d"
     fi
+
+    if [ -n "$(docker ps -q -l -f name="${NAME}")" ]; then
+        info "Container ${NAME} is already running"
+        exit 1
+    fi
     
     run docker container run ${DOCKEROPTS} prplmesh-runner$TAG $IPADDR "$BASE_MAC" "$@"
 }
