@@ -122,7 +122,23 @@ public:
         bool client_optimal_path_roaming_prefer_signal_strength = false;
     } sDbMasterSettings;
 
-    db(sDbMasterConfig &config_, beerocks::logging &logger_) : config(config_), logger(logger_) {}
+    db(sDbMasterConfig &config_, beerocks::logging &logger_) : config(config_), logger(logger_)
+    {
+        settings.enable_dfs_reentry &= config_.load_dfs_reentry;
+        settings.client_band_steering &= config_.load_client_band_steering;
+        settings.client_optimal_path_roaming &= config_.load_client_optimal_path_roaming;
+        settings.client_11k_roaming &= config_.load_client_11k_roaming;
+        settings.legacy_client_roaming &= config_.load_legacy_client_roaming;
+        settings.ire_roaming &= config_.load_ire_roaming;
+        settings.load_balancing &= config_.load_load_balancing;
+        settings.diagnostics_measurements &= config_.load_diagnostics_measurements;
+        settings.backhaul_measurements &= config_.load_backhaul_measurements;
+        settings.front_measurements &= config_.load_front_measurements;
+        settings.monitor_on_vaps &= config_.load_monitor_on_vaps;
+        settings.health_check &= config_.load_health_check;
+        settings.service_fairness &= config_.load_service_fairness;
+        settings.rdkb_extensions &= config_.load_rdkb_extensions;
+    }
     ~db(){};
 
     //logger
