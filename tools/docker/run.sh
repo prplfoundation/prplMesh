@@ -20,6 +20,7 @@ usage() {
     echo "      -i|--ipaddr - ipaddr for container br-lan (should be in network subnet)"
     echo "      -m|--mac - base MAC address for interfaces in the container"
     echo "      -n|--name - container name (for later easy attach)"
+    echo "      -p|--port - port to expose on the container"
     echo "      -I|--image - docker network to which to attach the container"
     echo "      -N|--network - docker network to which to attach the container"
     echo "      --entrypoint - use a different entrypoint for the container"
@@ -40,7 +41,7 @@ generate_container_random_ip() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvdi:m:n:N:o:t:' --long verbose,help,detach,ipaddr:,mac:,name:,network:,entrypoint:,tag:,options: -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvdi:m:n:N:o:t:p:' --long verbose,help,detach,ipaddr:,mac:,name:,network:,entrypoint:,tag:,port:,options: -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -55,6 +56,7 @@ main() {
             -m | --mac)         BASE_MAC="$2"; shift; shift ;;
             -n | --name)        NAME="$2"; shift; shift ;;
             -t | --tag)         TAG=":$2"; shift; shift ;;
+            -p | --port)        PORT=":$2"; shift; shift ;;
             -N | --network)     NETWORK="$2"; shift; shift ;;
             --entrypoint)       ENTRYPOINT="$2"; shift; shift ;;
             -- ) shift; break ;;
@@ -83,12 +85,14 @@ main() {
     dbg "IMAGE=prplmesh-runner$TAG"
     dbg "IPADDR=${IPADDR}"
     dbg "BASE_MAC=${BASE_MAC}"
+    dbg "PORT=${PORT}"
     dbg "NAME=${NAME}"
 
     DOCKEROPTS="-e USER=${SUDO_USER}
                 -e INSTALL_DIR=${installdir}
                 --privileged
                 --network ${NETWORK}
+                --expose ${PORT}
                 -v ${installdir}:${installdir}
                 -v ${sourcesdir}:${sourcesdir}
                 --name ${NAME}"
@@ -109,6 +113,7 @@ NETWORK=prplMesh-net
 IPADDR=
 NAME=prplMesh
 ENTRYPOINT=
+PORT=5000
 BASE_MAC=44:55:66:77
 
 main $@
