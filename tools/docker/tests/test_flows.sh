@@ -1,3 +1,4 @@
+#!/bin/sh
 ###############################################################
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 # Copyright (c) 2019 Gal Wiener (Intel), Tomer Eliyahu (Intel)
