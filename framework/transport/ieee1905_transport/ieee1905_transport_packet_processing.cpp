@@ -271,6 +271,9 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
     if (packet.ether_type != ETH_P_1905_1 ||
         packet.payload.iov_len <= kIeee1905FragmentationThreashold ||
         packet.src_if_type != CmduRxMessage::IF_TYPE_LOCAL_BUS) {
+        // add padding to minimum ethernet packet legnth if needed
+        if (packet.payload.iov_len < 64 - ETH_HLEN)
+            packet.pad(64);
         return send_packet_to_network_interface(if_index, packet);
     }
 
@@ -341,10 +344,15 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
 
         fragment_packet.payload.iov_base = buf;
         fragment_packet.payload.iov_len  = sizeof(Ieee1905CmduHeader) + fragmentTlvsLength;
+
+        // add EOM tlv for all fragments but the last which already has it
         if (remainingPacketLength) {
-            // add EOM tlv for all fragments but the last which already has it
             fragment_packet.payload.iov_len += sizeof(Tlv);
         }
+
+        // add padding to minimum ethernet packet legnth if needed
+        if (packet.payload.iov_len < 64 - ETH_HLEN)
+            packet.pad(64);
 
         // send the fragment
         MAPF_DBG("sending fragment " << (int)fragmentId

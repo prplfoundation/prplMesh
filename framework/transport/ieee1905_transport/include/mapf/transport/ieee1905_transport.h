@@ -136,6 +136,13 @@ private:
         struct iovec payload      = {.iov_base = NULL, .iov_len = 0};
 
         virtual std::ostream &print(std::ostream &os) const;
+
+        // add padding to minimum ethernet packet legnth
+        void pad(size_t count)
+        {
+            auto padding = count - ETH_HLEN - payload.iov_len;
+            payload.iov_len += padding;
+        }
     };
     friend std::ostream &operator<<(std::ostream &os, const Packet &m);
 
