@@ -242,27 +242,6 @@ void wfa_ca::handle_wfa_ca_message(
 
     switch (command_type) {
     case eWfaCaCommand::CA_GET_VERSION: {
-
-        /*
-         * This command is used to obtain the version of the Control Agent software. The command
-         * does not attempt to perform any action on the DUT itself. This command may be used to
-         * verify basic connectivity to the Control Agent.
-         *
-         * Parameters:
-         *   None
-         *
-         * Return Values:
-         *
-         * Param Name    | Values                        | Description
-         * ----------------------------------------------------------------------------------------
-         * "version"     | string                        | Control Agent software version
-         *
-         * Example:
-         * UCC: CA_GET_VERSION
-         * CA: status,RUNNING
-         * CA: status,COMPLETE,version,1.0
-         */
-
         // send back first reply
         if (!reply(sd, cmdu_tx, eWfaCaStatus::RUNNING)) {
             LOG(ERROR) << "failed to send reply";
@@ -304,33 +283,6 @@ void wfa_ca::handle_wfa_ca_message(
         break;
     }
     case eWfaCaCommand::DEV_RESET_DEFAULT: {
-
-        /* 
-        * This command is used to reset the device to its default program specific configuration, 
-        * as well as remove any cached profiles, keys and credentials.
-        *
-        * Parameters:
-        * 
-        * Param Name    | Values                        | Description
-        * ----------------------------------------------------------------------------------------
-        * "devrole"     | string ("controller"/"agent") | Device role    
-        * "name"        | string                        | Device name    
-        * "program"     | string ("map")                | Program name
-        * "type"        | string ("test bed"/"dut")     | Type of the device
-        * 
-        * Return Values: 
-        *   None.
-        *
-        * Example:
-        *   UCC: dev_reset_default,
-        *   CA:status,RUNNING
-        *   CA:status,COMPLETE
-        * 
-        *   UCC: dev_reset_default,
-        *   CA:status,RUNNING
-        *   CA:status,COMPLETE
-        */
-
         // NOTE: Note sure this parameters are actually needed. There is a controversial
         // between TestPlan and CAPI specification regarding if these params are required.
         std::unordered_map<std::string, std::string> params{
@@ -397,54 +349,6 @@ void wfa_ca::handle_wfa_ca_message(
         break;
     }
     case eWfaCaCommand::DEV_SEND_1905: {
-        /*
-        * This command is used to send a 1905 message with the relevant TLVs between the devices 
-        * (triggered by Wi-Fi Test Suit). If multiple TLVs, tlv_type, tlv_length, and tlv_value 
-        * parameters will be indexed (e.g. tlv_type1, tlv_length1, tlv_value1).
-        * 
-        * Parameters:
-        * 
-        * Param Name            | Values                        | Description
-        * ----------------------------------------------------------------------------------------
-        * "DestALID"            | string:                       | The destination ALID. 
-        *                       |  ex: 11:22:33:44:55:66        | 
-        *                       |                               |
-        * "MessageTypeValue"    | hex value:                    | The Multi-AP message type value in
-        *                       |    ex: 0x8009                 | hex.
-        *                       |                               | 
-        * "TLV_Type"            | hex value:                    | 
-        *                       |    ex: 0x90                   |
-        *                       |                               |
-        * "TLV_Length"          | hex value:                    | 
-        *                       |    ex: 0x000C                 | 
-        *                       |                               |
-        * "TLV_Value"           | hex value:                    | TLV value is separated by curly 
-        *                       |   ex: {11:22:33:44:55:66      | bracket and space for each field 
-        *                       |       aa:bb:cc:dd:ee:f0}      | and subfield. The field value
-        *                       |                               | should be in hex format.
-        * 
-        * Return values:
-        *   MID: Returns 1905 message ID Hex value: Ex: 0xb242
-        * 
-        * 
-        * Example:
-        * UCC: dev_send_1905,DestALid,00:90:4C:2A:21:C2,MessageTypeValue,0x8006,tlv_type1,0x8B,
-        * tlv_length1,0x004C,tlv_value1,{0x00904C2A11C2 0x14 {0x51 {0x00 0x00}} {0x52 {0x00 0x00}} 
-        * {0x53 {0x00 0x00}} {0x54 {0x00 0x00}} {0x73 0x03 {0x28 0x2C 0x30} 0x00} {0x74 0x01 {0x2C}
-        * 0x00} {0x75 {0x00 0x00}} {0x76 {0x00 0x00}} {0x77 {0x00 0x00}} {0x78 {0x00 0x00}} {0x79 
-        * {0x00 0x00}} {0x7A {0x00 0x00}} {0x7B {0x00 0x00}} {0x7C {0x00 0x00}} {0x7D {0x00 0x00}} 
-        * {0x7E {0x00 0x00}} {0x7F {0x00 0x00}} {0x80 0x05 {0x3A 0x6A 0x7A 0x8A 0x9B} 0x00} {0x81 
-        * {0x00 0x00}} {0x82 {0x00 0x00}}},tlv_type2,0x8D,tlv_length2,0x0007,tlv_value2,
-        * {0x00904C2A11C2 0x14}
-        * CA:status,RUNNING
-        * CA:status,COMPLETE,MID,0xb242
-        * 
-        * UCC:
-        * dev_send_1905,DestALid,00:90:4C:2A:21:B7,MessageTypeValue,0x0002
-        * CA:status,RUNNING
-        * CA: status,COMPLETE,MID,0xb3c9
-        */
-
         std::unordered_map<std::string, std::string> params{{"destalid", std::string()},
                                                             {"messagetypevalue", std::string()}};
 
@@ -529,51 +433,6 @@ void wfa_ca::handle_wfa_ca_message(
         break;
     }
     case eWfaCaCommand::DEV_SET_CONFIG: {
-        /*
-        * This command is used to configure the device with its configuration parameters.
-        * 
-        * Parameters:
-        * 
-        * Param Name    | Values                        | Description
-        * ----------------------------------------------------------------------------------------
-        * "backhaul"    | string:                       | Set a single backhual interface to 
-        *               |  ruid (ex: 11:22:33:44:55:66) | Ethernet or Wi-Fi. For Wi-Fi, a RUID 
-        *               |  eth                          | associated with its frequency band 
-        *               |                               | (2.4GHz, 5GHz Low, 5GHz High) is provided.
-        *               |                               | For Ethernet, the device should return 
-        *               |                               | status,COMPLETE until it completes 
-        *               |                               | Ethernet onboarding.  
-        *               |                               |
-        * "bss_info1"   | string:                       | BSS initialization data used by controller
-        *               |   WTS_REPLACE_DEST_ALID       | to configure agent's fronthaul radio.
-        *               |   8x Multi-AP-2G-1 0x0020     | The value is a list of fields separated by
-        *               |   0x0008 maprocks1 0 1        | space that stands for:
-        *               |                               | WTS_REPLACE_DEST_ALID, operating class,
-        *               |                               | SSID, authentication type (WPA2-PSK),
-        *               |                               | encryption type(AES-CCMP), network key, 
-        *               |                               | bit 6 of Multi-AP IE's extension
-        *               |                               | attribute, bit 5 of Multi-AP IE's,
-        *               |                               | bit 5 of Multi-AP IE's extension
-        *               |                               | attribute. To clear the BSS info stored
-        *               |                               | a specific operating class, only the
-        *               |                               | device ALID and operating class are 
-        *               |                               | retained.
-        *               |                               |
-        * "bss_info2"   | string                        |  
-        * "bss_infoN"   | string                        |  
-        * "name"        | string (ex: "dev1")           | Device name
-        * "program"     | string ("map)                 | Program name
-        * 
-        * Return values:
-        *   None.
-        * 
-        * 
-        * Example:
-        *   UCC: dev_set_config,name,agt1,program,map,backhaul,0x00904C2A11B7
-        *   CA:status,RUNNING
-        *   CA:status,COMPLETE
-        */
-
         // NOTE: Note sure this parameters are actually needed. There is a controversial
         // between TestPlan and CAPI specification regarding if these params are required.
         std::unordered_map<std::string, std::string> params{
