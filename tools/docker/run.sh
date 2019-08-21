@@ -17,6 +17,7 @@ usage() {
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
     echo "      -d|--detach - run in background"
+    echo "      -f|--force - if the container is already running, kill it and restart"
     echo "      -i|--ipaddr - ipaddr for container br-lan (should be in network subnet)"
     echo "      -m|--mac - base MAC address for interfaces in the container"
     echo "      -n|--name - container name (for later easy attach)"
@@ -41,7 +42,7 @@ generate_container_random_ip() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvdi:m:n:N:o:t:p:' --long verbose,help,detach,ipaddr:,mac:,name:,network:,entrypoint:,tag:,port:,options: -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvdfi:m:n:N:o:t:p:' --long verbose,help,detach,force,ipaddr:,mac:,name:,network:,entrypoint:,tag:,port:,options: -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -52,6 +53,7 @@ main() {
             -v | --verbose)     VERBOSE=true; shift ;;
             -h | --help)        usage; exit 0; shift ;;
             -d | --detach)      DETACH=true; shift ;;
+            -f | --force)       FORCE=true; shift ;;
             -i | --ipaddr)      IPADDR="$2"; shift; shift ;;
             -m | --mac)         BASE_MAC="$2"; shift; shift ;;
             -n | --name)        NAME="$2"; shift; shift ;;
@@ -106,7 +108,11 @@ main() {
 
     if [ -n "$(docker ps -q -l -f name="${NAME}")" ]; then
         info "Container ${NAME} is already running"
-        exit 1
+        if [ "$FORCE" = "true" ]; then
+            run docker container rm -f "$NAME"
+        else
+            exit 1
+        fi
     fi
     
     run docker container run ${DOCKEROPTS} prplmesh-runner$TAG $IPADDR "$BASE_MAC" "$@"
@@ -114,6 +120,7 @@ main() {
 
 VERBOSE=false
 DETACH=false
+FORCE=false
 NETWORK=prplMesh-net
 IPADDR=
 NAME=prplMesh
