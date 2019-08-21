@@ -38,6 +38,8 @@ public:
     typedef std::list<std::shared_ptr<beerocks_message::sConfigVapInfo>> vaps_list_t;
 
     typedef struct {
+        std::string vendor;
+        std::string model;
         std::string gw_ip;
         std::string gw_netmask;
         std::string ire_ip_range_low;
@@ -543,6 +545,9 @@ public:
     //
     // settings
     //
+    std::string settings_vendor() { return config.vendor; }
+    std::string settings_model() { return config.model; }
+
     // Features:
     void settings_dfs_reentry(bool en)
     {

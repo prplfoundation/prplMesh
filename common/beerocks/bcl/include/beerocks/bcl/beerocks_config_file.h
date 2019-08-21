@@ -33,6 +33,8 @@ public:
     typedef struct { // master
         //[master]
         std::string temp_path;
+        std::string vendor;
+        std::string model;
         std::string load_dfs_reentry;
         std::string load_client_band_steering;
         std::string load_client_optimal_path_roaming;

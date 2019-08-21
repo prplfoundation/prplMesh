@@ -120,6 +120,8 @@ static bool parse_arguments(int argc, char *argv[])
 static void fill_master_config(son::db::sDbMasterConfig &master_conf,
                                beerocks::config_file::sConfigMaster &main_master_conf)
 {
+    master_conf.vendor                    = main_master_conf.vendor;
+    master_conf.model                     = main_master_conf.model;
     master_conf.load_ire_roaming          = (main_master_conf.load_ire_roaming == "1");
     master_conf.load_service_fairness     = (main_master_conf.load_service_fairness == "1");
     master_conf.load_dfs_reentry          = (main_master_conf.load_dfs_reentry == "1");
