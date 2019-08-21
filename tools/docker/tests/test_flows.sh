@@ -18,14 +18,6 @@ topdir="${scriptdir%/*/*/*/*}"
 redirect="> /dev/null 2>&1"
 error=0
 
-start_gw_repeater() {
-    dbg "delete running containers before starting test"
-    eval docker rm -f gateway $redirect
-    eval docker rm -f repeater $redirect
-    dbg "start gw and repeater"
-    eval ${scriptdir}/test_gw_repeater.sh -d 5 $redirect
-}
-
 send_bml_command() {
     docker exec -it gateway ${installdir}/bin/beerocks_cli -c "$*"
 }
@@ -144,7 +136,8 @@ test_topology() {
 }
 test_init() {
     status "test initialization"
-    start_gw_repeater || {
+
+    eval ${scriptdir}/test_gw_repeater.sh -f -d 5 $redirect || {
         err "start GW+Repeater failed, abort"
         exit 1
     }
