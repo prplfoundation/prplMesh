@@ -655,8 +655,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         }
     }
 
-    if (database.setting_certification_mode() ||
-        cmdu_rx.getNextTlvType() == int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
+    if (cmdu_rx.getNextTlvType() == int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
         LOG(INFO) << "Intel radio agent join (al_mac=" << al_mac << " ruid=" << ruid;
         if (!handle_intel_slave_join(sd, cmdu_rx, cmdu_tx)) {
             LOG(ERROR) << "Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid
