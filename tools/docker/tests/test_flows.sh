@@ -91,12 +91,6 @@ test_channel_selection() {
 
     return $check_error
 }
-
-test_ap_capability_info_reporting() {
-    #TODO: Implement
-    return 1
-}
-
 test_client_capability_query() { 
     status "test client capability"  
 
@@ -108,9 +102,12 @@ test_client_capability_query() {
     docker exec -it repeater sh -c 'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
     docker exec -it repeater sh -c 'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 }
-test_link_metric_collection() {
-    #TODO: Implement
-    return 1
+test_ap_capability_query() {
+    status "test ap capability query"
+    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x8001\"" $redirect
+    sleep 1
+    dbg "Confirming ap capability query has been received on agent"
+    docker exec -it repeater sh -c 'grep -i -q "AP_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 }
 test_combined_infra_metrics() {
     #TODO: Implement
@@ -172,14 +169,12 @@ usage() {
     echo "      ap_config_renew - AP configuration renew test"
     echo "      ap_config_bss_tear_down - AP configuration BSS Tear Down test"
     echo "      channel_selection - Channel Selection test"
-    echo "      ap_capability_info_reporting - AP Capability info reporting test"
-    echo "      client_capability_info_reporting - Capability info reporting test"
     echo "      client_steering_mandate - Client Steering for Steering Mandate and Steering Opportunity test"
     echo "      client_steering_policy - Setting Client Steering Policy test"
     echo "      client_association - Client Association Control Message test"
     echo "      ap_capability_query - AP Capability query test"
     echo "      client_capability_query - Client Capability info reporting test"
-    echo "      combined_infra_metrics - Link metric collection test"
+    echo "      combined_infra_metrics - Combined Infrastructure Metrics test"
     echo "      higher_layer_data_payload_trigger - Higher layer data payload over 1905 trigger test"
     echo "      higher_layer_data_payload - Higher layer data payload over 1905 test"
 }
