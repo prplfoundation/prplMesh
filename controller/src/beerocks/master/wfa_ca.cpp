@@ -574,6 +574,15 @@ bool wfa_ca::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx, ieee1905_1::eMessag
         }
         break;
     }
+    case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE: {
+
+        cmdu_header = cmdu_tx.create(g_mid, ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE);
+        if (!cmdu_header) {
+            LOG(ERROR) << "Failed building AP_CAPABILITY_QUERY message!";
+            return false;
+        }
+        break;
+    }
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE: {
 
         cmdu_header = cmdu_tx.load();
