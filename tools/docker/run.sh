@@ -90,7 +90,7 @@ main() {
     dbg "PORT=${PORT}"
     dbg "NAME=${NAME}"
 
-    DOCKEROPTS="-e USER=${SUDO_USER}
+    DOCKEROPTS="-e USER=${SUDO_USER:-${USER}}
                 -e INSTALL_DIR=${installdir}
                 --privileged
                 --network ${NETWORK}

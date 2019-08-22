@@ -45,7 +45,7 @@ main() {
     dbg "VERBOSE=${VERBOSE}"
     dbg "IMAGE=prplmesh-runner$TAG"
 
-    DOCKEROPTS="-e USER=${SUDO_USER}
+    DOCKEROPTS="-e USER=${SUDO_USER:-${USER}}
                 -e SOURCES_DIR=${sourcesdir}
                 -v ${sourcesdir}:${sourcesdir}
                 --name prplMesh-clang-format"
