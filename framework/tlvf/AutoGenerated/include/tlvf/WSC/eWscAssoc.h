@@ -19,7 +19,7 @@
 
 namespace WSC {
 
-enum eWscAssoc: uint8_t {
+enum eWscAssoc: uint16_t {
     WSC_ASSOC_NOT_ASSOC = 0x0,
     WSC_ASSOC_CONN_SUCCESS = 0x1,
 };

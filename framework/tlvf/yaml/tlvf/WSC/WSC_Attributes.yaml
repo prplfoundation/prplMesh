@@ -196,7 +196,7 @@ sWscAttrAssociationState:
     _value: ATTR_ASSOC_STATE
   data_length:
     _type: uint16_t
-    _value: 1
+    _value: 2
   data:
     _type: eWscAssoc
     _value: WSC_ASSOC_NOT_ASSOC

@@ -274,10 +274,11 @@ typedef struct sWscAttrAssociationState {
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data));
     }
     void struct_init(){
         attribute_type = ATTR_ASSOC_STATE;
-        data_length = 0x1;
+        data_length = 0x2;
         data = WSC_ASSOC_NOT_ASSOC;
     }
 } __attribute__((packed)) sWscAttrAssociationState;
