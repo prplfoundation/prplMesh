@@ -472,6 +472,8 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
             return false;
         }
         return true;
+    case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE:
+        return handle_ap_capability_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
         return handle_channel_preference_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
@@ -4723,6 +4725,15 @@ bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMe
 {
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received CLIENT_CAPABILITY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
+    return true;
+}
+
+bool slave_thread::handle_ap_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    //TODO - this is a stub handler for the purpose of controller certification testing,
+    //       will be implemented later on agent certification
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received AP_CAPABILITY_QUERY_MESSAGE, mid=" << std::dec << int(mid);
     return true;
 }
 
