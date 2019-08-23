@@ -95,7 +95,7 @@ test_client_capability_query() {
     status "test client capability"  
 
     eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
-0x000C,tlv_value,{$RADIO_WLAN0_MAC 0x000000110022}\""'    
+0x000C,tlv_value,{$RADIO_WLAN0_MAC 0x000000110022}\""' $redirect
     sleep 1
     dbg "Confirming client capability query has been received on agent"
     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
