@@ -18,7 +18,15 @@ topdir="${scriptdir%/*/*/*/*}"
 redirect="> /dev/null 2>&1"
 error=0
 
-send_bml_command() {
+start_gw_repeater() {
+    dbg "delete running containers before starting test"
+    eval docker rm -f gateway $redirect
+    eval docker rm -f repeater $redirect
+    dbg "start gw and repeater"
+    eval ${scriptdir}/test_gw_repeater.sh -d 5 $redirect
+}
+
+send_bml_command() {       
     docker exec -it gateway ${installdir}/bin/beerocks_cli -c "$*"
 }
 
@@ -89,13 +97,16 @@ test_ap_capability_info_reporting() {
     return 1
 }
 
-test_client_capability_info_reporting() {
-    #TODO: Implement
-    return 1
-}
-test_client_capability_query() {
-     #TODO: Implement
-    return 1
+test_client_capability_query() { 
+    status "test client capability"  
+
+eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
+0x000C,tlv_value,{$RADIO_WLAN0_MAC 0x000000110022}\""'    
+    sleep 1
+    dbg "Confirming client capability query has been received on agent"
+    # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
+    docker exec -it repeater sh -c 'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    docker exec -it repeater sh -c 'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 }
 test_link_metric_collection() {
     #TODO: Implement
@@ -142,6 +153,12 @@ test_init() {
         exit 1
     }
     AL_MAC=$(docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map | grep IRE_BRIDGE | awk '{print $5}' | cut -d ',' -f 1)
+    RADIO_WLAN0_MAC=$(docker exec -it gateway /home/cor/work/dev1/build/install/bin/beerocks_cli -c bml_conn_map | grep "RADIO: wlan0" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)    
+    RADIO_WLAN0_MAC="0x${RADIO_WLAN0_MAC}"     
+
+    RADIO_WLAN2_MAC=$(docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map | grep "RADIO: wlan2" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)    
+    RADIO_WLAN2_MAC="0x${RADIO_WLAN2_MAC}"
+
 }
 usage() {
     echo "usage: $(basename $0) [-hv]"
@@ -199,5 +216,7 @@ main() {
 
 VERBOSE=false
 AL_MAC=
+RADIO_WLAN0_MAC=
+RADIO_WLAN2_MAC=
 
 main $@
