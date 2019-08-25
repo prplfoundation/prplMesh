@@ -100,7 +100,7 @@ test_ap_capability_info_reporting() {
 test_client_capability_query() { 
     status "test client capability"  
 
-eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
+    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
 0x000C,tlv_value,{$RADIO_WLAN0_MAC 0x000000110022}\""'    
     sleep 1
     dbg "Confirming client capability query has been received on agent"
@@ -153,7 +153,7 @@ test_init() {
         exit 1
     }
     AL_MAC=$(docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map | grep IRE_BRIDGE | awk '{print $5}' | cut -d ',' -f 1)
-    RADIO_WLAN0_MAC=$(docker exec -it gateway /home/cor/work/dev1/build/install/bin/beerocks_cli -c bml_conn_map | grep "RADIO: wlan0" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)    
+    RADIO_WLAN0_MAC=$(docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map | grep "RADIO: wlan0" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)    
     RADIO_WLAN0_MAC="0x${RADIO_WLAN0_MAC}"     
 
     RADIO_WLAN2_MAC=$(docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map | grep "RADIO: wlan2" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)    
