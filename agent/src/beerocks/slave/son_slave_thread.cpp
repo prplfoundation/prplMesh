@@ -4702,7 +4702,7 @@ bool slave_thread::parse_non_intel_join_response(Socket *sd)
 bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     const auto mid = cmdu_rx.getMessageId();
-    LOG(DEBUG) << "Received CLIENT_CAPABILITY_QUERY_MESSAGE, mid=" << std::dec << int(mid);
+    LOG(DEBUG) << "Received CLIENT_CAPABILITY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
     return true;
 }
 
