@@ -1080,8 +1080,8 @@ bool master_thread::handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageR
               << "    low_pass_filter_on = " << int(notification->low_pass_filter_on()) << std::endl
               << "    radio_identifier = " << radio_identifier << std::endl
               << "    radio_mac = " << radio_mac << std::endl
-              << "    acs_enabled = " << int(notification->wlan_settings().acs_enabled)
-              << std::endl;
+              << "    acs_enabled = " << int(notification->wlan_settings().acs_enabled) << std::endl
+              << "    is_gw_slave = " << int(is_gw_slave) << std::endl;
 
     if (!is_gw_slave) {
 
@@ -1532,9 +1532,47 @@ bool master_thread::handle_non_intel_slave_join(Socket *sd,
                                                 std::string bridge_mac, std::string radio_mac,
                                                 ieee1905_1::CmduMessageTx &cmdu_tx)
 {
-    // TODO backhaul handling.
-    // Multi-AP Agent doesn't say anything about the backhaul, so we have to rely on Intel Slave Join for that.
-    std::string backhaul_mac = "";
+
+    // Multi-AP Agent doesn't say anything about the backhaul, so simulate ethernet backhaul to satisfy
+    // network map. MAC address is the bridge MAC with the last octet incremented by 1.
+    // The mac address for the backhaul is the same since it is ethernet backhaul.
+    sMacAddr mac = network_utils::mac_from_string(bridge_mac);
+    mac.oct[5]++;
+    std::string backhaul_mac = network_utils::mac_to_string(mac);
+    mac.oct[5]++;
+    std::string eth_switch_mac   = network_utils::mac_to_string(mac);
+    std::string parent_bssid_mac = network_utils::ZERO_MAC_STRING;
+    std::string manufacturer(tlvwscM1->manufacturer(), tlvwscM1->manufacturer_length());
+
+    LOG(INFO) << "IRE generic Slave joined, sd=" << intptr_t(sd) << std::endl
+              << "    manufacturer=" << manufacturer << std::endl
+              << "    parent_bssid_mac=" << parent_bssid_mac << std::endl
+              << "    al_mac=" << bridge_mac << std::endl
+              << "    eth_switch_mac=" << eth_switch_mac << std::endl
+              << "    backhaul_mac=" << backhaul_mac << std::endl
+              << "    radio_identifier = " << radio_mac << std::endl;
+
+    LOG(DEBUG) << "simulate backhaul connected to the GW's LAN switch ";
+    auto gw_container = database.get_nodes_from_hierarchy(0, beerocks::TYPE_GW);
+    if (gw_container.empty()) {
+        LOG(ERROR) << "can't get GW node!";
+        return false;
+    }
+
+    auto gw_mac          = *gw_container.begin();
+    auto gw_lan_switches = database.get_node_children(gw_mac, beerocks::TYPE_ETH_SWITCH);
+
+    if (gw_lan_switches.empty()) {
+        LOG(ERROR) << "GW has no LAN SWITCH node!";
+        return false;
+    }
+
+    auto gw_lan_switch = *gw_lan_switches.begin();
+
+    LOG(DEBUG) << "add a placeholder backhaul_mac = " << backhaul_mac
+               << " gw_lan_switch = " << gw_lan_switch << " TYPE_IRE_BACKHAUL , STATE_CONNECTED";
+    database.add_node(backhaul_mac, gw_lan_switch, beerocks::TYPE_IRE_BACKHAUL);
+    database.set_node_state(backhaul_mac, beerocks::STATE_CONNECTED);
 
     // TODO bridge handling.
     // Assume repeater
@@ -1550,9 +1588,20 @@ bool master_thread::handle_non_intel_slave_join(Socket *sd,
                << ire_type;
     database.add_node(bridge_mac, backhaul_mac, ire_type);
     database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
-    database.set_node_manufacturer(bridge_mac, tlvwscM1->manufacturer());
-
-    // Controller expects backhaul which contains bridge which contains radio, but we only get radio...
+    database.set_node_socket(bridge_mac, sd);
+    database.set_node_platform(backhaul_mac, beerocks::ePlatform::PLATFORM_LINUX);
+    database.set_node_platform(bridge_mac, beerocks::ePlatform::PLATFORM_LINUX);
+    database.set_node_backhaul_iface_type(backhaul_mac, beerocks::eIfaceType::IFACE_TYPE_ETHERNET);
+    database.set_node_backhaul_iface_type(bridge_mac, beerocks::IFACE_TYPE_BRIDGE);
+    database.set_node_manufacturer(backhaul_mac, manufacturer);
+    database.set_node_manufacturer(bridge_mac, manufacturer);
+    database.set_node_type(backhaul_mac, beerocks::TYPE_IRE_BACKHAUL);
+    database.set_node_name(backhaul_mac, manufacturer + "_BH");
+    database.set_node_name(bridge_mac, manufacturer);
+    database.add_node(eth_switch_mac, bridge_mac, beerocks::TYPE_ETH_SWITCH);
+    database.set_node_state(eth_switch_mac, beerocks::STATE_CONNECTED);
+    database.set_node_name(eth_switch_mac, manufacturer + "_ETH");
+    database.set_node_manufacturer(eth_switch_mac, eth_switch_mac);
 
     // Update existing node, or add a new one
     if (database.has_node(radio_mac)) {
@@ -1574,14 +1623,18 @@ bool master_thread::handle_non_intel_slave_join(Socket *sd,
 
     database.set_node_state(radio_mac, beerocks::STATE_CONNECTED);
     database.set_node_backhaul_iface_type(radio_mac, beerocks::IFACE_TYPE_BRIDGE);
-    // TODO iface_name will not be set
     // TODO driver_version will not be set
+    database.set_hostap_iface_name(radio_mac, "N/A");
     database.set_hostap_iface_type(radio_mac, IFACE_TYPE_WIFI_UNSPECIFIED);
 
     // TODO number of antennas comes from HT/VHT capabilities (implicit from NxM)
     // TODO ant_gain and conducted_power will not be set
-    database.set_node_name(radio_mac, tlvwscM1->model_name());
-    database.set_node_manufacturer(radio_mac, tlvwscM1->manufacturer());
+    database.set_hostap_ant_num(radio_mac, beerocks::eWiFiAntNum::ANT_NONE);
+    database.set_hostap_ant_gain(radio_mac, 0);
+    database.set_hostap_conducted_power(radio_mac, 0);
+    database.set_hostap_active(radio_mac, true);
+    database.set_node_name(radio_mac, manufacturer + "_AP");
+    database.set_node_manufacturer(radio_mac, manufacturer);
     // TODO ipv4 will not be set
 
     // sd is assigned to src bridge mac
@@ -1602,12 +1655,14 @@ bool master_thread::handle_non_intel_slave_join(Socket *sd,
     database.set_hostap_band_capability(radio_mac, beerocks::SUBBAND_CAPABILITY_UNKNOWN);
     //        }
 
+    // update bml listeners
+    bml_task::connection_change_event bml_new_event;
+    bml_new_event.mac = bridge_mac;
+    tasks.push_event(database.get_bml_task_id(), bml_task::CONNECTION_CHANGE, &bml_new_event);
+    LOG(DEBUG) << "BML, sending IRE connect CONNECTION_CHANGE for mac " << bml_new_event.mac;
+
     LOG(DEBUG) << "send AP_AUTOCONFIG_WSC M2";
-    son_actions::send_cmdu_to_agent(sd, cmdu_tx);
-
-    // TODO update BML listeners
-
-    return true;
+    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
 }
 
 bool master_thread::handle_cmdu_control_message(
