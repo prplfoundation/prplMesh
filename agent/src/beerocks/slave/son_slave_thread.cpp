@@ -4416,27 +4416,62 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
     return true;
 }
 
+/**
+ * @brief Parse AP-Autoconfiguration WSC which should include one AP Radio Identifier
+ *        TLV and one or more WSC TLV containing M2
+ * 
+ * @param sd socket descriptor
+ * @param cmdu_rx received CMDU containing M2
+ * @return true on success
+ * @return false on failure
+ */
 bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    // Check if this is a M1 message that we sent to the controller, which was just looped back.
-    // The M1 and M2 messages are both of CMDU type AP_Autoconfiguration_WSC. Thus,
-    // when we send the M2 to the local agent, it will be published back on the local bus because
-    // the destination is our AL-MAC, and the controller does listen to this CMDU.
-    // Ideally, we should use the message type attribute from the WSC payload to distinguish.
-    // Unfortunately, that is a bit complicated with the current tlv parser. However, there is another
-    // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
-    // while the M2 has the AP_Radio_Identifier TLV.
-    // If this is a looped back M1 CMDU, we can treat is as handled successfully.
-    if (cmdu_rx.getNextTlvType() == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES)) {
-        LOG(DEBUG) << "looped back M1 CMDU";
-        return true;
+    LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
+
+    std::shared_ptr<wfa_map::tlvApRadioIdentifier> ruid = nullptr;
+    std::vector<std::shared_ptr<ieee1905_1::tlvWscM2>> m2_list;
+    bool intel_agent = false;
+    int type         = cmdu_rx.getNextTlvType();
+
+    while ((type = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
+        if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_IDENTIFIER)) {
+            LOG(DEBUG) << "Found TLV_AP_RADIO_IDENTIFIER TLV";
+            ruid = cmdu_rx.addClass<wfa_map::tlvApRadioIdentifier>();
+        } else if (type == int(ieee1905_1::eTlvType::TLV_WSC)) {
+            // parse all M2 TLVs
+            LOG(DEBUG) << "Found TLV_WSC TLV (assuming M2)";
+            auto tlvWscM2 = cmdu_rx.addClass<ieee1905_1::tlvWscM2>();
+            if (!tlvWscM2) {
+                LOG(ERROR) << "Not an WSC M2 TLV!";
+                return false;
+            }
+            m2_list.push_back(tlvWscM2);
+        } else if (type == int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
+            // If this is an Intel Agent, it will have VS TLV as the last TLV.
+            // Currently, we don't support skipping TLVs, so if we see a VS TLV, we assume
+            // It is an Intel agent, and will add the class in the Intel agent handling below.
+            intel_agent = true;
+            break;
+        } else if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES)) {
+            // Check if this is a M1 message that we sent to the controller, which was just looped back.
+            // The M1 and M2 messages are both of CMDU type AP_Autoconfiguration_WSC. Thus,
+            // when we send the M2 to the local agent, it will be published back on the local bus because
+            // the destination is our AL-MAC, and the controller does listen to this CMDU.
+            // Ideally, we should use the message type attribute from the WSC payload to distinguish.
+            // Unfortunately, that is a bit complicated with the current tlv parser. However, there is another
+            // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
+            // while the M2 has the AP_Radio_Identifier TLV.
+            // If this is a looped back M1 CMDU, we can treat is as handled successfully.
+            LOG(DEBUG) << "Loopbed back M1 CMDU";
+            return true;
+        } else {
+            LOG(ERROR) << "Uknown TLV, type " << std::hex << type;
+            return false;
+        }
+        type = cmdu_rx.getNextTlvType();
     }
 
-    /**
-    * @brief Parse AP-Autoconfiguration WSC which should include one AP Radio Identifier
-    * TLV and one or more WSC TLV containing M2
-    */
-    auto ruid = cmdu_rx.addClass<wfa_map::tlvApRadioIdentifier>();
     if (!ruid) {
         LOG(ERROR) << "Failed to get tlvApRadioIdentifier TLV";
         return false;
@@ -4447,21 +4482,6 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         LOG(DEBUG) << "not to me - ruid " << config.radio_identifier
                    << " != " << network_utils::mac_to_string(ruid->radio_uid());
         return true;
-    }
-
-    LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
-    // parse all M2 TLVs
-    std::vector<std::shared_ptr<ieee1905_1::tlvWscM2>> m2_list;
-    while (1) {
-        if (cmdu_rx.getNextTlvType() != uint8_t(ieee1905_1::eTlvType::TLV_WSC))
-            break;
-
-        auto tlvWscM2 = cmdu_rx.addClass<ieee1905_1::tlvWscM2>();
-        if (!tlvWscM2) {
-            LOG(ERROR) << "Not an WSC M2 TLV!";
-            return false;
-        }
-        m2_list.push_back(tlvWscM2);
     }
 
     if (m2_list.empty()) {
@@ -4503,7 +4523,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         return false;
     }
 
-    if (cmdu_rx.getNextTlvType() == uint8_t(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
+    if (intel_agent) {
         LOG(INFO) << "Intel controller join response";
         if (!parse_intel_join_response(sd, cmdu_rx)) {
             LOG(ERROR) << "Parse join response failed";
