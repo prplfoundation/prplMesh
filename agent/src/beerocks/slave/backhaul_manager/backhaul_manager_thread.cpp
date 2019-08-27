@@ -1579,7 +1579,8 @@ bool main_thread::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
  */
 bool main_thread::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    LOG(DEBUG) << "Received Topology Query message";
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received TOPOLOGY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
     //TODO - this should be part of the discovery agent, will be done as part of
     //       agent certification
     return true;
