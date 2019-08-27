@@ -3,7 +3,7 @@
 _namespace: WSC
 
 eWscEncr:
-  _type: enum
+  _type: enum_class
   _enum_storage: uint16_t
   WSC_ENCR_NONE: 0x0001
   WSC_ENCR_WEP: 0x0002

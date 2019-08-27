@@ -444,8 +444,10 @@ bool master_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tl
                                                   const mapf::encryption::diffie_hellman &dh,
                                                   uint8_t authkey[32], uint8_t keywrapkey[16])
 {
-    m2->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2PSK;
-    m2->encryption_type_flags_attr().data     = WSC::WSC_ENCR_NONE | WSC::WSC_ENCR_AES;
+    m2->authentication_type_flags_attr().data =
+        uint16_t(WSC::eWscAuth::WSC_AUTH_OPEN) | uint16_t(WSC::eWscAuth::WSC_AUTH_WPA2PSK);
+    m2->encryption_type_flags_attr().data =
+        uint16_t(WSC::eWscEncr::WSC_ENCR_NONE) | uint16_t(WSC::eWscEncr::WSC_ENCR_AES);
     std::copy_n(m1->enrolee_nonce_attr().data, m1->enrolee_nonce_attr().data_length,
                 m2->enrolee_nonce_attr().data);
     std::copy_n(dh.nonce(), dh.nonce_length(), m2->registrar_nonce_attr().data);
@@ -571,17 +573,18 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
     uint8_t buf[1024];
     WSC::cConfigData config_data(buf, sizeof(buf), false, true);
     config_data.set_ssid("prplMesh-ssid");
-    config_data.authentication_type_attr().data = WSC::WSC_AUTH_WPA2;
-    config_data.encryption_type_attr().data     = WSC::WSC_ENCR_AES;
+    config_data.authentication_type_attr().data = WSC::eWscAuth::WSC_AUTH_WPA2;
+    config_data.encryption_type_attr().data     = WSC::eWscEncr::WSC_ENCR_AES;
     std::fill(config_data.network_key_attr().data,
               config_data.network_key_attr().data + config_data.network_key_attr().data_length,
               0xaa); //DUMMY
 
-    LOG(DEBUG) << "WSC config_data:" << std::endl
+    LOG(DEBUG) << "WSC config_data:" << std::hex << std::endl
                << "     ssid: " << config_data.ssid() << std::endl
-               << "     authentication_type: " << config_data.authentication_type_attr().data
+               << "     authentication_type: " << int(config_data.authentication_type_attr().data)
                << std::endl
-               << "     encryption_type: " << config_data.encryption_type_attr().data << std::endl;
+               << "     encryption_type: " << int(config_data.encryption_type_attr().data)
+               << std::dec << std::endl;
 
     config_data.class_swap();
 

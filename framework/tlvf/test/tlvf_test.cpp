@@ -199,17 +199,18 @@ bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, u
     uint8_t buf[1024];
     WSC::cConfigData config_data(buf, sizeof(buf), false, true);
     config_data.set_ssid("test_ssid");
-    config_data.authentication_type_attr().data = WSC::WSC_AUTH_WPA2; //DUMMY
-    config_data.encryption_type_attr().data     = WSC::WSC_ENCR_AES;
+    config_data.authentication_type_attr().data = WSC::eWscAuth::WSC_AUTH_WPA2; //DUMMY
+    config_data.encryption_type_attr().data     = WSC::eWscEncr::WSC_ENCR_AES;
     std::fill(config_data.network_key_attr().data,
               config_data.network_key_attr().data + config_data.network_key_attr().data_length,
               0xaa); //DUMMY
 
     LOG(DEBUG) << "WSC config_data:" << std::endl
                << "     ssid: " << config_data.ssid() << std::endl
-               << "     authentication_type: " << config_data.authentication_type_attr().data
+               << "     authentication_type: " << int(config_data.authentication_type_attr().data)
                << std::endl
-               << "     encryption_type: " << config_data.encryption_type_attr().data << std::endl;
+               << "     encryption_type: " << int(config_data.encryption_type_attr().data)
+               << std::endl;
     config_data.class_swap();
 
     size_t len             = (config_data.getLen() + 16) & ~0xFU;
@@ -260,9 +261,10 @@ bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey,
 
     LOG(DEBUG) << "WSC config_data:" << std::endl
                << "     ssid: " << config_data.ssid() << std::endl
-               << "     authentication_type: " << config_data.authentication_type_attr().data
+               << "     authentication_type: " << int(config_data.authentication_type_attr().data)
                << std::endl
-               << "     encryption_type: " << config_data.encryption_type_attr().data << std::endl;
+               << "     encryption_type: " << int(config_data.encryption_type_attr().data)
+               << std::endl;
     LOG(DEBUG) << "authenticator type:" << m2->authenticator().attribute_type;
     LOG(DEBUG) << "authenticator length:" << m2->authenticator().data_length;
     LOG(DEBUG) << "authenticator buffer: " << std::endl

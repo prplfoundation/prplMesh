@@ -3,7 +3,7 @@
 _namespace: WSC
 
 eWscAuth:
-  _type: enum
+  _type: enum_class
   _enum_storage: uint16_t
   WSC_AUTH_OPEN: 0x0001
   WSC_AUTH_WPAPSK: 0x0002
