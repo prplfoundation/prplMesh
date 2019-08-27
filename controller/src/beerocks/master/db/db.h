@@ -14,6 +14,10 @@
 #include <beerocks/bcl/beerocks_defines.h>
 #include <beerocks/bcl/beerocks_logging.h>
 
+#include <tlvf/WSC/eWscAuth.h>
+#include <tlvf/WSC/eWscEncr.h>
+#include <tlvf/WSC/eWscVendorExt.h>
+
 #include <mutex>
 #include <queue>
 
@@ -503,6 +507,18 @@ public:
                     certification_tx_buffer.get());
     };
 
+    struct bss_info_conf_t {
+        uint8_t operating_class;
+        std::string ssid;
+        WSC::eWscAuth authentication_type;
+        WSC::eWscEncr encryption_type;
+        std::string network_key;
+        WSC::eWscVendorExtSubelementBssType bss_type;
+    };
+    void add_bss_info_configuration(const std::string &al_mac, const bss_info_conf_t &bss_info);
+    std::list<db::bss_info_conf_t> &get_bss_info_configuration(const std::string &al_mac);
+    void clear_bss_info_configuration();
+
     //
     // tasks
     //
@@ -693,6 +709,7 @@ private:
 
     // certification
     std::shared_ptr<uint8_t> certification_tx_buffer;
+    std::unordered_map<std::string, std::list<bss_info_conf_t>> bss_infos; // key=al_mac
 };
 
 } // namespace son
