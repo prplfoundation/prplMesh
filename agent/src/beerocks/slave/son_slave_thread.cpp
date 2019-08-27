@@ -4328,11 +4328,12 @@ bool slave_thread::autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWs
         return false;
     }
 
-    uint8_t buf[m1_auth_buf_len + m2->getLen() - sizeof(WSC::sWscAttrKeyWrapAuthenticator)];
+    // This is the content of M1 and M2, without the type and length.
+    uint8_t buf[m1_auth_buf_len + m2->getLen() - 3 - sizeof(WSC::sWscAttrKeyWrapAuthenticator)];
     auto next = std::copy_n(m1_auth_buf, m1_auth_buf_len, buf);
     m2->class_swap(); //swap to get network byte order
-    std::copy_n(m2->getStartBuffPtr(), m2->getLen() - sizeof(WSC::sWscAttrKeyWrapAuthenticator),
-                next);
+    std::copy_n(m2->getStartBuffPtr() + 3,
+                m2->getLen() - 3 - sizeof(WSC::sWscAttrKeyWrapAuthenticator), next);
     m2->class_swap(); //swap back
 
     uint8_t kwa[WSC::WSC_AUTHENTICATOR_LENGTH];
@@ -5015,12 +5016,13 @@ bool slave_thread::autoconfig_wsc_add_m1()
     tlvWscM1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_AES;
 
     // Authentication support - store swapped M1 for later M1 || M2* authentication
+    // This is the content of M1, without the type and length.
     if (m1_auth_buf)
         delete[] m1_auth_buf;
-    m1_auth_buf     = new uint8_t[tlvWscM1->getLen()];
-    m1_auth_buf_len = tlvWscM1->getLen();
+    m1_auth_buf_len = tlvWscM1->getLen() - 3;
+    m1_auth_buf     = new uint8_t[m1_auth_buf_len];
     tlvWscM1->class_swap(); //swap before store
-    std::copy_n(tlvWscM1->getStartBuffPtr(), tlvWscM1->getLen(), m1_auth_buf);
+    std::copy_n(tlvWscM1->getStartBuffPtr() + 3, m1_auth_buf_len, m1_auth_buf);
     tlvWscM1->class_swap(); //swap after store (will be swapped in Finalize)
 
     return true;
