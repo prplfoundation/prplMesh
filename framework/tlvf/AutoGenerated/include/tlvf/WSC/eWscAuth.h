@@ -19,13 +19,33 @@
 
 namespace WSC {
 
-enum eWscAuth: uint16_t {
+enum class eWscAuth : uint16_t {
     WSC_AUTH_OPEN = 0x1,
     WSC_AUTH_WPAPSK = 0x2,
     WSC_AUTH_SHARED = 0x4,
     WSC_AUTH_WPA = 0x8,
     WSC_AUTH_WPA2 = 0x10,
     WSC_AUTH_WPA2PSK = 0x20,
+};
+class eWscAuthValidate {
+public:
+    static bool check(uint16_t value) {
+        bool ret = false;
+        switch (value) {
+        case 0x1:
+        case 0x2:
+        case 0x4:
+        case 0x8:
+        case 0x10:
+        case 0x20:
+                ret = true;
+                break;
+            default:
+                ret = false;
+                break;
+        }
+        return ret;
+    }
 };
 
 

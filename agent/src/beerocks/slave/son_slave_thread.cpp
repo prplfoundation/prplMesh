@@ -4517,8 +4517,8 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
                    << "     Manufacturer: " << manufacturer << std::endl
                    << "     ssid: " << ssid << std::endl
                    << "     bssid: " << network_utils::mac_to_string(bssid) << std::endl
-                   << "     authentication_type: " << authtype << std::endl
-                   << "     encryption_type: " << enctype << std::endl;
+                   << "     authentication_type: " << std::hex << int(authtype) << std::endl
+                   << "     encryption_type: " << int(enctype) << std::dec << std::endl;
     }
 
     if (slave_state != STATE_WAIT_FOR_JOINED_RESPONSE) {
@@ -5012,8 +5012,9 @@ bool slave_thread::autoconfig_wsc_add_m1()
     dh = std::make_unique<mapf::encryption::diffie_hellman>();
     std::copy(dh->pubkey(), dh->pubkey() + dh->pubkey_length(), tlvWscM1->public_key_attr().data);
     std::copy(dh->nonce(), dh->nonce() + dh->nonce_length(), tlvWscM1->enrolee_nonce_attr().data);
-    tlvWscM1->authentication_type_flags_attr().data = WSC::WSC_AUTH_OPEN | WSC::WSC_AUTH_WPA2PSK;
-    tlvWscM1->encryption_type_flags_attr().data     = WSC::WSC_ENCR_AES;
+    tlvWscM1->authentication_type_flags_attr().data =
+        uint16_t(WSC::eWscAuth::WSC_AUTH_OPEN) | uint16_t(WSC::eWscAuth::WSC_AUTH_WPA2PSK);
+    tlvWscM1->encryption_type_flags_attr().data = uint16_t(WSC::eWscEncr::WSC_ENCR_AES);
 
     // Authentication support - store swapped M1 for later M1 || M2* authentication
     // This is the content of M1, without the type and length.

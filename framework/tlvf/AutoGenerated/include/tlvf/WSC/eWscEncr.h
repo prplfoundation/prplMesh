@@ -19,11 +19,29 @@
 
 namespace WSC {
 
-enum eWscEncr: uint16_t {
+enum class eWscEncr : uint16_t {
     WSC_ENCR_NONE = 0x1,
     WSC_ENCR_WEP = 0x2,
     WSC_ENCR_TKIP = 0x4,
     WSC_ENCR_AES = 0x8,
+};
+class eWscEncrValidate {
+public:
+    static bool check(uint16_t value) {
+        bool ret = false;
+        switch (value) {
+        case 0x1:
+        case 0x2:
+        case 0x4:
+        case 0x8:
+                ret = true;
+                break;
+            default:
+                ret = false;
+                break;
+        }
+        return ret;
+    }
 };
 
 
