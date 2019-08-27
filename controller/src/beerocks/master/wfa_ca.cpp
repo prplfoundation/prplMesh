@@ -78,10 +78,110 @@ static bool validate_hex_notation(const std::string &str, uint8_t expected_octet
 }
 
 /**
+ * @brief Parse bss_info string into bss_info_conf_struct.
+ * 
+ * @param[in] bss_info_str String containing bss info configuration.
+ * @param[out] bss_info_conf Controller database struct filled with configuration.
+ * @param[out] err_string Contains an error description if the function fails.
+ * @return al_mac on success, empty string if not.
+ */
+static std::string parse_bss_info(const std::string &bss_info_str,
+                                  db::bss_info_conf_t &bss_info_conf, std::string &err_string)
+{
+    auto confs = string_utils::str_split(bss_info_str, ' ');
+    if (confs.size() != 8) {
+        err_string = "missing configuration";
+        return std::string();
+    }
+
+    // Alid
+    std::string al_mac(confs[0]);
+    if (!net::network_utils::is_valid_mac(al_mac)) {
+        err_string = "invalid al_mac";
+        return std::string();
+    }
+
+    bss_info_conf = {};
+
+    // Operating class
+    uint operating_class = string_utils::stoi(confs[1]);
+    if (operating_class > UINT8_MAX || operating_class == 0) {
+        err_string = "invalid operating class";
+        return std::string();
+    }
+    bss_info_conf.operating_class = operating_class;
+
+    // SSID
+    bss_info_conf.ssid = confs[2];
+    if (bss_info_conf.ssid.size() > WSC::eWscLengths::WSC_MAX_SSID_LENGTH) {
+        err_string = "ssid is too long";
+        return std::string();
+    }
+
+    // Authentication type
+    auto &authentication_type_str = confs[3];
+    if (!validate_hex_notation(authentication_type_str, 2)) {
+        err_string = "invalid authentication type format";
+        return std::string();
+    }
+
+    uint16_t authentication_type = std::stoi(authentication_type_str, nullptr, 16);
+
+    if (!WSC::eWscAuthValidate::check(authentication_type)) {
+        err_string = "invalid authentication type value";
+        return std::string();
+    }
+    bss_info_conf.authentication_type = static_cast<WSC::eWscAuth>(authentication_type);
+
+    // Encryption type
+    auto &encryption_type_str = confs[4];
+    if (!validate_hex_notation(encryption_type_str, 2)) {
+        err_string = "invalid encryption type format";
+        return std::string();
+    }
+
+    uint16_t encryption_type = std::stoi(encryption_type_str, nullptr, 16);
+
+    if (!WSC::eWscEncrValidate::check(encryption_type)) {
+        err_string = "invalid encryption type value";
+        return std::string();
+    }
+    bss_info_conf.encryption_type = static_cast<WSC::eWscEncr>(encryption_type);
+
+    // Network key
+    bss_info_conf.network_key = confs[5];
+    if (bss_info_conf.network_key.size() > WSC::eWscLengths::WSC_MAX_NETWORK_KEY_LENGTH) {
+        err_string = "network key is too long";
+        return std::string();
+    }
+
+    // Bit 6 of Multi-AP IE's extention attribute, aka "Backhaul BSS"
+    auto &bit_6_str = confs[6];
+    if (bit_6_str != "0" && bit_6_str != "1") {
+        err_string = "invalid bit 6 of Multi-AP IE's extention attribute";
+        return std::string();
+    }
+    uint8_t bss_type = (bit_6_str == "1" ? WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS : 0);
+
+    // Bit 5 of Multi-AP IE's extention attribute, aka "Fronthaul BSS"
+    auto &bit_5_str = confs[7];
+    if (bit_5_str != "0" && bit_5_str != "1") {
+        err_string = "invalid bit 5 of Multi-AP IE's extention attribute";
+        return std::string();
+    }
+    bss_type |= (bit_5_str == "1" ? WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS : 0);
+
+    // Update Bits 6 and 5
+    bss_info_conf.bss_type = static_cast<WSC::eWscVendorExtSubelementBssType>(bss_type);
+
+    return al_mac;
+}
+
+/**
  * @brief Convert enum of WFA-CA status to string.
  * 
  * @param[in] status Enum of WFA-CA status. 
- * @return Status as string. 
+ * @return Status as string.
  */
 const std::string wfa_ca::wfa_ca_status_to_string(eWfaCaStatus status)
 {
@@ -373,9 +473,7 @@ void wfa_ca::handle_wfa_ca_message(
             break;
         }
 
-        // TODO: Perfrom reset to "name". Currently not needed.
-        // NOTE: This action is an asynchronous procedure and will be required to be executed
-        //       from task infrastructure.
+        database.clear_bss_info_configuration();
 
         // Send back second reply
         reply(sd, cmdu_tx, eWfaCaStatus::COMPLETE);
@@ -503,8 +601,6 @@ void wfa_ca::handle_wfa_ca_message(
             // {"program", std::string()},
         };
 
-        // NOTE: Uncertainty if param names: "backhaul", "bss_info{1..N}" are mandatory
-
         if (!parse_params(cmd_tokens_vec, params, err_string)) {
             LOG(ERROR) << err_string;
             reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
@@ -522,17 +618,43 @@ void wfa_ca::handle_wfa_ca_message(
             }
         }
 
-        // TODO: Find out what to do with value of params: "backhaul", bss_info{1..N}, "name".
+        if (params.find("backhaul") != params.end()) {
+            err_string = "parameter 'backhaul' is relevant only on an agent";
+            LOG(ERROR) << err_string;
+            reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+            break;
+        }
+
+        for (uint8_t bss_info_idx = 1; bss_info_idx < UINT8_MAX; bss_info_idx++) {
+            std::string key("bss_info");
+            key += std::to_string(bss_info_idx);
+            if (params.find(key) == params.end()) {
+                if (bss_info_idx == 1) {
+                    err_string = "command has no bss_info configuration";
+                    LOG(ERROR) << err_string;
+                    reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+                    return;
+                }
+                break;
+            }
+
+            db::bss_info_conf_t bss_info_conf;
+            auto al_mac = parse_bss_info(params[key], bss_info_conf, err_string);
+            if (al_mac.empty()) {
+                err_string += (" on " + key);
+                LOG(ERROR) << err_string;
+                reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
+                return;
+            }
+
+            database.add_bss_info_configuration(al_mac, bss_info_conf);
+        }
 
         // Send back first reply
         if (!reply(sd, cmdu_tx, eWfaCaStatus::RUNNING)) {
             LOG(ERROR) << "failed to send reply";
             break;
         }
-
-        // TODO: Configure device "name". Currently not needed.
-        // NOTE: This action is an asynchronous procedure and will be required to be executed
-        //       from task infrastructure.
 
         // Send back second reply
         reply(sd, cmdu_tx, eWfaCaStatus::COMPLETE);
