@@ -140,7 +140,7 @@ test_topology() {
     status "test topology query"
     eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x0002\"" $redirect    
     dbg "Confirming topology query was received"
-    docker exec -it repeater sh -c 'grep -i -q "Topology Query" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+    docker exec -it repeater sh -c 'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 }
 test_init() {
     status "test initialization"
