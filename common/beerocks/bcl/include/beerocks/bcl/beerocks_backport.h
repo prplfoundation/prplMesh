@@ -11,6 +11,7 @@
 
 #include <memory>
 
+#if __cplusplus < 201402L
 namespace std {
 // Backported from C++14
 template <typename T, typename... Args> std::unique_ptr<T> make_unique(Args &&... args)
@@ -18,4 +19,6 @@ template <typename T, typename... Args> std::unique_ptr<T> make_unique(Args &&..
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 } // namespace std
+#endif
+
 #endif // _BEEROCKS_BACKPORT_H_
