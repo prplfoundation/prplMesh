@@ -4329,11 +4329,11 @@ bool slave_thread::autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWs
     }
 
     // This is the content of M1 and M2, without the type and length.
-    uint8_t buf[m1_auth_buf_len + m2->getLen() - 3 - sizeof(WSC::sWscAttrKeyWrapAuthenticator)];
+    uint8_t buf[m1_auth_buf_len + m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator)];
     auto next = std::copy_n(m1_auth_buf, m1_auth_buf_len, buf);
     m2->class_swap(); //swap to get network byte order
-    std::copy_n(m2->getStartBuffPtr() + 3,
-                m2->getLen() - 3 - sizeof(WSC::sWscAttrKeyWrapAuthenticator), next);
+    std::copy_n(m2->getStartBuffPtr() + 3, m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator),
+                next);
     m2->class_swap(); //swap back
 
     uint8_t kwa[WSC::WSC_AUTHENTICATOR_LENGTH];
