@@ -478,15 +478,19 @@ bool master_thread::autoconfig_wsc_authentication(std::shared_ptr<ieee1905_1::tl
                                                   uint8_t authkey[32])
 {
     // Authentication on Full M1 || M2* (without the authenticator attribute)
-    // authentication is done on swapped data, so first swap the m1 and m2, calculate authenticator, then swap back
-    // since finalize will do the swapping.
+    // This is the content of M1 and M2, without the type and length.
+    // Authentication is done on swapped data, so first swap the m1 and m2, calculate authenticator,
+    // then swap back since finalize will do the swapping.
     m1->class_swap();
     m2->class_swap();
-    uint8_t buf[m1->getLen() + m2->getLen() - sizeof(WSC::sWscAttrAuthenticator)];
-    auto next = std::copy_n(m1->getStartBuffPtr(), m1->getLen(), buf);
-    std::copy_n(m2->getStartBuffPtr(), m2->getLen() - sizeof(WSC::sWscAttrAuthenticator), next);
-    LOG(DEBUG) << "m1 buf:" << std::endl << utils::dump_buffer(m1->getStartBuffPtr(), m1->getLen());
-    LOG(DEBUG) << "m2 buf:" << std::endl << utils::dump_buffer(m2->getStartBuffPtr(), m2->getLen());
+    uint8_t buf[m1->getLen() - 3 + m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator)];
+    auto next = std::copy_n(m1->getStartBuffPtr() + 3, m1->getLen() - 3, buf);
+    std::copy_n(m2->getStartBuffPtr() + 3, m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator),
+                next);
+    LOG(DEBUG) << "m1 buf:" << std::endl
+               << utils::dump_buffer(m1->getStartBuffPtr() + 3, m1->getLen() - 3);
+    LOG(DEBUG) << "m2 buf:" << std::endl
+               << utils::dump_buffer(m2->getStartBuffPtr() + 3, m2->getLen() - 3);
     // swap back
     m1->class_swap();
     m2->class_swap();
