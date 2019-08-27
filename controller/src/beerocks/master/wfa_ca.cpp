@@ -47,9 +47,10 @@ static std::string check_forbidden_chars(const std::string &str)
  * @brief Checks that the given string is in a hex notation
  * 
  * @param[in] str String to check hex notation.
+ * @param[in] expected_octets Number of expected octets (Optional).
  * @return true if string is valid hex notation, else false.
  */
-static bool validate_hex_notation(const std::string &str)
+static bool validate_hex_notation(const std::string &str, uint8_t expected_octets = 0)
 {
     // Each value must start with 0x
     if (str.substr(0, 2) != "0x") {
@@ -58,6 +59,13 @@ static bool validate_hex_notation(const std::string &str)
 
     // The number of digits must be even
     if (str.size() % 2 != 0) {
+        return false;
+    }
+
+    // Expected octets validation
+    // "str.size() - 2" ignore "0x" prefix.
+    // division by 2 because 2 chars are equal to one octet
+    if (expected_octets != 0 && (str.size() - 2) / 2 != expected_octets) {
         return false;
     }
 
@@ -666,10 +674,18 @@ bool wfa_ca::get_send_1905_1_tlv_hex_list(std::list<tlv_hex_t> &tlv_hex_list,
             // Type
             if (tlv_member_idx == 0) {
                 tlv_hex.type = &it->second;
+                if (!validate_hex_notation(*tlv_hex.type, 1)) {
+                    err_string = "param name '" + lookup_str + "' has invalid hex notation value";
+                    return false;
+                }
 
                 // Length
             } else if (tlv_member_idx == 1) {
                 tlv_hex.length = &it->second;
+                if (!validate_hex_notation(*tlv_hex.length, 2)) {
+                    err_string = "param name '" + lookup_str + "' has invalid hex notation value";
+                    return false;
+                }
 
                 // Value
             } else if (tlv_member_idx == 2) {
@@ -679,32 +695,20 @@ bool wfa_ca::get_send_1905_1_tlv_hex_list(std::list<tlv_hex_t> &tlv_hex_list,
                 it->second.erase(std::remove(it->second.begin(), it->second.end(), '}'),
                                  it->second.end());
                 tlv_hex.value = &it->second;
+
+                // Validate hex notation on list of values separated by space
+                auto values = string_utils::str_split(it->second, ' ');
+                for (const auto &value : values) {
+                    if (!validate_hex_notation(value)) {
+                        err_string =
+                            "param name '" + lookup_str + "' has invalid hex notation value";
+                        return false;
+                    }
+                }
             } else {
                 LOG(ERROR) << "Illegal tlv_member_idx value: " << int(tlv_member_idx);
                 err_string = err_internal;
                 return false;
-            }
-
-            // Validate hex notation on value or list of values separated by space
-            auto values = string_utils::str_split(it->second, ' ');
-            for (auto value : values) {
-                if (!validate_hex_notation(value)) {
-                    err_string = "param name '" + lookup_str + "' has invalid hex notation value";
-                    return false;
-                }
-
-                // Type and Length fields must have fixed size:
-
-                // Type
-                if (tlv_member_idx == 0 && value.size() != 4) {
-                    err_string = "type field is too large: " + value;
-                    return false;
-
-                    // Length
-                } else if (tlv_member_idx == 1 && value.size() != 6) {
-                    err_string = "length field is too large: " + value;
-                    return false;
-                }
             }
         }
 
