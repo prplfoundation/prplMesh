@@ -300,7 +300,7 @@ void utils::merge_list(std::vector<uint8_t> &ret, std::vector<uint8_t> &list)
     }
 }
 
-std::string utils::dump_buffer(uint8_t *buffer, size_t len)
+std::string utils::dump_buffer(const uint8_t *buffer, size_t len)
 {
     std::ostringstream hexdump;
     for (size_t i = 0; i < len; i += 16) {

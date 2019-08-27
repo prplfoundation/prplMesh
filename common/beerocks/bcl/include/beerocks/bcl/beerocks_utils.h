@@ -76,7 +76,7 @@ public:
     static void hex_dump(const std::string &description, uint8_t *addr, int len,
                          const char *calling_file = __builtin_FILE(),
                          int calling_line         = __builtin_LINE());
-    static std::string dump_buffer(uint8_t *buffer, size_t len);
+    static std::string dump_buffer(const uint8_t *buffer, size_t len);
 };
 
 } //namespace beerocks
