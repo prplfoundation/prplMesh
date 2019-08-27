@@ -71,7 +71,7 @@ public:
 #define __builtin_LINE() __LINE__
 #endif
 
-    static int64_t stoi(std::string str, const char *calling_file = __builtin_FILE(),
+    static int64_t stoi(const std::string &str, const char *calling_file = __builtin_FILE(),
                         int calling_line = __builtin_LINE());
 
     static std::string int_to_hex_string(const unsigned int integer,
