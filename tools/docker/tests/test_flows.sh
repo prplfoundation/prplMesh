@@ -21,9 +21,13 @@ error=0
 start_gw_repeater() {
     dbg "delete running containers before starting test"
     eval docker rm -f gateway $redirect
-    eval docker rm -f repeater $redirect
-    dbg "start gw and repeater"
-    eval ${scriptdir}/test_gw_repeater.sh -d 5 $redirect
+    eval docker rm -f repeater $redirect    
+    dbg "start gw and repeater"  
+    eval ${scriptdir}/test_gw_repeater.sh -f -d 5 $redirect|| 
+    {        
+        err "start GW+Repeater failed, abort"
+        exit 1
+    }
 }
 
 send_bml_command() {       
@@ -144,12 +148,10 @@ test_topology() {
 }
 test_init() {
     status "test initialization"
-
-    eval ${scriptdir}/test_gw_repeater.sh -f -d 5 $redirect || {
-        err "start GW+Repeater failed, abort"
-        exit 1
-    }
-    AL_MAC=$(docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map | grep IRE_BRIDGE | awk '{print $5}' | cut -d ',' -f 1)
+    eval start_gw_repeater $redirect    
+    # AL_MAC is the mac address agent1, so return the first match if there is more than one agent.
+    AL_MAC=$(docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map | grep IRE_BRIDGE | head -1 | awk '{print $5}' | cut -d ',' -f 1)
+    
     RADIO_WLAN0_MAC=$(docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map | grep "RADIO: wlan0" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)    
     RADIO_WLAN0_MAC="0x${RADIO_WLAN0_MAC}"     
 
