@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            // Install "Bash Debug" VSCODE extension by "rogalmic" for that to work
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash-Debug (select script from list of sh files)",
+            "cwd": "${workspaceFolder}/../",
+            "program": "${command:SelectScriptName}",
+            "args": []
+        },
+        {
             "name": "(gdb) Attach to prplMesh Cotroller",
             "type": "cppdbg",
             "request": "attach",
