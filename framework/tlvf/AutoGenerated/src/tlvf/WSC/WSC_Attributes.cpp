@@ -86,6 +86,7 @@ bool cConfigData::alloc_ssid(size_t count) {
     m_encryption_type_attr = (sWscAttrEncryptionType *)((uint8_t *)(m_encryption_type_attr) + len);
     m_network_key_attr = (sWscAttrNetworkKey *)((uint8_t *)(m_network_key_attr) + len);
     m_bssid_attr = (sWscAttrBssid *)((uint8_t *)(m_bssid_attr) + len);
+    m_multiap_attr = (sWscAttrVendorExtMultiAp *)((uint8_t *)(m_multiap_attr) + len);
     m_ssid_idx__ += count;
     *m_ssid_length += count;
     m_buff_ptr__ += len;
@@ -108,6 +109,10 @@ sWscAttrBssid& cConfigData::bssid_attr() {
     return (sWscAttrBssid&)(*m_bssid_attr);
 }
 
+sWscAttrVendorExtMultiAp& cConfigData::multiap_attr() {
+    return (sWscAttrVendorExtMultiAp&)(*m_multiap_attr);
+}
+
 void cConfigData::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_ssid_type));
@@ -116,6 +121,7 @@ void cConfigData::class_swap()
     m_encryption_type_attr->struct_swap();
     m_network_key_attr->struct_swap();
     m_bssid_attr->struct_swap();
+    m_multiap_attr->struct_swap();
 }
 
 size_t cConfigData::get_initial_size()
@@ -127,6 +133,7 @@ size_t cConfigData::get_initial_size()
     class_size += sizeof(sWscAttrEncryptionType); // encryption_type_attr
     class_size += sizeof(sWscAttrNetworkKey); // network_key_attr
     class_size += sizeof(sWscAttrBssid); // bssid_attr
+    class_size += sizeof(sWscAttrVendorExtMultiAp); // multiap_attr
     return class_size;
 }
 
@@ -159,6 +166,9 @@ bool cConfigData::init()
     m_bssid_attr = (sWscAttrBssid*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(sWscAttrBssid) * 1;
     if (!m_parse__) { m_bssid_attr->struct_init(); }
+    m_multiap_attr = (sWscAttrVendorExtMultiAp*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(sWscAttrVendorExtMultiAp) * 1;
+    if (!m_parse__) { m_multiap_attr->struct_init(); }
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
