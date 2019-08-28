@@ -21,6 +21,23 @@ size_t BaseClass::getBuffRemainingBytes(void *start)
 {
     return (m_buff_len__ - (size_t)(((uint8_t *)(start ? start : m_buff_ptr__)) - ((uint8_t *)m_buff__)));
 }
+
 size_t BaseClass::getLen() { return (size_t)((uint8_t *)m_buff_ptr__ - (uint8_t *)m_buff__); }
 
 bool BaseClass::isInitialized() { return m_init_succeeded; }
+
+/**
+ * @brief Increments m_buff_ptr__ pointer while avoiding out-of-bounds accesses.
+
+ * @param length size to increment by.
+ * @return true if incrementation is possible.
+ * @return false if incrementation is not possible and the process should be halted to avoid a segfault.
+ */
+bool BaseClass::buffPtrIncrementSafe(size_t length)
+{
+    if (getBuffRemainingBytes() <= length) {
+        return false;
+    }
+    m_buff_ptr__ += length;
+    return true;
+}

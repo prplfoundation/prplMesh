@@ -714,8 +714,9 @@ class TlvF:
                             param_val_const = param_type + "::" + param_val_const
                         lines_cpp.append("if (!m_%s__) *m_%s = %s;" % ( self.MEMBER_PARSE, param_name, param_val_const) )
                     elif param_val != None: lines_cpp.append("if (!m_%s__) *m_%s = %s;" % ( self.MEMBER_PARSE, param_name, param_val) )
-                    elif param_length_var:  lines_cpp.append("if (!m_%s__) *m_%s = 0;" % ( self.MEMBER_PARSE, param_name) )
-                    lines_cpp.append( "m_%s__ += sizeof(%s) * 1;" % ( self.MEMBER_BUFF_PTR, param_type) )
+                    elif param_length_var: lines_cpp.append("if (!m_%s__) *m_%s = 0;" % ( self.MEMBER_PARSE, param_name) )
+                    lines_cpp.append("%sif (!buffPtrIncrementSafe(sizeof(%s))) { return false; }" % (self.getIndentation(0), param_type) )
+
                     if obj_meta.is_tlv_class and param_name != MetaData.TLV_TYPE_TYPE and param_name != MetaData.TLV_TYPE_LENGTH:
                         lines_cpp.append( "if(m_length && !m_%s__){ (*m_length) += sizeof(%s); }" % ( self.MEMBER_PARSE, param_type) )
 
@@ -811,7 +812,7 @@ class TlvF:
                     lines_cpp.append("%s}" %(self.getIndentation(1)))
                 else:
                     lines_cpp.append("%sm_%s_idx__ = len/sizeof(%s);" % (self.getIndentation(1), param_name, param_type))
-                    lines_cpp.append("%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR))
+                    lines_cpp.append("%sif (!buffPtrIncrementSafe(len)) { return false; }" % (self.getIndentation(1)))
                 lines_cpp.append("}")
             if is_var_len or is_dynamic_len:
                 param_meta.list_index = obj_meta.list_index
@@ -840,9 +841,9 @@ class TlvF:
                     lines_cpp.append("}")
                 else:
                     lines_cpp.append("m_%s_idx__ = %s;" % (param_name, param_length))
-                    lines_cpp.append("m_%s__ += sizeof(%s)*(%s);" % (self.MEMBER_BUFF_PTR, param_type, param_length))
+                    lines_cpp.append("%sif (!buffPtrIncrementSafe(sizeof(%s)*(%s))) { return false; }" % (self.getIndentation(0), param_type,param_length) )
             if is_int_len or is_const_len:
-                lines_cpp.append( "m_%s__ += (sizeof(%s) * %s);" % (self.MEMBER_BUFF_PTR, param_type, param_length) )
+                lines_cpp.append("%sif (!buffPtrIncrementSafe(sizeof(%s)*(%s))) { return false; }" % (self.getIndentation(0), param_type,param_length) )
                 lines_cpp.append("m_%s_idx__  = %s;" % (param_name, param_length))
                 if obj_meta.is_tlv_class or TypeInfo(param_type).type == TypeInfo.STRUCT:
                     lines_cpp.append("if (!m_parse__) {")
@@ -1078,7 +1079,7 @@ class TlvF:
                 lines_cpp.append( "%sm_%s_vector.push_back(ptr);" % (self.getIndentation(1), param_name ))
             else:
                 lines_cpp.append( "%sm_%s_ptr = ptr;" % (self.getIndentation(1), param_name ))
-            lines_cpp.append( "%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR) )
+            lines_cpp.append("%sif (!buffPtrIncrementSafe(len)) { return false; }" % (self.getIndentation(1)) )
             if obj_meta.is_tlv_class:
                 lines_cpp.append( "%sif(!m_parse__ && m_length){ (*m_length) += len; }" % (self.getIndentation(1)))
             lines_cpp.append( "%sm_%s__ = false;" % (self.getIndentation(1), self.MEMBER_LOCK_ALLOCATION))
@@ -1111,7 +1112,7 @@ class TlvF:
             lines_cpp.append( "%sm_%s_idx__ += count;" % (self.getIndentation(1), param_name) )
             if is_var_len:
                 lines_cpp.append( "%s*m_%s += count;" % (self.getIndentation(1), param_length) )
-            lines_cpp.append( "%sm_%s__ += len;" % (self.getIndentation(1), self.MEMBER_BUFF_PTR) )
+            lines_cpp.append("%sif (!buffPtrIncrementSafe(len)) { return false; }" % (self.getIndentation(1)))
             if obj_meta.is_tlv_class:
                 lines_cpp.append( "%sif(m_length){ (*m_length) += len; }" % (self.getIndentation(1)))
             if TypeInfo(param_type).type == TypeInfo.STRUCT:
@@ -1464,10 +1465,6 @@ class TlvF:
         self.insertLineCpp(insert_name, insert_marker, "%sreturn false;" % self.getIndentation(2))
         self.insertLineCpp(insert_name, insert_marker, "%s}" % self.getIndentation(1) )
         self.insertLineCpp(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(1), self.CODE_CLASS_INIT_FUNC_INSERT, name))
-        self.insertLineCpp(insert_name, insert_marker, "%sif (m_%s__ - m_%s__ > ssize_t(m_buff_len__)) {" % (self.getIndentation(1), self.MEMBER_BUFF_PTR, self.MEMBER_BUFF))
-        self.insertLineCpp(insert_name, insert_marker, '%sTLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";' %  self.getIndentation(2) )
-        self.insertLineCpp(insert_name, insert_marker, "%sreturn false;" % self.getIndentation(2))
-        self.insertLineCpp(insert_name, insert_marker, "%s}" % self.getIndentation(1) )
         self.insertLineCpp(insert_name, insert_marker, "%sif (m_%s__ && m_%s__) { class_swap(); }" % (self.getIndentation(1), self.MEMBER_PARSE, self.MEMBER_SWAP))
         self.insertLineCpp(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(1), self.CODE_CLASS_INIT_FUNC_SWAP_INSERT, name))
         self.insertLineCpp(insert_name, insert_marker, "%sreturn true;" % (self.getIndentation(1)))
