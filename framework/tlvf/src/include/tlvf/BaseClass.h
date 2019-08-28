@@ -24,6 +24,8 @@ public:
     uint8_t *getBuffPtr();
     uint8_t *getStartBuffPtr();
     size_t getBuffRemainingBytes(void *start = nullptr);
+    bool buffPtrIncrementSafe(size_t length);
+
     size_t getLen();
     bool isInitialized();
     virtual void class_swap() = 0;
