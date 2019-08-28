@@ -614,7 +614,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_basic_caps = nullptr;
     std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1                         = nullptr;
     bool intel_agent                                                       = false;
-    int type = cmdu_rx.getNextTlvType();
+    int type;
 
     while ((type = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
         if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES)) {
