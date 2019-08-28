@@ -83,7 +83,7 @@ class tlvWscM1 : public BaseClass
         WSC::sWscAttrDevicePasswordID& device_password_id_attr();
         WSC::sWscAttrConfigurationError& configuration_error_attr();
         WSC::sWscAttrOsVersion& os_version_attr();
-        WSC::sWscAttrVendorExtension& vendor_extensions_attr();
+        WSC::sWscAttrVersion2& version2_attr();
         void class_swap();
         static size_t get_initial_size();
 
@@ -129,7 +129,7 @@ class tlvWscM1 : public BaseClass
         WSC::sWscAttrDevicePasswordID* m_device_password_id_attr = nullptr;
         WSC::sWscAttrConfigurationError* m_configuration_error_attr = nullptr;
         WSC::sWscAttrOsVersion* m_os_version_attr = nullptr;
-        WSC::sWscAttrVendorExtension* m_vendor_extensions_attr = nullptr;
+        WSC::sWscAttrVersion2* m_version2_attr = nullptr;
 };
 
 }; // close namespace: ieee1905_1

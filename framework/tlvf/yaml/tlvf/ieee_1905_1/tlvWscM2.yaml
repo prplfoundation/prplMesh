@@ -76,6 +76,6 @@ tlvWscM2:
   configuration_error_attr: WSC::sWscAttrConfigurationError
   device_password_id_attr: WSC::sWscAttrDevicePasswordID
   os_version_attr: WSC::sWscAttrOsVersion
-  vendor_extensions_attr: WSC::sWscAttrVendorExtension
+  version2_attr: WSC::sWscAttrVersion2
   encrypted_settings: WSC::cWscAttrEncryptedSettings
   authenticator: WSC::sWscAttrAuthenticator

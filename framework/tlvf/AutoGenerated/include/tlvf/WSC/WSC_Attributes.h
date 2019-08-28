@@ -331,7 +331,7 @@ typedef struct sWscAttrOsVersion {
     }
 } __attribute__((packed)) sWscAttrOsVersion;
 
-typedef struct sWscAttrVendorExtension {
+typedef struct sWscAttrVersion2 {
     eWscAttributes attribute_type;
     uint16_t data_length;
     uint8_t vendor_id_0;
@@ -350,11 +350,11 @@ typedef struct sWscAttrVendorExtension {
         vendor_id_0 = WSC_VENDOR_ID_WFA_1;
         vendor_id_1 = WSC_VENDOR_ID_WFA_2;
         vendor_id_2 = WSC_VENDOR_ID_WFA_3;
-        subelement_id = 0x6;
+        subelement_id = 0x0;
         subelement_length = 0x1;
-        subelement_value = TEARDOWN;
+        subelement_value = WSC_VERSION2;
     }
-} __attribute__((packed)) sWscAttrVendorExtension;
+} __attribute__((packed)) sWscAttrVersion2;
 
 typedef struct sWscAttrKeyWrapAuthenticator {
     eWscAttributes attribute_type;
