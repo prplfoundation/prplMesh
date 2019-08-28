@@ -5004,8 +5004,6 @@ bool slave_thread::autoconfig_wsc_add_m1()
     std::memset(tlvWscM1->uuid_e_attr().data, 0xff, tlvWscM1->uuid_e_attr().data_length);
     tlvWscM1->rf_bands_attr().data =
         hostap_params.iface_is_5ghz ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
-    // Simulate that this radio supports both fronthaul and backhaul BSS
-    tlvWscM1->version2_attr().subelement_value           = WSC::FRONTHAUL_BSS | WSC::BACKHAUL_BSS;
     tlvWscM1->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_AP;
 
     // encryption support - diffie-helman key-exchange
