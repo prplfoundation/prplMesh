@@ -237,7 +237,7 @@ sWscAttrOsVersion:
     _type: uint32_t
     _value: 0x80000001
 
-sWscAttrVendorExtension:
+sWscAttrVersion2:
   _type: struct
   attribute_type:
     _type: eWscAttributes
@@ -256,13 +256,13 @@ sWscAttrVendorExtension:
     _value: WSC_VENDOR_ID_WFA_3
   subelement_id:
     _type: uint8_t
-    _value: 0x6
+    _value: 0x0
   subelement_length:
     _type: uint8_t
     _value: 0x1
   subelement_value:
     _type: uint8_t
-    _value: TEARDOWN
+    _value: WSC_VERSION2
 
 sWscAttrKeyWrapAuthenticator:
   _type: struct

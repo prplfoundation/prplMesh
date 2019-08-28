@@ -8,4 +8,7 @@ eWscVendorExtSubelementBssType:
   BACKHAUL_BSS: 0x40
   FRONTHAUL_BSS: 0x20
   TEARDOWN: 0x10
-  
+
+eWscVendorExtVersionIE:
+  _type: enum
+  WSC_VERSION2: 0x20

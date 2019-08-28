@@ -26,6 +26,10 @@ enum eWscVendorExtSubelementBssType {
     TEARDOWN = 0x10,
 };
 
+enum eWscVendorExtVersionIE {
+    WSC_VERSION2 = 0x20,
+};
+
 
 }; // close namespace: WSC
 
