@@ -356,6 +356,31 @@ typedef struct sWscAttrVersion2 {
     }
 } __attribute__((packed)) sWscAttrVersion2;
 
+typedef struct sWscAttrVendorExtMultiAp {
+    eWscAttributes attribute_type;
+    uint16_t data_length;
+    uint8_t vendor_id_0;
+    uint8_t vendor_id_1;
+    uint8_t vendor_id_2;
+    uint8_t subelement_id;
+    uint8_t subelement_length;
+    uint8_t subelement_value;
+    void struct_swap(){
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
+    }
+    void struct_init(){
+        attribute_type = ATTR_VENDOR_EXTENSION;
+        data_length = WSC_VENDOR_EXTENSIONS_LENGTH;
+        vendor_id_0 = WSC_VENDOR_ID_WFA_1;
+        vendor_id_1 = WSC_VENDOR_ID_WFA_2;
+        vendor_id_2 = WSC_VENDOR_ID_WFA_3;
+        subelement_id = 0x6;
+        subelement_length = 0x1;
+        subelement_value = TEARDOWN;
+    }
+} __attribute__((packed)) sWscAttrVendorExtMultiAp;
+
 typedef struct sWscAttrKeyWrapAuthenticator {
     eWscAttributes attribute_type;
     uint16_t data_length;
@@ -475,6 +500,7 @@ class cConfigData : public BaseClass
         sWscAttrEncryptionType& encryption_type_attr();
         sWscAttrNetworkKey& network_key_attr();
         sWscAttrBssid& bssid_attr();
+        sWscAttrVendorExtMultiAp& multiap_attr();
         void class_swap();
         static size_t get_initial_size();
 
@@ -489,6 +515,7 @@ class cConfigData : public BaseClass
         sWscAttrEncryptionType* m_encryption_type_attr = nullptr;
         sWscAttrNetworkKey* m_network_key_attr = nullptr;
         sWscAttrBssid* m_bssid_attr = nullptr;
+        sWscAttrVendorExtMultiAp* m_multiap_attr = nullptr;
 };
 
 class cWscAttrEncryptedSettings : public BaseClass
