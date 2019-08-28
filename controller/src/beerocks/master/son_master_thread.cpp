@@ -444,10 +444,6 @@ bool master_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tl
                                                   const mapf::encryption::diffie_hellman &dh,
                                                   uint8_t authkey[32], uint8_t keywrapkey[16])
 {
-    m2->authentication_type_flags_attr().data =
-        uint16_t(WSC::eWscAuth::WSC_AUTH_OPEN) | uint16_t(WSC::eWscAuth::WSC_AUTH_WPA2PSK);
-    m2->encryption_type_flags_attr().data =
-        uint16_t(WSC::eWscEncr::WSC_ENCR_NONE) | uint16_t(WSC::eWscEncr::WSC_ENCR_AES);
     std::copy_n(m1->enrolee_nonce_attr().data, m1->enrolee_nonce_attr().data_length,
                 m2->enrolee_nonce_attr().data);
     std::copy_n(dh.nonce(), dh.nonce_length(), m2->registrar_nonce_attr().data);
@@ -536,6 +532,16 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
     }
 
     tlvWscM2->message_type_attr().data = WSC::WSC_MSG_TYPE_M2;
+    // enrolee_nonce and registrar_nonce are set in autoconfig_wsc_calculate_keys()
+    // TODO the following should be taken from the database
+    std::memset(tlvWscM2->uuid_r_attr().data, 0xee, tlvWscM2->uuid_r_attr().data_length);
+    // public_key is set in autoconfig_wsc_calculate_keys()
+    tlvWscM2->authentication_type_flags_attr().data =
+        uint16_t(WSC::eWscAuth::WSC_AUTH_OPEN) | uint16_t(WSC::eWscAuth::WSC_AUTH_WPA2PSK);
+    tlvWscM2->encryption_type_flags_attr().data =
+        uint16_t(WSC::eWscEncr::WSC_ENCR_NONE) | uint16_t(WSC::eWscEncr::WSC_ENCR_AES);
+    // connection_type and configuration_methods have default values
+    // TODO the following should be taken from the database
     if (!tlvWscM2->set_manufacturer("Intel"))
         return false;
     if (!tlvWscM2->set_model_name("Ubuntu"))
@@ -544,11 +550,14 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
         return false;
     if (!tlvWscM2->set_serial_number("prpl12345"))
         return false;
-    std::memset(tlvWscM2->uuid_r_attr().data, 0xee, tlvWscM2->uuid_r_attr().data_length);
+    tlvWscM2->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
+
+    // TODO Maybe the band should be taken from bss_info_conf.operating_class instead?
     tlvWscM2->rf_bands_attr().data = (tlvWscM1->rf_bands_attr().data & WSC::WSC_RF_BAND_5GHZ)
                                          ? WSC::WSC_RF_BAND_5GHZ
                                          : WSC::WSC_RF_BAND_2GHZ;
-    tlvWscM2->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
+    // association_state, configuration_error, device_password_id, os_version and vendor_extension
+    // have default values
 
     ///////////////////////////////
     // @brief encryption support //
