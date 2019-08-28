@@ -529,7 +529,6 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
         return false;
     }
 
-    int bss_type  = tlvWscM1->version2_attr().subelement_value;
     auto tlvWscM2 = cmdu_tx.addClass<ieee1905_1::tlvWscM2>();
     if (!tlvWscM2) {
         LOG(ERROR) << "Failed creating tlvWscM2";
@@ -549,10 +548,6 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
     tlvWscM2->rf_bands_attr().data = (tlvWscM1->rf_bands_attr().data & WSC::WSC_RF_BAND_5GHZ)
                                          ? WSC::WSC_RF_BAND_5GHZ
                                          : WSC::WSC_RF_BAND_2GHZ;
-    tlvWscM2->version2_attr().subelement_value =
-        bss_type & WSC::FRONTHAUL_BSS
-            ? WSC::FRONTHAUL_BSS
-            : (bss_type & WSC::BACKHAUL_BSS ? WSC::BACKHAUL_BSS : WSC::TEARDOWN);
     tlvWscM2->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
 
     ///////////////////////////////
