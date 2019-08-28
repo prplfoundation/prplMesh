@@ -1247,6 +1247,60 @@ std::string db::get_hostap_supported_channels_string(const std::string &radio_ma
     return os.str();
 }
 
+/**
+ * @brief Add supported operating class to the database.
+ * Currently this function is a wrapper which converts the operating
+ * class to a set of supported channels and updates the list of currently
+ * supported channels.
+ * 
+ * @param mac radio mac
+ * @param operating class operating class to add
+ * @tx_power transmit power
+ * @non_operable_channels list of statically non-operable channels
+ * @return true on success
+ * @return false on failure
+ */
+bool db::add_hostap_supported_operating_class(const std::string &radio_mac, uint8_t operating_class,
+                                              uint8_t tx_power,
+                                              const std::vector<uint8_t> &non_operable_channels)
+{
+    auto supported_channels = get_hostap_supported_channels(radio_mac);
+    auto channel_set        = wireless_utils::operating_class_to_channel_set(operating_class);
+
+    // Update current channels
+    for (auto c : channel_set) {
+        auto channel = std::find_if(
+            supported_channels.begin(), supported_channels.end(),
+            [&c](const beerocks_message::sWifiChannel &ch) { return ch.channel == c; });
+        if (channel != supported_channels.end()) {
+            channel->tx_pow = tx_power;
+            //TODO fill other channel parameters
+        } else {
+            beerocks_message::sWifiChannel ch = {0};
+            ch.channel                        = c;
+            ch.tx_pow                         = tx_power;
+            supported_channels.push_back(ch);
+        }
+    }
+
+    // Delete non-operable channels
+    for (auto c : non_operable_channels) {
+        auto channel = std::find_if(
+            supported_channels.begin(), supported_channels.end(),
+            [&c](const beerocks_message::sWifiChannel &ch) { return ch.channel == c; });
+        if (channel != supported_channels.end())
+            supported_channels.erase(channel);
+    }
+
+    set_hostap_supported_channels(radio_mac, &supported_channels[0], supported_channels.size());
+    // dump new supported channels state
+    LOG(DEBUG) << "New supported channels for hostap" << radio_mac << " operating class "
+               << int(operating_class) << std::endl
+               << get_hostap_supported_channels_string(radio_mac);
+
+    return true;
+}
+
 bool db::set_hostap_band_capability(std::string mac, beerocks::eRadioBandCapability capability)
 {
     auto n = get_node(mac);

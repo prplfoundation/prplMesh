@@ -17,6 +17,7 @@
 #include <tlvf/WSC/eWscAuth.h>
 #include <tlvf/WSC/eWscEncr.h>
 #include <tlvf/WSC/eWscVendorExt.h>
+#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 
 #include <mutex>
 #include <queue>
@@ -280,6 +281,10 @@ public:
     const std::vector<beerocks_message::sWifiChannel>
     get_hostap_supported_channels(std::string mac);
     std::string get_hostap_supported_channels_string(const std::string &radio_mac);
+
+    bool add_hostap_supported_operating_class(const std::string &radio_mac, uint8_t operating_class,
+                                              uint8_t tx_power,
+                                              const std::vector<uint8_t> &non_operable_channels);
 
     bool set_hostap_band_capability(std::string mac, beerocks::eRadioBandCapability capability);
     beerocks::eRadioBandCapability get_hostap_band_capability(std::string mac);
