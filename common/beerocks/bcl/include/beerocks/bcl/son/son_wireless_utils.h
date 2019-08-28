@@ -13,6 +13,7 @@
 #include "../beerocks_message_structs.h"
 
 #include <iostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -108,6 +109,7 @@ public:
                                                                uint16_t prev_vht_center_frequency,
                                                                beerocks::eWiFiBandwidth bw,
                                                                uint16_t vht_center_frequency);
+    static std::set<uint8_t> operating_class_to_channel_set(uint8_t operating_class);
 
 private:
     enum eAntennaFactor {
