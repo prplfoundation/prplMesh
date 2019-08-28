@@ -34,7 +34,6 @@ BEEROCKS_INIT_BEEROCKS_VERSION
 
 static bool g_running       = true;
 static bool g_loop_cmd_exec = false;
-static long g_wait_time     = 0;
 
 #ifdef HAVE_READLINE
 static std::vector<std::string> g_cli_cmds;
@@ -237,8 +236,6 @@ static int cli_non_interactive(std::string path, std::string tmp_path, std::stri
     if (-1 == cli_ptr->multiple_commands(command_string)) {
         status_code = 1;
     }
-
-    UTILS_SLEEP_MSEC(1000 * g_wait_time);
 
     // Max timeout according to CAPI specifications is 120 seconds
     auto timeout = std::chrono::steady_clock::now() + std::chrono::seconds(120);
@@ -471,7 +468,7 @@ int main(int argc, char *argv[])
     std::string command_string;
     uint16_t port = 0;
 
-    while ((opt = getopt(argc, argv, "pi:c:w:a:u:")) != -1) {
+    while ((opt = getopt(argc, argv, "pi:c:a:u:")) != -1) {
         switch (opt) {
         case 'p': {
             cli_role = CLI_PROXY;
@@ -484,10 +481,6 @@ int main(int argc, char *argv[])
         case 'c': {
             command_string = std::string(optarg);
             cli_role       = CLI_NON_INTERACTIVE;
-            break;
-        }
-        case 'w': {
-            g_wait_time = std::atoi(optarg);
             break;
         }
         case 'a': {
