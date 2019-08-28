@@ -659,7 +659,10 @@ void cli_bml::connection_map_cb(const struct BML_NODE_ITER *node_iter, bool to_c
             bml_utils_dump_conn_map(pThis->conn_map_nodes, network_utils::ZERO_MAC_STRING, ind, ss);
             pThis->conn_map_nodes.clear();
         }
+        // Printing the connection map
         std::cout << std::endl << ss.str();
+        //No need to wait anymore - this is the last fragment
+        pThis->pending_response = false;
     }
 }
 
@@ -682,7 +685,6 @@ void cli_bml::connection_map_to_console_cb(const struct BML_NODE_ITER *node_iter
         std::cout << "ERROR: Internal error - invalid context!" << std::endl;
         return;
     }
-    pThis->pending_response = false;
 }
 
 void cli_bml::map_query_to_socket_cb(const struct BML_NODE_ITER *node_iter)
