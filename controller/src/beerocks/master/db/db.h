@@ -508,7 +508,7 @@ public:
     };
 
     struct bss_info_conf_t {
-        uint8_t operating_class;
+        std::list<uint8_t> operating_class;
         std::string ssid;
         WSC::eWscAuth authentication_type;
         WSC::eWscEncr encryption_type;

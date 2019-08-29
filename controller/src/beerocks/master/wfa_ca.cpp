@@ -104,12 +104,17 @@ static std::string parse_bss_info(const std::string &bss_info_str,
     bss_info_conf = {};
 
     // Operating class
-    uint operating_class = string_utils::stoi(confs[1]);
-    if (operating_class > UINT8_MAX || operating_class == 0) {
-        err_string = "invalid operating class";
+    auto &operating_class_str = confs[1];
+    if (operating_class_str == "8x") {
+        bss_info_conf.operating_class = {81, 83, 84};
+    } else if (operating_class_str == "11x") {
+        bss_info_conf.operating_class = {115, 116};
+    } else if (operating_class_str == "12x") {
+        bss_info_conf.operating_class = {124, 125, 126};
+    } else {
+        err_string = "invalid operating class " + operating_class_str;
         return std::string();
     }
-    bss_info_conf.operating_class = operating_class;
 
     // SSID
     bss_info_conf.ssid = confs[2];
