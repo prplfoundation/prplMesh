@@ -80,7 +80,13 @@
 			"memory": "cpp",
 			"future": "cpp",
 			"optional": "cpp",
-			"string_view": "cpp"
+			"string_view": "cpp",
+			"algorithm": "cpp",
+			"iterator": "cpp",
+			"map": "cpp",
+			"memory_resource": "cpp",
+			"set": "cpp",
+			"string": "cpp"
 		}
 	}
 }
