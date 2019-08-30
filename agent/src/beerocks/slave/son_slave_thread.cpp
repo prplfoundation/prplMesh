@@ -27,6 +27,7 @@
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
 #include <tlvf/ieee_1905_1/tlvWscM2.h>
+#include <tlvf/wfa_map/tlvApMetricQuery.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
@@ -481,6 +482,8 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_ap_capability_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE:
         return handle_client_association_request(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE:
+        return handle_ap_metrics_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
         return handle_channel_preference_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
@@ -4886,6 +4889,25 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
         LOG(DEBUG) << "sending STEERING_COMPLETED_MESSAGE back to controller";
     }
     return send_cmdu_to_controller(cmdu_tx);
+}
+
+bool slave_thread::handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    auto tlv_type  = cmdu_rx.getNextTlvType();
+    while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
+        if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_AP_METRIC_QUERY)) {
+            auto ap_metrics_query_tlv = cmdu_tx.addClass<wfa_map::tlvApMetricQuery>();
+            if (!ap_metrics_query_tlv) {
+                LOG(ERROR) << "addClass tlvApMetricQuery has failed";
+                return false;
+            }
+            LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
+                       << ", with TLV type=" << std::hex << int(ap_metrics_query_tlv->type());
+        }
+        tlv_type = cmdu_tx.getNextTlvType();
+    }
+    return true;
 }
 
 bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
