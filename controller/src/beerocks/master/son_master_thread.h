@@ -22,6 +22,7 @@
 #include <mapf/common/encryption.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
 #include <tlvf/ieee_1905_1/tlvWscM2.h>
+#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 
 #include <cstddef>
 #include <ctime>
@@ -52,11 +53,14 @@ private:
                                 std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
                                 ieee1905_1::CmduMessageRx &cmdu_rx);
     void handle_cmdu_control_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
-    bool handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx,
+    bool handle_intel_slave_join(Socket *sd,
+                                 std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
+                                 ieee1905_1::CmduMessageRx &cmdu_rx,
                                  ieee1905_1::CmduMessageTx &cmdu_tx);
-    bool handle_non_intel_slave_join(Socket *sd, std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1,
-                                     std::string bridge_mac, std::string radio_mac,
-                                     ieee1905_1::CmduMessageTx &cmdu_tx);
+    bool handle_non_intel_slave_join(
+        Socket *sd, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
+        std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1, std::string bridge_mac,
+        std::string radio_mac, ieee1905_1::CmduMessageTx &cmdu_tx);
 
     // 1905 messages handlers
     bool handle_cmdu_1905_autoconfiguration_search(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
@@ -66,6 +70,8 @@ private:
                                                      ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_operating_channel_report(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 
+    bool autoconfig_wsc_parse_radio_caps(
+        std::string radio_mac, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps);
     // Autoconfig encryption support
     bool autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> m1);
     bool autoconfig_wsc_add_m2_encrypted_settings(std::shared_ptr<ieee1905_1::tlvWscM2> m2,

@@ -38,9 +38,6 @@
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
-#include <tlvf/ieee_1905_1/tlvWscM1.h>
-#include <tlvf/ieee_1905_1/tlvWscM2.h>
-#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
@@ -697,7 +694,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
 
     if (intel_agent) {
         LOG(INFO) << "Intel radio agent join (al_mac=" << al_mac << " ruid=" << ruid;
-        if (!handle_intel_slave_join(sd, cmdu_rx, cmdu_tx)) {
+        if (!handle_intel_slave_join(sd, radio_basic_caps, cmdu_rx, cmdu_tx)) {
             LOG(ERROR) << "Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid
                        << ")";
             return false;
@@ -707,7 +704,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         // Multi-AP Agent doesn't say anything about the bridge, so we have to rely on Intel Slave Join for that.
         // We'll use AL-MAC as the bridge
         // TODO convert source address into AL-MAC address
-        if (!handle_non_intel_slave_join(sd, tlvwscM1, al_mac, ruid, cmdu_tx)) {
+        if (!handle_non_intel_slave_join(sd, radio_basic_caps, tlvwscM1, al_mac, ruid, cmdu_tx)) {
             LOG(ERROR) << "Non-Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid
                        << ")";
             return false;
@@ -998,8 +995,9 @@ bool master_thread::handle_cmdu_1905_operating_channel_report(Socket *sd,
     return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
 }
 
-bool master_thread::handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx,
-                                            ieee1905_1::CmduMessageTx &cmdu_tx)
+bool master_thread::handle_intel_slave_join(
+    Socket *sd, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
+    ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx)
 {
     auto tlv_vs = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
     if (!tlv_vs) {
@@ -1412,6 +1410,7 @@ bool master_thread::handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageR
     } else {
         database.set_hostap_band_capability(radio_mac, beerocks::SUBBAND_CAPABILITY_UNKNOWN);
     }
+    autoconfig_wsc_parse_radio_caps(radio_mac, radio_caps);
 
     // send JOINED_RESPONSE with son config
     {
@@ -1527,10 +1526,67 @@ bool master_thread::handle_intel_slave_join(Socket *sd, ieee1905_1::CmduMessageR
     return true;
 }
 
-bool master_thread::handle_non_intel_slave_join(Socket *sd,
-                                                std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1,
-                                                std::string bridge_mac, std::string radio_mac,
-                                                ieee1905_1::CmduMessageTx &cmdu_tx)
+/**
+ * @brief Parse the radio basic capabilities TLV and store the operating class
+ * in the database as supported channels.
+ * 
+ * @param radio_mac radio mac address (RUID in non-Intel agent case)
+ * @param radio_caps radio basic capabilities TLV received from the remote agent
+ * @return true on success
+ * @return false on failure
+ */
+bool master_thread::autoconfig_wsc_parse_radio_caps(
+    std::string radio_mac, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps)
+{
+    // read all operating class list
+    auto operating_classes_list_length = radio_caps->operating_classes_info_list_length();
+    if (operating_classes_list_length > beerocks::message::SUPPORTED_CHANNELS_LENGTH) {
+        LOG(WARNING) << "operating class info list larger then maximum supported channels";
+        operating_classes_list_length = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
+    }
+    for (int oc_idx = 0; oc_idx < operating_classes_list_length; oc_idx++) {
+        std::stringstream ss;
+        auto operating_class_tuple = radio_caps->operating_classes_info_list(oc_idx);
+        if (!std::get<0>(operating_class_tuple)) {
+            LOG(ERROR) << "getting operating class entry has failed!";
+            return false;
+        }
+        auto &op_class                  = std::get<1>(operating_class_tuple);
+        auto operating_class            = op_class.operating_class();
+        auto maximum_transmit_power_dbm = op_class.maximum_transmit_power_dbm();
+        ss << "operating_class=" << int(operating_class) << std::endl;
+        ss << "maximum_transmit_power_dbm=" << int(maximum_transmit_power_dbm) << std::endl;
+        ss << "channel list={ ";
+        auto channel_list = son::wireless_utils::operating_class_to_channel_set(operating_class);
+        for (auto channel : channel_list) {
+            ss << int(channel) << " ";
+        }
+        ss << "}" << std::endl;
+        ss << "statically_non_operable_channel_list={ ";
+
+        auto non_oper_channels_list_length =
+            op_class.statically_non_operable_channels_list_length();
+        std::vector<uint8_t> non_operable_channels;
+        for (int ch_idx = 0; ch_idx < non_oper_channels_list_length; ch_idx++) {
+            auto ch_tuple = op_class.statically_non_operable_channels_list(ch_idx);
+            auto channel  = std::get<1>(ch_tuple);
+            ss << int(channel) << " ";
+            non_operable_channels.push_back(channel);
+        }
+        ss << " }" << std::endl;
+        LOG(DEBUG) << ss.str();
+        // store operating class in the DB for this hostap
+        database.add_hostap_supported_operating_class(
+            radio_mac, operating_class, maximum_transmit_power_dbm, non_operable_channels);
+    }
+
+    return true;
+}
+
+bool master_thread::handle_non_intel_slave_join(
+    Socket *sd, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
+    std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1, std::string bridge_mac, std::string radio_mac,
+    ieee1905_1::CmduMessageTx &cmdu_tx)
 {
 
     // Multi-AP Agent doesn't say anything about the backhaul, so simulate ethernet backhaul to satisfy
@@ -1640,7 +1696,7 @@ bool master_thread::handle_non_intel_slave_join(Socket *sd,
     // sd is assigned to src bridge mac
     sd->setPeerMac(bridge_mac);
 
-    // TODO database.set_hostap_supported_channels from radio_basic_caps->operating_classes_info_list
+    autoconfig_wsc_parse_radio_caps(radio_mac, radio_caps);
     // TODO assume SSIDs are not hidden
     database.set_hostap_advertise_ssid_flag(radio_mac, true);
 
