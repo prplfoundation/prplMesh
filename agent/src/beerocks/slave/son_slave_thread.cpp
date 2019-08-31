@@ -3720,8 +3720,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 LOG(ERROR) << "Failed creating operating classes info list";
                 return false;
             }
-            operationClassesInfo->operating_class()            = i;     // dummy value
-            operationClassesInfo->maximum_transmit_power_dbm() = i + 1; // dummy value
+            operationClassesInfo->operating_class()            = 81; // dummy value
+            operationClassesInfo->maximum_transmit_power_dbm() = 0;  // dummy value
 
             // TODO - the number of statically non operable channels can be 0 - meaning it is
             // an optional variable length list, this is not yet supported in tlvf according to issue #8
@@ -3731,7 +3731,10 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 return false;
             }
             // Set Dummy value for non operable channel list
-            std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) = i;
+            auto non_operable_channel =
+                *son::wireless_utils::operating_class_to_channel_set(81).begin();
+            std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) =
+                non_operable_channel;
 
             if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
                 LOG(ERROR) << "add_operating_classes_info_list failed";
