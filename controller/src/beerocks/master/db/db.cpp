@@ -1232,6 +1232,21 @@ const std::vector<beerocks_message::sWifiChannel> db::get_hostap_supported_chann
     return n->hostap->supported_channels;
 }
 
+std::string db::get_hostap_supported_channels_string(const std::string &radio_mac)
+{
+    std::ostringstream os;
+    auto supported_channels = get_hostap_supported_channels(radio_mac);
+    for (const auto &val : supported_channels) {
+        if (val.channel > 0) {
+            os << " ch = " << int(val.channel) << " | dfs = " << int(val.is_dfs_channel)
+               << " | tx_pow = " << int(val.tx_pow) << " | noise = " << int(val.noise)
+               << " [dbm] | bss_overlap = " << int(val.bss_overlap) << std::endl;
+        }
+    }
+
+    return os.str();
+}
+
 bool db::set_hostap_band_capability(std::string mac, beerocks::eRadioBandCapability capability)
 {
     auto n = get_node(mac);
