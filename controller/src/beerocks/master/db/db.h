@@ -279,6 +279,7 @@ public:
                                        int length);
     const std::vector<beerocks_message::sWifiChannel>
     get_hostap_supported_channels(std::string mac);
+    std::string get_hostap_supported_channels_string(const std::string &radio_mac);
 
     bool set_hostap_band_capability(std::string mac, beerocks::eRadioBandCapability capability);
     beerocks::eRadioBandCapability get_hostap_band_capability(std::string mac);
