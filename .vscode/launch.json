@@ -76,6 +76,21 @@
             ]
         },
         {
+            "name": "(gdb) Attach to prplMesh Monitor",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/../build/install/bin/beerocks_monitor",
+            "processId": "${command:pickProcess}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "(gdb) Attach to prplMesh CLI",
             "type": "cppdbg",
             "request": "attach",
