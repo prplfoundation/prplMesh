@@ -165,6 +165,7 @@ bool ap_wlan_hal_dummy::read_acs_report()
 {
     uint8_t idx = 0;
     if (m_radio_info.is_5ghz == false) {
+        m_radio_info.channel = 1;
         // 2.4G simulated report
         for (uint16_t ch = 1; ch <= 11; ch++) {
             m_radio_info.supported_channels[idx].channel     = ch;
@@ -175,6 +176,7 @@ bool ap_wlan_hal_dummy::read_acs_report()
         }
     } else {
         // 5G simulated report
+        m_radio_info.channel = 149;
         for (uint16_t ch = 36; ch <= 64; ch += 4) {
             for (uint16_t step = 0; step < 3; step++) {
                 m_radio_info.supported_channels[idx].channel     = ch;
