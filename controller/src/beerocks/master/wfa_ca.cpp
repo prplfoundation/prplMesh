@@ -489,8 +489,6 @@ void wfa_ca::handle_wfa_ca_message(
         std::unordered_map<std::string, std::string> params{{"destalid", std::string()},
                                                             {"messagetypevalue", std::string()}};
 
-        const auto mandatory_params_num = params.size();
-
         if (!parse_params(cmd_tokens_vec, params, err_string)) {
             LOG(ERROR) << err_string;
             reply(sd, cmdu_tx, eWfaCaStatus::INVALID, err_string);
@@ -534,9 +532,35 @@ void wfa_ca::handle_wfa_ca_message(
             break;
         }
 
-        // Check if additional tlvs were added to command. If yes, then needs to parse the tlv and
-        // send it as it.
-        if (mandatory_params_num < params.size()) {
+        // Check if CMDU message type has preprepared CMDU which can be loaded
+        auto certification_tx_buffer = database.get_certification_tx_buffer();
+        if (!certification_tx_buffer) {
+            LOG(ERROR) << "certification_tx_buffer is not allocated";
+            reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
+            break;
+        }
+        ieee1905_1::CmduMessageTx external_cmdu_tx(
+            certification_tx_buffer.get() + sizeof(beerocks::message::sUdsHeader),
+            message::MESSAGE_BUFFER_LENGTH - sizeof(beerocks::message::sUdsHeader));
+        if (create_cmdu(external_cmdu_tx, ieee1905_1::eMessageType(message_type), database,
+                        err_string)) {
+            // Success
+            if (!son_actions::send_cmdu_to_agent(agent_sd, external_cmdu_tx)) {
+                LOG(ERROR) << "Failed to send CMDU";
+                reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
+                break;
+            }
+
+        } else if (!err_string.empty()) {
+            // Failure
+            LOG(ERROR) << "cmdu creation of type 0x" << message_type_str << ", has failed";
+            reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_string);
+            break;
+
+        } else {
+            // CMDU was not loaded from preprepared buffer, and need to be created manually, and
+            // use TLV data from the command (if exists)
+
             if (!cmdu_tx.create(g_mid, ieee1905_1::eMessageType(message_type))) {
                 LOG(ERROR) << "cmdu creation of type 0x" << message_type_str << ", has failed";
                 reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
@@ -564,28 +588,6 @@ void wfa_ca::handle_wfa_ca_message(
                       << " TLVs, length " << cmdu_tx.getMessageLength();
 
             if (!son_actions::send_cmdu_to_agent(agent_sd, cmdu_tx)) {
-                LOG(ERROR) << "Failed to send CMDU";
-                reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
-                break;
-            }
-
-            // If not using TLVs from the command, create CMDU from existing buffer
-        } else {
-            auto certification_tx_buffer = database.get_certification_tx_buffer();
-            if (!certification_tx_buffer) {
-                LOG(ERROR) << "certification_tx_buffer is not allocated";
-            }
-            ieee1905_1::CmduMessageTx external_cmdu_tx(
-                certification_tx_buffer.get() + sizeof(beerocks::message::sUdsHeader),
-                message::MESSAGE_BUFFER_LENGTH - sizeof(beerocks::message::sUdsHeader));
-
-            if (!create_cmdu(external_cmdu_tx, ieee1905_1::eMessageType(message_type))) {
-                LOG(ERROR) << "Failed to create CMDU";
-                reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
-                break;
-            }
-
-            if (!son_actions::send_cmdu_to_agent(agent_sd, external_cmdu_tx)) {
                 LOG(ERROR) << "Failed to send CMDU";
                 reply(sd, cmdu_tx, eWfaCaStatus::ERROR, err_internal);
                 break;
@@ -676,48 +678,26 @@ void wfa_ca::handle_wfa_ca_message(
 }
 
 /**
- * @brief Create CMDU to send when receiving WFA-CA command "DEV_SEND_1905".
- * This function may create the CMDU from scratch or use the certification buffer which loaded with
- * preperared from advance.
+ * @brief Create CMDU manually by loading CMDU from preperared buffer, or getting the data to fill 
+ * TLVs from the database.
+ * If the function fails but err_string string is empty, then it means that the CMDU was not handled
+ * by this function, and the caller will need to create the CMDU by itself.
  * 
  * @param[in,out] cmdu_tx CmduTx message object created from certification_tx_buffer.
- * @param[in] message_type CMDU message type to create. 
- * @return true if successful, false if not.
+ * @param[in] message_type CMDU message type to create.
+ * @param[in] database Controllers database.
+ * @param[out] err_string Contains an error description if the function fails.
+ * @return true if CMDU was successfully loaded, false with empty err_string if CMDU was not loaded,
+ * but didn't fail, false with non-empty err_string on failure.
  */
-bool wfa_ca::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx, ieee1905_1::eMessageType message_type)
+bool wfa_ca::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx, ieee1905_1::eMessageType message_type,
+                         db &database, std::string &err_string)
 {
     std::shared_ptr<ieee1905_1::cCmduHeader> cmdu_header;
 
     int tlv_type;
 
     switch (message_type) {
-    case ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE: {
-        cmdu_header = cmdu_tx.create(g_mid, ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE);
-        if (!cmdu_header) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-        break;
-    }
-    case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE: {
-
-        cmdu_header =
-            cmdu_tx.create(g_mid, ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE);
-        if (!cmdu_header) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-        break;
-    }
-    case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE: {
-
-        cmdu_header = cmdu_tx.create(g_mid, ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE);
-        if (!cmdu_header) {
-            LOG(ERROR) << "Failed building AP_CAPABILITY_QUERY message!";
-            return false;
-        }
-        break;
-    }
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE: {
 
         cmdu_header = cmdu_tx.load();
@@ -731,11 +711,13 @@ bool wfa_ca::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx, ieee1905_1::eMessag
             if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_CHANNEL_PREFERENCE)) {
                 if (!cmdu_tx.addClass<wfa_map::tlvChannelPreference>()) {
                     LOG(ERROR) << "addClass tlvChannelPreference has failed";
+                    err_string = err_internal;
                     return false;
                 }
             } else if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_TRANSMIT_POWER_LIMIT)) {
                 if (!cmdu_tx.addClass<wfa_map::tlvTransmitPowerLimit>()) {
                     LOG(ERROR) << "addClass tlvTransmitPowerLimit has failed";
+                    err_string = err_internal;
                     return false;
                 }
             }
@@ -744,11 +726,14 @@ bool wfa_ca::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx, ieee1905_1::eMessag
         break;
     }
     default:
-        LOG(ERROR) << "Missing handler for message_type=" << std::hex << int(message_type);
-        break;
+        // If message type handler is not implemented, then return false with empty error, so the
+        // caller would know that it was not handled.
+        err_string = std::string();
+        return false;
     }
 
     if (!cmdu_header) {
+        err_string = err_internal;
         return false;
     }
 
