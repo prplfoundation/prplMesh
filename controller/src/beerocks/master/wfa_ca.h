@@ -47,7 +47,8 @@ private:
                              std::string &err_string);
 
     static bool create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx,
-                            ieee1905_1::eMessageType message_type);
+                            ieee1905_1::eMessageType message_type, db &database,
+                            std::string &err_string);
 
     struct tlv_hex_t {
         std::string *type   = nullptr;
