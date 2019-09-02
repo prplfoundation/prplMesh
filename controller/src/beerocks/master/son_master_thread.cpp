@@ -515,7 +515,8 @@ bool master_thread::autoconfig_wsc_authentication(std::shared_ptr<ieee1905_1::tl
  * @return true on success
  * @return false on failure
  */
-bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> tlvWscM1)
+bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> tlvWscM1,
+                                          const db::bss_info_conf_t *bss_info_conf)
 {
     if (!tlvWscM1) {
         LOG(ERROR) << "Invalid M1";
@@ -573,19 +574,26 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
     // Create ConfigData
     uint8_t buf[1024];
     WSC::cConfigData config_data(buf, sizeof(buf), false, true);
-    config_data.set_ssid("prplMesh-ssid");
-    config_data.authentication_type_attr().data = WSC::eWscAuth::WSC_AUTH_WPA2;
-    config_data.encryption_type_attr().data     = WSC::eWscEncr::WSC_ENCR_AES;
-    std::fill(config_data.network_key_attr().data,
-              config_data.network_key_attr().data + config_data.network_key_attr().data_length,
-              0xaa); //DUMMY
+    if (bss_info_conf) {
+        config_data.set_ssid(bss_info_conf->ssid);
+        config_data.authentication_type_attr().data = bss_info_conf->authentication_type;
+        config_data.encryption_type_attr().data     = bss_info_conf->encryption_type;
+        std::copy(bss_info_conf->network_key.c_str(),
+                  bss_info_conf->network_key.c_str() + bss_info_conf->network_key.size(),
+                  config_data.network_key_attr().data);
+        config_data.multiap_attr().subelement_value = bss_info_conf->bss_type;
 
-    LOG(DEBUG) << "WSC config_data:" << std::hex << std::endl
-               << "     ssid: " << config_data.ssid() << std::endl
-               << "     authentication_type: " << int(config_data.authentication_type_attr().data)
-               << std::endl
-               << "     encryption_type: " << int(config_data.encryption_type_attr().data)
-               << std::dec << std::endl;
+        LOG(DEBUG) << "WSC config_data:" << std::hex << std::endl
+                   << "     ssid: " << config_data.ssid() << std::endl
+                   << "     authentication_type: "
+                   << int(config_data.authentication_type_attr().data) << std::endl
+                   << "     encryption_type: " << int(config_data.encryption_type_attr().data)
+                   << std::dec << std::endl;
+    } else {
+        // Tear down. No need to set any parameter except the teardown bit and the MAC address.
+        config_data.multiap_attr().subelement_value = WSC::eWscVendorExtSubelementBssType::TEARDOWN;
+        LOG(DEBUG) << "WSC config_data: tear down";
+    }
 
     config_data.class_swap();
 
@@ -685,8 +693,39 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
 
     tlvRuid->radio_uid() = network_utils::mac_from_string(ruid);
 
-    for (int i = 0; i < radio_basic_caps->maximum_number_of_bsss_supported(); i++) {
-        if (!autoconfig_wsc_add_m2(tlvwscM1)) {
+    const auto &bss_info_confs = database.get_bss_info_configuration(al_mac);
+    uint8_t num_bsss           = 0;
+
+    for (const auto &bss_info_conf : bss_info_confs) {
+        // Check if the radio supports it
+        if (!son_actions::has_matching_operating_class(*radio_basic_caps, bss_info_conf)) {
+            LOG(INFO) << "Skipping " << bss_info_conf.ssid << " due to operclass mismatch";
+            continue;
+        }
+        if (!(tlvwscM1->authentication_type_flags_attr().data &
+              uint16_t(bss_info_conf.authentication_type))) {
+            LOG(INFO) << "Skipping " << bss_info_conf.ssid << " due to auth mismatch";
+            continue;
+        }
+        if (!(tlvwscM1->encryption_type_flags_attr().data &
+              uint16_t(bss_info_conf.encryption_type))) {
+            LOG(INFO) << "Skipping " << bss_info_conf.ssid << " due to encr mismatch";
+            continue;
+        }
+        if (num_bsss >= radio_basic_caps->maximum_number_of_bsss_supported()) {
+            LOG(INFO) << "Configured #BSS exceeds maximum for " << al_mac << " radio " << ruid;
+            break;
+        }
+        if (!autoconfig_wsc_add_m2(tlvwscM1, &bss_info_conf)) {
+            LOG(ERROR) << "Failed setting M2 attributes";
+            return false;
+        }
+        num_bsss++;
+    }
+
+    // If no BSS (either because none are configured, or because they don't match), tear down.
+    if (num_bsss == 0) {
+        if (!autoconfig_wsc_add_m2(tlvwscM1, nullptr)) {
             LOG(ERROR) << "Failed setting M2 attributes";
             return false;
         }
