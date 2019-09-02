@@ -485,9 +485,10 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_channel_preference_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
         return handle_channel_selection_request(sd, cmdu_rx);
-    case ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE: {
+    case ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE:
         return handle_client_capability_query(sd, cmdu_rx);
-    }
+    case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE:
+        return handle_multi_ap_policy_config_request(sd, cmdu_rx);
     default:
         LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
         return false;
@@ -4779,6 +4780,23 @@ bool slave_thread::handle_ap_capability_query(Socket *sd, ieee1905_1::CmduMessag
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received AP_CAPABILITY_QUERY_MESSAGE, mid=" << std::dec << int(mid);
     return true;
+}
+
+bool slave_thread::handle_multi_ap_policy_config_request(Socket *sd,
+                                                         ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    // TODO: This is a stub handler for the purpose of controller certification testing, will be
+    // implemented later on agent certification.
+    auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE, mid=" << std::hex << int(mid);
+
+    // send ACK_MESSAGE back to the controller
+    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+
+    return send_cmdu_to_controller(cmdu_tx);
 }
 
 bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
