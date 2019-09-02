@@ -9,8 +9,4 @@ tlvMacAddress:
     _type: eTlvType
     _value_const: TLV_MAC_ADDRESS
   length: uint16_t
-  mac:
-    _type: uint8_t
-    _length: [ 6 ]
-    _value: 0
-
+  mac: sMacAddr

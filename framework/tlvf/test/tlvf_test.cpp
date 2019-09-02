@@ -58,8 +58,7 @@ int test_int_len_list()
     memset(tx_buffer, 0, sizeof(tx_buffer));
     {
         auto tlv = tlvMacAddress(tx_buffer, sizeof(tx_buffer), false, true);
-        auto mac = &std::get<1>(tlv.mac(0));
-        std::copy_n(gTlvMacAddress, 6, mac);
+        std::copy_n(gTlvMacAddress, 6, tlv.mac().oct);
         tlv.class_swap(); //finalize
         LOG(DEBUG) << "TX: " << std::endl << dump_buffer(tx_buffer, tlv.getLen());
     }
@@ -68,8 +67,8 @@ int test_int_len_list()
     memcpy(rx_buffer, tx_buffer, sizeof(rx_buffer));
     {
         auto tlv = tlvMacAddress(tx_buffer, sizeof(tx_buffer), true, true);
-        auto mac = &std::get<1>(tlv.mac(0));
-        if (!std::equal(mac, mac + 6, gTlvMacAddress)) {
+        auto mac = tlv.mac();
+        if (!std::equal(mac.oct, mac.oct + 6, gTlvMacAddress)) {
             MAPF_ERR("MAC address in received TLV does not match expected result");
             errors++;
         }
