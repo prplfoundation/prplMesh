@@ -57,6 +57,7 @@ private:
         bool fConnected, std::shared_ptr<SSlaveSockets> pSocket = nullptr); // cmdu_duplicate
 
     bool send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> soc);
+    bool send_1905_topology_discovery_message();
 
     // cmdu handlers
     bool handle_master_message(ieee1905_1::CmduMessageRx &cmdu_rx,

@@ -26,6 +26,7 @@
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
+#include <tlvf/ieee_1905_1/tlvMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
@@ -312,6 +313,17 @@ void main_thread::after_select(bool timeout)
             soc->sta_wlan_hal->process_int_events();
             clear_ready(soc->sta_hal_int_events);
         }
+    }
+
+    // Send topology discovery every 60 seconds according to IEEE_Std_1905.1-2013 specification
+    static std::chrono::steady_clock::time_point discovery_timestamp =
+        std::chrono::steady_clock::now();
+    auto now     = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - discovery_timestamp);
+    if ((m_eFSMState == EState::CONNECTED) ||
+        (m_eFSMState == EState::OPERATIONAL && elapsed.count() == 60)) {
+        discovery_timestamp = now;
+        send_1905_topology_discovery_message();
     }
 }
 
@@ -802,6 +814,30 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
     }
 
     return (true);
+}
+
+bool main_thread::send_1905_topology_discovery_message()
+{
+    auto cmdu_hdr = cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE);
+    if (!cmdu_hdr) {
+        LOG(ERROR) << "Failed to create TOPOLOGY_DISCOVERY_MESSAGE cmdu";
+        return false;
+    }
+    auto tlvAlMac = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddressType>();
+    if (!tlvAlMac) {
+        LOG(ERROR) << "Failed to create tlvAlMacAddressType tlv";
+        return false;
+    }
+    tlvAlMac->mac() = network_utils::mac_from_string(bridge_info.mac);
+    auto tlvMac     = cmdu_tx.addClass<ieee1905_1::tlvMacAddress>();
+    if (!tlvMac) {
+        LOG(ERROR) << "Failed to create tlvMacAddress tlv";
+        return false;
+    }
+    tlvMac->mac() = network_utils::mac_from_string(bridge_info.mac);
+
+    LOG(DEBUG) << "send_1905_topology_discovery_message, bridge_mac=" << bridge_info.mac;
+    return send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
 }
 
 bool main_thread::send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> soc)
