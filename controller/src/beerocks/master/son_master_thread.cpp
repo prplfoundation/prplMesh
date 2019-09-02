@@ -595,6 +595,23 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
         LOG(DEBUG) << "WSC config_data: tear down";
     }
 
+    // The MAC address in the config data is tricky... According to "Wi-Fi Simple Configuration
+    // Technical Specification v2.0.6", section 7.2.2 "Validation of Configuration Data" the MAC
+    // address should be validated to match the Enrollee's own MAC address. "IEEE Std 1905.1-2013"
+    // section 10.1.2, Table 10-1 "IEEE 802.11 settings (ConfigData) in M2 frame" says that it
+    // should be "AP’s MAC address (BSSID)". The Multi-AP doesn't say anything about the MAC
+    // addresses in M2, but it does say that the Enrollee MAC address in the M1 message must be the
+    // AL-MAC address.
+    //
+    // Clearly, we can't use the real BSSID for the MAC address, since it's the responsibility of
+    // the agent to use one of its assigned unique addresses as BSSID, and we don't have that
+    // information in the controller. So we could use the AL-MAC addresses or the Radio UID. It
+    // seems the most logical to make sure it matches the MAC address in the M1, since that stays
+    // the closest to the WSC-specified behaviour.
+    //
+    // Note that the BBF 1905.1 implementation (meshComms) simply ignores the MAC address in M2.
+    config_data.bssid_attr().data = tlvWscM1->mac_attr().data;
+
     config_data.class_swap();
 
     if (!autoconfig_wsc_add_m2_encrypted_settings(tlvWscM2, config_data, authkey, keywrapkey))
