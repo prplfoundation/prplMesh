@@ -35,6 +35,7 @@
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
+#include <tlvf/ieee_1905_1/tlvMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
@@ -224,6 +225,8 @@ bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessa
         return handle_cmdu_1905_channel_selection_response(sd, cmdu_rx);
     case ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE:
         return handle_cmdu_1905_operating_channel_report(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE:
+        return handle_cmdu_1905_topology_discovery(sd, cmdu_rx);
     default:
         break;
     }
@@ -1049,6 +1052,30 @@ bool master_thread::handle_cmdu_1905_operating_channel_report(Socket *sd,
     }
 
     return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+}
+
+bool master_thread::handle_cmdu_1905_topology_discovery(Socket *sd,
+                                                        ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(INFO) << "Received TOPOLOGY_DISCOVERY_MESSAGE, mid=" << std::dec << int(mid);
+    auto tlvAlMac = cmdu_rx.addClass<ieee1905_1::tlvAlMacAddressType>();
+    if (!tlvAlMac) {
+        LOG(ERROR) << "addClass tlvAlMacAddressType failed";
+        return false;
+    }
+    auto al_mac = network_utils::mac_to_string(tlvAlMac->mac());
+    if (database.has_node(al_mac)) {
+        LOG(DEBUG) << "Skip setting AL MAC " << al_mac << " node";
+        return true;
+    }
+    LOG(DEBUG) << "adding node " << al_mac << " under " << network_utils::ZERO_MAC_STRING
+               << ", and mark as type " << beerocks::TYPE_IRE;
+    database.add_node(al_mac, network_utils::ZERO_MAC_STRING, beerocks::TYPE_IRE);
+    database.set_node_state(al_mac, beerocks::STATE_CONNECTED);
+    database.set_node_socket(al_mac, sd);
+
+    return true;
 }
 
 bool master_thread::handle_intel_slave_join(
