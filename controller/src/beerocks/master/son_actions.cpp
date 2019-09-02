@@ -432,6 +432,29 @@ bool son_actions::validate_beacon_measurement_report(beerocks_message::sBeaconRe
            (network_utils::mac_to_string(report.bssid) == bssid);
 }
 
+/**
+ * @brief Check if the operating classes of @a radio_basic_caps matches any of the operating classes
+ *        in @a bss_info_conf
+ *
+ * @param radio_basic_caps The AP Radio Basic Capabilities TLV of the radio
+ * @param bss_info_conf The BSS Info we try to configure
+ * @return true if one of the operating classes overlaps, false if they are disjoint
+ */
+bool son_actions::has_matching_operating_class(
+    wfa_map::tlvApRadioBasicCapabilities &radio_basic_caps,
+    const db::bss_info_conf_t &bss_info_conf)
+{
+    for (uint8_t i = 0; i < radio_basic_caps.operating_classes_info_list_length(); i++) {
+        auto operating_class_info = std::get<1>(radio_basic_caps.operating_classes_info_list(i));
+        for (auto operating_class : bss_info_conf.operating_class) {
+            if (operating_class == operating_class_info.operating_class()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool son_actions::send_cmdu_to_agent(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
                                      const std::string &radio_mac)
 {
