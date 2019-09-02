@@ -23,6 +23,7 @@
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
+#include <tlvf/ieee_1905_1/tlvLinkMetricQuery.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
@@ -484,6 +485,8 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_client_association_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE:
         return handle_ap_metrics_query(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::LINK_METRIC_QUERY_MESSAGE:
+        return handle_link_metrics_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
         return handle_channel_preference_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
@@ -4904,6 +4907,25 @@ bool slave_thread::handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx
             }
             LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
                        << ", with TLV type=" << std::hex << int(ap_metrics_query_tlv->type());
+        }
+        tlv_type = cmdu_tx.getNextTlvType();
+    }
+    return true;
+}
+
+bool slave_thread::handle_link_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    auto tlv_type  = cmdu_rx.getNextTlvType();
+    while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
+        if (tlv_type == int(ieee1905_1::eTlvType::TLV_LINK_METRIC_QUERY)) {
+            auto link_metrics_query_tlv = cmdu_tx.addClass<ieee1905_1::tlvLinkMetricQuery>();
+            if (!link_metrics_query_tlv) {
+                LOG(ERROR) << "addClass tlvLinkMetricQuery has failed";
+                return false;
+            }
+            LOG(DEBUG) << "Received LINK_METRIC_QUERY_MESSAGE , mid=" << std::hex << int(mid)
+                       << ", with TLV type=" << std::hex << int(link_metrics_query_tlv->type());
         }
         tlv_type = cmdu_tx.getNextTlvType();
     }
