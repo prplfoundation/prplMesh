@@ -107,6 +107,16 @@ int test_complex_list()
     std::get<1>(fourthTlv->simple_list(0)) = 0x0bb0;
     std::get<1>(fourthTlv->simple_list(1)) = 0x0bb1;
 
+    if (true == fourthTlv->set_test_string("1234567890")) {
+        LOG(ERROR) << "FAIL test maximum size string";
+        errors++;
+    }
+    // test allocation of correct length (less then max)
+    if (false == fourthTlv->set_test_string("1234567")) {
+        LOG(ERROR) << "FAIL test normal size string";
+        errors++;
+    }
+
     for (int i = 0; i < complex_list_entries; i++) {
         auto cmplx    = fourthTlv->create_complex_list();
         cmplx->var1() = 0xbbbbaaaa;
@@ -138,6 +148,7 @@ int test_complex_list()
         LOG(ERROR) << "Could add var1 a second time";
         errors++;
     }
+
     LOG(DEBUG) << "TLV 4 length " << fourthTlv->length();
 
     LOG(DEBUG) << "Finalize";
@@ -156,6 +167,10 @@ int test_complex_list()
     if (tlv4 == nullptr) {
         MAPF_ERR("TLV4 is NULL");
         return ++errors;
+    }
+    if (!tlv4->test_string_str().compare("1234567")) {
+        MAPF_ERR("FAIL, expected  \"1234567\", received " << tlv4->test_string_str());
+        errors++;
     }
     if (tlv4->complex_list_length() != complex_list_entries) {
         MAPF_ERR("Invalid complex list num of entries" << tlv4->complex_list_length());

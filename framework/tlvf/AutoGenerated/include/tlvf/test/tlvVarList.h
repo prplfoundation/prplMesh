@@ -20,8 +20,8 @@
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include <tuple>
-#include <vector>
 #include <tlvf/tlvfutils.h>
+#include <vector>
 class cInner;
 
 class tlvTestVarList : public BaseClass
@@ -37,6 +37,12 @@ class tlvTestVarList : public BaseClass
         uint8_t& simple_list_length();
         std::tuple<bool, uint16_t&> simple_list(size_t idx);
         bool alloc_simple_list(size_t count = 1);
+        uint8_t& test_string_length();
+        std::string test_string_str();
+        char* test_string(size_t length = 0);
+        bool set_test_string(const std::string& str);
+        bool set_test_string(const char buffer[], size_t size);
+        bool alloc_test_string(size_t count = 1);
         uint8_t& complex_list_length();
         std::tuple<bool, cInner&> complex_list(size_t idx);
         std::shared_ptr<cInner> create_complex_list();
@@ -61,6 +67,9 @@ class tlvTestVarList : public BaseClass
         uint16_t* m_simple_list = nullptr;
         size_t m_simple_list_idx__ = 0;
         int m_lock_order_counter__ = 0;
+        uint8_t* m_test_string_length = nullptr;
+        char* m_test_string = nullptr;
+        size_t m_test_string_idx__ = 0;
         uint8_t* m_complex_list_length = nullptr;
         cInner* m_complex_list = nullptr;
         size_t m_complex_list_idx__ = 0;

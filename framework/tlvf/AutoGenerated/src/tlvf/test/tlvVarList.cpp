@@ -69,6 +69,8 @@ bool tlvTestVarList::alloc_simple_list(size_t count) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
+    m_test_string_length = (uint8_t *)((uint8_t *)(m_test_string_length) + len);
+    m_test_string = (char *)((uint8_t *)(m_test_string) + len);
     m_complex_list_length = (uint8_t *)((uint8_t *)(m_complex_list_length) + len);
     m_complex_list = (cInner *)((uint8_t *)(m_complex_list) + len);
     m_var1 = (cInner *)((uint8_t *)(m_var1) + len);
@@ -76,6 +78,85 @@ bool tlvTestVarList::alloc_simple_list(size_t count) {
     m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len);
     m_simple_list_idx__ += count;
     *m_simple_list_length += count;
+    m_buff_ptr__ += len;
+    if(m_length){ (*m_length) += len; }
+    return true;
+}
+
+uint8_t& tlvTestVarList::test_string_length() {
+    return (uint8_t&)(*m_test_string_length);
+}
+
+std::string tlvTestVarList::test_string_str() {
+    char *test_string_ = test_string();
+    if (!test_string_) { return std::string(); }
+    return std::string(test_string_, m_test_string_idx__);
+}
+
+char* tlvTestVarList::test_string(size_t length) {
+    if( (m_test_string_idx__ <= 0) || (m_test_string_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "test_string length is smaller than requested length";
+        return nullptr;
+    }
+    if (m_test_string_idx__ > 8 )  {
+        TLVF_LOG(ERROR) << "Invalid length -  " << m_test_string_idx__ << " elements (max length is " << 8 << ")";
+        return nullptr;
+    }
+    return ((char*)m_test_string);
+}
+
+bool tlvTestVarList::set_test_string(const std::string& str) {
+    size_t str_size = str.size();
+    if (str_size == 0) {
+        TLVF_LOG(WARNING) << "set_test_string received an empty string.";
+        return false;
+    }
+    if (!alloc_test_string(str_size + 1)) { return false; } // +1 for null terminator
+    tlvf_copy_string(m_test_string, str.c_str(), str_size + 1);
+    return true;
+}
+bool tlvTestVarList::set_test_string(const char str[], size_t size) {
+    if (str == nullptr || size == 0) { 
+        TLVF_LOG(WARNING) << "set_test_string received an empty string.";
+        return false;
+    }
+    if (!alloc_test_string(size + 1)) { return false; } // +1 for null terminator
+    tlvf_copy_string(m_test_string, str, size + 1);
+    m_test_string[size] = '\0';
+    return true;
+}
+bool tlvTestVarList::alloc_test_string(size_t count) {
+    if (m_lock_order_counter__ > 1) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list test_string, abort!";
+        return false;
+    }
+    if (count == 0) {
+        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    if (count > 8 )  {
+        TLVF_LOG(ERROR) << "Can't allocate " << count << " elements (max length is " << 8 << ")";
+        return false;
+    }
+    m_lock_order_counter__ = 1;
+    uint8_t *src = (uint8_t *)&m_test_string[*m_test_string_length];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_complex_list_length = (uint8_t *)((uint8_t *)(m_complex_list_length) + len);
+    m_complex_list = (cInner *)((uint8_t *)(m_complex_list) + len);
+    m_var1 = (cInner *)((uint8_t *)(m_var1) + len);
+    m_var2 = (uint32_t *)((uint8_t *)(m_var2) + len);
+    m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len);
+    m_test_string_idx__ += count;
+    *m_test_string_length += count;
     m_buff_ptr__ += len;
     if(m_length){ (*m_length) += len; }
     return true;
@@ -95,7 +176,7 @@ std::tuple<bool, cInner&> tlvTestVarList::complex_list(size_t idx) {
 }
 
 std::shared_ptr<cInner> tlvTestVarList::create_complex_list() {
-    if (m_lock_order_counter__ > 1) {
+    if (m_lock_order_counter__ > 2) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list complex_list, abort!";
         return nullptr;
     }
@@ -104,7 +185,7 @@ std::shared_ptr<cInner> tlvTestVarList::create_complex_list() {
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return nullptr;
     }
-    m_lock_order_counter__ = 1;
+    m_lock_order_counter__ = 2;
     m_lock_allocation__ = true;
     uint8_t *src = (uint8_t *)m_complex_list;
     if (m_complex_list_idx__ > 0) {
@@ -156,7 +237,7 @@ bool tlvTestVarList::add_complex_list(std::shared_ptr<cInner> ptr) {
 }
 
 std::shared_ptr<cInner> tlvTestVarList::create_var1() {
-    if (m_lock_order_counter__ > 2) {
+    if (m_lock_order_counter__ > 3) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list var1, abort!";
         return nullptr;
     }
@@ -165,7 +246,7 @@ std::shared_ptr<cInner> tlvTestVarList::create_var1() {
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return nullptr;
     }
-    m_lock_order_counter__ = 2;
+    m_lock_order_counter__ = 3;
     m_lock_allocation__ = true;
     uint8_t *src = (uint8_t *)m_var1;
     if (!m_parse__) {
@@ -229,7 +310,7 @@ std::tuple<bool, cInner&> tlvTestVarList::unknown_length_list(size_t idx) {
 }
 
 std::shared_ptr<cInner> tlvTestVarList::create_unknown_length_list() {
-    if (m_lock_order_counter__ > 3) {
+    if (m_lock_order_counter__ > 4) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list unknown_length_list, abort!";
         return nullptr;
     }
@@ -238,7 +319,7 @@ std::shared_ptr<cInner> tlvTestVarList::create_unknown_length_list() {
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return nullptr;
     }
-    m_lock_order_counter__ = 3;
+    m_lock_order_counter__ = 4;
     m_lock_allocation__ = true;
     uint8_t *src = (uint8_t *)m_unknown_length_list;
     if (m_unknown_length_list_idx__ > 0) {
@@ -307,6 +388,7 @@ size_t tlvTestVarList::get_initial_size()
     class_size += sizeof(uint16_t); // length
     class_size += sizeof(uint16_t); // var0
     class_size += sizeof(uint8_t); // simple_list_length
+    class_size += sizeof(uint8_t); // test_string_length
     class_size += sizeof(uint8_t); // complex_list_length
     class_size += sizeof(uint32_t); // var2
     return class_size;
@@ -334,6 +416,13 @@ bool tlvTestVarList::init()
     uint8_t simple_list_length = *m_simple_list_length;
     m_simple_list_idx__ = simple_list_length;
     m_buff_ptr__ += sizeof(uint16_t)*(simple_list_length);
+    m_test_string_length = (uint8_t*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
+    m_test_string = (char*)m_buff_ptr__;
+    uint8_t test_string_length = *m_test_string_length;
+    m_test_string_idx__ = test_string_length;
+    m_buff_ptr__ += sizeof(char)*(test_string_length);
     m_complex_list_length = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
