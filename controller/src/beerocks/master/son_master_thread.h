@@ -72,6 +72,8 @@ private:
     bool handle_cmdu_1905_topology_discovery(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_ack_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_higher_layer_data_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_1905_steering_completed_message(Socket *sd,
+                                                     ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_client_steering_btm_report_message(Socket *sd,
                                                              ieee1905_1::CmduMessageRx &cmdu_rx);
 
