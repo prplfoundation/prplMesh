@@ -213,8 +213,6 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
 bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    LOG(DEBUG) << "handle_cmdu_1905_1_message " << std::hex << int(cmdu_rx.getMessageType());
-
     switch (cmdu_rx.getMessageType()) {
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE:
         return handle_cmdu_1905_autoconfiguration_search(sd, cmdu_rx);
