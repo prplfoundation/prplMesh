@@ -687,8 +687,8 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
     auto al_mac = network_utils::mac_to_string(tlvwscM1->mac_attr().data.oct);
     auto ruid   = network_utils::mac_to_string(radio_basic_caps->radio_uid());
     LOG(INFO) << "AP_AUTOCONFIGURATION_WSC M1 al_mac=" << al_mac << " ruid=" << ruid;
-    LOG(DEBUG) << "   device " << tlvwscM1->manufacturer() << " " << tlvwscM1->model_name() << " "
-               << tlvwscM1->device_name() << " " << tlvwscM1->serial_number();
+    LOG(DEBUG) << "   device " << tlvwscM1->manufacturer_str() << " " << tlvwscM1->model_name_str()
+               << " " << tlvwscM1->device_name_str() << " " << tlvwscM1->serial_number_str();
 
     //TODO autoconfig process the rest of the class
     //TODO autoconfig Keep intel agent support only as intel enhancements
@@ -1654,8 +1654,7 @@ bool master_thread::handle_non_intel_slave_join(
     mac.oct[5]++;
     std::string eth_switch_mac   = network_utils::mac_to_string(mac);
     std::string parent_bssid_mac = network_utils::ZERO_MAC_STRING;
-    std::string manufacturer(tlvwscM1->manufacturer(), tlvwscM1->manufacturer_length());
-
+    auto manufacturer            = tlvwscM1->manufacturer_str();
     LOG(INFO) << "IRE generic Slave joined, sd=" << intptr_t(sd) << std::endl
               << "    manufacturer=" << manufacturer << std::endl
               << "    parent_bssid_mac=" << parent_bssid_mac << std::endl
