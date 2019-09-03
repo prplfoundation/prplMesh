@@ -40,7 +40,7 @@ main() {
             -d | --delay)         DELAY="$2"; shift; shift ;;
             -f | --force)         FORCE_OPT="-f"; shift ;;
             -g | --gateway)       GW_NAME="$2"; shift; shift ;;
-            -r | --repeater)      REPEATER_NAME="$2"; shift; shift ;;
+            -r | --repeater)      REPEATER_NAMES="$REPEATER_NAMES $2"; shift; shift ;;
             --rm)                 REMOVE=true; shift ;;
             --gateway-only)       START_REPEATER=false; shift ;;
             --repeater-only)      START_GATEWAY=false; shift ;;
@@ -51,9 +51,13 @@ main() {
 
     status "Starting GW+Repeater test"
 
+    # default values for gateway and repeater[s] names
+    REPEATER_NAMES=${REPEATER_NAMES-repeater}
+    GW_NAME=${GW_NAME-gateway}
+
     dbg REMOVE=$REMOVE
     dbg GW_NAME=$GW_NAME
-    dbg REPEATER_NAME=$REPEATER_NAME
+    dbg REPEATER_NAMES=$REPEATER_NAMES
     dbg START_GATEWAY=$START_GATEWAY
     dbg START_REPEATER=$START_REPEATER
     dbg DELAY=$DELAY
@@ -69,8 +73,12 @@ main() {
     }
 
     [ "$START_REPEATER" = "true" ] && {
-        status "Start Repeater (Remote Agent)"
-        ${scriptdir}/../run.sh ${VERBOSE_OPT} ${FORCE_OPT} start-agent -d -n ${REPEATER_NAME} -m aa:bb:cc:dd "$@"
+        index=0
+        for repeater in $REPEATER_NAMES; do
+            status "Start Repeater (Remote Agent): $repeater"
+            ${scriptdir}/../run.sh ${VERBOSE_OPT} ${FORCE_OPT} start-agent -d -n ${repeater} -m aa:bb:cc:$index$index "$@"
+            index=$((index+1))
+        done
     }
 
     status "Delay ${DELAY} seconds..."
@@ -79,13 +87,19 @@ main() {
     error=0
     [ "$START_GATEWAY" = "true" ] && report "GW operational" \
         ${scriptdir}/../test.sh ${VERBOSE_OPT} -n ${GW_NAME}
-    
-    [ "$START_REPEATER" = "true" ] && report "Repeater operational" \
-        ${scriptdir}/../test.sh ${VERBOSE_OPT} -n ${REPEATER_NAME}
+
+
+    [ "$START_REPEATER" = "true" ] && {
+        for repeater in $REPEATER_NAMES
+        do
+            report "Repeater $repeater operational" \
+            ${scriptdir}/../test.sh ${VERBOSE_OPT} -n ${repeater}
+        done
+    }
 
     [ "$REMOVE" = "true" ] && {
-        status "Deleting containers ${GW_NAME}, ${REPEATER_NAME}"
-        docker rm -f ${GW_NAME} ${REPEATER_NAME} >/dev/null 2>&1
+        status "Deleting containers ${GW_NAME} ${REPEATER_NAMES}"
+        docker rm -f ${GW_NAME} ${REPEATER_NAMES} >/dev/null 2>&1
     }
 
     return $error
@@ -93,8 +107,6 @@ main() {
 
 VERBOSE=false
 REMOVE=false
-GW_NAME=gateway
-REPEATER_NAME=repeater
 START_GATEWAY=true
 START_REPEATER=true
 DELAY=5
