@@ -163,6 +163,7 @@ class MetaData:
     KEY_COMMENT = "_comment"
     KEY_LENGTH = "_length"
     KEY_LENGTH_VAR = "_length_var"
+    KEY_LENGTH_MAX = "_length_max"
     LENGTH_TYPE_INT = "_int_"
     LENGTH_TYPE_CONST = "_const_"
     LENGTH_TYPE_VAR = "_var_"
@@ -194,6 +195,7 @@ class MetaData:
         self.length = None
         self.length_type = None
         self.length_var = False
+        self.length_max = 0
         self.length_var_tlv = False
         self.comment = None
         self.optional = False
@@ -269,6 +271,8 @@ class MetaData:
                         self.length_type = MetaData.LENGTH_TYPE_DYNAMIC
                 elif key == MetaData.KEY_LENGTH_VAR:
                     self.length_var = value
+                elif key == MetaData.KEY_LENGTH_MAX:
+                    self.length_max = value
                 elif key == MetaData.KEY_CLASS_CONST:
                     self.class_const = True
                 else:
@@ -923,6 +927,11 @@ class TlvF:
                 lines_cpp.append( '%sTLVF_LOG(ERROR) << "%s length is smaller than requested length";' %  (self.getIndentation(2), param_name) )
                 lines_cpp.append( "%sreturn nullptr;" % self.getIndentation(2))
                 lines_cpp.append( "%s}" % self.getIndentation(1) )
+                if param_meta.length_max:
+                    lines_cpp.append( "%sif (m_%s_idx__ > %s )  {" % (self.getIndentation(1), param_name, param_meta.length_max) )
+                    lines_cpp.append( '%sTLVF_LOG(ERROR) << "Invalid length -  " << m_%s_idx__ << " elements (max length is " << %s << ")";' % ( self.getIndentation(2), param_name, param_meta.length_max ))
+                    lines_cpp.append( "%sreturn nullptr;" % self.getIndentation(2))
+                    lines_cpp.append( "%s}" % self.getIndentation(1) )
                 lines_cpp.append( "%sreturn ((%s*)m_%s);" % (self.getIndentation(1), param_type, param_name) )
                 lines_cpp.append( "}" )
                 lines_cpp.append( "" )
@@ -1082,6 +1091,11 @@ class TlvF:
             lines_cpp.append( '%sTLVF_LOG(ERROR) << "Not enough available space on buffer - can\'t allocate";' %  self.getIndentation(2) )
             lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
             lines_cpp.append( "%s}" % self.getIndentation(1) )
+            if param_meta.length_max:
+                lines_cpp.append( "%sif (count > %s )  {" % (self.getIndentation(1), param_meta.length_max) )
+                lines_cpp.append( '%sTLVF_LOG(ERROR) << "Can\'t allocate " << count << " elements (max length is " << %s << ")";' % ( self.getIndentation(2), param_meta.length_max ))
+                lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
+                lines_cpp.append( "%s}" % self.getIndentation(1) )
             lines_cpp.append( "%sm_%s__ = %s;" %(self.getIndentation(1), self.MEMBER_LOCK_ORDER_COUNTER, param_meta.list_index) )
             lines_cpp.extend( self.addAllocationMarkersAlloc(obj_meta, param_meta, param_length, True) ) # Variable length lists support
             lines_cpp.append( "%sm_%s_idx__ += count;" % (self.getIndentation(1), param_name) )
