@@ -242,6 +242,12 @@ uint32_t& cACTION_CLI_RESPONSE_STR::buffer_size() {
     return (uint32_t&)(*m_buffer_size);
 }
 
+std::string cACTION_CLI_RESPONSE_STR::buffer_str() {
+    char *buffer_ = buffer();
+    if (!buffer_) { return std::string(); }
+    return std::string(buffer_, m_buffer_idx__);
+}
+
 char* cACTION_CLI_RESPONSE_STR::buffer(size_t length) {
     if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";

@@ -88,6 +88,7 @@ class cInner : public BaseClass
         bool alloc_list(size_t count = 1);
         uint32_t& var1();
         size_t unknown_length_list_inner_length() { return m_unknown_length_list_inner_idx__ * sizeof(char); }
+        std::string unknown_length_list_inner_str();
         char* unknown_length_list_inner(size_t length = 0);
         bool set_unknown_length_list_inner(const std::string& str);
         bool set_unknown_length_list_inner(const char buffer[], size_t size);

@@ -25,6 +25,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::~cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION() {
 }
+std::string cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::slave_version_str() {
+    char *slave_version_ = slave_version();
+    if (!slave_version_) { return std::string(); }
+    return std::string(slave_version_, m_slave_version_idx__);
+}
+
 char* cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::slave_version(size_t length) {
     if( (m_slave_version_idx__ <= 0) || (m_slave_version_idx__ < length) ) {
         TLVF_LOG(ERROR) << "slave_version length is smaller than requested length";
@@ -179,6 +185,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_CONTROL_SLAVE_JOINED_RESPONSE::~cACTION_CONTROL_SLAVE_JOINED_RESPONSE() {
 }
+std::string cACTION_CONTROL_SLAVE_JOINED_RESPONSE::master_version_str() {
+    char *master_version_ = master_version();
+    if (!master_version_) { return std::string(); }
+    return std::string(master_version_, m_master_version_idx__);
+}
+
 char* cACTION_CONTROL_SLAVE_JOINED_RESPONSE::master_version(size_t length) {
     if( (m_master_version_idx__ <= 0) || (m_master_version_idx__ < length) ) {
         TLVF_LOG(ERROR) << "master_version length is smaller than requested length";
@@ -3181,6 +3193,12 @@ sMacAddr& cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::mac() {
 
 beerocks::net::sIpv4Addr& cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::ipv4() {
     return (beerocks::net::sIpv4Addr&)(*m_ipv4);
+}
+
+std::string cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::name_str() {
+    char *name_ = name();
+    if (!name_) { return std::string(); }
+    return std::string(name_, m_name_idx__);
 }
 
 char* cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::name(size_t length) {

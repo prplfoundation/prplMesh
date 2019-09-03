@@ -135,6 +135,12 @@ uint32_t& cACTION_BML_NW_MAP_RESPONSE::buffer_size() {
     return (uint32_t&)(*m_buffer_size);
 }
 
+std::string cACTION_BML_NW_MAP_RESPONSE::buffer_str() {
+    char *buffer_ = buffer();
+    if (!buffer_) { return std::string(); }
+    return std::string(buffer_, m_buffer_idx__);
+}
+
 char* cACTION_BML_NW_MAP_RESPONSE::buffer(size_t length) {
     if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
@@ -244,6 +250,12 @@ uint32_t& cACTION_BML_NW_MAP_UPDATE::node_num() {
 
 uint32_t& cACTION_BML_NW_MAP_UPDATE::buffer_size() {
     return (uint32_t&)(*m_buffer_size);
+}
+
+std::string cACTION_BML_NW_MAP_UPDATE::buffer_str() {
+    char *buffer_ = buffer();
+    if (!buffer_) { return std::string(); }
+    return std::string(buffer_, m_buffer_idx__);
 }
 
 char* cACTION_BML_NW_MAP_UPDATE::buffer(size_t length) {
@@ -357,6 +369,12 @@ uint32_t& cACTION_BML_STATS_UPDATE::buffer_size() {
     return (uint32_t&)(*m_buffer_size);
 }
 
+std::string cACTION_BML_STATS_UPDATE::buffer_str() {
+    char *buffer_ = buffer();
+    if (!buffer_) { return std::string(); }
+    return std::string(buffer_, m_buffer_idx__);
+}
+
 char* cACTION_BML_STATS_UPDATE::buffer(size_t length) {
     if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
@@ -462,6 +480,12 @@ cACTION_BML_EVENTS_UPDATE::~cACTION_BML_EVENTS_UPDATE() {
 }
 uint32_t& cACTION_BML_EVENTS_UPDATE::buffer_size() {
     return (uint32_t&)(*m_buffer_size);
+}
+
+std::string cACTION_BML_EVENTS_UPDATE::buffer_str() {
+    char *buffer_ = buffer();
+    if (!buffer_) { return std::string(); }
+    return std::string(buffer_, m_buffer_idx__);
 }
 
 char* cACTION_BML_EVENTS_UPDATE::buffer(size_t length) {
@@ -3463,6 +3487,12 @@ uint32_t& cACTION_BML_STEERING_EVENTS_UPDATE::buffer_size() {
     return (uint32_t&)(*m_buffer_size);
 }
 
+std::string cACTION_BML_STEERING_EVENTS_UPDATE::buffer_str() {
+    char *buffer_ = buffer();
+    if (!buffer_) { return std::string(); }
+    return std::string(buffer_, m_buffer_idx__);
+}
+
 char* cACTION_BML_STEERING_EVENTS_UPDATE::buffer(size_t length) {
     if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
@@ -3661,6 +3691,12 @@ uint16_t& cACTION_BML_WFA_CA_CONTROLLER_REQUEST::command_length() {
     return (uint16_t&)(*m_command_length);
 }
 
+std::string cACTION_BML_WFA_CA_CONTROLLER_REQUEST::command_str() {
+    char *command_ = command();
+    if (!command_) { return std::string(); }
+    return std::string(command_, m_command_idx__);
+}
+
 char* cACTION_BML_WFA_CA_CONTROLLER_REQUEST::command(size_t length) {
     if( (m_command_idx__ <= 0) || (m_command_idx__ < length) ) {
         TLVF_LOG(ERROR) << "command length is smaller than requested length";
@@ -3762,6 +3798,12 @@ cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::~cACTION_BML_WFA_CA_CONTROLLER_RESPONSE(
 }
 uint16_t& cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::reply_length() {
     return (uint16_t&)(*m_reply_length);
+}
+
+std::string cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::reply_str() {
+    char *reply_ = reply();
+    if (!reply_) { return std::string(); }
+    return std::string(reply_, m_reply_idx__);
 }
 
 char* cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::reply(size_t length) {

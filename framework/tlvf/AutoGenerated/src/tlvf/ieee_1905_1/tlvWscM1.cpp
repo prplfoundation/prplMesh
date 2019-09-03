@@ -85,6 +85,12 @@ uint16_t& tlvWscM1::manufacturer_length() {
     return (uint16_t&)(*m_manufacturer_length);
 }
 
+std::string tlvWscM1::manufacturer_str() {
+    char *manufacturer_ = manufacturer();
+    if (!manufacturer_) { return std::string(); }
+    return std::string(manufacturer_, m_manufacturer_idx__);
+}
+
 char* tlvWscM1::manufacturer(size_t length) {
     if( (m_manufacturer_idx__ <= 0) || (m_manufacturer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "manufacturer length is smaller than requested length";
@@ -168,6 +174,12 @@ uint16_t& tlvWscM1::model_name_length() {
     return (uint16_t&)(*m_model_name_length);
 }
 
+std::string tlvWscM1::model_name_str() {
+    char *model_name_ = model_name();
+    if (!model_name_) { return std::string(); }
+    return std::string(model_name_, m_model_name_idx__);
+}
+
 char* tlvWscM1::model_name(size_t length) {
     if( (m_model_name_idx__ <= 0) || (m_model_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "model_name length is smaller than requested length";
@@ -248,6 +260,12 @@ uint16_t& tlvWscM1::model_number_length() {
     return (uint16_t&)(*m_model_number_length);
 }
 
+std::string tlvWscM1::model_number_str() {
+    char *model_number_ = model_number();
+    if (!model_number_) { return std::string(); }
+    return std::string(model_number_, m_model_number_idx__);
+}
+
 char* tlvWscM1::model_number(size_t length) {
     if( (m_model_number_idx__ <= 0) || (m_model_number_idx__ < length) ) {
         TLVF_LOG(ERROR) << "model_number length is smaller than requested length";
@@ -323,6 +341,12 @@ WSC::eWscAttributes& tlvWscM1::serial_number_type() {
 
 uint16_t& tlvWscM1::serial_number_length() {
     return (uint16_t&)(*m_serial_number_length);
+}
+
+std::string tlvWscM1::serial_number_str() {
+    char *serial_number_ = serial_number();
+    if (!serial_number_) { return std::string(); }
+    return std::string(serial_number_, m_serial_number_idx__);
 }
 
 char* tlvWscM1::serial_number(size_t length) {
@@ -401,6 +425,12 @@ WSC::eWscAttributes& tlvWscM1::device_name_type() {
 
 uint16_t& tlvWscM1::device_name_length() {
     return (uint16_t&)(*m_device_name_length);
+}
+
+std::string tlvWscM1::device_name_str() {
+    char *device_name_ = device_name();
+    if (!device_name_) { return std::string(); }
+    return std::string(device_name_, m_device_name_idx__);
 }
 
 char* tlvWscM1::device_name(size_t length) {
