@@ -105,8 +105,7 @@ main() {
     else
         DOCKEROPTS="$DOCKEROPTS -d"
     fi
-
-    if [ -n "$(docker ps -q -l -f name="${NAME}")" ]; then
+    if [ -n "$(docker ps -f name="${NAME}" | grep -w "${NAME}")" ]; then
         info "Container ${NAME} is already running"
         if [ "$FORCE" = "true" ]; then
             run docker container rm -f "$NAME"
