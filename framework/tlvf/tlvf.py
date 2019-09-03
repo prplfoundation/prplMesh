@@ -903,11 +903,20 @@ class TlvF:
                 else:
                     lines_h.append("size_t %s_length() { return m_%s_idx__ * sizeof(%s); }" % (param_name, param_name, param_type_full))
 
-            #add function to get char pointer
             if param_type_info.type == TypeInfo.CHAR:
                 self.include_list.append("<string.h>")
                 self.include_list.append('<tlvf/tlvfutils.h>')
-                
+
+                #add function to get std::string                
+                lines_h.append( "std::string %s_str();" % (param_name) )
+                lines_cpp.append( "std::string %s::%s_str() {" % (obj_meta.name, param_name) )
+                lines_cpp.append( "%schar *%s_ = %s();" % (self.getIndentation(1), param_name, param_name) )
+                lines_cpp.append( "%sif (!%s_) { return std::string(); }" % (self.getIndentation(1), param_name) )
+                lines_cpp.append( "%sreturn std::string(%s_, m_%s_idx__);" % (self.getIndentation(1), param_name, param_name) )
+                lines_cpp.append( "}" )
+                lines_cpp.append( "" )
+
+                #add function to get char*
                 lines_h.append( "%s* %s(size_t length = 0);" % (param_type, param_name) )
                 lines_cpp.append( "%s* %s::%s(size_t length) {" % (param_type_full, obj_meta.name, param_name) )
                 lines_cpp.append( "%sif( (m_%s_idx__ <= 0) || (m_%s_idx__ < length) ) {" % (self.getIndentation(1), param_name, param_name) )
