@@ -44,6 +44,10 @@ char* cConfigData::ssid(size_t length) {
         TLVF_LOG(ERROR) << "ssid length is smaller than requested length";
         return nullptr;
     }
+    if (m_ssid_idx__ > WSC_MAX_SSID_LENGTH )  {
+        TLVF_LOG(ERROR) << "Invalid length -  " << m_ssid_idx__ << " elements (max length is " << WSC_MAX_SSID_LENGTH << ")";
+        return nullptr;
+    }
     return ((char*)m_ssid);
 }
 
@@ -79,6 +83,10 @@ bool cConfigData::alloc_ssid(size_t count) {
     size_t len = sizeof(char) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    if (count > WSC_MAX_SSID_LENGTH )  {
+        TLVF_LOG(ERROR) << "Can't allocate " << count << " elements (max length is " << WSC_MAX_SSID_LENGTH << ")";
         return false;
     }
     m_lock_order_counter__ = 0;

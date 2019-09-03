@@ -373,6 +373,7 @@ cConfigData:
   ssid:
     _type: char
     _length: [ ssid_length ]
+    _length_max: WSC_MAX_SSID_LENGTH
   authentication_type_attr: sWscAttrAuthenticationType
   encryption_type_attr: sWscAttrEncryptionType
   network_key_attr: sWscAttrNetworkKey
