@@ -226,6 +226,8 @@ bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessa
         return handle_cmdu_1905_channel_selection_response(sd, cmdu_rx);
     case ieee1905_1::eMessageType::ACK_MESSAGE:
         return handle_cmdu_1905_ack_message(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE:
+        return handle_cmdu_1905_client_steering_btm_report_message(sd, cmdu_rx);
     case ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE:
         return handle_cmdu_1905_operating_channel_report(sd, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE:
@@ -1002,6 +1004,23 @@ bool master_thread::handle_cmdu_1905_ack_message(Socket *sd, ieee1905_1::CmduMes
     //TODO: the ACK should be sent to the correct task and will be done as part of agent certification
     LOG(DEBUG) << "Received ACK_MESSAGE, mid=" << std::hex << int(mid);
     return true;
+}
+
+bool master_thread::handle_cmdu_1905_client_steering_btm_report_message(
+    Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(INFO) << "Received CLIENT_STEERING_BTM_REPORT_MESSAGE, mid=" << std::hex << int(mid);
+
+    // build ACK message CMDU
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+    LOG(DEBUG) << "sending ACK message back to agent";
+    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
 }
 
 bool master_thread::handle_cmdu_1905_channel_selection_response(Socket *sd,
