@@ -4552,8 +4552,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
                                                         teardown))
             return false;
 
-        std::string manufacturer =
-            std::string(tlvWscM2->manufacturer(), tlvWscM2->manufacturer_length());
+        std::string manufacturer = tlvWscM2->manufacturer_str();
 
         LOG(DEBUG) << "Controller configuration (WSC M2 Encrypted Settings)";
         LOG(DEBUG) << "     Manufacturer: " << manufacturer << ", ssid: " << ssid
