@@ -436,8 +436,6 @@ bool slave_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
         }
     } else { // IEEE 1905.1 message
-        LOG(DEBUG) << "handle_cmdu_control_ieee1905_1_message " << std::hex
-                   << int(cmdu_rx.getMessageType());
         return handle_cmdu_control_ieee1905_1_message(sd, cmdu_rx);
     }
     return true;
