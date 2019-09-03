@@ -133,6 +133,7 @@ bool main_thread::init()
             ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE,
             ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE,
             ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE,
+            ieee1905_1::eMessageType::CLIENT_STEERING_REQUEST_MESSAGE,
             ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE,
             ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE,
             ieee1905_1::eMessageType::ACK_MESSAGE,

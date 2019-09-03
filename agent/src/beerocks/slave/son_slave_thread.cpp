@@ -32,6 +32,8 @@
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
+#include <tlvf/wfa_map/tlvSteeringBTMReport.h>
+#include <tlvf/wfa_map/tlvSteeringRequest.h>
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
 // BPL Error Codes
@@ -485,6 +487,8 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_channel_preference_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
         return handle_channel_selection_request(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::CLIENT_STEERING_REQUEST_MESSAGE:
+        return handle_client_steering_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE:
         return handle_client_capability_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE:
@@ -4812,6 +4816,66 @@ bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::Cmd
         return false;
     }
     LOG(DEBUG) << "sending ACK message back to controller";
+    return send_cmdu_to_controller(cmdu_tx);
+}
+
+bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received CLIENT_STEERING_REQUEST_MESSAGE , mid=" << std::hex << int(mid);
+    auto steering_request_tlv = cmdu_rx.addClass<wfa_map::tlvSteeringRequest>();
+    if (!steering_request_tlv) {
+        LOG(ERROR) << "addClass wfa_map::tlvSteeringRequest failed";
+        return false;
+    }
+
+    auto request_mode = steering_request_tlv->request_flags().request_mode;
+    LOG(DEBUG) << "request_mode: " << std::hex << int(request_mode);
+
+    //TODO: validate the BTM request before sending the ack.
+    // build ACK message CMDU
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+
+    LOG(DEBUG) << "sending ACK message back to controller";
+    if (!send_cmdu_to_controller(cmdu_tx)) {
+        LOG(ERROR) << "failed to send ACK_MESSAGE";
+        return false;
+    }
+    //TODO - Send BTM Request frame to the STA including a Neighbor Report element specifying
+    // the BSSID, Operating Class and Channel Number of the identified target BSS
+
+    //check if the Request Mode bit is set
+    if (request_mode) {
+        //Steering Mandate
+        LOG(DEBUG) << "Request Mode bit is set - Steering Mandate";
+        // build and send Client Steering BTM report message
+        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE)) {
+            LOG(ERROR) << "cmdu creation of type CLIENT_STEERING_BTM_REPORT_MESSAGE, has failed";
+            return false;
+        }
+        auto steering_btm_report_tlv = cmdu_tx.addClass<wfa_map::tlvSteeringBTMReport>();
+        if (!steering_btm_report_tlv) {
+            LOG(ERROR) << "addClass wfa_map::tlvSteeringBTMReport failed";
+            return false;
+        }
+        LOG(DEBUG) << "sending CLIENT_STEERING_BTM_REPORT_MESSAGE back to controller";
+    } else {
+        LOG(DEBUG) << "Request Mode bit is not set - Steering Opportunity";
+        // build and send steering completed message
+        auto cmdu_tx_header =
+            cmdu_tx.create(0, ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE);
+
+        if (!cmdu_tx_header) {
+            LOG(ERROR) << "cmdu creation of type STEERING_COMPLETED_MESSAGE, has failed";
+            return false;
+        }
+        LOG(DEBUG) << "sending STEERING_COMPLETED_MESSAGE back to controller";
+    }
     return send_cmdu_to_controller(cmdu_tx);
 }
 
