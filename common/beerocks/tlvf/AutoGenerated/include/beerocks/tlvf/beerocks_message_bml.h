@@ -92,6 +92,7 @@ class cACTION_BML_NW_MAP_RESPONSE : public BaseClass
         }
         uint32_t& node_num();
         uint32_t& buffer_size();
+        std::string buffer_str();
         char* buffer(size_t length = 0);
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
@@ -121,6 +122,7 @@ class cACTION_BML_NW_MAP_UPDATE : public BaseClass
         }
         uint32_t& node_num();
         uint32_t& buffer_size();
+        std::string buffer_str();
         char* buffer(size_t length = 0);
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
@@ -150,6 +152,7 @@ class cACTION_BML_STATS_UPDATE : public BaseClass
         }
         uint32_t& num_of_stats_bulks();
         uint32_t& buffer_size();
+        std::string buffer_str();
         char* buffer(size_t length = 0);
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
@@ -178,6 +181,7 @@ class cACTION_BML_EVENTS_UPDATE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_EVENTS_UPDATE);
         }
         uint32_t& buffer_size();
+        std::string buffer_str();
         char* buffer(size_t length = 0);
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
@@ -1583,6 +1587,7 @@ class cACTION_BML_STEERING_EVENTS_UPDATE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_STEERING_EVENTS_UPDATE);
         }
         uint32_t& buffer_size();
+        std::string buffer_str();
         char* buffer(size_t length = 0);
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
@@ -1652,6 +1657,7 @@ class cACTION_BML_WFA_CA_CONTROLLER_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_WFA_CA_CONTROLLER_REQUEST);
         }
         uint16_t& command_length();
+        std::string command_str();
         char* command(size_t length = 0);
         bool set_command(const std::string& str);
         bool set_command(const char buffer[], size_t size);
@@ -1679,6 +1685,7 @@ class cACTION_BML_WFA_CA_CONTROLLER_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_WFA_CA_CONTROLLER_RESPONSE);
         }
         uint16_t& reply_length();
+        std::string reply_str();
         char* reply(size_t length = 0);
         bool set_reply(const std::string& str);
         bool set_reply(const char buffer[], size_t size);

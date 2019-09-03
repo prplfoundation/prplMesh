@@ -140,6 +140,7 @@ class cACTION_CLI_RESPONSE_STR : public BaseClass
             return (eActionOp_CLI)(ACTION_CLI_RESPONSE_STR);
         }
         uint32_t& buffer_size();
+        std::string buffer_str();
         char* buffer(size_t length = 0);
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);

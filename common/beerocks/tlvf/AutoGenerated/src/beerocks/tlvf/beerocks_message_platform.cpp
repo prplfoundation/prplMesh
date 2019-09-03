@@ -66,6 +66,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::~cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST() {
 }
+std::string cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::iface_name_str() {
+    char *iface_name_ = iface_name();
+    if (!iface_name_) { return std::string(); }
+    return std::string(iface_name_, m_iface_name_idx__);
+}
+
 char* cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::iface_name(size_t length) {
     if( (m_iface_name_idx__ <= 0) || (m_iface_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
@@ -198,6 +204,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST::~cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST() {
 }
+std::string cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST::iface_name_str() {
+    char *iface_name_ = iface_name();
+    if (!iface_name_) { return std::string(); }
+    return std::string(iface_name_, m_iface_name_idx__);
+}
+
 char* cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST::iface_name(size_t length) {
     if( (m_iface_name_idx__ <= 0) || (m_iface_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
@@ -411,6 +423,12 @@ sMacAddr& cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::mac() {
 
 beerocks::net::sIpv4Addr& cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::ipv4() {
     return (beerocks::net::sIpv4Addr&)(*m_ipv4);
+}
+
+std::string cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::hostname_str() {
+    char *hostname_ = hostname();
+    if (!hostname_) { return std::string(); }
+    return std::string(hostname_, m_hostname_idx__);
 }
 
 char* cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::hostname(size_t length) {
@@ -751,6 +769,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::~cACTION_PLATFORM_WPS_ONBOARDING_REQUEST() {
 }
+std::string cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::iface_name_str() {
+    char *iface_name_ = iface_name();
+    if (!iface_name_) { return std::string(); }
+    return std::string(iface_name_, m_iface_name_idx__);
+}
+
 char* cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::iface_name(size_t length) {
     if( (m_iface_name_idx__ <= 0) || (m_iface_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
@@ -908,6 +932,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::~cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST() {
 }
+std::string cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::iface_name_str() {
+    char *iface_name_ = iface_name();
+    if (!iface_name_) { return std::string(); }
+    return std::string(iface_name_, m_iface_name_idx__);
+}
+
 char* cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::iface_name(size_t length) {
     if( (m_iface_name_idx__ <= 0) || (m_iface_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
@@ -942,6 +972,12 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_iface_name(const char st
     m_iface_name[size] = '\0';
     return true;
 }
+std::string cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::ssid_str() {
+    char *ssid_ = ssid();
+    if (!ssid_) { return std::string(); }
+    return std::string(ssid_, m_ssid_idx__);
+}
+
 char* cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::ssid(size_t length) {
     if( (m_ssid_idx__ <= 0) || (m_ssid_idx__ < length) ) {
         TLVF_LOG(ERROR) << "ssid length is smaller than requested length";
@@ -976,6 +1012,12 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_ssid(const char str[], s
     m_ssid[size] = '\0';
     return true;
 }
+std::string cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::pass_str() {
+    char *pass_ = pass();
+    if (!pass_) { return std::string(); }
+    return std::string(pass_, m_pass_idx__);
+}
+
 char* cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::pass(size_t length) {
     if( (m_pass_idx__ <= 0) || (m_pass_idx__ < length) ) {
         TLVF_LOG(ERROR) << "pass length is smaller than requested length";
@@ -1010,6 +1052,12 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::set_pass(const char str[], s
     m_pass[size] = '\0';
     return true;
 }
+std::string cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::security_type_str() {
+    char *security_type_ = security_type();
+    if (!security_type_) { return std::string(); }
+    return std::string(security_type_, m_security_type_idx__);
+}
+
 char* cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST::security_type(size_t length) {
     if( (m_security_type_idx__ <= 0) || (m_security_type_idx__ < length) ) {
         TLVF_LOG(ERROR) << "security_type length is smaller than requested length";
@@ -1094,6 +1142,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE::~cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE() {
 }
+std::string cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE::iface_name_str() {
+    char *iface_name_ = iface_name();
+    if (!iface_name_) { return std::string(); }
+    return std::string(iface_name_, m_iface_name_idx__);
+}
+
 char* cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE::iface_name(size_t length) {
     if( (m_iface_name_idx__ <= 0) || (m_iface_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
@@ -1678,6 +1732,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST::~cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST() {
 }
+std::string cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST::iface_name_str() {
+    char *iface_name_ = iface_name();
+    if (!iface_name_) { return std::string(); }
+    return std::string(iface_name_, m_iface_name_idx__);
+}
+
 char* cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST::iface_name(size_t length) {
     if( (m_iface_name_idx__ <= 0) || (m_iface_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
@@ -1757,6 +1817,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE::~cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE() {
 }
+std::string cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE::iface_name_str() {
+    char *iface_name_ = iface_name();
+    if (!iface_name_) { return std::string(); }
+    return std::string(iface_name_, m_iface_name_idx__);
+}
+
 char* cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE::iface_name(size_t length) {
     if( (m_iface_name_idx__ <= 0) || (m_iface_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
@@ -1843,6 +1909,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST::~cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST() {
 }
+std::string cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST::iface_name_str() {
+    char *iface_name_ = iface_name();
+    if (!iface_name_) { return std::string(); }
+    return std::string(iface_name_, m_iface_name_idx__);
+}
+
 char* cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST::iface_name(size_t length) {
     if( (m_iface_name_idx__ <= 0) || (m_iface_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
@@ -1922,6 +1994,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE::~cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE() {
 }
+std::string cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE::iface_name_str() {
+    char *iface_name_ = iface_name();
+    if (!iface_name_) { return std::string(); }
+    return std::string(iface_name_, m_iface_name_idx__);
+}
+
 char* cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE::iface_name(size_t length) {
     if( (m_iface_name_idx__ <= 0) || (m_iface_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
@@ -2183,6 +2261,12 @@ uint32_t& cACTION_PLATFORM_ERROR_NOTIFICATION::code() {
     return (uint32_t&)(*m_code);
 }
 
+std::string cACTION_PLATFORM_ERROR_NOTIFICATION::data_str() {
+    char *data_ = data();
+    if (!data_) { return std::string(); }
+    return std::string(data_, m_data_idx__);
+}
+
 char* cACTION_PLATFORM_ERROR_NOTIFICATION::data(size_t length) {
     if( (m_data_idx__ <= 0) || (m_data_idx__ < length) ) {
         TLVF_LOG(ERROR) << "data length is smaller than requested length";
@@ -2259,6 +2343,12 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::~cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION() {
 }
+std::string cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_ap_str() {
+    char *iface_name_ap_ = iface_name_ap();
+    if (!iface_name_ap_) { return std::string(); }
+    return std::string(iface_name_ap_, m_iface_name_ap_idx__);
+}
+
 char* cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_ap(size_t length) {
     if( (m_iface_name_ap_idx__ <= 0) || (m_iface_name_ap_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name_ap length is smaller than requested length";
@@ -2293,6 +2383,12 @@ bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_ap(cons
     m_iface_name_ap[size] = '\0';
     return true;
 }
+std::string cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_bh_str() {
+    char *iface_name_bh_ = iface_name_bh();
+    if (!iface_name_bh_) { return std::string(); }
+    return std::string(iface_name_bh_, m_iface_name_bh_idx__);
+}
+
 char* cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_bh(size_t length) {
     if( (m_iface_name_bh_idx__ <= 0) || (m_iface_name_bh_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name_bh length is smaller than requested length";

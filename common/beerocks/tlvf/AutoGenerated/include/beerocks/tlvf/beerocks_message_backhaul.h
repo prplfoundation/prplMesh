@@ -36,9 +36,11 @@ class cACTION_BACKHAUL_REGISTER_REQUEST : public BaseClass
         static eActionOp_BACKHAUL get_action_op(){
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_REGISTER_REQUEST);
         }
+        std::string sta_iface_str();
         char* sta_iface(size_t length = 0);
         bool set_sta_iface(const std::string& str);
         bool set_sta_iface(const char buffer[], size_t size);
+        std::string hostap_iface_str();
         char* hostap_iface(size_t length = 0);
         bool set_hostap_iface(const std::string& str);
         bool set_hostap_iface(const char buffer[], size_t size);
@@ -111,23 +113,29 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         static eActionOp_BACKHAUL get_action_op(){
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_ENABLE);
         }
+        std::string bridge_iface_str();
         char* bridge_iface(size_t length = 0);
         bool set_bridge_iface(const std::string& str);
         bool set_bridge_iface(const char buffer[], size_t size);
         sMacAddr& iface_mac();
         uint8_t& iface_is_5ghz();
+        std::string wire_iface_str();
         char* wire_iface(size_t length = 0);
         bool set_wire_iface(const std::string& str);
         bool set_wire_iface(const char buffer[], size_t size);
+        std::string sta_iface_str();
         char* sta_iface(size_t length = 0);
         bool set_sta_iface(const std::string& str);
         bool set_sta_iface(const char buffer[], size_t size);
+        std::string ap_iface_str();
         char* ap_iface(size_t length = 0);
         bool set_ap_iface(const std::string& str);
         bool set_ap_iface(const char buffer[], size_t size);
+        std::string ssid_str();
         char* ssid(size_t length = 0);
         bool set_ssid(const std::string& str);
         bool set_ssid(const char buffer[], size_t size);
+        std::string pass_str();
         char* pass(size_t length = 0);
         bool set_pass(const std::string& str);
         bool set_pass(const char buffer[], size_t size);

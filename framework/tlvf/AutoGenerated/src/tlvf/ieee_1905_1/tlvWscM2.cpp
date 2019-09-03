@@ -81,6 +81,12 @@ uint16_t& tlvWscM2::manufacturer_length() {
     return (uint16_t&)(*m_manufacturer_length);
 }
 
+std::string tlvWscM2::manufacturer_str() {
+    char *manufacturer_ = manufacturer();
+    if (!manufacturer_) { return std::string(); }
+    return std::string(manufacturer_, m_manufacturer_idx__);
+}
+
 char* tlvWscM2::manufacturer(size_t length) {
     if( (m_manufacturer_idx__ <= 0) || (m_manufacturer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "manufacturer length is smaller than requested length";
@@ -163,6 +169,12 @@ uint16_t& tlvWscM2::model_name_length() {
     return (uint16_t&)(*m_model_name_length);
 }
 
+std::string tlvWscM2::model_name_str() {
+    char *model_name_ = model_name();
+    if (!model_name_) { return std::string(); }
+    return std::string(model_name_, m_model_name_idx__);
+}
+
 char* tlvWscM2::model_name(size_t length) {
     if( (m_model_name_idx__ <= 0) || (m_model_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "model_name length is smaller than requested length";
@@ -242,6 +254,12 @@ uint16_t& tlvWscM2::model_number_length() {
     return (uint16_t&)(*m_model_number_length);
 }
 
+std::string tlvWscM2::model_number_str() {
+    char *model_number_ = model_number();
+    if (!model_number_) { return std::string(); }
+    return std::string(model_number_, m_model_number_idx__);
+}
+
 char* tlvWscM2::model_number(size_t length) {
     if( (m_model_number_idx__ <= 0) || (m_model_number_idx__ < length) ) {
         TLVF_LOG(ERROR) << "model_number length is smaller than requested length";
@@ -316,6 +334,12 @@ WSC::eWscAttributes& tlvWscM2::serial_number_type() {
 
 uint16_t& tlvWscM2::serial_number_length() {
     return (uint16_t&)(*m_serial_number_length);
+}
+
+std::string tlvWscM2::serial_number_str() {
+    char *serial_number_ = serial_number();
+    if (!serial_number_) { return std::string(); }
+    return std::string(serial_number_, m_serial_number_idx__);
 }
 
 char* tlvWscM2::serial_number(size_t length) {

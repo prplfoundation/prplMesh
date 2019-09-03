@@ -473,6 +473,12 @@ uint32_t& cInner::var1() {
     return (uint32_t&)(*m_var1);
 }
 
+std::string cInner::unknown_length_list_inner_str() {
+    char *unknown_length_list_inner_ = unknown_length_list_inner();
+    if (!unknown_length_list_inner_) { return std::string(); }
+    return std::string(unknown_length_list_inner_, m_unknown_length_list_inner_idx__);
+}
+
 char* cInner::unknown_length_list_inner(size_t length) {
     if( (m_unknown_length_list_inner_idx__ <= 0) || (m_unknown_length_list_inner_idx__ < length) ) {
         TLVF_LOG(ERROR) << "unknown_length_list_inner length is smaller than requested length";

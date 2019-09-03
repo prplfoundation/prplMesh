@@ -492,6 +492,7 @@ class cConfigData : public BaseClass
 
         eWscAttributes& ssid_type();
         uint16_t& ssid_length();
+        std::string ssid_str();
         char* ssid(size_t length = 0);
         bool set_ssid(const std::string& str);
         bool set_ssid(const char buffer[], size_t size);
@@ -527,10 +528,12 @@ class cWscAttrEncryptedSettings : public BaseClass
 
         const eWscAttributes& type();
         const uint16_t& length();
+        std::string iv_str();
         char* iv(size_t length = 0);
         bool set_iv(const std::string& str);
         bool set_iv(const char buffer[], size_t size);
         size_t encrypted_settings_length() { return m_encrypted_settings_idx__ * sizeof(char); }
+        std::string encrypted_settings_str();
         char* encrypted_settings(size_t length = 0);
         bool set_encrypted_settings(const std::string& str);
         bool set_encrypted_settings(const char buffer[], size_t size);

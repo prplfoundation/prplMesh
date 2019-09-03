@@ -33,6 +33,12 @@ uint16_t& cConfigData::ssid_length() {
     return (uint16_t&)(*m_ssid_length);
 }
 
+std::string cConfigData::ssid_str() {
+    char *ssid_ = ssid();
+    if (!ssid_) { return std::string(); }
+    return std::string(ssid_, m_ssid_idx__);
+}
+
 char* cConfigData::ssid(size_t length) {
     if( (m_ssid_idx__ <= 0) || (m_ssid_idx__ < length) ) {
         TLVF_LOG(ERROR) << "ssid length is smaller than requested length";
@@ -195,6 +201,12 @@ const uint16_t& cWscAttrEncryptedSettings::length() {
     return (const uint16_t&)(*m_length);
 }
 
+std::string cWscAttrEncryptedSettings::iv_str() {
+    char *iv_ = iv();
+    if (!iv_) { return std::string(); }
+    return std::string(iv_, m_iv_idx__);
+}
+
 char* cWscAttrEncryptedSettings::iv(size_t length) {
     if( (m_iv_idx__ <= 0) || (m_iv_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iv length is smaller than requested length";
@@ -229,6 +241,12 @@ bool cWscAttrEncryptedSettings::set_iv(const char str[], size_t size) {
     m_iv[size] = '\0';
     return true;
 }
+std::string cWscAttrEncryptedSettings::encrypted_settings_str() {
+    char *encrypted_settings_ = encrypted_settings();
+    if (!encrypted_settings_) { return std::string(); }
+    return std::string(encrypted_settings_, m_encrypted_settings_idx__);
+}
+
 char* cWscAttrEncryptedSettings::encrypted_settings(size_t length) {
     if( (m_encrypted_settings_idx__ <= 0) || (m_encrypted_settings_idx__ < length) ) {
         TLVF_LOG(ERROR) << "encrypted_settings length is smaller than requested length";
