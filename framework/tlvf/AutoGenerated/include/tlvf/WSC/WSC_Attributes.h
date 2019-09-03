@@ -395,20 +395,6 @@ typedef struct sWscAttrKeyWrapAuthenticator {
     }
 } __attribute__((packed)) sWscAttrKeyWrapAuthenticator;
 
-typedef struct sWscAttrSsid {
-    eWscAttributes attribute_type;
-    uint16_t data_length;
-    char data[WSC_MAX_SSID_LENGTH];
-    void struct_swap(){
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
-    }
-    void struct_init(){
-        attribute_type = ATTR_SSID;
-        data_length = WSC_MAX_SSID_LENGTH;
-    }
-} __attribute__((packed)) sWscAttrSsid;
-
 typedef struct sWscAttrAuthenticationType {
     eWscAttributes attribute_type;
     uint16_t data_length;

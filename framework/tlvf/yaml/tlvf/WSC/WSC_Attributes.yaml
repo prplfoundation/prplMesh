@@ -305,18 +305,6 @@ sWscAttrKeyWrapAuthenticator:
 
 #encrypted attributes
 
-sWscAttrSsid:
-  _type: struct
-  attribute_type:
-    _type: eWscAttributes
-    _value: ATTR_SSID
-  data_length:
-    _type: uint16_t
-    _value: WSC_MAX_SSID_LENGTH
-  data:
-    _type: char
-    _length: [ WSC_MAX_SSID_LENGTH ]
-
 sWscAttrAuthenticationType:
   _type: struct
   attribute_type:
