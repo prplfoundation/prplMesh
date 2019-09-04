@@ -4415,6 +4415,20 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
 
     // Swap back to host byte order to read and use config_data
     config_data.class_swap();
+
+    // TODO tlvf should check this
+    if (config_data.ssid_length() > WSC::WSC_MAX_SSID_LENGTH) {
+        LOG(INFO) << "SSID too long: " << config_data.ssid_length();
+        return false;
+    }
+    // TODO tlvf should do conversion to std::string
+    if (config_data.ssid_length() == 0)
+        ssid = "";
+    else
+        ssid = std::string(config_data.ssid(), config_data.ssid_length());
+    bssid            = config_data.bssid_attr().data;
+    auth_type        = config_data.authentication_type_attr().data;
+    encr_type        = config_data.encryption_type_attr().data;
     uint8_t bss_type = config_data.multiap_attr().subelement_value;
     LOG(INFO) << "bss_type: " << std::hex << int(bss_type);
     fronthaul = bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS;
@@ -4424,10 +4438,6 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
     if (bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_STA) {
         LOG(WARNING) << "Unexpected backhaul STA bit";
     }
-    ssid      = std::string(config_data.ssid(), config_data.ssid_length());
-    bssid     = config_data.bssid_attr().data;
-    auth_type = config_data.authentication_type_attr().data;
-    encr_type = config_data.encryption_type_attr().data;
     LOG(DEBUG) << "KWA (Key Wrap Auth) success";
 
     return true;
