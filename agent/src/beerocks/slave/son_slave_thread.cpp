@@ -22,6 +22,9 @@
 #include <beerocks/tlvf/beerocks_message_monitor.h>
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
+#include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
+#include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
+#include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
 #include <tlvf/ieee_1905_1/tlvWscM2.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
@@ -472,6 +475,8 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
             return false;
         }
         return true;
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE:
+        return handle_autoconfiguration_renew(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE:
         return handle_ap_capability_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
@@ -4440,6 +4445,55 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
     }
     LOG(DEBUG) << "KWA (Key Wrap Auth) success";
 
+    return true;
+}
+
+/**
+ * @brief Parse AP-Autoconfiguration Renew message
+ *
+ * This function checks the TLVs in the AP-Autoconfiguration Renew message. If OK, it triggers
+ * autoconfiguration.
+ *
+ * @param sd socket descriptor
+ * @param cmdu_rx received CMDU containing AP-Autoconfiguration Renew
+ * @return true on success
+ * @return false on failure
+ */
+bool slave_thread::handle_autoconfiguration_renew(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    LOG(INFO) << "received autoconfig renew message";
+
+    auto tlvAlMac = cmdu_rx.addClass<ieee1905_1::tlvAlMacAddressType>();
+    if (tlvAlMac) {
+        LOG(DEBUG) << "tlvAlMac=" << network_utils::mac_to_string(tlvAlMac->mac());
+        // TODO register/update mapping of AL-MAC to interface, cfr. #81
+    } else {
+        LOG(ERROR) << "tlvAlMac missing - ignoring autconfig renew message";
+        return false;
+    }
+
+    auto tlvSupportedRole = cmdu_rx.addClass<ieee1905_1::tlvSupportedRole>();
+    if (tlvSupportedRole) {
+        LOG(DEBUG) << "tlvSupportedRole->value()=" << int(tlvSupportedRole->value());
+        if (tlvSupportedRole->value() != ieee1905_1::tlvSupportedRole::REGISTRAR) {
+            LOG(ERROR) << "invalid tlvSupportedRole value";
+            return false;
+        }
+    } else {
+        LOG(ERROR) << "tlvSupportedRole missing - ignoring autconfig renew message";
+        return false;
+    }
+
+    auto tlvSupportedFreqBand = cmdu_rx.addClass<ieee1905_1::tlvSupportedFreqBand>();
+    if (tlvSupportedFreqBand) {
+        LOG(DEBUG) << "tlvSupportedFreqBand->value()=" << int(tlvSupportedFreqBand->value());
+    } else {
+        LOG(ERROR) << "tlvSupportedFreqBand missing - ignoring autoconfig renew message";
+        return false;
+    }
+
+    LOG(TRACE) << "goto STATE_JOIN_MASTER";
+    slave_state = STATE_JOIN_MASTER;
     return true;
 }
 
