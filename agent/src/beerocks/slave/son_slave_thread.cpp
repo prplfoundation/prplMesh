@@ -3702,6 +3702,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
+        // TODO Move APRadioBasicCapabilities creation to a separate function
         auto radio_basic_caps = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
         if (!radio_basic_caps) {
             LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
@@ -3709,37 +3710,37 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         }
         radio_basic_caps->radio_uid() = network_utils::mac_from_string(config.radio_identifier);
         //TODO get maximum supported VAPs from DWPAL
-        radio_basic_caps->maximum_number_of_bsss_supported() = 1;
+        radio_basic_caps->maximum_number_of_bsss_supported() = 2;
 
-        // TODO: move WSC and M1 setters to separate functions
-        // TODO: Currently sending dummy values, need to read them from DWPAL and use the correct WiFi
-        //      Parameters based on the regulatory domain
-        for (int i = 0; i < radio_basic_caps->maximum_number_of_bsss_supported(); i++) {
-            auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
-            if (!operationClassesInfo) {
-                LOG(ERROR) << "Failed creating operating classes info list";
-                return false;
-            }
-            operationClassesInfo->operating_class()            = 81; // dummy value
-            operationClassesInfo->maximum_transmit_power_dbm() = 0;  // dummy value
+        auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
+        if (!operationClassesInfo) {
+            LOG(ERROR) << "Failed creating operating classes info list";
+            return false;
+        }
 
-            // TODO - the number of statically non operable channels can be 0 - meaning it is
-            // an optional variable length list, this is not yet supported in tlvf according to issue #8
-            // for now - lets define only one.
-            if (!operationClassesInfo->alloc_statically_non_operable_channels_list(1)) {
-                LOG(ERROR) << "Allocation statically non operable channels list failed";
-                return false;
-            }
-            // Set Dummy value for non operable channel list
-            auto non_operable_channel =
-                *son::wireless_utils::operating_class_to_channel_set(81).begin();
-            std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) =
-                non_operable_channel;
+        // TODO: Currently sending dummy values, just one operating class based on the band. Need
+        // to read them from DWPAL and use the correct WiFi Parameters based on the regulatory
+        // domain
+        uint8_t operating_class                            = hostap_params.iface_is_5ghz ? 110 : 81;
+        operationClassesInfo->operating_class()            = operating_class;
+        operationClassesInfo->maximum_transmit_power_dbm() = 0;
 
-            if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
-                LOG(ERROR) << "add_operating_classes_info_list failed";
-                return false;
-            }
+        // TODO - the number of statically non operable channels can be 0 - meaning it is
+        // an optional variable length list, this is not yet supported in tlvf according to issue #8
+        // for now - lets define only one.
+        if (!operationClassesInfo->alloc_statically_non_operable_channels_list(1)) {
+            LOG(ERROR) << "Allocation statically non operable channels list failed";
+            return false;
+        }
+        // Set Dummy value for non operable channel list
+        auto non_operable_channel =
+            *son::wireless_utils::operating_class_to_channel_set(operating_class).begin();
+        std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) =
+            non_operable_channel;
+
+        if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
+            LOG(ERROR) << "add_operating_classes_info_list failed";
+            return false;
         }
 
         // All attributes which are not explicitely set below are set to
