@@ -4358,7 +4358,8 @@ bool slave_thread::autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWs
 
 bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
     std::shared_ptr<ieee1905_1::tlvWscM2> m2, uint8_t authkey[32], uint8_t keywrapkey[16],
-    std::string &ssid, sMacAddr &bssid, WSC::eWscAuth &auth_type, WSC::eWscEncr &encr_type)
+    std::string &ssid, sMacAddr &bssid, WSC::eWscAuth &auth_type, WSC::eWscEncr &encr_type,
+    bool &backhaul, bool &fronthaul, bool &teardown)
 {
     auto encrypted_settings = m2->encrypted_settings();
     uint8_t *iv             = reinterpret_cast<uint8_t *>(encrypted_settings->iv());
@@ -4414,6 +4415,15 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
 
     // Swap back to host byte order to read and use config_data
     config_data.class_swap();
+    uint8_t bss_type = config_data.multiap_attr().subelement_value;
+    LOG(INFO) << "bss_type: " << std::hex << int(bss_type);
+    fronthaul = bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS;
+    backhaul  = bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS;
+    teardown  = bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN;
+    // BACKHAUL_STA bit is not expected to be set
+    if (bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_STA) {
+        LOG(WARNING) << "Unexpected backhaul STA bit";
+    }
     ssid      = std::string(config_data.ssid(), config_data.ssid_length());
     bssid     = config_data.bssid_attr().data;
     auth_type = config_data.authentication_type_attr().data;
@@ -4510,19 +4520,21 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         sMacAddr bssid;
         WSC::eWscAuth authtype;
         WSC::eWscEncr enctype;
+        bool fronthaul, backhaul, teardown;
         if (!autoconfig_wsc_parse_m2_encrypted_settings(tlvWscM2, authkey, keywrapkey, ssid, bssid,
-                                                        authtype, enctype))
+                                                        authtype, enctype, backhaul, fronthaul,
+                                                        teardown))
             return false;
 
         std::string manufacturer =
             std::string(tlvWscM2->manufacturer(), tlvWscM2->manufacturer_length());
 
-        LOG(DEBUG) << "Controller configuration (WSC M2 Encrypted Settings)" << std::endl
-                   << "     Manufacturer: " << manufacturer << std::endl
-                   << "     ssid: " << ssid << std::endl
-                   << "     bssid: " << network_utils::mac_to_string(bssid) << std::endl
-                   << "     authentication_type: " << std::hex << int(authtype) << std::endl
-                   << "     encryption_type: " << int(enctype) << std::dec << std::endl;
+        LOG(DEBUG) << "Controller configuration (WSC M2 Encrypted Settings)";
+        LOG(DEBUG) << "     Manufacturer: " << manufacturer << ", ssid: " << ssid
+                   << ", bssid: " << network_utils::mac_to_string(bssid)
+                   << ", authentication_type: " << std::hex << int(authtype)
+                   << ", encryption_type: " << int(enctype) << (fronthaul ? " fronthaul" : "")
+                   << (backhaul ? " backhaul" : "") << (teardown ? " teardown" : "");
     }
 
     if (slave_state != STATE_WAIT_FOR_JOINED_RESPONSE) {
