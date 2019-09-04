@@ -123,6 +123,7 @@ bool main_thread::init()
     if (!bus_subscribe(std::vector<ieee1905_1::eMessageType>{
             ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE,
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RESPONSE_MESSAGE,
+            ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE,
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE,
@@ -1557,6 +1558,18 @@ bool main_thread::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     switch (cmdu_rx.getMessageType()) {
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RESPONSE_MESSAGE: {
         return handle_1905_autoconfiguration_response(cmdu_rx, src_mac);
+    }
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE: {
+        if (src_mac != controller_bridge_mac) {
+            LOG(INFO) << "current controller_bridge_mac=" << controller_bridge_mac
+                      << " but renew came from src_mac=" << src_mac << ", ignoring";
+            return true;
+        }
+        // According to IEEE 1905.1, there should be a separate renew per frequency band. However,
+        // Multi-AP overrides this and says that all radios have to restart WSC when a renew is
+        // received. The actual handling is done in the slaves, so forward it to the slaves by
+        // returning false.
+        return false;
     }
     case ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE: {
         return handle_1905_discovery_query(cmdu_rx);
