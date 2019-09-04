@@ -122,8 +122,65 @@ test_combined_infra_metrics() {
     return 1
 }
 test_client_steering_mandate() {
-    #TODO: Implement
-    return 1
+    status "test client steering"
+    check_error=0
+
+    dbg "Send topology request to agent 1"
+    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002\"" $redirect
+    sleep 1
+    dbg "Confirming topology query was received"
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+
+    dbg "Send topology request to agent 2"
+    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent2,MessageTypeValue,0x0002\"" $redirect
+    sleep 1
+    dbg "Confirming topology query was received"
+    check docker exec -it repeater2 sh -c \
+        'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+
+    dbg "Send Client Steering Request message for Steering Mandate to CTT Agent1"
+    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
+0x001b,tlv_value,{$mac_agent1_wlan0 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {$mac_agent2_wlan0 0x73 0x24}}\""' $redirect
+    sleep 1
+    dbg "Confirming Client Steering Request message was received - mandate"
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "CLIENT_STEERING_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "CLIENT_STEERING_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+    
+    dbg "Confirming BTM Report message was received"
+    check docker exec -it gateway sh -c \
+        'grep -i -q "CLIENT_STEERING_BTM_REPORT_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
+
+    dbg "Confirming ACK message was received"
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+
+    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
+0x000C,tlv_value,{$mac_agent1_wlan0 0x00 0x000A 0x0000 0x00}\""' $redirect   
+    sleep 1
+    dbg "Confirming Client Steering Request message was received - Opportunity"
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "CLIENT_STEERING_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "CLIENT_STEERING_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+
+    dbg "Confirming ACK message was received"
+    check docker exec -it gateway sh -c \
+        'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
+
+    dbg "Confirming steering completed message was received"
+    check docker exec -it gateway sh -c \
+        'grep -i -q "STEERING_COMPLETED_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
+
+    dbg "Confirming ACK message was received"
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 }
 
 test_client_steering_policy() {
