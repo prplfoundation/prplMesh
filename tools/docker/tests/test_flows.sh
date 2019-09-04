@@ -18,14 +18,6 @@ topdir="${scriptdir%/*/*/*/*}"
 redirect="> /dev/null 2>&1"
 error=0
 
-start_gw_repeater() {
-    dbg "delete running containers before starting test"
-    eval docker rm -f gateway $redirect
-    eval docker rm -f repeater $redirect
-    dbg "start gw and repeater"
-    eval ${scriptdir}/test_gw_repeater.sh -d 5 $redirect
-}
-
 send_bml_command() {       
     docker exec -it gateway ${installdir}/bin/beerocks_cli -c "$*"
 }
@@ -34,17 +26,17 @@ test_initial_ap_config() {
     status "test initial autoconfig"
 
     check_error=0
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "WSC Global authentication success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "WSC Global authentication success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "KWA (Key Wrap Auth) success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "KWA (Key Wrap Auth) success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     return $check_error
@@ -65,28 +57,28 @@ test_channel_selection() {
     
     check_error=0
     dbg "Send channel preference query"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x8004\"" $redirect
+    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8004\"" $redirect
     sleep 1
     dbg "Confirming channel preference query has been received on agent"
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "CHANNEL_PREFERENCE_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "CHANNEL_PREFERENCE_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
     
     dbg "Send channel selection request"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x8006\"" $redirect
+    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8006\"" $redirect
     sleep 1
     dbg "Confirming channel selection request has been received on agent"
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "CHANNEL_SELECTION_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "CHANNEL_SELECTION_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
     
     dbg "Confirming 1905.1 Ack Message request was received on agent"
     # TODO: When creating handler for the ACK message on the agent, replace lookup of this string
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "handle_cmdu_control_ieee1905_1_message 8000" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater sh -c \
+    check docker exec -it repeater1 sh -c \
         'grep -i -q "handle_cmdu_control_ieee1905_1_message 8000" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     return $check_error
@@ -94,20 +86,20 @@ test_channel_selection() {
 test_client_capability_query() { 
     status "test client capability"  
 
-    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
-0x000C,tlv_value,{$RADIO_WLAN0_MAC 0x000000110022}\""' $redirect
+    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
+0x000C,tlv_value,{$mac_agent1_wlan0 0x000000110022}\""' $redirect
     sleep 1
     dbg "Confirming client capability query has been received on agent"
     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
-    docker exec -it repeater sh -c 'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    docker exec -it repeater sh -c 'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+    docker exec -it repeater1 sh -c 'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    docker exec -it repeater1 sh -c 'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 }
 test_ap_capability_query() {
     status "test ap capability query"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x8001\"" $redirect
+    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8001\"" $redirect
     sleep 1
     dbg "Confirming ap capability query has been received on agent"
-    docker exec -it repeater sh -c 'grep -i -q "AP_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    docker exec -it repeater1 sh -c 'grep -i -q "AP_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 }
 test_combined_infra_metrics() {
     #TODO: Implement
@@ -138,23 +130,42 @@ test_higher_layer_data_payload() {
 }
 test_topology() {
     status "test topology query"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$AL_MAC,MessageTypeValue,0x0002\"" $redirect    
+    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002\"" $redirect
     dbg "Confirming topology query was received"
-    docker exec -it repeater sh -c 'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+    docker exec -it repeater1 sh -c 'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 }
 test_init() {
     status "test initialization"
 
-    eval ${scriptdir}/test_gw_repeater.sh -f -d 5 $redirect || {
+    eval ${scriptdir}/test_gw_repeater.sh -f -r "repeater1" -r "repeater2" -d 5 $redirect || {
         err "start GW+Repeater failed, abort"
         exit 1
     }
-    AL_MAC=$(docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map | grep IRE_BRIDGE | awk '{print $5}' | cut -d ',' -f 1)
-    RADIO_WLAN0_MAC=$(docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map | grep "RADIO: wlan0" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)    
-    RADIO_WLAN0_MAC="0x${RADIO_WLAN0_MAC}"     
+    #save bml_conn_map output into a file.
+    connmap=$(tempfile)
+    trap "rm -f $connmap" EXIT
+    docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map > "$connmap"
 
-    RADIO_WLAN2_MAC=$(docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map | grep "RADIO: wlan2" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)    
-    RADIO_WLAN2_MAC="0x${RADIO_WLAN2_MAC}"
+    mac_agent1=$(grep "IRE_BRIDGE" "$connmap" | head -1 | awk '{print $5}' | cut -d ',' -f 1)
+    dbg "mac_agent1 = ${mac_agent1}"
+    mac_agent2=$(grep "IRE_BRIDGE" "$connmap" | sed -n 2p | awk '{print $5}' | cut -d ',' -f 1)
+    dbg "mac_agent2 = ${mac_agent2}"
+
+    mac_agent1_wlan0=$(grep "RADIO: wlan0" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)
+    mac_agent1_wlan0="0x${mac_agent1_wlan0}"
+    dbg "mac_agent1_wlan0 = ${mac_agent1_wlan0}"
+
+    mac_agent2_wlan0=$(grep "RADIO: wlan0" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)
+    mac_agent2_wlan0="0x${mac_agent2_wlan0}"
+    dbg "mac_agent2_wlan0 = ${mac_agent2_wlan0}"
+
+    mac_agent1_wlan2=$(grep "RADIO: wlan2" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)
+    mac_agent1_wlan2="0x${mac_agent1_wlan2}"
+    dbg "mac_agent1_wlan2 = ${mac_agent1_wlan2}"
+
+    mac_agent2_wlan2=$(grep "RADIO: wlan2" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)
+    mac_agent2_wlan2="0x${mac_agent2_wlan2}"
+    dbg "mac_agent2_wlan2 = ${mac_agent2_wlan2}"
 
 }
 usage() {
@@ -223,8 +234,5 @@ main() {
 }
 
 VERBOSE=false
-AL_MAC=
-RADIO_WLAN0_MAC=
-RADIO_WLAN2_MAC=
 
 main $@
