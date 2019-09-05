@@ -202,6 +202,19 @@ main() {
 
     if [ $error -gt 0 ]; then
         err "$error / $count tests failed"
+        if [ "$VERBOSE" == "true" ]; then
+            for dockerimage in gateway repeater; do
+                info "*** Dumping logs from $dockerimage ***"
+                docker exec $dockerimage sh -c '
+                    for logfile in controller agent agent_wlan0 agent_wlan2; do
+                        logpath=/tmp/$USER/beerocks/logs/beerocks_$logfile.log
+                        [ -e $logpath ] && {
+                            printf "\n\n==> %s <==\n" $logfile
+                            cat $logpath
+                        }
+                    done'
+            done
+        fi
     else
         success "$count / $count tests passed"
     fi
