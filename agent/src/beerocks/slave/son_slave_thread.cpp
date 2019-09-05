@@ -5047,19 +5047,6 @@ bool slave_thread::add_radio_basic_capabilities()
     operationClassesInfo->operating_class()            = operating_class;
     operationClassesInfo->maximum_transmit_power_dbm() = 0;
 
-    // TODO - the number of statically non operable channels can be 0 - meaning it is
-    // an optional variable length list, this is not yet supported in tlvf according to issue #8
-    // for now - lets define only one.
-    if (!operationClassesInfo->alloc_statically_non_operable_channels_list(1)) {
-        LOG(ERROR) << "Allocation statically non operable channels list failed";
-        return false;
-    }
-    // Set Dummy value for non operable channel list
-    auto non_operable_channel =
-        *son::wireless_utils::operating_class_to_channel_set(operating_class).begin();
-    std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) =
-        non_operable_channel;
-
     if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
         LOG(ERROR) << "add_operating_classes_info_list failed";
         return false;
