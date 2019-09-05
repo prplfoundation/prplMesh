@@ -3712,8 +3712,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        // All attributes which are not explicitely set below are set to
-        // default by the TLV factory, see WSC_Attributes.yml
         if (!autoconfig_wsc_add_m1()) {
             LOG(ERROR) << "Failed adding WSC M1 TLV";
             return false;
@@ -5078,6 +5076,8 @@ bool slave_thread::autoconfig_wsc_add_m1()
         return false;
     }
 
+    // All attributes which are not explicitely set below are set to default by the TLV factory,
+    // see WSC_Attributes.yml
     tlvWscM1->mac_attr().data = network_utils::mac_from_string(backhaul_params.bridge_mac);
     // TODO: read manufactured, name, model and device name from BPL
     if (!tlvWscM1->set_manufacturer("Intel"))
