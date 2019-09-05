@@ -234,7 +234,7 @@ main() {
     if [ $error -gt 0 ]; then
         err "$error / $count tests failed"
         if [ "$VERBOSE" == "true" ]; then
-            for dockerimage in gateway repeater; do
+            for dockerimage in gateway repeater1 repeater2; do
                 info "*** Dumping logs from $dockerimage ***"
                 docker exec $dockerimage sh -c '
                     for logfile in controller agent agent_wlan0 agent_wlan2; do
