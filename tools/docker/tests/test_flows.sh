@@ -153,7 +153,7 @@ test_topology() {
 test_init() {
     status "test initialization"
 
-    eval ${scriptdir}/test_gw_repeater.sh -f -r "repeater1" -r "repeater2" -d 5 $redirect || {
+    eval ${scriptdir}/test_gw_repeater.sh -f -r "repeater1" -r "repeater2" -d 7 $redirect || {
         err "start GW+Repeater failed, abort"
         exit 1
     }
