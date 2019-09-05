@@ -158,7 +158,8 @@ test_init() {
         exit 1
     }
     #save bml_conn_map output into a file.
-    connmap=$(tempfile)
+    connmap=$(mktemp)
+    [ -z "$connmap" ] && { err "Failed to create temp file"; exit 1; }
     trap "rm -f $connmap" EXIT
     docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map > "$connmap"
 
