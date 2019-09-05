@@ -297,3 +297,49 @@ bool node::set_type(beerocks::eType type_)
     }
     return false;
 }
+
+bool node::link_metrics_data::add_transmitter_link_metric(
+    std::shared_ptr<ieee1905_1::tlvTransmitterLinkMetric> tx_link_metric_data)
+{
+    //  interface_pair_info_length() returns the length in bytes (number of elements * sizeof(sInterfacePairInfo).
+    size_t info_size = tx_link_metric_data->interface_pair_info_length() /
+                       sizeof(ieee1905_1::tlvTransmitterLinkMetric::sInterfacePairInfo);
+
+    for (size_t i = 0; i < info_size; i++) {
+        auto info_tuple = tx_link_metric_data->interface_pair_info(i);
+
+        if (!std::get<0>(info_tuple)) {
+            LOG(ERROR) << "add_transmitter_link_metric getting operating class entry has failed!";
+            return false;
+        }
+        auto &InterfacePairInfo = std::get<1>(info_tuple);
+        transmitterLinkMetrics.push_back(InterfacePairInfo);
+
+        LOG(DEBUG) << "adding tlvTransmitterLinkMetric data to list"
+                   << " phy_rate = " << int(InterfacePairInfo.link_metric_info.phy_rate);
+    }
+    return true;
+}
+
+bool node::link_metrics_data::add_receiver_link_metric(
+    std::shared_ptr<ieee1905_1::tlvReceiverLinkMetric> RxLinkMetricData)
+{
+    //  interface_pair_info_length() returns the length in bytes (number of elements * sizeof(sInterfacePairInfo).
+    size_t info_size = RxLinkMetricData->interface_pair_info_length() /
+                       sizeof(ieee1905_1::tlvReceiverLinkMetric::sInterfacePairInfo);
+
+    for (size_t i = 0; i < info_size; i++) {
+        auto info_tuple = RxLinkMetricData->interface_pair_info(i);
+
+        if (!std::get<0>(info_tuple)) {
+            LOG(ERROR) << "add_receiver_link_metric getting operating class entry has failed!";
+            return false;
+        }
+        auto &InterfacePairInfo = std::get<1>(info_tuple);
+        receiverLinkMetrics.push_back(InterfacePairInfo);
+
+        LOG(DEBUG) << "adding tlvReceiverLinkMetric data to list"
+                   << " rssi_db = " << int(InterfacePairInfo.link_metric_info.rssi_db);
+    }
+    return true;
+}
