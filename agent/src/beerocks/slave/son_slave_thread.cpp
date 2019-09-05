@@ -3707,44 +3707,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        // TODO Move APRadioBasicCapabilities creation to a separate function
-        auto radio_basic_caps = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
-        if (!radio_basic_caps) {
-            LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
-            return false;
-        }
-        radio_basic_caps->radio_uid() = network_utils::mac_from_string(config.radio_identifier);
-        //TODO get maximum supported VAPs from DWPAL
-        radio_basic_caps->maximum_number_of_bsss_supported() = 2;
-
-        auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
-        if (!operationClassesInfo) {
-            LOG(ERROR) << "Failed creating operating classes info list";
-            return false;
-        }
-
-        // TODO: Currently sending dummy values, just one operating class based on the band. Need
-        // to read them from DWPAL and use the correct WiFi Parameters based on the regulatory
-        // domain
-        uint8_t operating_class                            = hostap_params.iface_is_5ghz ? 110 : 81;
-        operationClassesInfo->operating_class()            = operating_class;
-        operationClassesInfo->maximum_transmit_power_dbm() = 0;
-
-        // TODO - the number of statically non operable channels can be 0 - meaning it is
-        // an optional variable length list, this is not yet supported in tlvf according to issue #8
-        // for now - lets define only one.
-        if (!operationClassesInfo->alloc_statically_non_operable_channels_list(1)) {
-            LOG(ERROR) << "Allocation statically non operable channels list failed";
-            return false;
-        }
-        // Set Dummy value for non operable channel list
-        auto non_operable_channel =
-            *son::wireless_utils::operating_class_to_channel_set(operating_class).begin();
-        std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) =
-            non_operable_channel;
-
-        if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
-            LOG(ERROR) << "add_operating_classes_info_list failed";
+        if (!add_radio_basic_capabilities()) {
+            LOG(ERROR) << "Failed adding WSC M1 TLV";
             return false;
         }
 
@@ -5059,6 +5023,51 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
     operating_channel_report_tlv->current_transmit_power() = -50;
 
     return send_cmdu_to_controller(cmdu_tx);
+}
+
+bool slave_thread::add_radio_basic_capabilities()
+{
+    auto radio_basic_caps = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+    if (!radio_basic_caps) {
+        LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
+        return false;
+    }
+    radio_basic_caps->radio_uid() = network_utils::mac_from_string(config.radio_identifier);
+    //TODO get maximum supported VAPs from DWPAL
+    radio_basic_caps->maximum_number_of_bsss_supported() = 2;
+
+    auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
+    if (!operationClassesInfo) {
+        LOG(ERROR) << "Failed creating operating classes info list";
+        return false;
+    }
+
+    // TODO: Currently sending dummy values, just one operating class based on the band. Need
+    // to read them from DWPAL and use the correct WiFi Parameters based on the regulatory
+    // domain
+    uint8_t operating_class                            = hostap_params.iface_is_5ghz ? 110 : 81;
+    operationClassesInfo->operating_class()            = operating_class;
+    operationClassesInfo->maximum_transmit_power_dbm() = 0;
+
+    // TODO - the number of statically non operable channels can be 0 - meaning it is
+    // an optional variable length list, this is not yet supported in tlvf according to issue #8
+    // for now - lets define only one.
+    if (!operationClassesInfo->alloc_statically_non_operable_channels_list(1)) {
+        LOG(ERROR) << "Allocation statically non operable channels list failed";
+        return false;
+    }
+    // Set Dummy value for non operable channel list
+    auto non_operable_channel =
+        *son::wireless_utils::operating_class_to_channel_set(operating_class).begin();
+    std::get<1>(operationClassesInfo->statically_non_operable_channels_list(0)) =
+        non_operable_channel;
+
+    if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
+        LOG(ERROR) << "add_operating_classes_info_list failed";
+        return false;
+    }
+
+    return true;
 }
 
 bool slave_thread::autoconfig_wsc_add_m1()
