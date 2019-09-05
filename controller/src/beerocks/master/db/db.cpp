@@ -640,6 +640,12 @@ int db::get_node_last_ping_avg_ms(std::string mac)
     return n->last_ping_avg_ms;
 }
 
+std::unordered_map<sMacAddr, std::unordered_map<sMacAddr, son::node::link_metrics_data>> &
+db::get_link_metric_data_map()
+{
+    return m_link_metric_data;
+}
+
 bool db::set_hostap_active(std::string mac, bool active)
 {
     auto n = get_node(mac);

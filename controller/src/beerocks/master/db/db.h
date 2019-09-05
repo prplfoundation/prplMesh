@@ -238,6 +238,13 @@ public:
     void disconnected_slave_mac_queue_push(std::string node_mac);
     std::string node_to_string(std::string mac);
 
+    /**
+     * @brief Get the link metric database
+     * @return reference to the map that holds link metric data of all agents.
+     */
+    std::unordered_map<sMacAddr, std::unordered_map<sMacAddr, son::node::link_metrics_data>> &
+    get_link_metric_data_map();
+
     //
     // DB node functions (get only)
     //
@@ -725,6 +732,15 @@ private:
     friend class network_map;
 
     std::shared_ptr<vaps_list_t> m_vap_list;
+
+    /*
+    * This map holds link metric "data struct" per reporting Agent sMacAddr .
+    * "data struct" holds map of the actual link_metrics_data vector (tx/rx) per reported Agent sMacAddr.
+    * Map is Used in TYPE_GW/TYPE_IRE nodes.
+    * Map created empty in all other nodes.
+    */
+    std::unordered_map<sMacAddr, std::unordered_map<sMacAddr, son::node::link_metrics_data>>
+        m_link_metric_data;
 
     // certification
     std::shared_ptr<uint8_t> certification_tx_buffer;

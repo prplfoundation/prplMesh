@@ -10,8 +10,12 @@
 #define _NODE_H_
 
 #include "../tasks/task.h"
+#include <tlvf/common/sMacAddr.h>
+#include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
+#include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
 
 #include <list>
+#include <map>
 
 namespace son {
 typedef struct {
@@ -183,6 +187,21 @@ public:
         std::unordered_map<int8_t, sVapElement> vaps_info;
     };
     std::shared_ptr<radio> hostap;
+
+    class link_metrics_data {
+    public:
+        link_metrics_data(){};
+        ~link_metrics_data(){};
+
+        std::vector<ieee1905_1::tlvTransmitterLinkMetric::sInterfacePairInfo>
+            transmitterLinkMetrics;
+        std::vector<ieee1905_1::tlvReceiverLinkMetric::sInterfacePairInfo> receiverLinkMetrics;
+
+        bool add_transmitter_link_metric(
+            std::shared_ptr<ieee1905_1::tlvTransmitterLinkMetric> TxLinkMetricData);
+        bool add_receiver_link_metric(
+            std::shared_ptr<ieee1905_1::tlvReceiverLinkMetric> RxLinkMetricData);
+    };
 
     beerocks::eBandType band_type   = beerocks::eBandType::INVALID_BAND;
     beerocks::eIfaceType iface_type = beerocks::IFACE_TYPE_ETHERNET;
