@@ -288,6 +288,7 @@ private:
     bool handle_channel_selection_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_client_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_ap_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_client_association_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 };
 
 } // namespace son
