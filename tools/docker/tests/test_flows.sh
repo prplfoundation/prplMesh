@@ -132,8 +132,24 @@ test_client_steering_policy() {
 }
 
 test_client_association() {
-    #TODO: Implement
-    return 1
+    status "test client association"
+    
+    dbg "Send topology request to agent 1"
+    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002\"" $redirect
+    dbg "Confirming topology query was received"
+    docker exec -it repeater1 sh -c 'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+
+    dbg "Send client association control message"
+    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8016,tlv_type,0x9D,tlv_length,\
+0x000f,tlv_value,{$mac_agent1_wlan0 0x00 0x1E 0x01 {0x000000110022}}\""' $redirect
+
+    dbg "Confirming client association control message has been received on agent"
+    # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
+    docker exec -it repeater1 sh -c 'grep -i -q "CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    docker exec -it repeater1 sh -c 'grep -i -q "CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+
+    dbg "Confirming ACK message was received on controller"
+    docker exec -it gateway sh -c 'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
 }
 
 test_higher_layer_data_payload_trigger() {
