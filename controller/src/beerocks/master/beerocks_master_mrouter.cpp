@@ -57,6 +57,7 @@ bool master_mrouter::init()
         ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE,
         ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE,
         ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE,
+        ieee1905_1::eMessageType::ACK_MESSAGE,
     }));
 }
 

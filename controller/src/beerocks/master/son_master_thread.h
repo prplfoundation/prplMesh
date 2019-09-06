@@ -70,6 +70,7 @@ private:
                                                      ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_operating_channel_report(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_topology_discovery(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_1905_ack_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool autoconfig_wsc_parse_radio_caps(
         std::string radio_mac, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps);
     // Autoconfig encryption support
