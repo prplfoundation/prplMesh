@@ -963,7 +963,8 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(Socket *sd,
 bool master_thread::handle_cmdu_1905_ack_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
-    LOG(INFO) << "Received ACK_MESSAGE, mid=" << std::hex << int(mid);
+    //TODO: the ACK should be sent to the correct task and will be done as part of agent certification
+    LOG(DEBUG) << "Received ACK_MESSAGE, mid=" << std::hex << int(mid);
     return true;
 }
 
