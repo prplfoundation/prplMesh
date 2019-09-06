@@ -30,6 +30,7 @@
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
+#include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
 
@@ -131,6 +132,7 @@ bool main_thread::init()
             ieee1905_1::eMessageType::ACK_MESSAGE, ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE,
             ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE,
             ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE,
+            ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE,
             ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE})) {
 
         LOG(ERROR) << "Failed to init mapf_bus";
@@ -1612,6 +1614,9 @@ bool main_thread::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return handle_1905_discovery_query(cmdu_rx);
         //LOG(INFO) << "I got the Topology Query message!";
     }
+    case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE: {
+        return handle_1905_higher_layer_data_message(cmdu_rx, src_mac);
+    }
 
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
@@ -1634,6 +1639,33 @@ bool main_thread::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cmdu_rx
     //TODO - this should be part of the discovery agent, will be done as part of
     //       agent certification
     return true;
+}
+
+bool main_thread::handle_1905_higher_layer_data_message(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                        const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received HIGHER_LAYER_DATA_MESSAGE , mid=" << std::hex << int(mid);
+
+    auto tlvHigherLayerData = cmdu_tx.addClass<wfa_map::tlvHigherLayerData>();
+    if (!tlvHigherLayerData) {
+        LOG(ERROR) << "addClass wfa_map::tlvHigherLayerData failed";
+        return false;
+    }
+
+    auto protocol     = tlvHigherLayerData->protocol();
+    const auto length = tlvHigherLayerData->length();
+    LOG(DEBUG) << "protocol: " << std::hex << protocol;
+    LOG(DEBUG) << "length: " << int(length);
+
+    // build ACK message CMDU
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+    LOG(DEBUG) << "sending ACK message to the originator, mid=" << std::hex << int(mid);
+    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool main_thread::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessageRx &cmdu_rx,
