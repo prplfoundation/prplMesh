@@ -153,8 +153,29 @@ test_client_association() {
 }
 
 test_higher_layer_data_payload_trigger() {
-    #TODO: Implement
-    return 1
+    status "test higher layer data payload"
+    
+    mac_gateway_hex=`echo $mac_gateway | tr --delete :`
+    mac_gateway_hex="0x${mac_gateway_hex}"
+    copies=200
+    
+    for i in `seq 1 $copies`
+    do
+        payload="$payload $mac_gateway_hex"
+    done
+
+    dbg "Send Higher Layer Data message"
+    # MCUT sends Higher Layer Data message to CTT Agent1 by providing:
+    # Higher layer protocol = "0x00"
+    # Higher layer payload = 200 concatenated copies of the ALID of the MCUT (1200 octets)
+    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8018,tlv_type,0xA0,tlv_length,\
+0x04b1,tlv_value,{0x00 $payload}\""' $redirect
+
+    dbg "Confirming higher layer data message was received in the agent" 
+    docker exec -it repeater1 sh -c 'grep -i -q "HIGHER_LAYER_DATA_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+
+    dbg "Confirming ACK message was received in the controller"
+    docker exec -it gateway sh -c 'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
 }
 test_higher_layer_data_payload() {
     #TODO: Implement
