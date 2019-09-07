@@ -66,6 +66,7 @@ private:
     // 1905 messages handlers
     bool handle_cmdu_1905_autoconfiguration_search(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_autoconfiguration_WSC(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_1905_link_metric_response(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_channel_preference_report(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_channel_selection_response(Socket *sd,
                                                      ieee1905_1::CmduMessageRx &cmdu_rx);

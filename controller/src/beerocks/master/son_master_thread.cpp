@@ -249,6 +249,8 @@ bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessa
         return handle_cmdu_1905_higher_layer_data_message(sd, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE:
         return handle_cmdu_1905_topology_notification(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_link_metric_response(sd, cmdu_rx);
     default:
         break;
     }
@@ -1141,6 +1143,159 @@ bool master_thread::handle_cmdu_1905_channel_selection_response(Socket *sd,
                })(response_code);
 
     } while (cmdu_rx.getNextTlvType() != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE));
+
+    return true;
+}
+
+static void print_link_metric_map(
+    std::unordered_map<sMacAddr, std::unordered_map<sMacAddr, son::node::link_metrics_data>>
+        &link_metric_data)
+{
+    LOG(DEBUG) << "Printing Link Metrics data map";
+    for (auto const &pair_agent : link_metric_data) {
+        LOG(DEBUG) << "sent from al_mac= " << network_utils::mac_to_string(pair_agent.first)
+                   << std::endl;
+
+        for (auto const &pair_neighbor : link_metric_data[pair_agent.first]) {
+            LOG(DEBUG) << "reporting neighbor al_mac= "
+                       << network_utils::mac_to_string(pair_neighbor.first) << std::endl;
+
+            auto &vrx = pair_neighbor.second.receiverLinkMetrics;
+            for (unsigned int i = 0; i < vrx.size(); ++i) {
+                LOG(DEBUG) << "rx interface metric data # " << i << "  neighbor al_mac:"
+                           << network_utils::mac_to_string(vrx[i].neighbor_interface_mac)
+                           << "  receiving al_mac:"
+                           << network_utils::mac_to_string(vrx[i].rc_interface_mac)
+                           << "  rssi= " << std::hex << int(vrx[i].link_metric_info.rssi_db)
+                           << std::endl;
+            }
+
+            auto &vtx = pair_neighbor.second.transmitterLinkMetrics;
+            for (unsigned int i = 0; i < vtx.size(); i++) {
+                LOG(DEBUG) << "tx interface metric data # " << i << "  neighbor al_mac:"
+                           << network_utils::mac_to_string(vtx[i].neighbor_interface_mac)
+                           << "  receiving al_mac:"
+                           << network_utils::mac_to_string(vtx[i].rc_interface_mac)
+                           << "  phy_rate= " << std::hex << int(vtx[i].link_metric_info.phy_rate)
+                           << std::endl;
+            }
+        }
+    }
+}
+
+bool master_thread::handle_cmdu_1905_link_metric_response(Socket *sd,
+                                                          ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+
+    auto mid = cmdu_rx.getMessageId();
+    LOG(INFO) << "Received LINK_METRIC_RESPONSE_MESSAGE, mid=" << std::dec << int(mid);
+
+    //getting reference for link metric data storage from db
+    auto &link_metric_data = database.get_link_metric_data_map();
+
+    //will hold new link metric data from Reporting Agent
+    son::node::link_metrics_data new_link_metric_data;
+
+    int tlvType;
+    // holds mac address of the reporting agent, used as link_metric_data key
+    sMacAddr reporting_agent_al_mac, neighbor_al_mac;
+
+    // parse all tlvs in cmdu and save ap metric data to database
+    while ((tlvType = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
+
+        if (tlvType < 0) {
+            LOG(ERROR) << "getNextTlvType has failed";
+            return false;
+        }
+
+        if (tlvType == int(ieee1905_1::eTlvType::TLV_TRANSMITTER_LINK_METRIC)) {
+            // parse tx_Link_metric_data
+            auto TxLinkMetricData = cmdu_rx.addClass<ieee1905_1::tlvTransmitterLinkMetric>();
+            if (!TxLinkMetricData) {
+                LOG(ERROR) << "addClass ieee1905_1::tx_Link_metric_data has failed";
+                return false;
+            }
+
+            reporting_agent_al_mac = TxLinkMetricData->reporter_al_mac();
+            neighbor_al_mac        = TxLinkMetricData->neighbor_al_mac();
+
+            LOG(DEBUG) << "recieved  tlvTransmitterLinkMetric from al_mac ="
+                       << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
+                       << "reported  al_mac =" << network_utils::mac_to_string(neighbor_al_mac)
+                       << std::endl;
+
+            //fill tx data from TLV
+            if (!new_link_metric_data.add_transmitter_link_metric(TxLinkMetricData)) {
+                LOG(ERROR) << "adding TxLinkMetricData has failed";
+                return false;
+            }
+        } else if (tlvType == int(ieee1905_1::eTlvType::TLV_RECEIVER_LINK_METRIC)) {
+            // parse tlvReceiverLinkMetric
+            auto RxLinkMetricData = cmdu_rx.addClass<ieee1905_1::tlvReceiverLinkMetric>();
+            if (!RxLinkMetricData) {
+                LOG(ERROR) << "addClass ieee1905_1::tlvReceiverLinkMetric has failed";
+                return false;
+            }
+
+            if (reporting_agent_al_mac != RxLinkMetricData->reporter_al_mac()) {
+                LOG(ERROR) << "TLV_RECEIVER_LINK_METRIC reporter al_mac ="
+                           << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
+                           << " and TLV_TRANSMITTER_LINK_METRIC reporter al_mac ="
+                           << network_utils::mac_to_string(RxLinkMetricData->reporter_al_mac())
+                           << std::endl
+                           << " not the same";
+                return false;
+            }
+
+            if (neighbor_al_mac != RxLinkMetricData->neighbor_al_mac()) {
+                LOG(ERROR) << "TLV_RECEIVER_LINK_METRIC reported al_mac ="
+                           << network_utils::mac_to_string(neighbor_al_mac) << std::endl
+                           << " and TLV_TRANSMITTER_LINK_METRIC reported al_mac ="
+                           << network_utils::mac_to_string(RxLinkMetricData->neighbor_al_mac())
+                           << std::endl
+                           << " not the same";
+                return false;
+            }
+
+            LOG(DEBUG) << "recieved  tlvReceiverLinkMetric from al_mac="
+                       << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
+                       << "reported  al_mac =" << network_utils::mac_to_string(neighbor_al_mac)
+                       << std::endl;
+
+            //fill rx data from TLV
+            if (!new_link_metric_data.add_receiver_link_metric(RxLinkMetricData)) {
+                LOG(ERROR) << "adding RxLinkMetricData has failed";
+                return false;
+            }
+        } else {
+            LOG(ERROR) << " unexpected tlv is recieved ";
+            return false;
+        }
+    }
+
+    //save agent link metric data to database or modify already existing.
+    std::string reporter_status_s = "new";
+    std::string neighbor_status_s = "new";
+    auto reporting_map_it         = link_metric_data.find(reporting_agent_al_mac);
+
+    if (reporting_map_it != link_metric_data.end()) {
+        auto neighbor_map_it = reporting_map_it->second.find(neighbor_al_mac);
+        if (neighbor_map_it != reporting_map_it->second.end()) {
+            reporter_status_s = "existing";
+        } else {
+            neighbor_status_s = "existing";
+        }
+    }
+
+    link_metric_data[reporting_agent_al_mac][reporting_agent_al_mac] = new_link_metric_data;
+
+    LOG(DEBUG) << " Added metric data from " << reporter_status_s
+               << " al_mac = " << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
+               << "reported data for " << neighbor_status_s
+               << " neighbor al_mac =" << network_utils::mac_to_string(neighbor_al_mac)
+               << std::endl;
+
+    print_link_metric_map(link_metric_data);
 
     return true;
 }
