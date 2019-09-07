@@ -61,7 +61,9 @@ bool master_mrouter::init()
         ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE,
         ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE,
         ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE,
+        ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE,
         ieee1905_1::eMessageType::ACK_MESSAGE,
+
     }));
 }
 
