@@ -496,7 +496,7 @@ class cACTION_CLI_CLIENT_BEACON_11K_REQUEST : public BaseClass
         }
         sMacAddr& client_mac();
         sMacAddr& bssid();
-        std::tuple<bool, uint8_t&> ssid(size_t idx);
+        uint8_t* ssid(size_t idx = 0);
         uint8_t& use_optional_ssid();
         uint8_t& channel();
         uint8_t& measurement_mode();

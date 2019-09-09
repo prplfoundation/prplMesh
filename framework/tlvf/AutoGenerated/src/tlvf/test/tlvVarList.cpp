@@ -39,13 +39,12 @@ uint8_t& tlvTestVarList::simple_list_length() {
     return (uint8_t&)(*m_simple_list_length);
 }
 
-std::tuple<bool, uint16_t&> tlvTestVarList::simple_list(size_t idx) {
-    bool ret_success = ( (m_simple_list_idx__ > 0) && (m_simple_list_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
+uint16_t* tlvTestVarList::simple_list(size_t idx) {
+    if ( (m_simple_list_idx__ > 0) && (m_simple_list_idx__ > idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
     }
-    return std::forward_as_tuple(ret_success, m_simple_list[ret_idx]);
+    return &(m_simple_list[idx]);
 }
 
 bool tlvTestVarList::alloc_simple_list(size_t count) {
@@ -430,13 +429,12 @@ uint8_t& cInner::list_length() {
     return (uint8_t&)(*m_list_length);
 }
 
-std::tuple<bool, uint8_t&> cInner::list(size_t idx) {
-    bool ret_success = ( (m_list_idx__ > 0) && (m_list_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
+uint8_t* cInner::list(size_t idx) {
+    if ( (m_list_idx__ > 0) && (m_list_idx__ > idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
     }
-    return std::forward_as_tuple(ret_success, m_list[ret_idx]);
+    return &(m_list[idx]);
 }
 
 bool cInner::alloc_list(size_t count) {

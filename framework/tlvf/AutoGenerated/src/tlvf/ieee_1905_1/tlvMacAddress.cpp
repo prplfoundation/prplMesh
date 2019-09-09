@@ -33,13 +33,12 @@ const uint16_t& tlvMacAddress::length() {
     return (const uint16_t&)(*m_length);
 }
 
-std::tuple<bool, uint8_t&> tlvMacAddress::mac(size_t idx) {
-    bool ret_success = ( (m_mac_idx__ > 0) && (m_mac_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
+uint8_t* tlvMacAddress::mac(size_t idx) {
+    if ( (m_mac_idx__ > 0) && (m_mac_idx__ > idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
     }
-    return std::forward_as_tuple(ret_success, m_mac[ret_idx]);
+    return &(m_mac[idx]);
 }
 
 void tlvMacAddress::class_swap()

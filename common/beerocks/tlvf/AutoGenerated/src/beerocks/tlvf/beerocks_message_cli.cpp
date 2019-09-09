@@ -1111,13 +1111,12 @@ sMacAddr& cACTION_CLI_CLIENT_BEACON_11K_REQUEST::bssid() {
     return (sMacAddr&)(*m_bssid);
 }
 
-std::tuple<bool, uint8_t&> cACTION_CLI_CLIENT_BEACON_11K_REQUEST::ssid(size_t idx) {
-    bool ret_success = ( (m_ssid_idx__ > 0) && (m_ssid_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
+uint8_t* cACTION_CLI_CLIENT_BEACON_11K_REQUEST::ssid(size_t idx) {
+    if ( (m_ssid_idx__ > 0) && (m_ssid_idx__ > idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
     }
-    return std::forward_as_tuple(ret_success, m_ssid[ret_idx]);
+    return &(m_ssid[idx]);
 }
 
 uint8_t& cACTION_CLI_CLIENT_BEACON_11K_REQUEST::use_optional_ssid() {

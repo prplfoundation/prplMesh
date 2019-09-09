@@ -35,7 +35,7 @@ class tlvTestVarList : public BaseClass
         const uint16_t& length();
         uint16_t& var0();
         uint8_t& simple_list_length();
-        std::tuple<bool, uint16_t&> simple_list(size_t idx);
+        uint16_t* simple_list(size_t idx = 0);
         bool alloc_simple_list(size_t count = 1);
         uint8_t& complex_list_length();
         std::tuple<bool, cInner&> complex_list(size_t idx);
@@ -84,7 +84,7 @@ class cInner : public BaseClass
         const uint16_t& type();
         const uint16_t& length();
         uint8_t& list_length();
-        std::tuple<bool, uint8_t&> list(size_t idx);
+        uint8_t* list(size_t idx = 0);
         bool alloc_list(size_t count = 1);
         uint32_t& var1();
         size_t unknown_length_list_inner_length() { return m_unknown_length_list_inner_idx__ * sizeof(char); }

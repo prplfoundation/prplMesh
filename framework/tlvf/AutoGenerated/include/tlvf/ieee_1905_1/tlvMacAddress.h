@@ -34,7 +34,7 @@ class tlvMacAddress : public BaseClass
 
         const eTlvType& type();
         const uint16_t& length();
-        std::tuple<bool, uint8_t&> mac(size_t idx);
+        uint8_t* mac(size_t idx = 0);
         void class_swap();
         static size_t get_initial_size();
 

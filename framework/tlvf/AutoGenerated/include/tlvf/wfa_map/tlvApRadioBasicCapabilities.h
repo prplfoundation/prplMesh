@@ -70,7 +70,7 @@ class cOperatingClassesInfo : public BaseClass
         uint8_t& operating_class();
         uint8_t& maximum_transmit_power_dbm();
         uint8_t& statically_non_operable_channels_list_length();
-        std::tuple<bool, uint8_t&> statically_non_operable_channels_list(size_t idx);
+        uint8_t* statically_non_operable_channels_list(size_t idx = 0);
         bool alloc_statically_non_operable_channels_list(size_t count = 1);
         void class_swap();
         static size_t get_initial_size();
