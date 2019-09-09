@@ -80,8 +80,7 @@ void son_management::handle_cli_message(Socket *sd,
                 isOK = false;
                 break;
             }
-            auto data_tuple = request->data(0);
-            memset(&std::get<1>(data_tuple), 0, size_left);
+	    memset(request->data(), 0, request->data_length());
             if (!database.update_node_last_ping_sent(slave)) {
                 LOG(DEBUG) << "PING_MSG_REQUEST received for slave " << slave
                            << " , can't update last ping sent time for ";
@@ -128,8 +127,7 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        auto data_tuple = request->data(0);
-        memset(&std::get<1>(data_tuple), 0, size_left);
+	memset(request->data(), 0, request->data_length());
 
         auto slaves = database.get_active_hostaps();
         for (const auto &slave : slaves) {
@@ -509,7 +507,7 @@ void son_management::handle_cli_message(Socket *sd,
         if (cli_request->use_optional_ssid()) {
             request->params().use_optional_ssid = 1; // bool
             string_utils::copy_string((char *)request->params().ssid,
-                                      (char *)&std::get<1>(cli_request->ssid(0)),
+                                      (char *)cli_request->ssid(),
                                       beerocks::message::WIFI_SSID_MAX_LENGTH);
         } else {
             request->params().use_optional_ssid = 0;

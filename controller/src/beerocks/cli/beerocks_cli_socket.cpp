@@ -845,7 +845,7 @@ int cli_socket::client_beacon_11k_req(std::string client_mac, std::string bssid,
 
     if (!ssid.empty()) {
         request->use_optional_ssid() = true;
-        string_utils::copy_string((char *)&std::get<1>(request->ssid(0)), ssid.c_str(),
+        string_utils::copy_string((char *)request->ssid(), ssid.c_str(),
                                   message::WIFI_SSID_MAX_LENGTH);
     }
     wait_response = true;

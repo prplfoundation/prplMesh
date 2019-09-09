@@ -849,8 +849,7 @@ bool slave_thread::handle_cmdu_control_message(
                 LOG(ERROR) << "Failed buffer allocation to size=" << int(request->size());
                 break;
             }
-            auto data_tuple = response->data(0);
-            memset(&std::get<1>(data_tuple), 0, response->size());
+	    memset(request->data(), 0, request->data_length());
         }
         send_cmdu_to_controller(cmdu_tx);
         break;
@@ -878,8 +877,7 @@ bool slave_thread::handle_cmdu_control_message(
                     LOG(ERROR) << "Failed buffer allocation to size=" << int(request->size());
                     break;
                 }
-                auto data_tuple = request->data(0);
-                memset(&std::get<1>(data_tuple), 0, request->size());
+		memset(request->data(), 0, request->data_length());
             }
             send_cmdu_to_controller(cmdu_tx);
         }
@@ -4825,13 +4823,12 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
             return false;
         }
         auto channel_idx   = op_class_channels->channel_list_length();
-        auto channel_tuple = op_class_channels->channel_list(channel_idx - 1);
-        if (!std::get<0>(channel_tuple)) {
+        auto channel = op_class_channels->channel_list(channel_idx - 1);
+        if (!channel) {
             LOG(ERROR) << "getting channel entry has failed!";
             return false;
         }
-        auto &channel = std::get<1>(channel_tuple);
-        channel       = ch;
+        *channel       = ch;
     }
 
     // Update channel list flags
@@ -4905,27 +4902,26 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
 
                 auto channel_list_length = op_class_channels.channel_list_length();
                 for (int ch_idx = 0; ch_idx < channel_list_length; ch_idx++) {
-                    auto channel_tuple = op_class_channels.channel_list(ch_idx);
-                    if (!std::get<0>(channel_tuple)) {
+                    auto channel = op_class_channels.channel_list(ch_idx);
+                    if (!channel) {
                         LOG(ERROR) << "getting channel entry has failed!";
                         return false;
                     }
 
-                    auto channel = std::get<1>(channel_tuple);
-                    ss << int(channel);
+                    ss << int(*channel);
 
                     // add comma if not last channel in the list, else close list by add curl brackets
                     ss << (((ch_idx + 1) != channel_list_length) ? "," : "}");
 
                     // mark first supported non-dfs channel as selected channel
                     // TODO: need to check that selected channel does not violate radio restriction
-                    if (preference == 0 || wireless_utils::is_dfs_channel(channel)) {
+                    if (preference == 0 || wireless_utils::is_dfs_channel(*channel)) {
                         continue;
                     }
 
                     LOG(INFO) << "selected_operating_class=" << int(operating_class);
-                    LOG(INFO) << "selected_channel=" << int(channel);
-                    selected_channel         = channel;
+                    LOG(INFO) << "selected_channel=" << int(*channel);
+                    selected_channel         = *channel;
                     selected_operating_class = operating_class;
 
                     // TODO: check that the data is parsed properly after fixing the following bug:

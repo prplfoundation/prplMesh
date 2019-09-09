@@ -838,14 +838,13 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(Socket *sd,
 
                 auto channel_list_length = op_class_channels_rx.channel_list_length();
                 for (int ch_idx = 0; ch_idx < channel_list_length; ch_idx++) {
-                    auto channel_tuple_rx = op_class_channels_rx.channel_list(ch_idx);
-                    if (!std::get<0>(channel_tuple_rx)) {
+                    auto channel_rx = op_class_channels_rx.channel_list(ch_idx);
+                    if (!channel_rx) {
                         LOG(ERROR) << "getting channel entry has failed!";
                         return false;
                     }
 
-                    auto channel_rx = std::get<1>(channel_tuple_rx);
-                    ss << int(channel_rx);
+                    ss << int(*channel_rx);
 
                     // add comma if not last channel in the list, else close list by add curl brackets
                     ss << (((ch_idx + 1) != channel_list_length) ? "," : "}");
@@ -856,13 +855,13 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(Socket *sd,
                     const auto &ruid = channel_preference_tlv_rx->radio_uid();
 
                     if (std::find(ruid_list.begin(), ruid_list.end(), ruid) != ruid_list.end() ||
-                        preference == 0 || wireless_utils::is_dfs_channel(channel_rx)) {
+                        preference == 0 || wireless_utils::is_dfs_channel(*channel_rx)) {
                         continue;
                     }
 
                     LOG(INFO) << "ruid=" << network_utils::mac_to_string(ruid);
                     LOG(INFO) << "selected_operating_class=" << std::dec << int(operating_class);
-                    LOG(INFO) << "selected_channel=" << int(channel_rx);
+                    LOG(INFO) << "selected_channel=" << int(*channel_rx);
 
                     ruid_list.push_back(ruid);
 
@@ -898,13 +897,12 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(Socket *sd,
                         return false;
                     }
                     auto channel_idx      = op_class_channels_tx->channel_list_length();
-                    auto channel_tuple_tx = op_class_channels_tx->channel_list(channel_idx - 1);
-                    if (!std::get<0>(channel_tuple_tx)) {
+                    auto channel_tx = op_class_channels_tx->channel_list(channel_idx - 1);
+                    if (!channel_tx) {
                         LOG(ERROR) << "getting channel entry has failed!";
                         return false;
                     }
-                    auto &channel_tx = std::get<1>(channel_tuple_tx);
-                    channel_tx       = channel_rx;
+                    *channel_tx       = *channel_rx;
 
                     op_class_channels_tx->flags() = op_class_channels_rx.flags();
 
@@ -1624,10 +1622,9 @@ bool master_thread::autoconfig_wsc_parse_radio_caps(
             op_class.statically_non_operable_channels_list_length();
         std::vector<uint8_t> non_operable_channels;
         for (int ch_idx = 0; ch_idx < non_oper_channels_list_length; ch_idx++) {
-            auto ch_tuple = op_class.statically_non_operable_channels_list(ch_idx);
-            auto channel  = std::get<1>(ch_tuple);
-            ss << int(channel) << " ";
-            non_operable_channels.push_back(channel);
+            auto channel = op_class.statically_non_operable_channels_list(ch_idx);
+            ss << int(*channel) << " ";
+            non_operable_channels.push_back(*channel);
         }
         ss << " }" << std::endl;
         LOG(DEBUG) << ss.str();
@@ -2270,8 +2267,7 @@ bool master_thread::handle_cmdu_control_message(
                 LOG(ERROR) << "Failed buffer allocation to size=" << int(response->size());
                 break;
             }
-            auto data_tuple = request->data(0);
-            memset(&std::get<1>(data_tuple), 0, response->size());
+	    memset(request->data(), 0, request->data_length());
         }
 
         son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap_mac);
@@ -2315,8 +2311,7 @@ bool master_thread::handle_cmdu_control_message(
                     LOG(ERROR) << "Failed buffer allocation to size=" << int(response->size());
                     break;
                 }
-                auto data_tuple = request->data(0);
-                memset(&std::get<1>(data_tuple), 0, response->size());
+		memset(request->data(), 0, request->data_length());
                 if (!database.update_node_last_ping_sent(hostap_mac)) {
                     LOG(DEBUG) << "sending PING_MSG_REQUEST for slave " << hostap_mac
                                << " , can't update last ping sent time for ";
