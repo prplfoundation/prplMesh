@@ -48,6 +48,7 @@ main() {
     DOCKEROPTS="-e USER=${SUDO_USER:-${USER}}
                 -e SOURCES_DIR=${sourcesdir}
                 -v ${sourcesdir}:${sourcesdir}
+                --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)}
                 --name prplMesh-clang-format"
 
     DOCKEROPTS="$DOCKEROPTS --interactive --tty --rm"
