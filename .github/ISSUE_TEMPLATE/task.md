@@ -4,8 +4,7 @@ about: Feature currently being developed / reviewed
 title: "[TASK]"
 labels: enhancement
 assignees: ''
-milestone: Certifiable controller on Ubuntu NUC
-project: prplMesh
+
 ---
 
 ## Description
