@@ -155,8 +155,8 @@ test_client_association() {
 test_higher_layer_data_payload_trigger() {
     status "test higher layer data payload"
     
-    mac_gateway_hex=`echo $mac_gateway | tr --delete :`
-    mac_gateway_hex="0x${mac_gateway_hex}"
+    mac_gateway_hex=$(mac_to_hex $mac_gateway)
+    dbg "mac_gateway_hex = ${mac_gateway_hex}"
     copies=200
     
     for i in `seq 1 $copies`
@@ -188,8 +188,7 @@ test_topology() {
     docker exec -it repeater1 sh -c 'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 }
 test_init() {
-    status "test initialization"
-
+    status "test initialization"    
     eval ${scriptdir}/test_gw_repeater.sh -f -r "repeater1" -r "repeater2" -d 7 $redirect || {
         err "start GW+Repeater failed, abort"
         exit 1
@@ -208,20 +207,16 @@ test_init() {
     mac_agent2=$(grep "IRE_BRIDGE" "$connmap" | sed -n 2p | awk '{print $5}' | cut -d ',' -f 1)
     dbg "mac_agent2 = ${mac_agent2}"
 
-    mac_agent1_wlan0=$(grep "RADIO: wlan0" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)
-    mac_agent1_wlan0="0x${mac_agent1_wlan0}"
+    mac_agent1_wlan0=$(mac_to_hex $(grep "RADIO: wlan0" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1))
     dbg "mac_agent1_wlan0 = ${mac_agent1_wlan0}"
 
-    mac_agent2_wlan0=$(grep "RADIO: wlan0" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)
-    mac_agent2_wlan0="0x${mac_agent2_wlan0}"
+    mac_agent2_wlan0=$(mac_to_hex $(grep "RADIO: wlan0" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1))
     dbg "mac_agent2_wlan0 = ${mac_agent2_wlan0}"
 
-    mac_agent1_wlan2=$(grep "RADIO: wlan2" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)
-    mac_agent1_wlan2="0x${mac_agent1_wlan2}"
+    mac_agent1_wlan2=$(mac_to_hex $(grep "RADIO: wlan2" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1))
     dbg "mac_agent1_wlan2 = ${mac_agent1_wlan2}"
 
-    mac_agent2_wlan2=$(grep "RADIO: wlan2" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1 | tr --delete :)
-    mac_agent2_wlan2="0x${mac_agent2_wlan2}"
+    mac_agent2_wlan2=$(mac_to_hex $(grep "RADIO: wlan2" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1))
     dbg "mac_agent2_wlan2 = ${mac_agent2_wlan2}"
 
 }
