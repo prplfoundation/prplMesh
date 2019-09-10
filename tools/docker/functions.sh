@@ -16,6 +16,11 @@ status() {
 	printf '\033[1;35m'"$@\n"'\033[0m'
 }
 
+convert_to_hex(){
+   mac=`echo $@ | tr --delete :`
+   mac="0x${mac}"
+}
+
 err() {
     printf '\033[1;31m'"$@\n"'\033[0m'
 }
