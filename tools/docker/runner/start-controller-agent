@@ -5,5 +5,5 @@
 # This code is subject to the terms of the BSD+Patent license.
 # See LICENSE file for more details.
 ###############################################################
-${INSTALL_DIR}/scripts/prplmesh_utils.sh start
+${INSTALL_DIR}/scripts/prplmesh_utils.sh start "$@"
 tail -f /dev/null # hack so the script will not exit forcing the container to stop
