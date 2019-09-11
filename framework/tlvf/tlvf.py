@@ -725,7 +725,7 @@ class TlvF:
                     
                     # Add type checking
                     lines_cpp = []
-                    if obj_meta.is_tlv_class and param_name == MetaData.TLV_TYPE_TYPE:
+                    if obj_meta.is_tlv_class and param_name == MetaData.TLV_TYPE_TYPE and param_val_const:
                         lines_cpp.append("if (m_%s__) {" % (self.MEMBER_PARSE))
                         lines_cpp.append( "%sif (*m_type != %s) {" % ( self.getIndentation(1), param_val_const ) )
                         lines_cpp.append( '%sTLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(%s) << ", received value: " << int(*m_type);' %  (self.getIndentation(2), param_val_const) )
