@@ -1647,7 +1647,7 @@ bool main_thread::handle_1905_higher_layer_data_message(ieee1905_1::CmduMessageR
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received HIGHER_LAYER_DATA_MESSAGE , mid=" << std::hex << int(mid);
 
-    auto tlvHigherLayerData = cmdu_tx.addClass<wfa_map::tlvHigherLayerData>();
+    auto tlvHigherLayerData = cmdu_rx.addClass<wfa_map::tlvHigherLayerData>();
     if (!tlvHigherLayerData) {
         LOG(ERROR) << "addClass wfa_map::tlvHigherLayerData failed";
         return false;
