@@ -1112,7 +1112,7 @@ sMacAddr& cACTION_CLI_CLIENT_BEACON_11K_REQUEST::bssid() {
 }
 
 uint8_t* cACTION_CLI_CLIENT_BEACON_11K_REQUEST::ssid(size_t idx) {
-    if ( (m_ssid_idx__ > 0) && (m_ssid_idx__ > idx) ) {
+    if ( !((m_ssid_idx__ > 0) && (m_ssid_idx__ > idx)) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }

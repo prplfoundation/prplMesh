@@ -34,7 +34,7 @@ const uint16_t& tlvMacAddress::length() {
 }
 
 uint8_t* tlvMacAddress::mac(size_t idx) {
-    if ( (m_mac_idx__ > 0) && (m_mac_idx__ > idx) ) {
+    if ( !((m_mac_idx__ > 0) && (m_mac_idx__ > idx)) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }

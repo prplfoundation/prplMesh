@@ -40,7 +40,7 @@ uint8_t& tlvTestVarList::simple_list_length() {
 }
 
 uint16_t* tlvTestVarList::simple_list(size_t idx) {
-    if ( (m_simple_list_idx__ > 0) && (m_simple_list_idx__ > idx) ) {
+    if ( !((m_simple_list_idx__ > 0) && (m_simple_list_idx__ > idx)) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -430,7 +430,7 @@ uint8_t& cInner::list_length() {
 }
 
 uint8_t* cInner::list(size_t idx) {
-    if ( (m_list_idx__ > 0) && (m_list_idx__ > idx) ) {
+    if ( !((m_list_idx__ > 0) && (m_list_idx__ > idx)) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }

@@ -193,7 +193,7 @@ uint8_t& cPreferenceOperatingClasses::channel_list_length() {
 }
 
 uint8_t* cPreferenceOperatingClasses::channel_list(size_t idx) {
-    if ( (m_channel_list_idx__ > 0) && (m_channel_list_idx__ > idx) ) {
+    if ( !((m_channel_list_idx__ > 0) && (m_channel_list_idx__ > idx)) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }

@@ -402,7 +402,7 @@ uint16_t& cACTION_CONTROL_CONTROLLER_PING_REQUEST::size() {
 }
 
 uint8_t* cACTION_CONTROL_CONTROLLER_PING_REQUEST::data(size_t idx) {
-    if ( (m_data_idx__ > 0) && (m_data_idx__ > idx) ) {
+    if ( !((m_data_idx__ > 0) && (m_data_idx__ > idx)) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -495,7 +495,7 @@ uint16_t& cACTION_CONTROL_CONTROLLER_PING_RESPONSE::size() {
 }
 
 uint8_t* cACTION_CONTROL_CONTROLLER_PING_RESPONSE::data(size_t idx) {
-    if ( (m_data_idx__ > 0) && (m_data_idx__ > idx) ) {
+    if ( !((m_data_idx__ > 0) && (m_data_idx__ > idx)) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -588,7 +588,7 @@ uint16_t& cACTION_CONTROL_AGENT_PING_REQUEST::size() {
 }
 
 uint8_t* cACTION_CONTROL_AGENT_PING_REQUEST::data(size_t idx) {
-    if ( (m_data_idx__ > 0) && (m_data_idx__ > idx) ) {
+    if ( !((m_data_idx__ > 0) && (m_data_idx__ > idx)) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -681,7 +681,7 @@ uint16_t& cACTION_CONTROL_AGENT_PING_RESPONSE::size() {
 }
 
 uint8_t* cACTION_CONTROL_AGENT_PING_RESPONSE::data(size_t idx) {
-    if ( (m_data_idx__ > 0) && (m_data_idx__ > idx) ) {
+    if ( !((m_data_idx__ > 0) && (m_data_idx__ > idx)) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
