@@ -16,6 +16,7 @@
 #include "tlvf/ieee_1905_1/tlvLinkMetricQuery.h"
 #include "tlvf/ieee_1905_1/tlvMacAddress.h"
 #include "tlvf/ieee_1905_1/tlvNon1905neighborDeviceList.h"
+#include "tlvf/ieee_1905_1/tlvUnknown.h"
 #include "tlvf/ieee_1905_1/tlvVendorSpecific.h"
 #include "tlvf/ieee_1905_1/tlvWscM2.h"
 #include "tlvf/wfa_map/tlvApCapability.h"
@@ -402,6 +403,12 @@ int test_all()
     LOG(DEBUG) << "Done (WSC M2)";
     MAPF_DBG("TLV LENGTH WSC M2: " << thirdTlv->length());
 
+    auto mactlv                     = msg.addClass<tlvMacAddress>();
+    const uint8_t gTlvMacAddress[6] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
+    std::copy_n(gTlvMacAddress, 6, mactlv->mac().oct);
+
+    MAPF_DBG("TLV LENGHT MAC: " << mactlv->length());
+
     auto fourthTlv     = msg.addClass<tlvTestVarList>();
     fourthTlv->var0()  = 0xa0;
     allocation_succeed = fourthTlv->alloc_simple_list(2);
@@ -542,6 +549,18 @@ int test_all()
         errors++;
     }
 
+    auto tlvunknown = received_message.addClass<tlvUnknown>();
+    if (tlvunknown != nullptr) {
+        LOG(DEBUG) << "TLVUnknown Type: " << int(tlvunknown->type());
+
+        LOG(DEBUG) << "TLVUnknown data:";
+        for (uint8_t data_idx = 0; data_idx < tlvunknown->data_length(); data_idx++) {
+            LOG(DEBUG) << " " << int(tlvunknown->data()[data_idx]);
+        }
+    } else {
+        MAPF_ERR("TLVUnknown is NULL");
+        errors++;
+    }
     auto tlv4 = received_message.addClass<tlvTestVarList>();
     if (tlv4 == nullptr) {
         MAPF_ERR("TLV4 is NULL");
