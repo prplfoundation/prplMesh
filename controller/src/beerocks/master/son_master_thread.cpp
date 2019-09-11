@@ -42,6 +42,7 @@
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
+#include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvRadioOperationRestriction.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
@@ -229,6 +230,8 @@ bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessa
         return handle_cmdu_1905_operating_channel_report(sd, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE:
         return handle_cmdu_1905_topology_discovery(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE:
+        return handle_cmdu_1905_higher_layer_data_message(sd, cmdu_rx);
     default:
         break;
     }
@@ -1115,6 +1118,33 @@ bool master_thread::handle_cmdu_1905_topology_discovery(Socket *sd,
     database.set_node_socket(al_mac, sd);
 
     return true;
+}
+
+bool master_thread::handle_cmdu_1905_higher_layer_data_message(Socket *sd,
+                                                               ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received HIGHER_LAYER_DATA_MESSAGE , mid=" << std::hex << int(mid);
+
+    auto tlvHigherLayerData = cmdu_rx.addClass<wfa_map::tlvHigherLayerData>();
+    if (!tlvHigherLayerData) {
+        LOG(ERROR) << "addClass wfa_map::tlvHigherLayerData failed";
+        return false;
+    }
+
+    const auto protocol       = tlvHigherLayerData->protocol();
+    const auto payload_length = tlvHigherLayerData->payload_length();
+    LOG(DEBUG) << "protocol: " << std::hex << protocol;
+    LOG(DEBUG) << "payload length: " << int(payload_length);
+
+    // build ACK message CMDU
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+    LOG(DEBUG) << "sending ACK message to the agent, mid=" << std::hex << int(mid);
+    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
 }
 
 bool master_thread::handle_intel_slave_join(
