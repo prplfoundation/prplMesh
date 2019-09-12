@@ -413,13 +413,12 @@ uint16_t& cACTION_CONTROL_CONTROLLER_PING_REQUEST::size() {
     return (uint16_t&)(*m_size);
 }
 
-std::tuple<bool, uint8_t&> cACTION_CONTROL_CONTROLLER_PING_REQUEST::data(size_t idx) {
-    bool ret_success = ( (m_data_idx__ > 0) && (m_data_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
+uint8_t* cACTION_CONTROL_CONTROLLER_PING_REQUEST::data(size_t idx) {
+    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
     }
-    return std::forward_as_tuple(ret_success, m_data[ret_idx]);
+    return &(m_data[idx]);
 }
 
 bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::alloc_data(size_t count) {
@@ -507,13 +506,12 @@ uint16_t& cACTION_CONTROL_CONTROLLER_PING_RESPONSE::size() {
     return (uint16_t&)(*m_size);
 }
 
-std::tuple<bool, uint8_t&> cACTION_CONTROL_CONTROLLER_PING_RESPONSE::data(size_t idx) {
-    bool ret_success = ( (m_data_idx__ > 0) && (m_data_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
+uint8_t* cACTION_CONTROL_CONTROLLER_PING_RESPONSE::data(size_t idx) {
+    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
     }
-    return std::forward_as_tuple(ret_success, m_data[ret_idx]);
+    return &(m_data[idx]);
 }
 
 bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::alloc_data(size_t count) {
@@ -601,13 +599,12 @@ uint16_t& cACTION_CONTROL_AGENT_PING_REQUEST::size() {
     return (uint16_t&)(*m_size);
 }
 
-std::tuple<bool, uint8_t&> cACTION_CONTROL_AGENT_PING_REQUEST::data(size_t idx) {
-    bool ret_success = ( (m_data_idx__ > 0) && (m_data_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
+uint8_t* cACTION_CONTROL_AGENT_PING_REQUEST::data(size_t idx) {
+    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
     }
-    return std::forward_as_tuple(ret_success, m_data[ret_idx]);
+    return &(m_data[idx]);
 }
 
 bool cACTION_CONTROL_AGENT_PING_REQUEST::alloc_data(size_t count) {
@@ -695,13 +692,12 @@ uint16_t& cACTION_CONTROL_AGENT_PING_RESPONSE::size() {
     return (uint16_t&)(*m_size);
 }
 
-std::tuple<bool, uint8_t&> cACTION_CONTROL_AGENT_PING_RESPONSE::data(size_t idx) {
-    bool ret_success = ( (m_data_idx__ > 0) && (m_data_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
+uint8_t* cACTION_CONTROL_AGENT_PING_RESPONSE::data(size_t idx) {
+    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
     }
-    return std::forward_as_tuple(ret_success, m_data[ret_idx]);
+    return &(m_data[idx]);
 }
 
 bool cACTION_CONTROL_AGENT_PING_RESPONSE::alloc_data(size_t count) {

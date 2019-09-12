@@ -37,13 +37,12 @@ tlvHigherLayerData::eProtocol& tlvHigherLayerData::protocol() {
     return (eProtocol&)(*m_protocol);
 }
 
-std::tuple<bool, uint8_t&> tlvHigherLayerData::payload(size_t idx) {
-    bool ret_success = ( (m_payload_idx__ > 0) && (m_payload_idx__ > idx) );
-    size_t ret_idx = ret_success ? idx : 0;
-    if (!ret_success) {
+uint8_t* tlvHigherLayerData::payload(size_t idx) {
+    if ( (m_payload_idx__ <= 0) || (m_payload_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
     }
-    return std::forward_as_tuple(ret_success, m_payload[ret_idx]);
+    return &(m_payload[idx]);
 }
 
 bool tlvHigherLayerData::alloc_payload(size_t count) {
