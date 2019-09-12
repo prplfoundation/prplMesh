@@ -40,7 +40,7 @@ class tlvHigherLayerData : public BaseClass
         const uint16_t& length();
         eProtocol& protocol();
         size_t payload_length() { return m_payload_idx__ * sizeof(uint8_t); }
-        std::tuple<bool, uint8_t&> payload(size_t idx);
+        uint8_t* payload(size_t idx = 0);
         bool alloc_payload(size_t count = 1);
         void class_swap();
         static size_t get_initial_size();
