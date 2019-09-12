@@ -1104,7 +1104,7 @@ bool master_thread::handle_cmdu_1905_topology_discovery(Socket *sd,
         return false;
     }
     auto al_mac = network_utils::mac_to_string(tlvAlMac->mac());
-    if (database.has_node(al_mac)) {
+    if (database.has_node(tlvAlMac->mac())) {
         LOG(DEBUG) << "Skip setting AL MAC " << al_mac << " node";
         return true;
     }
@@ -1207,11 +1207,12 @@ bool master_thread::handle_intel_slave_join(
 
         // rejecting join if gw haven't joined yet
         if ((parent_bssid_mac != network_utils::ZERO_MAC_STRING) &&
-            (!database.has_node(parent_bssid_mac) ||
+            (!database.has_node(network_utils::mac_from_string(parent_bssid_mac)) ||
              (database.get_node_state(parent_bssid_mac) != beerocks::STATE_CONNECTED))) {
             LOG(DEBUG) << "sending back join reject!";
             LOG(DEBUG) << "reject_debug: parent_bssid_has_node="
-                       << (int)(database.has_node(parent_bssid_mac));
+                       << (int)(database.has_node(
+                              network_utils::mac_from_string(parent_bssid_mac)));
             auto response = message_com::add_intel_vs_data<
                 beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>(cmdu_tx, tlv_vs);
 
@@ -1284,7 +1285,8 @@ bool master_thread::handle_intel_slave_join(
 
     // bridge_mac node may have been created from DHCP/ARP event, if so delete it
     // this may only occur once
-    if (database.has_node(bridge_mac) && (database.get_node_type(bridge_mac) != ire_type)) {
+    if (database.has_node(network_utils::mac_from_string(bridge_mac)) &&
+        (database.get_node_type(bridge_mac) != ire_type)) {
         database.remove_node(bridge_mac);
     }
     // add new GW/IRE bridge_mac
@@ -1473,7 +1475,7 @@ bool master_thread::handle_intel_slave_join(
     /*
     * handle the HOSTAP node
     */
-    if (database.has_node(radio_mac)) {
+    if (database.has_node(network_utils::mac_from_string(radio_mac))) {
         if (database.get_node_type(radio_mac) != beerocks::TYPE_SLAVE) {
             database.set_node_type(radio_mac, beerocks::TYPE_SLAVE);
             LOG(ERROR) << "Existing mac node is not TYPE_SLAVE";
@@ -1756,7 +1758,8 @@ bool master_thread::handle_non_intel_slave_join(
 
     // bridge_mac node may have been created from DHCP/ARP event, if so delete it
     // this may only occur once
-    if (database.has_node(bridge_mac) && (database.get_node_type(bridge_mac) != ire_type)) {
+    if (database.has_node(network_utils::mac_from_string(bridge_mac)) &&
+        (database.get_node_type(bridge_mac) != ire_type)) {
         database.remove_node(bridge_mac);
     }
     // add new GW/IRE bridge_mac
@@ -1780,7 +1783,7 @@ bool master_thread::handle_non_intel_slave_join(
     database.set_node_manufacturer(eth_switch_mac, eth_switch_mac);
 
     // Update existing node, or add a new one
-    if (database.has_node(radio_mac)) {
+    if (database.has_node(network_utils::mac_from_string(radio_mac))) {
         if (database.get_node_type(radio_mac) != beerocks::TYPE_SLAVE) {
             database.set_node_type(radio_mac, beerocks::TYPE_SLAVE);
             LOG(ERROR) << "Existing mac node is not TYPE_SLAVE";
@@ -2032,8 +2035,9 @@ bool master_thread::handle_cmdu_control_message(
         std::string radio_mac = hostap_mac;
 
         for (auto vap : vaps_info) {
-            if (!database.has_node(vap.second.mac)) {
-                database.add_virtual_node(vap.second.mac, radio_mac);
+            if (!database.has_node(network_utils::mac_from_string(vap.second.mac))) {
+                database.add_virtual_node(network_utils::mac_from_string(vap.second.mac),
+                                          network_utils::mac_from_string(radio_mac));
             }
         }
 
@@ -2081,7 +2085,7 @@ bool master_thread::handle_cmdu_control_message(
             break;
         }
 
-        bool new_node = !database.has_node(client_mac);
+        bool new_node = !database.has_node(network_utils::mac_from_string(client_mac));
 
         beerocks::eType new_node_type = database.get_node_type(client_mac);
 
@@ -2562,7 +2566,7 @@ bool master_thread::handle_cmdu_control_message(
         LOG(DEBUG) << "dhcp complete for client " << client_mac << " new ip=" << ipv4
                    << " previous ip=" << database.get_node_ipv4(client_mac);
 
-        if (!database.has_node(client_mac)) {
+        if (!database.has_node(network_utils::mac_from_string(client_mac))) {
             LOG(DEBUG) << "client mac not in DB, add temp node " << client_mac;
             database.add_node(client_mac);
             database.update_node_last_seen(client_mac);
@@ -2679,7 +2683,7 @@ bool master_thread::handle_cmdu_control_message(
             auto &sta_stats = std::get<1>(sta_stats_tuple);
             auto client_mac = network_utils::mac_to_string(sta_stats.mac);
 
-            if (!database.has_node(client_mac)) {
+            if (!database.has_node(network_utils::mac_from_string(client_mac))) {
                 LOG(ERROR) << "sta " << client_mac << " is not in DB!";
                 continue;
             } else if (database.get_node_state(client_mac) != beerocks::STATE_CONNECTED) {

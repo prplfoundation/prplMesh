@@ -17,6 +17,7 @@
 
 using namespace beerocks;
 using namespace son;
+using namespace net;
 
 void db::set_log_level_state(const beerocks::eLogLevel &log_level, const bool &new_state)
 {
@@ -25,16 +26,16 @@ void db::set_log_level_state(const beerocks::eLogLevel &log_level, const bool &n
 
 // General set/get
 
-bool db::has_node(std::string mac)
+bool db::has_node(sMacAddr mac)
 {
     auto n = get_node(mac);
     return (n != nullptr);
 }
 
-bool db::add_virtual_node(std::string mac, std::string real_node_mac)
+bool db::add_virtual_node(sMacAddr mac, sMacAddr real_node_mac)
 {
     //TODO prototype code, untested
-    if (mac.empty()) {
+    if (mac == network_utils::ZERO_MAC) {
         LOG(ERROR) << "can't insert node with empty mac";
         return false;
     }
@@ -42,7 +43,7 @@ bool db::add_virtual_node(std::string mac, std::string real_node_mac)
     auto real_node = get_node(real_node_mac);
 
     if (!real_node) {
-        LOG(ERROR) << "node " << real_node_mac << " does not exist";
+        LOG(ERROR) << "node " << network_utils::mac_to_string(real_node_mac) << " does not exist";
         return false;
     }
 
@@ -53,7 +54,8 @@ bool db::add_virtual_node(std::string mac, std::string real_node_mac)
      * it should be able to find its virtual nodes and move them to the appropriate hierarchy as well
      */
 
-    nodes[real_node->hierarchy].insert(std::make_pair(mac, real_node));
+    nodes[real_node->hierarchy].insert(
+        std::make_pair(network_utils::mac_to_string(mac), real_node));
     return true;
 }
 
@@ -1506,7 +1508,9 @@ bool db::remove_vap(const std::string &radio_mac, int vap_id)
 bool db::add_vap(const std::string &radio_mac, int vap_id, std::string bssid, std::string ssid,
                  bool backhual)
 {
-    if (!has_node(bssid) && !add_virtual_node(bssid, radio_mac)) {
+    if (!has_node(network_utils::mac_from_string(bssid)) &&
+        !add_virtual_node(network_utils::mac_from_string(bssid),
+                          network_utils::mac_from_string(radio_mac))) {
         return false;
     }
 
@@ -3192,6 +3196,22 @@ std::shared_ptr<node> db::get_node(std::string key)
         }
     }
     return nullptr;
+}
+
+std::shared_ptr<node> db::get_node(sMacAddr mac)
+{
+    std::string key =
+        mac == network_utils::ZERO_MAC ? std::string() : network_utils::mac_to_string(mac);
+    return get_node(key);
+}
+
+std::shared_ptr<node> db::get_node(sMacAddr al_mac, sMacAddr ruid)
+{
+    std::string key = std::string();
+    if (al_mac != network_utils::ZERO_MAC && ruid != network_utils::ZERO_MAC)
+        key = network_utils::mac_to_string(al_mac) + network_utils::mac_to_string(ruid);
+
+    return get_node(key);
 }
 
 std::set<std::shared_ptr<node>> db::get_node_subtree(std::shared_ptr<node> n)
