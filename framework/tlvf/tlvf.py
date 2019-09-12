@@ -972,6 +972,16 @@ class TlvF:
                 lines_cpp.append( "%sreturn true;" % self.getIndentation(1))
                 lines_cpp.append( "}")
 
+            elif param_type_info.type == TypeInfo.STD:
+                lines_h.append( "%s* %s(size_t idx = 0);" % (param_type, param_name) )
+                lines_cpp.append( "%s* %s::%s(size_t idx) {" % (param_type_full, obj_meta.name, param_name) )
+                lines_cpp.append( "%sif ( (m_%s_idx__ <= 0) || (m_%s_idx__ <= idx) ) {" % (self.getIndentation(1), param_name, param_name) )
+                lines_cpp.append( '%sTLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";' %  self.getIndentation(2) )
+                lines_cpp.append( '%sreturn nullptr;' %  self.getIndentation(2) )
+                lines_cpp.append( "%s}" % self.getIndentation(1) )
+                lines_cpp.append( "%sreturn &(m_%s[idx]);" % (self.getIndentation(1), param_name) )
+                lines_cpp.append( "}" )
+                lines_cpp.append( "" )
             else:
                 #add function to get reference
                 lines_h.append( "std::tuple<bool, %s&> %s(size_t idx);" % (param_type, param_name) )
