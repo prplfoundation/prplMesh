@@ -64,7 +64,7 @@ main() {
 
     [ "$START_GATEWAY" = "true" ] && {
         status "Start GW (Controller + local Agent)"
-        ${scriptdir}/../run.sh ${VERBOSE_OPT} ${FORCE_OPT} start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33 "$@"
+        ${scriptdir}/../run.sh ${VERBOSE_OPT} ${FORCE_OPT} start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33 -- "$@"
     }
 
     [ "$START_GATEWAY" = "true" -a "$START_REPEATER" = "true" ] && {
@@ -74,10 +74,12 @@ main() {
 
     [ "$START_REPEATER" = "true" ] && {
         index=0
+        no_vendor="-n"
         for repeater in $REPEATER_NAMES; do
             status "Start Repeater (Remote Agent): $repeater"
-            ${scriptdir}/../run.sh ${VERBOSE_OPT} ${FORCE_OPT} start-agent -d -n ${repeater} -m aa:bb:cc:$index$index "$@"
+            ${scriptdir}/../run.sh ${VERBOSE_OPT} ${FORCE_OPT} start-agent -d -n ${repeater} -m aa:bb:cc:$index$index -- $no_vendor "$@"
             index=$((index+1))
+            no_vendor=
         done
     }
 
