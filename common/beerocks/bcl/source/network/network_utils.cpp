@@ -70,6 +70,7 @@ static int read_iface_flags(const std::string &strIface, struct ifreq &if_req)
 
 const std::string network_utils::ZERO_IP_STRING("0.0.0.0");
 const std::string network_utils::ZERO_MAC_STRING("00:00:00:00:00:00");
+const sMacAddr network_utils::ZERO_MAC{.oct = {0}};
 const std::string network_utils::WILD_MAC_STRING("ff:ff:ff:ff:ff:ff");
 
 //////////////////////////////////////////////////////////////////////////////

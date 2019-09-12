@@ -152,9 +152,9 @@ public:
     void set_log_level_state(const beerocks::eLogLevel &log_level, const bool &new_state);
 
     // General set/get
-    bool has_node(std::string mac);
+    bool has_node(sMacAddr mac);
 
-    bool add_virtual_node(std::string mac, std::string real_node_mac);
+    bool add_virtual_node(sMacAddr mac, sMacAddr real_node_mac);
     bool add_node(std::string mac, std::string parent_mac = std::string(),
                   beerocks::eType type         = beerocks::TYPE_CLIENT,
                   std::string radio_identifier = std::string());
@@ -663,6 +663,8 @@ public:
 private:
     std::string local_slave_mac;
     std::shared_ptr<node> get_node(std::string key); //key can be <mac> or <al_mac>_<ruid>
+    std::shared_ptr<node> get_node(sMacAddr mac);
+    std::shared_ptr<node> get_node(sMacAddr al_mac, sMacAddr ruid);
     int get_node_hierarchy(std::shared_ptr<node> n);
     std::set<std::shared_ptr<node>> get_node_subtree(std::shared_ptr<node> n);
     void adjust_subtree_hierarchy(std::shared_ptr<node> n);
