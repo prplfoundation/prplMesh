@@ -103,8 +103,8 @@ int test_complex_list()
         MAPF_ERR("Failed to allocate simple list");
         errors++;
     }
-    std::get<1>(fourthTlv->simple_list(0)) = 0x0bb0;
-    std::get<1>(fourthTlv->simple_list(1)) = 0x0bb1;
+    *(fourthTlv->simple_list(0)) = 0x0bb0;
+    *(fourthTlv->simple_list(1)) = 0x0bb1;
 
     if (true == fourthTlv->set_test_string("1234567890")) {
         LOG(ERROR) << "FAIL test maximum size string";
@@ -120,9 +120,9 @@ int test_complex_list()
         auto cmplx    = fourthTlv->create_complex_list();
         cmplx->var1() = 0xbbbbaaaa;
         cmplx->alloc_list(3);
-        std::get<1>(cmplx->list(0)) = 0xc0;
-        std::get<1>(cmplx->list(1)) = 0xc1;
-        std::get<1>(cmplx->list(2)) = 0xc2;
+        *(cmplx->list(0)) = 0xc0;
+        *(cmplx->list(1)) = 0xc1;
+        *(cmplx->list(2)) = 0xc2;
         if (!fourthTlv->add_complex_list(cmplx)) {
             LOG(ERROR) << "Failed to add complex list";
             errors++;
@@ -406,21 +406,21 @@ int test_all()
     fourthTlv->var0()  = 0xa0;
     allocation_succeed = fourthTlv->alloc_simple_list(2);
     mapf_assert(allocation_succeed);
-    std::get<1>(fourthTlv->simple_list(0)) = 0x0bb0;
-    std::get<1>(fourthTlv->simple_list(1)) = 0x0bb1;
+    *(fourthTlv->simple_list(0)) = 0x0bb0;
+    *(fourthTlv->simple_list(1)) = 0x0bb1;
 
     auto cmplx = fourthTlv->create_complex_list();
     cmplx->alloc_list(3);
-    std::get<1>(cmplx->list(0)) = 0xc0;
-    std::get<1>(cmplx->list(1)) = 0xc1;
-    std::get<1>(cmplx->list(2)) = 0xc2;
-    cmplx->var1()               = 0xd00d;
+    *(cmplx->list(0)) = 0xc0;
+    *(cmplx->list(1)) = 0xc1;
+    *(cmplx->list(2)) = 0xc2;
+    cmplx->var1()     = 0xd00d;
     cmplx->alloc_list();
-    std::get<1>(cmplx->list(3)) = 0xc3;
+    *(cmplx->list(3)) = 0xc3;
     cmplx->alloc_list();
-    std::get<1>(cmplx->list(4)) = 0xc4;
+    *(cmplx->list(4)) = 0xc4;
     cmplx->alloc_list();
-    std::get<1>(cmplx->list(5)) = 0xc5;
+    *(cmplx->list(5)) = 0xc5;
     if (!fourthTlv->add_complex_list(cmplx)) { //first entry
         LOG(ERROR) << "Failed to add complex list";
         errors++;
@@ -559,13 +559,13 @@ int test_all()
         }
         for (uint8_t list_idx = 0; list_idx < tlv4->simple_list_length(); list_idx++) {
             uint16_t expected = 0x0bb0;
-            if (!std::get<0>(tlv4->simple_list(list_idx))) {
+            if (!tlv4->simple_list(list_idx)) {
                 MAPF_ERR("TLV4 has no simple " << list_idx);
                 errors++;
             } else {
-                auto value = std::get<1>(tlv4->simple_list(list_idx));
-                if (value != expected + list_idx) {
-                    MAPF_ERR("TLV4 simple ") << list_idx << " has value " << std::hex << value
+                auto value = tlv4->simple_list(list_idx);
+                if (*value != expected + list_idx) {
+                    MAPF_ERR("TLV4 simple ") << list_idx << " has value " << std::hex << *value
                                              << " instead of " << std::hex << expected + list_idx;
                     errors++;
                 }
@@ -599,14 +599,14 @@ int test_all()
             }
             uint8_t expected = 0xc0;
             for (uint8_t list_idx = 0; list_idx < cmplx.list_length(); list_idx++) {
-                if (!std::get<0>(cmplx.list(list_idx))) {
+                if (!cmplx.list(list_idx)) {
                     MAPF_ERR("TLV4 complex 0 has no list[" << list_idx << "]");
                     errors++;
                 } else {
-                    auto value = std::get<1>(cmplx.list(list_idx));
-                    if (value != expected + list_idx) {
+                    auto value = cmplx.list(list_idx);
+                    if (*value != expected + list_idx) {
                         MAPF_ERR("TLV4 complex 0 list ")
-                            << list_idx << " has value " << std::hex << value << " instead of "
+                            << list_idx << " has value " << std::hex << *value << " instead of "
                             << std::hex << expected + list_idx;
                         errors++;
                     }
