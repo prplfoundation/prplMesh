@@ -36,6 +36,8 @@ elseif(TARGET_PLATFORM STREQUAL "rdkb")
 # Linux
 elseif(TARGET_PLATFORM STREQUAL "linux")
     set(BWL_TYPE_DEFAULT "DUMMY")
+    set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
+    add_definitions(-DBEEROCKS_TMP_PATH="${BEEROCKS_TMP_PATH}")
 endif()
 
 set(BWL_TYPE ${BWL_TYPE_DEFAULT} CACHE STRING "Which BWL backend to use")
