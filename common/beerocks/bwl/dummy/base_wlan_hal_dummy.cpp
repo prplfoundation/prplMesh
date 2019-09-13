@@ -14,7 +14,7 @@
 #include <beerocks/bcl/son/son_wireless_utils.h>
 
 #include <easylogging++.h>
-#include <sys/eventfd.h>
+#include <sys/inotify.h>
 
 #define UNHANDLED_EVENTS_LOGS 20
 
@@ -83,8 +83,20 @@ base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, std::string iface_name, b
     }
 
     // Set up dummy external events fd
-    if ((m_fd_ext_events = eventfd(0, EFD_SEMAPHORE)) < 0) {
-        LOG(FATAL) << "Failed creating eventfd: " << strerror(errno);
+    // dummy implementation is based on monitoring text file changes which
+    // are used to simulate clients activity - STA connected, disconnected, etc.
+    // For that we are creating the INOTIFY instance
+    // inotify_init1 not available with older kernels, consequently inotify reads block.
+    // inotify_init1 allows directory events to complete immediately, avoiding buffering delays. In practice,
+    // this significantly improves monotiring of newly created subdirectories.
+#ifdef IN_NONBLOCK
+    m_fd_ext_events = inotify_init1(IN_NONBLOCK);
+#else
+    m_fd_ext_events = inotify_init();
+#endif
+
+    if (m_fd_ext_events < 0) {
+        LOG(FATAL) << "Failed creating m_fd_ext_events: " << strerror(errno);
     }
 
     // Initialize the FSM
