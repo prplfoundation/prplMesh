@@ -174,6 +174,10 @@ test_higher_layer_data_payload_trigger() {
     dbg "Confirming higher layer data message was received in the agent" 
     docker exec -it repeater1 sh -c 'grep -i -q "HIGHER_LAYER_DATA_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
+    dbg "Confirming matching protocol and payload length"
+    docker exec -it repeater1 sh -c 'grep -i -q "protocol: 0" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+    docker exec -it repeater1 sh -c 'grep -i -q "payload_length: 4b0" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+
     dbg "Confirming ACK message was received in the controller"
     docker exec -it gateway sh -c 'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
 }
