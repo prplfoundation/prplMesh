@@ -100,15 +100,18 @@ test_channel_selection() {
     return $check_error
 }
 test_client_capability_query() { 
-    status "test client capability"  
+    status "test client capability"
 
+    check_error=0
     eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
 0x000C,tlv_value,{$mac_agent1_wlan0 0x000000110022}\""' $redirect
     sleep 1
     dbg "Confirming client capability query has been received on agent"
     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
-    docker exec -it repeater1 sh -c 'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    docker exec -it repeater1 sh -c 'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 }
 test_ap_capability_query() {
     status "test ap capability query"
@@ -209,11 +212,12 @@ test_client_steering_policy() {
 
 test_client_association() {
     status "test client association"
-    
+    check_error=0
     dbg "Send topology request to agent 1"
     eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002\"" $redirect
     dbg "Confirming topology query was received"
-    docker exec -it repeater1 sh -c 'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Send client association control message"
     eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8016,tlv_type,0x9D,tlv_length,\
@@ -221,16 +225,19 @@ test_client_association() {
 
     dbg "Confirming client association control message has been received on agent"
     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
-    docker exec -it repeater1 sh -c 'grep -i -q "CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    docker exec -it repeater1 sh -c 'grep -i -q "CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     dbg "Confirming ACK message was received on controller"
-    docker exec -it gateway sh -c 'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
+    check docker exec -it gateway sh -c \
+        'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
 }
 
 test_higher_layer_data_payload_trigger() {
     status "test higher layer data payload"
-    
+    check_error=0
     mac_gateway_hex=$(mac_to_hex $mac_gateway)
     dbg "mac_gateway_hex = ${mac_gateway_hex}"
     copies=200
@@ -248,15 +255,22 @@ test_higher_layer_data_payload_trigger() {
 0x04b1,tlv_value,{0x00 $payload}\""' $redirect
 
     dbg "Confirming higher layer data message was received in the agent" 
-    docker exec -it repeater1 sh -c 'grep -i -q "HIGHER_LAYER_DATA_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+    
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "HIGHER_LAYER_DATA_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Confirming matching protocol and payload length"
-    docker exec -it repeater1 sh -c 'grep -i -q "protocol: 0" /tmp/$USER/beerocks/logs/beerocks_agent.log'
-    docker exec -it repeater1 sh -c 'grep -i -q "payload_length: 4b0" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "protocol: 0" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "payload_length: 4b0" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Confirming ACK message was received in the controller"
-    docker exec -it gateway sh -c 'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
+    check docker exec -it gateway sh -c \
+        'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
 }
+
 test_higher_layer_data_payload() {
     #TODO: Implement
     return 1
