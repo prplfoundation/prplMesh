@@ -95,8 +95,14 @@ bool mon_wlan_hal_dummy::sta_link_measurements_11k_request(const std::string &st
     return true;
 }
 
-bool mon_wlan_hal_dummy::process_dummy_event(char *buffer, int bufLen, const std::string &opcode)
+bool mon_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
 {
+    // Filter out empty events
+    std::string opcode;
+    if (!(parsed_obj.find(DUMMY_EVENT_KEYLESS_PARAM_OPCODE) != parsed_obj.end() &&
+          !(opcode = parsed_obj[DUMMY_EVENT_KEYLESS_PARAM_OPCODE]).empty())) {
+        return true;
+    }
     LOG(TRACE) << __func__ << " - opcode: |" << opcode << "|";
     return true;
 }

@@ -42,7 +42,7 @@ public:
 
     // Protected methods:
 protected:
-    virtual bool process_dummy_event(char *buffer, int bufLen, const std::string &opcode) override;
+    virtual bool process_dummy_event(parsed_obj_map_t &parsed_obj) override;
 
     // Overload for Monitor events
     bool event_queue_push(mon_wlan_hal::Event event, std::shared_ptr<void> data = {})

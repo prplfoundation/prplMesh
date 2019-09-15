@@ -218,7 +218,7 @@ bool ap_wlan_hal_dummy::get_vap_enable(const std::string &iface_name, bool &enab
 
 std::string ap_wlan_hal_dummy::get_radio_driver_version() { return std::string("dummy"); }
 
-bool ap_wlan_hal_dummy::process_dummy_event(char *buffer, int bufLen, const std::string &opcode)
+bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
 {
     return true;
 }
