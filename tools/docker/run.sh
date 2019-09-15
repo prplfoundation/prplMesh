@@ -89,6 +89,7 @@ main() {
     dbg "BASE_MAC=${BASE_MAC}"
     dbg "PORT=${PORT}"
     dbg "NAME=${NAME}"
+    dbg "FORCE=${FORCE}"
 
     DOCKEROPTS="-e USER=${SUDO_USER:-${USER}}
                 -e INSTALL_DIR=${installdir}
@@ -105,7 +106,7 @@ main() {
     else
         DOCKEROPTS="$DOCKEROPTS -d"
     fi
-    if [ -n "$(docker ps -f name="${NAME}" | grep -w "${NAME}")" ]; then
+    if [ -n "$(docker ps -a -f name="${NAME}" | grep -w "${NAME}")" ]; then
         info "Container ${NAME} is already running"
         if [ "$FORCE" = "true" ]; then
             run docker container rm -f "$NAME"
