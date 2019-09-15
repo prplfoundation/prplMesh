@@ -289,6 +289,8 @@ bool base_wlan_hal_dummy::refresh_radio_info()
     if (get_iface_name() == "wlan2") {
         m_radio_info.is_5ghz = true;
     }
+    beerocks::net::network_utils::linux_iface_get_mac(
+        m_radio_info.iface_name, m_radio_info.available_vaps[beerocks::IFACE_VAP_ID_MIN].mac);
     return true;
 }
 
