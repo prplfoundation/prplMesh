@@ -60,6 +60,41 @@ struct DUMMY_acs_report_get {
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+static ap_wlan_hal::Event dummy_to_bwl_event(const std::string &opcode)
+{
+    if (opcode == "AP-ENABLED") {
+        return ap_wlan_hal::Event::AP_Enabled;
+    } else if (opcode == "AP-DISABLED") {
+        return ap_wlan_hal::Event::AP_Disabled;
+    } else if (opcode == "AP-STA-CONNECTED") {
+        return ap_wlan_hal::Event::STA_Connected;
+    } else if (opcode == "AP-STA-DISCONNECTED") {
+        return ap_wlan_hal::Event::STA_Disconnected;
+    } else if (opcode == "UNCONNECTED_STA_RSSI") {
+        return ap_wlan_hal::Event::STA_Unassoc_RSSI;
+    } else if (opcode == "INTERFACE-ENABLED") {
+        return ap_wlan_hal::Event::Interface_Enabled;
+    } else if (opcode == "INTERFACE-DISABLED") {
+        return ap_wlan_hal::Event::Interface_Disabled;
+    } else if (opcode == "ACS-STARTED") {
+        return ap_wlan_hal::Event::ACS_Started;
+    } else if (opcode == "ACS-COMPLETED") {
+        return ap_wlan_hal::Event::ACS_Completed;
+    } else if (opcode == "ACS-FAILED") {
+        return ap_wlan_hal::Event::ACS_Failed;
+    } else if (opcode == "AP-CSA-FINISHED") {
+        return ap_wlan_hal::Event::CSA_Finished;
+    } else if (opcode == "BSS-TM-RESP") {
+        return ap_wlan_hal::Event::BSS_TM_Response;
+    } else if (opcode == "DFS-CAC-COMPLETED") {
+        return ap_wlan_hal::Event::DFS_CAC_Completed;
+    } else if (opcode == "DFS-NOP-FINISHED") {
+        return ap_wlan_hal::Event::DFS_NOP_Finished;
+    }
+
+    return ap_wlan_hal::Event::Invalid;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -220,6 +255,126 @@ std::string ap_wlan_hal_dummy::get_radio_driver_version() { return std::string("
 
 bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
 {
+    char *tmp_str;
+
+    // Filter out empty events
+    std::string opcode;
+    if (!(parsed_obj.find(DUMMY_EVENT_KEYLESS_PARAM_OPCODE) != parsed_obj.end() &&
+          !(opcode = parsed_obj[DUMMY_EVENT_KEYLESS_PARAM_OPCODE]).empty())) {
+        return true;
+    }
+
+    LOG(TRACE) << __func__ << " - opcode: |" << opcode << "|";
+
+    auto event = dummy_to_bwl_event(opcode);
+
+    switch (event) {
+    // STA Connected
+    case Event::STA_Connected: {
+        auto msg_buff =
+            ALLOC_SMART_BUFFER(sizeof(sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION));
+        auto msg =
+            reinterpret_cast<sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION *>(msg_buff.get());
+        LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+        // Initialize the message
+        memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION));
+
+        msg->params.vap_id = beerocks::IFACE_VAP_ID_MIN;
+        LOG(DEBUG) << "iface name = " << get_iface_name()
+                   << ", vap_id = " << int(msg->params.vap_id);
+
+        if (!dummy_obj_read_str(DUMMY_EVENT_KEYLESS_PARAM_MAC, parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
+
+        msg->params.mac = beerocks::net::network_utils::mac_from_string(tmp_str);
+
+        bool caps_valid = true;
+        SRadioCapabilitiesStrings caps_strings;
+        if (!dummy_obj_read_str("SupportedRates", parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading SupportedRates parameter!";
+            caps_valid = false;
+        } else {
+            caps_strings.supported_rates.assign(tmp_str);
+        }
+
+        if (!dummy_obj_read_str("HT_CAP", parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading HT_CAP parameter!";
+            caps_valid = false;
+        } else {
+            caps_strings.ht_cap.assign(tmp_str);
+        }
+
+        if (!dummy_obj_read_str("HT_MCS", parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading HT_MCS parameter!";
+            caps_valid = false;
+        } else {
+            caps_strings.ht_mcs.assign(tmp_str);
+        }
+
+        if (!dummy_obj_read_str("VHT_CAP", parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading VHT_CAP parameter!";
+            caps_valid = false;
+        } else {
+            caps_strings.vht_cap.assign(tmp_str);
+        }
+
+        if (!dummy_obj_read_str("VHT_MCS", parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading VHT_CAP parameter!";
+            caps_valid = false;
+        } else {
+            caps_strings.vht_mcs.assign(tmp_str);
+        }
+
+        if (caps_valid) {
+            //get_sta_caps(caps_strings, msg->params.capabilities, get_radio_info().is_5ghz);
+        } else {
+            LOG(ERROR) << "One or more of required capability strings is missing!";
+
+            // Setting minimum default values
+            msg->params.capabilities.ant_num       = 1;
+            msg->params.capabilities.wifi_standard = STANDARD_N;
+            msg->params.capabilities.default_mcs   = MCS_6;
+        }
+
+        // Add the message to the queue
+        event_queue_push(Event::STA_Connected, msg_buff);
+    } break;
+    case Event::STA_Disconnected: {
+        auto msg_buff =
+            ALLOC_SMART_BUFFER(sizeof(sACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION));
+        auto msg =
+            reinterpret_cast<sACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION *>(msg_buff.get());
+        LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+        // Initialize the message
+        memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION));
+
+        msg->params.vap_id = beerocks::IFACE_VAP_ID_MIN;
+        LOG(DEBUG) << "iface name = " << get_iface_name()
+                   << ", vap_id = " << int(msg->params.vap_id);
+
+        if (!dummy_obj_read_str(DUMMY_EVENT_KEYLESS_PARAM_MAC, parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
+
+        // Store the MAC address of the disconnected STA
+        msg->params.mac = beerocks::net::network_utils::mac_from_string(tmp_str);
+
+        // Add the message to the queue
+        event_queue_push(Event::STA_Disconnected, msg_buff);
+    } break;
+    // Gracefully ignore unhandled events
+    default: {
+        LOG(WARNING) << "Unhandled event received: " << opcode;
+        return true;
+
+    } break;
+    }
+
     return true;
 }
 
