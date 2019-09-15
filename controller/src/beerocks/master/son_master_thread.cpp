@@ -680,11 +680,15 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
 
     while ((type = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
         if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES)) {
-            LOG(DEBUG) << "Found TLV_AP_RADIO_BASIC_CAPABILITIES TLV";
             radio_basic_caps = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+            if (!radio_basic_caps)
+                return false;
+            LOG(DEBUG) << "Found TLV_AP_RADIO_BASIC_CAPABILITIES TLV";
         } else if (type == int(ieee1905_1::eTlvType::TLV_WSC)) {
-            LOG(DEBUG) << "Found TLV_WSC TLV (assuming M1)";
             tlvwscM1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
+            if (!tlvwscM1)
+                return false;
+            LOG(DEBUG) << "Found TLV_WSC TLV (assuming M1)";
         } else if (type == int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
             // If this is an Intel Agent, it will have VS TLV as the last TLV.
             // Currently, we don't support skipping TLVs, so if we see a VS TLV, we assume
@@ -710,12 +714,12 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         type = cmdu_rx.getNextTlvType();
     }
 
-    if (radio_basic_caps == nullptr) {
+    if (!radio_basic_caps) {
         LOG(ERROR) << "Failed to get APRadioBasicCapabilities TLV";
         return false;
     }
 
-    if (tlvwscM1 == nullptr) {
+    if (!tlvwscM1) {
         LOG(ERROR) << "Failed to get TLV_WSC M1 TLV";
         return false;
     }

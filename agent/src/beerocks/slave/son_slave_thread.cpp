@@ -4479,8 +4479,10 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
 
     while ((type = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
         if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_IDENTIFIER)) {
-            LOG(DEBUG) << "Found TLV_AP_RADIO_IDENTIFIER TLV";
             ruid = cmdu_rx.addClass<wfa_map::tlvApRadioIdentifier>();
+            if (!ruid)
+                return false;
+            LOG(DEBUG) << "Found TLV_AP_RADIO_IDENTIFIER TLV";
         } else if (type == int(ieee1905_1::eTlvType::TLV_WSC)) {
             // parse all M2 TLVs
             LOG(DEBUG) << "Found TLV_WSC TLV (assuming M2)";
