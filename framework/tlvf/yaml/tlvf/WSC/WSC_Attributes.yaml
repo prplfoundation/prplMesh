@@ -2,6 +2,7 @@
 ---
 _include: {
   tlvf/WSC/eWscLengths.h,
+  tlvf/WSC/eWscAuth.h,
   tlvf/WSC/eWscVendorId.h,
   tlvf/WSC/eWscVendorExt.h,
   tlvf/WSC/eWscDev.h,
@@ -315,6 +316,7 @@ sWscAttrAuthenticationType:
     _value: 2
   data:
     _type: eWscAuth
+    _value: eWscAuth::WSC_AUTH_WPA2PSK
 
 sWscAttrEncryptionType:
   _type: struct
@@ -326,6 +328,7 @@ sWscAttrEncryptionType:
     _value: 2
   data:
     _type: eWscEncr
+    _value: eWscEncr::WSC_ENCR_AES
 
 sWscAttrNetworkKey:
   _type: struct

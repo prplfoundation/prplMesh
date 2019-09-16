@@ -407,6 +407,7 @@ typedef struct sWscAttrAuthenticationType {
     void struct_init(){
         attribute_type = ATTR_AUTH_TYPE;
         data_length = 0x2;
+        data = eWscAuth::WSC_AUTH_WPA2PSK;
     }
 } __attribute__((packed)) sWscAttrAuthenticationType;
 
@@ -422,6 +423,7 @@ typedef struct sWscAttrEncryptionType {
     void struct_init(){
         attribute_type = ATTR_ENCR_TYPE;
         data_length = 0x2;
+        data = eWscEncr::WSC_ENCR_AES;
     }
 } __attribute__((packed)) sWscAttrEncryptionType;
 
