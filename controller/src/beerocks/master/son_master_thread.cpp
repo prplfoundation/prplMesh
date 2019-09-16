@@ -1152,7 +1152,8 @@ bool master_thread::handle_cmdu_1905_topology_discovery(Socket *sd,
     }
     LOG(DEBUG) << "adding node " << al_mac << " under " << network_utils::ZERO_MAC_STRING
                << ", and mark as type " << beerocks::TYPE_IRE;
-    database.add_node(al_mac, network_utils::ZERO_MAC_STRING, beerocks::TYPE_IRE);
+    database.add_node(network_utils::mac_from_string(al_mac), network_utils::ZERO_MAC,
+                      beerocks::TYPE_IRE);
     database.set_node_state(al_mac, beerocks::STATE_CONNECTED);
     database.set_node_socket(al_mac, sd);
 
@@ -1310,7 +1311,9 @@ bool master_thread::handle_intel_slave_join(
             //add a placeholder
             LOG(DEBUG) << "add a placeholder backhaul_mac = " << backhaul_mac
                        << ", parent_bssid_mac = " << parent_bssid_mac;
-            database.add_node(backhaul_mac, parent_bssid_mac, beerocks::TYPE_IRE_BACKHAUL);
+            database.add_node(network_utils::mac_from_string(backhaul_mac),
+                              network_utils::mac_from_string(parent_bssid_mac),
+                              beerocks::TYPE_IRE_BACKHAUL);
         } else if (database.get_node_state(backhaul_mac) != beerocks::STATE_CONNECTED &&
                    database.get_node_state(backhaul_mac) != beerocks::STATE_CONNECTED_IP_UNKNOWN) {
             /* if the backhaul node doesn't exist, or is not already marked as connected,
@@ -1336,7 +1339,9 @@ bool master_thread::handle_intel_slave_join(
             LOG(DEBUG) << "add a placeholder backhaul_mac = " << backhaul_mac
                        << " gw_lan_switch = " << gw_lan_switch
                        << " TYPE_IRE_BACKHAUL , STATE_CONNECTED";
-            database.add_node(backhaul_mac, gw_lan_switch, beerocks::TYPE_IRE_BACKHAUL);
+            database.add_node(network_utils::mac_from_string(backhaul_mac),
+                              network_utils::mac_from_string(gw_lan_switch),
+                              beerocks::TYPE_IRE_BACKHAUL);
             database.set_node_state(backhaul_mac, beerocks::STATE_CONNECTED);
         }
     } else {
@@ -1356,12 +1361,13 @@ bool master_thread::handle_intel_slave_join(
     // this may only occur once
     if (database.has_node(network_utils::mac_from_string(bridge_mac)) &&
         (database.get_node_type(bridge_mac) != ire_type)) {
-        database.remove_node(bridge_mac);
+        database.remove_node(network_utils::mac_from_string(bridge_mac));
     }
     // add new GW/IRE bridge_mac
     LOG(DEBUG) << "adding node " << bridge_mac << " under " << backhaul_mac << ", and mark as type "
                << ire_type;
-    database.add_node(bridge_mac, backhaul_mac, ire_type);
+    database.add_node(network_utils::mac_from_string(bridge_mac),
+                      network_utils::mac_from_string(backhaul_mac), ire_type);
     database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
 
     /*
@@ -1394,7 +1400,8 @@ bool master_thread::handle_intel_slave_join(
         ++eth_sw_mac_binary.oct[5];
 
         std::string eth_switch_mac = network_utils::mac_to_string(eth_sw_mac_binary);
-        database.add_node(eth_switch_mac, bridge_mac, beerocks::TYPE_ETH_SWITCH);
+        database.add_node(network_utils::mac_from_string(eth_switch_mac),
+                          network_utils::mac_from_string(bridge_mac), beerocks::TYPE_ETH_SWITCH);
         database.set_node_state(eth_switch_mac, beerocks::STATE_CONNECTED);
         database.set_node_name(eth_switch_mac, slave_name + "_ETH");
         database.set_node_ipv4(eth_switch_mac, bridge_ipv4);
@@ -1551,7 +1558,9 @@ bool master_thread::handle_intel_slave_join(
         }
         database.clear_hostap_stats_info(radio_mac);
     } else {
-        database.add_node(radio_mac, bridge_mac, beerocks::TYPE_SLAVE, radio_identifier);
+        database.add_node(network_utils::mac_from_string(radio_mac),
+                          network_utils::mac_from_string(bridge_mac), beerocks::TYPE_SLAVE,
+                          network_utils::mac_from_string(radio_identifier));
     }
     database.set_hostap_is_acs_enabled(radio_mac, bool(notification->wlan_settings().acs_enabled));
     if (!notification->is_slave_reconf()) {
@@ -1818,7 +1827,8 @@ bool master_thread::handle_non_intel_slave_join(
 
     LOG(DEBUG) << "add a placeholder backhaul_mac = " << backhaul_mac
                << " gw_lan_switch = " << gw_lan_switch << " TYPE_IRE_BACKHAUL , STATE_CONNECTED";
-    database.add_node(backhaul_mac, gw_lan_switch, beerocks::TYPE_IRE_BACKHAUL);
+    database.add_node(network_utils::mac_from_string(backhaul_mac),
+                      network_utils::mac_from_string(gw_lan_switch), beerocks::TYPE_IRE_BACKHAUL);
     database.set_node_state(backhaul_mac, beerocks::STATE_CONNECTED);
 
     // TODO bridge handling.
@@ -1829,12 +1839,13 @@ bool master_thread::handle_non_intel_slave_join(
     // this may only occur once
     if (database.has_node(network_utils::mac_from_string(bridge_mac)) &&
         (database.get_node_type(bridge_mac) != ire_type)) {
-        database.remove_node(bridge_mac);
+        database.remove_node(network_utils::mac_from_string(bridge_mac));
     }
     // add new GW/IRE bridge_mac
     LOG(DEBUG) << "adding node " << bridge_mac << " under " << backhaul_mac << ", and mark as type "
                << ire_type;
-    database.add_node(bridge_mac, backhaul_mac, ire_type);
+    database.add_node(network_utils::mac_from_string(bridge_mac),
+                      network_utils::mac_from_string(backhaul_mac), ire_type);
     database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
     database.set_node_socket(bridge_mac, sd);
     database.set_node_platform(backhaul_mac, beerocks::ePlatform::PLATFORM_LINUX);
@@ -1846,7 +1857,8 @@ bool master_thread::handle_non_intel_slave_join(
     database.set_node_type(backhaul_mac, beerocks::TYPE_IRE_BACKHAUL);
     database.set_node_name(backhaul_mac, manufacturer + "_BH");
     database.set_node_name(bridge_mac, manufacturer);
-    database.add_node(eth_switch_mac, bridge_mac, beerocks::TYPE_ETH_SWITCH);
+    database.add_node(network_utils::mac_from_string(eth_switch_mac),
+                      network_utils::mac_from_string(bridge_mac), beerocks::TYPE_ETH_SWITCH);
     database.set_node_state(eth_switch_mac, beerocks::STATE_CONNECTED);
     database.set_node_name(eth_switch_mac, manufacturer + "_ETH");
     database.set_node_manufacturer(eth_switch_mac, eth_switch_mac);
@@ -1860,7 +1872,9 @@ bool master_thread::handle_non_intel_slave_join(
         database.clear_hostap_stats_info(radio_mac);
     } else {
         // TODO Intel Slave Join has separate radio MAC and UID; we use radio_mac for both.
-        database.add_node(radio_mac, bridge_mac, beerocks::TYPE_SLAVE, radio_mac);
+        database.add_node(network_utils::mac_from_string(radio_mac),
+                          network_utils::mac_from_string(bridge_mac), beerocks::TYPE_SLAVE,
+                          network_utils::mac_from_string(radio_mac));
     }
     database.set_hostap_is_acs_enabled(radio_mac, false);
 
@@ -2514,7 +2528,8 @@ bool master_thread::handle_cmdu_control_message(
 
         //add or update node parent
         auto bssid = database.get_hostap_vap_mac(hostap_mac, notification->params().vap_id);
-        database.add_node(client_mac, bssid);
+        database.add_node(network_utils::mac_from_string(client_mac),
+                          network_utils::mac_from_string(bssid));
 
         int hostap_channel = database.get_node_channel(hostap_mac);
         LOG(INFO) << "client associated, mac=" << client_mac << " hostap mac=" << hostap_mac
@@ -2637,7 +2652,7 @@ bool master_thread::handle_cmdu_control_message(
 
         if (!database.has_node(network_utils::mac_from_string(client_mac))) {
             LOG(DEBUG) << "client mac not in DB, add temp node " << client_mac;
-            database.add_node(client_mac);
+            database.add_node(network_utils::mac_from_string(client_mac));
             database.update_node_last_seen(client_mac);
         }
 

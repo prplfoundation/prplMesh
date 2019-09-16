@@ -13,6 +13,7 @@
 
 #include <beerocks/bcl/beerocks_defines.h>
 #include <beerocks/bcl/beerocks_logging.h>
+#include <beerocks/bcl/network/network_utils.h>
 
 #include <tlvf/WSC/eWscAuth.h>
 #include <tlvf/WSC/eWscEncr.h>
@@ -155,10 +156,11 @@ public:
     bool has_node(sMacAddr mac);
 
     bool add_virtual_node(sMacAddr mac, sMacAddr real_node_mac);
-    bool add_node(std::string mac, std::string parent_mac = std::string(),
-                  beerocks::eType type         = beerocks::TYPE_CLIENT,
-                  std::string radio_identifier = std::string());
-    bool remove_node(std::string mac);
+    bool add_node(const sMacAddr &mac,
+                  const sMacAddr &parent_mac       = beerocks::net::network_utils::ZERO_MAC,
+                  beerocks::eType type             = beerocks::TYPE_CLIENT,
+                  const sMacAddr &radio_identifier = beerocks::net::network_utils::ZERO_MAC);
+    bool remove_node(const sMacAddr &mac);
 
     bool set_node_type(std::string mac, beerocks::eType type);
     beerocks::eType get_node_type(std::string mac);
