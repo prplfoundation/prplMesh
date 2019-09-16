@@ -9,7 +9,6 @@
 #include "db.h"
 
 #include <beerocks/bcl/beerocks_utils.h>
-#include <beerocks/bcl/network/network_utils.h>
 #include <beerocks/bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
 
@@ -59,10 +58,10 @@ bool db::add_virtual_node(sMacAddr mac, sMacAddr real_node_mac)
     return true;
 }
 
-bool db::add_node(std::string mac, std::string parent_mac, beerocks::eType type,
-                  std::string radio_identifier)
+bool db::add_node(const sMacAddr &mac, const sMacAddr &parent_mac, beerocks::eType type,
+                  const sMacAddr &radio_identifier)
 {
-    if (mac.empty()) {
+    if (mac == network_utils::ZERO_MAC) {
         LOG(ERROR) << "can't insert node with empty mac";
         return false;
     }
@@ -71,39 +70,42 @@ bool db::add_node(std::string mac, std::string parent_mac, beerocks::eType type,
     // if parent node does not exist, new_hierarchy will be equal to 0
     int new_hierarchy = get_node_hierarchy(parent_node) + 1;
     if (new_hierarchy >= HIERARCHY_MAX) {
-        LOG(ERROR) << "hierarchy too high for node " << mac;
+        LOG(ERROR) << "hierarchy too high for node " << network_utils::mac_to_string(mac);
         return false;
     }
 
     auto n = get_node(mac);
     if (n) { // n is not nullptr
-        LOG(DEBUG) << "node with mac " << mac << " already exists, updating";
+        LOG(DEBUG) << "node with mac " << network_utils::mac_to_string(mac)
+                   << " already exists, updating";
         n->set_type(type);
-        if (n->parent_mac != parent_mac) {
+        if (n->parent_mac != network_utils::mac_to_string(parent_mac)) {
             n->previous_parent_mac = n->parent_mac;
-            n->parent_mac          = parent_mac;
+            n->parent_mac          = network_utils::mac_to_string(parent_mac);
         }
         int old_hierarchy = get_node_hierarchy(n);
         if (old_hierarchy >= 0 && old_hierarchy < HIERARCHY_MAX) {
-            nodes[old_hierarchy].erase(mac);
+            nodes[old_hierarchy].erase(network_utils::mac_to_string(mac));
         } else {
-            LOG(ERROR) << "old hierarchy " << old_hierarchy << " for node " << mac
-                       << " is invalid!!!";
+            LOG(ERROR) << "old hierarchy " << old_hierarchy << " for node "
+                       << network_utils::mac_to_string(mac) << " is invalid!!!";
         }
         auto subtree = get_node_subtree(n);
         int offset   = new_hierarchy - old_hierarchy;
         adjust_subtree_hierarchy(subtree, offset);
     } else {
-        LOG(DEBUG) << "node with mac " << mac << " being created, the type is " << type;
-        n             = std::make_shared<node>(type, mac);
-        n->parent_mac = parent_mac;
+        LOG(DEBUG) << "node with mac " << network_utils::mac_to_string(mac)
+                   << " being created, the type is " << type;
+        n             = std::make_shared<node>(type, network_utils::mac_to_string(mac));
+        n->parent_mac = network_utils::mac_to_string(parent_mac);
     }
-    n->radio_identifier = radio_identifier;
+    n->radio_identifier = network_utils::mac_to_string(radio_identifier);
     n->hierarchy        = new_hierarchy;
-    nodes[new_hierarchy].insert(std::make_pair(mac, n));
+    nodes[new_hierarchy].insert(std::make_pair(network_utils::mac_to_string(mac), n));
 
-    if (!radio_identifier.empty()) {
-        std::string ruid_key = get_node_key(parent_mac, radio_identifier);
+    if (radio_identifier != network_utils::ZERO_MAC) {
+        std::string ruid_key =
+            get_node_key(network_utils::mac_to_string(parent_mac), n->radio_identifier);
         if (ruid_key.empty()) {
             LOG(ERROR) << "can't insert node with empty RUID";
             return false;
@@ -118,31 +120,31 @@ bool db::add_node(std::string mac, std::string parent_mac, beerocks::eType type,
     return true;
 }
 
-bool db::remove_node(std::string mac)
+bool db::remove_node(const sMacAddr &mac)
 {
     int i;
     for (i = 0; i < HIERARCHY_MAX; i++) {
-        auto it = nodes[i].find(mac);
+        auto it = nodes[i].find(network_utils::mac_to_string(mac));
         if (it != nodes[i].end()) {
             std::string ruid_key =
                 get_node_key(it->second->parent_mac, it->second->radio_identifier);
             std::string node_mac = it->second->mac;
 
-            if (last_accessed_node_mac == mac) {
+            if (last_accessed_node_mac == network_utils::mac_to_string(mac)) {
                 last_accessed_node_mac = std::string();
                 last_accessed_node     = nullptr;
             }
 
             // map may include 2 keys to same node - if so remove other key-node pair from map
             // if removed by mac
-            if (mac == node_mac) {
+            if (network_utils::mac_to_string(mac) == node_mac) {
                 nodes[i].erase(it);
                 // if ruid_key exists for this node
                 if (!ruid_key.empty()) {
                     nodes[i].erase(ruid_key);
                 }
                 // if removed by ruid_key
-            } else if (mac == ruid_key) {
+            } else if (network_utils::mac_to_string(mac) == ruid_key) {
                 nodes[i].erase(node_mac);
             }
 

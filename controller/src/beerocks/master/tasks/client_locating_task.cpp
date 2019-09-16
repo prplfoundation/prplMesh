@@ -139,11 +139,15 @@ void client_locating_task::work()
                         // update node
                         if (database.get_node_type(client_mac) == beerocks::TYPE_IRE) {
                             auto ire_backhaul = database.get_node_parent_backhaul(client_mac);
-                            database.add_node(ire_backhaul, eth_sw_mac,
+                            database.add_node(network_utils::mac_from_string(ire_backhaul),
+                                              network_utils::mac_from_string(eth_sw_mac),
                                               beerocks::TYPE_IRE_BACKHAUL);
-                            database.add_node(client_mac, ire_backhaul, beerocks::TYPE_IRE);
+                            database.add_node(network_utils::mac_from_string(client_mac),
+                                              network_utils::mac_from_string(ire_backhaul),
+                                              beerocks::TYPE_IRE);
                         } else {
-                            database.add_node(client_mac, eth_sw_mac);
+                            database.add_node(network_utils::mac_from_string(client_mac),
+                                              network_utils::mac_from_string(eth_sw_mac));
                             database.set_node_state(client_mac, beerocks::STATE_CONNECTED);
                         }
 

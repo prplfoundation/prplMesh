@@ -126,7 +126,8 @@ bool son_actions::add_node_to_default_location(db &database, std::string client_
     }
 
     //LOG(DEBUG) << "adding node " << client_mac << " to db, after getting ARP_MONITOR_NOTIFICATION from source " << int(notification->params.source);
-    if (!database.add_node(client_mac, gw_lan_switch)) {
+    if (!database.add_node(network_utils::mac_from_string(client_mac),
+                           network_utils::mac_from_string(gw_lan_switch))) {
         LOG(ERROR) << "add_node_to_default_location - add_node failed";
         return false;
     }
