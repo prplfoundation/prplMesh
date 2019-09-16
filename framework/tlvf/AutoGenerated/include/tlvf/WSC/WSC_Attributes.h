@@ -93,7 +93,7 @@ typedef struct sWscAttrUuidR {
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
     }
     void struct_init(){
-        attribute_type = ATTR_UUID_E;
+        attribute_type = ATTR_UUID_R;
         data_length = WSC_UUID_LENGTH;
     }
 } __attribute__((packed)) sWscAttrUuidR;

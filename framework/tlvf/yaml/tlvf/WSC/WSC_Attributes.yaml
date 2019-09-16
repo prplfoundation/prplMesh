@@ -49,7 +49,7 @@ sWscAttrUuidR:
   _type: struct
   attribute_type:
     _type: eWscAttributes
-    _value: ATTR_UUID_E
+    _value: ATTR_UUID_R
   data_length:
     _type: uint16_t
     _value: WSC_UUID_LENGTH
