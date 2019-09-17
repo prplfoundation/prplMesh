@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 import sys
 import os
 import ctypes
@@ -737,8 +737,8 @@ def main(argv):
         is_conn_map_sep_win = False
         conf_list=[]
         #check python version
-        if (sys.version_info.major != 2) or (sys.version_info.minor != 7) or (sys.version_info.micro < 6):
-            PRINTF("Error: python version must be 2.7.X where x>=6\n")
+        if (sys.version_info.major != 3) or (sys.version_info.minor < 5):
+            PRINTF("Error: python version must be 3.5+\n")
             return
         #get command line args
         argv_len = len(sys.argv)
