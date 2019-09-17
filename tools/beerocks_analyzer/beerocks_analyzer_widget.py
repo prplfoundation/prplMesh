@@ -35,7 +35,7 @@ BAR_CODES = (matplotlib.path.Path.MOVETO,
          matplotlib.path.Path.LINETO,
          matplotlib.path.Path.CLOSEPOLY,)
 
-BARS_COLORS = np.array([i for i in xrange(10,100, 10)])
+BARS_COLORS = np.array([i for i in range(10,100, 10)])
 
 def PRINTF(fmt, *args):
     sys.stdout.write(fmt % args)
@@ -44,7 +44,7 @@ def PRINTF(fmt, *args):
 def makeBarCollection(x, y, w=0.2):
     yb=0
     patch_a=[]
-    for i in xrange(len(y)):
+    for i in range(len(y)):
         verts = (
             (x-w, yb), # left, bottom
             (x-w, yb+y[i]), # left, top
@@ -138,7 +138,7 @@ class BeeRocksAnalyzerWidget(QWidget):
         except: pass
 
     def getCommandLineArgs(self, argv):
-        for i in xrange(0,len(argv)):
+        for i in range(0,len(argv)):
             arg_i = argv[i].strip()
             try:
                 if arg_i.startswith("-f="):
@@ -163,7 +163,7 @@ class BeeRocksAnalyzerWidget(QWidget):
                         self.figsInfo[fig].append([])
                         self.subplots[fig].append([])
                         self.fig_ax[fig].append([])
-                    for i in xrange(len(self.fig_ax)):
+                    for i in range(len(self.fig_ax)):
                         self.fig_ax[i][0] = None
                     for l in labels:
                         self.figsInfo[fig][sub_plot].append(l)
@@ -350,7 +350,7 @@ class BeeRocksAnalyzerWidget(QWidget):
                     self.ap_mac2sta_mac[mac] = []
                 ap_id = self.ap_mac2num[mac]
 
-                for j in xrange(i1, len(param_n)):  # fill atrribute
+                for j in range(i1, len(param_n)):  # fill atrribute
                     name = 'ap%d_' % self.ap_mac2num[mac] + param_n[j]
                     val = int(param_v[j])
                     self.addAttr(param_t, name, val, 'ap',ap_id)
@@ -378,7 +378,7 @@ class BeeRocksAnalyzerWidget(QWidget):
                     PRINTF("Error, readSample() --> %s, 'client_stats_update' did not find sta_mac=%s in self.ap_mac2sta_mac\n", line,mac)
                     return
                 
-                for j in xrange(i1, len(param_n)): 
+                for j in range(i1, len(param_n)):
                     name_pattern = 'ap%d_sta%d_'+ param_n[j]
                     name = name_pattern % (ap_num ,sta_num)
                     val = int(param_v[j])
@@ -445,8 +445,8 @@ class BeeRocksAnalyzerWidget(QWidget):
     def addRemoveNewFigSubplots(self, ar_t, ar_v, target_lable, is_add, entity, entity_num):
         # print "addRemoveNewFigSubplots is_add=",is_add," entity=",entity," entity_num=",entity_num
         asterisk_signed = False
-        for f in xrange(len(self.figsInfo)):
-            for p in xrange(len(self.figsInfo[f])):
+        for f in range(len(self.figsInfo)):
+            for p in range(len(self.figsInfo[f])):
                 ar_lables = self.figsInfo[f][p]  
                 for param_n in ar_lables:
                     if param_n != target_lable:
@@ -468,7 +468,7 @@ class BeeRocksAnalyzerWidget(QWidget):
                             asterisk_signed=True
                         else:
                             self.figsInfo[f][p].remove(target_lable)
-                            for c in xrange(len(self.subplots[f][p])):
+                            for c in range(len(self.subplots[f][p])):
                                 if self.subplots[f][p][c][2] == target_lable:
                                     ax = self.subplots[f][p][c][0]
                                     handles, labels = ax.get_legend_handles_labels()
@@ -538,11 +538,11 @@ class BeeRocksAnalyzerWidget(QWidget):
         t_start = self.realtimeWindow_start - self.realtimeWindow
         if t_start <0: t_start=0
         xlim = [t_start, self.realtimeWindow_start + self.realtimeInterval + 1.0]
-        for f in xrange(len(self.figsInfo)):
+        for f in range(len(self.figsInfo)):
             if self.figsInfo[f] == None: continue
             self.deleteOldSamples(f) # clear unused values
             update_fig=False
-            for p in xrange(len(self.figsInfo[f])):
+            for p in range(len(self.figsInfo[f])):
                 ar_lables = self.figsInfo[f][p]
                 ymin=[]; ymax=[]
                 update_subplot=False
@@ -555,7 +555,7 @@ class BeeRocksAnalyzerWidget(QWidget):
                         except:
                             continue
 
-                        for s in xrange(len( self.subplots[f][p])):
+                        for s in range(len( self.subplots[f][p])):
                             (ax, plot_line, param_n_tmp) = self.subplots[f][p][s]
                             if param_n_tmp == param_n:
                                 update_subplot=True
@@ -586,7 +586,7 @@ class BeeRocksAnalyzerWidget(QWidget):
     def getMinMax(self, vec):
         if(len(vec)==0): return (0, 0)
         vmax = vmin = 0
-        for i in xrange(len(vec)):
+        for i in range(len(vec)):
             if vec[i] == None: continue
             if vmin > vec[i]: vmin = vec[i]
             if vmax < vec[i]: vmax = vec[i]
@@ -595,10 +595,10 @@ class BeeRocksAnalyzerWidget(QWidget):
     def deleteOldSamples(self, fig):
         t_start = self.realtimeWindow_start - self.realtimeWindow
         if t_start < 0: t_start=0
-        for f in xrange(len(self.figsInfo)):
+        for f in range(len(self.figsInfo)):
             if f != fig: continue
             if self.figsInfo[f] == None: continue
-            for p in xrange(len(self.figsInfo[f])):
+            for p in range(len(self.figsInfo[f])):
                 ar_lables = self.figsInfo[f][p]
                 for param_n in ar_lables:
                     try:
@@ -646,7 +646,7 @@ class BeeRocksAnalyzerWidget(QWidget):
     def addPlots(self):
         dpi=80; w=1200; h=720
         fig_num = 1
-        for f in xrange(len(self.figsInfo)):
+        for f in range(len(self.figsInfo)):
             if self.figsInfo[f] == None: continue
 
             fig_frame = QWidget()
@@ -663,7 +663,7 @@ class BeeRocksAnalyzerWidget(QWidget):
             fig_frame.setLayout(hbox)
 
             fig_subplot_num = len(self.figsInfo[f])*100 + 11
-            for p in xrange(len(self.figsInfo[f])):
+            for p in range(len(self.figsInfo[f])):
                 if self.fig_ax[f][p] == None:
                     ax = fig.add_subplot(fig_subplot_num)
                     if (len(self.figsTitle) > f) and (len(self.figsTitle[f]) > p):
