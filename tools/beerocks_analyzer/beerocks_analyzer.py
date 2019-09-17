@@ -92,7 +92,7 @@ class BeeRocksAnalyzer(QMainWindow):
         self.isExtLogFile = False
         self.isOnline = False
         self.wait_for_mark = False
-        for i in xrange(0,len(argv)):
+        for i in range(0,len(argv)):
             arg_i = argv[i].strip()
             if arg_i.startswith("-f="):
                 self.fname = arg_i.split("=")[1]
@@ -745,7 +745,7 @@ def main(argv):
             printUsage()
             return
         else:
-            for i in xrange(argv_len):
+            for i in range(argv_len):
                 arg_i = sys.argv[i].strip()
                 if arg_i.startswith("-f="):
                     g_ext_log_file = True
