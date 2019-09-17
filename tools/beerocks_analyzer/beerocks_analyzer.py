@@ -8,6 +8,7 @@ import time
 
 from PySide2.QtCore import *
 from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 from os import waitpid, execv, read, write
 from install_required_pkg import install_required_packages
