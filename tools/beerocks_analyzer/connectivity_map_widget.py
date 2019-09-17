@@ -12,15 +12,12 @@ from PySide2.QtGui import *
 import matplotlib
 from PySide2.QtWidgets import QTabWidget, QVBoxLayout, QWidget
 
-matplotlib.use('Qt4Agg')
-matplotlib.rcParams['backend.qt4']='PySide'
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+matplotlib.use('Qt5Agg')
 
 try:
-    from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
+    from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 except ImportError:
-    from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 import pylab
 import matplotlib.pyplot as plt
