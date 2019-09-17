@@ -29,6 +29,22 @@
             ]
         },
         {
+            "name": "(gdb) Remote debug prplMesh Controller",
+            "type": "gdb",
+            "request": "attach",
+            "executable": "${workspaceFolder}/../build/install/bin/beerocks_controller",
+            "target": "localhost:9999",
+            "remote": true,
+            "cwd": "${workspaceFolder}",
+            "autorun": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true //TODO: pretty printing doesn't seem to work
+                }
+            ]
+        },
+        {
             "name": "(gdb) Attach to prplMesh Agent",
             "type": "cppdbg",
             "request": "attach",
@@ -40,6 +56,22 @@
                     "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Remote debug prplMesh Agent",
+            "type": "gdb",
+            "request": "attach",
+            "executable": "${workspaceFolder}/../build/install/bin/beerocks_agent",
+            "target": "localhost:9999",
+            "remote": true,
+            "cwd": "${workspaceFolder}",
+            "autorun": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true //TODO: pretty printing doesn't seem to work
                 }
             ]
         },
@@ -58,7 +90,22 @@
                 }
             ]
         },
-        
+        {
+            "name": "(gdb) Remote debug prplMesh CLI",
+            "type": "gdb",
+            "request": "attach",
+            "executable": "${workspaceFolder}/../build/install/bin/beerocks_cli",
+            "target": "localhost:9999",
+            "remote": true,
+            "cwd": "${workspaceFolder}",
+            "autorun": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true //TODO: pretty printing doesn't seem to work
+                }
+            ]
+        },
         {
             "name": "(gdb) Launch beerocks_controller",
             "type": "cppdbg",
