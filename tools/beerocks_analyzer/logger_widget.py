@@ -6,8 +6,10 @@ import threading
 import socket
 import time
 
-from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import QWidget, QTextEdit, QTabWidget, QFormLayout
+
 
 def PRINTF(fmt, *args):
     sys.stdout.write(fmt % args)
