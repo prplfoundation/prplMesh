@@ -13,7 +13,7 @@ class dummmy_stderr():
     def flush(self):
         return
 
-required_packages_versions = [('matplotlib',''),('pyside',''),('numpy',''),('paramiko',''),('networkx','1.10')]
+required_packages_versions = [('matplotlib',''),('pyside2',''),('numpy',''),('paramiko',''),('networkx','1.10')]
 
 def PRINTF(fmt, *args):
     sys.stdout.write(fmt % args)
@@ -30,9 +30,9 @@ def install_required_packages():
     installed_packages_versions = {package.key: package.version for package in pip.get_installed_distributions()}
 
     for package_version in required_packages_versions:
-        if ('pyside' in package_version[0]) and ('linux' in platform):
+        if ('pyside2' in package_version[0]) and ('linux' in platform):
             try:
-                from PySide import QtCore, QtGui
+                from PySide2 import QtCore, QtGui
             except:
                 pkg = package_version[0]
                 try:

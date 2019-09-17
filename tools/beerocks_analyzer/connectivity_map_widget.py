@@ -6,10 +6,12 @@ import threading
 import time
 import math
 
-from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide2.QtCore import *
+from PySide2.QtGui import *
 
 import matplotlib
+from PySide2.QtWidgets import QTabWidget, QVBoxLayout, QWidget
+
 matplotlib.use('Qt4Agg')
 matplotlib.rcParams['backend.qt4']='PySide'
 import matplotlib.pyplot as plt
