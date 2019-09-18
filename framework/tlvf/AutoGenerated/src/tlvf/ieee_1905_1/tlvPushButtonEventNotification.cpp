@@ -69,7 +69,7 @@ bool tlvPushButtonEventNotification::alloc_media_type_list(size_t count) {
     }
     m_media_type_list_idx__ += count;
     *m_media_type_list_length += count;
-    m_buff_ptr__ += len;
+    if (!buffPtrIncrementSafe(len)) { return false; }
     if(m_length){ (*m_length) += len; }
     if (!m_parse__) { 
         for (size_t i = m_media_type_list_idx__ - count; i < m_media_type_list_idx__; i++) { m_media_type_list[i].struct_init(); }
@@ -102,22 +102,18 @@ bool tlvPushButtonEventNotification::init()
     }
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_PUSH_BUTTON_EVENT_NOTIFICATION;
-    m_buff_ptr__ += sizeof(eTlvType) * 1;
+    if (!buffPtrIncrementSafe(sizeof(eTlvType))) { return false; }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_media_type_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_media_type_list_length = 0;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_media_type_list = (sMediaType*)m_buff_ptr__;
     uint8_t media_type_list_length = *m_media_type_list_length;
     m_media_type_list_idx__ = media_type_list_length;
-    m_buff_ptr__ += sizeof(sMediaType)*(media_type_list_length);
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(sMediaType)*(media_type_list_length))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvType::TLV_PUSH_BUTTON_EVENT_NOTIFICATION) {

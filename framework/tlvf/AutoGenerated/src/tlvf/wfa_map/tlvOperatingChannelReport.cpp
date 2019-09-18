@@ -74,7 +74,7 @@ bool tlvOperatingChannelReport::alloc_operating_classes_list(size_t count) {
     m_current_transmit_power = (int8_t *)((uint8_t *)(m_current_transmit_power) + len);
     m_operating_classes_list_idx__ += count;
     *m_operating_classes_list_length += count;
-    m_buff_ptr__ += len;
+    if (!buffPtrIncrementSafe(len)) { return false; }
     if(m_length){ (*m_length) += len; }
     if (!m_parse__) { 
         for (size_t i = m_operating_classes_list_idx__ - count; i < m_operating_classes_list_idx__; i++) { m_operating_classes_list[i].struct_init(); }
@@ -114,29 +114,25 @@ bool tlvOperatingChannelReport::init()
     }
     m_type = (eTlvTypeMap*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_OPERATING_CHANNEL_REPORT;
-    m_buff_ptr__ += sizeof(eTlvTypeMap) * 1;
+    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) { return false; }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_radio_uid = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_radio_uid->struct_init(); }
     m_operating_classes_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_operating_classes_list_length = 0;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_operating_classes_list = (sOperatingClasses*)m_buff_ptr__;
     uint8_t operating_classes_list_length = *m_operating_classes_list_length;
     m_operating_classes_list_idx__ = operating_classes_list_length;
-    m_buff_ptr__ += sizeof(sOperatingClasses)*(operating_classes_list_length);
+    if (!buffPtrIncrementSafe(sizeof(sOperatingClasses)*(operating_classes_list_length))) { return false; }
     m_current_transmit_power = (int8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(int8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) { return false; }
     if(m_length && !m_parse__){ (*m_length) += sizeof(int8_t); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvTypeMap::TLV_OPERATING_CHANNEL_REPORT) {

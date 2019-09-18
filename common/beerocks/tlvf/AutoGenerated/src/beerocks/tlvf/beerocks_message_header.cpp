@@ -92,32 +92,28 @@ bool cACTION_HEADER::init()
     }
     m_magic = (uint32_t*)m_buff_ptr__;
     if (!m_parse__) *m_magic = beerocks::message::MESSAGE_MAGIC;
-    m_buff_ptr__ += sizeof(uint32_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
     m_version = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_version = beerocks::message::MESSAGE_VERSION;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_action = (eAction*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(eAction) * 1;
+    if (!buffPtrIncrementSafe(sizeof(eAction))) { return false; }
     m_action_op = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_direction = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_direction = 0x1;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_radio_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_radio_mac->struct_init(); }
     m_last = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_last = 0x0;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_id = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0x0;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }

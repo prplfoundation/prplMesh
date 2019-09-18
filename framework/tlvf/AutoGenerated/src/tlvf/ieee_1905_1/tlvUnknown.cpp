@@ -63,7 +63,7 @@ bool tlvUnknown::alloc_data(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_data_idx__ += count;
-    m_buff_ptr__ += len;
+    if (!buffPtrIncrementSafe(len)) { return false; }
     if(m_length){ (*m_length) += len; }
     return true;
 }
@@ -88,21 +88,17 @@ bool tlvUnknown::init()
         return false;
     }
     m_type = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_data = (uint8_t*)m_buff_ptr__;
     if (m_length && m_parse__) {
         size_t len = *m_length;
         if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_data_idx__ = len/sizeof(uint8_t);
-        m_buff_ptr__ += len;
-    }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
+        if (!buffPtrIncrementSafe(len)) { return false; }
     }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
