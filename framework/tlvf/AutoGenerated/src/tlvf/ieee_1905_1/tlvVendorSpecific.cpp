@@ -60,17 +60,13 @@ bool tlvVendorSpecific::init()
     }
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_VENDOR_SPECIFIC;
-    m_buff_ptr__ += sizeof(eTlvType) * 1;
+    if (!buffPtrIncrementSafe(sizeof(eTlvType))) { return false; }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0x3;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_vendor_oui = (sVendorOUI*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sVendorOUI) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sVendorOUI))) { return false; }
     if (!m_parse__) { m_vendor_oui->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }

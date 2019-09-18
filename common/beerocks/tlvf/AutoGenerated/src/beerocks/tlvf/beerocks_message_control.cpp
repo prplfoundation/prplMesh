@@ -139,38 +139,34 @@ bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::init()
         return false;
     }
     m_slave_version = (char*)m_buff_ptr__;
-    m_buff_ptr__ += (sizeof(char) * beerocks::message::VERSION_LENGTH);
+    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::VERSION_LENGTH))) { return false; }
     m_slave_version_idx__  = beerocks::message::VERSION_LENGTH;
     m_platform_settings = (sPlatformSettings*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sPlatformSettings) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sPlatformSettings))) { return false; }
     if (!m_parse__) { m_platform_settings->struct_init(); }
     m_wlan_settings = (sWlanSettings*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sWlanSettings) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sWlanSettings))) { return false; }
     if (!m_parse__) { m_wlan_settings->struct_init(); }
     m_backhaul_params = (sBackhaulParams*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sBackhaulParams) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sBackhaulParams))) { return false; }
     if (!m_parse__) { m_backhaul_params->struct_init(); }
     m_hostap = (sNodeHostap*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sNodeHostap) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sNodeHostap))) { return false; }
     if (!m_parse__) { m_hostap->struct_init(); }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
     if (!m_parse__) { m_cs_params->struct_init(); }
     m_platform = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_low_pass_filter_on = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_enable_repeater_mode = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_radio_identifier = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_radio_identifier->struct_init(); }
     m_is_slave_reconf = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -254,17 +250,13 @@ bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::init()
         return false;
     }
     m_master_version = (char*)m_buff_ptr__;
-    m_buff_ptr__ += (sizeof(char) * beerocks::message::VERSION_LENGTH);
+    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::VERSION_LENGTH))) { return false; }
     m_master_version_idx__  = beerocks::message::VERSION_LENGTH;
     m_err_code = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_config = (sSonConfig*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sSonConfig) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sSonConfig))) { return false; }
     if (!m_parse__) { m_config->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -326,24 +318,20 @@ bool cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::init()
         return false;
     }
     m_backhaul_iface_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_backhaul_iface_mac->struct_init(); }
     m_backhaul_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sIpv4Addr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) { return false; }
     if (!m_parse__) { m_backhaul_ipv4->struct_init(); }
     m_bridge_iface_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_bridge_iface_mac->struct_init(); }
     m_bridge_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sIpv4Addr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) { return false; }
     if (!m_parse__) { m_bridge_ipv4->struct_init(); }
     m_hostap = (sNodeHostap*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sNodeHostap) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sNodeHostap))) { return false; }
     if (!m_parse__) { m_hostap->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -381,12 +369,8 @@ bool cACTION_CONTROL_SON_CONFIG_UPDATE::init()
         return false;
     }
     m_config = (sSonConfig*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sSonConfig) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sSonConfig))) { return false; }
     if (!m_parse__) { m_config->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -443,7 +427,7 @@ bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::alloc_data(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_data_idx__ += count;
-    m_buff_ptr__ += len;
+    if (!buffPtrIncrementSafe(len)) { return false; }
     return true;
 }
 
@@ -470,16 +454,12 @@ bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::init()
         return false;
     }
     m_total = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_seq = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_size = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_data = (uint8_t*)m_buff_ptr__;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -536,7 +516,7 @@ bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::alloc_data(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_data_idx__ += count;
-    m_buff_ptr__ += len;
+    if (!buffPtrIncrementSafe(len)) { return false; }
     return true;
 }
 
@@ -563,16 +543,12 @@ bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::init()
         return false;
     }
     m_total = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_seq = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_size = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_data = (uint8_t*)m_buff_ptr__;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -629,7 +605,7 @@ bool cACTION_CONTROL_AGENT_PING_REQUEST::alloc_data(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_data_idx__ += count;
-    m_buff_ptr__ += len;
+    if (!buffPtrIncrementSafe(len)) { return false; }
     return true;
 }
 
@@ -656,16 +632,12 @@ bool cACTION_CONTROL_AGENT_PING_REQUEST::init()
         return false;
     }
     m_total = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_seq = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_size = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_data = (uint8_t*)m_buff_ptr__;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -722,7 +694,7 @@ bool cACTION_CONTROL_AGENT_PING_RESPONSE::alloc_data(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_data_idx__ += count;
-    m_buff_ptr__ += len;
+    if (!buffPtrIncrementSafe(len)) { return false; }
     return true;
 }
 
@@ -749,16 +721,12 @@ bool cACTION_CONTROL_AGENT_PING_RESPONSE::init()
         return false;
     }
     m_total = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_seq = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_size = (uint16_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_data = (uint8_t*)m_buff_ptr__;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -796,12 +764,8 @@ bool cACTION_CONTROL_ARP_QUERY_REQUEST::init()
         return false;
     }
     m_params = (sArpQuery*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sArpQuery) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sArpQuery))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -839,12 +803,8 @@ bool cACTION_CONTROL_ARP_QUERY_RESPONSE::init()
         return false;
     }
     m_params = (sArpMonitorData*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sArpMonitorData) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sArpMonitorData))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -882,12 +842,8 @@ bool cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION::init()
         return false;
     }
     m_versions = (sVersions*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sVersions) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sVersions))) { return false; }
     if (!m_parse__) { m_versions->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -930,14 +886,10 @@ bool cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION::init()
         return false;
     }
     m_bridge_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_bridge_mac->struct_init(); }
     m_operational = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -975,12 +927,8 @@ bool cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::init()
         return false;
     }
     m_params = (sBackhaulRssi*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sBackhaulRssi) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sBackhaulRssi))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1008,10 +956,6 @@ size_t cACTION_CONTROL_BACKHAUL_RESET::get_initial_size()
 bool cACTION_CONTROL_BACKHAUL_RESET::init()
 {
     if (getBuffRemainingBytes() < kMinimumLength) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -1052,12 +996,8 @@ bool cACTION_CONTROL_BACKHAUL_ROAM_REQUEST::init()
         return false;
     }
     m_params = (sBackhaulRoam*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sBackhaulRoam) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sBackhaulRoam))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1095,12 +1035,8 @@ bool cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL::init()
         return false;
     }
     m_params = (sLoggingLevelChange*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sLoggingLevelChange) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sLoggingLevelChange))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1138,12 +1074,8 @@ bool cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PREPARE_REQUEST::init()
         return false;
     }
     m_params = (sWifiCredentials*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sWifiCredentials) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sWifiCredentials))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1181,11 +1113,7 @@ bool cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PREPARE_RESPONSE::init()
         return false;
     }
     m_error_code = (uint32_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint32_t) * 1;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1213,10 +1141,6 @@ size_t cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PRE_COMMIT_REQUEST::get_initial_s
 bool cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PRE_COMMIT_REQUEST::init()
 {
     if (getBuffRemainingBytes() < kMinimumLength) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -1257,11 +1181,7 @@ bool cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PRE_COMMIT_RESPONSE::init()
         return false;
     }
     m_error_code = (uint32_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint32_t) * 1;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1289,10 +1209,6 @@ size_t cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_COMMIT_REQUEST::get_initial_size(
 bool cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_COMMIT_REQUEST::init()
 {
     if (getBuffRemainingBytes() < kMinimumLength) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -1326,10 +1242,6 @@ bool cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_ABORT_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1357,10 +1269,6 @@ size_t cACTION_CONTROL_HOSTAP_TX_ON_REQUEST::get_initial_size()
 bool cACTION_CONTROL_HOSTAP_TX_ON_REQUEST::init()
 {
     if (getBuffRemainingBytes() < kMinimumLength) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -1394,10 +1302,6 @@ bool cACTION_CONTROL_HOSTAP_TX_OFF_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1425,10 +1329,6 @@ size_t cACTION_CONTROL_HOSTAP_TX_ON_RESPONSE::get_initial_size()
 bool cACTION_CONTROL_HOSTAP_TX_ON_RESPONSE::init()
 {
     if (getBuffRemainingBytes() < kMinimumLength) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -1469,12 +1369,8 @@ bool cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1512,12 +1408,8 @@ bool cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1555,12 +1447,8 @@ bool cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1611,17 +1499,13 @@ bool cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
     if (!m_parse__) { m_cs_params->struct_init(); }
     m_supported_channels = (sWifiChannel*)m_buff_ptr__;
-    m_buff_ptr__ += (sizeof(sWifiChannel) * beerocks::message::SUPPORTED_CHANNELS_LENGTH);
+    if (!buffPtrIncrementSafe(sizeof(sWifiChannel)*(beerocks::message::SUPPORTED_CHANNELS_LENGTH))) { return false; }
     m_supported_channels_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
     if (!m_parse__) {
         for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels->struct_init(); }
-    }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
     }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1660,12 +1544,8 @@ bool cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::init()
         return false;
     }
     m_params = (sDfsCacCompleted*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sDfsCacCompleted) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sDfsCacCompleted))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1703,12 +1583,8 @@ bool cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::init()
         return false;
     }
     m_params = (sDfsChannelAvailable*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sDfsChannelAvailable) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sDfsChannelAvailable))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1746,12 +1622,8 @@ bool cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::init()
         return false;
     }
     m_params = (sApSetRestrictedFailsafe*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sApSetRestrictedFailsafe) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sApSetRestrictedFailsafe))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1788,11 +1660,7 @@ bool cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::init()
         return false;
     }
     m_success = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1830,12 +1698,8 @@ bool cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1873,11 +1737,7 @@ bool cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::init()
         return false;
     }
     m_attempts = (uint32_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint32_t) * 1;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1905,10 +1765,6 @@ size_t cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER::get_initial_size()
 bool cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER::init()
 {
     if (getBuffRemainingBytes() < kMinimumLength) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -1949,12 +1805,8 @@ bool cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sApChannelSwitch) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1991,11 +1843,7 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST::init()
         return false;
     }
     m_sync = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2050,7 +1898,7 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
     }
     m_sta_stats_idx__ += count;
     *m_sta_stats_size += count;
-    m_buff_ptr__ += len;
+    if (!buffPtrIncrementSafe(len)) { return false; }
     if (!m_parse__) { 
         for (size_t i = m_sta_stats_idx__ - count; i < m_sta_stats_idx__; i++) { m_sta_stats[i].struct_init(); }
     }
@@ -2080,19 +1928,15 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::init()
         return false;
     }
     m_ap_stats = (sApStatsParams*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sApStatsParams) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sApStatsParams))) { return false; }
     if (!m_parse__) { m_ap_stats->struct_init(); }
     m_sta_stats_size = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_sta_stats_size = 0;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_sta_stats = (sStaStatsParams*)m_buff_ptr__;
     uint8_t sta_stats_size = *m_sta_stats_size;
     m_sta_stats_idx__ = sta_stats_size;
-    m_buff_ptr__ += sizeof(sStaStatsParams)*(sta_stats_size);
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(sStaStatsParams)*(sta_stats_size))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2130,12 +1974,8 @@ bool cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::init()
         return false;
     }
     m_params = (sApLoadNotificationParams*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sApLoadNotificationParams) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sApLoadNotificationParams))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2173,12 +2013,8 @@ bool cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST::init()
         return false;
     }
     m_params = (sNeighborSetParams11k*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sNeighborSetParams11k) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sNeighborSetParams11k))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2216,12 +2052,8 @@ bool cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::init()
         return false;
     }
     m_params = (sNeighborRemoveParams11k*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sNeighborRemoveParams11k) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sNeighborRemoveParams11k))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2259,12 +2091,8 @@ bool cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     m_params = (sApActivityNotificationParams*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sApActivityNotificationParams) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sApActivityNotificationParams))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2302,12 +2130,8 @@ bool cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::init()
         return false;
     }
     m_params = (sVapsList*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sVapsList) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sVapsList))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2344,11 +2168,7 @@ bool cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION::init()
         return false;
     }
     m_vap_id = (int8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(int8_t) * 1;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2391,14 +2211,10 @@ bool cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION::init()
         return false;
     }
     m_vap_id = (int8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(int8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) { return false; }
     m_vap_info = (sVapInfo*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sVapInfo) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sVapInfo))) { return false; }
     if (!m_parse__) { m_vap_info->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2436,12 +2252,8 @@ bool cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::init()
         return false;
     }
     m_params = (sClientMonitoringParams*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sClientMonitoringParams) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sClientMonitoringParams))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2479,12 +2291,8 @@ bool cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2522,12 +2330,8 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::init()
         return false;
     }
     m_params = (sNodeRssiMeasurementRequest*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sNodeRssiMeasurementRequest) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurementRequest))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2565,12 +2369,8 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::init()
         return false;
     }
     m_params = (sNodeRssiMeasurement*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sNodeRssiMeasurement) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurement))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2608,12 +2408,8 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2651,12 +2447,8 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2694,12 +2486,8 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::init()
         return false;
     }
     m_params = (sNodeRssiMeasurement*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sNodeRssiMeasurement) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurement))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2737,12 +2525,8 @@ bool cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2780,12 +2564,8 @@ bool cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2823,12 +2603,8 @@ bool cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION::init()
         return false;
     }
     m_params = (sClientAssociationParams*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sClientAssociationParams) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sClientAssociationParams))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2866,12 +2642,8 @@ bool cACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION::init()
         return false;
     }
     m_params = (sClientDisconnectionParams*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sClientDisconnectionParams) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sClientDisconnectionParams))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2914,14 +2686,10 @@ bool cACTION_CONTROL_CLIENT_DISALLOW_REQUEST::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
     m_reject_sta = (uint8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint8_t) * 1;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2965,15 +2733,11 @@ bool cACTION_CONTROL_CLIENT_ALLOW_REQUEST::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
     m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sIpv4Addr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) { return false; }
     if (!m_parse__) { m_ipv4->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3028,18 +2792,14 @@ bool cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
     m_vap_id = (int8_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(int8_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) { return false; }
     m_type = (uint32_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint32_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
     m_reason = (uint32_t*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(uint32_t) * 1;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3077,12 +2837,8 @@ bool cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE::init()
         return false;
     }
     m_params = (sClientDisconnectResponse*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sClientDisconnectResponse) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sClientDisconnectResponse))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3120,12 +2876,8 @@ bool cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST::init()
         return false;
     }
     m_params = (sNodeBssSteerRequest*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sNodeBssSteerRequest) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sNodeBssSteerRequest))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3163,12 +2915,8 @@ bool cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE::init()
         return false;
     }
     m_params = (sNodeBssSteerResponse*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sNodeBssSteerResponse) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sNodeBssSteerResponse))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3253,18 +3001,14 @@ bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
     m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(beerocks::net::sIpv4Addr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) { return false; }
     if (!m_parse__) { m_ipv4->struct_init(); }
     m_name = (char*)m_buff_ptr__;
-    m_buff_ptr__ += (sizeof(char) * beerocks::message::NODE_NAME_LENGTH);
+    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::NODE_NAME_LENGTH))) { return false; }
     m_name_idx__  = beerocks::message::NODE_NAME_LENGTH;
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3302,12 +3046,8 @@ bool cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION::init()
         return false;
     }
     m_params = (sArpMonitorData*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sArpMonitorData) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sArpMonitorData))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3345,12 +3085,8 @@ bool cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST::init()
         return false;
     }
     m_params = (sBeaconRequest11k*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sBeaconRequest11k) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sBeaconRequest11k))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3388,12 +3124,8 @@ bool cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE::init()
         return false;
     }
     m_params = (sBeaconResponse11k*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sBeaconResponse11k) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sBeaconResponse11k))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3431,12 +3163,8 @@ bool cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST::init()
         return false;
     }
     m_params = (sStaChannelLoadRequest11k*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sStaChannelLoadRequest11k) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sStaChannelLoadRequest11k))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3474,12 +3202,8 @@ bool cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE::init()
         return false;
     }
     m_params = (sStaChannelLoadResponse11k*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sStaChannelLoadResponse11k) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sStaChannelLoadResponse11k))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3517,12 +3241,8 @@ bool cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST::init()
         return false;
     }
     m_params = (sStatisticsRequest11k*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sStatisticsRequest11k) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sStatisticsRequest11k))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3560,12 +3280,8 @@ bool cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE::init()
         return false;
     }
     m_params = (sStatisticsResponse11k*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sStatisticsResponse11k) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sStatisticsResponse11k))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3603,12 +3319,8 @@ bool cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sMacAddr) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3646,12 +3358,8 @@ bool cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::init()
         return false;
     }
     m_params = (sLinkMeasurementsResponse11k*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sLinkMeasurementsResponse11k) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sLinkMeasurementsResponse11k))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3689,12 +3397,8 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST::init()
         return false;
     }
     m_params = (sSteeringSetGroupRequest*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sSteeringSetGroupRequest) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sSteeringSetGroupRequest))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3732,12 +3436,8 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE::init()
         return false;
     }
     m_params = (sSteeringSetGroupResponse*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sSteeringSetGroupResponse) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sSteeringSetGroupResponse))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3775,12 +3475,8 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST::init()
         return false;
     }
     m_params = (sSteeringClientSetRequest*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sSteeringClientSetRequest) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sSteeringClientSetRequest))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3818,12 +3514,8 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE::init()
         return false;
     }
     m_params = (sSteeringClientSetResponse*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sSteeringClientSetResponse) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sSteeringClientSetResponse))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3861,12 +3553,8 @@ bool cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     m_params = (sSteeringEvActivity*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sSteeringEvActivity) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sSteeringEvActivity))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3904,12 +3592,8 @@ bool cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION::init()
         return false;
     }
     m_params = (sSteeringEvSnrXing*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sSteeringEvSnrXing) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sSteeringEvSnrXing))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3947,12 +3631,8 @@ bool cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION::init()
         return false;
     }
     m_params = (sSteeringEvProbeReq*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sSteeringEvProbeReq) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sSteeringEvProbeReq))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -3990,12 +3670,8 @@ bool cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::init()
         return false;
     }
     m_params = (sSteeringEvAuthFail*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sSteeringEvAuthFail) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sSteeringEvAuthFail))) { return false; }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }

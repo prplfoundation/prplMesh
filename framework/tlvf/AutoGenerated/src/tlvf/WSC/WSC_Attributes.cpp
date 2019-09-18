@@ -103,7 +103,7 @@ bool cConfigData::alloc_ssid(size_t count) {
     m_multiap_attr = (sWscAttrVendorExtMultiAp *)((uint8_t *)(m_multiap_attr) + len);
     m_ssid_idx__ += count;
     *m_ssid_length += count;
-    m_buff_ptr__ += len;
+    if (!buffPtrIncrementSafe(len)) { return false; }
     return true;
 }
 
@@ -159,34 +159,30 @@ bool cConfigData::init()
     }
     m_ssid_type = (eWscAttributes*)m_buff_ptr__;
     if (!m_parse__) *m_ssid_type = ATTR_SSID;
-    m_buff_ptr__ += sizeof(eWscAttributes) * 1;
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) { return false; }
     m_ssid_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_ssid_length = 0;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_ssid = (char*)m_buff_ptr__;
     uint16_t ssid_length = *m_ssid_length;
     if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&ssid_length)); }
     m_ssid_idx__ = ssid_length;
-    m_buff_ptr__ += sizeof(char)*(ssid_length);
+    if (!buffPtrIncrementSafe(sizeof(char)*(ssid_length))) { return false; }
     m_authentication_type_attr = (sWscAttrAuthenticationType*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sWscAttrAuthenticationType) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sWscAttrAuthenticationType))) { return false; }
     if (!m_parse__) { m_authentication_type_attr->struct_init(); }
     m_encryption_type_attr = (sWscAttrEncryptionType*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sWscAttrEncryptionType) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sWscAttrEncryptionType))) { return false; }
     if (!m_parse__) { m_encryption_type_attr->struct_init(); }
     m_network_key_attr = (sWscAttrNetworkKey*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sWscAttrNetworkKey) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sWscAttrNetworkKey))) { return false; }
     if (!m_parse__) { m_network_key_attr->struct_init(); }
     m_bssid_attr = (sWscAttrBssid*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sWscAttrBssid) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sWscAttrBssid))) { return false; }
     if (!m_parse__) { m_bssid_attr->struct_init(); }
     m_multiap_attr = (sWscAttrVendorExtMultiAp*)m_buff_ptr__;
-    m_buff_ptr__ += sizeof(sWscAttrVendorExtMultiAp) * 1;
+    if (!buffPtrIncrementSafe(sizeof(sWscAttrVendorExtMultiAp))) { return false; }
     if (!m_parse__) { m_multiap_attr->struct_init(); }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -305,7 +301,7 @@ bool cWscAttrEncryptedSettings::alloc_encrypted_settings(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_encrypted_settings_idx__ += count;
-    m_buff_ptr__ += len;
+    if (!buffPtrIncrementSafe(len)) { return false; }
     if(m_length){ (*m_length) += len; }
     return true;
 }
@@ -333,12 +329,12 @@ bool cWscAttrEncryptedSettings::init()
     }
     m_type = (eWscAttributes*)m_buff_ptr__;
     if (!m_parse__) *m_type = eWscAttributes::ATTR_ENCR_SETTINGS;
-    m_buff_ptr__ += sizeof(eWscAttributes) * 1;
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) { return false; }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    m_buff_ptr__ += sizeof(uint16_t) * 1;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_iv = (char*)m_buff_ptr__;
-    m_buff_ptr__ += (sizeof(char) * WSC_ENCRYPTED_SETTINGS_IV_LENGTH);
+    if (!buffPtrIncrementSafe(sizeof(char)*(WSC_ENCRYPTED_SETTINGS_IV_LENGTH))) { return false; }
     m_iv_idx__  = WSC_ENCRYPTED_SETTINGS_IV_LENGTH;
     if (!m_parse__) {
         if (m_length) { (*m_length) += (sizeof(char) * WSC_ENCRYPTED_SETTINGS_IV_LENGTH); }
@@ -349,11 +345,7 @@ bool cWscAttrEncryptedSettings::init()
         if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_encrypted_settings_idx__ = len/sizeof(char);
-        m_buff_ptr__ += len;
-    }
-    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
+        if (!buffPtrIncrementSafe(len)) { return false; }
     }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {
