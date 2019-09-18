@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import logging
 import os
 import sys
 import networkx as nx
@@ -22,16 +23,13 @@ except ImportError:
 import pylab
 import matplotlib.pyplot as plt
 
-def PRINTF(fmt, *args):
-    sys.stdout.write(fmt % args)
-    sys.stdout.flush()
-
 class UpdateSig(QObject):
     sig = Signal(int)
 
 class ConnectivityMapWidget(QWidget):
     def __init__(self, parent=None):
         super(ConnectivityMapWidget, self).__init__(parent)
+        self.logger = logging.getLogger(__name__)
         self.graph = nx.DiGraph()
         self.non_radio_labels_dict={}
         self.radio_labels_dict={}
@@ -91,6 +89,7 @@ class ConnectivityMapWidget(QWidget):
     
     class node:
         def __init__(self, node_type, mac, parent_mac, backhaul_mac="", channel=-1, bandwidth=-1, cac_completed=False, ap_active=False, name="",ip="", analyzer_id=-1):
+            self.logger = logging.getLogger(__name__)
             self.type = node_type
             self.mac = mac
             self.backhaul_mac = backhaul_mac
@@ -112,25 +111,23 @@ class ConnectivityMapWidget(QWidget):
             self.is_left_radio=False #for RADIO only
 
         def print_node(self):
-            PRINTF("\n")
-            PRINTF("type=%s\n",str(self.type))
-            PRINTF("mac=%s\n",str(self.mac))
-            PRINTF("backhaul_mac=%s\n",str(self.backhaul_mac))
-            PRINTF("parent_mac=%s\n",str(self.parent_mac))
-            PRINTF("channel=%s\n",str(self.channel))
-            PRINTF("bandwidth=%s\n",str(self.bandwidth))
-            PRINTF("name=%s\n",str(self.name))
-            PRINTF("ip=%s\n",str(self.ip))
-            PRINTF("analyzer_id=%s\n",str(self.analyzer_id))
-            PRINTF("hierarchy=%s\n",str(self.hierarchy))
-            PRINTF("x=%s\n",str(self.x))
-            PRINTF("y=%s\n",str(self.y))
-            PRINTF("size=%s\n",str(self.size))
-            PRINTF("color=%s\n",str(self.color))
-            PRINTF("label=%s\n",str(self.label))
-            PRINTF("has_left_radio=%s\n",str(self.has_left_radio))
-            PRINTF("is_left_radio=%s\n",str(self.is_left_radio))
-            PRINTF("\n")
+            self.logger.info("type=%s",str(self.type))
+            self.logger.info("mac=%s",str(self.mac))
+            self.logger.info("backhaul_mac=%s",str(self.backhaul_mac))
+            self.logger.info("parent_mac=%s",str(self.parent_mac))
+            self.logger.info("channel=%s",str(self.channel))
+            self.logger.info("bandwidth=%s",str(self.bandwidth))
+            self.logger.info("name=%s",str(self.name))
+            self.logger.info("ip=%s",str(self.ip))
+            self.logger.info("analyzer_id=%s",str(self.analyzer_id))
+            self.logger.info("hierarchy=%s",str(self.hierarchy))
+            self.logger.info("x=%s",str(self.x))
+            self.logger.info("y=%s",str(self.y))
+            self.logger.info("size=%s",str(self.size))
+            self.logger.info("color=%s",str(self.color))
+            self.logger.info("label=%s",str(self.label))
+            self.logger.info("has_left_radio=%s",str(self.has_left_radio))
+            self.logger.info("is_left_radio=%s",str(self.is_left_radio))
 
     def is_dfs_channel(self, channel):
         if ((channel>=52) and (channel<=64)) or ((channel>=100) and (channel<=144)):
@@ -668,8 +665,8 @@ class ConnectivityMapWidget(QWidget):
                 else:
                     param_v.append(arg_val[1].strip())
 
-        except:
-            PRINTF("Error, readSample() 1 line --> %s \n\n", line)
+        except Exception as e: # TODO: too broad exception
+            self.logger.error("Error, readSample() 1 line --> {}".format(line))
             return
 
         if param_v is None: return
@@ -701,8 +698,8 @@ class ConnectivityMapWidget(QWidget):
                     try:
                         i_backhaul=param_n.index('backhaul')
                         backhaul_mac=param_v[i_backhaul]
-                    except:
-                        PRINTF("readSample()  --> %s, nw_map_update IRE line does not contain a backhaul mac address\n", line)
+                    except Exception as e: # TODO: too broad exception
+                        self.logger.error("readSample()  --> {}, nw_map_update IRE line does not contain a backhaul mac address".format(line))
                         return
                 
                 if (not "1" in line_type) and (not "2" in line_type):
@@ -716,8 +713,8 @@ class ConnectivityMapWidget(QWidget):
                         bandwidth=param_v[i_bandwidth]
                     except:
                         pass
-            except:
-                PRINTF("readSample()  --> %s, nw_map_update line does not contain state or mac address or parent bssid or type\n", line)
+            except Exception as e: # TODO: too broad Exception
+                self.logger.error("readSample()  --> {}, nw_map_update line does not contain state or mac address or parent bssid or type".format(line))
                 return
 
             if state == "Connected":
@@ -740,8 +737,9 @@ class ConnectivityMapWidget(QWidget):
                     except: pass
                     try:
                         i_ap_mac=param_n.index('parent bssid')
-                    except:
-                        PRINTF("readSample()  --> %s, nw_map_update line does not contain parent bssid\n", line)
+                    except Exception as e: # TODO: too broad exception
+                        self.logger.error("readSample()  --> {}, nw_map_update"
+                                          " line does not contain parent bssid".format(line))
                         return
                     ap_mac = param_v[i_ap_mac]
                     if ap_id != -1:
@@ -764,8 +762,9 @@ class ConnectivityMapWidget(QWidget):
                 i_bandwidth=param_n.index('bandwidth')
                 i_cac_completed=param_n.index('cac completed')
                 i_ap_active=param_n.index('ap active')
-            except:
-                PRINTF("readSample()  --> %s, nw_map_update line does not contain channel or bandwidth or cac_completed or ap_active\n", line)
+            except Exception as e:  # TODO: too broad exception
+                self.logger.error("readSample()  --> {}, nw_map_update line "
+                                  "does not contain channel or bandwidth or cac_completed or ap_active".format(line))
                 return
             
             bandwidth = param_v[i_bandwidth]
@@ -792,8 +791,8 @@ class ConnectivityMapWidget(QWidget):
         elif "VAP" in param_m_n:
             try:
                 i_bssid=param_n.index('bssid')
-            except:
-                PRINTF("readSample()  --> %s, nw_map_update line does not contain bssid\n", line)
+            except Exception as e:  # TODO: too broad exception
+                self.logger.error("readSample()  --> {}, nw_map_update line does not contain bssid".format(line))
                 return
             mac = param_v[i_bssid]
             self.add_node_to_graph(ConnectivityMapWidget.node('RADIO', mac, self.last_ap_mac, "", self.last_radio_channel, self.last_radio_bandwidth, self.last_radio_cac_completed, self.last_radio_active))
@@ -802,8 +801,8 @@ class ConnectivityMapWidget(QWidget):
             param_m_v = int(param_m_val[1].strip())
             try:
                 i1=param_n.index('mac')
-            except:
-                PRINTF("Error, readSample() --> %s, 'stats_update' line not contain mac address\n", line)
+            except Exception as e:  # TODO: too broad exception
+                self.logger.error("Error, readSample() --> {}, 'stats_update' line not contain mac address".format(line))
                 return
 
             mac = param_v[i1]
