@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import logging
 import sys
 import os
 
@@ -37,10 +38,6 @@ BAR_CODES = (matplotlib.path.Path.MOVETO,
 
 BARS_COLORS = np.array([i for i in range(10,100, 10)])
 
-def PRINTF(fmt, *args):
-    sys.stdout.write(fmt % args)
-    sys.stdout.flush()
-
 def makeBarCollection(x, y, w=0.2):
     yb=0
     patch_a=[]
@@ -75,6 +72,7 @@ class UpdateSig(QObject):
 class BeeRocksAnalyzerWidget(QWidget):
     def __init__(self, argv, parent=None):
         super(BeeRocksAnalyzerWidget, self).__init__(parent)
+        self.logger = logging.getLogger(__name__)
         self.wait_for_start=True
         self.figsInfo = []
         self.figsTitle = []
@@ -183,34 +181,34 @@ class BeeRocksAnalyzerWidget(QWidget):
                 elif arg_i.startswith("-map") or arg_i.startswith("-graphs"):
                     pass
                 else:
-                    PRINTF("Error, unknown argument (%d) --> %s\n",i,arg_i)
+                    self.logger.error("Error, unknown argument ({:d}) --> {}".format(i, arg_i))
                     self.printUsage()
                     sys.exit(0)
-            except:
-                PRINTF("Error(2), in argument (%d) --> %s\n",i,arg_i)
+            except Exception as e: # TODO: too broad exception
+                self.logger.error("Error(2), in argument ({:d}) --> {}".format(i, arg_i))
                 self.printUsage()
                 sys.exit(0)
 
     def printUsage(self):
-        PRINTF("usage: BeeRocksAnalyzer [options]\n")
-        PRINTF("    -f=<log file>                                         - input log file\n")
-        PRINTF("    -plot<fig num><sub plot>=<Label 1>,<Label 1>,..       - enable and configure plots\n")
-        PRINTF("    -realtime=<update interval sec>,<samples>             - enable real time plot\n")
-        PRINTF("    -print_vals                                           - print log values to console\n")
-        PRINTF("    -print_labels                                         - print log labels to console\n")
-        PRINTF("    -output_csv                                           - output params to csv file\n")
+        self.logger.info("usage: BeeRocksAnalyzer [options]\n")
+        self.logger.info("    -f=<log file>                                         - input log file\n")
+        self.logger.info("    -plot<fig num><sub plot>=<Label 1>,<Label 1>,..       - enable and configure plots\n")
+        self.logger.info("    -realtime=<update interval sec>,<samples>             - enable real time plot\n")
+        self.logger.info("    -print_vals                                           - print log values to console\n")
+        self.logger.info("    -print_labels                                         - print log labels to console\n")
+        self.logger.info("    -output_csv                                           - output params to csv file\n")
 
     def printLabels(self):
-        PRINTF("printLabels:\n")
+        self.logger.info("printLabels:")
         for a_name in dir(self):
             if a_name.endswith("_v"):
-                PRINTF(" %s\n",a_name)
+                self.logger.info(" {}".format(a_name))
 
     def printVals(self):
-        PRINTF("printVals:\n")
+        self.logger.info("printVals:\n")
         for a_name in dir(self):
             if a_name.endswith("_v") or a_name.endswith("_t"):
-                PRINTF(" %s : %s\n", a_name, str(getattr(BeeRocksAnalyzerWidget, a_name)))
+                self.logger.info(" {} : {}\n".format(a_name, str(getattr(BeeRocksAnalyzerWidget, a_name))))
 
     def readSampleAndUpdateGraphs(self, line, param_t1, is_start, is_stop):
         if is_start:
@@ -255,8 +253,8 @@ class BeeRocksAnalyzerWidget(QWidget):
                 else:
                     param_v.append(arg_val[1].strip())
 
-        except:
-            PRINTF("Error, readSample() 1 line --> %s \n\n", line)
+        except Exception as e: # TODO: too broad exception
+            self.logger.error("Error, readSample() 1 line --> {}\n{}".format(line, e))
             return
 
         if param_v == None: return
@@ -272,8 +270,11 @@ class BeeRocksAnalyzerWidget(QWidget):
                 if not ("1" in param_v[i_type]):
                     i_ap_mac=param_n.index('parent bssid')
                 
-            except:
-                PRINTF("readSample()  --> %s, nw_map_update line does not contain state or mac or type or parent bssid\n", line)
+            except Exception as e: # TODO: too broad exception
+                self.logger.error("readSample()  --> {}, "
+                                  "nw_map_update line does not contain state or mac"
+                                  " or type or parent bssid\n"
+                                  "{}".format(line, e))
                 return
 
             state = (param_v[i_state].split())[0]
@@ -286,8 +287,10 @@ class BeeRocksAnalyzerWidget(QWidget):
                 try:
                     i_backhaul=param_n.index('backhaul')
                     mac = param_v[i_backhaul] #for IRE, the backhaul mac is the "client" mac
-                except:
-                    PRINTF("readSample()  --> %s, nw_map_update IRE line does not contain a backhaul mac address\n", line)
+                except Exception as e:  # TODO: too broad exception
+                    self.logger.error("readSample()  --> %s, nw_map_update IRE line does not contain"
+                                      " a backhaul mac address"
+                                      "\n{}".format(line, e))
                     return
             if ("2" in line_type) or ("3" in line_type): #IRE or client
                 if state == "Disconnected":
@@ -301,8 +304,9 @@ class BeeRocksAnalyzerWidget(QWidget):
                         try: 
                             i_sta_id=param_n.index('sta_id')
                             sta_id = int(param_v[i_sta_id])
-                        except: 
-                            PRINTF("readSample()  --> %s, nw_map_update - new STA line does not contain sta_id\n", line)
+                        except Exception as e:  # TODO: too broad exception
+                            self.logger.error("readSample()  --> {}, nw_map_update - "
+                                              "new STA line does not contain sta_id\n{}".format(line, e))
                             return
                         self.sta_mac2num[mac] = sta_id
                         self.defineLineColor('sta', self.sta_mac2num[mac])
@@ -313,8 +317,9 @@ class BeeRocksAnalyzerWidget(QWidget):
                         try: 
                             i_ap_id=param_n.index('ap_id')
                             ap_id = int(param_v[i_ap_id])
-                        except:
-                            PRINTF("readSample()  --> %s, nw_map_update - new AP line does not contain ap_id\n", line)
+                        except Exception as e:  # TODO: too broad exception
+                            self.logger.error("readSample()  --> %s, nw_map_update - "
+                                              "new AP line does not contain ap_id\n{}".format(line, e))
                             return
                         self.ap_mac2num[ap_mac] = ap_id
                         self.defineLineColor('ap', ap_id)
@@ -330,8 +335,8 @@ class BeeRocksAnalyzerWidget(QWidget):
             param_m_v = int(param_m_val[1].strip())
             try:
                 i1=param_n.index('mac')
-            except:
-                PRINTF("Error, readSample() --> %s, 'stats_update' line not contain mac address\n", line)
+            except Exception as e:  # TODO: too broad exception
+                self.logger.error("readSample() --> {}, 'stats_update' line not contain mac address\n{}".format(line, e))
                 return
 
             mac = param_v[i1]
@@ -342,8 +347,9 @@ class BeeRocksAnalyzerWidget(QWidget):
                     try: 
                         i_ap_id=param_n.index('ap_id')
                         ap_id = int(param_v[i_ap_id])
-                    except:
-                        PRINTF("readSample()  --> %s, nw_map_update - new AP line does not contain ap_id\n", line)
+                    except Exception as e:  # TODO: too broad exception
+                        self.logger.error("readSample()  --> %s, nw_map_update"
+                                          " - new AP line does not contain ap_id\n{}".format(line, e))
                         return
                     self.ap_mac2num[mac] = ap_id
                     self.defineLineColor('ap', ap_id)
@@ -361,8 +367,9 @@ class BeeRocksAnalyzerWidget(QWidget):
                     try: 
                         i_sta_id=param_n.index('sta_id')
                         sta_id = int(param_v[i_sta_id])
-                    except: 
-                        PRINTF("readSample()  --> %s, nw_map_update - new STA line does not contain sta_id\n", line)
+                    except Exception as e:  # TODO: too broad exception
+                        self.logger.error("readSample()  --> %s, nw_map_update"
+                                          " - new STA line does not contain sta_id\n{}".format(line, e))
                         return
                     self.sta_mac2num[mac] = sta_id
                     self.defineLineColor('sta', self.sta_mac2num[mac])
@@ -375,7 +382,7 @@ class BeeRocksAnalyzerWidget(QWidget):
                         break
                 
                 if ap_num==None:
-                    PRINTF("Error, readSample() --> %s, 'client_stats_update' did not find sta_mac=%s in self.ap_mac2sta_mac\n", line,mac)
+                    self.logger.error("Error, readSample() --> {}, 'client_stats_update' did not find sta_mac={} in self.ap_mac2sta_mac".format(line, mac))
                     return
                 
                 for j in range(i1, len(param_n)):
@@ -436,7 +443,7 @@ class BeeRocksAnalyzerWidget(QWidget):
         elif entity=='sta':
             self.sta_num2color[num] = self.next_color_idx
         else:
-            PRINTF("error defining color , entity=%s\n" % entity)
+            self.logger.error("error defining color , entity={}", entity)
             return
         self.next_color_idx += 1
         if self.next_color_idx == len(self.color):
@@ -490,7 +497,7 @@ class BeeRocksAnalyzerWidget(QWidget):
                         else:
                             color = self.getLineColor(entity, entity_num)
                             if color == None:
-                                PRINTF("Error, color == None, param_n=%s\n", param_n)
+                                self.logger.error("Error, color == None, param_n={}".format(param_n))
                                 return
                             marker = self.marker[0]
                             if self.fig_subplot_nums2marker.has_key((f,p)):
@@ -639,8 +646,8 @@ class BeeRocksAnalyzerWidget(QWidget):
             return self.color[self.ap_num2color[entity_num]]
         elif(entity=='sta'):
             return self.color[self.sta_num2color[entity_num]]
-        else: 
-            PRINTF("error getting line color - no such entity =%s\n" %  entity)
+        else:
+            self.logger.error("error getting line color - no such entity ={}".format(entity))
             return None
 
     def addPlots(self):

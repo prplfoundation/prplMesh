@@ -11,10 +11,6 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import QWidget, QTextEdit, QTabWidget, QFormLayout
 
 
-def PRINTF(fmt, *args):
-    sys.stdout.write(fmt % args)
-    sys.stdout.flush()
-
 class UpdateSig(QObject):
     sig = Signal(float)
 

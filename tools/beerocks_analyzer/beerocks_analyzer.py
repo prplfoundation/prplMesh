@@ -38,29 +38,26 @@ app = None
 logger_setup.setup_logger()
 logger = logging.getLogger(__name__)
 
-def PRINTF(fmt, *args):
-    sys.stdout.write(fmt % args)
-    sys.stdout.flush()
-
 def printUsage():
-    PRINTF("usage: BeeRocksAnalyzer [options]\n")
-    PRINTF("    -f=<input log file>                                         - input log file\n")
-    PRINTF("    -map                                                  - start connectivity map\n")
-    PRINTF("    -map_win                                              - start connectivity map on a separare window\n")
-    PRINTF("    -conf=<conf_file_name>                                - run configuration from ./conf/conf_file_name\n")
-    PRINTF("                                                          - can execute with several -conf=<conf_file_name1> -conf=<conf_file_name2> ...\n")
-    PRINTF("    -gw_ip=<IP of GW>                                     - GW ip to get updates from, default=192.168.1.1\n")
-    PRINTF("    -my_ip=[IP of PC]                                     - PC ip to send updates, if not set will automaticly set\n")
-    PRINTF("    -ssh_port=[ssh port of GW]                            - SSH port used to connect to GW\n")
+    logger.info("usage: BeeRocksAnalyzer [options]")
+    logger.info("    -f=<input log file>                                         - input log file")
+    logger.info("    -map                                                  - start connectivity map")
+    logger.info("    -map_win                                              - start connectivity map on a separare window")
+    logger.info("    -conf=<conf_file_name>                                - run configuration from ./conf/conf_file_name")
+    logger.info("                                                          - can execute with several -conf=<conf_file_name1> -conf=<conf_file_name2> ...")
+    logger.info("    -gw_ip=<IP of GW>                                     - GW ip to get updates from, default=192.168.1.1")
+    logger.info("    -my_ip=[IP of PC]                                     - PC ip to send updates, if not set will automaticly set")
+    logger.info("    -ssh_port=[ssh port of GW]                            - SSH port used to connect to GW")
 
 def signal_handler(signal, frame):
     global t_list, g_run_flag
 
-    PRINTF("")
+    logger.info("Signal received: " + str(signal))
     for t in t_list:
         try:
             t.terminate()
-        except:
+        except Exception as e:
+            logger.warning("Exception when trying to terminate thread: " + str(e))
             pass
     g_run_flag=False
 
@@ -174,15 +171,15 @@ class BeeRocksAnalyzer(QMainWindow):
             try: # open log file
                 self.fdLog = open(self.fname,"rt")
                 if log_start_pos > 0:
-                    # PRINTF("openLogFiles: seek to %d\n" % log_start_pos)
+                    logger.debug("openLogFiles: seek to {:d}", log_start_pos)
                     self.fdLog.seek(log_start_pos, 0)
                 elif log_start_pos < 0:
-                    # PRINTF("openLogFiles: seek to end of file\n")
+                    logger.debug("openLogFiles: seek to end of file", log_start_pos)
                     self.fdLog.seek(0, 2)
             except:
                 self.fdLog = None
             if self.fdLog == None:
-                PRINTF("Error(1): can't open file '%s'\n",self.fname)
+                logger.error("Error(1): can't open file {}".format(self.fname))
                 sys.exit(0)
 
     def startReadSampleThread(self, update_start_time=False):
@@ -233,10 +230,10 @@ class BeeRocksAnalyzer(QMainWindow):
                 elif param_m=="STOP":
                     is_stop = True
                 else:
-                    PRINTF("Error, readSample() 1 line --> %s \n\n", line)
-            except:
-                PRINTF("Error, readSample() 1 line --> %s \n\n", line)
-            
+                    logger.error("readSample() 1 line --> {}\n", line)
+            except Exception as e : # TODO: too broad exception
+                logger.error("readSample() 1 line --> {}\n{}", line, str(e))
+
             return [param_t, is_start, is_stop, is_map_update, res]
         else:
             try:
@@ -253,7 +250,7 @@ class BeeRocksAnalyzer(QMainWindow):
                     else:
                         param_v.append(arg_val[1].strip())
             except:
-                PRINTF("Error, readSample() 1 line --> %s \n\n", line)
+                logger.error("readSample() 1 line --> {}".format(line))
                 return [param_t, is_start, is_stop, is_map_update, res]
 
         if param_v == None: 
@@ -274,7 +271,9 @@ class BeeRocksAnalyzer(QMainWindow):
                         i_ap_mac=param_n.index('parent bssid')
                     
                 except:
-                    PRINTF("readSample()  --> %s, nw_map_update line does not contain state or mac or type or parent bssid\n", line)
+                    logger.info("readSample()  --> {}, "
+                                             "nw_map_update line does not contain state "
+                                             "or mac or type or parent bssid".format(line))
                     return [param_t, is_start, is_stop, is_map_update, res]
 
                 state = (param_v[i_state].split())[0]
@@ -287,8 +286,10 @@ class BeeRocksAnalyzer(QMainWindow):
                     try:
                         i_backhaul=param_n.index('backhaul')
                         mac = param_v[i_backhaul] #for IRE, the backhaul mac is the "client" mac
-                    except:
-                        PRINTF("readSample()  --> %s, nw_map_update IRE line does not contain a backhaul mac address\n", line)
+                    except Exception as e: # TODO: too broad exception
+                        logger.error("readSample()  --> {}, "
+                                                 "nw_map_update IRE line does not contain "
+                                                 "a backhaul mac address\n{}".format(line, str(e)))
                         return [param_t, is_start, is_stop, is_map_update, res]
                 if ("2" in line_type) or ("3" in line_type): #IRE or client
                     if state == "Connected":
@@ -306,8 +307,8 @@ class BeeRocksAnalyzer(QMainWindow):
                 param_m_v = int(param_m_val[1].strip())
                 try:
                     i1=param_n.index('mac')
-                except:
-                    PRINTF("Error, readSample() --> %s, 'stats_update' line not contain mac address\n", line)
+                except Exception as e: # TODO: too broad exception
+                    logger.error("readSample() --> {}, 'stats_update' line not contain mac address.\n{}".format(line, e))
                     return [param_t, is_start, is_stop, is_map_update, res]
 
                 mac = param_v[i1]
@@ -343,21 +344,22 @@ class BeeRocksAnalyzer(QMainWindow):
                     if param_t1 == -1:
                         time.sleep(0.1)
                     elif param_t1 == 0.000:
-                        #PRINTF("DEBUG, readSampleThread() --> param_t1=0.000, updating self.start_time\n")
+                        logger.debug("readSampleThread() --> param_t1=0.000, updating self.start_time")
                         self.start_time = time.time()
                     else:
                         if update_start_time:
-                            #PRINTF("DEBUG, updating start_time\n")
+                            logger.debug("updating start_time")
                             self.start_time = time.time() - float(param_t1)
                             update_start_time = False
                         self.runTime = round(time.time() - self.start_time, 3)
                         delta_t = self.fileTime - self.runTime
                         if delta_t > 0.1:
                             #if delta_t > 5:
-                            #    PRINTF("DEBUG, readSampleThread() --> sleeping for %.3f seconds\n", delta_t)
+                            logger.debug("readSampleThread() --> sleeping for {:.3f} seconds".format(delta_t))
                             time.sleep(delta_t)
                         elif (delta_t < -3) and (not is_map_update):
-                            #PRINTF("DEBUG, readSampleThread() --> (delta_t < -3) and (not is_map_update) -> update_widgets = False\n")
+                            logger.debug("readSampleThread() --> (delta_t < -3) "
+                                       "and (not is_map_update) -> update_widgets = False")
                             update_widgets = False
                         self.restartRuntime = False
                         self.timeUpdateSig.sig.emit(param_t1)
@@ -575,7 +577,7 @@ class BeeRocksAnalyzer(QMainWindow):
         self.showMaximized()
 
     def getFileMarkers(self):
-        PRINTF("Scanning log markers/time line...")
+        logger.info("Scanning log markers/time line...")
         fd= open(self.fname,"rt")
         line=" "
         self.file_marks=[]
@@ -593,7 +595,7 @@ class BeeRocksAnalyzer(QMainWindow):
                 self.file_marks.append( (p, t) )
 
         fd.close()
-        PRINTF("Done.\n")
+        logger.info("Done.")
 
     def timeSliderChanged(self, value):
         self.lastTimerValueChanged = (self.lastTimerValue != value)
@@ -635,13 +637,13 @@ def socket_server(log_file):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # Bind the socket to the port
+    server_address = ('', 10000)
     try:
-        server_address = ('', 10000)
-        PRINTF('starting up on %s port %s\n' % server_address)
+        logger.info("starting up on {a[0]} port {a[1]}".format(a=server_address))
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind(server_address)
-    except:
-        PRINTF('could not start up on %s port %s\n' % server_address)
+    except Exception as e: # TODO: too broad exception
+        logger.error("could not start up on {a[0]} port {a[1]}:\n{e}".format(a=server_address, e=e))
         return
 
     # Listen for incoming connections
@@ -653,12 +655,12 @@ def socket_server(log_file):
     run_local=True
     while g_run_flag and run_local:
         # Wait for a connection
-        PRINTF('waiting for a connection...\n')
+        logger.info('waiting for a connection...')
         connection, client_address = sock.accept()
         connection.settimeout(5)
         startTime = time.time()
 
-        PRINTF('connection from %s\n', client_address)
+        logger.info("connection from {}".format(client_address))
         file.write( '%.3f|START\n' % (time.time() - startTime))
         file.flush()
         # Receive the data in chunks
@@ -670,12 +672,13 @@ def socket_server(log_file):
             try:
                 data += connection.recv(256)
             except socket.timeout:
+                logger.info("Socket timed out")
                 pass
             except KeyboardInterrupt:
                 run_local=False
                 break
-            except:
-                PRINTF("Error, socket_server\n")
+            except Exception as e:
+                logger.error("Error when handling data from the socket_server:\n{}".format(str(e)))
                 run_local=False
                 break
             while g_run_flag:
@@ -716,12 +719,12 @@ def ssh_start_beerocks_cli(host="192.168.1.1",my_ip="",ssh_port=22, user='admin'
         in_buff += ssh_shell.recv(9999)
         if in_buff.endswith('password: '): 
             time.sleep(3)
-            PRINTF("ssh_command()  --> got 'password:', sending password...\n")
+            logger.info("ssh_command()  --> got 'password:', sending password...")
             ssh_shell.send(password + '\n')
             in_buff = ''
         elif 'are you sure you want to continue connecting' in in_buff:
             time.sleep(3)
-            PRINTF("ssh_command()  --> got 'are you sure you want to continue connecting', sending 'yes'...")
+            logger.info("ssh_command()  --> got 'are you sure you want to continue connecting', sending 'yes'...")
             ssh_shell.send('yes\n')
             in_buff = ''
     
@@ -743,7 +746,7 @@ def main(argv):
         conf_list=[]
         #check python version
         if (sys.version_info.major != 3) or (sys.version_info.minor < 5):
-            PRINTF("Error: python version must be 3.5+\n")
+            logger.critical("Error: python version must be 3.5+")
             return
         #get command line args
         argv_len = len(sys.argv)
@@ -818,12 +821,12 @@ def main(argv):
             t.join()
 
     except KeyboardInterrupt:
-        PRINTF("")
+        logger.info("Keyboard interrupt, terminating...")
         for t in t_list:
             try:
                 t.terminate()
-            except:
-                pass
+            except Exception as e:
+                logger.warning("Exception when trying to terminate thread: " + str(e))
         g_run_flag=False
         sys.exit(0)
 
