@@ -341,43 +341,47 @@ class BeeRocksAnalyzer(QMainWindow):
             if self.fdLog != None:
                 update_widgets = True
                 line = self.fdLog.readline()
-                if len(line) > 0:
-                    [param_t1, is_start, is_stop, is_map_update, sta_ap_ids] = self.readSample(line)
-                    if len(sta_ap_ids) > 0:
-                        line += ", " + sta_ap_ids
-                    if is_stop:
-                        self.threadExit=True
+                if not line:
+                    time.sleep(1)
+                    continue
+                [param_t1, is_start, is_stop, is_map_update, sta_ap_ids] = self.readSample(line)
+                if len(sta_ap_ids) > 0:
+                    line += ", " + sta_ap_ids
+                if is_stop:
+                    logger.info("Read stop flag, stopping")
+                    self.threadExit=True
 
-                    if param_t1 == -1:
-                        time.sleep(0.1)
-                    elif param_t1 == 0.000:
-                        logger.debug("readSampleThread() --> param_t1=0.000, updating self.start_time")
-                        self.start_time = time.time()
-                    else:
-                        if update_start_time:
-                            logger.debug("updating start_time")
-                            self.start_time = time.time() - float(param_t1)
-                            update_start_time = False
-                        self.runTime = round(time.time() - self.start_time, 3)
-                        delta_t = self.fileTime - self.runTime
-                        if delta_t > 0.1:
-                            #if delta_t > 5:
-                            logger.debug("readSampleThread() --> sleeping for {:.3f} seconds".format(delta_t))
-                            time.sleep(delta_t)
-                        elif (delta_t < -3) and (not is_map_update):
-                            logger.debug("readSampleThread() --> (delta_t < -3) "
-                                       "and (not is_map_update) -> update_widgets = False")
-                            update_widgets = False
-                        self.restartRuntime = False
-                        self.timeUpdateSig.sig.emit(param_t1)
-                        if update_widgets and not self.wait_for_mark:
-                            if "BML_EVENT" in line:
-                                self.log_widget.readSampleAndUpdateLogger(line, param_t1, is_start, is_stop)
-                            else:
-                                if self.isMap:
-                                    self.cm_widget.readSample(line, param_t1, is_start, is_stop)
-                                if self.isGraphs:
-                                    self.wa_widget.readSampleAndUpdateGraphs(line, param_t1, is_start, is_stop)
+                if param_t1 == -1:
+                    time.sleep(0.1)
+                elif param_t1 == 0.000:
+                    logger.debug("readSampleThread() --> param_t1=0.000, updating self.start_time")
+                    self.start_time = time.time()
+                else:
+                    if update_start_time:
+                        logger.debug("updating start_time")
+                        self.start_time = time.time() - float(param_t1)
+                        update_start_time = False
+                    self.runTime = round(time.time() - self.start_time, 3)
+                    delta_t = self.fileTime - self.runTime
+                    if delta_t > 0.1:
+                        #if delta_t > 5:
+                        logger.debug("readSampleThread() --> sleeping for {:.3f} seconds".format(delta_t))
+                        time.sleep(delta_t)
+                    elif (delta_t < -3) and (not is_map_update):
+                        logger.debug("readSampleThread() --> (delta_t < -3) "
+                                   "and (not is_map_update) -> update_widgets = False")
+                        update_widgets = False
+                    self.restartRuntime = False
+                    self.timeUpdateSig.sig.emit(param_t1)
+                    if update_widgets and not self.wait_for_mark:
+                        if "BML_EVENT" in line:
+                            self.log_widget.readSampleAndUpdateLogger(line, param_t1, is_start, is_stop)
+                        else:
+                            if self.isMap:
+                                logger.debug("self.isMap, calling readSample")
+                                self.cm_widget.readSample(line, param_t1, is_start, is_stop)
+                            if self.isGraphs:
+                                self.wa_widget.readSampleAndUpdateGraphs(line, param_t1, is_start, is_stop)
 
     def createAnalyzerWidget(self, widget_index=0):
         self.wa_widget_mod = __import__("beerocks_analyzer_widget")
