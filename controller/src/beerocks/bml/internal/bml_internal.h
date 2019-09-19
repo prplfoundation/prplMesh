@@ -145,7 +145,8 @@ public:
 
     // set global/slave restricted channel
     int set_restricted_channels(const uint8_t *restricted_channels, const std::string mac,
-                                uint is_global, uint8_t size);
+                                uint8_t is_global, uint8_t size);
+
     // get global/slave restricted channel
     int get_restricted_channels(uint8_t *restricted_channels, const std::string mac,
                                 uint8_t is_global);
