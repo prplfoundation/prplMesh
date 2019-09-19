@@ -89,7 +89,13 @@ static std::string parse_bss_info(const std::string &bss_info_str,
                                   db::bss_info_conf_t &bss_info_conf, std::string &err_string)
 {
     auto confs = string_utils::str_split(bss_info_str, ' ');
-    if (confs.size() != 8) {
+
+    /*
+    The Control API specification defines 8 parameters except for the case of 
+    clearing the BSS info stored for a specific operating class, define only
+    two parameters: ALID and operating class.
+    */
+    if ((confs.size() != 8) && (confs.size() != 2)) {
         err_string = "missing configuration";
         return std::string();
     }
@@ -114,6 +120,10 @@ static std::string parse_bss_info(const std::string &bss_info_str,
     } else {
         err_string = "invalid operating class " + operating_class_str;
         return std::string();
+    }
+
+    if (confs.size() == 2) {
+        return al_mac;
     }
 
     // SSID
