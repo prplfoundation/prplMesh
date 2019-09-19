@@ -17,6 +17,8 @@ elseif(TARGET_PLATFORM STREQUAL "rdkb")
     set(CMAKE_SKIP_RPATH TRUE)
 elseif (TARGET_PLATFORM STREQUAL "linux")
     set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
+elseif (TARGET_PLATFORM STREQUAL "turris-omnia")
+    set(BEEROCKS_TMP_PATH "/tmp/beerocks")
 endif()
 
 list (FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
@@ -30,9 +32,6 @@ option (BUILD_PATENTS "build with patents enabled" ON)
 if (BUILD_PATENTS)
     add_definitions(-DBEEROCKS_PATENTS)
 endif()
-
-# Default Compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pthread -std=c++11 -Wno-unused-parameter -Wno-missing-field-initializers -Wno-address-of-packed-member -fpermissive")
 
 option(STANDALONE "Standalone build" OFF)
 
@@ -63,16 +62,21 @@ message(STATUS "CMAKE_PREFIX_PATH - ${CMAKE_PREFIX_PATH}")
 message(STATUS "CMAKE_MULTIAP_OUTPUT_DIRECTORY - ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}")
 
 # Add "strip" flags
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
-endif()
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS} -std=c++11")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -Wl,-S -fPIE -fPIC")
+
+# Default Compiler flags
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pthread -Wno-comment -Wno-unused-parameter -Wno-missing-field-initializers -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS} -std=c++11 -fpermissive")
+
+# Compiler specific flags
 if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-address-of-packed-member")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector-strong")
 else()
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector")
 endif()
+
+# Release flags
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -Wl,-S -fPIE")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}")
 
 # Linker Options
@@ -93,6 +97,9 @@ add_definitions(-DBEEROCKS_REVISION="${${PROJECT}_REVISION}")
 if(TARGET_PLATFORM STREQUAL "linux")
 add_definitions(-DBEEROCKS_BIN_PATH="${CMAKE_INSTALL_PREFIX}/bin/")
 add_definitions(-DBEEROCKS_CONF_PATH="${CMAKE_INSTALL_PREFIX}/config/")
+elseif(TARGET_PLATFORM STREQUAL "turris-omnia")
+add_definitions(-DBEEROCKS_BIN_PATH="/opt/beerocks/bin/")
+add_definitions(-DBEEROCKS_CONF_PATH="/opt/beerocks/config/")
 else()
 add_definitions(-DBEEROCKS_BIN_PATH="/opt/beerocks/")
 add_definitions(-DBEEROCKS_CONF_PATH="/opt/beerocks/")

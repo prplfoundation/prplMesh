@@ -54,14 +54,14 @@ static void set_cursor(int n, int m)
     std::cout << "\033[" << n << ";" << m << "H";
 }
 
-static void sigterm_handler()
+static void sigterm_handler(int signum)
 {
     fclose(stdin);
     g_running = false;
 }
 
 // Invoked when sigint is invoked
-static void sigint_handler()
+static void sigint_handler(int signum)
 {
     if (g_loop_cmd_exec) {
         g_loop_cmd_exec = false;
@@ -78,13 +78,13 @@ static void sigint_handler()
 static void init_signals()
 {
     struct sigaction sigterm_action;
-    sigterm_action.sa_handler = (__sighandler_t)sigterm_handler;
+    sigterm_action.sa_handler = sigterm_handler;
     sigemptyset(&sigterm_action.sa_mask);
     sigterm_action.sa_flags = 0;
     sigaction(SIGTERM, &sigterm_action, NULL);
 
     struct sigaction sigint_action;
-    sigint_action.sa_handler = (__sighandler_t)sigint_handler;
+    sigint_action.sa_handler = sigint_handler;
     sigemptyset(&sigint_action.sa_mask);
     sigint_action.sa_flags = 0;
     sigaction(SIGINT, &sigint_action, NULL);
@@ -114,7 +114,7 @@ static void *xmalloc(int alloc_size)
     void *m = malloc(alloc_size);
     if (m == nullptr) {
         LOG(FATAL) << "Error: Out of memory. Exiting";
-        sigterm_handler();
+        sigterm_handler(0);
         return nullptr;
     }
     return m;
@@ -126,7 +126,7 @@ static char *dupstr(const std::string &s)
     char *r    = (char *)xmalloc(r_len);
     if (r == nullptr) {
         LOG(FATAL) << "Error: Out of memory. Exiting";
-        sigterm_handler();
+        sigterm_handler(0);
         return nullptr;
     }
     beerocks::string_utils::copy_string(r, s.c_str(), r_len);
