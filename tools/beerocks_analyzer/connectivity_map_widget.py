@@ -551,8 +551,8 @@ class ConnectivityMapWidget(QWidget):
     def mac_plus_one(self, mac):
         mac_int = int(mac.replace(':', ''), 16)
         mac_p1_int = mac_int+1
-        mac_p1 = str('%012x'%mac_p1_int) #convert to string
-        mac_p1 =':'.join(s.encode('hex') for s in mac_p1.decode('hex')) #add ':' between every 2 chars
+        mac_p1 = '{:012x}'.format(mac_p1_int) # convert to str
+        mac_p1 = ':'.join(mac_p1[i:i + 2] for i in range(0, len(mac_p1), 2))  # add ':' between every 2 chars
         return mac_p1
 
     def onresize(self, event):
