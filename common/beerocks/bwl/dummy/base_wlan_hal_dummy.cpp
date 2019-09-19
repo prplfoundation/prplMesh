@@ -117,7 +117,29 @@ bool base_wlan_hal_dummy::refresh_vap_info(int vap_id) { return true; }
 
 bool base_wlan_hal_dummy::refresh_vaps_info(int id) { return true; }
 
-bool base_wlan_hal_dummy::process_ext_events() { return true; }
+/**
+ * @brief process simulated events
+ *        events are expected to be simulated by writing the event
+ *        string to the event pipe (/tmp/$BEEROCKS_TMP_PATH/bwl-event-wlanX).
+ *        For example, simulating client connected event:
+ *        echo "STA_CONNECTED,11:22:33:44:55:66" > /tmp/$BEEROCKS_TMP_PATH/bwl-event-wlanX
+ *
+ * @return true on success
+ * @return false on failure
+ */
+bool base_wlan_hal_dummy::process_ext_events()
+{
+    if (m_fd_ext_events <= 0)
+        return true;
+
+    char buf[1024];
+    size_t len = read(m_fd_ext_events, buf, sizeof(buf));
+
+    LOG(DEBUG) << "Received event, len: " << len << ", data: " << std::string(buf, len);
+
+    // TODO Handle event
+    return true;
+}
 
 std::string base_wlan_hal_dummy::get_radio_mac()
 {

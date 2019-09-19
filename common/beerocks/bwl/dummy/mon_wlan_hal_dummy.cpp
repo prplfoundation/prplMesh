@@ -48,6 +48,12 @@ mon_wlan_hal_dummy::mon_wlan_hal_dummy(std::string iface_name, hal_event_cb_t ca
     : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, false, callback),
       base_wlan_hal_dummy(bwl::HALType::Monitor, iface_name, false, callback, BUFFER_SIZE)
 {
+    std::string event_file = std::string(BEEROCKS_TMP_PATH) + "/bwl-event-mon-" + get_iface_name();
+    mkfifo(event_file.c_str(), 0666);
+    m_fd_ext_events = open(event_file.c_str(), O_RDWR); // Open in read write so it won't block
+    if (m_fd_ext_events < 0) {
+        LOG(FATAL) << "Failed creating m_fd_ext_events: " << strerror(errno);
+    }
 }
 
 mon_wlan_hal_dummy::~mon_wlan_hal_dummy() {}
