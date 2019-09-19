@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 set(PROJECT_NAME bpl)
 project(${PROJECT_NAME})
 
-message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} ${BWL_TYPE} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
+message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
@@ -61,14 +61,23 @@ elseif (TARGET_PLATFORM STREQUAL "linux")
     add_definitions(-DPLATFORM_DB_PATH="${PLATFORM_DB_PATH}/prplmesh_platform_db")
     add_definitions(-DPLATFORM_DB_PATH_TEMP="${PLATFORM_DB_PATH_TEMP}/prplmesh_platform_db")
     install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
+
+elseif (TARGET_PLATFORM STREQUAL "turris-omnia")
+
+    file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
+
+    set(PLATFORM_DB_PATH "/opt/beerocks/share")
+    set(PLATFORM_DB_PATH_TEMP "/tmp/beerocks")
+    add_definitions(-DPLATFORM_DB_PATH="${PLATFORM_DB_PATH}/prplmesh_platform_db")
+    add_definitions(-DPLATFORM_DB_PATH_TEMP="${PLATFORM_DB_PATH_TEMP}/prplmesh_platform_db")
+    install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
+
 else()
 
     message(WARNING "${BoldWhite}Skipping ${BoldGreen}${PROJECT_NAME}${BoldWhite} build for unsupported platform...${ColourReset}")
     return()
 
 endif()
-
-message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 # Build the library
 add_library(${PROJECT_NAME} SHARED ${bpl_common_sources} ${bpl_platform_sources})
