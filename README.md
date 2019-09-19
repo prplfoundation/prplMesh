@@ -60,6 +60,20 @@ cd <path/to/prplmesh_root>/build/install/scripts
 sudo ./prplmesh_utils.sh start
 ```
 
+## Debugging Instructions
+
+To debug prplMesh controller, agent or cli it is needed to install 'Native Debug'
+extension for Visual Studio Code. Also prplMesh solution should be compiled with
+`CMAKE_BUILD_TYPE=Debug` flag.
+Debug instruction: 
+1. Start prplMesh solution(read Running Instructions)
+2. To remote debug it is needed to start gdbserver
+```bash
+gdbserver :9999 --attach <pid of controller/agent/cli>
+```
+2. Go to debug tab in the VSCode and choose one the option from the dropdown list.
+3. Add breakpoint and click start debugging.
+
 ### Log files locations
 
 - framework `/tmp/$USER/mapf`
