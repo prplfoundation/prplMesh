@@ -14,7 +14,6 @@
 #include <beerocks/bcl/son/son_wireless_utils.h>
 
 #include <easylogging++.h>
-#include <sys/eventfd.h>
 
 #define UNHANDLED_EVENTS_LOGS 20
 
@@ -82,10 +81,7 @@ base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, std::string iface_name, b
         });
     }
 
-    // Set up dummy external events fd
-    if ((m_fd_ext_events = eventfd(0, EFD_SEMAPHORE)) < 0) {
-        LOG(FATAL) << "Failed creating eventfd: " << strerror(errno);
-    }
+    m_fd_ext_events = 0;
 
     // Initialize the FSM
     fsm_setup();
