@@ -1,3 +1,14 @@
+# Default shell commands
+set(PS_CMD "ps -aux")
+set(AWK_CMD "awk '{print $2}'")
+
+# Platform specific overrides
+if (TARGET_PLATFORM STREQUAL "turris-omnia")
+    set(PS_CMD "ps")
+    set(AWK_CMD "awk '{print $1}'")
+endif()
+
+# Configure the prplMesh helper script
 configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/prplmesh_utils.sh.in"
         "${CMAKE_CURRENT_BINARY_DIR}/prplmesh_utils.sh"
