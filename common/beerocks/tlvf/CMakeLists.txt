@@ -3,7 +3,13 @@ cmake_minimum_required (VERSION 2.8.12)
 set(PROJECT_NAME btlvf)
 project(${PROJECT_NAME})
 
-find_package(PythonInterp REQUIRED)
+# TODO: FIXME: For some reason CMake detects only the Python from the cross-toolchain
+if (TARGET_PLATFORM STREQUAL "turris-omnia")
+    set(PYTHON_EXECUTABLE "/usr/bin/python")
+else()
+    find_package(PythonInterp REQUIRED)
+endif()
+
 find_program(PythonTlvf NAMES tlvf.py)
 
 if (NOT PythonTlvf)

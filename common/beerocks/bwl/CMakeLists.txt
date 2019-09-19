@@ -12,10 +12,13 @@ file(GLOB_RECURSE bwl_common_sources ${MODULE_PATH}/common/*.c*)
 # Support more permissive c++ language
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
+# Default BWL Type
+set(BWL_TYPE "DUMMY")
+
 # UGW
 if (TARGET_PLATFORM STREQUAL "ugw")
 
-    set(BWL_TYPE_DEFAULT "DWPAL")
+    set(BWL_TYPE "DWPAL")
     # Extra libraries
     list(APPEND BWL_LIBS rt fapiwlancommon dl helper ugwhelper blobmsg_json)
     # UGW platform libraries
@@ -24,23 +27,21 @@ if (TARGET_PLATFORM STREQUAL "ugw")
     link_directories(${PLATFORM_STAGING_DIR}/opt/lantiq/lib)
     # hostap dir
     set(HOSTAPD_DIR "${PLATFORM_BUILD_DIR}/iwlwav-hostap-2.6")
+    
 # RDKB
 elseif(TARGET_PLATFORM STREQUAL "rdkb")
 
-    set(BWL_TYPE_DEFAULT "DWPAL")
+    set(BWL_TYPE "DWPAL")
     # Extra libraries
     list(APPEND BWL_LIBS rt dl)
     # Extre directories
     include_directories(${PLATFORM_INCLUDE_DIR}/wav-dpal)
 
-# Linux
-elseif(TARGET_PLATFORM STREQUAL "linux")
-    set(BWL_TYPE_DEFAULT "DUMMY")
 endif()
 
-set(BWL_TYPE ${BWL_TYPE_DEFAULT} CACHE STRING "Which BWL backend to use")
+set(BWL_TYPE ${BWL_TYPE} CACHE STRING "Which BWL backend to use")
 
-message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} ${BWL_TYPE} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
+message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} (${BoldBlue}${BWL_TYPE}${BoldWhite}) for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 ##########################################################################
 ##########################################################################
