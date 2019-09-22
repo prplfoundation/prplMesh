@@ -80,6 +80,10 @@ public:
     void class_swap(){};
     static size_t get_initial_size() { return 0; };
 
+    bool add_tlv_value_hex_string(const std::string &value, uint16_t &length);
+    bool add_tlv_value_decimal_string(const std::string &value, uint16_t &length);
+    bool add_tlv_value_binary_string(const std::string &value, uint16_t &length);
+    bool add_tlv_value_mac(const std::string &value, uint16_t &length);
     bool add_tlvs_from_list(std::list<wfa_ca::tlv_hex_t> &tlv_hex_list, std::string &err_string);
 };
 
