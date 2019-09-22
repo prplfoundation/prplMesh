@@ -13,5 +13,5 @@ tlvApMetricQuery:
     _type: uint8_t
     _length_var: True
   bssid_list:
-    _type: sAddress
+    _type: sMacAddr
     _length: [ bssid_list_length ]
