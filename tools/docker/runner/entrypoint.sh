@@ -13,6 +13,7 @@ run() {
 
 bridge_ip="$1"; shift
 base_mac="$1"; shift
+gateway_ip="$1"; shift
 
 run ip link add          br-lan   address "${base_mac}:00:00" type bridge
 run ip link add          wlan0    address "${base_mac}:00:10" type dummy
@@ -28,6 +29,7 @@ run ip link set      dev wlan0    up
 run ip link set      dev wlan2    up
 run ip address add   dev br-lan "$bridge_ip"
 run ip link set      dev br-lan   up
+run ip route add "$gateway_ip" dev br-lan
 
 cd ${INSTALL_DIR}
 exec /bin/bash "$@"

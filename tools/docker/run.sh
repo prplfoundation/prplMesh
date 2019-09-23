@@ -36,9 +36,12 @@ iprand(){
     echo "$ip_rand"
 }
 
+gateway_ip() {
+    echo $(docker network inspect "$1" | jq -r '.[0].IPAM.Config'[0].Gateway)
+}
+
 generate_container_random_ip() {
-    gateway_ip=$(docker network inspect $1 | jq -r '.[0].IPAM.Config'[0].Gateway)
-    echo $(iprand ${gateway_ip})
+    echo $(iprand $(gateway_ip "$1"))
 }
 
 main() {
@@ -115,7 +118,7 @@ main() {
         fi
     fi
     
-    run docker container run ${DOCKEROPTS} prplmesh-runner$TAG $IPADDR "$BASE_MAC" "$@"
+    run docker container run ${DOCKEROPTS} prplmesh-runner$TAG $IPADDR "$BASE_MAC" "$(gateway_ip $NETWORK)" "$@"
 }
 
 VERBOSE=false
