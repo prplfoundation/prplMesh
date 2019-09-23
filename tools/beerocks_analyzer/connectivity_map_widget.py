@@ -510,7 +510,7 @@ class ConnectivityMapWidget(QWidget):
 
         #add new node and edge to parent node (if parent node exist)
         if (parent_node.mac != '') or (n.type == 'GW'):
-            self.graph.add_node(n, Position=(n.x, n.y))
+            self.graph.add_node(n)
         if parent_node.mac != '':
             self.graph.add_edge(parent_node, n)
             #set left/right radio attributes - for nodes positioning
@@ -527,7 +527,7 @@ class ConnectivityMapWidget(QWidget):
         if (n.type == 'GW') or (n.type == 'IRE'):
             eth_mac = self.mac_plus_one(n.mac)
             eth_node = self.node('ETH', eth_mac, n.mac)
-            self.graph.add_node(eth_node, Position=(eth_node.x, eth_node.y))
+            self.graph.add_node(eth_node)
             self.graph.add_edge(n, eth_node)
 
         self.sendSig()
