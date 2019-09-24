@@ -13,6 +13,7 @@
 
 #include <beerocks/bcl/network/network_utils.h>
 #include <easylogging++.h>
+#include <tlvf/wfa_map/tlvSteeringRequest.h>
 
 using namespace beerocks;
 using namespace net;
@@ -174,42 +175,51 @@ void client_steering_task::steer_sta()
                          &client_disallow_event);
     }
 
-    // Send disconnect (802.11v)
-    auto bss_steer_request =
-        message_com::create_vs_message<beerocks_message::cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST>(
-            cmdu_tx, id);
-
-    if (bss_steer_request == nullptr) {
-        LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_BSS_STEER_REQUEST message!";
+    // Send STEERING request
+    if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CLIENT_STEERING_REQUEST_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type CLIENT_STEERING_REQUEST_MESSAGE, has failed";
         return;
     }
-    bss_steer_request->params().mac            = network_utils::mac_from_string(sta_mac);
-    bss_steer_request->params().disassoc_timer = disassoc_timer;
-    bss_steer_request->params().bssid.mac      = network_utils::mac_from_string(hostap_mac);
-    bss_steer_request->params().bssid.channel  = database.get_node_channel(hostap_mac);
 
-    if (disassoc_imminent) {
-        TASK_LOG(DEBUG) << "diassoc_imminent enabled";
-        bss_steer_request->params().disassoc_imminent = 1;
-    } else {
-        TASK_LOG(DEBUG) << "diassoc_imminent disabled";
-        bss_steer_request->params().disassoc_imminent = 0;
+    auto steering_request_tlv = cmdu_tx.addClass<wfa_map::tlvSteeringRequest>();
+
+    if (!steering_request_tlv) {
+        LOG(ERROR) << "addClass wfa_map::tlvSteeringRequest failed";
+        return;
     }
 
     auto current_ap_mac = database.get_node_parent(sta_mac);
 
+    steering_request_tlv->request_flags().request_mode =
+        wfa_map::tlvSteeringRequest::REQUEST_IS_A_STEERING_MANDATE_TO_TRIGGER_STEERING;
+    steering_request_tlv->request_flags().btm_disassociation_imminent_bit = disassoc_imminent;
+
+    steering_request_tlv->btm_disassociation_timer() = disassoc_timer;
+    steering_request_tlv->bssid() = network_utils::mac_from_string(current_ap_mac);
+
+    steering_request_tlv->alloc_sta_list();
+    auto sta_list         = steering_request_tlv->sta_list(0);
+    std::get<1>(sta_list) = network_utils::mac_from_string(sta_mac);
+
+    steering_request_tlv->alloc_target_bssid_list();
+    auto bssid_list                      = steering_request_tlv->target_bssid_list(0);
+    std::get<1>(bssid_list).target_bssid = network_utils::mac_from_string(hostap_mac);
+    //TODO get real operating class
+    std::get<1>(bssid_list).target_bss_operating_class = 124;
+    std::get<1>(bssid_list).target_bss_channel_number  = database.get_node_channel(hostap_mac);
+
     sd = database.get_node_socket(current_ap_mac);
     son_actions::send_cmdu_to_agent(sd, cmdu_tx, original_radio_mac);
-    TASK_LOG(DEBUG) << "sending 11v bss steer request, sta " << sta_mac << " steer from AP "
+    TASK_LOG(DEBUG) << "sending steering request, sta " << sta_mac << " steer from AP "
                     << current_ap_mac << " to AP " << hostap_mac << " channel "
-                    << std::to_string(bss_steer_request->params().bssid.channel)
-                    << " id=" << int(id)
-                    << " disassoc_imminent=" << int(bss_steer_request->params().disassoc_imminent);
+                    << std::to_string(std::get<1>(bssid_list).target_bss_channel_number)
+                    << " disassoc_timer=" << disassoc_timer
+                    << " disassoc_imminent=" << disassoc_imminent << " id=" << int(id);
 
     // update bml listeners
     bml_task::bss_tm_req_available_event bss_tm_event;
     bss_tm_event.target_bssid      = hostap_mac;
-    bss_tm_event.disassoc_imminent = bss_steer_request->params().disassoc_imminent;
+    bss_tm_event.disassoc_imminent = disassoc_imminent;
     tasks.push_event(database.get_bml_task_id(), bml_task::BSS_TM_REQ_EVENT_AVAILABLE,
                      &bss_tm_event);
 }
