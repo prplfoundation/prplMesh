@@ -186,7 +186,7 @@ class ConnectivityMapWidget(QWidget):
 
     def add_delta_x_from_node(self, n, delta):
         n.x += delta
-        if n.x > self.last_x_in_hierarchy[n.hierarchy]:
+        if not self.last_x_in_hierarchy[n.hierarchy] or n.x > self.last_x_in_hierarchy[n.hierarchy]:
             self.last_x_in_hierarchy[n.hierarchy] = n.x
         for child in self.graph.successors(n):
             self.add_delta_x_from_node(child,delta)
