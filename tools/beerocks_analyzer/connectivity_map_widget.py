@@ -353,7 +353,7 @@ class ConnectivityMapWidget(QWidget):
 
         #update nodes "pos" attribute
         for n in self.graph:
-            self.graph.node[n]['pos']=[n.x,n.y]
+            self.graph.nodes[n]['pos']=[n.x,n.y]
         #draw new graph
         pos=nx.get_node_attributes(self.graph,'pos')
         #draw nodes
