@@ -11,7 +11,7 @@ set(CMAKE_CROSS_COMPILING ON)
 
 # Platform specific
 set(TARGET_PLATFORM             "turris-omnia" CACHE STRING "Target Platform")
-set(PLATFORM_BASE_DIR           /local/vitaly/turris/openwrt CACHE STRING "Platform Base Directory")
+set(PLATFORM_BASE_DIR           /local/vitaly/turris/openwrt-turris-omnia-v3_11_7 CACHE STRING "Platform Base Directory")
 set(PLATFORM_BUILD_NAME         target-arm_cortex-a9+vfpv3_musl-1.1.15_eabi CACHE STRING "Platform Build Name")
 set(PLATFORM_TOOLCHAIN          toolchain-arm_cortex-a9+vfpv3_gcc-4.8-linaro_musl-1.1.15_eabi CACHE STRING "Platform Toolchain")
 set(PLATFORM_TOOLCHAIN_PREFIX   arm-openwrt-linux-muslgnueabi- CACHE STRING "Platform Toolchain Prefix")
@@ -48,5 +48,5 @@ set(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES ${PLATFORM_TOOLCHAIN_DIR} CACHE STRING 
 set(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES ${PLATFORM_TOOLCHAIN_DIR} CACHE STRING "")
 
 ## Toolchain Programs
-set(CMAKE_C_COMPILER ${PLATFORM_TOOLCHAIN_DIR}/bin/${PLATFORM_TOOLCHAIN_PREFIX}-gcc CACHE STRING "C Compiler")
-set(CMAKE_CXX_COMPILER ${PLATFORM_TOOLCHAIN_DIR}/bin/${PLATFORM_TOOLCHAIN_PREFIX}-g++ CACHE STRING "C++ Compiler")
+set(CMAKE_C_COMPILER ${PLATFORM_TOOLCHAIN_DIR}/bin/${PLATFORM_TOOLCHAIN_PREFIX}gcc CACHE STRING "C Compiler")
+set(CMAKE_CXX_COMPILER ${PLATFORM_TOOLCHAIN_DIR}/bin/${PLATFORM_TOOLCHAIN_PREFIX}g++ CACHE STRING "C++ Compiler")
