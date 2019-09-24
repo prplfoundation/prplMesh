@@ -230,8 +230,9 @@ class BeeRocksAnalyzer(QMainWindow):
         if i2 == -1: # START or STOP or error
             try:
                 param_m = (str(line[i1+1:])).strip()
-                if param_m=="MARK" and self.wait_for_mark:
+                if param_m=="MARK":
                     self.wait_for_mark=False
+                    self.cm_widget.graph.clear()
                 if param_m=="START" or  param_m=="MARK":
                     is_start=True
                 elif param_m=="STOP":
