@@ -399,7 +399,7 @@ class ConnectivityMapWidget(QWidget):
                 ap_edges.append(edge)
             else:
                 non_ap_edges.append(edge)
-        nx.draw_networkx_edges(self.graph, pos, edgelist=ap_edges,edge_color='w',arrows=False, width=1.6)
+        nx.draw_networkx_edges(self.graph, pos, edgelist=ap_edges,edge_color='gray',arrows=False, width=1.6)
         nx.draw_networkx_edges(self.graph, pos, edgelist=non_ap_edges,arrows=False, width=1.6)
         #draw labels
         non_radio_font_size = 10
