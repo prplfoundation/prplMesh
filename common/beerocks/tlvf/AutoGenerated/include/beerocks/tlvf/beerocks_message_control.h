@@ -308,26 +308,6 @@ class cACTION_CONTROL_ARP_QUERY_RESPONSE : public BaseClass
         sArpMonitorData* m_params = nullptr;
 };
 
-class cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION : public BaseClass
-{
-    public:
-        cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION);
-        }
-        sVersions& versions();
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-        sVersions* m_versions = nullptr;
-};
-
 class cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION : public BaseClass
 {
     public:
