@@ -11,11 +11,6 @@ tlvClientAssociationEvent:
   length: uint16_t
   client_mac: sMacAddr
   bssid: sMacAddr
-  falgs: sFalgs
-
-sFalgs:
-  _type: struct
-  _bit_field: uint8_t
   association_event: eAssociationEvent
 
 eAssociationEvent:
