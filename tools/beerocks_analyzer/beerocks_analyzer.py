@@ -302,13 +302,13 @@ class BeeRocksAnalyzer(QMainWindow):
                         return [param_t, is_start, is_stop, is_map_update, res]
                 if ("2" in line_type) or ("3" in line_type): #IRE or client
                     if state == "Connected":
-                        if not(self.sta_mac2num.has_key(mac)): # new sta mac addr
+                        if mac not in self.sta_mac2num: # new sta mac addr
                             self.sta_mac2num[mac] = len(self.sta_mac2num)
-                        res += "sta_id: %d,"%self.sta_mac2num[mac]
+                        res += "sta_id: {:d},".format(self.sta_mac2num[mac])
                         
-                        if not(self.ap_mac2num.has_key(ap_mac)): # new ap mac addr
+                        if ap_mac not in self.ap_mac2num: # new ap mac addr
                             self.ap_mac2num[ap_mac] = len(self.ap_mac2num)
-                        res += "ap_id: %d,"%self.ap_mac2num[ap_mac]
+                        res += "ap_id: {:d},".format(self.ap_mac2num[ap_mac])
                         if res.endswith(','):
                             res = res[:-1]
 
@@ -328,7 +328,7 @@ class BeeRocksAnalyzer(QMainWindow):
                     res += "ap_id: %d"%self.ap_mac2num[mac]
 
                 elif param_m_v == 3: #Client stats update
-                    if not(self.sta_mac2num.has_key(mac)): # new sta mac addr
+                    if mac not in self.sta_mac2num: # new sta mac addr
                         self.sta_mac2num[mac] = len(self.sta_mac2num)
                     res += "sta_id: %d"%self.sta_mac2num[mac]
 
