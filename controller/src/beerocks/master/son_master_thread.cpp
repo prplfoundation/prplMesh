@@ -1291,7 +1291,6 @@ bool master_thread::handle_intel_slave_join(
                 return false;
             }
             response->err_code() = beerocks::JOIN_RESP_REJECT;
-            tlv_vs->length() += response->getLen();
             return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
         }
 
@@ -1461,7 +1460,6 @@ bool master_thread::handle_intel_slave_join(
                                   message::VERSION_LENGTH);
         string_utils::copy_string(response->versions().slave_version, slave_version.c_str(),
                                   message::VERSION_LENGTH);
-        tlv_vs->length() += response->getLen();
         return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
     }
 
@@ -1483,7 +1481,6 @@ bool master_thread::handle_intel_slave_join(
         response->err_code() = beerocks::JOIN_RESP_VERSION_MISMATCH;
         string_utils::copy_string(response->master_version(message::VERSION_LENGTH),
                                   BEEROCKS_VERSION, message::VERSION_LENGTH);
-        tlv_vs->length() += response->getLen();
         return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
     }
 
@@ -1656,7 +1653,6 @@ bool master_thread::handle_intel_slave_join(
             database.config.ire_rssi_report_rate_sec;
 
         LOG(DEBUG) << "send SLAVE_JOINED_RESPONSE";
-        tlv_vs->length() += joined_response->getLen();
         son_actions::send_cmdu_to_agent(sd, cmdu_tx);
     }
 
