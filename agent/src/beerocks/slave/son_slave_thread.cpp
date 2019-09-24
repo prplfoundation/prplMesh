@@ -3813,7 +3813,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         // Channel Selection Params
         notification->cs_params() = hostap_cs_params;
 
-        vs->length() += notification->getLen();
         send_cmdu_to_controller(cmdu_tx);
         LOG(DEBUG) << "send SLAVE_JOINED_NOTIFICATION Size=" << int(cmdu_tx.getMessageLength());
 
