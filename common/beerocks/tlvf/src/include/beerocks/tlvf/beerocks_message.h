@@ -125,6 +125,12 @@ public:
             return nullptr;
         }
 
+        return add_vs_tlv<T>(cmdu_tx, id);
+    }
+
+    template <class T>
+    static std::shared_ptr<T> add_vs_tlv(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
+    {
         auto tlvhdr = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
         if (!tlvhdr) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
