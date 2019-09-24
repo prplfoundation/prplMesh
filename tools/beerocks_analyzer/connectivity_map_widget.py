@@ -66,6 +66,7 @@ class ConnectivityMapWidget(QWidget):
         self.last_radio_active = False
         self.last_radio_cac_completed = False
         self.last_ap_mac = ""
+        self.gw_eth_mac = None
 
         self.sc = plt.scatter([],[],c='r', s=1000,alpha=0)
         self.annot = self.ax.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points", fontsize=13,
@@ -523,6 +524,8 @@ class ConnectivityMapWidget(QWidget):
                     if m.mac == n.mac:
                         m.is_left_radio = True
                         break
+        if n.type == 'GW': # keep the GW mac to use as parent mac
+            self.gw_eth_mac = self.mac_plus_one(n.mac)
         #add ETH node with mac = ire_mac/gw_mac+1
         if (n.type == 'GW') or (n.type == 'IRE'):
             eth_mac = self.mac_plus_one(n.mac)
@@ -749,22 +752,21 @@ class ConnectivityMapWidget(QWidget):
                         ap_id = int(param_v[i_ap_id])
                     except: pass
                     try:
-                        i_ap_mac=param_n.index('parent bssid')
-                    except Exception as e: # TODO: too broad exception
-                        self.logger.error("readSample()  --> {}, nw_map_update"
-                                          " line does not contain parent bssid".format(line))
-                        return
-                    ap_mac = param_v[i_ap_mac]
+                        i_parent_mac=param_n.index('parent bssid')
+                        parent_mac = param_v[i_parent_mac]
+                    except ValueError:
+                        # if it has no parent bssid, it should be connected to the gateway
+                        parent_mac = self.gw_eth_mac
                     if ap_id != -1:
                         for n in self.graph:
-                            if n.mac == ap_mac:
+                            if n.mac == parent_mac:
                                 n.analyzer_id = ap_id
                     if "2" in line_type:#IRE
-                        cm = ConnectivityMapWidget.node('IRE', mac, ap_mac, backhaul_mac, channel, bandwidth, cac_completed, False, name, ip, sta_id)
+                        cm = ConnectivityMapWidget.node('IRE', mac, parent_mac, backhaul_mac, channel, bandwidth, cac_completed, False, name, ip, sta_id)
                         self.add_node_to_graph(cm)
                         self.last_ap_mac = mac
                     if "3" in line_type:#client
-                        cm = ConnectivityMapWidget.node('Client', mac, ap_mac, backhaul_mac, channel, bandwidth, cac_completed, False, name, ip,sta_id)
+                        cm = ConnectivityMapWidget.node('Client', mac, parent_mac, backhaul_mac, channel, bandwidth, cac_completed, False, name, ip,sta_id)
                         self.add_node_to_graph(cm)
             elif state == "Disconnected":
                 self.remove_node_by_mac(mac)
