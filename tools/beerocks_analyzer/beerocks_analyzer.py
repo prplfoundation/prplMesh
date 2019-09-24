@@ -676,7 +676,7 @@ def socket_server(log_file):
                 logger.debug("Trying to get data from the socket")
             except socket.timeout:
                 logger.debug("Socket timed out")
-                pass
+                continue
             except KeyboardInterrupt:
                 logger.info("Keyboard interrupt, stopping")
                 run_local=False
