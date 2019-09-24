@@ -809,45 +809,6 @@ bool cACTION_CONTROL_ARP_QUERY_RESPONSE::init()
     return true;
 }
 
-cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION::cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
-    m_init_succeeded = init();
-}
-cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION::cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
-    m_init_succeeded = init();
-}
-cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION::~cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION() {
-}
-sVersions& cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION::versions() {
-    return (sVersions&)(*m_versions);
-}
-
-void cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION::class_swap()
-{
-    m_versions->struct_swap();
-}
-
-size_t cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION::get_initial_size()
-{
-    size_t class_size = 0;
-    class_size += sizeof(sVersions); // versions
-    return class_size;
-}
-
-bool cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION::init()
-{
-    if (getBuffRemainingBytes() < kMinimumLength) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
-    m_versions = (sVersions*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sVersions))) { return false; }
-    if (!m_parse__) { m_versions->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
-    return true;
-}
-
 cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
     BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();

@@ -1191,12 +1191,15 @@ bool master_thread::handle_intel_slave_join(
     Socket *sd, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
     ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx)
 {
-    auto tlv_vs = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
-    if (!tlv_vs) {
+    // Prepare outcoming response vs tlv
+    auto join_response =
+        message_com::add_vs_tlv<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>(cmdu_tx);
+    if (!join_response) {
         LOG(ERROR) << "Failed adding intel vendor specific TLV";
         return false;
     }
 
+    // Parse incomeing vs_tlv
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
     if (!beerocks_header) {
         LOG(ERROR) << "Failed to parse intel vs message (not Intel?)";
@@ -1211,7 +1214,7 @@ bool master_thread::handle_intel_slave_join(
 
     auto notification =
         cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>();
-    if (notification == nullptr) {
+    if (!notification) {
         LOG(ERROR) << "addClass cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION failed";
         return false;
     }
@@ -1283,14 +1286,8 @@ bool master_thread::handle_intel_slave_join(
             LOG(DEBUG) << "reject_debug: parent_bssid_has_node="
                        << (int)(database.has_node(
                               network_utils::mac_from_string(parent_bssid_mac)));
-            auto response = message_com::add_intel_vs_data<
-                beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>(cmdu_tx, tlv_vs);
 
-            if (response == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return false;
-            }
-            response->err_code() = beerocks::JOIN_RESP_REJECT;
+            join_response->err_code() = beerocks::JOIN_RESP_REJECT;
             return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
         }
 
@@ -1438,30 +1435,8 @@ bool master_thread::handle_intel_slave_join(
     auto slave_version_s  = version::version_from_string(slave_version);
     auto master_version_s = version::version_from_string(BEEROCKS_VERSION);
 
-    // check if mismatch notification is needed
-    auto local_slave_mac = database.get_local_slave_mac();
-    if ((!local_slave_mac.empty()) &&
-        ((slave_version_s.major > master_version_s.major) ||
-         ((slave_version_s.major == master_version_s.major) &&
-          (slave_version_s.minor > master_version_s.minor)) ||
-         ((slave_version_s.major == master_version_s.major) &&
-          (slave_version_s.minor == master_version_s.minor) &&
-          (slave_version_s.build_number > master_version_s.build_number)))) {
-        LOG(INFO) << "slave_version > master_version, sending "
-                     "ACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION";
-        auto response = message_com::add_intel_vs_data<
-            beerocks_message::cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION>(cmdu_tx, tlv_vs);
-        if (response == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-
-        string_utils::copy_string(response->versions().master_version, BEEROCKS_VERSION,
-                                  message::VERSION_LENGTH);
-        string_utils::copy_string(response->versions().slave_version, slave_version.c_str(),
-                                  message::VERSION_LENGTH);
-        return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
-    }
+    string_utils::copy_string(join_response->master_version(), BEEROCKS_VERSION,
+                              message::VERSION_LENGTH);
 
     // check if fatal mismatch
     if (slave_version_s.major != master_version_s.major ||
@@ -1470,16 +1445,9 @@ bool master_thread::handle_intel_slave_join(
                   << std::string(slave_version)
                   << " master_version=" << std::string(BEEROCKS_VERSION);
         LOG(INFO) << " bridge_mac=" << bridge_mac << " bridge_ipv4=" << bridge_ipv4;
-        auto response =
-            message_com::add_intel_vs_data<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>(
-                cmdu_tx, tlv_vs);
-        if (response == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
 
-        response->err_code() = beerocks::JOIN_RESP_VERSION_MISMATCH;
-        string_utils::copy_string(response->master_version(message::VERSION_LENGTH),
+        join_response->err_code() = beerocks::JOIN_RESP_VERSION_MISMATCH;
+        string_utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
                                   BEEROCKS_VERSION, message::VERSION_LENGTH);
         return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
     }
@@ -1515,8 +1483,7 @@ bool master_thread::handle_intel_slave_join(
     bool local_master = (bool)notification->platform_settings().local_master;
     if (local_master) {
         database.set_local_slave_mac(radio_mac);
-        local_slave_mac = radio_mac;
-        LOG(DEBUG) << "local_slave_mac = " << local_slave_mac;
+        LOG(DEBUG) << "local_slave_mac = " << radio_mac;
 #ifdef BEEROCKS_RDKB
         database.settings_rdkb_extensions(
             notification->platform_settings().rdkb_extensions_enabled);
@@ -1613,44 +1580,34 @@ bool master_thread::handle_intel_slave_join(
 
     // send JOINED_RESPONSE with son config
     {
-        auto joined_response =
-            message_com::add_intel_vs_data<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>(
-                cmdu_tx, tlv_vs);
-        if (joined_response == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
 
-        string_utils::copy_string(joined_response->master_version(message::VERSION_LENGTH),
+        string_utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
                                   BEEROCKS_VERSION, message::VERSION_LENGTH);
-        joined_response->config().monitor_total_ch_load_notification_hi_th_percent =
+        join_response->config().monitor_total_ch_load_notification_hi_th_percent =
             database.config.monitor_total_ch_load_notification_hi_th_percent;
-        joined_response->config().monitor_total_ch_load_notification_lo_th_percent =
+        join_response->config().monitor_total_ch_load_notification_lo_th_percent =
             database.config.monitor_total_ch_load_notification_lo_th_percent;
-        joined_response->config().monitor_total_ch_load_notification_delta_th_percent =
+        join_response->config().monitor_total_ch_load_notification_delta_th_percent =
             database.config.monitor_total_ch_load_notification_delta_th_percent;
-        joined_response->config().monitor_min_active_clients =
+        join_response->config().monitor_min_active_clients =
             database.config.monitor_min_active_clients;
-        joined_response->config().monitor_active_client_th =
-            database.config.monitor_active_client_th;
-        joined_response->config().monitor_client_load_notification_delta_th_percent =
+        join_response->config().monitor_active_client_th = database.config.monitor_active_client_th;
+        join_response->config().monitor_client_load_notification_delta_th_percent =
             database.config.monitor_client_load_notification_delta_th_percent;
-        joined_response->config().monitor_rx_rssi_notification_threshold_dbm =
+        join_response->config().monitor_rx_rssi_notification_threshold_dbm =
             database.config.monitor_rx_rssi_notification_threshold_dbm;
-        joined_response->config().monitor_rx_rssi_notification_delta_db =
+        join_response->config().monitor_rx_rssi_notification_delta_db =
             database.config.monitor_rx_rssi_notification_delta_db;
-        joined_response->config().monitor_ap_idle_threshold_B =
+        join_response->config().monitor_ap_idle_threshold_B =
             database.config.monitor_ap_idle_threshold_B;
-        joined_response->config().monitor_ap_active_threshold_B =
+        join_response->config().monitor_ap_active_threshold_B =
             database.config.monitor_ap_active_threshold_B;
-        joined_response->config().monitor_ap_idle_stable_time_sec =
+        join_response->config().monitor_ap_idle_stable_time_sec =
             database.config.monitor_ap_idle_stable_time_sec;
-        joined_response->config().monitor_disable_initiative_arp =
+        join_response->config().monitor_disable_initiative_arp =
             database.config.monitor_disable_initiative_arp;
-        joined_response->config().slave_keep_alive_retries =
-            database.config.slave_keep_alive_retries;
-        joined_response->config().ire_rssi_report_rate_sec =
-            database.config.ire_rssi_report_rate_sec;
+        join_response->config().slave_keep_alive_retries = database.config.slave_keep_alive_retries;
+        join_response->config().ire_rssi_report_rate_sec = database.config.ire_rssi_report_rate_sec;
 
         LOG(DEBUG) << "send SLAVE_JOINED_RESPONSE";
         son_actions::send_cmdu_to_agent(sd, cmdu_tx);

@@ -96,10 +96,6 @@ cACTION_CONTROL_ARP_QUERY_RESPONSE:
   _type: class
   params: sArpMonitorData 
 
-cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION:
-  _type: class
-  versions: sVersions 
-
 cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION:
   _type: class
   bridge_mac: sMacAddr 

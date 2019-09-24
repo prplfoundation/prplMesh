@@ -1265,35 +1265,6 @@ bool slave_thread::handle_cmdu_control_message(
         }
         break;
     }
-    case beerocks_message::ACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION: {
-        LOG(TRACE) << "ACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION";
-        auto notification =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_VERSION_MISMATCH_NOTIFICATION>();
-        if (notification == nullptr) {
-            LOG(ERROR) << "addClass failed";
-            return false;
-        }
-
-        auto notification_out = message_com::create_vs_message<
-            beerocks_message::cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION>(
-            cmdu_tx, beerocks_header->id());
-
-        if (notification_out == nullptr) {
-            LOG(ERROR)
-                << "Failed building ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUES message!";
-            break;
-        }
-
-        string_utils::copy_string(notification_out->versions().master_version,
-                                  notification->versions().master_version,
-                                  sizeof(notification_out->versions().master_version));
-        string_utils::copy_string(notification_out->versions().slave_version,
-                                  notification->versions().slave_version,
-                                  sizeof(notification_out->versions().slave_version));
-
-        message_com::send_cmdu(platform_manager_socket, cmdu_tx);
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST: {
         LOG(TRACE) << "ACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST";
         auto update =
@@ -3728,14 +3699,9 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        auto vs = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
-        if (!vs) {
-            LOG(ERROR) << "Failed adding intel vendor specific TLV";
-            return false;
-        }
-
-        auto notification = message_com::add_intel_vs_data<
-            beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(cmdu_tx, vs);
+        auto notification =
+            message_com::add_vs_tlv<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(
+                cmdu_tx);
 
         if (!notification) {
             LOG(ERROR) << "Failed building cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION!";
