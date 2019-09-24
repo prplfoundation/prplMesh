@@ -715,19 +715,17 @@ class ConnectivityMapWidget(QWidget):
                         self.logger.exception(e)
                         return
                 
-                if (not "1" in line_type) and (not "2" in line_type):
+                if "3" in line_type:
                     try:
                         i_channel=param_n.index('channel')
                         channel=param_v[i_channel]
-                    except Exception as e:
-                        self.logger.debug("channel exception")
-                        self.logger.exception(e)
+                    except ValueError:
+                        self.logger.debug("channel not available for client with mac {}".format(mac))
                     try:
                         i_bandwidth=param_n.index('bandwidth')
                         bandwidth=param_v[i_bandwidth]
-                    except Exception as e:
-                        self.logger.debug("bandwidth exception")
-                        self.logger.exception(e)
+                    except ValueError:
+                        self.logger.debug("bandwidth not available for client with mac {}".format(mac))
             except Exception as e: # TODO: too broad Exception
                 self.logger.error("readSample()  --> {}, nw_map_update line does not contain state or mac address or parent bssid or type".format(line))
                 self.logger.exception(e)
