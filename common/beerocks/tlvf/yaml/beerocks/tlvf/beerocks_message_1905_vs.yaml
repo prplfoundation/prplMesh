@@ -1,0 +1,37 @@
+#
+---
+_include: {
+  beerocks/bcl/beerocks_message_structs.h,
+  beerocks/tlvf/beerocks_message_action.h,
+}
+
+_namespace: beerocks_message
+
+_multi_class: True
+_multi_class_auto_insert:
+  action_op:
+    _type: eActionOp_1905_VS
+    _value_const: ACTION_TLV_VENDOR_SPECIFIC  
+    _class_const: True
+
+#################################################
+#################################################
+
+tlvVsClientAssociationEvent:
+  _type: class
+  _comment: TOPOLOGY_NOTIFICATION_MESSAGE
+  mac: sMacAddr
+  bssid: sMacAddr
+  vap_id: int8_t
+  capabilities: 
+    _type: beerocks::message::sRadioCapabilities
+    _comment: relevant only on connect event
+  disconnect_reason: 
+    _type: uint8_t
+    _comment: relevant only on disconnect event
+  disconnect_source: 
+    _type: uint8_t
+    _comment: relevant only on disconnect event
+  disconnect_type: 
+    _type: uint8_t
+    _comment: relevant only on disconnect event

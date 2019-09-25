@@ -6,6 +6,7 @@ eAction:
   _type: enum
   _enum_storage: uint8_t
   ACTION_NONE: 0
+  ACTION_1905_VS: 1
   ACTION_CONTROL: 10
   ACTION_BACKHAUL: 11
   ACTION_PLATFORM: 12
@@ -17,6 +18,14 @@ eAction:
 
 ####################################################
 ####################################################
+
+# General enum for all the ACTION_1905_VS tlvs
+
+eActionOp_1905_VS:
+  _type: enum
+  _enum_storage: uint8_t
+  ACTION_TLV_VENDOR_SPECIFIC: 0xb
+
 eActionOp_CONTROL:
   _type: enum
   _enum_storage: uint8_t

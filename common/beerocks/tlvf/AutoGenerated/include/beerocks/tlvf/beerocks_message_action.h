@@ -21,6 +21,7 @@ namespace beerocks_message {
 
 enum eAction: uint8_t {
     ACTION_NONE = 0x0,
+    ACTION_1905_VS = 0x1,
     ACTION_CONTROL = 0xa,
     ACTION_BACKHAUL = 0xb,
     ACTION_PLATFORM = 0xc,
@@ -29,6 +30,10 @@ enum eAction: uint8_t {
     ACTION_DHCP = 0x28,
     ACTION_CLI = 0x32,
     ACTION_BML = 0x3c,
+};
+
+enum eActionOp_1905_VS: uint8_t {
+    ACTION_TLV_VENDOR_SPECIFIC = 0xb,
 };
 
 enum eActionOp_CONTROL: uint8_t {
