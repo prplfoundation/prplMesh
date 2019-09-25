@@ -226,7 +226,7 @@ class BeeRocksAnalyzer(QMainWindow):
                 param_m = (str(line[i1+1:])).strip()
                 if param_m=="MARK":
                     self.wait_for_mark=False
-                    self.cm_widget.graph.clear()
+                    self.cm_widget.increment_node_counters()
                 if param_m=="START" or  param_m=="MARK":
                     is_start=True
                 elif param_m=="STOP":
