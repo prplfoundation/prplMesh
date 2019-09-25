@@ -21,6 +21,7 @@
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message_cli.h>
+#include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
 
 using namespace beerocks;
 using namespace net;
@@ -144,7 +145,8 @@ void son_actions::unblock_sta(db &database, ieee1905_1::CmduMessageTx &cmdu_tx, 
 {
     LOG(DEBUG) << "unblocking " << sta_mac << " from network";
 
-    auto hostaps = database.get_active_hostaps();
+    auto hostaps        = database.get_active_hostaps();
+    auto current_ap_mac = database.get_node_parent(sta_mac);
     for (auto &hostap : hostaps) {
         /*
          * unblock client from all hostaps to prevent it from getting locked out
@@ -154,14 +156,31 @@ void son_actions::unblock_sta(db &database, ieee1905_1::CmduMessageTx &cmdu_tx, 
             continue;
         }
         Socket *sd = database.get_node_socket(hostap);
-        auto request =
-            message_com::create_vs_message<beerocks_message::cACTION_CONTROL_CLIENT_ALLOW_REQUEST>(
-                cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_ALLOW_REQUEST message!";
+        if (!cmdu_tx.create(0,
+                            ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
+            LOG(ERROR)
+                << "cmdu creation of type CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE, has failed";
             break;
         }
-        request->mac() = network_utils::mac_from_string(sta_mac);
+        auto association_control_request_tlv =
+            cmdu_tx.addClass<wfa_map::tlvClientAssociationControlRequest>();
+        if (!association_control_request_tlv) {
+            LOG(ERROR) << "addClass wfa_map::tlvClientAssociationControlRequest failed";
+            break;
+        }
+        association_control_request_tlv->bssid_to_block_client() =
+            network_utils::mac_from_string(current_ap_mac);
+        association_control_request_tlv->association_control() =
+            wfa_map::tlvClientAssociationControlRequest::UNBLOCK;
+        /*
+        According to section 11.6 in the Multi-AP Specification
+        The Validity Period field in a Client Association Control Request message 
+        with Association Control field set to 0x01 (Client Unblocking) is ignored
+        */
+        association_control_request_tlv->validity_period_sec() = 0;
+        association_control_request_tlv->alloc_sta_list();
+        auto sta_list         = association_control_request_tlv->sta_list(0);
+        std::get<1>(sta_list) = network_utils::mac_from_string(sta_mac);
 
         son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap);
         LOG(DEBUG) << "sending allow request for " << sta_mac << " to " << hostap;
