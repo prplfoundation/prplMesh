@@ -87,7 +87,9 @@ public:
         }
 
         auto action_op = p_class->get_action_op();
-        if (typeid(action_op) == typeid(beerocks_message::eActionOp_CONTROL))
+        if (typeid(action_op) == typeid(beerocks_message::eActionOp_1905_VS))
+            action = beerocks_message::eAction::ACTION_1905_VS;
+        else if (typeid(action_op) == typeid(beerocks_message::eActionOp_CONTROL))
             action = beerocks_message::eAction::ACTION_CONTROL;
         else if (typeid(action_op) == typeid(beerocks_message::eActionOp_PLATFORM))
             action = beerocks_message::eAction::ACTION_PLATFORM;
