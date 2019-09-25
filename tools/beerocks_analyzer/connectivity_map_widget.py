@@ -27,6 +27,10 @@ class UpdateSig(QObject):
     sig = Signal(int)
 
 class ConnectivityMapWidget(QWidget):
+
+    _MAX_LAST_SEEN = 2
+    """Number of updates after which a node is considered to be disconnected and should be removed"""
+
     def __init__(self, parent=None):
         super(ConnectivityMapWidget, self).__init__(parent)
         self.logger = logging.getLogger(__name__)
@@ -110,6 +114,7 @@ class ConnectivityMapWidget(QWidget):
             self.label= self.type
             self.has_left_radio=False #for GW/IRE only
             self.is_left_radio=False #for RADIO only
+            self.last_seen = 0 # the number of updates since the node was last seen
 
         def print_node(self):
             self.logger.info("type=%s",str(self.type))
@@ -465,6 +470,8 @@ class ConnectivityMapWidget(QWidget):
         self.threadEvent.set()
 
     def add_node_to_graph(self, n):
+        self.reset_last_seen(n.mac)
+
         #if n already in self.graph:
         #   if with same data - return
         #   else - update data and return
@@ -850,3 +857,29 @@ class ConnectivityMapWidget(QWidget):
         fig = self.fig
         bbox = fig.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
         self.width, self.height = bbox.width*fig.dpi, bbox.height*fig.dpi
+
+    def increment_node_counters(self):
+        """Increment the "last seen" attribute of each node.
+        Nodes having a counter greater or equal to `_MAX_LAST_SEEN` will be removed.
+        Note that ETH nodes are not sent in the updates, so they are not removed unless their parent is removed.
+        """
+        nodes_to_remove = []
+        for n in self.graph:
+            n.last_seen += 1
+            if n.type != "ETH" and n.last_seen >= self._MAX_LAST_SEEN:
+                self.logger.info("Node with MAC {} last seen {} updates ago, removing".format(n.mac, n.last_seen))
+                nodes_to_remove.append(n)
+        self.graph.remove_nodes_from(nodes_to_remove)
+        self.sendSig()
+
+    def reset_last_seen(self, mac) -> None:
+        """Reset the "last seen" attribute of the node that has the given MAC address.
+
+        Parameters
+        ----------
+        mac
+            The mac address of the node.
+        """
+        for n in self.graph:
+            if n.mac == mac:
+                n.last_seen = 0
