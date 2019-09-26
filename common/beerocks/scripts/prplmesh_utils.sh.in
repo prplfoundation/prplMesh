@@ -149,6 +149,9 @@ start_function() {
             ;;
         * ) err "unsupported mode: $PRPLMESH_MODE"; usage; exit 1 ;;
     esac
+
+    # Give write permissions
+    chmod -R o+w /tmp/${SUDO_USER:-${USER}}
 }
 
 stop_function() {
