@@ -16,6 +16,7 @@
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
+#include <beerocks/tlvf/beerocks_message_1905_vs.h>
 #include <beerocks/tlvf/beerocks_message_apmanager.h>
 #include <beerocks/tlvf/beerocks_message_backhaul.h>
 #include <beerocks/tlvf/beerocks_message_control.h>
@@ -33,6 +34,7 @@
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
+#include <tlvf/wfa_map/tlvClientAssociationEvent.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvSteeringBTMReport.h>
 #include <tlvf/wfa_map/tlvSteeringRequest.h>
@@ -2377,24 +2379,46 @@ bool slave_thread::handle_cmdu_ap_manager_message(
             notification_out->mac() = notification_in->params().mac;
             message_com::send_cmdu(monitor_socket, cmdu_tx);
         }
+
         //notify master
-        // if the master is not connected, remove element from pending_client_association
-        if (master_socket) {
-            auto notification_out = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION>(
-                cmdu_tx, beerocks_header->id());
-
-            if (notification_out == nullptr) {
-                LOG(ERROR)
-                    << "Failed building ACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION message!";
-                break;
-            }
-            notification_out->params() = notification_in->params();
-            send_cmdu_to_controller(cmdu_tx);
-
-        } else {
-            pending_client_association_cmdu.erase(client_mac);
+        if (!master_socket) {
+            LOG(DEBUG) << "Controller is not connected";
+            return true;
         }
+
+        // build 1905.1 message CMDU to send to the controller
+        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
+            LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
+            return false;
+        }
+
+        auto client_association_event_tlv = cmdu_tx.addClass<wfa_map::tlvClientAssociationEvent>();
+        if (!client_association_event_tlv) {
+            LOG(ERROR) << "addClass tlvClientAssociationEvent failed";
+            return false;
+        }
+        client_association_event_tlv->client_mac() = notification_in->params().mac;
+        client_association_event_tlv->bssid()      = notification_in->params().bssid;
+        client_association_event_tlv->association_event() =
+            wfa_map::tlvClientAssociationEvent::CLIENT_HAS_LEFT_THE_BSS;
+
+        // Add vendor specific tlv
+        auto vs_tlv =
+            message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationEvent>(cmdu_tx);
+
+        if (!vs_tlv) {
+            LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationEvent failed";
+            return false;
+        }
+
+        vs_tlv->mac()               = notification_in->params().mac;
+        vs_tlv->bssid()             = notification_in->params().bssid;
+        vs_tlv->vap_id()            = notification_in->params().vap_id;
+        vs_tlv->disconnect_reason() = notification_in->params().reason;
+        vs_tlv->disconnect_source() = notification_in->params().source;
+        vs_tlv->disconnect_type()   = notification_in->params().type;
+
+        send_cmdu_to_controller(cmdu_tx);
 
         break;
     }
@@ -2484,31 +2508,50 @@ bool slave_thread::handle_cmdu_ap_manager_message(
     case beerocks_message::ACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION: {
         auto notification_in =
             cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION>();
-        if (notification_in == nullptr) {
+        if (!notification_in) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION failed";
             return false;
         }
         LOG(TRACE) << "received ACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION";
-
-        auto notification_out = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION>(
-            cmdu_tx, beerocks_header->id());
-        if (notification_out == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-
         std::string client_mac = network_utils::mac_to_string(notification_in->params().mac);
         LOG(INFO) << "client associated sta_mac=" << client_mac;
 
-        notification_out->params() = notification_in->params();
-
-        // if the master is not connected, save the association notification
-        if (master_socket) {
-            send_cmdu_to_controller(cmdu_tx);
-        } else {
-            pending_client_association_cmdu[client_mac] = notification_out->params();
+        if (!master_socket) {
+            LOG(DEBUG) << "Controller is not connected";
+            return true;
         }
+        // build 1905.1 message CMDU to send to the controller
+        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
+            LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
+            return false;
+        }
+
+        auto client_association_event_tlv = cmdu_tx.addClass<wfa_map::tlvClientAssociationEvent>();
+        if (!client_association_event_tlv) {
+            LOG(ERROR) << "addClass tlvClientAssociationEvent failed";
+            return false;
+        }
+        client_association_event_tlv->client_mac() = notification_in->params().mac;
+        client_association_event_tlv->bssid()      = notification_in->params().bssid;
+        client_association_event_tlv->association_event() =
+            wfa_map::tlvClientAssociationEvent::CLIENT_HAS_JOINED_THE_BSS;
+
+        // Add vendor specific tlv
+        auto vs_tlv =
+            message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationEvent>(cmdu_tx);
+
+        if (!vs_tlv) {
+            LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationEvent failed";
+            return false;
+        }
+
+        vs_tlv->mac()          = notification_in->params().mac;
+        vs_tlv->bssid()        = notification_in->params().bssid;
+        vs_tlv->vap_id()       = notification_in->params().vap_id;
+        vs_tlv->capabilities() = notification_in->params().capabilities;
+
+        send_cmdu_to_controller(cmdu_tx);
+
         break;
     }
     case beerocks_message::ACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION: {
@@ -4607,19 +4650,6 @@ bool slave_thread::parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessage
     }
     message_com::send_cmdu(ap_manager_socket, cmdu_tx);
 
-    // send all pending_client_association notifications
-    for (auto notify : pending_client_association_cmdu) {
-        auto notification = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
-        if (notification == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-        notification->params() = notify.second;
-        send_cmdu_to_controller(cmdu_tx);
-    }
-    pending_client_association_cmdu.clear();
-
     master_version.assign(joined_response->master_version(message::VERSION_LENGTH));
 
     LOG(DEBUG) << "Version (Master/Slave): " << master_version << "/" << BEEROCKS_VERSION;
@@ -4703,19 +4733,6 @@ bool slave_thread::parse_non_intel_join_response(Socket *sd)
         return false;
     }
     message_com::send_cmdu(ap_manager_socket, cmdu_tx);
-
-    // send all pending_client_association notifications
-    for (auto notify : pending_client_association_cmdu) {
-        auto notification = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
-        if (notification == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-        notification->params() = notify.second;
-        send_cmdu_to_controller(cmdu_tx);
-    }
-    pending_client_association_cmdu.clear();
 
     // No version checking for non-Intel controller
 
