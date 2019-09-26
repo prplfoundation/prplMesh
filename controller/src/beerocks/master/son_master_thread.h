@@ -76,6 +76,7 @@ private:
                                                      ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_client_steering_btm_report_message(Socket *sd,
                                                              ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_1905_topology_notification(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 
     bool autoconfig_wsc_parse_radio_caps(
         std::string radio_mac, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps);
