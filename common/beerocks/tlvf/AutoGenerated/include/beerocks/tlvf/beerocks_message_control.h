@@ -1187,46 +1187,6 @@ class cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION : public BaseClass
         sMacAddr* m_mac = nullptr;
 };
 
-class cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
-{
-    public:
-        cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION);
-        }
-        sClientAssociationParams& params();
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-        sClientAssociationParams* m_params = nullptr;
-};
-
-class cACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION : public BaseClass
-{
-    public:
-        cACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION);
-        }
-        sClientDisconnectionParams& params();
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-        sClientDisconnectionParams* m_params = nullptr;
-};
-
 class cACTION_CONTROL_CLIENT_DISALLOW_REQUEST : public BaseClass
 {
     public:
