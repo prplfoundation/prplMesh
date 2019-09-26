@@ -232,6 +232,20 @@ int db::get_node_channel(std::string mac)
     return n->channel;
 }
 
+int db::get_hostap_operating_class(const sMacAddr &mac)
+{
+    auto mac_str = network_utils::mac_to_string(mac);
+    auto n       = get_node(mac_str);
+    if (!n) {
+        LOG(WARNING) << "node " << mac_str << " does not exist!";
+        return 0;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || !n->hostap) {
+        LOG(WARNING) << "node " << mac_str << " is not a valid hostap!";
+        return 0;
+    }
+    return n->hostap->operating_class;
+}
+
 bool db::set_node_vap_id(std::string mac, int8_t vap_id)
 {
     auto n = get_node(mac);

@@ -176,6 +176,8 @@ public:
 
     int get_node_channel(std::string mac);
 
+    int get_hostap_operating_class(const sMacAddr &mac);
+
     bool set_node_vap_id(std::string mac, int8_t vap_id);
     int8_t get_node_vap_id(std::string mac);
 
