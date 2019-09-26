@@ -283,14 +283,6 @@ cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION:
   _type: class
   mac: sMacAddr 
 
-cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION:
-  _type: class
-  params: sClientAssociationParams 
-
-cACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION:
-  _type: class
-  params: sClientDisconnectionParams 
-
 cACTION_CONTROL_CLIENT_DISALLOW_REQUEST:
   _type: class
   mac: sMacAddr
