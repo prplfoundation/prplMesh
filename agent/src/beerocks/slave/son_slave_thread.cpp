@@ -4820,6 +4820,7 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
 {
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received CLIENT_STEERING_REQUEST_MESSAGE , mid=" << std::hex << int(mid);
+
     auto steering_request_tlv = cmdu_rx.addClass<wfa_map::tlvSteeringRequest>();
     if (!steering_request_tlv) {
         LOG(ERROR) << "addClass wfa_map::tlvSteeringRequest failed";
@@ -4848,6 +4849,23 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
 
     //check if the Request Mode bit is set
     if (request_mode) {
+        //TODO Handle 0 or more then 1 sta in list, currenlty cli steers only 1 client
+        auto request_out = message_com::create_vs_message<
+            beerocks_message::cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST>(cmdu_tx, mid);
+        if (request_out == nullptr) {
+            LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST message!";
+            return false;
+        }
+        auto bssid_list = steering_request_tlv->target_bssid_list(0);
+
+        request_out->params().mac            = std::get<1>(steering_request_tlv->sta_list(0));
+        request_out->params().disassoc_timer = steering_request_tlv->btm_disassociation_timer();
+        request_out->params().bssid.mac      = std::get<1>(bssid_list).target_bssid;
+        request_out->params().bssid.channel  = std::get<1>(bssid_list).target_bss_channel_number;
+        request_out->params().disassoc_imminent =
+            steering_request_tlv->request_flags().btm_disassociation_imminent_bit;
+
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
         //Steering Mandate
         LOG(DEBUG) << "Request Mode bit is set - Steering Mandate";
         // build and send Client Steering BTM report message
