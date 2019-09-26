@@ -31,6 +31,7 @@
 
 #include <beerocks/tlvf/beerocks_message_1905_vs.h>
 #include <beerocks/tlvf/beerocks_message_control.h>
+
 #include <tlvf/ieee_1905_1/eMessageType.h>
 #include <tlvf/ieee_1905_1/eTlvType.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
@@ -2607,105 +2608,6 @@ bool master_thread::handle_cmdu_control_message(
                       << " closing socket and marking as disconnected";
             son_actions::handle_dead_node(client_mac, hostap_mac, database, cmdu_tx, tasks);
         }
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION: {
-        auto notification =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION>();
-        if (notification == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_ASSOCIATED_NOTIFICATION failed";
-            return false;
-        }
-
-        std::string client_mac = network_utils::mac_to_string(notification->params().mac);
-
-        LOG(DEBUG) << "sd = " << sd << ", hostap_mac = " << hostap_mac;
-
-        if (hostap_mac.empty()) {
-            LOG(ERROR) << "hostap mac for client " << client_mac << " is empty!!! ignoring!";
-            break;
-        }
-
-        //add or update node parent
-        auto bssid = database.get_hostap_vap_mac(hostap_mac, notification->params().vap_id);
-        database.add_node(network_utils::mac_from_string(client_mac),
-                          network_utils::mac_from_string(bssid));
-
-        int hostap_channel = database.get_node_channel(hostap_mac);
-        LOG(INFO) << "client associated, mac=" << client_mac << " hostap mac=" << hostap_mac
-                  << " setting to channel=" << hostap_channel;
-
-        database.set_node_channel_bw(client_mac, hostap_channel, database.get_node_bw(hostap_mac),
-                                     database.get_node_channel_ext_above_secondary(hostap_mac), 0,
-                                     database.get_hostap_vht_center_frequency(hostap_mac));
-
-        database.set_node_vap_id(client_mac, notification->params().vap_id);
-        database.set_station_capabilities(client_mac, notification->params().capabilities);
-
-        database.clear_node_cross_rssi(client_mac);
-        database.clear_node_stats_info(client_mac);
-
-        if (database.get_node_type(client_mac) == beerocks::TYPE_IRE_BACKHAUL &&
-            database.get_node_handoff_flag(client_mac)) {
-            /*
-                * this means the node is an IRE in handoff
-                */
-        } else {
-            database.set_node_type(client_mac, beerocks::TYPE_CLIENT);
-        }
-
-        database.set_node_backhaul_iface_type(client_mac, beerocks::IFACE_TYPE_WIFI_UNSPECIFIED);
-
-        /*
-             * notify existing steering task of completed connection
-             */
-        int prev_steering_task = database.get_steering_task_id(client_mac);
-        tasks.push_event(prev_steering_task, client_steering_task::STA_CONNECTED);
-#ifdef BEEROCKS_RDKB
-        //push event to rdkb_wlan_hal task
-        if (database.settings_rdkb_extensions()) {
-            beerocks_message::sClientAssociationParams new_event = {};
-            new_event                                            = notification->params();
-            tasks.push_event(database.get_rdkb_wlan_task_id(),
-                             rdkb_wlan_task::events::STEERING_EVENT_CLIENT_CONNECT_AVAILABLE,
-                             &new_event);
-        }
-#endif
-        if (database.get_node_ipv4(client_mac).empty()) {
-            database.set_node_state(client_mac, beerocks::STATE_CONNECTED_IP_UNKNOWN);
-            LOG(INFO) << "STATE_CONNECTED_IP_UNKNOWN for node mac " << client_mac;
-        } else {
-            son_actions::handle_completed_connection(database, cmdu_tx, tasks, client_mac);
-        }
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION: {
-        auto notification =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION>();
-        if (notification == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION failed";
-            return false;
-        }
-        std::string client_mac = network_utils::mac_to_string(notification->params().mac);
-        std::string bssid = database.get_hostap_vap_mac(hostap_mac, notification->params().vap_id);
-#ifdef BEEROCKS_RDKB
-        //push event to rdkb_wlan_hal task
-        if (database.settings_rdkb_extensions()) {
-            beerocks_message::sSteeringEvDisconnect new_event = {};
-            new_event.client_mac = network_utils::mac_from_string(client_mac);
-            new_event.bssid      = network_utils::mac_from_string(bssid);
-            new_event.reason     = notification->params().reason;
-            new_event.source = beerocks_message::eDisconnectSource(notification->params().source);
-            new_event.type   = beerocks_message::eDisconnectType(notification->params().type);
-
-            tasks.push_event(database.get_rdkb_wlan_task_id(),
-                             rdkb_wlan_task::events::STEERING_EVENT_CLIENT_DISCONNECT_AVAILABLE,
-                             &new_event);
-        }
-#endif
-        LOG(INFO) << "client disconnected, mac=" << client_mac << " hostap mac=" << bssid
-                  << " socket fd=" << uint64_t(sd);
-        son_actions::handle_dead_node(client_mac, bssid, database, cmdu_tx, tasks);
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE: {
