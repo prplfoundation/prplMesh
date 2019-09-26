@@ -229,9 +229,6 @@ private:
     } iface_action;
     std::unordered_map<std::string, iface_action> pending_iface_actions;
 
-    std::unordered_map<std::string, beerocks_message::sClientAssociationParams>
-        pending_client_association_cmdu; // key:client_mac, val:notification_params // cmdu_duplicate
-
     sSlaveBackhaulParams backhaul_params;
     beerocks_message::sNodeHostap hostap_params;
     beerocks_message::sApChannelSwitch hostap_cs_params;
