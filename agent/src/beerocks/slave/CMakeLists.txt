@@ -6,6 +6,7 @@ message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the $
 
 # Use BPL package from mAP Framework
 find_package(btl REQUIRED)
+find_package(MapfTransport QUIET)
 
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
@@ -33,6 +34,11 @@ endif()
 add_executable(${PROJECT_NAME} ${beerocks_agent_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
 target_link_libraries(${PROJECT_NAME} rt dl beerocks::bcl beerocks::btl tlvf elpp beerocks::btlvf ${LIBS})
+
+# For some reason, this isn't found automatically from btl...
+if (MapfTransport_FOUND)
+     target_link_libraries(${PROJECT_NAME} PRIVATE mapf::ieee1905_transport_messages)
+endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${MODULE_PATH}/../../../external
