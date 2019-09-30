@@ -58,8 +58,8 @@ bool db::add_virtual_node(sMacAddr mac, sMacAddr real_node_mac)
     return true;
 }
 
-bool db::add_node(const sMacAddr &mac, const sMacAddr &parent_mac, beerocks::eType type,
-                  const sMacAddr &radio_identifier)
+bool db::add_node(sMacAddr mac, sMacAddr parent_mac, beerocks::eType type,
+                  sMacAddr radio_identifier)
 {
     if (mac == network_utils::ZERO_MAC) {
         LOG(ERROR) << "can't insert node with empty mac";
@@ -120,7 +120,7 @@ bool db::add_node(const sMacAddr &mac, const sMacAddr &parent_mac, beerocks::eTy
     return true;
 }
 
-bool db::remove_node(const sMacAddr &mac)
+bool db::remove_node(sMacAddr mac)
 {
     int i;
     for (i = 0; i < HIERARCHY_MAX; i++) {
