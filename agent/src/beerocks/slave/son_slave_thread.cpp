@@ -4819,13 +4819,18 @@ bool slave_thread::handle_ack_message(Socket *sd, ieee1905_1::CmduMessageRx &cmd
 bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     const auto mid = cmdu_rx.getMessageId();
-    LOG(DEBUG) << "Received CLIENT_STEERING_REQUEST_MESSAGE , mid=" << std::hex << int(mid);
 
     auto steering_request_tlv = cmdu_rx.addClass<wfa_map::tlvSteeringRequest>();
     if (!steering_request_tlv) {
         LOG(ERROR) << "addClass wfa_map::tlvSteeringRequest failed";
         return false;
     }
+
+    if (steering_request_tlv->bssid() != hostap_params.iface_mac) {
+        return true;
+    }
+
+    LOG(DEBUG) << "Received CLIENT_STEERING_REQUEST_MESSAGE , mid=" << std::hex << int(mid);
 
     auto request_mode = steering_request_tlv->request_flags().request_mode;
     LOG(DEBUG) << "request_mode: " << std::hex << int(request_mode);
