@@ -42,7 +42,9 @@ elseif(TARGET_PLATFORM STREQUAL "turris-omnia")
     set(BWL_TYPE "NL80211")
 
     # hostapd directory
-    set(HOSTAPD_DIR "${PLATFORM_BUILD_DIR}/hostapd-full/hostapd-2016-12-19")
+    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd-full*/hostapd-*")
+    find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS "${HOSTAPD_SEARCH_PATHS}" NO_CMAKE_FIND_ROOT_PATH)
+    set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
 
 endif()
 
