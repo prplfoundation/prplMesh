@@ -821,25 +821,6 @@ bool slave_thread::handle_cmdu_control_message(
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
         break;
     }
-    case beerocks_message::ACTION_CONTROL_CLIENT_BSS_STEER_REQUEST: {
-        auto request_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST>();
-        if (request_in == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_BSS_STEER_REQUEST failed";
-            return false;
-        }
-
-        auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST>(cmdu_tx,
-                                                                          beerocks_header->id());
-        if (request_out == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST message!";
-            return false;
-        }
-        request_out->params() = request_in->params();
-        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_CONTROLLER_PING_REQUEST: {
         LOG(DEBUG) << "received ACTION_CONTROL_CONTROLLER_PING_REQUEST";
         auto request =
