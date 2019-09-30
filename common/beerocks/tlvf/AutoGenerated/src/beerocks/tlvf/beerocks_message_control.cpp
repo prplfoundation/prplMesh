@@ -2726,45 +2726,6 @@ bool cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE::init()
     return true;
 }
 
-cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST::cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
-    m_init_succeeded = init();
-}
-cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST::cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
-    m_init_succeeded = init();
-}
-cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST::~cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST() {
-}
-sNodeBssSteerRequest& cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST::params() {
-    return (sNodeBssSteerRequest&)(*m_params);
-}
-
-void cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST::class_swap()
-{
-    m_params->struct_swap();
-}
-
-size_t cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST::get_initial_size()
-{
-    size_t class_size = 0;
-    class_size += sizeof(sNodeBssSteerRequest); // params
-    return class_size;
-}
-
-bool cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST::init()
-{
-    if (getBuffRemainingBytes() < kMinimumLength) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
-    m_params = (sNodeBssSteerRequest*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sNodeBssSteerRequest))) { return false; }
-    if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
-    return true;
-}
-
 cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE::cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
     BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
