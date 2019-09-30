@@ -304,10 +304,6 @@ cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE:
   _type: class
   params: sClientDisconnectResponse
 
-cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST:
-  _type: class
-  params: sNodeBssSteerRequest 
-
 cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE:
   _type: class
   params: sNodeBssSteerResponse 
