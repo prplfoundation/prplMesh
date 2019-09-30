@@ -148,9 +148,7 @@ test_client_steering_mandate() {
     sleep 1
     dbg "Confirming Client Steering Request message was received - mandate"
     check docker exec -it repeater1 sh -c \
-        'grep -i -q "CLIENT_STEERING_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
-        'grep -i -q "CLIENT_STEERING_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+        'grep -i -q "Got steer request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
     
     dbg "Confirming BTM Report message was received"
     check docker exec -it gateway sh -c \
@@ -159,8 +157,6 @@ test_client_steering_mandate() {
     dbg "Confirming ACK message was received"
     check docker exec -it repeater1 sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
-        'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
 0x000C,tlv_value,{$mac_agent1_wlan0 0x00 0x000A 0x0000 0x00}\""' $redirect   
@@ -168,8 +164,6 @@ test_client_steering_mandate() {
     dbg "Confirming Client Steering Request message was received - Opportunity"
     check docker exec -it repeater1 sh -c \
         'grep -i -q "CLIENT_STEERING_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
-        'grep -i -q "CLIENT_STEERING_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     dbg "Confirming ACK message was received"
     check docker exec -it gateway sh -c \
@@ -182,8 +176,6 @@ test_client_steering_mandate() {
     dbg "Confirming ACK message was received"
     check docker exec -it repeater1 sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
-        'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 }
 
 test_client_steering_policy() {
