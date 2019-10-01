@@ -8,7 +8,7 @@
 
 ALL_TESTS="topology initial_ap_config ap_config_renew ap_config_bss_tear_down channel_selection
            ap_capability_query client_capability_query combined_infra_metrics
-           client_steering_mandate client_steering_policy client_association
+           client_steering_mandate client_steering_dummy client_steering_policy client_association
            higher_layer_data_payload_trigger higher_layer_data_payload"
 
 scriptdir="$(cd "${0%/*}"; pwd)"
@@ -178,6 +178,45 @@ test_client_steering_mandate() {
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 }
 
+test_client_steering_dummy() {
+    status "test client steering dummy"
+    check_error=0
+
+    dbg "Connect dummy STA to wlan0"
+    check docker exec -it repeater1 sh -c \
+        'echo "AP-STA-CONNECTED 11:22:33:44:55:66" > /tmp/$USER/beerocks/wlan0/EVENT'
+
+    dbg "Send steer request "
+    eval send_bml_command "steer_client \"11:22:33:44:55:66 aa:bb:cc:00:00:20\"" $redirect
+    sleep 1
+
+    dbg "Confirming Client Steering Request message was received - mandate"
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "Got steer request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+
+    dbg "Confirming BTM Report message was received"
+    check docker exec -it gateway sh -c \
+        'grep -i -q "CLIENT_STEERING_BTM_REPORT_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
+
+    dbg "Confirming ACK message was received"
+    check docker exec -it repeater1 sh -c \
+        'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+
+    dbg "Disconnect dummy STA from wlan0"
+    check docker exec -it repeater1 sh -c \
+        'echo "AP-STA-DISCONNECTED 11:22:33:44:55:66" > /tmp/$USER/beerocks/wlan0/EVENT'
+
+    #TODO// check for "disconnected after successful steering, proceeding to unblock" message 
+
+    dbg "Connect dummy STA to wlan2"
+    check docker exec -it repeater1 sh -c \
+        'echo "AP-STA-CONNECTED 11:22:33:44:55:66" > /tmp/$USER/beerocks/wlan2/EVENT'
+
+    dbg "Confirm steering success by client connected"
+    check docker exec -it gateway sh -c \
+        'grep -i -q "steering successful for sta 11:22:33:44:55:66" /tmp/$USER/beerocks/logs/beerocks_controller.log'
+}
+
 test_client_steering_policy() {
     status "test client steering policy"
     rm /tmp/catch
@@ -319,6 +358,7 @@ usage() {
     echo "      ap_config_bss_tear_down - AP configuration BSS Tear Down test"
     echo "      channel_selection - Channel Selection test"
     echo "      client_steering_mandate - Client Steering for Steering Mandate and Steering Opportunity test"
+    echo "      client_steering_dummy - Client Steering using dummy bwl"
     echo "      client_steering_policy - Setting Client Steering Policy test"
     echo "      client_association - Client Association Control Message test"
     echo "      ap_capability_query - AP Capability query test"
