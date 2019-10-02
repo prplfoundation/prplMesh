@@ -155,7 +155,7 @@ private:
     template <typename T, typename K> bool conf_erase(T &conf, K k);
     std::shared_ptr<rdkb_hal_sta_config> conf_find_client(const std::string sta_mac);
     std::shared_ptr<rdkb_hal_ap_config> conf_find_ap(const int8_t vap_id);
-    void print_debug_info(mon_rdkb_debug_info_t &mdi);
+    void print_debug_info(mon_rdkb_debug_info_t &mdi, bool pkts_count_en);
 
     monitor_db *mon_db   = nullptr;
     Socket *slave_socket = nullptr;
