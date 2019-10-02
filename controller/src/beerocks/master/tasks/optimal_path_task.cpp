@@ -54,7 +54,15 @@ void optimal_path_task::work()
         (!database.settings_client_band_steering()) &&
         (!database.settings_client_optimal_path_roaming()) &&
         (!database.settings_client_11k_roaming())) {
-        LOG_CLI(DEBUG, sta_mac << " band_steering and client_roaming disabled");
+        LOG_CLI(DEBUG, sta_mac << " band_steering and client_roaming disabled"
+                               << "get_node_type" << database.get_node_type(sta_mac)
+                               << "settings_client_band_steering"
+                               << database.settings_client_band_steering()
+                               << "settings_client_optimal_path_roaming"
+                               << database.settings_client_optimal_path_roaming()
+                               << "settings_client_11k_roaming"
+                               << database.settings_client_11k_roaming());
+
         task_enabled = false;
     } else if (database.get_node_type(sta_mac) == beerocks::TYPE_IRE_BACKHAUL) {
         if (started_as_client) {
@@ -77,6 +85,18 @@ void optimal_path_task::work()
     case START: {
 
         current_hostap_vap = database.get_node_parent(sta_mac);
+
+        auto current_vap_name = database.get_hostap_iface_name(current_hostap_vap);
+        current_vap_name.append(".");
+        current_vap_name.append(std::to_string(database.get_node_vap_id(sta_mac)));
+        auto steer_vaps = database.config.load_steer_on_vaps;
+        if (steer_vaps.find(current_vap_name) == std::string::npos) {
+            TASK_LOG(INFO) << "current hostap vap:" << current_vap_name << " mac:" << sta_mac
+                           << "is not in steer list:" << steer_vaps << " aborting optimal task"
+                           << std::endl;
+            finish();
+            return;
+        }
 
         if (database.get_node_handoff_flag(sta_mac)) {
             LOG_CLI(DEBUG, sta_mac << " is already in handoff, killing task");

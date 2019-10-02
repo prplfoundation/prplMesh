@@ -1269,7 +1269,7 @@ bool master_thread::handle_intel_slave_join(
               << "    low_pass_filter_on = " << int(notification->low_pass_filter_on()) << std::endl
               << "    radio_identifier = " << radio_identifier << std::endl
               << "    radio_mac = " << radio_mac << std::endl
-              << "    acs_enabled = " << int(notification->wlan_settings().acs_enabled) << std::endl
+              << "    channel = " << int(notification->wlan_settings().channel) << std::endl
               << "    is_gw_slave = " << int(is_gw_slave) << std::endl;
 
     if (!is_gw_slave) {
@@ -1553,7 +1553,7 @@ bool master_thread::handle_intel_slave_join(
     } else {
         database.add_node(radio_mac, bridge_mac, beerocks::TYPE_SLAVE, radio_identifier);
     }
-    database.set_hostap_is_acs_enabled(radio_mac, bool(notification->wlan_settings().acs_enabled));
+    database.set_hostap_is_acs_enabled(radio_mac, notification->wlan_settings().channel == 0);
     if (!notification->is_slave_reconf()) {
         son_actions::set_hostap_active(database, tasks, radio_mac,
                                        false); // make sure AP is marked as not active
@@ -2321,7 +2321,7 @@ bool master_thread::handle_cmdu_control_message(
             (beerocks_header->id() == database.get_rdkb_wlan_task_id())) {
             beerocks_message::sSteeringEvSnr new_event;
             new_event.snr = notification->params().rx_snr;
-            std::copy_n(notification->params().mac.oct, sizeof(new_event.client_mac.oct),
+            std::copy_n(notification->params().result.mac.oct, sizeof(new_event.client_mac.oct),
                         new_event.client_mac.oct);
             new_event.bssid = network_utils::mac_from_string(
                 database.get_hostap_vap_mac(ap_mac, notification->params().vap_id));
@@ -2356,11 +2356,13 @@ bool master_thread::handle_cmdu_control_message(
             (database.get_node_state(client_mac) == beerocks::STATE_CONNECTED) &&
             (!database.get_node_handoff_flag(client_mac)) && is_parent) {
 
-            database.set_node_cross_rx_rssi(client_mac, ap_mac, notification->params().rx_rssi, 1);
+            database.set_node_cross_rx_rssi(client_mac, ap_mac, 
+                notification->params().rx_rssi, 
+                notification->params().rx_packets);
             database.set_node_cross_tx_phy_rate_100kb(client_mac,
-                                                      notification->params().tx_phy_rate_100kb);
+                notification->params().tx_phy_rate_100kb);
             database.set_node_cross_rx_phy_rate_100kb(client_mac,
-                                                      notification->params().rx_phy_rate_100kb);
+                notification->params().rx_phy_rate_100kb);
 
             /*
                 * when a notification arrives, it means a large change in rx_rssi occurred (above the defined thershold)
@@ -2556,12 +2558,13 @@ bool master_thread::handle_cmdu_control_message(
                              &new_event);
         }
 #endif
-        if (database.get_node_ipv4(client_mac).empty()) {
-            database.set_node_state(client_mac, beerocks::STATE_CONNECTED_IP_UNKNOWN);
-            LOG(INFO) << "STATE_CONNECTED_IP_UNKNOWN for node mac " << client_mac;
-        } else {
-            son_actions::handle_completed_connection(database, cmdu_tx, tasks, client_mac);
-        }
+        // if (database.get_node_ipv4(client_mac).empty()) {
+        //     database.set_node_state(client_mac, beerocks::STATE_CONNECTED_IP_UNKNOWN);
+        //     LOG(INFO) << "STATE_CONNECTED_IP_UNKNOWN for node mac " << client_mac;
+        // } else {
+        //     son_actions::handle_completed_connection(database, cmdu_tx, tasks, client_mac);
+        // }
+        son_actions::handle_completed_connection(database, cmdu_tx, tasks, client_mac);
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION: {

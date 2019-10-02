@@ -124,8 +124,8 @@ bool db::remove_node(std::string mac)
     for (i = 0; i < HIERARCHY_MAX; i++) {
         auto it = nodes[i].find(mac);
         if (it != nodes[i].end()) {
-            std::string ruid_key =
-                get_node_key(it->second->parent_mac, it->second->radio_identifier);
+            std::string ruid_key = get_node_key(
+                it->second->parent_mac, it->second->radio_identifier);
             std::string node_mac = it->second->mac;
 
             if (last_accessed_node_mac == mac) {
@@ -1570,11 +1570,19 @@ std::string db::get_hostap_vap_with_ssid(const std::string &mac, const std::stri
         LOG(WARNING) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
         return std::string();
     }
+
+    auto vap_name = get_hostap_iface_name(mac);
+    vap_name.append(".");
+
     for (auto const &it : n->hostap->vaps_info) {
-        if (it.second.ssid == ssid) {
+        auto tmp_vap_name = vap_name;
+        tmp_vap_name.append(std::to_string(get_hostap_vap_id(it.second.mac)));
+        if ((it.second.ssid == ssid) &&
+            (config.load_steer_on_vaps.find(tmp_vap_name) != std::string::npos)) {
             return it.second.mac;
         }
     }
+
     return std::string();
 }
 
@@ -2177,6 +2185,38 @@ bool db::get_hostap_is_acs_enabled(std::string mac)
     }
     LOG(DEBUG) << __FUNCTION__ << "n->hostap->is_acs_enabled = " << int(n->hostap->is_acs_enabled);
     return n->hostap->is_acs_enabled;
+}
+
+bool db::set_hostap_passive_mode_enabled(std::string mac, bool enable)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+    LOG(DEBUG) << __FUNCTION__ << ", enable = " << int(enable);
+    n->hostap->passive_mode_enabled = enable;
+    return true;
+}
+
+bool db::get_hostap_passive_mode_enabled(std::string mac)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+    LOG(DEBUG) << __FUNCTION__
+               << "n->hostap->passive_mode_enabled = " << int(n->hostap->passive_mode_enabled);
+    return n->hostap->passive_mode_enabled;
 }
 
 //
@@ -2867,6 +2907,11 @@ bool db::set_node_channel_bw(const std::string &mac, int channel, beerocks::eWiF
             return false;
         }
     }
+
+    LOG(INFO) << "set node " << mac << " to channel=" << channel << ", bw=" << int(bw)
+              << ", channel_ext_above_secondary=" << int(channel_ext_above_secondary)
+              << ", channel_ext_above_primary=" << int(channel_ext_above_primary)
+              << ", vht_center_frequency=" << int(vht_center_frequency);
 
     n->channel                     = channel;
     n->bandwidth                   = bw;
