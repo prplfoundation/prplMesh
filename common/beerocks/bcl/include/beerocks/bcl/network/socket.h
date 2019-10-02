@@ -66,8 +66,9 @@ public:
     SOCKET getSocketFd() { return m_socket; }
     std::string getError()
     {
-        return m_error;
+        auto temp = m_error;
         m_error.clear();
+        return temp;
     }
     std::string getPeerIP() { return m_peer_ip; }
     int getPeerPort() { return m_peer_port; }
@@ -131,8 +132,9 @@ public:
     bool isBlocking() { return m_isBlocking; }
     std::string getError()
     {
-        return m_error;
+        auto temp = m_error;
         m_error.clear();
+        return temp;
     }
 
 private:

@@ -39,6 +39,7 @@ public:
         std::string load_client_band_steering;
         std::string load_client_optimal_path_roaming;
         std::string load_client_11k_roaming;
+        std::string load_steer_on_vaps;
         std::string load_legacy_client_roaming;
         std::string load_ire_roaming;
         std::string load_load_balancing;
