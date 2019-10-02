@@ -85,3 +85,8 @@ gdbserver :9999 --attach <pid of controller/agent/cli>
 ### Checking status
 
 System is operational if you see `FSM: CONNECTED --> OPERATIONAL` in the main agent log. In the future there will be a bml cli command to verify operational state.
+
+### Displaying the connection map (GUI)
+
+There is a tool to display the connection map on a GUI in `tools/beerocks_analyzer`.
+Its [README file](tools/beerocks_analyzer/README.md) explains how to use it.
