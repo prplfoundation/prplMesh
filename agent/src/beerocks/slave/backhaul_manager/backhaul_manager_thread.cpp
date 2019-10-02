@@ -162,7 +162,7 @@ bool main_thread::work()
 void main_thread::on_thread_stop()
 {
     // Close the socket with the platform manager
-    if (!m_scPlatform) {
+    if (m_scPlatform) {
         m_scPlatform.reset();
     }
 
@@ -176,7 +176,7 @@ void main_thread::on_thread_stop()
                 delete soc->slave;
             }
             if (soc->sta_wlan_hal) {
-                soc->sta_wlan_hal.reset();
+                soc->sta_wlan_hal = nullptr;
             }
             if (soc->sta_hal_ext_events) {
                 remove_socket(soc->sta_hal_ext_events);
@@ -211,6 +211,14 @@ bool main_thread::socket_disconnected(Socket *sd)
         return true;
     }
 
+    if (m_scPlatform.get() == sd) {
+        LOG(ERROR) << "platform manager socket disconnected " << intptr_t(sd)
+                   << " restarting backhaul manager";
+        m_scPlatform.reset();
+        FSM_MOVE_STATE(RESTART);
+        return true;
+    }
+
     for (auto it = slaves_sockets.begin(); it != slaves_sockets.end();) {
         auto soc          = *it;
         std::string iface = soc->hostap_iface;
@@ -224,7 +232,7 @@ bool main_thread::socket_disconnected(Socket *sd)
             }
             if (soc->sta_wlan_hal) {
                 LOG(INFO) << "dereferencing sta_wlan_hal";
-                soc->sta_wlan_hal.reset();
+                soc->sta_wlan_hal = nullptr;
             }
             if (soc->sta_hal_ext_events) {
                 LOG(INFO) << "removing sta_hal_ext_events socket";
@@ -386,7 +394,7 @@ bool main_thread::finalize_slaves_connect_state(bool fConnected,
                 for (auto soc : slaves_sockets) {
 
                     if (soc->sta_wlan_hal) {
-                        soc->sta_wlan_hal.reset();
+                        soc->sta_wlan_hal = nullptr;
                     }
                     if (soc->sta_hal_ext_events) {
                         remove_socket(soc->sta_hal_ext_events);
@@ -424,7 +432,7 @@ bool main_thread::finalize_slaves_connect_state(bool fConnected,
                         soc->slave_is_backhaul_manager = false;
                         // detach from unused stations
                         if (soc->sta_wlan_hal) {
-                            soc->sta_wlan_hal.reset();
+                            soc->sta_wlan_hal = nullptr;
                         }
                         if (soc->sta_hal_ext_events) {
                             remove_socket(soc->sta_hal_ext_events);
@@ -586,17 +594,18 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
 
         LOG(TRACE) << "backhaul manager state=ENABLED";
 
-        // Connect to the platform manager
+        // Connect/Reconnect to the platform manager
         if (!m_scPlatform) {
-            m_scPlatform.reset();
-        }
-
-        m_scPlatform = std::make_shared<SocketClient>(
-            SocketClient(beerocks_temp_path + std::string(BEEROCKS_PLAT_MGR_UDS)));
-        std::string err = m_scPlatform->getError();
-        if (!err.empty()) {
-            m_scPlatform.reset();
-            LOG(ERROR) << "Failed connecting to Platform Manager: " << err;
+            m_scPlatform = std::make_shared<SocketClient>(
+                SocketClient(beerocks_temp_path + std::string(BEEROCKS_PLAT_MGR_UDS)));
+            std::string err = m_scPlatform->getError();
+            if (!err.empty()) {
+                m_scPlatform.reset();
+                LOG(ERROR) << "Failed connecting to Platform Manager: " << err;
+            }
+        } else {
+            LOG(DEBUG) << "Using existing platform_manager_socket=0x"
+                       << intptr_t(m_scPlatform.get());
         }
 
         if (local_master && local_gw) {
@@ -604,6 +613,7 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
             FSM_MOVE_STATE(MASTER_DISCOVERY);
         } else { // link establish
 
+#ifdef BEEROCKS_LINUX
             // Remove the sta interfaces from the bridge
             for (auto soc : slaves_sockets) {
                 if (!soc->sta_iface.empty()) {
@@ -611,6 +621,7 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
                                                                   soc->sta_iface);
                 }
             }
+#endif
 
             // If a wired (WAN) interface was provided, try it first, check if the interface is UP
             if ((!m_sConfig.wire_iface.empty()) &&
@@ -766,7 +777,7 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
             std::string iface = soc->sta_iface;
 
             if (soc->sta_wlan_hal) {
-                soc->sta_wlan_hal.reset();
+                soc->sta_wlan_hal = nullptr;
             }
             if (soc->sta_hal_ext_events) {
                 remove_socket(soc->sta_hal_ext_events);
@@ -923,7 +934,57 @@ bool main_thread::send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> 
     return send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
 }
 
-bool main_thread::backhaul_fsm_wired(bool &skip_select) { return (true); }
+bool main_thread::backhaul_fsm_wired(bool &skip_select)
+{
+    switch (m_eFSMState) {
+        case EState::WIRED_BRIDGE_DHCP: {
+
+            // Clear ip on backhaul ifaces
+            if (!m_sConfig.wireless_iface.empty()) {
+                if (network_utils::linux_iface_is_up(m_sConfig.wireless_iface)) {
+                    network_utils::linux_iface_ctrl(m_sConfig.wireless_iface, true); // clear ip
+                }
+            }
+
+            // Trigger the DHCP process on the bridge and apply the leased address
+            run_dhcp_client(m_ftDHCPRetCode, m_sConfig.bridge_iface, true);
+            FSM_MOVE_STATE(WIRED_BRIDGE_DHCP_WAIT);
+
+        } break;
+
+        case EState::WIRED_BRIDGE_DHCP_WAIT: {
+            // As long as the future is NOT valid, the command DHCP
+            // command hasn't finished
+            if (!m_ftDHCPRetCode.valid())
+                break;
+
+            // DHCP Succeeded
+            if (m_ftDHCPRetCode.get() == 0) {
+                LOG(DEBUG) << "DHCP Succeeded";
+
+                // Attempt a connection to the master
+                FSM_MOVE_STATE(MASTER_DISCOVERY);
+
+                // DHCP Failed
+            } else {
+                LOG(ERROR) << "Failed obtaining DHCP on interface '" << m_sConfig.bridge_iface << "'";
+
+                platform_notify_error(BPL_ERR_BH_OBTAINING_DHCP_BRIDGE_INTERFACE,
+                                    "iface=" + m_sConfig.bridge_iface);
+                stop_on_failure_attempts--;
+                FSM_MOVE_STATE(RESTART);
+            }
+
+        } break;
+
+        default: {
+            LOG(ERROR) << "backhaul_fsm_wired() Invalid state: " << int(m_eFSMState);
+            return (false);
+        }
+    }
+
+    return (true);
+}
 
 bool main_thread::backhaul_fsm_wireless(bool &skip_select)
 {
@@ -938,6 +999,7 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
     case EState::WPA_ATTACH: {
 
         bool success = true;
+        bool connected = false;
 
         for (auto soc : slaves_sockets) {
             std::string iface = soc->sta_iface;
@@ -984,6 +1046,21 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
                     break;
                 }
 
+                if (soc->sta_wlan_hal->is_connected()) {
+                    if (!soc->sta_wlan_hal->update_status()) {
+                        LOG(ERROR) << "failed to update sta status";
+                        success = false;
+                        break;
+                    }
+                    connected                      = true;
+                    m_sConfig.wireless_iface       = iface;
+                    m_sConfig.eType                = SBackhaulConfig::EType::Wireless;
+                    selected_bssid                 = soc->sta_wlan_hal->get_bssid();
+                    selected_bssid_channel         = soc->sta_wlan_hal->get_channel();
+                    soc->slave_is_backhaul_manager = true;
+                    break;
+                }
+
             } else if (attach_state == bwl::HALState::Failed) {
                 // Delete the HAL instance
                 soc->sta_wlan_hal.reset();
@@ -992,7 +1069,11 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
             }
         }
 
-        if (success) {
+        if (success && connected) {
+            // send_slaves_enable();
+            FSM_MOVE_STATE(MASTER_DISCOVERY);
+            state_attempts = 0; // for next state
+        } else if (success) {
             FSM_MOVE_STATE(INITIATE_SCAN);
             state_attempts = 0; // for next state
         } else {
@@ -1035,9 +1116,43 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
         }
 
         bool success = true;
+        bool preferred_band_is_supported = false;
+
+        // Check if backhaul preferred band is supported (supporting radio is available)
+        if (m_sConfig.backhaul_preferred_radio_band == beerocks::eFreqType::FREQ_AUTO) {
+            preferred_band_is_supported = true;
+        } else {
+            for (auto soc : slaves_sockets) {
+                if (soc->sta_iface.empty())
+                    continue;
+                if (!soc->sta_wlan_hal) {
+                    LOG(WARNING) << "Sta_hal of " << soc->sta_iface << " is null";
+                    continue;
+                }
+                if (m_sConfig.backhaul_preferred_radio_band == soc->freq_type) {
+                    preferred_band_is_supported = true;
+                }
+            }
+        }
+
+        LOG_IF(!preferred_band_is_supported, DEBUG) << "Preferred backhaul band is not available";
+
         for (auto soc : slaves_sockets) {
             if (soc->sta_iface.empty())
                 continue;
+
+            if (!soc->sta_wlan_hal) {
+                LOG(WARNING) << "Sta_hal of " << soc->sta_iface << " is null";
+                continue;
+            }
+            if (preferred_band_is_supported) {
+                if ((m_sConfig.backhaul_preferred_radio_band != beerocks::eFreqType::FREQ_AUTO) &&
+                    (m_sConfig.backhaul_preferred_radio_band != soc->freq_type)) {
+                    LOG(DEBUG) << "slave iface=" << soc->sta_iface
+                               << " is not of the preferred backhaul band";
+                    continue;
+                }
+            }
 
             std::string iface = soc->sta_iface;
             pending_slave_sta_ifaces.insert(iface);
@@ -1046,7 +1161,7 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
                 LOG(ERROR) << "initiate_scan for iface " << iface << " failed!";
                 platform_notify_error(BPL_ERR_BH_SCAN_FAILED_TO_INITIATE_SCAN,
                                       "iface='" + iface + "'");
-                ;
+
                 success = false;
                 break;
             }
@@ -1081,7 +1196,7 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
         // Disconnect is necessary before changing 4addr mode, to make sure wpa_supplicant is not using the iface
         if (hidden_ssid) {
             for (auto soc : slaves_sockets) {
-                if (soc->sta_iface.empty())
+                if (soc->sta_iface.empty() || !soc->sta_wlan_hal)
                     continue;
                 std::string iface = soc->sta_iface;
                 soc->sta_wlan_hal->disconnect();
@@ -1104,19 +1219,14 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
         if (roam_flag) {
             selected_bssid         = roam_selected_bssid;
             selected_bssid_channel = roam_selected_bssid_channel;
-        }
-
-        if (wifi_reconnect_flag) {
             if (!active_hal->roam(selected_bssid, selected_bssid_channel)) {
                 platform_notify_error(BPL_ERR_BH_ROAMING, "BSSID='" + selected_bssid + "'");
-                wifi_reconnect_flag = false;
-                stop_on_failure_attempts--;
                 FSM_MOVE_STATE(RESTART);
                 break;
             }
-            wifi_reconnect_flag = false;
+        }
 
-        } else {
+        if (!wifi_reconnect_flag) {
             if (hidden_ssid) {
                 std::string iface;
 
@@ -1151,7 +1261,8 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
             }
 
             if (active_hal->connect(m_sConfig.ssid, m_sConfig.pass, m_sConfig.security_type,
-                                    selected_bssid, selected_bssid_channel, hidden_ssid)) {
+                                    m_sConfig.mem_only_psk, selected_bssid, selected_bssid_channel, 
+                                    hidden_ssid)) {
                 LOG(DEBUG) << "successful call to active_hal->connect(), bssid=" << selected_bssid
                            << ", channel=" << selected_bssid_channel
                            << ", iface=" << m_sConfig.wireless_iface;
@@ -1161,6 +1272,8 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
                 break;
             }
         }
+
+        wifi_reconnect_flag = false;
 
         FSM_MOVE_STATE(WIRELESS_ASSOCIATE_4ADDR_WAIT);
         state_attempts           = 0;
@@ -1257,11 +1370,22 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
         break;
     }
     case EState::WIRELESS_WAIT_FOR_RECONNECT: {
-        if (std::chrono::steady_clock::now() > state_time_stamp_timeout) {
+        auto now = std::chrono::steady_clock::now();
+
+        if (now > state_time_stamp_timeout) {
             LOG(DEBUG) << "reconnect wait timed out";
 
-            FSM_MOVE_STATE(WIRELESS_ASSOCIATE_4ADDR);
-            wifi_reconnect_flag = true;
+            // increment attempts count in blacklist
+            if (!selected_bssid.empty()) {
+                ap_blacklist_entry &entry = ap_blacklist[selected_bssid];
+                entry.timestamp           = now;
+                entry.attempts++;
+                LOG(DEBUG) << "updating bssid " << selected_bssid
+                           << " blacklist entry, attempts=" << entry.attempts
+                           << ", max_allowed attempts=" << AP_BLACK_LIST_FAILED_ATTEMPTS_THRESHOLD;
+            }
+
+            FSM_MOVE_STATE(INITIATE_SCAN);
         }
         break;
     }
@@ -1319,7 +1443,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         // Forward cmdu to all slaves how it is on UDS, without changing it
         for (auto soc_iter : slaves_sockets) {
             if (!message_com::forward_cmdu_to_uds(soc_iter->slave, cmdu_rx, length)) {
-                LOG(ERROR) << "forward_cmdu_to_uds() failed - " << print_cmdu_types(uds_header);
+                LOG(ERROR) << "forward_cmdu_to_uds() failed - " << print_cmdu_types(uds_header)
+                           << " sd=" << intptr_t(soc_iter->slave);
             }
         }
 
@@ -1413,10 +1538,10 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
             return false;
         }
 
-        std::string mac            = network_utils::mac_to_string(request->iface_mac());
-        soc->radio_mac             = mac;
-        soc->freq_type             = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
-                                                   : beerocks::eFreqType::FREQ_24G);
+        std::string mac = network_utils::mac_to_string(request->iface_mac());
+        soc->radio_mac  = mac;
+        soc->freq_type  = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
+                                                    : beerocks::eFreqType::FREQ_24G);
         soc->controller_discovered = false;
 
         LOG(DEBUG) << "ACTION_BACKHAUL_ENABLE hostap_iface=" << soc->hostap_iface
@@ -1458,6 +1583,16 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
                     m_sConfig.ssid.assign(request->ssid(message::WIFI_SSID_MAX_LENGTH));
                     m_sConfig.pass.assign(request->pass(message::WIFI_PASS_MAX_LENGTH));
                     m_sConfig.security_type = static_cast<bwl::WiFiSec>(request->security_type());
+                    m_sConfig.mem_only_psk  = request->mem_only_psk();
+                    if (request->backhaul_preferred_radio_band() ==
+                        beerocks::eFreqType::FREQ_UNKNOWN) {
+                        LOG(DEBUG) << "Unknown backhaul preferred radio band, setting to auto";
+                        m_sConfig.backhaul_preferred_radio_band = beerocks::eFreqType::FREQ_AUTO;
+                    } else {
+                        m_sConfig.backhaul_preferred_radio_band =
+                            (beerocks::eFreqType)request->backhaul_preferred_radio_band();
+                    }
+
                     // Change mixed state to WPA2
                     if (m_sConfig.security_type == bwl::WiFiSec::WPA_WPA2_PSK) {
                         m_sConfig.security_type = bwl::WiFiSec::WPA2_PSK;
@@ -1466,7 +1601,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
                     m_sConfig.wire_iface_type = (beerocks::eIfaceType)request->wire_iface_type();
                     m_sConfig.wired_backhaul  = request->wired_backhaul();
                     LOG(DEBUG) << "All slaves ready, proceeding" << std::endl
-                               << "SSID: " << m_sConfig.ssid << ", Pass: " << m_sConfig.pass
+                               << "SSID: " << m_sConfig.ssid << ", Pass: ****"
                                << ", Security: " << int(m_sConfig.security_type)
                                << ", Bridge: " << m_sConfig.bridge_iface
                                << ", Wired: " << m_sConfig.wire_iface;
@@ -1783,6 +1918,22 @@ bool main_thread::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessage
     return true;
 }
 
+bool main_thread::send_slaves_enable()
+{
+    for (auto soc : slaves_sockets) {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION>(cmdu_tx);
+
+        if (soc->sta_iface == m_sConfig.wireless_iface) {
+            notification->channel() = get_wireless_hal()->get_channel();
+        }
+        LOG(DEBUG) << "Sending enable to slave " << soc->radio_mac;
+        message_com::send_cmdu(soc->slave, cmdu_tx);
+    }
+
+    return true;
+}
+
 bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr,
                                     std::string iface)
 {
@@ -1860,12 +2011,21 @@ bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_pt
                     }
                 }
             }
+
+            if (FSM_IS_IN_STATE(WIRELESS_ASSOCIATE_4ADDR_WAIT)) {
+                if (!wifi_reconnect_flag) {
+                    // Send slaves to enable the AP's
+                    send_slaves_enable();
+                }
+
+                // FSM_MOVE_STATE(WIRELESS_BRIDGE_DHCP);
+                FSM_MOVE_STATE(MASTER_DISCOVERY);
+            }
+
             roam_flag           = false;
             wifi_reconnect_flag = false;
             state_attempts      = 0;
-            if (FSM_IS_IN_STATE(WIRELESS_ASSOCIATE_4ADDR_WAIT)) {
-                FSM_MOVE_STATE(WIRELESS_BRIDGE_DHCP);
-            }
+
         } else if (FSM_IS_IN_STATE(WIRELESS_WAIT_FOR_RECONNECT)) {
             LOG(DEBUG) << "reconnected successfully, continuing";
             if (local_master && !local_gw) { // ire_master
@@ -2026,13 +2186,13 @@ bool main_thread::select_bssid()
     std::string best_24_sta_iface, best_5_high_sta_iface, best_5_low_sta_iface, best_5_sta_iface;
 
     // Support up to 256 scan results
-    net::sScanResult scan_results[256];
+    std::vector<bwl::SScanResult> scan_results;
 
     LOG(DEBUG) << "select_bssid: SSID = " << m_sConfig.ssid;
 
     for (auto soc : slaves_sockets) {
 
-        if (soc->sta_iface.empty()) {
+        if (soc->sta_iface.empty() || !soc->sta_wlan_hal) {
             LOG(DEBUG) << "skipping empty iface";
             continue;
         }
@@ -2040,16 +2200,16 @@ bool main_thread::select_bssid()
         std::string iface = soc->sta_iface;
 
         LOG(DEBUG) << "select_bssid: iface  = " << iface;
-        int num_of_results = soc->sta_wlan_hal->get_scan_results(m_sConfig.ssid, scan_results, 256);
+        int num_of_results = soc->sta_wlan_hal->get_scan_results(m_sConfig.ssid, scan_results);
         LOG(DEBUG) << "Scan Results: " << num_of_results;
 
-        for (int i = 0; i < num_of_results; i++) {
-            auto &scan_result = scan_results[i];
+        for (auto &scan_result : scan_results) {
 
-            auto bssid = network_utils::mac_to_string(scan_result.mac);
+            auto bssid = network_utils::mac_to_string(scan_result.bssid);
             LOG(DEBUG) << "select_bssid: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface
                        << ", rssi=" << int(scan_result.rssi);
+
             auto ap_blacklist_it = ap_blacklist.find(bssid);
             if (ap_blacklist_it != ap_blacklist.end()) {
                 ap_blacklist_entry &entry = ap_blacklist_it->second;
@@ -2220,9 +2380,8 @@ bool main_thread::select_bssid()
 
 void main_thread::get_scan_measurement()
 {
-
     // Support up to 256 scan results
-    net::sScanResult scan_results[256];
+    std::vector<bwl::SScanResult> scan_results;
 
     LOG(DEBUG) << "get_scan_measurement: SSID = " << m_sConfig.ssid;
     scan_measurement_list.clear();
@@ -2232,10 +2391,13 @@ void main_thread::get_scan_measurement()
             LOG(DEBUG) << "skipping empty iface";
             continue;
         }
+        if (!soc->sta_wlan_hal) {
+            continue;
+        }
 
         std::string iface = soc->sta_iface;
         LOG(DEBUG) << "get_scan_measurement: iface  = " << iface;
-        int num_of_results = soc->sta_wlan_hal->get_scan_results(m_sConfig.ssid, scan_results, 256);
+        int num_of_results = soc->sta_wlan_hal->get_scan_results(m_sConfig.ssid, scan_results);
         LOG(DEBUG) << "Scan Results: " << int(num_of_results);
         if (num_of_results < 0) {
             LOG(ERROR) << "get_scan_results failed!";
@@ -2244,10 +2406,9 @@ void main_thread::get_scan_measurement()
             continue;
         }
 
-        for (int i = 0; i < num_of_results; i++) {
-            auto &scan_result = scan_results[i];
+        for (auto &scan_result : scan_results) {
 
-            auto bssid = network_utils::mac_to_string(scan_result.mac);
+            auto bssid = network_utils::mac_to_string(scan_result.bssid);
             LOG(DEBUG) << "get_scan_measurement: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface;
 
@@ -2265,7 +2426,7 @@ void main_thread::get_scan_measurement()
                 //insert new entry
                 sScanResult scan_measurement;
 
-                std::copy_n(scan_result.mac.oct, MAC_ADDR_LEN, scan_measurement.mac.oct);
+                std::copy_n(scan_result.bssid.oct, MAC_ADDR_LEN, scan_measurement.mac.oct);
                 scan_measurement.channel     = scan_result.channel;
                 scan_measurement.rssi        = scan_result.rssi;
                 scan_measurement_list[bssid] = scan_measurement;

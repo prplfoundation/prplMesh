@@ -80,6 +80,7 @@ private:
     void get_scan_measurement();
     bool select_bssid();
     void platform_notify_error(int code, const std::string &error_data);
+    bool send_slaves_enable();
 
     std::shared_ptr<bwl::sta_wlan_hal> get_wireless_hal(std::string iface = "");
 
@@ -126,6 +127,8 @@ private:
         beerocks::eIfaceType wire_iface_type;
         beerocks::eIfaceType wireless_iface_type;
         bwl::WiFiSec security_type;
+        bool mem_only_psk;
+        eFreqType backhaul_preferred_radio_band;
 
         // Slave handling the active wireless connection
         // std::shared_ptr<bwl::sta_wlan_hal> active_slave_hal;
@@ -227,6 +230,8 @@ private:
     STATE(ENABLED)                                                                                 \
                                                                                                    \
     STATE(_WIRED_START_)                                                                           \
+    STATE(WIRED_BRIDGE_DHCP)                                                                       \
+    STATE(WIRED_BRIDGE_DHCP_WAIT)                                                                  \
     STATE(_WIRED_END_)                                                                             \
                                                                                                    \
     STATE(_WIRELESS_START_)                                                                        \

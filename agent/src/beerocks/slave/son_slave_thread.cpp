@@ -191,14 +191,16 @@ void slave_thread::on_thread_stop() { stop_slave_thread(); }
 
 bool slave_thread::socket_disconnected(Socket *sd)
 {
-    if (slave_state == STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE ||
-        slave_state == STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE ||
-        slave_state == STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE) {
+    if (configuration_in_progress) {
         LOG(DEBUG) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
         detach_on_conf_change = true;
         if (sd == ap_manager_socket || sd == monitor_socket) {
             ap_manager_stop();
             monitor_stop();
+            return false;
+        }
+        else if (sd == backhaul_manager_socket) {
+            backhaul_manager_stop();
             return false;
         }
         return true;
@@ -734,8 +736,8 @@ bool slave_thread::handle_cmdu_control_message(
         LOG(INFO) << "rx_rssi measurement request for client mac="
                   << network_utils::mac_to_string(request_in->params().mac)
                   << " ip=" << network_utils::ipv4_to_string(request_in->params().ipv4)
-                  << " channel=" << int(request_in->params().channel) << " bandwidth="
-                  << utils::convert_bandwidth_to_int(
+                  << " channel=" << int(request_in->params().channel) 
+                  << " bandwidth=" << utils::convert_bandwidth_to_int(
                          (beerocks::eWiFiBandwidth)request_in->params().bandwidth)
                   << " cross=" << int(request_in->params().cross)
                   << " id=" << int(beerocks_header->id());
@@ -1429,6 +1431,33 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
         break;
     }
 
+    case beerocks_message::ACTION_BACKHAUL_ENABLE_APS_NOTIFICATION: {
+        auto notification_in =
+            cmdu_rx.addClass<beerocks_message::cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION>();
+        if (!notification_in) {
+            LOG(ERROR) << "Failed building cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION message!";
+            return false;
+        }
+
+        auto notification_out =
+            message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_ENABLE_APS_REQUEST>(
+                cmdu_tx);
+        if (notification_out == nullptr) {
+            LOG(ERROR) << "Failed building ACTION_APMANAGER_ENABLE_APS_REQUEST message!";
+            return false;
+        }
+
+        notification_out->channel()        = notification_in->channel();
+        notification_out->bandwidth()      = notification_in->bandwidth();
+        notification_out->center_channel() = notification_in->center_channel();
+        LOG(DEBUG) << "Sending ACTION_APMANAGER_ENABLE_APS_REQUEST";
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+
+        configuration_in_progress = true;
+
+        break;
+    }
+
     case beerocks_message::ACTION_BACKHAUL_CONNECTED_NOTIFICATION: {
 
         auto notification =
@@ -2055,38 +2084,13 @@ bool slave_thread::handle_cmdu_platform_manager_message(
         LOG(INFO) << "ACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST config_start="
                   << int(response->config_start());
 
-        if (slave_state == STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE) {
-            LOG(DEBUG) << "slave wifi credentials set in progress - ignore wifi configuration "
-                          "notification";
-        } else if (slave_state != STATE_OPERATIONAL &&
-                   slave_state != STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE &&
-                   slave_state != STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE) {
-            LOG(DEBUG) << "invalid slave state - ignore wifi configuration notification";
-        } else if (!response->config_start()) {
-            LOG(DEBUG) << "WIFI_CONFIGURATION_UPDATE_COMPLETE";
+        configuration_in_progress = response->config_start();
+        LOG(DEBUG) << "WIFI_CONFIGURATION_UPDATE_COMPLETE";
+        if (!configuration_in_progress) {
             if (detach_on_conf_change) {
                 LOG(DEBUG) << "detach occurred on wifi conf change, slave reset!";
                 slave_reset();
-            } else if (
-                master_socket) { // if backhaul disconnects before we get WIFI_CONFIGURATION_UPDATE_COMPLETE, so the slave will continue on its current state
-                LOG(DEBUG) << "WIFI_CONFIGURATION_UPDATE_COMPLETE! goto STATE_OPERATIONAL";
-                slave_state = STATE_OPERATIONAL;
             }
-
-        } else if (slave_state == STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE) {
-            // response->config_start == 1, but prev conf change is not finished yet
-            slave_state_timer =
-                std::chrono::steady_clock::now() +
-                std::chrono::seconds(beerocks::SON_SLAVE_WAIT_AFTER_WIFI_CONFIG_UPDATE_SEC);
-            LOG(DEBUG) << "goto STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE";
-            slave_state = STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE;
-
-        } else { // response->config_start == 1, new conf update request
-            slave_state_timer =
-                std::chrono::steady_clock::now() +
-                std::chrono::seconds(STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE_TIMEOUT_SEC);
-            LOG(DEBUG) << "goto STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE";
-            slave_state = STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE;
         }
         break;
     }
@@ -2210,11 +2214,10 @@ bool slave_thread::handle_cmdu_ap_manager_message(
                   << int(response_in->vap_id());
         if (response_in->vap_id() == beerocks::IFACE_RADIO_ID) {
             LOG(WARNING) << __FUNCTION__ << "AP_Disabled on radio, slave reset";
-            if (slave_state == STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE ||
-                slave_state == STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE ||
-                slave_state == STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE) {
+            if (configuration_in_progress) {
                 LOG(INFO) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
                 detach_on_conf_change = true;
+                break;
             } else if (platform_settings.passive_mode_enabled == 0) {
                 stop_on_failure_attempts--;
                 platform_notify_error(BPL_ERR_AP_MANAGER_HOSTAP_DISABLED, config.hostap_iface);
@@ -2230,6 +2233,27 @@ bool slave_thread::handle_cmdu_ap_manager_message(
 
             response_out->vap_id() = response_in->vap_id();
             send_cmdu_to_controller(cmdu_tx);
+        }
+        break;
+    }
+    case beerocks_message::ACTION_APMANAGER_ENABLE_APS_RESPONSE: {
+        configuration_in_progress = false;
+        LOG(INFO) << "received ACTION_APMANAGER_ENABLE_APS_RESPONSE";
+
+        auto response = cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_ENABLE_APS_RESPONSE>();
+        if (response == nullptr) {
+            LOG(ERROR) << "addClass cACTION_APMANAGER_ENABLE_APS_RESPONSE failed";
+            return false;
+        }
+
+        if (!response->success()) {
+            LOG(ERROR) << "failed to enable APs";
+            slave_reset();
+        }
+
+        if (detach_on_conf_change) {
+            LOG(DEBUG) << "detach occurred on wifi conf change, slave reset!";
+            slave_reset();
         }
         break;
     }
@@ -2281,7 +2305,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
         auto notification_in =
             cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION>();
         if (notification_in == nullptr) {
-            LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION failed";
+            LOG(ERROR) << "addClass ACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION failed";
             return false;
         }
         auto notification_out = message_com::create_vs_message<
@@ -2672,9 +2696,13 @@ bool slave_thread::handle_cmdu_monitor_message(
         LOG(INFO) << "received ACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION";
         if (response_in->vap_id() == beerocks::IFACE_RADIO_ID) {
             LOG(WARNING) << __FUNCTION__ << "AP_Disabled on radio, slave reset";
-            if (platform_settings.passive_mode_enabled == 0) {
+            if (configuration_in_progress) {
+                LOG(INFO) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
+                detach_on_conf_change = true;
+                break;
+            } else if (platform_settings.passive_mode_enabled == 0) {
                 stop_on_failure_attempts--;
-                platform_notify_error(BPL_ERR_MONITOR_HOSTAP_DISABLED, config.hostap_iface);
+                platform_notify_error(BPL_ERR_AP_MANAGER_HOSTAP_DISABLED, config.hostap_iface);
             }
             slave_reset();
         }
@@ -2985,9 +3013,7 @@ bool slave_thread::handle_cmdu_monitor_message(
         LOG(INFO) << "ACTION_MONITOR_ERROR_NOTIFICATION, error_code="
                   << int(notification->error_code());
 
-        if (slave_state == STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE ||
-            slave_state == STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE ||
-            slave_state == STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE) {
+        if (configuration_in_progress) {
             LOG(INFO) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
             detach_on_conf_change = true;
             break;
@@ -3201,61 +3227,63 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         break;
     }
     case STATE_CONNECT_TO_BACKHAUL_MANAGER: {
-        if (backhaul_manager_socket) {
-            remove_socket(backhaul_manager_socket);
-            delete backhaul_manager_socket;
-            backhaul_manager_socket = nullptr;
-        }
-        backhaul_manager_socket = new SocketClient(backhaul_manager_uds);
-        std::string err         = backhaul_manager_socket->getError();
-        if (!err.empty()) {
-            delete backhaul_manager_socket;
-            backhaul_manager_socket = nullptr;
-            LOG(ERROR) << "backhaul_manager_socket: " << err;
-            platform_notify_error(BPL_ERR_SLAVE_CONNECTING_TO_BACKHAUL_MANAGER,
-                                  "iface=" + config.backhaul_wireless_iface);
-            stop_on_failure_attempts--;
-            slave_reset();
-        } else {
-            add_socket(backhaul_manager_socket);
-
-            // CMDU Message
-            auto request =
-                message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_REGISTER_REQUEST>(
-                    cmdu_tx);
-
-            if (request == nullptr) {
-                LOG(ERROR) << "Failed building message!";
+        if (backhaul_manager_socket == nullptr) {
+            LOG(DEBUG) << "create backhaul_manager_socket";
+            backhaul_manager_socket = new SocketClient(backhaul_manager_uds);
+            std::string err         = backhaul_manager_socket->getError();
+            if (!err.empty()) {
+                LOG(ERROR) << "backhaul_manager_socket: " << err;
+                backhaul_manager_stop();
+                platform_notify_error(BPL_ERR_SLAVE_CONNECTING_TO_BACKHAUL_MANAGER,
+                                      "iface=" + config.backhaul_wireless_iface);
+                stop_on_failure_attempts--;
+                slave_reset();
                 break;
-            }
-
-            if (platform_settings.local_gw || config.backhaul_wireless_iface.empty()) {
-                memset(request->sta_iface(message::IFACE_NAME_LENGTH), 0,
-                       message::IFACE_NAME_LENGTH);
             } else {
-                string_utils::copy_string(request->sta_iface(message::IFACE_NAME_LENGTH),
-                                          config.backhaul_wireless_iface.c_str(),
-                                          message::IFACE_NAME_LENGTH);
+                add_socket(backhaul_manager_socket);
             }
-            string_utils::copy_string(request->hostap_iface(message::IFACE_NAME_LENGTH),
-                                      config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
-
-            request->local_master()         = platform_settings.local_master;
-            request->local_gw()             = platform_settings.local_gw;
-            request->sta_iface_filter_low() = config.backhaul_wireless_iface_filter_low;
-            request->onboarding()           = platform_settings.onboarding;
-            LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST local_master="
-                      << int(platform_settings.local_master)
-                      << " local_gw=" << int(platform_settings.local_gw)
-                      << " hostap_iface=" << request->hostap_iface(message::IFACE_NAME_LENGTH)
-                      << " sta_iface=" << request->sta_iface(message::IFACE_NAME_LENGTH)
-                      << " onboarding=" << int(request->onboarding());
-
-            message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
-            LOG(TRACE) << "send ACTION_BACKHAUL_REGISTER_REQUEST";
-            LOG(TRACE) << "goto STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE";
-            slave_state = STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE;
+        } else {
+            LOG(DEBUG) << "using existing backhaul_manager_socket=0x"
+                       << intptr_t(backhaul_manager_socket);
         }
+
+        // CMDU Message
+        auto request =
+            message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_REGISTER_REQUEST>(
+                cmdu_tx);
+
+        if (request == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            break;
+        }
+
+        if (platform_settings.local_gw || config.backhaul_wireless_iface.empty()) {
+            memset(request->sta_iface(message::IFACE_NAME_LENGTH), 0,
+                    message::IFACE_NAME_LENGTH);
+        } else {
+            string_utils::copy_string(request->sta_iface(message::IFACE_NAME_LENGTH),
+                                        config.backhaul_wireless_iface.c_str(),
+                                        message::IFACE_NAME_LENGTH);
+        }
+        string_utils::copy_string(request->hostap_iface(message::IFACE_NAME_LENGTH),
+                                    config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
+
+        request->local_master()         = platform_settings.local_master;
+        request->local_gw()             = platform_settings.local_gw;
+        request->sta_iface_filter_low() = config.backhaul_wireless_iface_filter_low;
+        request->onboarding()           = platform_settings.onboarding;
+        LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST local_master="
+                    << int(platform_settings.local_master)
+                    << " local_gw=" << int(platform_settings.local_gw)
+                    << " hostap_iface=" << request->hostap_iface(message::IFACE_NAME_LENGTH)
+                    << " sta_iface=" << request->sta_iface(message::IFACE_NAME_LENGTH)
+                    << " onboarding=" << int(request->onboarding());
+
+        message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
+        LOG(TRACE) << "send ACTION_BACKHAUL_REGISTER_REQUEST";
+        LOG(TRACE) << "goto STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE";
+        slave_state = STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE;
+
         break;
     }
     case STATE_WAIT_RETRY_CONNECT_TO_BACKHAUL_MANAGER: {
@@ -3534,6 +3562,9 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                       platform_settings.back_pass, message::WIFI_PASS_MAX_LENGTH);
             bh_enable->security_type() = static_cast<uint32_t>(
                 platform_to_bwl_security(platform_settings.back_security_type));
+            bh_enable->mem_only_psk() = platform_settings.mem_only_psk;
+            bh_enable->backhaul_preferred_radio_band() =
+                platform_settings.backhaul_preferred_radio_band;
 
             // Interfaces
             if (platform_settings.wired_backhaul) {
@@ -3786,10 +3817,9 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                     << network_utils::mac_to_string(notification->backhaul_params()
                                                         .backhaul_scan_measurement_list[i]
                                                         .mac.oct)
-                    << " channel = "
-                    << int(notification->backhaul_params()
-                               .backhaul_scan_measurement_list[i]
-                               .channel)
+                    << " channel = " << int(notification->backhaul_params()
+                                                        .backhaul_scan_measurement_list[i]
+                                                        .channel)
                     << " rssi = "
                     << int(notification->backhaul_params().backhaul_scan_measurement_list[i].rssi);
             }
@@ -3816,7 +3846,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         slave_state_timer = std::chrono::steady_clock::now() +
                             std::chrono::seconds(WAIT_FOR_JOINED_RESPONSE_TIMEOUT_SEC);
 
-        if (!wlan_settings.acs_enabled) {
+        if (wlan_settings.channel != 0 /* NOT ACS */) {
             send_platform_iface_status_notif(eRadioStatus::AP_OK, true);
         }
 
@@ -3913,9 +3943,9 @@ bool slave_thread::ap_manager_start()
     ap_manager_thread::ap_manager_conf_t ap_manager_conf;
     ap_manager_conf.hostap_iface      = config.hostap_iface;
     ap_manager_conf.hostap_iface_type = config.hostap_iface_type;
-    ap_manager_conf.acs_enabled       = wlan_settings.acs_enabled;
+    ap_manager_conf.passive_mode_enabled = platform_settings.passive_mode_enabled;
+    ap_manager_conf.channel           = wlan_settings.channel;
     ap_manager_conf.iface_filter_low  = config.backhaul_wireless_iface_filter_low;
-    //ap_manager_conf.is_passive_mode     = (platform_settings.passive_mode_enabled == 1);
     ap_manager_conf.backhaul_vaps_bssid = platform_settings.backhaul_vaps_bssid;
 
     ap_manager->ap_manager_config(ap_manager_conf);
@@ -3955,6 +3985,7 @@ void slave_thread::ap_manager_stop()
 void slave_thread::backhaul_manager_stop()
 {
     if (backhaul_manager_socket) {
+        LOG(DEBUG) << "removing backhaul_manager_socket";
         remove_socket(backhaul_manager_socket);
         delete backhaul_manager_socket;
     }

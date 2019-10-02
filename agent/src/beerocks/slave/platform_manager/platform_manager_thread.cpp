@@ -40,6 +40,19 @@ static const uint8_t s_arrBCastMac[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+static beerocks::eFreqType bpl_band_to_freq_type(int bpl_band)
+{
+    if (bpl_band == BPL_RADIO_BAND_2G) {
+        return beerocks::eFreqType::FREQ_24G;
+    } else if (bpl_band == BPL_RADIO_BAND_5G) {
+        return beerocks::eFreqType::FREQ_5G;
+    } else if (bpl_band == BPL_RADIO_BAND_AUTO) {
+        return beerocks::eFreqType::FREQ_AUTO;
+    } else {
+        return beerocks::eFreqType::FREQ_UNKNOWN;
+    }
+}
+
 static bool fill_platform_settings(
     std::string iface_name,
     std::shared_ptr<beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE> msg,
@@ -66,9 +79,18 @@ static bool fill_platform_settings(
         return false;
     }
 
+    int mem_only_psk = bpl_cfg_get_security_policy();
+    if (mem_only_psk < 0) {
+        LOG(ERROR) << "Failed reading Wi-Fi security policy!";
+        return false;
+    }
+
+    msg->platform_settings().mem_only_psk = mem_only_psk;
+
     LOG(DEBUG) << "Back Credentials:"
                << " ssid=" << msg->platform_settings().back_ssid
-               << " sec=" << msg->platform_settings().back_security_type << " pass=***";
+               << " sec=" << msg->platform_settings().back_security_type 
+               << " mem_only_psk=" << int(msg->platform_settings().mem_only_psk) << " pass=***";
 
     struct BPL_WLAN_PARAMS params;
     if (bpl_cfg_get_wifi_params(iface_name.c_str(), &params) < 0) {
@@ -77,7 +99,7 @@ static bool fill_platform_settings(
     }
     /* update message */
     msg->wlan_settings().band_enabled   = params.enabled;
-    msg->wlan_settings().acs_enabled    = params.acs;
+    msg->wlan_settings().channel        = params.channel;
     msg->wlan_settings().advertise_ssid = params.advertise_ssid;
     string_utils::copy_string(msg->wlan_settings().ssid, params.ssid,
                               beerocks::message::WIFI_SSID_MAX_LENGTH);
@@ -88,7 +110,8 @@ static bool fill_platform_settings(
 
     LOG(DEBUG) << "wlan settings:"
                << " ssid=" << msg->wlan_settings().ssid
-               << " sec=" << msg->wlan_settings().security_type << " pass=***";
+               << " sec=" << msg->wlan_settings().security_type << " pass=***"
+               << " channel=" << int(msg->wlan_settings().channel);
 
     // initialize wlan params cache
     //erase interface cache from map if exists
@@ -100,7 +123,7 @@ static bool fill_platform_settings(
     }
 
     params_ptr->band_enabled   = params.enabled;
-    params_ptr->acs_enabled    = params.acs;
+    params_ptr->channel        = params.channel;
     params_ptr->advertise_ssid = params.advertise_ssid;
     string_utils::copy_string(params_ptr->ssid, params.ssid,
                               beerocks::message::WIFI_SSID_MAX_LENGTH);
@@ -158,9 +181,9 @@ static bool fill_platform_settings(
 
         if (bpl_cfg_get_backhaul_params(&platform_common_conf.backhaul_max_vaps,
                                         &platform_common_conf.backhaul_network_enabled,
-                                        &platform_common_conf.backhaul_prefered_radio_band) < 0) {
+                                        &platform_common_conf.backhaul_preferred_radio_band) < 0) {
             LOG(ERROR) << "Failed reading 'backhaul_max_vaps, backhaul_network_enabled, "
-                          "backhaul_prefered_radio_band'!";
+                          "backhaul_preferred_radio_band'!";
         }
 
         if (bpl_cfg_get_backhaul_vaps(back_vaps, back_vaps_buff_len) < 0) {
@@ -207,8 +230,8 @@ static bool fill_platform_settings(
     msg->platform_settings().backhaul_max_vaps = uint8_t(platform_common_conf.backhaul_max_vaps);
     msg->platform_settings().backhaul_network_enabled =
         uint8_t(platform_common_conf.backhaul_network_enabled);
-    msg->platform_settings().backhaul_prefered_radio_band =
-        uint8_t(platform_common_conf.backhaul_prefered_radio_band);
+    msg->platform_settings().backhaul_preferred_radio_band =
+        uint8_t(bpl_band_to_freq_type(platform_common_conf.backhaul_preferred_radio_band));
 
     msg->platform_settings().load_balancing_enabled   = 0; // for v1.3 TODO read from CAL DB
     msg->platform_settings().service_fairness_enabled = 0; // for v1.3 TODO read from CAL DB
@@ -229,6 +252,8 @@ static bool fill_platform_settings(
     LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)msg->platform_settings().dfs_reentry_enabled;
     LOG(DEBUG) << "passive_mode_enabled: "
                << (unsigned)msg->platform_settings().passive_mode_enabled;
+    LOG(DEBUG) << "backhaul_preferred_radio_band: "
+               << (unsigned)msg->platform_settings().backhaul_preferred_radio_band;
 
     return true;
 }
@@ -698,9 +723,9 @@ bool main_thread::wlan_params_changed_check()
             LOG(DEBUG) << "band_enabled changed";
             wlan_params_changed = true;
         }
-        if (elm.second->acs_enabled != params.acs) {
-            elm.second->acs_enabled = params.acs;
-            LOG(DEBUG) << "acs changed";
+        if (elm.second->channel != params.channel) {
+            elm.second->channel = params.channel;
+            LOG(DEBUG) << "channel changed";
             wlan_params_changed = true;
         }
         if (elm.second->advertise_ssid != params.advertise_ssid) {
@@ -741,7 +766,7 @@ bool main_thread::wlan_params_changed_check()
             }
 
             notification->wlan_settings().band_enabled   = elm.second->band_enabled;
-            notification->wlan_settings().acs_enabled    = elm.second->acs_enabled;
+            notification->wlan_settings().channel        = elm.second->channel;
             notification->wlan_settings().advertise_ssid = elm.second->advertise_ssid;
             string_utils::copy_string(notification->wlan_settings().ssid, elm.second->ssid,
                                       beerocks::message::WIFI_SSID_MAX_LENGTH);
@@ -809,22 +834,8 @@ void main_thread::on_thread_stop()
         LOG(DEBUG) << "DHCP Monitor Stopped.";
     }
 
-    if (m_ctxArpMon) {
-        bpl_arp_mon_stop(m_ctxArpMon);
-        LOG(DEBUG) << "ARP Monitor Stopped.";
-    }
-
-    if (m_pArpRawSocket) {
-        remove_socket(m_pArpRawSocket);
-        delete m_pArpRawSocket;
-        m_pArpRawSocket = nullptr;
-    }
-
-    if (m_pArpMonSocket) {
-        remove_socket(m_pArpMonSocket);
-        delete m_pArpMonSocket;
-        m_pArpMonSocket = nullptr;
-    }
+    // Stop the ARP Monitor
+    stop_arp_monitor();
 
     if (m_pDHCPMonSocket) {
         remove_socket(m_pDHCPMonSocket);
@@ -847,7 +858,8 @@ bool main_thread::socket_disconnected(Socket *sd)
         LOG(INFO) << "non slave socket disconnected! (probably backhaul manager)";
         return true;
     }
-    LOG(DEBUG) << "slave socket_disconnected, iface=" << m_mapSlaves[sd] << ", sd=" << sd;
+    LOG(DEBUG) << "slave socket_disconnected, iface=" << m_mapSlaves[sd] << ", sd=" << sd
+               << ", is_platform_operational = " << platform_operational;
 
     // we should have only one per sd
     bpl_iface_wlan_params_map.erase(m_mapSlaves[sd]);
@@ -1940,13 +1952,18 @@ bool main_thread::handle_arp_raw()
 {
     // Skip invalid ARP packets
     BPL_ARP_MON_ENTRY entry;
-    int iTaskID = bpl_arp_mon_process_raw_arp(m_ctxArpMon, &entry);
-    if (iTaskID <= 0)
-        return (false);
+    int task_id = bpl_arp_mon_process_raw_arp(m_ctxArpMon, &entry);
+    if (task_id == 0) {
+        // task-id equals to 0  means nodes list is empty
+        // not an error, but no further work is required
+        return true;
+    } else if (task_id < 0) {
+        return false;
+    }
 
     auto arp_resp =
         message_com::create_vs_message<beerocks_message::cACTION_PLATFORM_ARP_QUERY_RESPONSE>(
-            cmdu_tx, iTaskID);
+            cmdu_tx, task_id);
 
     if (arp_resp == nullptr) {
         LOG(ERROR) << "Failed building cACTION_PLATFORM_ARP_QUERY_RESPONSE message!";
@@ -2016,7 +2033,7 @@ bool main_thread::handle_arp_raw()
     if (sd) {
         LOG(TRACE) << "ACTION_PLATFORM_ARP_QUERY_RESPONSE mac="
                    << network_utils::mac_to_string(arp_resp->params().mac)
-                   << " task_id=" << iTaskID;
+                   << " task_id=" << task_id;
         send_cmdu_safe(sd, cmdu_tx);
     }
 
@@ -2074,13 +2091,23 @@ void main_thread::after_select(bool timeout)
     // ARP Monitor
     if (m_pArpMonSocket && read_ready(m_pArpMonSocket)) {
         clear_ready(m_pArpMonSocket);
-        handle_arp_monitor();
+        if (!handle_arp_monitor()) {
+            LOG(ERROR) << "handle_arp_monitor failed, restarting ARP monitor";
+            if (!restart_arp_monitor()) {
+                LOG(ERROR) << "failed to restart ARP monitor";
+            }
+        }
     }
 
     // ARP Monitor - RAW Socket
     if (m_pArpRawSocket && read_ready(m_pArpRawSocket)) {
         clear_ready(m_pArpRawSocket);
-        handle_arp_raw();
+        if (!handle_arp_raw()) {
+            LOG(ERROR) << "handle_arp_raw failed, restarting ARP monitor";
+            if (!restart_arp_monitor()) {
+                LOG(ERROR) << "failed to restart ARP monitor";
+            }
+        }
     }
 
     // check if wlan params changed
@@ -2124,6 +2151,39 @@ bool main_thread::init_arp_monitor()
 
         // Initialize the ARP entries cleanup timestamp
         m_tpArpEntriesCleanup = std::chrono::steady_clock::now();
+    }
+
+    return true;
+}
+
+void main_thread::stop_arp_monitor()
+{
+    if (m_ctxArpMon) {
+        bpl_arp_mon_stop(m_ctxArpMon);
+        LOG(DEBUG) << "ARP Monitor Stopped.";
+        m_ctxArpMon = nullptr;
+    }
+
+    if (m_pArpRawSocket) {
+        remove_socket(m_pArpRawSocket);
+        delete m_pArpRawSocket;
+        m_pArpRawSocket = nullptr;
+    }
+
+    if (m_pArpMonSocket) {
+        remove_socket(m_pArpMonSocket);
+        delete m_pArpMonSocket;
+        m_pArpMonSocket = nullptr;
+    }
+}
+
+bool main_thread::restart_arp_monitor()
+{
+    stop_arp_monitor();
+
+    if (!init_arp_monitor()) {
+        LOG(ERROR) << "can't start ARP monitor";
+        return false;
     }
 
     return true;

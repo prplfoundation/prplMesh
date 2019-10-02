@@ -163,8 +163,9 @@ ap_manager_thread::~ap_manager_thread() { stop_ap_manager_thread(); }
 
 void ap_manager_thread::ap_manager_config(ap_manager_conf_t &conf)
 {
-    acs_enabled = conf.acs_enabled;
-    low_filter  = conf.iface_filter_low;
+    acs_enabled  = (conf.channel == 0);
+    wifi_channel = conf.channel;
+    low_filter   = conf.iface_filter_low;
 
     // initialize backhaul_vaps_list
     int num_of_elements = sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid) /
@@ -178,9 +179,13 @@ void ap_manager_thread::ap_manager_config(ap_manager_conf_t &conf)
 
     using namespace std::placeholders; // for `_1`
 
+    bwl::hal_conf_t hal_conf;
+    hal_conf.ap_acs_enabled          = acs_enabled;
+    hal_conf.ap_passive_mode_enabled = conf.passive_mode_enabled;
+
     // Create a new AP HAL instance
     ap_wlan_hal = std::shared_ptr<bwl::ap_wlan_hal>(
-        ap_wlan_hal_create(conf.hostap_iface, acs_enabled,
+        ap_wlan_hal_create(conf.hostap_iface, hal_conf,
                            std::bind(&ap_manager_thread::hal_event_handler, this, _1)),
         [](bwl::ap_wlan_hal *obj) {
             if (obj)
@@ -436,6 +441,71 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
 
     switch (beerocks_header->action_op()) {
+    case beerocks_message::ACTION_APMANAGER_ENABLE_APS_REQUEST: {
+        LOG(TRACE) << "ACTION_APMANAGER_ENABLE_APS_REQUEST";
+
+        auto notification =
+            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_ENABLE_APS_REQUEST>();
+        if (notification == nullptr) {
+            LOG(ERROR) << "addClass cACTION_APMANAGER_ENABLE_APS_REQUEST failed";
+            return false;
+        }
+
+        bool success = true;
+
+        // set start_disabled flag to false
+        if (!ap_wlan_hal->set_start_disabled(false)) {
+            LOG(ERROR) << "Failed setting start_disabled";
+            // platform notify?
+            success = false;
+        }
+
+        // Make hostapd to consider the new configuration
+        if (!ap_wlan_hal->disable()) {
+            LOG(ERROR) << "Failed disable";
+            // platform notify?
+            success = false;
+        }
+
+        // // set Original channel or BH channel
+        uint8_t channel        = notification->channel();
+        uint32_t bw            = notification->bandwidth();
+        uint8_t center_channel = notification->center_channel();
+
+        if (channel == 0) {
+            channel        = wifi_channel;
+            bw             = 0;
+            center_channel = 0;
+        }
+
+        if (!ap_wlan_hal->set_channel(channel, bw, center_channel)) {
+            LOG(ERROR) << "Failed setting set_channel";
+            // platform notify?
+            success = false;
+        }
+
+        if (!ap_wlan_hal->enable()) {
+            LOG(ERROR) << "Failed enable";
+            // platform notify?
+            success = false;
+        }
+
+        LOG(INFO) << "send cACTION_APMANAGER_ENABLE_APS_RESPONSE";
+
+        auto response =
+            message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_ENABLE_APS_RESPONSE>(
+                cmdu_tx);
+        if (response == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+
+        response->success() = success;
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+
+        break;
+    }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST: {
 
         auto request = cmdu_rx.addClass<
@@ -798,6 +868,10 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             return false;
         }
 
+        break;
+    }
+    case beerocks_message::ACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST: {
+        ap_wlan_hal->generate_connected_clients_events();
         break;
     }
     default: {

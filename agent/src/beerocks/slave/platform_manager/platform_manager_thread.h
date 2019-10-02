@@ -47,9 +47,10 @@ public:
         int local_master;
         int backhaul_max_vaps;
         int backhaul_network_enabled;
-        int backhaul_prefered_radio_band;
+        int backhaul_preferred_radio_band;
         int dfs_reentry;
         int passive_mode;
+        int proprietry_repeater;
     };
 
     virtual bool init() override;
@@ -80,6 +81,8 @@ private:
     void arp_entries_cleanup();
     bool init_dhcp_monitor();
     bool init_arp_monitor();
+    void stop_arp_monitor();
+    bool restart_arp_monitor();
 
     void send_slave_iface_status_to_bpl(bool bforce = false);
     bool slave_iface_status_check(const std::string &iface_name, uint8_t status,
