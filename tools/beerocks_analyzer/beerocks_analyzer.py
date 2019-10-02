@@ -795,25 +795,28 @@ class BeerocksCliThread(threading.Thread):
             # and its assignment to self.process
             self.process.kill()
 
+
 class SSHThread(threading.Thread):
 
-    def __init__(self, host="192.168.1.1", my_ip="", ssh_port=22, user='admin', password='admin'):
+    def __init__(self, host="192.168.1.1", my_ip="", ssh_port=22, user='root'):
         super().__init__()
+        self.logger = logging.getLogger(__name__)
         self.host = host
         self.my_ip = my_ip
         self.ssh_port = ssh_port
         self.user = user
-        self.password = password
+        self.ssh_client = paramiko.SSHClient()
 
     def run(self):
-        self.ssh_client = paramiko.SSHClient()
-        self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.ssh_client.connect(self.host, port=self.ssh_port, username=self.user, password=self.password, allow_agent = False)
+        self.ssh_client.set_missing_host_key_policy(paramiko.WarningPolicy())
+        self.ssh_client.connect(self.host, port=self.ssh_port, username=self.user)
 
         if not self.my_ip:
-            my_ip = self.ssh_client.get_transport().sock.getsockname()[0]
+            self.my_ip = self.ssh_client.get_transport().sock.getsockname()[0]
 
-        command = '/opt/beerocks/beerocks_cli -a ' + my_ip
+        self.logger.info("Controller will send update to IP {}".format(self.my_ip))
+        # TODO: add a cli option for the path
+        command = 'LD_LIBRARY_PATH=/opt/beerocks/lib /opt/beerocks/bin/beerocks_cli -a {}'.format(self.my_ip)
 
         #create ssh shell
         ssh_shell = self.ssh_client.invoke_shell()
@@ -821,17 +824,7 @@ class SSHThread(threading.Thread):
         #establish connection
         in_buff = ''
         while not in_buff.endswith(':~# '):
-            in_buff += ssh_shell.recv(9999)
-            if in_buff.endswith('password: '):
-                time.sleep(3)
-                logger.info("ssh_command()  --> got 'password:', sending password...")
-                ssh_shell.send(self.password + '\n')
-                in_buff = ''
-            elif 'are you sure you want to continue connecting' in in_buff:
-                time.sleep(3)
-                logger.info("ssh_command()  --> got 'are you sure you want to continue connecting', sending 'yes'...")
-                ssh_shell.send('yes\n')
-                in_buff = ''
+            in_buff += ssh_shell.recv(9999).decode("utf-8")
 
         #execute command
         logger.debug("Starting beerock_cli -a")
