@@ -458,8 +458,9 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY &sArpMonData)
     }
 
     // Do NOT continue if the nodes list is empty
+    // taskId cannot be 0 - 0 means nodes list is empty
     if (!m_lstProbe.size()) {
-        return -1;
+        return 0;
     }
 
     // Check packet size
