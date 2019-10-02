@@ -83,6 +83,7 @@ typedef struct sPlatformSettings {
     uint8_t local_master;
     uint8_t local_gw;
     uint8_t operating_mode;
+    uint8_t mem_only_psk;
     uint8_t client_band_steering_enabled;
     uint8_t client_optimal_path_roaming_enabled;
     uint8_t dfs_reentry_enabled;
@@ -95,7 +96,7 @@ typedef struct sPlatformSettings {
     uint8_t wired_backhaul;
     uint8_t backhaul_max_vaps;
     uint8_t backhaul_network_enabled;
-    uint8_t backhaul_prefered_radio_band;
+    uint8_t backhaul_preferred_radio_band;
     sMacAddr backhaul_vaps_bssid[12];
     void struct_swap(){
         for (size_t i = 0; i < 12; i++){
@@ -111,7 +112,7 @@ typedef struct sPlatformSettings {
 
 typedef struct sWlanSettings {
     uint8_t band_enabled;
-    uint8_t acs_enabled;
+    uint8_t channel;
     uint8_t advertise_ssid;
     char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
     char pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
