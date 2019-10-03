@@ -67,21 +67,11 @@ std::ostream &operator<<(std::ostream &out, const dummy_fsm_event &value)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, std::string iface_name, bool acs_enabled,
-                                         hal_event_cb_t callback, int wpa_ctrl_buffer_size)
-    : base_wlan_hal(type, iface_name, IfaceType::Intel, acs_enabled, callback),
-      beerocks::beerocks_fsm<dummy_fsm_state, dummy_fsm_event>(dummy_fsm_state::Delay),
-      m_wpa_ctrl_buffer_size(wpa_ctrl_buffer_size)
+base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, std::string iface_name,
+                                         hal_event_cb_t callback, hal_conf_t hal_conf)
+    : base_wlan_hal(type, iface_name, IfaceType::Intel, callback, hal_conf),
+      beerocks::beerocks_fsm<dummy_fsm_state, dummy_fsm_event>(dummy_fsm_state::Delay)
 {
-
-    // Allocate wpa_ctrl buffer
-    if (m_wpa_ctrl_buffer_size) {
-        m_wpa_ctrl_buffer = std::shared_ptr<char>(new char[m_wpa_ctrl_buffer_size], [](char *obj) {
-            if (obj)
-                delete[] obj;
-        });
-    }
-
     // Set up dummy external events fd
     if ((m_fd_ext_events = eventfd(0, EFD_SEMAPHORE)) < 0) {
         LOG(FATAL) << "Failed creating eventfd: " << strerror(errno);
@@ -102,6 +92,11 @@ HALState base_wlan_hal_dummy::attach(bool block)
 }
 
 bool base_wlan_hal_dummy::detach() { return true; }
+
+bool base_wlan_hal_dummy::set(const std::string &param, const std::string &value, int vap_id)
+{
+    return true;
+}
 
 bool base_wlan_hal_dummy::ping() { return true; }
 
