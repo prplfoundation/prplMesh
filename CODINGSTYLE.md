@@ -81,10 +81,12 @@ In case only a C-style "next" function is available, use assignment-in-while:
 
 Member functions must be declared const, unless they modify the object.
 
-Non-scalar function arguments should be passed as const-reference `const foo&` instead of by value `foo`.
+Non-scalar function arguments should be passed as const-reference `const foo&` instead of by value `foo` if the structure is larger than 32 bits.
 This specifically applies to `std::string` arguments.
 Even though the C++11 move constructor can avoid a large part of the copy overhead implied by passing by value, it is not always very clear when the move semantics apply.
 Therefore, we choose to always explicitly use const-reference.
+We empirically determined that GCC generates equal or better code for const-reference arguments for the 6-byte `sMacAddress` structure.
+The difference is too small to matter much, but it's good to have a fixed rule of thumb, therefore we set the limit to 32 bits.
 
 Functions should almost always return a success or failure status.
 If a function needs to return some other information as well, use that as the return value, and use a sentinel value to indicate failure.
