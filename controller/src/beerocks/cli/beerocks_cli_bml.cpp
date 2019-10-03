@@ -167,8 +167,9 @@ static void bml_utils_dump_conn_map(
                << ", mac: " << node->mac << ", ipv4: " << node->ip_v4 << std::endl;
 
             // ETHERNET
-            auto eth_mac = node->mac;
-            eth_mac.back() += 1; // generate eth address from bridge address
+            auto eth_sw_mac_binary = network_utils::mac_from_string(node->mac);
+            ++eth_sw_mac_binary.oct[5]; // generate eth address from bridge address
+            auto eth_mac = network_utils::mac_to_string(eth_sw_mac_binary);
             ss << ind_inc(ind_str) << "ETHERNET:"
                << " mac: " << eth_mac << std::endl;
             // add clients which are connected to the Ethernet
