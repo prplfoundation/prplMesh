@@ -1238,6 +1238,7 @@ bool master_thread::handle_intel_slave_join(
     bool backhaul_manager            = (bool)notification->backhaul_params().is_backhaul_manager;
     beerocks::ePlatform ire_platform = (beerocks::ePlatform)notification->platform();
     std::string radio_identifier = network_utils::mac_to_string(notification->radio_identifier());
+    bool acs_enabled             = (notification->wlan_settings().channel == 0);
 
     std::string gw_name;
     if (is_gw_slave) {
@@ -1363,13 +1364,13 @@ bool master_thread::handle_intel_slave_join(
                << ire_type;
     database.add_node(bridge_mac, backhaul_mac, ire_type);
     database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
+    database.set_node_socket(bridge_mac, sd);
 
     /*
     * Set IRE backhaul manager slave
     * keep in mind that the socket's peer mac will be the hostap mac
     */
     if (backhaul_manager) {
-        database.set_node_socket(bridge_mac, sd);
         /*
         * handle the IRE node itself, representing the backhaul
         */
@@ -1505,6 +1506,7 @@ bool master_thread::handle_intel_slave_join(
               << std::endl
               << "    ant_num=" << int(notification->hostap().ant_num)
               << " ant_gain=" << int(notification->hostap().ant_gain)
+              << " channel=" << int(notification->cs_params().channel)
               << " conducted=" << int(notification->hostap().conducted_power) << std::endl
               << "    radio_mac=" << radio_mac << std::endl;
 
@@ -1553,7 +1555,10 @@ bool master_thread::handle_intel_slave_join(
     } else {
         database.add_node(radio_mac, bridge_mac, beerocks::TYPE_SLAVE, radio_identifier);
     }
-    database.set_hostap_is_acs_enabled(radio_mac, notification->wlan_settings().channel == 0);
+    database.set_hostap_is_acs_enabled(radio_mac, acs_enabled);
+    database.set_hostap_passive_mode_enabled(
+        radio_mac, notification->platform_settings().passive_mode_enabled);
+        
     if (!notification->is_slave_reconf()) {
         son_actions::set_hostap_active(database, tasks, radio_mac,
                                        false); // make sure AP is marked as not active

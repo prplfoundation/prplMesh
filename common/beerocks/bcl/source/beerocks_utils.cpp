@@ -165,6 +165,10 @@ std::string utils::get_iface_string_from_iface_vap_ids(int8_t iface_id, int8_t v
 
 std::string utils::get_iface_string_from_iface_vap_ids(const std::string &iface, int8_t vap_id)
 {
+    if (vap_id == beerocks::IFACE_RADIO_ID) {
+        return iface;
+    }
+
     std::string ifname;
     if ((iface.find("wlan") == std::string::npos) || (vap_id < beerocks::IFACE_VAP_ID_MIN) ||
         (vap_id > beerocks::IFACE_VAP_ID_MAX)) {
