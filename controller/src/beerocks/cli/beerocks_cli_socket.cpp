@@ -602,7 +602,7 @@ int cli_socket::cross_rx_rssi_measurement(std::string client_mac, std::string ho
     return 0;
 }
 
-int cli_socket::steer_client(std::string client_mac, std::string bssid, int disassoc_timer)
+int cli_socket::steer_client(std::string client_mac, std::string bssid, int disassoc_timer_ms)
 {
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_CLIENT_BSS_STEER_REQUEST>(
@@ -611,10 +611,10 @@ int cli_socket::steer_client(std::string client_mac, std::string bssid, int disa
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_BSS_STEER_REQUEST message!";
         return -1;
     }
-    request->client_mac()     = network_utils::mac_from_string(client_mac);
-    request->bssid()          = network_utils::mac_from_string(bssid);
-    request->disassoc_timer() = disassoc_timer;
-    wait_response             = true;
+    request->client_mac()        = network_utils::mac_from_string(client_mac);
+    request->bssid()             = network_utils::mac_from_string(bssid);
+    request->disassoc_timer_ms() = disassoc_timer_ms;
+    wait_response                = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
     return 0;

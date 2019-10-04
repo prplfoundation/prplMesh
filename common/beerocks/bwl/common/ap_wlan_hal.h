@@ -113,7 +113,7 @@ public:
      * @param [in] mac The MAC address of the station.
      * @param [in] bssid The MAC address of the target AP.
      * @param [in] chan The channel of the target AP.
-     * @param [in] disassoc_timer Time in milliseconds before the AP should 
+     * @param [in] disassoc_timer Time in TU (time units, 1 TU = 1.024ms) before the AP should 
      *             forcefully disconnect the client. Setting a non-ZERO value
      *             should enable the "disassociation imminent" function and
      *             arm the internal AP timer (usually performed by the hardware).

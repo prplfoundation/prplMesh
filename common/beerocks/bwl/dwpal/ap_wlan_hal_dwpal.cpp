@@ -441,9 +441,11 @@ bool ap_wlan_hal_dwpal::sta_bss_steer(const std::string &mac, const std::string 
         + " dialog_token=" + "0" + " Mode=" + "0" + " pref=" + "1" + " abridged=" + "1" +
         " neighbor=" + bssid + ",0,0," + std::to_string(chan) + ",0,255";
 
+    // Divide disassoc_timer by 100, because the hostapd expects it to be in beacon interval
+    // which is 100ms.
     if (disassoc_timer) {
         cmd += std::string() + " disassoc_imminent=" + "1" +
-               " disassoc_timer=" + std::to_string(disassoc_timer);
+               " disassoc_timer=" + std::to_string(disassoc_timer / 100);
     }
 
     if (valid_int) {

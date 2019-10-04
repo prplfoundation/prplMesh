@@ -105,7 +105,7 @@ private:
                                   uint16_t center_frequency = 0);
 
     int steer_client(std::string client_mac, std::string bssid,
-                     int disassoc_timer = beerocks::BSS_STEER_DISASSOC_TIMER);
+                     int disassoc_timer_ms = beerocks::BSS_STEER_DISASSOC_TIMER_MS);
 
     int steer_ire(std::string client_mac, std::string bssid);
 

@@ -112,7 +112,7 @@ cACTION_CLI_CLIENT_BSS_STEER_REQUEST:
   _type: class
   client_mac: sMacAddr
   bssid: sMacAddr
-  disassoc_timer: uint32_t
+  disassoc_timer_ms: uint32_t
 
 cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST:
   _type: class

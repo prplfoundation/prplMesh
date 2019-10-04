@@ -891,12 +891,12 @@ void son_management::handle_cli_message(Socket *sd,
         std::string client_mac = network_utils::mac_to_string(request->client_mac());
         std::string hostap_mac = network_utils::mac_to_string(request->bssid());
 
-        uint8_t disassoc_imminent = request->disassoc_timer() ? uint8_t(1) : uint8_t(0);
+        uint8_t disassoc_imminent = request->disassoc_timer_ms() ? uint8_t(1) : uint8_t(0);
         LOG(DEBUG) << "CLI steer sta request for " << client_mac << " to hostap: " << hostap_mac
                    << " disassoc_imminent=" << int(disassoc_imminent)
-                   << " disassoc_timer=" << int(request->disassoc_timer());
+                   << " disassoc_timer=" << int(request->disassoc_timer_ms());
         son_actions::steer_sta(database, cmdu_tx, tasks, client_mac, hostap_mac,
-                               int(disassoc_imminent), int(request->disassoc_timer()));
+                               int(disassoc_imminent), int(request->disassoc_timer_ms()));
 
         break;
     }

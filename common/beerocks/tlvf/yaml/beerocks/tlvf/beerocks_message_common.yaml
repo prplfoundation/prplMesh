@@ -316,7 +316,7 @@ sNodeBssSteerTarget:
 sNodeBssSteerRequest:
   _type: struct
   mac: sMacAddr
-  disassoc_timer: uint16_t
+  disassoc_timer_ms: uint16_t
   disassoc_imminent: uint8_t 
   bssid: sNodeBssSteerTarget 
 

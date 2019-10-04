@@ -4844,10 +4844,11 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
         }
         auto bssid_list = steering_request_tlv->target_bssid_list(0);
 
-        request_out->params().mac            = std::get<1>(steering_request_tlv->sta_list(0));
-        request_out->params().disassoc_timer = steering_request_tlv->btm_disassociation_timer();
-        request_out->params().bssid.mac      = std::get<1>(bssid_list).target_bssid;
-        request_out->params().bssid.channel  = std::get<1>(bssid_list).target_bss_channel_number;
+        request_out->params().mac = std::get<1>(steering_request_tlv->sta_list(0));
+        request_out->params().disassoc_timer_ms =
+            steering_request_tlv->btm_disassociation_timer_ms();
+        request_out->params().bssid.mac     = std::get<1>(bssid_list).target_bssid;
+        request_out->params().bssid.channel = std::get<1>(bssid_list).target_bss_channel_number;
         request_out->params().disassoc_imminent =
             steering_request_tlv->request_flags().btm_disassociation_imminent_bit;
 
