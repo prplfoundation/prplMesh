@@ -874,15 +874,15 @@ sMacAddr& cACTION_CLI_CLIENT_BSS_STEER_REQUEST::bssid() {
     return (sMacAddr&)(*m_bssid);
 }
 
-uint32_t& cACTION_CLI_CLIENT_BSS_STEER_REQUEST::disassoc_timer() {
-    return (uint32_t&)(*m_disassoc_timer);
+uint32_t& cACTION_CLI_CLIENT_BSS_STEER_REQUEST::disassoc_timer_ms() {
+    return (uint32_t&)(*m_disassoc_timer_ms);
 }
 
 void cACTION_CLI_CLIENT_BSS_STEER_REQUEST::class_swap()
 {
     m_client_mac->struct_swap();
     m_bssid->struct_swap();
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_disassoc_timer));
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_disassoc_timer_ms));
 }
 
 size_t cACTION_CLI_CLIENT_BSS_STEER_REQUEST::get_initial_size()
@@ -890,7 +890,7 @@ size_t cACTION_CLI_CLIENT_BSS_STEER_REQUEST::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // client_mac
     class_size += sizeof(sMacAddr); // bssid
-    class_size += sizeof(uint32_t); // disassoc_timer
+    class_size += sizeof(uint32_t); // disassoc_timer_ms
     return class_size;
 }
 
@@ -906,7 +906,7 @@ bool cACTION_CLI_CLIENT_BSS_STEER_REQUEST::init()
     m_bssid = (sMacAddr*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_bssid->struct_init(); }
-    m_disassoc_timer = (uint32_t*)m_buff_ptr__;
+    m_disassoc_timer_ms = (uint32_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;

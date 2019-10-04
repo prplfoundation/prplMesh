@@ -80,7 +80,7 @@ class tlvSteeringRequest : public BaseClass
         //If Request Mode bit is 1, then this field is ignored 
         uint16_t& steering_opportunity_window_sec();
         //Time period in TUs of the disassociation timer in the BTM Request.
-        uint16_t& btm_disassociation_timer();
+        uint16_t& btm_disassociation_timer_ms();
         uint8_t& sta_list_length();
         std::tuple<bool, sMacAddr&> sta_list(size_t idx);
         bool alloc_sta_list(size_t count = 1);
@@ -97,7 +97,7 @@ class tlvSteeringRequest : public BaseClass
         sMacAddr* m_bssid = nullptr;
         sRequestFlags* m_request_flags = nullptr;
         uint16_t* m_steering_opportunity_window_sec = nullptr;
-        uint16_t* m_btm_disassociation_timer = nullptr;
+        uint16_t* m_btm_disassociation_timer_ms = nullptr;
         uint8_t* m_sta_list_length = nullptr;
         sMacAddr* m_sta_list = nullptr;
         size_t m_sta_list_idx__ = 0;

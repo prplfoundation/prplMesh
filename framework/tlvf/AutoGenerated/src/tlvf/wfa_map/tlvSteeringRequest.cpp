@@ -45,8 +45,8 @@ uint16_t& tlvSteeringRequest::steering_opportunity_window_sec() {
     return (uint16_t&)(*m_steering_opportunity_window_sec);
 }
 
-uint16_t& tlvSteeringRequest::btm_disassociation_timer() {
-    return (uint16_t&)(*m_btm_disassociation_timer);
+uint16_t& tlvSteeringRequest::btm_disassociation_timer_ms() {
+    return (uint16_t&)(*m_btm_disassociation_timer_ms);
 }
 
 uint8_t& tlvSteeringRequest::sta_list_length() {
@@ -145,7 +145,7 @@ void tlvSteeringRequest::class_swap()
     m_bssid->struct_swap();
     m_request_flags->struct_swap();
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_steering_opportunity_window_sec));
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_btm_disassociation_timer));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_btm_disassociation_timer_ms));
     for (size_t i = 0; i < (size_t)*m_sta_list_length; i++){
         m_sta_list[i].struct_swap();
     }
@@ -162,7 +162,7 @@ size_t tlvSteeringRequest::get_initial_size()
     class_size += sizeof(sMacAddr); // bssid
     class_size += sizeof(sRequestFlags); // request_flags
     class_size += sizeof(uint16_t); // steering_opportunity_window_sec
-    class_size += sizeof(uint16_t); // btm_disassociation_timer
+    class_size += sizeof(uint16_t); // btm_disassociation_timer_ms
     class_size += sizeof(uint8_t); // sta_list_length
     class_size += sizeof(uint8_t); // target_bssid_list_length
     return class_size;
@@ -191,7 +191,7 @@ bool tlvSteeringRequest::init()
     m_steering_opportunity_window_sec = (uint16_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
-    m_btm_disassociation_timer = (uint16_t*)m_buff_ptr__;
+    m_btm_disassociation_timer_ms = (uint16_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_sta_list_length = (uint8_t*)m_buff_ptr__;

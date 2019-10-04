@@ -427,7 +427,7 @@ class cACTION_CLI_CLIENT_BSS_STEER_REQUEST : public BaseClass
         }
         sMacAddr& client_mac();
         sMacAddr& bssid();
-        uint32_t& disassoc_timer();
+        uint32_t& disassoc_timer_ms();
         void class_swap();
         static size_t get_initial_size();
 
@@ -436,7 +436,7 @@ class cACTION_CLI_CLIENT_BSS_STEER_REQUEST : public BaseClass
         eActionOp_CLI* m_action_op = nullptr;
         sMacAddr* m_client_mac = nullptr;
         sMacAddr* m_bssid = nullptr;
-        uint32_t* m_disassoc_timer = nullptr;
+        uint32_t* m_disassoc_timer_ms = nullptr;
 };
 
 class cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
