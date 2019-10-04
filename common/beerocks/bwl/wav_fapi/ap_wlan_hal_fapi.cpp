@@ -483,8 +483,10 @@ bool ap_wlan_hal_fapi::sta_bss_steer(const std::string &mac, const std::string &
                    << ", adding disassoc_timer = " << disassoc_timer;
         UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.SSID.X_LANTIQ_COM_Vendor", "disassoc_imminent",
                               "1", 0, 0);
+        // Divide disassoc_timer by 100, because the hostapd expects it to be in beacon interval
+        // which is 100ms.
         UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.SSID.X_LANTIQ_COM_Vendor", "disassoc_timer",
-                              std::to_string(disassoc_timer).c_str(), 0, 0);
+                              std::to_string(disassoc_timer / 100).c_str(), 0, 0);
     }
     wav_fapi_debug_obj(wlObj, "fapi_wlan_bss_transition_management_req");
     // Execute the command

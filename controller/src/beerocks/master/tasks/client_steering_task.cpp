@@ -22,11 +22,11 @@ using namespace son;
 client_steering_task::client_steering_task(db &database_, ieee1905_1::CmduMessageTx &cmdu_tx_,
                                            task_pool &tasks_, std::string sta_mac_,
                                            std::string hostap_mac_, bool disassoc_imminent_,
-                                           int disassoc_timer_, bool steer_restricted_,
+                                           int disassoc_timer_ms_, bool steer_restricted_,
                                            std::string task_name_)
     : task(task_name_), database(database_), cmdu_tx(cmdu_tx_), tasks(tasks_), sta_mac(sta_mac_),
       hostap_mac(hostap_mac_), //Chosen VAP BSSID to steer the client to
-      disassoc_imminent(disassoc_imminent_), disassoc_timer(disassoc_timer_),
+      disassoc_imminent(disassoc_imminent_), disassoc_timer_ms(disassoc_timer_ms_),
       steer_restricted(steer_restricted_)
 {
 }
@@ -194,7 +194,7 @@ void client_steering_task::steer_sta()
         wfa_map::tlvSteeringRequest::REQUEST_IS_A_STEERING_MANDATE_TO_TRIGGER_STEERING;
     steering_request_tlv->request_flags().btm_disassociation_imminent_bit = disassoc_imminent;
 
-    steering_request_tlv->btm_disassociation_timer() = disassoc_timer;
+    steering_request_tlv->btm_disassociation_timer_ms() = disassoc_timer_ms;
     steering_request_tlv->bssid() = network_utils::mac_from_string(current_ap_mac);
 
     steering_request_tlv->alloc_sta_list();
@@ -213,7 +213,7 @@ void client_steering_task::steer_sta()
     TASK_LOG(DEBUG) << "sending steering request, sta " << sta_mac << " steer from AP "
                     << current_ap_mac << " to AP " << hostap_mac << " channel "
                     << std::to_string(std::get<1>(bssid_list).target_bss_channel_number)
-                    << " disassoc_timer=" << disassoc_timer
+                    << " disassoc_timer=" << disassoc_timer_ms
                     << " disassoc_imminent=" << disassoc_imminent << " id=" << int(id);
 
     // update bml listeners

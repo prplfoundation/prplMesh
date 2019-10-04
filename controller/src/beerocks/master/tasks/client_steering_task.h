@@ -26,7 +26,7 @@ public:
 public:
     client_steering_task(db &database_, ieee1905_1::CmduMessageTx &cmdu_tx_, task_pool &tasks_,
                          std::string sta_mac_, std::string hostap_mac, bool disassoc_imminent_,
-                         int disassoc_timer_    = beerocks::BSS_STEER_DISASSOC_TIMER,
+                         int disassoc_timer_ms_ = beerocks::BSS_STEER_DISASSOC_TIMER_MS,
                          bool steer_restricted_ = false,
                          std::string task_name_ = std::string("client_steering_task"));
     virtual ~client_steering_task() {}
@@ -47,7 +47,7 @@ private:
     std::string original_hostap_mac;
     bool steering_success  = false;
     bool disassoc_imminent = true;
-    const int disassoc_timer;
+    const int disassoc_timer_ms;
     bool bss_tm_response_received = false;
     bool steer_restricted         = false;
 

@@ -1062,13 +1062,13 @@ void channel_selection_task::work()
         std::for_each(std::begin(set_reentry_clients), std::end(set_reentry_clients),
                       [&](std::string set_reentry_client) {
                           auto disassoc_imminent = true;
-                          int disassoc_timer     = DISASSOC_STEER_TIMER_SEC;
+                          int disassoc_timer_ms  = DISASSOC_STEER_TIMER_MS;
                           auto steer_restricted  = true;
                           TASK_LOG(DEBUG) << "hostap_mac - " << hostap_mac << " steer sta "
                                           << set_reentry_client << " to 2.4G - " << *hostap_mac_2g;
                           son_actions::steer_sta(database, cmdu_tx, tasks, set_reentry_client,
-                                                 *hostap_mac_2g, disassoc_imminent, disassoc_timer,
-                                                 steer_restricted);
+                                                 *hostap_mac_2g, disassoc_imminent,
+                                                 disassoc_timer_ms, steer_restricted);
                       });
 
         FSM_MOVE_STATE(GOTO_IDLE);
@@ -1093,11 +1093,11 @@ void channel_selection_task::work()
         std::for_each(std::begin(set_reentry_clients), std::end(set_reentry_clients),
                       [&](std::string set_reentry_client) {
                           auto disassoc_imminent = true;
-                          int disassoc_timer     = DISASSOC_STEER_TIMER_SEC;
+                          int disassoc_timer_ms  = DISASSOC_STEER_TIMER_MS;
                           TASK_LOG(DEBUG) << "hostap_mac - " << hostap_mac << " steer sta "
                                           << set_reentry_client << " back to - " << hostap_mac;
                           son_actions::steer_sta(database, cmdu_tx, tasks, set_reentry_client,
-                                                 hostap_mac, disassoc_imminent, disassoc_timer);
+                                                 hostap_mac, disassoc_imminent, disassoc_timer_ms);
                       });
         FSM_MOVE_STATE(GOTO_IDLE);
         break;

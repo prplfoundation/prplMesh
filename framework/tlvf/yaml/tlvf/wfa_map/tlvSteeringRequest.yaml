@@ -16,7 +16,7 @@ tlvSteeringRequest:
     _comment: |
       Time period in seconds (from reception of the Steering Request message) for which the request is valid.
       If Request Mode bit is 1, then this field is ignored 
-  btm_disassociation_timer:
+  btm_disassociation_timer_ms:
     _type: uint16_t
     _comment: |
       Time period in TUs of the disassociation timer in the BTM Request.

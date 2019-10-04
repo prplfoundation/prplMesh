@@ -170,11 +170,11 @@ void son_actions::unblock_sta(db &database, ieee1905_1::CmduMessageTx &cmdu_tx, 
 
 int son_actions::steer_sta(db &database, ieee1905_1::CmduMessageTx &cmdu_tx, task_pool &tasks,
                            std::string sta_mac, std::string chosen_hostap, bool disassoc_imminent,
-                           int disassoc_timer, bool steer_restricted)
+                           int disassoc_timer_ms, bool steer_restricted)
 {
-    auto new_task =
-        std::make_shared<client_steering_task>(database, cmdu_tx, tasks, sta_mac, chosen_hostap,
-                                               disassoc_imminent, disassoc_timer, steer_restricted);
+    auto new_task = std::make_shared<client_steering_task>(database, cmdu_tx, tasks, sta_mac,
+                                                           chosen_hostap, disassoc_imminent,
+                                                           disassoc_timer_ms, steer_restricted);
     tasks.add_task(new_task);
     return new_task->id;
 }

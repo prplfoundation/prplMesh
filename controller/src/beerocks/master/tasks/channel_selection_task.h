@@ -214,7 +214,7 @@ private:
     const static int RESTRICTED_CHANNEL_RESPONSE_WAIT_TIME = 20000;
     const static int CAC_COMPLETED_WAIT_TIME               = 660000; //11 minutes
     const static int REENTRY_STEERED_CLIENTS_WAIT          = 60000;
-    const static int DISASSOC_STEER_TIMER_SEC              = 150; //200;//20;
+    const static int DISASSOC_STEER_TIMER_MS               = 15000;
 
     typedef struct {
         uint8_t channel = 0;
