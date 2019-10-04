@@ -458,12 +458,12 @@ typedef struct sNodeBssSteerTarget {
 
 typedef struct sNodeBssSteerRequest {
     sMacAddr mac;
-    uint16_t disassoc_timer;
+    uint16_t disassoc_timer_ms;
     uint8_t disassoc_imminent;
     sNodeBssSteerTarget bssid;
     void struct_swap(){
         mac.struct_swap();
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&disassoc_timer));
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&disassoc_timer_ms));
         bssid.struct_swap();
     }
     void struct_init(){
