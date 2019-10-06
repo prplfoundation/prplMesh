@@ -2,8 +2,13 @@
 set(PS_CMD "ps -aux")
 set(AWK_CMD "awk '{print $2}'")
 
-# Platform specific overrides
-if (TARGET_PLATFORM STREQUAL "turris-omnia")
+# Platform specific definitions
+if (TARGET_PLATFORM STREQUAL "linux")
+    set(PLATFORM_DB_PATH ${CMAKE_INSTALL_PREFIX}/share)
+    set(PLATFORM_DB_PATH_TEMP /tmp)
+elseif (TARGET_PLATFORM STREQUAL "turris-omnia")
+    set(PLATFORM_DB_PATH "/opt/beerocks/share")
+    set(PLATFORM_DB_PATH_TEMP "/tmp/beerocks")
     set(PS_CMD "ps")
     set(AWK_CMD "awk '{print $1}'")
 endif()

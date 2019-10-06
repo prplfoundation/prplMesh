@@ -95,7 +95,7 @@ void client_steering_task::steer_sta()
 
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CONTROL_CLIENT_ALLOW_REQUEST>(
-            cmdu_tx, id);
+            cmdu_tx, 0);
 
     if (request == nullptr) {
         LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_ALLOW_REQUEST message!";
@@ -121,7 +121,7 @@ void client_steering_task::steer_sta()
                         << " has an active socket, sending BACKHAUL_ROAM_REQUEST";
         auto roam_request =
             message_com::create_vs_message<beerocks_message::cACTION_CONTROL_BACKHAUL_ROAM_REQUEST>(
-                cmdu_tx, id);
+                cmdu_tx, 0);
         if (roam_request == nullptr) {
             LOG(ERROR) << "Failed building message!";
             return;
@@ -149,7 +149,7 @@ void client_steering_task::steer_sta()
         */
         Socket *sd   = database.get_node_socket(hostap);
         auto request = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_DISALLOW_REQUEST>(cmdu_tx, id);
+            beerocks_message::cACTION_CONTROL_CLIENT_DISALLOW_REQUEST>(cmdu_tx, 0);
 
         if (request == nullptr) {
             LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_DISALLOW_REQUEST message!";
@@ -177,7 +177,7 @@ void client_steering_task::steer_sta()
     // Send disconnect (802.11v)
     auto bss_steer_request =
         message_com::create_vs_message<beerocks_message::cACTION_CONTROL_CLIENT_BSS_STEER_REQUEST>(
-            cmdu_tx, id);
+            cmdu_tx, 0);
 
     if (bss_steer_request == nullptr) {
         LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_BSS_STEER_REQUEST message!";

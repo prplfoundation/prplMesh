@@ -81,12 +81,12 @@ prplmesh_platform_db_init() {
     management_mode=${1-Multi-AP-Controller-and-Agent}
     operating_mode=${2-Gateway}
 
-    mkdir -p /tmp/
+    mkdir -p @PLATFORM_DB_PATH_TEMP@
     {
         echo "management_mode=${management_mode}"
         echo "operating_mode=${operating_mode}"
         echo "wired_backhaul=1"
-    } > /tmp/prplmesh_platform_db
+    } > @PLATFORM_DB_PATH_TEMP@/prplmesh_platform_db
 }
 
 prplmesh_framework_init() {
@@ -194,13 +194,13 @@ status_function() {
 
     error=0
     report "Main agent operational" main_agent_operational $LOGS_PATH
-    report "wlan0 radio agent operational" radio_agent_operational $LOGS_PATH wlan0
-    report "wlan2 radio agent operational" radio_agent_operational $LOGS_PATH wlan2
+    report "@BEEROCKS_WLAN1_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN1_IFACE@
+    report "@BEEROCKS_WLAN2_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN2_IFACE@
 
     [ "$VERBOSE" = "true" -a $error = 1 ] && {
         cat $LOGS_PATH/beerocks_agent.log
-        cat $LOGS_PATH/beerocks_agent_wlan0.log
-        cat $LOGS_PATH/beerocks_agent_wlan2.log
+        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN1_IFACE@.log
+        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN2_IFACE@.log
     }
 
     return $error
