@@ -709,7 +709,8 @@ void wfa_ca::handle_wfa_ca_message(
                 return;
             }
 
-            database.add_bss_info_configuration(al_mac, bss_info_conf);
+            database.add_bss_info_configuration(net::network_utils::mac_from_string(al_mac),
+                                                bss_info_conf);
         }
 
         // Send back first reply

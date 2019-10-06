@@ -22,6 +22,18 @@ inline bool operator==(sMacAddr const &lhs, sMacAddr const &rhs)
 
 inline bool operator!=(sMacAddr const &lhs, sMacAddr const &rhs) { return !(rhs == lhs); }
 
+template <> struct std::hash<sMacAddr> {
+    size_t operator()(const sMacAddr &m) const
+    {
+        uint64_t value_to_hash = 0;
+        for (size_t byte = 0; byte < sizeof(m.oct); byte++) {
+            value_to_hash <<= 8;
+            value_to_hash += m.oct[byte];
+        }
+        return std::hash<std::uint64_t>()(value_to_hash);
+    }
+};
+
 namespace beerocks {
 namespace net {
 
