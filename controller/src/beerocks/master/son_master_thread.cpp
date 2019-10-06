@@ -760,7 +760,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
 
     tlvRuid->radio_uid() = network_utils::mac_from_string(ruid);
 
-    const auto &bss_info_confs = database.get_bss_info_configuration(al_mac);
+    const auto &bss_info_confs = database.get_bss_info_configuration(tlvwscM1->mac_attr().data);
     uint8_t num_bsss           = 0;
 
     for (const auto &bss_info_conf : bss_info_confs) {

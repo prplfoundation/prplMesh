@@ -3157,12 +3157,12 @@ void db::setting_certification_mode(bool en)
     config.certification_mode = true;
 }
 
-void db::add_bss_info_configuration(const std::string &al_mac, const bss_info_conf_t &bss_info)
+void db::add_bss_info_configuration(const sMacAddr &al_mac, const bss_info_conf_t &bss_info)
 {
     bss_infos[al_mac].push_back(bss_info);
 }
 
-std::list<db::bss_info_conf_t> &db::get_bss_info_configuration(const std::string &al_mac)
+std::list<db::bss_info_conf_t> &db::get_bss_info_configuration(const sMacAddr &al_mac)
 {
     // If al_mac not exist, it will be added, and return empty list
     return bss_infos[al_mac];

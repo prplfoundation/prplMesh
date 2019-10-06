@@ -523,8 +523,8 @@ public:
         std::string network_key;
         WSC::eWscVendorExtSubelementBssType bss_type;
     };
-    void add_bss_info_configuration(const std::string &al_mac, const bss_info_conf_t &bss_info);
-    std::list<db::bss_info_conf_t> &get_bss_info_configuration(const std::string &al_mac);
+    void add_bss_info_configuration(const sMacAddr &al_mac, const bss_info_conf_t &bss_info);
+    std::list<db::bss_info_conf_t> &get_bss_info_configuration(const sMacAddr &al_mac);
     void clear_bss_info_configuration();
 
     //
@@ -719,7 +719,7 @@ private:
 
     // certification
     std::shared_ptr<uint8_t> certification_tx_buffer;
-    std::unordered_map<std::string, std::list<bss_info_conf_t>> bss_infos; // key=al_mac
+    std::unordered_map<sMacAddr, std::list<bss_info_conf_t>> bss_infos; // key=al_mac
 };
 
 } // namespace son
