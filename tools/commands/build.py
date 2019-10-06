@@ -23,6 +23,11 @@ class builder(object):
         self.install_path = install_dir
         self.env = os.environ.copy()
 
+        # If the STAGING_DIR environment variable is not set, 
+        # use an empty variable for suppressing compiler warnings
+        if not "STAGING_DIR" in os.environ:
+            self.env["STAGING_DIR"] = ""
+
     def __str__(self):
         return "'{}' builder configuration:\n\tsrc_path: {}\n\tbuild_path: {}\n\tinstall_path: {}".format(self.name, self.src_path, self.build_path, self.install_path)
 
