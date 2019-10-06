@@ -283,15 +283,6 @@ cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION:
   _type: class
   mac: sMacAddr 
 
-cACTION_CONTROL_CLIENT_DISALLOW_REQUEST:
-  _type: class
-  mac: sMacAddr
-  reject_sta: uint8_t
-
-cACTION_CONTROL_CLIENT_ALLOW_REQUEST:
-  _type: class
-  mac: sMacAddr 
-  ipv4: beerocks::net::sIpv4Addr 
 
 cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST:
   _type: class
