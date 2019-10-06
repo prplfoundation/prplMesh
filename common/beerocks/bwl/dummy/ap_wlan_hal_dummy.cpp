@@ -122,9 +122,17 @@ HALState ap_wlan_hal_dummy::attach(bool block)
     return state;
 }
 
-bool ap_wlan_hal_dummy::sta_allow(const std::string &mac) { return true; }
+bool ap_wlan_hal_dummy::sta_allow(const std::string &mac)
+{
+    LOG(DEBUG) << "Got client allow request for " << mac;
+    return true;
+}
 
-bool ap_wlan_hal_dummy::sta_deny(const std::string &mac, int reject_sta) { return true; }
+bool ap_wlan_hal_dummy::sta_deny(const std::string &mac, int reject_sta)
+{
+    LOG(DEBUG) << "Got client disallow request for " << mac << " reject_sta " << reject_sta;
+    return true;
+}
 
 bool ap_wlan_hal_dummy::sta_disassoc(int8_t vap_id, const std::string &mac, uint32_t reason)
 {
