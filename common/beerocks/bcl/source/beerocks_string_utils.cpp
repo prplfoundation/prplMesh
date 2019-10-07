@@ -95,7 +95,7 @@ std::vector<std::string> string_utils::str_split(const std::string &s, char deli
 
 int64_t string_utils::stoi(const std::string &str, const char *calling_file, int calling_line)
 {
-    if (str.find_first_not_of("0123456789") != std::string::npos) {
+    if (str.find_first_not_of("-0123456789") != std::string::npos) {
         auto calling_file_str       = std::string(calling_file);
         const auto caller_file_name = calling_file_str.substr(calling_file_str.rfind('/') + 1);
         LOG(WARNING) << "string_utils::stoi(), string \"" << str
