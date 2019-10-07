@@ -125,18 +125,6 @@ static void listed_map_obj_parser(
     }
 }
 
-static std::string::size_type find_first_of_delimiter_pair(std::string &str,
-                std::string::size_type pos, char delim_near, char delim_far)
-{
-    // finds first occurrence on string 'str' of <'delim_near'><any_characters except delimiters><'delim_far'>
-    auto idx = str.find_first_of(delim_far, pos);
-    if (idx == std::string::npos) {
-        return idx;
-    }
-    idx = str.rfind(delim_near, idx);
-    return idx;
-}
-
 static void map_event_obj_parser(std::string event_str, 
                 base_wlan_hal_nl80211::parsed_obj_map_t &map_obj)
 {
@@ -148,53 +136,29 @@ static void map_event_obj_parser(std::string event_str,
         LOG(WARNING) << "empty event! event_string: " << event_str;
     }
 
-    // find params without key end index
-    auto idx = find_first_of_delimiter_pair(event_str, idx_start, ' ', '=');
-
-    // put null terminator at the end of our key=val, for ss construction
-    if (idx != std::string::npos) {
-        event_str[idx] = '\0';
-    }
-
-    // insert to map known prams without key
+    // Parse all the args
     std::stringstream ss(event_str.c_str() + idx_start);
     std::string str_storage;
-    bool opcode = true;
+    bool opcode = false;
+    bool mac = false;
+    int arg = 0;
+
     while (std::getline(ss, str_storage, ' ')) {
-        if (opcode) {
-            // assume that the first param is event name
-            // map_obj[WAV_EVENT_KEYLESS_PARAM_OPCODE] = str_storage;
-            map_obj["_opcode"] = str_storage;
-            opcode                                  = false;
-        } else if (beerocks::net::network_utils::is_valid_mac(str_storage)) {
-            // map_obj[WAV_EVENT_KEYLESS_PARAM_MAC] = str_storage;
-            map_obj["_mac"] = str_storage;
-        } else if (!strncmp(str_storage.c_str(), "wlan", 4)) {
-            // map_obj[WAV_EVENT_KEYLESS_PARAM_IFACE] = str_storage;
-            map_obj["_iface"] = str_storage;
+        auto idx = str_storage.find_first_of('=', idx_start);
+        if (idx == std::string::npos) {
+            if (!opcode) {
+                map_obj["_opcode"] = str_storage;
+                opcode = true;
+            } else if (!mac && beerocks::net::network_utils::is_valid_mac(str_storage)) {
+                map_obj["_mac"] = str_storage;
+                mac = true;
+            } else {
+                map_obj["_arg" + std::to_string(arg++)] = str_storage;
+            }
+        } else {
+            map_obj[str_storage.substr(0, idx)] = str_storage.substr(idx + 1, std::string::npos);
         }
-    }
-
-    // fill the map with the rest of event data
-    while (idx != std::string::npos) {
-
-        idx_start = ++idx;
-
-        // find first '=' to skip on it
-        idx = event_str.find_first_of('=', idx_start);
-
-        // find the next pair of delimiters index
-        idx = find_first_of_delimiter_pair(event_str, ++idx, ' ', '=');
-
-        if (idx != std::string::npos) {
-            // put null terminator at the end of our key=val, for ss_in construction
-            event_str[idx] = '\0';
-        }
-
-        // parse key=val
-        std::stringstream ss_in(event_str.c_str() + idx_start);
-        map_obj_parser(ss_in, {'='}, map_obj);
-    }
+    }      
 }
 
 #if 0

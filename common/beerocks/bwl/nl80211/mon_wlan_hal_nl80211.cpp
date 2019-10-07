@@ -47,22 +47,23 @@ namespace nl80211 {
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-#if 0
-
 static mon_wlan_hal::Event wav_to_bwl_event(const std::string &opcode)
 {
-    if (opcode == "RRM-CHANNEL-LOAD-RECEIVED") {
-        return mon_wlan_hal::Event::RRM_Channel_Load_Response;
-    } else if (opcode == "RRM-BEACON-REP-RECEIVED") {
+    if (opcode == "BEACON-REQ-TX-STATUS") {
+        return mon_wlan_hal::Event::RRM_Beacon_Request_Status;
+    } else if (opcode == "BEACON-RESP-RX") {
         return mon_wlan_hal::Event::RRM_Beacon_Response;
-    } else if (opcode == "RRM-STA-STATISTICS-RECEIVED") {
-        return mon_wlan_hal::Event::RRM_STA_Statistics_Response;
-    } else if (opcode == "RRM-LINK-MEASUREMENT-RECEIVED") {
-        return mon_wlan_hal::Event::RRM_Link_Measurement_Response;
     }
+    // } else if (opcode == "RRM-STA-STATISTICS-RECEIVED") {
+    //     return mon_wlan_hal::Event::RRM_STA_Statistics_Response;
+    // } else if (opcode == "RRM-LINK-MEASUREMENT-RECEIVED") {
+    //     return mon_wlan_hal::Event::RRM_Link_Measurement_Response;
+    // }
 
     return mon_wlan_hal::Event::Invalid;
 }
+
+#if 0
 
 static void calc_curr_traffic(std::string buff, uint64_t &total, uint32_t &curr)
 {
@@ -311,7 +312,73 @@ bool mon_wlan_hal_nl80211::sta_channel_load_11k_request(const SStaChannelLoadReq
 
 bool mon_wlan_hal_nl80211::sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token)
 {
-    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
+    LOG(TRACE) << __func__;
+
+    // parameters preperations
+
+    // Mode
+    auto request = (!req.enable) ? 0 : req.request;
+    auto report  = (!req.enable) ? 0 : req.report;
+
+    uint8_t req_mode = (req.parallel | (req.enable ? 0x02 : 0) | (request ? 0x04 : 0) |
+                        (report ? 0x08 : 0) | (req.mandatory_duration ? 0x10 : 0));
+
+    auto op_class = req.op_class < 0 ? GET_OP_CLASS(get_radio_info().channel) : req.op_class;
+
+    if (req.op_class <= 0) {
+        LOG(WARNING) << __func__ << " op_class not set!";
+    }
+
+    std::string measurement_mode;
+    switch ((SBeaconRequest11k::MeasurementMode)(req.measurement_mode)) {
+        case SBeaconRequest11k::MeasurementMode::Passive:
+            measurement_mode = "00";
+            break;
+        case SBeaconRequest11k::MeasurementMode::Active:
+            measurement_mode = "01";
+            break;
+        case SBeaconRequest11k::MeasurementMode::Table:
+            measurement_mode = "02";
+            break;
+        default: {
+            LOG(WARNING) << "Invalid measuremetn mode: " << int(req.measurement_mode)
+                        << ", using PASSIVE...";
+
+            measurement_mode = "00";
+        }
+    }
+
+    // REQ_BEACON 02:14:5f:b8:ae:9f req_mode=01 510B000011110004f021318193
+    // op_class (2), channel (2), randomization_interval (4), measurement duration (4), measurement mode (2), bssid (12)
+
+    // build command
+    std::string cmd = "REQ_BEACON " + beerocks::net::network_utils::mac_to_string(req.sta_mac.oct) +
+                      " " +                                  // Destination MAC Address
+                      "req_mode=" + measurement_mode + " " + // Measurements Request Mode
+                      beerocks::string_utils::int_to_hex_string(op_class, 2) +
+                      beerocks::string_utils::int_to_hex_string(req.channel, 2) +
+                      beerocks::string_utils::int_to_hex_string(req.rand_ival, 4) +
+                      beerocks::string_utils::int_to_hex_string(req.duration, 4) +
+                      beerocks::string_utils::int_to_hex_string(req_mode, 2) +
+                      beerocks::string_utils::int_to_hex_string(req.bssid.oct[0], 2) +
+                      beerocks::string_utils::int_to_hex_string(req.bssid.oct[1], 2) +
+                      beerocks::string_utils::int_to_hex_string(req.bssid.oct[2], 2) +
+                      beerocks::string_utils::int_to_hex_string(req.bssid.oct[3], 2) +
+                      beerocks::string_utils::int_to_hex_string(req.bssid.oct[4], 2) +
+                      beerocks::string_utils::int_to_hex_string(req.bssid.oct[5], 2);
+
+    // Print the command
+    LOG(DEBUG) << __func__ << " - " << cmd;
+
+    // Send the command
+    parsed_obj_map_t reply;
+    if (!wpa_ctrl_send_msg(cmd, reply)) {
+        LOG(ERROR) << __func__ << " failed";
+        return false;
+    }
+
+    dialog_token = 0;//tmp_int;
+
     return true;
 }
 
@@ -336,37 +403,135 @@ bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
         return true;
     }
 
-    // LOG(TRACE) << __func__ << " - opcode: |" << opcode << "|";
-
-#if 0
-
     auto event = wav_to_bwl_event(opcode);
 
     // Handle the event
     switch (event) {
 
-    case Event::RRM_Channel_Load_Response: {
-    } break;
+        case Event::RRM_Beacon_Request_Status: {
 
-    case Event::RRM_Beacon_Response: {
-    } break;
+            // Allocate response object
+            auto resp_buff = ALLOC_SMART_BUFFER(sizeof(SBeaconRequestStatus11k));
+            auto resp      = reinterpret_cast<SBeaconRequestStatus11k *>(resp_buff.get());
+            LOG_IF(!resp, FATAL) << "Memory allocation failed!";
 
-    case Event::RRM_STA_Statistics_Response: {
-    } break;
+            // Initialize the message
+            memset(resp_buff.get(), 0, sizeof(SBeaconRequestStatus11k));
 
-    case Event::RRM_Link_Measurement_Response: {
-    } break;
+            // STA Mac Address
+            beerocks::net::network_utils::mac_from_string(resp->sta_mac.oct, parsed_obj["_mac"]);
 
-    // Gracefully ignore unhandled events
-    // TODO: Probably should be changed to an error once WAV will stop
-    //       sending empty or irrelevant events...
-    default: {
-        LOG(WARNING) << "Unhandled event received: " << opcode;
-        break;
-    };
+            // Dialog token and ACK
+            resp->dialog_token = beerocks::string_utils::stoi(parsed_obj["_arg0"]);
+            resp->ack = beerocks::string_utils::stoi(parsed_obj["ack"]);
+
+            // Add the message to the queue
+            event_queue_push(event, resp_buff);
+
+        } break;
+
+        case Event::RRM_Beacon_Response: {            
+
+            // Allocate response object
+            auto resp_buff = ALLOC_SMART_BUFFER(sizeof(SBeaconResponse11k));
+            auto resp      = reinterpret_cast<SBeaconResponse11k *>(resp_buff.get());
+            LOG_IF(!resp, FATAL) << "Memory allocation failed!";
+
+            // Initialize the message
+            memset(resp_buff.get(), 0, sizeof(SBeaconResponse11k));
+
+            // STA Mac Address
+            beerocks::net::network_utils::mac_from_string(resp->sta_mac.oct, parsed_obj["_mac"]);
+
+            // Dialog token and rep_mode
+            resp->dialog_token = beerocks::string_utils::stoi(parsed_obj["_arg0"]);
+            resp->rep_mode = beerocks::string_utils::stoi(parsed_obj["_arg1"]);
+
+            // Parse the report
+            auto report = parsed_obj["_arg2"];
+            if (report.length() < 52) {
+                LOG(WARNING) << "Invalid 11k report length!";
+                break;
+            }
+
+            // TODO: Check for argument validity and use a safer stoi version
+            int idx = 0;
+
+            // op_class
+            resp->op_class = std::stoi(report.substr(idx, 2), 0, 16);
+            idx += 2;
+
+            // channel
+            resp->channel = std::stoi(report.substr(idx, 2), 0, 16);
+            idx += 2;
+
+            // start_time
+            resp->start_time = std::stoull(report.substr(idx, 16), 0, 16);
+            resp->start_time = htole64(resp->start_time);
+            idx += 16;
+
+            // measurement_duration
+            resp->duration = std::stoi(report.substr(idx, 4), 0, 16);
+            resp->duration = htole16(resp->duration);
+            idx += 4;
+
+            // phy_type
+            resp->phy_type = std::stoi(report.substr(idx, 2), 0, 16);
+            idx += 2;
+
+            // rcpi
+            resp->rcpi = std::stoi(report.substr(idx, 2), 0, 16);
+            idx += 2;
+
+            // rsni
+            resp->rsni = std::stoi(report.substr(idx, 2), 0, 16);
+            idx += 2;
+
+            // bssid
+            resp->bssid.oct[0] = std::stoi(report.substr(idx + 0, 2), 0, 16);
+            resp->bssid.oct[1] = std::stoi(report.substr(idx + 2, 2), 0, 16);
+            resp->bssid.oct[2] = std::stoi(report.substr(idx + 4, 2), 0, 16);
+            resp->bssid.oct[3] = std::stoi(report.substr(idx + 6, 2), 0, 16);
+            resp->bssid.oct[4] = std::stoi(report.substr(idx + 8, 2), 0, 16);
+            resp->bssid.oct[5] = std::stoi(report.substr(idx + 10, 2), 0, 16);
+            idx += 12;
+
+            // ant_id
+            resp->ant_id = std::stoi(report.substr(idx, 2), 0, 16);
+            idx += 2;
+
+            // parent_tsf
+            resp->parent_tsf = std::stoi(report.substr(idx, 8), 0, 16);
+            idx += 8;
+
+            // TODO: Ignore everything else?
+            // WLAN_BEACON_REPORT_SUBELEM_FRAME_BODY == 01
+            // frame_body.length = ??
+
+            // LOG(DEBUG) << "op_class = " << int(resp->op_class);
+            // LOG(DEBUG) << "channel = " << int(resp->channel);
+            // LOG(DEBUG) << "start_time = " << int(resp->start_time);
+            // LOG(DEBUG) << "duration = " << int(resp->duration);
+            // LOG(DEBUG) << "phy_type = " << int(resp->phy_type);
+            // LOG(DEBUG) << "rcpi = " << int(resp->rcpi);
+            // LOG(DEBUG) << "rsni = " << int(resp->rsni);
+            // LOG(DEBUG) << "bssid = " << beerocks::net::network_utils::mac_to_string(resp->bssid.oct);
+            // LOG(DEBUG) << "ant_id = " << int(resp->ant_id);
+            // LOG(DEBUG) << "parent_tfs = " << int(resp->parent_tsf);
+
+            // Add the message to the queue
+            event_queue_push(event, resp_buff);
+
+        } break;
+
+        // Gracefully ignore unhandled events
+        // TODO: Probably should be changed to an error once WAV will stop
+        //       sending empty or irrelevant events...
+        default: {
+            LOG(WARNING) << "Unhandled event received: " << opcode;
+            break;
+        };
     }
-
-#endif
 
     return true;
 }
