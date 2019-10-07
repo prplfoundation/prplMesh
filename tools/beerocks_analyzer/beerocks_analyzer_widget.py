@@ -254,7 +254,8 @@ class BeeRocksAnalyzerWidget(QWidget):
                     param_v.append(arg_val[1].strip())
 
         except Exception as e: # TODO: too broad exception
-            self.logger.error("Error, readSample() 1 line --> {}\n{}".format(line, e))
+            self.logger.error("Error, readSample() 1 line --> {}".format(line))
+            self.logger.exception(e)
             return
 
         if param_v == None: return
@@ -263,6 +264,7 @@ class BeeRocksAnalyzerWidget(QWidget):
         param_m_n = param_m_val[0].strip()
 
         if param_m_n == "Name": #nw_map_update
+            self.logger.debug("Updating network map")
             try:
                 i_state=param_n.index('state')
                 i_mac=param_n.index('mac')
@@ -273,8 +275,8 @@ class BeeRocksAnalyzerWidget(QWidget):
             except Exception as e: # TODO: too broad exception
                 self.logger.error("readSample()  --> {}, "
                                   "nw_map_update line does not contain state or mac"
-                                  " or type or parent bssid\n"
-                                  "{}".format(line, e))
+                                  " or type or parent bssid".format(line))
+                self.logger.exception(e)
                 return
 
             state = (param_v[i_state].split())[0]
@@ -289,8 +291,8 @@ class BeeRocksAnalyzerWidget(QWidget):
                     mac = param_v[i_backhaul] #for IRE, the backhaul mac is the "client" mac
                 except Exception as e:  # TODO: too broad exception
                     self.logger.error("readSample()  --> %s, nw_map_update IRE line does not contain"
-                                      " a backhaul mac address"
-                                      "\n{}".format(line, e))
+                                      " a backhaul mac address".format(line))
+                    self.logger.exception(e)
                     return
             if ("2" in line_type) or ("3" in line_type): #IRE or client
                 if state == "Disconnected":
@@ -306,7 +308,8 @@ class BeeRocksAnalyzerWidget(QWidget):
                             sta_id = int(param_v[i_sta_id])
                         except Exception as e:  # TODO: too broad exception
                             self.logger.error("readSample()  --> {}, nw_map_update - "
-                                              "new STA line does not contain sta_id\n{}".format(line, e))
+                                              "new STA line does not contain sta_id".format(line))
+                            self.logger.exception(e)
                             return
                         self.sta_mac2num[mac] = sta_id
                         self.defineLineColor('sta', self.sta_mac2num[mac])
@@ -336,7 +339,8 @@ class BeeRocksAnalyzerWidget(QWidget):
             try:
                 i1=param_n.index('mac')
             except Exception as e:  # TODO: too broad exception
-                self.logger.error("readSample() --> {}, 'stats_update' line not contain mac address\n{}".format(line, e))
+                self.logger.error("readSample() --> {}, 'stats_update' line not contain mac address".format(line))
+                self.logger.exception(e)
                 return
 
             mac = param_v[i1]
@@ -349,7 +353,8 @@ class BeeRocksAnalyzerWidget(QWidget):
                         ap_id = int(param_v[i_ap_id])
                     except Exception as e:  # TODO: too broad exception
                         self.logger.error("readSample()  --> %s, nw_map_update"
-                                          " - new AP line does not contain ap_id\n{}".format(line, e))
+                                          " - new AP line does not contain ap_id".format(line))
+                        self.logger.exception(e)
                         return
                     self.ap_mac2num[mac] = ap_id
                     self.defineLineColor('ap', ap_id)
@@ -369,7 +374,8 @@ class BeeRocksAnalyzerWidget(QWidget):
                         sta_id = int(param_v[i_sta_id])
                     except Exception as e:  # TODO: too broad exception
                         self.logger.error("readSample()  --> %s, nw_map_update"
-                                          " - new STA line does not contain sta_id\n{}".format(line, e))
+                                          " - new STA line does not contain sta_id".format(line))
+                        self.logger.exception(e)
                         return
                     self.sta_mac2num[mac] = sta_id
                     self.defineLineColor('sta', self.sta_mac2num[mac])
@@ -382,7 +388,8 @@ class BeeRocksAnalyzerWidget(QWidget):
                         break
                 
                 if ap_num==None:
-                    self.logger.error("Error, readSample() --> {}, 'client_stats_update' did not find sta_mac={} in self.ap_mac2sta_mac".format(line, mac))
+                    self.logger.error("Error, readSample() --> {}, 'client_stats_update'"
+                                      " did not find sta_mac={} in self.ap_mac2sta_mac".format(line, mac))
                     return
                 
                 for j in range(i1, len(param_n)):
