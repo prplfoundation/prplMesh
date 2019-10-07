@@ -192,11 +192,10 @@ class ConnectivityMapWidget(QWidget):
     
     def update_x_positions_from_node(self, n):
         #check if n has clients connected
-        num_of_successors =len(self.graph.successors(n))
         has_clients_connected = False
-        if num_of_successors != 0: #IRE/GW - check if have children after eth/radios
+        if self.graph.out_degree(n): #IRE/GW - check if have children after eth/radios
             for ap in self.graph.successors(n):
-                if len(self.graph.successors(ap)) > 0:
+                if self.graph.out_degree(ap):
                     has_clients_connected = True
                     break
             
@@ -253,7 +252,7 @@ class ConnectivityMapWidget(QWidget):
             self.last_x_in_hierarchy[n.hierarchy] = n.x
         
         #Update n's aps x positions
-        if num_of_successors != 0:
+        if self.graph.out_degree(n):
             factor = 0.065
             radius = 0.45*n.size*factor
             alpha = math.radians(60)
@@ -268,7 +267,7 @@ class ConnectivityMapWidget(QWidget):
                     ap.x = n.x
     
     def update_y_positions_from_node(self, n):
-        num_of_successors =len(self.graph.successors(n))
+        num_of_successors =len(list(self.graph.successors(n)))
         if num_of_successors == 0:
             return
         else:
