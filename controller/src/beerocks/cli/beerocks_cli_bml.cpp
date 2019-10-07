@@ -1542,7 +1542,7 @@ int cli_bml::analyzer_init(std::string remote_pc_ip)
                 break;
             }
         }
-        if (t < 19) {
+        if (t < 1) {
             t++;
         } else {
             t = 0;
