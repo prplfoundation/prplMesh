@@ -201,6 +201,12 @@ struct SBeaconRequest11k {
     uint32_t new_ch_center_freq_seg_1;        // not sure if this type is most fit
 };
 
+struct SBeaconRequestStatus11k {
+    SMacAddr sta_mac;
+    uint8_t dialog_token;
+    uint8_t ack;
+};
+
 struct SBeaconResponse11k {
     uint8_t
         channel; // A Channel Number of 0 indicates a request to make iterative measurements for all supported channels in the Regulatory Class
