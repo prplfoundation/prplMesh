@@ -345,10 +345,10 @@ class ConnectivityMapWidget(QWidget):
                     self.update_positions_from_node(n)
                     break
             if not found_gw:
-                #print 'could not update graph - gw node was not found'
+                self.logger.error("could not update graph - gw node was not found(2)")
                 return
         else:
-            #print 'could not update graph - gw node was not found'
+            self.logger.error("could not update graph - gw node was not found")
             return
 
         #update nodes "pos" attribute
@@ -456,8 +456,11 @@ class ConnectivityMapWidget(QWidget):
         self.sc=plt.scatter(x,y, s=size,alpha=0)
 
         pylab.axis('off')
-        try: self.fig.canvas.draw()
-        except: pass
+        try:
+            self.logger.debug("Redrawing canvas")
+            self.fig.canvas.draw()
+        except Exception as e: # TODO: too broad exception
+            self.logger.exception(e)
         self.threadEvent.set()
 
     def add_node_to_graph(self, n):
@@ -625,14 +628,18 @@ class ConnectivityMapWidget(QWidget):
         if cont:
             self.update_annot(ind)
             self.annot.set_visible(True)
-            try: self.fig.canvas.draw_idle()
-            except: pass
+            try:
+                self.fig.canvas.draw_idle()
+            except Exception as e: # TODO: too broad exception
+                self.logger.exception(e)
         else:
             if vis:
                 self.annot.set_position((20,20))
                 self.annot.set_visible(False)
-                try: self.fig.canvas.draw_idle()
-                except: pass
+                try:
+                    self.fig.canvas.draw_idle()
+                except Exception as e: # TODO: too broad exception
+                    self.logger.exception(e)
 
     def readSample(self, line, param_t, is_start, is_stop):
         if is_start:
@@ -666,9 +673,12 @@ class ConnectivityMapWidget(QWidget):
 
         except Exception as e: # TODO: too broad exception
             self.logger.error("Error, readSample() 1 line --> {}".format(line))
+            self.logger.exception(e)
             return
 
-        if param_v is None: return
+        if param_v is None:
+            self.logger.debug("self.param_v is null, returning")
+            return
 
         param_m_val = param_m.split(':')
         param_m_n = param_m_val[0].strip()
@@ -699,21 +709,25 @@ class ConnectivityMapWidget(QWidget):
                         backhaul_mac=param_v[i_backhaul]
                     except Exception as e: # TODO: too broad exception
                         self.logger.error("readSample()  --> {}, nw_map_update IRE line does not contain a backhaul mac address".format(line))
+                        self.logger.exception(e)
                         return
                 
                 if (not "1" in line_type) and (not "2" in line_type):
                     try:
                         i_channel=param_n.index('channel')
                         channel=param_v[i_channel]
-                    except:
-                        pass
+                    except Exception as e:
+                        self.logger.debug("channel exception")
+                        self.logger.exception(e)
                     try:
                         i_bandwidth=param_n.index('bandwidth')
                         bandwidth=param_v[i_bandwidth]
-                    except:
-                        pass
+                    except Exception as e:
+                        self.logger.debug("bandwidth exception")
+                        self.logger.exception(e)
             except Exception as e: # TODO: too broad Exception
                 self.logger.error("readSample()  --> {}, nw_map_update line does not contain state or mac address or parent bssid or type".format(line))
+                self.logger.exception(e)
                 return
 
             if state == "Connected":
