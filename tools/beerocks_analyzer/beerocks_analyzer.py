@@ -670,7 +670,7 @@ def socket_server(log_file):
                 g_marker_update = False
                 sent_bytes = connection.send("marker")
             try:
-                data += connection.recv(256)
+                data += connection.recv(256).decode("utf-8")
             except socket.timeout:
                 logger.info("Socket timed out")
                 pass
