@@ -308,13 +308,35 @@ HALState ap_wlan_hal_nl80211::attach(bool block)
 
 bool ap_wlan_hal_nl80211::sta_allow(const std::string &mac)
 {
-    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
+    LOG(TRACE) << __func__ << " mac: " << mac;
+
+    // Build command string
+    // We use the DENY_ACL list only
+    const std::string cmd = "DENY_ACL DEL_MAC " + mac;
+
+    // Send command
+    if (!wpa_ctrl_send_msg(cmd)) {
+        LOG(ERROR) << "sta_allow() failed!";
+        return false;
+    }
+
     return true;
 }
 
 bool ap_wlan_hal_nl80211::sta_deny(const std::string &mac, int reject_sta)
 {
-    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
+    LOG(TRACE) << __func__ << " mac: " << mac;
+
+    // Build command string
+    // We use the DENY_ACL list only
+    const std::string cmd = "DENY_ACL ADD_MAC " + mac;
+
+    // Send command
+    if (!wpa_ctrl_send_msg(cmd)) {
+        LOG(ERROR) << "sta_deny() failed!";
+        return false;
+    }
+
     return true;
 }
 
