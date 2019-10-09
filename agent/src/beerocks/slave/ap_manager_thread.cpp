@@ -711,6 +711,28 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST failed";
             return false;
         }
+
+        auto bssid                    = network_utils::mac_to_string(request->params().cur_bssid);
+        const auto &vap_unordered_map = ap_wlan_hal->get_radio_info().available_vaps;
+        auto it = std::find_if(vap_unordered_map.begin(), vap_unordered_map.end(),
+                               [&](const std::pair<int, bwl::VAPElement> &element) {
+                                   return element.second.mac == bssid;
+                               });
+
+        if (it == vap_unordered_map.end()) {
+            LOG(DEBUG) << "Steer request for unknown vap";
+            return false;
+        }
+        //TODO Check for STA errors, if error ACK with ErrorCodeTLV
+        auto response = message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_ACK>(
+            cmdu_tx, beerocks_header->id());
+
+        if (response == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+
         std::string sta_mac       = network_utils::mac_to_string(request->params().mac);
         std::string target_bssid  = network_utils::mac_to_string(request->params().target.bssid);
         uint8_t disassoc_imminent = request->params().disassoc_imminent;

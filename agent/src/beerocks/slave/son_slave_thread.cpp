@@ -2403,6 +2403,25 @@ bool slave_thread::handle_cmdu_ap_manager_message(
 
         break;
     }
+    case beerocks_message::ACTION_APMANAGER_ACK: {
+        auto response_in = cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_ACK>();
+        if (response_in == nullptr) {
+            LOG(ERROR) << "addClass ACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE failed";
+            return false;
+        }
+
+        auto cmdu_tx_header =
+            cmdu_tx.create(beerocks_header->id(), ieee1905_1::eMessageType::ACK_MESSAGE);
+
+        if (!cmdu_tx_header) {
+            LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+            return false;
+        }
+
+        LOG(DEBUG) << "sending ACK message back to controller";
+        send_cmdu_to_controller(cmdu_tx);
+        break;
+    }
     case beerocks_message::ACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE: {
         auto response_in =
             cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE>();
@@ -4807,44 +4826,26 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
         return false;
     }
 
-    if (steering_request_tlv->bssid() != hostap_params.iface_mac) {
-        return true;
-    }
-
     LOG(DEBUG) << "Received CLIENT_STEERING_REQUEST_MESSAGE , mid=" << std::hex << int(mid);
 
     auto request_mode = steering_request_tlv->request_flags().request_mode;
     LOG(DEBUG) << "request_mode: " << std::hex << int(request_mode);
 
-    //TODO: validate the BTM request before sending the ack.
-    // build ACK message CMDU
-    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
-
-    if (!cmdu_tx_header) {
-        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
-        return false;
-    }
-
-    LOG(DEBUG) << "sending ACK message back to controller";
-    if (!send_cmdu_to_controller(cmdu_tx)) {
-        LOG(ERROR) << "failed to send ACK_MESSAGE";
-        return false;
-    }
-    //TODO - Send BTM Request frame to the STA including a Neighbor Report element specifying
-    // the BSSID, Operating Class and Channel Number of the identified target BSS
-
-    //check if the Request Mode bit is set
-    if (request_mode) {
+    if (request_mode ==
+        wfa_map::tlvSteeringRequest::REQUEST_IS_A_STEERING_MANDATE_TO_TRIGGER_STEERING) {
         //TODO Handle 0 or more then 1 sta in list, currenlty cli steers only 1 client
+        LOG(DEBUG) << "Request Mode bit is set - Steering Mandate";
+
         auto request_out = message_com::create_vs_message<
             beerocks_message::cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST>(cmdu_tx, mid);
-        if (request_out == nullptr) {
+        if (!request_out) {
             LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST message!";
             return false;
         }
-        auto bssid_list = steering_request_tlv->target_bssid_list(0);
 
-        request_out->params().mac = std::get<1>(steering_request_tlv->sta_list(0));
+        auto bssid_list                 = steering_request_tlv->target_bssid_list(0);
+        request_out->params().cur_bssid = steering_request_tlv->bssid();
+        request_out->params().mac       = std::get<1>(steering_request_tlv->sta_list(0));
         request_out->params().disassoc_timer_ms =
             steering_request_tlv->btm_disassociation_timer_ms();
         request_out->params().target.bssid = std::get<1>(bssid_list).target_bssid;
@@ -4855,8 +4856,6 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
             steering_request_tlv->request_flags().btm_disassociation_imminent_bit;
 
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
-        //Steering Mandate
-        LOG(DEBUG) << "Request Mode bit is set - Steering Mandate";
         // build and send Client Steering BTM report message
         if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE)) {
             LOG(ERROR) << "cmdu creation of type CLIENT_STEERING_BTM_REPORT_MESSAGE, has failed";
@@ -4869,6 +4868,7 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
         }
         LOG(DEBUG) << "sending CLIENT_STEERING_BTM_REPORT_MESSAGE back to controller";
     } else {
+        //TODO Add handling of steering opportunity
         LOG(DEBUG) << "Request Mode bit is not set - Steering Opportunity";
         // build and send steering completed message
         auto cmdu_tx_header =
