@@ -140,6 +140,19 @@ bool ap_wlan_hal_dummy::sta_bss_steer(const std::string &mac, const std::string 
                                       int disassoc_timer, int valid_int)
 {
     LOG(DEBUG) << "Got steer request for " << mac << " steer to " << bssid;
+
+    auto msg_buff = ALLOC_SMART_BUFFER(sizeof(sACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE));
+    auto msg      = reinterpret_cast<sACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE *>(msg_buff.get());
+    LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+    memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE));
+
+    msg->params.mac         = beerocks::net::network_utils::mac_from_string(mac);
+    msg->params.status_code = 0;
+
+    // Add the message to the queue
+    event_queue_push(Event::BSS_TM_Response, msg_buff);
+
     return true;
 }
 
