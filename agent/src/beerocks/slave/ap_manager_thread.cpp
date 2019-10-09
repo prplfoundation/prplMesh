@@ -1041,6 +1041,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
             return false;
         }
 
+        //TODO EasyMesh SteeringBTMReport should contain source BSSID and target BSSID
         auto msg = static_cast<bwl::sACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE *>(data);
         LOG(INFO) << "BSS_STEER_RESPONSE client " << network_utils::mac_to_string(msg->params.mac)
                   << " status_code=" << int(msg->params.status_code);

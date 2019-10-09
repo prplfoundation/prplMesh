@@ -2432,14 +2432,20 @@ bool slave_thread::handle_cmdu_ap_manager_message(
         LOG(INFO) << "ACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE, rep_mode="
                   << int(response_in->params().status_code);
 
-        auto response_out = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE>(cmdu_tx,
-                                                                         beerocks_header->id());
-        if (response_out == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE message!";
-            break;
+        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE)) {
+            LOG(ERROR) << "cmdu creation of type CLIENT_STEERING_BTM_REPORT_MESSAGE, has failed";
+            return false;
         }
-        response_out->params() = response_in->params();
+        auto steering_btm_report_tlv = cmdu_tx.addClass<wfa_map::tlvSteeringBTMReport>();
+        if (!steering_btm_report_tlv) {
+            LOG(ERROR) << "addClass wfa_map::tlvSteeringBTMReport failed";
+            return false;
+        }
+        //TODO Add target/source BSSID
+        steering_btm_report_tlv->sta_mac()         = response_in->params().mac;
+        steering_btm_report_tlv->btm_status_code() = response_in->params().status_code;
+
+        LOG(DEBUG) << "sending CLIENT_STEERING_BTM_REPORT_MESSAGE back to controller";
         send_cmdu_to_controller(cmdu_tx);
         break;
     }
@@ -4856,17 +4862,7 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
             steering_request_tlv->request_flags().btm_disassociation_imminent_bit;
 
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
-        // build and send Client Steering BTM report message
-        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE)) {
-            LOG(ERROR) << "cmdu creation of type CLIENT_STEERING_BTM_REPORT_MESSAGE, has failed";
-            return false;
-        }
-        auto steering_btm_report_tlv = cmdu_tx.addClass<wfa_map::tlvSteeringBTMReport>();
-        if (!steering_btm_report_tlv) {
-            LOG(ERROR) << "addClass wfa_map::tlvSteeringBTMReport failed";
-            return false;
-        }
-        LOG(DEBUG) << "sending CLIENT_STEERING_BTM_REPORT_MESSAGE back to controller";
+        return true;
     } else {
         //TODO Add handling of steering opportunity
         LOG(DEBUG) << "Request Mode bit is not set - Steering Opportunity";
@@ -4879,8 +4875,8 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
             return false;
         }
         LOG(DEBUG) << "sending STEERING_COMPLETED_MESSAGE back to controller";
+        return send_cmdu_to_controller(cmdu_tx);
     }
-    return send_cmdu_to_controller(cmdu_tx);
 }
 
 bool slave_thread::handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
