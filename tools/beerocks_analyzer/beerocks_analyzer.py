@@ -31,7 +31,6 @@ import logger_setup
 VERSION="3.3"
 
 t_list=[]
-g_ssh=None
 g_ext_log_file=False
 g_marker_update=False
 LOG_FILE="beerocks_analyzer.log"
@@ -66,9 +65,6 @@ def signal_handler(signal, frame):
             logger.warning("Exception when trying to terminate thread: " + str(e))
             pass
 
-    global g_ssh
-    if g_ssh != None:
-        g_ssh.close()
 
 class UpdateSig(QObject):
     sig = Signal(float)
@@ -799,40 +795,53 @@ class BeerocksCliThread(threading.Thread):
             # and its assignment to self.process
             self.process.kill()
 
+class SSHThread(threading.Thread):
 
-def ssh_start_beerocks_cli(host="192.168.1.1",my_ip="",ssh_port=22, user='admin', password='admin'):
-    global g_ssh
-    g_ssh = paramiko.SSHClient()
-    g_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    g_ssh.connect(host, port=ssh_port, username=user, password=password, allow_agent = False)
-    
-    if my_ip == "":
-        my_ip = g_ssh.get_transport().sock.getsockname()[0]
-        
-    command = '/opt/beerocks/beerocks_cli -a ' + my_ip
+    def __init__(self, host="192.168.1.1", my_ip="", ssh_port=22, user='admin', password='admin'):
+        super().__init__()
+        self.host = host
+        self.my_ip = my_ip
+        self.ssh_port = ssh_port
+        self.user = user
+        self.password = password
 
-    #create ssh shell
-    ssh_shell = g_ssh.invoke_shell()
+    def run(self):
+        self.ssh_client = paramiko.SSHClient()
+        self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.ssh_client.connect(self.host, port=self.ssh_port, username=self.user, password=self.password, allow_agent = False)
 
-    #establish connection
-    in_buff = ''
-    while not in_buff.endswith(':~# '):
-        in_buff += ssh_shell.recv(9999)
-        if in_buff.endswith('password: '): 
-            time.sleep(3)
-            logger.info("ssh_command()  --> got 'password:', sending password...")
-            ssh_shell.send(password + '\n')
-            in_buff = ''
-        elif 'are you sure you want to continue connecting' in in_buff:
-            time.sleep(3)
-            logger.info("ssh_command()  --> got 'are you sure you want to continue connecting', sending 'yes'...")
-            ssh_shell.send('yes\n')
-            in_buff = ''
-    
-    #execute command
-    i, o, e = g_ssh.exec_command(command)
-    return o.channel.recv_exit_status()
-    
+        if not self.my_ip:
+            my_ip = self.ssh_client.get_transport().sock.getsockname()[0]
+
+        command = '/opt/beerocks/beerocks_cli -a ' + my_ip
+
+        #create ssh shell
+        ssh_shell = self.ssh_client.invoke_shell()
+
+        #establish connection
+        in_buff = ''
+        while not in_buff.endswith(':~# '):
+            in_buff += ssh_shell.recv(9999)
+            if in_buff.endswith('password: '):
+                time.sleep(3)
+                logger.info("ssh_command()  --> got 'password:', sending password...")
+                ssh_shell.send(self.password + '\n')
+                in_buff = ''
+            elif 'are you sure you want to continue connecting' in in_buff:
+                time.sleep(3)
+                logger.info("ssh_command()  --> got 'are you sure you want to continue connecting', sending 'yes'...")
+                ssh_shell.send('yes\n')
+                in_buff = ''
+
+        #execute command
+        logger.debug("Starting beerock_cli -a")
+        i, o, e = self.ssh_client.exec_command(command)
+        logger.debug("beerock_cli -a exited")
+        return o.channel.recv_exit_status()
+
+    def terminate(self):
+        self.ssh_client.close()
+
 def main(argv):
     global t_list, g_ext_log_file
     signal.signal(signal.SIGINT, signal_handler)
@@ -917,7 +926,7 @@ def main(argv):
                 # running locally
                 t = BeerocksCliThread(bin_path, my_ip, docker_container)
             else:
-                t = Thread(target=ssh_start_beerocks_cli, args=(gw_ip, my_ip, ssh_port))
+                t = SSHThread(gw_ip, my_ip, ssh_port)
             t.daemon = True
             t.start()
             t_list.append(t)
