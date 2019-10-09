@@ -49,6 +49,7 @@
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvRadioOperationRestriction.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
+#include <tlvf/wfa_map/tlvSteeringBTMReport.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
@@ -1033,6 +1034,12 @@ bool master_thread::handle_cmdu_1905_client_steering_btm_report_message(
     auto mid = cmdu_rx.getMessageId();
     LOG(INFO) << "Received CLIENT_STEERING_BTM_REPORT_MESSAGE, mid=" << std::hex << int(mid);
 
+    auto steering_btm_report = cmdu_rx.addClass<wfa_map::tlvSteeringBTMReport>();
+    if (!steering_btm_report) {
+        LOG(ERROR) << "addClass wfa_map::tlvSteeringBTMReportfailed";
+        return false;
+    }
+
     // build ACK message CMDU
     auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
 
@@ -1041,7 +1048,29 @@ bool master_thread::handle_cmdu_1905_client_steering_btm_report_message(
         return false;
     }
     LOG(DEBUG) << "sending ACK message back to agent";
-    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+    son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+
+    std::string client_mac = network_utils::mac_to_string(steering_btm_report->sta_mac());
+    uint8_t status_code    = steering_btm_report->btm_status_code();
+
+    LOG(DEBUG) << "BSS_TM_RESP from client_mac=" << client_mac
+               << " status_code=" << (int)status_code;
+
+    int steering_task_id = database.get_steering_task_id(client_mac);
+    tasks.push_event(steering_task_id, client_steering_task::BSS_TM_RESPONSE_RECEIVED);
+    database.update_node_11v_responsiveness(client_mac, true);
+
+    if (status_code != 0) {
+        LOG(DEBUG) << "sta " << client_mac << " rejected BSS steer request";
+        LOG(DEBUG) << "killing roaming task";
+
+        int prev_roaming_task = database.get_roaming_task_id(client_mac);
+        tasks.kill_task(prev_roaming_task);
+
+        tasks.push_event(steering_task_id, client_steering_task::BSS_TM_REQUEST_REJECTED);
+    }
+
+    return true;
 }
 
 bool master_thread::handle_cmdu_1905_channel_selection_response(Socket *sd,
@@ -2607,35 +2636,6 @@ bool master_thread::handle_cmdu_control_message(
                       << " hostap mac=" << hostap_mac
                       << " closing socket and marking as disconnected";
             son_actions::handle_dead_node(client_mac, hostap_mac, database, cmdu_tx, tasks);
-        }
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE: {
-        auto response =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE failed";
-            return false;
-        }
-
-        std::string client_mac = network_utils::mac_to_string(response->params().mac);
-        int status_code        = response->params().status_code;
-
-        LOG(DEBUG) << "BSS_TM_RESP from client_mac=" << client_mac
-                   << " status_code=" << status_code;
-
-        int steering_task_id = database.get_steering_task_id(client_mac);
-        tasks.push_event(steering_task_id, client_steering_task::BSS_TM_RESPONSE_RECEIVED);
-        database.update_node_11v_responsiveness(client_mac, true);
-
-        if (status_code != 0) {
-            LOG(DEBUG) << "sta " << client_mac << " rejected BSS steer request";
-            LOG(DEBUG) << "killing roaming task";
-
-            int prev_roaming_task = database.get_roaming_task_id(client_mac);
-            tasks.kill_task(prev_roaming_task);
-
-            tasks.push_event(steering_task_id, client_steering_task::BSS_TM_REQUEST_REJECTED);
         }
         break;
     }
