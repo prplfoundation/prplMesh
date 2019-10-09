@@ -621,6 +621,24 @@ class cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION : public BaseClass
         sMacAddr* m_mac = nullptr;
 };
 
+class cACTION_APMANAGER_ACK : public BaseClass
+{
+    public:
+        cACTION_APMANAGER_ACK(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_APMANAGER_ACK(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_APMANAGER_ACK();
+
+        static eActionOp_APMANAGER get_action_op(){
+            return (eActionOp_APMANAGER)(ACTION_APMANAGER_ACK);
+        }
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_APMANAGER* m_action_op = nullptr;
+};
+
 class cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST : public BaseClass
 {
     public:
