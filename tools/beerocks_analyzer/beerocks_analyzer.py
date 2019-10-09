@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 from importlib.machinery import SourceFileLoader
 import logging
 import subprocess
@@ -53,6 +54,7 @@ def printUsage():
     logger.info("    -bin_path=<path_to_beerocks_cli>                      - Path to the beerocks_cli binary. If empty, use build from <top_level>/../")
     logger.info("    -my_ip=[IP of PC]                                     - PC ip to send updates, if not set will automaticly set")
     logger.info("    -ssh_port=[ssh port of GW]                            - SSH port used to connect to GW")
+    logger.info("    -docker_container=[name of container]                 - Name of the docker container on which to run beerocks_cli")
 
 def signal_handler(signal, frame):
     global t_list, g_run_flag
@@ -716,7 +718,7 @@ def socket_server(log_file):
     file.close()
 
 
-def local_start_beerocks_cli(beerocks_cli_path: Union[Path, None], target_ip: IPv4Address) -> int:
+def local_start_beerocks_cli(beerocks_cli_path: Union[Path, None], target_ip: IPv4Address, docker_container_name: str = None) -> int:
     """Start beerocks_cli locally.
 
     Parameters
@@ -726,6 +728,11 @@ def local_start_beerocks_cli(beerocks_cli_path: Union[Path, None], target_ip: IP
         If None, the following path will be tried: <prplMesh_top_level>/../build/install/bin/beerocks_cli
     target_ip: IPv4Address
         The IP address to send the data to. Defaults to 127.0.0.1.
+    docker_container_name: str
+        (optional) The name of the docker container on which to run beerocks_cli.
+        If None (default value), docker won't be used and a local controller is assumed.
+        Note that the binary path is assumed to be mapped to the same directory inside
+        the container than the path on the host.
 
     Returns
     -------
@@ -739,10 +746,23 @@ def local_start_beerocks_cli(beerocks_cli_path: Union[Path, None], target_ip: IP
     if not beerocks_cli_path.is_file():
         raise ValueError("Path to beerocks_cli not found: {}".format(beerocks_cli_path))
     if not target_ip:
-        target_ip = ip_address("127.0.0.1")
-
-    command = [beerocks_cli_path, "-a", str(target_ip)]
-    logger.debug("Starting beerock_cli -a")
+        if docker_container_name:
+            try:
+                # try to find the gateway IP based on the docker network settings
+                config = json.loads(subprocess.check_output(["docker", "inspect", docker_container_name]))[0]
+                # pick any network:
+                network_name = next(iter(config["NetworkSettings"]["Networks"]))
+                network_config = json.loads(subprocess.check_output(["docker", "network", "inspect", network_name]))[0]
+                target_ip = network_config["IPAM"]["Config"][0]["Gateway"]
+            except (KeyError, TypeError):
+                raise("Could not find the target IP, please use the -my_ip option")
+        else:
+            # running locally:
+            target_ip = ip_address("127.0.0.1")
+    command = [str(beerocks_cli_path), "-a", str(target_ip)]
+    if docker_container_name:
+        command = ["docker", "exec", docker_container_name] + command
+    logger.debug("Starting '%s'", ' '.join(command))
     exit_status = subprocess.call(command)
     logger.debug("beerock_cli -a exited")
 
@@ -791,6 +811,7 @@ def main(argv):
         my_ip=None
         ssh_port=22
         bin_path = None
+        docker_container = None
         g_ext_log_file = False
         is_conn_map = False
         is_conn_map_sep_win = False
@@ -827,6 +848,8 @@ def main(argv):
                     my_ip = arg_i.split("=")[1]
                 elif arg_i.startswith("-ssh_port="):
                     ssh_port = int(arg_i.split("=")[1])
+                elif arg_i.startswith("-docker_container="):
+                    docker_container = arg_i.split("=")[1]
 
         #add conn map
         if is_conn_map:
@@ -860,7 +883,7 @@ def main(argv):
             time.sleep(3)
             if not gw_ip:
                 # running locally
-                t = Thread(target=local_start_beerocks_cli, args=(bin_path, my_ip))
+                t = Thread(target=local_start_beerocks_cli, args=(bin_path, my_ip, docker_container))
             else:
                 t = Thread(target=ssh_start_beerocks_cli, args=(gw_ip, my_ip, ssh_port))
             t.start()
