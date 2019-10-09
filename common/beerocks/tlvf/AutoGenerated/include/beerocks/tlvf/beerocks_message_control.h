@@ -1277,26 +1277,6 @@ class cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE : public BaseClass
         sClientDisconnectResponse* m_params = nullptr;
 };
 
-class cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE : public BaseClass
-{
-    public:
-        cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_BSS_STEER_RESPONSE);
-        }
-        sNodeBssSteerResponse& params();
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-        sNodeBssSteerResponse* m_params = nullptr;
-};
-
 class cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION : public BaseClass
 {
     public:
