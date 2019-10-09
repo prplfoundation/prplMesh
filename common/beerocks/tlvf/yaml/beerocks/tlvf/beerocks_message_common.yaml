@@ -310,15 +310,17 @@ sArpQuery:
 
 sNodeBssSteerTarget:
   _type: struct
-  mac: sMacAddr
-  channel: uint8_t 
+  bssid: sMacAddr
+  operating_class: uint8_t
+  channel: uint8_t
 
 sNodeBssSteerRequest:
   _type: struct
   mac: sMacAddr
+  cur_bssid: sMacAddr
   disassoc_timer_ms: uint16_t
-  disassoc_imminent: uint8_t 
-  bssid: sNodeBssSteerTarget 
+  disassoc_imminent: uint8_t
+  target: sNodeBssSteerTarget
 
 sNodeBssSteerResponse:
   _type: struct
