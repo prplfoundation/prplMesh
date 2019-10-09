@@ -139,6 +139,9 @@ cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION:
   _type: class
   mac: sMacAddr
 
+cACTION_APMANAGER_ACK:
+  _type: class
+
 cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST:
   _type: class
   params: sNodeBssSteerRequest

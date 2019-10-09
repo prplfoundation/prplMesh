@@ -1207,6 +1207,36 @@ bool cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::init()
     return true;
 }
 
+cACTION_APMANAGER_ACK::cACTION_APMANAGER_ACK(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_APMANAGER_ACK::cACTION_APMANAGER_ACK(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_APMANAGER_ACK::~cACTION_APMANAGER_ACK() {
+}
+void cACTION_APMANAGER_ACK::class_swap()
+{
+}
+
+size_t cACTION_APMANAGER_ACK::get_initial_size()
+{
+    size_t class_size = 0;
+    return class_size;
+}
+
+bool cACTION_APMANAGER_ACK::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
 cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
     BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
