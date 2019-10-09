@@ -57,14 +57,14 @@ def printUsage():
 def signal_handler(signal, frame):
     global t_list
 
-    logger.info("Signal received: " + str(signal))
+    logger.info("Signal {} received \nterminating", str(signal))
     for t in t_list:
         try:
             t.terminate()
         except Exception as e:
             logger.warning("Exception when trying to terminate thread: " + str(e))
             pass
-
+    QApplication.quit()
 
 class UpdateSig(QObject):
     sig = Signal(float)
@@ -937,18 +937,15 @@ def main(argv):
         init(command[:])
         show()
 
-        for t in t_list:
-            logger.debug("Joining thread {}" + str(t))
-            t.join()
 
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt, terminating...")
-        for t in t_list:
-            try:
-                t.terminate()
-            except Exception as e:
-                logger.warning("Exception when trying to terminate thread: " + str(e))
-        sys.exit(0)
+    for t in t_list:
+        try:
+            t.terminate()
+        except Exception as e:
+            logger.warning("Exception when trying to terminate thread: " + str(e))
+
 
 if __name__ == "__main__":
     main(sys.argv)
