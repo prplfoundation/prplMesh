@@ -31,7 +31,6 @@ import logger_setup
 VERSION="3.3"
 
 t_list=[]
-g_run_flag=True
 g_ssh=None
 g_ext_log_file=False
 g_marker_update=False
@@ -57,7 +56,7 @@ def printUsage():
     logger.info("    -docker_container=[name of container]                 - Name of the docker container on which to run beerocks_cli")
 
 def signal_handler(signal, frame):
-    global t_list, g_run_flag
+    global t_list
 
     logger.info("Signal received: " + str(signal))
     for t in t_list:
@@ -66,7 +65,6 @@ def signal_handler(signal, frame):
         except Exception as e:
             logger.warning("Exception when trying to terminate thread: " + str(e))
             pass
-    g_run_flag=False
 
     global g_ssh
     if g_ssh != None:
@@ -634,79 +632,97 @@ def show():
     bra.show()
     app.exec_()
 
-def socket_server(log_file):
-    global g_run_flag, g_marker_update
-    # Create a TCP/IP socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # Bind the socket to the port
-    server_address = ('', 10000)
-    try:
-        logger.info("starting up on {a[0]} port {a[1]}".format(a=server_address))
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind(server_address)
-    except Exception as e: # TODO: too broad exception
-        logger.error("could not start up on {a[0]} port {a[1]}:\n{e}".format(a=server_address, e=e))
-        return
+class SocketServerThread(threading.Thread):
 
-    # Listen for incoming connections
-    sock.listen(1)
+    def __init__(self, log_file: str):
+        """Thread opening and listening to a socket to get data from the controller.
 
-    #open log file
-    file = open(log_file,'w') 
+        Parameters
+        ----------
+        log_file : str
+            Path to the logfile to store data to.
+            If the file doesn't exist, it will be created.
+            If it does, its content will be overwritten.
+        """
+        super().__init__()
+        self.log_file = log_file
+        self.run_flag = True
 
-    run_local=True
-    while g_run_flag and run_local:
-        # Wait for a connection
-        logger.info('waiting for a connection...')
-        connection, client_address = sock.accept()
-        connection.settimeout(5)
-        startTime = time.time()
+    def run(self):
+        global g_marker_update
+        # Create a TCP/IP socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        logger.info("connection from {}".format(client_address))
-        file.write( '%.3f|START\n' % (time.time() - startTime))
-        file.flush()
-        # Receive the data in chunks
-        data = ""
-        while g_run_flag:
-            if g_marker_update:
-                g_marker_update = False
-                sent_bytes = connection.send("marker")
-            try:
-                data += connection.recv(256).decode("utf-8")
-                logger.debug("Trying to get data from the socket")
-            except socket.timeout:
-                logger.debug("Socket timed out")
-                continue
-            except KeyboardInterrupt:
-                logger.info("Keyboard interrupt, stopping")
-                run_local=False
-                break
-            except Exception as e:
-                logger.error("Error when handling data from the socket_server:\n"
-                             "{}\n"
-                             "Stopping".format(str(e)))
-                run_local=False
-                break
-            while g_run_flag:
+        # Bind the socket to the port
+        server_address = ('', 10000)
+        try:
+            logger.info("starting up on {a[0]} port {a[1]}".format(a=server_address))
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(server_address)
+        except Exception as e: # TODO: too broad exception
+            logger.error("could not start up on {a[0]} port {a[1]}:\n{e}".format(a=server_address, e=e))
+            return
+
+        # Listen for incoming connections
+        sock.listen(1)
+
+        #open log file
+        file = open(self.log_file,'w')
+
+        while self.run_flag:
+            # Wait for a connection
+            logger.info('waiting for a connection...')
+            connection, client_address = sock.accept()
+            connection.settimeout(5)
+            startTime = time.time()
+
+            logger.info("connection from {}".format(client_address))
+            file.write( '%.3f|START\n' % (time.time() - startTime))
+            file.flush()
+            # Receive the data in chunks
+            data = ""
+            while self.run_flag:
+                if g_marker_update:
+                    g_marker_update = False
+                    sent_bytes = connection.send("marker")
                 try:
-                    i=data.index('\n')
-                except Exception as e:
-                    logger.debug("data.index failed: {}".format(data))
+                    logger.debug("Trying to get data from the socket")
+                    data += connection.recv(256).decode("utf-8")
+                except socket.timeout:
+                    logger.debug("Socket timed out")
+                    continue
+                except KeyboardInterrupt:
+                    logger.info("Keyboard interrupt, stopping")
+                    self.run_flag=False
                     break
-                send_data = data.split('\n')[0]
-                data = data[i+1:]
-                if send_data:
-                    file.write(('%.3f|' % (time.time() - startTime)) + send_data + '\n')
-                    file.flush()
+                except Exception as e:
+                    logger.error("Error when handling data from the socket_server:\n"
+                                 "{}\n"
+                                 "Stopping".format(str(e)))
+                    self.run_flag=False
+                    break
+                while self.run_flag:
+                    try:
+                        i=data.index('\n')
+                    except Exception as e:
+                        logger.debug("data.index failed: {}".format(data))
+                        break
+                    send_data = data.split('\n')[0]
+                    data = data[i+1:]
+                    if send_data:
+                        file.write(('%.3f|' % (time.time() - startTime)) + send_data + '\n')
+                        file.flush()
 
-    # Clean up the connection
-    connection.close()
-    file.write('%.3f|STOP\n' % (time.time() - startTime))
-    file.flush()
+            # Clean up the connection
+            connection.close()
+            file.write('%.3f|STOP\n' % (time.time() - startTime))
+            file.flush()
 
-    file.close()
+        file.close()
 
+    def terminate(self):
+        self.run_flag = False
 
 def local_start_beerocks_cli(beerocks_cli_path: Union[Path, None], target_ip: IPv4Address, docker_container_name: str = None) -> int:
     """Start beerocks_cli locally.
@@ -793,7 +809,7 @@ def ssh_start_beerocks_cli(host="192.168.1.1",my_ip="",ssh_port=22, user='admin'
     return o.channel.recv_exit_status()
     
 def main(argv):
-    global t_list, g_run_flag, g_ext_log_file
+    global t_list, g_ext_log_file
     signal.signal(signal.SIGINT, signal_handler)
     try:
         log_file=LOG_FILE
@@ -866,7 +882,8 @@ def main(argv):
         #Server socket & beerocks_cli updates
         if not g_ext_log_file: 
             #start server_socket
-            t = Thread(target=socket_server, args=(log_file,))
+            t = SocketServerThread(log_file)
+            t.daemon = True
             t.start()
             t_list.append(t)
             # beerocks_cli updates (either via ssh or locally)
@@ -885,8 +902,6 @@ def main(argv):
         init(command[:])
         show()
 
-        g_run_flag=False
-
         for t in t_list:
             logger.debug("Joining thread {}" + str(t))
             t.join()
@@ -898,7 +913,6 @@ def main(argv):
                 t.terminate()
             except Exception as e:
                 logger.warning("Exception when trying to terminate thread: " + str(e))
-        g_run_flag=False
         sys.exit(0)
 
 if __name__ == "__main__":
