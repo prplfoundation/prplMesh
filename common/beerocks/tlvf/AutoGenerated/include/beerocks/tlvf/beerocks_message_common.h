@@ -446,29 +446,33 @@ typedef struct sArpQuery {
 } __attribute__((packed)) sArpQuery;
 
 typedef struct sNodeBssSteerTarget {
-    sMacAddr mac;
+    sMacAddr bssid;
+    uint8_t operating_class;
     uint8_t channel;
     void struct_swap(){
-        mac.struct_swap();
+        bssid.struct_swap();
     }
     void struct_init(){
-        mac.struct_init();
+        bssid.struct_init();
     }
 } __attribute__((packed)) sNodeBssSteerTarget;
 
 typedef struct sNodeBssSteerRequest {
     sMacAddr mac;
+    sMacAddr cur_bssid;
     uint16_t disassoc_timer_ms;
     uint8_t disassoc_imminent;
-    sNodeBssSteerTarget bssid;
+    sNodeBssSteerTarget target;
     void struct_swap(){
         mac.struct_swap();
+        cur_bssid.struct_swap();
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&disassoc_timer_ms));
-        bssid.struct_swap();
+        target.struct_swap();
     }
     void struct_init(){
         mac.struct_init();
-        bssid.struct_init();
+        cur_bssid.struct_init();
+        target.struct_init();
     }
 } __attribute__((packed)) sNodeBssSteerRequest;
 
