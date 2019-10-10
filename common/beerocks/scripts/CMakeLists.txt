@@ -2,7 +2,6 @@
 set(PS_CMD "ps -aux")
 set(AWK_CMD "awk '{print $2}'")
 
-<<<<<<< 6dc89b8ebd810c9893787d633ecfa0b62a1d2adb
 # Platform specific definitions
 if (TARGET_PLATFORM STREQUAL "linux")
     set(PLATFORM_DB_PATH ${CMAKE_INSTALL_PREFIX}/share)
