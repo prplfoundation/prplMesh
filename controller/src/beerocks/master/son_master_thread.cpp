@@ -1311,8 +1311,7 @@ bool master_thread::handle_intel_slave_join(
             LOG(DEBUG) << "add a placeholder backhaul_mac = " << backhaul_mac
                        << ", parent_bssid_mac = " << parent_bssid_mac;
             database.add_node(backhaul_mac, parent_bssid_mac, beerocks::TYPE_IRE_BACKHAUL);
-        } else if (database.get_node_state(backhaul_mac) != beerocks::STATE_CONNECTED &&
-                   database.get_node_state(backhaul_mac) != beerocks::STATE_CONNECTED_IP_UNKNOWN) {
+        } else if (database.get_node_state(backhaul_mac) != beerocks::STATE_CONNECTED) {
             /* if the backhaul node doesn't exist, or is not already marked as connected,
             * we assume it is connected to the GW's LAN switch
             */
@@ -2202,10 +2201,8 @@ bool master_thread::handle_cmdu_control_message(
                 LOG(DEBUG) << "node_state = DISCONNECTED client_mac = " << client_mac
                            << " client_ipv4 =" << client_ipv4;
 
-                // Client is pending IP update or the IP has changed
-            } else if ((database.get_node_state(client_mac) ==
-                        beerocks::STATE_CONNECTED_IP_UNKNOWN) ||
-                       (database.get_node_ipv4(client_mac) != client_ipv4)) {
+                // The IP has changed
+            } else if (database.get_node_ipv4(client_mac) != client_ipv4) {
 
                 LOG(DEBUG) << "Update node IP - mac: " << client_mac << " ipv4: " << client_ipv4;
                 database.set_node_ipv4(client_mac, client_ipv4);
@@ -2557,8 +2554,7 @@ bool master_thread::handle_cmdu_control_message(
         }
 #endif
         if (database.get_node_ipv4(client_mac).empty()) {
-            database.set_node_state(client_mac, beerocks::STATE_CONNECTED_IP_UNKNOWN);
-            LOG(INFO) << "STATE_CONNECTED_IP_UNKNOWN for node mac " << client_mac;
+            LOG(INFO) << "Unknown IP address for node mac " << client_mac;
         } else {
             son_actions::handle_completed_connection(database, cmdu_tx, tasks, client_mac);
         }
@@ -2652,8 +2648,7 @@ bool master_thread::handle_cmdu_control_message(
                 LOG(ERROR) << "set node name failed";
             }
 
-            if ((database.get_node_state(client_mac) == beerocks::STATE_CONNECTED_IP_UNKNOWN) ||
-                ((!db_ipv4.empty()) && (database.get_node_ipv4(client_mac) != ipv4))) {
+            if (database.get_node_ipv4(client_mac) != ipv4) {
                 LOG(DEBUG) << "handle_completed_connection client_mac = " << client_mac;
                 son_actions::handle_completed_connection(database, cmdu_tx, tasks, client_mac);
             }

@@ -68,8 +68,7 @@ extern "C" {
 #define BML_NODE_STATE_DISCONNECTED 0
 #define BML_NODE_STATE_CONNECTING 1
 #define BML_NODE_STATE_CONNECTED 2
-#define BML_NODE_STATE_CONNECTED_UNKNOWN_IP 3
-#define BML_NODE_STATE_UNKNOWN 4
+#define BML_NODE_STATE_UNKNOWN 3
 
 /* BML Wi-Fi Definitions */
 #define BML_WLAN_DRIVER_VERSION_LEN (32 + 4) /* Maximal string length (32) + null termination */
