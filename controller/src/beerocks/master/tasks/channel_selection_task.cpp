@@ -1003,7 +1003,7 @@ void channel_selection_task::work()
                 std::find_if(clients.begin(), clients.end(), [&](const std::string &client_mac) {
                     auto client_state = (uint8_t)database.get_node_state(client_mac);
                     return client_state >= eNodeState::STATE_CONNECTING &&
-                           client_state <= STATE_CONNECTED_IP_UNKNOWN;
+                           client_state <= STATE_CONNECTED;
                 });
 
             if (it != clients.end()) {
