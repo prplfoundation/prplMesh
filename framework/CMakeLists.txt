@@ -71,6 +71,12 @@ if(TARGET_PLATFORM STREQUAL "linux")
 elseif (TARGET_PLATFORM STREQUAL "turris-omnia")
     set(MAPF_ROOT "/opt/beerocks")
     set(TMP_PATH "/tmp/beerocks")
+elseif (TARGET_PLATFORM STREQUAL "glinet-b1300")
+    set(MAPF_ROOT "/opt/beerocks")
+    set(TMP_PATH "/tmp/beerocks")
+    # Add library search path explicitly through options
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${PLATFORM_STAGING_DIR}/usr/lib")
+    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${PLATFORM_STAGING_DIR}/usr/lib")
 endif()
 
 

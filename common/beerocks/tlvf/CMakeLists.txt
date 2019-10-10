@@ -6,6 +6,8 @@ project(${PROJECT_NAME})
 # TODO: FIXME: For some reason CMake detects only the Python from the cross-toolchain
 if (TARGET_PLATFORM STREQUAL "turris-omnia")
     set(PYTHON_EXECUTABLE "/usr/bin/python")
+elseif (TARGET_PLATFORM STREQUAL "glinet-b1300")
+    set(PYTHON_EXECUTABLE "/usr/bin/python")
 else()
     find_package(PythonInterp REQUIRED)
 endif()

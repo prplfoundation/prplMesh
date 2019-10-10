@@ -24,7 +24,7 @@ endif()
 add_executable(${PROJECT_NAME} ${controller_sources} ${controller_tasks_sources} ${controller_db_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
 
-target_link_libraries(${PROJECT_NAME} beerocks::bcl beerocks::btl tlvf elpp beerocks::btlvf)
+target_link_libraries(${PROJECT_NAME} PRIVATE beerocks::bcl beerocks::btl tlvf elpp beerocks::btlvf)
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${MODULE_PATH}/../bml
     ${MODULE_PATH}/../../../external
@@ -36,7 +36,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 if (MapfTransport_FOUND)
      target_link_libraries(${PROJECT_NAME} PRIVATE mapf::ieee1905_transport_messages)
 endif()
-
 
 # Install
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})

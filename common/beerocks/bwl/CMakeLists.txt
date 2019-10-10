@@ -46,6 +46,15 @@ elseif(TARGET_PLATFORM STREQUAL "turris-omnia")
     find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS "${HOSTAPD_SEARCH_PATHS}" NO_CMAKE_FIND_ROOT_PATH)
     set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
 
+elseif(TARGET_PLATFORM STREQUAL "glinet-b1300")
+
+    set(BWL_TYPE "NL80211")
+
+    # hostapd directory
+    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd-full*/hostapd-*")
+    find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS "${HOSTAPD_SEARCH_PATHS}" NO_CMAKE_FIND_ROOT_PATH)
+    set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
+
 endif()
 
 set(BWL_TYPE ${BWL_TYPE} CACHE STRING "Which BWL backend to use")

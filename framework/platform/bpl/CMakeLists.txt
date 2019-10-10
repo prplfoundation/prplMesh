@@ -72,6 +72,16 @@ elseif (TARGET_PLATFORM STREQUAL "turris-omnia")
     add_definitions(-DPLATFORM_DB_PATH_TEMP="${PLATFORM_DB_PATH_TEMP}/prplmesh_platform_db")
     install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 
+elseif (TARGET_PLATFORM STREQUAL "glinet-b1300")
+
+    file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
+
+    set(PLATFORM_DB_PATH "/opt/beerocks/share")
+    set(PLATFORM_DB_PATH_TEMP "/tmp/beerocks")
+    add_definitions(-DPLATFORM_DB_PATH="${PLATFORM_DB_PATH}/prplmesh_platform_db")
+    add_definitions(-DPLATFORM_DB_PATH_TEMP="${PLATFORM_DB_PATH_TEMP}/prplmesh_platform_db")
+    install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
+
 else()
 
     message(WARNING "${BoldWhite}Skipping ${BoldGreen}${PROJECT_NAME}${BoldWhite} build for unsupported platform...${ColourReset}")

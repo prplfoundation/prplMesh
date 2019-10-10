@@ -62,6 +62,11 @@ target_include_directories(common
 		${OPENSSL_INCLUDE_DIR}
 )
 
+# Without having zmq and json-c under PUBLIC they are not explicitly linked with
+if(TARGET_PLATFORM STREQUAL "glinet-b1300")
+    target_link_libraries(common PUBLIC ${MSGLIB} json-c)
+endif()
+
 configure_file(
 	"${CMAKE_CURRENT_SOURCE_DIR}/mapf_config.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/include/mapf/common/config.h"
