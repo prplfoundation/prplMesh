@@ -1842,6 +1842,49 @@ class TlvF:
         self.logger.error(msg)
         
         sys.exit(1)
+    
+    def generateParseSwitch(self,parsed_obj, yaml_config,switch_parameter):
+        """
+        Parameters
+        --
+        `parsed_obj` : BaseClass
+
+            the object to run the add_func on
+
+        `yaml_config` : iterator <(yaml,converter_function)> t
+
+            Iterator of tuples, each consisting of 
+            1. a YAML file name and 
+            2. the method of enum to filename conversion
+            3. namespace
+            4. adding function
+
+        `switch_parameter` : string
+
+            the parameter on which the switch statement will be used on.
+
+        
+
+
+        """
+        self.appendLineCpp(f"switch({switch_parameter}):")
+        self.appendLineCpp("{")
+        for yaml, converter, namespace, add_func in yaml_config:
+            for key, val in yaml.items():
+                if key.startswith(MetaData.META_PREFIX):
+                    continue
+                self.appendLineCpp(f"{self.getIndentation(1)}case ({val}):"+"{")
+                #clarification for basic case of extracting tlvs from cmdu:
+                #parsed_obj is usually cmdu_rx
+                #add_func is addClass<T>
+                #converter converts UPPER_CASE_UNDERSCORE to camelCase so TLV_END_OF_MESSAGE ->tlvEndOfMessage
+                #so the following line appends:  return {cmdu_rx}.{addClass<{ieee1905_1::tlvEndOfMessage}>()};
+                #(curly braces whenever it's a result of a function)
+                
+                self.appendLineCpp(f"{self.getIndentation(2)} return {parsed_obj}.{add_func(namespace + '::' + converter(key))};")
+                self.appendLineCpp(self.getIndentation(1)+"}")
+
+        self.appendLineCpp("}")
 
 def test(conf, output, print_dependencies, print_outputs):
     code_c = r'''
