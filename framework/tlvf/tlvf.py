@@ -327,6 +327,7 @@ class TlvF:
         self.CODE_NAMESPACE_INSERT                  = "//~namespace_insert"
         self.CODE_CLASS_START                       = "//~class_start"
         self.CODE_CLASS_END                         = "//~class_end"
+        #TODO: fix typos
         self.CODE_CLASS_CONSTRACTOR                 = "//~class_constractor"
         self.CODE_CLASS_DISTRACTOR                  = "//~class_distractor"
         self.CODE_CLASS_PUBLIC_VARS_INSERT          = "//~class_public_vars_insert"
