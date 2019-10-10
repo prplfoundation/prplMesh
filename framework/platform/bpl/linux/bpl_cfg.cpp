@@ -199,6 +199,8 @@ int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SS
     return RETURN_ERR;
 }
 
+int bpl_cfg_get_security_policy() { return 0; }
+
 int bpl_cfg_set_onboarding(int enable) { return RETURN_ERR; }
 
 int bpl_cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN],
