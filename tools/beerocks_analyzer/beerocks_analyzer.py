@@ -275,9 +275,7 @@ class BeeRocksAnalyzer(QMainWindow):
                     i_state=param_n.index('state')
                     i_mac=param_n.index('mac')
                     i_type=param_n.index('type')
-                    if not ("1" in param_v[i_type]):
-                        i_ap_mac=param_n.index('parent bssid')
-                    
+
                 except Exception as e: # TODO: too broad exception
                     logger.error("readSample()  --> {}, "
                                              "nw_map_update line does not contain state "
@@ -288,8 +286,6 @@ class BeeRocksAnalyzer(QMainWindow):
                 state = (param_v[i_state].split())[0]
                 mac = param_v[i_mac]
                 line_type = param_v[i_type]
-                if not ("1" in line_type):
-                    ap_mac = param_v[i_ap_mac]
                 
                 if "2" in line_type: #IRE
                     try:
@@ -305,10 +301,7 @@ class BeeRocksAnalyzer(QMainWindow):
                         if mac not in self.sta_mac2num: # new sta mac addr
                             self.sta_mac2num[mac] = len(self.sta_mac2num)
                         res += "sta_id: {:d},".format(self.sta_mac2num[mac])
-                        
-                        if ap_mac not in self.ap_mac2num: # new ap mac addr
-                            self.ap_mac2num[ap_mac] = len(self.ap_mac2num)
-                        res += "ap_id: {:d},".format(self.ap_mac2num[ap_mac])
+
                         if res.endswith(','):
                             res = res[:-1]
 
@@ -322,12 +315,8 @@ class BeeRocksAnalyzer(QMainWindow):
 
                 mac = param_v[i1]
                 i1+=1
-                if param_m_v == 1: #AP stats update
-                    if not(self.ap_mac2num.has_key(mac)): # new ap mac addr
-                        self.ap_mac2num[mac] = len(self.ap_mac2num)
-                    res += "ap_id: %d"%self.ap_mac2num[mac]
 
-                elif param_m_v == 3: #Client stats update
+                if param_m_v == 3: #Client stats update
                     if mac not in self.sta_mac2num: # new sta mac addr
                         self.sta_mac2num[mac] = len(self.sta_mac2num)
                     res += "sta_id: %d"%self.sta_mac2num[mac]

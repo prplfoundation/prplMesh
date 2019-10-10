@@ -740,16 +740,10 @@ class ConnectivityMapWidget(QWidget):
                     self.last_ap_mac = mac
                 else:
                     i_sta_id=-1
-                    i_ap_id=-1
                     sta_id=-1
-                    ap_id=-1
-                    try: 
+                    try:
                         i_sta_id=param_n.index('sta_id')
                         sta_id = int(param_v[i_sta_id])
-                    except: pass
-                    try: 
-                        i_ap_id=param_n.index('ap_id')
-                        ap_id = int(param_v[i_ap_id])
                     except: pass
                     try:
                         i_parent_mac=param_n.index('parent bssid')
@@ -757,10 +751,6 @@ class ConnectivityMapWidget(QWidget):
                     except ValueError:
                         # if it has no parent bssid, it should be connected to the gateway
                         parent_mac = self.gw_eth_mac
-                    if ap_id != -1:
-                        for n in self.graph:
-                            if n.mac == parent_mac:
-                                n.analyzer_id = ap_id
                     if "2" in line_type:#IRE
                         cm = ConnectivityMapWidget.node('IRE', mac, parent_mac, backhaul_mac, channel, bandwidth, cac_completed, False, name, ip, sta_id)
                         self.add_node_to_graph(cm)
@@ -823,18 +813,7 @@ class ConnectivityMapWidget(QWidget):
             mac = param_v[i1]
             i1+=1
 
-            if param_m_v == 1: #AP stats update
-                i_ap_id=-1
-                ap_id=-1
-                try: 
-                    i_ap_id=param_n.index('ap_id')
-                    ap_id = int(param_v[i_ap_id])
-                except: pass
-                if ap_id != -1:# new ap mac addr
-                    for n in self.graph:
-                        if mac == n.mac:
-                            n.analyzer_id = ap_id
-            elif param_m_v == 3: #Client stats update
+            if param_m_v == 3: #Client stats update
                 i_sta_id=-1
                 sta_id=-1
                 try: 
