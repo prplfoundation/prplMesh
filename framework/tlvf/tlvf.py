@@ -1842,6 +1842,13 @@ class TlvF:
         self.logger.error(msg)
         
         sys.exit(1)
+    def tlvTypeDefaultConverter(self, input):
+        out = input.split('_')
+        out = ''.join(x for x in input.title() if x.isalnum())
+        return out[0].lower()+out[1:]
+        
+    def tlvDefaultAddClass(self, input):
+        return f"addClass<{input}>()"
     
     def generateParseSwitch(self,parsed_obj, yaml_config,switch_parameter):
         """
