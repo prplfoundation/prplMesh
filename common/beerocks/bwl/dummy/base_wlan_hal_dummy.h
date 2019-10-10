@@ -16,6 +16,8 @@
 #include <chrono>
 #include <memory>
 
+#define HOSTAPD_MSG_LENGTH (4096 * 4)
+
 namespace bwl {
 namespace dummy {
 
@@ -44,11 +46,14 @@ public:
 
     // Protected methods
 protected:
-    base_wlan_hal_dummy(HALType type, std::string iface_name, bool acs_enabled,
-                        hal_event_cb_t callback, int wpa_ctrl_buffer_size);
+    base_wlan_hal_dummy(HALType type, std::string iface_name, hal_event_cb_t callback,
+                        hal_conf_t hal_conf = {});
 
     // Process dummy event
     virtual bool process_dummy_event(char *buffer, int bufLen, const std::string &opcode) = 0;
+
+    bool set(const std::string &param, const std::string &value,
+             int vap_id = beerocks::IFACE_RADIO_ID);
 
     bool dummy_send_cmd(const std::string &cmd, char **reply); // for external process
     bool dummy_send_cmd(const std::string &cmd);
@@ -67,8 +72,8 @@ private:
 
     void *m_dummy_ctx = nullptr;
 
-    std::shared_ptr<char> m_wpa_ctrl_buffer;
-    size_t m_wpa_ctrl_buffer_size = 0;
+    char m_wpa_ctrl_buffer[HOSTAPD_MSG_LENGTH];
+    size_t m_wpa_ctrl_buffer_size = HOSTAPD_MSG_LENGTH;
 };
 
 } // namespace dummy

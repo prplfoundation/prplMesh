@@ -209,6 +209,7 @@ private:
     bool is_slave_reset                                = false;
     bool is_backhual_reconf                            = false;
     bool detach_on_conf_change                         = false;
+    bool configuration_in_progress                     = false;
     beerocks_message::sWifiCredentials new_credentials = {};
 
     bool is_backhaul_manager = false;

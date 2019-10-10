@@ -31,11 +31,11 @@ enum {
 };
 
 static const struct blobmsg_policy dhcp_event_policy[] = {
-    //TODO Remove: [DHCP_EVENT_ID] = { .name = "id", .type = BLOBMSG_TYPE_INT32 },
-    [DHCP_EVENT_OP]       = {.name = "op", .type = BLOBMSG_TYPE_STRING},
-    [DHCP_EVENT_MAC]      = {.name = "mac", .type = BLOBMSG_TYPE_STRING},
-    [DHCP_EVENT_IP]       = {.name = "ip", .type = BLOBMSG_TYPE_STRING},
-    [DHCP_EVENT_HOSTNAME] = {.name = "hostname", .type = BLOBMSG_TYPE_STRING}};
+        //TODO Remove: [DHCP_EVENT_ID] = { .name = "id", .type = BLOBMSG_TYPE_INT32 },
+        [DHCP_EVENT_OP] = {.name = "op", .type = BLOBMSG_TYPE_STRING},
+        [DHCP_EVENT_MAC] = {.name = "mac", .type = BLOBMSG_TYPE_STRING},
+        [DHCP_EVENT_IP] = {.name = "ip", .type = BLOBMSG_TYPE_STRING},
+        [DHCP_EVENT_HOSTNAME] = {.name = "hostname", .type = BLOBMSG_TYPE_STRING}};
 
 struct dhcp_event_request {
     struct ubus_request_data req;

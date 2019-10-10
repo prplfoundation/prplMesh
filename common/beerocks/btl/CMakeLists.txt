@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 set(PROJECT_NAME btl)
 project(${PROJECT_NAME})
-message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${BEEROCKS_TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
+message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 find_package(MapfTransport QUIET)
 
@@ -33,9 +33,12 @@ if (MapfTransport_FOUND)
 endif()
 
 # Include paths
-target_include_directories(${PROJECT_NAME} PRIVATE ${MODULE_PATH} 
-    ${MODULE_PATH}/../../../external
-    $<TARGET_PROPERTY:beerocks::bcl,INTERFACE_INCLUDE_DIRECTORIES>
+target_include_directories(${PROJECT_NAME} 
+    PRIVATE 
+        ${MODULE_PATH} 
+        ${MODULE_PATH}/../../../external
+        $<TARGET_PROPERTY:beerocks::bcl,INTERFACE_INCLUDE_DIRECTORIES>
+        ${PLATFORM_INCLUDE_DIR}
 )
 
 # Install

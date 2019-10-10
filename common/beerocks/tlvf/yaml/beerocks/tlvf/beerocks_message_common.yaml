@@ -75,6 +75,7 @@ sPlatformSettings:
   local_master: uint8_t 
   local_gw: uint8_t 
   operating_mode: uint8_t 
+  mem_only_psk: uint8_t
 
   client_band_steering_enabled: uint8_t 
   client_optimal_path_roaming_enabled: uint8_t 
@@ -91,7 +92,7 @@ sPlatformSettings:
   wired_backhaul: uint8_t 
   backhaul_max_vaps: uint8_t 
   backhaul_network_enabled: uint8_t 
-  backhaul_prefered_radio_band: uint8_t 
+  backhaul_preferred_radio_band: uint8_t 
   backhaul_vaps_bssid:
     _type: sMacAddr 
     _length: [ 12 ]
@@ -101,7 +102,7 @@ sWlanSettings:
   _type: struct
   band_enabled:
     _type: uint8_t
-  acs_enabled: uint8_t 
+  channel: uint8_t 
   advertise_ssid: uint8_t 
   ssid:
     _type: char    

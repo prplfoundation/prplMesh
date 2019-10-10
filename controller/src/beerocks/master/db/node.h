@@ -136,6 +136,7 @@ public:
         bool active               = false;
         bool is_backhaul_manager  = false;
         bool is_acs_enabled       = false;
+        bool passive_mode_enabled = false;
         bool advertise_ssid       = true;
         bool enable_repeater_mode = false;
         std::string iface_name;

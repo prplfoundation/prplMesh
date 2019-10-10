@@ -45,8 +45,8 @@ namespace dummy {
 //////////////////////////////////////////////////////////////////////////////
 
 mon_wlan_hal_dummy::mon_wlan_hal_dummy(std::string iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, false, callback),
-      base_wlan_hal_dummy(bwl::HALType::Monitor, iface_name, false, callback, BUFFER_SIZE)
+    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback),
+      base_wlan_hal_dummy(bwl::HALType::Monitor, iface_name, callback)
 {
 }
 

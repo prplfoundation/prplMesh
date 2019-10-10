@@ -91,13 +91,19 @@ elseif(BWL_TYPE STREQUAL "WAV")
 
 elseif(BWL_TYPE STREQUAL "DWPAL")
     
+    include_directories(
+        ${HOSTAPD_DIR}/src/drivers
+        ${PLATFORM_BUILD_DIR}/iwlwav-iw-4.14
+        ${PLATFORM_INCLUDE_DIR}/libnl3
+    )
+
     file(GLOB bwl_platform_sources
         ${bwl_platform_sources}
         ${MODULE_PATH}/dwpal/*.c*
     )
 
-    find_package(dwpal REQUIRED)
-    list(APPEND BWL_LIBS dwpal::dwpal)
+    # find_package(dwpal REQUIRED)
+    list(APPEND BWL_LIBS dwpal)
 
 elseif(BWL_TYPE STREQUAL "NL80211")
 

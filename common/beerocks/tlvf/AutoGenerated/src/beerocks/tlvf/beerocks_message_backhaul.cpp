@@ -518,6 +518,14 @@ uint8_t& cACTION_BACKHAUL_ENABLE::wired_backhaul() {
     return (uint8_t&)(*m_wired_backhaul);
 }
 
+uint8_t& cACTION_BACKHAUL_ENABLE::mem_only_psk() {
+    return (uint8_t&)(*m_mem_only_psk);
+}
+
+uint8_t& cACTION_BACKHAUL_ENABLE::backhaul_preferred_radio_band() {
+    return (uint8_t&)(*m_backhaul_preferred_radio_band);
+}
+
 void cACTION_BACKHAUL_ENABLE::class_swap()
 {
     m_iface_mac->struct_swap();
@@ -541,6 +549,8 @@ size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
     class_size += sizeof(uint8_t); // wire_iface_type
     class_size += sizeof(uint8_t); // wireless_iface_type
     class_size += sizeof(uint8_t); // wired_backhaul
+    class_size += sizeof(uint8_t); // mem_only_psk
+    class_size += sizeof(uint8_t); // backhaul_preferred_radio_band
     return class_size;
 }
 
@@ -583,6 +593,10 @@ bool cACTION_BACKHAUL_ENABLE::init()
     m_wireless_iface_type = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     m_wired_backhaul = (uint8_t*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    m_mem_only_psk = (uint8_t*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    m_backhaul_preferred_radio_band = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
@@ -667,6 +681,62 @@ bool cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION::init()
         return false;
     }
     m_stopped = (uint8_t*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
+cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION::cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION::cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION::~cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION() {
+}
+uint8_t& cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION::channel() {
+    return (uint8_t&)(*m_channel);
+}
+
+uint32_t& cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION::bandwidth() {
+    return (uint32_t&)(*m_bandwidth);
+}
+
+uint8_t& cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION::center_channel() {
+    return (uint8_t&)(*m_center_channel);
+}
+
+void cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION::class_swap()
+{
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_bandwidth));
+}
+
+size_t cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // channel
+    class_size += sizeof(uint32_t); // bandwidth
+    class_size += sizeof(uint8_t); // center_channel
+    return class_size;
+}
+
+bool cACTION_BACKHAUL_ENABLE_APS_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_channel = (uint8_t*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(uint8_t) * 1;
+    m_bandwidth = (uint32_t*)m_buff_ptr__;
+    m_buff_ptr__ += sizeof(uint32_t) * 1;
+    m_center_channel = (uint8_t*)m_buff_ptr__;
     m_buff_ptr__ += sizeof(uint8_t) * 1;
     if (m_buff_ptr__ - m_buff__ > ssize_t(m_buff_len__)) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

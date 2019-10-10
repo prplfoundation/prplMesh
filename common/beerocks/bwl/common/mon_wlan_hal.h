@@ -39,15 +39,15 @@ public:
 public:
     virtual ~mon_wlan_hal() = default;
 
-    virtual bool update_radio_stats(SRadioStats &radio_stats)                             = 0;
+    virtual bool update_radio_stats(SRadioStats &radio_stats) = 0;
     virtual bool update_vap_stats(const std::string vap_iface_name, SVapStats &vap_stats) = 0;
     virtual bool update_stations_stats(const std::string vap_iface_name, const std::string sta_mac,
-                                       SStaStats &sta_stats)                              = 0;
+                                       SStaStats &sta_stats) = 0;
 
-    virtual bool sta_channel_load_11k_request(const SStaChannelLoadRequest11k &req)      = 0;
+    virtual bool sta_channel_load_11k_request(const SStaChannelLoadRequest11k &req) = 0;
     virtual bool sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token) = 0;
-    virtual bool sta_statistics_11k_request(const SStatisticsRequest11k &req)            = 0;
-    virtual bool sta_link_measurements_11k_request(const std::string &sta_mac)           = 0;
+    virtual bool sta_statistics_11k_request(const SStatisticsRequest11k &req)  = 0;
+    virtual bool sta_link_measurements_11k_request(const std::string &sta_mac) = 0;
 };
 
 } // namespace bwl

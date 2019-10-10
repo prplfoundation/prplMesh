@@ -143,6 +143,11 @@ public:
     const RadioInfo &get_radio_info() const { return (m_radio_info); }
 
     /*!
+     * Return HAL configuration.
+     */
+    const hal_conf_t &get_hal_conf() const { return (m_hal_conf); }
+
+    /*!
      * Returns the Radio's main MAC address.
      */
     virtual std::string get_radio_mac() = 0;
@@ -156,9 +161,10 @@ protected:
      * @param [in] iface_name Interface name.
      * @param [in] iface_type Interface type.
      * @param [in] callback Callback for handling internal events.
+     * @param [in] hal_conf HAL configuration.
      */
-    base_wlan_hal(HALType type, std::string iface_name, IfaceType iface_type, bool m_acs_enabled,
-                  hal_event_cb_t callback);
+    base_wlan_hal(HALType type, std::string iface_name, IfaceType iface_type,
+                  hal_event_cb_t callback, hal_conf_t hal_conf = {});
 
     /*!
      * Push a new (internal) event into the queue.
@@ -169,6 +175,13 @@ protected:
      * @return true on success of false on failure.
      */
     bool event_queue_push(int event, std::shared_ptr<void> data = {});
+
+    /*!
+     * set a parameter in the interface
+     *
+     * @return true on success or false on error.
+     */
+    virtual bool set(const std::string &param, const std::string &value, int vap_id) = 0;
 
     // Protected methods:
 protected:
@@ -185,19 +198,21 @@ protected:
 
     int m_fd_ext_events = -1;
 
+    hal_conf_t m_hal_conf;
+
     // Private data-members:
 private:
-    HALType m_type;
+    HALType m_type = HALType::Invalid;
 
     std::string m_iface_name;
 
-    IfaceType m_iface_type;
+    IfaceType m_iface_type = IfaceType::Unsupported;
 
-    bool m_acs_enabled;
+    bool m_acs_enabled = false;
 
     int m_fd_int_events = -1;
 
-    hal_event_cb_t m_int_event_cb;
+    hal_event_cb_t m_int_event_cb = nullptr;
 
     beerocks::thread_safe_queue<hal_event_ptr_t> m_queue_events;
 };

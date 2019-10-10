@@ -16,7 +16,7 @@
 #include <cmath>
 
 extern "C" {
-#include <dwpal/dwpal.h>
+#include <dwpal.h>
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,6 @@ namespace dwpal {
 //////////////////////////////////////////////////////////////////////////////
 
 #define GET_OP_CLASS(channel) ((channel < 14) ? 4 : 5)
-#define BUFFER_SIZE 4096
 
 // Allocate a char array wrapped in a shared_ptr
 #define ALLOC_SMART_BUFFER(size)                                                                   \
@@ -78,8 +77,8 @@ static void calc_curr_traffic(const uint64_t val, uint64_t &total, uint32_t &cur
 //////////////////////////////////////////////////////////////////////////////
 
 mon_wlan_hal_dwpal::mon_wlan_hal_dwpal(std::string iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, false, callback),
-      base_wlan_hal_dwpal(bwl::HALType::Monitor, iface_name, false, callback, BUFFER_SIZE)
+    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback),
+      base_wlan_hal_dwpal(bwl::HALType::Monitor, iface_name, callback)
 {
 }
 
@@ -98,8 +97,8 @@ bool mon_wlan_hal_dwpal::update_radio_stats(SRadioStats &radio_stats)
     uint64_t BytesSent = 0, BytesReceived = 0, PacketsSent = 0, PacketsReceived = 0;
     FieldsToParse fieldsToParse[] = {
         {(void *)&BytesSent, &numOfValidArgs[0], DWPAL_LONG_LONG_INT_PARAM, "BytesSent=", 0},
-        {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM,
-         "BytesReceived=", 0},
+        {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM, "BytesReceived=",
+         0},
         {(void *)&PacketsSent, &numOfValidArgs[2], DWPAL_LONG_LONG_INT_PARAM, "PacketsSent=", 0},
         {(void *)&PacketsReceived, &numOfValidArgs[3], DWPAL_LONG_LONG_INT_PARAM,
          "PacketsReceived=", 0},
@@ -111,7 +110,8 @@ bool mon_wlan_hal_dwpal::update_radio_stats(SRadioStats &radio_stats)
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse) == DWPAL_FAILURE) {
+    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, sizeof(SRadioStats)) ==
+        DWPAL_FAILURE) {
         LOG(ERROR) << "DWPAL parse error ==> Abort";
         return false;
     }
@@ -159,19 +159,20 @@ bool mon_wlan_hal_dwpal::update_vap_stats(const std::string vap_iface_name, SVap
     uint64_t BytesSent = 0, BytesReceived = 0, PacketsSent = 0, PacketsReceived = 0;
     FieldsToParse fieldsToParse[] = {
         {(void *)&BytesSent, &numOfValidArgs[0], DWPAL_LONG_LONG_INT_PARAM, "BytesSent=", 0},
-        {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM,
-         "BytesReceived=", 0},
+        {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM, "BytesReceived=",
+         0},
         {(void *)&PacketsSent, &numOfValidArgs[2], DWPAL_LONG_LONG_INT_PARAM, "PacketsSent=", 0},
         {(void *)&PacketsReceived, &numOfValidArgs[3], DWPAL_LONG_LONG_INT_PARAM,
          "PacketsReceived=", 0},
         {(void *)&vap_stats.retrans_count, &numOfValidArgs[4], DWPAL_INT_PARAM, "RetransCount=", 0},
         {(void *)&vap_stats.errors_sent, &numOfValidArgs[5], DWPAL_INT_PARAM, "ErrorsSent=", 0},
-        {(void *)&vap_stats.errors_received, &numOfValidArgs[6], DWPAL_INT_PARAM,
-         "ErrorsReceived=", 0},
+        {(void *)&vap_stats.errors_received, &numOfValidArgs[6], DWPAL_INT_PARAM, "ErrorsReceived=",
+         0},
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse) == DWPAL_FAILURE) {
+    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, sizeof(SVapStats)) ==
+        DWPAL_FAILURE) {
         LOG(ERROR) << "DWPAL parse error ==> Abort";
         return false;
     }
@@ -227,14 +228,14 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string vap_iface_name,
     char SNR[24]                  = {0};
     FieldsToParse fieldsToParse[] = {
         {(void *)&BytesSent, &numOfValidArgs[0], DWPAL_LONG_LONG_INT_PARAM, "BytesSent=", 0},
-        {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM,
-         "BytesReceived=", 0},
+        {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM, "BytesReceived=",
+         0},
         {(void *)&PacketsSent, &numOfValidArgs[2], DWPAL_LONG_LONG_INT_PARAM, "PacketsSent=", 0},
         {(void *)&PacketsReceived, &numOfValidArgs[3], DWPAL_LONG_LONG_INT_PARAM,
          "PacketsReceived=", 0},
         {(void *)&sta_stats.retrans_count, &numOfValidArgs[4], DWPAL_INT_PARAM, "RetransCount=", 0},
-        {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_PARAM,
-         "ShortTermRSSIAverage=", sizeof(ShortTermRSSIAverage)},
+        {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_PARAM, "ShortTermRSSIAverage=",
+         sizeof(ShortTermRSSIAverage)},
         {(void *)&LastDataDownlinkRate, &numOfValidArgs[6], DWPAL_LONG_LONG_INT_PARAM,
          "LastDataDownlinkRate=", 0},
         {(void *)&LastDataUplinkRate, &numOfValidArgs[7], DWPAL_LONG_LONG_INT_PARAM,
@@ -244,7 +245,8 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string vap_iface_name,
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse) == DWPAL_FAILURE) {
+    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, sizeof(SStaStats)) ==
+        DWPAL_FAILURE) {
         LOG(ERROR) << "DWPAL parse error ==> Abort";
         return false;
     }
@@ -374,7 +376,8 @@ bool mon_wlan_hal_dwpal::sta_beacon_11k_request(const SBeaconRequest11k &req, in
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse) == DWPAL_FAILURE) {
+    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, sizeof(dialog_token)) ==
+        DWPAL_FAILURE) {
         LOG(ERROR) << "DWPAL parse error ==> Abort";
         return false;
     }
@@ -436,8 +439,8 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
             {(void *)MACAddress, &numOfValidArgs[2], DWPAL_STR_PARAM, NULL, sizeof(MACAddress)},
             {(void *)&resp->channel, &numOfValidArgs[3], DWPAL_CHAR_PARAM, "channel=", 0},
             {(void *)&resp->dialog_token, &numOfValidArgs[4], DWPAL_CHAR_PARAM, "dialog_token=", 0},
-            {(void *)&resp->rep_mode, &numOfValidArgs[5], DWPAL_CHAR_PARAM,
-             "measurement_rep_mode=", 0},
+            {(void *)&resp->rep_mode, &numOfValidArgs[5], DWPAL_CHAR_PARAM, "measurement_rep_mode=",
+             0},
             {(void *)&resp->op_class, &numOfValidArgs[6], DWPAL_CHAR_PARAM, "op_class=", 0},
             {(void *)&resp->duration, &numOfValidArgs[7], DWPAL_SHORT_INT_PARAM, "duration=", 0},
             {(void *)&resp->rcpi, &numOfValidArgs[8], DWPAL_CHAR_PARAM, "rcpi=", 0},
@@ -446,7 +449,8 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse,
+                                         sizeof(SBeaconResponse11k)) == DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -507,7 +511,8 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(interface)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -549,7 +554,8 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(interface)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }

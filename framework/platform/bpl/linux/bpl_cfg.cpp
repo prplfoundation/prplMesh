@@ -155,7 +155,6 @@ int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_para
         return RETURN_ERR;
     }
     wlan_params->enabled        = 1;
-    wlan_params->acs            = 1;
     wlan_params->advertise_ssid = 1;
     utils::copy_string(wlan_params->ssid, "test_ssid", BPL_SSID_LEN);
     utils::copy_string(wlan_params->passphrase, "test_pass", BPL_PASS_LEN);

@@ -21,7 +21,7 @@ if (TARGET_PLATFORM STREQUAL "ugw")
     include_directories(${MODULE_PATH}/ugw/cfg/cal)
 
     # Platform specific includes
-    include_directories(${PLATFORM_BUILD_DIR}/libnl-3.2.25/include)
+    include_directories(${PLATFORM_INCLUDE_DIR}/libnl3)
     include_directories(${PLATFORM_BUILD_DIR}/linux-lantiq_xrx500/bridge-utils-1.4/libbridge)
     include_directories(${PLATFORM_INCLUDE_DIR})
 
@@ -50,7 +50,7 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
     file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/rdkb/*.c*)
 
     find_package(ubus REQUIRED)
-    list(APPEND BPL_LIBS ubus nl-3 nl-route-3 bridge dl swpal slibc)
+    list(APPEND BPL_LIBS ubus nl-3 nl-route-3 bridge dl slibc uci)
 
 elseif (TARGET_PLATFORM STREQUAL "linux")
 

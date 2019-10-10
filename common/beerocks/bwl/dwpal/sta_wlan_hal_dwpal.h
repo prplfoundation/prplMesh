@@ -31,14 +31,13 @@ public:
     sta_wlan_hal_dwpal(std::string iface_name, hal_event_cb_t callback);
     virtual ~sta_wlan_hal_dwpal();
 
-    virtual bool detach() override;
-
     virtual bool initiate_scan() override;
-    virtual int get_scan_results(const std::string &ssid, beerocks::net::sScanResult *list,
-                                 int size) override;
+    virtual int get_scan_results(const std::string &ssid, std::vector<SScanResult> &list,
+                                 bool parse_vsie) override;
 
     virtual bool connect(const std::string &ssid, const std::string &pass, WiFiSec sec,
-                         const std::string &bssid, uint8_t channel, bool hidden_ssid) override;
+                         bool mem_only_psk, const std::string &bssid, uint8_t channel,
+                         bool hidden_ssid) override;
 
     virtual bool disconnect() override;
 
@@ -52,8 +51,8 @@ public:
                                           int window_size) override;
 
     virtual bool is_connected() override;
-    virtual int get_rssi() override;
     virtual int get_channel() override;
+    virtual bool update_status() override;
 
     std::string get_ssid() override;
     std::string get_bssid() override;
@@ -68,11 +67,36 @@ protected:
     }
 
 private:
+    // Client connection status
+    struct ConnectionStatus {
+        std::string bssid;
+        int freq;
+        std::string ssid;
+        int id;
+        std::string mode;
+        std::string pairwise_cipher;
+        std::string group_cipher;
+        std::string key_mgmt;
+        std::string wpa_state;
+        std::string address;
+        std::string uuid;
+    };
+
+    int add_network();
+    bool set_network(int network_id, const std::string &param, const std::string &value);
+    bool set_network_params(int network_id, const std::string &ssid, const std::string &bssid,
+                            WiFiSec sec, bool mem_only_psk, const std::string &pass,
+                            bool hidden_ssid, int freq = 0);
+    bool read_status(ConnectionStatus &connection_status);
+    void update_status(const ConnectionStatus &connection_status);
+    bool enable_network(int network_id);
+    bool is_connected(const std::string &wpa_state);
+
     // Active network parameters
     std::string m_active_ssid;
     std::string m_active_bssid;
     std::string m_active_pass;
-    WiFiSec m_active_secutiry = WiFiSec::Invalid;
+    WiFiSec m_active_security = WiFiSec::Invalid;
     uint8_t m_active_channel  = 0;
     int m_active_network_id   = -1;
 

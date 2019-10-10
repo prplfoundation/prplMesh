@@ -14,7 +14,7 @@
 #include "bpl_cfg_helper.h"
 
 extern "C" {
-#include <uci_wrapper.h>
+#include "../uci/bpl_cfg_uci.h"
 }
 
 #include "mapf/common/logger.h"
@@ -43,6 +43,8 @@ int bpl_cfg_is_master()
     } else {
         std::string mode_str(man_mode);
         if (mode_str == "Multi-AP-Controller-and-Agent") {
+            retVal = 1;
+        } else if (mode_str == "Proprietary-Mesh") {
             retVal = 1;
         } else if (mode_str == "Multi-AP-Agent") {
             retVal = 0;
@@ -141,6 +143,45 @@ int bpl_cfg_get_passive_mode()
     return retVal;
 }
 
+int bpl_cfg_get_dcs_params(const char *iface, BPL_DCS_PARAMS *params)
+{
+
+    int index         = 0;
+    unsigned long tmp = 0;
+    if (bpl_cfg_uci_get_wireless_radio_idx(iface, &index) == RETURN_ERR) {
+        MAPF_ERR("bpl_cfg_uci_get_wireless_radio_idx: Failed\n");
+        return RETURN_ERR;
+    }
+
+    if (bpl_cfg_uci_get_radio_param_ulong(index, "dcs_enable", &tmp) == RETURN_ERR) {
+        MAPF_ERR("bpl_cfg_uci_get_radio_param: Failed to read DCS  dcs_enable\n");
+        return RETURN_ERR;
+    }
+    params->enable = tmp;
+    if (bpl_cfg_uci_get_radio_param_ulong(index, "dcs_interval_sec", &tmp) == RETURN_ERR) {
+        MAPF_ERR("bpl_cfg_uci_get_radio_param: Failed to read DCS  dcs_interval_sec\n");
+        return RETURN_ERR;
+    }
+    params->interval_sec = tmp;
+    if (bpl_cfg_uci_get_radio_param_ulong(index, "dcs_dwell_msec", &tmp) == RETURN_ERR) {
+        MAPF_ERR("bpl_cfg_uci_get_radio_param: Failed to read DCS  dcs_dwell_msec\n");
+        return RETURN_ERR;
+    }
+    params->dwell_msec = tmp;
+    if (bpl_cfg_uci_get_radio_param_ulong(index, "dcs_refresh_sec", &tmp) == RETURN_ERR) {
+        MAPF_ERR("bpl_cfg_uci_get_radio_param: Failed to read DCS  dcs_refresh_sec\n");
+        return RETURN_ERR;
+    }
+    params->refresh_sec = tmp;
+    if (bpl_cfg_uci_get_radio_param(index, "dcs_channel_pool", params->channel_pool,
+                                    BPL_DCS_CHANNEL_POOL_LEN) == RETURN_ERR) {
+        MAPF_ERR("bpl_cfg_uci_get_radio_param: Failed to read DCS  dcs_channel_pool\n");
+        return RETURN_ERR;
+    }
+
+    return RETURN_OK;
+}
+
 int bpl_cfg_get_client_roaming()
 {
     int retVal = -1;
@@ -168,22 +209,22 @@ int bpl_cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PA
         return retVal;
     }
 
-    retVal |= uci_converter_get_bool(TYPE_RADIO, index, "disabled", &disabled);
+    retVal |= bpl_cfg_uci_get_wireless_bool(TYPE_RADIO, index, "disabled", &disabled);
     if (!retVal) {
         wlan_params->enabled = !disabled;
     }
-    retVal |= bpl_cfg_get_auto_channel_enable(index, &wlan_params->acs);
+    retVal |= bpl_cfg_get_channel(index, &wlan_params->channel);
     retVal |= bpl_cfg_get_ssid_advertisement_enabled(index, &wlan_params->advertise_ssid);
 
     char ssid[MAX_UCI_BUF_LEN] = {0}, security[MAX_UCI_BUF_LEN] = {0},
          passphrase[MAX_UCI_BUF_LEN] = {0};
-    retVal |= uci_converter_get_str(TYPE_VAP, index, "ssid", ssid);
-    retVal |= uci_converter_get_str(TYPE_VAP, index, "wav_security_mode", security);
+    retVal |= bpl_cfg_uci_get_wireless(TYPE_VAP, index, "ssid", ssid);
+    retVal |= bpl_cfg_uci_get_wireless(TYPE_VAP, index, "wav_security_mode", security);
     std::string mode = std::string(security);
     if (mode == BPL_WLAN_SEC_WEP64_STR || mode == BPL_WLAN_SEC_WEP128_STR) {
         retVal |= bpl_cfg_get_wep_key(index, -1, passphrase);
     } else if (mode != BPL_WLAN_SEC_NONE_STR) {
-        retVal |= uci_converter_get_str(TYPE_VAP, index, "key", passphrase);
+        retVal |= bpl_cfg_uci_get_wireless(TYPE_VAP, index, "key", passphrase);
     }
 
     utils::copy_string(wlan_params->ssid, ssid, BPL_SSID_LEN);
@@ -193,9 +234,40 @@ int bpl_cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PA
     return retVal;
 }
 
-int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefered_radio_band)
+int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *preferred_radio_band)
 {
-    return 0;
+    int retVal = 0;
+
+    if (max_vaps) {
+        //get max_vaps
+    }
+
+    if (network_enabled) {
+        //get network_enabled
+    }
+
+    if (preferred_radio_band) {
+        char backhaul_band[BPL_BACKHAUL_BAND_LEN] = {0};
+        //get preferred_radio_band
+        retVal = bpl_cfg_get_beerocks_param("backhaul_band", backhaul_band, BPL_BACKHAUL_BAND_LEN);
+        if (retVal == RETURN_ERR) {
+            MAPF_ERR("bpl_cfg_get_backhaul_params: Failed to read backhaul_band parameter\n");
+            return RETURN_ERR;
+        }
+        std::string preferred_bh_band(backhaul_band);
+        if (preferred_bh_band.compare("2.4GHz") == 0) {
+            *preferred_radio_band = BPL_RADIO_BAND_2G;
+        } else if (preferred_bh_band.compare("5GHz") == 0) {
+            *preferred_radio_band = BPL_RADIO_BAND_5G;
+        } else if (preferred_bh_band.compare("auto") == 0) {
+            *preferred_radio_band = BPL_RADIO_BAND_AUTO;
+        } else {
+            MAPF_ERR("bpl_cfg_get_backhaul_params: unknown backhaul_band parameter value\n");
+            return RETURN_ERR;
+        }
+    }
+
+    return RETURN_OK;
 }
 
 int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len) { return 0; }
@@ -213,6 +285,16 @@ int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN
         retVal |= bpl_cfg_get_beerocks_param("key_passphrase", pass, BPL_PASS_LEN);
     }
 
+    return retVal;
+}
+
+int bpl_cfg_get_security_policy()
+{
+    int retVal = -1;
+    if (bpl_cfg_get_beerocks_param_int("mem_only_psk", &retVal) == RETURN_ERR) {
+        MAPF_ERR("bpl_cfg_get_security_policy: Failed to read mem_only_psk parameter\n");
+        return RETURN_ERR;
+    }
     return retVal;
 }
 

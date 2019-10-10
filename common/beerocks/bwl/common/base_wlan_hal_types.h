@@ -88,12 +88,16 @@ struct RadioInfo {
     int channel_ext_above           = 0;
     int vht_center_freq             = 0;
     bool is_dfs_channel             = false;
-    bool acs_enabled                = false;
     int ant_num                     = 0;
     int conducted_power             = 0;
     ChanSwReason last_csa_sw_reason = ChanSwReason::Unknown;
     std::vector<WiFiChannel> supported_channels;
-    std::unordered_map<int, VAPElement> available_vaps;
+    std::unordered_map<int, VAPElement> available_vaps; // key = vap_id
+};
+
+struct hal_conf_t {
+    bool ap_acs_enabled          = false;
+    bool ap_passive_mode_enabled = false;
 };
 
 //sta_wlan_hal
@@ -250,7 +254,7 @@ typedef struct {
     int8_t vap_id;
 } sHOSTAP_ENABLED_NOTIFICATION;
 
-#define SSID_MAX_SIZE 24
+#define SSID_MAX_SIZE beerocks::message::WIFI_SSID_MAX_LENGTH
 #define MAC_ADDR_SIZE 18
 #define MAX_SUPPORTED_20M_CHANNELS beerocks::message::SUPPORTED_CHANNELS_LENGTH
 #define MAX_SUPPORTED_CHANNELS                                                                     \

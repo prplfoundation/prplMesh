@@ -57,6 +57,7 @@ public:
         bool load_client_band_steering;
         bool load_client_optimal_path_roaming;
         bool load_client_11k_roaming;
+        std::string load_steer_on_vaps;
         bool load_legacy_client_roaming;
         bool load_ire_roaming;
         bool load_load_balancing;
@@ -383,6 +384,10 @@ public:
 
     bool set_hostap_is_acs_enabled(std::string mac, bool enable);
     bool get_hostap_is_acs_enabled(std::string mac);
+
+    bool set_hostap_passive_mode_enabled(std::string mac, bool enable);
+    bool get_hostap_passive_mode_enabled(std::string mac);
+
     //
     // CLI
     //

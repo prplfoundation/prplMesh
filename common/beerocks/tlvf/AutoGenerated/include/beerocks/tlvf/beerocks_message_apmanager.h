@@ -69,6 +69,50 @@ class cACTION_APMANAGER_JOINED_NOTIFICATION : public BaseClass
         sApChannelSwitch* m_cs_params = nullptr;
 };
 
+class cACTION_APMANAGER_ENABLE_APS_REQUEST : public BaseClass
+{
+    public:
+        cACTION_APMANAGER_ENABLE_APS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_APMANAGER_ENABLE_APS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_APMANAGER_ENABLE_APS_REQUEST();
+
+        static eActionOp_APMANAGER get_action_op(){
+            return (eActionOp_APMANAGER)(ACTION_APMANAGER_ENABLE_APS_REQUEST);
+        }
+        uint8_t& channel();
+        uint32_t& bandwidth();
+        uint8_t& center_channel();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_APMANAGER* m_action_op = nullptr;
+        uint8_t* m_channel = nullptr;
+        uint32_t* m_bandwidth = nullptr;
+        uint8_t* m_center_channel = nullptr;
+};
+
+class cACTION_APMANAGER_ENABLE_APS_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_APMANAGER_ENABLE_APS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_APMANAGER_ENABLE_APS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_APMANAGER_ENABLE_APS_RESPONSE();
+
+        static eActionOp_APMANAGER get_action_op(){
+            return (eActionOp_APMANAGER)(ACTION_APMANAGER_ENABLE_APS_RESPONSE);
+        }
+        uint8_t& success();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_APMANAGER* m_action_op = nullptr;
+        uint8_t* m_success = nullptr;
+};
+
 class cACTION_APMANAGER_INIT_DONE_NOTIFICATION : public BaseClass
 {
     public:
@@ -178,6 +222,24 @@ class cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST : public BaseClass
 
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST);
+        }
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_APMANAGER* m_action_op = nullptr;
+};
+
+class cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST : public BaseClass
+{
+    public:
+        cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST();
+
+        static eActionOp_APMANAGER get_action_op(){
+            return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST);
         }
         void class_swap();
         static size_t get_initial_size();
