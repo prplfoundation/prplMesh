@@ -41,6 +41,10 @@ generate_container_random_ip() {
     echo $(iprand ${gateway_ip})
 }
 
+gateway_netid_length() {
+    echo $(docker network inspect prplMesh-net | jq -r '.[0].IPAM.Config'[0].Subnet | sed -rn 's/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{2})$/\1/p')
+}
+
 main() {
     OPTS=`getopt -o 'hvdfi:m:n:N:o:t:p:' --long verbose,help,detach,force,ipaddr:,mac:,name:,network:,entrypoint:,tag:,port:,options: -n 'parse-options' -- "$@"`
 
@@ -81,6 +85,9 @@ main() {
         dbg "Generate random IP for container $NAME for network $NETWORK"
         IPADDR=$(generate_container_random_ip $NETWORK)
     }
+
+    IPADDR="${IPADDR}$(gateway_netid_length)"
+
     dbg "VERBOSE=${VERBOSE}"
     dbg "DETACH=${DETACH}"
     dbg "NETWORK=${NETWORK}"
