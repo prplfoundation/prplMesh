@@ -286,9 +286,10 @@ static bool get_sta_caps(SRadioCapabilitiesStrings &caps_strings,
 
 // NOTE: Since *base_wlan_hal_nl80211* inherits *base_wlan_hal* virtually, we
 //       need to explicitly call it's from any deriving class
-ap_wlan_hal_nl80211::ap_wlan_hal_nl80211(std::string iface_name, bool acs_enabled, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::AccessPoint, iface_name, IfaceType::Intel, acs_enabled, callback),
-      base_wlan_hal_nl80211(bwl::HALType::AccessPoint, iface_name, acs_enabled, callback, BUFFER_SIZE)
+ap_wlan_hal_nl80211::ap_wlan_hal_nl80211(std::string iface_name, 
+            hal_event_cb_t callback, hal_conf_t hal_conf)
+    : base_wlan_hal(bwl::HALType::AccessPoint, iface_name, IfaceType::Intel, callback, hal_conf),
+      base_wlan_hal_nl80211(bwl::HALType::AccessPoint, iface_name, callback, BUFFER_SIZE)
 {
 }
 
@@ -304,6 +305,30 @@ HALState ap_wlan_hal_nl80211::attach(bool block)
     }
 
     return state;
+}
+
+bool ap_wlan_hal_nl80211::enable()
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
+    return true;
+}
+
+bool ap_wlan_hal_nl80211::disable()
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
+    return true;
+}
+
+bool ap_wlan_hal_nl80211::set_start_disabled(bool enable, int vap_id)
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
+    return true;
+}
+
+bool ap_wlan_hal_nl80211::set_channel(int chan, int bw, int center_channel)
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
+    return true;
 }
 
 bool ap_wlan_hal_nl80211::sta_allow(const std::string &mac)
@@ -412,7 +437,7 @@ bool ap_wlan_hal_nl80211::sta_unassoc_rssi_measurement(const std::string &mac, i
                                                    int vht_center_frequency, int delay,
                                                    int window_size)
 {
-    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";   
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
     return false;
 }
 
@@ -577,6 +602,12 @@ bool ap_wlan_hal_nl80211::read_acs_report()
     return true;
 }
 
+bool ap_wlan_hal_nl80211::read_supported_channels()
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
+    return true;
+}
+
 bool ap_wlan_hal_nl80211::set_vap_enable(const std::string &iface_name, const bool enable)
 {
     LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
@@ -584,6 +615,12 @@ bool ap_wlan_hal_nl80211::set_vap_enable(const std::string &iface_name, const bo
 }
 
 bool ap_wlan_hal_nl80211::get_vap_enable(const std::string &iface_name, bool &enable)
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
+    return true;
+}
+
+bool ap_wlan_hal_nl80211::generate_connected_clients_events()
 {
     LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
     return true;
@@ -775,10 +812,10 @@ bool ap_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
 // AP WAV HAL Factory Functions
 extern "C" {
 
-bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bool acs_enabled,
+bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bwl::hal_conf_t hal_conf,
                                      bwl::base_wlan_hal::hal_event_cb_t callback)
 {
-    return new bwl::nl80211::ap_wlan_hal_nl80211(iface_name, acs_enabled, callback);
+    return new bwl::nl80211::ap_wlan_hal_nl80211(iface_name, callback, hal_conf);
 }
 
 void ap_wlan_hal_destroy(bwl::ap_wlan_hal *obj) { delete obj; }

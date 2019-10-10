@@ -85,8 +85,8 @@ static void calc_curr_traffic(std::string buff, uint64_t &total, uint32_t &curr)
 //////////////////////////////////////////////////////////////////////////////
 
 mon_wlan_hal_nl80211::mon_wlan_hal_nl80211(std::string iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, false, callback),
-      base_wlan_hal_nl80211(bwl::HALType::Monitor, iface_name, false, callback, BUFFER_SIZE)
+    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback),
+      base_wlan_hal_nl80211(bwl::HALType::Monitor, iface_name, callback, BUFFER_SIZE)
 {
 }
 

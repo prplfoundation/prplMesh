@@ -28,11 +28,15 @@ public:
      * @param [in] iface_name AP interface name.
      * @param [in] callback Callback for handling internal events.
      */
-    ap_wlan_hal_nl80211(std::string iface_name, bool acs_enabled, hal_event_cb_t callback);
+    ap_wlan_hal_nl80211(std::string iface_name, hal_event_cb_t callback, hal_conf_t hal_conf);
 
     virtual ~ap_wlan_hal_nl80211();
 
     virtual HALState attach(bool block = false) override;
+    virtual bool enable() override;
+    virtual bool disable() override;
+    virtual bool set_start_disabled(bool enable, int vap_id = beerocks::IFACE_RADIO_ID) override;
+    virtual bool set_channel(int chan, int bw, int center_channel) override;
     virtual bool sta_allow(const std::string &mac) override;
     virtual bool sta_deny(const std::string &mac, int reject_sta) override;
     virtual bool sta_disassoc(int8_t vap_id, const std::string &mac, uint32_t reason = 0) override;
@@ -60,9 +64,11 @@ public:
     virtual bool restricted_channels_set(char *channel_list) override;
     virtual bool restricted_channels_get(char *channel_list) override;
     virtual bool read_acs_report() override;
+    virtual bool read_supported_channels() override;
     virtual std::string get_radio_driver_version() override;
     virtual bool set_vap_enable(const std::string &iface_name, const bool enable) override;
     virtual bool get_vap_enable(const std::string &iface_name, bool &enable) override;
+    virtual bool generate_connected_clients_events() override;
 
     // Protected methods:
 protected:

@@ -56,11 +56,15 @@ public:
 
 // Protected methods
 protected:
-    base_wlan_hal_nl80211(HALType type, std::string iface_name, bool acs_enabled,
-                          hal_event_cb_t callback, int wpa_ctrl_buffer_size);
+    base_wlan_hal_nl80211(HALType type, std::string iface_name,
+                          hal_event_cb_t callback, int wpa_ctrl_buffer_size, 
+                          hal_conf_t hal_conf = {});
 
     // Process hostapd/wpa_supplicant event
     virtual bool process_nl80211_event(parsed_obj_map_t& event) = 0;
+
+    bool set(const std::string &param, const std::string &value,
+             int vap_id = beerocks::IFACE_RADIO_ID);
 
     // Send a message via the WPA Control Interface
     bool wpa_ctrl_send_msg(const std::string &cmd, parsed_obj_map_t &reply);

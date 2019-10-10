@@ -202,9 +202,10 @@ static void parsed_obj_debug(base_wlan_hal_nl80211::parsed_obj_listed_map_t &obj
 //////////////////////////////////////////////////////////////////////////////
 
 base_wlan_hal_nl80211::base_wlan_hal_nl80211(
-    HALType type, std::string iface_name, bool acs_enabled,
-    hal_event_cb_t callback, int wpa_ctrl_buffer_size) : 
-        base_wlan_hal(type, iface_name, IfaceType::Intel, acs_enabled, callback),
+    HALType type, std::string iface_name,
+    hal_event_cb_t callback, int wpa_ctrl_buffer_size,
+    hal_conf_t hal_conf) : 
+        base_wlan_hal(type, iface_name, IfaceType::Intel, callback, hal_conf),
         beerocks::beerocks_fsm<nl80211_fsm_state, nl80211_fsm_event>(nl80211_fsm_state::Delay),
         m_wpa_ctrl_buffer_size(wpa_ctrl_buffer_size)
 {
@@ -361,56 +362,15 @@ bool base_wlan_hal_nl80211::fsm_setup()
                     return (transition.change_destination(nl80211_fsm_state::Detach));
                 }
 
-                // If Non-AP HAL, continue to the next state
-                if (get_type() != HALType::AccessPoint) {
-                    return true;
-                }
+                // Move to the next state
+                return true;
 
-                auto fixed_channel = (!m_radio_info.acs_enabled && !m_radio_info.is_dfs_channel);
-                auto fixed_dfs_channel = (!m_radio_info.acs_enabled && m_radio_info.is_dfs_channel);
-                LOG(DEBUG) << "m_radio_info.acs_enabled  = " << int(m_radio_info.acs_enabled)
-                           << " m_radio_info.is_dfs_channel = " << int(m_radio_info.is_dfs_channel)
-                           << " fixed_dfs_channel = " << int(fixed_dfs_channel)
-                           << " fixed_channel = " << int(fixed_channel);
+                // if (error || (std::chrono::steady_clock::now() >= m_state_timeout)) {
+                //     return (transition.change_destination(nl80211_fsm_state::Detach));
+                // }
 
-                // AP is Enabled
-                LOG(DEBUG) << "wifi_ctrl_enabled  = " << int(m_radio_info.wifi_ctrl_enabled);
-
-                bool error = false;
-                if (fixed_dfs_channel) {
-                    if (m_radio_info.tx_enabled) {
-                        LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
-                        return true;
-                    } else {
-                        LOG(ERROR) << "ap_enabled with tx OFF!";
-                        error = true;
-                    }
-                } else if (fixed_channel) {
-                    if (m_radio_info.wifi_ctrl_enabled == 1) {
-                        if (m_radio_info.tx_enabled) {
-                            LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
-                            return true;
-                        } else {
-                            LOG(ERROR) << "ap_enabled with tx OFF!";
-                            error = true;
-                        }
-                    }
-                } else if (m_radio_info.wifi_ctrl_enabled == 2) {
-                    if (m_radio_info.tx_enabled) {
-                        LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
-                        return true;
-                    } else {
-                        LOG(ERROR) << "ap_enabled with tx OFF!";
-                        error = true;
-                    }
-                }
-
-                if (error || (std::chrono::steady_clock::now() >= m_state_timeout)) {
-                    return (transition.change_destination(nl80211_fsm_state::Detach));
-                }
-
-                // Remain in the current state
-                return false;
+                // // Remain in the current state
+                // return false;
             })
 
         //////////////////////////////////////////////////////////////////////////
@@ -559,6 +519,12 @@ bool base_wlan_hal_nl80211::detach()
 {
     fire(nl80211_fsm_event::Detach);
     return (state() == nl80211_fsm_state::Detach);
+}
+
+bool base_wlan_hal_nl80211::set(const std::string &param, const std::string &value, int vap_id)
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";   
+    return true;
 }
 
 bool base_wlan_hal_nl80211::ping()
