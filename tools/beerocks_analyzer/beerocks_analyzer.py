@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import logging
 import sys
 import os
 import ctypes
@@ -20,6 +21,8 @@ from multiprocessing import Process
 from threading import Thread
 import struct
 
+import logger_setup
+
 VERSION="3.3"
 
 t_list=[]
@@ -31,6 +34,9 @@ LOG_FILE="beerocks_analyzer.log"
 
 bra = None
 app = None
+
+logger_setup.setup_logger()
+logger = logging.getLogger(__name__)
 
 def PRINTF(fmt, *args):
     sys.stdout.write(fmt % args)
