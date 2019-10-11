@@ -2555,9 +2555,8 @@ bool master_thread::handle_cmdu_control_message(
 #endif
         if (database.get_node_ipv4(client_mac).empty()) {
             LOG(INFO) << "Unknown IP address for node mac " << client_mac;
-        } else {
-            son_actions::handle_completed_connection(database, cmdu_tx, tasks, client_mac);
         }
+        son_actions::handle_completed_connection(database, cmdu_tx, tasks, client_mac);
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_DISCONNECTED_NOTIFICATION: {
