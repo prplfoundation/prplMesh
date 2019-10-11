@@ -772,13 +772,15 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         }
         if (!(tlvwscM1->authentication_type_flags_attr().data &
               uint16_t(bss_info_conf.authentication_type))) {
-            LOG(INFO) << "Skipping " << bss_info_conf.ssid << " due to auth mismatch";
-            continue;
+            LOG(INFO) << std::hex << "Auth mismatch for " << bss_info_conf.ssid << ": get 0x"
+                      << tlvwscM1->authentication_type_flags_attr().data << " need 0x"
+                      << uint16_t(bss_info_conf.authentication_type);
         }
         if (!(tlvwscM1->encryption_type_flags_attr().data &
               uint16_t(bss_info_conf.encryption_type))) {
-            LOG(INFO) << "Skipping " << bss_info_conf.ssid << " due to encr mismatch";
-            continue;
+            LOG(INFO) << std::hex << "Encr mismatch for " << bss_info_conf.ssid << ": get 0x"
+                      << tlvwscM1->encryption_type_flags_attr().data << " need 0x"
+                      << uint16_t(bss_info_conf.encryption_type);
         }
         if (num_bsss >= radio_basic_caps->maximum_number_of_bsss_supported()) {
             LOG(INFO) << "Configured #BSS exceeds maximum for " << al_mac << " radio " << ruid;
