@@ -39,9 +39,11 @@ test_initial_ap_config() {
     check docker exec -it repeater1 sh -c \
         'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
+    # Regression test: MAC address should be case insensitive
+    MAC_AGENT1=$(echo $mac_agent1 | tr a-z A-Z)
     # Configure the controller and send renew
     eval send_bml_command "bml_wfa_ca_controller \"DEV_RESET_DEFAULT\"" $redirect
-    eval send_bml_command "bml_wfa_ca_controller \\\"DEV_SET_CONFIG,bss_info1,$mac_agent1 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1,bss_info2,$mac_agent1 8x Multi-AP-24G-2 0x0020 0x0008 maprocks2 1 0\\\"" $redirect
+    eval send_bml_command "bml_wfa_ca_controller \\\"DEV_SET_CONFIG,bss_info1,$MAC_AGENT1 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1,bss_info2,$mac_agent1 8x Multi-AP-24G-2 0x0020 0x0008 maprocks2 1 0\\\"" $redirect
     gw_mac_without_colons="$(printf $mac_gateway | tr -d :)"
     eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x000A,tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}\"" $redirect
 
