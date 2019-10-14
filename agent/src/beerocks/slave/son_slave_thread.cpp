@@ -3216,87 +3216,94 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        auto notification =
-            message_com::add_vs_tlv<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(
-                cmdu_tx);
-
-        if (!notification) {
-            LOG(ERROR) << "Failed building cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION!";
-            return false;
-        }
-
-        notification->is_slave_reconf() = is_backhual_reconf;
-        is_backhual_reconf              = false;
-
-        // Version
-        string_utils::copy_string(notification->slave_version(message::VERSION_LENGTH),
-                                  BEEROCKS_VERSION, message::VERSION_LENGTH);
-
-        // Platform Configuration
-        notification->low_pass_filter_on()   = config.backhaul_wireless_iface_filter_low;
-        notification->enable_repeater_mode() = config.enable_repeater_mode;
-        notification->radio_identifier()     = hostap_params.iface_mac;
-
-        // Backhaul Params
-        notification->backhaul_params().gw_ipv4 =
-            network_utils::ipv4_from_string(backhaul_params.gw_ipv4);
-        notification->backhaul_params().gw_bridge_mac =
-            network_utils::mac_from_string(backhaul_params.gw_bridge_mac);
-        notification->backhaul_params().is_backhaul_manager = is_backhaul_manager;
-        notification->backhaul_params().backhaul_iface_type = backhaul_params.backhaul_iface_type;
-        notification->backhaul_params().backhaul_mac =
-            network_utils::mac_from_string(backhaul_params.backhaul_mac);
-        notification->backhaul_params().backhaul_channel = backhaul_params.backhaul_channel;
-        notification->backhaul_params().backhaul_bssid =
-            network_utils::mac_from_string(backhaul_params.backhaul_bssid);
-        notification->backhaul_params().backhaul_is_wireless = backhaul_params.backhaul_is_wireless;
-
-        if (!config.bridge_iface.empty()) {
-            notification->backhaul_params().bridge_mac =
-                network_utils::mac_from_string(backhaul_params.bridge_mac);
-            notification->backhaul_params().bridge_ipv4 =
-                network_utils::ipv4_from_string(backhaul_params.bridge_ipv4);
-            notification->backhaul_params().backhaul_ipv4 =
-                network_utils::ipv4_from_string(backhaul_params.bridge_ipv4);
+        if (config.no_vendor_specific) {
+            LOG(INFO) << "Configured as non-Intel, not sending SLAVE_JOINED_NOTIFICATION";
         } else {
-            notification->backhaul_params().backhaul_ipv4 =
-                network_utils::ipv4_from_string(backhaul_params.backhaul_ipv4);
-        }
+            auto notification = message_com::add_vs_tlv<
+                beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(cmdu_tx);
 
-        std::copy_n(backhaul_params.backhaul_scan_measurement_list,
-                    beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH,
-                    notification->backhaul_params().backhaul_scan_measurement_list);
+            if (!notification) {
+                LOG(ERROR) << "Failed building cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION!";
+                return false;
+            }
 
-        for (unsigned int i = 0; i < message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
-            if (notification->backhaul_params().backhaul_scan_measurement_list[i].channel > 0) {
-                LOG(DEBUG)
-                    << "mac = "
-                    << notification->backhaul_params().backhaul_scan_measurement_list[i].mac.oct
-                    << " channel = "
-                    << int(notification->backhaul_params()
-                               .backhaul_scan_measurement_list[i]
-                               .channel)
-                    << " rssi = "
-                    << int(notification->backhaul_params().backhaul_scan_measurement_list[i].rssi);
+            notification->is_slave_reconf() = is_backhual_reconf;
+            is_backhual_reconf              = false;
+
+            // Version
+            string_utils::copy_string(notification->slave_version(message::VERSION_LENGTH),
+                                      BEEROCKS_VERSION, message::VERSION_LENGTH);
+
+            // Platform Configuration
+            notification->low_pass_filter_on()   = config.backhaul_wireless_iface_filter_low;
+            notification->enable_repeater_mode() = config.enable_repeater_mode;
+            notification->radio_identifier()     = hostap_params.iface_mac;
+            network_utils::mac_from_string(config.radio_identifier);
+
+            // Backhaul Params
+            notification->backhaul_params().gw_ipv4 =
+                network_utils::ipv4_from_string(backhaul_params.gw_ipv4);
+            notification->backhaul_params().gw_bridge_mac =
+                network_utils::mac_from_string(backhaul_params.gw_bridge_mac);
+            notification->backhaul_params().is_backhaul_manager = is_backhaul_manager;
+            notification->backhaul_params().backhaul_iface_type =
+                backhaul_params.backhaul_iface_type;
+            notification->backhaul_params().backhaul_mac =
+                network_utils::mac_from_string(backhaul_params.backhaul_mac);
+            notification->backhaul_params().backhaul_channel = backhaul_params.backhaul_channel;
+            notification->backhaul_params().backhaul_bssid =
+                network_utils::mac_from_string(backhaul_params.backhaul_bssid);
+            notification->backhaul_params().backhaul_is_wireless =
+                backhaul_params.backhaul_is_wireless;
+
+            if (!config.bridge_iface.empty()) {
+                notification->backhaul_params().bridge_mac =
+                    network_utils::mac_from_string(backhaul_params.bridge_mac);
+                notification->backhaul_params().bridge_ipv4 =
+                    network_utils::ipv4_from_string(backhaul_params.bridge_ipv4);
+                notification->backhaul_params().backhaul_ipv4 =
+                    network_utils::ipv4_from_string(backhaul_params.bridge_ipv4);
+            } else {
+                notification->backhaul_params().backhaul_ipv4 =
+                    network_utils::ipv4_from_string(backhaul_params.backhaul_ipv4);
+            }
+
+            std::copy_n(backhaul_params.backhaul_scan_measurement_list,
+                        beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH,
+                        notification->backhaul_params().backhaul_scan_measurement_list);
+
+            for (unsigned int i = 0; i < message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
+                if (notification->backhaul_params().backhaul_scan_measurement_list[i].channel > 0) {
+                    LOG(DEBUG)
+                        << "mac = "
+                        << notification->backhaul_params().backhaul_scan_measurement_list[i].mac.oct
+                        << " channel = "
+                        << int(notification->backhaul_params()
+                                   .backhaul_scan_measurement_list[i]
+                                   .channel)
+                        << " rssi = "
+                        << int(notification->backhaul_params()
+                                   .backhaul_scan_measurement_list[i]
+                                   .rssi);
+                }
+
+                //Platform Settings
+                notification->platform_settings() = platform_settings;
+
+                //Wlan Settings
+                notification->wlan_settings() = wlan_settings;
+                // Hostap Params
+                notification->hostap()          = hostap_params;
+                notification->hostap().ant_gain = config.hostap_ant_gain;
+
+                // Channel Selection Params
+                notification->cs_params() = hostap_cs_params;
             }
         }
 
-        //Platform Settings
-        notification->platform_settings() = platform_settings;
-
-        //Wlan Settings
-        notification->wlan_settings() = wlan_settings;
-        // Hostap Params
-        notification->hostap()          = hostap_params;
-        notification->hostap().ant_gain = config.hostap_ant_gain;
-
-        // Channel Selection Params
-        notification->cs_params() = hostap_cs_params;
-
         send_cmdu_to_controller(cmdu_tx);
-        LOG(DEBUG) << "send SLAVE_JOINED_NOTIFICATION Size=" << int(cmdu_tx.getMessageLength());
+        LOG(DEBUG) << "sending WSC M1 Size=" << int(cmdu_tx.getMessageLength());
 
-        LOG(DEBUG) << "sending ACTION_CONTROL_SLAVE_JOINED_NOTIFICATION";
         LOG(TRACE) << "goto STATE_WAIT_FOR_JOINED_RESPONSE";
         slave_state_timer = std::chrono::steady_clock::now() +
                             std::chrono::seconds(WAIT_FOR_JOINED_RESPONSE_TIMEOUT_SEC);
@@ -3575,9 +3582,9 @@ bool slave_thread::ap_manager_heartbeat_check()
     if (time_elapsed_secs > AP_MANAGER_HEARTBEAT_TIMEOUT_SEC) {
         ap_manager_retries_counter++;
         ap_manager_last_seen = now;
-        LOG(INFO)
-            << "time_elapsed_secs > AP_MANAGER_HEARTBEAT_TIMEOUT_SEC ap_manager_retries_counter = "
-            << int(ap_manager_retries_counter);
+        LOG(INFO) << "time_elapsed_secs > AP_MANAGER_HEARTBEAT_TIMEOUT_SEC "
+                     "ap_manager_retries_counter = "
+                  << int(ap_manager_retries_counter);
     }
     if (ap_manager_retries_counter >= AP_MANAGER_HEARTBEAT_RETRIES) {
         LOG(INFO) << "ap_manager_retries_counter >= AP_MANAGER_HEARTBEAT_RETRIES "
