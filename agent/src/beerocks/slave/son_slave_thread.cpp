@@ -1946,21 +1946,25 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         client_association_event_tlv->association_event() =
             wfa_map::tlvClientAssociationEvent::CLIENT_HAS_LEFT_THE_BSS;
 
-        // Add vendor specific tlv
-        auto vs_tlv =
-            message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationEvent>(cmdu_tx);
+        if (config.no_vendor_specific) {
+            LOG(DEBUG) << "non-Intel, not adding ClientAssociationEvent VS TLV";
+        } else {
+            // Add vendor specific tlv
+            auto vs_tlv =
+                message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationEvent>(cmdu_tx);
 
-        if (!vs_tlv) {
-            LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationEvent failed";
-            return false;
+            if (!vs_tlv) {
+                LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationEvent failed";
+                return false;
+            }
+
+            vs_tlv->mac()               = notification_in->params().mac;
+            vs_tlv->bssid()             = notification_in->params().bssid;
+            vs_tlv->vap_id()            = notification_in->params().vap_id;
+            vs_tlv->disconnect_reason() = notification_in->params().reason;
+            vs_tlv->disconnect_source() = notification_in->params().source;
+            vs_tlv->disconnect_type()   = notification_in->params().type;
         }
-
-        vs_tlv->mac()               = notification_in->params().mac;
-        vs_tlv->bssid()             = notification_in->params().bssid;
-        vs_tlv->vap_id()            = notification_in->params().vap_id;
-        vs_tlv->disconnect_reason() = notification_in->params().reason;
-        vs_tlv->disconnect_source() = notification_in->params().source;
-        vs_tlv->disconnect_type()   = notification_in->params().type;
 
         send_cmdu_to_controller(cmdu_tx);
 
@@ -2107,19 +2111,23 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         client_association_event_tlv->association_event() =
             wfa_map::tlvClientAssociationEvent::CLIENT_HAS_JOINED_THE_BSS;
 
-        // Add vendor specific tlv
-        auto vs_tlv =
-            message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationEvent>(cmdu_tx);
+        if (config.no_vendor_specific) {
+            LOG(DEBUG) << "non-Intel, not adding ClientAssociationEvent VS TLV";
+        } else {
+            // Add vendor specific tlv
+            auto vs_tlv =
+                message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationEvent>(cmdu_tx);
 
-        if (!vs_tlv) {
-            LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationEvent failed";
-            return false;
+            if (!vs_tlv) {
+                LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationEvent failed";
+                return false;
+            }
+
+            vs_tlv->mac()          = notification_in->params().mac;
+            vs_tlv->bssid()        = notification_in->params().bssid;
+            vs_tlv->vap_id()       = notification_in->params().vap_id;
+            vs_tlv->capabilities() = notification_in->params().capabilities;
         }
-
-        vs_tlv->mac()          = notification_in->params().mac;
-        vs_tlv->bssid()        = notification_in->params().bssid;
-        vs_tlv->vap_id()       = notification_in->params().vap_id;
-        vs_tlv->capabilities() = notification_in->params().capabilities;
 
         send_cmdu_to_controller(cmdu_tx);
 
