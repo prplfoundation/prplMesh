@@ -34,7 +34,6 @@
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
-#include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvSteeringBTMReport.h>
@@ -4805,47 +4804,6 @@ bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::Cmd
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE, mid=" << std::dec
                << int(mid);
-
-    auto association_control_request_tlv =
-        cmdu_rx.addClass<wfa_map::tlvClientAssociationControlRequest>();
-    if (!association_control_request_tlv) {
-        LOG(ERROR) << "addClass wfa_map::tlvClientAssociationControlRequest failed";
-        return false;
-    }
-    auto sta_mac = std::get<1>(association_control_request_tlv->sta_list(0));
-
-    //Add VS tlv
-    auto vs_tlv =
-        message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationControlRequest>(cmdu_tx);
-    if (!vs_tlv) {
-        LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationControlRequest failed";
-    }
-
-    auto block = association_control_request_tlv->association_control();
-    if (block == wfa_map::tlvClientAssociationControlRequest::UNBLOCK) {
-        auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_APMANAGER_CLIENT_ALLOW_REQUEST>(cmdu_tx, mid);
-        if (!request_out) {
-            LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_ALLOW_REQUEST message!";
-            return false;
-        }
-        if (vs_tlv) {
-            request_out->ipv4() = vs_tlv->ipv4();
-        }
-        request_out->mac() = sta_mac;
-    } else if (block == wfa_map::tlvClientAssociationControlRequest::BLOCK) {
-        auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST>(cmdu_tx, mid);
-        if (!request_out) {
-            LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_DISALLOW_REQUEST message!";
-            return false;
-        }
-        if (vs_tlv) {
-            request_out->reject_sta() = vs_tlv->reject_sta();
-        }
-        request_out->mac() = sta_mac;
-    }
-    message_com::send_cmdu(ap_manager_socket, cmdu_tx);
 
     if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
         LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
