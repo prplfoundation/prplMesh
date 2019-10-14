@@ -24,7 +24,6 @@ include_yaml_path: {
   "tlvf/wfa_map/tlvSteeringRequest.yaml",
   "tlvf/wfa_map/tlvApMetricQuery.yaml",
   "tlvf/wfa_map/tlvClientAssociationEvent.yaml",
-  "tlvf/wfa_map/tlvClientAssociationControlRequest.yaml",
 }
 
 # Relative to tlvf.py src_path variable
