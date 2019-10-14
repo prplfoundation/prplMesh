@@ -61,28 +61,6 @@ class tlvVsClientAssociationEvent : public BaseClass
         uint8_t* m_disconnect_type = nullptr;
 };
 
-class tlvVsClientAssociationControlRequest : public BaseClass
-{
-    public:
-        tlvVsClientAssociationControlRequest(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvVsClientAssociationControlRequest(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~tlvVsClientAssociationControlRequest();
-
-        static eActionOp_1905_VS get_action_op(){
-            return (eActionOp_1905_VS)(ACTION_TLV_VENDOR_SPECIFIC);
-        }
-        uint8_t& reject_sta();
-        beerocks::net::sIpv4Addr& ipv4();
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_1905_VS* m_action_op = nullptr;
-        uint8_t* m_reject_sta = nullptr;
-        beerocks::net::sIpv4Addr* m_ipv4 = nullptr;
-};
-
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_1905_VS_H_
