@@ -2531,6 +2531,100 @@ bool cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::init()
     return true;
 }
 
+cACTION_CONTROL_CLIENT_DISALLOW_REQUEST::cACTION_CONTROL_CLIENT_DISALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_DISALLOW_REQUEST::cACTION_CONTROL_CLIENT_DISALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_DISALLOW_REQUEST::~cACTION_CONTROL_CLIENT_DISALLOW_REQUEST() {
+}
+sMacAddr& cACTION_CONTROL_CLIENT_DISALLOW_REQUEST::mac() {
+    return (sMacAddr&)(*m_mac);
+}
+
+uint8_t& cACTION_CONTROL_CLIENT_DISALLOW_REQUEST::reject_sta() {
+    return (uint8_t&)(*m_reject_sta);
+}
+
+void cACTION_CONTROL_CLIENT_DISALLOW_REQUEST::class_swap()
+{
+    m_mac->struct_swap();
+}
+
+size_t cACTION_CONTROL_CLIENT_DISALLOW_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // mac
+    class_size += sizeof(uint8_t); // reject_sta
+    return class_size;
+}
+
+bool cACTION_CONTROL_CLIENT_DISALLOW_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!m_parse__) { m_mac->struct_init(); }
+    m_reject_sta = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_CLIENT_ALLOW_REQUEST::cACTION_CONTROL_CLIENT_ALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_ALLOW_REQUEST::cACTION_CONTROL_CLIENT_ALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_ALLOW_REQUEST::~cACTION_CONTROL_CLIENT_ALLOW_REQUEST() {
+}
+sMacAddr& cACTION_CONTROL_CLIENT_ALLOW_REQUEST::mac() {
+    return (sMacAddr&)(*m_mac);
+}
+
+beerocks::net::sIpv4Addr& cACTION_CONTROL_CLIENT_ALLOW_REQUEST::ipv4() {
+    return (beerocks::net::sIpv4Addr&)(*m_ipv4);
+}
+
+void cACTION_CONTROL_CLIENT_ALLOW_REQUEST::class_swap()
+{
+    m_mac->struct_swap();
+    m_ipv4->struct_swap();
+}
+
+size_t cACTION_CONTROL_CLIENT_ALLOW_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // mac
+    class_size += sizeof(beerocks::net::sIpv4Addr); // ipv4
+    return class_size;
+}
+
+bool cACTION_CONTROL_CLIENT_ALLOW_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!m_parse__) { m_mac->struct_init(); }
+    m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) { return false; }
+    if (!m_parse__) { m_ipv4->struct_init(); }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
 cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
     BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();
