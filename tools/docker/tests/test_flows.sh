@@ -188,38 +188,6 @@ test_client_steering_dummy() {
     check docker exec -it repeater1 sh -c \
         'echo "AP-STA-CONNECTED 11:22:33:44:55:66" > /tmp/$USER/beerocks/wlan0/EVENT'
 
-    dbg "Send client association control request to the chosen BSSID to steer the client (UNBLOCK) "
-    eval send_bml_command "client_allow \"11:22:33:44:55:66 aa:bb:cc:00:00:20\"" $redirect
-    sleep 1
-
-    dbg "Confirming Client Association Control Request message was received (UNBLOCK)"
-    check docker exec -it repeater1 sh -c \
-        'grep -i -q "Got client allow request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
-
-    dbg "Send client association control request to all other (BLOCK) "
-    eval send_bml_command "client_disallow \"11:22:33:44:55:66 aa:bb:cc:00:00:10\"" $redirect
-    sleep 1
-
-    dbg "Confirming Client Association Control Request message was received (BLOCK)"
-    check docker exec -it repeater1 sh -c \
-        'grep -i -q "Got client disallow request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-
-    dbg "Send client association control request to all other (BLOCK) "
-    eval send_bml_command "client_disallow \"11:22:33:44:55:66 aa:bb:cc:11:00:10\"" $redirect
-    sleep 1
-
-    dbg "Confirming Client Association Control Request message was received (BLOCK)"
-    check docker exec -it repeater2 sh -c \
-        'grep -i -q "Got client disallow request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-
-    dbg "Send client association control request to all other (BLOCK) "
-    eval send_bml_command "client_disallow \"11:22:33:44:55:66 aa:bb:cc:11:00:20\"" $redirect
-    sleep 1
-
-    dbg "Confirming Client Association Control Request message was received (BLOCK)"
-    check docker exec -it repeater2 sh -c \
-        'grep -i -q "Got client disallow request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
-
     dbg "Send steer request "
     eval send_bml_command "steer_client \"11:22:33:44:55:66 aa:bb:cc:00:00:20\"" $redirect
     sleep 1
