@@ -750,6 +750,54 @@ bool slave_thread::handle_cmdu_control_message(
                   << " id=" << int(beerocks_header->id());
         break;
     }
+    case beerocks_message::ACTION_CONTROL_CLIENT_DISALLOW_REQUEST: {
+        auto request_in =
+            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_DISALLOW_REQUEST>();
+        if (request_in == nullptr) {
+            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_DISALLOW_REQUEST failed";
+            return false;
+        }
+
+        std::string mac = network_utils::mac_to_string(request_in->mac());
+        LOG(INFO) << "CLIENT_DISALLOW mac " << mac
+                  << ", reject_sta=" << int(request_in->reject_sta());
+
+        auto request_out = message_com::create_vs_message<
+            beerocks_message::cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST>(cmdu_tx,
+                                                                         beerocks_header->id());
+        if (request_out == nullptr) {
+            LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_DISALLOW_REQUEST message!";
+            return false;
+        }
+        request_out->mac()        = request_in->mac();
+        request_out->reject_sta() = request_in->reject_sta();
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_CONTROL_CLIENT_ALLOW_REQUEST: {
+        auto request_in =
+            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_ALLOW_REQUEST>();
+        if (request_in == nullptr) {
+            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_ALLOW_REQUEST failed";
+            return false;
+        }
+
+        std::string sta_mac = network_utils::mac_to_string(request_in->mac());
+        LOG(DEBUG) << "CLIENT_ALLOW, mac = " << sta_mac
+                   << ", ip = " << network_utils::ipv4_to_string(request_in->ipv4());
+
+        auto request_out = message_com::create_vs_message<
+            beerocks_message::cACTION_APMANAGER_CLIENT_ALLOW_REQUEST>(cmdu_tx,
+                                                                      beerocks_header->id());
+        if (request_out == nullptr) {
+            LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_ALLOW_REQUEST message!";
+            return false;
+        }
+        request_out->mac()  = request_in->mac();
+        request_out->ipv4() = request_in->ipv4();
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+        break;
+    }
     case beerocks_message::ACTION_CONTROL_CLIENT_DISCONNECT_REQUEST: {
         auto request_in =
             cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST>();
