@@ -9,7 +9,7 @@ installdir="${topdir}/build/install"
 sourcesdir="${topdir}/prplMesh"
 
 dbg() {
-    [ "$VERBOSE" = "true" ] && echo "$(basename $0): $*"
+    if [ "$VERBOSE" = "true" ]; then echo "$(basename $0): $*"; fi
 }
 
 status() {
