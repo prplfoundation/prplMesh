@@ -119,7 +119,7 @@ public:
     template <class T>
     static std::shared_ptr<T> create_vs_message(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
     {
-        auto cmduhdr = cmdu_tx.create(id, ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE);
+        auto cmduhdr = cmdu_tx.create(0, ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE);
         if (!cmduhdr) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
             return nullptr;
