@@ -19,4 +19,4 @@ script:
   - git diff-index --exit-code HEAD
   # Tests
   - ./run.sh --entrypoint "$PWD/../../../build/install/bin/tests/tlvf_test"
-  - ./tests/test_flows.sh -v topology initial_ap_config channel_selection client_capability_query ap_capability_query client_steering_dummy
+  - ./tests/test_flows.sh -v topology initial_ap_config channel_selection client_capability_query ap_capability_query client_steering_dummy client_association_dummy
