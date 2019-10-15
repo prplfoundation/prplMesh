@@ -32,6 +32,8 @@ Build OpenWRT image and toolchain:
    and upgrade by running sysupgrade on the target:
      ssh root@192.168.1.1 -C "sysupgrade /tmp/fw.bin"
 
+6. Set up 2 wireless networks w/ WPA2-PSK security (one on radio0 another on radio1)
+
 
 Build PurplMesh for the target platform:
 
