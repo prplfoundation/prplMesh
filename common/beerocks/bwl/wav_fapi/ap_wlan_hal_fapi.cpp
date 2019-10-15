@@ -394,8 +394,9 @@ bool ap_wlan_hal_fapi::sta_allow(const std::string &mac)
     return true;
 }
 
-bool ap_wlan_hal_fapi::sta_deny(const std::string &mac, int reject_sta)
+bool ap_wlan_hal_fapi::sta_deny(const std::string &mac)
 {
+    int reject_sta = 33;
     LOG(TRACE) << __func__ << " mac: " << mac << ", reject_sta=" << reject_sta;
 
     // Create a new object
@@ -407,10 +408,8 @@ bool ap_wlan_hal_fapi::sta_deny(const std::string &mac, int reject_sta)
     UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.AccessPoint.X_LANTIQ_COM_Vendor",
                           "MACAddressControlList", mac.c_str(), 0, 0);
 
-    if (reject_sta) {
-        UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.AccessPoint.X_LANTIQ_COM_Vendor", "rejectSta",
-                              std::to_string(reject_sta).c_str(), 0, 0);
-    }
+    UGW_OBJLIST_EDIT_NODE(wlObj, "Device.WiFi.AccessPoint.X_LANTIQ_COM_Vendor", "rejectSta",
+                          std::to_string(reject_sta).c_str(), 0, 0);
 
     if (fapi_wlan_sta_deny(get_radio_info().iface_name.c_str(), wlObj.get(), 0) == UGW_FAILURE) {
         LOG(ERROR) << "fapi_wlan_sta_deny failed!";

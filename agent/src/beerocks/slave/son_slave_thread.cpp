@@ -4792,9 +4792,6 @@ bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::Cmd
             LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_DISALLOW_REQUEST message!";
             return false;
         }
-        if (vs_tlv) {
-            request_out->reject_sta() = vs_tlv->reject_sta();
-        }
         request_out->mac() = sta_mac;
     }
     message_com::send_cmdu(ap_manager_socket, cmdu_tx);

@@ -168,7 +168,7 @@ bool ap_wlan_hal_brcm::sta_allow(const std::string &mac)
     return true;
 }
 
-bool ap_wlan_hal_brcm::sta_deny(const std::string &mac, int reject_sta)
+bool ap_wlan_hal_brcm::sta_deny(const std::string &mac)
 {
     LOG(TRACE) << __func__ << " mac: " << mac;
 

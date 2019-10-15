@@ -617,9 +617,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             return false;
         }
         std::string sta_mac = network_utils::mac_to_string(request->mac());
-        LOG(DEBUG) << "CLIENT_DISALLOW, mac = " << sta_mac
-                   << ", reject_sta=" << int(request->reject_sta());
-        ap_wlan_hal->sta_deny(sta_mac, request->reject_sta());
+        LOG(DEBUG) << "CLIENT_DISALLOW, mac = " << sta_mac;
+        ap_wlan_hal->sta_deny(sta_mac);
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_ALLOW_REQUEST: {
