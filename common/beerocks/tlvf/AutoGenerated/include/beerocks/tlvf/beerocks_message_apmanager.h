@@ -528,7 +528,6 @@ class cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_DISALLOW_REQUEST);
         }
         sMacAddr& mac();
-        uint8_t& reject_sta();
         void class_swap();
         static size_t get_initial_size();
 
@@ -536,7 +535,6 @@ class cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST : public BaseClass
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
         sMacAddr* m_mac = nullptr;
-        uint8_t* m_reject_sta = nullptr;
 };
 
 class cACTION_APMANAGER_CLIENT_ALLOW_REQUEST : public BaseClass

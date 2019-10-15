@@ -1010,10 +1010,6 @@ sMacAddr& cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::mac() {
     return (sMacAddr&)(*m_mac);
 }
 
-uint8_t& cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::reject_sta() {
-    return (uint8_t&)(*m_reject_sta);
-}
-
 void cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::class_swap()
 {
     m_mac->struct_swap();
@@ -1023,7 +1019,6 @@ size_t cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // mac
-    class_size += sizeof(uint8_t); // reject_sta
     return class_size;
 }
 
@@ -1036,8 +1031,6 @@ bool cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::init()
     m_mac = (sMacAddr*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
-    m_reject_sta = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
