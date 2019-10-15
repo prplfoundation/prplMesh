@@ -191,7 +191,7 @@ void client_steering_task::steer_sta()
             network_utils::mac_from_string(current_ap_mac);
         association_control_block_request_tlv->association_control() =
             wfa_map::tlvClientAssociationControlRequest::BLOCK;
-        association_control_block_request_tlv->validity_period_sec() = disassoc_timer_ms;
+        association_control_block_request_tlv->validity_period_sec() = steering_wait_time_ms / 1000;
         association_control_block_request_tlv->alloc_sta_list();
         auto sta_list_block         = association_control_block_request_tlv->sta_list(0);
         std::get<1>(sta_list_block) = network_utils::mac_from_string(sta_mac);
