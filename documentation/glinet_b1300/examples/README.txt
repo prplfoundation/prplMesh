@@ -3,6 +3,6 @@ and config files for setting up the devices as a gateway and an extender.
 
 install-stripped.tgz     - binaries to extract into /opt/beerocks on the device
 owrt-cfg-gateway.tar.gz  - confg file to load onto gateway device
-owrt-cfg-extender.tar.gz - config file to load onto extende device
+owrt-cfg-extender.tar.gz - config file to load onto extender device
 fw.bin                   - openwrt firware (master as of mid October 2019)
 
