@@ -2871,7 +2871,7 @@ bool slave_thread::handle_cmdu_monitor_message(
         break;
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE: {
-        LOG(TRACE) << "ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE id=" << beerocks_header->id();
+        LOG(TRACE) << "ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE id=" << int(beerocks_header->id());
         auto response_in =
             cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>();
         if (response_in == nullptr) {
