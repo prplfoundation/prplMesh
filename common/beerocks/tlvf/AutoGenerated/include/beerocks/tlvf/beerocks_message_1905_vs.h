@@ -71,7 +71,6 @@ class tlvVsClientAssociationControlRequest : public BaseClass
         static eActionOp_1905_VS get_action_op(){
             return (eActionOp_1905_VS)(ACTION_TLV_VENDOR_SPECIFIC);
         }
-        uint8_t& reject_sta();
         beerocks::net::sIpv4Addr& ipv4();
         void class_swap();
         static size_t get_initial_size();
@@ -79,7 +78,6 @@ class tlvVsClientAssociationControlRequest : public BaseClass
     private:
         bool init();
         eActionOp_1905_VS* m_action_op = nullptr;
-        uint8_t* m_reject_sta = nullptr;
         beerocks::net::sIpv4Addr* m_ipv4 = nullptr;
 };
 

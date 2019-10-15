@@ -110,10 +110,6 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 tlvVsClientAssociationControlRequest::~tlvVsClientAssociationControlRequest() {
 }
-uint8_t& tlvVsClientAssociationControlRequest::reject_sta() {
-    return (uint8_t&)(*m_reject_sta);
-}
-
 beerocks::net::sIpv4Addr& tlvVsClientAssociationControlRequest::ipv4() {
     return (beerocks::net::sIpv4Addr&)(*m_ipv4);
 }
@@ -126,7 +122,6 @@ void tlvVsClientAssociationControlRequest::class_swap()
 size_t tlvVsClientAssociationControlRequest::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(uint8_t); // reject_sta
     class_size += sizeof(beerocks::net::sIpv4Addr); // ipv4
     return class_size;
 }
@@ -137,8 +132,6 @@ bool tlvVsClientAssociationControlRequest::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_reject_sta = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) { return false; }
     if (!m_parse__) { m_ipv4->struct_init(); }

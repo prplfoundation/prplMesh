@@ -39,5 +39,4 @@ tlvVsClientAssociationEvent:
 
 tlvVsClientAssociationControlRequest:
   _type: class
-  reject_sta: uint8_t
   ipv4: beerocks::net::sIpv4Addr 
