@@ -128,9 +128,9 @@ bool ap_wlan_hal_dummy::sta_allow(const std::string &mac)
     return true;
 }
 
-bool ap_wlan_hal_dummy::sta_deny(const std::string &mac, int reject_sta)
+bool ap_wlan_hal_dummy::sta_deny(const std::string &mac)
 {
-    LOG(DEBUG) << "Got client disallow request for " << mac << " reject_sta " << reject_sta;
+    LOG(DEBUG) << "Got client disallow request for " << mac << " reject_sta: 33";
     return true;
 }
 

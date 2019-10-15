@@ -36,7 +36,7 @@ public:
     virtual bool detach() override;
     virtual bool process_ext_events() override;
     virtual bool sta_allow(const std::string &mac) override;
-    virtual bool sta_deny(const std::string &mac, int reject_sta) override;
+    virtual bool sta_deny(const std::string &mac) override;
     virtual bool sta_disassoc(int8_t vap_id, const std::string &mac, uint32_t reason = 0) override;
     virtual bool sta_bss_steer(const std::string &mac, const std::string &bssid, int chan,
                                int disassoc_timer, int valid_int) override;

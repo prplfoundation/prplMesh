@@ -205,14 +205,9 @@ void client_steering_task::steer_sta()
             return;
         }
 
-        /*
-        * Only for the original hostap, add error code "33" to signal hostap that we want to continue 
-        * to hear BTM response from client.
-        */
-        vs_tlv->reject_sta() = (hostap == original_radio_mac) ? 33 : 0;
         son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap);
         TASK_LOG(DEBUG) << "sending disallow request for " << sta_mac << " to " << hostap
-                        << " id=" << int(id) << " reject_sta=" << int(vs_tlv->reject_sta());
+                        << " id=" << int(id);
 
         // update bml listeners
         bml_task::client_disallow_req_available_event client_disallow_event;

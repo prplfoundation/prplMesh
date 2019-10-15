@@ -370,14 +370,10 @@ bool ap_wlan_hal_dwpal::sta_allow(const std::string &mac)
     return true;
 }
 
-bool ap_wlan_hal_dwpal::sta_deny(const std::string &mac, int reject_sta)
+bool ap_wlan_hal_dwpal::sta_deny(const std::string &mac)
 {
     // Build command string
-    std::string cmd = "DENY_MAC " + mac;
-
-    if (reject_sta) {
-        cmd += " reject_sta=" + std::to_string(reject_sta);
-    }
+    std::string cmd = "DENY_MAC " + mac + " reject_sta=33";
 
     // Send command
     if (!dwpal_send_cmd(cmd)) {

@@ -77,13 +77,11 @@ public:
     /*!
      * Deny the station with the given MAC address from connecting to the AP.
      *
-     * @param [in] mac The MAC address of the station.
-     *
-     * @param [in] reject status code to be sent to the station if not 0
+     * @param [in] mac The MAC address of the station.        
      * 
      * @return true on success or false on error.
      */
-    virtual bool sta_deny(const std::string &mac, int reject_sta) = 0;
+    virtual bool sta_deny(const std::string &mac) = 0;
 
     /*!
      * Disassociate the station with the given MAC address.
