@@ -631,12 +631,16 @@ class cACTION_APMANAGER_ACK : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_ACK);
         }
+        uint8_t& reason();
+        sMacAddr& sta_mac();
         void class_swap();
         static size_t get_initial_size();
 
     private:
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
+        uint8_t* m_reason = nullptr;
+        sMacAddr* m_sta_mac = nullptr;
 };
 
 class cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST : public BaseClass

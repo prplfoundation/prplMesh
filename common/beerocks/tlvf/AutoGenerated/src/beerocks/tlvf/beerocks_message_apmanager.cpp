@@ -1217,13 +1217,24 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_APMANAGER_ACK::~cACTION_APMANAGER_ACK() {
 }
+uint8_t& cACTION_APMANAGER_ACK::reason() {
+    return (uint8_t&)(*m_reason);
+}
+
+sMacAddr& cACTION_APMANAGER_ACK::sta_mac() {
+    return (sMacAddr&)(*m_sta_mac);
+}
+
 void cACTION_APMANAGER_ACK::class_swap()
 {
+    m_sta_mac->struct_swap();
 }
 
 size_t cACTION_APMANAGER_ACK::get_initial_size()
 {
     size_t class_size = 0;
+    class_size += sizeof(uint8_t); // reason
+    class_size += sizeof(sMacAddr); // sta_mac
     return class_size;
 }
 
@@ -1233,6 +1244,11 @@ bool cACTION_APMANAGER_ACK::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
+    m_reason = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    m_sta_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!m_parse__) { m_sta_mac->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
