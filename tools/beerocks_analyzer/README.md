@@ -72,7 +72,7 @@ To run the analyzer, you need to give the IP of the gateway:
 
 ```sh
 GW_IP=192.168.1.1
-./beerocks_analyzer.py -map -gw_ip="GW_IP"
+./beerocks_analyzer.py -map -gw_ip="$GW_IP"
 ```
 
 Note that currently, the binary path is hard-coded to `/opt/beerocks/bin/beerocks_cli`.
