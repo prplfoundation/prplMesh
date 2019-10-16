@@ -2358,7 +2358,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
     }
     case beerocks_message::ACTION_APMANAGER_ACK: {
         auto response_in = cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_ACK>();
-        if (response_in == nullptr) {
+        if (!response_in) {
             LOG(ERROR) << "addClass ACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE failed";
             return false;
         }

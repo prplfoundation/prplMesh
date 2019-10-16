@@ -727,7 +727,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         auto response = message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_ACK>(
             cmdu_tx, beerocks_header->id());
 
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
