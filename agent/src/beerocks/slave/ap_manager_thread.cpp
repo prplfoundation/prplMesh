@@ -720,8 +720,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                                });
 
         if (it == vap_unordered_map.end()) {
-            LOG(DEBUG) << "Steer request for unknown vap";
-            return false;
+            //AP does not have the requested vap, probably will be handled on the other AP
+            return true;
         }
         //TODO Check for STA errors, if error ACK with ErrorCodeTLV
         auto response = message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_ACK>(
