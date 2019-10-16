@@ -432,7 +432,7 @@ class TlvF:
                 if self.root_obj_meta == None: self.root_obj_meta = obj_meta
 
                 self.generateObject(obj_meta, dict_value)
-
+                if fname == 'tlvParser': self.generateTlvParser()
                 self.closeObject(obj_meta)
             self.closeFile()
 
