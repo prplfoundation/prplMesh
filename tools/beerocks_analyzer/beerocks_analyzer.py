@@ -774,7 +774,7 @@ class BeerocksCliThread(threading.Thread):
         command = [str(self.beerocks_cli_path), "-a", str(self.target_ip)]
         if self.docker_container_name:
             command = ["docker", "exec", self.docker_container_name] + command
-        self.logger.debug("Starting '%s'", ' '.join(command))
+        self.logger.debug("Starting '{}'", ' '.join(command))
         self.process = subprocess.Popen(command)
         outs = None
         errs = None
