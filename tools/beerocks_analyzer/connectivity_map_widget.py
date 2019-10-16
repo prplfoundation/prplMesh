@@ -46,6 +46,7 @@ class ConnectivityMapWidget(QWidget):
         self.delta_x={}
         self.width=0
         self.height=0
+        self.last_radio_has_vap = False # True if the latest encountered radio already has a VAP
 
         self.thread = None
         self.threadEvent = threading.Event()
@@ -767,6 +768,7 @@ class ConnectivityMapWidget(QWidget):
                 self.remove_node_by_mac(mac)
                 
         elif "Radio" in param_m_n:
+            self.last_radio_has_vap = False
             try:
                 i_channel=param_n.index('channel')
                 i_bandwidth=param_n.index('bandwidth')
@@ -798,7 +800,7 @@ class ConnectivityMapWidget(QWidget):
             else:
                 self.last_radio_active = False
 
-        elif "VAP" in param_m_n:
+        elif "VAP" in param_m_n and not self.last_radio_has_vap:
             try:
                 i_bssid=param_n.index('bssid')
             except Exception as e:  # TODO: too broad exception
@@ -806,6 +808,7 @@ class ConnectivityMapWidget(QWidget):
                 return
             mac = param_v[i_bssid]
             self.add_node_to_graph(ConnectivityMapWidget.node('RADIO', mac, self.last_ap_mac, "", self.last_radio_channel, self.last_radio_bandwidth, self.last_radio_cac_completed, self.last_radio_active))
+            self.last_radio_has_vap = True
 
         elif param_m_n == "type" or param_m_n == "Type":
             param_m_v = int(param_m_val[1].strip())
