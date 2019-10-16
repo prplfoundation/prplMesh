@@ -329,22 +329,22 @@ bool mon_wlan_hal_nl80211::sta_beacon_11k_request(const SBeaconRequest11k &req, 
         LOG(WARNING) << __func__ << " op_class not set!";
     }
 
-    std::string measurement_mode;
+    uint8_t measurement_mode;
     switch ((SBeaconRequest11k::MeasurementMode)(req.measurement_mode)) {
         case SBeaconRequest11k::MeasurementMode::Passive:
-            measurement_mode = "00";
+            measurement_mode = 0;
             break;
         case SBeaconRequest11k::MeasurementMode::Active:
-            measurement_mode = "01";
+            measurement_mode = 1;
             break;
         case SBeaconRequest11k::MeasurementMode::Table:
-            measurement_mode = "02";
+            measurement_mode = 2;
             break;
         default: {
             LOG(WARNING) << "Invalid measuremetn mode: " << int(req.measurement_mode)
                         << ", using PASSIVE...";
 
-            measurement_mode = "00";
+            measurement_mode = 0;
         }
     }
 
@@ -354,12 +354,12 @@ bool mon_wlan_hal_nl80211::sta_beacon_11k_request(const SBeaconRequest11k &req, 
     // build command
     std::string cmd = "REQ_BEACON " + beerocks::net::network_utils::mac_to_string(req.sta_mac.oct) +
                       " " +                                  // Destination MAC Address
-                      "req_mode=" + measurement_mode + " " + // Measurements Request Mode
+                      "req_mode=" + beerocks::string_utils::int_to_hex_string(req_mode, 2) + " " + // Measurements Request Mode
                       beerocks::string_utils::int_to_hex_string(op_class, 2) +
                       beerocks::string_utils::int_to_hex_string(req.channel, 2) +
-                      beerocks::string_utils::int_to_hex_string(req.rand_ival, 4) +
-                      beerocks::string_utils::int_to_hex_string(req.duration, 4) +
-                      beerocks::string_utils::int_to_hex_string(req_mode, 2) +
+                      beerocks::string_utils::int_to_hex_string(htobe16(req.rand_ival), 4) +
+                      beerocks::string_utils::int_to_hex_string(htobe16(req.duration), 4) +
+                      beerocks::string_utils::int_to_hex_string(measurement_mode, 2) +
                       beerocks::string_utils::int_to_hex_string(req.bssid.oct[0], 2) +
                       beerocks::string_utils::int_to_hex_string(req.bssid.oct[1], 2) +
                       beerocks::string_utils::int_to_hex_string(req.bssid.oct[2], 2) +
@@ -467,12 +467,12 @@ bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
 
             // start_time
             resp->start_time = std::stoull(report.substr(idx, 16), 0, 16);
-            resp->start_time = htole64(resp->start_time);
+            resp->start_time = be64toh(resp->start_time);
             idx += 16;
 
             // measurement_duration
             resp->duration = std::stoi(report.substr(idx, 4), 0, 16);
-            resp->duration = htole16(resp->duration);
+            resp->duration = be16toh(resp->duration);
             idx += 4;
 
             // phy_type
