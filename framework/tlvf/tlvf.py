@@ -1901,8 +1901,12 @@ class TlvF:
                 appendLine(ind,"}")
         appendLine(ind,"}")
     
-
-        self.appendLineCpp("}")
+    def generateParseFunction(self,name,param_type,param_name, config,switch_parameter,appendline_function,indent):
+        appendLine = lambda ind,s: appendline_function(self.getIndentation(indent+ind)+s)
+        appendLine(0,f"void {name}({param_type} {param_name})")
+        appendLine(0,"{")
+        self.generateParseSwitch(param_name,config,switch_parameter,appendline_function,indent+1)
+        appendLine(0,"}")
 
 def test(conf, output, print_dependencies, print_outputs):
     code_c = r'''
