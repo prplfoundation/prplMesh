@@ -437,7 +437,19 @@ class TlvF:
             self.closeFile()
 
         logConsole("Done\n")
+    def generateTlvParser(self):
 
+        yaml_config = [[self.db[('eTlvType','eTlvType')],self.tlvTypeDefaultConverter,self.db[('eTlvType','_namespace')],self.tlvDefaultAddClass],
+        [self.db[('eTlvTypeMap','eTlvTypeMap')],self.tlvTypeDefaultConverter,self.db[('eTlvTypeMap','_namespace')],self.tlvDefaultAddClass]]
+        
+        #add references to header file
+        for yaml, converter, namespace, add_func in yaml_config:
+            for key, val in yaml.items():
+                if key.startswith(MetaData.META_PREFIX):
+                    continue
+                if namespace == 'ieee1905_1': namespace = 'ieee_1905_1'
+                self.include_list.append(f"<tlvf/{namespace}/{converter(key)}.h>")
+        self.generateParseFunction('Parse','CmduMessageRx',"cmdu_rx",yaml_config,'cmdu_rx.getNextTlvType()',self.appendLineCpp,0)
     def processDeceleration(self, obj_name, dict_value):
         if obj_name == MetaData.DECELERATION_NAMESPACE:
             self.openNamespace(dict_value)
