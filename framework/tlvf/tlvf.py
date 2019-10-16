@@ -1851,7 +1851,7 @@ class TlvF:
     def tlvDefaultAddClass(self, input):
         return f"addClass<{input}>()"
     
-    def generateParseSwitch(self,parsed_obj, yaml_config,switch_parameter):
+    def generateParseSwitch(self,parsed_obj, yaml_config,switch_parameter,appendline_function,indent):
         """
         Parameters
         --
@@ -1871,17 +1871,24 @@ class TlvF:
 
             the parameter on which the switch statement will be used on.
 
+        `appendline_function` : function
         
+            method of appending lines
 
+        `indent` : int
 
+            current indentation
         """
-        self.appendLineCpp(f"switch({switch_parameter}):")
-        self.appendLineCpp("{")
+        appendLine = lambda ind,s: appendline_function(self.getIndentation(indent+ind)+s)
+        ind = 0
+        appendLine(ind,f"switch({switch_parameter})")
+        appendLine(ind,"{")
+        ind +=1
         for yaml, converter, namespace, add_func in yaml_config:
             for key, val in yaml.items():
                 if key.startswith(MetaData.META_PREFIX):
                     continue
-                self.appendLineCpp(f"{self.getIndentation(1)}case ({val}):"+"{")
+                appendline_function(f"{self.getIndentation(1+indent)}case ({val}):"+"{")
                 #clarification for basic case of extracting tlvs from cmdu:
                 #parsed_obj is usually cmdu_rx
                 #add_func is addClass<T>
@@ -1889,8 +1896,11 @@ class TlvF:
                 #so the following line appends:  return {cmdu_rx}.{addClass<{ieee1905_1::tlvEndOfMessage}>()};
                 #(curly braces whenever it's a result of a function)
                 
-                self.appendLineCpp(f"{self.getIndentation(2)} return {parsed_obj}.{add_func(namespace + '::' + converter(key))};")
-                self.appendLineCpp(self.getIndentation(1)+"}")
+                appendLine(ind,f"{parsed_obj}.{add_func(namespace + '::' + converter(key))};")
+                appendLine(ind,"return;")
+                appendLine(ind,"}")
+        appendLine(ind,"}")
+    
 
         self.appendLineCpp("}")
 
