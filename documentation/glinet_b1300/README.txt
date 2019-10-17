@@ -69,13 +69,19 @@ Run PurplMesh on the target platform:
    Run it with -h option to see help. The following example uploads and extracts the files:
      ./prplMesh/tools/commands/package_owrt.sh root@192.168.1.1
 
-2. Ssh to the target and start everything by running:
+2. Configure and enable SSIDs on both radios.
+
+3. Reconfigure MAC addresses on the device wireless interfaces and the LAN bridge.
+   The MAC addresses of all interfaces (br-lan, eth0, eth1, wlan0, wlan1 ...) must be unique.
+   See example commands in .../documentation/glinet_b1300/examples/README.txt in prplMesh repo.
+
+4. Ssh to the target and start everything by running:
      /opt/beerocks/scripts/prplmesh_utils.sh start
 
-3. Check the status by running:
+5. Check the status by running:
      /opt/beerocks/scripts/prplmesh_utils.sh status
 
-4. Examine the logs under /tmp/beerocks/logs:
+6. Examine the logs under /tmp/beerocks/logs:
      ls -l /tmp/beerocks/logs/
 
 
