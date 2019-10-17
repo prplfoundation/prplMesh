@@ -434,28 +434,6 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
                                 "one is waiting...";
             }
         } break;
-        case beerocks_message::ACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE: {
-            //Signal any waiting threads
-            if (!wake_up(beerocks_message::ACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST, 0)) {
-                LOG(WARNING) << "Received ACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE response, "
-                                "but no one is waiting...";
-            }
-        } break;
-        case beerocks_message::ACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE: {
-            auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE>();
-            if (!response) {
-                LOG(ERROR) << "addClass cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE failed";
-                return BML_RET_OP_FAILED;
-            }
-
-            //Signal any waiting threads
-            if (!wake_up(beerocks_message::ACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST,
-                         response->isEnable())) {
-                LOG(WARNING) << "Received ACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE response, "
-                                "but no one is waiting...";
-            }
-        } break;
         case beerocks_message::ACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE: {
             auto response = cmdu_rx.addClass<
                 beerocks_message::cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE>();
