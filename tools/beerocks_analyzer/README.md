@@ -12,6 +12,7 @@ Using a virtualenv allows to install the dependencies in a local directory, whic
 
 You only need to create the `venv` once. Later on you just need to activate the `venv` to be able to use the application.
 
+Note for *Windows* users: you may need to run the command-line as an administrator depending on your setup.
 
 ### Create a virtualenv to use the application
 
@@ -19,10 +20,20 @@ You only need to create the `venv` once. Later on you just need to activate the 
 python3 -m venv analyzer-venv
 ```
 
+On Windows:
+```sh
+python -m venv analyzer-venv
+```
+
 1.  Activate the environment
 
 ```sh
 source analyzer-venv/bin/activate
+```
+
+On Windows:
+```sh
+analyzer-venv\Scripts\activate.bat
 ```
 
 Your prompt should now have "analyzer-venv" appended to it.
