@@ -352,8 +352,7 @@ void channel_selection_task::work()
         auto channel_ext_above_secondary = (freq < vht_center_frequency) ? true : false;
         if (!database.set_node_channel_bw(
                 hostap_mac, slave_joined_event->channel,
-                (beerocks::eWiFiBandwidth)slave_joined_event->supported_channels[0]
-                    .channel_bandwidth,
+                (beerocks::eWiFiBandwidth)slave_joined_event->cs_params.bandwidth,
                 bool(channel_ext_above_secondary), channel_ext_above_primary,
                 vht_center_frequency)) {
             TASK_LOG(ERROR) << "set node hostap bw failed, mac=" << hostap_mac;
@@ -650,7 +649,7 @@ void channel_selection_task::work()
     case eState::ON_RESTRICTED_FAIL_SAFE_CHANNEL_RESPONSE: {
         if (restricted_channel_response_event->success) {
             if (!database.get_hostap_passive_mode_enabled(hostap_mac) &&
-                 database.get_hostap_is_acs_enabled(hostap_mac)) {
+                database.get_hostap_is_acs_enabled(hostap_mac)) {
                 FSM_MOVE_STATE(SEND_ACS);
             } else {
                 FSM_MOVE_STATE(ACTIVATE_SLAVE);
