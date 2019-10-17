@@ -221,7 +221,7 @@ struct SBeaconResponse11k {
     uint8_t rsni;        // received signal to noise
     uint8_t ant_id;      // number for the antennas used for this measurement
     uint16_t duration;   // measurement duration, expressed in units of TUs [=1024usec]
-    uint32_t parent_tsf; // see IEEE part11, page 42
+    uint64_t parent_tsf; // see IEEE part11, page 42
     uint64_t start_time;
     SMacAddr sta_mac; // mac to send response
     SMacAddr

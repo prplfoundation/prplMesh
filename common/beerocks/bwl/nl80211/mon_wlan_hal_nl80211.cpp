@@ -501,23 +501,24 @@ bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
             idx += 2;
 
             // parent_tsf
-            resp->parent_tsf = std::stoi(report.substr(idx, 8), 0, 16);
+            resp->parent_tsf = std::stoull(report.substr(idx, 8), 0, 16);
             idx += 8;
 
             // TODO: Ignore everything else?
             // WLAN_BEACON_REPORT_SUBELEM_FRAME_BODY == 01
             // frame_body.length = ??
 
-            // LOG(DEBUG) << "op_class = " << int(resp->op_class);
-            // LOG(DEBUG) << "channel = " << int(resp->channel);
-            // LOG(DEBUG) << "start_time = " << int(resp->start_time);
-            // LOG(DEBUG) << "duration = " << int(resp->duration);
-            // LOG(DEBUG) << "phy_type = " << int(resp->phy_type);
-            // LOG(DEBUG) << "rcpi = " << int(resp->rcpi);
-            // LOG(DEBUG) << "rsni = " << int(resp->rsni);
-            // LOG(DEBUG) << "bssid = " << beerocks::net::network_utils::mac_to_string(resp->bssid.oct);
-            // LOG(DEBUG) << "ant_id = " << int(resp->ant_id);
-            // LOG(DEBUG) << "parent_tfs = " << int(resp->parent_tsf);
+            LOG(DEBUG) << "Beacon Response:" << std::endl
+                       << "  op_class = " << int(resp->op_class) << std::endl
+                       << "  channel = " << int(resp->channel) << std::endl
+                       << "  start_time = " << int(resp->start_time) << std::endl
+                       << "  duration = " << int(resp->duration) << std::endl
+                       << "  phy_type = " << int(resp->phy_type) << std::endl
+                       << "  rcpi = " << int(resp->rcpi) << std::endl
+                       << "  rsni = " << int(resp->rsni) << std::endl
+                       << "  bssid = " << beerocks::net::network_utils::mac_to_string(resp->bssid.oct) << std::endl
+                       << "  ant_id = " << int(resp->ant_id) << std::endl
+                       << "  parent_tfs = " << int(resp->parent_tsf);
 
             // Add the message to the queue
             event_queue_push(event, resp_buff);
