@@ -20,7 +20,7 @@ load_client_band_steering=1
 load_client_optimal_path_roaming=1
 load_legacy_client_roaming=1
 load_client_11k_roaming=1
-load_steer_on_vaps=wlan0.0,wlan2.0
+load_steer_on_vaps=@BEEROCKS_WLAN1_IFACE@.0,@BEEROCKS_WLAN2_IFACE@.0
 
 #   IRE roaming feature:
 load_ire_roaming=1
