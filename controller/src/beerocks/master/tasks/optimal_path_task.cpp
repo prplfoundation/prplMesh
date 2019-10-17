@@ -179,9 +179,9 @@ void optimal_path_task::work()
         ires_outside_subtree.erase(sta_mac);
         potential_11k_aps.clear();
 
-        for (auto ire : ires_outside_subtree) {
+        for (const auto &ire : ires_outside_subtree) {
             auto ire_hostaps = database.get_node_children(ire, beerocks::TYPE_SLAVE);
-            for (auto hostap : ire_hostaps) {
+            for (const auto &hostap : ire_hostaps) {
                 int8_t rx_rssi, dummy;
                 bool sta_is_5ghz = database.is_node_5ghz(sta_mac);
                 database.get_node_cross_rx_rssi(sta_mac, current_hostap, rx_rssi, dummy);
@@ -337,8 +337,8 @@ void optimal_path_task::work()
         TASK_LOG(DEBUG) << "responsiveness_precentage_11k: " << int(responsiveness_precentage_11k)
                         << "%";
 
-        if (responsiveness_precentage_11k != 100) {
-            TASK_LOG(DEBUG) << "11k measurement request responsiveness is less than 100%";
+        if (responsiveness_precentage_11k < 50) {
+            TASK_LOG(DEBUG) << "11k measurement request responsiveness is less than 50%";
             if (database.settings_front_measurements()) {
                 /////////////// FOR DEBUG ONLY ////////////////
                 if (use_cli_value) {
@@ -392,7 +392,7 @@ void optimal_path_task::work()
 
         sticky_roaming_rssi = 0;
 
-        for (auto it : potential_11k_aps) {
+        for (const auto &it : potential_11k_aps) {
             auto hostap = it.first;
 
             bool estimate_dl_rssi = false;
@@ -1065,12 +1065,15 @@ bool optimal_path_task::check_if_sta_can_steer_to_ap(std::string ap_mac)
         (database.get_hostap_exclude_from_steering_flag(ap_mac)) ||
         (!database.settings_client_band_steering() && (sta_is_5ghz != hostap_is_5ghz))) {
         TASK_LOG(DEBUG) << "sta " << sta_mac << " cannot steer to hostap " << ap_mac << std::endl
-            << "  hostap_is_5ghz = " << hostap_is_5ghz << std::endl
-            << "  sta_is_5ghz = " << sta_is_5ghz << std::endl
-            << "  node_5ghz_support = " << database.get_node_5ghz_support(sta_mac) << std::endl
-            << "  node_24ghz_support = " << database.get_node_24ghz_support(sta_mac) << std::endl
-            << "  hostap_exclude_from_steering = " << database.get_hostap_exclude_from_steering_flag(ap_mac) << std::endl
-            << "  client_band_steering = " << database.settings_client_band_steering();
+                        << "  hostap_is_5ghz = " << hostap_is_5ghz << std::endl
+                        << "  sta_is_5ghz = " << sta_is_5ghz << std::endl
+                        << "  node_5ghz_support = " << database.get_node_5ghz_support(sta_mac)
+                        << std::endl
+                        << "  node_24ghz_support = " << database.get_node_24ghz_support(sta_mac)
+                        << std::endl
+                        << "  hostap_exclude_from_steering = "
+                        << database.get_hostap_exclude_from_steering_flag(ap_mac) << std::endl
+                        << "  client_band_steering = " << database.settings_client_band_steering();
         return false;
     }
     return true;
@@ -1184,39 +1187,11 @@ void optimal_path_task::handle_response(std::string mac,
             return;
         }
 
-        LOG(DEBUG) << "beacon response , ID: " << id << std::endl
-                   << "sta_mac: " << network_utils::mac_to_string(response->params().sta_mac)
-                   << std::endl
-                   << "measurement_rep_mode: " << (int)response->params().rep_mode << std::endl
-                   << "op_class: " << (int)response->params().op_class << std::endl
-                   << "channel: "
-                   << (int)response->params().channel
-                   //<< std::endl << "start_time: "           << (int)response->params.start_time
-                   << std::endl
-                   << "duration: "
-                   << (int)response->params().duration
-                   //<< std::endl << "phy_type: "             << (int)response->params.phy_type
-                   //<< std::endl << "frame_type: "           << (int)response->params.frame_type
-                   << std::endl
-                   << "rcpi: " << (int)response->params().rcpi << std::endl
-                   << "rsni: " << (int)response->params().rsni << std::endl
-                   << "bssid: " << network_utils::mac_to_string(response->params().bssid)
-            //<< std::endl << "ant_id: "               << (int)response->params.ant_id
-            //<< std::endl << "tsf: "                  << (int)response->params.parent_tsf
-
-            //<< std::endl << "new_ch_width: "                         << (int)response->params.new_ch_width
-            //<< std::endl << "new_ch_center_freq_seg_0: "             << (int)response->params.new_ch_center_freq_seg_0
-            //<< std::endl << "new_ch_center_freq_seg_1: "             << (int)response->params.new_ch_center_freq_seg_1
-            ;
-
         auto bssid     = network_utils::mac_to_string(response->params().bssid);
         auto radio_mac = database.get_node_parent_radio(bssid);
         TASK_LOG(INFO) << "response for beacon measurement request was received on bssid " << bssid;
         if (potential_11k_aps.find(radio_mac) == potential_11k_aps.end()) {
             TASK_LOG(WARNING) << "unexpected measurement on bssid " << bssid;
-            // discard pending macs discrimination:
-            add_pending_mac(current_hostap,
-                            beerocks_message::ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE);
             break;
         }
 
@@ -1230,7 +1205,7 @@ void optimal_path_task::handle_response(std::string mac,
                 state = FIND_AND_PICK_HOSTAP_11K;
             }
         } else {
-            TASK_LOG(INFO) << "invalid beacon measurement response not valid on bssid " << bssid;
+            TASK_LOG(INFO) << "beacon measurement response on bssid " << bssid << " is invalid!";
         }
         break;
     }
