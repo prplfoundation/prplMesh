@@ -1929,13 +1929,14 @@ class TlvF:
                 #clarification for basic case of extracting tlvs from cmdu:
                 #parsed_obj is usually cmdu_rx
                 #add_func is addClass<T>
-                #converter converts UPPER_CASE_UNDERSCORE to camelCase so TLV_END_OF_MESSAGE ->tlvEndOfMessage
+                #converter converts UPPER_SNAKE_CASE to lowerCamelCase so TLV_END_OF_MESSAGE ->tlvEndOfMessage
                 #so the following line appends:  return {cmdu_rx}.{addClass<{ieee1905_1::tlvEndOfMessage}>()};
                 #(curly braces whenever it's a result of a function)
                 
                 appendLine(ind,f"{parsed_obj}.{add_func(namespace + '::' + converter(key))};")
                 appendLine(ind,"return;")
                 appendLine(ind,"}")
+        ind -=1
         appendLine(ind,"}")
     
     def generateParseFunction(self,name,param_type,param_name, config,switch_parameter,appendline_function,indent):
