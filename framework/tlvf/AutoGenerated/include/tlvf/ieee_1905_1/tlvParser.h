@@ -16,9 +16,6 @@
 #include <cstddef>
 #include <stdint.h>
 #include <tlvf/swap.h>
-#include <string.h>
-#include <memory>
-#include <tlvf/BaseClass.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvMacAddress.h>
@@ -77,20 +74,12 @@
 
 namespace ieee1905_1 {
 
+class tlvParser 
 
-class tlvParser : public BaseClass
 {
     public:
-        tlvParser(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvParser(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~tlvParser();
-
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
 };
+        static void ParseTlv(CmduMessageRx cmdu_rx);
 
 }; // close namespace: ieee1905_1
 
