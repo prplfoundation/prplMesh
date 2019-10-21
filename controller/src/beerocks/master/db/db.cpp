@@ -2878,6 +2878,12 @@ bool db::set_node_channel_bw(const std::string &mac, int channel, beerocks::eWiF
             n->hostap->vht_center_frequency      = vht_center_frequency;
             auto is_dfs                          = wireless_utils::is_dfs_channel(channel);
             set_hostap_is_dfs(mac, is_dfs);
+            if (channel <= 13)
+                n->hostap->operating_class = 81;
+            else if (channel <= 48)
+                n->hostap->operating_class = 115;
+            else
+                n->hostap->operating_class = 121;
         } else {
             LOG(ERROR) << __FUNCTION__ << " - node " << mac << " is null!";
             return false;
