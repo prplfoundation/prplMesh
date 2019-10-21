@@ -436,7 +436,6 @@ class TlvF:
                 if self.root_obj_meta == None: self.root_obj_meta = obj_meta
 
                 self.generateObject(obj_meta, dict_value)
-                if fname == 'tlvParser': self.generateTlvParser()
                 self.closeObject(obj_meta)
             self.closeFile()
 
@@ -1379,6 +1378,8 @@ class TlvF:
             self.addEnumCode(insert_name, insert_marker, name, obj_meta.enum_storage)
         elif obj_meta.type == MetaData.TYPE_ENUM_CLASS:
             self.addEnumClassCode(insert_name, insert_marker, name, obj_meta.enum_storage)
+        elif obj_meta.type == MetaData.TYPE_CUSTOM:
+            if name == 'tlvParser': self.generateTlvParser(insert_name,insert_marker,name)
         else:
             self.abort("%s.yaml --> error in _type=%s" % (self.yaml_fname, dict_value))
     
