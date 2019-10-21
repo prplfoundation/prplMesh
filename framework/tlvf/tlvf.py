@@ -440,7 +440,7 @@ class TlvF:
             self.closeFile()
 
         logConsole("Done\n")
-    def generateTlvParser(self):
+    def generateTlvParser(self,insert_name,insert_marker,name):
 
         yaml_config = [[self.db[('eTlvType','eTlvType')],self.tlvTypeDefaultConverter,self.db[('eTlvType','_namespace')],self.tlvDefaultAddClass],
         [self.db[('eTlvTypeMap','eTlvTypeMap')],self.tlvTypeDefaultConverter,self.db[('eTlvTypeMap','_namespace')],self.tlvDefaultAddClass]]
@@ -452,7 +452,28 @@ class TlvF:
                     continue
                 if namespace == 'ieee1905_1': namespace = 'ieee_1905_1'
                 self.include_list.append(f"<tlvf/{namespace}/{converter(key)}.h>")
-        self.generateParseFunction('Parse','CmduMessageRx',"cmdu_rx",yaml_config,'cmdu_rx.getNextTlvType()',self.appendLineCpp,0)
+                
+       
+        self.insertLineH(insert_name, insert_marker,"%sclass %s " % (self.getIndentation(0), name))
+        self.insertLineH(insert_name, insert_marker, "")
+        self.insertLineH(insert_name, insert_marker, "{" )
+        # self.insertLineH(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(1), self.CODE_CLASS_START, name) )
+        func_name = 'ParseTlv'
+        self.insertLineH(insert_name, insert_marker, "%spublic:" % self.getIndentation(1))
+        self.appendLineH(f"{self.getIndentation(2)}static void {func_name}(CmduMessageRx cmdu_rx);")
+
+        #class end
+        self.insertLineH(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(1), self.CODE_CLASS_END, name))
+        self.insertLineH(insert_name, insert_marker, "};")
+
+        # cpp file
+        self.appendLineCpp(f'#include "{name}.h"')
+        self.appendLineCpp('')
+        self.appendLineCpp("%sclass %s {" % (self.getIndentation(0), name))
+        self.appendLineCpp('')
+        self.generateParseFunction(func_name,'CmduMessageRx',"cmdu_rx",yaml_config,'cmdu_rx.getNextTlvType()',self.appendLineCpp,1)
+        self.appendLineCpp('}')
+
     def processDeceleration(self, obj_name, dict_value):
         if obj_name == MetaData.DECELERATION_NAMESPACE:
             self.openNamespace(dict_value)
