@@ -1385,7 +1385,6 @@ class TlvF:
                     param_meta = MetaData(self.yaml_fname, param_name, param_dict)
                     if param_meta.error: self.abort(param_meta.error)
                     self.addClassParam(obj_meta, param_name, param_meta.type, param_meta.type_info, param_meta)
-
         elif obj_meta.type == MetaData.TYPE_STRUCT:
             self.addStructCode(insert_name, insert_marker, name)
             if obj_meta.bit_field:
@@ -1416,7 +1415,6 @@ class TlvF:
         self.addClassPublicMembers(insert_name, insert_marker, name)
         self.addClassSwapMethod(insert_name, insert_marker, name)
         self.addClassSizeMethod(insert_name, insert_marker, name)
-
         self.insertLineH(insert_name, insert_marker, "" )
         self.insertLineH(insert_name, insert_marker, "%sprivate:" % self.getIndentation(1))
 
