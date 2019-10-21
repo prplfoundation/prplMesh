@@ -244,9 +244,9 @@ void client_steering_task::steer_sta()
     steering_request_tlv->alloc_target_bssid_list();
     auto bssid_list                      = steering_request_tlv->target_bssid_list(0);
     std::get<1>(bssid_list).target_bssid = network_utils::mac_from_string(hostap_mac);
-    //TODO get real operating class
-    std::get<1>(bssid_list).target_bss_operating_class = 124;
-    std::get<1>(bssid_list).target_bss_channel_number  = database.get_node_channel(hostap_mac);
+    std::get<1>(bssid_list).target_bss_operating_class =
+        database.get_hostap_operating_class(network_utils::mac_from_string(hostap_mac));
+    std::get<1>(bssid_list).target_bss_channel_number = database.get_node_channel(hostap_mac);
 
     sd = database.get_node_socket(current_ap_mac);
     son_actions::send_cmdu_to_agent(sd, cmdu_tx, original_radio_mac);
