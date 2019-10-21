@@ -2,4 +2,4 @@
 _namespace: ieee1905_1
 tlvParser:
   
-  _type: class
+  _type: custom
