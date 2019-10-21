@@ -85,6 +85,7 @@ class TypeInfo:
     ENUM_CLASS = "ENUM_CLASS"
     STRUCT = "STRUCT"
     CLASS = "CLASS"
+    CUSTOM = "CUSTOM"
     STRUCT_SWAP_FUNCTION_NAME = "struct_swap()"
     STRUCT_INIT_FUNCTION_NAME = "struct_init()"
     CLASS_SWAP_FUNCTION_NAME = "class_swap()"
@@ -122,6 +123,8 @@ class TypeInfo:
                 self.type = TypeInfo.CHAR
             elif self.type_str == "enum_class":
                 self.type = TypeInfo.ENUM_CLASS
+            elif self.type_str == "custom":
+                self.type = TypeInfo.CUSTOM
             elif self.type_str == "size_t":
                 self.type = TypeInfo.ERROR
             elif len(self.type_str) > 2 and (str(self.type_str[1]).isupper() or str(self.type_str[1]).isdigit()):
@@ -150,6 +153,7 @@ class MetaData:
     TYPE_STRUCT = "struct"
     TYPE_ENUM   = "enum"
     TYPE_ENUM_CLASS   = "enum_class"
+    TYPE_CUSTOM = "custom"
     META_PREFIX = "_"
     KEY_TYPE = "_type"
     KEY_ENUM_STORAGE = "_enum_storage"
@@ -497,7 +501,8 @@ class TlvF:
                     if (param_type_info.type == TypeInfo.ENUM or
                         param_type_info.type == TypeInfo.STRUCT or
                         param_type_info.type == TypeInfo.CLASS or
-                        param_type_info.type == TypeInfo.ENUM_CLASS):
+                        param_type_info.type == TypeInfo.ENUM_CLASS or
+                        param_type_info.type == TypeInfo.CUSTOM):
                         if (self.db_yaml_paths.__contains__(param_type)):
                             self.include_list.append('"' + self.db_yaml_paths[param_type] + "/" + param_type + ".h" + '"')
                         else:
@@ -1335,9 +1340,9 @@ class TlvF:
             insert_name   = ""
             insert_marker = self.CODE_END_INSERT
             
-        elif root_obj_meta.type == MetaData.TYPE_CLASS:
+        elif root_obj_meta.type == MetaData.TYPE_CLASS or root_obj_meta.type==MetaData.TYPE_CUSTOM:
             insert_name = name
-            if obj_meta.type == MetaData.TYPE_CLASS and obj_meta.name == root_obj_meta.name:
+            if (obj_meta.type == MetaData.TYPE_CLASS or obj_meta.type==MetaData.TYPE_CUSTOM) and obj_meta.name == root_obj_meta.name:
                 insert_marker = self.CODE_CLASS_PUBLIC_VARS_END_INSERT + "_" + root_obj_meta.name
                 self.insertLineH(root_obj_meta.name, self.CODE_CLASS_PUBLIC_VARS_END_INSERT, insert_marker + "_" + insert_name)
             elif obj_meta.type == MetaData.TYPE_CLASS:
