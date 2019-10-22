@@ -8,7 +8,7 @@
 
 ALL_TESTS="topology initial_ap_config ap_config_renew ap_config_bss_tear_down channel_selection
            ap_capability_query client_capability_query combined_infra_metrics
-           client_steering_mandate client_steering_dummy client_steering_policy client_association
+           client_steering_mandate client_steering_dummy client_association_dummy client_steering_policy client_association
            higher_layer_data_payload_trigger higher_layer_data_payload"
 
 scriptdir="$(cd "${0%/*}"; pwd)"
@@ -178,6 +178,33 @@ test_client_steering_mandate() {
     dbg "Confirming ACK message was received"
     check docker exec -it repeater1 sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+}
+
+test_client_association_dummy(){
+    status "test client association dummy"
+    check_error=0
+    sta_mac=11:11:33:44:55:66
+
+    dbg "Connect dummy STA to wlan0"
+    check docker exec -it repeater1 sh -c \
+        "echo 'AP-STA-CONNECTED ${sta_mac}' >> /tmp/$USER/beerocks/wlan0/EVENT"
+    
+    dbg "Send client association control request to the chosen BSSID to steer the client (UNBLOCK) "
+    eval send_bml_command "client_allow \"${sta_mac} ${mac_agent1_wlan2}\"" $redirect
+    sleep 1
+
+    dbg "Confirming Client Association Control Request message was received (UNBLOCK)"
+    check docker exec -it repeater1 sh -c \
+        "grep -i -q 'Got client allow request for ${sta_mac}' /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log"
+
+    dbg "Send client association control request to all other (BLOCK) "
+    eval send_bml_command "client_disallow \"${sta_mac} ${mac_agent1_wlan0}\"" $redirect
+    sleep 1
+
+    dbg "Confirming Client Association Control Request message was received (BLOCK)"
+    check docker exec -it repeater1 sh -c \
+        "grep -i -q 'Got client disallow request for ${sta_mac}' /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log"
+        
 }
 
 test_client_steering_dummy() {
@@ -377,6 +404,7 @@ usage() {
     echo "      channel_selection - Channel Selection test"
     echo "      client_steering_mandate - Client Steering for Steering Mandate and Steering Opportunity test"
     echo "      client_steering_dummy - Client Steering using dummy bwl"
+    echo "      client_association_dummy - Client Association Control Message using dummy bwl"
     echo "      client_steering_policy - Setting Client Steering Policy test"
     echo "      client_association - Client Association Control Message test"
     echo "      ap_capability_query - AP Capability query test"
