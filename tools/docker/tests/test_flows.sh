@@ -350,16 +350,16 @@ test_init() {
     mac_agent2=$(grep "IRE_BRIDGE" "$connmap" | sed -n 2p | awk '{print $5}' | cut -d ',' -f 1)
     dbg "mac_agent2 = ${mac_agent2}"
 
-    mac_agent1_wlan0=$(mac_to_hex $(grep "RADIO: wlan0" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1))
+    mac_agent1_wlan0=$(grep "RADIO: wlan0" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1)
     dbg "mac_agent1_wlan0 = ${mac_agent1_wlan0}"
 
-    mac_agent2_wlan0=$(mac_to_hex $(grep "RADIO: wlan0" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1))
+    mac_agent2_wlan0=$(grep "RADIO: wlan0" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1)
     dbg "mac_agent2_wlan0 = ${mac_agent2_wlan0}"
 
-    mac_agent1_wlan2=$(mac_to_hex $(grep "RADIO: wlan2" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1))
+    mac_agent1_wlan2=$(grep "RADIO: wlan2" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1)
     dbg "mac_agent1_wlan2 = ${mac_agent1_wlan2}"
 
-    mac_agent2_wlan2=$(mac_to_hex $(grep "RADIO: wlan2" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1))
+    mac_agent2_wlan2=$(grep "RADIO: wlan2" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1)
     dbg "mac_agent2_wlan2 = ${mac_agent2_wlan2}"
 
 }
