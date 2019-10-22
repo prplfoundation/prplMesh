@@ -210,13 +210,14 @@ test_client_association_dummy(){
 test_client_steering_dummy() {
     status "test client steering dummy"
     check_error=0
+    sta_mac=11:22:33:44:55:66
 
     dbg "Connect dummy STA to wlan0"
     check docker exec -it repeater1 sh -c \
-        'echo "AP-STA-CONNECTED 11:22:33:44:55:66" > /tmp/$USER/beerocks/wlan0/EVENT'
+        "echo 'AP-STA-CONNECTED ${sta_mac}' >> /tmp/$USER/beerocks/wlan0/EVENT"
 
     dbg "Send steer request "
-    eval send_bml_command "steer_client \"11:22:33:44:55:66 aa:bb:cc:00:00:20\"" $redirect
+    eval send_bml_command "steer_client \"${sta_mac} ${mac_agent1_wlan2}\"" $redirect
     sleep 1
 
     dbg "Confirming Client Association Control Request message was received (UNBLOCK)"
@@ -249,17 +250,17 @@ test_client_steering_dummy() {
 
     dbg "Disconnect dummy STA from wlan0"
     check docker exec -it repeater1 sh -c \
-        'echo "AP-STA-DISCONNECTED 11:22:33:44:55:66" > /tmp/$USER/beerocks/wlan0/EVENT'
+        "echo 'AP-STA-DISCONNECTED ${sta_mac}' >> /tmp/$USER/beerocks/wlan0/EVENT"
 
     #TODO// check for "disconnected after successful steering, proceeding to unblock" message 
 
     dbg "Connect dummy STA to wlan2"
     check docker exec -it repeater1 sh -c \
-        'echo "AP-STA-CONNECTED 11:22:33:44:55:66" > /tmp/$USER/beerocks/wlan2/EVENT'
+        "echo 'AP-STA-CONNECTED ${sta_mac}' >> /tmp/$USER/beerocks/wlan2/EVENT"
 
     dbg "Confirm steering success by client connected"
     check docker exec -it gateway sh -c \
-        'grep -i -q "steering successful for sta 11:22:33:44:55:66" /tmp/$USER/beerocks/logs/beerocks_controller.log'
+        "grep -i -q 'steering successful for sta ${sta_mac}' /tmp/$USER/beerocks/logs/beerocks_controller.log"
 }
 
 test_client_steering_policy() {
