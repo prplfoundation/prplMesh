@@ -428,10 +428,10 @@ main() {
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
     done
-    [ -z "$@" ] && set ${ALL_TESTS}
-    echo $@
+    [ -z "$*" ] && set ${ALL_TESTS}
+    info "Tests to run: $*"
     test_init
-    for test in $@; do
+    for test in "$@"; do
        report "test_${test}" test_${test}
        count=$((count+1))
     done
@@ -460,4 +460,4 @@ main() {
 
 VERBOSE=false
 
-main $@
+main "$@"
