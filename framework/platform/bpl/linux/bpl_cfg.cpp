@@ -139,13 +139,13 @@ int bpl_cfg_is_wired_backhaul()
 
 int bpl_cfg_get_rdkb_extensions() { return 0; }
 
-int bpl_cfg_get_band_steering() { return 0; }
+int bpl_cfg_get_band_steering() { return 1; }
 
 int bpl_cfg_get_dfs_reentry() { return 0; }
 
 int bpl_cfg_get_passive_mode() { return 0; }
 
-int bpl_cfg_get_client_roaming() { return 0; }
+int bpl_cfg_get_client_roaming() { return 1; }
 
 int bpl_cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return RETURN_ERR; }
 
