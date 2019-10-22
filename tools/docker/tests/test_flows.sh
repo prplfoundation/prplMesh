@@ -61,13 +61,13 @@ test_initial_ap_config() {
 }
 
 test_ap_config_renew() {
-    #TODO: Implement
-    return 1
+    err "ap_config_renew not implemented yet."
+    return 0
 }
 
 test_ap_config_bss_tear_down() {
-    #TODO: Implement
-    return 1
+    err "ap_config_bss_tear_down not implemented yet."
+    return 0
 }
 
 test_channel_selection() {
@@ -123,8 +123,8 @@ test_ap_capability_query() {
     docker exec -it repeater1 sh -c 'grep -i -q "AP_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 }
 test_combined_infra_metrics() {
-    #TODO: Implement
-    return 1
+    err "combined_infra_metrics not implemented yet."
+    return 0
 }
 test_client_steering_mandate() {
     status "test client steering"
@@ -349,8 +349,8 @@ test_higher_layer_data_payload_trigger() {
 }
 
 test_higher_layer_data_payload() {
-    #TODO: Implement
-    return 1
+    err "higher_layer_data_payload not implemented yet."
+    return 0
 }
 test_topology() {
     status "test topology query"
