@@ -330,18 +330,6 @@ sWscAttrEncryptionType:
     _type: eWscEncr
     _value: eWscEncr::WSC_ENCR_AES
 
-sWscAttrNetworkKey:
-  _type: struct
-  attribute_type:
-    _type: eWscAttributes
-    _value: ATTR_NETWORK_KEY
-  data_length:
-    _type: uint16_t
-    _value: WSC_MAX_NETWORK_KEY_LENGTH
-  data:
-    _type: char
-    _length: [ WSC_MAX_NETWORK_KEY_LENGTH ]
-
 sWscAttrBssid:
   _type: struct
   attribute_type:
@@ -379,7 +367,16 @@ cConfigData:
     _length_max: WSC_MAX_SSID_LENGTH
   authentication_type_attr: sWscAttrAuthenticationType
   encryption_type_attr: sWscAttrEncryptionType
-  network_key_attr: sWscAttrNetworkKey
+  network_key_type:
+    _type: eWscAttributes
+    _value: ATTR_NETWORK_KEY
+  network_key_length:
+    _type: uint16_t
+    _length_var: True
+  network_key:
+    _type: char
+    _length: [ network_key_length ]
+    _length_max: WSC_MAX_NETWORK_KEY_LENGTH
   bssid_attr: sWscAttrBssid
   multiap_attr: sWscAttrVendorExtMultiAp
 
