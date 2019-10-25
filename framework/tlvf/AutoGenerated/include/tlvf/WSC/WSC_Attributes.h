@@ -427,20 +427,6 @@ typedef struct sWscAttrEncryptionType {
     }
 } __attribute__((packed)) sWscAttrEncryptionType;
 
-typedef struct sWscAttrNetworkKey {
-    eWscAttributes attribute_type;
-    uint16_t data_length;
-    char data[WSC_MAX_NETWORK_KEY_LENGTH];
-    void struct_swap(){
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
-    }
-    void struct_init(){
-        attribute_type = ATTR_NETWORK_KEY;
-        data_length = WSC_MAX_NETWORK_KEY_LENGTH;
-    }
-} __attribute__((packed)) sWscAttrNetworkKey;
-
 typedef struct sWscAttrBssid {
     eWscAttributes attribute_type;
     uint16_t data_length;
@@ -487,7 +473,13 @@ class cConfigData : public BaseClass
         bool alloc_ssid(size_t count = 1);
         sWscAttrAuthenticationType& authentication_type_attr();
         sWscAttrEncryptionType& encryption_type_attr();
-        sWscAttrNetworkKey& network_key_attr();
+        eWscAttributes& network_key_type();
+        uint16_t& network_key_length();
+        std::string network_key_str();
+        char* network_key(size_t length = 0);
+        bool set_network_key(const std::string& str);
+        bool set_network_key(const char buffer[], size_t size);
+        bool alloc_network_key(size_t count = 1);
         sWscAttrBssid& bssid_attr();
         sWscAttrVendorExtMultiAp& multiap_attr();
         void class_swap();
@@ -502,7 +494,10 @@ class cConfigData : public BaseClass
         int m_lock_order_counter__ = 0;
         sWscAttrAuthenticationType* m_authentication_type_attr = nullptr;
         sWscAttrEncryptionType* m_encryption_type_attr = nullptr;
-        sWscAttrNetworkKey* m_network_key_attr = nullptr;
+        eWscAttributes* m_network_key_type = nullptr;
+        uint16_t* m_network_key_length = nullptr;
+        char* m_network_key = nullptr;
+        size_t m_network_key_idx__ = 0;
         sWscAttrBssid* m_bssid_attr = nullptr;
         sWscAttrVendorExtMultiAp* m_multiap_attr = nullptr;
 };

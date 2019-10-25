@@ -88,7 +88,9 @@ bool cConfigData::alloc_ssid(size_t count) {
     }
     m_authentication_type_attr = (sWscAttrAuthenticationType *)((uint8_t *)(m_authentication_type_attr) + len);
     m_encryption_type_attr = (sWscAttrEncryptionType *)((uint8_t *)(m_encryption_type_attr) + len);
-    m_network_key_attr = (sWscAttrNetworkKey *)((uint8_t *)(m_network_key_attr) + len);
+    m_network_key_type = (eWscAttributes *)((uint8_t *)(m_network_key_type) + len);
+    m_network_key_length = (uint16_t *)((uint8_t *)(m_network_key_length) + len);
+    m_network_key = (char *)((uint8_t *)(m_network_key) + len);
     m_bssid_attr = (sWscAttrBssid *)((uint8_t *)(m_bssid_attr) + len);
     m_multiap_attr = (sWscAttrVendorExtMultiAp *)((uint8_t *)(m_multiap_attr) + len);
     m_ssid_idx__ += count;
@@ -188,7 +190,8 @@ void cConfigData::class_swap()
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_ssid_length));
     m_authentication_type_attr->struct_swap();
     m_encryption_type_attr->struct_swap();
-    m_network_key_attr->struct_swap();
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_network_key_type));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_network_key_length));
     m_bssid_attr->struct_swap();
     m_multiap_attr->struct_swap();
 }
@@ -200,7 +203,8 @@ size_t cConfigData::get_initial_size()
     class_size += sizeof(uint16_t); // ssid_length
     class_size += sizeof(sWscAttrAuthenticationType); // authentication_type_attr
     class_size += sizeof(sWscAttrEncryptionType); // encryption_type_attr
-    class_size += sizeof(sWscAttrNetworkKey); // network_key_attr
+    class_size += sizeof(eWscAttributes); // network_key_type
+    class_size += sizeof(uint16_t); // network_key_length
     class_size += sizeof(sWscAttrBssid); // bssid_attr
     class_size += sizeof(sWscAttrVendorExtMultiAp); // multiap_attr
     return class_size;
@@ -229,9 +233,17 @@ bool cConfigData::init()
     m_encryption_type_attr = (sWscAttrEncryptionType*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sWscAttrEncryptionType))) { return false; }
     if (!m_parse__) { m_encryption_type_attr->struct_init(); }
-    m_network_key_attr = (sWscAttrNetworkKey*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sWscAttrNetworkKey))) { return false; }
-    if (!m_parse__) { m_network_key_attr->struct_init(); }
+    m_network_key_type = (eWscAttributes*)m_buff_ptr__;
+    if (!m_parse__) *m_network_key_type = ATTR_NETWORK_KEY;
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) { return false; }
+    m_network_key_length = (uint16_t*)m_buff_ptr__;
+    if (!m_parse__) *m_network_key_length = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    m_network_key = (char*)m_buff_ptr__;
+    uint16_t network_key_length = *m_network_key_length;
+    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&network_key_length)); }
+    m_network_key_idx__ = network_key_length;
+    if (!buffPtrIncrementSafe(sizeof(char)*(network_key_length))) { return false; }
     m_bssid_attr = (sWscAttrBssid*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sWscAttrBssid))) { return false; }
     if (!m_parse__) { m_bssid_attr->struct_init(); }

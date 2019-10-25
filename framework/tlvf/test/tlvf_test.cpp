@@ -216,14 +216,16 @@ bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, u
     config_data.set_ssid("test_ssid");
     config_data.authentication_type_attr().data = WSC::eWscAuth::WSC_AUTH_WPA2; //DUMMY
     config_data.encryption_type_attr().data     = WSC::eWscEncr::WSC_ENCR_AES;
-    std::fill(config_data.network_key_attr().data,
-              config_data.network_key_attr().data + config_data.network_key_attr().data_length,
-              0xaa); //DUMMY
+    config_data.set_network_key("test1234");
 
     LOG(DEBUG) << "WSC config_data:" << std::endl
                << "     ssid: " << config_data.ssid() << std::endl
                << "     authentication_type: " << int(config_data.authentication_type_attr().data)
                << std::endl
+               << "     network_key: "
+               << std::string(config_data.network_key(), config_data.network_key_length())
+               << std::endl
+               << "     network_key length: " << int(config_data.network_key_length()) << std::endl
                << "     encryption_type: " << int(config_data.encryption_type_attr().data)
                << std::endl;
     config_data.class_swap();

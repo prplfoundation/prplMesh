@@ -625,9 +625,7 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
         config_data.set_ssid(bss_info_conf->ssid);
         config_data.authentication_type_attr().data = bss_info_conf->authentication_type;
         config_data.encryption_type_attr().data     = bss_info_conf->encryption_type;
-        std::copy(bss_info_conf->network_key.c_str(),
-                  bss_info_conf->network_key.c_str() + bss_info_conf->network_key.size(),
-                  config_data.network_key_attr().data);
+        config_data.set_network_key(bss_info_conf->network_key);
         config_data.multiap_attr().subelement_value = bss_info_conf->bss_type;
 
         LOG(DEBUG) << "WSC config_data:" << std::hex << std::endl
