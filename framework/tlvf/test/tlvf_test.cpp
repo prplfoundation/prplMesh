@@ -168,7 +168,7 @@ int test_complex_list()
         MAPF_ERR("TLV4 is NULL");
         return ++errors;
     }
-    if (!tlv4->test_string_str().compare("1234567")) {
+    if (tlv4->test_string_str().compare("1234567")) {
         MAPF_ERR("FAIL, expected  \"1234567\", received " << tlv4->test_string_str());
         errors++;
     }
@@ -196,7 +196,7 @@ int test_complex_list()
 
     auto str = std::string(tlv4->var1()->unknown_length_list_inner(),
                            tlv4->var1()->unknown_length_list_inner_length());
-    if (!str.compare("prplMesh")) {
+    if (str.compare("prplMesh")) {
         MAPF_ERR("unknown length list failure - expected \"prplMesh\", received " << str);
         errors++;
     }
