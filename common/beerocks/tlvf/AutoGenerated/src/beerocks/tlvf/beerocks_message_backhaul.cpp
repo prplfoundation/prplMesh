@@ -39,30 +39,17 @@ char* cACTION_BACKHAUL_REGISTER_REQUEST::sta_iface(size_t length) {
     return ((char*)m_sta_iface);
 }
 
-bool cACTION_BACKHAUL_REGISTER_REQUEST::set_sta_iface(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_sta_iface received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_sta_iface, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BACKHAUL_REGISTER_REQUEST::set_sta_iface(const std::string& str) { return set_sta_iface(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_REGISTER_REQUEST::set_sta_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_sta_iface received an empty string.";
         return false;
     }
-    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (size > beerocks::message::IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_sta_iface, str, size + 1);
-    m_sta_iface[size] = '\0';
+    std::copy(str, str + size, m_sta_iface);
     return true;
 }
 std::string cACTION_BACKHAUL_REGISTER_REQUEST::hostap_iface_str() {
@@ -79,30 +66,17 @@ char* cACTION_BACKHAUL_REGISTER_REQUEST::hostap_iface(size_t length) {
     return ((char*)m_hostap_iface);
 }
 
-bool cACTION_BACKHAUL_REGISTER_REQUEST::set_hostap_iface(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_hostap_iface received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_hostap_iface, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BACKHAUL_REGISTER_REQUEST::set_hostap_iface(const std::string& str) { return set_hostap_iface(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_REGISTER_REQUEST::set_hostap_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_hostap_iface received an empty string.";
         return false;
     }
-    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (size > beerocks::message::IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_hostap_iface, str, size + 1);
-    m_hostap_iface[size] = '\0';
+    std::copy(str, str + size, m_hostap_iface);
     return true;
 }
 uint8_t& cACTION_BACKHAUL_REGISTER_REQUEST::local_master() {
@@ -252,30 +226,17 @@ char* cACTION_BACKHAUL_ENABLE::bridge_iface(size_t length) {
     return ((char*)m_bridge_iface);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_bridge_iface(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_bridge_iface received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_bridge_iface, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BACKHAUL_ENABLE::set_bridge_iface(const std::string& str) { return set_bridge_iface(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_ENABLE::set_bridge_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_bridge_iface received an empty string.";
         return false;
     }
-    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (size > beerocks::message::IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_bridge_iface, str, size + 1);
-    m_bridge_iface[size] = '\0';
+    std::copy(str, str + size, m_bridge_iface);
     return true;
 }
 sMacAddr& cACTION_BACKHAUL_ENABLE::iface_mac() {
@@ -300,30 +261,17 @@ char* cACTION_BACKHAUL_ENABLE::wire_iface(size_t length) {
     return ((char*)m_wire_iface);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_wire_iface(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_wire_iface received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_wire_iface, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BACKHAUL_ENABLE::set_wire_iface(const std::string& str) { return set_wire_iface(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_ENABLE::set_wire_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_wire_iface received an empty string.";
         return false;
     }
-    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (size > beerocks::message::IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_wire_iface, str, size + 1);
-    m_wire_iface[size] = '\0';
+    std::copy(str, str + size, m_wire_iface);
     return true;
 }
 std::string cACTION_BACKHAUL_ENABLE::sta_iface_str() {
@@ -340,30 +288,17 @@ char* cACTION_BACKHAUL_ENABLE::sta_iface(size_t length) {
     return ((char*)m_sta_iface);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_sta_iface(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_sta_iface received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_sta_iface, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BACKHAUL_ENABLE::set_sta_iface(const std::string& str) { return set_sta_iface(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_ENABLE::set_sta_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_sta_iface received an empty string.";
         return false;
     }
-    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (size > beerocks::message::IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_sta_iface, str, size + 1);
-    m_sta_iface[size] = '\0';
+    std::copy(str, str + size, m_sta_iface);
     return true;
 }
 std::string cACTION_BACKHAUL_ENABLE::ap_iface_str() {
@@ -380,30 +315,17 @@ char* cACTION_BACKHAUL_ENABLE::ap_iface(size_t length) {
     return ((char*)m_ap_iface);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_ap_iface(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_ap_iface received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_ap_iface, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BACKHAUL_ENABLE::set_ap_iface(const std::string& str) { return set_ap_iface(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_ENABLE::set_ap_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_ap_iface received an empty string.";
         return false;
     }
-    if (size + 1 > beerocks::message::IFACE_NAME_LENGTH) { // +1 for null terminator
+    if (size > beerocks::message::IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_ap_iface, str, size + 1);
-    m_ap_iface[size] = '\0';
+    std::copy(str, str + size, m_ap_iface);
     return true;
 }
 std::string cACTION_BACKHAUL_ENABLE::ssid_str() {
@@ -420,30 +342,17 @@ char* cACTION_BACKHAUL_ENABLE::ssid(size_t length) {
     return ((char*)m_ssid);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_ssid(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_ssid received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > beerocks::message::WIFI_SSID_MAX_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_ssid, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BACKHAUL_ENABLE::set_ssid(const std::string& str) { return set_ssid(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_ENABLE::set_ssid(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_ssid received an empty string.";
         return false;
     }
-    if (size + 1 > beerocks::message::WIFI_SSID_MAX_LENGTH) { // +1 for null terminator
+    if (size > beerocks::message::WIFI_SSID_MAX_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_ssid, str, size + 1);
-    m_ssid[size] = '\0';
+    std::copy(str, str + size, m_ssid);
     return true;
 }
 std::string cACTION_BACKHAUL_ENABLE::pass_str() {
@@ -460,30 +369,17 @@ char* cACTION_BACKHAUL_ENABLE::pass(size_t length) {
     return ((char*)m_pass);
 }
 
-bool cACTION_BACKHAUL_ENABLE::set_pass(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_pass received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > beerocks::message::WIFI_PASS_MAX_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_pass, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BACKHAUL_ENABLE::set_pass(const std::string& str) { return set_pass(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_ENABLE::set_pass(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_pass received an empty string.";
         return false;
     }
-    if (size + 1 > beerocks::message::WIFI_PASS_MAX_LENGTH) { // +1 for null terminator
+    if (size > beerocks::message::WIFI_PASS_MAX_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_pass, str, size + 1);
-    m_pass[size] = '\0';
+    std::copy(str, str + size, m_pass);
     return true;
 }
 uint32_t& cACTION_BACKHAUL_ENABLE::security_type() {

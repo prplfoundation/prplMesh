@@ -51,24 +51,14 @@ char* cConfigData::ssid(size_t length) {
     return ((char*)m_ssid);
 }
 
-bool cConfigData::set_ssid(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_ssid received an empty string.";
-        return false;
-    }
-    if (!alloc_ssid(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_ssid, str.c_str(), str_size + 1);
-    return true;
-}
+bool cConfigData::set_ssid(const std::string& str) { return set_ssid(str.c_str(), str.size()); }
 bool cConfigData::set_ssid(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_ssid received an empty string.";
         return false;
     }
-    if (!alloc_ssid(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_ssid, str, size + 1);
-    m_ssid[size] = '\0';
+    if (!alloc_ssid(size)) { return false; }
+    std::copy(str, str + size, m_ssid);
     return true;
 }
 bool cConfigData::alloc_ssid(size_t count) {
@@ -115,8 +105,73 @@ sWscAttrEncryptionType& cConfigData::encryption_type_attr() {
     return (sWscAttrEncryptionType&)(*m_encryption_type_attr);
 }
 
-sWscAttrNetworkKey& cConfigData::network_key_attr() {
-    return (sWscAttrNetworkKey&)(*m_network_key_attr);
+eWscAttributes& cConfigData::network_key_type() {
+    return (eWscAttributes&)(*m_network_key_type);
+}
+
+uint16_t& cConfigData::network_key_length() {
+    return (uint16_t&)(*m_network_key_length);
+}
+
+std::string cConfigData::network_key_str() {
+    char *network_key_ = network_key();
+    if (!network_key_) { return std::string(); }
+    return std::string(network_key_, m_network_key_idx__);
+}
+
+char* cConfigData::network_key(size_t length) {
+    if( (m_network_key_idx__ <= 0) || (m_network_key_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "network_key length is smaller than requested length";
+        return nullptr;
+    }
+    if (m_network_key_idx__ > WSC_MAX_NETWORK_KEY_LENGTH )  {
+        TLVF_LOG(ERROR) << "Invalid length -  " << m_network_key_idx__ << " elements (max length is " << WSC_MAX_NETWORK_KEY_LENGTH << ")";
+        return nullptr;
+    }
+    return ((char*)m_network_key);
+}
+
+bool cConfigData::set_network_key(const std::string& str) { return set_network_key(str.c_str(), str.size()); }
+bool cConfigData::set_network_key(const char str[], size_t size) {
+    if (str == nullptr || size == 0) {
+        TLVF_LOG(WARNING) << "set_network_key received an empty string.";
+        return false;
+    }
+    if (!alloc_network_key(size)) { return false; }
+    std::copy(str, str + size, m_network_key);
+    return true;
+}
+bool cConfigData::alloc_network_key(size_t count) {
+    if (m_lock_order_counter__ > 1) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list network_key, abort!";
+        return false;
+    }
+    if (count == 0) {
+        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    if (count > WSC_MAX_NETWORK_KEY_LENGTH )  {
+        TLVF_LOG(ERROR) << "Can't allocate " << count << " elements (max length is " << WSC_MAX_NETWORK_KEY_LENGTH << ")";
+        return false;
+    }
+    m_lock_order_counter__ = 1;
+    uint8_t *src = (uint8_t *)&m_network_key[*m_network_key_length];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_bssid_attr = (sWscAttrBssid *)((uint8_t *)(m_bssid_attr) + len);
+    m_multiap_attr = (sWscAttrVendorExtMultiAp *)((uint8_t *)(m_multiap_attr) + len);
+    m_network_key_idx__ += count;
+    *m_network_key_length += count;
+    if (!buffPtrIncrementSafe(len)) { return false; }
+    return true;
 }
 
 sWscAttrBssid& cConfigData::bssid_attr() {
@@ -219,30 +274,17 @@ char* cWscAttrEncryptedSettings::iv(size_t length) {
     return ((char*)m_iv);
 }
 
-bool cWscAttrEncryptedSettings::set_iv(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_iv received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > WSC_ENCRYPTED_SETTINGS_IV_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_iv, str.c_str(), str_size + 1);
-    return true;
-}
+bool cWscAttrEncryptedSettings::set_iv(const std::string& str) { return set_iv(str.c_str(), str.size()); }
 bool cWscAttrEncryptedSettings::set_iv(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_iv received an empty string.";
         return false;
     }
-    if (size + 1 > WSC_ENCRYPTED_SETTINGS_IV_LENGTH) { // +1 for null terminator
+    if (size > WSC_ENCRYPTED_SETTINGS_IV_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_iv, str, size + 1);
-    m_iv[size] = '\0';
+    std::copy(str, str + size, m_iv);
     return true;
 }
 std::string cWscAttrEncryptedSettings::encrypted_settings_str() {
@@ -259,24 +301,14 @@ char* cWscAttrEncryptedSettings::encrypted_settings(size_t length) {
     return ((char*)m_encrypted_settings);
 }
 
-bool cWscAttrEncryptedSettings::set_encrypted_settings(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_encrypted_settings received an empty string.";
-        return false;
-    }
-    if (!alloc_encrypted_settings(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_encrypted_settings, str.c_str(), str_size + 1);
-    return true;
-}
+bool cWscAttrEncryptedSettings::set_encrypted_settings(const std::string& str) { return set_encrypted_settings(str.c_str(), str.size()); }
 bool cWscAttrEncryptedSettings::set_encrypted_settings(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_encrypted_settings received an empty string.";
         return false;
     }
-    if (!alloc_encrypted_settings(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_encrypted_settings, str, size + 1);
-    m_encrypted_settings[size] = '\0';
+    if (!alloc_encrypted_settings(size)) { return false; }
+    std::copy(str, str + size, m_encrypted_settings);
     return true;
 }
 bool cWscAttrEncryptedSettings::alloc_encrypted_settings(size_t count) {
