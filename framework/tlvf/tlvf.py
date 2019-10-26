@@ -938,38 +938,22 @@ class TlvF:
                 lines_cpp.append( "" )
 
                 lines_h.append( "bool set_%s(const std::string& str);" % (param_name) )
-                lines_cpp.append( "bool %s::set_%s(const std::string& str) {" % (obj_meta.name, param_name) )
-                lines_cpp.append( "%ssize_t str_size = str.size();" % (self.getIndentation(1)))
-                lines_cpp.append( "%sif (str_size == 0) {" % (self.getIndentation(1)))
-                lines_cpp.append( '%sTLVF_LOG(WARNING) << "set_%s received an empty string.";' %  (self.getIndentation(2), param_name) )
-                lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
-                lines_cpp.append( "%s}" % self.getIndentation(1) )
-                if is_const_len or is_int_len:
-                    lines_cpp.append( "%sif (str_size + 1 > %s) { // +1 for null terminator"  % (self.getIndentation(1), param_length))
-                    lines_cpp.append( '%sTLVF_LOG(ERROR) << "Received buffer size is smaller than string length";' %  self.getIndentation(2) )
-                    lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
-                    lines_cpp.append( "%s}" % self.getIndentation(1) )
-                else:
-                    lines_cpp.append( "%sif (!alloc_%s(str_size + 1)) { return false; } // +1 for null terminator" % (self.getIndentation(1), param_name))
-                lines_cpp.append( "%stlvf_copy_string(m_%s, str.c_str(), str_size + 1);" % (self.getIndentation(1), param_name))
-                lines_cpp.append( "%sreturn true;" % (self.getIndentation(1)))
-                lines_cpp.append( "}")
+                lines_cpp.append( "bool %s::set_%s(const std::string& str) { return set_%s(str.c_str(), str.size()); }" % (obj_meta.name, param_name, param_name) )
 
                 lines_h.append( "bool set_%s(const char buffer[], size_t size);" % (param_name) )
                 lines_cpp.append( "bool %s::set_%s(const char str[], size_t size) {" % (obj_meta.name, param_name) )
-                lines_cpp.append( "%sif (str == nullptr || size == 0) { " % self.getIndentation(1))
+                lines_cpp.append( "%sif (str == nullptr || size == 0) {" % self.getIndentation(1))
                 lines_cpp.append( '%sTLVF_LOG(WARNING) << "set_%s received an empty string.";' %  (self.getIndentation(2), param_name) )
                 lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                 lines_cpp.append( "%s}" % self.getIndentation(1) )
                 if is_const_len or is_int_len:
-                    lines_cpp.append( "%sif (size + 1 > %s) { // +1 for null terminator"  % (self.getIndentation(1), param_length))
+                    lines_cpp.append( "%sif (size > %s) {"  % (self.getIndentation(1), param_length))
                     lines_cpp.append( '%sTLVF_LOG(ERROR) << "Received buffer size is smaller than string length";' %  self.getIndentation(2) )
                     lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                     lines_cpp.append( "%s}" % self.getIndentation(1) )
                 else:
-                    lines_cpp.append( "%sif (!alloc_%s(size + 1)) { return false; } // +1 for null terminator"  % (self.getIndentation(1), param_name))
-                lines_cpp.append( "%stlvf_copy_string(m_%s, str, size + 1);"  % (self.getIndentation(1), param_name))
-                lines_cpp.append( "%sm_%s[size] = '\\0';"  % (self.getIndentation(1), param_name))
+                    lines_cpp.append( "%sif (!alloc_%s(size)) { return false; }"  % (self.getIndentation(1), param_name))
+                lines_cpp.append( "%sstd::copy(str, str + size, m_%s);" % (self.getIndentation(1), param_name))
                 lines_cpp.append( "%sreturn true;" % self.getIndentation(1))
                 lines_cpp.append( "}")
 

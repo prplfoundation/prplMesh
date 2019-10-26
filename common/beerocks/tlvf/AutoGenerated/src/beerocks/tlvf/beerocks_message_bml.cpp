@@ -137,24 +137,14 @@ char* cACTION_BML_NW_MAP_RESPONSE::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
-        return false;
-    }
-    if (!alloc_buffer(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_buffer received an empty string.";
         return false;
     }
-    if (!alloc_buffer(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str, size + 1);
-    m_buffer[size] = '\0';
+    if (!alloc_buffer(size)) { return false; }
+    std::copy(str, str + size, m_buffer);
     return true;
 }
 bool cACTION_BML_NW_MAP_RESPONSE::alloc_buffer(size_t count) {
@@ -250,24 +240,14 @@ char* cACTION_BML_NW_MAP_UPDATE::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
-        return false;
-    }
-    if (!alloc_buffer(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_buffer received an empty string.";
         return false;
     }
-    if (!alloc_buffer(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str, size + 1);
-    m_buffer[size] = '\0';
+    if (!alloc_buffer(size)) { return false; }
+    std::copy(str, str + size, m_buffer);
     return true;
 }
 bool cACTION_BML_NW_MAP_UPDATE::alloc_buffer(size_t count) {
@@ -363,24 +343,14 @@ char* cACTION_BML_STATS_UPDATE::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_BML_STATS_UPDATE::set_buffer(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
-        return false;
-    }
-    if (!alloc_buffer(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BML_STATS_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_STATS_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_buffer received an empty string.";
         return false;
     }
-    if (!alloc_buffer(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str, size + 1);
-    m_buffer[size] = '\0';
+    if (!alloc_buffer(size)) { return false; }
+    std::copy(str, str + size, m_buffer);
     return true;
 }
 bool cACTION_BML_STATS_UPDATE::alloc_buffer(size_t count) {
@@ -472,24 +442,14 @@ char* cACTION_BML_EVENTS_UPDATE::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_BML_EVENTS_UPDATE::set_buffer(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
-        return false;
-    }
-    if (!alloc_buffer(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BML_EVENTS_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_EVENTS_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_buffer received an empty string.";
         return false;
     }
-    if (!alloc_buffer(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str, size + 1);
-    m_buffer[size] = '\0';
+    if (!alloc_buffer(size)) { return false; }
+    std::copy(str, str + size, m_buffer);
     return true;
 }
 bool cACTION_BML_EVENTS_UPDATE::alloc_buffer(size_t count) {
@@ -3193,24 +3153,14 @@ char* cACTION_BML_STEERING_EVENTS_UPDATE::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
-        return false;
-    }
-    if (!alloc_buffer(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_buffer received an empty string.";
         return false;
     }
-    if (!alloc_buffer(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str, size + 1);
-    m_buffer[size] = '\0';
+    if (!alloc_buffer(size)) { return false; }
+    std::copy(str, str + size, m_buffer);
     return true;
 }
 bool cACTION_BML_STEERING_EVENTS_UPDATE::alloc_buffer(size_t count) {
@@ -3385,24 +3335,14 @@ char* cACTION_BML_WFA_CA_CONTROLLER_REQUEST::command(size_t length) {
     return ((char*)m_command);
 }
 
-bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::set_command(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_command received an empty string.";
-        return false;
-    }
-    if (!alloc_command(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_command, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::set_command(const std::string& str) { return set_command(str.c_str(), str.size()); }
 bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::set_command(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_command received an empty string.";
         return false;
     }
-    if (!alloc_command(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_command, str, size + 1);
-    m_command[size] = '\0';
+    if (!alloc_command(size)) { return false; }
+    std::copy(str, str + size, m_command);
     return true;
 }
 bool cACTION_BML_WFA_CA_CONTROLLER_REQUEST::alloc_command(size_t count) {
@@ -3490,24 +3430,14 @@ char* cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::reply(size_t length) {
     return ((char*)m_reply);
 }
 
-bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::set_reply(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_reply received an empty string.";
-        return false;
-    }
-    if (!alloc_reply(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_reply, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::set_reply(const std::string& str) { return set_reply(str.c_str(), str.size()); }
 bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::set_reply(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_reply received an empty string.";
         return false;
     }
-    if (!alloc_reply(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_reply, str, size + 1);
-    m_reply[size] = '\0';
+    if (!alloc_reply(size)) { return false; }
+    std::copy(str, str + size, m_reply);
     return true;
 }
 bool cACTION_BML_WFA_CA_CONTROLLER_RESPONSE::alloc_reply(size_t count) {

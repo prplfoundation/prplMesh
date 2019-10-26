@@ -39,30 +39,17 @@ char* cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::slave_version(size_t length) {
     return ((char*)m_slave_version);
 }
 
-bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_slave_version received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > beerocks::message::VERSION_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_slave_version, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const std::string& str) { return set_slave_version(str.c_str(), str.size()); }
 bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_slave_version received an empty string.";
         return false;
     }
-    if (size + 1 > beerocks::message::VERSION_LENGTH) { // +1 for null terminator
+    if (size > beerocks::message::VERSION_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_slave_version, str, size + 1);
-    m_slave_version[size] = '\0';
+    std::copy(str, str + size, m_slave_version);
     return true;
 }
 sPlatformSettings& cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::platform_settings() {
@@ -195,30 +182,17 @@ char* cACTION_CONTROL_SLAVE_JOINED_RESPONSE::master_version(size_t length) {
     return ((char*)m_master_version);
 }
 
-bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_master_version received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > beerocks::message::VERSION_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_master_version, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const std::string& str) { return set_master_version(str.c_str(), str.size()); }
 bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_master_version received an empty string.";
         return false;
     }
-    if (size + 1 > beerocks::message::VERSION_LENGTH) { // +1 for null terminator
+    if (size > beerocks::message::VERSION_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_master_version, str, size + 1);
-    m_master_version[size] = '\0';
+    std::copy(str, str + size, m_master_version);
     return true;
 }
 uint8_t& cACTION_CONTROL_SLAVE_JOINED_RESPONSE::err_code() {
@@ -2664,30 +2638,17 @@ char* cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::name(size_t length) {
     return ((char*)m_name);
 }
 
-bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_name received an empty string.";
-        return false;
-    }
-    if (str_size + 1 > beerocks::message::NODE_NAME_LENGTH) { // +1 for null terminator
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    tlvf_copy_string(m_name, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const std::string& str) { return set_name(str.c_str(), str.size()); }
 bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_name received an empty string.";
         return false;
     }
-    if (size + 1 > beerocks::message::NODE_NAME_LENGTH) { // +1 for null terminator
+    if (size > beerocks::message::NODE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
-    tlvf_copy_string(m_name, str, size + 1);
-    m_name[size] = '\0';
+    std::copy(str, str + size, m_name);
     return true;
 }
 void cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::class_swap()

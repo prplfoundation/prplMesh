@@ -99,24 +99,14 @@ char* tlvWscM1::manufacturer(size_t length) {
     return ((char*)m_manufacturer);
 }
 
-bool tlvWscM1::set_manufacturer(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_manufacturer received an empty string.";
-        return false;
-    }
-    if (!alloc_manufacturer(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_manufacturer, str.c_str(), str_size + 1);
-    return true;
-}
+bool tlvWscM1::set_manufacturer(const std::string& str) { return set_manufacturer(str.c_str(), str.size()); }
 bool tlvWscM1::set_manufacturer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_manufacturer received an empty string.";
         return false;
     }
-    if (!alloc_manufacturer(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_manufacturer, str, size + 1);
-    m_manufacturer[size] = '\0';
+    if (!alloc_manufacturer(size)) { return false; }
+    std::copy(str, str + size, m_manufacturer);
     return true;
 }
 bool tlvWscM1::alloc_manufacturer(size_t count) {
@@ -188,24 +178,14 @@ char* tlvWscM1::model_name(size_t length) {
     return ((char*)m_model_name);
 }
 
-bool tlvWscM1::set_model_name(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_model_name received an empty string.";
-        return false;
-    }
-    if (!alloc_model_name(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_model_name, str.c_str(), str_size + 1);
-    return true;
-}
+bool tlvWscM1::set_model_name(const std::string& str) { return set_model_name(str.c_str(), str.size()); }
 bool tlvWscM1::set_model_name(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_model_name received an empty string.";
         return false;
     }
-    if (!alloc_model_name(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_model_name, str, size + 1);
-    m_model_name[size] = '\0';
+    if (!alloc_model_name(size)) { return false; }
+    std::copy(str, str + size, m_model_name);
     return true;
 }
 bool tlvWscM1::alloc_model_name(size_t count) {
@@ -274,24 +254,14 @@ char* tlvWscM1::model_number(size_t length) {
     return ((char*)m_model_number);
 }
 
-bool tlvWscM1::set_model_number(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_model_number received an empty string.";
-        return false;
-    }
-    if (!alloc_model_number(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_model_number, str.c_str(), str_size + 1);
-    return true;
-}
+bool tlvWscM1::set_model_number(const std::string& str) { return set_model_number(str.c_str(), str.size()); }
 bool tlvWscM1::set_model_number(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_model_number received an empty string.";
         return false;
     }
-    if (!alloc_model_number(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_model_number, str, size + 1);
-    m_model_number[size] = '\0';
+    if (!alloc_model_number(size)) { return false; }
+    std::copy(str, str + size, m_model_number);
     return true;
 }
 bool tlvWscM1::alloc_model_number(size_t count) {
@@ -357,24 +327,14 @@ char* tlvWscM1::serial_number(size_t length) {
     return ((char*)m_serial_number);
 }
 
-bool tlvWscM1::set_serial_number(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_serial_number received an empty string.";
-        return false;
-    }
-    if (!alloc_serial_number(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_serial_number, str.c_str(), str_size + 1);
-    return true;
-}
+bool tlvWscM1::set_serial_number(const std::string& str) { return set_serial_number(str.c_str(), str.size()); }
 bool tlvWscM1::set_serial_number(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_serial_number received an empty string.";
         return false;
     }
-    if (!alloc_serial_number(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_serial_number, str, size + 1);
-    m_serial_number[size] = '\0';
+    if (!alloc_serial_number(size)) { return false; }
+    std::copy(str, str + size, m_serial_number);
     return true;
 }
 bool tlvWscM1::alloc_serial_number(size_t count) {
@@ -441,24 +401,14 @@ char* tlvWscM1::device_name(size_t length) {
     return ((char*)m_device_name);
 }
 
-bool tlvWscM1::set_device_name(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_device_name received an empty string.";
-        return false;
-    }
-    if (!alloc_device_name(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_device_name, str.c_str(), str_size + 1);
-    return true;
-}
+bool tlvWscM1::set_device_name(const std::string& str) { return set_device_name(str.c_str(), str.size()); }
 bool tlvWscM1::set_device_name(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_device_name received an empty string.";
         return false;
     }
-    if (!alloc_device_name(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_device_name, str, size + 1);
-    m_device_name[size] = '\0';
+    if (!alloc_device_name(size)) { return false; }
+    std::copy(str, str + size, m_device_name);
     return true;
 }
 bool tlvWscM1::alloc_device_name(size_t count) {

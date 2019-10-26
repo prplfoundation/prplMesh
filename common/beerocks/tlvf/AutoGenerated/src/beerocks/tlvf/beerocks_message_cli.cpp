@@ -236,24 +236,14 @@ char* cACTION_CLI_RESPONSE_STR::buffer(size_t length) {
     return ((char*)m_buffer);
 }
 
-bool cACTION_CLI_RESPONSE_STR::set_buffer(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
-        return false;
-    }
-    if (!alloc_buffer(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str.c_str(), str_size + 1);
-    return true;
-}
+bool cACTION_CLI_RESPONSE_STR::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_CLI_RESPONSE_STR::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_buffer received an empty string.";
         return false;
     }
-    if (!alloc_buffer(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_buffer, str, size + 1);
-    m_buffer[size] = '\0';
+    if (!alloc_buffer(size)) { return false; }
+    std::copy(str, str + size, m_buffer);
     return true;
 }
 bool cACTION_CLI_RESPONSE_STR::alloc_buffer(size_t count) {

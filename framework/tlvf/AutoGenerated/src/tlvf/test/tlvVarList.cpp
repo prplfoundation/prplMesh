@@ -104,24 +104,14 @@ char* tlvTestVarList::test_string(size_t length) {
     return ((char*)m_test_string);
 }
 
-bool tlvTestVarList::set_test_string(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_test_string received an empty string.";
-        return false;
-    }
-    if (!alloc_test_string(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_test_string, str.c_str(), str_size + 1);
-    return true;
-}
+bool tlvTestVarList::set_test_string(const std::string& str) { return set_test_string(str.c_str(), str.size()); }
 bool tlvTestVarList::set_test_string(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_test_string received an empty string.";
         return false;
     }
-    if (!alloc_test_string(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_test_string, str, size + 1);
-    m_test_string[size] = '\0';
+    if (!alloc_test_string(size)) { return false; }
+    std::copy(str, str + size, m_test_string);
     return true;
 }
 bool tlvTestVarList::alloc_test_string(size_t count) {
@@ -570,24 +560,14 @@ char* cInner::unknown_length_list_inner(size_t length) {
     return ((char*)m_unknown_length_list_inner);
 }
 
-bool cInner::set_unknown_length_list_inner(const std::string& str) {
-    size_t str_size = str.size();
-    if (str_size == 0) {
-        TLVF_LOG(WARNING) << "set_unknown_length_list_inner received an empty string.";
-        return false;
-    }
-    if (!alloc_unknown_length_list_inner(str_size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_unknown_length_list_inner, str.c_str(), str_size + 1);
-    return true;
-}
+bool cInner::set_unknown_length_list_inner(const std::string& str) { return set_unknown_length_list_inner(str.c_str(), str.size()); }
 bool cInner::set_unknown_length_list_inner(const char str[], size_t size) {
-    if (str == nullptr || size == 0) { 
+    if (str == nullptr || size == 0) {
         TLVF_LOG(WARNING) << "set_unknown_length_list_inner received an empty string.";
         return false;
     }
-    if (!alloc_unknown_length_list_inner(size + 1)) { return false; } // +1 for null terminator
-    tlvf_copy_string(m_unknown_length_list_inner, str, size + 1);
-    m_unknown_length_list_inner[size] = '\0';
+    if (!alloc_unknown_length_list_inner(size)) { return false; }
+    std::copy(str, str + size, m_unknown_length_list_inner);
     return true;
 }
 bool cInner::alloc_unknown_length_list_inner(size_t count) {
