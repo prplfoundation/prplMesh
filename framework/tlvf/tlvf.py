@@ -1899,7 +1899,11 @@ class TlvF:
         self.logger.error(msg)
         
         sys.exit(1)
-    def tlvTypeDefaultConverter(self, input):
+    def tlvDefaultConverter(self, input):
+        if input == 'ieee1905_1':
+            return 'ieee_1905_1'
+        if not ('tlv' in input.lower()):
+            return input
         out = input.split('_')
         out = ''.join(x for x in input.title() if x.isalnum())
         return out[0].lower()+out[1:]
