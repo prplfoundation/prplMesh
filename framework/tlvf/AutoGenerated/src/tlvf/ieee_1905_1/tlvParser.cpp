@@ -12,145 +12,111 @@
 
 #include "tlvParser.h"
 
-void ParseTlv(ieee1905_1::CmduMessageRx cmdu_rx)
+std::shared_ptr<BaseClass> ParseTlv(ieee1905_1::CmduMessageRx cmdu_rx)
 {
     switch(cmdu_rx.getNextTlvType())
     {
         case (0):{
-        cmdu_rx.addClass<ieee1905_1::tlvEndOfMessage>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvEndOfMessage>();
         }
         case (1):{
-        cmdu_rx.addClass<ieee1905_1::tlvAlMacAddressType>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvAlMacAddressType>();
         }
         case (2):{
-        cmdu_rx.addClass<ieee1905_1::tlvMacAddress>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvMacAddress>();
         }
         case (3):{
-        cmdu_rx.addClass<ieee1905_1::tlvDeviceInformation>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvDeviceInformation>();
         }
         case (4):{
-        cmdu_rx.addClass<ieee1905_1::tlvDeviceBridgingCapability>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvDeviceBridgingCapability>();
         }
         case (6):{
-        cmdu_rx.addClass<ieee1905_1::tlvNon1905neighborDeviceList>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvNon1905neighborDeviceList>();
         }
         case (7):{
-        cmdu_rx.addClass<ieee1905_1::tlv1905NeighborDevice>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlv1905NeighborDevice>();
         }
         case (8):{
-        cmdu_rx.addClass<ieee1905_1::tlvLinkMetricQuery>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvLinkMetricQuery>();
         }
         case (9):{
-        cmdu_rx.addClass<ieee1905_1::tlvTransmitterLinkMetric>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvTransmitterLinkMetric>();
         }
         case (10):{
-        cmdu_rx.addClass<ieee1905_1::tlvReceiverLinkMetric>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvReceiverLinkMetric>();
         }
         case (11):{
-        cmdu_rx.addClass<ieee1905_1::tlvVendorSpecific>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvVendorSpecific>();
         }
         case (12):{
-        cmdu_rx.addClass<ieee1905_1::tlvLinkMetricResultCode>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvLinkMetricResultCode>();
         }
         case (13):{
-        cmdu_rx.addClass<ieee1905_1::tlvSearchedRole>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvSearchedRole>();
         }
         case (14):{
-        cmdu_rx.addClass<ieee1905_1::tlvAutoconfigFreqBand>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvAutoconfigFreqBand>();
         }
         case (15):{
-        cmdu_rx.addClass<ieee1905_1::tlvSupportedRole>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvSupportedRole>();
         }
         case (16):{
-        cmdu_rx.addClass<ieee1905_1::tlvSupportedFreqBand>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvSupportedFreqBand>();
         }
         case (18):{
-        cmdu_rx.addClass<ieee1905_1::tlvPushButtonEventNotification>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvPushButtonEventNotification>();
         }
         case (19):{
-        cmdu_rx.addClass<ieee1905_1::tlvPushButtonJoinNotification>();
-        return;
+        return cmdu_rx.addClass<ieee1905_1::tlvPushButtonJoinNotification>();
         }
         case (128):{
-        cmdu_rx.addClass<wfa_map::tlvSupportedService>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvSupportedService>();
         }
         case (129):{
-        cmdu_rx.addClass<wfa_map::tlvSearchedService>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvSearchedService>();
         }
         case (130):{
-        cmdu_rx.addClass<wfa_map::tlvApRadioIdentifier>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvApRadioIdentifier>();
         }
         case (133):{
-        cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
         }
         case (139):{
-        cmdu_rx.addClass<wfa_map::tlvChannelPreference>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvChannelPreference>();
         }
         case (140):{
-        cmdu_rx.addClass<wfa_map::tlvRadioOperationRestriction>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvRadioOperationRestriction>();
         }
         case (141):{
-        cmdu_rx.addClass<wfa_map::tlvTransmitPowerLimit>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvTransmitPowerLimit>();
         }
         case (142):{
-        cmdu_rx.addClass<wfa_map::tlvChannelSelectionResponse>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvChannelSelectionResponse>();
         }
         case (143):{
-        cmdu_rx.addClass<wfa_map::tlvOperatingChannelReport>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvOperatingChannelReport>();
         }
         case (146):{
-        cmdu_rx.addClass<wfa_map::tlvClientAssociationEvent>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvClientAssociationEvent>();
         }
         case (147):{
-        cmdu_rx.addClass<wfa_map::tlvApMetricQuery>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvApMetricQuery>();
         }
         case (155):{
-        cmdu_rx.addClass<wfa_map::tlvSteeringRequest>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvSteeringRequest>();
         }
         case (156):{
-        cmdu_rx.addClass<wfa_map::tlvSteeringBTMReport>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvSteeringBTMReport>();
         }
         case (157):{
-        cmdu_rx.addClass<wfa_map::tlvClientAssociationControlRequest>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvClientAssociationControlRequest>();
         }
         case (160):{
-        cmdu_rx.addClass<wfa_map::tlvHigherLayerData>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvHigherLayerData>();
         }
         case (161):{
-        cmdu_rx.addClass<wfa_map::tlvApCapability>();
-        return;
+        return cmdu_rx.addClass<wfa_map::tlvApCapability>();
         }
     }
 }
