@@ -440,6 +440,25 @@ class TlvF:
             self.closeFile()
 
         logConsole("Done\n")
+    def trimAndFixFileList(self, yaml, converter):
+        result = []
+        for key, val in yaml.items():
+            if key.startswith(MetaData.META_PREFIX):
+                    continue
+            filename = converter(key)
+            #skip if the file does not exist
+            keylist = list(map(lambda x: x[0], self.db.keys()))
+            lowerkeylist = list(map(lambda x: x.lower(), keylist))
+            if converter(key) not in keylist:
+                #TODO: some tlvs are not in camel case format
+                if converter(key).lower() in lowerkeylist:  
+                    #this is a dirty, dirty workaround
+                    realfilename = list(filter(lambda k: k.lower() == converter(key).lower(),keylist))[0]
+                    result.append((realfilename,val))
+                continue
+            result.append((filename,val))
+        return result
+
     def generateTlvParser(self,insert_name,insert_marker,name):
 
         yaml_config = [[self.db[('eTlvType','eTlvType')],self.tlvTypeDefaultConverter,self.db[('eTlvType','_namespace')],self.tlvDefaultAddClass],
