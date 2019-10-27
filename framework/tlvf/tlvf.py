@@ -1911,19 +1911,19 @@ class TlvF:
     def tlvDefaultAddClass(self, input):
         return f"addClass<{input}>()"
     
-    def generateParseSwitch(self,parsed_obj, yaml_config,switch_parameter,appendline_function,indent):
+    def generateParseSwitch(self,parsed_obj, yaml_config,switch_parameter,appendline_function,indent=0):
         """
         Parameters
         --
-        `parsed_obj` : BaseClass
+        `parsed_obj` : string
 
             the object to run the add_func on
 
         `yaml_config` : iterator <(yaml,converter_function)> t
 
             Iterator of tuples, each consisting of 
-            1. a YAML file name and 
-            2. the method of enum to filename conversion
+            1. list of YAML filenames
+            2. the method of enum to filename conversion, as well as namespace converstion rules
             3. namespace
             4. adding function
 
@@ -1937,7 +1937,7 @@ class TlvF:
 
         `indent` : int
 
-            current indentation
+            optional additional indentation
         """
         appendLine = lambda ind,s: appendline_function(self.getIndentation(indent+ind)+s)
         ind = 0
@@ -1945,10 +1945,11 @@ class TlvF:
         appendLine(ind,"{")
         ind +=1
         for yaml, converter, namespace, add_func in yaml_config:
-            for key, val in yaml.items():
-                if key.startswith(MetaData.META_PREFIX):
-                    continue
-                appendline_function(f"{self.getIndentation(1+indent)}case ({val}):"+"{")
+            for name, id in yaml:
+                # add to include list
+                self.include_list.append(f"<tlvf/{converter(namespace)}/{name}.h>")
+
+                appendline_function(f"{self.getIndentation(1+indent)}case ({id}):"+"{")
                 #clarification for basic case of extracting tlvs from cmdu:
                 #parsed_obj is usually cmdu_rx
                 #add_func is addClass<T>
@@ -1956,7 +1957,7 @@ class TlvF:
                 #so the following line appends:  return {cmdu_rx}.{addClass<{ieee1905_1::tlvEndOfMessage}>()};
                 #(curly braces whenever it's a result of a function)
                 
-                appendLine(ind,f"{parsed_obj}.{add_func(namespace + '::' + converter(key))};")
+                appendLine(ind,f"{parsed_obj}.{add_func(namespace + '::' + name)};")
                 appendLine(ind,"return;")
                 appendLine(ind,"}")
         ind -=1
