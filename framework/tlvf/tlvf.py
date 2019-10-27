@@ -461,37 +461,28 @@ class TlvF:
 
     def generateTlvParser(self,insert_name,insert_marker,name):
 
-        yaml_config = [[self.db[('eTlvType','eTlvType')],self.tlvTypeDefaultConverter,self.db[('eTlvType','_namespace')],self.tlvDefaultAddClass],
-        [self.db[('eTlvTypeMap','eTlvTypeMap')],self.tlvTypeDefaultConverter,self.db[('eTlvTypeMap','_namespace')],self.tlvDefaultAddClass]]
-        
-        #add references to header file
-        for yaml, converter, namespace, add_func in yaml_config:
-            for key, val in yaml.items():
-                if key.startswith(MetaData.META_PREFIX):
-                    continue
-                if namespace == 'ieee1905_1': namespace = 'ieee_1905_1'
-                self.include_list.append(f"<tlvf/{namespace}/{converter(key)}.h>")
+        tlv_yaml = self.trimAndFixFileList(self.db[('eTlvType','eTlvType')],self.tlvDefaultConverter)
+        tlv_map_yaml = self.trimAndFixFileList(self.db[('eTlvTypeMap','eTlvTypeMap')],self.tlvDefaultConverter)
+        yaml_config = [[tlv_yaml,self.tlvDefaultConverter,self.db[('eTlvType','_namespace')],self.tlvDefaultAddClass],
+        [tlv_map_yaml,self.tlvDefaultConverter,self.db[('eTlvTypeMap','_namespace')],self.tlvDefaultAddClass]]
                 
-       
         self.insertLineH(insert_name, insert_marker,"%sclass %s " % (self.getIndentation(0), name))
-        self.insertLineH(insert_name, insert_marker, "")
         self.insertLineH(insert_name, insert_marker, "{" )
-        # self.insertLineH(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(1), self.CODE_CLASS_START, name) )
+
         func_name = 'ParseTlv'
         self.insertLineH(insert_name, insert_marker, "%spublic:" % self.getIndentation(1))
-        self.appendLineH(f"{self.getIndentation(2)}static void {func_name}(CmduMessageRx cmdu_rx);")
-
+        self.insertLineH(insert_name, insert_marker, f"{self.getIndentation(2)}static void {func_name}(CmduMessageRx cmdu_rx);")
         #class end
         self.insertLineH(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(1), self.CODE_CLASS_END, name))
         self.insertLineH(insert_name, insert_marker, "};")
+        self.include_list.append('<tlvf/CmduMessageRx.h>')
+
 
         # cpp file
         self.appendLineCpp(f'#include "{name}.h"')
         self.appendLineCpp('')
-        self.appendLineCpp("%sclass %s {" % (self.getIndentation(0), name))
-        self.appendLineCpp('')
-        self.generateParseFunction(func_name,'CmduMessageRx',"cmdu_rx",yaml_config,'cmdu_rx.getNextTlvType()',self.appendLineCpp,1)
-        self.appendLineCpp('}')
+        self.generateParseFunction(func_name,'ieee1905_1::CmduMessageRx',"cmdu_rx",yaml_config,'cmdu_rx.getNextTlvType()',self.appendLineCpp,0)        
+
 
     def processDeceleration(self, obj_name, dict_value):
         if obj_name == MetaData.DECELERATION_NAMESPACE:
