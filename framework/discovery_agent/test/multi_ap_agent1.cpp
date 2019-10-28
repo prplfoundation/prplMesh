@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
         apopbss_in.ap_list[i].bss_count = 2;
         for (j = 0; j < apopbss_in.ap_list[i].bss_count; j++) {
             memcpy(apopbss_in.ap_list[i].bss_list[j].bssmac, BSS_MAC, ETH_ALEN);
-            snprintf(apopbss_in.ap_list[i].bss_list[j].ssid, 9, "%s", "test_ssid");
+            snprintf(apopbss_in.ap_list[i].bss_list[j].ssid, 10, "%s", "test_ssid");
         }
     }
     mapf::Message::Frame data8(sizeof(apopbss_in), (const void *)&apopbss_in);
