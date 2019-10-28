@@ -118,7 +118,7 @@ add_subdirectory(common)
 if (NOT MSGLIB STREQUAL "None")
 add_subdirectory(cli)
 add_subdirectory(transport)
-#add_subdirectory(discovery_agent)
+add_subdirectory(discovery_agent)
 add_subdirectory(examples)
 endif()
 
