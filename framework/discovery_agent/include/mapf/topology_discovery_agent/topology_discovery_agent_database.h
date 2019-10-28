@@ -5,6 +5,7 @@
  * This code is subject to the terms of the BSD+Patent license.
  * See LICENSE file for more details.
  */
+#include <linux/if_ether.h>
 
 #ifndef _MAP_DISCOVERY_AGENT_LOCALDB_H_
 #define _MAP_DISCOVERY_AGENT_LOCALDB_H_
