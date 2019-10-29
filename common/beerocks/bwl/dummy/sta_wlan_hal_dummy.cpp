@@ -63,6 +63,8 @@ std::string sta_wlan_hal_dummy::get_ssid() { return m_active_ssid; }
 
 std::string sta_wlan_hal_dummy::get_bssid() { return m_active_bssid; }
 
+bool sta_wlan_hal_dummy::process_dummy_data(parsed_obj_map_t &parsed_obj) { return true; }
+
 bool sta_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj) { return true; }
 
 bool sta_wlan_hal_dummy::update_status() { return false; }

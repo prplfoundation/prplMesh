@@ -76,6 +76,7 @@ public:
     // Protected methods:
 protected:
     virtual bool process_dummy_event(parsed_obj_map_t &parsed_obj) override;
+    virtual bool process_dummy_data(parsed_obj_map_t &parsed_obj) override;
 
     // Overload for AP events
     bool event_queue_push(ap_wlan_hal::Event event, std::shared_ptr<void> data = {})

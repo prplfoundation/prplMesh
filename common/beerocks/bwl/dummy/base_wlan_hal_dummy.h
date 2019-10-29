@@ -16,6 +16,7 @@
 #include <chrono>
 #include <memory>
 
+#define DUMMY_EVENT_KEYLESS_PARAM_TYPE "_type"
 #define DUMMY_EVENT_KEYLESS_PARAM_OPCODE "_opcode"
 #define DUMMY_EVENT_KEYLESS_PARAM_MAC "_mac"
 #define DUMMY_EVENT_KEYLESS_PARAM_IFACE "_iface"
@@ -63,6 +64,9 @@ protected:
 
     // Process dummy event
     virtual bool process_dummy_event(parsed_obj_map_t &parsed_obj) = 0;
+
+    // Process dummy data
+    virtual bool process_dummy_data(parsed_obj_map_t &parsed_obj) = 0;
 
     virtual bool set(const std::string &param, const std::string &value,
                      int vap_id = beerocks::IFACE_RADIO_ID) override;
