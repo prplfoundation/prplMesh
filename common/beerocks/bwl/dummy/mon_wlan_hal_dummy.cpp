@@ -40,6 +40,14 @@ namespace dummy {
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+static mon_wlan_hal::Event dummy_to_bwl_event(const std::string &opcode)
+{
+    if (opcode == "RRM-BEACON-REP-RECEIVED")
+        return mon_wlan_hal::Event::RRM_Beacon_Response;
+
+    return mon_wlan_hal::Event::Invalid;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -142,6 +150,8 @@ bool mon_wlan_hal_dummy::process_dummy_data(parsed_obj_map_t &parsed_obj) { retu
 
 bool mon_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
 {
+    char *tmp_str;
+    int64_t tmp_int;
     // Filter out empty events
     std::string opcode;
     if (!(parsed_obj.find(DUMMY_EVENT_KEYLESS_PARAM_OPCODE) != parsed_obj.end() &&
@@ -149,6 +159,95 @@ bool mon_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
         return true;
     }
     LOG(TRACE) << __func__ << " - opcode: |" << opcode << "|";
+
+    auto event = dummy_to_bwl_event(opcode);
+
+    switch (event) {
+    case Event::RRM_Beacon_Response: {
+        // Allocate response object
+        auto resp_buff = ALLOC_SMART_BUFFER(sizeof(SBeaconResponse11k));
+        auto resp      = reinterpret_cast<SBeaconResponse11k *>(resp_buff.get());
+
+        if (!resp) {
+            LOG(FATAL) << "Memory allocation failed!";
+            return false;
+        }
+
+        // Initialize the message
+        memset(resp_buff.get(), 0, sizeof(SBeaconResponse11k));
+
+        // STA MAC
+        if (!dummy_obj_read_str(DUMMY_EVENT_KEYLESS_PARAM_MAC, parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
+
+        beerocks::net::network_utils::mac_from_string(resp->sta_mac.oct, tmp_str);
+
+        // Channel
+        if (!dummy_obj_read_int("channel", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading channel parameter!";
+            return false;
+        }
+        resp->channel = tmp_int;
+
+        // Dialog Token
+        if (!dummy_obj_read_int("dialog_token", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading dialog_token parameter!";
+            return false;
+        }
+        resp->dialog_token = tmp_int;
+
+        // Measurement Response Mode
+        if (!dummy_obj_read_int("measurement_rep_mode", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading measurement_rep_mode parameter!";
+            return false;
+        }
+        resp->rep_mode = tmp_int;
+
+        // Operating Class
+        if (!dummy_obj_read_int("op_class", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading op_class parameter!";
+            return false;
+        }
+        resp->op_class = tmp_int;
+
+        // Measurement Duration
+        if (!dummy_obj_read_int("duration", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading duration parameter!";
+            return false;
+        }
+        resp->duration = tmp_int;
+
+        // RCPI
+        if (!dummy_obj_read_int("rcpi", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading rcpi parameter!";
+            return false;
+        }
+        resp->rcpi = tmp_int;
+
+        // RSNI
+        if (!dummy_obj_read_int("rsni", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading rsni parameter!";
+            return false;
+        }
+        resp->rsni = tmp_int;
+
+        // BSSID
+        if (!dummy_obj_read_str("bssid", parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
+        beerocks::net::network_utils::mac_from_string(resp->bssid.oct, tmp_str);
+
+        // Add the message to the queue
+        event_queue_push(event, resp_buff);
+        break;
+    }
+    default:
+        LOG(WARNING) << "Unhandled event received: " << opcode;
+        break;
+    }
     return true;
 }
 
