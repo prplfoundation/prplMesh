@@ -120,9 +120,14 @@ static void map_event_obj_parser(std::string event_str, parsed_obj_map_t &map_ob
     std::stringstream ss(event_str.c_str() + idx_start);
     std::string str_storage;
     bool opcode = true;
+    bool type   = true;
     while (std::getline(ss, str_storage, ' ')) {
-        if (opcode) {
-            // assume that the first param is event name
+        if (type) {
+            // assume that the first param is type - DATA or EVENT
+            map_obj[DUMMY_EVENT_KEYLESS_PARAM_TYPE] = str_storage;
+            type                                    = false;
+        } else if (opcode) {
+            // assume that the second param is data or event name
             map_obj[DUMMY_EVENT_KEYLESS_PARAM_OPCODE] = str_storage;
             opcode                                    = false;
         } else if (beerocks::net::network_utils::is_valid_mac(str_storage)) {
@@ -343,9 +348,22 @@ bool base_wlan_hal_dummy::process_ext_events()
     //base_wlan_hal_dummy::parsed_obj_debug(event_obj);
 
     // Process the event
-    if (!process_dummy_event(event_obj)) {
-        LOG(ERROR) << "Failed processing DUMMY event: "
-                   << event_obj[DUMMY_EVENT_KEYLESS_PARAM_OPCODE];
+    if (event_obj[DUMMY_EVENT_KEYLESS_PARAM_TYPE] == "EVENT") {
+        if (!process_dummy_event(event_obj)) {
+            LOG(ERROR) << "Failed processing DUMMY event: "
+                       << event_obj[DUMMY_EVENT_KEYLESS_PARAM_OPCODE];
+            return false;
+        }
+    }
+    // Process data
+    else if (event_obj[DUMMY_EVENT_KEYLESS_PARAM_TYPE] == "DATA") {
+        if (!process_dummy_data(event_obj)) {
+            LOG(ERROR) << "Failed processing DUMMY data: "
+                       << event_obj[DUMMY_EVENT_KEYLESS_PARAM_OPCODE];
+            return false;
+        }
+    } else {
+        LOG(ERROR) << "Unsupported type " << event_obj[DUMMY_EVENT_KEYLESS_PARAM_TYPE];
         return false;
     }
 

@@ -60,6 +60,7 @@ public:
     std::string get_bssid() override;
 
 protected:
+    virtual bool process_dummy_data(parsed_obj_map_t &parsed_obj) override;
     virtual bool process_dummy_event(parsed_obj_map_t &parsed_obj) override;
 
     // Overload for Monitor events
