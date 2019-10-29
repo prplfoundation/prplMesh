@@ -48,6 +48,14 @@ static mon_wlan_hal::Event dummy_to_bwl_event(const std::string &opcode)
     return mon_wlan_hal::Event::Invalid;
 }
 
+static mon_wlan_hal_dummy::Data dummy_to_bwl_data(const std::string &opcode)
+{
+    if (opcode == "STA-UPDATE-STATS")
+        return mon_wlan_hal_dummy::Data::STA_Update_Stats;
+
+    return mon_wlan_hal_dummy::Data::Invalid;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -75,7 +83,23 @@ bool mon_wlan_hal_dummy::update_vap_stats(const std::string vap_iface_name, SVap
 bool mon_wlan_hal_dummy::update_stations_stats(const std::string vap_iface_name,
                                                const std::string sta_mac, SStaStats &sta_stats)
 {
-    sta_stats = {};
+    SStaStats dummy_sta_stats;
+    auto dummy_sta = m_dummy_stas_map.find(sta_mac);
+
+    if (dummy_sta == m_dummy_stas_map.end()) {
+        LOG(WARNING) << "No stats for sta " << sta_mac;
+        return false;
+    }
+
+    dummy_sta_stats = dummy_sta->second;
+
+    sta_stats.rx_rssi_watt             = dummy_sta_stats.rx_rssi_watt;
+    sta_stats.rx_rssi_watt_samples_cnt = dummy_sta_stats.rx_rssi_watt_samples_cnt;
+    sta_stats.rx_snr_watt              = dummy_sta_stats.rx_snr_watt;
+    sta_stats.rx_snr_watt_samples_cnt  = dummy_sta_stats.rx_snr_watt_samples_cnt;
+    sta_stats.tx_phy_rate_100kb        = dummy_sta_stats.tx_phy_rate_100kb;
+    sta_stats.rx_phy_rate_100kb        = dummy_sta_stats.rx_phy_rate_100kb;
+
     return true;
 }
 
@@ -89,48 +113,12 @@ bool mon_wlan_hal_dummy::sta_beacon_11k_request(const SBeaconRequest11k &req, in
 {
     LOG(TRACE) << __func__;
 
-    std::string measurement_mode;
-    switch ((SBeaconRequest11k::MeasurementMode)(req.measurement_mode)) {
-    case SBeaconRequest11k::MeasurementMode::Passive:
-        measurement_mode = "passive";
-        break;
-    case SBeaconRequest11k::MeasurementMode::Active:
-        measurement_mode = "active";
-        break;
-    case SBeaconRequest11k::MeasurementMode::Table:
-        measurement_mode = "table";
-        break;
-    default:
-        measurement_mode = "passive";
-    }
+    auto sta_mac = beerocks::net::network_utils::mac_to_string(req.sta_mac.oct);
+    auto bssid   = beerocks::net::network_utils::mac_to_string(req.bssid.oct);
 
-    auto request = (!req.enable) ? 0 : req.request;
-    auto report  = (!req.enable) ? 0 : req.report;
+    LOG(DEBUG) << "Beacon 11k request to sta " << sta_mac << " on bssid " << bssid << " channel "
+               << std::to_string(req.channel);
 
-    uint8_t req_mode = (req.parallel | (req.enable ? 0x02 : 0) | (request ? 0x04 : 0) |
-                        (report ? 0x08 : 0) | (req.mandatory_duration ? 0x10 : 0));
-
-    auto op_class = req.op_class < 0 ? GET_OP_CLASS(get_radio_info().channel) : req.op_class;
-
-    std::string cmd = beerocks::net::network_utils::mac_to_string(req.sta_mac.oct) +
-                      " " + // Destination MAC Address
-                      beerocks::net::network_utils::mac_to_string(req.bssid.oct) +
-                      " " +                                 // Target BSSID
-                      std::to_string(req.channel) + " " +   // Channel
-                      std::to_string(req.repeats) + " " +   // Number of repitions
-                      std::to_string(req_mode) + " " +      // Measurements Request Mode
-                      std::to_string(op_class) + " " +      // Operating Class
-                      std::to_string(req.rand_ival) + " " + // Random Interval
-                      std::to_string(req.duration) + " " +  // Duration
-                      measurement_mode;                     // Measurement Mode
-
-    if (req.use_optional_ssid) {
-        std::string req_ssid = '"' + std::string((char *)req.ssid) + '"';
-
-        cmd += " ssid=" + req_ssid;
-    }
-
-    LOG(DEBUG) << "Beacon 11k request " << cmd;
     return true;
 }
 
@@ -146,7 +134,82 @@ bool mon_wlan_hal_dummy::sta_link_measurements_11k_request(const std::string &st
     return true;
 }
 
-bool mon_wlan_hal_dummy::process_dummy_data(parsed_obj_map_t &parsed_obj) { return true; }
+bool mon_wlan_hal_dummy::process_dummy_data(parsed_obj_map_t &parsed_obj)
+{
+    char *tmp_str;
+    char *sta_mac;
+    int64_t tmp_int;
+    // Filter out empty data
+    std::string opcode;
+    if (!(parsed_obj.find(DUMMY_EVENT_KEYLESS_PARAM_OPCODE) != parsed_obj.end() &&
+          !(opcode = parsed_obj[DUMMY_EVENT_KEYLESS_PARAM_OPCODE]).empty())) {
+        return true;
+    }
+    LOG(TRACE) << __func__ << " - opcode: |" << opcode << "|";
+
+    auto data = dummy_to_bwl_data(opcode);
+
+    switch (data) {
+    case Data::STA_Update_Stats: {
+        if (!dummy_obj_read_str(DUMMY_EVENT_KEYLESS_PARAM_MAC, parsed_obj, &sta_mac)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
+
+        if (!dummy_obj_read_str("rssi", parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading rssi!";
+            return false;
+        }
+
+        SStaStats dummy_sta_stats = {};
+
+        // Format rssi= %d,%d,%d,%d
+        auto samples = beerocks::string_utils::str_split(tmp_str, ',');
+        for (auto &s : samples) {
+            float s_float = float(beerocks::string_utils::stoi(s));
+            if (s_float > beerocks::RSSI_MIN) {
+                dummy_sta_stats.rx_rssi_watt += std::pow(10, s_float / float(10));
+                dummy_sta_stats.rx_rssi_watt_samples_cnt++;
+            }
+        }
+
+        if (!dummy_obj_read_str("snr", parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading snr!";
+            return false;
+        }
+
+        // Format snr=%d,%d,%d,%d
+        auto samples_snr = beerocks::string_utils::str_split(tmp_str, ',');
+        for (auto &s : samples_snr) {
+            float s_float = float(beerocks::string_utils::stoi(s));
+            if (s_float >= beerocks::SNR_MIN) {
+                dummy_sta_stats.rx_snr_watt += std::pow(10, s_float / float(10));
+                dummy_sta_stats.rx_snr_watt_samples_cnt++;
+            }
+        }
+
+        if (!dummy_obj_read_int("uplink", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading rsni parameter!";
+            return false;
+        }
+        dummy_sta_stats.tx_phy_rate_100kb = (tmp_int / 100);
+
+        if (!dummy_obj_read_int("downlink", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading rsni parameter!";
+            return false;
+        }
+        dummy_sta_stats.rx_phy_rate_100kb = (tmp_int / 100);
+
+        m_dummy_stas_map[sta_mac] = dummy_sta_stats;
+        break;
+    }
+    default:
+        LOG(WARNING) << "Unhandled event received: " << opcode;
+        break;
+    }
+
+    return true;
+}
 
 bool mon_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
 {
