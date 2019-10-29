@@ -56,6 +56,7 @@ class tlvParser
 {
     public:
         static std::shared_ptr<BaseClass> parseTlv(ieee1905_1::CmduMessageRx &cmdu_rx);
+        static std::shared_ptr<BaseClass> parseWsc(ieee1905_1::CmduMessageRx &cmdu_rx);
 };
 
 #endif //_TLVF/IEEE_1905_1_TLVPARSER_H_

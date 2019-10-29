@@ -519,12 +519,12 @@ int test_all()
     auto tlv3 = std::dynamic_pointer_cast<tlvWscM2>(tlvParser::parseTlv(received_message));
     if (tlv3 != nullptr) {
         MAPF_DBG("TLV3 LENGTH AFTER INIT: " << tlv3->length());
+        if (!parse_encrypted_settings(tlv3, keywrapkey, iv)) {
+            MAPF_ERR("TLV3 parse encrypted settings failed");
+            errors++;
+        }
     } else {
         MAPF_ERR("TLV3 IS NULL");
-        errors++;
-    }
-    if (!parse_encrypted_settings(tlv3, keywrapkey, iv)) {
-        MAPF_ERR("TLV3 parse encrypted settings failed");
         errors++;
     }
 

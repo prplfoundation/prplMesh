@@ -11,6 +11,65 @@
  */
 
 #include <tlvf/ieee_1905_1/tlvParser.h>
+#include <tlvf/ieee_1905_1/tlvWscM2.h>
+#include <tlvf/ieee_1905_1/tlvWscM1.h>
+#include <tlvf/WSC/eWscAttributes.h>
+
+#pragma pack(push, 1)
+struct Tlv {
+    protected:
+        uint8_t tlvType;
+        uint16_t tlvLength;
+
+    public:
+        uint8_t type() { return tlvType; }
+
+        Tlv *next() { return (Tlv *)((uint8_t *)this + size()); }
+
+        uint8_t *data() { return (uint8_t *)this + sizeof(Tlv); }
+
+        size_t size() { return sizeof(Tlv) + ntohs(tlvLength); }
+    };
+#pragma pack(pop)
+
+// packed WSC Attribute struct to help in the parsing of the packet
+#pragma pack(push, 1)
+struct Wsc {
+    protected:
+        uint16_t wsc_type;
+        uint16_t length;
+
+    public:
+        uint16_t type() { return ntohs(wsc_type); }
+
+        Wsc *next() { return (Wsc *)((uint8_t *)this + size()); }
+
+        uint8_t *data() { return (uint8_t *)this + sizeof(Wsc); }
+
+        size_t size() { return sizeof(Wsc) + ntohs(length); }
+    };
+#pragma pack(pop)
+
+std::shared_ptr<BaseClass> tlvParser::parseWsc(ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    Tlv *tlv = (Tlv *)cmdu_rx.getClassVector().back()->getBuffPtr();
+
+    if (ieee1905_1::eTlvType(tlv->type()) != ieee1905_1::eTlvType::TLV_WSC)
+        return nullptr;
+
+    Wsc *wsc = (Wsc *)(tlv->data());
+    uint16_t type = wsc->type();
+    while (type != WSC::ATTR_MSG_TYPE) {
+        wsc = wsc->next();
+        type = wsc->type();
+    }
+    if (*wsc->data() == WSC::WSC_MSG_TYPE_M2)
+        return cmdu_rx.addClass<ieee1905_1::tlvWscM2>();
+    else
+        return cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
+
+    return nullptr;
+}
 
 std::shared_ptr<BaseClass> tlvParser::parseTlv(ieee1905_1::CmduMessageRx &cmdu_rx)
 {
@@ -63,6 +122,9 @@ std::shared_ptr<BaseClass> tlvParser::parseTlv(ieee1905_1::CmduMessageRx &cmdu_r
         }
         case (16):{
         return cmdu_rx.addClass<ieee1905_1::tlvSupportedFreqBand>();
+        }
+        case (17): {
+            return parseWsc(cmdu_rx);
         }
         case (18):{
         return cmdu_rx.addClass<ieee1905_1::tlvPushButtonEventNotification>();
