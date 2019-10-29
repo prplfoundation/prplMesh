@@ -6,6 +6,7 @@
  * See LICENSE file for more details.
  */
 
+#include "tlvf/ieee_1905_1/tlvParser.h"
 #include "tlvf/CmduMessageRx.h"
 #include "tlvf/CmduMessageTx.h"
 #include <cstring>
@@ -478,15 +479,7 @@ int test_all()
     CmduMessageRx received_message;
     received_message.parse(recv_buffer, sizeof(recv_buffer), true);
 
-    eTlvType type;
-    if (received_message.getNextTlvType(type) &&
-        type == eTlvType::TLV_NON_1905_NEIGHBOR_DEVICE_LIST) {
-        MAPF_DBG("SUCCESS");
-    }
-
-    MAPF_DBG("size: " << received_message.getNextTlvLength());
-
-    auto tlv1 = received_message.addClass<tlvNon1905neighborDeviceList>();
+    auto tlv1 = std::dynamic_pointer_cast<tlvNon1905neighborDeviceList>(tlvParser::parseTlv(received_message));
     if (tlv1 != nullptr) {
         MAPF_DBG("LENGTH AFTER INIT: " << tlv1->length());
         //tlv1->alloc_mac_non_1905_device(3);
@@ -515,15 +508,7 @@ int test_all()
         errors++;
     }
 
-    if (received_message.getNextTlvType(type) && type == eTlvType::TLV_LINK_METRIC_QUERY) {
-        MAPF_DBG("SUCCESS");
-    } else {
-        errors++;
-    }
-
-    MAPF_DBG("size: " << received_message.getNextTlvLength());
-
-    auto tlv2 = received_message.addClass<tlvLinkMetricQuery>();
+    auto tlv2 = std::dynamic_pointer_cast<tlvLinkMetricQuery>(tlvParser::parseTlv(received_message));
     if (tlv2 != nullptr) {
         MAPF_DBG("TLV2 LENGTH AFTER INIT: " << tlv2->length());
     } else {
@@ -531,13 +516,7 @@ int test_all()
         errors++;
     }
 
-    if (received_message.getNextTlvType(type) && type == eTlvType::TLV_WSC) {
-        MAPF_DBG("SUCCESS");
-    } else {
-        errors++;
-    }
-
-    auto tlv3 = received_message.addClass<tlvWscM2>();
+    auto tlv3 = std::dynamic_pointer_cast<tlvWscM2>(tlvParser::parseTlv(received_message));
     if (tlv3 != nullptr) {
         MAPF_DBG("TLV3 LENGTH AFTER INIT: " << tlv3->length());
     } else {
@@ -681,6 +660,7 @@ int test_all()
         MAPF_DBG("HEADER PROTECTION SUCCESS");
     }
 
+    eTlvType type;
     if (!received_message.getNextTlvType(type)) {
         MAPF_DBG("TYPE PROTECTION SUCCESS");
     }

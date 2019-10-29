@@ -440,6 +440,7 @@ class TlvF:
             self.closeFile()
 
         logConsole("Done\n")
+
     def trimAndFixFileList(self, yaml, converter):
         result = []
         for key, val in yaml.items():
@@ -465,13 +466,14 @@ class TlvF:
         tlv_map_yaml = self.trimAndFixFileList(self.db[('eTlvTypeMap','eTlvTypeMap')],self.tlvDefaultConverter)
         yaml_config = [[tlv_yaml,self.tlvDefaultConverter,self.db[('eTlvType','_namespace')],self.tlvDefaultAddClass],
         [tlv_map_yaml,self.tlvDefaultConverter,self.db[('eTlvTypeMap','_namespace')],self.tlvDefaultAddClass]]
-                
+
+        self.insertLineH(insert_name, insert_marker, "")
         self.insertLineH(insert_name, insert_marker,"%sclass %s " % (self.getIndentation(0), name))
         self.insertLineH(insert_name, insert_marker, "{" )
 
-        func_name = 'ParseTlv'
+        func_name = 'parseTlv'
         self.insertLineH(insert_name, insert_marker, "%spublic:" % self.getIndentation(1))
-        self.insertLineH(insert_name, insert_marker, f"{self.getIndentation(2)}static void {func_name}(CmduMessageRx cmdu_rx);")
+        self.insertLineH(insert_name, insert_marker, "{}static std::shared_ptr<BaseClass> {}(ieee1905_1::CmduMessageRx &cmdu_rx);".format(self.getIndentation(2),func_name))
         #class end
         self.insertLineH(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(1), self.CODE_CLASS_END, name))
         self.insertLineH(insert_name, insert_marker, "};")
@@ -479,7 +481,7 @@ class TlvF:
 
 
         # cpp file
-        self.appendLineCpp(f'#include "{name}.h"')
+        self.appendLineCpp('#include <tlvf/ieee_1905_1/{}.h>'.format(name))
         self.appendLineCpp('')
         self.generateParseFunction(func_name,'ieee1905_1::CmduMessageRx',"cmdu_rx",yaml_config,'cmdu_rx.getNextTlvType()',self.appendLineCpp,0)        
 
@@ -1408,7 +1410,7 @@ class TlvF:
             self.addEnumCode(insert_name, insert_marker, name, obj_meta.enum_storage)
         elif obj_meta.type == MetaData.TYPE_ENUM_CLASS:
             self.addEnumClassCode(insert_name, insert_marker, name, obj_meta.enum_storage)
-        elif obj_meta.type == MetaData.TYPE_CUSTOM:
+        elif obj_meta.type == MetaData.TYPE_CUSTOM: # Not needed - why not just generate the parser? no need for another file type
             if name == 'tlvParser': self.generateTlvParser(insert_name,insert_marker,name)
         else:
             self.abort("%s.yaml --> error in _type=%s" % (self.yaml_fname, dict_value))
@@ -1899,10 +1901,10 @@ class TlvF:
         out = ''.join(x for x in input.title() if x.isalnum())
         return out[0].lower()+out[1:]
         
-    def tlvDefaultAddClass(self, input):
-        return f"addClass<{input}>()"
+    def tlvDefaultAddClass(self, *argv):
+        return "addClass<{}>()".format(','.join([a for a in argv]))
     
-    def generateParseSwitch(self,parsed_obj, yaml_config,switch_parameter,appendline_function,indent=0):
+    def generateParseSwitch(self,parsed_obj, yaml_config, switch_parameter, appendline_function, indent=0):
         """
         Parameters
         --
@@ -1932,33 +1934,32 @@ class TlvF:
         """
         appendLine = lambda ind,s: appendline_function(self.getIndentation(indent+ind)+s)
         ind = 0
-        appendLine(ind,f"switch({switch_parameter})")
+        appendLine(ind,"switch({})".format(switch_parameter))
         appendLine(ind,"{")
         ind +=1
         for yaml, converter, namespace, add_func in yaml_config:
             for name, id in yaml:
                 # add to include list
-                self.include_list.append(f"<tlvf/{converter(namespace)}/{name}.h>")
+                self.include_list.append("<tlvf/{}/{}.h>".format(converter(namespace), name))
 
-                appendline_function(f"{self.getIndentation(1+indent)}case ({id}):"+"{")
-                #clarification for basic case of extracting tlvs from cmdu:
-                #parsed_obj is usually cmdu_rx
-                #add_func is addClass<T>
-                #converter converts UPPER_SNAKE_CASE to lowerCamelCase so TLV_END_OF_MESSAGE ->tlvEndOfMessage
-                #so the following line appends:  return {cmdu_rx}.{addClass<{ieee1905_1::tlvEndOfMessage}>()};
-                #(curly braces whenever it's a result of a function)
-                appendLine(ind,f"{add_func(case_action,parsed_obj,namespace+'::'+name)};")
-                # appendLine(ind,f"{parsed_obj}.{add_func(namespace + '::' + name,'return')};")
-                # appendLine(ind,"return;")
+                appendline_function("{}case ({}):".format(self.getIndentation(1+indent), id) + "{")
+                # clarification for basic case of extracting tlvs from cmdu:
+                # parsed_obj is usually cmdu_rx
+                # add_func is addClass<T>
+                # converter converts UPPER_SNAKE_CASE to lowerCamelCase so TLV_END_OF_MESSAGE ->tlvEndOfMessage
+                # so the following line appends:  return {cmdu_rx}.{addClass<{ieee1905_1::tlvEndOfMessage}>()};
+                # (curly braces whenever it's a result of a function)
+                appendLine(ind,"return {}.{};".format(parsed_obj, add_func(namespace + '::' + name)))
                 appendLine(ind,"}")
         ind -=1
         appendLine(ind,"}")
+        appendLine(ind,"return nullptr; // unknown tlv")
     
     def generateParseFunction(self,name,param_type,param_name, config,switch_parameter,appendline_function,indent):
         appendLine = lambda ind,s: appendline_function(self.getIndentation(indent+ind)+s)
-        appendLine(0,f"std::shared_ptr<BaseClass> {name}({param_type} {param_name})")
+        appendLine(0, "std::shared_ptr<BaseClass> tlvParser::{}({} &{})".format(name, param_type, param_name))
         appendLine(0,"{")
-        self.generateParseSwitch(param_name,config,switch_parameter,appendline_function,"return",indent+1)
+        self.generateParseSwitch(param_name,config,switch_parameter,appendline_function,indent+1)
         appendLine(0,"}")
 
 def test(conf, output, print_dependencies, print_outputs):

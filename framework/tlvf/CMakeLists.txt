@@ -23,6 +23,7 @@ execute_process(
     OUTPUT_VARIABLE TLVF_DEPENDENCIES
     RESULT_VARIABLE RET
 )
+message("TLVF_DEPENDENCIES: ${TLVF_DEPENDENCIES}")
 if(NOT RET EQUAL 0)
     message(FATAL_ERROR "-- ${TLVF_COMMAND} --print-dependencies failed!")
 endif()
@@ -33,6 +34,7 @@ execute_process(
     OUTPUT_VARIABLE TLVF_OUTPUTS
     RESULT_VARIABLE RET
 )
+message("TLVF_OUTPUTS: ${TLVF_OUTPUTS}")
 if(NOT RET EQUAL 0)
     message(FATAL_ERROR "-- ${TLVF_COMMAND} --print-outputs failed!")
 endif()

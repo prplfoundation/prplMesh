@@ -52,14 +52,10 @@
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
 
-namespace ieee1905_1 {
-
 class tlvParser 
 {
     public:
-        static void ParseTlv(CmduMessageRx cmdu_rx);
+        static std::shared_ptr<BaseClass> parseTlv(ieee1905_1::CmduMessageRx &cmdu_rx);
 };
-
-}; // close namespace: ieee1905_1
 
 #endif //_TLVF/IEEE_1905_1_TLVPARSER_H_

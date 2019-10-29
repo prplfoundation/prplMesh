@@ -10,9 +10,9 @@
  * See LICENSE file for more details.
  */
 
-#include "tlvParser.h"
+#include <tlvf/ieee_1905_1/tlvParser.h>
 
-std::shared_ptr<BaseClass> ParseTlv(ieee1905_1::CmduMessageRx cmdu_rx)
+std::shared_ptr<BaseClass> tlvParser::parseTlv(ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     switch(cmdu_rx.getNextTlvType())
     {
@@ -119,4 +119,5 @@ std::shared_ptr<BaseClass> ParseTlv(ieee1905_1::CmduMessageRx cmdu_rx)
         return cmdu_rx.addClass<wfa_map::tlvApCapability>();
         }
     }
+    return nullptr; // unknown tlv
 }
