@@ -80,6 +80,49 @@ bool mon_wlan_hal_dummy::sta_channel_load_11k_request(const SStaChannelLoadReque
 bool mon_wlan_hal_dummy::sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token)
 {
     LOG(TRACE) << __func__;
+
+    std::string measurement_mode;
+    switch ((SBeaconRequest11k::MeasurementMode)(req.measurement_mode)) {
+    case SBeaconRequest11k::MeasurementMode::Passive:
+        measurement_mode = "passive";
+        break;
+    case SBeaconRequest11k::MeasurementMode::Active:
+        measurement_mode = "active";
+        break;
+    case SBeaconRequest11k::MeasurementMode::Table:
+        measurement_mode = "table";
+        break;
+    default:
+        measurement_mode = "passive";
+    }
+
+    auto request = (!req.enable) ? 0 : req.request;
+    auto report  = (!req.enable) ? 0 : req.report;
+
+    uint8_t req_mode = (req.parallel | (req.enable ? 0x02 : 0) | (request ? 0x04 : 0) |
+                        (report ? 0x08 : 0) | (req.mandatory_duration ? 0x10 : 0));
+
+    auto op_class = req.op_class < 0 ? GET_OP_CLASS(get_radio_info().channel) : req.op_class;
+
+    std::string cmd = beerocks::net::network_utils::mac_to_string(req.sta_mac.oct) +
+                      " " + // Destination MAC Address
+                      beerocks::net::network_utils::mac_to_string(req.bssid.oct) +
+                      " " +                                 // Target BSSID
+                      std::to_string(req.channel) + " " +   // Channel
+                      std::to_string(req.repeats) + " " +   // Number of repitions
+                      std::to_string(req_mode) + " " +      // Measurements Request Mode
+                      std::to_string(op_class) + " " +      // Operating Class
+                      std::to_string(req.rand_ival) + " " + // Random Interval
+                      std::to_string(req.duration) + " " +  // Duration
+                      measurement_mode;                     // Measurement Mode
+
+    if (req.use_optional_ssid) {
+        std::string req_ssid = '"' + std::string((char *)req.ssid) + '"';
+
+        cmd += " ssid=" + req_ssid;
+    }
+
+    LOG(DEBUG) << "Beacon 11k request " << cmd;
     return true;
 }
 
