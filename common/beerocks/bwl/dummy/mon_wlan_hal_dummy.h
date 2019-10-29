@@ -20,6 +20,13 @@ namespace dummy {
  */
 class mon_wlan_hal_dummy : public base_wlan_hal_dummy, public mon_wlan_hal {
 
+    // Public definitions
+public:
+    enum class Data {
+        Invalid = 0,
+        STA_Update_Stats
+    };
+
     // Public methods
 public:
     /*!
@@ -56,6 +63,7 @@ protected:
     // Private data-members:
 private:
     std::shared_ptr<char> m_temp_dummy_value;
+    std::unordered_map<std::string, struct SStaStats> m_dummy_stas_map; // key=sta_mac
 };
 
 } // namespace dummy
