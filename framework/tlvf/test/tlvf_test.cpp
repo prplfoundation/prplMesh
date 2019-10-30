@@ -18,6 +18,7 @@
 #include "tlvf/ieee_1905_1/tlvNon1905neighborDeviceList.h"
 #include "tlvf/ieee_1905_1/tlvUnknown.h"
 #include "tlvf/ieee_1905_1/tlvVendorSpecific.h"
+#include "tlvf/ieee_1905_1/tlvWscM1.h"
 #include "tlvf/ieee_1905_1/tlvWscM2.h"
 #include "tlvf/wfa_map/tlvApCapability.h"
 #include <tlvf/test/tlvVarList.h>
@@ -287,6 +288,46 @@ bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey,
     LOG(DEBUG) << "authenticator buffer: " << std::endl
                << dump_buffer((uint8_t *)m2->authenticator().data, m2->authenticator().data_length);
     return true;
+}
+
+int test_parser()
+{
+    int errors = 0;
+    uint8_t tx_buffer[4096];
+    //creating cmdu message class and setting the header
+    CmduMessageTx msg = CmduMessageTx(tx_buffer, sizeof(tx_buffer));
+
+    //create method initializes the buffer and returns shared pointer to the message header
+    auto header = msg.create(0, eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE);
+    header->flags().last_fragment_indicator = 1;
+    header->flags().relay_indicator         = 1;
+
+    auto tlv1 = msg.addClass<tlvNon1905neighborDeviceList>();
+    auto tlv2 = msg.addClass<tlvLinkMetricQuery>();
+    auto tlv3 = msg.addClass<tlvWscM1>();
+
+    LOG(DEBUG) << "Finalize";
+    msg.finalize(true);
+
+    LOG(DEBUG) << "TX: " << std::endl << dump_buffer(tx_buffer, msg.getMessageLength());
+
+    uint8_t recv_buffer[sizeof(tx_buffer)];
+    memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
+
+    CmduMessageRx received_message;
+    received_message.parse(recv_buffer, sizeof(recv_buffer), true, true);
+    auto tlv1_ = received_message.getClass<tlvNon1905neighborDeviceList>();
+    if (!tlv1_)
+        errors++;
+    auto tlv2_ = received_message.getClass<tlvLinkMetricQuery>();
+    if (!tlv2_)
+        errors++;
+    auto tlv3_ = received_message.getClass<tlvWscM1>();
+    if (!tlv3_)
+        errors++;
+
+    MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
+    return errors;
 }
 
 int test_all()
@@ -678,8 +719,7 @@ int test_all()
     memcpy(invalidBuffer, recv_buffer, 26);
 
     CmduMessageRx invmsg;
-    auto invheader = invmsg.parse(invalidBuffer, invalidBufferSize, false);
-    if (invheader == nullptr) {
+    if (!invmsg.parse(invalidBuffer, invalidBufferSize, false)) {
         MAPF_DBG("HEADER PROTECTION SUCCESS");
     }
 
@@ -707,6 +747,7 @@ int main(int argc, char *argv[])
     errors += test_int_len_list();
     errors += test_complex_list();
     errors += test_all();
+    errors += test_parser();
     MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
     return errors;
 }
