@@ -17,6 +17,11 @@
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 
+// OpenSSL 1.1.0 compatability layer (for platforms with older version)
+#if OPENSSL_VERSION_NUMBER < 0x10100000L // OpenSSL < 1.1.0
+#include "openssl_compat.h"
+#endif
+
 namespace mapf {
 namespace encryption {
 

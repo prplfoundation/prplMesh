@@ -37,15 +37,30 @@ install(TARGETS local_bus DESTINATION bin)
 
 endif()
 
+# We use OpenSSL 1.1.x for Encryption
+find_package(OpenSSL 1.1 QUIET)
+if(NOT OpenSSL_FOUND)
+	# Try older versions and use compatability layer
+	find_package(OpenSSL 1.0 REQUIRED)
+	set(sources "${sources};openssl_compat.c")
+endif()
+
 # Create a single common library
 add_library(common SHARED ${sources})
 set_target_properties(common PROPERTIES PREFIX "mapf" VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
-target_link_libraries(common PRIVATE ${MSGLIB_TARGET} mapf::elpp json-c)
-target_include_directories(common PUBLIC ${PLATFORM_INCLUDE_DIR})
-
-# Encryption - we use OpenSSL 1.1.x API
-find_package(OpenSSL 1.1 REQUIRED)
-target_link_libraries(common PRIVATE OpenSSL::SSL)
+target_link_libraries(common 
+	PRIVATE 
+		${MSGLIB_TARGET} 
+		mapf::elpp 
+		json-c 
+	PUBLIC
+		${OPENSSL_LIBRARIES}
+)
+target_include_directories(common 
+	PUBLIC 
+		${PLATFORM_INCLUDE_DIR}
+		${OPENSSL_INCLUDE_DIR}
+)
 
 configure_file(
 	"${CMAKE_CURRENT_SOURCE_DIR}/mapf_config.h.in"
