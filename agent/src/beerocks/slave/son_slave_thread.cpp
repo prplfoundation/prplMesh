@@ -4944,12 +4944,8 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
 
     channel_preference_tlv->radio_uid() = network_utils::mac_from_string(config.radio_identifier);
 
-    // Create operating class object
-    auto op_class_channels = channel_preference_tlv->create_operating_classes_list();
-    if (!op_class_channels) {
-        LOG(ERROR) << "create_operating_classes_list() has failed!";
-        return false;
-    }
+    // Get supported channels and operating classes .
+    auto m = get_supported_channels_map();
 
     // TODO: check that the data is parsed properly after fixing the following bug:
     // Since sFlags is defined after dynamic list cPreferenceOperatingClasses it cause data override
@@ -4957,33 +4953,42 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
     // See: https://github.com/prplfoundation/prplMesh/issues/8
 
     // Fill operating class object
-    op_class_channels->operating_class() = 80; // random operating class for test purpose
+    for (auto it = m.begin(); it != m.end(); ++it) {
+        // Create operating class object
+        auto op_class_channels = channel_preference_tlv->create_operating_classes_list();
 
-    // Fill up channels list in operating class object, with test values
-    for (uint8_t ch = 36; ch < 50; ch += 2) {
-        // allocate 1 channel
-        if (!op_class_channels->alloc_channel_list()) {
-            LOG(ERROR) << "alloc_channel_list() has failed!";
+        if (!op_class_channels) {
+            LOG(ERROR) << "create_operating_classes_list() has failed!";
             return false;
         }
-        auto channel_idx = op_class_channels->channel_list_length();
-        auto channel     = op_class_channels->channel_list(channel_idx - 1);
-        if (!channel) {
-            LOG(ERROR) << "getting channel entry has failed!";
+
+        op_class_channels->operating_class() = it->first;
+        // Fill up channels list in operating class object
+        for (auto &ch : it->second) {
+            // allocate 1 channel
+            if (!op_class_channels->alloc_channel_list()) {
+                LOG(ERROR) << "alloc_channel_list() has failed!";
+                return false;
+            }
+            auto channel_idx = op_class_channels->channel_list_length();
+            auto channel     = op_class_channels->channel_list(channel_idx - 1);
+            if (!channel) {
+                LOG(ERROR) << "getting channel entry has failed!";
+                return false;
+            }
+            *channel = ch;
+        }
+
+        //TODO: get real preference score, and set Non-operable channel score to zero.
+        op_class_channels->flags().preference = 15; // channels preference
+        op_class_channels->flags().reason_code =
+            wfa_map::cPreferenceOperatingClasses::eReasonCode::UNSPECIFIED;
+
+        // Push operating class object to the list of operating class objects
+        if (!channel_preference_tlv->add_operating_classes_list(op_class_channels)) {
+            LOG(ERROR) << "add_operating_classes_list() has failed!";
             return false;
         }
-        *channel = ch;
-    }
-
-    // Update channel list flags
-    op_class_channels->flags().preference = 15; // channels preference
-    op_class_channels->flags().reason_code =
-        wfa_map::cPreferenceOperatingClasses::eReasonCode::UNSPECIFIED;
-
-    // Push operating class object to the list of operating class objects
-    if (!channel_preference_tlv->add_operating_classes_list(op_class_channels)) {
-        LOG(ERROR) << "add_operating_classes_list() has failed!";
-        return false;
     }
 
     LOG(DEBUG) << "sending channel preference report for ruid=" << config.radio_identifier;
