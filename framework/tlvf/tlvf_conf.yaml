@@ -31,6 +31,7 @@ include_yaml_path: {
 include_source_path: {
   "include/tlvf/swap.h",
   "include/tlvf/tlvfutils.h",
+  "include/tlvf/tlvfstructs.h",
   "include/tlvf/tlvflogging.h",
   "include/tlvf/BaseClass.h",
   "src/BaseClass.cpp",
