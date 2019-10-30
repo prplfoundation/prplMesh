@@ -11,7 +11,7 @@
 #include "bpl_cfg_helper.h"
 
 extern "C" {
-#include <uci_wrapper.h>
+#include "../uci/bpl_cfg_uci.h"
 }
 
 #include "mapf/common/logger.h"
@@ -31,7 +31,7 @@ static int bpl_get_number_of_radios(int *radios)
 
     *radios = 0;
     for (i = 0; i < MAX_NUM_OF_RADIOS; i++) {
-        if (uci_converter_get_str(TYPE_RADIO, i, "phy", radio_dev) == RETURN_OK)
+        if (bpl_cfg_uci_get_wireless(TYPE_RADIO, i, "phy", radio_dev) == RETURN_OK)
             (*radios)++;
     }
 
@@ -49,20 +49,20 @@ static int bpl_cfg_iface_config_up(int index)
     if (index < radioCount) { /* radio */
         sprintf(command, "%s up radio%d", "/sbin/wifi", UCI_INDEX(TYPE_RADIO, index));
     } else { /* VAP */
-        if (uci_converter_get_str(TYPE_VAP, index, "device", radio_dev) == RETURN_ERR) {
-            MAPF_ERR("%s failed retrieving radio device for vap %d\n", __FUNCTION__, index);
+        if (bpl_cfg_uci_get_wireless(TYPE_VAP, index, "device", radio_dev) == RETURN_ERR) {
+            MAPF_ERR("failed retrieving radio device for vap %d" << index);
             return RETURN_ERR;
         }
         sprintf(command, "%s up %s", "/sbin/wifi", radio_dev);
     }
 
     if (uci_converter_commit_wireless() != RETURN_OK)
-        MAPF_ERR("%s uci_converter_commit_wireless failed\n", __FUNCTION__);
+        MAPF_ERR("uci_converter_commit_wireless failed");
 
     if (uci_converter_system(command) == RETURN_OK) {
-        MAPF_INFO("%s completed successfully\n", __FUNCTION__);
+        MAPF_INFO("completed successfully");
     } else {
-        MAPF_ERR("%s failed\n", __FUNCTION__);
+        MAPF_ERR("failed");
         return RETURN_ERR;
     }
 
@@ -154,11 +154,11 @@ int bpl_cfg_set_wifi_iface_state(const char iface[BPL_IFNAME_LEN], int op)
         return RETURN_ERR;
     }
 
-    MAPF_INFO("bpl_cfg_set_wifi_iface_state(%s,%d)\n", iface, op);
+    MAPF_INFO("bpl_cfg_set_wifi_iface_state(" << iface << "," << op << ")");
 
     retVal = bpl_cfg_get_index_from_interface(iface, &index);
     if (retVal) {
-        MAPF_ERR("bpl_cfg_set_wifi_iface_state: Can't find index from insterface %s\n", iface);
+        MAPF_ERR("bpl_cfg_set_wifi_iface_state: Can't find index from insterface " << iface);
         return retVal;
     }
 
