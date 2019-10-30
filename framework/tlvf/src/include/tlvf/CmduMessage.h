@@ -52,11 +52,64 @@ public:
 
     static uint16_t getCmduHeaderLength() { return kCmduHeaderLength; }
 
+    /**
+     * @brief Get the Class object at index idx in the all classes array
+     * 
+     * @param idx index in the all classes array
+     * @return std::shared_ptr<BaseClass> to the class object at index idx, nullptr if not found
+     */
     std::shared_ptr<BaseClass> getClass(size_t idx) const;
 
+    /**
+     * @brief Get the (first) Class object
+     * 
+     * @tparam T class template
+     * @return std::shared_ptr<T> to the first object found of type T, nullptr if not found
+     */
+    template <class T> std::shared_ptr<T> getClass() const
+    {
+        for (size_t idx = 0; idx < getClassCount(); idx++) {
+            if (auto c = std::dynamic_pointer_cast<T>(getClass(idx)))
+                return c;
+        }
+        return nullptr;
+    }
+
+    /**
+     * @brief Get a class object of type T in index `idx` in the logical array containing
+     *        all classes of type T.
+     * 
+     * @tparam T class template
+     * @param idx index in the class T array
+     * @return std::shared_ptr<T> to the T class at index `idx` in the class T array
+     */
     template <class T> std::shared_ptr<T> getClass(size_t idx) const
     {
-        return std::dynamic_pointer_cast<T>(getClass(idx));
+        size_t idx_ = 0;
+        for (size_t i = 0; i < getClassCount(); i++) {
+            if (auto c = std::dynamic_pointer_cast<T>(getClass(i))) {
+                if (idx_++ == idx)
+                    return c;
+            }
+        }
+        return nullptr;
+    }
+
+    /**
+     * @brief Get the number of classes of type T
+     * 
+     * @tparam T class template
+     * @return size_t number of classes of type T
+     */
+    template <class T> size_t getClassCount() const
+    {
+        size_t count = 0;
+        for (size_t i = 0; i < getClassCount(); i++) {
+            if (auto c = std::dynamic_pointer_cast<T>(getClass(i))) {
+                count++;
+            }
+        }
+        return count;
     }
 
     size_t getClassCount() const;
