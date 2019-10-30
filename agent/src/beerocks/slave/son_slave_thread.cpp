@@ -3789,7 +3789,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         slave_state_timer = std::chrono::steady_clock::now() +
                             std::chrono::seconds(WAIT_FOR_JOINED_RESPONSE_TIMEOUT_SEC);
 
-        if (!wlan_settings.acs_enabled) {
+        if (wlan_settings.channel != 0 /* NOT ACS */) {
             send_platform_iface_status_notif(eRadioStatus::AP_OK, true);
         }
 
@@ -3886,7 +3886,7 @@ bool slave_thread::ap_manager_start()
     ap_manager_thread::ap_manager_conf_t ap_manager_conf;
     ap_manager_conf.hostap_iface      = config.hostap_iface;
     ap_manager_conf.hostap_iface_type = config.hostap_iface_type;
-    ap_manager_conf.acs_enabled       = wlan_settings.acs_enabled;
+    ap_manager_conf.channel           = wlan_settings.channel;
     ap_manager_conf.iface_filter_low  = config.backhaul_wireless_iface_filter_low;
     //ap_manager_conf.is_passive_mode     = (platform_settings.passive_mode_enabled == 1);
     ap_manager_conf.backhaul_vaps_bssid = platform_settings.backhaul_vaps_bssid;

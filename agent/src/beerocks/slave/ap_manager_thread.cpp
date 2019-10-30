@@ -163,8 +163,9 @@ ap_manager_thread::~ap_manager_thread() { stop_ap_manager_thread(); }
 
 void ap_manager_thread::ap_manager_config(ap_manager_conf_t &conf)
 {
-    acs_enabled = conf.acs_enabled;
-    low_filter  = conf.iface_filter_low;
+    acs_enabled  = (conf.channel == 0);
+    wifi_channel = conf.channel;
+    low_filter   = conf.iface_filter_low;
 
     // initialize backhaul_vaps_list
     int num_of_elements = sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid) /
