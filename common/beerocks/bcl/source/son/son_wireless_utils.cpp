@@ -493,6 +493,32 @@ std::vector<uint8_t> wireless_utils::calc_5g_20MHz_subband_channels(
     return channels;
 }
 
+std::map<uint8_t, std::set<uint8_t>>
+wireless_utils::channel_set_to_operating_classes(std::set<uint8_t> channels)
+{
+    std::map<uint8_t, std::set<uint8_t>> map_result;
+    for (auto &ch : channels) {
+        for (auto it = operating_class_to_channels_map.begin();
+             it != operating_class_to_channels_map.end(); ++it) {
+            if (it->second.find(ch) != it->second.end()) {
+                auto op_class = it->first;
+                //check if operating class is already in the result map
+                auto search = map_result.find(op_class);
+                //if it does, insert the current channel to map_result
+                if (search != map_result.end()) {
+                    search->second.insert(ch);
+                    //else create a key
+                } else {
+                    std::set<uint8_t> s;
+                    s.insert(ch);
+                    map_result.insert({op_class, s});
+                }
+            }
+        }
+    }
+    return map_result;
+}
+
 /**
  * @brief convert operating class to channel set based on Table 4-E in the ieee 802.11 specification
  *

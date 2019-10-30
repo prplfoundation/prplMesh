@@ -111,6 +111,8 @@ public:
                                                                beerocks::eWiFiBandwidth bw,
                                                                uint16_t vht_center_frequency);
     static std::set<uint8_t> operating_class_to_channel_set(uint8_t operating_class);
+    static std::map<uint8_t, std::set<uint8_t>>
+    channel_set_to_operating_classes(std::set<uint8_t> channels);
 
 private:
     enum eAntennaFactor {
