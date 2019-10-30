@@ -125,6 +125,7 @@ public:
     uint16_t getNextTlvLength() const;
     uint8_t *getNextTlvData() const;
     void swap();
+    bool swap_needed() {return m_swap; }
     bool is_finalized() const { return m_finalized; };
     bool is_swapped() const { return m_swapped; };
     eMessageType getMessageType();
