@@ -5179,24 +5179,31 @@ bool slave_thread::add_radio_basic_capabilities()
     //TODO get maximum supported VAPs from DWPAL
     radio_basic_caps->maximum_number_of_bsss_supported() = 2;
 
-    auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
-    if (!operationClassesInfo) {
-        LOG(ERROR) << "Failed creating operating classes info list";
-        return false;
-    }
-
     // TODO: Currently sending dummy values, just one operating class based on the band. Need
     // to read them from DWPAL and use the correct WiFi Parameters based on the regulatory
     // domain
-    uint8_t operating_class                            = hostap_params.iface_is_5ghz ? 110 : 81;
-    operationClassesInfo->operating_class()            = operating_class;
-    operationClassesInfo->maximum_transmit_power_dbm() = 0;
 
-    if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
-        LOG(ERROR) << "add_operating_classes_info_list failed";
-        return false;
+    // Get supported channels and operating classes .
+    auto m = get_supported_channels_map();
+
+    for (auto it = m.begin(); it != m.end(); ++it) {
+        // Create operating class object
+        auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
+        if (!operationClassesInfo) {
+            LOG(ERROR) << "Failed creating operating classes info list";
+            return false;
+        }
+        operationClassesInfo->operating_class() = it->first;
+        //TODO: Get real Maximum transmit
+        operationClassesInfo->maximum_transmit_power_dbm() = 0;
+        //TODO: Set number of statically Non-operable channels in the operating class and their numbers
+
+        // Push operating class object to the list of operating class objects
+        if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
+            LOG(ERROR) << "add_operating_classes_info_list failed";
+            return false;
+        }
     }
-
     return true;
 }
 
