@@ -9,10 +9,8 @@
 #ifndef _CmduMessageRX_H_
 #define _CmduMessageRX_H_
 
-#include "ieee_1905_1/cCmduHeader.h"
-#include "ieee_1905_1/tlvVendorSpecific.h"
-
-#include "CmduMessage.h"
+#include <tlvf/ieee_1905_1/cCmduHeader.h>
+#include <tlvf/CmduMessage.h>
 
 namespace ieee1905_1 {
 
@@ -22,10 +20,12 @@ public:
     CmduMessageRx();
     CmduMessageRx(CmduMessageRx &original);
     ~CmduMessageRx();
-
-public:
-    std::shared_ptr<cCmduHeader> parse(uint8_t *buff, size_t buff_len, bool swap_needed = true);
+    bool parse(uint8_t *buff, size_t buff_len, bool swap_needed = true, bool parse_tlvs = false);
     CmduMessageRx &operator=(const CmduMessageRx &) = delete;
+
+private:
+    std::shared_ptr<BaseClass> parseNextTlv();
+    std::shared_ptr<BaseClass> parseWscTlv();
 };
 
 }; // close namespace: ieee1905_1
