@@ -10,13 +10,22 @@
 #include "../../common/utils/utils.h"
 
 extern "C" {
-#include <uci_wrapper.h>
+#include "../uci/bpl_cfg_uci.h"
 }
+
 #include <slibc/stdio.h>
 
 using namespace beerocks::bpl;
 
-//============================================ STATIC START ============================================
+#ifndef BPL_PASSIVE_MODE
+
+static bool bpl_cfg_is_empty_str(const char *str)
+{
+    if (str == NULL)
+        return true;
+
+    return str[0] == '\0';
+}
 
 static int bpl_cfg_set_security_mode(int index, const std::string &beaconType,
                                      const std::string &authMode)
@@ -66,7 +75,7 @@ static int bpl_cfg_set_encryption(int index)
          authentication_mode[MAX_UCI_BUF_LEN] = {0};
     char empty_str[MAX_UCI_BUF_LEN]           = {0};
 
-    status = uci_converter_get_str(TYPE_VAP, index, "wav_security_mode", security_mode);
+    status = bpl_cfg_uci_get_wireless(TYPE_VAP, index, "wav_security_mode", security_mode);
     if (status == RETURN_ERR)
         return RETURN_ERR;
 
@@ -80,7 +89,7 @@ static int bpl_cfg_set_encryption(int index)
     if (!security_mode_str.compare("None")) {
         security_mode_str = "none";
     } else if ((!security_mode_str.compare("WEP-64") || !security_mode_str.compare("WEP-128")) &&
-               !is_empty_str(authentication_mode)) {
+               !bpl_cfg_is_empty_str(authentication_mode)) {
         security_mode_str = authentication_mode;
     } else if (!security_mode_str.compare("WPA-Personal")) {
         security_mode_str = "psk";
@@ -127,7 +136,7 @@ static int bpl_cfg_set_basic_authentication_modes(int index, const std::string &
     char security[MAX_UCI_BUF_LEN] = {0}, beaconType[MAX_UCI_BUF_LEN] = {0},
          wep_empty_str[MAX_UCI_BUF_LEN] = {0};
 
-    status = uci_converter_get_str(TYPE_VAP, index, "wav_beacon_type", beaconType);
+    status = bpl_cfg_uci_get_wireless(TYPE_VAP, index, "wav_beacon_type", beaconType);
     if (status == RETURN_ERR)
         return RETURN_ERR;
 
@@ -136,7 +145,7 @@ static int bpl_cfg_set_basic_authentication_modes(int index, const std::string &
         return RETURN_ERR;
 
     if (!authMode.compare("None")) {
-        status = uci_converter_get_str(TYPE_VAP, index, "wav_security_mode", security);
+        status = bpl_cfg_uci_get_wireless(TYPE_VAP, index, "wav_security_mode", security);
         if (status == RETURN_ERR)
             return RETURN_ERR;
 
@@ -237,100 +246,6 @@ static int bpl_cfg_set_ap_security_mode_enabled(int index, const std::string &mo
     return bpl_cfg_set_encryption(index);
 }
 
-//============================================ STATIC END ============================================
-
-int bpl_cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex)
-{
-    char ifname[BPL_IFNAME_LEN] = {0};
-    int rpcIndex                = -1;
-
-    if (!nIndex) {
-        return RETURN_ERR;
-    }
-    utils::copy_string(ifname, inputIfName.c_str(), BPL_IFNAME_LEN);
-
-    const int ifType = (inputIfName.find('.') != std::string::npos) ? TYPE_VAP : TYPE_RADIO;
-
-    if (uci_getIndexFromInterface(ifname, &rpcIndex) == RETURN_OK) {
-        *nIndex = UCI_RETURN_INDEX(ifType, rpcIndex);
-    } else {
-        return RETURN_ERR;
-    }
-
-    return RETURN_OK;
-}
-
-int bpl_cfg_get_beerocks_param(const std::string &param, char *buf, size_t buf_len)
-{
-    char path[MAX_UCI_BUF_LEN] = {0};
-
-    if (buf_len > MAX_UCI_BUF_LEN) {
-        buf_len = MAX_UCI_BUF_LEN;
-    }
-
-    if (snprintf_s(path, MAX_UCI_BUF_LEN, "wireless.beerocks.%s", param.c_str()) <= 0)
-        return RETURN_ERR;
-
-    return uci_converter_get(path, buf, buf_len);
-}
-
-int bpl_cfg_get_beerocks_param_int(const std::string &param, int *buf)
-{
-    int status;
-    char val[MAX_UCI_BUF_LEN] = "";
-
-    status = bpl_cfg_get_beerocks_param(param, val, MAX_UCI_BUF_LEN);
-    if (status == RETURN_ERR)
-        return RETURN_ERR;
-
-    status = sscanf_s(val, "%d", buf);
-    if (status != 1)
-        return RETURN_ERR;
-
-    return RETURN_OK;
-}
-
-int bpl_cfg_get_auto_channel_enable(int index, int *enable)
-{
-    char channel[MAX_UCI_BUF_LEN] = {0};
-
-    if (!enable) {
-        return RETURN_ERR;
-    }
-
-    int status = uci_converter_get_str(TYPE_RADIO, index, "channel", channel);
-    if (status == RETURN_ERR)
-        return RETURN_ERR;
-
-    std::string channel_str(channel);
-    if (!channel_str.compare("auto")) {
-        *enable = 1;
-    } else {
-        *enable = 0;
-    }
-
-    return RETURN_OK;
-}
-
-int bpl_cfg_get_ssid_advertisement_enabled(int index, int *enabled)
-{
-    bool hidden;
-
-    int status = uci_converter_get_bool(TYPE_VAP, index, "hidden", &hidden);
-    if (status == RETURN_OK) {
-        *enabled = (!hidden) ? 1 : 0;
-    }
-
-    return status;
-}
-
-int bpl_cfg_get_wep_key(int index, int keyIndex, char *key)
-{
-    /*TODO: implement using d/s-pal apis*/
-
-    return RETURN_OK;
-}
-
 int bpl_cfg_set_vap_credentials(int index, const char ssid[BPL_SSID_LEN],
                                 const char sec[BPL_SEC_LEN], const char key[BPL_PASS_LEN],
                                 const char psk[BPL_PASS_LEN])
@@ -355,4 +270,96 @@ int bpl_cfg_set_vap_credentials(int index, const char ssid[BPL_SSID_LEN],
     }
 
     return ret;
+}
+
+#endif // BPL_PASSIVE_MODE
+
+int bpl_cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex)
+{
+    char ifname[BPL_IFNAME_LEN] = {0};
+    int rpcIndex                = -1;
+
+    if (!nIndex) {
+        return RETURN_ERR;
+    }
+    utils::copy_string(ifname, inputIfName.c_str(), BPL_IFNAME_LEN);
+
+    const int ifType = (inputIfName.find('.') != std::string::npos) ? TYPE_VAP : TYPE_RADIO;
+
+    if (bpl_cfg_uci_get_wireless_idx(ifname, &rpcIndex) == RETURN_OK) {
+        *nIndex = UCI_RETURN_INDEX(ifType, rpcIndex);
+    } else {
+        return RETURN_ERR;
+    }
+
+    return RETURN_OK;
+}
+
+int bpl_cfg_get_beerocks_param(const std::string &param, char *buf, size_t buf_len)
+{
+    char path[MAX_UCI_BUF_LEN] = {0};
+
+    if (buf_len > MAX_UCI_BUF_LEN) {
+        buf_len = MAX_UCI_BUF_LEN;
+    }
+
+    if (snprintf_s(path, MAX_UCI_BUF_LEN, "beerocks.config.%s", param.c_str()) <= 0)
+        return RETURN_ERR;
+
+    return bpl_cfg_uci_get(path, buf, buf_len);
+}
+
+int bpl_cfg_get_beerocks_param_int(const std::string &param, int *buf)
+{
+    int status;
+    char val[MAX_UCI_BUF_LEN] = "";
+
+    status = bpl_cfg_get_beerocks_param(param, val, MAX_UCI_BUF_LEN);
+    if (status == RETURN_ERR)
+        return RETURN_ERR;
+
+    status = sscanf_s(val, "%d", buf);
+    if (status != 1)
+        return RETURN_ERR;
+
+    return RETURN_OK;
+}
+
+int bpl_cfg_get_channel(int index, int *channel)
+{
+    if (!channel) {
+        return RETURN_ERR;
+    }
+
+    char channel_num[MAX_UCI_BUF_LEN] = {0};
+    int status = bpl_cfg_uci_get_wireless(TYPE_RADIO, index, "channel", channel_num);
+    if (status == RETURN_ERR)
+        return RETURN_ERR;
+
+    std::string channel_str(channel_num);
+    if (!channel_str.compare("auto")) {
+        *channel = 0;
+    } else {
+        *channel = utils::stoi(channel_str);
+    }
+
+    return RETURN_OK;
+}
+
+int bpl_cfg_get_ssid_advertisement_enabled(int index, int *enabled)
+{
+    bool hidden;
+
+    int status = bpl_cfg_uci_get_wireless_bool(TYPE_VAP, index, "hidden", &hidden);
+    if (status == RETURN_OK) {
+        *enabled = (!hidden) ? 1 : 0;
+    }
+
+    return status;
+}
+
+int bpl_cfg_get_wep_key(int index, int keyIndex, char *key)
+{
+    /*TODO: implement using d/s-pal apis*/
+    return RETURN_OK;
 }
