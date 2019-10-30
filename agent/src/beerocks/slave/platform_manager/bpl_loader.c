@@ -49,6 +49,7 @@ struct SModuleSymbols {
     int (*bpl_cfg_set_wifi_advertise_ssid)(const char *, int);
     int (*bpl_cfg_get_beerocks_credentials)(const int, char *, char *, char *);
     int (*bpl_cfg_set_beerocks_credentials)(const int, const char *, const char *, const char *);
+    int (*bpl_cfg_get_security_policy)();
     int (*bpl_cfg_set_wifi_credentials)(const char *iface, const char *, const char *,
                                         const char *);
     int (*bpl_cfg_set_onboarding)(int);
@@ -60,6 +61,7 @@ struct SModuleSymbols {
     int (*bpl_cfg_notify_iface_status)(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif);
     int (*bpl_cfg_get_administrator_credentials)(char *);
     int (*bpl_cfg_get_device_info)(struct BPL_DEVICE_INFO *);
+    int (*bpl_cfg_get_dcs_params)(const char *iface, BPL_DCS_PARAMS *params);
 
     // BPL DHCP Symbols
     int (*bpl_dhcp_mon_start)(bpl_dhcp_mon_cb);
@@ -233,6 +235,8 @@ int bpl_cfg_set_beerocks_credentials(int radio_dir, const char *ssid, const char
     return (BPL_EXEC_SYM(bpl_cfg_set_beerocks_credentials, radio_dir, ssid, pass, sec));
 }
 
+int bpl_cfg_get_security_policy() { return (BPL_EXEC_SYM(bpl_cfg_get_security_policy)); }
+
 int bpl_cfg_set_wifi_credentials(const char *iface, const char *ssid, const char *pass,
                                  const char *sec)
 {
@@ -276,6 +280,11 @@ int bpl_cfg_get_administrator_credentials(char *pass)
 int bpl_cfg_get_device_info(struct BPL_DEVICE_INFO *device_info)
 {
     return (BPL_EXEC_SYM(bpl_cfg_get_device_info, device_info));
+}
+
+int bpl_cfg_get_dcs_params(const char *iface, BPL_DCS_PARAMS *params)
+{
+    return (BPL_EXEC_SYM(bpl_cfg_get_dcs_params, iface, params));
 }
 
 int bpl_dhcp_mon_start(bpl_dhcp_mon_cb cb) { return (BPL_EXEC_SYM(bpl_dhcp_mon_start, cb)); }
