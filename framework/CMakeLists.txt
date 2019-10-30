@@ -1,5 +1,5 @@
 set(PROJECT FRAMEWORK)
-project (multiap_framework CXX)
+project (multiap_framework C CXX)
 cmake_minimum_required (VERSION 2.8.12)
 
 include(FindPkgConfig)
@@ -59,15 +59,19 @@ endif ("${isSystemDir}" STREQUAL "-1")
 set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 set(MAPF_ROOT "/opt/multiap/framework")
+set(TMP_PATH "/tmp")
 
 if(TARGET_PLATFORM STREQUAL "linux")
     set(MAPF_ROOT "${CMAKE_INSTALL_PREFIX}")
     option(USE_USER_TMP_PATH "use /tmp/$USER instead of /tmp path" ON)
     if(USE_USER_TMP_PATH)
-	    set(USER "$ENV{USER}")
+        set(USER "$ENV{USER}")
+        set(TMP_PATH "/tmp/${USER}")
     endif()
+elseif (TARGET_PLATFORM STREQUAL "turris-omnia")
+    set(MAPF_ROOT "/opt/prplmesh")
+    set(TMP_PATH "/tmp/prplmesh")
 endif()
-set(TMP_PATH "/tmp/${USER}")
 
 option(STANDALONE "Standalone build" OFF)
 
