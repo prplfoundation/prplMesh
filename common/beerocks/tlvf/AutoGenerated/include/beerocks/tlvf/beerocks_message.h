@@ -60,13 +60,13 @@ public:
 
     template <class T> static std::shared_ptr<T> get_vs_class(ieee1905_1::CmduMessage &cmdu)
     {
-        return cmdu.getClass<T>(2);
+        return std::dynamic_pointer_cast<T>(cmdu.getClass(2));
     }
 
     static std::shared_ptr<beerocks_message::cACTION_HEADER>
     get_vs_class_header(ieee1905_1::CmduMessage &cmdu)
     {
-        return cmdu.getClass<beerocks_message::cACTION_HEADER>(1);
+        return std::dynamic_pointer_cast<beerocks_message::cACTION_HEADER>(cmdu.getClass(1));
     }
 
     template <class T>
