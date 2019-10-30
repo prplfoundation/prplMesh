@@ -7,10 +7,15 @@
  */
 
 #include <tlvf/CmduMessageRx.h>
+#include <tlvf/CmduParser.h>
+#include <tlvf/CmduTlvParser.h>
 
 using namespace ieee1905_1;
 
-CmduMessageRx::CmduMessageRx() : CmduMessage() {}
+CmduMessageRx::CmduMessageRx() : CmduMessage()
+{
+    parsers_.emplace_back(std::make_shared<CmduTlvParser>(*this)); // default parser
+}
 
 CmduMessageRx::CmduMessageRx(CmduMessageRx &original) : CmduMessage()
 {
@@ -31,12 +36,7 @@ CmduMessageRx::~CmduMessageRx()
     }
 }
 
-/*
- * TODO
- * change all pointer arguments to const type where applicable
- */
-
-std::shared_ptr<cCmduHeader> CmduMessageRx::parse(uint8_t *buff, size_t buff_len, bool swap_needed)
+bool CmduMessageRx::parse(uint8_t *buff, size_t buff_len, bool swap_needed, bool parse_tlvs)
 {
     reset();
     m_parse       = true;
@@ -46,7 +46,17 @@ std::shared_ptr<cCmduHeader> CmduMessageRx::parse(uint8_t *buff, size_t buff_len
     m_cmdu_header = std::make_shared<cCmduHeader>(buff, buff_len, true, false);
     if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
         m_cmdu_header = nullptr;
+        return false;
+    }
+    
+    if (!parse_tlvs)
+        return true;
+
+    for (auto parser : parsers_) {
+        if (parser->parse())
+            return true;
     }
 
-    return m_cmdu_header;
+    
+    return false;
 }

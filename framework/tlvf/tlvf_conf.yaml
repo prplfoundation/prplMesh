@@ -40,6 +40,9 @@ include_source_path: {
   "src/CmduMessageTx.cpp",
   "include/tlvf/CmduMessageRx.h",
   "src/CmduMessageRx.cpp",
+  "include/tlvf/CmduParser.h",
+  "include/tlvf/CmduTlvParser.h",
+  "src/CmduTlvParser.cpp",
   "include/tlvf/ieee_1905_1/sVendorOUI.h",
 }
 

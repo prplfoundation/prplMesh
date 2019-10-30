@@ -12,12 +12,15 @@
 #ifndef _CmduMessageRX_H_
 #define _CmduMessageRX_H_
 
-#include "ieee_1905_1/cCmduHeader.h"
-#include "ieee_1905_1/tlvVendorSpecific.h"
+#include <tlvf/ieee_1905_1/cCmduHeader.h>
+#include <tlvf/CmduMessage.h>
 
-#include "CmduMessage.h"
+#include <list>
+#include <memory>
 
 namespace ieee1905_1 {
+
+class CmduParser;
 
 class CmduMessageRx : public CmduMessage {
 
@@ -25,10 +28,11 @@ public:
     CmduMessageRx();
     CmduMessageRx(CmduMessageRx &original);
     ~CmduMessageRx();
-
-public:
-    std::shared_ptr<cCmduHeader> parse(uint8_t *buff, size_t buff_len, bool swap_needed = true);
+    bool parse(uint8_t *buff, size_t buff_len, bool swap_needed = true, bool parse_tlvs = false);
     CmduMessageRx &operator=(const CmduMessageRx &) = delete;
+
+private:
+    std::list<std::shared_ptr<CmduParser>> parsers_;
 };
 
 }; // close namespace: ieee1905_1
