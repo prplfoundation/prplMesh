@@ -59,6 +59,15 @@ public:
         return std::dynamic_pointer_cast<T>(getClass(idx));
     }
 
+    template <class T> std::shared_ptr<T> getClass() const
+    {
+        for (size_t idx = 0; idx < getClassCount(); idx++) {
+            if (auto c = getClass<T>(idx))
+                return c;
+        }
+        return nullptr;
+    }
+
     size_t getClassCount() const;
     const std::vector<std::shared_ptr<BaseClass>> &getClassVector() const;
     size_t getMessageLength() const;
