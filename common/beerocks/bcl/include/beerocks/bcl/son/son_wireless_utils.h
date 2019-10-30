@@ -13,6 +13,7 @@
 #include "../beerocks_message_structs.h"
 
 #include <iostream>
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -248,6 +249,8 @@ private:
         {1300, 189}, {1350, 157}, {1560, 196}, {1620, 202}, {1755, 208}, {1800, 161}, {2160, 213},
         {2340, 241}, {2430, 220}, {2633, 169}, {2700, 232}, {2925, 189}, {3240, 237}, {3510, 251},
         {3600, 246}, {3900, 328}, {4680, 251}, {5265, 253}, {5850, 261}, {7020, 266}, {7800, 266}};
+
+    static const std::map<uint8_t, std::set<uint8_t>> operating_class_to_channels_map;
 };
 } // namespace son
 
