@@ -233,6 +233,8 @@ private:
     beerocks_message::sNodeHostap hostap_params;
     beerocks_message::sApChannelSwitch hostap_cs_params;
 
+    std::map<uint8_t, std::set<uint8_t>> get_supported_channels_map();
+
     SocketClient *platform_manager_socket = nullptr;
     SocketClient *backhaul_manager_socket = nullptr;
     SocketClient *master_socket           = nullptr;

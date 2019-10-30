@@ -4230,6 +4230,20 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
 }
 
 /**
+ * @param[in] None
+ * @return Map of Operating classes and matching supported channels
+ */
+std::map<uint8_t, std::set<uint8_t>> slave_thread::get_supported_channels_map()
+{
+    auto channels_list = hostap_params.supported_channels;
+    std::set<uint8_t> channels_set;
+    for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+        channels_set.insert(channels_list[i].channel);
+    }
+    return wireless_utils::channel_set_to_operating_classes(channels_set);
+}
+
+/**
  * @brief Diffie-Hellman public key exchange keys calculation
  *        class member params authkey and keywrapauth are computed
  *        on success.
