@@ -30,12 +30,14 @@ extern "C" {
 #define BPL_IFNAME_LEN 32         /* Maximal length of Wi-Fi interface name */
 #define BPL_NUM_OF_INTERFACES 7   /* Maximal number of Interfaces: (3 APs + 3 STAs) + 1 Wired */
 #define BPL_MNS_DATA_LEN 256      /* Maximal length of BPL MNS data */
-#define BPL_BACK_VAPS_GROUPS 4 /* Backhaul VAPS Groups size, group contain 1 Vap for every radio */
-#define BPL_BACK_VAPS_IN_GROUP 3   /* Number of vaps in 1 VAP group */
+#define BPL_BACK_VAPS_GROUPS 4 /* Backhaul VAPs Groups size, group contain 1 Vap for every radio */
+#define BPL_BACK_VAPS_IN_GROUP 3   /* Number of VAPs in 1 VAP group */
 #define BPL_MAC_ADDR_OCTETS_LEN 6  /* Number of octets in mac address */
 #define BPL_IPV4_ADDR_OCTETS_LEN 4 /* Number of octets in ipv4 address */
+#define BPL_BACKHAUL_BAND_LEN 7    /* Max length of backhaul preferred band: 2.4GHz/5GHz/auto */
 
 /* Radio Direction */
+#define BPL_RADIO_BAND_AUTO 0
 #define BPL_RADIO_FRONT 0
 #define BPL_RADIO_BACK 1
 
@@ -76,9 +78,12 @@ extern "C" {
 #define BPL_WLAN_SEC_WPA2_PSK_STR "WPA2-Personal"
 #define BPL_WLAN_SEC_WPA_WPA2_PSK_STR "WPA-WPA2-Personal"
 
-/* Gateway database*/
+/* Gateway database */
 #define BPL_GW_DB_MANAGE_MODE_LEN (127 + 1) /* Maximal length of MANAGEMENT MODE string */
 #define BPL_GW_DB_OPER_MODE_LEN (127 + 1)   /* Maximal length of OPERATING MODE string */
+
+/* DCS */
+#define BPL_DCS_CHANNEL_POOL_LEN (256) /* Maximal length of CHANNEL POOL string */
 
 /****************************************************************************/
 /******************************* Structures *********************************/
@@ -244,8 +249,8 @@ struct BPL_WLAN_PARAMS {
     /* Wi-Fi AP enable */
     int enabled;
 
-    /* Wi-Fi ACS enable */
-    int acs;
+    /* Wi-Fi Channel (0 for ACS) */
+    int channel;
 
     /* Wi-Fi SSID advertising */
     int advertise_ssid;
@@ -259,6 +264,15 @@ struct BPL_WLAN_PARAMS {
     /* Wi-Fi Securirt Mode */
     char security[BPL_SEC_LEN];
 };
+
+/* DCS Parameters */
+typedef struct BPL_DCS_PARAMS {
+    uint8_t enable;
+    uint16_t interval_sec;
+    uint8_t dwell_msec;
+    uint64_t refresh_sec;
+    char channel_pool[BPL_DCS_CHANNEL_POOL_LEN];
+} BPL_DCS_PARAMS;
 
 /****************************************************************************/
 /******************************** Functions *********************************/
@@ -350,6 +364,15 @@ int bpl_cfg_get_dfs_reentry();
 int bpl_cfg_get_passive_mode();
 
 /**
+ * Returns DCS channel pool [sec].
+ * 
+ * @param [in] iface Interface name for the requested parameters.
+ * @param [in/out]  a pointer to dcs parameters struct.
+ * @return -1 Error.
+ * */
+int bpl_cfg_get_dcs_params(const char *iface, BPL_DCS_PARAMS *params);
+
+/**
  * Checks the state of the Client Roaming feature.
  *
  * @return 1 Enabled.
@@ -386,12 +409,12 @@ int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_para
  * 
  * @param [out] max_vaps an int.
  * @param [out] network_enabled 1 if network is enabled or 0 otherwise.
- * @param [out] prefered_radio_band BPL_RADIO_BAND_5G or BPL_RADIO_BAND_2G
+ * @param [out] preferred_radio_band BPL_RADIO_BAND_5G or BPL_RADIO_BAND_2G or BPL_RADIO_BAND_AUTO
  *
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefered_radio_band);
+int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *preferred_radio_band);
 
 /**
  * Returns backhaul vaps list. 
@@ -444,6 +467,14 @@ int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN
  */
 int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SSID_LEN],
                                      const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN]);
+
+/**
+ * Returns the platform SDL policy
+ *
+ * @return mem_only_psk on success
+ * @return -1 Error.
+ */
+int bpl_cfg_get_security_policy();
 
 /**
  * Update the Wi-Fi settings.
