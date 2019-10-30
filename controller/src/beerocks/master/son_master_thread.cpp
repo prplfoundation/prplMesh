@@ -1419,6 +1419,7 @@ bool master_thread::handle_intel_slave_join(
     bool backhaul_manager            = (bool)notification->backhaul_params().is_backhaul_manager;
     beerocks::ePlatform ire_platform = (beerocks::ePlatform)notification->platform();
     std::string radio_identifier = network_utils::mac_to_string(notification->radio_identifier());
+    bool acs_enabled             = (notification->wlan_settings().channel == 0);
 
     std::string gw_name;
     if (is_gw_slave) {
@@ -1450,7 +1451,7 @@ bool master_thread::handle_intel_slave_join(
               << "    low_pass_filter_on = " << int(notification->low_pass_filter_on()) << std::endl
               << "    radio_identifier = " << radio_identifier << std::endl
               << "    radio_mac = " << radio_mac << std::endl
-              << "    acs_enabled = " << int(notification->wlan_settings().acs_enabled) << std::endl
+              << "    channel = " << int(notification->wlan_settings().channel) << std::endl
               << "    is_gw_slave = " << int(is_gw_slave) << std::endl;
 
     if (!is_gw_slave) {
@@ -1703,7 +1704,7 @@ bool master_thread::handle_intel_slave_join(
                           network_utils::mac_from_string(bridge_mac), beerocks::TYPE_SLAVE,
                           network_utils::mac_from_string(radio_identifier));
     }
-    database.set_hostap_is_acs_enabled(radio_mac, bool(notification->wlan_settings().acs_enabled));
+    database.set_hostap_is_acs_enabled(radio_mac, acs_enabled);
     if (!notification->is_slave_reconf()) {
         son_actions::set_hostap_active(database, tasks, radio_mac,
                                        false); // make sure AP is marked as not active
