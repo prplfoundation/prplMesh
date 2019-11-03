@@ -1518,7 +1518,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             LOG(DEBUG) << "slave is backhaul manager, updating";
             m_pBackhaulManagerSlave = sd;
 
-#ifndef BEEROCKS_TURRIS_OMNIA
+#if !defined(BEEROCKS_LINUX) && !defined(BEEROCKS_TURRIS_OMNIA)
             // Start ARP monitor
             if (enable_arp_monitor) {
                 if (!init_arp_monitor()) {
@@ -1535,7 +1535,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                 }
             }
 #else
-            LOG(INFO) << "*** ARP & DHCP Monitors are disabled in Turris Omnia ***";
+            LOG(INFO) << "*** ARP & DHCP Monitors are disabled ***";
 #endif
         }
     } break;
