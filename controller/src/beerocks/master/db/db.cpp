@@ -3190,6 +3190,8 @@ std::list<db::bss_info_conf_t> &db::get_bss_info_configuration(const sMacAddr &a
 
 void db::clear_bss_info_configuration() { bss_infos.clear(); }
 
+void db::clear_bss_info_configuration(const sMacAddr &al_mac) { bss_infos[al_mac].clear(); }
+
 //
 // PRIVATE FUNCTIONS
 //   must be used from a thread safe context
