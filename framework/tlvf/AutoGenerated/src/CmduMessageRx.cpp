@@ -65,6 +65,9 @@ CmduMessageRx::CmduMessageRx(CmduMessageRx &original) : CmduMessage()
     if (m_swap) {
         m_cmdu_header->class_swap();
     }
+    auto tlv_map_parser = std::make_shared<TlvMapParser>(new TlvMapParser());
+    parsers[-1]=tlv_map_parser;
+    
 }
 
 CmduMessageRx::~CmduMessageRx()
@@ -211,7 +214,6 @@ std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
         }
     }
 }
-
 bool CmduMessageRx::parse(uint8_t *buff, size_t buff_len, bool swap_needed, bool parse_tlvs)
 {
     reset();
@@ -227,12 +229,17 @@ bool CmduMessageRx::parse(uint8_t *buff, size_t buff_len, bool swap_needed, bool
     
     if (!parse_tlvs)
         return true;
-
-    while (auto tlv = parseNextTlv()) {
+    //need to beter classify message types in order to fit them into dictionary values,
+    //currently -1 is the default TlvMapParser.
+    //for example 4 is for vendor specific messages.
+    int msgtype = -1;
+    CmduParser* parser = (parsers[msgtype]).get();
+    while (std::shared_ptr<BaseClass> tlv = parser->Parse(*this)){
         if (std::dynamic_pointer_cast<tlvEndOfMessage>(tlv)) {
             return true;
         }
     }
+    
 
     return false;
 }
