@@ -529,6 +529,7 @@ public:
     void add_bss_info_configuration(const sMacAddr &al_mac, const bss_info_conf_t &bss_info);
     std::list<db::bss_info_conf_t> &get_bss_info_configuration(const sMacAddr &al_mac);
     void clear_bss_info_configuration();
+    void clear_bss_info_configuration(const sMacAddr &al_mac);
 
     //
     // tasks
