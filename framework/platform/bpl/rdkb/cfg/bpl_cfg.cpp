@@ -143,45 +143,6 @@ int bpl_cfg_get_passive_mode()
     return retVal;
 }
 
-int bpl_cfg_get_dcs_params(const char *iface, BPL_DCS_PARAMS *params)
-{
-
-    int index         = 0;
-    unsigned long tmp = 0;
-    if (bpl_cfg_uci_get_wireless_radio_idx(iface, &index) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_uci_get_wireless_radio_idx: Failed\n");
-        return RETURN_ERR;
-    }
-
-    if (bpl_cfg_uci_get_radio_param_ulong(index, "dcs_enable", &tmp) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_uci_get_radio_param: Failed to read DCS  dcs_enable\n");
-        return RETURN_ERR;
-    }
-    params->enable = tmp;
-    if (bpl_cfg_uci_get_radio_param_ulong(index, "dcs_interval_sec", &tmp) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_uci_get_radio_param: Failed to read DCS  dcs_interval_sec\n");
-        return RETURN_ERR;
-    }
-    params->interval_sec = tmp;
-    if (bpl_cfg_uci_get_radio_param_ulong(index, "dcs_dwell_msec", &tmp) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_uci_get_radio_param: Failed to read DCS  dcs_dwell_msec\n");
-        return RETURN_ERR;
-    }
-    params->dwell_msec = tmp;
-    if (bpl_cfg_uci_get_radio_param_ulong(index, "dcs_refresh_sec", &tmp) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_uci_get_radio_param: Failed to read DCS  dcs_refresh_sec\n");
-        return RETURN_ERR;
-    }
-    params->refresh_sec = tmp;
-    if (bpl_cfg_uci_get_radio_param(index, "dcs_channel_pool", params->channel_pool,
-                                    BPL_DCS_CHANNEL_POOL_LEN) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_uci_get_radio_param: Failed to read DCS  dcs_channel_pool\n");
-        return RETURN_ERR;
-    }
-
-    return RETURN_OK;
-}
-
 int bpl_cfg_get_client_roaming()
 {
     int retVal = -1;
