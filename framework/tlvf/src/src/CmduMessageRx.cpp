@@ -62,6 +62,9 @@ CmduMessageRx::CmduMessageRx(CmduMessageRx &original) : CmduMessage()
     if (m_swap) {
         m_cmdu_header->class_swap();
     }
+    auto tlv_map_parser = std::make_shared<TlvMapParser>(new TlvMapParser());
+    parsers[-1]=tlv_map_parser;
+    
 }
 
 CmduMessageRx::~CmduMessageRx()

@@ -11,6 +11,8 @@
 
 #include <tlvf/ieee_1905_1/cCmduHeader.h>
 #include <tlvf/CmduMessage.h>
+#include <tlvf/CmduParser.h>
+#include <map>
 
 namespace ieee1905_1 {
 
@@ -26,6 +28,7 @@ public:
 private:
     std::shared_ptr<BaseClass> parseNextTlv();
     std::shared_ptr<BaseClass> parseWscTlv();
+    std::map<int,std::shared_ptr<CmduParser>> parsers;
 };
 
 }; // close namespace: ieee1905_1
