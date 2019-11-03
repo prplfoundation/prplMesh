@@ -70,7 +70,7 @@ if(TARGET_PLATFORM STREQUAL "linux")
     endif()
 elseif (TARGET_PLATFORM STREQUAL "turris-omnia")
     set(MAPF_ROOT "/opt/prplmesh")
-    set(TMP_PATH "/tmp/prplmesh")
+    set(TMP_PATH "/tmp/beerocks")
 endif()
 
 option(STANDALONE "Standalone build" OFF)
