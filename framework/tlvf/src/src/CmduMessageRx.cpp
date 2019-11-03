@@ -227,8 +227,12 @@ bool CmduMessageRx::parse(uint8_t *buff, size_t buff_len, bool swap_needed, bool
     
     if (!parse_tlvs)
         return true;
-
-    while (auto tlv = parseNextTlv()) {
+    //need to beter classify message types in order to fit them into dictionary values,
+    //currently -1 is the default TlvMapParser.
+    //for example 4 is for vendor specific messages.
+    int msgtype = -1;
+    CmduParser* parser = (parsers[msgtype]).get();
+    while (std::shared_ptr<BaseClass> tlv = parser->Parse(*this)){
         if (std::dynamic_pointer_cast<tlvEndOfMessage>(tlv)) {
             return true;
         }

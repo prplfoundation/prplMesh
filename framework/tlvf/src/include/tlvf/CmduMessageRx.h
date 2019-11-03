@@ -12,6 +12,7 @@
 #include <tlvf/ieee_1905_1/cCmduHeader.h>
 #include <tlvf/CmduMessage.h>
 #include <tlvf/CmduParser.h>
+#include <tlvf/TlvMapParser.h>
 #include <map>
 
 namespace ieee1905_1 {
