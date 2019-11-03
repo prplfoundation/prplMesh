@@ -82,9 +82,6 @@ extern "C" {
 #define BPL_GW_DB_MANAGE_MODE_LEN (127 + 1) /* Maximal length of MANAGEMENT MODE string */
 #define BPL_GW_DB_OPER_MODE_LEN (127 + 1)   /* Maximal length of OPERATING MODE string */
 
-/* DCS */
-#define BPL_DCS_CHANNEL_POOL_LEN (256) /* Maximal length of CHANNEL POOL string */
-
 /****************************************************************************/
 /******************************* Structures *********************************/
 /****************************************************************************/
@@ -265,15 +262,6 @@ struct BPL_WLAN_PARAMS {
     char security[BPL_SEC_LEN];
 };
 
-/* DCS Parameters */
-typedef struct BPL_DCS_PARAMS {
-    uint8_t enable;
-    uint16_t interval_sec;
-    uint8_t dwell_msec;
-    uint64_t refresh_sec;
-    char channel_pool[BPL_DCS_CHANNEL_POOL_LEN];
-} BPL_DCS_PARAMS;
-
 /****************************************************************************/
 /******************************** Functions *********************************/
 /****************************************************************************/
@@ -362,15 +350,6 @@ int bpl_cfg_get_dfs_reentry();
  * @return -1 Error.
  */
 int bpl_cfg_get_passive_mode();
-
-/**
- * Returns DCS channel pool [sec].
- * 
- * @param [in] iface Interface name for the requested parameters.
- * @param [in/out]  a pointer to dcs parameters struct.
- * @return -1 Error.
- * */
-int bpl_cfg_get_dcs_params(const char *iface, BPL_DCS_PARAMS *params);
 
 /**
  * Checks the state of the Client Roaming feature.
