@@ -13,13 +13,17 @@
 
 #include <beerocks/bcl/beerocks_state_machine.h>
 
+extern "C" {
+#include <dwpal.h>
+}
+
 #include <chrono>
 #include <memory>
 
 namespace bwl {
 namespace dwpal {
 
-enum class dwpal_fsm_state { Delay, Init, GetRadioInfo, Attach, Operational, Detach };
+enum class dwpal_fsm_state { Delay, Init, GetRadioInfo, AttachVaps, Attach, Operational, Detach };
 
 enum class dwpal_fsm_event { Attach, Detach };
 
@@ -44,19 +48,24 @@ public:
 
     // Protected methods
 protected:
-    base_wlan_hal_dwpal(HALType type, std::string iface_name, bool acs_enabled,
-                        hal_event_cb_t callback, int wpa_ctrl_buffer_size);
+    base_wlan_hal_dwpal(HALType type, std::string iface_name, hal_event_cb_t callback,
+                        hal_conf_t hal_conf = {});
 
     // Process dwpal event
     virtual bool process_dwpal_event(char *buffer, int bufLen, const std::string &opcode) = 0;
 
-    bool dwpal_send_cmd(const std::string &cmd, char **reply); // for external process
-    bool dwpal_send_cmd(const std::string &cmd);
+    bool set(const std::string &param, const std::string &value,
+             int vap_id = beerocks::IFACE_RADIO_ID);
+
+    bool dwpal_send_cmd(const std::string &cmd, char **reply,
+                        int vap_id = beerocks::IFACE_RADIO_ID); // for external process
+    bool dwpal_send_cmd(const std::string &cmd, int vap_id = beerocks::IFACE_RADIO_ID);
+    bool attach_ctrl_interface(int vap_id);
 
     // Private data-members:
 private:
-    const uint32_t AP_ENABELED_TIMEOUT_SEC           = 15;
-    const uint32_t AP_ENABELED_FIXED_DFS_TIMEOUT_SEC = 660;
+    const uint32_t AP_ENABLED_TIMEOUT_SEC           = 15;
+    const uint32_t AP_ENABLED_FIXED_DFS_TIMEOUT_SEC = 660;
 
     bool fsm_setup();
     bool refresh_vap_info(int vap_id);
@@ -65,10 +74,10 @@ private:
 
     std::chrono::steady_clock::time_point m_state_timeout;
 
-    void *m_dwpal_ctx = nullptr;
+    void *m_dwpal_ctx[beerocks::IFACE_TOTAL_VAPS] = {nullptr};
 
-    std::shared_ptr<char> m_wpa_ctrl_buffer;
-    size_t m_wpa_ctrl_buffer_size = 0;
+    char m_wpa_ctrl_buffer[HOSTAPD_TO_DWPAL_MSG_LENGTH];
+    size_t m_wpa_ctrl_buffer_size = HOSTAPD_TO_DWPAL_MSG_LENGTH;
 };
 
 } // namespace dwpal

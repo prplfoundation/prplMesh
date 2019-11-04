@@ -16,7 +16,7 @@
 #include <easylogging++.h>
 
 extern "C" {
-#include <dwpal/dwpal.h>
+#include <dwpal.h>
 }
 
 #define UNHANDLED_EVENTS_LOGS 20
@@ -39,6 +39,9 @@ std::ostream &operator<<(std::ostream &out, const dwpal_fsm_state &value)
         break;
     case dwpal_fsm_state::GetRadioInfo:
         out << "GetRadioInfo";
+        break;
+    case dwpal_fsm_state::AttachVaps:
+        out << "AttachVaps";
         break;
     case dwpal_fsm_state::Attach:
         out << "Attach";
@@ -70,21 +73,11 @@ std::ostream &operator<<(std::ostream &out, const dwpal_fsm_event &value)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-base_wlan_hal_dwpal::base_wlan_hal_dwpal(HALType type, std::string iface_name, bool acs_enabled,
-                                         hal_event_cb_t callback, int wpa_ctrl_buffer_size)
-    : base_wlan_hal(type, iface_name, IfaceType::Intel, acs_enabled, callback),
-      beerocks::beerocks_fsm<dwpal_fsm_state, dwpal_fsm_event>(dwpal_fsm_state::Delay),
-      m_wpa_ctrl_buffer_size(wpa_ctrl_buffer_size)
+base_wlan_hal_dwpal::base_wlan_hal_dwpal(HALType type, std::string iface_name,
+                                         hal_event_cb_t callback, hal_conf_t hal_conf)
+    : base_wlan_hal(type, iface_name, IfaceType::Intel, callback, hal_conf),
+      beerocks::beerocks_fsm<dwpal_fsm_state, dwpal_fsm_event>(dwpal_fsm_state::Delay)
 {
-
-    // Allocate wpa_ctrl buffer
-    if (m_wpa_ctrl_buffer_size) {
-        m_wpa_ctrl_buffer = std::shared_ptr<char>(new char[m_wpa_ctrl_buffer_size], [](char *obj) {
-            if (obj)
-                delete[] obj;
-        });
-    }
-
     // Initialize the FSM
     fsm_setup();
 }
@@ -136,21 +129,8 @@ bool base_wlan_hal_dwpal::fsm_setup()
                 // Open and attach a control interface to wpa_supplicant/hostapd.
                 // Check if not exist before
                 bool attached = false;
-                if (m_dwpal_ctx == nullptr) {
-                    int result = dwpal_hostap_interface_attach(
-                        &m_dwpal_ctx, m_radio_info.iface_name.c_str(),
-                        nullptr); // return values: 0 on success, -1 on failure
-                    if ((result == 0) && m_dwpal_ctx) {
-                        attached = true;
-                        LOG(DEBUG) << "dwpal_hostap_interface_attach() success for: "
-                                   << m_radio_info.iface_name;
-                    } else if (result != 0) {
-                        LOG(ERROR) << "dwpal_hostap_interface_attach() failed for: "
-                                   << m_radio_info.iface_name;
-                    } else {
-                        LOG(ERROR) << "dwpal_hostap_interface_attach() returns 0 for: "
-                                   << m_radio_info.iface_name << " but context is NULL!";
-                    }
+                if (m_dwpal_ctx[0] == nullptr) {
+                    attached = attach_ctrl_interface(beerocks::IFACE_RADIO_ID);
                 } else {
                     //Already attached
                     attached = true;
@@ -182,14 +162,14 @@ bool base_wlan_hal_dwpal::fsm_setup()
 
         .entry([&](const void *args) -> bool {
             m_state_timeout =
-                std::chrono::steady_clock::now() + std::chrono::seconds(AP_ENABELED_TIMEOUT_SEC);
+                std::chrono::steady_clock::now() + std::chrono::seconds(AP_ENABLED_TIMEOUT_SEC);
             return true;
         })
 
         // Handle "Detach" event
         .on(dwpal_fsm_event::Detach, dwpal_fsm_state::Detach)
 
-        .on(dwpal_fsm_event::Attach, {dwpal_fsm_state::Attach, dwpal_fsm_state::Detach},
+        .on(dwpal_fsm_event::Attach, {dwpal_fsm_state::AttachVaps, dwpal_fsm_state::Detach},
             [&](TTransition &transition, const void *args) -> bool {
                 // Attempt to read radio info
                 if (!refresh_radio_info()) {
@@ -201,12 +181,16 @@ bool base_wlan_hal_dwpal::fsm_setup()
                     return true;
                 }
 
-                auto fixed_channel = (!m_radio_info.acs_enabled && !m_radio_info.is_dfs_channel);
-                auto fixed_dfs_channel = (!m_radio_info.acs_enabled && m_radio_info.is_dfs_channel);
-                LOG(DEBUG) << "m_radio_info.acs_enabled  = " << int(m_radio_info.acs_enabled)
-                           << " m_radio_info.is_dfs_channel = " << int(m_radio_info.is_dfs_channel)
-                           << " fixed_dfs_channel = " << int(fixed_dfs_channel)
-                           << " fixed_channel = " << int(fixed_channel);
+                auto fixed_channel =
+                    (!get_hal_conf().ap_acs_enabled && !m_radio_info.is_dfs_channel);
+                auto fixed_dfs_channel =
+                    (!get_hal_conf().ap_acs_enabled && m_radio_info.is_dfs_channel);
+                LOG(DEBUG) << "hal_conf.ap_acs_enabled=" << int(get_hal_conf().ap_acs_enabled)
+                           << ", hal_conf.ap_passive_mode_enabled="
+                           << int(get_hal_conf().ap_passive_mode_enabled)
+                           << ", m_radio_info.is_dfs_channel=" << int(m_radio_info.is_dfs_channel)
+                           << ", fixed_dfs_channel=" << int(fixed_dfs_channel)
+                           << ", fixed_channel=" << int(fixed_channel);
 
                 // AP is Enabled
                 LOG(DEBUG) << "wifi_ctrl_enabled  = " << int(m_radio_info.wifi_ctrl_enabled);
@@ -230,13 +214,37 @@ bool base_wlan_hal_dwpal::fsm_setup()
                             error = true;
                         }
                     }
-                } else if (m_radio_info.wifi_ctrl_enabled == 2) {
-                    if (m_radio_info.tx_enabled) {
-                        LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
-                        return true;
-                    } else {
-                        LOG(ERROR) << "ap_enabled with tx OFF!";
-                        error = true;
+                } else { // Auto Channel
+                    if (get_hal_conf().ap_passive_mode_enabled) {
+                        if (m_radio_info.wifi_ctrl_enabled == 1) {
+                            if (m_radio_info.tx_enabled) {
+                                LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
+                                return true;
+                            } else {
+                                LOG(ERROR) << "ap_enabled with tx OFF!";
+                                error = true;
+                            }
+                        } else if (m_radio_info.wifi_ctrl_enabled == 2) {
+                            LOG(ERROR)
+                                << "Auto channel with passive_mode=on, wifi_ctrl_enabled = 2";
+                            error = true;
+                        }
+                    } else { // ap_passive_mode_enabled == false
+
+                        if (m_radio_info.wifi_ctrl_enabled == 2) {
+
+                            if (m_radio_info.tx_enabled) {
+                                LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
+                                return true;
+                            } else {
+                                LOG(ERROR) << "ap_enabled with tx OFF!";
+                                error = true;
+                            }
+                        } else if (m_radio_info.wifi_ctrl_enabled == 1) {
+                            LOG(ERROR)
+                                << "Auto channel with passive_mode=off, wifi_ctrl_enabled = 1";
+                            error = true;
+                        }
                     }
                 }
 
@@ -246,6 +254,34 @@ bool base_wlan_hal_dwpal::fsm_setup()
 
                 // Remain in the current state
                 return false;
+            })
+
+        //////////////////////////////////////////////////////////////////////////
+        ////////////////////////// State: AttachVaps ///////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        .state(dwpal_fsm_state::AttachVaps)
+
+        .entry([&](const void *args) -> bool { return true; })
+
+        // Handle "Detach" event
+        .on(dwpal_fsm_event::Detach, dwpal_fsm_state::Detach)
+
+        .on(dwpal_fsm_event::Attach, {dwpal_fsm_state::Attach, dwpal_fsm_state::Detach},
+            [&](TTransition &transition, const void *args) -> bool {
+                uint attached = 0;
+                for (auto &vap : m_radio_info.available_vaps) {
+                    if (attach_ctrl_interface(vap.first)) {
+                        attached++;
+                    }
+                }
+
+                if (attached != m_radio_info.available_vaps.size()) {
+                    return (transition.change_destination(dwpal_fsm_state::Detach));
+                }
+
+                // move to next state
+                return true;
             })
 
         //////////////////////////////////////////////////////////////////////////
@@ -261,8 +297,8 @@ bool base_wlan_hal_dwpal::fsm_setup()
             {dwpal_fsm_state::Operational, dwpal_fsm_state::Delay, dwpal_fsm_state::Detach},
             [&](TTransition &transition, const void *args) -> bool {
                 // Get the wpa_supplicant/hostapd event interface file descriptor
-                if (m_dwpal_ctx != nullptr) {
-                    if (dwpal_hostap_event_fd_get(m_dwpal_ctx, &m_fd_ext_events)) {
+                if (m_dwpal_ctx[0] != nullptr) {
+                    if (dwpal_hostap_event_fd_get(m_dwpal_ctx[0], &m_fd_ext_events)) {
                         LOG(ERROR) << "dwpal_hostap_event_fd_get() failed for: "
                                    << m_radio_info.iface_name;
                         return (transition.change_destination(dwpal_fsm_state::Detach));
@@ -294,24 +330,27 @@ bool base_wlan_hal_dwpal::fsm_setup()
         .state(dwpal_fsm_state::Detach)
 
         .entry([&](const void *args) -> bool {
-            LOG(DEBUG) << "dwpal_attach_fsm - Detaching...";
+            bool success = true;
 
-            if (m_dwpal_ctx == nullptr) {
-                LOG(WARNING) << "Trying to detach while dwpal context is NULL ==> cont...";
-            } else {
-                DWPAL_Ret ret = dwpal_hostap_interface_detach(&m_dwpal_ctx);
-                if (ret != 0) {
-                    LOG(ERROR) << "dwpal_hostap_interface_detach() failed, ret=" << ret;
-                    return false;
+            LOG(DEBUG) << "dwpal_fsm_state::Detach";
+
+            for (int i = 0; i < beerocks::IFACE_TOTAL_VAPS; i++) {
+                if (m_dwpal_ctx[i]) {
+                    LOG(INFO) << "Call DWPAL socket close";
+                    DWPAL_Ret ret = dwpal_hostap_socket_close(&m_dwpal_ctx[i]);
+
+                    if (ret == DWPAL_SUCCESS) {
+                        m_dwpal_ctx[i] = nullptr;
+                    } else {
+                        LOG(ERROR) << "DWPAL socket close failed, ret=" << ret;
+                        success = false;
+                    }
                 }
-
-                m_dwpal_ctx = nullptr;
-                LOG(INFO) << "dwpal_hostap_interface_detach() success!";
             }
 
             m_fd_ext_events = -1;
 
-            return true;
+            return success;
         })
 
         // Handle "Attach" event
@@ -338,6 +377,7 @@ HALState base_wlan_hal_dwpal::attach(bool block)
         case dwpal_fsm_state::Delay:
         case dwpal_fsm_state::Init:
         case dwpal_fsm_state::GetRadioInfo:
+        case dwpal_fsm_state::AttachVaps:
         case dwpal_fsm_state::Attach: {
             if (block) {
                 // TODO: Delay?
@@ -371,32 +411,49 @@ bool base_wlan_hal_dwpal::detach()
     return (state() == dwpal_fsm_state::Detach);
 }
 
-bool base_wlan_hal_dwpal::ping()
+bool base_wlan_hal_dwpal::set(const std::string &param, const std::string &value, int vap_id)
 {
-    char *reply = nullptr;
-
-    if (!dwpal_send_cmd("PING", &reply)) {
+    const std::string cmd = "SET " + param + " " + value;
+    if (!dwpal_send_cmd(cmd, vap_id)) {
+        LOG(ERROR) << "FAiled setting param " << param;
         return false;
     }
 
     return true;
 }
 
-bool base_wlan_hal_dwpal::dwpal_send_cmd(const std::string &cmd)
+bool base_wlan_hal_dwpal::ping()
+{
+    if (!dwpal_send_cmd("PING")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool base_wlan_hal_dwpal::dwpal_send_cmd(const std::string &cmd, int vap_id)
 {
     int result;
     int try_cnt = 0;
 
-    auto buffer         = m_wpa_ctrl_buffer.get();
+    auto buffer         = m_wpa_ctrl_buffer;
     auto buff_size_copy = m_wpa_ctrl_buffer_size;
-    if (!m_dwpal_ctx) {
-        LOG(ERROR) << "m_dwpal_ctx=nullptr";
+    int ctx_index       = vap_id + 1;
+
+    if (ctx_index < 0 || ctx_index >= beerocks::IFACE_TOTAL_VAPS) {
+        LOG(ERROR) << "ctx_index " << ctx_index << " is out of bounds";
+        return false;
+    }
+
+    if (!m_dwpal_ctx[ctx_index]) {
+        LOG(ERROR) << "m_dwpal_ctx[" << ctx_index << "]=nullptr";
         return false;
     }
 
     do {
         //LOG(DEBUG) << "Send dwpal cmd: " << cmd.c_str();
-        result = dwpal_hostap_cmd_send(m_dwpal_ctx, cmd.c_str(), NULL, buffer, &buff_size_copy);
+        result = dwpal_hostap_cmd_send(m_dwpal_ctx[ctx_index], cmd.c_str(), NULL, buffer,
+                                       &buff_size_copy);
         if (result != 0) {
             LOG(DEBUG) << "Failed to send cmd to DWPAL: " << cmd << " --> Retry";
         }
@@ -422,18 +479,49 @@ bool base_wlan_hal_dwpal::dwpal_send_cmd(const std::string &cmd)
     return true;
 }
 
-bool base_wlan_hal_dwpal::dwpal_send_cmd(const std::string &cmd, char **reply)
+bool base_wlan_hal_dwpal::dwpal_send_cmd(const std::string &cmd, char **reply, int vap_id)
 {
     if (!reply) {
         LOG(ERROR) << "Invalid reply pointer!";
         return false;
     }
 
-    if (!dwpal_send_cmd(cmd)) {
+    if (!dwpal_send_cmd(cmd, vap_id)) {
         return false;
     }
 
-    *reply = m_wpa_ctrl_buffer.get();
+    *reply = m_wpa_ctrl_buffer;
+
+    return true;
+}
+
+bool base_wlan_hal_dwpal::attach_ctrl_interface(int vap_id)
+{
+    int ctx_index = vap_id + 1;
+    if (ctx_index < 0 || ctx_index >= beerocks::IFACE_TOTAL_VAPS) {
+        LOG(ERROR) << "ctx_index " << ctx_index << " is out of bounds";
+        return false;
+    }
+
+    if (m_dwpal_ctx[ctx_index]) {
+        LOG(ERROR) << "m_dwpal_ctx[" << ctx_index << "] already attached";
+        return false;
+    }
+
+    const std::string ifname =
+        beerocks::utils::get_iface_string_from_iface_vap_ids(m_radio_info.iface_name, vap_id);
+    int result = dwpal_hostap_interface_attach(&m_dwpal_ctx[ctx_index], ifname.c_str(), nullptr);
+
+    if ((result == 0) && m_dwpal_ctx[ctx_index]) {
+        LOG(DEBUG) << "dwpal_hostap_interface_attach() success for: " << ifname;
+    } else if (result != 0) {
+        LOG(ERROR) << "dwpal_hostap_interface_attach() failed for: " << ifname;
+        return false;
+    } else {
+        LOG(ERROR) << "dwpal_hostap_interface_attach() returns 0 for: " << ifname
+                   << " but context is NULL!";
+        return false;
+    }
 
     return true;
 }
@@ -442,10 +530,7 @@ bool base_wlan_hal_dwpal::refresh_radio_info()
 {
     char *reply = nullptr;
 
-    if (!dwpal_send_cmd("GET_RADIO_INFO", &reply)) {
-        LOG(ERROR) << __func__ << " failed";
-        return false;
-    }
+    // TODO: Add radio_info get for station
 
     // Station HAL
     if (get_type() == HALType::Station) {
@@ -454,14 +539,17 @@ bool base_wlan_hal_dwpal::refresh_radio_info()
         // m_radio_info.wifi_ctrl_enabled = beerocks::string_utils::stoi(reply["HostapdEnabled"]);
         // m_radio_info.tx_enabled        = beerocks::string_utils::stoi(reply["TxPower"]);
         // m_radio_info.channel           = beerocks::string_utils::stoi(reply["Channel"]);
-        if (m_radio_info.channel <= 0) {
-            //LOG(ERROR) << "X_LANTIQ_COM_Vendor_Channel not valid: " << radio_info.channel;
-            return false;
-        } else if (son::wireless_utils::which_freq(m_radio_info.channel) ==
-                   beerocks::eFreqType::FREQ_5G) {
-            m_radio_info.is_5ghz = true;
-        }
+        // if (m_radio_info.channel <= 0) {
+        // 	//LOG(ERROR) << "X_LANTIQ_COM_Vendor_Channel not valid: " << radio_info.channel;
+        // 	return false;
+        // } else if (son::wireless_utils::which_freq(m_radio_info.channel) == beerocks::eFreqType::FREQ_5G) {
+        // 	m_radio_info.is_5ghz = true;
+        // }
     } else {
+        if (!dwpal_send_cmd("GET_RADIO_INFO", &reply)) {
+            LOG(ERROR) << __func__ << " failed";
+            return false;
+        }
         // update radio info struct
         size_t replyLen               = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
         size_t numOfValidArgs[7]      = {0};
@@ -480,7 +568,8 @@ bool base_wlan_hal_dwpal::refresh_radio_info()
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, sizeof(m_radio_info)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -549,7 +638,8 @@ bool base_wlan_hal_dwpal::refresh_vap_info(int vap_id)
 
     replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
 
-    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse) == DWPAL_FAILURE) {
+    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, sizeof(ssid)) ==
+        DWPAL_FAILURE) {
         LOG(ERROR) << "DWPAL parse error on " << ifname;
         return false;
     }
@@ -598,16 +688,16 @@ bool base_wlan_hal_dwpal::process_ext_events()
 {
     char opCode[DWPAL_OPCODE_STRING_LENGTH] = {0};
 
-    if (!m_dwpal_ctx) {
+    if (!m_dwpal_ctx[0]) {
         LOG(ERROR) << "Invalid WPA Control socket (m_dwpal_ctx == nullptr)";
         return false;
     }
 
-    auto buffer         = m_wpa_ctrl_buffer.get();
+    auto buffer         = m_wpa_ctrl_buffer;
     auto buff_size_copy = m_wpa_ctrl_buffer_size;
 
     // Check if there are pending event and get it
-    int status = dwpal_hostap_event_get(m_dwpal_ctx, buffer, &buff_size_copy, opCode);
+    int status = dwpal_hostap_event_get(m_dwpal_ctx[0], buffer, &buff_size_copy, opCode);
 
     if (status == DWPAL_FAILURE) {
         LOG(ERROR) << "Failed reading event from DWPAL socket --> detaching!";
@@ -630,6 +720,14 @@ bool base_wlan_hal_dwpal::process_ext_events()
             << "DWPAL unhandled event opcode recieved: " << opCode;
         return true;
     } else if (!strncmp(opCode, "BEACON-REQ-TX-STATUS", sizeof(opCode))) {
+        LOG_EVERY_N(UNHANDLED_EVENTS_LOGS, DEBUG)
+            << "DWPAL unhandled event opcode recieved: " << opCode;
+        return true;
+    } else if (!strncmp(opCode, "CTRL-EVENT-BSS-ADDED", sizeof(opCode))) {
+        LOG_EVERY_N(UNHANDLED_EVENTS_LOGS, DEBUG)
+            << "DWPAL unhandled event opcode recieved: " << opCode;
+        return true;
+    } else if (!strncmp(opCode, "CTRL-EVENT-BSS-REMOVED", sizeof(opCode))) {
         LOG_EVERY_N(UNHANDLED_EVENTS_LOGS, DEBUG)
             << "DWPAL unhandled event opcode recieved: " << opCode;
         return true;
