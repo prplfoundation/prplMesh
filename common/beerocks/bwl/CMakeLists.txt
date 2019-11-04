@@ -12,10 +12,13 @@ file(GLOB_RECURSE bwl_common_sources ${MODULE_PATH}/common/*.c*)
 # Support more permissive c++ language
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
+# Default BWL Type
+set(BWL_TYPE "DUMMY")
+
 # UGW
 if (TARGET_PLATFORM STREQUAL "ugw")
 
-    set(BWL_TYPE_DEFAULT "DWPAL")
+    set(BWL_TYPE "DWPAL")
     # Extra libraries
     list(APPEND BWL_LIBS rt fapiwlancommon dl helper ugwhelper blobmsg_json)
     # UGW platform libraries
@@ -24,10 +27,11 @@ if (TARGET_PLATFORM STREQUAL "ugw")
     link_directories(${PLATFORM_STAGING_DIR}/opt/lantiq/lib)
     # hostap dir
     set(HOSTAPD_DIR "${PLATFORM_BUILD_DIR}/iwlwav-hostap-2.6")
+    
 # RDKB
 elseif(TARGET_PLATFORM STREQUAL "rdkb")
 
-    set(BWL_TYPE_DEFAULT "DWPAL")
+    set(BWL_TYPE "DWPAL")
     # Extra libraries
     list(APPEND BWL_LIBS rt dl)
     # Extre directories
@@ -35,14 +39,25 @@ elseif(TARGET_PLATFORM STREQUAL "rdkb")
 
 # Linux
 elseif(TARGET_PLATFORM STREQUAL "linux")
-    set(BWL_TYPE_DEFAULT "DUMMY")
+    set(BWL_TYPE "DUMMY")
     set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
     add_definitions(-DBEEROCKS_TMP_PATH="${BEEROCKS_TMP_PATH}")
+
+# Turris Omnia
+elseif(TARGET_PLATFORM STREQUAL "turris-omnia")
+
+    set(BWL_TYPE "NL80211")
+
+    # hostapd directory
+    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd-full*/hostapd-*")
+    find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS "${HOSTAPD_SEARCH_PATHS}" NO_CMAKE_FIND_ROOT_PATH)
+    set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
+
 endif()
 
-set(BWL_TYPE ${BWL_TYPE_DEFAULT} CACHE STRING "Which BWL backend to use")
+set(BWL_TYPE ${BWL_TYPE} CACHE STRING "Which BWL backend to use")
 
-message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} ${BWL_TYPE} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
+message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} (${BoldBlue}${BWL_TYPE}${BoldWhite}) for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 ##########################################################################
 ##########################################################################
@@ -83,13 +98,49 @@ elseif(BWL_TYPE STREQUAL "WAV")
 
 elseif(BWL_TYPE STREQUAL "DWPAL")
     
+    include_directories(
+        ${HOSTAPD_DIR}/src/drivers
+        ${PLATFORM_BUILD_DIR}/iwlwav-iw-4.14
+        ${PLATFORM_INCLUDE_DIR}/libnl3
+    )
+
     file(GLOB bwl_platform_sources
         ${bwl_platform_sources}
         ${MODULE_PATH}/dwpal/*.c*
     )
 
-    find_package(dwpal REQUIRED)
-    list(APPEND BWL_LIBS dwpal::dwpal)
+    list(APPEND BWL_LIBS dwpal)
+
+elseif(BWL_TYPE STREQUAL "NL80211")
+
+    file(GLOB bwl_platform_sources
+        ${MODULE_PATH}/nl80211/*.c*
+
+        # WPA Control Interface
+        ${HOSTAPD_DIR}/src/common/wpa_ctrl.c
+        ${HOSTAPD_DIR}/src/utils/os_unix.c
+    )
+
+    # Enable WPA control interface
+    add_definitions(
+        -DCONFIG_CTRL_IFACE
+        -DCONFIG_CTRL_IFACE_UNIX
+    )
+
+    # Hostapd/NL80211 include directories
+    include_directories(
+        ${HOSTAPD_DIR}/src/utils
+        ${HOSTAPD_DIR}/src/common
+        ${HOSTAPD_DIR}/src/drivers
+        ${PLATFORM_INCLUDE_DIR}/libnl-tiny
+    )
+
+    # Platform libraries
+    link_directories(
+        ${PLATFORM_STAGING_DIR}/usr/lib
+    )
+
+    list(APPEND BWL_LIBS nl-tiny)
 
 elseif(BWL_TYPE STREQUAL "DUMMY")
 
@@ -104,8 +155,9 @@ endif()
 
 # Build the library
 add_library(${PROJECT_NAME} SHARED ${bwl_common_sources} ${bwl_platform_sources})
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
-target_link_libraries(${PROJECT_NAME} beerocks::bcl ${BWL_LIBS})
+target_link_libraries(${PROJECT_NAME} beerocks::bcl elpp ${BWL_LIBS})
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         $<TARGET_PROPERTY:beerocks::bcl,INTERFACE_INCLUDE_DIRECTORIES>
