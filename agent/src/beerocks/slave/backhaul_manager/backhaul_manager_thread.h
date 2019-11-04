@@ -127,6 +127,8 @@ private:
         beerocks::eIfaceType wire_iface_type;
         beerocks::eIfaceType wireless_iface_type;
         bwl::WiFiSec security_type;
+        bool mem_only_psk;
+        eFreqType backhaul_preferred_radio_band;
 
         // Slave handling the active wireless connection
         // std::shared_ptr<bwl::sta_wlan_hal> active_slave_hal;
