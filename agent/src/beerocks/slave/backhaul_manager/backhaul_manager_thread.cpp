@@ -1157,7 +1157,8 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
             }
 
             if (active_hal->connect(m_sConfig.ssid, m_sConfig.pass, m_sConfig.security_type,
-                                    selected_bssid, selected_bssid_channel, hidden_ssid)) {
+                                    m_sConfig.mem_only_psk, selected_bssid, selected_bssid_channel,
+                                    hidden_ssid)) {
                 LOG(DEBUG) << "successful call to active_hal->connect(), bssid=" << selected_bssid
                            << ", channel=" << selected_bssid_channel
                            << ", iface=" << m_sConfig.wireless_iface;
@@ -2032,13 +2033,13 @@ bool main_thread::select_bssid()
     std::string best_24_sta_iface, best_5_high_sta_iface, best_5_low_sta_iface, best_5_sta_iface;
 
     // Support up to 256 scan results
-    net::sScanResult scan_results[256];
+    std::vector<bwl::SScanResult> scan_results;
 
     LOG(DEBUG) << "select_bssid: SSID = " << m_sConfig.ssid;
 
     for (auto soc : slaves_sockets) {
 
-        if (soc->sta_iface.empty()) {
+        if (soc->sta_iface.empty() || !soc->sta_wlan_hal) {
             LOG(DEBUG) << "skipping empty iface";
             continue;
         }
@@ -2046,16 +2047,16 @@ bool main_thread::select_bssid()
         std::string iface = soc->sta_iface;
 
         LOG(DEBUG) << "select_bssid: iface  = " << iface;
-        int num_of_results = soc->sta_wlan_hal->get_scan_results(m_sConfig.ssid, scan_results, 256);
+        int num_of_results = soc->sta_wlan_hal->get_scan_results(m_sConfig.ssid, scan_results);
         LOG(DEBUG) << "Scan Results: " << num_of_results;
 
-        for (int i = 0; i < num_of_results; i++) {
-            auto &scan_result = scan_results[i];
+        for (auto &scan_result : scan_results) {
 
-            auto bssid = network_utils::mac_to_string(scan_result.mac);
+            auto bssid = network_utils::mac_to_string(scan_result.bssid);
             LOG(DEBUG) << "select_bssid: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface
                        << ", rssi=" << int(scan_result.rssi);
+
             auto ap_blacklist_it = ap_blacklist.find(bssid);
             if (ap_blacklist_it != ap_blacklist.end()) {
                 ap_blacklist_entry &entry = ap_blacklist_it->second;
@@ -2226,9 +2227,8 @@ bool main_thread::select_bssid()
 
 void main_thread::get_scan_measurement()
 {
-
     // Support up to 256 scan results
-    net::sScanResult scan_results[256];
+    std::vector<bwl::SScanResult> scan_results;
 
     LOG(DEBUG) << "get_scan_measurement: SSID = " << m_sConfig.ssid;
     scan_measurement_list.clear();
@@ -2238,10 +2238,13 @@ void main_thread::get_scan_measurement()
             LOG(DEBUG) << "skipping empty iface";
             continue;
         }
+        if (!soc->sta_wlan_hal) {
+            continue;
+        }
 
         std::string iface = soc->sta_iface;
         LOG(DEBUG) << "get_scan_measurement: iface  = " << iface;
-        int num_of_results = soc->sta_wlan_hal->get_scan_results(m_sConfig.ssid, scan_results, 256);
+        int num_of_results = soc->sta_wlan_hal->get_scan_results(m_sConfig.ssid, scan_results);
         LOG(DEBUG) << "Scan Results: " << int(num_of_results);
         if (num_of_results < 0) {
             LOG(ERROR) << "get_scan_results failed!";
@@ -2250,10 +2253,9 @@ void main_thread::get_scan_measurement()
             continue;
         }
 
-        for (int i = 0; i < num_of_results; i++) {
-            auto &scan_result = scan_results[i];
+        for (auto &scan_result : scan_results) {
 
-            auto bssid = network_utils::mac_to_string(scan_result.mac);
+            auto bssid = network_utils::mac_to_string(scan_result.bssid);
             LOG(DEBUG) << "get_scan_measurement: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface;
 
@@ -2271,7 +2273,7 @@ void main_thread::get_scan_measurement()
                 //insert new entry
                 sScanResult scan_measurement;
 
-                std::copy_n(scan_result.mac.oct, MAC_ADDR_LEN, scan_measurement.mac.oct);
+                std::copy_n(scan_result.bssid.oct, MAC_ADDR_LEN, scan_measurement.mac.oct);
                 scan_measurement.channel     = scan_result.channel;
                 scan_measurement.rssi        = scan_result.rssi;
                 scan_measurement_list[bssid] = scan_measurement;
