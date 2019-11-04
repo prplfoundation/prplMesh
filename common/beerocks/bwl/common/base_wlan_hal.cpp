@@ -20,16 +20,14 @@ SHARE_EASYLOGGINGPP(el::Helpers::storage())
 namespace bwl {
 
 base_wlan_hal::base_wlan_hal(HALType type, std::string iface_name, IfaceType iface_type,
-                             bool acs_enabled, hal_event_cb_t callback)
-    : m_type(type), m_iface_name(iface_name), m_iface_type(iface_type), m_acs_enabled(acs_enabled),
+                             hal_event_cb_t callback, hal_conf_t hal_conf)
+    : m_hal_conf(hal_conf), m_type(type), m_iface_name(iface_name), m_iface_type(iface_type),
       m_int_event_cb(callback)
-
 {
-
     // Initialize radio info structure
-    m_radio_info.iface_name  = iface_name;
-    m_radio_info.iface_type  = iface_type;
-    m_radio_info.acs_enabled = acs_enabled;
+    m_radio_info.iface_name = iface_name;
+    m_radio_info.iface_type = iface_type;
+
     // Create an eventfd for internal events
     if ((m_fd_int_events = eventfd(0, EFD_SEMAPHORE)) < 0) {
         LOG(FATAL) << "Failed creating eventfd: " << strerror(errno);

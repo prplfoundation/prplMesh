@@ -66,6 +66,41 @@ public:
     virtual ~ap_wlan_hal() = default;
 
     /*!
+     * Enable the radio interface
+     *
+     * @return true on success or false on error.
+     */
+    virtual bool enable() = 0;
+
+    /*!
+     * Disable the radio interface
+     *
+     * @return true on success or false on error.
+     */
+    virtual bool disable() = 0;
+
+    /*!
+     * Set start_disabled flag
+     * 
+     * @param [in] enable The start_disabled flag
+     * @param [in] vap_id vap_id to set
+     * 
+     * @return true on success or false on error.
+     */
+    virtual bool set_start_disabled(bool enable, int vap_id = beerocks::IFACE_RADIO_ID) = 0;
+
+    /*!
+     * Set the AP channel
+     * 
+     * @param [in] chan The channel to switch to.
+     * @param [in] bw The bandwidth (in Mhz) of the target channel.
+     * @param [in] center_channel VHT center frequency.
+     * 
+     * @return true on success or false on error.
+     */
+    virtual bool set_channel(int chan, int bw, int center_channel) = 0;
+
+    /*!
      * Allow the station with the given MAC address to connect.
      *
      * @param [in] mac The MAC address of the station.
@@ -262,6 +297,14 @@ public:
     virtual bool read_acs_report() = 0;
 
     /*!
+     * Read the supported channls from the hardware
+     * On successful completion the information can be retrieved 
+     *
+     * @return true on success or false on error.
+     */
+    virtual bool read_supported_channels() = 0;
+
+    /*!
      * Returns a string representation of the WLAN driver version.
      */
     virtual std::string get_radio_driver_version() = 0;
@@ -273,6 +316,13 @@ public:
      */
     virtual bool set_vap_enable(const std::string &iface_name, const bool enable) = 0;
     virtual bool get_vap_enable(const std::string &iface_name, bool &enable)      = 0;
+
+    /*!
+     * Generate "AP-STA-CONNECTED" events on connected clients on AP
+     * 
+     * @return true on success or false on error.
+     */
+    virtual bool generate_connected_clients_events() = 0;
 };
 
 } // namespace bwl
@@ -281,12 +331,12 @@ public:
 extern "C" {
 
 // Types
-typedef bwl::ap_wlan_hal *(*ap_wlan_hal_create_t)(std::string, bool,
+typedef bwl::ap_wlan_hal *(*ap_wlan_hal_create_t)(std::string, bwl::hal_conf_t,
                                                   bwl::base_wlan_hal::hal_event_cb_t);
 typedef void (*ap_wlan_hal_destroy_t)(bwl::ap_wlan_hal *);
 
 // Prototypes
-bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bool acs_enabled,
+bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bwl::hal_conf_t hal_conf,
                                      bwl::base_wlan_hal::hal_event_cb_t cb);
 void ap_wlan_hal_destroy(bwl::ap_wlan_hal *obj);
 }
