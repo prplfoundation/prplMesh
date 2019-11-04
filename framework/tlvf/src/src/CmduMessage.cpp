@@ -80,6 +80,19 @@ uint16_t CmduMessage::getNextTlvLength() const
     return tlvLength;
 }
 
+uint8_t *CmduMessage::getNextTlvData() const
+{
+    uint8_t *tlvData = nullptr;
+    if (m_cmdu_header && (m_cmdu_header->getBuffRemainingBytes() > kTlvHeaderLength)) {
+        if (m_class_vector.size() == 0) {
+            tlvData = m_cmdu_header->getBuffPtr() + sizeof(uint8_t) + sizeof(uint16_t);
+        } else {
+            tlvData = m_class_vector.back()->getBuffPtr() + sizeof(uint8_t) + sizeof(uint16_t);
+        }
+    }
+    return tlvData;
+}
+
 size_t CmduMessage::getClassCount() const { return m_class_vector.size(); }
 
 const std::vector<std::shared_ptr<BaseClass>> &CmduMessage::getClassVector() const

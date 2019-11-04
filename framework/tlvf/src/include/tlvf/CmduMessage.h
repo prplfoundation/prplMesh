@@ -120,6 +120,7 @@ public:
     bool getNextTlvType(eTlvType &tlvType) const;
     int getNextTlvType() const;
     uint16_t getNextTlvLength() const;
+    uint8_t *getNextTlvData() const;
     void swap();
     bool is_finalized() const { return m_finalized; };
     bool is_swapped() const { return m_swapped; };
