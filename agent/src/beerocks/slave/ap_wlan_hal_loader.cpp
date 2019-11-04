@@ -37,7 +37,7 @@ static ap_wlan_hal_destroy_t s_obj_destroy = nullptr;
 
 extern "C" {
 
-bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bool acs_enabled,
+bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bwl::hal_conf_t hal_conf,
                                      bwl::base_wlan_hal::hal_event_cb_t cb)
 {
     // Load the shared library on demand
@@ -76,7 +76,7 @@ bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bool acs_enabled,
     }
 
     // Create and return a new instance of the HAL class
-    return s_obj_create(iface_name, acs_enabled, cb);
+    return s_obj_create(iface_name, hal_conf, cb);
 }
 
 void ap_wlan_hal_destroy(bwl::ap_wlan_hal *obj)

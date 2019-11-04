@@ -179,9 +179,13 @@ void ap_manager_thread::ap_manager_config(ap_manager_conf_t &conf)
 
     using namespace std::placeholders; // for `_1`
 
+    bwl::hal_conf_t hal_conf;
+    hal_conf.ap_acs_enabled          = acs_enabled;
+    hal_conf.ap_passive_mode_enabled = conf.passive_mode_enabled;
+
     // Create a new AP HAL instance
     ap_wlan_hal = std::shared_ptr<bwl::ap_wlan_hal>(
-        ap_wlan_hal_create(conf.hostap_iface, acs_enabled,
+        ap_wlan_hal_create(conf.hostap_iface, hal_conf,
                            std::bind(&ap_manager_thread::hal_event_handler, this, _1)),
         [](bwl::ap_wlan_hal *obj) {
             if (obj)
