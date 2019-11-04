@@ -33,12 +33,12 @@ const uint16_t& tlvReceiverLinkMetric::length() {
     return (const uint16_t&)(*m_length);
 }
 
-sMacAddr& tlvReceiverLinkMetric::al_mac_of_the_device_that_transmits() {
-    return (sMacAddr&)(*m_al_mac_of_the_device_that_transmits);
+sMacAddr& tlvReceiverLinkMetric::reporter_al_mac() {
+    return (sMacAddr&)(*m_reporter_al_mac);
 }
 
-sMacAddr& tlvReceiverLinkMetric::al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv() {
-    return (sMacAddr&)(*m_al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv);
+sMacAddr& tlvReceiverLinkMetric::neighbor_al_mac() {
+    return (sMacAddr&)(*m_neighbor_al_mac);
 }
 
 std::tuple<bool, tlvReceiverLinkMetric::sInterfacePairInfo&> tlvReceiverLinkMetric::interface_pair_info(size_t idx) {
@@ -83,8 +83,8 @@ bool tlvReceiverLinkMetric::alloc_interface_pair_info(size_t count) {
 void tlvReceiverLinkMetric::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
-    m_al_mac_of_the_device_that_transmits->struct_swap();
-    m_al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv->struct_swap();
+    m_reporter_al_mac->struct_swap();
+    m_neighbor_al_mac->struct_swap();
     for (size_t i = 0; i < m_interface_pair_info_idx__; i++){
         m_interface_pair_info[i].struct_swap();
     }
@@ -95,8 +95,8 @@ size_t tlvReceiverLinkMetric::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(eTlvType); // type
     class_size += sizeof(uint16_t); // length
-    class_size += sizeof(sMacAddr); // al_mac_of_the_device_that_transmits
-    class_size += sizeof(sMacAddr); // al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv
+    class_size += sizeof(sMacAddr); // reporter_al_mac
+    class_size += sizeof(sMacAddr); // neighbor_al_mac
     return class_size;
 }
 
@@ -112,14 +112,14 @@ bool tlvReceiverLinkMetric::init()
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
-    m_al_mac_of_the_device_that_transmits = (sMacAddr*)m_buff_ptr__;
+    m_reporter_al_mac = (sMacAddr*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
-    if (!m_parse__) { m_al_mac_of_the_device_that_transmits->struct_init(); }
-    m_al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv = (sMacAddr*)m_buff_ptr__;
+    if (!m_parse__) { m_reporter_al_mac->struct_init(); }
+    m_neighbor_al_mac = (sMacAddr*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
-    if (!m_parse__) { m_al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv->struct_init(); }
+    if (!m_parse__) { m_neighbor_al_mac->struct_init(); }
     m_interface_pair_info = (sInterfacePairInfo*)m_buff_ptr__;
     if (m_length && m_parse__) {
         size_t len = *m_length;
