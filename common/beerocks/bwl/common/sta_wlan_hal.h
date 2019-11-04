@@ -10,6 +10,7 @@
 #define _BWL_STA_WLAN_HAL_H_
 
 #include "base_wlan_hal.h"
+#include "sta_wlan_hal_types.h"
 
 namespace bwl {
 
@@ -38,12 +39,14 @@ public:
 public:
     virtual ~sta_wlan_hal() = default;
 
-    virtual bool initiate_scan()           = 0;
-    virtual int get_scan_results(const std::string &ssid, beerocks::net::sScanResult *list,
-                                 int size) = 0;
+    virtual bool initiate_scan() = 0;
+
+    virtual int get_scan_results(const std::string &ssid, std::vector<SScanResult> &list,
+                                 bool parse_vsie = false) = 0;
 
     virtual bool connect(const std::string &ssid, const std::string &pass, WiFiSec sec,
-                         const std::string &bssid, uint8_t channel, bool hidden_ssid) = 0;
+                         bool mem_only_psk, const std::string &bssid, uint8_t channel,
+                         bool hidden_ssid) = 0;
 
     virtual bool disconnect() = 0;
 
@@ -55,9 +58,9 @@ public:
     virtual bool unassoc_rssi_measurement(const std::string &mac, int chan, int bw,
                                           int vht_center_frequency, int delay, int window_size) = 0;
 
-    virtual bool is_connected() = 0;
-    virtual int get_rssi()      = 0;
-    virtual int get_channel()   = 0;
+    virtual bool is_connected()  = 0;
+    virtual int get_channel()    = 0;
+    virtual bool update_status() = 0;
 
     virtual std::string get_ssid()  = 0;
     virtual std::string get_bssid() = 0;

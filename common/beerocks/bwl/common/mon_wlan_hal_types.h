@@ -201,6 +201,12 @@ struct SBeaconRequest11k {
     uint32_t new_ch_center_freq_seg_1;        // not sure if this type is most fit
 };
 
+struct SBeaconRequestStatus11k {
+    SMacAddr sta_mac;
+    uint8_t dialog_token;
+    uint8_t ack;
+};
+
 struct SBeaconResponse11k {
     uint8_t
         channel; // A Channel Number of 0 indicates a request to make iterative measurements for all supported channels in the Regulatory Class
@@ -215,7 +221,7 @@ struct SBeaconResponse11k {
     uint8_t rsni;        // received signal to noise
     uint8_t ant_id;      // number for the antennas used for this measurement
     uint16_t duration;   // measurement duration, expressed in units of TUs [=1024usec]
-    uint32_t parent_tsf; // see IEEE part11, page 42
+    uint64_t parent_tsf; // see IEEE part11, page 42
     uint64_t start_time;
     SMacAddr sta_mac; // mac to send response
     SMacAddr
