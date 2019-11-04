@@ -57,6 +57,7 @@ bool config_file::read_master_config_file(std::string config_file_path, sConfigM
                         mandatory_master),
         std::make_tuple("load_client_11k_roaming=", &conf.load_client_11k_roaming,
                         mandatory_master),
+        std::make_tuple("load_steer_on_vaps=", &conf.load_steer_on_vaps, mandatory_master),
         std::make_tuple("load_legacy_client_roaming=", &conf.load_legacy_client_roaming,
                         mandatory_master),
         std::make_tuple("load_ire_roaming=", &conf.load_ire_roaming, mandatory_master),
