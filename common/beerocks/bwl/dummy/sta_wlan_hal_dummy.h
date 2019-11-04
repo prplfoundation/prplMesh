@@ -6,19 +6,19 @@
  * See LICENSE file for more details.
  */
 
-#ifndef _BWL_STA_WLAN_HAL_DWPAL_H_
-#define _BWL_STA_WLAN_HAL_DWPAL_H_
+#ifndef _BWL_STA_WLAN_HAL_DUMMY_H_
+#define _BWL_STA_WLAN_HAL_DUMMY_H_
 
 #include "../common/sta_wlan_hal.h"
-#include "base_wlan_hal_dwpal.h"
+#include "base_wlan_hal_dummy.h"
 
 namespace bwl {
-namespace dwpal {
+namespace dummy {
 
 /*!
      * Hardware abstraction layer for WLAN Station/Client.
      */
-class sta_wlan_hal_dwpal : public base_wlan_hal_dwpal, public sta_wlan_hal {
+class sta_wlan_hal_dummy : public base_wlan_hal_dummy, public sta_wlan_hal {
 
     // Public methods
 public:
@@ -28,14 +28,14 @@ public:
              * @param [in] iface_name STA/Client interface name.
              * @param [in] callback Callback for handling internal events.
              */
-    sta_wlan_hal_dwpal(std::string iface_name, hal_event_cb_t callback);
-    virtual ~sta_wlan_hal_dwpal();
+    sta_wlan_hal_dummy(std::string iface_name, hal_event_cb_t callback);
+    virtual ~sta_wlan_hal_dummy();
 
     virtual bool detach() override;
 
     virtual bool initiate_scan() override;
-    virtual int get_scan_results(const std::string &ssid, net::sScanResult *list,
-                                 int size) override;
+    virtual int get_scan_results(const std::string &ssid, std::vector<SScanResult> &list,
+                                 bool parse_vsie = false) override;
 
     virtual bool connect(const std::string &ssid, const std::string &pass, WiFiSec sec,
                          const std::string &bssid, uint8_t channel, bool hidden_ssid) override;
@@ -59,7 +59,7 @@ public:
     std::string get_bssid() override;
 
 protected:
-    virtual bool process_dwpal_event(char *buffer, int bufLen, const std::string &opcode) override;
+    virtual bool process_dummy_event(char *buffer, int bufLen, const std::string &opcode) override;
 
     // Overload for Monitor events
     bool event_queue_push(sta_wlan_hal::Event event, std::shared_ptr<void> data = {})
@@ -82,7 +82,7 @@ private:
     int m_unassoc_measure_delay       = 0;
 };
 
-} // namespace dwpal
+} // namespace dummy
 } // namespace bwl
 
-#endif // _BWL_STA_WLAN_HAL_DWPAL_H_
+#endif // _BWL_STA_WLAN_HAL_DUMMY_H_

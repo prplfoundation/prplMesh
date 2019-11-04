@@ -45,8 +45,8 @@ namespace dummy {
 //////////////////////////////////////////////////////////////////////////////
 
 mon_wlan_hal_dummy::mon_wlan_hal_dummy(std::string iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, false, callback),
-      base_wlan_hal_dummy(bwl::HALType::Monitor, iface_name, false, callback, BUFFER_SIZE)
+    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback),
+      base_wlan_hal_dummy(bwl::HALType::Monitor, iface_name, callback)
 {
 }
 
@@ -104,6 +104,12 @@ bool mon_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
         return true;
     }
     LOG(TRACE) << __func__ << " - opcode: |" << opcode << "|";
+    return true;
+}
+
+bool mon_wlan_hal_dummy::set(const std::string &param, const std::string &value, int vap_id)
+{
+    LOG(TRACE) << __func__;
     return true;
 }
 
