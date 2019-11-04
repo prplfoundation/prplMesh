@@ -18,9 +18,6 @@
 #include <easylogging++.h>
 #include <math.h>
 
-extern "C" {
-#include <dwpal/dwpal.h>
-}
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////// Local Module Definitions //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -138,25 +135,26 @@ static bool get_sta_caps(SRadioCapabilitiesStrings &caps_strings,
     std::string item;
     uint8_t i = 0;
 
-    sta_caps        = beerocks::message::sRadioCapabilities();
+    memset(&sta_caps, 0, sizeof(beerocks::message::sRadioCapabilities));
     sta_caps.ht_bw  = 0xFF;
     sta_caps.vht_bw = 0xFF;
 
     // HT, VHT caps parsing
     if (!caps_strings.ht_cap.empty()) {
         uint16_t ht_cap = uint16_t(std::stoul(caps_strings.ht_cap, nullptr, 16));
-        sta_caps.ht_bw  = (ht_cap & HT_CAP_INFO_SUPP_CHANNEL_WIDTH_SET) >> 1; //20 == 0 / 40 == 1
-        sta_caps.ht_sm_power_save =
-            (ht_cap & HT_CAP_INFO_SMPS_MASK) >> 2; // 0=static, 1=dynamic, 2=reserved, 3=disabled
+        sta_caps.ht_bw  = (ht_cap & HT_CAP_INFO_SUPP_CHANNEL_WIDTH_SET) != 0; // 20 == 0 / 40 == 1
+        sta_caps.ht_sm_power_save = ((ht_cap & HT_CAP_INFO_SMPS_MASK) >> 2) &
+                                    0x03; // 0=static, 1=dynamic, 2=reserved, 3=disabled
         sta_caps.ht_low_bw_short_gi =
-            (ht_cap & HT_CAP_INFO_SHORT_GI20MHZ) >> 5; // 20 long == 0 / short == 1
-        sta_caps.ht_high_bw_short_gi = (ht_cap & HT_CAP_INFO_SHORT_GI40MHZ) >> 6; // 40
+            (ht_cap & HT_CAP_INFO_SHORT_GI20MHZ) != 0; // 20MHz long == 0 / short == 1
+        sta_caps.ht_high_bw_short_gi =
+            (ht_cap & HT_CAP_INFO_SHORT_GI40MHZ) != 0; // 40MHz long == 0 / short == 1
 
         // parsing "AA BB CC DD XX ..." to 0xDDCCBBAA
         uint32_t ht_mcs = 0;
         str_stream.str(caps_strings.ht_mcs);
         for (i = 0; i < 4; i++) {
-            getline(str_stream, item, ' ');
+            std::getline(str_stream, item, ' ');
             ht_mcs |= (uint8_t)std::stoul(item, nullptr, 16) << (8 * i);
         }
 
@@ -197,7 +195,7 @@ static bool get_sta_caps(SRadioCapabilitiesStrings &caps_strings,
         uint16_t vht_mcs_rx = 0;
         uint16_t vht_mcs_temp;
 
-        getline(str_stream, item, ' ');
+        std::getline(str_stream, item, ' ');
         vht_mcs_rx = (uint16_t)std::stoul(item, nullptr, 16);
 
         for (i = 4; i > 0; i--) { // 4ss
@@ -243,7 +241,7 @@ static bool get_sta_caps(SRadioCapabilitiesStrings &caps_strings,
     uint16_t temp_rate    = 0;
     uint16_t max_rate     = 0;
     i                     = 0;
-    while (getline(str_stream, item, ' ')) {
+    while (std::getline(str_stream, item, ' ')) {
         temp_rate = (uint8_t)beerocks::string_utils::stoi(item);
         temp_rate = (temp_rate & 0x7F) * 5; // *5 because rate/2 * 10
         if (temp_rate > max_rate) {
@@ -292,7 +290,19 @@ static bool get_sta_caps(SRadioCapabilitiesStrings &caps_strings,
                                            beerocks::eWiFiBandwidth(sta_caps.ht_bw)))
                                      : "n/a")
         << std::endl
-        << "ht_sm_power_save = " << (sta_caps.ht_sm_power_save ? "true" : "false")
+        << "ht_sm_power_save = " << ([](uint8_t n) {
+               switch (n) {
+               case beerocks::HT_SM_POWER_SAVE_MODE_STATIC:
+                   return "static";
+               case beerocks::HT_SM_POWER_SAVE_MODE_DYNAMIC:
+                   return "dynamic";
+               case beerocks::HT_SM_POWER_SAVE_MODE_RESERVED:
+                   return "reserved(ERROR)";
+               case beerocks::HT_SM_POWER_SAVE_MODE_DISABLED:
+                   return "disabled";
+               }
+               return "ERROR";
+           })(sta_caps.ht_sm_power_save)
 
         << std::endl
         << "\n sta VHT_CAPS:" << std::endl
@@ -328,17 +338,126 @@ static bool get_sta_caps(SRadioCapabilitiesStrings &caps_strings,
     return true;
 }
 
+static std::shared_ptr<char> generate_client_assoc_event(const std::string &event, int vap_id,
+                                                         bool radio_5G)
+{
+    // TODO: Change to HAL objects
+    auto msg_buff = ALLOC_SMART_BUFFER(sizeof(sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION));
+    auto msg = reinterpret_cast<sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION *>(msg_buff.get());
+
+    if (!msg) {
+        LOG(FATAL) << "Memory allocation failed";
+        return nullptr;
+    }
+
+    // Initialize the message
+    memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION));
+    memset((char *)&msg->params.capabilities, 0, sizeof(msg->params.capabilities));
+
+    char client_mac[MAC_ADDR_SIZE] = {0};
+    char supported_rates[64]       = {0};
+    char ht_cap[8]                 = {0};
+    char ht_mcs[64]                = {0};
+    char vht_cap[16]               = {0};
+    char vht_mcs[24]               = {0};
+    char rrm_cap[20]               = {0};
+    size_t numOfValidArgs[18]      = {0};
+    FieldsToParse fieldsToParse[]  = {
+        {(void *)client_mac, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, sizeof(client_mac)},
+        {(void *)supported_rates, &numOfValidArgs[1], DWPAL_STR_PARAM,
+         "supported_rates=", sizeof(supported_rates)},
+        {(void *)ht_cap, &numOfValidArgs[2], DWPAL_STR_PARAM, "ht_caps_info=", sizeof(ht_cap)},
+        {(void *)ht_mcs, &numOfValidArgs[3], DWPAL_STR_PARAM, "ht_mcs_bitmask=", sizeof(ht_mcs)},
+        {(void *)vht_cap, &numOfValidArgs[4], DWPAL_STR_PARAM, "vht_caps_info=", sizeof(vht_cap)},
+        {(void *)vht_mcs, &numOfValidArgs[5], DWPAL_STR_PARAM, "rx_vht_mcs_map=", sizeof(vht_mcs)},
+        /* missing */ // { (void *)&msg->params.capabilities.btm_supported, 		&numOfValidArgs[6],  DWPAL_CHAR_PARAM, "btm_supported=",   0 						},
+        /* missing */ // { (void *)&msg->params.capabilities.cell_capa,     		&numOfValidArgs[7],  DWPAL_CHAR_PARAM, "cell_capa=",	   0 						},
+        /* missing */ // { (void *)&msg->params.capabilities.band_2g_capable,	&numOfValidArgs[8], DWPAL_CHAR_PARAM, "band_2g_capable=", 0 						},
+        /* missing */ // { (void *)&msg->params.capabilities.band_5g_capable,	&numOfValidArgs[9], DWPAL_CHAR_PARAM, "band_5g_capable=", 0 						},
+        /* missing */ // { (void *)&msg->params.capabilities.rrm_supported, 		&numOfValidArgs[10], DWPAL_CHAR_PARAM, "rrm_supported=",   0 						},
+        /* missing */ // { (void *)rrm_cap,  							   		&numOfValidArgs[11], DWPAL_STR_PARAM,  "rrm_cap=",   	   sizeof(rrm_cap) 			},
+        /* missing */ // { (void *)&msg->params.capabilities.max_ch_width,  		&numOfValidArgs[12], DWPAL_CHAR_PARAM, "max_ch_width=",    0 						},
+        /* missing */ // { (void *)&msg->params.capabilities.max_streams,   		&numOfValidArgs[13], DWPAL_CHAR_PARAM, "max_streams=",	   0 						},
+        /* missing */ // { (void *)&msg->params.capabilities.phy_mode,  	   		&numOfValidArgs[14], DWPAL_CHAR_PARAM, "phy_mode=",        0 						},
+        /* missing */ // { (void *)&msg->params.capabilities.max_mcs,  	   		&numOfValidArgs[15], DWPAL_CHAR_PARAM, "max_mcs=",   	   0 						},
+        {(void *)&msg->params.capabilities.max_tx_power, &numOfValidArgs[16], DWPAL_CHAR_PARAM,
+         "max_txpower=", 0},
+        /* missing */ // { (void *)&msg->params.capabilities.mumimo_supported, 	&numOfValidArgs[17], DWPAL_CHAR_PARAM, "mu_mimo=",         0 						},
+
+        /* Must be at the end */
+        {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
+
+    if (dwpal_string_to_struct_parse((char *)event.c_str(), event.length(), fieldsToParse,
+                                     sizeof(client_mac)) == DWPAL_FAILURE) {
+        LOG(ERROR) << "DWPAL parse error ==> Abort";
+        return nullptr;
+    }
+
+    /* TEMP: Traces... */
+    LOG(DEBUG) << "numOfValidArgs[0]=" << numOfValidArgs[0] << " client_mac=" << client_mac;
+    LOG(DEBUG) << "numOfValidArgs[1]=" << numOfValidArgs[1]
+               << " supported_rates=" << supported_rates;
+    LOG(DEBUG) << "numOfValidArgs[2]=" << numOfValidArgs[2] << " ht_caps_info=" << ht_cap;
+    LOG(DEBUG) << "numOfValidArgs[3]=" << numOfValidArgs[3] << " ht_mcs_bitmask=" << ht_mcs;
+    LOG(DEBUG) << "numOfValidArgs[4]=" << numOfValidArgs[4] << " vht_cap=" << vht_cap;
+    LOG(DEBUG) << "numOfValidArgs[5]=" << numOfValidArgs[5] << " vht_mcs=" << vht_mcs;
+    /* missing */ // LOG(DEBUG) << "numOfValidArgs[6]="  << numOfValidArgs[6]  << " btm_supported=" 		<< (int)msg->params.capabilities.btm_supported;
+    /* missing */ // LOG(DEBUG) << "numOfValidArgs[7]="  << numOfValidArgs[7]  << " cell_capa=" 			<< (int)msg->params.capabilities.cell_capa;
+    /* missing */ // LOG(DEBUG) << "numOfValidArgs[8]="  << numOfValidArgs[8]  << " band_2g_capable=" 	<< (int)msg->params.capabilities.band_2g_capable;
+    /* missing */ // LOG(DEBUG) << "numOfValidArgs[9]="  << numOfValidArgs[9]  << " band_5g_capable=" 	<< (int)msg->params.capabilities.band_5g_capable;
+    /* missing */ // LOG(DEBUG) << "numOfValidArgs[10]=" << numOfValidArgs[10] << " rrm_supported=" 		<< (int)msg->params.capabilities.rrm_supported;
+    /* missing */ // LOG(DEBUG) << "numOfValidArgs[11]=" << numOfValidArgs[11] << " rrm_cap=" 			<< rrm_cap;
+    /* missing */ // LOG(DEBUG) << "numOfValidArgs[12]=" << numOfValidArgs[12] << " max_ch_width=" 		<< (int)msg->params.capabilities.max_ch_width;
+    /* missing */ // LOG(DEBUG) << "numOfValidArgs[13]=" << numOfValidArgs[13] << " max_streams=" 		<< (int)msg->params.capabilities.max_streams;
+    /* missing */ // LOG(DEBUG) << "numOfValidArgs[14]=" << numOfValidArgs[14] << " phy_mode=" 			<< (int)msg->params.capabilities.phy_mode;
+    /* missing */ // LOG(DEBUG) << "numOfValidArgs[15]=" << numOfValidArgs[15] << " max_mcs=" 			<< (int)msg->params.capabilities.max_mcs;
+    LOG(DEBUG) << "numOfValidArgs[16]=" << numOfValidArgs[16]
+               << " max_txpower=" << (int)msg->params.capabilities.max_tx_power;
+    /* missing */ // LOG(DEBUG) << "numOfValidArgs[17]=" << numOfValidArgs[17] << " mumimo_supported=" 	<< (int)msg->params.capabilities.mumimo_supported;
+
+    /* End of TEMP: Traces... */
+    for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
+        if ((i >= 6 && i <= 15) || i == 17)
+            continue; // skipping unhandled fields
+        if (numOfValidArgs[i] == 0) {
+            LOG(ERROR) << "Failed reading parsed parameter " << (int)i
+                       << " ==> Continue with default values";
+        }
+    }
+
+    msg->params.vap_id = vap_id;
+    msg->params.mac    = beerocks::net::network_utils::mac_from_string(client_mac);
+    SRadioCapabilitiesStrings caps_strings;
+    caps_strings.supported_rates.assign(supported_rates);
+    caps_strings.ht_cap.assign(ht_cap);
+    caps_strings.ht_mcs.assign(ht_mcs);
+    // convert string from style "ffff0000000000000000" to "FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00" - adding space after every to chars:
+    // insert 1 spaces and move iterator 2 chars forward on loop body
+    for (auto it = (caps_strings.ht_mcs.begin() + 2); it != caps_strings.ht_mcs.end(); it += 2) {
+        it = caps_strings.ht_mcs.insert(it, ' ');
+        it++; // move the iterator to position after the added char
+    }
+
+    caps_strings.vht_cap.assign(vht_cap);
+    caps_strings.vht_mcs.assign(vht_mcs);
+    caps_strings.rrm_caps.assign(rrm_cap);
+
+    get_sta_caps(caps_strings, msg->params.capabilities, radio_5G);
+
+    // return the buffer
+    return msg_buff;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
 // NOTE: Since *base_wlan_hal_dwpal* inherits *base_wlan_hal* virtually, we
 //       need to explicitly call it's from any deriving class
-ap_wlan_hal_dwpal::ap_wlan_hal_dwpal(std::string iface_name, bool acs_enabled,
-                                     hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::AccessPoint, iface_name, IfaceType::Intel, acs_enabled, callback),
-      base_wlan_hal_dwpal(bwl::HALType::AccessPoint, iface_name, acs_enabled, callback,
-                          HOSTAPD_TO_DWPAL_MSG_LENGTH)
+ap_wlan_hal_dwpal::ap_wlan_hal_dwpal(std::string iface_name, hal_event_cb_t callback,
+                                     hal_conf_t hal_conf)
+    : base_wlan_hal(bwl::HALType::AccessPoint, iface_name, IfaceType::Intel, callback, hal_conf),
+      base_wlan_hal_dwpal(bwl::HALType::AccessPoint, iface_name, callback, hal_conf)
 {
 }
 
@@ -354,6 +473,94 @@ HALState ap_wlan_hal_dwpal::attach(bool block)
     }
 
     return state;
+}
+
+bool ap_wlan_hal_dwpal::enable()
+{
+    if (!dwpal_send_cmd("ENABLE")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool ap_wlan_hal_dwpal::disable()
+{
+    if (!dwpal_send_cmd("DISABLE")) {
+        return false;
+    }
+
+    return true;
+}
+
+bool ap_wlan_hal_dwpal::set_start_disabled(bool enable, int vap_id)
+{
+    if (vap_id != beerocks::IFACE_RADIO_ID) {
+        return set("start_disabled", std::to_string(enable), vap_id);
+    }
+
+    bool ret = true;
+
+    for (auto &vap : m_radio_info.available_vaps) {
+        if (!set("start_disabled", std::to_string(enable), vap.first)) {
+            LOG(ERROR) << "Failed setting start_disabled on vap=" << vap.first;
+            ret = false;
+        }
+    }
+
+    return ret;
+}
+
+bool ap_wlan_hal_dwpal::set_channel(int chan, int bw, int center_channel)
+{
+    if (chan < 0) {
+        LOG(ERROR) << "Invalid input: channel(" << chan << ") < 0";
+        return false;
+    }
+
+    std::string chan_string = (chan == 0) ? "acs_smart" : std::to_string(chan);
+
+    LOG(DEBUG) << "Set channel to " << chan_string;
+
+    if (!set("channel", chan_string)) {
+        LOG(ERROR) << "Failed setting channel";
+        return false;
+    }
+
+    if (bw > 0) {
+        int wifi_bw = 0;
+        // based on hostapd.conf @ https://w1.fi/cgit/hostap/plain/hostapd/hostapd.conf
+        // # 0 = 20 or 40 MHz operating Channel width
+        // # 1 = 80 MHz channel width
+        // # 2 = 160 MHz channel width
+        // # 3 = 80+80 MHz channel width
+        // #vht_oper_chwidth=1
+
+        if (bw == 20 || bw == 40) {
+            wifi_bw = 0;
+        } else if (bw == 80) {
+            wifi_bw = 1;
+        } else if (bw == 160) {
+            wifi_bw = 2;
+        } else {
+            LOG(ERROR) << "Unknown BW " << bw;
+            return false;
+        }
+
+        if (!set("vht_oper_chwidth", std::to_string(wifi_bw))) {
+            LOG(ERROR) << "Failed setting vht_oper_chwidth";
+            return false;
+        }
+    }
+
+    if (center_channel > 0) {
+        if (!set("vht_oper_centr_freq_seg0_idx=", std::to_string(center_channel))) {
+            LOG(ERROR) << "Failed setting vht_oper_centr_freq_seg0_idx";
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool ap_wlan_hal_dwpal::sta_allow(const std::string &mac)
@@ -690,7 +897,8 @@ bool ap_wlan_hal_dwpal::failsafe_channel_get(int &chan, int &bw)
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse) == DWPAL_FAILURE) {
+    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, sizeof(freq)) ==
+        DWPAL_FAILURE) {
         LOG(ERROR) << "DWPAL parse error ==> Abort";
         return false;
     }
@@ -832,7 +1040,9 @@ bool ap_wlan_hal_dwpal::read_acs_report()
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse) == DWPAL_FAILURE) {
+    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse,
+                                     sizeof(DWPAL_acs_report_get) * MAX_SUPPORTED_CHANNELS) ==
+        DWPAL_FAILURE) {
         LOG(ERROR) << "DWPAL parse error ==> Abort";
         return false;
     }
@@ -875,6 +1085,69 @@ bool ap_wlan_hal_dwpal::read_acs_report()
     return true;
 }
 
+bool ap_wlan_hal_dwpal::read_supported_channels()
+{
+    char *reply = nullptr;
+    if (!dwpal_send_cmd("GET_HW_FEATURES", &reply)) {
+        LOG(ERROR) << __func__ << " failed";
+        return false;
+    }
+
+    size_t replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
+    for (size_t i = 0; i < replyLen; i++) {
+        if (reply[i] == ')') {
+            reply[i] = ' ';
+        }
+    }
+
+    LOG(DEBUG) << "GET_HW_FEATURES replylen=" << (int)replyLen;
+    LOG(DEBUG) << "GET_HW_FEATURES reply=\n" << reply;
+
+    size_t numOfValidArgs[2] = {0};
+    int chan                 = -1;
+    char dfs_state[50]       = {0};
+
+    FieldsToParse fieldsToParse[] = {
+        {(void *)&chan, &numOfValidArgs[0], DWPAL_INT_PARAM, "chan=", 0},
+        {(void *)dfs_state, &numOfValidArgs[1], DWPAL_STR_PARAM,
+         "(DFS state = ", sizeof(dfs_state)},
+        /* Must be at the end */
+        {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
+
+    // size_t dmaxLen = strnlen(reply, DWPAL_TO_HOSTAPD_MSG_LENGTH);
+    // char    *p2str = nullptr;
+    char *lineMsg = strtok(reply, "\n");
+    int i         = 0;
+    while (lineMsg != NULL) {
+        size_t lineLen = strnlen(lineMsg, HOSTAPD_TO_DWPAL_MSG_LENGTH);
+
+        // TODO: fieldsToParse.field should be contained in one struct and struct size should be
+        //       passed to the dwpal_string_to_struct_parse - a security fix for multiline reply
+        if (dwpal_string_to_struct_parse(lineMsg, lineLen, fieldsToParse, sizeof(dfs_state)) ==
+            DWPAL_FAILURE) {
+            LOG(ERROR) << "DWPAL parse error ==> Abort";
+            return false;
+        }
+
+        // LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[0] << " chan= " << chan;
+        // LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " dfs_state= " << dfs_state;
+
+        m_radio_info.supported_channels[i].bandwidth   = 20;
+        m_radio_info.supported_channels[i].channel     = chan;
+        m_radio_info.supported_channels[i].bss_overlap = 0;
+        m_radio_info.supported_channels[i].is_dfs      = numOfValidArgs[1];
+
+        i++;
+
+        chan = -1;
+        memset(dfs_state, 0, sizeof(dfs_state));
+
+        lineMsg = strtok(NULL, "\n");
+    }
+
+    return true;
+}
+
 bool ap_wlan_hal_dwpal::set_vap_enable(const std::string &iface_name, const bool enable)
 {
     LOG(DEBUG) << "TODO: missing function implementation";
@@ -885,6 +1158,71 @@ bool ap_wlan_hal_dwpal::get_vap_enable(const std::string &iface_name, bool &enab
 {
     LOG(DEBUG) << "TODO: missing function implementation";
     return true;
+}
+
+bool ap_wlan_hal_dwpal::generate_connected_clients_events()
+{
+    bool queried_first = false;
+    std::string cmd;
+    std::string client_mac;
+    bool ret = true;
+
+    for (const auto &vap_element : m_radio_info.available_vaps) {
+        char *reply;
+        size_t replyLen;
+
+        const int &vap_id = vap_element.first;
+        auto vap_iface_name =
+            beerocks::utils::get_iface_string_from_iface_vap_ids(get_iface_name(), vap_id);
+        LOG(TRACE) << __func__ << " for vap interface: " << vap_iface_name;
+
+        do {
+            if (queried_first) {
+                cmd = "STA-NEXT " + vap_iface_name + " " + client_mac;
+            } else {
+                cmd           = "STA-FIRST " + vap_iface_name;
+                queried_first = true;
+            }
+
+            reply = nullptr;
+
+            // Send command
+            if (!dwpal_send_cmd(cmd, &reply)) {
+                LOG(ERROR) << __func__ << ": cmd='" << cmd << "' failed!";
+                ret = false;
+                break;
+            }
+
+            replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
+            /* TEMP: Traces... */
+            LOG(DEBUG) << "cmd: '" << cmd << "' replylen=" << (int)replyLen;
+            LOG(DEBUG) << "cmd: '" << cmd << "' reply=\n" << reply;
+
+            if (replyLen == 0)
+                break;
+
+            auto msg_buff = generate_client_assoc_event(reply, vap_id, get_radio_info().is_5ghz);
+
+            if (!msg_buff)
+                break;
+
+            // update client mac
+            auto msg = reinterpret_cast<sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION *>(
+                msg_buff.get());
+            client_mac = beerocks::net::network_utils::mac_to_string(msg->params.mac);
+
+            // send message
+            event_queue_push(Event::STA_Connected, msg_buff);
+
+        } while (replyLen > 0);
+
+        if (!ret)
+            return ret; // return from lambda function
+
+        queried_first = false;
+    }
+
+    return ret;
 }
 
 std::string ap_wlan_hal_dwpal::get_radio_driver_version()
@@ -903,7 +1241,7 @@ static bool is_acs_completed_scan(char *buffer, int bufLen)
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-    if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE)
+    if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(scan)) == DWPAL_FAILURE)
         return false;
 
     return !strncmp(scan, "SCAN", 4);
@@ -958,7 +1296,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(m_radio_info)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -1026,7 +1365,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         LOG_IF(!msg, FATAL) << "Memory allocation failed!";
         // Initialize the message
         memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION));
-        msg->params.capabilities = beerocks::message::sRadioCapabilities();
+        memset((char *)&msg->params.capabilities, 0, sizeof(msg->params.capabilities));
 
         char VAP[SSID_MAX_SIZE]        = {0};
         char MACAddress[MAC_ADDR_SIZE] = {0};
@@ -1074,7 +1413,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(VAP)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -1161,7 +1501,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(VAP)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -1215,7 +1556,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(MACAddress)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -1314,8 +1656,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParseForMsgType) ==
-            DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParseForMsgType,
+                                         sizeof(message_type)) == DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -1367,7 +1709,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
                 /* Must be at the end */
                 {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-            if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+            if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(vap_name)) ==
+                DWPAL_FAILURE) {
                 LOG(ERROR) << "DWPAL parse error ==> Abort";
                 return false;
             }
@@ -1446,7 +1789,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
                 /* Must be at the end */
                 {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-            if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+            if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(vap_name)) ==
+                DWPAL_FAILURE) {
                 LOG(ERROR) << "DWPAL parse error ==> Abort";
                 return false;
             }
@@ -1506,7 +1850,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(MACAddress)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -1559,7 +1904,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(int)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -1613,7 +1959,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(int)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -1658,7 +2005,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(interface)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -1686,7 +2034,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse) == DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(interface)) ==
+            DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
@@ -1724,10 +2073,10 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
 // AP dwpal HAL Factory Functions
 extern "C" {
 
-bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bool acs_enabled,
+bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bwl::hal_conf_t hal_conf,
                                      bwl::base_wlan_hal::hal_event_cb_t callback)
 {
-    return new bwl::dwpal::ap_wlan_hal_dwpal(iface_name, acs_enabled, callback);
+    return new bwl::dwpal::ap_wlan_hal_dwpal(iface_name, callback, hal_conf);
 }
 
 void ap_wlan_hal_destroy(bwl::ap_wlan_hal *obj) { delete obj; }
