@@ -51,8 +51,8 @@ public:
 
     // Protected methods
 protected:
-    base_wlan_hal_dummy(HALType type, std::string iface_name, bool acs_enabled,
-                        hal_event_cb_t callback, int wpa_ctrl_buffer_size);
+    base_wlan_hal_dummy(HALType type, std::string iface_name, hal_event_cb_t callback,
+                        hal_conf_t hal_conf = {});
 
     void parsed_obj_debug(parsed_obj_map_t &obj);
     void parsed_obj_debug(parsed_obj_listed_map_t &obj);
@@ -63,6 +63,9 @@ protected:
 
     // Process dummy event
     virtual bool process_dummy_event(parsed_obj_map_t &parsed_obj) = 0;
+
+    virtual bool set(const std::string &param, const std::string &value,
+                     int vap_id = beerocks::IFACE_RADIO_ID) override;
 
     bool dummy_send_cmd(const std::string &cmd, char **reply); // for external process
     bool dummy_send_cmd(const std::string &cmd);
@@ -78,11 +81,6 @@ private:
     dummy_fsm_state m_last_attach_state = dummy_fsm_state::Detach;
 
     std::chrono::steady_clock::time_point m_state_timeout;
-
-    void *m_dummy_ctx = nullptr;
-
-    std::shared_ptr<char> m_wpa_ctrl_buffer;
-    size_t m_wpa_ctrl_buffer_size = 0;
 };
 
 } // namespace dummy

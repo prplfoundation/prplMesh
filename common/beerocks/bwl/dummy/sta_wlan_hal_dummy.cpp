@@ -6,18 +6,15 @@
  * See LICENSE file for more details.
  */
 
-#include "sta_wlan_hal_dwpal.h"
+#include "sta_wlan_hal_dummy.h"
 
 #include <beerocks/bcl/beerocks_utils.h>
 #include <beerocks/bcl/network/network_utils.h>
 
 #include <easylogging++.h>
 
-#define LOGGING_ID sta_wlan_hal_dwpal
-#define PACKAGE_ID "0"
-
 namespace bwl {
-namespace dwpal {
+namespace dummy {
 
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////// Local Module Definitions //////////////////////////
@@ -293,14 +290,14 @@ struct ConnectionStatus {
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-sta_wlan_hal_dwpal::sta_wlan_hal_dwpal(std::string iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(), base_wlan_hal_dwpal(bwl::HALType::Station, iface_name, true, callback, 1024)
+sta_wlan_hal_dummy::sta_wlan_hal_dummy(std::string iface_name, hal_event_cb_t callback)
+    : base_wlan_hal(), base_wlan_hal_dummy(bwl::HALType::Station, iface_name, true, callback, 1024)
 {
 }
 
-sta_wlan_hal_dwpal::~sta_wlan_hal_dwpal() { detach(); }
+sta_wlan_hal_dummy::~sta_wlan_hal_dummy() { detach(); }
 
-bool sta_wlan_hal_dwpal::detach()
+bool sta_wlan_hal_dummy::detach()
 {
     /*
         LOG(TRACE) << __func__ << ": iface = " << get_iface_name();
@@ -311,7 +308,7 @@ bool sta_wlan_hal_dwpal::detach()
     return true;
 }
 
-bool sta_wlan_hal_dwpal::initiate_scan()
+bool sta_wlan_hal_dummy::initiate_scan()
 {
     /*
         auto& iface_name = get_iface_name();
@@ -326,7 +323,8 @@ bool sta_wlan_hal_dwpal::initiate_scan()
     return true;
 }
 
-int sta_wlan_hal_dwpal::get_scan_results(const std::string &ssid, net::sScanResult *list, int size)
+int sta_wlan_hal_dummy::get_scan_results(const std::string &ssid, std::vector<SScanResult> &list,
+                                         bool parse_vsie)
 {
 #if 0
         // Validate input parameters
@@ -361,7 +359,7 @@ int sta_wlan_hal_dwpal::get_scan_results(const std::string &ssid, net::sScanResu
     return 0;
 }
 
-bool sta_wlan_hal_dwpal::connect(const std::string &ssid, const std::string &pass, WiFiSec sec,
+bool sta_wlan_hal_dummy::connect(const std::string &ssid, const std::string &pass, WiFiSec sec,
                                  const std::string &bssid, uint8_t channel, bool hidden_ssid)
 {
     /*
@@ -406,7 +404,7 @@ bool sta_wlan_hal_dwpal::connect(const std::string &ssid, const std::string &pas
     return true;
 }
 
-bool sta_wlan_hal_dwpal::disconnect()
+bool sta_wlan_hal_dummy::disconnect()
 {
     /*
         LOG(TRACE) << __func__ << ": iface = " << get_iface_name() << ", m_active_network_id = " << m_active_network_id;
@@ -455,7 +453,7 @@ bool sta_wlan_hal_dwpal::disconnect()
     return true;
 }
 
-bool sta_wlan_hal_dwpal::roam(const std::string &bssid, uint8_t channel)
+bool sta_wlan_hal_dummy::roam(const std::string &bssid, uint8_t channel)
 {
     /*
         auto& iface = get_iface_name();
@@ -487,7 +485,7 @@ bool sta_wlan_hal_dwpal::roam(const std::string &bssid, uint8_t channel)
     return true;
 }
 
-bool sta_wlan_hal_dwpal::get_4addr_mode()
+bool sta_wlan_hal_dummy::get_4addr_mode()
 {
     /*
         LOG(TRACE) << __func__ << ": iface = " << get_iface_name();
@@ -515,7 +513,7 @@ bool sta_wlan_hal_dwpal::get_4addr_mode()
     return true;
 }
 
-bool sta_wlan_hal_dwpal::set_4addr_mode(bool enable)
+bool sta_wlan_hal_dummy::set_4addr_mode(bool enable)
 {
     /*
         LOG(TRACE) << __func__ << ": iface = " << get_iface_name() << ", enable: " << enable;
@@ -538,7 +536,7 @@ bool sta_wlan_hal_dwpal::set_4addr_mode(bool enable)
     return true;
 }
 
-bool sta_wlan_hal_dwpal::unassoc_rssi_measurement(const std::string &mac, int chan, int bw,
+bool sta_wlan_hal_dummy::unassoc_rssi_measurement(const std::string &mac, int chan, int bw,
                                                   int vht_center_frequency, int delay,
                                                   int window_size)
 {
@@ -582,7 +580,7 @@ bool sta_wlan_hal_dwpal::unassoc_rssi_measurement(const std::string &mac, int ch
     return true;
 }
 
-bool sta_wlan_hal_dwpal::is_connected()
+bool sta_wlan_hal_dummy::is_connected()
 {
     /*
         // Allocate a new FAPI object
@@ -608,21 +606,21 @@ bool sta_wlan_hal_dwpal::is_connected()
     return true;
 }
 
-int sta_wlan_hal_dwpal::get_rssi() { return beerocks::RSSI_INVALID; }
+int sta_wlan_hal_dummy::get_rssi() { return beerocks::RSSI_INVALID; }
 
-int sta_wlan_hal_dwpal::get_channel() { return m_active_channel; }
+int sta_wlan_hal_dummy::get_channel() { return m_active_channel; }
 
-std::string sta_wlan_hal_dwpal::get_ssid() { return m_active_ssid; }
+std::string sta_wlan_hal_dummy::get_ssid() { return m_active_ssid; }
 
-std::string sta_wlan_hal_dwpal::get_bssid() { return m_active_bssid; }
+std::string sta_wlan_hal_dummy::get_bssid() { return m_active_bssid; }
 
-bool sta_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std::string &opcode)
+bool sta_wlan_hal_dummy::process_dummy_event(char *buffer, int bufLen, const std::string &opcode)
 {
     return true;
 }
 
 #if 0
-    bool sta_wlan_hal_dwpal::parse_fapi_event(const std::string& opcode, std::shared_ptr<void> obj)
+    bool sta_wlan_hal_dummy::parse_fapi_event(const std::string& opcode, std::shared_ptr<void> obj)
     {
         // Filter out empty events
         if (opcode.empty()) { return true; }
@@ -785,7 +783,7 @@ bool sta_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
     }
 #endif
 
-} // namespace dwpal
+} // namespace dummy
 } // namespace bwl
 
 // AP FAPI HAL Factory Functions
@@ -794,7 +792,7 @@ extern "C" {
 bwl::sta_wlan_hal *sta_wlan_hal_create(std::string iface_name,
                                        bwl::base_wlan_hal::hal_event_cb_t callback)
 {
-    return new bwl::dwpal::sta_wlan_hal_dwpal(iface_name, callback);
+    return new bwl::dummy::sta_wlan_hal_dummy(iface_name, callback);
 }
 
 void sta_wlan_hal_destroy(bwl::sta_wlan_hal *obj) { delete obj; }

@@ -50,6 +50,8 @@ protected:
         return base_wlan_hal::event_queue_push(int(event), data);
     }
 
+    virtual bool set(const std::string &param, const std::string &value, int vap_id) override;
+
     // Private data-members:
 private:
     std::shared_ptr<char> m_temp_dummy_value;

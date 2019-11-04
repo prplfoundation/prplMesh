@@ -224,21 +224,11 @@ void base_wlan_hal_dummy::parsed_obj_debug(parsed_obj_listed_map_t &obj)
     LOG(DEBUG) << ss_obj.str();
 }
 
-base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, std::string iface_name, bool acs_enabled,
-                                         hal_event_cb_t callback, int wpa_ctrl_buffer_size)
-    : base_wlan_hal(type, iface_name, IfaceType::Intel, acs_enabled, callback),
-      beerocks::beerocks_fsm<dummy_fsm_state, dummy_fsm_event>(dummy_fsm_state::Delay),
-      m_wpa_ctrl_buffer_size(wpa_ctrl_buffer_size)
+base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, std::string iface_name,
+                                         hal_event_cb_t callback, hal_conf_t hal_conf)
+    : base_wlan_hal(type, iface_name, IfaceType::Intel, callback, hal_conf),
+      beerocks::beerocks_fsm<dummy_fsm_state, dummy_fsm_event>(dummy_fsm_state::Delay)
 {
-
-    // Allocate wpa_ctrl buffer
-    if (m_wpa_ctrl_buffer_size) {
-        m_wpa_ctrl_buffer = std::shared_ptr<char>(new char[m_wpa_ctrl_buffer_size], [](char *obj) {
-            if (obj)
-                delete[] obj;
-        });
-    }
-
     // Set up dummy external events fd
     // dummy implementation is based on monitoring text file changes which
     // are used to simulate clients activity - STA connected, disconnected, etc.
@@ -277,6 +267,11 @@ HALState base_wlan_hal_dummy::attach(bool block)
 }
 
 bool base_wlan_hal_dummy::detach() { return true; }
+
+bool base_wlan_hal_dummy::set(const std::string &param, const std::string &value, int vap_id)
+{
+    return true;
+}
 
 bool base_wlan_hal_dummy::ping() { return true; }
 

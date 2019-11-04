@@ -101,10 +101,10 @@ static ap_wlan_hal::Event dummy_to_bwl_event(const std::string &opcode)
 
 // NOTE: Since *base_wlan_hal_dummy* inherits *base_wlan_hal* virtually, we
 //       need to explicitly call it's from any deriving class
-ap_wlan_hal_dummy::ap_wlan_hal_dummy(std::string iface_name, bool acs_enabled,
-                                     hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::AccessPoint, iface_name, IfaceType::Intel, acs_enabled, callback),
-      base_wlan_hal_dummy(bwl::HALType::AccessPoint, iface_name, acs_enabled, callback, 0)
+ap_wlan_hal_dummy::ap_wlan_hal_dummy(std::string iface_name, hal_event_cb_t callback,
+                                     hal_conf_t hal_conf)
+    : base_wlan_hal(bwl::HALType::AccessPoint, iface_name, IfaceType::Intel, callback, hal_conf),
+      base_wlan_hal_dummy(bwl::HALType::AccessPoint, iface_name, callback, hal_conf)
 {
 }
 
@@ -121,6 +121,14 @@ HALState ap_wlan_hal_dummy::attach(bool block)
 
     return state;
 }
+
+bool ap_wlan_hal_dummy::enable() { return true; }
+
+bool ap_wlan_hal_dummy::disable() { return true; }
+
+bool ap_wlan_hal_dummy::set_start_disabled(bool enable, int vap_id) { return true; }
+
+bool ap_wlan_hal_dummy::set_channel(int chan, int bw, int center_channel) { return true; }
 
 bool ap_wlan_hal_dummy::sta_allow(const std::string &mac)
 {
@@ -266,12 +274,16 @@ bool ap_wlan_hal_dummy::read_acs_report()
     return true;
 }
 
+bool ap_wlan_hal_dummy::read_supported_channels() { return true; }
+
 bool ap_wlan_hal_dummy::set_vap_enable(const std::string &iface_name, const bool enable)
 {
     return true;
 }
 
 bool ap_wlan_hal_dummy::get_vap_enable(const std::string &iface_name, bool &enable) { return true; }
+
+bool ap_wlan_hal_dummy::generate_connected_clients_events() { return true; }
 
 std::string ap_wlan_hal_dummy::get_radio_driver_version() { return std::string("dummy"); }
 
@@ -400,16 +412,22 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
     return true;
 }
 
+bool ap_wlan_hal_dummy::set(const std::string &param, const std::string &value, int vap_id)
+{
+    LOG(TRACE) << __func__;
+    return true;
+}
+
 } // namespace dummy
 } // namespace bwl
 
 // AP dummy HAL Factory Functions
 extern "C" {
 
-bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bool acs_enabled,
+bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bwl::hal_conf_t hal_conf,
                                      bwl::base_wlan_hal::hal_event_cb_t callback)
 {
-    return new bwl::dummy::ap_wlan_hal_dummy(iface_name, acs_enabled, callback);
+    return new bwl::dummy::ap_wlan_hal_dummy(iface_name, callback, hal_conf);
 }
 
 void ap_wlan_hal_destroy(bwl::ap_wlan_hal *obj) { delete obj; }
