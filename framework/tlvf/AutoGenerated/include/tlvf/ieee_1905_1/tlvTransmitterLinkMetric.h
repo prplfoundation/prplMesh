@@ -68,25 +68,25 @@ class tlvTransmitterLinkMetric : public BaseClass
         } __attribute__((packed)) sLinkMetricInfo;
         
         typedef struct sInterfacePairInfo {
-            sMacAddr mac_of_an_interface_in_the_receiving_al;
-            sMacAddr mac_of_an_interface_in_the_neighbor_al;
+            sMacAddr rc_interface_mac;
+            sMacAddr neighbor_interface_mac;
             sLinkMetricInfo link_metric_info;
             void struct_swap(){
-                mac_of_an_interface_in_the_receiving_al.struct_swap();
-                mac_of_an_interface_in_the_neighbor_al.struct_swap();
+                rc_interface_mac.struct_swap();
+                neighbor_interface_mac.struct_swap();
                 link_metric_info.struct_swap();
             }
             void struct_init(){
-                mac_of_an_interface_in_the_receiving_al.struct_init();
-                mac_of_an_interface_in_the_neighbor_al.struct_init();
+                rc_interface_mac.struct_init();
+                neighbor_interface_mac.struct_init();
                 link_metric_info.struct_init();
             }
         } __attribute__((packed)) sInterfacePairInfo;
         
         const eTlvType& type();
         const uint16_t& length();
-        sMacAddr& al_mac_of_the_device_that_transmits();
-        sMacAddr& al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv();
+        sMacAddr& reporter_al_mac();
+        sMacAddr& neighbor_al_mac();
         //The fields shall be repeated for each connected interface pair between the receiving
         //905.1 AL and the neighbor 1905.1 AL.
         size_t interface_pair_info_length() { return m_interface_pair_info_idx__ * sizeof(tlvTransmitterLinkMetric::sInterfacePairInfo); }
@@ -99,8 +99,8 @@ class tlvTransmitterLinkMetric : public BaseClass
         bool init();
         eTlvType* m_type = nullptr;
         uint16_t* m_length = nullptr;
-        sMacAddr* m_al_mac_of_the_device_that_transmits = nullptr;
-        sMacAddr* m_al_mac_of_the_neighbor_whose_link_metric_is_reported_in_this_tlv = nullptr;
+        sMacAddr* m_reporter_al_mac = nullptr;
+        sMacAddr* m_neighbor_al_mac = nullptr;
         sInterfacePairInfo* m_interface_pair_info = nullptr;
         size_t m_interface_pair_info_idx__ = 0;
         int m_lock_order_counter__ = 0;
