@@ -33,7 +33,7 @@ killall_program() {
     else
         KILL_SIG=$SIG_KILL
     fi
-    for PID in $(ps -ef | grep $PROGRAM_NAME | grep -v grep | grep -v ${0} | grep -v vi | grep -v tail | awk '{print $2}'); do
+    for PID in $(pgrep -f $PROGRAM_NAME); do
         echo "kill $KILL_SIG $PID $PROGRAM_NAME";
         kill $KILL_SIG $PID > /dev/null 2>&1;
     done
@@ -81,18 +81,18 @@ prplmesh_platform_db_init() {
     management_mode=${1-Multi-AP-Controller-and-Agent}
     operating_mode=${2-Gateway}
 
-    mkdir -p /tmp/
+    mkdir -p @PLATFORM_DB_PATH_TEMP@
     {
         echo "management_mode=${management_mode}"
         echo "operating_mode=${operating_mode}"
         echo "wired_backhaul=1"
-    } > /tmp/prplmesh_platform_db
+    } > @PLATFORM_DB_PATH_TEMP@/prplmesh_platform_db
 }
 
 prplmesh_framework_init() {
     echo "prplmesh_framework_init - starting local_bus and ieee1905_transport processes..."
-    @CMAKE_INSTALL_PREFIX@/bin/local_bus &
-    @CMAKE_INSTALL_PREFIX@/bin/ieee1905_transport &
+    @BEEROCKS_INSTALL_PATH@/bin/local_bus &
+    @BEEROCKS_INSTALL_PATH@/bin/ieee1905_transport &
 }
 
 prplmesh_framework_deinit() {
@@ -103,7 +103,7 @@ prplmesh_framework_deinit() {
 
 prplmesh_controller_start() {
     echo "prplmesh_controller_start - start beerocks_controller process..."
-    @CMAKE_INSTALL_PREFIX@/bin/beerocks_controller &
+    @BEEROCKS_INSTALL_PATH@/bin/beerocks_controller &
 }
 
 prplmesh_controller_stop() {
@@ -113,7 +113,7 @@ prplmesh_controller_stop() {
 
 prplmesh_agent_start() {
     echo "prplmesh_agent_start - start beerocks_agent process..."
-    @CMAKE_INSTALL_PREFIX@/bin/beerocks_agent &
+    @BEEROCKS_INSTALL_PATH@/bin/beerocks_agent &
 }
 
 prplmesh_agent_stop() {
@@ -149,9 +149,6 @@ start_function() {
             ;;
         * ) err "unsupported mode: $PRPLMESH_MODE"; usage; exit 1 ;;
     esac
-
-    # Give write permissions
-    chmod -R o+w /tmp/${SUDO_USER:-${USER}}
 }
 
 stop_function() {
@@ -166,12 +163,12 @@ stop_function() {
 }
 
 main_agent_operational() {
-    ps -aux | grep beerocks_agent | grep -v wlan | grep -v grep > /dev/null 2>&1 || return 1
+    pgrep -la beerocks_agent | grep -v wlan > /dev/null 2>&1 || return 1
     grep -q 'CONNECTED --> OPERATIONAL' "$1/beerocks_agent.log"
 }
 
 radio_agent_operational() {
-    ps -aux | grep beerocks_agent | grep $2 | grep -v grep > /dev/null 2>&1 || return 1
+    pgrep -la beerocks_agent | grep $2 | grep -v grep > /dev/null 2>&1 || return 1
     grep -q 'CSA' "$1/beerocks_agent_$2.log"
 }
 
@@ -188,22 +185,22 @@ report() {
 status_function() {
     echo "$0: status"
 
-    ps -aux | grep beerocks | grep -v grep
-    ps -aux | grep ieee1905_transport | grep -v grep
-    ps -aux | grep local_bus | grep -v grep
+    pgrep -la beerocks
+    pgrep -la ieee1905_transport
+    pgrep -la local_bus
 
     # check for operational status
     LOGS_PATH=@BEEROCKS_TMP_PATH@/logs/
 
     error=0
     report "Main agent operational" main_agent_operational $LOGS_PATH
-    report "wlan0 radio agent operational" radio_agent_operational $LOGS_PATH wlan0
-    report "wlan2 radio agent operational" radio_agent_operational $LOGS_PATH wlan2
+    report "@BEEROCKS_WLAN1_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN1_IFACE@
+    report "@BEEROCKS_WLAN2_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN2_IFACE@
 
     [ "$VERBOSE" = "true" -a $error = 1 ] && {
         cat $LOGS_PATH/beerocks_agent.log
-        cat $LOGS_PATH/beerocks_agent_wlan0.log
-        cat $LOGS_PATH/beerocks_agent_wlan2.log
+        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN1_IFACE@.log
+        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN2_IFACE@.log
     }
 
     return $error
@@ -255,13 +252,19 @@ main() {
         *)
             err "unsupported argument \"$1\""; usage; exit 1 ;;
     esac
+
+    # Give write permissions
+    chmod -R +o+w /tmp/${SUDO_USER:-${USER}}
 }
 
 VERBOSE=false
-PLATFORM_INIT=true
+PLATFORM_INIT=@BEEROCKS_PLATFORM_INIT@
 DELETE_LOGS=false
 CONTROL_IFACE=enp0s25
 DATA_IFACE=enx00ee22aa28ef
 PRPLMESH_MODE="CA" # CA = Controller & Agent, A = Agent only, C = Controller only
+
+# Export MultiAP libs folder
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@BEEROCKS_INSTALL_PATH@/lib
 
 main $@

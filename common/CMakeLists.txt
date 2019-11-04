@@ -12,22 +12,31 @@ endif()
 
 include(GNUInstallDirs)
 
+# Default values
+set(BEEROCKS_BRIDGE_IFACE "br-lan")
+set(BEEROCKS_PLATFORM_INIT "false")
+set(BEEROCKS_INSTALL_PATH "/opt/prplmesh")
+set(BEEROCKS_TMP_PATH "/tmp/beerocks")
+set(BEEROCKS_WLAN1_IFACE "wlan0")
+set(BEEROCKS_WLAN2_IFACE "wlan2")
+
+# Platform specific overrides
 if (TARGET_PLATFORM STREQUAL "ugw")
     add_definitions(-DBEEROCKS_UGW)
-    set(BEEROCKS_BRIDGE_IFACE "br-lan")
     set(BEEROCKS_BH_WIRE_IFACE "eth1")
-    set(BEEROCKS_TMP_PATH "/tmp/beerocks")
 elseif (TARGET_PLATFORM STREQUAL "rdkb")
     add_definitions(-DBEEROCKS_RDKB)
     set(BEEROCKS_BRIDGE_IFACE "brlan0")
     set(BEEROCKS_BH_WIRE_IFACE "nsgmii0")
-    set(BEEROCKS_TMP_PATH "/tmp/beerocks")
     set(CMAKE_SKIP_RPATH TRUE)
 elseif (TARGET_PLATFORM STREQUAL "linux")
     add_definitions(-DBEEROCKS_LINUX)
-    set(BEEROCKS_BRIDGE_IFACE "br-lan")
     set(BEEROCKS_BH_WIRE_IFACE "sim-eth0")
+    set(BEEROCKS_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}")
     set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
+    set(BEEROCKS_PLATFORM_INIT "true")
+elseif (TARGET_PLATFORM STREQUAL "turris-omnia")
+    set(BEEROCKS_BH_WIRE_IFACE "eth1")
 endif()
 
 list (FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
@@ -69,16 +78,20 @@ message(STATUS "CMAKE_PROGRAM_PATH - ${CMAKE_PROGRAM_PATH}")
 message(STATUS "CMAKE_MULTIAP_OUTPUT_DIRECTORY - ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}")
 
 # Default Compiler flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pthread -Wno-comment -Wno-unused-parameter -Wno-missing-field-initializers -Wno-address-of-packed-member -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pthread -Wno-comment -Wno-unused-parameter -Wno-missing-field-initializers -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS} -std=c++11 -fpermissive")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -Wl,-S -fPIE -fPIC")
+
+# Compiler specific flags
 if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-address-of-packed-member")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector-strong")
 else()
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector")
 endif()
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}")
 
+# Release flags
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -Wl,-S -fPIE")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}")
 
 message(STATUS "Prefix=${CMAKE_INSTALL_PREFIX}")
 
