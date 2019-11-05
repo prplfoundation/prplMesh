@@ -448,9 +448,11 @@ int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SS
                                      const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN]);
 
 /**
- * Returns the platform SDL policy
+ * @brief Returns the platform SDL policy which is represented by 'mem_only_psk' flag.
+ * 'mem_only_psk' flag sets whether the platform shall save the credentials in some encrypted DB so 
+ * the wpa-supplicant will get from there in runtime, without supply it on `connect` API, or not.
  *
- * @return mem_only_psk on success
+ * @return mem_only_psk flag on success.
  * @return -1 Error.
  */
 int bpl_cfg_get_security_policy();
