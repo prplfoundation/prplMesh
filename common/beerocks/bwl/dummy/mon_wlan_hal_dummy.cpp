@@ -52,6 +52,8 @@ static mon_wlan_hal_dummy::Data dummy_to_bwl_data(const std::string &opcode)
 {
     if (opcode == "STA-UPDATE-STATS")
         return mon_wlan_hal_dummy::Data::STA_Update_Stats;
+    else if (opcode == "RRM-BEACON-REP-RECEIVED")
+        return mon_wlan_hal_dummy::Data::RRM_Update_Beacon_Measurements;
 
     return mon_wlan_hal_dummy::Data::Invalid;
 }
@@ -91,7 +93,7 @@ bool mon_wlan_hal_dummy::update_stations_stats(const std::string vap_iface_name,
         return false;
     }
 
-    dummy_sta_stats = dummy_sta->second;
+    dummy_sta_stats = dummy_sta->second.sta_stats;
 
     sta_stats.rx_rssi_watt             = dummy_sta_stats.rx_rssi_watt;
     sta_stats.rx_rssi_watt_samples_cnt = dummy_sta_stats.rx_rssi_watt_samples_cnt;
@@ -119,6 +121,20 @@ bool mon_wlan_hal_dummy::sta_beacon_11k_request(const SBeaconRequest11k &req, in
     LOG(DEBUG) << "Beacon 11k request to sta " << sta_mac << " on bssid " << bssid << " channel "
                << std::to_string(req.channel);
 
+    auto dummy_sta = m_dummy_stas_map.find(sta_mac);
+    if (dummy_sta != m_dummy_stas_map.end()) {
+        auto dummy_bssid_event = dummy_sta->second.beacon_measurment_events.find(bssid);
+        if (dummy_bssid_event == dummy_sta->second.beacon_measurment_events.end()) {
+            LOG(WARNING) << "No RRM beacon response for bssid " << bssid;
+        } else {
+            //TODO: remove sleep. Sleep fixes missing requests sent by controller but not
+            //received by agent
+            sleep(1);
+            process_dummy_event(dummy_bssid_event->second);
+        }
+    } else
+        LOG(WARNING) << "No RRM beacon response for sta " << sta_mac;
+
     return true;
 }
 
@@ -138,6 +154,7 @@ bool mon_wlan_hal_dummy::process_dummy_data(parsed_obj_map_t &parsed_obj)
 {
     char *tmp_str;
     char *sta_mac;
+    char *bssid;
     int64_t tmp_int;
     // Filter out empty data
     std::string opcode;
@@ -200,7 +217,21 @@ bool mon_wlan_hal_dummy::process_dummy_data(parsed_obj_map_t &parsed_obj)
         }
         dummy_sta_stats.rx_phy_rate_100kb = (tmp_int / 100);
 
-        m_dummy_stas_map[sta_mac] = dummy_sta_stats;
+        m_dummy_stas_map[sta_mac].sta_stats = dummy_sta_stats;
+        break;
+    }
+    case Data::RRM_Update_Beacon_Measurements: {
+        if (!dummy_obj_read_str(DUMMY_EVENT_KEYLESS_PARAM_MAC, parsed_obj, &sta_mac)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
+
+        if (!dummy_obj_read_str("bssid", parsed_obj, &bssid)) {
+            LOG(ERROR) << "Failed reading bssid!";
+            return false;
+        }
+
+        m_dummy_stas_map[sta_mac].beacon_measurment_events[bssid] = parsed_obj;
         break;
     }
     default:
