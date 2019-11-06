@@ -22,6 +22,7 @@ include_yaml_path: {
   "tlvf/wfa_map/tlvHigherLayerData.yaml",
   "tlvf/wfa_map/tlvSteeringBTMReport.yaml",
   "tlvf/wfa_map/tlvSteeringRequest.yaml",
+  "tlvf/wfa_map/tlvApMetric.yaml",
   "tlvf/wfa_map/tlvApMetricQuery.yaml",
   "tlvf/wfa_map/tlvClientAssociationEvent.yaml",
   "tlvf/wfa_map/tlvClientAssociationControlRequest.yaml",
