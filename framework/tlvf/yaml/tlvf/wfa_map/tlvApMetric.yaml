@@ -9,22 +9,22 @@ tlvApMetric:
     _type: eTlvTypeMap
     _value_const: TLV_AP_METRIC 
   length: uint16_t
-  bssid: sAddress
+  bssid: sMacAddr
   channel_utilization: uint8_t
   number_of_stas_currently_associated: uint16_t
   estimated_service_parameters: sEstimatedService
   estimated_service_info_field_ac_be:
     _type: uint8_t
-    _length: [ ]
+    _length: [3]
   estimated_service_info_field_ac_bk:
     _type: uint8_t
-    _length: [ ]
+    _length: [3]
   estimated_service_info_field_ac_vo:
     _type: uint8_t
-    _length: [ ]
+    _length: [3]
   estimated_service_info_field_ac_vi:
     _type: uint8_t
-    _length: [ ]
+    _length: [3]
 
 sEstimatedService:
   _type: struct
