@@ -362,21 +362,3 @@ cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST:
   _type: class
   al_mac: sMacAddr
   ruid: sMacAddr
-
-cACTION_BML_WFA_CA_CONTROLLER_REQUEST:
-  _type: class
-  command_length:
-    _type: uint16_t
-    _length_var: True
-  command:
-    _type: char
-    _length: [ command_length ]
-
-cACTION_BML_WFA_CA_CONTROLLER_RESPONSE:
-  _type: class
-  reply_length:
-    _type: uint16_t
-    _length_var: True
-  reply:
-    _type: char
-    _length: [ reply_length ]
