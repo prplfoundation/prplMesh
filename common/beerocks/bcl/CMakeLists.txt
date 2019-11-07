@@ -51,3 +51,5 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/beerocks/${PROJECT_NAME}/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/beerocks/${PROJECT_NAME})
 
 install(EXPORT bclConfig NAMESPACE beerocks:: DESTINATION lib/cmake/beerocks/${PROJECT_NAME})
+
+add_definitions(-DBEEROCKS_VERSION="${${PROJECT}_VERSION_STRING}")
