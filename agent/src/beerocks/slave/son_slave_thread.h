@@ -9,6 +9,7 @@
 #ifndef _SON_SLAVE_THREAD_H
 #define _SON_SLAVE_THREAD_H
 
+#include "agent_ucc_listener.h"
 #include "ap_manager_thread.h"
 
 #include <beerocks/bcl/beerocks_backport.h>
@@ -148,6 +149,9 @@ private:
 
     void process_keep_alive();
 
+    void before_select() override;
+    void after_select(bool timeout) override;
+
     bool slave_fsm(bool &call_slave_select);
     void slave_reset();
     void stop_slave_thread();
@@ -278,6 +282,8 @@ private:
     //copy of M1 message used for authentication
     uint8_t *m1_auth_buf   = nullptr;
     size_t m1_auth_buf_len = 0;
+
+    std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
 
     bool parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool parse_non_intel_join_response(Socket *sd);
