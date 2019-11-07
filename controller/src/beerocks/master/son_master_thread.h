@@ -9,6 +9,7 @@
 #ifndef _SON_MASTER_THREAD_H
 #define _SON_MASTER_THREAD_H
 
+#include "controller_ucc_listener.h"
 #include "db/db.h"
 #include "tasks/optimal_path_task.h"
 #include "tasks/task_pool.h"
@@ -96,6 +97,7 @@ private:
 
     db &database;
     task_pool tasks;
+    std::unique_ptr<beerocks::controller_ucc_listener> m_controller_ucc_listener;
 };
 
 } // namespace son

@@ -25,6 +25,7 @@
 #include "tasks/ire_network_optimization_task.h"
 #include "tasks/network_health_check_task.h"
 
+#include <beerocks/bcl/beerocks_backport.h>
 #include <beerocks/bcl/beerocks_version.h>
 #include <beerocks/bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
@@ -96,6 +97,14 @@ bool master_thread::init()
     if (database.setting_certification_mode()) {
         if (!database.allocate_certification_tx_buffer()) {
             LOG(ERROR) << "failed to allocate certification_tx_buffer";
+            return false;
+        }
+    }
+
+    if (database.config.ucc_listener_port != 0) {
+        m_controller_ucc_listener = std::make_unique<controller_ucc_listener>(database);
+        if (m_controller_ucc_listener && !m_controller_ucc_listener->start("ucc_listener")) {
+            LOG(ERROR) << "failed start controller_ucc_listener";
             return false;
         }
     }
