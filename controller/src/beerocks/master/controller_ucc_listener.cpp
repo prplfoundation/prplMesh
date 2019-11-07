@@ -110,6 +110,11 @@ bool controller_ucc_listener::handle_dev_set_config(
             m_database.clear_bss_info_configuration(mac);
             al_mac_cleared_conf.insert(mac);
         }
+
+        //If SSID is empty, tear down - do not add bss_info_conf to database.
+        if (bss_info_conf.ssid.empty()) {
+            continue;
+        }
         m_database.add_bss_info_configuration(mac, bss_info_conf);
     }
     return true;
