@@ -587,12 +587,6 @@ typedef void (*BML_STATS_UPDATE_CB)(const struct BML_STATS_ITER *);
  */
 typedef void (*BML_EVENT_CB)(const struct BML_EVENT *);
 
-/**
- * WFA-CA reply function. When registered, the function will be called when
- * a reply to WFA-CA command is received. 
- */
-typedef void (*BML_WFA_CA_CB)(BML_CTX ctx, const char *buffer);
-
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

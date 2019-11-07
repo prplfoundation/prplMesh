@@ -509,32 +509,6 @@ int bml_set_slave_restricted_channels(BML_CTX ctx, const uint8_t *restricted_cha
 int bml_get_slave_restricted_channels(BML_CTX ctx, uint8_t *restricted_channels, const char *mac);
 
 /**
- * Sends wfa-ca command to controller.
- * 
- * @param [in] ctx BML Context.
- * @param [in] cmd, command buffer
- * @param [in] command, command buffer
- * @param [in] command_len, command buffer length
- * @param [in] reply_cb, callback function which prints a reply to a wfa-ca command
- *
- *
- */
-int bml_wfa_ca_controller(BML_CTX ctx, const char *command, int command_len,
-                          BML_WFA_CA_CB reply_cb);
-
-/*
- * Sends wfa-ca command to agent
- *
- * @param [in] ctx BML Context.
- * @param [in] cmd, command buffer
- * @param [out] ret_buf, return buffer
- * @param [in] ret_buf_size, return buffer size
- *
- * @return BML_RET_OK on success.
- */
-int bml_wfa_ca_agent(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf_size);
-
-/**
  * Trigger Topology Discovery Task.
  *
  * @param [in] ctx BML Context.

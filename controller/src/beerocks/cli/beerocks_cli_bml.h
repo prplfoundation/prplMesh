@@ -97,7 +97,6 @@ private:
     static void events_update_cb(const struct BML_EVENT *event, bool to_console);
     static void events_update_to_console_cb(const struct BML_EVENT *event);
     static void events_update_to_socket_cb(const struct BML_EVENT *event);
-    static void wfa_ca_reply_to_console_cb(BML_CTX ctx, const char *buffer);
 
     // Caller functions
     int connect_caller(int numOfArgs);
@@ -135,8 +134,6 @@ private:
     int get_global_restricted_channels_caller(int numOfArgs);
     int set_slave_restricted_channels_caller(int numOfArgs);
     int get_slave_restricted_channels_caller(int numOfArgs);
-    int bml_wfa_ca_controller_caller(int numOfArgs);
-    int bml_wfa_ca_agent_caller(int numOfArgs);
     int bml_trigger_topology_discovery_caller(int numOfArgs);
     int bml_channel_selection_caller(int numOfArgs);
 #ifdef BEEROCKS_RDKB
@@ -183,8 +180,6 @@ private:
     int set_slave_restricted_channels(const std::string &restricted_channels,
                                       const std::string &hostap_mac);
     int get_slave_restricted_channels(const std::string &hostap_mac);
-    int wfa_ca_controller(const std::string &cmd);
-    int wfa_ca_agent(const std::string &cmd);
     int topology_discovery(const std::string &al_mac);
     int channel_selection(const std::string &al_mac, const std::string &ruid);
 #ifdef BEEROCKS_RDKB
