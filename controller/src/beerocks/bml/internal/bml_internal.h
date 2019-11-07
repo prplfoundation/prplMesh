@@ -150,13 +150,6 @@ public:
     int get_restricted_channels(uint8_t *restricted_channels, const std::string mac,
                                 uint8_t is_global);
 
-    // send wfa-ca controller command
-    int wfa_ca_controller(BML_CTX ctx, const char *command, int command_len,
-                          BML_WFA_CA_CB reply_cb);
-
-    // send wfa-ca agent command
-    int wfa_ca_agent(const char *cmd, char *ret_buf, int ret_buf_size);
-
     // triggers topology discovery
     int topology_discovery(const char *al_mac);
 
@@ -242,7 +235,6 @@ private:
     BML_NW_MAP_QUERY_CB m_cbNetMapUpdate = nullptr;
     BML_STATS_UPDATE_CB m_cbStatsUpdate  = nullptr;
     BML_EVENT_CB m_cbEvent               = nullptr;
-    BML_WFA_CA_CB m_cbWfaCaReply         = nullptr;
 
     beerocks_message::sDeviceInfo *m_device_info                 = nullptr;
     beerocks_message::sWifiCredentials *m_wifi_credentials       = nullptr;

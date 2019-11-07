@@ -469,11 +469,6 @@ void cli_bml::setFunctionsMapAndArray()
     insertCommandToMap(
         "bml_restricted_channels_get_slave", "<mac>", "Get restricted channels from slave 'mac'",
         static_cast<pFunction>(&cli_bml::get_slave_restricted_channels_caller), 1, 1, STRING_ARG);
-    insertCommandToMap(
-        "bml_wfa_ca_controller", "<string_command>", "send wfa_ca controller<string_command>",
-        static_cast<pFunction>(&cli_bml::bml_wfa_ca_controller_caller), 1, 1, STRING_ARG);
-    insertCommandToMap("bml_wfa_ca_agent", "<string_command>", "send wfa_ca agent <string_command>",
-                       static_cast<pFunction>(&cli_bml::bml_wfa_ca_agent_caller), 1, 1, STRING_ARG);
     insertCommandToMap("bml_trigger_topology_discovery", "<al_mac (mac format)>",
                        "trigger topology query towards 'al_mac'",
                        static_cast<pFunction>(&cli_bml::bml_trigger_topology_discovery_caller), 1,
@@ -816,23 +811,6 @@ void cli_bml::events_update_to_socket_cb(const struct BML_EVENT *event)
     cli_bml::events_update_cb(event, false);
 }
 
-void cli_bml::wfa_ca_reply_to_console_cb(BML_CTX ctx, const char *buffer)
-{
-    cli_bml *pThis = reinterpret_cast<cli_bml *>(bml_get_user_data(ctx));
-    if (!pThis) {
-        std::cout << "ERROR: Internal error - invalid context!" << std::endl;
-        return;
-    }
-
-    static const std::string ref("status,RUNNING");
-    std::string reply(buffer);
-    // Check if the reply string start with "status,RUNNING" to update 'pending_response' accordingly
-    pThis->pending_response =
-        ((reply.size() >= ref.size()) && (reply.substr(0, ref.size()) == ref)) ? true : false;
-
-    std::cout << reply << std::endl << std::flush;
-}
-
 //
 // Caller functions
 //
@@ -1091,22 +1069,6 @@ int cli_bml::get_slave_restricted_channels_caller(int numOfArgs)
 {
     if (numOfArgs == 1) {
         return get_slave_restricted_channels(args.stringArgs[0]);
-    }
-    return -1;
-}
-
-int cli_bml::bml_wfa_ca_controller_caller(int numOfArgs)
-{
-    if (numOfArgs == 1) {
-        return wfa_ca_controller(args.stringArgs[0]);
-    }
-    return -1;
-}
-
-int cli_bml::bml_wfa_ca_agent_caller(int numOfArgs)
-{
-    if (numOfArgs == 1) {
-        return wfa_ca_agent(args.stringArgs[0]);
     }
     return -1;
 }
@@ -1621,25 +1583,6 @@ int cli_bml::get_slave_restricted_channels(const std::string &hostap_mac)
         std::cout << int(elem) << " ,";
     }
     printBmlReturnVals("get_slave_restricted_channels", ret);
-    return 0;
-}
-
-int cli_bml::wfa_ca_controller(const std::string &cmd)
-{
-    int ret = bml_wfa_ca_controller(ctx, cmd.c_str(), cmd.size() + 1, wfa_ca_reply_to_console_cb);
-
-    // print error message only on error
-    if (ret != BML_RET_OK) {
-        printBmlReturnVals("wfca_controller", ret);
-    }
-
-    pending_response = true;
-    return 0;
-}
-
-int cli_bml::wfa_ca_agent(const std::string &cmd)
-{
-    //TODO
     return 0;
 }
 

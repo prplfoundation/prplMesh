@@ -547,44 +547,6 @@ int bml_get_slave_restricted_channels(BML_CTX ctx, uint8_t *restricted_channels,
     return (pBML->get_restricted_channels(restricted_channels, mac, 0));
 }
 
-int bml_wfa_ca_controller(BML_CTX ctx, const char *command, int command_len, BML_WFA_CA_CB reply_cb)
-{
-    // Validate input parameters
-    if (!ctx) {
-        return (-BML_RET_INVALID_ARGS);
-    }
-
-    if (command == nullptr) {
-        LOG(ERROR) << "Invalid command ptr";
-        return (-BML_RET_INVALID_ARGS);
-    }
-
-    if (reply_cb == nullptr) {
-        LOG(ERROR) << "Invalid reply_cb ptr";
-        return (-BML_RET_INVALID_ARGS);
-    }
-
-    if (command_len < 1) {
-        LOG(ERROR) << "Invalid command_len size=" << command_len;
-        return (-BML_RET_INVALID_ARGS);
-    }
-
-    bml_internal *pBML = (bml_internal *)ctx;
-
-    return (pBML->wfa_ca_controller(ctx, command, command_len, reply_cb));
-}
-
-int bml_wfa_ca_agent(BML_CTX ctx, const char *cmd, char *ret_buf, int ret_buf_size)
-{
-    // Validate input parameters
-    if (!ctx || !cmd)
-        return (-BML_RET_INVALID_ARGS);
-
-    bml_internal *pBML = (bml_internal *)ctx;
-
-    return (pBML->wfa_ca_agent(cmd, ret_buf, ret_buf_size));
-}
-
 int bml_trigger_topology_discovery(BML_CTX ctx, const char *al_mac)
 {
     // Validate input parameter

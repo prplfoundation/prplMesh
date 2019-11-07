@@ -850,24 +850,6 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
             *m_pvaps_list_size = i;
 
         } break;
-        case beerocks_message::ACTION_BML_WFA_CA_CONTROLLER_RESPONSE: {
-            auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_WFA_CA_CONTROLLER_RESPONSE>();
-            if (!response) {
-                LOG(ERROR) << "addClass cACTION_BML_WFA_CA_CONTROLLER_RESPONSE failed";
-                return BML_RET_OP_FAILED;
-            }
-
-            const char *reply_ptr = response->reply();
-
-            if (m_cbWfaCaReply == nullptr) {
-                LOG(WARNING) << "wfa-ca reply callback function was NOT registered...";
-                return (-BML_RET_OP_NOT_SUPPORTED);
-            }
-
-            m_cbWfaCaReply(this, reply_ptr);
-
-        } break;
         default: {
             LOG(WARNING) << "unhandled header BML action type 0x" << std::hex
                          << int(beerocks_header->action_op());
@@ -2637,51 +2619,6 @@ int bml_internal::get_restricted_channels(uint8_t *restricted_channels, const st
     }
 
     return (iRet);
-}
-
-int bml_internal::wfa_ca_controller(BML_CTX ctx, const char *command, int command_len,
-                                    BML_WFA_CA_CB reply_cb)
-{
-    if (command == nullptr) {
-        LOG(ERROR) << "Invalid command ptr";
-        return (-BML_RET_INVALID_ARGS);
-    }
-
-    if (reply_cb == nullptr) {
-        LOG(ERROR) << "Invalid reply_cb ptr";
-        return (-BML_RET_INVALID_ARGS);
-    }
-
-    if (command_len < 1) {
-        LOG(ERROR) << "Invalid command_len size=" << command_len;
-        return (-BML_RET_INVALID_ARGS);
-    }
-
-    auto request =
-        message_com::create_vs_message<beerocks_message::cACTION_BML_WFA_CA_CONTROLLER_REQUEST>(
-            cmdu_tx);
-
-    if (!request) {
-        LOG(ERROR) << "Failed building cACTION_BML_WFA_CA_CONTROLLER_REQUEST message!";
-        return (-BML_RET_OP_FAILED);
-    }
-
-    request->set_command(command, command_len);
-
-    m_cbWfaCaReply = reply_cb;
-
-    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
-        LOG(ERROR) << "Failed sending message!";
-        return (-BML_RET_OP_FAILED);
-    }
-
-    return BML_RET_OK;
-}
-
-int bml_internal::wfa_ca_agent(const char *cmd, char *ret_buf, int ret_buf_size)
-{
-    // TODO: implement function
-    return BML_RET_OK;
 }
 
 int bml_internal::topology_discovery(const char *al_mac)
