@@ -51,6 +51,7 @@ public:
         std::string ire_ip_range_low;
         std::string ire_ip_range_high;
         std::vector<uint8_t> global_restricted_channels;
+        int ucc_listener_port;
         int diagnostics_measurements_polling_rate_sec;
         int ire_rssi_report_rate_sec;
         bool load_dfs_reentry;

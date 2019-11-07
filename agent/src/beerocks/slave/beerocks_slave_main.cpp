@@ -149,7 +149,13 @@ static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_
 {
     son_slave_conf.platform =
         beerocks::utils::get_platform_from_string(beerocks_slave_conf.platform);
-    son_slave_conf.temp_path         = beerocks_slave_conf.temp_path;
+    son_slave_conf.temp_path = beerocks_slave_conf.temp_path;
+    son_slave_conf.vendor    = beerocks_slave_conf.vendor;
+    son_slave_conf.model     = beerocks_slave_conf.model;
+    son_slave_conf.ucc_listener_port =
+        beerocks::string_utils::stoi(beerocks_slave_conf.ucc_listener_port);
+    son_slave_conf.ucc_listener_slave_hostap_iface =
+        beerocks_slave_conf.ucc_listener_slave_hostap_iface;
     son_slave_conf.enable_keep_alive = beerocks_slave_conf.enable_keep_alive == "1";
     son_slave_conf.enable_credentials_automatic_unify =
         beerocks_slave_conf.enable_credentials_automatic_unify == "1";

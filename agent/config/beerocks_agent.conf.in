@@ -11,6 +11,10 @@
 [global]
 platform=@BEEROCKS_PLATFORM@
 temp_path=@BEEROCKS_TMP_PATH@
+vendor=Intel
+model=prplMesh
+ucc_listener_port=8002 # 0 - disabled
+ucc_listener_slave_hostap_iface=wlan0
 enable_arp_monitor=1
 enable_keep_alive=1
 enable_bpl_iface_status_notifications=@BEEROCKS_NOTIFY@

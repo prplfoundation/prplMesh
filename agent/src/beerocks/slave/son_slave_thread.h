@@ -29,6 +29,10 @@ public:
         // from slave config file //
         std::string temp_path;
         beerocks::ePlatform platform;
+        std::string vendor;
+        std::string model;
+        uint16_t ucc_listener_port;
+        std::string ucc_listener_slave_hostap_iface;
         std::string bridge_iface;
         int stop_on_failure_attempts;
         bool enable_keep_alive;
