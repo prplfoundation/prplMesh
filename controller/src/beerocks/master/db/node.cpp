@@ -343,3 +343,30 @@ bool node::link_metrics_data::add_receiver_link_metric(
     }
     return true;
 }
+
+bool node::ap_metrics_data::add_ap_metric_data(std::shared_ptr<wfa_map::tlvApMetric> ApMetricData)
+{
+    bssid                               = ApMetricData->bssid();
+    channel_utilization                 = ApMetricData->channel_utilization();
+    number_of_stas_currently_associated = ApMetricData->number_of_stas_currently_associated();
+
+    for (int i = 0; i < 3; i++) {
+        if (ApMetricData->estimated_service_parameters().include_ac_be) {
+            estimated_service_info_field_ac_be[i] =
+                *ApMetricData->estimated_service_info_field_ac_be(i);
+        }
+        if (ApMetricData->estimated_service_parameters().include_ac_bk) {
+            estimated_service_info_field_ac_bk[i] =
+                *ApMetricData->estimated_service_info_field_ac_bk(i);
+        }
+        if (ApMetricData->estimated_service_parameters().include_ac_vo) {
+            estimated_service_info_field_ac_vo[i] =
+                *ApMetricData->estimated_service_info_field_ac_vo(i);
+        }
+        if (ApMetricData->estimated_service_parameters().include_ac_vi) {
+            estimated_service_info_field_ac_vi[i] =
+                *ApMetricData->estimated_service_info_field_ac_vi(i);
+        }
+    }
+    return true;
+}
