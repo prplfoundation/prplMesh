@@ -133,10 +133,12 @@ test_client_capability_query() {
 }
 test_ap_capability_query() {
     status "test ap capability query"
-    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8001" $redirect
+    check_error=0
+    check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8001" $redirect
     sleep 1
     dbg "Confirming ap capability query has been received on agent"
-    docker exec -it repeater1 sh -c 'grep -i -q "AP_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec -it repeater1 sh -c 'grep -i -q "AP_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    return $check_error
 }
 test_combined_infra_metrics() {
     err "combined_infra_metrics not implemented yet."
@@ -147,21 +149,21 @@ test_client_steering_mandate() {
     check_error=0
 
     dbg "Send topology request to agent 1"
-    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
+    check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
     sleep 1
     dbg "Confirming topology query was received"
     check docker exec -it repeater1 sh -c \
         'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Send topology request to agent 2"
-    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent2,MessageTypeValue,0x0002" $redirect
+    check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent2,MessageTypeValue,0x0002" $redirect
     sleep 1
     dbg "Confirming topology query was received"
     check docker exec -it repeater2 sh -c \
         'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Send Client Steering Request message for Steering Mandate to CTT Agent1"
-    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
+    check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
 0x001b,tlv_value,{$mac_agent1_wlan0 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {$mac_agent2_wlan0 0x73 0x24}}" $redirect
     sleep 1
     dbg "Confirming Client Steering Request message was received - mandate"
@@ -176,7 +178,7 @@ test_client_steering_mandate() {
     check docker exec -it repeater1 sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 
-    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
+    check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
 0x000C,tlv_value,{$mac_agent1_wlan0 0x00 0x000A 0x0000 0x00}" $redirect
     sleep 1
     dbg "Confirming Client Steering Request message was received - Opportunity"
@@ -194,6 +196,7 @@ test_client_steering_mandate() {
     dbg "Confirming ACK message was received"
     check docker exec -it repeater1 sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    return $check_error
 }
 
 test_client_association_dummy(){
@@ -220,7 +223,7 @@ test_client_association_dummy(){
     dbg "Confirming Client Association Control Request message was received (BLOCK)"
     check docker exec -it repeater1 sh -c \
         "grep -i -q 'Got client disallow request for ${sta_mac}' /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log"
-        
+    return $check_error
 }
 
 test_client_steering_dummy() {
@@ -277,21 +280,23 @@ test_client_steering_dummy() {
     dbg "Confirm steering success by client connected"
     check docker exec -it gateway sh -c \
         "grep -i -q 'steering successful for sta ${sta_mac}' /tmp/$USER/beerocks/logs/beerocks_controller.log"
+    return $check_error
 }
 
 test_client_steering_policy() {
     status "test client steering policy"
+    check_error=0
     rm /tmp/catch
 
     dbg "Send client steering policy to agent 1"
-    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8003,tlv_type,0x89,tlv_length\
+    check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8003,tlv_type,0x89,tlv_length\
 ,0x000C,tlv_value,{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}" > /tmp/catch
     sleep 1
     MID_STR=$(grep -Po "(?<=mid,0x).*[^\s]" /tmp/catch)
     MID1=$(echo "ibase=16; $MID_STR" | bc)
     dbg "Confirming client steering policy has been received on agent"
     
-    docker exec -it repeater1 sh -c 'grep -i -q "MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log > /tmp/catch'
+    check docker exec -it repeater1 sh -c 'grep -i -q "MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log > /tmp/catch'
     sleep 1
     dbg "Confirming client steering policy ack message has been received on the controller"
     TMP="$(docker exec -it gateway sh -c 'grep -i "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log')"
@@ -301,19 +306,20 @@ test_client_steering_policy() {
     if [ "$MID1" -ne "$MID2" ]; then
         return 1
     fi
+    return $check_error
 }
 
 test_client_association() {
     status "test client association"
     check_error=0
     dbg "Send topology request to agent 1"
-    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
+    check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
     dbg "Confirming topology query was received"
     check docker exec -it repeater1 sh -c \
         'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Send client association control message"
-    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8016,tlv_type,0x9D,tlv_length,\
+    check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8016,tlv_type,0x9D,tlv_length,\
 0x000f,tlv_value,{$mac_agent1_wlan0 0x00 0x1E 0x01 {0x000000110022}}" $redirect
 
     dbg "Confirming client association control message has been received on agent"
@@ -326,6 +332,7 @@ test_client_association() {
     dbg "Confirming ACK message was received on controller"
     check docker exec -it gateway sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
+    return $check_error
 }
 
 test_higher_layer_data_payload_trigger() {
@@ -344,7 +351,7 @@ test_higher_layer_data_payload_trigger() {
     # MCUT sends Higher Layer Data message to CTT Agent1 by providing:
     # Higher layer protocol = "0x00"
     # Higher layer payload = 200 concatenated copies of the ALID of the MCUT (1200 octets)
-    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8018,tlv_type,0xA0,tlv_length,\
+    check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8018,tlv_type,0xA0,tlv_length,\
 0x04b1,tlv_value,{0x00 $payload}" $redirect
 
     dbg "Confirming higher layer data message was received in the agent" 
@@ -362,6 +369,7 @@ test_higher_layer_data_payload_trigger() {
     dbg "Confirming ACK message was received in the controller"
     check docker exec -it gateway sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
+    return $check_error
 }
 
 test_higher_layer_data_payload() {
@@ -370,9 +378,11 @@ test_higher_layer_data_payload() {
 }
 test_topology() {
     status "test topology query"
-    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
+    check_error=0
+    check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
     dbg "Confirming topology query was received"
     docker exec -it repeater1 sh -c 'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+    return $check_error
 }
 test_init() {
     status "test initialization"    
