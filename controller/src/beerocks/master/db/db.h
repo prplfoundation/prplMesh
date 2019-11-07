@@ -503,8 +503,8 @@ public:
     //
     // certification
     //
-    std::shared_ptr<uint8_t> &get_certification_tx_buffer() { return certification_tx_buffer; };
-    std::shared_ptr<uint8_t> &allocate_certification_tx_buffer()
+    std::shared_ptr<uint8_t> get_certification_tx_buffer() { return certification_tx_buffer; };
+    std::shared_ptr<uint8_t> allocate_certification_tx_buffer()
     {
         return (certification_tx_buffer =
                     std::shared_ptr<uint8_t>(new uint8_t[beerocks::message::MESSAGE_BUFFER_LENGTH],
