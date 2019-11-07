@@ -3568,10 +3568,12 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     case STATE_BACKHAUL_MANAGER_CONNECTED: {
         LOG(TRACE) << "MASTER_CONNECTED";
 
+        master_socket = backhaul_manager_socket;
+        master_socket->setPeerMac(backhaul_params.controller_bridge_mac);
+
         if (!wlan_settings.band_enabled) {
 
             iface_status_operational_state = true;
-            master_socket                  = backhaul_manager_socket;
             iface_status_ap                = eRadioStatus::OFF;
             LOG(TRACE) << "goto STATE_OPERATIONAL";
             slave_state = STATE_OPERATIONAL;
@@ -3658,8 +3660,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 is_backhaul_manager; //redundant for now but might be needed in the future
             message_com::send_cmdu(platform_manager_socket, cmdu_tx);
         }
-
-        master_socket = backhaul_manager_socket;
 
         LOG(TRACE) << "goto STATE_JOIN_MASTER";
         slave_state = STATE_JOIN_MASTER;
