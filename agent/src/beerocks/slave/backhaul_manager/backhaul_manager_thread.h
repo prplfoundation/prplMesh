@@ -15,6 +15,7 @@
 
 #include <beerocks/bwl/sta_wlan_hal.h>
 
+#include <beerocks/bcl/beerocks_config_file.h>
 #include <beerocks/bcl/beerocks_socket_thread.h>
 #include <beerocks/bcl/network/network_utils.h>
 
@@ -29,9 +30,9 @@ namespace backhaul_manager {
 class main_thread : public btl::transport_socket_thread {
 
 public:
-    main_thread(std::string temp_path_, std::set<std::string> slave_ap_ifaces_,
-                std::set<std::string> slave_sta_ifaces_, int stop_on_failure_attempts,
-                std::string const_bh_slave_);
+    main_thread(const config_file::sConfigSlave &config,
+                const std::set<std::string> &slave_ap_ifaces_,
+                const std::set<std::string> &slave_sta_ifaces_);
     ~main_thread();
 
     virtual bool init() override;
@@ -84,7 +85,7 @@ private:
     std::shared_ptr<bwl::sta_wlan_hal> get_wireless_hal(std::string iface = "");
 
 private:
-    std::string beerocks_temp_path;
+    const std::string &beerocks_temp_path;
 
     struct SSlaveSockets {
         Socket *slave = nullptr;
@@ -137,8 +138,8 @@ private:
     int unassociated_rssi_measurement_header_id = -1;
 
     //comes from config file
-    const std::set<std::string> slave_ap_ifaces;
-    const std::set<std::string> slave_sta_ifaces;
+    const std::set<std::string> &slave_ap_ifaces;
+    const std::set<std::string> &slave_sta_ifaces;
 
     //used for several states independently
     std::set<std::string> pending_slave_ifaces;
@@ -149,7 +150,8 @@ private:
     net::network_utils::iface_info bridge_info;
 
     int configuration_stop_on_failure_attempts;
-    std::string config_const_bh_slave;
+    const std::string &config_const_bh_slave;
+
     int stop_on_failure_attempts;
     bool local_master = false;
     bool local_gw     = false;
