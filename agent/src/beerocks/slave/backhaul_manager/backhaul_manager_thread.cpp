@@ -96,18 +96,20 @@ const char *main_thread::s_arrStates[] = {FOREACH_STATE(GENERATE_STRING)};
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-main_thread::main_thread(std::string temp_path_, std::set<std::string> slave_ap_ifaces_,
-                         std::set<std::string> slave_sta_ifaces_, int stop_on_failure_attempts_,
-                         std::string const_bh_slave_)
-    : transport_socket_thread(temp_path_ + std::string(BEEROCKS_BACKHAUL_MGR_UDS)),
-      beerocks_temp_path(temp_path_), slave_ap_ifaces(slave_ap_ifaces_),
-      slave_sta_ifaces(slave_sta_ifaces_), pending_slave_ifaces(slave_ap_ifaces_),
-      config_const_bh_slave(const_bh_slave_), stop_on_failure_attempts(stop_on_failure_attempts_),
-      m_eFSMState(EState::INIT)
+main_thread::main_thread(const config_file::sConfigSlave &config,
+                         const std::set<std::string> &slave_ap_ifaces_,
+                         const std::set<std::string> &slave_sta_ifaces_)
+    : transport_socket_thread(config.temp_path + std::string(BEEROCKS_BACKHAUL_MGR_UDS)),
+      beerocks_temp_path(config.temp_path), slave_ap_ifaces(slave_ap_ifaces_),
+      slave_sta_ifaces(slave_sta_ifaces_), config_const_bh_slave(config.const_backhaul_slave)
 {
-    thread_name = "backhaul_manager";
-    LOG(DEBUG) << "stop_on_failure_attempts=" << stop_on_failure_attempts;
-    configuration_stop_on_failure_attempts = stop_on_failure_attempts;
+    thread_name                            = "backhaul_manager";
+    pending_slave_ifaces                   = slave_ap_ifaces_;
+    configuration_stop_on_failure_attempts = string_utils::stoi(config.stop_on_failure_attempts);
+    stop_on_failure_attempts               = configuration_stop_on_failure_attempts;
+    LOG(DEBUG) << "stop_on_failure_attempts=" << configuration_stop_on_failure_attempts;
+
+    m_eFSMState = EState::INIT;
     set_select_timeout(SELECT_TIMEOUT_MSC);
 }
 
