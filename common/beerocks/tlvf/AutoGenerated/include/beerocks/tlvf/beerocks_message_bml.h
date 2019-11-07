@@ -1646,62 +1646,6 @@ class cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST : public BaseClass
         sMacAddr* m_ruid = nullptr;
 };
 
-class cACTION_BML_WFA_CA_CONTROLLER_REQUEST : public BaseClass
-{
-    public:
-        cACTION_BML_WFA_CA_CONTROLLER_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BML_WFA_CA_CONTROLLER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_BML_WFA_CA_CONTROLLER_REQUEST();
-
-        static eActionOp_BML get_action_op(){
-            return (eActionOp_BML)(ACTION_BML_WFA_CA_CONTROLLER_REQUEST);
-        }
-        uint16_t& command_length();
-        std::string command_str();
-        char* command(size_t length = 0);
-        bool set_command(const std::string& str);
-        bool set_command(const char buffer[], size_t size);
-        bool alloc_command(size_t count = 1);
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_BML* m_action_op = nullptr;
-        uint16_t* m_command_length = nullptr;
-        char* m_command = nullptr;
-        size_t m_command_idx__ = 0;
-        int m_lock_order_counter__ = 0;
-};
-
-class cACTION_BML_WFA_CA_CONTROLLER_RESPONSE : public BaseClass
-{
-    public:
-        cACTION_BML_WFA_CA_CONTROLLER_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BML_WFA_CA_CONTROLLER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_BML_WFA_CA_CONTROLLER_RESPONSE();
-
-        static eActionOp_BML get_action_op(){
-            return (eActionOp_BML)(ACTION_BML_WFA_CA_CONTROLLER_RESPONSE);
-        }
-        uint16_t& reply_length();
-        std::string reply_str();
-        char* reply(size_t length = 0);
-        bool set_reply(const std::string& str);
-        bool set_reply(const char buffer[], size_t size);
-        bool alloc_reply(size_t count = 1);
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_BML* m_action_op = nullptr;
-        uint16_t* m_reply_length = nullptr;
-        char* m_reply = nullptr;
-        size_t m_reply_idx__ = 0;
-        int m_lock_order_counter__ = 0;
-};
-
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_BML_H_
