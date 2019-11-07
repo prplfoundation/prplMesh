@@ -318,8 +318,8 @@ test_higher_layer_data_payload_trigger() {
     mac_gateway_hex=$(mac_to_hex $mac_gateway)
     dbg "mac_gateway_hex = ${mac_gateway_hex}"
     copies=200
-    
-    for i in `seq 1 $copies`
+    payload="$mac_gateway_hex"
+    for i in `seq 1 $(($copies - 1))`
     do
         payload="$payload $mac_gateway_hex"
     done
