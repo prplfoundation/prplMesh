@@ -35,6 +35,7 @@ public:
         std::string temp_path;
         std::string vendor;
         std::string model;
+        std::string ucc_listener_port;
         std::string load_dfs_reentry;
         std::string load_client_band_steering;
         std::string load_client_optimal_path_roaming;
@@ -89,6 +90,10 @@ public:
         //[global]
         std::string platform;
         std::string temp_path;
+        std::string vendor;
+        std::string model;
+        std::string ucc_listener_port;
+        std::string ucc_listener_slave_hostap_iface;
         std::string enable_arp_monitor;
         std::string enable_keep_alive;
         std::string enable_credentials_automatic_unify;
