@@ -245,6 +245,12 @@ public:
     std::unordered_map<sMacAddr, std::unordered_map<sMacAddr, son::node::link_metrics_data>> &
     get_link_metric_data_map();
 
+    /**
+     * @brief Get the ap metric database
+     * @return reference to the map that holds ap metric data of all agents.
+     */
+    std::unordered_map<sMacAddr, son::node::ap_metrics_data> &get_ap_metric_data_map();
+
     //
     // DB node functions (get only)
     //
@@ -741,6 +747,13 @@ private:
     */
     std::unordered_map<sMacAddr, std::unordered_map<sMacAddr, son::node::link_metrics_data>>
         m_link_metric_data;
+
+    /*
+    * This map holds ap metric data per reporting Agent sMacAddr .
+    * Map is Used in TYPE_GW/TYPE_IRE nodes.
+    * Map created empty in all other nodes.
+    */
+    std::unordered_map<sMacAddr, son::node::ap_metrics_data> m_ap_metric_data;
 
     // certification
     std::shared_ptr<uint8_t> certification_tx_buffer;
