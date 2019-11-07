@@ -119,6 +119,17 @@ bool slave_thread::init()
         return false;
     }
 
+    if (config.ucc_listener_slave_hostap_iface == config.hostap_iface &&
+        config.ucc_listener_port != 0) {
+        m_agent_ucc_listener =
+            std::make_unique<agent_ucc_listener>(config.ucc_listener_port, config.vendor,
+                                                 config.model, config.bridge_iface, &master_socket);
+        if (m_agent_ucc_listener && !m_agent_ucc_listener->start("ucc_listener")) {
+            LOG(ERROR) << "failed start agent_ucc_listener";
+            return false;
+        }
+    }
+
     return socket_thread::init();
 }
 
@@ -332,6 +343,20 @@ bool slave_thread::work()
         }
     }
     return true;
+}
+
+void slave_thread::before_select()
+{
+    if (m_agent_ucc_listener) {
+        m_agent_ucc_listener->unlock();
+    }
+}
+
+void slave_thread::after_select(bool timeout)
+{
+    if (m_agent_ucc_listener) {
+        m_agent_ucc_listener->lock();
+    }
 }
 
 void slave_thread::process_keep_alive()
