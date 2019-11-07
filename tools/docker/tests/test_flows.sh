@@ -18,8 +18,24 @@ topdir="${scriptdir%/*/*/*/*}"
 redirect="> /dev/null 2>&1"
 error=0
 
-send_bml_command() {       
+bridge_name=br-lan
+
+container_ip() {
+    docker exec -t "$1" ip -f inet addr show "$bridge_name" | grep -Po 'inet \K[\d.]+'
+}
+
+container_CAPI_port() {
+    # get the CAPI port based on the container name.
+    docker exec -t "$1" grep ucc_listener_port ${installdir}/config/beerocks_controller.conf  | cut -f2 -d= | cut -f1 -d' '
+}
+
+send_bml_command() {
     docker exec -it gateway ${installdir}/bin/beerocks_cli -c "$*"
+}
+
+send_CAPI_command() {
+    # send a CAPI command to a container.
+    ${topdir}/prplMesh/tools/docker/tests/send_CAPI_command.py $(container_ip "$1") $(container_CAPI_port "$1") "$2"
 }
 
 test_initial_ap_config() {
@@ -42,10 +58,10 @@ test_initial_ap_config() {
     # Regression test: MAC address should be case insensitive
     MAC_AGENT1=$(echo $mac_agent1 | tr a-z A-Z)
     # Configure the controller and send renew
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_RESET_DEFAULT\"" $redirect
-    eval send_bml_command "bml_wfa_ca_controller \\\"DEV_SET_CONFIG,bss_info1,$MAC_AGENT1 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1,bss_info2,$mac_agent1 8x Multi-AP-24G-2 0x0020 0x0008 maprocks2 1 0\\\"" $redirect
+    send_CAPI_command gateway "DEV_RESET_DEFAULT" $redirect
+    send_CAPI_command gateway "DEV_SET_CONFIG,bss_info1,$MAC_AGENT1 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1,bss_info2,$mac_agent1 8x Multi-AP-24G-2 0x0020 0x0008 maprocks2 1 0" $redirect
     gw_mac_without_colons="$(printf $mac_gateway | tr -d :)"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x000A,tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}\"" $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x000A,tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}" $redirect
 
     # Wait a bit for the renew to complete
     sleep 3
@@ -75,7 +91,7 @@ test_channel_selection() {
     
     check_error=0
     dbg "Send channel preference query"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8004\"" $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8004" $redirect
     sleep 1
     dbg "Confirming channel preference query has been received on agent"
     check docker exec -it repeater1 sh -c \
@@ -84,7 +100,7 @@ test_channel_selection() {
         'grep -i -q "CHANNEL_PREFERENCE_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
     
     dbg "Send channel selection request"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8006\"" $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8006" $redirect
     sleep 1
     dbg "Confirming channel selection request has been received on agent"
     check docker exec -it repeater1 sh -c \
@@ -105,8 +121,8 @@ test_client_capability_query() {
     status "test client capability"
 
     check_error=0
-    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
-0x000C,tlv_value,{$mac_agent1_wlan0 0x000000110022}\""' $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
+0x000C,tlv_value,{$mac_agent1_wlan0 0x000000110022}" $redirect
     sleep 1
     dbg "Confirming client capability query has been received on agent"
     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
@@ -117,7 +133,7 @@ test_client_capability_query() {
 }
 test_ap_capability_query() {
     status "test ap capability query"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8001\"" $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8001" $redirect
     sleep 1
     dbg "Confirming ap capability query has been received on agent"
     docker exec -it repeater1 sh -c 'grep -i -q "AP_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
@@ -131,22 +147,22 @@ test_client_steering_mandate() {
     check_error=0
 
     dbg "Send topology request to agent 1"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002\"" $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
     sleep 1
     dbg "Confirming topology query was received"
     check docker exec -it repeater1 sh -c \
         'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Send topology request to agent 2"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent2,MessageTypeValue,0x0002\"" $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent2,MessageTypeValue,0x0002" $redirect
     sleep 1
     dbg "Confirming topology query was received"
     check docker exec -it repeater2 sh -c \
         'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Send Client Steering Request message for Steering Mandate to CTT Agent1"
-    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
-0x001b,tlv_value,{$mac_agent1_wlan0 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {$mac_agent2_wlan0 0x73 0x24}}\""' $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
+0x001b,tlv_value,{$mac_agent1_wlan0 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {$mac_agent2_wlan0 0x73 0x24}}" $redirect
     sleep 1
     dbg "Confirming Client Steering Request message was received - mandate"
     check docker exec -it repeater1 sh -c \
@@ -160,8 +176,8 @@ test_client_steering_mandate() {
     check docker exec -it repeater1 sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 
-    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
-0x000C,tlv_value,{$mac_agent1_wlan0 0x00 0x000A 0x0000 0x00}\""' $redirect   
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
+0x000C,tlv_value,{$mac_agent1_wlan0 0x00 0x000A 0x0000 0x00}" $redirect
     sleep 1
     dbg "Confirming Client Steering Request message was received - Opportunity"
     check docker exec -it repeater1 sh -c \
@@ -268,8 +284,8 @@ test_client_steering_policy() {
     rm /tmp/catch
 
     dbg "Send client steering policy to agent 1"
-    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8003,tlv_type,0x89,tlv_length\
-,0x000C,tlv_value,{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}\""' > /tmp/catch
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8003,tlv_type,0x89,tlv_length\
+,0x000C,tlv_value,{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}" > /tmp/catch
     sleep 1
     MID_STR=$(grep -Po "(?<=mid,0x).*[^\s]" /tmp/catch)
     MID1=$(echo "ibase=16; $MID_STR" | bc)
@@ -291,14 +307,14 @@ test_client_association() {
     status "test client association"
     check_error=0
     dbg "Send topology request to agent 1"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002\"" $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
     dbg "Confirming topology query was received"
     check docker exec -it repeater1 sh -c \
         'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Send client association control message"
-    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8016,tlv_type,0x9D,tlv_length,\
-0x000f,tlv_value,{$mac_agent1_wlan0 0x00 0x1E 0x01 {0x000000110022}}\""' $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8016,tlv_type,0x9D,tlv_length,\
+0x000f,tlv_value,{$mac_agent1_wlan0 0x00 0x1E 0x01 {0x000000110022}}" $redirect
 
     dbg "Confirming client association control message has been received on agent"
     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
@@ -328,8 +344,8 @@ test_higher_layer_data_payload_trigger() {
     # MCUT sends Higher Layer Data message to CTT Agent1 by providing:
     # Higher layer protocol = "0x00"
     # Higher layer payload = 200 concatenated copies of the ALID of the MCUT (1200 octets)
-    eval send_bml_command '"bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8018,tlv_type,0xA0,tlv_length,\
-0x04b1,tlv_value,{0x00 $payload}\""' $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8018,tlv_type,0xA0,tlv_length,\
+0x04b1,tlv_value,{0x00 $payload}" $redirect
 
     dbg "Confirming higher layer data message was received in the agent" 
     
@@ -354,7 +370,7 @@ test_higher_layer_data_payload() {
 }
 test_topology() {
     status "test topology query"
-    eval send_bml_command "bml_wfa_ca_controller \"DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002\"" $redirect
+    send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
     dbg "Confirming topology query was received"
     docker exec -it repeater1 sh -c 'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 }
