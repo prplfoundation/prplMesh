@@ -350,23 +350,28 @@ bool node::ap_metrics_data::add_ap_metric_data(std::shared_ptr<wfa_map::tlvApMet
     channel_utilization                 = ApMetricData->channel_utilization();
     number_of_stas_currently_associated = ApMetricData->number_of_stas_currently_associated();
 
-    for (int i = 0; i < 3; i++) {
-        if (ApMetricData->estimated_service_parameters().include_ac_be) {
-            estimated_service_info_field_ac_be[i] =
-                *ApMetricData->estimated_service_info_field_ac_be(i);
-        }
-        if (ApMetricData->estimated_service_parameters().include_ac_bk) {
-            estimated_service_info_field_ac_bk[i] =
-                *ApMetricData->estimated_service_info_field_ac_bk(i);
-        }
-        if (ApMetricData->estimated_service_parameters().include_ac_vo) {
-            estimated_service_info_field_ac_vo[i] =
-                *ApMetricData->estimated_service_info_field_ac_vo(i);
-        }
-        if (ApMetricData->estimated_service_parameters().include_ac_vi) {
-            estimated_service_info_field_ac_vi[i] =
-                *ApMetricData->estimated_service_info_field_ac_vi(i);
-        }
+    if (ApMetricData->estimated_service_parameters().include_ac_be) {
+        std::copy(ApMetricData->estimated_service_info_field_ac_be(),
+                  ApMetricData->estimated_service_info_field_ac_be() + 3,
+                  estimated_service_info_field_ac_be);
+    }
+
+    if (ApMetricData->estimated_service_parameters().include_ac_bk) {
+        std::copy(ApMetricData->estimated_service_info_field_ac_bk(),
+                  ApMetricData->estimated_service_info_field_ac_bk() + 3,
+                  estimated_service_info_field_ac_bk);
+    }
+
+    if (ApMetricData->estimated_service_parameters().include_ac_vo) {
+        std::copy(ApMetricData->estimated_service_info_field_ac_vo(),
+                  ApMetricData->estimated_service_info_field_ac_vo() + 3,
+                  estimated_service_info_field_ac_vo);
+    }
+
+    if (ApMetricData->estimated_service_parameters().include_ac_vi) {
+        std::copy(ApMetricData->estimated_service_info_field_ac_vi(),
+                  ApMetricData->estimated_service_info_field_ac_vi() + 3,
+                  estimated_service_info_field_ac_vi);
     }
     return true;
 }
