@@ -638,7 +638,7 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
         config_data.multiap_attr().subelement_value = bss_info_conf->bss_type;
 
         LOG(DEBUG) << "WSC config_data:" << std::hex << std::endl
-                   << "     ssid: " << config_data.ssid() << std::endl
+                   << "     ssid: " << config_data.ssid_str() << std::endl
                    << "     authentication_type: "
                    << int(config_data.authentication_type_attr().data) << std::endl
                    << "     encryption_type: " << int(config_data.encryption_type_attr().data)
