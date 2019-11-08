@@ -4,9 +4,7 @@ set(PROJECT_NAME btl)
 project(${PROJECT_NAME})
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
-find_package(MapfTransport QUIET)
-
-if(MapfTransport_FOUND)
+if (NOT MSGLIB STREQUAL "None")
 message(STATUS "${BoldGreen}Using MultiAP Framework for BTL transport${ColourReset}")
 set(BTL_TYPE "LOCAL_BUS" PARENT_SCOPE)
 set(btl_sources btl.cpp btl_local_bus.cpp)
@@ -17,7 +15,6 @@ add_definitions(-DUDS_BUS)
 set(btl_sources btl.cpp btl_uds.cpp)
 endif()
 
-find_package(Tlvf REQUIRED)
 find_package(elpp REQUIRED)
 
 # Set the base path for the current module
@@ -26,9 +23,9 @@ set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 # Build the library
 add_library(${PROJECT_NAME} SHARED ${btl_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
-target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf elpp btlvf mapf::common)
-if (MapfTransport_FOUND)
-     target_link_libraries(${PROJECT_NAME} PRIVATE mapf::ieee1905_transport_messages)
+target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf elpp btlvf common)
+if (NOT MSGLIB STREQUAL "None")
+     target_link_libraries(${PROJECT_NAME} PRIVATE ieee1905_transport_messages)
 endif()
 
 # Include paths
