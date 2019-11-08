@@ -11,7 +11,7 @@
 
 #include "wan_monitor.h"
 
-#include <beerocks/btl/btl.h>
+#include <btl.h>
 
 #include <beerocks/bwl/sta_wlan_hal.h>
 
