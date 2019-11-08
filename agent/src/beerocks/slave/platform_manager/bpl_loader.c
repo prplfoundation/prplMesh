@@ -6,10 +6,10 @@
  * See LICENSE file for more details.
  */
 
-#include <bpl/bpl.h>
-#include <bpl/bpl_arp.h>
-#include <bpl/bpl_cfg.h>
-#include <bpl/bpl_dhcp.h>
+#include <bpl.h>
+#include <bpl_arp.h>
+#include <bpl_cfg.h>
+#include <bpl_dhcp.h>
 
 #include <dlfcn.h>
 #include <stdio.h>

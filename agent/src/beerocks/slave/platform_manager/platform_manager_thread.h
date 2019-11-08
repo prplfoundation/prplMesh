@@ -16,8 +16,8 @@
 
 #include "beerocks/tlvf/beerocks_message_common.h"
 
-#include <bpl/bpl_arp.h>
-#include <bpl/bpl_cfg.h>
+#include <bpl_arp.h>
+#include <bpl_cfg.h>
 
 #include <unordered_map>
 #include <unordered_set>
