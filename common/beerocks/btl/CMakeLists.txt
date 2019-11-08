@@ -18,7 +18,6 @@ set(btl_sources btl.cpp btl_uds.cpp)
 endif()
 
 find_package(Tlvf REQUIRED)
-find_package(btlvf REQUIRED)
 find_package(elpp REQUIRED)
 
 # Set the base path for the current module
@@ -27,7 +26,7 @@ set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 # Build the library
 add_library(${PROJECT_NAME} SHARED ${btl_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
-target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf elpp beerocks::btlvf mapf::common)
+target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf elpp btlvf mapf::common)
 if (MapfTransport_FOUND)
      target_link_libraries(${PROJECT_NAME} PRIVATE mapf::ieee1905_transport_messages)
 endif()
