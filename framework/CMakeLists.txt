@@ -4,10 +4,6 @@ cmake_minimum_required (VERSION 2.8.12)
 
 include(FindPkgConfig)
 
-if(NOT DEFINED TARGET_PLATFORM)
-set(TARGET_PLATFORM "linux")
-endif()
-
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.0")
       message(FATAL_ERROR "gcc version (${CMAKE_CXX_COMPILER_VERSION} not supported, minumum is 4.8.0")

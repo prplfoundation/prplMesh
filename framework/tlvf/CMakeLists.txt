@@ -54,6 +54,9 @@ target_include_directories(tlvf
         $<INSTALL_INTERFACE:include>
     )
 
+# Add a custom property to the tlvf library to point to tlvf.py
+set_target_properties(tlvf PROPERTIES PythonTlvf ${PythonTlvf})
+
 install(TARGETS tlvf EXPORT TlvfConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
