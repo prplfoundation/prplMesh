@@ -8,6 +8,7 @@
 
 #include "controller_ucc_listener.h"
 #include "son_actions.h"
+#include <unordered_set>
 
 using namespace beerocks;
 
@@ -80,6 +81,7 @@ bool controller_ucc_listener::send_cmdu_to_destination(Socket *sd,
 bool controller_ucc_listener::handle_dev_set_config(
     std::unordered_map<std::string, std::string> &params, std::string &err_string)
 {
+    std::unordered_set<sMacAddr> al_mac_cleared_conf;
     if (params.find("backhaul") != params.end()) {
         err_string = "parameter 'backhaul' is not relevant to the controller";
         return false;
@@ -103,8 +105,12 @@ bool controller_ucc_listener::handle_dev_set_config(
             return false;
         }
 
-        m_database.add_bss_info_configuration(net::network_utils::mac_from_string(al_mac),
-                                              bss_info_conf);
+        auto mac = net::network_utils::mac_from_string(al_mac);
+        if (al_mac_cleared_conf.find(mac) == al_mac_cleared_conf.end()) {
+            m_database.clear_bss_info_configuration(mac);
+            al_mac_cleared_conf.insert(mac);
+        }
+        m_database.add_bss_info_configuration(mac, bss_info_conf);
     }
     return true;
 }
