@@ -1,5 +1,5 @@
 set(ELPP_LIB_NAME "mapf::elpp")
-set(ELPP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/external/easylogging)
+set(ELPP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/framework/external/easylogging)
 set(ELPP_LIBRARY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libelpp.so.1.4.0)
 
 add_definitions(-DELPP_THREAD_SAFE)

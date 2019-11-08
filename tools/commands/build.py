@@ -9,7 +9,7 @@ import multiprocessing
 
 logger = logging.getLogger("build")
 build_targets=['prepare', 'clean', 'distclean', 'make']
-map_modules=['framework', 'common', 'controller', 'agent']
+map_modules=['.', 'common', 'controller', 'agent']
 dep_modules=['nng', 'safeclib', 'dwpal', 'hostapd', 'wpa_supplicant']
 
 # base builder class
