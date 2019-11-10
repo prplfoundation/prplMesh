@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string>
+#include <memory>
 
 class BaseClass {
 protected:
@@ -29,6 +30,14 @@ public:
     size_t getLen();
     bool isInitialized();
     virtual void class_swap() = 0;
+    template <class T> std::shared_ptr<T> class_cast()
+    {
+        if (!m_parse__)
+            return nullptr;
+        if (m_swap__)
+            class_swap();
+        return std::make_shared<T>(m_buff__, m_buff_len__, true, m_swap__);
+    }
 
 protected:
     uint8_t *m_buff__;

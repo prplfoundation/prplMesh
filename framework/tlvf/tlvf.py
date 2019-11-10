@@ -336,7 +336,7 @@ class TlvF:
         self.CODE_CLASS_PUBLIC_FUNC_INSERT          = "//~class_public_func_insert"
         self.CODE_CLASS_PRIVATE_FUNC_INSERT         = "//~class_private_func_insert"
         self.CODE_CLASS_INIT_FUNC_INSERT            = "//~class_init_func_insert"
-        self.CODE_CLASS_INIT_FUNC_SWAP_INSERT            = "//~class_init_func_swap_insert"
+        self.CODE_CLASS_INIT_FUNC_SWAP_INSERT       = "//~class_init_func_swap_insert"
         self.CODE_CLASS_SWAP_FUNC_INSERT            = "//~class_swap_func_insert"
         self.CODE_CLASS_SIZE_FUNC_INSERT            = "//~class_size_func_insert"
         self.CODE_ENUM_INSERT                       = "//~enum_insert"
@@ -1454,7 +1454,7 @@ class TlvF:
         self.insertLineCpp(insert_name, insert_marker, "%sreturn true;" % (self.getIndentation(1)))
         self.insertLineCpp(insert_name, insert_marker, "}")
         self.insertLineCpp(insert_name, insert_marker, "")
-
+    
     def addClassSwapMethod(self, insert_name, insert_marker, name):
         self.insertLineH(insert_name, insert_marker, "%svoid class_swap();" % self.getIndentation(2))
 
