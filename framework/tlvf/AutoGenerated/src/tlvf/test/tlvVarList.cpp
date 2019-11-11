@@ -23,8 +23,8 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 tlvTestVarList::~tlvTestVarList() {
 }
-const uint16_t& tlvTestVarList::type() {
-    return (const uint16_t&)(*m_type);
+const uint8_t& tlvTestVarList::type() {
+    return (const uint8_t&)(*m_type);
 }
 
 const uint16_t& tlvTestVarList::length() {
@@ -354,7 +354,6 @@ bool tlvTestVarList::add_unknown_length_list(std::shared_ptr<cInner> ptr) {
 
 void tlvTestVarList::class_swap()
 {
-    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_var0));
     for (size_t i = 0; i < (size_t)*m_simple_list_length; i++){
@@ -373,7 +372,7 @@ void tlvTestVarList::class_swap()
 size_t tlvTestVarList::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(uint16_t); // type
+    class_size += sizeof(uint8_t); // type
     class_size += sizeof(uint16_t); // length
     class_size += sizeof(uint16_t); // var0
     class_size += sizeof(uint8_t); // simple_list_length
@@ -389,9 +388,9 @@ bool tlvTestVarList::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (uint16_t*)m_buff_ptr__;
-    if (!m_parse__) *m_type = 0x1;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    m_type = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_type = 0xff;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
@@ -474,8 +473,8 @@ bool tlvTestVarList::init()
     }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {
-        if (*m_type != 0x1) {
-            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(0x1) << ", received value: " << int(*m_type);
+        if (*m_type != 0xff) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(0xff) << ", received value: " << int(*m_type);
             return false;
         }
     }

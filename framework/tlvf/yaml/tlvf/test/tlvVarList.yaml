@@ -6,8 +6,8 @@ tlvTestVarList:
   _is_tlv_class : True
   # TODO tlvf currently requires type to be first field
   type:
-    _type: uint16_t
-    _value_const: 1
+    _type: uint8_t
+    _value_const: 255
   # TODO tlvf currently requires length to be second field
   length: uint16_t
   var0: uint16_t
