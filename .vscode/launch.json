@@ -146,7 +146,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/../build/install/bin/tests/tlvf_test",
             "args": [],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,

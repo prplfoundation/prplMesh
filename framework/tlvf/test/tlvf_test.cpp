@@ -296,6 +296,11 @@ int test_parser()
     auto tlv1 = msg.addClass<tlvNon1905neighborDeviceList>();
     auto tlv2 = msg.addClass<tlvLinkMetricQuery>();
     auto tlv3 = msg.addClass<tlvWscM1>();
+    // TODO https://github.com/prplfoundation/prplMesh/issues/480
+    tlv3->add_vendor_ext(tlv3->create_vendor_ext());
+    auto tlv4 = msg.addClass<tlvTestVarList>();
+    // TODO https://github.com/prplfoundation/prplMesh/issues/480
+    tlv4->add_var1(tlv4->create_var1());
 
     LOG(DEBUG) << "Finalize";
     msg.finalize(true);
@@ -307,15 +312,26 @@ int test_parser()
 
     CmduMessageRx received_message;
     received_message.parse(recv_buffer, sizeof(recv_buffer), true, true);
-    auto tlv1_ = received_message.getClass<tlvNon1905neighborDeviceList>();
-    if (!tlv1_)
+    auto tlv4_ = received_message.getClass<tlvUnknown>();
+    if (!tlv4_) {
+        LOG(ERROR) << "getClass<tlvUnknown> failed";
         errors++;
-    auto tlv2_ = received_message.getClass<tlvLinkMetricQuery>();
-    if (!tlv2_)
-        errors++;
+    }
     auto tlv3_ = received_message.getClass<tlvWscM1>();
-    if (!tlv3_)
+    if (!tlv3_) {
+        LOG(ERROR) << "getClass<tlvWscM1> failed";
         errors++;
+    }
+    auto tlv2_ = received_message.getClass<tlvLinkMetricQuery>();
+    if (!tlv2_) {
+        LOG(ERROR) << "getClass<tlvLinkMetricQuery> failed";
+        errors++;
+    }
+    auto tlv1_ = received_message.getClass<tlvNon1905neighborDeviceList>();
+    if (!tlv1_) {
+        LOG(ERROR) << "getClass<tlvNon1905neighborDeviceList> failed";
+        errors++;
+    }
 
     MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
     return errors;
