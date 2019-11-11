@@ -447,6 +447,7 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
     // (= plaintext length + 64 bits HMAC aligned to 16 bytes boundary)
     // The Key Wrap Authenticator is 96 bits long
     size_t len = (config_data.getLen() + sizeof(WSC::sWscAttrKeyWrapAuthenticator) + 15) & ~0xFU;
+    uint8_t pkcs7_padding = len - config_data.getLen() - sizeof(WSC::sWscAttrKeyWrapAuthenticator);
 
     auto encrypted_settings = m2->create_encrypted_settings();
     if (!encrypted_settings)
@@ -457,6 +458,7 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
         return false;
 
     auto buf = reinterpret_cast<uint8_t *>(encrypted_settings->encrypted_settings());
+    std::fill(buf, buf + len, pkcs7_padding);
     std::copy_n(config_data.getStartBuffPtr(), config_data.getLen(), buf);
     WSC::sWscAttrKeyWrapAuthenticator keywrapauth;
     keywrapauth.struct_init();
@@ -473,10 +475,14 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
     if (!mapf::encryption::create_iv(iv, WSC::WSC_ENCRYPTED_SETTINGS_IV_LENGTH))
         return false;
 
+    LOG(DEBUG) << "iv: " << std::endl << utils::dump_buffer(iv, 16);
+    LOG(DEBUG) << "key: " << std::endl << utils::dump_buffer(keywrapkey, 16);
+    LOG(DEBUG) << "plaintext: " << std::endl << utils::dump_buffer(buf, len);
     if (!mapf::encryption::aes_encrypt(keywrapkey, iv, buf, len)) {
         LOG(DEBUG) << "aes encrypt";
         return false;
     }
+    LOG(DEBUG) << "ciphertext: " << std::endl << utils::dump_buffer(buf, len);
 
     return true;
 }
