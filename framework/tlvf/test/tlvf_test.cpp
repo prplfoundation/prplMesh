@@ -320,17 +320,31 @@ int test_parser()
     CmduMessageRx received_message;
     received_message.parse(recv_buffer, sizeof(recv_buffer), true, true);
     auto tlv1_ = received_message.getClass<tlvNon1905neighborDeviceList>();
-    if (!tlv1_)
+    if (!tlv1_) {
+        LOG(ERROR) << "get class tlvNon1905neighborDeviceList";
         errors++;
+    }
     auto tlv2_ = received_message.getClass<tlvLinkMetricQuery>();
-    if (!tlv2_)
+    if (!tlv2_) {
+        LOG(ERROR) << "get class tlvLinkMetricQuery";
         errors++;
+    }
     auto tlv3_ = received_message.getClass<tlvWscM1>();
-    if (!tlv3_)
+    if (!tlv3_) {
+        LOG(ERROR) << "get class tlvWscM1";
         errors++;
+    }
     auto tlv4_ = received_message.getClass<tlvUnknown>();
-    if (!tlv4_)
+    if (!tlv4_) {
+        LOG(ERROR) << "get class tlvUnknown";
         errors++;
+    } else {
+        auto tlv4_cast = tlv4_->class_cast<tlvTestVarList>();;
+        if (!tlv4_cast) {
+            LOG(ERROR) << "castFrom failed";
+            errors++;
+        }
+    }
 
     MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
     return errors;
