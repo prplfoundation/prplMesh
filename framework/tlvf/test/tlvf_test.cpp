@@ -305,6 +305,9 @@ int test_parser()
     auto tlv1 = msg.addClass<tlvNon1905neighborDeviceList>();
     auto tlv2 = msg.addClass<tlvLinkMetricQuery>();
     auto tlv3 = msg.addClass<tlvWscM1>();
+    auto tlv4 = msg.addClass<tlvTestVarList>();
+    // TODO https://github.com/prplfoundation/prplMesh/issues/480
+    tlv4->add_var1(tlv4->create_var1());
 
     LOG(DEBUG) << "Finalize";
     msg.finalize(true);
@@ -324,6 +327,9 @@ int test_parser()
         errors++;
     auto tlv3_ = received_message.getClass<tlvWscM1>();
     if (!tlv3_)
+        errors++;
+    auto tlv4_ = received_message.getClass<tlvUnknown>();
+    if (!tlv4_)
         errors++;
 
     MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
