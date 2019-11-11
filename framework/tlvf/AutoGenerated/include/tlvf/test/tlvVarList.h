@@ -31,7 +31,7 @@ class tlvTestVarList : public BaseClass
         tlvTestVarList(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
         ~tlvTestVarList();
 
-        const uint16_t& type();
+        const uint8_t& type();
         const uint16_t& length();
         uint16_t& var0();
         uint8_t& simple_list_length();
@@ -60,7 +60,7 @@ class tlvTestVarList : public BaseClass
 
     private:
         bool init();
-        uint16_t* m_type = nullptr;
+        uint8_t* m_type = nullptr;
         uint16_t* m_length = nullptr;
         uint16_t* m_var0 = nullptr;
         uint8_t* m_simple_list_length = nullptr;
