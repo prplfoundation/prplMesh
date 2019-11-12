@@ -316,20 +316,16 @@ test_client_steering_policy() {
     check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8003,tlv_type,0x89,tlv_length\
 ,0x000C,tlv_value,{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}" > /tmp/catch
     sleep 1
-    MID_STR=$(grep -Po "(?<=mid,0x).*[^\s]" /tmp/catch)
-    MID1=$(echo "ibase=16; $MID_STR" | bc)
+    MID1_STR=$(grep -Po "(?<=mid,0x).*[^\s]" /tmp/catch)
     dbg "Confirming client steering policy has been received on agent"
     
     check docker exec -it repeater1 sh -c 'grep -i -q "MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log > /tmp/catch'
     sleep 1
     dbg "Confirming client steering policy ack message has been received on the controller"
     TMP="$(docker exec -it gateway sh -c 'grep -i "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log')"
-    MID_STR=$(echo "$TMP" | tr ' ' '\n' | grep -Po "(?<=mid=).*[^\s]")
-    MID2=$(echo "ibase=16; $MID_STR" | bc)
+    MID2_STR=$(echo "$TMP" | tr ' ' '\n' | grep -Po "(?<=mid=).*[^\s]")
 
-    if [ "$MID1" -ne "$MID2" ]; then
-        return 1
-    fi
+    check [ "$MID1_STR" = "$MID2_STR" ]
     return $check_error
 }
 
