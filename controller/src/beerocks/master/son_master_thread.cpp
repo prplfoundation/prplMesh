@@ -446,8 +446,12 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
     // Calculate length of data to encrypt
     // (= plaintext length + 64 bits HMAC aligned to 16 bytes boundary)
     // The Key Wrap Authenticator is 96 bits long
-    size_t len = (config_data.getLen() + sizeof(WSC::sWscAttrKeyWrapAuthenticator) + 31) & ~0xFU;
+    size_t len = (config_data.getLen() + sizeof(WSC::sWscAttrKeyWrapAuthenticator) + 15) & ~0xFU;
     uint8_t pkcs7_padding = len - config_data.getLen() - sizeof(WSC::sWscAttrKeyWrapAuthenticator);
+    if (!pkcs7_padding) {
+        pkcs7_padding = 16;
+        len += 16;
+    }
     LOG(DEBUG) << "plaintext len: " << config_data.getLen() + sizeof(WSC::sWscAttrKeyWrapAuthenticator);
     LOG(DEBUG) << "plaintext + padding len: " << len;
     LOG(DEBUG) << "padding len: " << len - config_data.getLen() - sizeof(WSC::sWscAttrKeyWrapAuthenticator);
