@@ -13,7 +13,7 @@ dbg() {
 }
 
 status() {
-    printf '\033[1;35m%s\033[0m\n' "$@"
+    printf '\033[1;35m%s\033[0m\n' "$*"
 }
 
 mac_to_hex(){
@@ -21,15 +21,15 @@ mac_to_hex(){
 }
 
 err() {
-    printf '\033[1;31m%s\033[0m\n' "$@"
+    printf '\033[1;31m%s\033[0m\n' "$*"
 }
 
 info() {
-    printf '\033[1;35m%s: %s\033[0m\n' "$(basename "$0")" "$@"
+    printf '\033[1;35m%s: %s\033[0m\n' "$(basename "$0")" "$*"
 }
 
 success() {
-    printf '\033[1;32m%s\033[0m\n' "$@"
+    printf '\033[1;32m%s\033[0m\n' "$*"
 }
 
 run() {
@@ -39,9 +39,9 @@ run() {
 
 check() {
     if "$@"; then
-        dbg "OK $@"
+        dbg "OK $*"
     else
-        err "FAIL $@"
+        err "FAIL $*"
         check_error=$((check_error+1))
     fi
 }
