@@ -323,7 +323,7 @@ test_client_steering_policy() {
     sleep 1
     dbg "Confirming client steering policy ack message has been received on the controller"
     TMP="$(docker exec -it gateway sh -c 'grep -i "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log')"
-    MID2_STR=$(echo "$TMP" | tr ' ' '\n' | grep -Po "(?<=mid=).*[^\s]")
+    MID2_STR="$(echo "$TMP" | tr ' ' '\n' | grep -Po "(?<=mid=).*[^\s]" | tail -n 1)"
 
     check [ "$MID1_STR" = "$MID2_STR" ]
     return $check_error
