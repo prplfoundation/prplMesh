@@ -71,8 +71,11 @@ int main()
         uint8_t iv[128];
         mapf::encryption::create_iv(iv, sizeof(iv));
         // maximum padding can be block size, which is 16 bytes, per PKCS#5 padding scheme
-        int cipherlen           = sizeof(plaintext) + 16;
-        uint8_t data[cipherlen] = {0};
+        int cipherlen = sizeof(plaintext) + 16;
+        // Since we use the same buffer for decryption, leave additional block size
+        // for last block correctness check done by openssl EVP_DecryptUpdate() API.
+        int datalen           = cipherlen + 16;
+        uint8_t data[datalen] = {0};
         check(errors,
               mapf::encryption::aes_encrypt(keywrapkey1, iv, plaintext, sizeof(plaintext), data,
                                             cipherlen),
@@ -81,9 +84,12 @@ int main()
               "ciphertext length > plaintext length");
         check(errors, size_t(cipherlen) <= sizeof(plaintext) + 16,
               "ciphertext length <= plaintext length + 16");
-        check(errors, mapf::encryption::aes_decrypt(keywrapkey2, iv, data, cipherlen),
+        check(errors,
+              mapf::encryption::aes_decrypt(keywrapkey2, iv, data, cipherlen, data, datalen),
               "AES decrypt");
-        check(errors, std::equal(data, data + plaintextlen, plaintext),
+        check(errors, datalen == sizeof(plaintext),
+              "Decrypted length should be equal to plaintext length");
+        check(errors, std::equal(data, data + sizeof(plaintext), plaintext),
               "Decrypted cyphertext should be equal to plaintext");
         uint8_t *kwa_in = &data[plaintextlen];
         uint8_t kwa_out[8];

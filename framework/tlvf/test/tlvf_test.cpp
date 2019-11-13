@@ -255,19 +255,17 @@ bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, u
 bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, uint8_t *iv)
 {
     auto encrypted_settings = m2->encrypted_settings();
-    mapf::encryption::aes_decrypt(keywrapkey, iv,
-                                  (uint8_t *)encrypted_settings->encrypted_settings(),
-                                  encrypted_settings->encrypted_settings_length());
     LOG(DEBUG) << "type: " << encrypted_settings->type();
     LOG(DEBUG) << "encrypted settings length: " << encrypted_settings->getLen();
     LOG(DEBUG) << "encrypted settings buffer: " << std::endl
                << utils::dump_buffer((uint8_t *)encrypted_settings->encrypted_settings(),
                                      encrypted_settings->encrypted_settings_length());
-
-    uint8_t buf[encrypted_settings->encrypted_settings_length()];
-    std::copy_n(encrypted_settings->encrypted_settings(),
-                encrypted_settings->encrypted_settings_length(), buf);
-    WSC::cConfigData config_data(buf, sizeof(buf), true, true);
+    int dlen = encrypted_settings->encrypted_settings_length() + 16;
+    uint8_t buf[dlen];
+    mapf::encryption::aes_decrypt(keywrapkey, iv,
+                                  (uint8_t *)encrypted_settings->encrypted_settings(),
+                                  encrypted_settings->encrypted_settings_length(), buf, dlen);
+    WSC::cConfigData config_data(buf, dlen, true, true);
 
     LOG(DEBUG) << "WSC config_data:" << std::endl
                << "     ssid: " << config_data.ssid() << std::endl

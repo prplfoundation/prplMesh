@@ -280,33 +280,53 @@ bool aes_encrypt(const uint8_t *key, const uint8_t *iv, uint8_t *plaintext, int 
     return true;
 }
 
-bool aes_decrypt(const uint8_t *key, const uint8_t *iv, uint8_t *data, uint32_t data_len)
+bool aes_decrypt(const uint8_t *key, const uint8_t *iv, uint8_t *ciphertext, int clen,
+                 uint8_t *plaintext, int &plen)
 {
     EVP_CIPHER_CTX *ctx;
+    int len;
 
-    int plen, len;
-    uint8_t buf[128];
+    /*
+     * The decrypt operation will fail if  the final block is not correctly formatted.
+     * This check requires the output buffer to have sufficient room for this check
+     * which is (inl + cipher_block_size), which is clen + 16 in this case (aes128).
+     */
+    if (plen < clen + 16) {
+        LOG(ERROR) << "Insufficient room for final block (padding) format check";
+        return false;
+    }
 
     ctx = EVP_CIPHER_CTX_new();
     if (NULL == ctx) {
+        MAPF_ERR("Failed to create context");
         return false;
     }
+
     if (EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, iv) != 1) {
-        return false;
-    }
-    EVP_CIPHER_CTX_set_padding(ctx, 0);
-
-    plen = data_len;
-    if (EVP_DecryptUpdate(ctx, data, &plen, data, data_len) != 1 || plen != (int)data_len) {
+        MAPF_ERR("EVP_DecryptInit_ex Failed");
+        EVP_CIPHER_CTX_free(ctx);
         return false;
     }
 
-    len = sizeof(buf);
-    if (EVP_DecryptFinal_ex(ctx, buf, &len) != 1 || len != 0) {
+    if (EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, clen) != 1) {
+        MAPF_ERR("EVP_DecryptUpdate Failed");
+        EVP_CIPHER_CTX_free(ctx);
         return false;
     }
+    plen = len;
+
+    /*
+     * Finalise the decryption. Further plaintext bytes may be written at
+     * this stage.
+     */
+    if (EVP_DecryptFinal_ex(ctx, plaintext + plen, &len) != 1) {
+        MAPF_ERR("EVP_DecryptFinal_ex Failed");
+        EVP_CIPHER_CTX_free(ctx);
+        return false;
+    }
+    plen += len;
+
     EVP_CIPHER_CTX_free(ctx);
-
     return true;
 }
 
