@@ -223,33 +223,60 @@ bool hmac::digest(uint8_t *digest)
     return HMAC_Final(m_ctx, digest, &digest_length);
 }
 
-bool aes_encrypt(const uint8_t *key, const uint8_t *iv, uint8_t *data, uint32_t data_len)
+bool aes_encrypt(const uint8_t *key, const uint8_t *iv, uint8_t *plaintext, int plen,
+                 uint8_t *ciphertext, int &clen)
 {
     EVP_CIPHER_CTX *ctx;
+    int len;
 
-    int clen, len;
-    uint8_t buf[128];
+    /* Verify that the ciphertext buffer has enough storage room
+     * for block size alignment padding which will be added
+     * during encryption, which is up to plen + cipher_block_size -1
+     * for the update, and another cipher_block_size for the final one. 
+     */
+    int padlen = 16 - (plen % 16);
+    if (clen < plen + padlen) {
+        LOG(ERROR) << "Insufficient room for padding in ciphertext buffer" << std::endl
+                   << "plaintext len: " << plen << std::endl
+                   << "ciphertext len: " << clen << std::endl
+                   << "padlen: " << padlen;
+        return false;
+    }
 
     ctx = EVP_CIPHER_CTX_new();
     if (NULL == ctx) {
+        MAPF_ERR("Failed to create context");
         return false;
     }
+
     if (EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, iv) != 1) {
-        return false;
-    }
-    EVP_CIPHER_CTX_set_padding(ctx, 0);
-
-    clen = data_len;
-    if (EVP_EncryptUpdate(ctx, data, &clen, data, data_len) != 1 || clen != (int)data_len) {
+        MAPF_ERR("EVP_EncryptInit_ex Failed");
+        EVP_CIPHER_CTX_free(ctx);
         return false;
     }
 
-    len = sizeof(buf);
-    if (EVP_EncryptFinal_ex(ctx, buf, &len) != 1 || len != 0) {
+    /*
+     * Provide the message to be encrypted, and obtain the encrypted output.
+     * EVP_EncryptUpdate() encrypts inl bytes from the buffer in and writes
+     * the encrypted version to out. The amount of data written depends on
+     * the block alignment of the encrypted data: as a result the amount of
+     * data written may be anything from zero bytes to
+     * (inl + cipher_block_size - 1) so out should contain sufficient room.
+     */
+    if (EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plen) != 1) {
+        MAPF_ERR("EVP_EncryptUpdate Failed");
+        EVP_CIPHER_CTX_free(ctx);
         return false;
     }
+
+    if (EVP_EncryptFinal_ex(ctx, ciphertext + len, &clen) != 1) {
+        MAPF_ERR("EVP_EncryptFinal_ex Failed. clen=" << clen);
+        EVP_CIPHER_CTX_free(ctx);
+        return false;
+    }
+    clen += len;
+
     EVP_CIPHER_CTX_free(ctx);
-
     return true;
 }
 

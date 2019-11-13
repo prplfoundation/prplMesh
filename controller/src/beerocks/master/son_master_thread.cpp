@@ -443,40 +443,54 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
     std::shared_ptr<ieee1905_1::tlvWscM2> m2, WSC::cConfigData &config_data, uint8_t authkey[32],
     uint8_t keywrapkey[16])
 {
-    // Calculate length of data to encrypt
-    // (= plaintext length + 64 bits HMAC aligned to 16 bytes boundary)
-    // The Key Wrap Authenticator is 96 bits long
-    size_t len = (config_data.getLen() + sizeof(WSC::sWscAttrKeyWrapAuthenticator) + 15) & ~0xFU;
+    // Step 1 - prepare the plaintext: [config_data | keywrapauth]:
+    // We use the config_data buffer as the plaintext buffer for encryption.
+    // The config_data buffer has room for 12 bytes for the keywrapauth (2 bytes
+    // attribute type, 2 bytes attribute length, 8 bytes data), but check it anyway
+    // to be on the safe side. Then, we add keywrapauth at its end.
+    uint8_t *plaintext = config_data.getStartBuffPtr();
+    int plaintextlen   = config_data.getLen() + sizeof(WSC::sWscAttrKeyWrapAuthenticator);
+    if (config_data.getBuffRemainingBytes() < sizeof(WSC::sWscAttrKeyWrapAuthenticator)) {
+        LOG(ERROR) << "No room for keywrap auth in config_data";
+        return false;
+    }
+    WSC::sWscAttrKeyWrapAuthenticator *keywrapauth =
+        reinterpret_cast<WSC::sWscAttrKeyWrapAuthenticator *>(&plaintext[config_data.getLen()]);
+    keywrapauth->struct_init();
+    uint8_t *kwa = reinterpret_cast<uint8_t *>(keywrapauth->data);
+    // Add KWA which is the 1st 64 bits of HMAC of config_data using AuthKey
+    if (!mapf::encryption::kwa_compute(authkey, plaintext, config_data.getLen(), kwa))
+        return false;
+    keywrapauth->struct_swap();
 
+    // Step 2 - AES encryption using temporary buffer. This is needed since we only
+    // know the encrypted length after encryption.
+    // Calculate initialization vector (IV), and encrypt the plaintext using aes128 cbc.
+    // leave room for up to 16 bytes internal padding length - see aes_encrypt()
     auto encrypted_settings = m2->create_encrypted_settings();
     if (!encrypted_settings)
         return false;
-    if (!encrypted_settings->alloc_encrypted_settings(len))
-        return false;
-    if (!m2->add_encrypted_settings(encrypted_settings))
-        return false;
-
-    auto buf = reinterpret_cast<uint8_t *>(encrypted_settings->encrypted_settings());
-    std::copy_n(config_data.getStartBuffPtr(), config_data.getLen(), buf);
-    WSC::sWscAttrKeyWrapAuthenticator keywrapauth;
-    keywrapauth.struct_init();
-    keywrapauth.struct_swap();
-    uint8_t *kwa = reinterpret_cast<uint8_t *>(keywrapauth.data);
-    // Add KWA which is the 1st 64 bits of HMAC of config_data using AuthKey
-    if (!mapf::encryption::kwa_compute(authkey, buf, config_data.getLen(), kwa))
-        return false;
-
-    std::copy_n(reinterpret_cast<uint8_t *>(&keywrapauth), sizeof(keywrapauth),
-                &buf[config_data.getLen()]);
-    uint8_t *iv = reinterpret_cast<uint8_t *>(m2->encrypted_settings()->iv());
-
-    if (!mapf::encryption::create_iv(iv, WSC::WSC_ENCRYPTED_SETTINGS_IV_LENGTH))
-        return false;
-
-    if (!mapf::encryption::aes_encrypt(keywrapkey, iv, buf, len)) {
-        LOG(DEBUG) << "aes encrypt";
+    int cipherlen = plaintextlen + 16;
+    uint8_t ciphertext[cipherlen];
+    uint8_t *iv = reinterpret_cast<uint8_t *>(encrypted_settings->iv());
+    if (!mapf::encryption::create_iv(iv, WSC::WSC_ENCRYPTED_SETTINGS_IV_LENGTH)) {
+        LOG(ERROR) << "create iv failure";
         return false;
     }
+    if (!mapf::encryption::aes_encrypt(keywrapkey, iv, plaintext, plaintextlen, ciphertext,
+                                       cipherlen)) {
+        LOG(ERROR) << "aes encrypt failure";
+        return false;
+    }
+    LOG(DEBUG) << "ciphertext: " << std::endl << utils::dump_buffer(ciphertext, cipherlen);
+
+    // Step 3 - Allocate encrypted settings with the size of the output ciphertext,
+    // and copy the ciphertext to it.
+    if (!encrypted_settings->alloc_encrypted_settings(cipherlen))
+        return false;
+    std::copy_n(ciphertext, cipherlen, encrypted_settings->encrypted_settings());
+    if (!m2->add_encrypted_settings(encrypted_settings))
+        return false;
 
     return true;
 }

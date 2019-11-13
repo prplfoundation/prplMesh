@@ -221,10 +221,11 @@ bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, u
                << std::endl;
     config_data.class_swap();
 
-    size_t len             = (config_data.getLen() + 16) & ~0xFU;
-    uint8_t encrypted[len] = {0};
+    int datalen                  = config_data.getLen();
+    int cipherlen                = datalen + 16;
+    uint8_t encrypted[cipherlen] = {0};
     std::copy_n(config_data.getStartBuffPtr(), config_data.getLen(), encrypted);
-    if (!mapf::encryption::aes_encrypt(keywrapkey, iv, encrypted, sizeof(encrypted))) {
+    if (!mapf::encryption::aes_encrypt(keywrapkey, iv, encrypted, datalen, encrypted, cipherlen)) {
         LOG(DEBUG) << "aes encrypt";
         return false;
     }
@@ -233,9 +234,9 @@ bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, u
               0xbb);
 
     auto encrypted_settings = m2->create_encrypted_settings();
-    encrypted_settings->alloc_encrypted_settings(len);
+    encrypted_settings->alloc_encrypted_settings(cipherlen);
     m2->add_encrypted_settings(encrypted_settings);
-    std::copy_n(encrypted, sizeof(encrypted), encrypted_settings->encrypted_settings());
+    std::copy_n(encrypted, cipherlen, encrypted_settings->encrypted_settings());
     std::copy_n(iv, sizeof(iv), encrypted_settings->iv());
     LOG(DEBUG) << "encrypted settings length: " << encrypted_settings->getLen();
     LOG(DEBUG) << "encrypted settings buffer: " << std::endl
