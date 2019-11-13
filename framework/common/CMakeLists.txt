@@ -11,14 +11,14 @@ file(COPY "${CMAKE_CURRENT_BINARY_DIR}/logging.conf" DESTINATION "${CMAKE_MULTIA
 if(MSGLIB STREQUAL "None")
 
 message(STATUS "${BoldYellow}Messaging library - None${ColourReset}")
-set(sources logger.cpp encryption.cpp)
+set(sources logger.cpp encryption.cpp utils.cpp)
 
 else()
 
 message(STATUS "${BoldGreen}Messaging library - ${MSGLIB}${ColourReset}")
 find_package(${MSGLIB} REQUIRED)
 set(MSGLIB_TARGET ${MSGLIB}::${MSGLIB})
-set(sources logger.cpp encryption.cpp message_factory.cpp broker_config.cpp broker_interface.cpp ${MSGLIB}/broker.cpp ${MSGLIB}/socket.cpp ${MSGLIB}/context.cpp ${MSGLIB}/poller.cpp )
+set(sources logger.cpp encryption.cpp utils.cpp message_factory.cpp broker_config.cpp broker_interface.cpp ${MSGLIB}/broker.cpp ${MSGLIB}/socket.cpp ${MSGLIB}/context.cpp ${MSGLIB}/poller.cpp )
 
 add_executable(version ${MSGLIB}/version.cpp)
 target_link_libraries(version common mapf::elpp ${MSGLIB_TARGET})
