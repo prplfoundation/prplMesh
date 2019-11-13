@@ -26,6 +26,7 @@
 #include <mapf/common/encryption.h>
 #include <mapf/common/err.h>
 #include <mapf/common/logger.h>
+#include <mapf/common/utils.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
 
 #include <algorithm>
@@ -39,17 +40,6 @@ MAPF_INITIALIZE_LOGGER
 
 using namespace mapf;
 
-std::string dump_buffer(uint8_t *buffer, size_t len)
-{
-    std::ostringstream hexdump;
-    for (size_t i = 0; i < len; i += 16) {
-        for (size_t j = i; j < len && j < i + 16; j++)
-            hexdump << std::hex << std::setw(2) << std::setfill('0') << (unsigned)buffer[j] << " ";
-        hexdump << std::endl;
-    }
-    return hexdump.str();
-}
-
 int test_int_len_list()
 {
     int errors = 0;
@@ -62,7 +52,7 @@ int test_int_len_list()
         auto tlv = tlvMacAddress(tx_buffer, sizeof(tx_buffer), false, true);
         std::copy_n(gTlvMacAddress, 6, tlv.mac().oct);
         tlv.class_swap(); //finalize
-        LOG(DEBUG) << "TX: " << std::endl << dump_buffer(tx_buffer, tlv.getLen());
+        LOG(DEBUG) << "TX: " << std::endl << utils::dump_buffer(tx_buffer, tlv.getLen());
     }
 
     uint8_t rx_buffer[sizeof(tx_buffer)];
@@ -74,7 +64,7 @@ int test_int_len_list()
             MAPF_ERR("MAC address in received TLV does not match expected result");
             errors++;
         }
-        LOG(DEBUG) << "RX: " << std::endl << dump_buffer(rx_buffer, tlv.getLen());
+        LOG(DEBUG) << "RX: " << std::endl << utils::dump_buffer(rx_buffer, tlv.getLen());
     }
 
     MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
@@ -156,7 +146,7 @@ int test_complex_list()
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
 
-    LOG(DEBUG) << "TX: " << std::endl << dump_buffer(tx_buffer, msg.getMessageLength());
+    LOG(DEBUG) << "TX: " << std::endl << utils::dump_buffer(tx_buffer, msg.getMessageLength());
 
     uint8_t recv_buffer[sizeof(tx_buffer)];
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
@@ -249,13 +239,14 @@ bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, u
     std::copy_n(iv, sizeof(iv), encrypted_settings->iv());
     LOG(DEBUG) << "encrypted settings length: " << encrypted_settings->getLen();
     LOG(DEBUG) << "encrypted settings buffer: " << std::endl
-               << dump_buffer((uint8_t *)encrypted_settings->encrypted_settings(),
-                              encrypted_settings->encrypted_settings_length());
+               << utils::dump_buffer((uint8_t *)encrypted_settings->encrypted_settings(),
+                                     encrypted_settings->encrypted_settings_length());
 
     LOG(DEBUG) << "authenticator type:" << m2->authenticator().attribute_type;
     LOG(DEBUG) << "authenticator length: " << m2->authenticator().data_length;
     LOG(DEBUG) << "authenticator buffer: " << std::endl
-               << dump_buffer((uint8_t *)m2->authenticator().data, m2->authenticator().data_length);
+               << utils::dump_buffer((uint8_t *)m2->authenticator().data,
+                                     m2->authenticator().data_length);
 
     return true;
 }
@@ -269,8 +260,8 @@ bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey,
     LOG(DEBUG) << "type: " << encrypted_settings->type();
     LOG(DEBUG) << "encrypted settings length: " << encrypted_settings->getLen();
     LOG(DEBUG) << "encrypted settings buffer: " << std::endl
-               << dump_buffer((uint8_t *)encrypted_settings->encrypted_settings(),
-                              encrypted_settings->encrypted_settings_length());
+               << utils::dump_buffer((uint8_t *)encrypted_settings->encrypted_settings(),
+                                     encrypted_settings->encrypted_settings_length());
 
     uint8_t buf[encrypted_settings->encrypted_settings_length()];
     std::copy_n(encrypted_settings->encrypted_settings(),
@@ -286,7 +277,8 @@ bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey,
     LOG(DEBUG) << "authenticator type:" << m2->authenticator().attribute_type;
     LOG(DEBUG) << "authenticator length:" << m2->authenticator().data_length;
     LOG(DEBUG) << "authenticator buffer: " << std::endl
-               << dump_buffer((uint8_t *)m2->authenticator().data, m2->authenticator().data_length);
+               << utils::dump_buffer((uint8_t *)m2->authenticator().data,
+                                     m2->authenticator().data_length);
     return true;
 }
 
@@ -309,7 +301,7 @@ int test_parser()
     LOG(DEBUG) << "Finalize";
     msg.finalize(true);
 
-    LOG(DEBUG) << "TX: " << std::endl << dump_buffer(tx_buffer, msg.getMessageLength());
+    LOG(DEBUG) << "TX: " << std::endl << utils::dump_buffer(tx_buffer, msg.getMessageLength());
 
     uint8_t recv_buffer[sizeof(tx_buffer)];
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
@@ -513,7 +505,7 @@ int test_all()
     //MANDATORY - swaps to little indian.
     msg.finalize(true);
 
-    LOG(DEBUG) << "TX: " << std::endl << dump_buffer(tx_buffer, msg.getMessageLength());
+    LOG(DEBUG) << "TX: " << std::endl << utils::dump_buffer(tx_buffer, msg.getMessageLength());
 
     uint8_t recv_buffer[sizeof(tx_buffer)];
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
