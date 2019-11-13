@@ -7,6 +7,7 @@
  * See LICENSE file for more details.
  */
 
+#include <list>
 #include <mapf/common/encryption.h>
 #include <mapf/common/logger.h>
 
@@ -60,8 +61,15 @@ int main()
     check(errors, std::equal(keywrapkey1, keywrapkey1 + sizeof(keywrapkey1), keywrapkey2),
           "keywrapkeys should be equal");
 
-    {
-        uint8_t plaintext[50];
+    /* size 16 and 816 yield a multiple of block size.
+     * The other sizes are just one more and one less of the block size
+     * since these are potentially interesting as they cross the natural
+     * boundary (16 in our case).
+     */
+    std::vector<int> sizes = {15, 16, 17, 815, 816, 817};
+    for (auto size : sizes) {
+        LOG(INFO) << "Test encryption with plaintext size " << size;
+        uint8_t plaintext[size];
         std::fill(plaintext, plaintext + sizeof(plaintext), 1);
         // last 8 bytes are the KWA
         int plaintextlen = sizeof(plaintext) - 8;
@@ -87,7 +95,7 @@ int main()
         check(errors,
               mapf::encryption::aes_decrypt(keywrapkey2, iv, data, cipherlen, data, datalen),
               "AES decrypt");
-        check(errors, datalen == sizeof(plaintext),
+        check(errors, size_t(datalen) == sizeof(plaintext),
               "Decrypted length should be equal to plaintext length");
         check(errors, std::equal(data, data + sizeof(plaintext), plaintext),
               "Decrypted cyphertext should be equal to plaintext");
