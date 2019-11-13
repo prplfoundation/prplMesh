@@ -112,16 +112,29 @@ bool create_iv(uint8_t *iv, unsigned iv_length);
 bool kwa_compute(const uint8_t *key, uint8_t *data, uint32_t data_len, uint8_t *kwa);
 
 /**
- * @brief AES encryption
- *
- * @param[in] key 32 byte KeyWrapKey calculated according to WSC v2.0.6 specification
- * @param[in] iv random 128bit input vector
- * @param[in/out] plaintext bytestream, aligned to 16 bytes boundary
- * @param[in] data_len plaintext buffer length
+ * @brief AES128-CBC Encryption
+ * 
+ * Perform AES128 CBC (cipher block chaining) encryption on given plaintext
+ * and write the output encrypted data into the ciphertext buffer.
+ * plaintext and ciphertext can be the same buffer (in place encryption).
+ * Padding is handled internally, so the encrypted buffer can be up to 16
+ * bytes larger than the plaintext buffer, and therefore this function
+ * will fail if the given clen is not big enough (>= plen + 15).
+ * Key and IV should be the same as block size, which 16 bytes
+ * since we are using 128 bit AES (i.e. a 128 bit key).
+ * The IV size for *most* modes is the same as the block size.
+ * 
+ * @param[in] key 16 bytes encryption key
+ * @param[in] iv 16 bytes random initialization vector 
+ * @param[in] plaintext bytestream (data to encrypt)
+ * @param[in] plen plaintext buffer length
+ * @param[out] ciphertext output buffer of encrypted data (can be the same as plaintext buffer)
+ * @param[in,out] clen in - length of ciphertext buffer (>= plen + 15) out - length of output ciphertext
  * @return true on success
- * @return false on error
+ * @return false failure
  */
-bool aes_encrypt(const uint8_t *key, const uint8_t *iv, uint8_t *data, uint32_t data_len);
+bool aes_encrypt(const uint8_t *key, const uint8_t *iv, uint8_t *plaintext, int plen,
+                 uint8_t *ciphertext, int &clen);
 
 /**
  * @brief AES decryption
