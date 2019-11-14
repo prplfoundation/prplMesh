@@ -10,10 +10,10 @@
 #define _BaseClass_H_
 
 #include <cstddef>
+#include <memory>
 #include <stddef.h>
 #include <stdint.h>
 #include <string>
-#include <memory>
 
 class BaseClass {
 protected:
@@ -30,7 +30,9 @@ public:
     size_t getLen();
     bool isInitialized();
     virtual void class_swap() = 0;
-    template <class T> std::shared_ptr<T> class_cast()
+    //this following line assures the template class is derived from BaseClass
+    template <class T, class = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
+    std::shared_ptr<T> class_cast()
     {
         if (!m_parse__)
             return nullptr;
