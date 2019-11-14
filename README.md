@@ -49,7 +49,7 @@ Subsequent builds don't need to repeat all of these options:
 
 Run `./prplMesh/tools/maptools.py build --help` for more options.
 
-Note - to build with Docker, see provided [building with docker](tools/docker/builder/README.md)
+Note - to build with Docker, see provided [building with docker](tools/docker/README.md)
 
 ## Running Instructions
 
