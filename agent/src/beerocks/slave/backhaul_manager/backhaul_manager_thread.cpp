@@ -140,6 +140,7 @@ bool main_thread::init()
             ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE,
             ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE,
             ieee1905_1::eMessageType::LINK_METRIC_QUERY_MESSAGE,
+            ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE,
             ieee1905_1::eMessageType::ACK_MESSAGE,
         })) {
         LOG(ERROR) << "Failed to init mapf_bus";
@@ -1625,7 +1626,6 @@ bool main_thread::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE: {
         return handle_1905_higher_layer_data_message(cmdu_rx, src_mac);
     }
-
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
