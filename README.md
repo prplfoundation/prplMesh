@@ -1,7 +1,17 @@
 # prplMesh
 [![Build Status](https://travis-ci.com/prplfoundation/prplMesh.svg?branch=master)](https://travis-ci.org/prplfoundation/prplMesh)
 
-TODO describe this project
+prplMesh is an open-source, carrier-grade and certifiable implementation of the WiFi Alliance’s Multi-AP specification.
+
+The result will be source-code covering both the agent and the controller part of the Multi-AP specification.
+However, it is scoped as a reference implementation and will leave ample room for differentiation, for example for proprietary IP algorithms making intelligent decisions for the whole Multi-AP network.
+
+In short, the project’s aim is to create a baseline for OEMs and developers to easily integrate Multi-AP into various products and platforms.
+Initial targets include prplWrt and RDK-B with support for WiFi chipsets from almost any SoC vendor to be used in residential gateways, WiFi extenders from both retail brands and internet service providers.
+
+This project is part of a wider collaboration between Prpl Foundation and Broadband Forum, and is based on a proven full mesh solution contributed by Intel Corp (Controller and Agent running on actual HW).
+
+Architecture documentation can be found in the [documentation](documentation/) folder.
 
 ## Requirements
 
