@@ -18,7 +18,10 @@
 #include "../include/beerocks/bcl/beerocks_string_utils.h"
 #include "../include/beerocks/bcl/network/network_utils.h"
 
+#include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
+#include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
 #include <tlvf/wfa_map/eTlvTypeMap.h>
+#include <tlvf/wfa_map/tlvApMetric.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
@@ -285,6 +288,38 @@ bool beerocks_ucc_listener::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx,
             } else if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_TRANSMIT_POWER_LIMIT)) {
                 if (!cmdu_tx.addClass<wfa_map::tlvTransmitPowerLimit>()) {
                     LOG(ERROR) << "addClass tlvTransmitPowerLimit has failed";
+                    err_string = err_internal;
+                    return false;
+                }
+            }
+            tlv_type = cmdu_tx.getNextTlvType();
+        }
+        break;
+    }
+    case ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE: {
+
+        cmdu_header = cmdu_tx.load();
+        if (!cmdu_header) {
+            LOG(ERROR) << "load cmdu has failed";
+            return false;
+        }
+        tlv_type = cmdu_tx.getNextTlvType();
+        while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
+            if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_AP_METRIC)) {
+                if (!cmdu_tx.addClass<wfa_map::tlvApMetric>()) {
+                    LOG(ERROR) << "addClass tlvApMetric has failed";
+                    err_string = err_internal;
+                    return false;
+                }
+            } else if (tlv_type == int(ieee1905_1::eTlvType::TLV_RECEIVER_LINK_METRIC)) {
+                if (!cmdu_tx.addClass<ieee1905_1::tlvReceiverLinkMetric>()) {
+                    LOG(ERROR) << "addClass tlvReceiverLinkMetric has failed";
+                    err_string = err_internal;
+                    return false;
+                }
+            } else if (tlv_type == int(ieee1905_1::eTlvType::TLV_TRANSMITTER_LINK_METRIC)) {
+                if (!cmdu_tx.addClass<ieee1905_1::tlvTransmitterLinkMetric>()) {
+                    LOG(ERROR) << "addClass tlvTransmitterLinkMetric has failed";
                     err_string = err_internal;
                     return false;
                 }
