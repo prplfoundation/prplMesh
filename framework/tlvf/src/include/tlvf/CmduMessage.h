@@ -24,8 +24,9 @@ public:
 
 public:
     std::shared_ptr<cCmduHeader> getCmduHeader() const;
-
-    template <class T> std::shared_ptr<T> addClass()
+    
+    template <class T, class = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
+    std::shared_ptr<T> addClass()
     {
         std::shared_ptr<T> ptr;
         if (m_cmdu_header) {
