@@ -146,6 +146,25 @@
             "request": "launch",
             "program": "${workspaceFolder}/../build/install/bin/tests/tlvf_test",
             "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Launch encryption_test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/../build/install/bin/tests/common/encryption_test",
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
