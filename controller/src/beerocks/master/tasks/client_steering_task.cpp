@@ -146,7 +146,7 @@ void client_steering_task::steer_sta()
                         << " has an active socket, sending BACKHAUL_ROAM_REQUEST";
         auto roam_request =
             message_com::create_vs_message<beerocks_message::cACTION_CONTROL_BACKHAUL_ROAM_REQUEST>(
-                cmdu_tx, id);
+                cmdu_tx, 0);
         if (roam_request == nullptr) {
             LOG(ERROR) << "Failed building message!";
             return;
