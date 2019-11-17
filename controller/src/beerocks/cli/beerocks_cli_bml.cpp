@@ -424,12 +424,10 @@ void cli_bml::setFunctionsMapAndArray()
         "value",
         static_cast<pFunction>(&cli_bml::enable_client_roaming_prefer_signal_strength_caller), 0, 1,
         INT_ARG);
-#ifdef BEEROCKS_RDKB
     insertCommandToMap("bml_enable_client_band_steering", "[<1 or 0>]",
                        "if input was given - enable/disable band steering, prints current value",
                        static_cast<pFunction>(&cli_bml::enable_client_band_steering_caller), 0, 1,
                        INT_ARG);
-#endif //BEEROCKS_RDKB
     insertCommandToMap("bml_enable_ire_roaming", "[<1 or 0>]",
                        "if input was given - enable/disable ire roaming, prints current value",
                        static_cast<pFunction>(&cli_bml::enable_ire_roaming_caller), 0, 1, INT_ARG);
@@ -974,7 +972,7 @@ int cli_bml::enable_client_roaming_prefer_signal_strength_caller(int numOfArgs)
         return enable_client_roaming_prefer_signal_strength();
     return enable_client_roaming_prefer_signal_strength(args.intArgs[0]);
 }
-#ifdef BEEROCKS_RDKB
+
 int cli_bml::enable_client_band_steering_caller(int numOfArgs)
 {
     if (numOfArgs < 0)
@@ -983,7 +981,7 @@ int cli_bml::enable_client_band_steering_caller(int numOfArgs)
         return enable_client_band_steering();
     return enable_client_band_steering(args.intArgs[0]);
 }
-#endif
+
 int cli_bml::enable_ire_roaming_caller(int numOfArgs)
 {
     if (numOfArgs < 0)

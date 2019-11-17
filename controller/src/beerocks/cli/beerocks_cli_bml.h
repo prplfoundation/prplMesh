@@ -121,9 +121,7 @@ private:
     int enable_legacy_client_roaming_caller(int numOfArgs);
     int enable_client_roaming_caller(int numOfArgs);
     int enable_client_roaming_prefer_signal_strength_caller(int numOfArgs);
-#ifdef BEEROCKS_RDKB
     int enable_client_band_steering_caller(int numOfArgs);
-#endif
     int enable_ire_roaming_caller(int numOfArgs);
     int enable_load_balancer_caller(int numOfArgs);
     int enable_service_fairness_caller(int numOfArgs);

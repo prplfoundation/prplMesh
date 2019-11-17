@@ -562,6 +562,28 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
             auto response = cmdu_rx.addClass<beerocks_message::cACTION_BML_EVENTS_UPDATE>();
             handle_event_update((uint8_t *)response->buffer(0));
         } break;
+        case beerocks_message::ACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE: {
+            //Signal any waiting threads
+            if (!wake_up(beerocks_message::ACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST, 0)) {
+                LOG(WARNING) << "Received ACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE response, "
+                                "but no one is waiting...";
+            }
+        } break;
+        case beerocks_message::ACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE: {
+            auto response =
+                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE>();
+            if (!response) {
+                LOG(ERROR) << "addClass cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE failed";
+                return BML_RET_OP_FAILED;
+            }
+
+            //Signal any waiting threads
+            if (!wake_up(beerocks_message::ACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST,
+                         response->isEnable())) {
+                LOG(WARNING) << "Received ACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE response, "
+                                "but no one is waiting...";
+            }
+        } break;
         case beerocks_message::ACTION_BML_SET_CLIENT_ROAMING_RESPONSE: {
             //Signal any waiting threads
             if (!wake_up(beerocks_message::ACTION_BML_SET_CLIENT_ROAMING_REQUEST, 0)) {
