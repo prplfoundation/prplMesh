@@ -2929,6 +2929,11 @@ bool db::set_node_channel_bw(const std::string &mac, int channel, beerocks::eWiF
         }
     }
 
+    LOG(INFO) << "set node " << mac << " to channel=" << channel << ", bw=" << int(bw)
+              << ", channel_ext_above_secondary=" << int(channel_ext_above_secondary)
+              << ", channel_ext_above_primary=" << int(channel_ext_above_primary)
+              << ", vht_center_frequency=" << int(vht_center_frequency);
+
     n->channel                     = channel;
     n->bandwidth                   = bw;
     n->channel_ext_above_secondary = channel_ext_above_secondary;
