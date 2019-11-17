@@ -2202,6 +2202,38 @@ bool db::get_hostap_is_acs_enabled(std::string mac)
     return n->hostap->is_acs_enabled;
 }
 
+bool db::set_hostap_passive_mode_enabled(std::string mac, bool enable)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+    LOG(DEBUG) << __FUNCTION__ << ", enable = " << int(enable);
+    n->hostap->passive_mode_enabled = enable;
+    return true;
+}
+
+bool db::get_hostap_passive_mode_enabled(std::string mac)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+    LOG(DEBUG) << __FUNCTION__
+               << "n->hostap->passive_mode_enabled = " << int(n->hostap->passive_mode_enabled);
+    return n->hostap->passive_mode_enabled;
+}
+
 //
 // CLI
 //
