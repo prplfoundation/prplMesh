@@ -389,17 +389,23 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
             auto response = cmdu_rx.addClass<beerocks_message::cACTION_BML_EVENTS_UPDATE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_EVENTS_UPDATE failed";
-                return false;
+                return BML_RET_OP_FAILED;
             }
 
-            handle_steering_event_update((uint8_t *)response->buffer(0));
+            auto buffer = response->buffer(0);
+            if (!buffer) {
+                LOG(ERROR) << "get buffer has failed";
+                return BML_RET_OP_FAILED;
+            }
+
+            handle_steering_event_update((uint8_t *)buffer);
         } break;
         case beerocks_message::ACTION_BML_STEERING_SET_GROUP_RESPONSE: {
             auto response =
                 cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_SET_GROUP_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_SET_GROUP_RESPONSE failed";
-                return false;
+                return BML_RET_OP_FAILED;
             }
 
             // Signal any waiting threads
@@ -416,7 +422,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
                 cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_SET_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_SET_RESPONSE failed";
-                return false;
+                return BML_RET_OP_FAILED;
             }
 
             // Signal any waiting threads
@@ -456,7 +462,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
             if (!response) {
                 LOG(ERROR)
                     << "addClass cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE failed";
-                return false;
+                return BML_RET_OP_FAILED;
             }
 
             // Signal any waiting threads
@@ -474,7 +480,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
                     .addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE failed";
-                return false;
+                return BML_RET_OP_FAILED;
             }
 
             // Signal any waiting threads
@@ -491,7 +497,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
                 cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE failed";
-                return false;
+                return BML_RET_OP_FAILED;
             }
 
             // Signal any waiting threads

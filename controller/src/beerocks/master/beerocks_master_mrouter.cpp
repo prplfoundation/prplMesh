@@ -118,7 +118,12 @@ bool master_mrouter::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     std::shared_ptr<sMasterSockets> soc = nullptr;
     auto uds_header                     = message_com::get_uds_header(cmdu_rx);
-    uint16_t length                     = uds_header->length;
+    if (uds_header == nullptr) {
+        LOG(ERROR) << "get_uds_header() returns nullptr";
+        return false;
+    }
+
+    uint16_t length = uds_header->length;
 
     std::string src_mac = network_utils::mac_to_string(uds_header->src_bridge_mac);
     std::string dst_mac = network_utils::mac_to_string(uds_header->dst_bridge_mac);
