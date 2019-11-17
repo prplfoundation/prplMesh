@@ -26,7 +26,7 @@ if (readline_FOUND)
     # For now - simply do not set this property for none linux platforms - in UGW and RDKB we already have usr/include included
     # TODO: Find a real solution...
     #############################################################################################################################
-    if (TARGET_PLATFORM STREQUAL "linux")
+    if (TARGET_PLATFORM STREQUAL "linux" OR TARGET_PLATFORM STREQUAL "turris-omnia")
         # Include directory
         set_target_properties(readline PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${READLINE_INCLUDE_DIRS}"
