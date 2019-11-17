@@ -2515,7 +2515,7 @@ int bml_internal::set_log_context(void *log_ctx)
 }
 
 int bml_internal::set_restricted_channels(const uint8_t *restricted_channels, const std::string mac,
-                                          uint is_global, uint8_t size)
+                                          uint8_t is_global, uint8_t size)
 {
     // // If the socket is not valid, attempt to re-establish the connection
     // if (m_sockPlatform == nullptr && !connect_to_platform()) {
