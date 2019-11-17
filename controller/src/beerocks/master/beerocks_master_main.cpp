@@ -132,6 +132,7 @@ static void fill_master_config(son::db::sDbMasterConfig &master_conf,
     master_conf.load_client_optimal_path_roaming =
         (main_master_conf.load_client_optimal_path_roaming == "1");
     master_conf.load_client_11k_roaming    = (main_master_conf.load_client_11k_roaming == "1");
+    master_conf.load_steer_on_vaps         = main_master_conf.load_steer_on_vaps;
     master_conf.load_legacy_client_roaming = (main_master_conf.load_legacy_client_roaming == "1");
     master_conf.load_load_balancing        = (main_master_conf.load_load_balancing == "1");
     master_conf.load_diagnostics_measurements =

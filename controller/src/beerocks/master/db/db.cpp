@@ -1586,8 +1586,15 @@ std::string db::get_hostap_vap_with_ssid(const std::string &mac, const std::stri
         LOG(WARNING) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
         return std::string();
     }
+
+    auto vap_name = get_hostap_iface_name(mac);
+    vap_name.append(".");
+
     for (auto const &it : n->hostap->vaps_info) {
-        if (it.second.ssid == ssid) {
+        auto tmp_vap_name = vap_name;
+        tmp_vap_name.append(std::to_string(get_hostap_vap_id(it.second.mac)));
+        if ((it.second.ssid == ssid) &&
+            (config.load_steer_on_vaps.find(tmp_vap_name) != std::string::npos)) {
             return it.second.mac;
         }
     }
