@@ -2476,7 +2476,7 @@ bool master_thread::handle_cmdu_control_message(
             (beerocks_header->id() == database.get_rdkb_wlan_task_id())) {
             beerocks_message::sSteeringEvSnr new_event;
             new_event.snr = notification->params().rx_snr;
-            std::copy_n(notification->params().mac.oct, sizeof(new_event.client_mac.oct),
+            std::copy_n(notification->params().result.mac.oct, sizeof(new_event.client_mac.oct),
                         new_event.client_mac.oct);
             new_event.bssid = network_utils::mac_from_string(
                 database.get_hostap_vap_mac(ap_mac, notification->params().vap_id));
@@ -2511,7 +2511,8 @@ bool master_thread::handle_cmdu_control_message(
             (database.get_node_state(client_mac) == beerocks::STATE_CONNECTED) &&
             (!database.get_node_handoff_flag(client_mac)) && is_parent) {
 
-            database.set_node_cross_rx_rssi(client_mac, ap_mac, notification->params().rx_rssi, 1);
+            database.set_node_cross_rx_rssi(client_mac, ap_mac, notification->params().rx_rssi,
+                                            notification->params().rx_packets);
             database.set_node_cross_tx_phy_rate_100kb(client_mac,
                                                       notification->params().tx_phy_rate_100kb);
             database.set_node_cross_rx_phy_rate_100kb(client_mac,
