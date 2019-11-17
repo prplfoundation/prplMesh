@@ -90,8 +90,7 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
         // LOG(DEBUG) << "num_of_nodes = " << num_of_nodes << ", size = " << int(size) << ", size_left = " << int(size_left);
 
         n_type = n->get_type();
-        if ((n->state == beerocks::STATE_CONNECTED ||
-             n->state == beerocks::STATE_CONNECTED_IP_UNKNOWN) &&
+        if (n->state == beerocks::STATE_CONNECTED &&
             (n_type == beerocks::TYPE_CLIENT || n_type == beerocks::TYPE_IRE ||
              n_type == beerocks::TYPE_GW)) {
 
@@ -221,10 +220,6 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
 
         case beerocks::STATE_CONNECTED:
             node->state = BML_NODE_STATE_CONNECTED;
-            break;
-
-        case beerocks::STATE_CONNECTED_IP_UNKNOWN:
-            node->state = BML_NODE_STATE_CONNECTED_UNKNOWN_IP;
             break;
 
         default:
