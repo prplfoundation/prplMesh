@@ -1551,13 +1551,13 @@ bool master_thread::handle_intel_slave_join(
     database.add_node(network_utils::mac_from_string(bridge_mac),
                       network_utils::mac_from_string(backhaul_mac), ire_type);
     database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
+    database.set_node_socket(bridge_mac, sd);
 
     /*
     * Set IRE backhaul manager slave
     * keep in mind that the socket's peer mac will be the hostap mac
     */
     if (backhaul_manager) {
-        database.set_node_socket(bridge_mac, sd);
         /*
         * handle the IRE node itself, representing the backhaul
         */
