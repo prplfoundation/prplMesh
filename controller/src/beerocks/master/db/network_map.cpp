@@ -497,10 +497,16 @@ void network_map::send_bml_bss_tm_req_message_to_listeners(db &database,
         return;
     }
 
-    auto event            = (BML_EVENT *)response->buffer(0);
-    event->type           = BML_EVENT_TYPE_BSS_TM_REQ;
-    auto size             = sizeof(BML_EVENT);
-    event->data           = GET_MESSAGE_POINTER(BML_EVENT_BSS_TM_REQ, response->buffer(0), size);
+    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
+    if (event == nullptr) {
+        LOG(ERROR) << "event is nullptr";
+        return;
+    }
+
+    event->type = BML_EVENT_TYPE_BSS_TM_REQ;
+    auto size   = sizeof(BML_EVENT);
+    event->data = GET_MESSAGE_POINTER(BML_EVENT_BSS_TM_REQ, response->buffer(0), size);
+
     auto event_bss_tm_req = (BML_EVENT_BSS_TM_REQ *)event->data;
     network_utils::mac_from_string(event_bss_tm_req->target_bssid, target_bssid);
     event_bss_tm_req->disassoc_imminent = disassoc_imminent;
@@ -525,10 +531,16 @@ void network_map::send_bml_bh_roam_req_message_to_listeners(db &database,
         return;
     }
 
-    auto event             = (BML_EVENT *)response->buffer(0);
-    event->type            = BML_EVENT_TYPE_BH_ROAM_REQ;
-    auto size              = sizeof(BML_EVENT);
-    event->data            = GET_MESSAGE_POINTER(BML_EVENT_BH_ROAM_REQ, response->buffer(0), size);
+    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
+    if (event == nullptr) {
+        LOG(ERROR) << "event is nullptr";
+        return;
+    }
+
+    event->type = BML_EVENT_TYPE_BH_ROAM_REQ;
+    auto size   = sizeof(BML_EVENT);
+    event->data = GET_MESSAGE_POINTER(BML_EVENT_BH_ROAM_REQ, response->buffer(0), size);
+
     auto event_bh_roam_req = (BML_EVENT_BH_ROAM_REQ *)event->data;
     network_utils::mac_from_string(event_bh_roam_req->bssid, bssid);
     event_bh_roam_req->channel = channel;
@@ -552,7 +564,12 @@ void network_map::send_bml_client_allow_req_message_to_listeners(
         return;
     }
 
-    auto event  = (BML_EVENT *)response->buffer(0);
+    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
+    if (event == nullptr) {
+        LOG(ERROR) << "event is nullptr";
+        return;
+    }
+
     event->type = BML_EVENT_TYPE_CLIENT_ALLOW_REQ;
 
     auto size   = sizeof(BML_EVENT);
@@ -581,7 +598,12 @@ void network_map::send_bml_client_disallow_req_message_to_listeners(
         return;
     }
 
-    auto event  = (BML_EVENT *)response->buffer(0);
+    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
+    if (event == nullptr) {
+        LOG(ERROR) << "event is nullptr";
+        return;
+    }
+
     event->type = BML_EVENT_TYPE_CLIENT_DISALLOW_REQ;
     auto size   = sizeof(BML_EVENT);
     event->data = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_DISALLOW_REQ, response->buffer(0), size);
@@ -610,7 +632,12 @@ void network_map::send_bml_acs_start_message_to_listeners(db &database,
         return;
     }
 
-    auto event  = (BML_EVENT *)response->buffer(0);
+    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
+    if (event == nullptr) {
+        LOG(ERROR) << "event is nullptr";
+        return;
+    }
+
     event->type = BML_EVENT_TYPE_ACS_START;
     auto size   = sizeof(BML_EVENT);
     event->data = GET_MESSAGE_POINTER(BML_EVENT_ACS_START, response->buffer(0), size);
@@ -639,7 +666,12 @@ void network_map::send_bml_csa_notification_message_to_listeners(
         return;
     }
 
-    auto event  = (BML_EVENT *)response->buffer(0);
+    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
+    if (event == nullptr) {
+        LOG(ERROR) << "event is nullptr";
+        return;
+    }
+
     event->type = BML_EVENT_TYPE_CSA_NOTIFICATION;
     auto size   = sizeof(BML_EVENT);
     event->data = GET_MESSAGE_POINTER(BML_EVENT_CSA_NOTIFICATION, response->buffer(0), size);
@@ -671,7 +703,12 @@ void network_map::send_bml_cac_status_changed_notification_message_to_listeners(
         return;
     }
 
-    auto event  = (BML_EVENT *)response->buffer(0);
+    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
+    if (event == nullptr) {
+        LOG(ERROR) << "event is nullptr";
+        return;
+    }
+
     event->type = BML_EVENT_TYPE_CAC_STATUS_CHANGED_NOTIFICATION;
     auto size   = sizeof(BML_EVENT);
     event->data =
