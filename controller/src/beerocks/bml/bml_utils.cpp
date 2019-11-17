@@ -77,10 +77,6 @@ static std::string node_state_to_string(uint8_t state)
         ret = "Connected";
         break;
 
-    case BML_NODE_STATE_CONNECTED_UNKNOWN_IP:
-        ret = "Connected W/O IP";
-        break;
-
     default:
         ret = "Unknown";
     }
