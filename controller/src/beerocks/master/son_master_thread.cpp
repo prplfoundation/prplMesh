@@ -1663,6 +1663,7 @@ bool master_thread::handle_intel_slave_join(
               << std::endl
               << "    ant_num=" << int(notification->hostap().ant_num)
               << " ant_gain=" << int(notification->hostap().ant_gain)
+              << " channel=" << int(notification->cs_params().channel)
               << " conducted=" << int(notification->hostap().conducted_power) << std::endl
               << "    radio_mac=" << radio_mac << std::endl;
 
