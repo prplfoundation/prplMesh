@@ -100,14 +100,9 @@ include(multiap-helpers)
 
 option(BUILD_EXAMPLES "build examples" OFF)
 option(BUILD_TESTS "build multiap unit tests" OFF)
-option(PASSIVE_MODE "build framework passive mode" OFF)
 
 set(MSGLIB "zmq" CACHE STRING "Which messaging library backend to use")
 set_property(CACHE MSGLIB PROPERTY STRINGS "zmq" "nng" "None")
-if(PASSIVE_MODE)
-message(STATUS "Force MSGLIB=None in passive mode")
-set(MSGLIB "None")
-endif()
 
 find_package(json-c REQUIRED)
 
