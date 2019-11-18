@@ -11,6 +11,7 @@
 
 #include "ieee_1905_1/cCmduHeader.h"
 #include "ieee_1905_1/eTlvType.h"
+#include "TlvList.h"
 #include <memory>
 #include <vector>
 
@@ -24,31 +25,13 @@ public:
 
 public:
     std::shared_ptr<cCmduHeader> getCmduHeader() const;
-    
-    template <class T, class = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-    std::shared_ptr<T> addClass()
-    {
-        std::shared_ptr<T> ptr;
-        if (m_cmdu_header) {
-            if (m_class_vector.size() == 0) {
-                ptr = std::make_shared<T>(m_cmdu_header, m_parse, m_swap);
-            } else {
-                ptr = std::make_shared<T>(m_class_vector.back(), m_parse, m_swap);
-            }
-            if (!ptr || ptr->isInitialized() == false) {
-                return std::shared_ptr<T>();
-            } else {
-                m_class_vector.push_back(std::shared_ptr<BaseClass>(ptr));
-            }
-        } else {
-            return std::shared_ptr<T>();
-        }
-        return ptr;
-    }
 
+    TlvList tlvs;
+
+    template <class T> std::shared_ptr<T> addClass() { return tlvs.addClass<T>(); }
     template <class T> std::shared_ptr<T> dynamicCast(std::shared_ptr<BaseClass> ptr) const
     {
-        return std::dynamic_pointer_cast<T>(ptr);
+        return tlvs.dynamicCast<T>(ptr);
     }
 
     static uint16_t getCmduHeaderLength() { return kCmduHeaderLength; }
@@ -59,7 +42,7 @@ public:
      * @param idx index in the all classes array
      * @return std::shared_ptr<BaseClass> to the class object at index idx, nullptr if not found
      */
-    std::shared_ptr<BaseClass> getClass(size_t idx) const;
+    std::shared_ptr<BaseClass> getClass(size_t idx) const { return tlvs.getClass(idx);}
 
     /**
      * @brief Get the (first) Class object
@@ -67,14 +50,7 @@ public:
      * @tparam T class template
      * @return std::shared_ptr<T> to the first object found of type T, nullptr if not found
      */
-    template <class T> std::shared_ptr<T> getClass() const
-    {
-        for (size_t idx = 0; idx < getClassCount(); idx++) {
-            if (auto c = std::dynamic_pointer_cast<T>(getClass(idx)))
-                return c;
-        }
-        return nullptr;
-    }
+    template <class T> std::shared_ptr<T> getClass() const { return tlvs.getClass<T>(); }
 
     /**
      * @brief Get a class object of type T in index `idx` in the logical array containing
@@ -84,17 +60,7 @@ public:
      * @param idx index in the class T array
      * @return std::shared_ptr<T> to the T class at index `idx` in the class T array
      */
-    template <class T> std::shared_ptr<T> getClass(size_t idx) const
-    {
-        size_t idx_ = 0;
-        for (size_t i = 0; i < getClassCount(); i++) {
-            if (auto c = std::dynamic_pointer_cast<T>(getClass(i))) {
-                if (idx_++ == idx)
-                    return c;
-            }
-        }
-        return nullptr;
-    }
+    template <class T> std::shared_ptr<T> getClass(size_t idx) const { return tlvs.getClass<T>(idx); }
 
     /**
      * @brief Get the number of classes of type T
@@ -102,19 +68,12 @@ public:
      * @tparam T class template
      * @return size_t number of classes of type T
      */
-    template <class T> size_t getClassCount() const
+    template <class T> size_t getClassCount() const { return tlvs.getClassCount<T>(); }
+    size_t getClassCount() const { return tlvs.getClassCount(); }
+    const std::vector<std::shared_ptr<BaseClass>> &getClassVector() const
     {
-        size_t count = 0;
-        for (size_t i = 0; i < getClassCount(); i++) {
-            if (auto c = std::dynamic_pointer_cast<T>(getClass(i))) {
-                count++;
-            }
-        }
-        return count;
+        return tlvs.getClassVector();
     }
-
-    size_t getClassCount() const;
-    const std::vector<std::shared_ptr<BaseClass>> &getClassVector() const;
     size_t getMessageLength() const;
     size_t getMessageBuffLength() const;
     uint8_t *getMessageBuff() const;
@@ -123,24 +82,17 @@ public:
     uint16_t getNextTlvLength() const;
     uint8_t *getNextTlvData() const;
     void swap();
-    bool swap_needed() {return m_swap; }
-    bool is_finalized() const { return m_finalized; };
-    bool is_swapped() const { return m_swapped; };
+    bool swap_needed() {return tlvs.swap_needed(); }
+    bool is_finalized() const { return tlvs.is_finalized(); };
+    bool is_swapped() const { return tlvs.is_swapped(); };
     eMessageType getMessageType();
     uint16_t getMessageId();
 
 protected:
     void reset();
 
-    size_t m_buff_len            = 0;
-    bool m_finalized             = false;
-    bool m_swapped               = false;
-    bool m_parse                 = false;
-    bool m_swap                  = false;
-    bool m_dynamically_allocated = false;
     uint8_t *m_buff              = nullptr;
     std::shared_ptr<cCmduHeader> m_cmdu_header;
-    std::vector<std::shared_ptr<BaseClass>> m_class_vector;
     static const uint16_t kCmduHeaderLength = 8;
     static const uint16_t kTlvHeaderLength  = 3;
 };
