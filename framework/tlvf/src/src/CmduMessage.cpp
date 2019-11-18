@@ -16,15 +16,6 @@ CmduMessage::~CmduMessage() {}
 
 std::shared_ptr<cCmduHeader> CmduMessage::getCmduHeader() const { return m_cmdu_header; }
 
-std::shared_ptr<BaseClass> CmduMessage::getClass(size_t idx) const
-{
-    if (m_class_vector.size() > idx) {
-        return std::shared_ptr<BaseClass>(m_class_vector.at(idx));
-    } else {
-        return nullptr;
-    }
-}
-
 int CmduMessage::getNextTlvType() const
 {
     uint8_t tlvValue = 0;
@@ -136,15 +127,9 @@ void CmduMessage::swap()
 
 void CmduMessage::reset()
 {
-    m_finalized = false;
-    m_swapped   = false;
-    m_swap      = false;
     if (m_cmdu_header)
         m_cmdu_header.reset();
-    for (auto &c : m_class_vector) {
-        c.reset();
-    }
-    m_class_vector.clear();
+    tlvs.reset();
 }
 
 eMessageType CmduMessage::getMessageType()
