@@ -13,6 +13,9 @@ tlvVendorSpecific:
     _length_var: True
   vendor_oui:
     _type: sVendorOUI
+  payload:
+    _type: uint8_t
+    _length: [ ]
 
 eVendorOUI:
   _type: enum
