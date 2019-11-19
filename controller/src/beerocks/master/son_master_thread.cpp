@@ -3435,7 +3435,7 @@ bool master_thread::handle_cmdu_control_message(
     if (beerocks_header->m_header->id()) {
         tasks.response_received(beerocks_header->m_header->id(), hostap_mac,
                                 (beerocks_message::eActionOp_CONTROL)beerocks_header->action_op(),
-                                cmdu_rx);
+                                beerocks_header);
         return true;
     }
 

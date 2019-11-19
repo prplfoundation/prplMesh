@@ -29,7 +29,7 @@ public:
     virtual ~task() {}
     void execute();
     void response_received(std::string mac, beerocks_message::eActionOp_CONTROL action_op,
-                           ieee1905_1::CmduMessageRx &cmdu_rx);
+                           std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header);
     void event_received(int event_type, void *obj = nullptr);
     void pending_task_ended(int task_id);
     bool is_done();
