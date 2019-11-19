@@ -54,22 +54,23 @@ public:
 
     class beerocks_header {
     public:
-        beerocks_header(ieee1905_1::CmduMessageRx &cmdu_rx,
+        beerocks_header(TlvList contents,
                         std::shared_ptr<beerocks_message::cACTION_HEADER> header)
-            : m_cmdu_rx(cmdu_rx), m_header(header)
+            : m_contents(contents), m_header(header)
         {}
         beerocks_message::eAction action() { return m_header->action(); }
         uint8_t action_op() { return m_header->action_op(); };
         template <class T> std::shared_ptr<T> addClass()
         {
-            return m_cmdu_rx.addClass<T>();
+            return m_contents.addClass<T>();
         }
         template <class T> std::shared_ptr<T> get_vs_class()
         {
-            return m_cmdu_rx.getClass<T>(2);
+            return m_contents.getClass<T>(2);
         }
-        ieee1905_1::CmduMessageRx &m_cmdu_rx;
         std::shared_ptr<beerocks_message::cACTION_HEADER> m_header;
+    private:
+        TlvList &m_contents;
     };
 
     static std::shared_ptr<beerocks_header>
@@ -85,17 +86,24 @@ public:
     static std::shared_ptr<T> add_intel_vs_data(ieee1905_1::CmduMessageTx &cmdu_tx,
                 std::shared_ptr<ieee1905_1::tlvVendorSpecific> vs_tlv, uint16_t id = 0)
     {
+        // TODO cmdu_tx parameter is no longer needed and should be removed
         beerocks_message::eAction action;
         std::shared_ptr<T> p_class = nullptr;
-
-        auto actionhdr = cmdu_tx.addClass<beerocks_message::cACTION_HEADER>();
+        // TODO This fixed payload length only works for fixed-size payload.
+        // Most of the beerocks messages are fixed size, but we need to find a solution for
+        // the others. Perhaps in finalize, like it was done before.
+        size_t payload_length = beerocks_message::cACTION_HEADER::get_initial_size() +
+                T::get_initial_size();
+        uint8_t *vs_buf = vs_tlv->alloc_payload(payload_length);
+        // TODO check success
+        TlvList actions(vs_buf, payload_length);
+        auto actionhdr = actions.addClass<beerocks_message::cACTION_HEADER>();
         if (!actionhdr) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
             return nullptr;
         }
-        vs_tlv->length() += beerocks_message::cACTION_HEADER::get_initial_size();
 
-        p_class = cmdu_tx.addClass<T>();
+        p_class = actions.addClass<T>();
         if (!p_class) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
             return nullptr;
