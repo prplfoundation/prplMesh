@@ -377,19 +377,19 @@ bool slave_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         switch (beerocks_header->action()) {
         case beerocks_message::ACTION_CONTROL: {
-            return handle_cmdu_control_message(sd, beerocks_header, cmdu_rx);
+            return handle_cmdu_control_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
         } break;
         case beerocks_message::ACTION_BACKHAUL: {
-            return handle_cmdu_backhaul_manager_message(sd, beerocks_header, cmdu_rx);
+            return handle_cmdu_backhaul_manager_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
         } break;
         case beerocks_message::ACTION_PLATFORM: {
-            return handle_cmdu_platform_manager_message(sd, beerocks_header, cmdu_rx);
+            return handle_cmdu_platform_manager_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
         } break;
         case beerocks_message::ACTION_APMANAGER: {
-            return handle_cmdu_ap_manager_message(sd, beerocks_header, cmdu_rx);
+            return handle_cmdu_ap_manager_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
         } break;
         case beerocks_message::ACTION_MONITOR: {
-            return handle_cmdu_monitor_message(sd, beerocks_header, cmdu_rx);
+            return handle_cmdu_monitor_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
         } break;
         default: {
             LOG(ERROR) << "Unknown message, action: " << int(beerocks_header->action());
