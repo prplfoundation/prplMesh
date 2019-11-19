@@ -75,11 +75,6 @@ public:
     static std::shared_ptr<beerocks_header>
     parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx);
 
-    template <class T> static std::shared_ptr<T> get_vs_class(ieee1905_1::CmduMessage &cmdu)
-    {
-        return std::dynamic_pointer_cast<T>(cmdu.getClass(2));
-    }
-
     static std::shared_ptr<beerocks_message::cACTION_HEADER>
     get_vs_class_header(ieee1905_1::CmduMessage &cmdu)
     {
