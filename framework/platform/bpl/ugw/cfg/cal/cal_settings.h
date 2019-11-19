@@ -59,8 +59,6 @@ public:
                                       std::string &sec);
     int beerocks_set_beerocks_credentials(const int radio_dir, std::string ssid, std::string pass,
                                           std::string sec);
-    int beerocks_set_wifi_credentials(std::string iface, std::string ssid, std::string pass,
-                                      std::string sec);
     int beerocks_get_administrator_credentials(std::string &pass);
     int beerocks_is_wired_backhaul();
 

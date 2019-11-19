@@ -207,9 +207,7 @@ void slave_thread::on_thread_stop() { stop_slave_thread(); }
 
 bool slave_thread::socket_disconnected(Socket *sd)
 {
-    if (slave_state == STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE ||
-        slave_state == STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE ||
-        slave_state == STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE) {
+    if (configuration_in_progress) {
         LOG(DEBUG) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
         detach_on_conf_change = true;
         if (sd == ap_manager_socket || sd == monitor_socket) {
@@ -1665,33 +1663,6 @@ bool slave_thread::handle_cmdu_platform_manager_message(
             LOG(INFO) << "local_master=" << (int)platform_settings.local_master;
             LOG(INFO) << "local_gw=" << (int)platform_settings.local_gw;
 
-            // check if wlan wifi credentials are same as beerocks wifi credentials
-            if (!strncmp(wlan_settings.ssid, platform_settings.front_ssid,
-                         message::WIFI_SSID_MAX_LENGTH) &&
-                !strncmp(wlan_settings.pass, platform_settings.front_pass,
-                         message::WIFI_PASS_MAX_LENGTH) &&
-                !strncmp(wlan_settings.security_type, platform_settings.front_security_type,
-                         message::WIFI_SECURITY_TYPE_MAX_LENGTH)) {
-
-                LOG(DEBUG) << "wlan credentials unification is not required";
-                is_wlan_credentials_unified = true;
-
-            } else {
-                LOG(DEBUG) << "wlan credentials unification is required:";
-                LOG(DEBUG) << "wlan ssid:" << wlan_settings.ssid
-                           << ", platform front ssid:" << platform_settings.front_ssid;
-                LOG(DEBUG) << "wlan security type:" << wlan_settings.security_type
-                           << ", platform front security type:"
-                           << platform_settings.front_security_type;
-                if (config.enable_credentials_automatic_unify) {
-                    is_wlan_credentials_unified = false;
-                } else {
-                    LOG(DEBUG) << "wlan credentials unification SKIPPED - "
-                                  "enable_credentials_automatic_unify is set to disable in "
-                                  "slave-config file";
-                }
-            }
-
             LOG(TRACE) << "goto STATE_CONNECT_TO_BACKHAUL_MANAGER";
             slave_state = STATE_CONNECT_TO_BACKHAUL_MANAGER;
         } else {
@@ -1772,45 +1743,6 @@ bool slave_thread::handle_cmdu_platform_manager_message(
         }
         break;
     }
-
-    case beerocks_message::ACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE: {
-        LOG(TRACE) << "received ACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE";
-        if (slave_state == STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE) {
-            auto response =
-                cmdu_rx
-                    .addClass<beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE>();
-            if (response == nullptr) {
-                LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE failed";
-                return false;
-            }
-            std::string iface = response->iface_name(message::IFACE_NAME_LENGTH);
-            bool success      = (1 == response->success()) ? true : false;
-
-            LOG(DEBUG) << "set wifi credentials result=" << (success ? "success" : "failure");
-
-            is_wlan_credentials_unified = (success) ? true : false;
-
-            if (!success) {
-                platform_notify_error(BPL_ERR_SLAVE_WIFI_CREDENTIALS_SET_FAILED, iface.c_str());
-                stop_on_failure_attempts--;
-                LOG(DEBUG) << "set wifi credentials failed, slave reset!";
-                slave_reset();
-            } else {
-                if (detach_on_conf_change) {
-                    LOG(DEBUG) << "detach occurred on wifi conf change, slave reset!";
-                    slave_reset();
-                } else {
-                    LOG(DEBUG) << "credentials set finished successfully";
-                    LOG(DEBUG) << "goto STATE_START_MONITOR";
-                    slave_state = STATE_START_MONITOR;
-                }
-            }
-        } else {
-            LOG(DEBUG) << "slave_state != STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE";
-        }
-        break;
-    }
-
     case beerocks_message::ACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE: {
         LOG(TRACE) << "received ACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE";
         //make sure slave reset didn't occur while we performed post init configurations
@@ -2007,12 +1939,9 @@ bool slave_thread::handle_cmdu_platform_manager_message(
         LOG(INFO) << "ACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST config_start="
                   << int(response->config_start());
 
-        if (slave_state == STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE) {
-            LOG(DEBUG) << "slave wifi credentials set in progress - ignore wifi configuration "
-                          "notification";
-        } else if (slave_state != STATE_OPERATIONAL &&
-                   slave_state != STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE &&
-                   slave_state != STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE) {
+        if (slave_state != STATE_OPERATIONAL &&
+            slave_state != STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE &&
+            slave_state != STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE) {
             LOG(DEBUG) << "invalid slave state - ignore wifi configuration notification";
         } else if (!response->config_start()) {
             LOG(DEBUG) << "WIFI_CONFIGURATION_UPDATE_COMPLETE";
@@ -3452,63 +3381,10 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         break;
     }
     case STATE_AP_MANAGER_JOINED: {
-        if (!is_wlan_credentials_unified && config.enable_credentials_automatic_unify) {
-            LOG(TRACE) << "goto STATE_UNIFY_WIFI_CREDENTIALS";
-            slave_state = STATE_UNIFY_WIFI_CREDENTIALS;
-        } else {
-            LOG(TRACE) << "goto STATE_START_MONITOR";
-            slave_state = STATE_START_MONITOR;
-        }
+        LOG(TRACE) << "goto STATE_START_MONITOR";
+        slave_state = STATE_START_MONITOR;
         break;
     }
-    case STATE_UNIFY_WIFI_CREDENTIALS: {
-        auto iface = (!config.backhaul_wireless_iface.empty() && !platform_settings.local_gw)
-                         ? config.backhaul_wireless_iface
-                         : config.hostap_iface;
-
-        auto request = message_com::create_vs_message<
-            beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST>(cmdu_tx);
-
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-
-        string_utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH), iface.c_str(),
-                                  message::IFACE_NAME_LENGTH);
-        string_utils::copy_string(request->ssid(message::WIFI_SSID_MAX_LENGTH),
-                                  platform_settings.front_ssid, message::WIFI_SSID_MAX_LENGTH);
-        string_utils::copy_string(request->pass(message::WIFI_PASS_MAX_LENGTH),
-                                  platform_settings.front_pass, message::WIFI_PASS_MAX_LENGTH);
-        string_utils::copy_string(request->security_type(message::WIFI_SECURITY_TYPE_MAX_LENGTH),
-                                  platform_settings.front_security_type,
-                                  message::WIFI_SECURITY_TYPE_MAX_LENGTH);
-
-        LOG(INFO) << "unifying wlan credentials iface=" << request->iface_name()
-                  << " to: ssid=" << request->ssid() << " sec=" << request->security_type()
-                  << " pass=***";
-
-        if (!message_com::send_cmdu(platform_manager_socket, cmdu_tx)) {
-            LOG(ERROR) << "can't send message to platform manager!";
-            return false;
-        }
-
-        slave_state_timer =
-            std::chrono::steady_clock::now() +
-            std::chrono::seconds(STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE_TIMEOUT_SEC);
-
-        LOG(TRACE) << "goto STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE";
-        slave_state = STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE;
-    } break;
-    case STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE: {
-        //if timeout passed perform slave reset
-        if (std::chrono::steady_clock::now() > slave_state_timer) {
-            LOG(ERROR) << "STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE timeout!";
-            platform_notify_error(BPL_ERR_SLAVE_TIMEOUT_WIFI_CREDENTIALS_SET_REQUEST, "");
-            stop_on_failure_attempts--;
-            slave_reset();
-        }
-    } break;
     case STATE_START_MONITOR: {
         monitor_start();
         LOG(TRACE) << "goto STATE_WAIT_FOR_MONITOR_JOINED";

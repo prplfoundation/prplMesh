@@ -557,58 +557,6 @@ public:
         return 0;
     }
 
-    int beerocks_set_wifi_credentials(std::string &iface, std::string &ssid, std::string &pass,
-                                      std::string &sec)
-    {
-        cal_message msg(MOPT_SET, SOPT_OBJVALUE, OWN_WEB);
-        auto ip_interface_count = get_ip_interface_count();
-
-        for (int i = 1; i < ip_interface_count; i++) {
-            auto index_suffix       = std::to_string(i);
-            std::string object_name = DEVICE_WIFI_RADIO_OBJECT_NAME + "." + index_suffix;
-
-            cal_message msg1(MOPT_GET);
-            msg1.add_get_object(object_name).add_get_param("Name");
-
-            int rv = m_cal->cal_getValue(msg1);
-
-            // ap_radio_settings radio;
-            if (0 == rv) {
-                auto obj_it = msg1.begin();
-                // Skip not the requested interfaces
-                if (iface != obj_it->get_param("Name", ""))
-                    continue;
-
-                std::string object_name1 = DEVICE_WIFI_SSID_OBJECT_NAME + "." + index_suffix;
-                auto cal_obj1            = msg.add_set_object(object_name1, OBJOPT_MODIFY);
-                cal_obj1.add_set_param("SSID", ssid.c_str());
-                std::string object_name2 =
-                    DEVICE_WIFI_ACCESSPOINT_OBJECT_NAME + "." + index_suffix + ".Security";
-                auto cal_obj2 = msg.add_set_object(object_name2, OBJOPT_MODIFY);
-                cal_obj2.add_set_param("ModeEnabled", sec.c_str());
-
-                if (sec == "None") {
-                    cal_obj2.add_set_param("WEPKey", "");
-                    cal_obj2.add_set_param("KeyPassphrase", "");
-                    // WEP
-                } else if (sec == "WEP-64" || sec == "WEP-128") {
-                    cal_obj2.add_set_param("WEPKey", pass.c_str());
-                    // WPA2
-                } else {
-                    cal_obj2.add_set_param("KeyPassphrase", pass.c_str());
-                }
-            }
-        }
-        int rv = m_cal->cal_setValue(msg);
-
-        if (rv < 0) {
-            MAPF_ERR("Failed setting wifi credentials to DB: " << rv);
-            return -1;
-        }
-
-        return 0;
-    }
-
     int beerocks_get_administrator_credentials(std::string &pass)
     {
         cal_message msg(MOPT_GET, SOPT_OBJVALUE | GET_PWD_VAL);
@@ -742,14 +690,6 @@ int cal_settings::beerocks_set_beerocks_credentials(const int radio_dir, std::st
 {
     cal_query_wifi cal_query(m_cal);
     int ret = cal_query.beerocks_set_beerocks_credentials(radio_dir, ssid, pass, sec);
-    return ret;
-}
-
-int cal_settings::beerocks_set_wifi_credentials(std::string iface, std::string ssid,
-                                                std::string pass, std::string sec)
-{
-    cal_query_wifi cal_query(m_cal);
-    int ret = cal_query.beerocks_set_wifi_credentials(iface, ssid, pass, sec);
     return ret;
 }
 

@@ -97,7 +97,6 @@ public:
         std::string ucc_listener_slave_hostap_iface;
         std::string enable_arp_monitor;
         std::string enable_keep_alive;
-        std::string enable_credentials_automatic_unify;
         std::string debug_disable_arp;
         std::string enable_bpl_iface_status_notifications;
         std::string bridge_iface;

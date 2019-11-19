@@ -1188,55 +1188,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
     } break;
 
-    case beerocks_message::ACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST: {
-        LOG(TRACE) << "ACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST";
-
-        auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST failed";
-            return false;
-        }
-
-        std::string iface(request->iface_name(BPL_IFNAME_LEN));
-        std::string ssid(request->ssid(BPL_SSID_LEN));
-        std::string pass(request->pass(BPL_PASS_LEN));
-        std::string sec(request->security_type(BPL_SEC_LEN));
-
-        LOG(DEBUG) << "ACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST: iface:" << iface
-                   << " ssid:" << ssid << " pass:*** sec:" << sec;
-
-        // Add a job to the async work queue
-        work_queue.enqueue<void>([this, iface, ssid, pass, sec, sd]() {
-            int result = bpl_cfg_set_wifi_credentials(iface.c_str(), ssid.c_str(), pass.c_str(),
-                                                      sec.c_str());
-
-            size_t headroom = sizeof(beerocks::message::sUdsHeader);
-            size_t buffer_size =
-                headroom + message_com::get_vs_cmdu_size_on_buffer<
-                               beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE>();
-            uint8_t tx_buffer[buffer_size];
-            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
-
-            auto response = message_com::create_vs_message<
-                beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE>(cmdu_tx);
-
-            if (response == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return;
-            }
-
-            string_utils::copy_string(response->iface_name(message::IFACE_NAME_LENGTH),
-                                      iface.c_str(), message::IFACE_NAME_LENGTH);
-            response->success() = (0 == result) ? 1 : 0;
-
-            LOG(DEBUG) << "ACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST: result=" << result;
-
-            send_cmdu_safe(sd, cmdu_tx);
-        });
-
-    } break;
-
     case beerocks_message::ACTION_PLATFORM_POST_INIT_CONFIG_REQUEST: {
         LOG(TRACE) << "ACTION_PLATFORM_POST_INIT_CONFIG_REQUEST";
 

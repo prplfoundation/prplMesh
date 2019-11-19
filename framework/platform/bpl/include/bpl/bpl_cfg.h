@@ -433,20 +433,6 @@ int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SS
 int bpl_cfg_get_security_policy();
 
 /**
- * Update the Wi-Fi settings.
- *
- * @param [in] radio_dir radio direction (BPL_RADIO_FRONT/BPL_RADIO_BACK)
- * @param [in] ssid SSID (up to 32 bytes in length).
- * @param [in] pass Password (up to 64 bytes in length).
- * @param [in] sec Security Mode (up to 32 bytes in length).
- *
- * @return 0 Success.
- * @return -1 Error.
- */
-int bpl_cfg_set_wifi_credentials(const char iface[BPL_IFNAME_LEN], const char ssid[BPL_SSID_LEN],
-                                 const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN]);
-
-/**
  * Set platform onboarding state.
  *
  * @param [in] enable, 0= disable, 1 = enable.

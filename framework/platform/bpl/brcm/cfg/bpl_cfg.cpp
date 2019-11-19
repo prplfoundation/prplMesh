@@ -70,12 +70,6 @@ int bpl_cfg_get_wifi_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
     return 0;
 }
 
-int bpl_cfg_set_wifi_credentials(const int radio_dir, const char ssid[BPL_SSID_LEN],
-                                 const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])
-{
-    return -1;
-}
-
 int bpl_cfg_notify_fw_version_mismatch() { return -1; }
 
 int bpl_cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return -1; }

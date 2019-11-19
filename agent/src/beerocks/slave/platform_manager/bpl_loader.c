@@ -49,8 +49,6 @@ struct SModuleSymbols {
     int (*bpl_cfg_get_beerocks_credentials)(const int, char *, char *, char *);
     int (*bpl_cfg_set_beerocks_credentials)(const int, const char *, const char *, const char *);
     int (*bpl_cfg_get_security_policy)();
-    int (*bpl_cfg_set_wifi_credentials)(const char *iface, const char *, const char *,
-                                        const char *);
     int (*bpl_cfg_set_onboarding)(int);
     int (*bpl_cfg_notify_onboarding_completed)(const char *, const char *, const char *,
                                                const char *, const int);
@@ -229,12 +227,6 @@ int bpl_cfg_set_beerocks_credentials(int radio_dir, const char *ssid, const char
 }
 
 int bpl_cfg_get_security_policy() { return (BPL_EXEC_SYM(bpl_cfg_get_security_policy)); }
-
-int bpl_cfg_set_wifi_credentials(const char *iface, const char *ssid, const char *pass,
-                                 const char *sec)
-{
-    return (BPL_EXEC_SYM(bpl_cfg_set_wifi_credentials, iface, ssid, pass, sec));
-}
 
 int bpl_cfg_set_onboarding(int enable) { return (BPL_EXEC_SYM(bpl_cfg_set_onboarding, enable)); }
 

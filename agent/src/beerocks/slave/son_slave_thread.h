@@ -37,7 +37,6 @@ public:
         std::string bridge_iface;
         int stop_on_failure_attempts;
         bool enable_keep_alive;
-        bool enable_credentials_automatic_unify;
         bool debug_disable_arp;
         bool enable_bpl_iface_status_notifications;
         bool enable_repeater_mode;
@@ -91,9 +90,7 @@ public:
         STATE_WAIT_FOR_AP_MANAGER_INIT_DONE_NOTIFICATION,
         STATE_WAIT_FOR_AP_MANAGER_JOINED,
         STATE_AP_MANAGER_JOINED,
-        STATE_UNIFY_WIFI_CREDENTIALS,
         STATE_START_MONITOR,
-        STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE,
         STATE_WAIT_FOR_MONITOR_JOINED,
         STATE_MONITOR_JOINED,
         STATE_WAIT_BEFORE_JOIN_MASTER,
@@ -192,7 +189,6 @@ private:
     const int AP_MANAGER_HEARTBEAT_TIMEOUT_SEC                                         = 10;
     const int AP_MANAGER_HEARTBEAT_RETRIES                                             = 10;
     const int STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE_TIMEOUT_SEC                    = 4;
-    const int STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE_TIMEOUT_SEC               = 60;
 
     const int CONNECT_PLATFORM_RETRY_SLEEP     = 1000;
     const int CONNECT_PLATFORM_RETRY_COUNT_MAX = 5;
@@ -213,7 +209,6 @@ private:
     bool stopped                                       = false;
     bool is_backhaul_disconnected                      = false;
     bool is_credentials_changed_on_db                  = false;
-    bool is_wlan_credentials_unified                   = false;
     bool is_slave_reset                                = false;
     bool is_backhual_reconf                            = false;
     bool detach_on_conf_change                         = false;
