@@ -26,7 +26,7 @@ public:
     void kill_task(int id);
     void push_event(int task_id, int event_type, void *obj = nullptr);
     void response_received(int id, std::string mac, beerocks_message::eActionOp_CONTROL action_op,
-                           ieee1905_1::CmduMessageRx &cmdu_rx);
+                           std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header);
     void pending_task_ended(int task_id);
     void run_tasks();
 
