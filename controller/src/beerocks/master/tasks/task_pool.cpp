@@ -63,11 +63,11 @@ void task_pool::pending_task_ended(int task_id)
 
 void task_pool::response_received(int id, std::string mac,
                                   beerocks_message::eActionOp_CONTROL action_op,
-                                  ieee1905_1::CmduMessageRx &cmdu_rx)
+                                  std::shared_ptr<message_com::beerocks_header> beerocks_header)
 {
     std::unordered_map<int, std::shared_ptr<task>>::const_iterator got = scheduled_tasks.find(id);
     if (got != scheduled_tasks.end()) {
-        got->second->response_received(mac, action_op, cmdu_rx);
+        got->second->response_received(mac, action_op, beerocks_header);
     }
 }
 
