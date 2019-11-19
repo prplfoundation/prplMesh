@@ -165,9 +165,6 @@ public:
 
             rv                      = m_cal->cal_getValue(msg_accesspoint);
             auto accesspoint_obj_it = msg_accesspoint.begin();
-            //ap_settings.advertise_ssid = (accesspoint_obj_it->get_param("SSIDAdvertisementEnabled") == "1") || (accesspoint_obj_it->get_param("SSIDAdvertisementEnabled") == "true");
-            //TODO temporarily disabled for 1.1
-            ap_settings.advertise_ssid = false;
 
             std::string object_name_security = DEVICE_WIFI_ACCESSPOINT_OBJECT_NAME + "." +
                                                index_suffix + "." + SECURITY_OBJECT_NAME;

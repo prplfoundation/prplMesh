@@ -35,7 +35,6 @@ public:
     struct SAPSettings {
         bool enabled;
         bool acs;
-        bool advertise_ssid;
         std::string ssid;
         std::string pass;
         std::string sec_mode;

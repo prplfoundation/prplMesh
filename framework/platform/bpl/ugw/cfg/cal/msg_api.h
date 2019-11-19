@@ -19,9 +19,6 @@ bool sl_beerocks_notify_error(int code, const char *data);
 bool sl_beerocks_set_wifi_credentials(const int radio_dir, const char *ssid, const char *pass,
                                       const char *sec);
 
-// Send Wi-Fi advertise SSID flag update to the beerocks SL
-bool sl_beerocks_set_wifi_advertise_ssid(const char *iface, int advertise_ssid);
-
 // Send Wi-Fi set iface state
 bool sl_beerocks_set_wifi_iface_state(const char *iface, int op);
 

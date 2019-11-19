@@ -134,32 +134,6 @@ bool sl_beerocks_set_wifi_credentials(const int radio_int, const char *ssid, con
     return send_msg(xMsg);
 }
 
-bool sl_beerocks_set_wifi_advertise_ssid(const char *iface, int advertise_ssid)
-{
-    Msg_t xMsg;
-
-    MAPF_ERR("sl_beerocks_set_wifi_advertise_ssid iface=" << iface
-                                                          << " advertise_ssid=" << advertise_ssid);
-
-    // Initialize the message
-    init_msg(xMsg);
-
-    // Set the message opcode
-    xMsg.nMsgType = BPL_MSG_SET_WIFI_ADVERTISE_SSID;
-
-    BPL_WIFI_ADVERTISE_SSID_FLAG sWifiAdvertiseSsid = {0};
-
-    utils::copy_string(sWifiAdvertiseSsid.ifname, iface, BPL_IFNAME_LEN);
-    sWifiAdvertiseSsid.advertise_ssid = advertise_ssid;
-
-    // Build the message
-    xMsg.pMsg     = &sWifiAdvertiseSsid;
-    xMsg.nMsgSize = sizeof(sWifiAdvertiseSsid);
-
-    // Send the message
-    return send_msg(xMsg);
-}
-
 bool sl_beerocks_set_wifi_iface_state(const char *iface, int op)
 {
     Msg_t xMsg;

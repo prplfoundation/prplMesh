@@ -80,10 +80,4 @@ int bpl_cfg_get_wep_key(int index, int keyIndex, char *key);
  * @return 0 on success or -1 on error.
  **/
 
-#ifndef BPL_PASSIVE_MODE
-int bpl_cfg_set_vap_credentials(int index, const char ssid[BPL_SSID_LEN],
-                                const char sec[BPL_SEC_LEN], const char key[BPL_PASS_LEN],
-                                const char psk[BPL_PASS_LEN]);
-#endif
-
 #endif // _BPL_CFG_HELPER_H

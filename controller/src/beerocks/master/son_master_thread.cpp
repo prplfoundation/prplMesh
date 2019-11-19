@@ -1987,22 +1987,6 @@ bool master_thread::handle_intel_slave_join(
     beerocks::eIfaceType hostap_iface_type =
         (beerocks::eIfaceType)notification->hostap().iface_type;
 
-    bool advertise_ssid = (bool)notification->wlan_settings().advertise_ssid;
-    LOG(DEBUG) << "joined slave advertise_ssid=" << (advertise_ssid ? "true" : "false")
-               << " for vap " << radio_mac;
-    /*
-        * TODO temporarily disabled for 1.1
-    auto local_slave_advertise_ssid = database.get_hostap_advertise_ssid_flag(local_slave_mac);
-    if (!is_gw_slave && local_slave_advertise_ssid != advertise_ssid) {
-        LOG(INFO) << "advertise SSID flag mismatch! local_slave_advertise_ssid=" << (local_slave_advertise_ssid?"true":"false");
-        message::sACTION_CONTROL_SLAVE_JOINED_RESPONSE joined_response = {};
-        joined_response.err_code = beerocks::JOIN_RESP_ADVERTISE_SSID_FLAG_MISMATCH;
-        std::ptrdiff_t size = message_com::build_message(tx_buffer, message::ACTION_CONTROL_SLAVE_JOINED_RESPONSE, joined_response);
-        message_com::send_message(sd, tx_buffer, size);
-        break;
-    }
-    */
-
     LOG(INFO) << std::endl
               << "    hostap_iface_name=" << notification->hostap().iface_name << std::endl
               << "    hostap_iface_type=" << utils::get_iface_type_string(hostap_iface_type)
@@ -2100,8 +2084,6 @@ bool master_thread::handle_intel_slave_join(
 
     database.set_hostap_supported_channels(radio_mac, notification->hostap().supported_channels,
                                            message::SUPPORTED_CHANNELS_LENGTH);
-
-    database.set_hostap_advertise_ssid_flag(radio_mac, advertise_ssid);
 
     if (database.get_node_5ghz_support(radio_mac)) {
         if (notification->low_pass_filter_on()) {
@@ -2393,7 +2375,6 @@ bool master_thread::handle_non_intel_slave_join(
 
     autoconfig_wsc_parse_radio_caps(radio_mac, radio_caps);
     // TODO assume SSIDs are not hidden
-    database.set_hostap_advertise_ssid_flag(radio_mac, true);
 
     // TODO
     //        if (database.get_node_5ghz_support(radio_mac)) {

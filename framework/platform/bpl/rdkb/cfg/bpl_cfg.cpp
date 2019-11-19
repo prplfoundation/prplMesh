@@ -175,7 +175,6 @@ int bpl_cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PA
         wlan_params->enabled = !disabled;
     }
     retVal |= bpl_cfg_get_channel(index, &wlan_params->channel);
-    retVal |= bpl_cfg_get_ssid_advertisement_enabled(index, &wlan_params->advertise_ssid);
 
     char ssid[MAX_UCI_BUF_LEN] = {0}, security[MAX_UCI_BUF_LEN] = {0},
          passphrase[MAX_UCI_BUF_LEN] = {0};

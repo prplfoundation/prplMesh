@@ -1666,33 +1666,6 @@ int8_t db::get_hostap_vap_id(const std::string &mac)
     return IFACE_ID_INVALID;
 }
 
-bool db::get_hostap_advertise_ssid_flag(std::string mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return false;
-    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
-        LOG(WARNING) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
-        return false;
-    }
-    return n->hostap->advertise_ssid;
-}
-
-bool db::set_hostap_advertise_ssid_flag(std::string mac, bool flag)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return false;
-    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
-        LOG(WARNING) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
-        return false;
-    }
-    n->hostap->advertise_ssid = flag;
-    return true;
-}
-
 bool db::get_hostap_repeater_mode_flag(std::string mac)
 {
     auto n = get_node(mac);

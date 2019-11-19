@@ -98,9 +98,8 @@ static bool fill_platform_settings(
         return false;
     }
     /* update message */
-    msg->wlan_settings().band_enabled   = params.enabled;
-    msg->wlan_settings().channel        = params.channel;
-    msg->wlan_settings().advertise_ssid = params.advertise_ssid;
+    msg->wlan_settings().band_enabled = params.enabled;
+    msg->wlan_settings().channel      = params.channel;
     string_utils::copy_string(msg->wlan_settings().ssid, params.ssid,
                               beerocks::message::WIFI_SSID_MAX_LENGTH);
     string_utils::copy_string(msg->wlan_settings().pass, params.passphrase,
@@ -122,9 +121,8 @@ static bool fill_platform_settings(
         return false;
     }
 
-    params_ptr->band_enabled   = params.enabled;
-    params_ptr->channel        = params.channel;
-    params_ptr->advertise_ssid = params.advertise_ssid;
+    params_ptr->band_enabled = params.enabled;
+    params_ptr->channel      = params.channel;
     string_utils::copy_string(params_ptr->ssid, params.ssid,
                               beerocks::message::WIFI_SSID_MAX_LENGTH);
     string_utils::copy_string(params_ptr->pass, params.passphrase,
@@ -728,11 +726,6 @@ bool main_thread::wlan_params_changed_check()
             LOG(DEBUG) << "channel changed";
             wlan_params_changed = true;
         }
-        if (elm.second->advertise_ssid != params.advertise_ssid) {
-            elm.second->advertise_ssid = params.advertise_ssid;
-            LOG(DEBUG) << "advertise_ssid changed";
-            wlan_params_changed = true;
-        }
         if (std::string(elm.second->ssid).compare(std::string(params.ssid))) {
             LOG(DEBUG) << "ssid changed, cached=" << std::string(elm.second->ssid) << ", new="
                        << std::string(params.ssid, beerocks::message::WIFI_SSID_MAX_LENGTH);
@@ -765,9 +758,8 @@ bool main_thread::wlan_params_changed_check()
                 return false;
             }
 
-            notification->wlan_settings().band_enabled   = elm.second->band_enabled;
-            notification->wlan_settings().channel        = elm.second->channel;
-            notification->wlan_settings().advertise_ssid = elm.second->advertise_ssid;
+            notification->wlan_settings().band_enabled = elm.second->band_enabled;
+            notification->wlan_settings().channel      = elm.second->channel;
             string_utils::copy_string(notification->wlan_settings().ssid, elm.second->ssid,
                                       beerocks::message::WIFI_SSID_MAX_LENGTH);
             string_utils::copy_string(notification->wlan_settings().pass, elm.second->pass,
@@ -1284,75 +1276,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         });
 
     } break;
-
-    case beerocks_message::ACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST: {
-        LOG(TRACE) << "ACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST";
-
-        // Request message
-        auto request =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST failed";
-            return false;
-        }
-
-        bool flag = (bool)request->flag();
-
-        // Perform the operation asynchronously
-        work_queue.enqueue<void>(
-            [this](uint16_t header_id, bool flag, Socket *sd) {
-                bool fError = false;
-
-                std::string iface = get_hostap_iface_name_from_slave_socket(sd);
-
-                LOG(INFO) << "Updating advertise SSID flag for iface " << iface << " to "
-                          << (flag ? "true" : "false");
-
-                if (bpl_cfg_set_wifi_advertise_ssid(iface.c_str(), flag) < 0) {
-                    LOG(WARNING) << "Failed setting advertise SSID for iface " << iface << " to "
-                                 << (flag ? "true" : "false");
-                    fError = true;
-                } else {
-                    LOG(DEBUG) << "Successfully set advertise SSID for iface " << iface << " to "
-                               << (flag ? "true" : "false");
-                }
-
-                // Response message
-                size_t headroom = sizeof(beerocks::message::sUdsHeader);
-                size_t buffer_size =
-                    headroom +
-                    message_com::get_vs_cmdu_size_on_buffer<
-                        beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE>();
-                uint8_t tx_buffer[buffer_size];
-                ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom,
-                                                  sizeof(tx_buffer) - headroom);
-
-                auto response = message_com::create_vs_message<
-                    beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE>(
-                    cmdu_tx, header_id);
-
-                if (response == nullptr) {
-                    LOG(ERROR) << "Failed building "
-                                  "ACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE message!";
-                    return;
-                }
-
-                // Set the operation result
-                response->result() = fError ? 0 : 1;
-
-                LOG(DEBUG) << "sending ACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE";
-                if (!send_cmdu_safe(sd, cmdu_tx)) {
-                    LOG(ERROR)
-                        << "failed to send ACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE sd="
-                        << intptr_t(sd);
-                }
-            },
-            beerocks_header->id(), flag, sd);
-
-        break;
-    }
-
     case beerocks_message::ACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST: {
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE>(cmdu_tx);

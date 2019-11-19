@@ -78,25 +78,6 @@ static int bpl_cfg_iface_config_down(int index)
 
 //============================================ STATIC END ============================================
 
-int bpl_cfg_set_wifi_advertise_ssid(const char iface[BPL_IFNAME_LEN], int advertise_ssid)
-{
-    int retVal = 0;
-    int index  = 0;
-
-    if (!iface) {
-        return RETURN_ERR;
-    }
-
-    retVal = bpl_cfg_get_index_from_interface(iface, &index);
-    if (retVal) {
-        return retVal;
-    }
-
-    retVal |= uci_converter_set_bool(TYPE_VAP, index, "hidden", !advertise_ssid);
-
-    return retVal;
-}
-
 int bpl_cfg_set_wifi_credentials(const char iface[BPL_IFNAME_LEN], const char ssid[BPL_SSID_LEN],
                                  const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])
 {
@@ -191,11 +172,6 @@ int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable
 }
 
 #else //PASSIVE_MODE is on
-
-int bpl_cfg_set_wifi_advertise_ssid(const char iface[BPL_IFNAME_LEN], int advertise_ssid)
-{
-    return 0;
-}
 
 int bpl_cfg_set_wifi_credentials(const char iface[BPL_IFNAME_LEN], const char ssid[BPL_SSID_LEN],
                                  const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])

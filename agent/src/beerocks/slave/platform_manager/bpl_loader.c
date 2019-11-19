@@ -46,7 +46,6 @@ struct SModuleSymbols {
     int (*bpl_cfg_get_wifi_params)(const char *iface, struct BPL_WLAN_PARAMS *wlan_params);
     int (*bpl_cfg_get_backhaul_params)(int *, int *, int *);
     int (*bpl_cfg_get_backhaul_vaps)(char *, const int);
-    int (*bpl_cfg_set_wifi_advertise_ssid)(const char *, int);
     int (*bpl_cfg_get_beerocks_credentials)(const int, char *, char *, char *);
     int (*bpl_cfg_set_beerocks_credentials)(const int, const char *, const char *, const char *);
     int (*bpl_cfg_get_security_policy)();
@@ -216,11 +215,6 @@ int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefer
 int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len)
 {
     return (BPL_EXEC_SYM(bpl_cfg_get_backhaul_vaps, backhaul_vaps_buf, buf_len));
-}
-
-int bpl_cfg_set_wifi_advertise_ssid(const char *iface, int advertise_ssid)
-{
-    return (BPL_EXEC_SYM(bpl_cfg_set_wifi_advertise_ssid, iface, advertise_ssid));
 }
 
 int bpl_cfg_get_beerocks_credentials(int radio_dir, char *ssid, char *pass, char *sec)

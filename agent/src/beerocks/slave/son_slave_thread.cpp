@@ -1641,19 +1641,6 @@ bool slave_thread::handle_cmdu_platform_manager_message(
     }
 
     switch (beerocks_header->action_op()) {
-    case beerocks_message::ACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE: {
-        auto response =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE failed";
-            return false;
-        }
-        bool success = response->result();
-        LOG(DEBUG) << "received ACTION_PLATFORM_SET_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE "
-                   << (success ? "success" : "failure");
-        break;
-    }
     case beerocks_message::ACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE: {
         LOG(TRACE) << "ACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE";
         if (slave_state == STATE_WAIT_FOR_PLATFORM_MANAGER_REGISTER_RESPONSE) {
@@ -4741,16 +4728,6 @@ bool slave_thread::parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessage
         LOG(ERROR) << "Mismatch SSID!";
         LOG(DEBUG) << "goto STATE_SSID_MISMATCH";
         slave_state = STATE_SSID_MISMATCH;
-    } else if (joined_response->err_code() == beerocks::JOIN_RESP_ADVERTISE_SSID_FLAG_MISMATCH) {
-        LOG(INFO) << "advertise SSID flag mismatch";
-        auto notification = message_com::create_vs_message<
-            beerocks_message::cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST>(cmdu_tx);
-        if (notification == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-        notification->flag() = (wlan_settings.advertise_ssid ? 0 : 1);
-        message_com::send_cmdu(platform_manager_socket, cmdu_tx);
     } else {
         //Send master version + slave version to platform manager
         auto notification = message_com::create_vs_message<
