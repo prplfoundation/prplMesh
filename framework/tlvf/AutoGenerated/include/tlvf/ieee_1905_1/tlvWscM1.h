@@ -88,7 +88,9 @@ class tlvWscM1 : public BaseClass
         WSC::sWscAttrDevicePasswordID& device_password_id_attr();
         WSC::sWscAttrConfigurationError& configuration_error_attr();
         WSC::sWscAttrOsVersion& os_version_attr();
-        WSC::sWscAttrVersion2& version2_attr();
+        std::shared_ptr<WSC::cWscVendorExtWfa> create_vendor_ext();
+        bool add_vendor_ext(std::shared_ptr<WSC::cWscVendorExtWfa> ptr);
+        std::shared_ptr<WSC::cWscVendorExtWfa> vendor_ext() { return m_vendor_ext_ptr; }
         void class_swap();
         static size_t get_initial_size();
 
@@ -134,7 +136,9 @@ class tlvWscM1 : public BaseClass
         WSC::sWscAttrDevicePasswordID* m_device_password_id_attr = nullptr;
         WSC::sWscAttrConfigurationError* m_configuration_error_attr = nullptr;
         WSC::sWscAttrOsVersion* m_os_version_attr = nullptr;
-        WSC::sWscAttrVersion2* m_version2_attr = nullptr;
+        WSC::cWscVendorExtWfa *m_vendor_ext = nullptr;
+        std::shared_ptr<WSC::cWscVendorExtWfa> m_vendor_ext_ptr = nullptr;
+        bool m_lock_allocation__ = false;
 };
 
 }; // close namespace: ieee1905_1
