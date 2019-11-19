@@ -55,7 +55,7 @@ bool message_com::intel_oui(
            ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL;
 }
 
-std::shared_ptr<beerocks_message::cACTION_HEADER>
+std::shared_ptr<message_com::beerocks_header>
 message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (!cmdu_rx.getMessageLength()) {
@@ -66,7 +66,10 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
         return nullptr;
     if (!intel_oui(tlv_header))
         return nullptr;
-    return cmdu_rx.addClass<beerocks_message::cACTION_HEADER>();
+    auto header = cmdu_rx.addClass<beerocks_message::cACTION_HEADER>();
+    if (!header)
+        return nullptr;
+    return std::make_shared<beerocks_header>(cmdu_rx, header);
 }
 
 std::string message_com::print_cmdu_types(const message::sUdsHeader *uds_header,
