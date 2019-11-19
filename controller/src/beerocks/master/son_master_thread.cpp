@@ -2422,19 +2422,19 @@ bool master_thread::handle_non_intel_slave_join(
 }
 
 bool master_thread::handle_cmdu_control_message(
-    Socket *sd, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
-    ieee1905_1::CmduMessageRx &cmdu_rx)
+    Socket *sd, std::shared_ptr<message_com::beerocks_header> beerocks_header)
 {
-    std::string hostap_mac = network_utils::mac_to_string(beerocks_header->radio_mac());
+    auto& cmdu_rx = beerocks_header->m_cmdu_rx;
+    std::string hostap_mac = network_utils::mac_to_string(beerocks_header->m_header->radio_mac());
 
     // Sanity tests
     if (hostap_mac.empty()) {
-        LOG(ERROR) << "CMDU received with id=" << int(beerocks_header->id())
+        LOG(ERROR) << "CMDU received with id=" << int(beerocks_header->m_header->id())
                    << " op=" << int(beerocks_header->action_op()) << " with empty mac!";
         return false;
     }
 
-    if (beerocks_header->direction() == beerocks::BEEROCKS_DIRECTION_AGENT) {
+    if (beerocks_header->m_header->direction() == beerocks::BEEROCKS_DIRECTION_AGENT) {
         return true;
     }
 
@@ -2459,7 +2459,7 @@ bool master_thread::handle_cmdu_control_message(
         LOG(DEBUG)
             << "received ACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE from "
             << hostap_mac;
-        auto response = cmdu_rx.addClass<
+        auto response = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE>();
 
         if (response == nullptr) {
@@ -2469,7 +2469,7 @@ bool master_thread::handle_cmdu_control_message(
 
         auto new_event = CHANNEL_SELECTION_ALLOCATE_EVENT(
             channel_selection_task::sRestrictedChannelResponse_event);
-        new_event->hostap_mac = beerocks_header->radio_mac();
+        new_event->hostap_mac = beerocks_header->m_header->radio_mac();
         new_event->success    = response->success();
         tasks.push_event(database.get_channel_selection_task_id(),
                          (int)channel_selection_task::eEvent::RESTRICTED_CHANNEL_RESPONSE_EVENT,
@@ -2552,7 +2552,7 @@ bool master_thread::handle_cmdu_control_message(
 
         LOG(DEBUG) << "CS_task,sending CSA_EVENT for mac " << hostap_mac;
         auto new_event = CHANNEL_SELECTION_ALLOCATE_EVENT(channel_selection_task::sCsa_event);
-        new_event->hostap_mac = beerocks_header->radio_mac();
+        new_event->hostap_mac = beerocks_header->m_header->radio_mac();
         new_event->cs_params  = notification->cs_params();
         tasks.push_event(database.get_channel_selection_task_id(),
                          (int)channel_selection_task::eEvent::CSA_EVENT, (void *)new_event);
@@ -2583,8 +2583,7 @@ bool master_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION: {
         auto notification =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION failed";
             return false;
@@ -3485,8 +3484,8 @@ bool master_thread::handle_cmdu_control_message(
 
     // If this is a response message to a task (header->id() == task id), send it to it directly - cmdu_rx is owned by the task
     // e.g. only the task may call addClass
-    if (beerocks_header->id()) {
-        tasks.response_received(beerocks_header->id(), hostap_mac,
+    if (beerocks_header->m_header->id()) {
+        tasks.response_received(beerocks_header->m_header->id(), hostap_mac,
                                 (beerocks_message::eActionOp_CONTROL)beerocks_header->action_op(),
                                 cmdu_rx);
         return true;
