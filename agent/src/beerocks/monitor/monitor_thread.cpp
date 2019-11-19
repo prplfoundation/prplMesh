@@ -619,7 +619,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     switch (beerocks_header->action_op()) {
     case beerocks_message::ACTION_MONITOR_SON_CONFIG_UPDATE: {
         LOG(TRACE) << "received ACTION_MONITOR_SON_CONFIG_UPDATE";
-        auto update = cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_SON_CONFIG_UPDATE>();
+        auto update = beerocks_header->addClass<beerocks_message::cACTION_MONITOR_SON_CONFIG_UPDATE>();
         if (update == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_SON_CONFIG_UPDATE failed";
             return false;
@@ -647,7 +647,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST: {
         // LOG(TRACE) << "received ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST"; // floods the log
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST failed";
             return false;
@@ -661,7 +661,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL: {
         LOG(TRACE) << "received ACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL";
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL failed";
             return false;
@@ -678,7 +678,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST: {
         LOG(TRACE) << "received ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST";
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST failed";
             return false;
@@ -721,7 +721,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST: {
 
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST failed";
             send_steering_return_status(
@@ -787,7 +787,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         LOG(TRACE) << "received ACTION_MONITOR_STEERING_CLIENT_SET_REQUEST";
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST failed";
             send_steering_return_status(
@@ -845,7 +845,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST: {
         LOG(TRACE) << "received ACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST";
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST failed";
             return false;
@@ -914,7 +914,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_MONITOR_CLIENT_BEACON_11K_REQUEST: {
         LOG(TRACE) << "received ACTION_MONITOR_CLIENT_BEACON_11K_REQUEST";
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST failed";
             return false;
@@ -968,7 +968,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST failed";
             return false;
@@ -1005,7 +1005,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST failed";
             return false;

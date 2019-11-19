@@ -570,7 +570,7 @@ bool slave_thread::handle_cmdu_control_message(
     switch (beerocks_header->action_op()) {
     case beerocks_message::ACTION_CONTROL_ARP_QUERY_REQUEST: {
         LOG(TRACE) << "ACTION_CONTROL_ARP_QUERY_REQUEST";
-        auto request_in = cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_ARP_QUERY_REQUEST>();
+        auto request_in = beerocks_header->addClass<beerocks_message::cACTION_CONTROL_ARP_QUERY_REQUEST>();
         if (request_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_ARP_QUERY_REQUEST failed";
             return false;
@@ -589,7 +589,7 @@ bool slave_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_SON_CONFIG_UPDATE: {
         LOG(DEBUG) << "received ACTION_CONTROL_SON_CONFIG_UPDATE";
-        auto update = cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_SON_CONFIG_UPDATE>();
+        auto update = beerocks_header->addClass<beerocks_message::cACTION_CONTROL_SON_CONFIG_UPDATE>();
         if (update == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_SON_CONFIG_UPDATE failed";
             return false;
@@ -625,7 +625,7 @@ bool slave_thread::handle_cmdu_control_message(
     case beerocks_message::ACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START: {
         LOG(DEBUG) << "received ACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START";
         auto request_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START>();
         if (request_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START failed";
             return false;
@@ -647,7 +647,7 @@ bool slave_thread::handle_cmdu_control_message(
     case beerocks_message::ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST: {
         LOG(DEBUG) << "received ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST";
         auto request_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST>();
         if (request_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST failed";
             return false;
@@ -689,7 +689,7 @@ bool slave_thread::handle_cmdu_control_message(
     case beerocks_message::ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST: {
         LOG(DEBUG) << "received ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST";
         auto request_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST>();
         if (request_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST failed";
             return false;
@@ -777,7 +777,7 @@ bool slave_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_DISCONNECT_REQUEST: {
         auto request_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST>();
         if (request_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_DISCONNECT_REQUEST failed";
             return false;
@@ -802,7 +802,7 @@ bool slave_thread::handle_cmdu_control_message(
     case beerocks_message::ACTION_CONTROL_CONTROLLER_PING_REQUEST: {
         LOG(DEBUG) << "received ACTION_CONTROL_CONTROLLER_PING_REQUEST";
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CONTROLLER_PING_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_CONTROLLER_PING_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_CONTROLLER_PING_REQUEST failed";
             return false;
@@ -830,7 +830,7 @@ bool slave_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_AGENT_PING_RESPONSE: {
         LOG(DEBUG) << "received ACTION_CONTROL_AGENT_PING_RESPONSE";
-        auto response = cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_AGENT_PING_RESPONSE>();
+        auto response = beerocks_header->addClass<beerocks_message::cACTION_CONTROL_AGENT_PING_RESPONSE>();
         if (response == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_AGENT_PING_RESPONSE failed";
             return false;
@@ -859,7 +859,7 @@ bool slave_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL: {
         auto request_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL>();
         if (request_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL failed";
             return false;
@@ -898,7 +898,7 @@ bool slave_thread::handle_cmdu_control_message(
         LOG(TRACE) << "received ACTION_CONTROL_BACKHAUL_ROAM_REQUEST";
         if (is_backhaul_manager && backhaul_params.backhaul_is_wireless) {
             auto request_in =
-                cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_BACKHAUL_ROAM_REQUEST>();
+                beerocks_header->addClass<beerocks_message::cACTION_CONTROL_BACKHAUL_ROAM_REQUEST>();
             if (request_in == nullptr) {
                 LOG(ERROR) << "addClass cACTION_CONTROL_BACKHAUL_ROAM_REQUEST failed";
                 return false;
@@ -965,7 +965,7 @@ bool slave_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST: {
         auto request_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST>();
         if (request_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST failed";
             return false;
@@ -1006,7 +1006,7 @@ bool slave_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_BEACON_11K_REQUEST: {
         auto request_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST>();
         if (request_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_BEACON_11K_REQUEST failed";
             return false;
@@ -1033,7 +1033,7 @@ bool slave_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST: {
         auto request_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST>();
         if (request_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST failed";
             return false;
@@ -1053,7 +1053,7 @@ bool slave_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST: {
         auto request_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST>();
         if (request_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST failed";
             return false;
@@ -1229,7 +1229,7 @@ bool slave_thread::handle_cmdu_control_message(
     case beerocks_message::ACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST: {
         LOG(TRACE) << "ACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST";
         auto update =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST>();
         if (update == nullptr) {
             LOG(ERROR) << "addClass failed";
             return false;
@@ -1265,7 +1265,7 @@ bool slave_thread::handle_cmdu_control_message(
     case beerocks_message::ACTION_CONTROL_STEERING_CLIENT_SET_REQUEST: {
         LOG(TRACE) << "ACTION_CONTROL_STEERING_CLIENT_SET_REQUEST";
         auto update =
-            cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST>();
         if (update == nullptr) {
             LOG(ERROR) << "addClass failed";
             return false;
@@ -1354,7 +1354,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
         LOG(DEBUG) << "ACTION_BACKHAUL_REGISTER_RESPONSE";
         if (slave_state == STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE) {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BACKHAUL_REGISTER_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BACKHAUL_REGISTER_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "Failed building message!";
                 return false;
@@ -1397,7 +1397,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
     case beerocks_message::ACTION_BACKHAUL_CONNECTED_NOTIFICATION: {
 
         auto notification =
-            cmdu_rx.addClass<beerocks_message::cACTION_BACKHAUL_CONNECTED_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_BACKHAUL_CONNECTED_NOTIFICATION>();
         if (!notification) {
             LOG(ERROR) << "Failed building message!";
             return false;
@@ -1500,7 +1500,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
         LOG(DEBUG) << "ACTION_BACKHAUL_DISCONNECTED_NOTIFICATION";
 
         auto notification =
-            cmdu_rx.addClass<beerocks_message::cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION>();
         if (!notification) {
             LOG(ERROR) << "Failed building message!";
             return false;
@@ -1584,7 +1584,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
     case beerocks_message::ACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION: {
         LOG(DEBUG) << "ACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION";
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION>();
         if (!notification_in) {
             LOG(ERROR) << "Failed building ACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION message!";
             return false;
@@ -1658,7 +1658,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
         LOG(TRACE) << "ACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE";
         if (slave_state == STATE_WAIT_FOR_PLATFORM_MANAGER_REGISTER_RESPONSE) {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE>();
             if (response == nullptr) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE failed";
                 return false;
@@ -1743,7 +1743,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 
     case beerocks_message::ACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE: {
         auto response =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE>();
+            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE>();
         if (response == nullptr) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE failed";
             return false;
@@ -1829,7 +1829,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
         //make sure slave reset didn't occur while we performed post init configurations
         if (slave_state == STATE_OPERATIONAL) {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE>();
             if (response == nullptr) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE failed";
                 return false;
@@ -1852,7 +1852,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 
     case beerocks_message::ACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE: {
         auto response =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE>();
+            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE>();
         if (response == nullptr) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE failed";
             return false;
@@ -1889,7 +1889,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
         // LOG(TRACE) << "ACTION_PLATFORM_ARP_MONITOR_NOTIFICATION";
         if (master_socket) {
             auto notification_in =
-                cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION>();
+                beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION>();
             if (notification_in == nullptr) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION failed";
                 return false;
@@ -1911,7 +1911,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
         LOG(TRACE) << "ACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION";
 
         auto notification =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION failed";
             return false;
@@ -1926,7 +1926,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
     }
     case beerocks_message::ACTION_PLATFORM_OPERATIONAL_NOTIFICATION: {
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_OPERATIONAL_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_OPERATIONAL_NOTIFICATION>();
         if (notification_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_OPERATIONAL_NOTIFICATION failed";
             return false;
@@ -1951,7 +1951,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
     }
     case beerocks_message::ACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION: {
         auto notification =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass ACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION failed";
             return false;
@@ -2059,7 +2059,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
         LOG(TRACE) << "ACTION_PLATFORM_ARP_QUERY_RESPONSE";
         if (master_socket) {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_ARP_QUERY_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ARP_QUERY_RESPONSE>();
             if (response == nullptr) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_ARP_QUERY_RESPONSE failed";
                 return false;
@@ -2126,7 +2126,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
     case beerocks_message::ACTION_APMANAGER_JOINED_NOTIFICATION: {
         LOG(INFO) << "received ACTION_APMANAGER_JOINED_NOTIFICATION";
         auto notification =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_JOINED_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_JOINED_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_JOINED_NOTIFICATION failed";
             return false;
@@ -2166,7 +2166,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION: {
         auto response_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION>();
         if (response_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION failed";
             return false;
@@ -2218,7 +2218,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION: {
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION>();
         if (notification_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION failed";
             return false;
@@ -2262,7 +2262,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
     case beerocks_message::ACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION: {
         LOG(INFO) << "ACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION";
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION>();
         if (notification_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION failed";
             return false;
@@ -2286,7 +2286,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
         LOG(INFO) << "ACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION";
 
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION>();
         if (notification_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION failed";
             return false;
@@ -2314,7 +2314,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
     case beerocks_message::ACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION: {
         LOG(INFO) << "received ACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION";
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION>();
         if (notification_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION failed";
             return false;
@@ -2427,7 +2427,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
         break;
     }
     case beerocks_message::ACTION_APMANAGER_ACK: {
-        auto response_in = cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_ACK>();
+        auto response_in = beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_ACK>();
         if (!response_in) {
             LOG(ERROR) << "addClass ACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE failed";
             return false;
@@ -2447,7 +2447,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE: {
         auto response_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE>();
         if (response_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE failed";
             return false;
@@ -2536,7 +2536,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION: {
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION>();
         if (!notification_in) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION failed";
             return false;
@@ -2628,7 +2628,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE: {
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE>();
         if (notification_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE failed";
             return false;
@@ -2647,7 +2647,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
     }
     case beerocks_message::ACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE: {
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE>();
         if (notification_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE failed";
             return false;
@@ -2713,7 +2713,7 @@ bool slave_thread::handle_cmdu_monitor_message(
     }
     case beerocks_message::ACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION: {
         auto response_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION>();
         if (response_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION failed";
             return false;
@@ -2842,7 +2842,7 @@ bool slave_thread::handle_cmdu_monitor_message(
         // LOG(DEBUG) << "Received ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE"; // the print is flooding the log
 
         auto response_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE>();
         if (response_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE failed";
             return false;
@@ -2876,7 +2876,7 @@ bool slave_thread::handle_cmdu_monitor_message(
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION: {
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION>();
         if (notification_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION failed";
             break;
@@ -2895,7 +2895,7 @@ bool slave_thread::handle_cmdu_monitor_message(
     case beerocks_message::ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE: {
         LOG(TRACE) << "ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE id=" << int(beerocks_header->id());
         auto response_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>();
         if (response_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE failed";
             break;
@@ -2913,7 +2913,7 @@ bool slave_thread::handle_cmdu_monitor_message(
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE: {
         auto response_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE>();
         if (response_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE failed";
             break;
@@ -2932,7 +2932,7 @@ bool slave_thread::handle_cmdu_monitor_message(
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE: {
         auto response_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE>();
         if (response_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE failed";
             break;
@@ -2990,7 +2990,7 @@ bool slave_thread::handle_cmdu_monitor_message(
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION: {
         auto response_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION>();
         if (response_in == nullptr) {
             LOG(ERROR) << "addClass ACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION failed";
             break;
@@ -3009,7 +3009,7 @@ bool slave_thread::handle_cmdu_monitor_message(
     }
     case beerocks_message::ACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION: {
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION>();
         if (notification_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION failed";
             return false;
@@ -3027,7 +3027,7 @@ bool slave_thread::handle_cmdu_monitor_message(
     }
     case beerocks_message::ACTION_MONITOR_ERROR_NOTIFICATION: {
         auto notification =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_ERROR_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_ERROR_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_ERROR_NOTIFICATION failed";
             return false;
@@ -3147,7 +3147,7 @@ bool slave_thread::handle_cmdu_monitor_message(
     }
     case beerocks_message::ACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE: {
         auto notification_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE>();
+            beerocks_header->addClass<beerocks_message::cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE>();
         if (notification_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE failed";
             return false;
@@ -4668,7 +4668,7 @@ bool slave_thread::parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessage
     }
 
     auto joined_response =
-        cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>();
+        beerocks_header->addClass<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>();
     if (joined_response == nullptr) {
         LOG(ERROR) << "addClass cACTION_CONTROL_SLAVE_JOINED_RESPONSE failed";
         return false;

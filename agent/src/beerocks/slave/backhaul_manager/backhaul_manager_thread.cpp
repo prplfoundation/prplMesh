@@ -1358,7 +1358,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
     // Handle messages
     switch (beerocks_header->action_op()) {
     case beerocks_message::ACTION_BACKHAUL_REGISTER_REQUEST: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_BACKHAUL_REGISTER_REQUEST>();
+        auto request = beerocks_header->addClass<beerocks_message::cACTION_BACKHAUL_REGISTER_REQUEST>();
         if (!request) {
             LOG(ERROR) << "addClass cACTION_BACKHAUL_REGISTER_REQUEST failed";
             return false;
@@ -1389,7 +1389,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
 
     case beerocks_message::ACTION_BACKHAUL_ENABLE: {
 
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_BACKHAUL_ENABLE>();
+        auto request = beerocks_header->addClass<beerocks_message::cACTION_BACKHAUL_ENABLE>();
         if (!request) {
             LOG(ERROR) << "addClass cACTION_BACKHAUL_ENABLE failed";
             return false;
@@ -1470,7 +1470,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_ROAM_REQUEST: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_BACKHAUL_ROAM_REQUEST>();
+        auto request = beerocks_header->addClass<beerocks_message::cACTION_BACKHAUL_ROAM_REQUEST>();
         if (!request) {
             LOG(ERROR) << "addClass ACTION_BACKHAUL_ROAM_REQUEST failed";
             return false;

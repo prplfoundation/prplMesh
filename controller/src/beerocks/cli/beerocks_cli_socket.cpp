@@ -234,7 +234,7 @@ bool cli_socket::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     switch (beerocks_header->action_op()) {
 
     case beerocks_message::ACTION_CLI_RESPONSE_STR: {
-        auto response = cmdu_rx.addClass<beerocks_message::cACTION_CLI_RESPONSE_STR>();
+        auto response = beerocks_header->addClass<beerocks_message::cACTION_CLI_RESPONSE_STR>();
         if (!response) {
             LOG(ERROR) << "addClass cACTION_CLI_RESPONSE_STR failed";
             return false;
@@ -251,7 +251,7 @@ bool cli_socket::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         break;
     }
     case beerocks_message::ACTION_CLI_RESPONSE_INT: {
-        auto notification = cmdu_rx.addClass<beerocks_message::cACTION_CLI_RESPONSE_INT>();
+        auto notification = beerocks_header->addClass<beerocks_message::cACTION_CLI_RESPONSE_INT>();
         if (!notification) {
             LOG(ERROR) << "addClass cACTION_CLI_RESPONSE_INT failed";
             return false;
