@@ -40,6 +40,7 @@
 namespace WSC {
 
 class cWscAttrEncryptedSettings;
+class cWscVendorExtWfa;
 typedef struct sWscAttrVersion {
     eWscAttributes attribute_type;
     uint16_t data_length;
@@ -356,6 +357,19 @@ typedef struct sWscAttrVersion2 {
     }
 } __attribute__((packed)) sWscAttrVersion2;
 
+typedef struct sWscIeVersion2 {
+    uint8_t subelement_id;
+    uint8_t subelement_length;
+    uint8_t subelement_value;
+    void struct_swap(){
+    }
+    void struct_init(){
+        subelement_id = 0x0;
+        subelement_length = 0x1;
+        subelement_value = WSC_VERSION2;
+    }
+} __attribute__((packed)) sWscIeVersion2;
+
 typedef struct sWscAttrVendorExtMultiAp {
     eWscAttributes attribute_type;
     uint16_t data_length;
@@ -533,6 +547,36 @@ class cWscAttrEncryptedSettings : public BaseClass
         int m_lock_order_counter__ = 0;
         char* m_encrypted_settings = nullptr;
         size_t m_encrypted_settings_idx__ = 0;
+};
+
+class cWscVendorExtWfa : public BaseClass
+{
+    public:
+        cWscVendorExtWfa(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cWscVendorExtWfa(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cWscVendorExtWfa();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        uint8_t& vendor_id_0();
+        uint8_t& vendor_id_1();
+        uint8_t& vendor_id_2();
+        size_t vs_data_length() { return m_vs_data_idx__ * sizeof(uint8_t); }
+        uint8_t* vs_data(size_t idx = 0);
+        bool alloc_vs_data(size_t count = 1);
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        uint8_t* m_vendor_id_0 = nullptr;
+        uint8_t* m_vendor_id_1 = nullptr;
+        uint8_t* m_vendor_id_2 = nullptr;
+        uint8_t* m_vs_data = nullptr;
+        size_t m_vs_data_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 }; // close namespace: WSC

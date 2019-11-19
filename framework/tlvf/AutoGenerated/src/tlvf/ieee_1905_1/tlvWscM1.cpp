@@ -148,7 +148,7 @@ bool tlvWscM1::alloc_manufacturer(size_t count) {
     m_device_password_id_attr = (WSC::sWscAttrDevicePasswordID *)((uint8_t *)(m_device_password_id_attr) + len);
     m_configuration_error_attr = (WSC::sWscAttrConfigurationError *)((uint8_t *)(m_configuration_error_attr) + len);
     m_os_version_attr = (WSC::sWscAttrOsVersion *)((uint8_t *)(m_os_version_attr) + len);
-    m_version2_attr = (WSC::sWscAttrVersion2 *)((uint8_t *)(m_version2_attr) + len);
+    m_vendor_ext = (WSC::cWscVendorExtWfa *)((uint8_t *)(m_vendor_ext) + len);
     m_manufacturer_idx__ += count;
     *m_manufacturer_length += count;
     if (!buffPtrIncrementSafe(len)) { return false; }
@@ -224,7 +224,7 @@ bool tlvWscM1::alloc_model_name(size_t count) {
     m_device_password_id_attr = (WSC::sWscAttrDevicePasswordID *)((uint8_t *)(m_device_password_id_attr) + len);
     m_configuration_error_attr = (WSC::sWscAttrConfigurationError *)((uint8_t *)(m_configuration_error_attr) + len);
     m_os_version_attr = (WSC::sWscAttrOsVersion *)((uint8_t *)(m_os_version_attr) + len);
-    m_version2_attr = (WSC::sWscAttrVersion2 *)((uint8_t *)(m_version2_attr) + len);
+    m_vendor_ext = (WSC::cWscVendorExtWfa *)((uint8_t *)(m_vendor_ext) + len);
     m_model_name_idx__ += count;
     *m_model_name_length += count;
     if (!buffPtrIncrementSafe(len)) { return false; }
@@ -297,7 +297,7 @@ bool tlvWscM1::alloc_model_number(size_t count) {
     m_device_password_id_attr = (WSC::sWscAttrDevicePasswordID *)((uint8_t *)(m_device_password_id_attr) + len);
     m_configuration_error_attr = (WSC::sWscAttrConfigurationError *)((uint8_t *)(m_configuration_error_attr) + len);
     m_os_version_attr = (WSC::sWscAttrOsVersion *)((uint8_t *)(m_os_version_attr) + len);
-    m_version2_attr = (WSC::sWscAttrVersion2 *)((uint8_t *)(m_version2_attr) + len);
+    m_vendor_ext = (WSC::cWscVendorExtWfa *)((uint8_t *)(m_vendor_ext) + len);
     m_model_number_idx__ += count;
     *m_model_number_length += count;
     if (!buffPtrIncrementSafe(len)) { return false; }
@@ -367,7 +367,7 @@ bool tlvWscM1::alloc_serial_number(size_t count) {
     m_device_password_id_attr = (WSC::sWscAttrDevicePasswordID *)((uint8_t *)(m_device_password_id_attr) + len);
     m_configuration_error_attr = (WSC::sWscAttrConfigurationError *)((uint8_t *)(m_configuration_error_attr) + len);
     m_os_version_attr = (WSC::sWscAttrOsVersion *)((uint8_t *)(m_os_version_attr) + len);
-    m_version2_attr = (WSC::sWscAttrVersion2 *)((uint8_t *)(m_version2_attr) + len);
+    m_vendor_ext = (WSC::cWscVendorExtWfa *)((uint8_t *)(m_vendor_ext) + len);
     m_serial_number_idx__ += count;
     *m_serial_number_length += count;
     if (!buffPtrIncrementSafe(len)) { return false; }
@@ -437,7 +437,7 @@ bool tlvWscM1::alloc_device_name(size_t count) {
     m_device_password_id_attr = (WSC::sWscAttrDevicePasswordID *)((uint8_t *)(m_device_password_id_attr) + len);
     m_configuration_error_attr = (WSC::sWscAttrConfigurationError *)((uint8_t *)(m_configuration_error_attr) + len);
     m_os_version_attr = (WSC::sWscAttrOsVersion *)((uint8_t *)(m_os_version_attr) + len);
-    m_version2_attr = (WSC::sWscAttrVersion2 *)((uint8_t *)(m_version2_attr) + len);
+    m_vendor_ext = (WSC::cWscVendorExtWfa *)((uint8_t *)(m_vendor_ext) + len);
     m_device_name_idx__ += count;
     *m_device_name_length += count;
     if (!buffPtrIncrementSafe(len)) { return false; }
@@ -465,8 +465,51 @@ WSC::sWscAttrOsVersion& tlvWscM1::os_version_attr() {
     return (WSC::sWscAttrOsVersion&)(*m_os_version_attr);
 }
 
-WSC::sWscAttrVersion2& tlvWscM1::version2_attr() {
-    return (WSC::sWscAttrVersion2&)(*m_version2_attr);
+std::shared_ptr<WSC::cWscVendorExtWfa> tlvWscM1::create_vendor_ext() {
+    if (m_lock_order_counter__ > 5) {
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list vendor_ext, abort!";
+        return nullptr;
+    }
+    size_t len = WSC::cWscVendorExtWfa::get_initial_size();
+    if (m_lock_allocation__ || getBuffRemainingBytes() < len) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return nullptr;
+    }
+    m_lock_order_counter__ = 5;
+    m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_vendor_ext;
+    if (!m_parse__) {
+        uint8_t *dst = src + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    return std::make_shared<WSC::cWscVendorExtWfa>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
+}
+
+bool tlvWscM1::add_vendor_ext(std::shared_ptr<WSC::cWscVendorExtWfa> ptr) {
+    if (ptr == nullptr) {
+        TLVF_LOG(ERROR) << "Received entry is nullptr";
+        return false;
+    }
+    if (m_lock_allocation__ == false) {
+        TLVF_LOG(ERROR) << "No call to create_vendor_ext was called before add_vendor_ext";
+        return false;
+    }
+    uint8_t *src = (uint8_t *)m_vendor_ext;
+    if (ptr->getStartBuffPtr() != src) {
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
+        return false;
+    }
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return false;
+    }
+    size_t len = ptr->getLen();
+    m_vendor_ext_ptr = ptr;
+    if (!buffPtrIncrementSafe(len)) { return false; }
+    if(!m_parse__ && m_length){ (*m_length) += len; }
+    m_lock_allocation__ = false;
+    return true;
 }
 
 void tlvWscM1::class_swap()
@@ -499,7 +542,7 @@ void tlvWscM1::class_swap()
     m_device_password_id_attr->struct_swap();
     m_configuration_error_attr->struct_swap();
     m_os_version_attr->struct_swap();
-    m_version2_attr->struct_swap();
+    if (m_vendor_ext_ptr) { m_vendor_ext_ptr->class_swap(); }
 }
 
 size_t tlvWscM1::get_initial_size()
@@ -534,7 +577,6 @@ size_t tlvWscM1::get_initial_size()
     class_size += sizeof(WSC::sWscAttrDevicePasswordID); // device_password_id_attr
     class_size += sizeof(WSC::sWscAttrConfigurationError); // configuration_error_attr
     class_size += sizeof(WSC::sWscAttrOsVersion); // os_version_attr
-    class_size += sizeof(WSC::sWscAttrVersion2); // version2_attr
     return class_size;
 }
 
@@ -683,10 +725,20 @@ bool tlvWscM1::init()
     if (!buffPtrIncrementSafe(sizeof(WSC::sWscAttrOsVersion))) { return false; }
     if(m_length && !m_parse__){ (*m_length) += sizeof(WSC::sWscAttrOsVersion); }
     if (!m_parse__) { m_os_version_attr->struct_init(); }
-    m_version2_attr = (WSC::sWscAttrVersion2*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(WSC::sWscAttrVersion2))) { return false; }
-    if(m_length && !m_parse__){ (*m_length) += sizeof(WSC::sWscAttrVersion2); }
-    if (!m_parse__) { m_version2_attr->struct_init(); }
+    m_vendor_ext = (WSC::cWscVendorExtWfa*)m_buff_ptr__;
+    if (m_parse__) {
+        auto vendor_ext = create_vendor_ext();
+        if (!vendor_ext) {
+            TLVF_LOG(ERROR) << "create_vendor_ext() failed";
+            return false;
+        }
+        if (!add_vendor_ext(vendor_ext)) {
+            TLVF_LOG(ERROR) << "add_vendor_ext() failed";
+            return false;
+        }
+        // swap back since vendor_ext will be swapped as part of the whole class swap
+        vendor_ext->class_swap();
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvType::TLV_WSC) {

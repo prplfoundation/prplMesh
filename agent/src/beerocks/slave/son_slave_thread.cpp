@@ -5301,6 +5301,23 @@ bool slave_thread::autoconfig_wsc_add_m1()
         hostap_params.iface_is_5ghz ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
     tlvWscM1->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_AP;
 
+    auto vendor_ext = tlvWscM1->create_vendor_ext();
+    if (!vendor_ext) {
+        LOG(ERROR) << "Failed to create the vendor_ext attribute";
+        return false;
+    }
+
+    if (!vendor_ext->alloc_vs_data(sizeof(WSC::sWscAttrVersion2))) {
+        LOG(ERROR) << "buffer allocation failed for version2 attribute";
+        return false;
+    }
+
+    WSC::sWscAttrVersion2 version2;
+    version2.struct_swap();
+    uint8_t *version2_buf = reinterpret_cast<uint8_t *>(&version2);
+    std::copy(version2_buf, version2_buf + sizeof(version2), vendor_ext->vs_data());
+    tlvWscM1->add_vendor_ext(vendor_ext);
+
     // encryption support - diffie-helman key-exchange
     dh = std::make_unique<mapf::encryption::diffie_hellman>();
     std::copy(dh->pubkey(), dh->pubkey() + dh->pubkey_length(), tlvWscM1->public_key_attr().data);

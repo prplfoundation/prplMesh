@@ -265,6 +265,18 @@ sWscAttrVersion2:
     _type: uint8_t
     _value: WSC_VERSION2
 
+sWscIeVersion2:
+  _type: struct
+  subelement_id:
+    _type: uint8_t
+    _value: 0x0
+  subelement_length:
+    _type: uint8_t
+    _value: 0x1
+  subelement_value:
+    _type: uint8_t
+    _value: WSC_VERSION2
+
 sWscAttrVendorExtMultiAp:
   _type: struct
   attribute_type:
@@ -394,4 +406,26 @@ cWscAttrEncryptedSettings:
     _length: [WSC_ENCRYPTED_SETTINGS_IV_LENGTH]
   encrypted_settings:
     _type: char
+    _length: []
+
+cWscVendorExtWfa:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_VENDOR_EXTENSION
+  length:
+    _type: uint16_t
+    _length_var: True
+  vendor_id_0:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_1
+  vendor_id_1:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_2
+  vendor_id_2:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_3
+  vs_data:
+    _type: uint8_t
     _length: []

@@ -89,4 +89,4 @@ tlvWscM1:
   device_password_id_attr: WSC::sWscAttrDevicePasswordID
   configuration_error_attr: WSC::sWscAttrConfigurationError
   os_version_attr: WSC::sWscAttrOsVersion
-  version2_attr: WSC::sWscAttrVersion2
+  vendor_ext: WSC::cWscVendorExtWfa
