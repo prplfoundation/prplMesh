@@ -60,7 +60,7 @@ protected:
     virtual void handle_event(int event_type, void *obj) {}
     virtual void handle_response(std::string slave_mac,
                                  beerocks_message::eActionOp_CONTROL action_op,
-                                 ieee1905_1::CmduMessageRx &cmdu_rx)
+                                 std::shared_ptr<message_com::beerocks_header> beerocks_header)
     {
     }
     virtual void handle_responses_timeout(
