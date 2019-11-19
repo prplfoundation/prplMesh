@@ -20,7 +20,6 @@
 #endif
 #include "db/db_algo.h"
 #include "db/network_map.h"
-#include "tasks/bml_wifi_credentials_update_task.h"
 #include "tasks/client_locating_task.h"
 #include "tasks/ire_network_optimization_task.h"
 #include "tasks/network_health_check_task.h"
@@ -3315,18 +3314,6 @@ bool master_thread::handle_cmdu_control_message(
             LOG(ERROR) << "addClass cACTION_CONTROL_ARP_QUERY_RESPONSE failed";
             return false;
         }
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PREPARE_RESPONSE: {
-        LOG(TRACE) << "ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PREPARE_RESPONSE: "
-                   << network_utils::mac_to_string(beerocks_header->radio_mac())
-                   << ", ID: " << beerocks_header->id();
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PRE_COMMIT_RESPONSE: {
-        LOG(TRACE) << "ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PRE_COMMIT_RESPONSE: "
-                   << network_utils::mac_to_string(beerocks_header->radio_mac())
-                   << ", ID: " << beerocks_header->id();
         break;
     }
 #ifdef BEEROCKS_RDKB

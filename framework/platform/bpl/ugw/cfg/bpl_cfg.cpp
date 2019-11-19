@@ -167,21 +167,6 @@ int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN
     return 0;
 }
 
-int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SSID_LEN],
-                                     const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])
-{
-    if (bpl_cfg_is_onboarding() > 0) {
-        cal_settings cal;
-
-        std::string ssid_str(ssid);
-        std::string pass_str(pass);
-        std::string sec_str(sec);
-        return (cal.beerocks_set_beerocks_credentials(radio_dir, ssid_str, pass_str, sec_str));
-    }
-
-    return (sl_beerocks_set_wifi_credentials(radio_dir, ssid, pass, sec) ? 0 : -1);
-}
-
 int bpl_cfg_set_onboarding(int enable)
 {
     cal_settings cal;

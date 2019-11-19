@@ -108,32 +108,6 @@ bool sl_beerocks_notify_error(int code, const char *data)
     return send_msg(xMsg);
 }
 
-bool sl_beerocks_set_wifi_credentials(const int radio_int, const char *ssid, const char *pass,
-                                      const char *sec)
-{
-    Msg_t xMsg;
-
-    // Initialize the message
-    init_msg(xMsg);
-
-    // Set the message opcode
-    xMsg.nMsgType = BPL_MSG_SET_WIFI_CRED;
-
-    // Fill the credentials structure
-    BPL_WIFI_CREDENTIALS sWifiCred = {0};
-
-    utils::copy_string(sWifiCred.ssid, ssid, BPL_SSID_LEN);
-    utils::copy_string(sWifiCred.pass, pass, BPL_PASS_LEN);
-    utils::copy_string(sWifiCred.sec, sec, BPL_SEC_LEN);
-
-    // Build the message
-    xMsg.pMsg     = &sWifiCred;
-    xMsg.nMsgSize = sizeof(sWifiCred);
-
-    // Send the message
-    return send_msg(xMsg);
-}
-
 bool sl_beerocks_set_wifi_iface_state(const char *iface, int op)
 {
     Msg_t xMsg;

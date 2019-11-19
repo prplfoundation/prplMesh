@@ -256,49 +256,6 @@ static bool fill_platform_settings(
     return true;
 }
 
-static bool set_beerocks_credentials(beerocks_message::sWifiCredentials &cred) //cmdu_overload
-{
-    std::string sec;
-
-    switch (cred.sec) {
-    case beerocks_message::eWiFiSec_None:
-        sec = BPL_WLAN_SEC_NONE_STR;
-        break;
-
-    case beerocks_message::eWiFiSec_WEP64:
-        sec = BPL_WLAN_SEC_WEP64_STR;
-        break;
-
-    case beerocks_message::eWiFiSec_WEP128:
-        sec = BPL_WLAN_SEC_WEP128_STR;
-        break;
-
-    case beerocks_message::eWiFiSec_WPA_PSK:
-        sec = BPL_WLAN_SEC_WPA_PSK_STR;
-        break;
-
-    case beerocks_message::eWiFiSec_WPA2_PSK:
-        sec = BPL_WLAN_SEC_WPA2_PSK_STR;
-        break;
-
-    case beerocks_message::eWiFiSec_WPA_WPA2_PSK:
-        sec = BPL_WLAN_SEC_WPA_WPA2_PSK_STR;
-        break;
-
-    default: {
-        LOG(WARNING) << "Unsupported Wi-Fi Security: " << int(cred.sec);
-        return (false);
-    }
-    }
-
-    if (bpl_cfg_set_beerocks_credentials(cred.radio_dir, cred.ssid, cred.pass, sec.c_str()) < 0) {
-        LOG(ERROR) << "Failed setting Wi-Fi credentials!";
-        return (false);
-    }
-
-    return (true);
-}
-
 static bool set_iface_state(std::string iface, eWifiIfaceOperation operation, bool is_ap_iface)
 {
     LOG(TRACE) << "set iface '" << iface << "' state, operation=" << operation << " start";
@@ -997,71 +954,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
             m_mapArpEntries[uiMAC] = pArpEntry;
         }
-
-    } break;
-
-    case beerocks_message::ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST: {
-        LOG(TRACE) << "ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST";
-
-        // Request message
-        auto request =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST failed";
-            return false;
-        }
-
-        // Perform the operation asynchronously
-        work_queue.enqueue<void>(
-            [this, sd](uint16_t header_id, beerocks_message::sWifiCredentials request) {
-                bool fError = false;
-
-                // Apply the SSID & Password locally
-                LOG(INFO) << "Updating SSID (" << std::string(request.ssid) << ")"
-                          << " and PASS ***";
-
-                if (set_beerocks_credentials(request) == false) {
-                    LOG(WARNING) << "Failed setting SSID/Pass";
-                    fError = true;
-                } else {
-                    LOG(DEBUG) << "Credentials updated successfully";
-                }
-
-                // Response message
-                size_t headroom = sizeof(beerocks::message::sUdsHeader);
-                size_t buffer_size =
-                    headroom +
-                    message_com::get_vs_cmdu_size_on_buffer<
-                        beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE>();
-                uint8_t tx_buffer[buffer_size];
-                ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom,
-                                                  sizeof(tx_buffer) - headroom);
-
-                auto response = message_com::create_vs_message<
-                    beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE>(
-                    cmdu_tx, header_id);
-
-                if (response == nullptr) {
-                    LOG(ERROR) << "Failed building "
-                                  "ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE message!";
-                    return;
-                }
-
-                // Set the operation result
-                response->result() = fError ? 0 : 1;
-
-                LOG(DEBUG)
-                    << "sending ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE to slave, sd="
-                    << sd;
-                if (!send_cmdu_safe(sd, cmdu_tx)) {
-                    LOG(ERROR) << "failed to send "
-                                  "ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE to slave, "
-                                  "sd="
-                               << sd;
-                }
-            },
-            beerocks_header->id(), request->params());
 
     } break;
 

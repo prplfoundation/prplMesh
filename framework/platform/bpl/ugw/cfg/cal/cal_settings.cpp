@@ -522,41 +522,6 @@ public:
         return 0;
     }
 
-    int beerocks_set_beerocks_credentials(const int radio_dir, std::string &ssid, std::string &pass,
-                                          std::string &sec)
-    {
-        cal_message msg(MOPT_SET, SOPT_OBJVALUE,
-                        OWN_WEB); // set OWN_WEB will make the platform to onboard
-        auto cal_obj1 = msg.add_set_object((radio_dir ? DEVICE_BEEROCKS_BACK_WIFI_OBJECT_NAME
-                                                      : DEVICE_BEEROCKS_FRONT_WIFI_OBJECT_NAME),
-                                           OBJOPT_MODIFY);
-        cal_obj1.add_set_param("SSID", ssid.c_str());
-        cal_obj1.add_set_param("ModeEnabled", sec.c_str());
-
-        if (sec == "None") {
-            cal_obj1.add_set_param("WEPKey", "");
-            cal_obj1.add_set_param("KeyPassphrase", "");
-            // WEP
-        } else if (sec == "WEP-64" || sec == "WEP-128") {
-            cal_obj1.add_set_param("WEPKey", pass.c_str());
-            // WPA2
-        } else {
-            cal_obj1.add_set_param("KeyPassphrase", pass.c_str());
-        }
-
-        auto cal_obj2 = msg.add_set_object(DEVICE_BEEROCKS_OBJECT_NAME, OBJOPT_MODIFY);
-        cal_obj2.add_set_param("Onboarding", "false");
-
-        int rv = m_cal->cal_setValue(msg);
-
-        if (rv < 0) {
-            MAPF_ERR("Failed setting wifi credentials: " << rv);
-            return -1;
-        }
-
-        return 0;
-    }
-
     int beerocks_get_administrator_credentials(std::string &pass)
     {
         cal_message msg(MOPT_GET, SOPT_OBJVALUE | GET_PWD_VAL);
@@ -683,14 +648,6 @@ int cal_settings::beerocks_get_wifi_credentials(int radio_dir, std::string &ssid
 {
     cal_query_wifi cal_query(m_cal);
     return (cal_query.beerocks_get_wifi_credentials(radio_dir, ssid, pass, sec));
-}
-
-int cal_settings::beerocks_set_beerocks_credentials(const int radio_dir, std::string ssid,
-                                                    std::string pass, std::string sec)
-{
-    cal_query_wifi cal_query(m_cal);
-    int ret = cal_query.beerocks_set_beerocks_credentials(radio_dir, ssid, pass, sec);
-    return ret;
 }
 
 int cal_settings::beerocks_set_onboarding(int enable)

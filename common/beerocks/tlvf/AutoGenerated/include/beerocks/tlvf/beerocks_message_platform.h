@@ -356,46 +356,6 @@ class cACTION_PLATFORM_WPS_ONBOARDING_REQUEST : public BaseClass
         int m_lock_order_counter__ = 0;
 };
 
-class cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST : public BaseClass
-{
-    public:
-        cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST();
-
-        static eActionOp_PLATFORM get_action_op(){
-            return (eActionOp_PLATFORM)(ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST);
-        }
-        sWifiCredentials& params();
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_PLATFORM* m_action_op = nullptr;
-        sWifiCredentials* m_params = nullptr;
-};
-
-class cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE : public BaseClass
-{
-    public:
-        cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE();
-
-        static eActionOp_PLATFORM get_action_op(){
-            return (eActionOp_PLATFORM)(ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE);
-        }
-        uint32_t& result();
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_PLATFORM* m_action_op = nullptr;
-        uint32_t* m_result = nullptr;
-};
-
 class cACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST : public BaseClass
 {
     public:

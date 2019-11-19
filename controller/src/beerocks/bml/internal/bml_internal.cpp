@@ -922,22 +922,6 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
             }
 
         } break;
-        case beerocks_message::ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE: {
-            auto response = cmdu_rx.addClass<
-                beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE>();
-            if (response == nullptr) {
-                LOG(ERROR)
-                    << "addClass ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE failed";
-                return BML_RET_OP_FAILED;
-            }
-            // Signal any waiting threads
-            if (m_prmWiFiCredentialsUpdate) {
-                m_prmWiFiCredentialsUpdate->set_value(response->result() == 1);
-                m_prmWiFiCredentialsUpdate = nullptr;
-            } else {
-                LOG(WARNING) << "Received CONFIG_UPDATE response, but no one is waiting...";
-            }
-        } break;
         case beerocks_message::ACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE: {
             auto response =
                 cmdu_rx
@@ -1514,158 +1498,88 @@ int bml_internal::set_wifi_credentials(const std::string ssid, const std::string
     m_prmWiFiCredentialsUpdate = &prmWiFiCredentialsUpdate;
     int iOpTimeout             = 60000; // Default timeout
 
-    // Check whether the crednetials should be applied locally in onboarding or forwarded to master
-    if (m_fOnboarding) {
-        auto config = message_com::create_vs_message<
-            beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST>(cmdu_tx);
+    // Send to master for credential update
+    LOG(TRACE) << "BML:: Config update prepareing message to send to master";
 
-        if (config == nullptr) {
-            LOG(ERROR)
-                << "Failed building ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST message!";
+    // Increase the operation timeout to 3 minutes (for global update)
+    iOpTimeout = 180000;
+
+    // Command supported only on local master
+    if (!is_local_master()) {
+        LOG(ERROR) << "Command supported only on local master!";
+        // Clear the promise holder
+        m_prmWiFiCredentialsUpdate = nullptr;
+        return (-BML_RET_OP_NOT_SUPPORTED);
+    }
+
+    // If the socket is not valid, attempt to re-establish the connection
+    if (m_sockMaster == nullptr) {
+        int iRet = connect_to_master();
+        if (iRet != BML_RET_OK) {
             // Clear the promise holder
             m_prmWiFiCredentialsUpdate = nullptr;
-            return (-BML_RET_OP_FAILED);
+            return iRet;
         }
+    }
 
-        string_utils::copy_string(config->params().ssid, ssid.c_str(),
-                                  message::WIFI_SSID_MAX_LENGTH);
-        string_utils::copy_string(config->params().pass, pass.c_str(),
-                                  message::WIFI_PASS_MAX_LENGTH);
+    auto config = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST>(cmdu_tx);
 
-        switch (sec) {
-        case BML_WLAN_SEC_NONE:
-            config->params().sec = beerocks_message::eWiFiSec_None;
-            break;
+    if (config == nullptr) {
+        LOG(ERROR) << "Failed building ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST message!";
+        // Clear the promise holder
+        m_prmWiFiCredentialsUpdate = nullptr;
+        return (-BML_RET_OP_FAILED);
+    }
 
-        case BML_WLAN_SEC_WEP64:
-            config->params().sec = beerocks_message::eWiFiSec_WEP64;
-            break;
+    string_utils::copy_string(config->params().ssid, ssid.c_str(), message::WIFI_SSID_MAX_LENGTH);
+    string_utils::copy_string(config->params().pass, pass.c_str(), message::WIFI_PASS_MAX_LENGTH);
 
-        case BML_WLAN_SEC_WEP128:
-            config->params().sec = beerocks_message::eWiFiSec_WEP128;
-            break;
+    switch (sec) {
+    case BML_WLAN_SEC_NONE:
+        config->params().sec = beerocks_message::eWiFiSec_None;
+        break;
 
-        case BML_WLAN_SEC_WPA_PSK:
-            config->params().sec = beerocks_message::eWiFiSec_WPA_PSK;
-            break;
+    case BML_WLAN_SEC_WEP64:
+        config->params().sec = beerocks_message::eWiFiSec_WEP64;
+        break;
 
-        case BML_WLAN_SEC_WPA2_PSK:
-            config->params().sec = beerocks_message::eWiFiSec_WPA2_PSK;
-            break;
+    case BML_WLAN_SEC_WEP128:
+        config->params().sec = beerocks_message::eWiFiSec_WEP128;
+        break;
 
-        case BML_WLAN_SEC_WPA_WPA2_PSK:
-            config->params().sec = beerocks_message::eWiFiSec_WPA_WPA2_PSK;
-            break;
+    case BML_WLAN_SEC_WPA_PSK:
+        config->params().sec = beerocks_message::eWiFiSec_WPA_PSK;
+        break;
 
-        default: {
-            LOG(WARNING) << "Unsupported Wi-Fi security: " << sec;
-            // Clear the promise holder
-            m_prmWiFiCredentialsUpdate = nullptr;
-            return (false);
-        }
-        }
+    case BML_WLAN_SEC_WPA2_PSK:
+        config->params().sec = beerocks_message::eWiFiSec_WPA2_PSK;
+        break;
 
-        // Set the rest of the message values
-        config->params().vap_id = uint8_t(vap_id);
-        config->params().force  = (force) ? 1 : 0;
+    case BML_WLAN_SEC_WPA_WPA2_PSK:
+        config->params().sec = beerocks_message::eWiFiSec_WPA_WPA2_PSK;
+        break;
 
-        // Build and send the message
+    default: {
+        LOG(WARNING) << "Unsupported Wi-Fi security: " << sec;
+        // Clear the promise holder
+        m_prmWiFiCredentialsUpdate = nullptr;
+        return (false);
+    }
+    }
 
-        if (!message_com::send_cmdu(m_sockPlatform, cmdu_tx)) {
-            LOG(ERROR) << "Failed sending configuration update message!";
-            // Clear the promise holder
-            m_prmWiFiCredentialsUpdate = nullptr;
-            return (-BML_RET_OP_FAILED);
-        }
+    // Set the rest of the message values
+    config->params().vap_id = uint8_t(vap_id);
+    config->params().force  = (force) ? 1 : 0;
 
-        // Forward credentials update request to master
-    } else {
+    // Build and send the message
+    LOG(TRACE) << "Sending config update message to master";
 
-        // Send to master for credential update
-        LOG(TRACE) << "BML:: Config update prepareing message to send to master";
-
-        // Increase the operation timeout to 3 minutes (for global update)
-        iOpTimeout = 180000;
-
-        // Command supported only on local master
-        if (!is_local_master()) {
-            LOG(ERROR) << "Command supported only on local master!";
-            // Clear the promise holder
-            m_prmWiFiCredentialsUpdate = nullptr;
-            return (-BML_RET_OP_NOT_SUPPORTED);
-        }
-
-        // If the socket is not valid, attempt to re-establish the connection
-        if (m_sockMaster == nullptr) {
-            int iRet = connect_to_master();
-            if (iRet != BML_RET_OK) {
-                // Clear the promise holder
-                m_prmWiFiCredentialsUpdate = nullptr;
-                return iRet;
-            }
-        }
-
-        auto config = message_com::create_vs_message<
-            beerocks_message::cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST>(cmdu_tx);
-
-        if (config == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST message!";
-            // Clear the promise holder
-            m_prmWiFiCredentialsUpdate = nullptr;
-            return (-BML_RET_OP_FAILED);
-        }
-
-        string_utils::copy_string(config->params().ssid, ssid.c_str(),
-                                  message::WIFI_SSID_MAX_LENGTH);
-        string_utils::copy_string(config->params().pass, pass.c_str(),
-                                  message::WIFI_PASS_MAX_LENGTH);
-
-        switch (sec) {
-        case BML_WLAN_SEC_NONE:
-            config->params().sec = beerocks_message::eWiFiSec_None;
-            break;
-
-        case BML_WLAN_SEC_WEP64:
-            config->params().sec = beerocks_message::eWiFiSec_WEP64;
-            break;
-
-        case BML_WLAN_SEC_WEP128:
-            config->params().sec = beerocks_message::eWiFiSec_WEP128;
-            break;
-
-        case BML_WLAN_SEC_WPA_PSK:
-            config->params().sec = beerocks_message::eWiFiSec_WPA_PSK;
-            break;
-
-        case BML_WLAN_SEC_WPA2_PSK:
-            config->params().sec = beerocks_message::eWiFiSec_WPA2_PSK;
-            break;
-
-        case BML_WLAN_SEC_WPA_WPA2_PSK:
-            config->params().sec = beerocks_message::eWiFiSec_WPA_WPA2_PSK;
-            break;
-
-        default: {
-            LOG(WARNING) << "Unsupported Wi-Fi security: " << sec;
-            // Clear the promise holder
-            m_prmWiFiCredentialsUpdate = nullptr;
-            return (false);
-        }
-        }
-
-        // Set the rest of the message values
-        config->params().vap_id = uint8_t(vap_id);
-        config->params().force  = (force) ? 1 : 0;
-
-        // Build and send the message
-        LOG(TRACE) << "Sending config update message to master";
-
-        if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
-            LOG(ERROR) << "Failed sending configuration update message!";
-            // Clear the promise holder
-            m_prmWiFiCredentialsUpdate = nullptr;
-            return (-BML_RET_OP_FAILED);
-        }
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending configuration update message!";
+        // Clear the promise holder
+        m_prmWiFiCredentialsUpdate = nullptr;
+        return (-BML_RET_OP_FAILED);
     }
 
     int iRet = BML_RET_OK;
