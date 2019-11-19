@@ -29,7 +29,7 @@ protected:
     virtual void work() override;
     virtual void handle_response(std::string slave_mac,
                                  beerocks_message::eActionOp_CONTROL action_op,
-                                 ieee1905_1::CmduMessageRx &cmdu_rx) override;
+                                 std::shared_ptr<message_com::beerocks_header> beerocks_header) override;
 
 private:
     db &database;
