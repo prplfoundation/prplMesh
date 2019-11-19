@@ -83,30 +83,6 @@ bool CmduMessageTx::finalize(bool swap_needed)
     if (!m_cmdu_header)
         return false; 
 
-    // Update vendor specific length which is seperated to 3 classes
-    for (auto class_it = m_class_vector.begin(); class_it != m_class_vector.end(); class_it++) {
-        if(!(*class_it)->isPostInitSucceeded()){
-            TLVF_LOG(ERROR) << "TLV post init failed";
-            return false;
-        }
-        // Type is the first byte in the tlv buffer
-        uint8_t tlv_type = *(*class_it)->getStartBuffPtr();
-        if (tlv_type == uint8_t(eTlvType::TLV_VENDOR_SPECIFIC)) {
-            uint16_t* tlv_length = reinterpret_cast<uint16_t *>
-                ((class_it->get())->getStartBuffPtr() + sizeof(uint8_t));
-            // tlv vendor specific length already include OUI and beerocks header length
-            // need to add only beerocks message length.
-            // Classes order: +0 = tlvVendorSpecific, +1 = beerocks_header, +2 = beerocks_message
-            if (std::next(class_it, 1) == m_class_vector.end() ||
-                std::next(class_it, 2)  == m_class_vector.end()) {
-                TLVF_LOG(ERROR) << "vendor specific TLV has not been added correctly"; 
-                return false;
-            }
-            *tlv_length += (std::next(class_it, 2)->get())->getLen();
-            class_it += 2;
-        }
-    }
-
     if (!addClass<tlvEndOfMessage>())
         return false;
 
