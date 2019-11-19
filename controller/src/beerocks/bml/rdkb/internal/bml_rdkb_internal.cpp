@@ -364,7 +364,7 @@ bool bml_rdkb_internal::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         return false;
     }
 
-    int ret = process_cmdu_header(beerocks_header, cmdu_rx);
+    int ret = process_cmdu_header(beerocks_header->m_header, beerocks_header->m_cmdu_rx);
     if (ret == BML_RET_OP_FAILED) {
         LOG(ERROR) << "bml_rdkb_internal::process_cmdu_header failed !";
     } else if (ret == BML_RET_OP_NOT_SUPPORTED) {
@@ -488,7 +488,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
             }
         } break;
         default: {
-            if ((ret = bml_internal::process_cmdu_header(beerocks_header, cmdu_rx)) != BML_RET_OK) {
+            if ((ret = bml_internal::process_cmdu_header(beerocks_header->m_header, beerocks_header->m_cmdu_rx)) != BML_RET_OK) {
                 LOG(WARNING) << "unhandled extended cmdu header action bml type 0x" << std::hex
                              << action_op;
                 return ret;
@@ -496,7 +496,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
         }
         }
     } else {
-        if ((ret = bml_internal::process_cmdu_header(beerocks_header, cmdu_rx)) != BML_RET_OK) {
+        if ((ret = bml_internal::process_cmdu_header(beerocks_header->m_header, beerocks_header->m_cmdu_rx)) != BML_RET_OK) {
             LOG(WARNING) << "unhandled extended cmdu header action type 0x" << std::hex << action;
             return ret;
         }

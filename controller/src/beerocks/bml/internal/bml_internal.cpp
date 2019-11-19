@@ -501,7 +501,7 @@ bool bml_internal::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         return false;
     }
 
-    if (process_cmdu_header(beerocks_header, cmdu_rx) != BML_RET_OK) {
+    if (process_cmdu_header(beerocks_header->m_header, beerocks_header->m_cmdu_rx) != BML_RET_OK) {
         return false;
     }
 

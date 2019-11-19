@@ -201,15 +201,15 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
         switch (beerocks_header->action()) {
         case beerocks_message::ACTION_CLI: {
-            son_management::handle_cli_message(sd, beerocks_header, cmdu_rx, cmdu_tx, database,
+            son_management::handle_cli_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx, cmdu_tx, database,
                                                tasks);
         } break;
         case beerocks_message::ACTION_BML: {
-            son_management::handle_bml_message(sd, beerocks_header, cmdu_rx, cmdu_tx, database,
+            son_management::handle_bml_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx, cmdu_tx, database,
                                                tasks);
         } break;
         case beerocks_message::ACTION_CONTROL: {
-            handle_cmdu_control_message(sd, beerocks_header, cmdu_rx);
+            handle_cmdu_control_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
         } break;
         default: {
             LOG(ERROR) << "Unknown message, action: " << int(beerocks_header->action());

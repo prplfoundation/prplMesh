@@ -52,7 +52,27 @@ public:
      * should this be removed and replaced by parse_intel_vs_message() ?
      */
 
-    static std::shared_ptr<beerocks_message::cACTION_HEADER>
+    class beerocks_header {
+    public:
+        beerocks_header(ieee1905_1::CmduMessageRx &cmdu_rx,
+                        std::shared_ptr<beerocks_message::cACTION_HEADER> header)
+            : m_cmdu_rx(cmdu_rx), m_header(header)
+        {}
+        beerocks_message::eAction action() { return m_header->action(); }
+        uint8_t action_op() { return m_header->action_op(); };
+        template <class T> std::shared_ptr<T> addClass()
+        {
+            return m_cmdu_rx.addClass<T>();
+        }
+        template <class T> std::shared_ptr<T> get_vs_class()
+        {
+            return m_cmdu_rx.getClass<T>(2);
+        }
+        ieee1905_1::CmduMessageRx &m_cmdu_rx;
+        std::shared_ptr<beerocks_message::cACTION_HEADER> m_header;
+    };
+
+    static std::shared_ptr<beerocks_header>
     parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx);
 
     template <class T> static std::shared_ptr<T> get_vs_class(ieee1905_1::CmduMessage &cmdu)
