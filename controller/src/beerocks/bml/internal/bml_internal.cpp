@@ -530,7 +530,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         // Network Map Response
         case beerocks_message::ACTION_BML_NW_MAP_RESPONSE: {
-            auto response = cmdu_rx.addClass<beerocks_message::cACTION_BML_NW_MAP_RESPONSE>();
+            auto response = beerocks_header->addClass<beerocks_message::cACTION_BML_NW_MAP_RESPONSE>();
             uint32_t num_of_nodes = response->node_num();
             char *firstNode       = (num_of_nodes > 0) ? response->buffer(0) : nullptr;
 
@@ -540,7 +540,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         // Network map update
         case beerocks_message::ACTION_BML_NW_MAP_UPDATE: {
-            auto response         = cmdu_rx.addClass<beerocks_message::cACTION_BML_NW_MAP_UPDATE>();
+            auto response         = beerocks_header->addClass<beerocks_message::cACTION_BML_NW_MAP_UPDATE>();
             uint32_t num_of_nodes = response->node_num();
 
             auto firstNode = response->buffer(0);
@@ -550,7 +550,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         // statistics update
         case beerocks_message::ACTION_BML_STATS_UPDATE: {
-            auto response         = cmdu_rx.addClass<beerocks_message::cACTION_BML_STATS_UPDATE>();
+            auto response         = beerocks_header->addClass<beerocks_message::cACTION_BML_STATS_UPDATE>();
             uint32_t num_of_nodes = response->num_of_stats_bulks();
 
             auto firstNode = response->buffer(0);
@@ -559,7 +559,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         // event update
         case beerocks_message::ACTION_BML_EVENTS_UPDATE: {
-            auto response = cmdu_rx.addClass<beerocks_message::cACTION_BML_EVENTS_UPDATE>();
+            auto response = beerocks_header->addClass<beerocks_message::cACTION_BML_EVENTS_UPDATE>();
             handle_event_update((uint8_t *)response->buffer(0));
         } break;
         case beerocks_message::ACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE: {
@@ -571,7 +571,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -593,7 +593,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_BML_GET_CLIENT_ROAMING_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_CLIENT_ROAMING_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_GET_CLIENT_ROAMING_RESPONSE>();
 
             // Signal any waiting threads
             if (!wake_up(beerocks_message::ACTION_BML_GET_CLIENT_ROAMING_REQUEST,
@@ -654,7 +654,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_BML_GET_IRE_ROAMING_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_IRE_ROAMING_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_GET_IRE_ROAMING_RESPONSE>();
 
             //Signal any waiting threads
             if (!wake_up(beerocks_message::ACTION_BML_GET_IRE_ROAMING_REQUEST,
@@ -672,7 +672,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_BML_GET_LOAD_BALANCER_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_LOAD_BALANCER_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_GET_LOAD_BALANCER_RESPONSE>();
 
             //Signal any waiting threads
             if (!wake_up(beerocks_message::ACTION_BML_GET_LOAD_BALANCER_REQUEST,
@@ -690,7 +690,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE>();
 
             //Signal any waiting threads
             if (!wake_up(beerocks_message::ACTION_BML_GET_SERVICE_FAIRNESS_REQUEST,
@@ -708,7 +708,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_BML_GET_DFS_REENTRY_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_DFS_REENTRY_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_GET_DFS_REENTRY_RESPONSE>();
 
             //Signal any waiting threads
             if (!wake_up(beerocks_message::ACTION_BML_GET_DFS_REENTRY_REQUEST,
@@ -726,7 +726,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_BML_GET_CERTIFICATION_MODE_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE>();
 
             //Signal any waiting threads
             if (!wake_up(beerocks_message::ACTION_BML_GET_CERTIFICATION_MODE_REQUEST,
@@ -737,7 +737,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE>();
 
             // Signal any waiting threads
             if (m_prmWiFiCredentialsUpdate) {
@@ -757,7 +757,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE>();
             //Signal any waiting threads
             if (!wake_up(beerocks_message::ACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST,
                          (response->error_code() == 0))) {
@@ -767,7 +767,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE>();
             // Signal any waiting threads
             if (m_prmRestrictedChannelsGet) {
                 if (m_Restricted_channels != nullptr) {
@@ -813,7 +813,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
             }
 
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE>();
             if (response == nullptr) {
                 LOG(ERROR) << "addClass cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -886,7 +886,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         // Onboard Query Response
         case beerocks_message::ACTION_PLATFORM_ONBOARD_QUERY_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE>();
             if (response == nullptr) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -905,7 +905,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE>();
             if (response == nullptr) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -968,7 +968,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
         } break;
         case beerocks_message::ACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE>();
             if (response == nullptr) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE failed";
                 return BML_RET_OP_FAILED;

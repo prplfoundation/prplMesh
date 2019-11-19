@@ -386,7 +386,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
         // Process BML messages
         switch (action_op) {
         case beerocks_message::ACTION_BML_STEERING_EVENTS_UPDATE: {
-            auto response = cmdu_rx.addClass<beerocks_message::cACTION_BML_EVENTS_UPDATE>();
+            auto response = beerocks_header->addClass<beerocks_message::cACTION_BML_EVENTS_UPDATE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_EVENTS_UPDATE failed";
                 return BML_RET_OP_FAILED;
@@ -402,7 +402,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
         } break;
         case beerocks_message::ACTION_BML_STEERING_SET_GROUP_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_SET_GROUP_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_STEERING_SET_GROUP_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_SET_GROUP_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -419,7 +419,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
         } break;
         case beerocks_message::ACTION_BML_STEERING_CLIENT_SET_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_SET_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_SET_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_SET_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -472,7 +472,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
         } break;
         case beerocks_message::ACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE failed";
                 return BML_RET_OP_FAILED;
