@@ -1143,14 +1143,13 @@ void optimal_path_task::handle_responses_timeout(
 
 void optimal_path_task::handle_response(std::string mac,
                                         beerocks_message::eActionOp_CONTROL action_op,
-                                        ieee1905_1::CmduMessageRx &cmdu_rx)
+                                        std::shared_ptr<message_com::beerocks_header> beerocks_header)
 {
 
     switch (action_op) {
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION: {
-        auto notification = message_com::get_vs_class<
-            beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION>(
-            cmdu_rx);
+        auto notification = beerocks_header->get_vs_class<
+            beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION>();
 
         if (!notification) {
             TASK_LOG(ERROR) << "getClass failed for "
@@ -1187,8 +1186,7 @@ void optimal_path_task::handle_response(std::string mac,
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE: {
         auto response =
-            message_com::get_vs_class<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>(
-                cmdu_rx);
+            beerocks_header->get_vs_class<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>();
 
         if (!response) {
             TASK_LOG(ERROR) << "getClass failed for ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE";

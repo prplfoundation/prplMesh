@@ -82,7 +82,7 @@ void statistics_polling_task::work()
 
 void statistics_polling_task::handle_response(std::string mac,
                                               beerocks_message::eActionOp_CONTROL action_op,
-                                              ieee1905_1::CmduMessageRx &cmdu_rx)
+                                              std::shared_ptr<message_com::beerocks_header> beerocks_header)
 {
     valid_hostaps.insert(mac);
 }

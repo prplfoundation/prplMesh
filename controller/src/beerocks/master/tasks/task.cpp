@@ -32,7 +32,7 @@ void task::response_received(std::string mac, beerocks_message::eActionOp_CONTRO
     for (auto it = range.first; it != range.second;) {
         if ((it->second == action_op) && (it->first == mac)) {
             it = pending_macs.erase(it);
-            handle_response(mac, action_op, beerocks_header->m_cmdu_rx);
+            handle_response(mac, action_op, beerocks_header);
             return;
         } else {
             it++;
@@ -40,7 +40,7 @@ void task::response_received(std::string mac, beerocks_message::eActionOp_CONTRO
     }
 
     // Handle the response even if we are not expecting it
-    handle_response(mac, action_op, beerocks_header->m_cmdu_rx);
+    handle_response(mac, action_op, beerocks_header);
 }
 
 void task::event_received(int event_type, void *obj)
