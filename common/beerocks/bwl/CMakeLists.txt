@@ -160,7 +160,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_ST
 target_link_libraries(${PROJECT_NAME} bcl elpp ${BWL_LIBS})
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-        $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
         ${PLATFORM_INCLUDE_DIR}
     PUBLIC
         $<INSTALL_INTERFACE:include>
