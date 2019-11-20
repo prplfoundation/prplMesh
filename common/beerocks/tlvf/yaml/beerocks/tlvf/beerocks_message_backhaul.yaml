@@ -59,6 +59,7 @@ cACTION_BACKHAUL_ENABLE:
   wire_iface_type: uint8_t  
   wireless_iface_type: uint8_t  
   wired_backhaul: uint8_t  
+  mem_only_psk: uint8_t
   backhaul_preferred_radio_band: uint8_t
 
 cACTION_BACKHAUL_CONNECTED_NOTIFICATION:
