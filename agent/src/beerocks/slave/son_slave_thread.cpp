@@ -3251,59 +3251,59 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     case STATE_CONNECT_TO_BACKHAUL_MANAGER: {
         if (backhaul_manager_socket == nullptr) {
             LOG(DEBUG) << "create backhaul_manager_socket";
-        backhaul_manager_socket = new SocketClient(backhaul_manager_uds);
-        std::string err         = backhaul_manager_socket->getError();
-        if (!err.empty()) {
-            LOG(ERROR) << "backhaul_manager_socket: " << err;
+            backhaul_manager_socket = new SocketClient(backhaul_manager_uds);
+            std::string err         = backhaul_manager_socket->getError();
+            if (!err.empty()) {
+                LOG(ERROR) << "backhaul_manager_socket: " << err;
                 backhaul_manager_stop();
-            platform_notify_error(BPL_ERR_SLAVE_CONNECTING_TO_BACKHAUL_MANAGER,
-                                  "iface=" + config.backhaul_wireless_iface);
-            stop_on_failure_attempts--;
-            slave_reset();
+                platform_notify_error(BPL_ERR_SLAVE_CONNECTING_TO_BACKHAUL_MANAGER,
+                                      "iface=" + config.backhaul_wireless_iface);
+                stop_on_failure_attempts--;
+                slave_reset();
                 break;
-        } else {
-            add_socket(backhaul_manager_socket);
+            } else {
+                add_socket(backhaul_manager_socket);
             }
         } else {
             LOG(DEBUG) << "using existing backhaul_manager_socket=0x"
                        << intptr_t(backhaul_manager_socket);
         }
 
-            // CMDU Message
-            auto request =
-                message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_REGISTER_REQUEST>(
-                    cmdu_tx);
+        // CMDU Message
+        auto request =
+            message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_REGISTER_REQUEST>(
+                cmdu_tx);
 
-            if (request == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                break;
-            }
+        if (request == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            break;
+        }
 
-            if (platform_settings.local_gw || config.backhaul_wireless_iface.empty()) {
+        if (platform_settings.local_gw || config.backhaul_wireless_iface.empty()) {
             memset(request->sta_iface(message::IFACE_NAME_LENGTH), 0, message::IFACE_NAME_LENGTH);
-            } else {
-                string_utils::copy_string(request->sta_iface(message::IFACE_NAME_LENGTH),
-                                          config.backhaul_wireless_iface.c_str(),
-                                          message::IFACE_NAME_LENGTH);
-            }
-            string_utils::copy_string(request->hostap_iface(message::IFACE_NAME_LENGTH),
-                                      config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
+        } else {
+            string_utils::copy_string(request->sta_iface(message::IFACE_NAME_LENGTH),
+                                      config.backhaul_wireless_iface.c_str(),
+                                      message::IFACE_NAME_LENGTH);
+        }
+        string_utils::copy_string(request->hostap_iface(message::IFACE_NAME_LENGTH),
+                                  config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
 
-            request->local_master()         = platform_settings.local_master;
-            request->local_gw()             = platform_settings.local_gw;
-            request->sta_iface_filter_low() = config.backhaul_wireless_iface_filter_low;
-            request->onboarding()           = platform_settings.onboarding;
-            LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST local_master="
-                      << int(platform_settings.local_master)
-                      << " local_gw=" << int(platform_settings.local_gw)
-                      << " hostap_iface=" << request->hostap_iface(message::IFACE_NAME_LENGTH)
-                      << " sta_iface=" << request->sta_iface(message::IFACE_NAME_LENGTH)
-                      << " onboarding=" << int(request->onboarding());
+        request->local_master()         = platform_settings.local_master;
+        request->local_gw()             = platform_settings.local_gw;
+        request->sta_iface_filter_low() = config.backhaul_wireless_iface_filter_low;
+        request->onboarding()           = platform_settings.onboarding;
+        LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST local_master="
+                  << int(platform_settings.local_master)
+                  << " local_gw=" << int(platform_settings.local_gw)
+                  << " hostap_iface=" << request->hostap_iface(message::IFACE_NAME_LENGTH)
+                  << " sta_iface=" << request->sta_iface(message::IFACE_NAME_LENGTH)
+                  << " onboarding=" << int(request->onboarding());
 
-            message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
-            LOG(TRACE) << "send ACTION_BACKHAUL_REGISTER_REQUEST";
-            LOG(TRACE) << "goto STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE";
-            slave_state = STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE;
+        message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
+        LOG(TRACE) << "send ACTION_BACKHAUL_REGISTER_REQUEST";
+        LOG(TRACE) << "goto STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE";
+        slave_state = STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE;
 
         break;
     }
@@ -3583,6 +3583,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                       platform_settings.back_pass, message::WIFI_PASS_MAX_LENGTH);
             bh_enable->security_type() = static_cast<uint32_t>(
                 platform_to_bwl_security(platform_settings.back_security_type));
+            bh_enable->mem_only_psk() = platform_settings.mem_only_psk;
             bh_enable->backhaul_preferred_radio_band() =
                 platform_settings.backhaul_preferred_radio_band;
 
