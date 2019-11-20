@@ -745,6 +745,7 @@ private:
     * Map is Used in TYPE_GW/TYPE_IRE nodes.
     * Map created empty in all other nodes.
     */
+    //TODO: This map should be moved to the agent nodes instead of being a separate map.
     std::unordered_map<sMacAddr, std::unordered_map<sMacAddr, son::node::link_metrics_data>>
         m_link_metric_data;
 
@@ -753,6 +754,7 @@ private:
     * Map is Used in TYPE_GW/TYPE_IRE nodes.
     * Map created empty in all other nodes.
     */
+    //TODO:  This map should be moved to the BSS nodes (which currently don't exist) instead of being a separate map.
     std::unordered_map<sMacAddr, son::node::ap_metrics_data> m_ap_metric_data;
 
     // certification
