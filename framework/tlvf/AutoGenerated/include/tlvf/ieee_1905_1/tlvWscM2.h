@@ -75,6 +75,13 @@ class tlvWscM2 : public BaseClass
         bool set_serial_number(const char buffer[], size_t size);
         bool alloc_serial_number(size_t count = 1);
         WSC::sWscAttrPrimaryDeviceType& primary_device_type_attr();
+        WSC::eWscAttributes& device_name_type();
+        uint16_t& device_name_length();
+        std::string device_name_str();
+        char* device_name(size_t length = 0);
+        bool set_device_name(const std::string& str);
+        bool set_device_name(const char buffer[], size_t size);
+        bool alloc_device_name(size_t count = 1);
         WSC::sWscAttrRfBands& rf_bands_attr();
         WSC::sWscAttrAssociationState& association_state_attr();
         WSC::sWscAttrConfigurationError& configuration_error_attr();
@@ -120,6 +127,10 @@ class tlvWscM2 : public BaseClass
         char* m_serial_number = nullptr;
         size_t m_serial_number_idx__ = 0;
         WSC::sWscAttrPrimaryDeviceType* m_primary_device_type_attr = nullptr;
+        WSC::eWscAttributes* m_device_name_type = nullptr;
+        uint16_t* m_device_name_length = nullptr;
+        char* m_device_name = nullptr;
+        size_t m_device_name_idx__ = 0;
         WSC::sWscAttrRfBands* m_rf_bands_attr = nullptr;
         WSC::sWscAttrAssociationState* m_association_state_attr = nullptr;
         WSC::sWscAttrConfigurationError* m_configuration_error_attr = nullptr;

@@ -71,6 +71,17 @@ tlvWscM2:
     _length: [ serial_number_length ]
 
   primary_device_type_attr: WSC::sWscAttrPrimaryDeviceType
+
+  device_name_type:
+    _type: WSC::eWscAttributes
+    _value: WSC::ATTR_DEV_NAME
+  device_name_length:
+    _type: uint16_t
+    _length_var: True
+  device_name:
+    _type: char
+    _length: [ device_name_length ]
+
   rf_bands_attr: WSC::sWscAttrRfBands
   association_state_attr: WSC::sWscAttrAssociationState
   configuration_error_attr: WSC::sWscAttrConfigurationError

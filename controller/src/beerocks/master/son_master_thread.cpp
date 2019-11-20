@@ -624,6 +624,8 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
         return false;
     if (!tlvWscM2->set_serial_number("prpl12345"))
         return false;
+    if (!tlvWscM2->set_device_name("prplMesh-controller"))
+        return false;
     tlvWscM2->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
 
     // TODO Maybe the band should be taken from bss_info_conf.operating_class instead?
