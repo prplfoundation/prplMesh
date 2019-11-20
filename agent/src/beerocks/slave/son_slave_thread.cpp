@@ -2264,7 +2264,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
         auto notification_in =
             cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION>();
         if (notification_in == nullptr) {
-            LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION failed";
+            LOG(ERROR) << "addClass ACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION failed";
             return false;
         }
         auto notification_out = message_com::create_vs_message<
@@ -2893,7 +2893,7 @@ bool slave_thread::handle_cmdu_monitor_message(
         break;
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE: {
-        LOG(TRACE) << "ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE id=" << beerocks_header->id();
+        LOG(TRACE) << "ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE id=" << int(beerocks_header->id());
         auto response_in =
             cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>();
         if (response_in == nullptr) {
@@ -3249,23 +3249,25 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         break;
     }
     case STATE_CONNECT_TO_BACKHAUL_MANAGER: {
-        if (backhaul_manager_socket) {
-            remove_socket(backhaul_manager_socket);
-            delete backhaul_manager_socket;
-            backhaul_manager_socket = nullptr;
-        }
+        if (backhaul_manager_socket == nullptr) {
+            LOG(DEBUG) << "create backhaul_manager_socket";
         backhaul_manager_socket = new SocketClient(backhaul_manager_uds);
         std::string err         = backhaul_manager_socket->getError();
         if (!err.empty()) {
-            delete backhaul_manager_socket;
-            backhaul_manager_socket = nullptr;
             LOG(ERROR) << "backhaul_manager_socket: " << err;
+                backhaul_manager_stop();
             platform_notify_error(BPL_ERR_SLAVE_CONNECTING_TO_BACKHAUL_MANAGER,
                                   "iface=" + config.backhaul_wireless_iface);
             stop_on_failure_attempts--;
             slave_reset();
+                break;
         } else {
             add_socket(backhaul_manager_socket);
+            }
+        } else {
+            LOG(DEBUG) << "using existing backhaul_manager_socket=0x"
+                       << intptr_t(backhaul_manager_socket);
+        }
 
             // CMDU Message
             auto request =
@@ -3278,8 +3280,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             }
 
             if (platform_settings.local_gw || config.backhaul_wireless_iface.empty()) {
-                memset(request->sta_iface(message::IFACE_NAME_LENGTH), 0,
-                       message::IFACE_NAME_LENGTH);
+            memset(request->sta_iface(message::IFACE_NAME_LENGTH), 0, message::IFACE_NAME_LENGTH);
             } else {
                 string_utils::copy_string(request->sta_iface(message::IFACE_NAME_LENGTH),
                                           config.backhaul_wireless_iface.c_str(),
@@ -3303,7 +3304,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             LOG(TRACE) << "send ACTION_BACKHAUL_REGISTER_REQUEST";
             LOG(TRACE) << "goto STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE";
             slave_state = STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE;
-        }
+
         break;
     }
     case STATE_WAIT_RETRY_CONNECT_TO_BACKHAUL_MANAGER: {
@@ -3999,6 +4000,7 @@ void slave_thread::ap_manager_stop()
 void slave_thread::backhaul_manager_stop()
 {
     if (backhaul_manager_socket) {
+        LOG(DEBUG) << "removing backhaul_manager_socket";
         remove_socket(backhaul_manager_socket);
         delete backhaul_manager_socket;
     }
