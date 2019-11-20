@@ -10,7 +10,7 @@
 #define _BWL_BASE_WLAN_HAL_FAPI_H_
 
 #include "fapi_attach_fsm.h"
-#include <base_wlan_hal.h>
+#include <bwl/base_wlan_hal.h>
 
 #include <chrono>
 #include <memory>

@@ -10,7 +10,7 @@
 #define _BWL_MON_WLAN_HAL_NL80211_H_
 
 #include "base_wlan_hal_nl80211.h"
-#include <mon_wlan_hal.h>
+#include <bwl/mon_wlan_hal.h>
 
 namespace bwl {
 namespace nl80211 {

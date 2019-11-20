@@ -10,7 +10,7 @@
 #define _BWL_AP_WLAN_HAL_BRCM_H_
 
 #include "base_wlan_hal_brcm.h"
-#include <ap_wlan_hal.h>
+#include <bwl/ap_wlan_hal.h>
 
 namespace bwl {
 namespace brcm {
