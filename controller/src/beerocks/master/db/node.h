@@ -212,10 +212,10 @@ public:
         sMacAddr bssid;
         uint8_t channel_utilization;
         uint16_t number_of_stas_currently_associated;
-        uint8_t estimated_service_info_field_ac_be[3];
-        uint8_t estimated_service_info_field_ac_bk[3];
-        uint8_t estimated_service_info_field_ac_vo[3];
-        uint8_t estimated_service_info_field_ac_vi[3];
+        std::vector<uint8_t> estimated_service_info_fields;
+        bool include_ac_vo = false;
+        bool include_ac_bk = false;
+        bool include_ac_vi = false;
 
         bool add_ap_metric_data(std::shared_ptr<wfa_map::tlvApMetric> ApMetricData);
     };
