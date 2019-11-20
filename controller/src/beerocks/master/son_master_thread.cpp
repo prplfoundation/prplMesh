@@ -1408,15 +1408,22 @@ bool master_thread::construct_combined_infra_metric()
         ap_metrics_tlv->channel_utilization() = metric_data_per_agent.channel_utilization;
         ap_metrics_tlv->number_of_stas_currently_associated() =
             metric_data_per_agent.number_of_stas_currently_associated;
-        for (int i = 0; i < 3; ++i) {
-            *ap_metrics_tlv->estimated_service_info_field_ac_be(i) =
-                metric_data_per_agent.estimated_service_info_field_ac_be[i];
-            *ap_metrics_tlv->estimated_service_info_field_ac_bk(i) =
-                metric_data_per_agent.estimated_service_info_field_ac_bk[i];
-            *ap_metrics_tlv->estimated_service_info_field_ac_vo(i) =
-                metric_data_per_agent.estimated_service_info_field_ac_vo[i];
-            *ap_metrics_tlv->estimated_service_info_field_ac_vi(i) =
-                metric_data_per_agent.estimated_service_info_field_ac_vi[i];
+        auto len = metric_data_per_agent.estimated_service_info_fields.size();
+        if (!ap_metrics_tlv->alloc_estimated_service_info_field(len)) {
+            LOG(ERROR) << "alloc_estimated_service_info_field() has failed!";
+            return false;
+        }
+        std::copy(metric_data_per_agent.estimated_service_info_fields.begin(),
+                  metric_data_per_agent.estimated_service_info_fields.end(),
+                  ap_metrics_tlv->estimated_service_info_field());
+        if (metric_data_per_agent.include_ac_bk) {
+            ap_metrics_tlv->estimated_service_parameters().include_ac_bk = 0x1;
+        }
+        if (metric_data_per_agent.include_ac_vi) {
+            ap_metrics_tlv->estimated_service_parameters().include_ac_vi = 0x1;
+        }
+        if (metric_data_per_agent.include_ac_vo) {
+            ap_metrics_tlv->estimated_service_parameters().include_ac_vo = 0x1;
         }
     }
 
