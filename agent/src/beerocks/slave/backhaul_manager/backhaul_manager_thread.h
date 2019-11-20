@@ -210,9 +210,8 @@ private:
 
     std::chrono::steady_clock::time_point rssi_poll_timer;
     std::chrono::steady_clock::time_point eth_link_poll_timer;
-    bool m_eth_link_up       = false;
-    bool pending_enable      = false;
-    bool wifi_reconnect_flag = false;
+    bool m_eth_link_up  = false;
+    bool pending_enable = false;
 
     std::string controller_bridge_mac;
     std::string bssid_bridge_mac;
