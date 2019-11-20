@@ -62,14 +62,22 @@ monitor_rdkb_hal::snr_change_t monitor_rdkb_hal::get_snr_change_type(int8_t prev
     }
 }
 
-void monitor_rdkb_hal::print_debug_info(mon_rdkb_debug_info_t &mdi)
+void monitor_rdkb_hal::print_debug_info(mon_rdkb_debug_info_t &mdi, bool pkts_count_en)
 {
+    std::stringstream ss;
+    ss << mdi.sample << ": " << mdi.sta_mac << " prev_snr:" << int(mdi.prev_snr)
+       << " curr_snr:" << int(mdi.cur_snr) << " snrInact:" << int(mdi.snrInactXing)
+       << " snrLow:" << int(mdi.snrLowXing) << " snrHigh:" << int(mdi.snrHighXing)
+       << " act_state:" << mdi.state;
 
-    LOG(DEBUG) << mdi.sample << ": " << mdi.sta_mac << " prev_snr:" << int(mdi.prev_snr)
-               << " snr:" << int(mdi.cur_snr) << " inac:" << int(mdi.snrInactXing)
-               << " low:" << int(mdi.snrLowXing) << " high:" << int(mdi.snrHighXing)
-               << " act state:" << mdi.state << " tx_packs:" << mdi.tx_packets
-               << " rx_packs:" << mdi.rx_packets << " accum_pack:" << mdi.accumulatedPackets;
+    if (pkts_count_en) {
+        ss << " tx_pkts:" << int(mdi.tx_packets) << " rx_pkts:" << int(mdi.rx_packets)
+           << " accum_tx_pkts:" << int(mdi.accumulatedPackets);
+    } else {
+        ss << " {tx_pkts|rx_pkts|accum_pkts}: N/A";
+    }
+
+    LOG(DEBUG) << ss.str();
 }
 
 void monitor_rdkb_hal::process()
@@ -127,39 +135,37 @@ void monitor_rdkb_hal::process()
             continue;
         }
 
-        uint32_t nPacketsSample = sta_node->get_rx_packets() + sta_node->get_tx_packets();
-        int sample              = conf_client->getSample();
-
         mon_rdkb_debug_info_t debug_info;
-        debug_info.sta_mac            = sta_mac;
-        debug_info.prev_snr           = prev_snr;
-        debug_info.cur_snr            = cur_snr;
-        debug_info.snrInactXing       = snrInactXing;
-        debug_info.snrLowXing         = snrLowXing;
-        debug_info.snrHighXing        = snrHighXing;
-        debug_info.state              = conf_client->getStateAbbreviation();
-        debug_info.accumulatedPackets = conf_client->getAccumulatedPackets() + nPacketsSample;
-        debug_info.sample             = sample;
+        debug_info.sample       = conf_client->getSample();
+        debug_info.sta_mac      = sta_mac;
+        debug_info.prev_snr     = prev_snr;
+        debug_info.cur_snr      = cur_snr;
+        debug_info.snrInactXing = snrInactXing;
+        debug_info.snrLowXing   = snrLowXing;
+        debug_info.snrHighXing  = snrHighXing;
+        debug_info.state        = conf_client->getStateAbbreviation();
 
         bool isSampleIntervalPassed =
             conf_client->getLastSampleTime() +
                 std::chrono::milliseconds(1000 * conf_ap->getInactCheckIntervalSec()) <
             std::chrono::steady_clock::now();
-        if (isSampleIntervalPassed == false) {
-            debug_info.tx_packets = -1;
-            debug_info.rx_packets = -1;
-            print_debug_info(debug_info);
-            continue;
+
+        if (isSampleIntervalPassed) {
+            conf_client->setLastSampleTime(std::chrono::steady_clock::now());
+            debug_info.tx_packets = sta_node->get_tx_packets();
+            debug_info.rx_packets = sta_node->get_rx_packets();
+
+            uint32_t nPacketsSample = sta_node->get_tx_packets() + sta_node->get_rx_packets();
+            conf_client->setSamplePackets(nPacketsSample);
+
+            debug_info.accumulatedPackets = conf_client->getAccumulatedPackets() + nPacketsSample;
+            conf_client->setAccumulatedPackets(conf_client->getAccumulatedPackets() +
+                                               nPacketsSample);
+
+            conf_client->setSample(debug_info.sample + 1);
         }
 
-        debug_info.tx_packets = sta_node->get_tx_packets();
-        debug_info.rx_packets = sta_node->get_rx_packets();
-        print_debug_info(debug_info);
-
-        conf_client->setLastSampleTime(std::chrono::steady_clock::now());
-        conf_client->setSamplePackets(nPacketsSample);
-        conf_client->setAccumulatedPackets(conf_client->getAccumulatedPackets() + nPacketsSample);
-        conf_client->setSample(conf_client->getSample() + 1);
+        print_debug_info(debug_info, isSampleIntervalPassed);
 
         bool thresholdTimeElapsed =
             conf_client->getStartTime() +
@@ -178,7 +184,7 @@ void monitor_rdkb_hal::process()
                 conf_client->setState(rdkb_hal_sta_config::HAL_CLIENT_INACTIVE_STATE);
                 send_activity_event(sta_mac, false, conf_client->getVapIndex());
                 LOG(DEBUG) << "goto  HAL_CLIENT_INACTIVE_STATE from START mac: " << sta_mac
-                           << " s:" << sample;
+                           << " s:" << debug_info.sample;
             }
             break;
         }
@@ -186,7 +192,8 @@ void monitor_rdkb_hal::process()
             if (conf_client->getAccumulatedPackets() > conf_ap->getInactCheckThresholdPackets()) {
                 conf_client->setState(rdkb_hal_sta_config::HAL_CLIENT_ACTIVE_STATE);
                 send_activity_event(sta_mac, true, conf_client->getVapIndex());
-                LOG(DEBUG) << "goto  HAL_CLIENT_ACTIVE_STATE mac: " << sta_mac << " s:" << sample;
+                LOG(DEBUG) << "goto  HAL_CLIENT_ACTIVE_STATE mac: " << sta_mac
+                           << " s:" << debug_info.sample;
             }
             break;
         }
@@ -194,7 +201,8 @@ void monitor_rdkb_hal::process()
             if (conf_client->getAccumulatedPackets() <= conf_ap->getInactCheckThresholdPackets()) {
                 conf_client->setState(rdkb_hal_sta_config::HAL_CLIENT_INACTIVE_STATE);
                 send_activity_event(sta_mac, false, conf_client->getVapIndex());
-                LOG(DEBUG) << "goto  HAL_CLIENT_INACTIVE_STATE mac: " << sta_mac << " s:" << sample;
+                LOG(DEBUG) << "goto  HAL_CLIENT_INACTIVE_STATE mac: " << sta_mac
+                           << " s:" << debug_info.sample;
             }
             break;
         }
