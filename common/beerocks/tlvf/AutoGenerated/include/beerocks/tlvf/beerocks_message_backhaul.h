@@ -144,6 +144,7 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         uint8_t& wire_iface_type();
         uint8_t& wireless_iface_type();
         uint8_t& wired_backhaul();
+        uint8_t& backhaul_preferred_radio_band();
         void class_swap();
         static size_t get_initial_size();
 
@@ -170,6 +171,7 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         uint8_t* m_wire_iface_type = nullptr;
         uint8_t* m_wireless_iface_type = nullptr;
         uint8_t* m_wired_backhaul = nullptr;
+        uint8_t* m_backhaul_preferred_radio_band = nullptr;
 };
 
 class cACTION_BACKHAUL_CONNECTED_NOTIFICATION : public BaseClass

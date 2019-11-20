@@ -3538,6 +3538,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                       platform_settings.back_pass, message::WIFI_PASS_MAX_LENGTH);
             bh_enable->security_type() = static_cast<uint32_t>(
                 platform_to_bwl_security(platform_settings.back_security_type));
+            bh_enable->backhaul_preferred_radio_band() =
+                platform_settings.backhaul_preferred_radio_band;
 
             // Interfaces
             if (platform_settings.wired_backhaul) {

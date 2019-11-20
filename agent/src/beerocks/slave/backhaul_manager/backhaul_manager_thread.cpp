@@ -1070,6 +1070,13 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
                 continue;
             }
 
+            if (m_sConfig.backhaul_preferred_radio_band != beerocks::eFreqType::FREQ_AUTO &&
+                m_sConfig.backhaul_preferred_radio_band != soc->freq_type) {
+                LOG(DEBUG) << "slave iface=" << soc->sta_iface
+                           << " is not of the preferred backhaul band";
+                continue;
+            }
+
             std::string iface = soc->sta_iface;
             pending_slave_sta_ifaces.insert(iface);
 
@@ -1490,6 +1497,15 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
                     m_sConfig.ssid.assign(request->ssid(message::WIFI_SSID_MAX_LENGTH));
                     m_sConfig.pass.assign(request->pass(message::WIFI_PASS_MAX_LENGTH));
                     m_sConfig.security_type = static_cast<bwl::WiFiSec>(request->security_type());
+                    if (request->backhaul_preferred_radio_band() ==
+                        beerocks::eFreqType::FREQ_UNKNOWN) {
+                        LOG(DEBUG) << "Unknown backhaul preferred radio band, setting to auto";
+                        m_sConfig.backhaul_preferred_radio_band = beerocks::eFreqType::FREQ_AUTO;
+                    } else {
+                        m_sConfig.backhaul_preferred_radio_band =
+                            (beerocks::eFreqType)request->backhaul_preferred_radio_band();
+                    }
+
                     // Change mixed state to WPA2
                     if (m_sConfig.security_type == bwl::WiFiSec::WPA_WPA2_PSK) {
                         m_sConfig.security_type = bwl::WiFiSec::WPA2_PSK;
