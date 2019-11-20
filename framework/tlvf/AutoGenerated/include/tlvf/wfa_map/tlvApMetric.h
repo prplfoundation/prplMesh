@@ -63,10 +63,9 @@ class tlvApMetric : public BaseClass
         uint8_t& channel_utilization();
         uint16_t& number_of_stas_currently_associated();
         sEstimatedService& estimated_service_parameters();
-        uint8_t* estimated_service_info_field_ac_be(size_t idx = 0);
-        uint8_t* estimated_service_info_field_ac_bk(size_t idx = 0);
-        uint8_t* estimated_service_info_field_ac_vo(size_t idx = 0);
-        uint8_t* estimated_service_info_field_ac_vi(size_t idx = 0);
+        size_t estimated_service_info_field_length() { return m_estimated_service_info_field_idx__ * sizeof(uint8_t); }
+        uint8_t* estimated_service_info_field(size_t idx = 0);
+        bool alloc_estimated_service_info_field(size_t count = 1);
         void class_swap();
         static size_t get_initial_size();
 
@@ -78,15 +77,9 @@ class tlvApMetric : public BaseClass
         uint8_t* m_channel_utilization = nullptr;
         uint16_t* m_number_of_stas_currently_associated = nullptr;
         sEstimatedService* m_estimated_service_parameters = nullptr;
-        uint8_t* m_estimated_service_info_field_ac_be = nullptr;
-        size_t m_estimated_service_info_field_ac_be_idx__ = 0;
+        uint8_t* m_estimated_service_info_field = nullptr;
+        size_t m_estimated_service_info_field_idx__ = 0;
         int m_lock_order_counter__ = 0;
-        uint8_t* m_estimated_service_info_field_ac_bk = nullptr;
-        size_t m_estimated_service_info_field_ac_bk_idx__ = 0;
-        uint8_t* m_estimated_service_info_field_ac_vo = nullptr;
-        size_t m_estimated_service_info_field_ac_vo_idx__ = 0;
-        uint8_t* m_estimated_service_info_field_ac_vi = nullptr;
-        size_t m_estimated_service_info_field_ac_vi_idx__ = 0;
 };
 
 }; // close namespace: wfa_map

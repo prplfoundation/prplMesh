@@ -49,36 +49,39 @@ tlvApMetric::sEstimatedService& tlvApMetric::estimated_service_parameters() {
     return (sEstimatedService&)(*m_estimated_service_parameters);
 }
 
-uint8_t* tlvApMetric::estimated_service_info_field_ac_be(size_t idx) {
-    if ( (m_estimated_service_info_field_ac_be_idx__ <= 0) || (m_estimated_service_info_field_ac_be_idx__ <= idx) ) {
+uint8_t* tlvApMetric::estimated_service_info_field(size_t idx) {
+    if ( (m_estimated_service_info_field_idx__ <= 0) || (m_estimated_service_info_field_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
-    return &(m_estimated_service_info_field_ac_be[idx]);
+    return &(m_estimated_service_info_field[idx]);
 }
 
-uint8_t* tlvApMetric::estimated_service_info_field_ac_bk(size_t idx) {
-    if ( (m_estimated_service_info_field_ac_bk_idx__ <= 0) || (m_estimated_service_info_field_ac_bk_idx__ <= idx) ) {
-        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
-        return nullptr;
+bool tlvApMetric::alloc_estimated_service_info_field(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list estimated_service_info_field, abort!";
+        return false;
     }
-    return &(m_estimated_service_info_field_ac_bk[idx]);
-}
-
-uint8_t* tlvApMetric::estimated_service_info_field_ac_vo(size_t idx) {
-    if ( (m_estimated_service_info_field_ac_vo_idx__ <= 0) || (m_estimated_service_info_field_ac_vo_idx__ <= idx) ) {
-        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
-        return nullptr;
+    if (count == 0) {
+        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
+        return false;
     }
-    return &(m_estimated_service_info_field_ac_vo[idx]);
-}
-
-uint8_t* tlvApMetric::estimated_service_info_field_ac_vi(size_t idx) {
-    if ( (m_estimated_service_info_field_ac_vi_idx__ <= 0) || (m_estimated_service_info_field_ac_vi_idx__ <= idx) ) {
-        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
-        return nullptr;
+    size_t len = sizeof(uint8_t) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
     }
-    return &(m_estimated_service_info_field_ac_vi[idx]);
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_estimated_service_info_field;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_estimated_service_info_field_idx__ += count;
+    if (!buffPtrIncrementSafe(len)) { return false; }
+    if(m_length){ (*m_length) += len; }
+    return true;
 }
 
 void tlvApMetric::class_swap()
@@ -98,10 +101,6 @@ size_t tlvApMetric::get_initial_size()
     class_size += sizeof(uint8_t); // channel_utilization
     class_size += sizeof(uint16_t); // number_of_stas_currently_associated
     class_size += sizeof(sEstimatedService); // estimated_service_parameters
-    class_size += 3 * sizeof(uint8_t); // estimated_service_info_field_ac_be
-    class_size += 3 * sizeof(uint8_t); // estimated_service_info_field_ac_bk
-    class_size += 3 * sizeof(uint8_t); // estimated_service_info_field_ac_vo
-    class_size += 3 * sizeof(uint8_t); // estimated_service_info_field_ac_vi
     return class_size;
 }
 
@@ -131,29 +130,13 @@ bool tlvApMetric::init()
     if (!buffPtrIncrementSafe(sizeof(sEstimatedService))) { return false; }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sEstimatedService); }
     if (!m_parse__) { m_estimated_service_parameters->struct_init(); }
-    m_estimated_service_info_field_ac_be = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t)*(3))) { return false; }
-    m_estimated_service_info_field_ac_be_idx__  = 3;
-    if (!m_parse__) {
-        if (m_length) { (*m_length) += (sizeof(uint8_t) * 3); }
-    }
-    m_estimated_service_info_field_ac_bk = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t)*(3))) { return false; }
-    m_estimated_service_info_field_ac_bk_idx__  = 3;
-    if (!m_parse__) {
-        if (m_length) { (*m_length) += (sizeof(uint8_t) * 3); }
-    }
-    m_estimated_service_info_field_ac_vo = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t)*(3))) { return false; }
-    m_estimated_service_info_field_ac_vo_idx__  = 3;
-    if (!m_parse__) {
-        if (m_length) { (*m_length) += (sizeof(uint8_t) * 3); }
-    }
-    m_estimated_service_info_field_ac_vi = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t)*(3))) { return false; }
-    m_estimated_service_info_field_ac_vi_idx__  = 3;
-    if (!m_parse__) {
-        if (m_length) { (*m_length) += (sizeof(uint8_t) * 3); }
+    m_estimated_service_info_field = (uint8_t*)m_buff_ptr__;
+    if (m_length && m_parse__) {
+        size_t len = *m_length;
+        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
+        len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
+        m_estimated_service_info_field_idx__ = len/sizeof(uint8_t);
+        if (!buffPtrIncrementSafe(len)) { return false; }
     }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {
