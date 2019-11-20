@@ -111,6 +111,95 @@ bool cACTION_APMANAGER_JOINED_NOTIFICATION::init()
     return true;
 }
 
+cACTION_APMANAGER_ENABLE_APS_REQUEST::cACTION_APMANAGER_ENABLE_APS_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_APMANAGER_ENABLE_APS_REQUEST::cACTION_APMANAGER_ENABLE_APS_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_APMANAGER_ENABLE_APS_REQUEST::~cACTION_APMANAGER_ENABLE_APS_REQUEST() {
+}
+uint8_t& cACTION_APMANAGER_ENABLE_APS_REQUEST::channel() {
+    return (uint8_t&)(*m_channel);
+}
+
+uint32_t& cACTION_APMANAGER_ENABLE_APS_REQUEST::bandwidth() {
+    return (uint32_t&)(*m_bandwidth);
+}
+
+uint8_t& cACTION_APMANAGER_ENABLE_APS_REQUEST::center_channel() {
+    return (uint8_t&)(*m_center_channel);
+}
+
+void cACTION_APMANAGER_ENABLE_APS_REQUEST::class_swap()
+{
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_bandwidth));
+}
+
+size_t cACTION_APMANAGER_ENABLE_APS_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // channel
+    class_size += sizeof(uint32_t); // bandwidth
+    class_size += sizeof(uint8_t); // center_channel
+    return class_size;
+}
+
+bool cACTION_APMANAGER_ENABLE_APS_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_channel = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    m_bandwidth = (uint32_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
+    m_center_channel = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
+cACTION_APMANAGER_ENABLE_APS_RESPONSE::cACTION_APMANAGER_ENABLE_APS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_APMANAGER_ENABLE_APS_RESPONSE::cACTION_APMANAGER_ENABLE_APS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_APMANAGER_ENABLE_APS_RESPONSE::~cACTION_APMANAGER_ENABLE_APS_RESPONSE() {
+}
+uint8_t& cACTION_APMANAGER_ENABLE_APS_RESPONSE::success() {
+    return (uint8_t&)(*m_success);
+}
+
+void cACTION_APMANAGER_ENABLE_APS_RESPONSE::class_swap()
+{
+}
+
+size_t cACTION_APMANAGER_ENABLE_APS_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // success
+    return class_size;
+}
+
+bool cACTION_APMANAGER_ENABLE_APS_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_success = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
 cACTION_APMANAGER_INIT_DONE_NOTIFICATION::cACTION_APMANAGER_INIT_DONE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
     BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();

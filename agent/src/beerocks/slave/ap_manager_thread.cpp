@@ -441,6 +441,70 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
 
     switch (beerocks_header->action_op()) {
+    case beerocks_message::ACTION_APMANAGER_ENABLE_APS_REQUEST: {
+        LOG(TRACE) << "ACTION_APMANAGER_ENABLE_APS_REQUEST";
+
+        auto notification =
+            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_ENABLE_APS_REQUEST>();
+        if (!notification) {
+            LOG(ERROR) << "addClass cACTION_APMANAGER_ENABLE_APS_REQUEST failed";
+            return false;
+        }
+
+        auto response =
+            message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_ENABLE_APS_RESPONSE>(
+                cmdu_tx);
+
+        if (!response) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+
+        response->success() = true;
+
+        // Enable beaconing by setting start_disabled flag to false.
+        if (!ap_wlan_hal->set_start_disabled(false)) {
+            LOG(ERROR) << "Failed setting start_disabled";
+            response->success() = false;
+            message_com::send_cmdu(slave_socket, cmdu_tx);
+            break;
+        }
+
+        // Disable the radio interface to make hostapd to consider the new configuration.
+        if (!ap_wlan_hal->disable()) {
+            LOG(ERROR) << "Failed disable";
+            response->success() = false;
+            message_com::send_cmdu(slave_socket, cmdu_tx);
+            break;
+        }
+
+        // If it is not the radio of the BH, then channel, bandwidth and center channel paramenters
+        // will be all set to 0.
+        LOG(DEBUG) << "Setting AP channel: "
+                   << ", channel=" << int(notification->channel())
+                   << ", bandwidth=" << int(notification->bandwidth())
+                   << ", center_channel=" << int(notification->center_channel());
+
+        // Set original channel or BH channel
+        if (!ap_wlan_hal->set_channel(notification->channel(), notification->bandwidth(),
+                                      notification->center_channel())) {
+            LOG(ERROR) << "Failed setting set_channel";
+            response->success() = false;
+            message_com::send_cmdu(slave_socket, cmdu_tx);
+            break;
+        }
+
+        // Enable the radio interface to apply the new configuration.
+        if (!ap_wlan_hal->enable()) {
+            LOG(ERROR) << "Failed enable";
+            response->success() = false;
+        }
+
+        LOG(INFO) << "send ACTION_APMANAGER_ENABLE_APS_RESPONSE, success="
+                  << int(response->success());
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+        break;
+    }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST: {
 
         auto request = cmdu_rx.addClass<

@@ -1367,6 +1367,33 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
         break;
     }
 
+    case beerocks_message::ACTION_BACKHAUL_ENABLE_APS_REQUEST: {
+        auto notification_in =
+            cmdu_rx.addClass<beerocks_message::cACTION_BACKHAUL_ENABLE_APS_REQUEST>();
+        if (!notification_in) {
+            LOG(ERROR) << "Failed building cACTION_BACKHAUL_ENABLE_APS_REQUEST message!";
+            return false;
+        }
+
+        auto notification_out =
+            message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_ENABLE_APS_REQUEST>(
+                cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR) << "Failed building ACTION_APMANAGER_ENABLE_APS_REQUEST message!";
+            return false;
+        }
+
+        notification_out->channel()        = notification_in->channel();
+        notification_out->bandwidth()      = notification_in->bandwidth();
+        notification_out->center_channel() = notification_in->center_channel();
+        LOG(DEBUG) << "Sending ACTION_APMANAGER_ENABLE_APS_REQUEST";
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+
+        configuration_in_progress = true;
+
+        break;
+    }
+
     case beerocks_message::ACTION_BACKHAUL_CONNECTED_NOTIFICATION: {
 
         auto notification =
@@ -2148,14 +2175,10 @@ bool slave_thread::handle_cmdu_ap_manager_message(
                   << int(response_in->vap_id());
         if (response_in->vap_id() == beerocks::IFACE_RADIO_ID) {
             LOG(WARNING) << __FUNCTION__ << "AP_Disabled on radio, slave reset";
-            if (slave_state == STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE ||
-                slave_state == STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE ||
-                slave_state == STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE) {
+            if (configuration_in_progress) {
                 LOG(INFO) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
                 detach_on_conf_change = true;
-            } else if (platform_settings.passive_mode_enabled == 0) {
-                stop_on_failure_attempts--;
-                platform_notify_error(BPL_ERR_AP_MANAGER_HOSTAP_DISABLED, config.hostap_iface);
+                break;
             }
             slave_reset();
         } else {
@@ -2169,6 +2192,28 @@ bool slave_thread::handle_cmdu_ap_manager_message(
             response_out->vap_id() = response_in->vap_id();
             send_cmdu_to_controller(cmdu_tx);
         }
+        break;
+    }
+    case beerocks_message::ACTION_APMANAGER_ENABLE_APS_RESPONSE: {
+        configuration_in_progress = false;
+        LOG(INFO) << "received ACTION_APMANAGER_ENABLE_APS_RESPONSE";
+
+        auto response = cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_ENABLE_APS_RESPONSE>();
+        if (!response) {
+            LOG(ERROR) << "addClass cACTION_APMANAGER_ENABLE_APS_RESPONSE failed";
+            return false;
+        }
+
+        if (!response->success()) {
+            LOG(ERROR) << "failed to enable APs";
+            slave_reset();
+        }
+
+        if (detach_on_conf_change) {
+            LOG(DEBUG) << "detach occurred on wifi conf change, slave reset!";
+            slave_reset();
+        }
+
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION: {
@@ -2676,9 +2721,10 @@ bool slave_thread::handle_cmdu_monitor_message(
         LOG(INFO) << "received ACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION";
         if (response_in->vap_id() == beerocks::IFACE_RADIO_ID) {
             LOG(WARNING) << __FUNCTION__ << "AP_Disabled on radio, slave reset";
-            if (platform_settings.passive_mode_enabled == 0) {
-                stop_on_failure_attempts--;
-                platform_notify_error(BPL_ERR_MONITOR_HOSTAP_DISABLED, config.hostap_iface);
+            if (configuration_in_progress) {
+                LOG(INFO) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
+                detach_on_conf_change = true;
+                break;
             }
             slave_reset();
         }
@@ -2989,9 +3035,7 @@ bool slave_thread::handle_cmdu_monitor_message(
         LOG(INFO) << "ACTION_MONITOR_ERROR_NOTIFICATION, error_code="
                   << int(notification->error_code());
 
-        if (slave_state == STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE ||
-            slave_state == STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE ||
-            slave_state == STATE_WAIT_FOR_UNIFY_WIFI_CREDENTIALS_RESPONSE) {
+        if (configuration_in_progress) {
             LOG(INFO) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
             detach_on_conf_change = true;
             break;

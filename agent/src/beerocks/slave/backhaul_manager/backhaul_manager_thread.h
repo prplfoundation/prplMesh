@@ -81,6 +81,7 @@ private:
     void get_scan_measurement();
     bool select_bssid();
     void platform_notify_error(int code, const std::string &error_data);
+    bool send_slaves_enable();
 
     std::shared_ptr<bwl::sta_wlan_hal> get_wireless_hal(std::string iface = "");
 

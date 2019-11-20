@@ -1501,6 +1501,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
                     m_sConfig.ssid.assign(request->ssid(message::WIFI_SSID_MAX_LENGTH));
                     m_sConfig.pass.assign(request->pass(message::WIFI_PASS_MAX_LENGTH));
                     m_sConfig.security_type = static_cast<bwl::WiFiSec>(request->security_type());
+                    m_sConfig.mem_only_psk  = request->mem_only_psk();
                     if (request->backhaul_preferred_radio_band() ==
                         beerocks::eFreqType::FREQ_UNKNOWN) {
                         LOG(DEBUG) << "Unknown backhaul preferred radio band, setting to auto";
@@ -1518,7 +1519,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
                     m_sConfig.wire_iface_type = (beerocks::eIfaceType)request->wire_iface_type();
                     m_sConfig.wired_backhaul  = request->wired_backhaul();
                     LOG(DEBUG) << "All slaves ready, proceeding" << std::endl
-                               << "SSID: " << m_sConfig.ssid << ", Pass: " << m_sConfig.pass
+                               << "SSID: " << m_sConfig.ssid << ", Pass: ****"
                                << ", Security: " << int(m_sConfig.security_type)
                                << ", Bridge: " << m_sConfig.bridge_iface
                                << ", Wired: " << m_sConfig.wire_iface;
@@ -1843,6 +1844,34 @@ bool main_thread::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessage
     return true;
 }
 
+bool main_thread::send_slaves_enable()
+{
+    auto iface_hal = get_wireless_hal();
+    iface_hal->refresh_radio_info();
+    const auto &radio_info = iface_hal->get_radio_info();
+
+    for (auto soc : slaves_sockets) {
+        auto notification =
+            message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_ENABLE_APS_REQUEST>(
+                cmdu_tx);
+
+        if (soc->sta_iface == m_sConfig.wireless_iface) {
+            notification->channel()   = iface_hal->get_channel();
+            notification->bandwidth() = radio_info.bandwidth;
+            notification->center_channel() =
+                beerocks::utils::wifi_freq_to_channel(radio_info.vht_center_freq);
+        }
+        LOG(DEBUG) << "Sending enable to slave " << soc->radio_mac
+                   << ", channel=" << int(notification->channel())
+                   << ", bandwidth=" << int(notification->bandwidth())
+                   << ", center_channel=" << int(notification->center_channel());
+
+        message_com::send_cmdu(soc->slave, cmdu_tx);
+    }
+
+    return true;
+}
+
 bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr,
                                     std::string iface)
 {
@@ -1922,9 +1951,11 @@ bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_pt
             }
             roam_flag      = false;
             state_attempts = 0;
-            if (FSM_IS_IN_STATE(WIRELESS_ASSOCIATE_4ADDR_WAIT)) {
-                FSM_MOVE_STATE(WIRELESS_BRIDGE_DHCP);
-            }
+
+            // Send slaves to enable the AP's
+            send_slaves_enable();
+
+            FSM_MOVE_STATE(MASTER_DISCOVERY);
         } else if (FSM_IS_IN_STATE(WIRELESS_WAIT_FOR_RECONNECT)) {
             LOG(DEBUG) << "reconnected successfully, continuing";
             if (local_master && !local_gw) { // ire_master
