@@ -108,59 +108,6 @@ bool sl_beerocks_notify_error(int code, const char *data)
     return send_msg(xMsg);
 }
 
-bool sl_beerocks_set_wifi_iface_state(const char *iface, int op)
-{
-    Msg_t xMsg;
-
-    MAPF_ERR("sl_beerocks_set_wifi_iface_state iface=" << iface << " op=" << op);
-
-    // Initialize the message
-    init_msg(xMsg);
-
-    // Set the message opcode
-    xMsg.nMsgType = BPL_MSG_SET_WIFI_IFACE_STATE;
-
-    // Fill the credentials structure
-    BPL_WIFI_IFACE_STATE sWifiIfaceState = {0};
-
-    utils::copy_string(sWifiIfaceState.ifname, iface, BPL_IFNAME_LEN);
-    sWifiIfaceState.op = op;
-
-    // Build the message
-    xMsg.pMsg     = &sWifiIfaceState;
-    xMsg.nMsgSize = sizeof(sWifiIfaceState);
-
-    // Send the message
-    return send_msg(xMsg);
-}
-
-bool sl_beerocks_set_wifi_radio_tx_state(const char *iface, int enable)
-{
-    Msg_t xMsg;
-
-    MAPF_ERR("sl_beerocks_set_wifi_radio_tx_state iface=" << iface << " enable=" << enable);
-
-    // Initialize the message
-    init_msg(xMsg);
-
-    // Set the message opcode
-    xMsg.nMsgType = BPL_MSG_SET_WIFI_RADIO_TX_STATE;
-
-    // Fill the credentials structure
-    BPL_WIFI_RADIO_TX_STATE sWifiIRadioTxState = {0};
-
-    utils::copy_string(sWifiIRadioTxState.ifname, iface, BPL_IFNAME_LEN);
-
-    sWifiIRadioTxState.enable = enable;
-
-    // Build the message
-    xMsg.pMsg     = &sWifiIRadioTxState;
-    xMsg.nMsgSize = sizeof(sWifiIRadioTxState);
-
-    // Send the message
-    return send_msg(xMsg);
-}
-
 bool sl_beerocks_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif)
 {
     if (status_notif == nullptr) {

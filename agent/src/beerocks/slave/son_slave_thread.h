@@ -82,10 +82,6 @@ public:
         STATE_WAIT_RETRY_CONNECT_TO_BACKHAUL_MANAGER,
         STATE_WAIT_FOR_BACKHAUL_MANAGER_REGISTER_RESPONSE,
         STATE_JOIN_INIT,
-        STATE_GET_WLAN_READY_STATUS,
-        STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE,
-        STATE_JOIN_INIT_BRING_UP_INTERFACES,
-        STATE_JOIN_INIT_WAIT_FOR_IFACE_CHANGE_DONE,
         STATE_START_AP_MANAGER,
         STATE_WAIT_FOR_AP_MANAGER_INIT_DONE_NOTIFICATION,
         STATE_WAIT_FOR_AP_MANAGER_JOINED,
@@ -160,9 +156,6 @@ private:
     void monitor_start();
     void monitor_stop();
     void log_son_config();
-    bool set_wifi_iface_state(const std::string iface,
-                              beerocks::eWifiIfaceOperation iface_operation);
-    bool set_radio_tx_enable(const std::string iface, bool enable);
     void platform_notify_error(int code, const std::string &error_data);
     void update_iface_status(bool is_ap, int8_t iface_status);
     void send_iface_status();
@@ -186,7 +179,6 @@ private:
     const int MONITOR_HEARTBEAT_RETRIES                                     = 10;
     const int AP_MANAGER_HEARTBEAT_TIMEOUT_SEC                              = 10;
     const int AP_MANAGER_HEARTBEAT_RETRIES                                  = 10;
-    const int STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE_TIMEOUT_SEC         = 4;
 
     const int CONNECT_PLATFORM_RETRY_SLEEP     = 1000;
     const int CONNECT_PLATFORM_RETRY_COUNT_MAX = 5;
@@ -221,13 +213,6 @@ private:
     bool hostap_params_available;
     bool wifi_configuration_in_progress;
     int slave_resets_counter = 0;
-
-    typedef struct {
-        std::string iface;
-        int operation;
-        std::chrono::steady_clock::time_point timestamp;
-    } iface_action;
-    std::unordered_map<std::string, iface_action> pending_iface_actions;
 
     sSlaveBackhaulParams backhaul_params;
     beerocks_message::sNodeHostap hostap_params;

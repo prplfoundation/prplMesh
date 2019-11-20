@@ -24,113 +24,12 @@ using namespace beerocks::bpl;
 
 //============================================ STATIC START ============================================
 
-static int bpl_get_number_of_radios(int *radios)
-{
-    char radio_dev[MAX_LEN_PARAM_VALUE] = "";
-    int i;
-
-    *radios = 0;
-    for (i = 0; i < MAX_NUM_OF_RADIOS; i++) {
-        if (bpl_cfg_uci_get_wireless(TYPE_RADIO, i, "phy", radio_dev) == RETURN_OK)
-            (*radios)++;
-    }
-
-    return RETURN_OK;
-}
-
-static int bpl_cfg_iface_config_up(int index)
-{
-    char radio_dev[MAX_LEN_PARAM_VALUE] = {'\0'};
-    char command[MAX_LEN_PARAM_VALUE]   = {'\0'};
-    int radioCount                      = 0;
-
-    bpl_get_number_of_radios(&radioCount);
-
-    if (index < radioCount) { /* radio */
-        sprintf(command, "%s up radio%d", "/sbin/wifi", UCI_INDEX(TYPE_RADIO, index));
-    } else { /* VAP */
-        if (bpl_cfg_uci_get_wireless(TYPE_VAP, index, "device", radio_dev) == RETURN_ERR) {
-            MAPF_ERR("failed retrieving radio device for vap %d" << index);
-            return RETURN_ERR;
-        }
-        sprintf(command, "%s up %s", "/sbin/wifi", radio_dev);
-    }
-
-    if (uci_converter_commit_wireless() != RETURN_OK)
-        MAPF_ERR("uci_converter_commit_wireless failed");
-
-    if (uci_converter_system(command) == RETURN_OK) {
-        MAPF_INFO("completed successfully");
-    } else {
-        MAPF_ERR("failed");
-        return RETURN_ERR;
-    }
-
-    return RETURN_OK;
-}
-
-static int bpl_cfg_iface_config_down(int index)
-{
-    /*TODO: implement using d/s-pal apis*/
-
-    return RETURN_OK;
-}
-
 //============================================ STATIC END ============================================
 
 int bpl_cfg_set_onboarding(int enable) { return 0; }
 
-int bpl_cfg_set_wifi_iface_state(const char iface[BPL_IFNAME_LEN], int op)
-{
-    int retVal = 0;
-    int index  = 0;
-
-    if (!iface) {
-        return RETURN_ERR;
-    }
-
-    MAPF_INFO("bpl_cfg_set_wifi_iface_state(" << iface << "," << op << ")");
-
-    retVal = bpl_cfg_get_index_from_interface(iface, &index);
-    if (retVal) {
-        MAPF_ERR("bpl_cfg_set_wifi_iface_state: Can't find index from insterface " << iface);
-        return retVal;
-    }
-
-    if (op) {
-        retVal = bpl_cfg_iface_config_up(index);
-    } else {
-        retVal = bpl_cfg_iface_config_down(index);
-    }
-
-    return retVal;
-}
-
-int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable)
-{
-    int retVal = 0;
-    int index  = 0;
-
-    if (!iface) {
-        return RETURN_ERR;
-    }
-
-    retVal = bpl_cfg_get_index_from_interface(iface, &index);
-    if (retVal) {
-        return retVal;
-    }
-
-    retVal = uci_converter_set_bool(TYPE_RADIO, index, "disabled", !enable);
-
-    return retVal;
-}
-
 #else //PASSIVE_MODE is on
 
 int bpl_cfg_set_onboarding(int enable) { return 0; }
-
-int bpl_cfg_set_wifi_iface_state(const char iface[BPL_IFNAME_LEN], int op) { return 0; }
-
-int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable) { return 0; }
 
 #endif

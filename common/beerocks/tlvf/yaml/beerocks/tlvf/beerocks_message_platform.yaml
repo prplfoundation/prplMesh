@@ -30,17 +30,6 @@ cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE:
     _type: uint32_t
     _comment: #Marks whether the settings are valid
 
-cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST:
-  _type: class
-  iface_name:
-    _type: char    
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
-
-cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE:
-  _type: class
-  result: uint8_t
-  _comment: # 0 - Failure, 1 - Success
-
 cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION:
   _type: class
   params: sArpMonitorData 
@@ -88,14 +77,6 @@ cACTION_PLATFORM_WPS_ONBOARDING_REQUEST:
     _type: char 
     _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
 
-cACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST:
-  _type: class
-
-cACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE:
-  _type: class
-  result: uint8_t
-  _comment: # 0 - Failure, 1 - Success
-
 cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST:
   _type: class
   vap_id: uint8_t 
@@ -134,40 +115,6 @@ cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST:
 cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE:
   _type: class
   local_master: uint8_t 
-
-cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST:
-  _type: class
-  iface_name: 
-    _type: char     
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
-  iface_operation:
-    _type: int8_t
-    _comment: # -1 (Ignore), 0 (Disable), 1 (Enable), 2 (Restore), 3 (Restart)
-
-cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE:
-  _type: class
-  iface_name: 
-    _type: char     
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
-  iface_operation:
-    _type: int8_t
-    _comment: # -1 (Ignore), 0 (Disable), 1 (Enable), 2 (Restore), 3 (Restart)
-  success: uint8_t  
-
-cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST:
-  _type: class
-  iface_name: 
-    _type: char     
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
-  enable: uint8_t  
-
-cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE:
-  _type: class
-  iface_name: 
-    _type: char     
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
-  enable: uint8_t  
-  success: uint8_t  
 
 cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION:
   _type: class

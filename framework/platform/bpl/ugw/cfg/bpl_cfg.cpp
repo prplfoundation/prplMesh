@@ -192,16 +192,6 @@ int bpl_cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN])
     return (sl_beerocks_notify_error(code, full_data.c_str()) ? 0 : -1);
 }
 
-int bpl_cfg_set_wifi_iface_state(const char iface[BPL_IFNAME_LEN], int op)
-{
-    return (sl_beerocks_set_wifi_iface_state(iface, op) ? 0 : -1);
-}
-
-int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable)
-{
-    return (sl_beerocks_set_wifi_radio_tx_state(iface, enable) ? 0 : -1);
-}
-
 int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif)
 {
     return (sl_beerocks_notify_iface_status(status_notif) ? 0 : -1);

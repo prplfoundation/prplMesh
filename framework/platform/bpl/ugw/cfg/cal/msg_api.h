@@ -15,12 +15,6 @@ bool sl_beerocks_notify_fw_mismatch();
 // Notify the beerocks SL about a beerocks error
 bool sl_beerocks_notify_error(int code, const char *data);
 
-// Send Wi-Fi set iface state
-bool sl_beerocks_set_wifi_iface_state(const char *iface, int op);
-
-// Send Wi-Fi set radio tx state
-bool sl_beerocks_set_wifi_radio_tx_state(const char *iface, int enable);
-
 bool sl_beerocks_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif);
 
 bool sl_beerocks_notify_onboarding_completed(const char *ssid, const char *pass, const char *sec,
