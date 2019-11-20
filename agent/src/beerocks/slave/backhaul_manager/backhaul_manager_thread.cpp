@@ -600,13 +600,13 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
 
         // Connect/Reconnect to the platform manager
         if (!m_scPlatform) {
-        m_scPlatform = std::make_shared<SocketClient>(
-            SocketClient(beerocks_temp_path + std::string(BEEROCKS_PLAT_MGR_UDS)));
-        std::string err = m_scPlatform->getError();
-        if (!err.empty()) {
-            m_scPlatform.reset();
-            LOG(ERROR) << "Failed connecting to Platform Manager: " << err;
-        }
+            m_scPlatform = std::make_shared<SocketClient>(
+                SocketClient(beerocks_temp_path + std::string(BEEROCKS_PLAT_MGR_UDS)));
+            std::string err = m_scPlatform->getError();
+            if (!err.empty()) {
+                m_scPlatform.reset();
+                LOG(ERROR) << "Failed connecting to Platform Manager: " << err;
+            }
         } else {
             LOG(DEBUG) << "Using existing platform_manager_socket=0x"
                        << intptr_t(m_scPlatform.get());
@@ -1141,63 +1141,57 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
         if (roam_flag) {
             selected_bssid         = roam_selected_bssid;
             selected_bssid_channel = roam_selected_bssid_channel;
-        }
-
-        if (wifi_reconnect_flag) {
             if (!active_hal->roam(selected_bssid, selected_bssid_channel)) {
                 platform_notify_error(BPL_ERR_BH_ROAMING, "BSSID='" + selected_bssid + "'");
-                wifi_reconnect_flag = false;
                 stop_on_failure_attempts--;
                 FSM_MOVE_STATE(RESTART);
                 break;
             }
-            wifi_reconnect_flag = false;
+        }
 
-        } else {
-            if (hidden_ssid) {
-                std::string iface;
+        if (hidden_ssid) {
+            std::string iface;
 
-                std::shared_ptr<bwl::sta_wlan_hal> selected_hal;
-                for (auto it = pending_slave_sta_ifaces.cbegin();
-                     it != pending_slave_sta_ifaces.end();) {
-                    iface          = *it;
-                    auto iface_hal = get_wireless_hal(iface);
+            std::shared_ptr<bwl::sta_wlan_hal> selected_hal;
+            for (auto it = pending_slave_sta_ifaces.cbegin();
+                 it != pending_slave_sta_ifaces.end();) {
+                iface          = *it;
+                auto iface_hal = get_wireless_hal(iface);
 
-                    if (!iface_hal) {
-                        LOG(ERROR) << "Slave for iface " << iface << " not found!";
-                        break;
-                    }
-
-                    iface_hal->refresh_radio_info();
-
-                    if (son::wireless_utils::which_freq(iface_hal->get_radio_info().channel) ==
-                            beerocks::FREQ_24G &&
-                        pending_slave_sta_ifaces.size() > 1) {
-                        ++it;
-                        LOG(DEBUG) << "skipping 2.4GHz iface " << iface
-                                   << " while other ifaces are available";
-                        continue;
-                    }
-
-                    it = pending_slave_sta_ifaces.erase(it);
+                if (!iface_hal) {
+                    LOG(ERROR) << "Slave for iface " << iface << " not found!";
                     break;
                 }
 
-                m_sConfig.wireless_iface = iface;
-                active_hal               = get_wireless_hal();
-            }
+                iface_hal->refresh_radio_info();
 
-            if (active_hal->connect(m_sConfig.ssid, m_sConfig.pass, m_sConfig.security_type,
-                                    m_sConfig.mem_only_psk, selected_bssid, selected_bssid_channel,
-                                    hidden_ssid)) {
-                LOG(DEBUG) << "successful call to active_hal->connect(), bssid=" << selected_bssid
-                           << ", channel=" << selected_bssid_channel
-                           << ", iface=" << m_sConfig.wireless_iface;
-            } else {
-                LOG(ERROR) << "connect command failed for iface " << m_sConfig.wireless_iface;
-                FSM_MOVE_STATE(INITIATE_SCAN);
+                if (son::wireless_utils::which_freq(iface_hal->get_radio_info().channel) ==
+                        beerocks::FREQ_24G &&
+                    pending_slave_sta_ifaces.size() > 1) {
+                    ++it;
+                    LOG(DEBUG) << "skipping 2.4GHz iface " << iface
+                               << " while other ifaces are available";
+                    continue;
+                }
+
+                it = pending_slave_sta_ifaces.erase(it);
                 break;
             }
+
+            m_sConfig.wireless_iface = iface;
+            active_hal               = get_wireless_hal();
+        }
+
+        if (active_hal->connect(m_sConfig.ssid, m_sConfig.pass, m_sConfig.security_type,
+                                m_sConfig.mem_only_psk, selected_bssid, selected_bssid_channel,
+                                hidden_ssid)) {
+            LOG(DEBUG) << "successful call to active_hal->connect(), bssid=" << selected_bssid
+                       << ", channel=" << selected_bssid_channel
+                       << ", iface=" << m_sConfig.wireless_iface;
+        } else {
+            LOG(ERROR) << "connect command failed for iface " << m_sConfig.wireless_iface;
+            FSM_MOVE_STATE(INITIATE_SCAN);
+            break;
         }
 
         FSM_MOVE_STATE(WIRELESS_ASSOCIATE_4ADDR_WAIT);
@@ -1223,17 +1217,18 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
                     break;
                 }
             } else {
-                if (!wifi_reconnect_flag && !roam_flag) {
-                    stop_on_failure_attempts--;
-                    platform_notify_error(BPL_ERR_BH_ASSOCIATE_4ADDR_TIMEOUT,
-                                          "SSID='" + m_sConfig.ssid + "', iface='" +
-                                              m_sConfig.wireless_iface + "'");
-                } else {
+
+                if (roam_flag) {
                     FSM_MOVE_STATE(RESTART);
-                    wifi_reconnect_flag = false;
-                    roam_flag           = false;
+                    roam_flag = false;
                     break;
                 }
+
+                stop_on_failure_attempts--;
+                platform_notify_error(BPL_ERR_BH_ASSOCIATE_4ADDR_TIMEOUT,
+                                      "SSID='" + m_sConfig.ssid + "', iface='" +
+                                          m_sConfig.wireless_iface + "'");
+
                 if (!selected_bssid.empty()) {
                     ap_blacklist_entry &entry = ap_blacklist[selected_bssid];
                     entry.timestamp           = now;
@@ -1241,8 +1236,7 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
                     LOG(DEBUG) << "updating bssid " << selected_bssid
                                << " blacklist entry, attempts=" << entry.attempts;
                 }
-                wifi_reconnect_flag = false;
-                roam_flag           = false;
+                roam_flag = false;
             }
             FSM_MOVE_STATE(INITIATE_SCAN);
         }
@@ -1295,11 +1289,21 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
         break;
     }
     case EState::WIRELESS_WAIT_FOR_RECONNECT: {
-        if (std::chrono::steady_clock::now() > state_time_stamp_timeout) {
+        auto now = std::chrono::steady_clock::now();
+        if (now > state_time_stamp_timeout) {
             LOG(DEBUG) << "reconnect wait timed out";
 
-            FSM_MOVE_STATE(WIRELESS_ASSOCIATE_4ADDR);
-            wifi_reconnect_flag = true;
+            // increment attempts count in blacklist
+            if (!selected_bssid.empty()) {
+                auto &entry     = ap_blacklist[selected_bssid];
+                entry.timestamp = now;
+                entry.attempts++;
+                LOG(DEBUG) << "updating bssid " << selected_bssid
+                           << " blacklist entry, attempts=" << entry.attempts
+                           << ", max_allowed attempts=" << AP_BLACK_LIST_FAILED_ATTEMPTS_THRESHOLD;
+            }
+
+            FSM_MOVE_STATE(INITIATE_SCAN);
         }
         break;
     }
@@ -1536,6 +1540,15 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
         roam_flag                   = true;
         LOG(DEBUG) << "ACTION_BACKHAUL_ROAM_REQUEST to bssid=" << roam_selected_bssid
                    << " on channel=" << int(roam_selected_bssid_channel);
+
+        /*
+        * NOTE: Why moving to RESTART state? It causing BACKHAUL DISCONNECTED to the son slaves,
+        * which in the past (when we had TCP socket to the controller instead of the bus)
+        * disconnected the socket, but now when we have bus it is not happening anyway. 
+        * Another thing it is causing is to re-scan the for networks. Is it really necessary?
+        * Can we just move immediately to WIRELESS_ASSOCIATE_4ADDR, and then when successfully
+        * connected, notify the agent about the ne bssid?
+        */
         FSM_MOVE_STATE(RESTART);
         break;
     }
@@ -1907,9 +1920,8 @@ bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_pt
                     }
                 }
             }
-            roam_flag           = false;
-            wifi_reconnect_flag = false;
-            state_attempts      = 0;
+            roam_flag      = false;
+            state_attempts = 0;
             if (FSM_IS_IN_STATE(WIRELESS_ASSOCIATE_4ADDR_WAIT)) {
                 FSM_MOVE_STATE(WIRELESS_BRIDGE_DHCP);
             }
@@ -1940,8 +1952,7 @@ bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_pt
                     LOG(ERROR) << "Disconnected event without data!";
                     return false;
                 }
-                wifi_reconnect_flag = false;
-                roam_flag           = false;
+                roam_flag = false;
                 auto msg =
                     static_cast<bwl::sACTION_BACKHAUL_DISCONNECT_REASON_NOTIFICATION *>(data);
                 if (msg->disconnect_reason == uint32_t(DEAUTH_REASON_PASSPHRASE_MISMACH)) {
