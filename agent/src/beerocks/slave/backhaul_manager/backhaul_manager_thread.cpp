@@ -617,14 +617,6 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
             FSM_MOVE_STATE(MASTER_DISCOVERY);
         } else { // link establish
 
-            // Remove the sta interfaces from the bridge
-            for (auto soc : slaves_sockets) {
-                if (!soc->sta_iface.empty()) {
-                    network_utils::linux_remove_iface_from_bridge(m_sConfig.bridge_iface,
-                                                                  soc->sta_iface);
-                }
-            }
-
             // If a wired (WAN) interface was provided, try it first, check if the interface is UP
             if ((!m_sConfig.wire_iface.empty()) &&
                 (wan_mon.initialize(m_sConfig.wire_iface) == wan_monitor::ELinkState::eUp) &&
