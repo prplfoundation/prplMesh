@@ -9,8 +9,8 @@
 #ifndef _BWL_AP_WLAN_HAL_FAPI_H_
 #define _BWL_AP_WLAN_HAL_FAPI_H_
 
-#include "../common/ap_wlan_hal.h"
 #include "base_wlan_hal_fapi.h"
+#include <ap_wlan_hal.h>
 
 namespace bwl {
 namespace wav_fapi {

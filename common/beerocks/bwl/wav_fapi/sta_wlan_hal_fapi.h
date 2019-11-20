@@ -8,8 +8,8 @@
 #ifndef _BWL_STA_WLAN_HAL_FAPI_H_
 #define _BWL_STA_WLAN_HAL_FAPI_H_
 
-#include "../common/sta_wlan_hal.h"
 #include "base_wlan_hal_fapi.h"
+#include <sta_wlan_hal.h>
 
 namespace bwl {
 namespace wav_fapi {

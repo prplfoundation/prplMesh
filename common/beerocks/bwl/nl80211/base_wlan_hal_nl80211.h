@@ -9,7 +9,7 @@
 #ifndef _BWL_BASE_WLAN_HAL_NL80211_H_
 #define _BWL_BASE_WLAN_HAL_NL80211_H_
 
-#include "../common/base_wlan_hal.h"
+#include <base_wlan_hal.h>
 
 #include <beerocks/bcl/beerocks_state_machine.h>
 

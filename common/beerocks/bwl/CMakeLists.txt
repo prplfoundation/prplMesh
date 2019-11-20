@@ -161,7 +161,9 @@ target_link_libraries(${PROJECT_NAME} bcl elpp ${BWL_LIBS})
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${PLATFORM_INCLUDE_DIR}
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
     PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/beerocks/bwl>
         $<INSTALL_INTERFACE:include>
 )
 
