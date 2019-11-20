@@ -691,18 +691,15 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
 
         bool sent_for_2g = false;
         bool sent_for_5g = false;
-        /*
-             * TODO
-             * this is a workaround, need to find a better way to know each slave's band
-             */
+
         for (auto soc : slaves_sockets) {
-            if (soc->hostap_iface == "wlan0") {
+            if (soc->freq_type == eFreqType::FREQ_24G) {
                 if (sent_for_2g)
                     continue;
                 if (send_autoconfig_search_message(soc)) {
                     sent_for_2g = true;
                 }
-            } else if (soc->hostap_iface == "wlan2" || soc->hostap_iface == "wlan4") {
+            } else if (soc->freq_type == eFreqType::FREQ_5G) {
                 if (sent_for_5g)
                     continue;
                 if (send_autoconfig_search_message(soc)) {
