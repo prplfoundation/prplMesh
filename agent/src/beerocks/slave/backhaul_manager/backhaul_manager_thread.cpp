@@ -942,7 +942,8 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
     }
     case EState::WPA_ATTACH: {
 
-        bool success = true;
+        bool success   = true;
+        bool connected = false;
 
         for (auto soc : slaves_sockets) {
             std::string iface = soc->sta_iface;
@@ -989,6 +990,21 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
                     break;
                 }
 
+                if (!roam_flag && soc->sta_wlan_hal->is_connected()) {
+                    if (!soc->sta_wlan_hal->update_status()) {
+                        LOG(ERROR) << "failed to update sta status";
+                        success = false;
+                        break;
+                    }
+                    connected                      = true;
+                    m_sConfig.wireless_iface       = iface;
+                    m_sConfig.eType                = SBackhaulConfig::EType::Wireless;
+                    selected_bssid                 = soc->sta_wlan_hal->get_bssid();
+                    selected_bssid_channel         = soc->sta_wlan_hal->get_channel();
+                    soc->slave_is_backhaul_manager = true;
+                    break;
+                }
+
             } else if (attach_state == bwl::HALState::Failed) {
                 // Delete the HAL instance
                 soc->sta_wlan_hal.reset();
@@ -997,10 +1013,7 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
             }
         }
 
-        if (success) {
-            FSM_MOVE_STATE(INITIATE_SCAN);
-            state_attempts = 0; // for next state
-        } else {
+        if (!success) {
             if (std::chrono::steady_clock::now() > state_time_stamp_timeout) {
                 LOG(ERROR) << "attach wpa timeout";
                 platform_notify_error(BPL_ERR_BH_TIMEOUT_ATTACHING_TO_WPA_SUPPLICANT, "");
@@ -1009,6 +1022,14 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
             } else {
                 UTILS_SLEEP_MSEC(1000);
             }
+        }
+
+        if (connected) {
+            FSM_MOVE_STATE(MASTER_DISCOVERY);
+            state_attempts = 0; // for next state
+        } else {
+            FSM_MOVE_STATE(INITIATE_SCAN);
+            state_attempts = 0; // for next state
         }
 
         break;
