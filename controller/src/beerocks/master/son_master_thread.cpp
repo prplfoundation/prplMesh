@@ -1194,6 +1194,7 @@ print_ap_metric_map(std::unordered_map<sMacAddr, son::node::ap_metrics_data> &ap
 {
     LOG(DEBUG) << "Print Ap Metrics data map";
     for (auto const &pair_agent : ap_metric_data) {
+        auto len = pair_agent.second.estimated_service_info_fields.size();
         LOG(DEBUG) << std::endl
                    << "  Ap Metrics from agent with bssid= "
                    << network_utils::mac_to_string(pair_agent.first) << std::endl
@@ -1202,21 +1203,22 @@ print_ap_metric_map(std::unordered_map<sMacAddr, son::node::ap_metrics_data> &ap
                    << "  number_of_stas_currently_associated="
                    << int(pair_agent.second.number_of_stas_currently_associated) << std::endl
                    << "  estimated_service_info_field_ac_be = 0x" << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_be[0]) << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_be[1]) << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_be[2]) << std::endl
-                   << "  estimated_service_info_field_ac_bk = 0x" << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_bk[0]) << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_bk[1]) << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_bk[2]) << std::endl
-                   << "  estimated_service_info_field_ac_vo = 0x" << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_vo[0]) << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_vo[1]) << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_vo[2]) << std::endl
-                   << "  estimated_service_info_field_ac_vi = 0x" << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_vi[0]) << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_vi[1]) << std::hex
-                   << int(pair_agent.second.estimated_service_info_field_ac_vi[2]);
+                   << int(pair_agent.second.estimated_service_info_fields[0])
+                   << int(pair_agent.second.estimated_service_info_fields[1])
+                   << int(pair_agent.second.estimated_service_info_fields[2]) << std::endl;
+        if (len > 3) {
+            int lists_count = (len - 3) / 3;
+            int i           = 3;
+            for (int k = 0; k < lists_count; k++) {
+
+                LOG(DEBUG) << "  estimated_service_info_field_ac_** = 0x" << std::hex
+                           << int(pair_agent.second.estimated_service_info_fields[i])
+                           << int(pair_agent.second.estimated_service_info_fields[i + 1])
+                           << int(pair_agent.second.estimated_service_info_fields[i + 2])
+                           << std::endl;
+                i = i + 3;
+            }
+        }
     }
 }
 
