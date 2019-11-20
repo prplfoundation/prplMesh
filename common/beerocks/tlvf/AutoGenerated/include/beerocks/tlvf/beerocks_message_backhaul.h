@@ -214,6 +214,30 @@ class cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION : public BaseClass
         uint8_t* m_stopped = nullptr;
 };
 
+class cACTION_BACKHAUL_ENABLE_APS_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BACKHAUL_ENABLE_APS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_ENABLE_APS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_BACKHAUL_ENABLE_APS_REQUEST();
+
+        static eActionOp_BACKHAUL get_action_op(){
+            return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_ENABLE_APS_REQUEST);
+        }
+        uint8_t& channel();
+        uint32_t& bandwidth();
+        uint8_t& center_channel();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BACKHAUL* m_action_op = nullptr;
+        uint8_t* m_channel = nullptr;
+        uint32_t* m_bandwidth = nullptr;
+        uint8_t* m_center_channel = nullptr;
+};
+
 class cACTION_BACKHAUL_ROAM_REQUEST : public BaseClass
 {
     public:
