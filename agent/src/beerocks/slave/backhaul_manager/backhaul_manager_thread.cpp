@@ -1833,11 +1833,9 @@ bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_pt
                             !son::wireless_utils::is_low_subband(radio_info.channel)) {
                             LOG(DEBUG) << "iface " << iface
                                        << " is connected on low 5G band with filter, aborting";
-                            if (FSM_IS_IN_STATE(WIRELESS_ASSOCIATE_4ADDR_WAIT)) {
                                 FSM_MOVE_STATE(WIRELESS_CONFIG_4ADDR_MODE);
+                            return true;
                             }
-                            break;
-                        }
                         /* prevent unfiltered ("high") radio from connecting to low band, unless we have only 2 radios */
                         int sta_iface_count_5ghz = 0;
                         for (const auto &sta_iface : slave_sta_ifaces) {
@@ -1858,10 +1856,8 @@ bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_pt
                             sta_iface_count_5ghz > 1) {
                             LOG(DEBUG) << "iface " << iface
                                        << " is connected on low 5G band with filter, aborting";
-                            if (FSM_IS_IN_STATE(WIRELESS_ASSOCIATE_4ADDR_WAIT)) {
                                 FSM_MOVE_STATE(WIRELESS_CONFIG_4ADDR_MODE);
-                            }
-                            break;
+                            return true;
                         }
                     }
                 }
