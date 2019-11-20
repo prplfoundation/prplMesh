@@ -8,7 +8,7 @@
 
 #include <beerocks/bcl/beerocks_state_machine.h>
 
-#include "../common/base_wlan_hal_types.h"
+#include <base_wlan_hal_types.h>
 
 #include <chrono>
 

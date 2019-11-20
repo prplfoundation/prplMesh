@@ -9,7 +9,7 @@
 #ifndef _BWL_BASE_WLAN_HAL_DWPAL_H_
 #define _BWL_BASE_WLAN_HAL_DWPAL_H_
 
-#include "../common/base_wlan_hal.h"
+#include <base_wlan_hal.h>
 
 #include <beerocks/bcl/beerocks_state_machine.h>
 

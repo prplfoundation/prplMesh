@@ -9,8 +9,8 @@
 #ifndef _BWL_AP_WLAN_HAL_DUMMY_H_
 #define _BWL_AP_WLAN_HAL_DUMMY_H_
 
-#include "../common/ap_wlan_hal.h"
 #include "base_wlan_hal_dummy.h"
+#include <ap_wlan_hal.h>
 
 namespace bwl {
 namespace dummy {
