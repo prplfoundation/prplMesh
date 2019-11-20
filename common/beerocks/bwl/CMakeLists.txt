@@ -161,6 +161,7 @@ target_link_libraries(${PROJECT_NAME} bcl elpp ${BWL_LIBS})
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${PLATFORM_INCLUDE_DIR}
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
     PUBLIC
         $<INSTALL_INTERFACE:include>
 )

@@ -9,8 +9,8 @@
 #ifndef _BWL_MON_WLAN_HAL_DWPAL_H_
 #define _BWL_MON_WLAN_HAL_DWPAL_H_
 
-#include "../common/mon_wlan_hal.h"
 #include "base_wlan_hal_dwpal.h"
+#include <mon_wlan_hal.h>
 
 namespace bwl {
 namespace dwpal {
