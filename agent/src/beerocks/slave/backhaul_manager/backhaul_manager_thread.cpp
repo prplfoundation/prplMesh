@@ -166,7 +166,7 @@ bool main_thread::work()
 void main_thread::on_thread_stop()
 {
     // Close the socket with the platform manager
-    if (!m_scPlatform) {
+    if (m_scPlatform) {
         m_scPlatform.reset();
     }
 
@@ -590,17 +590,18 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
 
         LOG(TRACE) << "backhaul manager state=ENABLED";
 
-        // Connect to the platform manager
+        // Connect/Reconnect to the platform manager
         if (!m_scPlatform) {
-            m_scPlatform.reset();
-        }
-
         m_scPlatform = std::make_shared<SocketClient>(
             SocketClient(beerocks_temp_path + std::string(BEEROCKS_PLAT_MGR_UDS)));
         std::string err = m_scPlatform->getError();
         if (!err.empty()) {
             m_scPlatform.reset();
             LOG(ERROR) << "Failed connecting to Platform Manager: " << err;
+        }
+        } else {
+            LOG(DEBUG) << "Using existing platform_manager_socket=0x"
+                       << intptr_t(m_scPlatform.get());
         }
 
         if (local_master && local_gw) {
@@ -1046,6 +1047,11 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
             if (soc->sta_iface.empty())
                 continue;
 
+            if (!soc->sta_wlan_hal) {
+                LOG(WARNING) << "Sta_hal of " << soc->sta_iface << " is null";
+                continue;
+            }
+
             std::string iface = soc->sta_iface;
             pending_slave_sta_ifaces.insert(iface);
 
@@ -1053,7 +1059,6 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
                 LOG(ERROR) << "initiate_scan for iface " << iface << " failed!";
                 platform_notify_error(BPL_ERR_BH_SCAN_FAILED_TO_INITIATE_SCAN,
                                       "iface='" + iface + "'");
-                ;
                 success = false;
                 break;
             }
@@ -1088,7 +1093,7 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
         // Disconnect is necessary before changing 4addr mode, to make sure wpa_supplicant is not using the iface
         if (hidden_ssid) {
             for (auto soc : slaves_sockets) {
-                if (soc->sta_iface.empty())
+                if (!soc->sta_wlan_hal || soc->sta_iface.empty())
                     continue;
                 std::string iface = soc->sta_iface;
                 soc->sta_wlan_hal->disconnect();
@@ -1327,7 +1332,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         // Forward cmdu to all slaves how it is on UDS, without changing it
         for (auto soc_iter : slaves_sockets) {
             if (!message_com::forward_cmdu_to_uds(soc_iter->slave, cmdu_rx, length)) {
-                LOG(ERROR) << "forward_cmdu_to_uds() failed - " << print_cmdu_types(uds_header);
+                LOG(ERROR) << "forward_cmdu_to_uds() failed - " << print_cmdu_types(uds_header)
+                           << " sd=" << intptr_t(soc_iter->slave);
             }
         }
 
