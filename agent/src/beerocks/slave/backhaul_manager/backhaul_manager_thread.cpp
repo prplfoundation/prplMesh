@@ -215,6 +215,14 @@ bool main_thread::socket_disconnected(Socket *sd)
         return true;
     }
 
+    if (m_scPlatform.get() == sd) {
+        LOG(ERROR) << "platform manager socket disconnected " << intptr_t(sd)
+                   << " restarting backhaul manager";
+        m_scPlatform.reset();
+        FSM_MOVE_STATE(RESTART);
+        return true;
+    }
+
     for (auto it = slaves_sockets.begin(); it != slaves_sockets.end();) {
         auto soc          = *it;
         std::string iface = soc->hostap_iface;
