@@ -9,7 +9,7 @@
 #ifndef _BWL_BASE_WLAN_HAL_BRCM_H_
 #define _BWL_BASE_WLAN_HAL_BRCM_H_
 
-#include <base_wlan_hal.h>
+#include <bwl/base_wlan_hal.h>
 
 #include <chrono>
 #include <memory>

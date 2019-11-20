@@ -161,9 +161,8 @@ target_link_libraries(${PROJECT_NAME} bcl elpp ${BWL_LIBS})
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${PLATFORM_INCLUDE_DIR}
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/beerocks/bwl>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 
@@ -175,6 +174,5 @@ install(
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-file(GLOB bwl_install_files ${MODULE_PATH}/common/*.h)
-install(FILES ${bwl_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/beerocks/${PROJECT_NAME})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT bwlConfig NAMESPACE beerocks:: DESTINATION lib/cmake/beerocks/${PROJECT_NAME})

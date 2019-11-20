@@ -9,7 +9,7 @@
 #define _BWL_STA_WLAN_HAL_FAPI_H_
 
 #include "base_wlan_hal_fapi.h"
-#include <sta_wlan_hal.h>
+#include <bwl/sta_wlan_hal.h>
 
 namespace bwl {
 namespace wav_fapi {

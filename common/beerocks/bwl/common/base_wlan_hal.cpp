@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include "base_wlan_hal.h"
+#include <bwl/base_wlan_hal.h>
 
 #include <easylogging++.h>
 

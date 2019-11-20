@@ -13,7 +13,7 @@
 
 #include <beerocks/btl/btl.h>
 
-#include <beerocks/bwl/sta_wlan_hal.h>
+#include <bwl/sta_wlan_hal.h>
 
 #include <beerocks/bcl/beerocks_config_file.h>
 #include <beerocks/bcl/beerocks_socket_thread.h>

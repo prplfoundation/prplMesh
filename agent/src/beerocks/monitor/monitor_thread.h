@@ -22,7 +22,7 @@
 #include <beerocks/tlvf/beerocks_message_monitor.h>
 
 // Monitor HAL
-#include <beerocks/bwl/mon_wlan_hal.h>
+#include <bwl/mon_wlan_hal.h>
 
 namespace son {
 class monitor_thread : public beerocks::socket_thread {
