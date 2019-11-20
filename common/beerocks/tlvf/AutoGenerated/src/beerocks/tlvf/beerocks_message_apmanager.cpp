@@ -330,6 +330,36 @@ bool cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::init()
     return true;
 }
 
+cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST::cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST::cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST::~cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST() {
+}
+void cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST::class_swap()
+{
+}
+
+size_t cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    return class_size;
+}
+
+bool cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
 cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
     BaseClass(buff, buff_len, parse, swap_needed) {
     m_init_succeeded = init();

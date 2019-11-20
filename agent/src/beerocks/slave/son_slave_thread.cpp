@@ -4644,6 +4644,15 @@ bool slave_thread::parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessage
     }
     message_com::send_cmdu(ap_manager_socket, cmdu_tx);
 
+    auto notification = message_com::create_vs_message<
+        beerocks_message::
+            cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST>(cmdu_tx);
+    if (!notification) {
+        LOG(ERROR) << "Failed building message!";
+        return false;
+    }
+    message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+
     master_version.assign(joined_response->master_version(message::VERSION_LENGTH));
 
     LOG(DEBUG) << "Version (Master/Slave): " << master_version << "/" << BEEROCKS_VERSION;
