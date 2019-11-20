@@ -56,36 +56,6 @@ namespace backhaul_manager {
 #define FSM_IS_IN_STATE(eState) (m_eFSMState == EState::eState)
 #define FSM_CURR_STATE_STR s_arrStates[int(m_eFSMState)]
 
-#define UDHCPC_SCRIPT "./udhcpc.script.alt"
-
-//////////////////////////////////////////////////////////////////////////////
-/////////////////////////// Local Module Functions ///////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
-static void run_dhcp_client(std::future<int> &future, std::string strIface, bool fApplyLease)
-{
-    // Trigger the DHCP process on the interface
-    LOG(DEBUG) << "Running DHCP client on '" << strIface << "'...";
-    future = std::async(std::launch::async, [=]() -> int {
-        std::string strCmd("/sbin/udhcpc -i " + strIface + " -f -n -q");
-
-        if (fApplyLease)
-            strCmd += " -s " + std::string(UDHCPC_SCRIPT);
-
-        FILE *fp;
-        LOG(DEBUG) << "DHCP Command: " << strCmd;
-        if ((fp = popen(strCmd.c_str(), "r")) == nullptr) {
-            LOG(ERROR) << "failed to run DHCP";
-            return -1;
-        }
-
-        int ret = pclose(fp);
-        LOG(DEBUG) << "DHCP Result: " << ret;
-
-        return ret;
-    });
-}
-
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Static Members ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -260,7 +230,6 @@ bool main_thread::socket_disconnected(Socket *sd)
 
             it = slaves_sockets.erase(it);
             if ((m_eFSMState > EState::_WIRELESS_START_ && m_eFSMState < EState::_WIRELESS_END_) ||
-                (m_eFSMState > EState::_WIRED_START_ && m_eFSMState < EState::_WIRED_END_) ||
                 (soc->slave_is_backhaul_manager &&
                  m_sConfig.eType == SBackhaulConfig::EType::Wireless)) {
                 LOG(INFO) << "Not in operational state OR backhaul manager slave disconnected, "
@@ -562,12 +531,8 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
     // Process internal FSMs before the main one, to prevent
     // falling into the "default" case...
 
-    // Wired FSM
-    if (m_eFSMState > EState::_WIRED_START_ && m_eFSMState < EState::_WIRED_END_) {
-        return backhaul_fsm_wired(skip_select);
-    }
     // Wireless FSM
-    else if (m_eFSMState > EState::_WIRELESS_START_ && m_eFSMState < EState::_WIRELESS_END_) {
+    if (m_eFSMState > EState::_WIRELESS_START_ && m_eFSMState < EState::_WIRELESS_END_) {
         return backhaul_fsm_wireless(skip_select);
     }
 
@@ -928,8 +893,6 @@ bool main_thread::send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> 
     return send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
 }
 
-bool main_thread::backhaul_fsm_wired(bool &skip_select) { return (true); }
-
 bool main_thread::backhaul_fsm_wireless(bool &skip_select)
 {
     switch (m_eFSMState) {
@@ -1239,52 +1202,6 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
                 roam_flag = false;
             }
             FSM_MOVE_STATE(INITIATE_SCAN);
-        }
-        break;
-    }
-    case EState::WIRELESS_BRIDGE_DHCP: {
-
-        // Clear the wireless backhaul interface IP
-        if (network_utils::linux_iface_is_up(m_sConfig.wireless_iface)) {
-            network_utils::linux_iface_ctrl(m_sConfig.wireless_iface, true);
-        }
-
-        //add interface to bridge
-        network_utils::linux_add_iface_to_bridge(m_sConfig.bridge_iface, m_sConfig.wireless_iface);
-
-        // Trigger the DHCP process on the bridge and apply the leased address
-        run_dhcp_client(m_ftDHCPRetCode, m_sConfig.bridge_iface, true);
-        FSM_MOVE_STATE(WIRELESS_BRIDGE_DHCP_WAIT);
-        break;
-    }
-    case EState::WIRELESS_BRIDGE_DHCP_WAIT: {
-        // As long as the future is NOT valid, the command DHCP
-        // command hasn't finished
-        if (!m_ftDHCPRetCode.valid()) {
-            state_attempts++;
-            break;
-        }
-
-        // DHCP Succeeded
-        if (m_ftDHCPRetCode.get() == 0) {
-            LOG(DEBUG) << "DHCP Succeeded";
-
-            // Attempt a connection to the master
-            FSM_MOVE_STATE(MASTER_DISCOVERY);
-
-            // DHCP Failed
-        } else {
-            LOG(ERROR) << "Failed obtaining DHCP on interface '" << m_sConfig.bridge_iface << "'";
-            state_attempts++;
-            FSM_MOVE_STATE(WIRELESS_BRIDGE_DHCP);
-        }
-        if (state_attempts == MAX_FAILED_DHCP_ATTEMPTS) {
-            stop_on_failure_attempts--;
-            platform_notify_error(BPL_ERR_BH_OBTAINING_DHCP_BRIDGE_INTERFACE_MAX_ATTEMPTS,
-                                  "iface=" + m_sConfig.bridge_iface +
-                                      ", attempts=" + std::to_string(MAX_FAILED_DHCP_ATTEMPTS));
-            stop_on_failure_attempts--;
-            FSM_MOVE_STATE(RESTART);
         }
         break;
     }

@@ -230,9 +230,6 @@ private:
     STATE(WAIT_ENABLE)                                                                             \
     STATE(ENABLED)                                                                                 \
                                                                                                    \
-    STATE(_WIRED_START_)                                                                           \
-    STATE(_WIRED_END_)                                                                             \
-                                                                                                   \
     STATE(_WIRELESS_START_)                                                                        \
     STATE(INIT_HAL)                                                                                \
     STATE(WPA_ATTACH)                                                                              \
@@ -241,8 +238,6 @@ private:
     STATE(WIRELESS_CONFIG_4ADDR_MODE)                                                              \
     STATE(WIRELESS_ASSOCIATE_4ADDR)                                                                \
     STATE(WIRELESS_ASSOCIATE_4ADDR_WAIT)                                                           \
-    STATE(WIRELESS_BRIDGE_DHCP)                                                                    \
-    STATE(WIRELESS_BRIDGE_DHCP_WAIT)                                                               \
     STATE(WIRELESS_WAIT_FOR_RECONNECT)                                                             \
     STATE(_WIRELESS_END_)                                                                          \
                                                                                                    \
