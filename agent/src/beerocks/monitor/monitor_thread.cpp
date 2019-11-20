@@ -1164,6 +1164,37 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
     } break;
 
+    case Event::RRM_Beacon_Request_Status: {
+
+        auto hal_data = static_cast<bwl::SBeaconRequestStatus11k *>(data);
+        auto sta_mac  = network_utils::mac_to_string((sMacAddr &)hal_data->sta_mac);
+
+        LOG(INFO) << "Received beacon measurement request status for STA: " << sta_mac
+                  << ", dialog_token: " << int(hal_data->dialog_token)
+                  << ", ack: " << int(hal_data->ack);
+
+        // TODO: If ack == 0, remove the request?
+
+        // Update the dialog token for the STA
+        bool found     = false;
+        auto event_map = pending_11k_events.equal_range("RRM_EVENT_BEACON_REP_RXED");
+        for (auto it = event_map.first; it != event_map.second; it++) {
+            auto &req = it->second;
+            if (req.sta_mac == sta_mac) {
+                req.dialog_token = hal_data->dialog_token;
+                LOG(INFO) << "Updated dialog_token for STA: " << sta_mac;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            LOG(WARNING) << "Received 11k request status for STA: " << sta_mac
+                         << ", but no request was sent...";
+        }
+
+    } break;
+
     case Event::RRM_Beacon_Response: {
 
         auto hal_data = static_cast<bwl::SBeaconResponse11k *>(data);
