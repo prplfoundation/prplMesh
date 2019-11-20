@@ -402,6 +402,11 @@ uint8_t& cACTION_BACKHAUL_ENABLE::wired_backhaul() {
     return (uint8_t&)(*m_wired_backhaul);
 }
 
+
+uint8_t& cACTION_BACKHAUL_ENABLE::backhaul_preferred_radio_band() {
+    return (uint8_t&)(*m_backhaul_preferred_radio_band);
+}
+
 void cACTION_BACKHAUL_ENABLE::class_swap()
 {
     m_iface_mac->struct_swap();
@@ -425,6 +430,7 @@ size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
     class_size += sizeof(uint8_t); // wire_iface_type
     class_size += sizeof(uint8_t); // wireless_iface_type
     class_size += sizeof(uint8_t); // wired_backhaul
+    class_size += sizeof(uint8_t); // backhaul_preferred_radio_band
     return class_size;
 }
 
@@ -467,6 +473,8 @@ bool cACTION_BACKHAUL_ENABLE::init()
     m_wireless_iface_type = (uint8_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_wired_backhaul = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    m_backhaul_preferred_radio_band = (uint8_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
