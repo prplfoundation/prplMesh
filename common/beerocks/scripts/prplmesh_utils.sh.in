@@ -169,7 +169,7 @@ main_agent_operational() {
 
 radio_agent_operational() {
     pgrep -la beerocks_agent | grep $2 | grep -v grep > /dev/null 2>&1 || return 1
-    grep -q 'CSA' "$1/beerocks_agent_$2.log"
+    grep -q 'goto STATE_OPERATIONAL' "$1/beerocks_agent_$2.log"
 }
 
 report() {
