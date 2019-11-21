@@ -6,9 +6,8 @@
  * See LICENSE file for more details.
  */
 
-#include "btl.h"
-
 #include <bcl/network/network_utils.h>
+#include <btl/btl.h>
 #include <easylogging++.h>
 
 using namespace beerocks::btl;
