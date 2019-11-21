@@ -1,29 +1,14 @@
-
-/*##################################################################################################
-# "Copyright (c) 2013 Intel Corporation                                                            #
-# DISTRIBUTABLE AS SAMPLE SOURCE SOFTWARE                                                          #
-# This Distributable As Sample Source Software is subject to the terms and conditions              #
-# of the Intel Software License Agreement for the Intel(R) Cable and GW Software Development Kit"  #
-##################################################################################################*/
-
-/*! \file 	uci_wrapper.c
-	\brief 	This file implements a wrapper over uci library.
-	\todo 	Add license header
-	\todo   Add null pointer verifications and clean-up
+/* SPDX-License-Identifier: BSD-2-Clause-Patent
+ *
+ * Copyright (c) 2016-2019 Intel Corporation
+ *
+ * This code is subject to the terms of the BSD+Patent license.
+ * See LICENSE file for more details.
  */
 
+#include "bpl_cfg_uci.h"
+
 #include <uci.h>
-
-#include "../uci/bpl_cfg_uci.h"
-
-#include <slibc/stdio.h>
-#include <slibc/string.h>
-
-// #define CRIT(fmt, args...) LOGF_LOG_CRIT(fmt, ##args)
-// #define ERROR(fmt, args...) LOGF_LOG_ERROR(fmt, ##args)
-// #define WARN(fmt, args...) LOGF_LOG_WARN(fmt, ##args)
-// #define INFO(fmt, args...) LOGF_LOG_INFO(fmt, ##args)
-// #define DEBUG(fmt, args...) LOGF_LOG_DEBUG(fmt, ##args)
 
 #define LOGF_LOG_CRIT(args...) PRINTF("CRIT", ##args)
 #define LOGF_LOG_ERROR(args...) PRINTF("ERROR", ##args)
@@ -129,7 +114,7 @@ int bpl_cfg_uci_get_wireless(enum paramType type, int index, const char param[],
     char radio_str[]           = "default_radio"; /* == TYPE_VAP */
 
     if (type == TYPE_RADIO) {
-        strncpy_s(radio_str, sizeof(radio_str), "radio", sizeof(radio_str) - 1);
+        strncpy_s(radio_str, sizeof(radio_str), "radio", 5);
     }
 
     status = snprintf_s(path, MAX_UCI_BUF_LEN, "wireless.%s%d.%s", radio_str,
@@ -297,5 +282,3 @@ int bpl_cfg_uci_get_wireless_bool(enum paramType type, int index, const char par
 
     return RETURN_OK;
 }
-
-//UCI HELPER ENDS
