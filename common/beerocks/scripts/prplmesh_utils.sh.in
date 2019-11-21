@@ -163,12 +163,12 @@ stop_function() {
 }
 
 main_agent_operational() {
-    pgrep -la beerocks_agent | grep -v wlan > /dev/null 2>&1 || return 1
+    pgrep -fx "@BEEROCKS_INSTALL_PATH@/bin/beerocks_agent" > /dev/null 2>&1 || return 1
     grep -q 'CONNECTED --> OPERATIONAL' "$1/beerocks_agent.log"
 }
 
 radio_agent_operational() {
-    pgrep -la beerocks_agent | grep $2 | grep -v grep > /dev/null 2>&1 || return 1
+    pgrep -fx "@BEEROCKS_INSTALL_PATH@/bin/beerocks_agent -i $2" > /dev/null 2>&1 || return 1
     grep -q 'goto STATE_OPERATIONAL' "$1/beerocks_agent_$2.log"
 }
 
@@ -253,8 +253,10 @@ main() {
             err "unsupported argument \"$1\""; usage; exit 1 ;;
     esac
 
-    # Give write permissions
-    chmod -R +o+w /tmp/${SUDO_USER:-${USER}}
+    # Give write permissions (linux only)
+    if [ "@TARGET_PLATFORM@" == "linux" ]; then
+        chmod -R +o+w /tmp/${SUDO_USER:-${USER}}
+    fi
 }
 
 VERBOSE=false
@@ -265,6 +267,6 @@ DATA_IFACE=enx00ee22aa28ef
 PRPLMESH_MODE="CA" # CA = Controller & Agent, A = Agent only, C = Controller only
 
 # Export MultiAP libs folder
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@BEEROCKS_INSTALL_PATH@/lib
+export LD_LIBRARY_PATH=@BEEROCKS_INSTALL_PATH@/lib:$LD_LIBRARY_PATH:@EXTRA_LD_PATH@
 
 main $@

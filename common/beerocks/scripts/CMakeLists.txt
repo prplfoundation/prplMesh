@@ -3,8 +3,11 @@ if (TARGET_PLATFORM STREQUAL "linux")
     set(PLATFORM_DB_PATH ${CMAKE_INSTALL_PREFIX}/share)
     set(PLATFORM_DB_PATH_TEMP /tmp)
 elseif (TARGET_PLATFORM STREQUAL "openwrt")
-    set(PLATFORM_DB_PATH "/opt/prplmesh/share")
+    set(PLATFORM_DB_PATH "/opt/prplMesh/share")
     set(PLATFORM_DB_PATH_TEMP "/tmp/beerocks")
+    if (TARGET_PLATFORM_TYPE STREQUAL "ugw")
+        set(EXTRA_LD_PATH "/opt/intel/lib")
+    endif()
 endif()
 
 # Configure the prplMesh helper script
