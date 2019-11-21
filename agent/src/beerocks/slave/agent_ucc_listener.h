@@ -18,7 +18,7 @@ namespace beerocks {
 class agent_ucc_listener : public beerocks_ucc_listener {
 public:
     agent_ucc_listener(uint16_t port, const std::string &vendor, const std::string &model,
-                       const std::string &bridge_iface, Socket **controller_sd);
+                       const std::string &bridge_iface, SocketClient **controller_sd);
     ~agent_ucc_listener(){};
 
     bool init() override;
@@ -39,7 +39,7 @@ private:
     const std::string &m_model;
     const std::string &m_bridge_iface;
     std::string m_bridge_mac;
-    Socket **const m_controller_sd;
+    SocketClient **const m_controller_sd;
 
     std::mutex mutex;
 };
