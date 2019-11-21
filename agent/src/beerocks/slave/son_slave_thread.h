@@ -12,9 +12,9 @@
 #include "agent_ucc_listener.h"
 #include "ap_manager_thread.h"
 
-#include <beerocks/bcl/beerocks_backport.h>
-#include <beerocks/bcl/beerocks_logging.h>
-#include <beerocks/bcl/beerocks_socket_thread.h>
+#include <bcl/beerocks_backport.h>
+#include <bcl/beerocks_logging.h>
+#include <bcl/beerocks_socket_thread.h>
 
 #include <beerocks/tlvf/beerocks_message_header.h>
 

@@ -8,7 +8,7 @@
 
 #include "btl.h"
 
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
 using namespace beerocks::btl;

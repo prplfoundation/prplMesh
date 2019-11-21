@@ -11,11 +11,11 @@
 #include "beerocks_cli_proxy.h"
 #include "beerocks_cli_socket.h"
 
-#include <beerocks/bcl/beerocks_config_file.h>
-#include <beerocks/bcl/beerocks_defines.h>
-#include <beerocks/bcl/beerocks_os_utils.h>
-#include <beerocks/bcl/beerocks_string_utils.h>
-#include <beerocks/bcl/beerocks_version.h>
+#include <bcl/beerocks_config_file.h>
+#include <bcl/beerocks_defines.h>
+#include <bcl/beerocks_os_utils.h>
+#include <bcl/beerocks_string_utils.h>
+#include <bcl/beerocks_version.h>
 #include <easylogging++.h>
 
 #include <chrono>

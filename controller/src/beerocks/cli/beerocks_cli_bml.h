@@ -16,7 +16,7 @@
 #include "rdkb/bml_rdkb.h"
 #endif
 
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/network/network_utils.h>
 
 #include <list>
 #include <unordered_map>

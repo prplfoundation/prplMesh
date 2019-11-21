@@ -9,7 +9,7 @@
 #ifndef _AP_MANAGER_THREAD_H
 #define _AP_MANAGER_THREAD_H
 
-#include <beerocks/bcl/beerocks_socket_thread.h>
+#include <bcl/beerocks_socket_thread.h>
 
 // AP HAL
 #include <bwl/ap_wlan_hal.h>

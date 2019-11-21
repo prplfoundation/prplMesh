@@ -13,10 +13,10 @@
  *     echo -n <command> | nc <bridge_ip_addr> <port>
  */
 
-#include "../include/beerocks/bcl/beerocks_ucc_listener.h"
+#include <bcl/beerocks_ucc_listener.h>
 
-#include "../include/beerocks/bcl/beerocks_string_utils.h"
-#include "../include/beerocks/bcl/network/network_utils.h"
+#include <bcl/beerocks_string_utils.h>
+#include <bcl/network/network_utils.h>
 
 #include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
 #include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>

@@ -13,7 +13,7 @@
 #include "task.h"
 #include "task_pool.h"
 
-#include <beerocks/bcl/network/socket.h>
+#include <bcl/network/socket.h>
 
 #include <beerocks/tlvf/beerocks_message_common.h>
 

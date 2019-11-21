@@ -11,7 +11,7 @@
 
 #include <bwl/base_wlan_hal.h>
 
-#include <beerocks/bcl/beerocks_state_machine.h>
+#include <bcl/beerocks_state_machine.h>
 
 #include <chrono>
 #include <memory>

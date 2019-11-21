@@ -13,10 +13,10 @@
 #include "ire_network_optimization_task.h"
 #include "optimal_path_task.h"
 
-#include <beerocks/bcl/beerocks_utils.h>
-#include <beerocks/bcl/network/network_utils.h>
-#include <beerocks/bcl/network/socket.h>
-#include <beerocks/bcl/son/son_wireless_utils.h>
+#include <bcl/beerocks_utils.h>
+#include <bcl/network/network_utils.h>
+#include <bcl/network/socket.h>
+#include <bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message_control.h>

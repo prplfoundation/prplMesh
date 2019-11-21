@@ -10,11 +10,11 @@
 #include "platform_manager/platform_manager_thread.h"
 #include "son_slave_thread.h"
 
-#include <beerocks/bcl/beerocks_config_file.h>
-#include <beerocks/bcl/beerocks_logging.h>
-#include <beerocks/bcl/beerocks_utils.h>
-#include <beerocks/bcl/beerocks_version.h>
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/beerocks_config_file.h>
+#include <bcl/beerocks_logging.h>
+#include <bcl/beerocks_utils.h>
+#include <bcl/beerocks_version.h>
+#include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
 /// Do not use this macro anywhere else in gateway process

@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include "../../include/beerocks/bcl/network/socket.h"
+#include <bcl/network/socket.h>
 
 #include <errno.h>
 
@@ -21,7 +21,7 @@ typedef int socklen_t;
 #include <sys/types.h>
 #include <sys/un.h>
 
-#include "../include/beerocks/bcl/beerocks_string_utils.h"
+#include <bcl/beerocks_string_utils.h>
 
 #define closesocket close
 #define ioctlsocket ioctl

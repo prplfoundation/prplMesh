@@ -12,7 +12,7 @@
 #include "base_802_11_defs.h"
 #include "base_wlan_hal_types.h"
 
-#include <beerocks/bcl/beerocks_thread_safe_queue.h>
+#include <bcl/beerocks_thread_safe_queue.h>
 
 #include <functional>
 #include <memory>

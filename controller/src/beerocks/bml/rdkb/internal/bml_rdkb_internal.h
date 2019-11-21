@@ -9,9 +9,9 @@
 #ifndef _BML_RDKB_INTERNAL_H_
 #define _BML_RDKB_INTERNAL_H_
 
-#include <beerocks/bcl/beerocks_config_file.h>
-#include <beerocks/bcl/beerocks_promise.h>
-#include <beerocks/bcl/beerocks_socket_thread.h>
+#include <bcl/beerocks_config_file.h>
+#include <bcl/beerocks_promise.h>
+#include <bcl/beerocks_socket_thread.h>
 
 #include <beerocks/tlvf/beerocks_message_common.h>
 

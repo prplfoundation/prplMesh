@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include "../include/beerocks/bcl/beerocks_thread_base.h"
+#include <bcl/beerocks_thread_base.h>
 
 using namespace beerocks;
 

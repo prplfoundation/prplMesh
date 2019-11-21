@@ -9,10 +9,10 @@
 #ifndef _PLATFORM_MANAGER_THREAD_H
 #define _PLATFORM_MANAGER_THREAD_H
 
-#include <beerocks/bcl/beerocks_async_work_queue.h>
-#include <beerocks/bcl/beerocks_config_file.h>
-#include <beerocks/bcl/beerocks_logging.h>
-#include <beerocks/bcl/beerocks_socket_thread.h>
+#include <bcl/beerocks_async_work_queue.h>
+#include <bcl/beerocks_config_file.h>
+#include <bcl/beerocks_logging.h>
+#include <bcl/beerocks_socket_thread.h>
 
 #include "beerocks/tlvf/beerocks_message_common.h"
 

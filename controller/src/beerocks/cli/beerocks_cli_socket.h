@@ -11,8 +11,8 @@
 
 #include "beerocks_cli.h"
 
-#include <beerocks/bcl/beerocks_socket_thread.h>
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/beerocks_socket_thread.h>
+#include <bcl/network/network_utils.h>
 
 namespace beerocks {
 

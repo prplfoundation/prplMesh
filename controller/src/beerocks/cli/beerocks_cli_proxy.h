@@ -9,7 +9,7 @@
 #ifndef __CLI_PROXY_H__
 #define __CLI_PROXY_H__
 
-#include <beerocks/bcl/beerocks_socket_thread.h>
+#include <bcl/beerocks_socket_thread.h>
 #include <beerocks/tlvf/beerocks_message.h>
 
 namespace beerocks {

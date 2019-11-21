@@ -7,7 +7,7 @@
  */
 
 #include "btl.h"
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 #include <mapf/local_bus.h>
 #include <mapf/transport/ieee1905_transport.h>

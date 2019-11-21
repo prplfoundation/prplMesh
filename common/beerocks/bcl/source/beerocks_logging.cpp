@@ -6,9 +6,9 @@
  * See LICENSE file for more details.
  */
 
-#include "../include/beerocks/bcl/beerocks_logging.h"
-#include "../include/beerocks/bcl/beerocks_os_utils.h"
-#include "../include/beerocks/bcl/network/socket.h"
+#include <bcl/beerocks_logging.h>
+#include <bcl/beerocks_os_utils.h>
+#include <bcl/network/socket.h>
 
 #include <algorithm>
 #include <iostream>
