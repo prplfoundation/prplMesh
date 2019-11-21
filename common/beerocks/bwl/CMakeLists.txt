@@ -12,46 +12,49 @@ file(GLOB_RECURSE bwl_common_sources ${MODULE_PATH}/common/*.c*)
 # Support more permissive c++ language
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
-# Default BWL Type
+# Default BWL Type and Libraries
 set(BWL_TYPE "DUMMY")
-
-# UGW
-if (TARGET_PLATFORM STREQUAL "ugw")
-
-    set(BWL_TYPE "DWPAL")
-    # Extra libraries
-    list(APPEND BWL_LIBS rt fapiwlancommon dl helper ugwhelper blobmsg_json)
-    # UGW platform libraries
-    link_directories(${PLATFORM_STAGING_DIR}/usr/lib)
-    # Extra libraries (for dwpal)
-    link_directories(${PLATFORM_STAGING_DIR}/opt/lantiq/lib)
-    # hostap dir
-    set(HOSTAPD_DIR "${PLATFORM_BUILD_DIR}/iwlwav-hostap-2.6")
-    
-# RDKB
-elseif(TARGET_PLATFORM STREQUAL "rdkb")
-
-    set(BWL_TYPE "DWPAL")
-    # Extra libraries
-    list(APPEND BWL_LIBS rt dl)
-    # Extre directories
-    include_directories(${PLATFORM_INCLUDE_DIR}/wav-dpal)
+list(APPEND BWL_LIBS rt dl)
 
 # Linux
-elseif(TARGET_PLATFORM STREQUAL "linux")
-    set(BWL_TYPE "DUMMY")
+if(TARGET_PLATFORM STREQUAL "linux")
     set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
     add_definitions(-DBEEROCKS_TMP_PATH="${BEEROCKS_TMP_PATH}")
 
-# Turris Omnia
-elseif(TARGET_PLATFORM STREQUAL "turris-omnia")
+# OpenWRT
+elseif (TARGET_PLATFORM STREQUAL "openwrt")
 
-    set(BWL_TYPE "NL80211")
+    # UGW
+    if (TARGET_PLATFORM_TYPE STREQUAL "ugw")
+        set(BWL_TYPE "DWPAL")
+
+        # dwpal search path
+        link_directories(${PLATFORM_STAGING_DIR}/opt/intel/lib)
+
+        # UGW specific libraries
+        find_package(safec REQUIRED)
+        list(APPEND BWL_LIBS safec)
+    
+    # Turris Omnia    
+    elseif (TARGET_PLATFORM_TYPE STREQUAL "turris-omnia")
+        set(BWL_TYPE "NL80211")
+    endif()
 
     # hostapd directory
-    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd-full*/hostapd-*")
+    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd-*/hostapd*")
     find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS "${HOSTAPD_SEARCH_PATHS}" NO_CMAKE_FIND_ROOT_PATH)
     set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
+    
+# RDKB
+elseif(TARGET_PLATFORM STREQUAL "rdkb")
+    set(BWL_TYPE "DWPAL")
+
+    # Extre directories
+    include_directories(${PLATFORM_INCLUDE_DIR}/wav-dpal)
+
+    # RDKB specific libraries
+    find_package(slibc REQUIRED)
+    list(APPEND BWL_LIBS slibc)
 
 endif()
 
