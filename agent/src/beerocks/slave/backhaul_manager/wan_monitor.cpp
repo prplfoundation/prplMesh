@@ -8,8 +8,8 @@
 
 #include "wan_monitor.h"
 
-#include <beerocks/bcl/beerocks_logging.h>
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/beerocks_logging.h>
+#include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
 #include <errno.h>           // errno

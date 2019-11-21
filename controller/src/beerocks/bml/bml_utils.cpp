@@ -8,8 +8,8 @@
 
 #include "bml_utils.h"
 
-#include <beerocks/bcl/beerocks_utils.h>
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/beerocks_utils.h>
+#include <bcl/network/network_utils.h>
 
 #include <iomanip> // std::setprecision
 #include <sstream>

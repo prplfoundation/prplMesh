@@ -9,8 +9,8 @@
 #ifndef _BEEROCKS_MAPF_SOCKET_THREAD_H_
 #define _BEEROCKS_MAPF_SOCKET_THREAD_H_
 
-#include <beerocks/bcl/beerocks_message_structs.h>
-#include <beerocks/bcl/beerocks_socket_thread.h>
+#include <bcl/beerocks_message_structs.h>
+#include <bcl/beerocks_socket_thread.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
 #include <tlvf/ieee_1905_1/eMessageType.h>

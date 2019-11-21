@@ -8,8 +8,8 @@
 
 #include "sta_wlan_hal_fapi.h"
 
-#include <beerocks/bcl/beerocks_utils.h>
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/beerocks_utils.h>
+#include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
 #include "ugw_helper.h"

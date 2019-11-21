@@ -8,9 +8,9 @@
 
 #include "monitor_thread.h"
 
-#include <beerocks/bcl/beerocks_logging.h>
-#include <beerocks/bcl/beerocks_os_utils.h>
-#include <beerocks/bcl/beerocks_version.h>
+#include <bcl/beerocks_logging.h>
+#include <bcl/beerocks_os_utils.h>
+#include <bcl/beerocks_version.h>
 #include <easylogging++.h>
 
 /// Do not use this macro anywhere else in gateway process

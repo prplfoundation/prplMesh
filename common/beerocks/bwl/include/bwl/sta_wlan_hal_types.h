@@ -11,7 +11,7 @@
 
 #include <stdint.h>
 
-#include <beerocks/bcl/network/net_struct.h>
+#include <bcl/network/net_struct.h>
 
 namespace bwl {
 

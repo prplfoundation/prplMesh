@@ -8,8 +8,8 @@
 
 #include "db.h"
 
-#include <beerocks/bcl/beerocks_utils.h>
-#include <beerocks/bcl/son/son_wireless_utils.h>
+#include <bcl/beerocks_utils.h>
+#include <bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
 
 #include <algorithm>

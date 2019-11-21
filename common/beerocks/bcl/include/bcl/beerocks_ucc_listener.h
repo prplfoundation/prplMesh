@@ -9,7 +9,7 @@
 #ifndef __BEEROCKS_UCC_LISTENER_H__
 #define __BEEROCKS_UCC_LISTENER_H__
 
-#include "../include/beerocks/bcl/beerocks_socket_thread.h"
+#include <bcl/beerocks_socket_thread.h>
 
 #include <list>
 #include <string>

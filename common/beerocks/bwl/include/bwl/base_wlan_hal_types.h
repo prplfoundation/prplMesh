@@ -9,9 +9,9 @@
 #ifndef _BWL_BASE_WLAN_HAL_TYPES_H_
 #define _BWL_BASE_WLAN_HAL_TYPES_H_
 
-#include <beerocks/bcl/beerocks_defines.h>
-#include <beerocks/bcl/beerocks_message_structs.h>
-#include <beerocks/bcl/network/net_struct.h>
+#include <bcl/beerocks_defines.h>
+#include <bcl/beerocks_message_structs.h>
+#include <bcl/network/net_struct.h>
 
 #include <stdint.h>
 

@@ -25,9 +25,9 @@
 #include "tasks/ire_network_optimization_task.h"
 #include "tasks/network_health_check_task.h"
 
-#include <beerocks/bcl/beerocks_backport.h>
-#include <beerocks/bcl/beerocks_version.h>
-#include <beerocks/bcl/son/son_wireless_utils.h>
+#include <bcl/beerocks_backport.h>
+#include <bcl/beerocks_version.h>
+#include <bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message_1905_vs.h>

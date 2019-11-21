@@ -14,11 +14,11 @@
 #include "tasks/optimal_path_task.h"
 #include "tasks/task_pool.h"
 
-#include <beerocks/bcl/beerocks_defines.h>
-#include <beerocks/bcl/beerocks_logging.h>
-#include <beerocks/bcl/beerocks_message_structs.h>
-#include <beerocks/bcl/beerocks_socket_thread.h>
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/beerocks_defines.h>
+#include <bcl/beerocks_logging.h>
+#include <bcl/beerocks_message_structs.h>
+#include <bcl/beerocks_socket_thread.h>
+#include <bcl/network/network_utils.h>
 
 #include <mapf/common/encryption.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>

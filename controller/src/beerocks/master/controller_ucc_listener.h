@@ -9,7 +9,7 @@
 #ifndef __CONTROLLER_UCC_LISTENER_H__
 #define __CONTROLLER_UCC_LISTENER_H__
 
-#include <beerocks/bcl/beerocks_ucc_listener.h>
+#include <bcl/beerocks_ucc_listener.h>
 
 #include "db/db.h"
 

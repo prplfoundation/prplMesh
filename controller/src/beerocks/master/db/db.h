@@ -11,9 +11,9 @@
 
 #include "node.h"
 
-#include <beerocks/bcl/beerocks_defines.h>
-#include <beerocks/bcl/beerocks_logging.h>
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/beerocks_defines.h>
+#include <bcl/beerocks_logging.h>
+#include <bcl/network/network_utils.h>
 
 #include <tlvf/WSC/eWscAuth.h>
 #include <tlvf/WSC/eWscEncr.h>

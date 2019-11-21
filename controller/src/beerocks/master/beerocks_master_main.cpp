@@ -6,9 +6,9 @@
  * See LICENSE file for more details.
  */
 
-#include <beerocks/bcl/beerocks_config_file.h>
-#include <beerocks/bcl/beerocks_logging.h>
-#include <beerocks/bcl/beerocks_version.h>
+#include <bcl/beerocks_config_file.h>
+#include <bcl/beerocks_logging.h>
+#include <bcl/beerocks_version.h>
 #include <easylogging++.h>
 
 #include "db/db.h"

@@ -8,7 +8,7 @@
 
 #include "beerocks_cli.h"
 
-#include <beerocks/bcl/beerocks_string_utils.h>
+#include <bcl/beerocks_string_utils.h>
 
 #include <iostream>
 #include <iterator>

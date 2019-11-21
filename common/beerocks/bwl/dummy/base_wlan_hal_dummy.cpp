@@ -8,10 +8,10 @@
 
 #include "base_wlan_hal_dummy.h"
 
-#include <beerocks/bcl/beerocks_string_utils.h>
-#include <beerocks/bcl/beerocks_utils.h>
-#include <beerocks/bcl/network/network_utils.h>
-#include <beerocks/bcl/son/son_wireless_utils.h>
+#include <bcl/beerocks_string_utils.h>
+#include <bcl/beerocks_utils.h>
+#include <bcl/network/network_utils.h>
+#include <bcl/son/son_wireless_utils.h>
 
 #include <easylogging++.h>
 #include <limits.h>

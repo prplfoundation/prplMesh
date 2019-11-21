@@ -11,8 +11,8 @@
 
 #include "monitor_db.h"
 
-#include <beerocks/bcl/beerocks_message_structs.h>
-#include <beerocks/bcl/network/socket.h>
+#include <bcl/beerocks_message_structs.h>
+#include <bcl/network/socket.h>
 
 #include <tlvf/CmduMessageTx.h>
 

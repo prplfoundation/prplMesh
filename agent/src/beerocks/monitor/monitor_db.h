@@ -9,7 +9,7 @@
 #ifndef MONITOR_DB_H
 #define MONITOR_DB_H
 
-#include <beerocks/bcl/beerocks_defines.h>
+#include <bcl/beerocks_defines.h>
 #include <bwl/mon_wlan_hal_types.h>
 
 #include <chrono>

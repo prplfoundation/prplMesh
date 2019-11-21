@@ -15,9 +15,9 @@
 
 #include <bwl/sta_wlan_hal.h>
 
-#include <beerocks/bcl/beerocks_config_file.h>
-#include <beerocks/bcl/beerocks_socket_thread.h>
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/beerocks_config_file.h>
+#include <bcl/beerocks_socket_thread.h>
+#include <bcl/network/network_utils.h>
 
 #include <beerocks/tlvf/beerocks_message_header.h>
 

@@ -8,8 +8,8 @@
 
 #include "mon_wlan_hal_nl80211.h"
 
-#include <beerocks/bcl/beerocks_utils.h>
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/beerocks_utils.h>
+#include <bcl/network/network_utils.h>
 
 #include <easylogging++.h>
 

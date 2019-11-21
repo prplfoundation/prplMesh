@@ -10,7 +10,7 @@
 
 #include <bwl/base_wlan_hal_types.h>
 
-#include <beerocks/bcl/beerocks_utils.h>
+#include <bcl/beerocks_utils.h>
 #include <easylogging++.h>
 
 #include "ugw_helper.h"

@@ -16,8 +16,8 @@
 #include "monitor_db.h"
 #include "monitor_stats.h"
 
-#include <beerocks/bcl/beerocks_logging.h>
-#include <beerocks/bcl/beerocks_socket_thread.h>
+#include <bcl/beerocks_logging.h>
+#include <bcl/beerocks_socket_thread.h>
 
 #include <beerocks/tlvf/beerocks_message_monitor.h>
 

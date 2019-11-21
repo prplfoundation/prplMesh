@@ -9,7 +9,7 @@
 #ifndef _CLIENT_LOCATING_TASK_H_
 #define _CLIENT_LOCATING_TASK_H_
 
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/network/network_utils.h>
 
 #include "../db/db.h"
 #include "task.h"

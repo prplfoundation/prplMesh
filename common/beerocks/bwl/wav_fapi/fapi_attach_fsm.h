@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include <beerocks/bcl/beerocks_state_machine.h>
+#include <bcl/beerocks_state_machine.h>
 
 #include <bwl/base_wlan_hal_types.h>
 

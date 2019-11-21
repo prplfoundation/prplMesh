@@ -8,8 +8,8 @@
 
 #include "ap_manager_thread.h"
 
-#include <beerocks/bcl/beerocks_utils.h>
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/beerocks_utils.h>
+#include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message.h>

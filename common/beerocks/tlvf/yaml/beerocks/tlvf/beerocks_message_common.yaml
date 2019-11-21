@@ -2,7 +2,7 @@
 ---
 _include: {
   beerocks/tlvf/beerocks_message_action.h,
-  beerocks/bcl/beerocks_message_structs.h,
+  bcl/beerocks_message_structs.h,
 }
 
 _namespace: beerocks_message

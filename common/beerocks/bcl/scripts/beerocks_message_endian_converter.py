@@ -112,7 +112,7 @@ class MessageEndianConverter():
     def writeCPPFile(self):
         fd = tempfile.NamedTemporaryFile(mode='w+t', delete=False)
 
-        self.writeLine(fd,'#include "../include/beerocks/bcl/beerocks_message_endian_converter.h"')
+        self.writeLine(fd,'#include <bcl/beerocks_message_endian_converter.h>')
         self.writeLine(fd,'')
         self.writeLine(fd,'using namespace beerocks;')
         self.writeLine(fd,'using namespace message;')

@@ -8,7 +8,7 @@
 
 #include "node.h"
 
-#include <beerocks/bcl/beerocks_utils.h>
+#include <bcl/beerocks_utils.h>
 #include <easylogging++.h>
 
 using namespace beerocks;

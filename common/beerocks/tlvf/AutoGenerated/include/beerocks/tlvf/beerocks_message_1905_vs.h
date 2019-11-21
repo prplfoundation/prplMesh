@@ -19,7 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
-#include "beerocks/bcl/beerocks_message_structs.h"
+#include "bcl/beerocks_message_structs.h"
 #include "beerocks/tlvf/beerocks_message_action.h"
 
 namespace beerocks_message {

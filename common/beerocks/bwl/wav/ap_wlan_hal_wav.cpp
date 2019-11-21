@@ -8,11 +8,11 @@
 
 #include "ap_wlan_hal_wav.h"
 
-#include <beerocks/bcl/beerocks_os_utils.h>
-#include <beerocks/bcl/beerocks_utils.h>
-#include <beerocks/bcl/beerocks_version.h>
-#include <beerocks/bcl/network/network_utils.h>
-#include <beerocks/bcl/son/son_wireless_utils.h>
+#include <bcl/beerocks_os_utils.h>
+#include <bcl/beerocks_utils.h>
+#include <bcl/beerocks_version.h>
+#include <bcl/network/network_utils.h>
+#include <bcl/son/son_wireless_utils.h>
 
 #include <easylogging++.h>
 

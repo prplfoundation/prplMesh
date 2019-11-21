@@ -17,8 +17,8 @@
 #include <tlvf/CmduMessageTx.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
 
-#include <beerocks/bcl/beerocks_message_structs.h>
-#include <beerocks/bcl/network/socket.h>
+#include <bcl/beerocks_message_structs.h>
+#include <bcl/network/socket.h>
 
 #include <type_traits>
 

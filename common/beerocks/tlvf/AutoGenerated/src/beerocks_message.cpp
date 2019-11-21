@@ -11,8 +11,8 @@
 
 #include <beerocks/tlvf/beerocks_message.h>
 
-#include <beerocks/bcl/beerocks_utils.h>
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/beerocks_utils.h>
+#include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
 using namespace beerocks;

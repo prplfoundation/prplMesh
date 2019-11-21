@@ -8,7 +8,7 @@
 
 #include "agent_ucc_listener.h"
 
-#include <beerocks/bcl/network/network_utils.h>
+#include <bcl/network/network_utils.h>
 #include <beerocks/tlvf/beerocks_message.h>
 
 #include <easylogging++.h>

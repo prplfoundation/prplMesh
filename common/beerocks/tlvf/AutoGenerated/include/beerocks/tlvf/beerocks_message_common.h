@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <tlvf/swap.h>
 #include "beerocks/tlvf/beerocks_message_action.h"
-#include "beerocks/bcl/beerocks_message_structs.h"
+#include "bcl/beerocks_message_structs.h"
 
 namespace beerocks_message {
 

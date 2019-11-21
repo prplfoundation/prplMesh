@@ -6,11 +6,11 @@
  * See LICENSE file for more details.
  */
 
-#include "../include/beerocks/bcl/beerocks_socket_thread.h"
-#include "../include/beerocks/bcl/beerocks_backport.h"
+#include <bcl/beerocks_backport.h>
+#include <bcl/beerocks_socket_thread.h>
 #include <easylogging++.h>
 
-#include <beerocks/bcl/beerocks_utils.h>
+#include <bcl/beerocks_utils.h>
 
 #include <tlvf/CmduMessageRx.h>
 #include <tlvf/ieee_1905_1/eTlvType.h>

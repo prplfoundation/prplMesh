@@ -8,8 +8,8 @@
 
 #include "beerocks_cli_socket.h"
 
-#include <beerocks/bcl/beerocks_string_utils.h>
-#include <beerocks/bcl/beerocks_utils.h>
+#include <bcl/beerocks_string_utils.h>
+#include <bcl/beerocks_utils.h>
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message.h>

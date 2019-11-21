@@ -9,8 +9,8 @@
 #ifndef __AGENT_UCC_LISTENER_H__
 #define __AGENT_UCC_LISTENER_H__
 
-#include <beerocks/bcl/beerocks_config_file.h>
-#include <beerocks/bcl/beerocks_ucc_listener.h>
+#include <bcl/beerocks_config_file.h>
+#include <bcl/beerocks_ucc_listener.h>
 
 #include <mutex>
 

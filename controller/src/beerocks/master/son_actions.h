@@ -11,8 +11,8 @@
 
 #include "son_master_thread.h"
 
-#include <beerocks/bcl/beerocks_message_structs.h>
-#include <beerocks/bcl/beerocks_utils.h>
+#include <bcl/beerocks_message_structs.h>
+#include <bcl/beerocks_utils.h>
 
 #define CLI_LOG(a) LOG(a)
 
