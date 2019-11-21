@@ -21,7 +21,11 @@ class builder(object):
         self.build_path = "{}/{}".format(build_dir, name)
         self.install_path = install_dir
         self.env = os.environ.copy()
-        self.env["STAGING_DIR"] = ""
+
+        # If the STAGING_DIR environment variable is not set, 
+        # use an empty variable for suppressing compiler warnings
+        if not "STAGING_DIR" in os.environ:
+            self.env["STAGING_DIR"] = ""
 
     def __str__(self):
         return "'{}' builder configuration:\n\tsrc_path: {}\n\tbuild_path: {}\n\tinstall_path: {}".format(self.name, self.src_path, self.build_path, self.install_path)
@@ -192,9 +196,14 @@ class mapbuild(object):
         modules_dir = os.path.realpath(args.map_path)
 
         map_cmake_flags = ["STANDALONE=ON"] + args.cmake_flags
-        if not args.native: map_cmake_flags += ["CMAKE_TOOLCHAIN_FILE=external_toolchain.cmake"]
-        builder = cmakebuilder(".", modules_dir, build_dir, install_dir, args.cmake_verbose, args.make_verbose,
-                               map_cmake_flags, args.generator)
+        if not args.native: 
+            if "CMAKE_TOOLCHAIN_FILE" in os.environ:
+                map_cmake_flags += ["CMAKE_TOOLCHAIN_FILE=" + os.path.abspath(os.environ.get('CMAKE_TOOLCHAIN_FILE'))]
+            else:
+                map_cmake_flags += ["CMAKE_TOOLCHAIN_FILE=external_toolchain.cmake"]
+        for name in _map_modules:
+            builder = cmakebuilder(name, modules_dir, build_dir, install_dir, args.cmake_verbose, args.make_verbose,
+                map_cmake_flags, args.generator)
 
         self.run_command(builder, commands)
 
