@@ -9,8 +9,8 @@
 #ifndef __MASTER_MESSAGE_ROUTER_H__
 #define __MASTER_MESSAGE_ROUTER_H__
 
-#include <beerocks/btl/btl.h>
 #include <beerocks/tlvf/beerocks_message.h>
+#include <btl.h>
 #include <list>
 
 namespace beerocks {
