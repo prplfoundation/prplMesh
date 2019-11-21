@@ -1695,10 +1695,10 @@ bool master_thread::handle_cmdu_1905_topology_notification(Socket *sd,
                              &new_event);
         }
 #endif
+
         if (database.get_node_ipv4(client_mac_str).empty()) {
             database.set_node_state(client_mac_str, beerocks::STATE_CONNECTED_IP_UNKNOWN);
             LOG(INFO) << "STATE_CONNECTED_IP_UNKNOWN for node mac " << client_mac_str;
-            return true;
         }
 
         son_actions::handle_completed_connection(database, cmdu_tx, tasks, client_mac_str);
