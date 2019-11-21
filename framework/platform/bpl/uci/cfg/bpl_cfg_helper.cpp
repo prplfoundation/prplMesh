@@ -6,14 +6,10 @@
  * See LICENSE file for more details.
  */
 
-#include "bpl_cfg_helper.h"
 #include "../../common/utils/utils.h"
 
-extern "C" {
-#include "../uci/bpl_cfg_uci.h"
-}
-
-#include <slibc/stdio.h>
+#include "bpl_cfg_helper.h"
+#include "bpl_cfg_uci.h"
 
 using namespace beerocks::bpl;
 
