@@ -18,7 +18,7 @@ using namespace net;
 
 agent_ucc_listener::agent_ucc_listener(uint16_t port, const std::string &vendor,
                                        const std::string &model, const std::string &bridge_iface,
-                                       Socket **controller_sd)
+                                       SocketClient **controller_sd)
     : beerocks_ucc_listener(port), m_vendor(vendor), m_model(model), m_bridge_iface(bridge_iface),
       m_controller_sd(controller_sd)
 {
