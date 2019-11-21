@@ -8,8 +8,7 @@ import shutil
 import multiprocessing
 
 logger = logging.getLogger("build")
-build_targets=['prepare', 'clean', 'distclean', 'make']
-map_modules=['.']
+build_targets=['prepare', 'clean', 'make']
 dep_modules=['nng', 'safeclib', 'dwpal', 'hostapd', 'wpa_supplicant']
 
 # base builder class
@@ -29,13 +28,8 @@ class builder(object):
 
     def clean(self):
         if os.path.exists(self.build_path):
-            logger.info("cleaning {}".format(self.name))
-            shutil.rmtree(self.build_path)
-
-    def distclean(self):
-        self.clean()
-        if os.path.exists(self.install_path):
-            shutil.rmtree(self.install_path)
+            logger.info("cleaning {} (Removing {})".format(self.name, os.path.abspath(self.build_path)))
+            shutil.rmtree(os.path.abspath(self.build_path))
 
     def prepare(self):
         raise NotImplementedError('prepare() function must be overrided')
@@ -54,8 +48,7 @@ class cmakebuilder(builder):
         super(cmakebuilder, self).__init__(name, modules_dir, build_dir, install_dir)
 
     def clean(self):
-        if os.path.exists(self.build_path):
-            os.system("xargs rm < {}/install_manifest.txt".format(self.build_path))
+
         super(cmakebuilder, self).clean()
 
     def prepare(self):
@@ -145,9 +138,6 @@ class hostapbuilder(builder):
         if os.path.exists(self.config_dst_fpath):
             os.remove(self.config_dst_fpath)
 
-    def distclean(self):
-        self.clean()
-
     def prepare(self):
         logger.info("preparing {}".format(self.name))
         shutil.copy2(self.config_src_fpath, self.config_dst_fpath)
@@ -171,10 +161,9 @@ class mapbuild(object):
         if args.verbose: logger.setLevel(logging.DEBUG)
 
         commands = args.commands
-        _map_modules = map_modules if 'all' in args.modules or 'map' in args.modules else [m for m in map_modules if m in args.modules]
         _dep_modules = dep_modules if 'all' in args.modules or 'dep' in args.modules else [m for m in dep_modules if m in args.modules]
 
-        logger.info("{} {}".format(commands, _map_modules + _dep_modules))
+        logger.info("{} {}".format(commands, ["map"] + _dep_modules))
 
         build_dir = os.path.realpath(os.path.join(args.map_path, '..', 'build'))
         install_dir = os.path.join(build_dir, 'install')
@@ -204,16 +193,13 @@ class mapbuild(object):
 
         map_cmake_flags = ["STANDALONE=ON"] + args.cmake_flags
         if not args.native: map_cmake_flags += ["CMAKE_TOOLCHAIN_FILE=external_toolchain.cmake"]
-        for name in _map_modules:
-            builder = cmakebuilder(name, modules_dir, build_dir, install_dir, args.cmake_verbose, args.make_verbose,
-                map_cmake_flags, args.generator)
+        builder = cmakebuilder(".", modules_dir, build_dir, install_dir, args.cmake_verbose, args.make_verbose,
+                               map_cmake_flags, args.generator)
 
-            self.run_command(builder, commands)
+        self.run_command(builder, commands)
 
     def run_command(self, builder, commands):
         logger.debug(builder)
-        if 'distclean' in commands:
-            builder.distclean()
         if 'clean' in commands:
             builder.clean()
         if 'prepare' in commands:
@@ -225,7 +211,7 @@ class mapbuild(object):
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='build')):
         parser.help = "multiap_sw standalone build module"
-        parser.add_argument('modules', choices=['all', 'map', 'dep'] + map_modules + dep_modules, nargs='+', help='module[s] to build')
+        parser.add_argument('modules', choices=['all', 'map', 'dep'] + dep_modules, nargs='+', help='module[s] to build')
         parser.add_argument('-c', '--commands', choices=build_targets, nargs='+', default=['make'], help="build command (default is clean+make)")
         parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
         parser.add_argument("--native", "-n", action="store_true", help="Build native (not cross compile - ignore external_toolchain.cfg)")
