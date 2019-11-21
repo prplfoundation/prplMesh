@@ -11,13 +11,11 @@
 
 #include "wan_monitor.h"
 
-#include <btl.h>
-
-#include <bwl/sta_wlan_hal.h>
-
 #include <bcl/beerocks_config_file.h>
 #include <bcl/beerocks_socket_thread.h>
 #include <bcl/network/network_utils.h>
+#include <btl/btl.h>
+#include <bwl/sta_wlan_hal.h>
 
 #include <beerocks/tlvf/beerocks_message_header.h>
 

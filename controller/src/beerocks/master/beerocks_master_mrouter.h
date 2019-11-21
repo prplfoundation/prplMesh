@@ -10,7 +10,7 @@
 #define __MASTER_MESSAGE_ROUTER_H__
 
 #include <beerocks/tlvf/beerocks_message.h>
-#include <btl.h>
+#include <btl/btl.h>
 #include <list>
 
 namespace beerocks {
