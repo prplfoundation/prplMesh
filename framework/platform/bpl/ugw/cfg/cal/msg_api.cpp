@@ -12,7 +12,7 @@ extern "C" {
 }
 
 #include "../../../common/utils/utils.h"
-#include <bpl_cfg.h>
+#include <bpl/bpl_cfg.h>
 
 #include <mapf/common/logger.h>
 

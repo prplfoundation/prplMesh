@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include "../../include/bpl_wlan.h"
+#include <bpl/bpl_wlan.h>
 
 #ifndef BPL_PASSIVE_MODE
 int bpl_wlan_ap_start(const char *iface) { return 0; }

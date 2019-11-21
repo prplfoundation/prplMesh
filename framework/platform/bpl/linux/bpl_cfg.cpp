@@ -6,10 +6,10 @@
  * See LICENSE file for more details.
  */
 
-#include "../include/bpl_cfg.h"
 #include "../common/utils/utils.h"
 #include "../common/utils/utils_net.h"
 #include "mapf/common/logger.h"
+#include <bpl/bpl_cfg.h>
 
 using namespace mapf;
 

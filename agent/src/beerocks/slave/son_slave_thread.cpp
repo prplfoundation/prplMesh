@@ -42,8 +42,8 @@
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
 // BPL Error Codes
-#include <bpl_cfg.h>
-#include <bpl_err.h>
+#include <bpl/bpl_cfg.h>
+#include <bpl/bpl_err.h>
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// Local Module Functions ///////////////////////////

@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include <bpl_dhcp.h>
+#include <bpl/bpl_dhcp.h>
 
 #include <errno.h>
 #include <fcntl.h>

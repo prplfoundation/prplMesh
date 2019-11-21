@@ -6,8 +6,8 @@
  * See LICENSE file for more details.
  */
 
-#include "../../bpl_cfg.h"
 #include "../../common/utils/utils.h"
+#include <bpl/bpl_cfg.h>
 
 #include <mapf/common/logger.h>
 

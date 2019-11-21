@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include <bpl_dhcp.h>
+#include <bpl/bpl_dhcp.h>
 
 // Ignore some warnings from libubus
 #pragma GCC diagnostic ignored "-Wunused-parameter"

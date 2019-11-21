@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include "../include/bpl.h"
+#include <bpl/bpl.h>
 
 #include <mapf/common/logger.h>
 

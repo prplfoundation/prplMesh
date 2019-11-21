@@ -11,7 +11,7 @@
 
 #include <string>
 
-#include "../../include/bpl_cfg.h"
+#include <bpl/bpl_cfg.h>
 
 /**
  * Returns the index of interface from DB

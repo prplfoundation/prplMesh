@@ -6,8 +6,8 @@
  * See LICENSE file for more details.
  */
 
-#include "../../include/bpl_arp.h"
 #include "../../common/utils/utils.h"
+#include <bpl/bpl_arp.h>
 
 #include "monitor/arp_monitor.h"
 using namespace beerocks::bpl;
