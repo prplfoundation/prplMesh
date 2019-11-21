@@ -10,12 +10,10 @@
 
 #include "../../common/utils/utils.h"
 #include "../../common/utils/utils_net.h"
-#include "bpl_cfg_helper.h"
 #include <bpl/bpl_cfg.h>
 
-extern "C" {
-#include "../uci/bpl_cfg_uci.h"
-}
+#include "bpl_cfg_helper.h"
+#include "bpl_cfg_uci.h"
 
 #include "mapf/common/logger.h"
 

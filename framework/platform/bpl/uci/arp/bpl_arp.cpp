@@ -16,7 +16,7 @@
 #include <linux/if.h>
 
 extern "C" {
-#define FEATURE_LQ_BRCTL_SHOWMACS_IFNAME
+#define FEATURE_BRCTL_SHOWMACS_IFNAME
 #include <libbridge.h>
 }
 
