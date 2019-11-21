@@ -47,8 +47,6 @@ void son_actions::handle_completed_connection(db &database, ieee1905_1::CmduMess
 
     auto new_hostap_mac      = database.get_node_parent(client_mac);
     auto previous_hostap_mac = database.get_node_previous_parent(client_mac);
-    auto ire_mac             = database.get_node_parent_ire(client_mac);
-    auto ipv4                = database.get_node_ipv4(client_mac);
     auto hostaps             = database.get_active_hostaps();
 
     hostaps.erase(new_hostap_mac); //next operations will be done only on the other APs
