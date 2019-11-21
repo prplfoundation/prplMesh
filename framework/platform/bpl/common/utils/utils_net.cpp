@@ -7,8 +7,8 @@
  */
 
 #include "utils_net.h"
-#include "../../include/bpl_cfg.h"
 #include "utils.h"
+#include <bpl/bpl_cfg.h>
 
 #include <algorithm> // std::transform
 #include <cstring>

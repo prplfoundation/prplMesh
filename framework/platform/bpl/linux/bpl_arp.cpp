@@ -6,8 +6,8 @@
  * See LICENSE file for more details.
  */
 
-#include "../include/bpl_arp.h"
 #include "../common/utils/utils.h"
+#include <bpl/bpl_arp.h>
 
 #include <sys/socket.h>
 // must come after sys/socket.h - see https://lore.kernel.org/patchwork/patch/762406/

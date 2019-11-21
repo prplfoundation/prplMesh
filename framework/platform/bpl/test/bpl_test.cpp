@@ -6,8 +6,8 @@
  * See LICENSE file for more details.
  */
 
-#include <bpl_cfg.h>
-#include <bpl_wlan.h>
+#include <bpl/bpl_cfg.h>
+#include <bpl/bpl_wlan.h>
 #include <dlfcn.h>
 #include <mapf/common/logger.h>
 #include <stdio.h>

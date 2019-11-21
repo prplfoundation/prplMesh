@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include "../../include/bpl_wlan.h"
+#include <bpl/bpl_wlan.h>
 
 int bpl_wlan_ready() { return 0; }
 int bpl_wlan_ap_postinit(const char *iface) { return 0; }

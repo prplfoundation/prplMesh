@@ -31,7 +31,7 @@
 
 #include "../../../common/utils/utils.h"
 #include "../../../common/utils/utils_net.h"
-#include "../../../include/bpl_cfg.h"
+#include <bpl/bpl_cfg.h>
 
 #include <mapf/common/logger.h>
 

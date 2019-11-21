@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include "../include/bpl_wlan.h"
+#include <bpl/bpl_wlan.h>
 
 #include <mapf/common/logger.h>
 

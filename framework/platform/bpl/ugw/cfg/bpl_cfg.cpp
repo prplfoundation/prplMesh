@@ -6,9 +6,9 @@
  * See LICENSE file for more details.
  */
 
-#include "../../include/bpl_cfg.h"
 #include "../../common/utils/utils.h"
 #include "../../common/utils/utils_net.h"
+#include <bpl/bpl_cfg.h>
 
 #include "cal/cal_settings.h"
 #include "cal/msg_api.h"
