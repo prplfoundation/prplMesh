@@ -14,28 +14,63 @@ file(GLOB_RECURSE bpl_common_sources ${MODULE_PATH}/common/*.c*)
 # Common libraries
 find_package(elpp REQUIRED)
 
-# UGW
-if (TARGET_PLATFORM STREQUAL "ugw")
-    
-    # UGW specific includes
-    include_directories(${MODULE_PATH}/ugw/cfg/cal)
+# OpenWRT
+if (TARGET_PLATFORM STREQUAL "openwrt")
 
-    # Platform specific includes
-    include_directories(${PLATFORM_INCLUDE_DIR}/libnl3)
-    include_directories(${PLATFORM_BUILD_DIR}/linux-lantiq_xrx500/bridge-utils-1.4/libbridge)
-    include_directories(${PLATFORM_INCLUDE_DIR})
+    # Platform definitions
+    add_definitions(
+        -DBPL_PASSIVE_MODE
+    )
 
-    # libbridge 
-    link_directories(${PLATFORM_BUILD_DIR}/linux-lantiq_xrx500/bridge-utils-1.4/libbridge)
+    # UGW
+    if (TARGET_PLATFORM_TYPE STREQUAL "ugw")
 
-    # UGW specific sources
-    file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/ugw/*.c*)
+        # Platform definitions
+        add_definitions(-DBEEROCKS_UGW)
 
-    # UGW specific libraries
-    find_package(ubus REQUIRED)
-    list(APPEND BPL_LIBS ubus nl-3 nl-route-3 bridge ugwhelper msgapi cal capi blobmsg_json)
+        # Platform specific includes
+        include_directories(${PLATFORM_INCLUDE_DIR}/libnl3)
+        include_directories(${PLATFORM_INCLUDE_DIR})
+
+        # libbridge
+        file(GLOB LIBBRIDGE_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/linux-intel_mips*/bridge-utils*/libbridge")
+        find_path(LIBBRIDGE_INCLUDE_DIR NAMES "libbridge.h" PATHS "${LIBBRIDGE_SEARCH_PATHS}" NO_CMAKE_FIND_ROOT_PATH)
+        include_directories(${LIBBRIDGE_INCLUDE_DIR})
+        link_directories(${LIBBRIDGE_INCLUDE_DIR})
+
+        # UCI BPL
+        file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/uci/*.c*)
+
+        # UGW specific libraries
+        find_package(ubus REQUIRED)
+        find_package(safec REQUIRED)
+
+        link_directories(${PLATFORM_STAGING_DIR}/usr/lib)
+        list(APPEND BPL_LIBS ubus nl-3 nl-route-3 bridge dl uci ubox safec)
+
+        # Signal libsafec that we support the C99 standard
+        add_definitions(-DHAVE_C99)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+
+    elseif (TARGET_PLATFORM_TYPE STREQUAL "turris-omnia")
+
+        # Platform definitions
+        add_definitions(-DBEEROCKS_TURRIS_OMNIA)
+
+        file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
+
+        set(PLATFORM_DB_PATH "/opt/prplMesh/share")
+        set(PLATFORM_DB_PATH_TEMP "/tmp/beerocks")
+        add_definitions(-DPLATFORM_DB_PATH="${PLATFORM_DB_PATH}/prplmesh_platform_db")
+        add_definitions(-DPLATFORM_DB_PATH_TEMP="${PLATFORM_DB_PATH_TEMP}/prplmesh_platform_db")
+        install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
+
+    endif()
 
 elseif (TARGET_PLATFORM STREQUAL "rdkb")
+
+    # Platform definitions
+    add_definitions(-DBEEROCKS_RDKB)
 
     # Platform specific includes
     include_directories(${PLATFORM_INCLUDE_DIR})
@@ -46,28 +81,24 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
         add_definitions(-DBPL_PASSIVE_MODE)
     endif()
 
-    # RDKB specific sources
-    file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/rdkb/*.c*)
+    # UCI BPL
+    file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/uci/*.c*)
 
+    # RDKB specific libraries
     find_package(ubus REQUIRED)
-    list(APPEND BPL_LIBS ubus nl-3 nl-route-3 bridge dl slibc uci)
+    find_package(slibc REQUIRED)
+
+    list(APPEND BPL_LIBS nl-3 nl-route-3 bridge dl swpal uci ubox ubus slibc)
 
 elseif (TARGET_PLATFORM STREQUAL "linux")
+
+    # Platform definitions
+    add_definitions(-DBEEROCKS_LINUX)
 
     file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
 
     set(PLATFORM_DB_PATH ${CMAKE_INSTALL_PREFIX}/share)
     set(PLATFORM_DB_PATH_TEMP /tmp)
-    add_definitions(-DPLATFORM_DB_PATH="${PLATFORM_DB_PATH}/prplmesh_platform_db")
-    add_definitions(-DPLATFORM_DB_PATH_TEMP="${PLATFORM_DB_PATH_TEMP}/prplmesh_platform_db")
-    install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
-
-elseif (TARGET_PLATFORM STREQUAL "openwrt")
-
-    file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
-
-    set(PLATFORM_DB_PATH "/opt/prplmesh/share")
-    set(PLATFORM_DB_PATH_TEMP "/tmp/beerocks")
     add_definitions(-DPLATFORM_DB_PATH="${PLATFORM_DB_PATH}/prplmesh_platform_db")
     add_definitions(-DPLATFORM_DB_PATH_TEMP="${PLATFORM_DB_PATH_TEMP}/prplmesh_platform_db")
     install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
@@ -82,6 +113,7 @@ endif()
 # Build the library
 add_library(${PROJECT_NAME} SHARED ${bpl_common_sources} ${bpl_platform_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
 target_link_libraries(${PROJECT_NAME} PRIVATE mapf::elpp common ${BPL_LIBS})
 
 # Install
