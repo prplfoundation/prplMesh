@@ -196,7 +196,9 @@ class mapbuild(object):
         modules_dir = os.path.realpath(args.map_path)
 
         map_cmake_flags = ["STANDALONE=ON"] + args.cmake_flags
-        if not args.native: map_cmake_flags += ["CMAKE_TOOLCHAIN_FILE=external_toolchain.cmake"]
+        if not args.native:
+            cmake_toolchain_file = os.environ.get('CMAKE_TOOLCHAIN_FILE', 'external_toolchain.cmake')
+            map_cmake_flags = ["CMAKE_TOOLCHAIN_FILE=" + cmake_toolchain_file] + map_cmake_flags
         builder = cmakebuilder(".", modules_dir, build_dir, install_dir, args.cmake_verbose, args.make_verbose,
                                map_cmake_flags, args.generator)
 
