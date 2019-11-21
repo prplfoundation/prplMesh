@@ -1707,14 +1707,15 @@ bool master_thread::handle_cmdu_1905_topology_notification(Socket *sd,
         // client disconnected
 
 #ifdef BEEROCKS_RDKB
-        //push event to rdkb_wlan_hal task
+
+        // Push event to rdkb_wlan_hal task
         if (vs_tlv && database.settings_rdkb_extensions()) {
             beerocks_message::sSteeringEvDisconnect new_event = {};
-            new_event.client_mac                              = client_mac_str;
-            new_event.bssid                                   = bssid_str;
-            new_event.reason                                  = vs_tlv->params().reason;
-            new_event.source = beerocks_message::eDisconnectSource(vs_tlv->params().source);
-            new_event.type   = beerocks_message::eDisconnectType(vs_tlv->params().type);
+            new_event.client_mac                              = client_mac;
+            new_event.bssid                                   = bssid;
+            new_event.reason                                  = vs_tlv->disconnect_reason();
+            new_event.source = beerocks_message::eDisconnectSource(vs_tlv->disconnect_source());
+            new_event.type   = beerocks_message::eDisconnectType(vs_tlv->disconnect_type());
 
             tasks.push_event(database.get_rdkb_wlan_task_id(),
                              rdkb_wlan_task::events::STEERING_EVENT_CLIENT_DISCONNECT_AVAILABLE,
