@@ -4,10 +4,6 @@ set(PROJECT_NAME beerocks_controller)
 project (${PROJECT_NAME})
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
-# Dependecies
-find_package(btl REQUIRED)
-find_package(MapfTransport QUIET)
-
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
@@ -24,19 +20,10 @@ endif()
 add_executable(${PROJECT_NAME} ${controller_sources} ${controller_tasks_sources} ${controller_db_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
 
-target_link_libraries(${PROJECT_NAME} beerocks::bcl beerocks::btl tlvf elpp beerocks::btlvf)
+target_link_libraries(${PROJECT_NAME} bcl btl tlvf elpp btlvf)
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${MODULE_PATH}/../bml
-    ${MODULE_PATH}/../../../external
-    $<TARGET_PROPERTY:beerocks::bcl,INTERFACE_INCLUDE_DIRECTORIES>
-    $<TARGET_PROPERTY:beerocks::btlvf,INTERFACE_INCLUDE_DIRECTORIES>
 )
-
-# For some reason, this isn't found automatically from btl...
-if (MapfTransport_FOUND)
-     target_link_libraries(${PROJECT_NAME} PRIVATE mapf::ieee1905_transport_messages)
-endif()
-
 
 # Install
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
