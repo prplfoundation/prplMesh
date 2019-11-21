@@ -29,13 +29,7 @@ if (NOT MSGLIB STREQUAL "None")
 endif()
 
 # Include paths
-target_include_directories(${PROJECT_NAME} 
-    PRIVATE 
-        ${MODULE_PATH} 
-        ${MODULE_PATH}/../../../external
-        $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
-        ${PLATFORM_INCLUDE_DIR}
-)
+target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>)
 
 # Install
 install(
