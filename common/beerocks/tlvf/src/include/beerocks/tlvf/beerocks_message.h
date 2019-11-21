@@ -9,10 +9,12 @@
 #ifndef _TLVF_BEEROCKS_MESSAGE_H_
 #define _TLVF_BEEROCKS_MESSAGE_H_
 
+
 #include <beerocks/tlvf/beerocks_message_header.h>
 #include <tlvf/CmduMessageRx.h>
 #include <tlvf/CmduMessageTx.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
+#include <tlvf/TlvList.h>
 
 #include <bcl/beerocks_message_structs.h>
 #include <bcl/network/socket.h>
@@ -54,9 +56,9 @@ public:
 
     class beerocks_header {
     public:
-        beerocks_header(TlvList contents,
+        beerocks_header(ieee1905_1::TlvList contents,
                         std::shared_ptr<beerocks_message::cACTION_HEADER> header)
-            : m_contents(contents), m_header(header)
+            : m_header(header),m_contents(contents)
         {}
         beerocks_message::eAction action() { return m_header->action(); }
         uint8_t action_op() { return m_header->action_op(); };
@@ -70,7 +72,7 @@ public:
         }
         std::shared_ptr<beerocks_message::cACTION_HEADER> m_header;
     private:
-        TlvList &m_contents;
+        ieee1905_1::TlvList &m_contents;
     };
 
     static std::shared_ptr<beerocks_header>
@@ -96,7 +98,7 @@ public:
                 T::get_initial_size();
         uint8_t *vs_buf = vs_tlv->alloc_payload(payload_length);
         // TODO check success
-        TlvList actions(vs_buf, payload_length);
+        ieee1905_1::TlvList actions(vs_buf, payload_length);
         auto actionhdr = actions.addClass<beerocks_message::cACTION_HEADER>();
         if (!actionhdr) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;

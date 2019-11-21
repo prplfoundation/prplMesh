@@ -37,6 +37,40 @@ sVendorOUI& tlvVendorSpecific::vendor_oui() {
     return (sVendorOUI&)(*m_vendor_oui);
 }
 
+uint8_t* tlvVendorSpecific::payload(size_t idx) {
+    if ( (m_payload_idx__ <= 0) || (m_payload_idx__ <= idx) ) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
+    }
+    return &(m_payload[idx]);
+}
+
+bool tlvVendorSpecific::alloc_payload(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list payload, abort!";
+        return false;
+    }
+    if (count == 0) {
+        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
+        return false;
+    }
+    size_t len = sizeof(uint8_t) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_payload;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_payload_idx__ += count;
+    if (!buffPtrIncrementSafe(len)) { return false; }
+    return true;
+}
+
 void tlvVendorSpecific::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
@@ -67,6 +101,7 @@ bool tlvVendorSpecific::init()
     m_vendor_oui = (sVendorOUI*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sVendorOUI))) { return false; }
     if (!m_parse__) { m_vendor_oui->struct_init(); }
+    m_payload = (uint8_t*)m_buff_ptr__;
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }

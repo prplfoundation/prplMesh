@@ -501,19 +501,19 @@ bool bml_internal::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         return false;
     }
 
-    if (process_cmdu_header(beerocks_header->m_header, beerocks_header->m_cmdu_rx) != BML_RET_OK) {
+    if (process_cmdu_header(beerocks_header, cmdu_rx) != BML_RET_OK) {
         return false;
     }
 
     return true;
 }
 
-int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
+int bml_internal::process_cmdu_header(std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
                                       ieee1905_1::CmduMessageRx &cmdu_rx)
 {
 
     // BML messages
-    if (beerocks_header->action() == beerocks_message::ACTION_BML) {
+    if (beerocks_header->m_header->action() == beerocks_message::ACTION_BML) {
         //uint32_t num_of_nodes;
         // Process BML messages
         switch (beerocks_header->action_op()) {
@@ -535,7 +535,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
             char *firstNode       = (num_of_nodes > 0) ? response->buffer(0) : nullptr;
 
             // Process the message
-            handle_nw_map_query_update(num_of_nodes, (int)beerocks_header->last(), firstNode, true);
+            handle_nw_map_query_update(num_of_nodes, (int)(beerocks_header->m_header->last()), firstNode, true);
 
         } break;
         // Network map update
@@ -545,7 +545,7 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
 
             auto firstNode = response->buffer(0);
             // Process the message
-            handle_nw_map_query_update(num_of_nodes, (int)beerocks_header->last(), firstNode,
+            handle_nw_map_query_update(num_of_nodes, (int)beerocks_header->m_header->last(), firstNode,
                                        false);
         } break;
         // statistics update

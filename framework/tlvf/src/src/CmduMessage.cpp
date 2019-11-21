@@ -23,10 +23,10 @@ int CmduMessage::getNextTlvType() const
         return -1;
     }
 
-    if (m_class_vector.size() == 0) {
+    if (tlvs.getClassVector().size() == 0) {
         tlvValue = *m_cmdu_header->getBuffPtr();
     } else {
-        tlvValue = *m_class_vector.back()->getBuffPtr();
+        tlvValue = *tlvs.getClassVector().back()->getBuffPtr();
     }
     
     return int(tlvValue);
@@ -39,10 +39,10 @@ bool CmduMessage::getNextTlvType(eTlvType &tlvType) const
         return false;
     }
 
-    if (m_class_vector.size() == 0) {
+    if (tlvs.getClassVector().size() == 0) {
         tlvValue = *m_cmdu_header->getBuffPtr();
     } else {
-        tlvValue = *m_class_vector.back()->getBuffPtr();
+        tlvValue = *tlvs.getClassVector().back()->getBuffPtr();
     }
     if (eTlvTypeValidate::check(tlvValue)) {
         tlvType = (eTlvType)tlvValue;
@@ -56,15 +56,15 @@ uint16_t CmduMessage::getNextTlvLength() const
 {
     uint16_t tlvLength;
     if (m_cmdu_header && (m_cmdu_header->getBuffRemainingBytes() > kTlvHeaderLength)) {
-        if (m_class_vector.size() == 0) {
+        if (tlvs.getClassVector().size() == 0) {
             tlvLength = *((uint16_t *)(m_cmdu_header->getBuffPtr() + sizeof(uint8_t)));
         } else {
-            tlvLength = *((uint16_t *)(m_class_vector.back()->getBuffPtr() + sizeof(uint8_t)));
+            tlvLength = *((uint16_t *)(tlvs.getClassVector().back()->getBuffPtr() + sizeof(uint8_t)));
         }
 
-        if (m_swap) {
-            swap_16((uint16_t &)tlvLength);
-        }
+        // if (m_swap) {
+        //     swap_16((uint16_t &)tlvLength);
+        // }
     } else {
         tlvLength = 0;
     }
@@ -75,20 +75,13 @@ uint8_t *CmduMessage::getNextTlvData() const
 {
     uint8_t *tlvData = nullptr;
     if (m_cmdu_header && (m_cmdu_header->getBuffRemainingBytes() > kTlvHeaderLength)) {
-        if (m_class_vector.size() == 0) {
+        if (tlvs.getClassVector().size() == 0) {
             tlvData = m_cmdu_header->getBuffPtr() + sizeof(uint8_t) + sizeof(uint16_t);
         } else {
-            tlvData = m_class_vector.back()->getBuffPtr() + sizeof(uint8_t) + sizeof(uint16_t);
+            tlvData = tlvs.getClassVector().back()->getBuffPtr() + sizeof(uint8_t) + sizeof(uint16_t);
         }
     }
     return tlvData;
-}
-
-size_t CmduMessage::getClassCount() const { return m_class_vector.size(); }
-
-const std::vector<std::shared_ptr<BaseClass>> &CmduMessage::getClassVector() const
-{
-    return (const std::vector<std::shared_ptr<BaseClass>> &)m_class_vector;
 }
 
 size_t CmduMessage::getMessageLength() const
@@ -96,13 +89,13 @@ size_t CmduMessage::getMessageLength() const
     if (m_cmdu_header == nullptr)
         return 0;
     size_t msg_len = m_cmdu_header->getLen();
-    for (auto const &c : m_class_vector) {
+    for (auto const &c : tlvs.getClassVector()) {
         msg_len += c->getLen();
     }
     return msg_len;
 }
-
-size_t CmduMessage::getMessageBuffLength() const { return m_buff_len; }
+//TODO: this might cause issues, maybe because it doesnt count in the length of the header?
+size_t CmduMessage::getMessageBuffLength() const { return tlvs.getMessageBuffLength(); }
 
 uint8_t *CmduMessage::getMessageBuff() const
 {
@@ -115,14 +108,10 @@ void CmduMessage::swap()
         return;
 
     m_cmdu_header
-        ->class_swap(); // the header isn't part of the m_class_vector, so we should swap it separately
+        ->class_swap(); // the header isn't part of the tlvs.getClassVector(), so we should swap it separately
 
     // call all tlv finalize functions
-    for (auto const &c : m_class_vector) {
-        c->class_swap();
-    }
-
-    m_swapped = !m_swapped;
+    tlvs.swap();
 }
 
 void CmduMessage::reset()
@@ -137,7 +126,7 @@ eMessageType CmduMessage::getMessageType()
     uint16_t msgValue = 0;
 
     msgValue = (uint16_t)getCmduHeader()->message_type();
-    if (m_swap && !m_swapped) {
+    if (swap_needed() && !is_swapped()) {
         swap_16((uint16_t &)msgValue);
     }
 
@@ -148,7 +137,7 @@ uint16_t CmduMessage::getMessageId()
 {
     uint16_t mid = getCmduHeader()->message_id();
 
-    if (m_swap && !m_swapped) {
+    if (swap_needed() && !is_swapped()) {
         swap_16((uint16_t &)mid);
     }
 
