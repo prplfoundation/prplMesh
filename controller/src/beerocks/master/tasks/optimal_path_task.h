@@ -14,9 +14,9 @@
 #include "task_pool.h"
 
 #define MEAS_MAX_DELAY_ALLOWED 10
+using namespace beerocks;
 
 namespace son {
-
 class optimal_path_task : public task {
 public:
     optimal_path_task(db &database_, ieee1905_1::CmduMessageTx &cmdu_tx_, task_pool &tasks_,

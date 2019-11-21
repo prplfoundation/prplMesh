@@ -21,6 +21,7 @@
 #include <tlvf/BaseClass.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
 #include "tlvf/ieee_1905_1/sVendorOUI.h"
+#include <tuple>
 
 namespace ieee1905_1 {
 
@@ -40,6 +41,9 @@ class tlvVendorSpecific : public BaseClass
         const eTlvType& type();
         uint16_t& length();
         sVendorOUI& vendor_oui();
+        size_t payload_length() { return m_payload_idx__ * sizeof(uint8_t); }
+        uint8_t* payload(size_t idx = 0);
+        bool alloc_payload(size_t count = 1);
         void class_swap();
         static size_t get_initial_size();
 
@@ -48,6 +52,9 @@ class tlvVendorSpecific : public BaseClass
         eTlvType* m_type = nullptr;
         uint16_t* m_length = nullptr;
         sVendorOUI* m_vendor_oui = nullptr;
+        uint8_t* m_payload = nullptr;
+        size_t m_payload_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 }; // close namespace: ieee1905_1

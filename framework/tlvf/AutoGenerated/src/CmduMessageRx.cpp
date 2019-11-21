@@ -22,30 +22,27 @@ CmduMessageRx::CmduMessageRx() : CmduMessage()
 
 CmduMessageRx::CmduMessageRx(CmduMessageRx &original) : CmduMessage()
 {
-    m_dynamically_allocated = true;
     size_t buff_len         = original.getMessageBuffLength();
     m_buff                  = new uint8_t[buff_len];
     std::copy(original.getMessageBuff(), original.getMessageBuff() + buff_len, m_buff);
-    parse(m_buff, buff_len, original.m_swap);
-    if (m_swap) {
+    parse(m_buff, buff_len, original.tlvs.swap_needed());
+    if (original.swap_needed()) {
         m_cmdu_header->class_swap();
     }
 }
 
 CmduMessageRx::~CmduMessageRx()
 {
-    if (m_dynamically_allocated) {
+    //TODO: Do we need to check for anything?
+    // if (m_dynamically_allocated) {
         delete m_buff;
-    }
+    // }
 }
 
 bool CmduMessageRx::parse(uint8_t *buff, size_t buff_len, bool swap_needed, bool parse_tlvs)
 {
     reset();
-    m_parse       = true;
-    m_swap        = swap_needed;
     m_buff        = buff;
-    m_buff_len    = buff_len;
     m_cmdu_header = std::make_shared<cCmduHeader>(buff, buff_len, true, false);
     if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
         m_cmdu_header = nullptr;

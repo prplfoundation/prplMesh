@@ -66,7 +66,7 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
         return nullptr;
     if (!intel_oui(tlv_header))
         return nullptr;
-    TlvList vs_contents(tlv_header.payload(), tlv_header.payload_length());
+    ieee1905_1::TlvList vs_contents(tlv_header->payload(), tlv_header->payload_length());
     auto header = vs_contents.addClass<beerocks_message::cACTION_HEADER>();
     if (!header)
         return nullptr;
@@ -109,7 +109,7 @@ std::string message_com::print_cmdu_types(ieee1905_1::CmduMessageRx &cmdu_rx, sC
             LOG(ERROR) << "addClass<tlvVendorSpecific> failed!";
             return info;
         }
-        TlvList actions(tlv_header->payload(), tlv_header->payload_length());
+        ieee1905_1::TlvList actions(tlv_header->payload(), tlv_header->payload_length());
         auto beerocks_header = actions.addClass<beerocks_message::cACTION_HEADER>();
         if (!beerocks_header) {
             LOG(ERROR) << "addClass<cACTION_HEADER> failed!";

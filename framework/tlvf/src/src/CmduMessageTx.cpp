@@ -26,10 +26,9 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType mes
     if (!m_buff || !m_buff_len)
         return nullptr;
 
-    m_parse = false;
-    memset(m_buff, 0, m_buff_len);
+    memset(m_buff, 0, getMessageBuffLength());
     reset();
-    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, m_buff_len);
+    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, getMessageBuffLength());
     if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
         return nullptr;
     }
@@ -44,9 +43,9 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::load()
     if (!m_buff || !m_buff_len)
         return nullptr;
 
-    m_parse = true;
+    
     reset();
-    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, m_buff_len, m_parse);
+    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, getMessageBuffLength());
     if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
         return nullptr;
     }
@@ -77,8 +76,6 @@ std::shared_ptr<tlvVendorSpecific> CmduMessageTx::add_vs_tlv(tlvVendorSpecific::
 
 bool CmduMessageTx::finalize(bool swap_needed)
 {
-    if (m_finalized)
-        return true;
 
     if (!m_cmdu_header)
         return false; 
@@ -89,6 +86,5 @@ bool CmduMessageTx::finalize(bool swap_needed)
     if (swap_needed)
         swap();
 
-    m_finalized = true;
     return true;
 }

@@ -13,7 +13,6 @@
 
 #include <beerocks/tlvf/beerocks_message.h>
 #include <beerocks/tlvf/beerocks_message_control.h>
-
 #include <chrono>
 #include <memory>
 #include <set>
@@ -60,7 +59,7 @@ protected:
     virtual void handle_event(int event_type, void *obj) {}
     virtual void handle_response(std::string slave_mac,
                                  beerocks_message::eActionOp_CONTROL action_op,
-                                 std::shared_ptr<message_com::beerocks_header> beerocks_header)
+                                 std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
     {
     }
     virtual void handle_responses_timeout(
