@@ -20,7 +20,7 @@ To build prplMesh, you need (on Ubuntu) the following packages:
 ```bash
 sudo apt install curl gcc cmake binutils git autoconf autogen libtool pkg-config \
      libreadline-dev libncurses-dev libssl-dev libjson-c-dev libnl-genl-3-dev libzmq3-dev \
-     python python-yaml python-paramiko repo bridge-utils clang-format
+     python python-yaml python-paramiko repo bridge-utils clang-format ninja
 ```
 
 If you haven't done so already, set up your git configuration:
@@ -43,30 +43,33 @@ repo forall -p -c 'git checkout $REPO_RREV'
 
 ## Build Instructions
 
-Each component can be built with CMAKE, or use the [tools/maptools.py](tools/README.md) build command.
+Use standard CMake to build prplMesh, with a configure-build-install cycle.
 
-To build prplMesh in debug mode (for being able to debug with gdb), with all features and tests, run
-
-```bash
-./prplMesh/tools/maptools.py build map -f MSGLIB=zmq BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug
-```
-
-Subsequent builds don't need to repeat all of these options:
+To build prplMesh natively in debug mode (for being able to debug with gdb), with all features and tests, and installed in a local directory, run
 
 ```bash
-./prplMesh/tools/maptools.py build map
+cmake -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=../build/install -H . -B ../build -G Ninja
+ninja -C ../build install
 ```
 
-Run `./prplMesh/tools/maptools.py build --help` for more options.
+If you prefer, `make` can be used instead of `ninja` by removing the `-G Ninja` part.
 
-Note - to build with Docker, see provided [building with docker](tools/docker/README.md)
+For system-level install, the standard DESTDIR approach can be used for installing prplMesh as a package.
+
+```bash
+DESTDIR=/tmp/prplMesh-install ninja install
+```
+
+Alternatively, [tools/maptools.py](tools/README.md) can be used to build and install prplMesh with a single command.
+
+Note - to build and run with Docker, see provided [building with docker](tools/docker/README.md)
 
 ## Running Instructions
 
 Once built, prplMesh controller, agent and framework can be started using `prplmesh_utils.sh`:
 
 ```bash
-cd <path/to/prplmesh_root>/build/install/scripts
+cd <path/to/install/dir>/scripts
 sudo ./prplmesh_utils.sh start
 ```
 
