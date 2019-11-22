@@ -28,6 +28,8 @@ extern "C" {
 
 #define FOREACH_ERROR_CODE(ERROR_CODE)                                                             \
     ERROR_CODE(BPL_ERR_NONE)                                                                       \
+    ERROR_CODE(BPL_ERR_UNKNOWN)                                                                    \
+    ERROR_CODE(BPL_ERR_OPERATION_NOT_SUPPORTED)                                                    \
     ERROR_CODE(BPL_ERR_BH_READING_DATA_FROM_THE_BRIDGE)                                            \
     ERROR_CODE(BPL_ERR_BH_TIMEOUT_ATTACHING_TO_WPA_SUPPLICANT)                                     \
     ERROR_CODE(BPL_ERR_BH_SCAN_FAILED_TO_INITIATE_SCAN)                                            \
