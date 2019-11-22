@@ -12,8 +12,13 @@ file(GLOB_RECURSE bwl_common_sources ${MODULE_PATH}/common/*.c*)
 # Support more permissive c++ language
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
-# Default BWL Type
+# Default defaults
 set(BWL_TYPE "DUMMY")
+set(BEEROCKS_TMP_PATH "/tmp/beerocks")
+if(TARGET_PLATFORM STREQUAL "linux")
+    set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
+endif()
+add_definitions(-DBEEROCKS_TMP_PATH="${BEEROCKS_TMP_PATH}")
 
 # UGW
 if (TARGET_PLATFORM STREQUAL "ugw")
@@ -36,12 +41,6 @@ elseif(TARGET_PLATFORM STREQUAL "rdkb")
     list(APPEND BWL_LIBS rt dl)
     # Extre directories
     include_directories(${PLATFORM_INCLUDE_DIR}/wav-dpal)
-
-# Linux
-elseif(TARGET_PLATFORM STREQUAL "linux")
-    set(BWL_TYPE "DUMMY")
-    set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
-    add_definitions(-DBEEROCKS_TMP_PATH="${BEEROCKS_TMP_PATH}")
 
 # Turris Omnia
 elseif(TARGET_PLATFORM STREQUAL "turris-omnia")
