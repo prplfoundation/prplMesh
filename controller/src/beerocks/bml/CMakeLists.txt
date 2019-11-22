@@ -28,8 +28,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE bcl tlvf elpp btlvf)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs" VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${MODULE_PATH}
-    $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
-    $<TARGET_PROPERTY:btlvf,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 # Install
