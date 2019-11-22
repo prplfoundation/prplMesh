@@ -17,7 +17,7 @@
 
 using namespace beerocks::bpl;
 
-int bpl_arp_mon_start(BPL_ARP_MON_CTX *ctx, const char *iface) { return 0; }
+int bpl_arp_mon_start(BPL_ARP_MON_CTX *ctx, const char *iface) { return -2; }
 
 int bpl_arp_mon_stop(BPL_ARP_MON_CTX ctx) { return 0; }
 
