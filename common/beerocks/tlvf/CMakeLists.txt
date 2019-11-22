@@ -40,23 +40,15 @@ add_custom_command(
 
 add_library(${PROJECT_NAME} SHARED ${TLVF_OUTPUTS})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
+
 target_include_directories(${PROJECT_NAME}
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${TLVF_OUT}/include
     PUBLIC
-        $<TARGET_PROPERTY:tlvf,INTERFACE_INCLUDE_DIRECTORIES>
-        $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
         $<BUILD_INTERFACE:${TLVF_OUT}/include>
-        $<INSTALL_INTERFACE:include>
-    )
+)
 
-# set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
-target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf)
+target_link_libraries(${PROJECT_NAME} PRIVATE bcl tlvf)
 
-install(TARGETS ${PROJECT_NAME} EXPORT btlvfConfig
+install(TARGETS ${PROJECT_NAME}
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(DIRECTORY ${TLVF_OUT}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(EXPORT btlvfConfig NAMESPACE beerocks:: DESTINATION lib/cmake/beerocks/${PROJECT_NAME})
