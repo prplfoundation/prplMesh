@@ -1518,7 +1518,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             LOG(DEBUG) << "slave is backhaul manager, updating";
             m_pBackhaulManagerSlave = sd;
 
-#if !defined(BEEROCKS_LINUX) && !defined(BEEROCKS_TURRIS_OMNIA)
             // Start ARP monitor
             if (enable_arp_monitor) {
                 if (!init_arp_monitor()) {
@@ -1534,9 +1533,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                     return false;
                 }
             }
-#else
-            LOG(INFO) << "*** ARP & DHCP Monitors are disabled ***";
-#endif
         }
     } break;
 
@@ -2126,13 +2122,18 @@ bool main_thread::init_arp_monitor()
             return false;
         }
 
-        m_uiArpMonIP   = info.ipa.s_addr;
-        m_uiArpMonMask = info.nmask.s_addr;
-
-        if (bpl_arp_mon_start(&m_ctxArpMon, config.bridge_iface.c_str()) != 0) {
+        int ret = bpl_arp_mon_start(&m_ctxArpMon, config.bridge_iface.c_str());
+        if (ret < 0) {
+            if (ret == -BPL_ERR_OPERATION_NOT_SUPPORTED) {
+                LOG(INFO) << "Skip starting ARP monitor (not supported)";
+                return (true);
+            }
             LOG(ERROR) << "Failed starting ARP monitor!";
             return (false);
         }
+
+        m_uiArpMonIP   = info.ipa.s_addr;
+        m_uiArpMonMask = info.nmask.s_addr;
 
         // Create wrapper socket classes
         if (!m_pArpRawSocket) {
@@ -2198,11 +2199,15 @@ bool main_thread::init_dhcp_monitor()
 
     if (!m_pDHCPMonSocket) {
 
-        int dhcp_mon_fd;
-        if ((dhcp_mon_fd = bpl_dhcp_mon_start(
-                 [](const char *op, const char *mac, const char *ip, const char *hostname) {
-                     dhcp_monitor_cb_wrapper(op, mac, ip, hostname);
-                 })) < 0) {
+        int dhcp_mon_fd = bpl_dhcp_mon_start(
+            [](const char *op, const char *mac, const char *ip, const char *hostname) {
+                dhcp_monitor_cb_wrapper(op, mac, ip, hostname);
+            });
+        if (dhcp_mon_fd < 0) {
+            if (dhcp_mon_fd == -BPL_ERR_OPERATION_NOT_SUPPORTED) {
+                LOG(INFO) << "Skip starting DHCP monitor (not supported)";
+                return (true);
+            }
             LOG(ERROR) << "Failed starting DHCP monitor: " << dhcp_mon_fd;
             return (false);
         }
