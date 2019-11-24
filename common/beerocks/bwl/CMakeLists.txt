@@ -49,7 +49,7 @@ elseif (TARGET_PLATFORM STREQUAL "openwrt")
 elseif(TARGET_PLATFORM STREQUAL "rdkb")
     set(BWL_TYPE "DWPAL")
 
-    # Extre directories
+    # Extra directories
     include_directories(${PLATFORM_INCLUDE_DIR}/wav-dpal)
 
     # RDKB specific libraries

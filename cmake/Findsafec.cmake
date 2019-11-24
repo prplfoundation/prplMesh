@@ -14,11 +14,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(safec DEFAULT_MSG
     SAFEC_INCLUDE_DIRS
 )
 
-# message("SAFEC_LIBRARY: ${SAFEC_LIBRARY}")
-# message("SAFEC_INCLUDE_DIRS: ${SAFEC_INCLUDE_DIRS}")
-
 if (safec_FOUND)
-    # message("safec found")
     add_library(safec UNKNOWN IMPORTED)
 
     # Includes
