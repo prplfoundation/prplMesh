@@ -104,3 +104,5 @@ int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable
 }
 
 int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif) { return 0; }
+
+int bpl_cfg_monitoring_supported(void) { return 1; }

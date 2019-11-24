@@ -228,3 +228,5 @@ int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_
 }
 
 int bpl_cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return RETURN_ERR; }
+
+int bpl_cfg_monitoring_supported(void) { return 0; }

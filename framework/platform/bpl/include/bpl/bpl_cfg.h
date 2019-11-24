@@ -555,6 +555,13 @@ int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_
  */
 int bpl_cfg_get_administrator_credentials(char pass[BPL_USER_PASS_LEN]);
 
+/**
+ * @brief Return 1 BPL supports monitoring (ARP and DHCP)
+ * 
+ * @return 1 if monitoring supported, 0 otherwise
+ */
+int bpl_cfg_monitoring_supported(void);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
