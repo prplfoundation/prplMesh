@@ -3,7 +3,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
 
 ## General configuration
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR ARMV7 CACHE STRING "System Processor")
 set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON)
 
 # Workaround for https://www.cmake.org/Bug/view.php?id=14075
