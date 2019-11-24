@@ -47,7 +47,6 @@ public:
         int backhaul_network_enabled;
         int backhaul_preferred_radio_band;
         int dfs_reentry;
-        int passive_mode;
         int proprietary_repeater;
     };
 

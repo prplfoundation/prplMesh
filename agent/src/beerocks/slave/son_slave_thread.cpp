@@ -217,23 +217,6 @@ bool slave_thread::socket_disconnected(Socket *sd)
         return true;
     }
 
-    auto ap_manager_err_code_to_bpl_err_code = [](int code) -> int {
-        if (code == ap_manager_thread::eThreadErrors::APMANAGER_THREAD_ERROR_HOSTAP_DISABLED) {
-            return BPL_ERR_AP_MANAGER_HOSTAP_DISABLED;
-        } else if (code == ap_manager_thread::eThreadErrors::APMANAGER_THREAD_ERROR_ATTACH_FAIL) {
-            return BPL_ERR_AP_MANAGER_ATTACH_FAIL;
-        } else if (code == ap_manager_thread::eThreadErrors::APMANAGER_THREAD_ERROR_SUDDEN_DETACH) {
-            return BPL_ERR_AP_MANAGER_SUDDEN_DETACH;
-        } else if (code ==
-                   ap_manager_thread::eThreadErrors::APMANAGER_THREAD_ERROR_HAL_DISCONNECTED) {
-            return BPL_ERR_AP_MANAGER_HAL_DISCONNECTED;
-        } else if (code == ap_manager_thread::eThreadErrors::APMANAGER_THREAD_ERROR_CAC_TIMEOUT) {
-            return BPL_ERR_AP_MANAGER_CAC_TIMEOUT;
-        } else {
-            return BPL_ERR_AP_MANAGER_DISCONNECTED;
-        }
-    };
-
     if (sd == backhaul_manager_socket) {
         LOG(DEBUG) << "backhaul manager & master socket disconnected! - slave_reset()";
         platform_notify_error(BPL_ERR_SLAVE_SLAVE_BACKHAUL_MANAGER_DISCONNECTED, "");
@@ -250,18 +233,10 @@ bool slave_thread::socket_disconnected(Socket *sd)
             err_code != ap_manager_thread::eThreadErrors::APMANAGER_THREAD_ERROR_NO_ERROR) {
             LOG(DEBUG) << "ap_manager socket disconnected, last error code " << int(err_code)
                        << "  - slave_reset()";
-            if (!platform_settings.passive_mode_enabled) {
-                stop_on_failure_attempts--;
-                platform_notify_error(ap_manager_err_code_to_bpl_err_code(err_code), "");
-            }
             slave_reset();
         } else {
             // only monitor disconnected
             LOG(DEBUG) << "monitor socket disconnected! - slave_reset()";
-            if (!platform_settings.passive_mode_enabled) {
-                stop_on_failure_attempts--;
-                platform_notify_error(BPL_ERR_MONITOR_DISCONNECTED, "");
-            }
             slave_reset();
         }
 
@@ -3353,11 +3328,10 @@ bool slave_thread::ap_manager_start()
     ap_manager = new ap_manager_thread(slave_uds);
 
     ap_manager_thread::ap_manager_conf_t ap_manager_conf;
-    ap_manager_conf.hostap_iface      = config.hostap_iface;
-    ap_manager_conf.hostap_iface_type = config.hostap_iface_type;
-    ap_manager_conf.channel           = wlan_settings.channel;
-    ap_manager_conf.iface_filter_low  = config.backhaul_wireless_iface_filter_low;
-    //ap_manager_conf.is_passive_mode     = (platform_settings.passive_mode_enabled == 1);
+    ap_manager_conf.hostap_iface        = config.hostap_iface;
+    ap_manager_conf.hostap_iface_type   = config.hostap_iface_type;
+    ap_manager_conf.channel             = wlan_settings.channel;
+    ap_manager_conf.iface_filter_low    = config.backhaul_wireless_iface_filter_low;
     ap_manager_conf.backhaul_vaps_bssid = platform_settings.backhaul_vaps_bssid;
 
     ap_manager->ap_manager_config(ap_manager_conf);

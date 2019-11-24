@@ -171,10 +171,6 @@ static bool fill_platform_settings(
             LOG(ERROR) << "Failed reading 'dfs_reentry'";
             return false;
         }
-        if ((platform_common_conf.passive_mode = bpl_cfg_get_passive_mode()) < 0) {
-            LOG(ERROR) << "Failed reading 'passive_mode'";
-            return false;
-        }
 
         if (bpl_cfg_get_backhaul_params(&platform_common_conf.backhaul_max_vaps,
                                         &platform_common_conf.backhaul_network_enabled,
@@ -211,7 +207,6 @@ static bool fill_platform_settings(
     msg->platform_settings().dfs_reentry_enabled = uint8_t(platform_common_conf.dfs_reentry);
     msg->platform_settings().rdkb_extensions_enabled =
         uint8_t(platform_common_conf.rdkb_extensions);
-    msg->platform_settings().passive_mode_enabled = uint8_t(platform_common_conf.passive_mode);
     msg->platform_settings().client_band_steering_enabled =
         uint8_t(platform_common_conf.band_steering);
     msg->platform_settings().client_optimal_path_roaming_enabled =
@@ -247,8 +242,6 @@ static bool fill_platform_settings(
     LOG(DEBUG) << "local_gw: " << (unsigned)msg->platform_settings().local_gw;
     LOG(DEBUG) << "local_master: " << (unsigned)msg->platform_settings().local_master;
     LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)msg->platform_settings().dfs_reentry_enabled;
-    LOG(DEBUG) << "passive_mode_enabled: "
-               << (unsigned)msg->platform_settings().passive_mode_enabled;
     LOG(DEBUG) << "backhaul_preferred_radio_band: "
                << (unsigned)msg->platform_settings().backhaul_preferred_radio_band;
 

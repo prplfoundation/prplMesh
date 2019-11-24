@@ -309,15 +309,6 @@ int bpl_cfg_get_band_steering();
 int bpl_cfg_get_dfs_reentry();
 
 /**
- * Checks the state of the Passive Mode feature.
- *
- * @return 1 Enabled.
- * @return 0 Disabled.
- * @return -1 Error.
- */
-int bpl_cfg_get_passive_mode();
-
-/**
  * Checks the state of the Client Roaming feature.
  *
  * @return 1 Enabled.

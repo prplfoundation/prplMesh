@@ -133,16 +133,6 @@ int bpl_cfg_get_dfs_reentry()
     return retVal;
 }
 
-int bpl_cfg_get_passive_mode()
-{
-    int retVal = -1;
-    if (bpl_cfg_get_beerocks_param_int("passive_mode", &retVal) == RETURN_ERR) {
-        printf("bpl_cfg_get_passive_mode: Failed to read PassiveMode parameter\n");
-        return RETURN_ERR;
-    }
-    return retVal;
-}
-
 int bpl_cfg_get_client_roaming()
 {
     int retVal = -1;

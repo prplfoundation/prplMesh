@@ -20,16 +20,4 @@ using namespace mapf;
 
 using namespace beerocks::bpl;
 
-#ifndef BPL_PASSIVE_MODE
-
-//============================================ STATIC START ============================================
-
-//============================================ STATIC END ============================================
-
 int bpl_cfg_set_onboarding(int enable) { return 0; }
-
-#else //PASSIVE_MODE is on
-
-int bpl_cfg_set_onboarding(int enable) { return 0; }
-
-#endif

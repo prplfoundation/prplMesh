@@ -35,8 +35,6 @@ int bpl_cfg_get_rdkb_extensions() { return 0; }
 
 int bpl_cfg_get_dfs_reentry() { return 0; }
 
-int bpl_cfg_get_passive_mode() { return 0; }
-
 int bpl_cfg_get_client_roaming() { return 0; }
 
 int bpl_cfg_get_wifi_params(const char *iface, int *enabled, int *acs)

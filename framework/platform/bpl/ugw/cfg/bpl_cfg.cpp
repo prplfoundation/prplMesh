@@ -60,8 +60,6 @@ int bpl_cfg_get_band_steering()
 
 int bpl_cfg_get_dfs_reentry() { return 1; }
 
-int bpl_cfg_get_passive_mode() { return 0; }
-
 int bpl_cfg_get_client_roaming()
 {
     cal_settings cal;
