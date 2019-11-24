@@ -19,10 +19,15 @@ list(APPEND BWL_LIBS rt dl)
 # Linux
 if(TARGET_PLATFORM STREQUAL "linux")
     set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
-    add_definitions(-DBEEROCKS_TMP_PATH="${BEEROCKS_TMP_PATH}")
+else()
+    set(BEEROCKS_TMP_PATH "/tmp/beerocks")
+endif()
+
+# Defult TMP path
+add_definitions(-DBEEROCKS_TMP_PATH="${BEEROCKS_TMP_PATH}")
 
 # OpenWRT
-elseif (TARGET_PLATFORM STREQUAL "openwrt")
+if (TARGET_PLATFORM STREQUAL "openwrt")
 
     # UGW
     if (TARGET_PLATFORM_TYPE STREQUAL "ugw")
