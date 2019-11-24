@@ -121,9 +121,9 @@ bool slave_thread::init()
 
     if (config.ucc_listener_slave_hostap_iface == config.hostap_iface &&
         config.ucc_listener_port != 0) {
-        m_agent_ucc_listener = std::make_unique<agent_ucc_listener>(
-            config.ucc_listener_port, config.vendor, config.model, config.bridge_iface,
-            (Socket **)&master_socket);
+        m_agent_ucc_listener =
+            std::make_unique<agent_ucc_listener>(config.ucc_listener_port, config.vendor,
+                                                 config.model, config.bridge_iface, &master_socket);
         if (m_agent_ucc_listener && !m_agent_ucc_listener->start("ucc_listener")) {
             LOG(ERROR) << "failed start agent_ucc_listener";
             return false;
