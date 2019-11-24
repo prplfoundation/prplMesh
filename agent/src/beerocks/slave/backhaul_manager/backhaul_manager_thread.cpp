@@ -590,23 +590,9 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
                 // Mark the connection as WIRED
                 m_sConfig.eType = SBackhaulConfig::EType::Wired;
 
-                LOG(DEBUG) << "add wired_backhaul to bridge " << m_sConfig.wire_iface;
-                if (!network_utils::linux_add_iface_to_bridge(m_sConfig.bridge_iface,
-                                                              m_sConfig.wire_iface)) {
-                    LOG(ERROR) << "linux_add_iface_to_bridge failed!";
-                }
-
             } else {
                 // Mark the connection as WIRELESS
                 m_sConfig.eType = SBackhaulConfig::EType::Wireless;
-
-                if (m_sConfig.wired_backhaul) {
-                    LOG(DEBUG) << "remove wired_backhaul to bridge " << m_sConfig.wire_iface;
-                    if (!network_utils::linux_remove_iface_from_bridge(m_sConfig.bridge_iface,
-                                                                       m_sConfig.wire_iface)) {
-                        LOG(ERROR) << "linux_remove_iface_to_bridge failed!";
-                    }
-                }
             }
 
             // Move to the next state immediately
