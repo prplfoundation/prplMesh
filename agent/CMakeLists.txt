@@ -51,23 +51,6 @@ endif()
 # Default Compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pthread -std=c++11 -Wno-unused-parameter -Wno-missing-field-initializers -Wno-address-of-packed-member -fpermissive")
 
-option(STANDALONE "Standalone build" OFF)
-
-# Search local cmake folder first
-list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
-# Add beerocks cmake modules to search paths
-list(APPEND CMAKE_PREFIX_PATH ${PLATFORM_STAGING_DIR}/usr/lib/cmake/beerocks)
-if (NOT STANDALONE)
-    message(STATUS "${BoldBlue}Building 'In-Tree'${ColourReset}")
-else()
-    message(STATUS "${BoldBlue}Building 'Standalone'${ColourReset}")
-    # Convert the install prefix into an absolute path
-    get_filename_component(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}"
-        REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
-    list(INSERT CMAKE_FIND_ROOT_PATH 0 ${CMAKE_INSTALL_PREFIX})
-    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/lib/cmake/beerocks)
-endif()
-
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/lib)
