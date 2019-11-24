@@ -44,27 +44,6 @@ if ("${isSystemDir}" STREQUAL "-1")
     set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 endif ("${isSystemDir}" STREQUAL "-1")
 set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-option(STANDALONE "Standalone build" OFF)
-
-# Set the CMAKE modules path
-if (NOT STANDALONE)
-    message(STATUS "${BoldBlue}Building 'In-Tree'${ColourReset}")
-else() # Standalone build
-    message(STATUS "${BoldBlue}Building 'Standalone'${ColourReset}")
-
-    # Convert the install prefix into an absolute path
-    get_filename_component(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" 
-        REALPATH BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
-
-    # CMake search paths
-    list(INSERT CMAKE_FIND_ROOT_PATH 0 ${CMAKE_INSTALL_PREFIX})
-    list(APPEND CMAKE_PROGRAM_PATH ${CMAKE_INSTALL_PREFIX}/host/bin)
-    list(APPEND CMAKE_PROGRAM_PATH ${PLATFORM_STAGING_DIR}/host/bin)
-endif()
-
-# Search local cmake folder first
-list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
  
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
