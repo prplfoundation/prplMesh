@@ -13,7 +13,7 @@
 
 BaseClass::BaseClass(uint8_t *buff, const size_t buff_len, const bool parse, const bool swap_needed)
     : m_buff__(buff), m_buff_ptr__(buff), m_buff_len__(buff_len), m_parse__(parse),
-      m_swap__(swap_needed), m_init_succeeded(false)
+      m_swap__(swap_needed)
 {
 }
 BaseClass::~BaseClass() {}
