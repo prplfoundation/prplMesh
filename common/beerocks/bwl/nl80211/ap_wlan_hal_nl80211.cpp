@@ -18,6 +18,13 @@
 
 #include <cmath>
 
+#include <linux/nl80211.h>
+#include <netlink/genl/ctrl.h>
+#include <netlink/genl/family.h>
+#include <netlink/genl/genl.h>
+#include <netlink/msg.h>
+#include <netlink/netlink.h>
+
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////// Local Module Definitions //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -424,10 +431,130 @@ bool ap_wlan_hal_nl80211::read_acs_report()
     return true;
 }
 
+// based on print_channels_handler() iw/phy.c
 bool ap_wlan_hal_nl80211::read_supported_channels()
 {
-    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
-    return true;
+    LOG(TRACE) << __func__ << " for interface: " << get_radio_info().iface_name;
+
+    // Clear the supported channels vector
+    m_radio_info.supported_channels.clear();
+
+    auto ret = send_nl80211_msg(
+        NL80211_CMD_GET_WIPHY, 0,
+        // Create the message
+        [&](struct nl_msg *msg) -> bool { return true; },
+        // Handle the reponse
+        [&](struct nl_msg *msg) -> bool {
+            struct nlattr *tb_msg[NL80211_ATTR_MAX + 1];
+            struct genlmsghdr *gnlh = (struct genlmsghdr *)nlmsg_data(nlmsg_hdr(msg));
+            struct nlattr *tb_band[NL80211_BAND_ATTR_MAX + 1] = {};
+            struct nlattr *tb_freq[NL80211_FREQUENCY_ATTR_MAX + 1];
+            static struct nla_policy freq_policy[NL80211_FREQUENCY_ATTR_MAX + 1];
+            freq_policy[NL80211_FREQUENCY_ATTR_FREQ]         = {.type = NLA_U32};
+            freq_policy[NL80211_FREQUENCY_ATTR_DISABLED]     = {.type = NLA_FLAG};
+            freq_policy[NL80211_FREQUENCY_ATTR_RADAR]        = {.type = NLA_FLAG};
+            freq_policy[NL80211_FREQUENCY_ATTR_MAX_TX_POWER] = {.type = NLA_U32};
+
+            struct nlattr *nl_band;
+            struct nlattr *nl_freq;
+            int rem_band, rem_freq, last_band = 0;
+            bool width_40, width_80, width_160;
+            uint8_t idx = 0;
+
+            width_40 = width_80 = width_160 = false;
+
+            nla_parse(tb_msg, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0),
+                      NULL);
+            if (tb_msg[NL80211_ATTR_WIPHY_BANDS]) {
+                nla_for_each_nested(nl_band, tb_msg[NL80211_ATTR_WIPHY_BANDS], rem_band)
+                {
+                    if (last_band != nl_band->nla_type) {
+                        width_40 = width_80 = width_160 = false;
+                        last_band                       = nl_band->nla_type;
+                    }
+                    nla_parse(tb_band, NL80211_BAND_ATTR_MAX, (struct nlattr *)nla_data(nl_band),
+                              nla_len(nl_band), NULL);
+
+                    if (tb_band[NL80211_BAND_ATTR_HT_CAPA]) {
+                        uint16_t cap = nla_get_u16(tb_band[NL80211_BAND_ATTR_HT_CAPA]);
+
+                        if (cap & BIT(1))
+                            width_40 = true;
+                    }
+
+                    if (tb_band[NL80211_BAND_ATTR_VHT_CAPA]) {
+                        uint16_t capa;
+
+                        width_80 = true;
+
+                        capa = nla_get_u32(tb_band[NL80211_BAND_ATTR_VHT_CAPA]);
+                        switch ((capa >> 2) & 3) {
+                        case 2:
+                            /* width_80p80 = true; */
+                            /* fall through */
+                        case 1:
+                            width_160 = true;
+                            break;
+                        }
+                    }
+
+                    if (tb_band[NL80211_BAND_ATTR_FREQS]) {
+                        nla_for_each_nested(nl_freq, tb_band[NL80211_BAND_ATTR_FREQS], rem_freq)
+                        {
+                            uint32_t freq;
+
+                            nla_parse(tb_freq, NL80211_FREQUENCY_ATTR_MAX,
+                                      (struct nlattr *)nla_data(nl_freq), nla_len(nl_freq),
+                                      freq_policy);
+                            if (!tb_freq[NL80211_FREQUENCY_ATTR_FREQ] ||
+                                tb_freq[NL80211_FREQUENCY_ATTR_DISABLED] ||
+                                (tb_freq[NL80211_FREQUENCY_ATTR_NO_IR] &&
+                                 tb_freq[__NL80211_FREQUENCY_ATTR_NO_IBSS]) ||
+                                tb_freq[__NL80211_FREQUENCY_ATTR_NO_IBSS]) {
+                                continue;
+                            }
+
+                            freq = nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_FREQ]);
+                            m_radio_info.supported_channels[idx].channel =
+                                beerocks::utils::wifi_freq_to_channel(freq);
+
+                            if (tb_freq[NL80211_FREQUENCY_ATTR_MAX_TX_POWER]) {
+                                m_radio_info.supported_channels[idx].tx_pow =
+                                    0.01 *
+                                    nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_MAX_TX_POWER]);
+                            }
+
+                            if (tb_freq[NL80211_FREQUENCY_ATTR_RADAR])
+                                m_radio_info.supported_channels[idx].is_dfs = 1;
+
+                            if (!tb_freq[NL80211_FREQUENCY_ATTR_NO_20MHZ])
+                                m_radio_info.supported_channels[idx].bandwidth = 20;
+                            if (width_40 && (!tb_freq[NL80211_FREQUENCY_ATTR_NO_HT40_MINUS] ||
+                                             !tb_freq[NL80211_FREQUENCY_ATTR_NO_HT40_PLUS])) {
+                                m_radio_info.supported_channels[idx].bandwidth = 40;
+                            }
+                            if (width_80 && !tb_freq[NL80211_FREQUENCY_ATTR_NO_80MHZ])
+                                m_radio_info.supported_channels[idx].bandwidth = 80;
+                            if (width_160 && !tb_freq[NL80211_FREQUENCY_ATTR_NO_160MHZ])
+                                m_radio_info.supported_channels[idx].bandwidth = 160;
+
+                            if (tb_freq[NL80211_FREQUENCY_ATTR_DFS_STATE] &&
+                                nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_DFS_STATE]) ==
+                                    NL80211_DFS_UNAVAILABLE) {
+                                m_radio_info.supported_channels[idx].radar_affected = 1;
+                            }
+                            idx++;
+                        }
+                    }
+                }
+            }
+            return true;
+        });
+
+    if (!ret)
+        LOG(TRACE) << "Failed to get channels info";
+
+    return ret;
 }
 
 bool ap_wlan_hal_nl80211::set_vap_enable(const std::string &iface_name, const bool enable)
