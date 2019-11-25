@@ -135,7 +135,7 @@ bool config_file::read_master_config_file(std::string config_file_path, sConfigM
                     read_log_section(config_file_path, conf.sLog));
 
     // check temp_path has trailing slash
-    if (conf.temp_path.back() != '/') {
+    if (ret_val && !conf.temp_path.empty() && conf.temp_path.back() != '/') {
         conf.temp_path += '/';
     }
     return ret_val;
