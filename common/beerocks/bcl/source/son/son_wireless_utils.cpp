@@ -10,6 +10,8 @@
 #include <bcl/network/network_utils.h>
 #include <bcl/son/son_wireless_utils.h>
 
+#include <tlvf/wfa_map/tlvChannelPreference.h>
+
 #include <easylogging++.h>
 
 #include <cmath>
@@ -53,6 +55,15 @@ constexpr wireless_utils::sPhyRateTableEntry
     wireless_utils::phy_rate_table[PHY_RATE_TABLE_ANT_MODE_MAX][PHY_RATE_TABLE_MCS_MAX];
 constexpr wireless_utils::sPhyRateBitRateEntry
     wireless_utils::bit_rate_max_table_mbps[BIT_RATE_MAX_TABLE_SIZE];
+
+static bool has_operating_class_channel(const sOperatingClass &oper_class,
+                                        const beerocks::message::sWifiChannel &channel)
+{
+    if (oper_class.band != channel.channel_bandwidth)
+        return false;
+    auto it = oper_class.channels.find(channel.channel);
+    return it != oper_class.channels.end();
+}
 
 wireless_utils::sPhyUlParams
 wireless_utils::estimate_ul_params(int ul_rssi, uint16_t sta_phy_tx_rate_100kb,
@@ -554,6 +565,112 @@ std::vector<uint8_t> wireless_utils::calc_5g_20MHz_subband_channels(
                   [](uint8_t channel) { LOG(DEBUG) << "channel:" << int(channel); });
 
     return channels;
+}
+
+/**
+ * @brief get temporary non operable channels list for all supported operating classes
+ *
+ * @param supported_channels list of supported channels
+ * @return list of temporary non operable channels with <oper_class, preference, reason,
+ *         list of channels> as value
+ */
+std::list<wireless_utils::sChannelPreference>
+wireless_utils::get_channel_preferences(beerocks::message::sWifiChannel supported_channels[])
+{
+    std::list<sChannelPreference> preferences;
+
+    for (auto oper_class : operating_classes_list) {
+        std::vector<beerocks::message::sWifiChannel> radar_affected_channels;
+        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+            if (has_operating_class_channel(oper_class.second, supported_channels[i]) &&
+                supported_channels[i].radar_affected) {
+                radar_affected_channels.push_back(supported_channels[i]);
+            }
+        }
+        if (!radar_affected_channels.empty()) {
+            auto pref = beerocks::message::sPreference(
+                {oper_class.first, 0,
+                 wfa_map::cPreferenceOperatingClasses::eReasonCode::
+                     OPERATION_DISALLOWED_DUE_TO_RADAR_DETECTION_ON_A_DFS_CHANNEL});
+
+            preferences.push_back({pref, radar_affected_channels});
+        }
+    }
+
+    return preferences;
+}
+
+/**
+ * @brief get list of supported operating classes 
+ *
+ * @param supported_channels list of supported channels
+ * @return std::vector<uint8_t> vector of supported operating classes
+ */
+std::vector<uint8_t> wireless_utils::get_supported_operating_classes(
+    beerocks::message::sWifiChannel supported_channels[])
+{
+    std::vector<uint8_t> operating_classes;
+    //TODO handle regulatory domain operating classes
+    for (auto oper_class : operating_classes_list) {
+        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+            if (has_operating_class_channel(oper_class.second, supported_channels[i])) {
+                operating_classes.push_back(oper_class.first);
+                break;
+            }
+        }
+    }
+
+    return operating_classes;
+}
+
+/**
+ * @brief get maximum transmit power of operating class
+ *
+ * @param supported_channels list of supported channels
+ * @param operating_class operating class to find max tx for
+ * @return max tx power for requested operating class
+ */
+uint8_t wireless_utils::get_operating_class_max_tx_power(
+    beerocks::message::sWifiChannel supported_channels[], uint8_t operating_class)
+{
+    uint8_t max_tx_power = 0;
+    auto oper_class      = operating_classes_list.at(operating_class);
+
+    for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+        if (has_operating_class_channel(oper_class, supported_channels[i])) {
+            max_tx_power = std::max(max_tx_power, supported_channels[i].tx_pow);
+        }
+    }
+    return max_tx_power;
+}
+
+/**
+ * @brief get list of permanent non operable channels for operating class
+ *
+ * @param supported_channels list of supported channels
+ * @param operating_class operating class to find non operable channels for
+ * @return std::vector<uint8_t> vector of non operable channels
+ */
+std::vector<uint8_t> wireless_utils::get_operating_class_non_oper_channels(
+    beerocks::message::sWifiChannel supported_channels[], uint8_t operating_class)
+{
+    std::vector<uint8_t> non_oper_channels;
+    auto oper_class = operating_classes_list.at(operating_class);
+
+    for (auto op_class_channel : oper_class.channels) {
+        uint8_t found = 0;
+        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+            if (op_class_channel == supported_channels[i].channel &&
+                oper_class.band == supported_channels[i].channel_bandwidth) {
+                found = 1;
+                break;
+            }
+        }
+        if (!found)
+            non_oper_channels.push_back(op_class_channel);
+    }
+
+    return non_oper_channels;
 }
 
 /**
