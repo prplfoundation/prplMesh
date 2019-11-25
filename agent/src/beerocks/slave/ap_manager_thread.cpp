@@ -34,15 +34,13 @@ using namespace beerocks::net;
 //////////////////////////////////////////////////////////////////////////////
 
 static void copy_radio_supported_channels(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal,
-                                          beerocks_message::sWifiChannel supported_channels[])
+                                          beerocks::message::sWifiChannel supported_channels[])
 {
     auto radio_channels = ap_wlan_hal->get_radio_info().supported_channels;
 
     // Copy the channels
     for (uint i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH && i < radio_channels.size();
          i++) {
-
-        memset(&supported_channels[i], 0, sizeof(beerocks_message::sWifiChannel));
 
         supported_channels[i].channel        = radio_channels[i].channel;
         supported_channels[i].noise          = radio_channels[i].noise;

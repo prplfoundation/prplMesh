@@ -712,7 +712,7 @@ sApChannelSwitch& cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::cs_params() {
     return (sApChannelSwitch&)(*m_cs_params);
 }
 
-std::tuple<bool, sWifiChannel&> cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::supported_channels_list(size_t idx) {
+std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::supported_channels_list(size_t idx) {
     bool ret_success = ( (m_supported_channels_list_idx__ > 0) && (m_supported_channels_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
     if (!ret_success) {
@@ -733,7 +733,7 @@ size_t cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sApChannelSwitch); // cs_params
-    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(sWifiChannel); // supported_channels_list
+    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
     return class_size;
 }
 
@@ -749,9 +749,9 @@ bool cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    m_supported_channels_list = (sWifiChannel*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
+    m_supported_channels_list = (beerocks::message::sWifiChannel*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
         return false;
     }
     m_supported_channels_list_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;

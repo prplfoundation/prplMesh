@@ -113,6 +113,28 @@ typedef struct sPreference {
     }
 } __attribute__((packed)) sPreference;
 
+typedef struct sWifiChannel {
+    uint8_t channel           = 0;
+    int8_t noise              = 0;
+    uint8_t tx_pow            = 0;
+    uint8_t bss_overlap       = 0;
+    uint8_t channel_bandwidth = 0;
+    uint8_t is_dfs_channel    = 0;
+    uint8_t radar_affected    = 0;
+    sWifiChannel(){};
+    void struct_swap() {}
+    void struct_init()
+    {
+        channel           = 0;
+        noise             = 0;
+        tx_pow            = 0;
+        bss_overlap       = 0;
+        channel_bandwidth = 0;
+        is_dfs_channel    = 0;
+        radar_affected    = 0;
+    }
+} __attribute__((packed)) sWifiChannel;
+
 //////////////////// tlvf includes - END/////////////////////////////
 
 #define MACRO_IS_ENABLE                                                                            \
