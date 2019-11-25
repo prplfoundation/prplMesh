@@ -31,6 +31,7 @@ public:
 
     size_t getLen();
     bool isInitialized();
+    virtual bool isPostInitSucceeded() { return true; };
     virtual void class_swap() = 0;
 
 protected:
@@ -39,7 +40,7 @@ protected:
     const size_t m_buff_len__;
     const bool m_parse__;
     const bool m_swap__;
-    bool m_init_succeeded;
+    bool m_init_succeeded = false;
     static const size_t kMinimumLength = 3; // tlv header length
 };
 
