@@ -59,7 +59,7 @@ public:
         sMacAddr hostap_mac;
         beerocks_message::sApChannelSwitch cs_params;
 
-        beerocks_message::sWifiChannel
+        beerocks::message::sWifiChannel
             supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
     } sAcsResponse_event;
 
@@ -70,7 +70,7 @@ public:
         uint8_t backhaul_channel;
         uint8_t channel;
         beerocks_message::sApChannelSwitch cs_params;
-        beerocks_message::sWifiChannel
+        beerocks::message::sWifiChannel
             supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
         beerocks::net::sScanResult
             backhaul_scan_measurement_list[beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];

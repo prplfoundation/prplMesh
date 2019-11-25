@@ -175,20 +175,6 @@ typedef struct sDfsChannelAvailable {
     }
 } __attribute__((packed)) sDfsChannelAvailable;
 
-typedef struct sWifiChannel {
-    uint8_t channel;
-    int8_t noise;
-    uint8_t tx_pow;
-    uint8_t bss_overlap;
-    uint8_t channel_bandwidth;
-    uint8_t is_dfs_channel;
-    uint8_t radar_affected;
-    void struct_swap(){
-    }
-    void struct_init(){
-    }
-} __attribute__((packed)) sWifiChannel;
-
 typedef struct sClientAssociationParams {
     sMacAddr mac;
     sMacAddr bssid;
@@ -385,7 +371,7 @@ typedef struct sNodeHostap {
     uint8_t ant_gain;
     uint8_t conducted_power;
     char driver_version[beerocks::message::WIFI_DRIVER_VER_LENGTH];
-    sWifiChannel supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+    beerocks::message::sWifiChannel supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
     void struct_swap(){
         iface_mac.struct_swap();
         for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){

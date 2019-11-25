@@ -1165,7 +1165,7 @@ int db::get_hostap_conducted_power(std::string mac)
     return n->hostap->conducted_power;
 }
 
-bool db::set_hostap_supported_channels(std::string mac, beerocks_message::sWifiChannel *channels,
+bool db::set_hostap_supported_channels(std::string mac, beerocks::message::sWifiChannel *channels,
                                        int length)
 {
     auto n = get_node(mac);
@@ -1176,7 +1176,7 @@ bool db::set_hostap_supported_channels(std::string mac, beerocks_message::sWifiC
         LOG(WARNING) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
         return false;
     }
-    std::vector<beerocks_message::sWifiChannel> supported_channels_(channels, channels + length);
+    std::vector<beerocks::message::sWifiChannel> supported_channels_(channels, channels + length);
     n->hostap->supported_channels = supported_channels_;
 
     if (n->hostap->supported_channels.size() == 0) {
@@ -1198,15 +1198,16 @@ bool db::set_hostap_supported_channels(std::string mac, beerocks_message::sWifiC
     return true;
 }
 
-const std::vector<beerocks_message::sWifiChannel> db::get_hostap_supported_channels(std::string mac)
+const std::vector<beerocks::message::sWifiChannel>
+db::get_hostap_supported_channels(std::string mac)
 {
     auto n = get_node(mac);
     if (!n) {
         LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return std::vector<beerocks_message::sWifiChannel>();
+        return std::vector<beerocks::message::sWifiChannel>();
     } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
         LOG(WARNING) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
-        return std::vector<beerocks_message::sWifiChannel>();
+        return std::vector<beerocks::message::sWifiChannel>();
     }
     return n->hostap->supported_channels;
 }
@@ -1250,14 +1251,14 @@ bool db::add_hostap_supported_operating_class(const std::string &radio_mac, uint
     for (auto c : channel_set) {
         auto channel = std::find_if(
             supported_channels.begin(), supported_channels.end(),
-            [&c](const beerocks_message::sWifiChannel &ch) { return ch.channel == c; });
+            [&c](const beerocks::message::sWifiChannel &ch) { return ch.channel == c; });
         if (channel != supported_channels.end()) {
             channel->tx_pow = tx_power;
             //TODO fill other channel parameters
         } else {
-            beerocks_message::sWifiChannel ch = {0};
-            ch.channel                        = c;
-            ch.tx_pow                         = tx_power;
+            beerocks::message::sWifiChannel ch;
+            ch.channel = c;
+            ch.tx_pow  = tx_power;
             supported_channels.push_back(ch);
         }
     }
@@ -1266,7 +1267,7 @@ bool db::add_hostap_supported_operating_class(const std::string &radio_mac, uint
     for (auto c : non_operable_channels) {
         auto channel = std::find_if(
             supported_channels.begin(), supported_channels.end(),
-            [&c](const beerocks_message::sWifiChannel &ch) { return ch.channel == c; });
+            [&c](const beerocks::message::sWifiChannel &ch) { return ch.channel == c; });
         if (channel != supported_channels.end())
             supported_channels.erase(channel);
     }
@@ -1853,7 +1854,7 @@ bool db::set_supported_channel_radar_affected(std::string mac, std::vector<uint8
     LOG(DEBUG) << " channels_count = " << int(channels_count);
     auto it =
         find_if(std::begin(n->hostap->supported_channels), std::end(n->hostap->supported_channels),
-                [&](beerocks_message::sWifiChannel supported_channel) {
+                [&](beerocks::message::sWifiChannel supported_channel) {
                     return supported_channel.channel == *channels.begin();
                 });
 
@@ -1862,7 +1863,7 @@ bool db::set_supported_channel_radar_affected(std::string mac, std::vector<uint8
         return false;
     }
     std::for_each(it, std::next(it, channels_count),
-                  [&](beerocks_message::sWifiChannel &supported_channel) {
+                  [&](beerocks::message::sWifiChannel &supported_channel) {
                       LOG(DEBUG) << " supported_channel = " << int(supported_channel.channel)
                                  << " affected = " << int(affected);
                       supported_channel.radar_affected = affected;

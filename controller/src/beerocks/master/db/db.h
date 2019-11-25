@@ -292,9 +292,9 @@ public:
     int get_hostap_conducted_power(std::string mac);
 
     bool set_hostap_supported_channels(std::string mac,
-                                       beerocks_message::sWifiChannel *supported_channels,
+                                       beerocks::message::sWifiChannel *supported_channels,
                                        int length);
-    const std::vector<beerocks_message::sWifiChannel>
+    const std::vector<beerocks::message::sWifiChannel>
     get_hostap_supported_channels(std::string mac);
     std::string get_hostap_supported_channels_string(const std::string &radio_mac);
 

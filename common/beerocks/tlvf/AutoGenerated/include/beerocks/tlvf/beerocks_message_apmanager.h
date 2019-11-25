@@ -362,7 +362,7 @@ class cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION);
         }
         sApChannelSwitch& cs_params();
-        std::tuple<bool, sWifiChannel&> supported_channels_list(size_t idx);
+        std::tuple<bool, beerocks::message::sWifiChannel&> supported_channels_list(size_t idx);
         void class_swap();
         static size_t get_initial_size();
 
@@ -370,7 +370,7 @@ class cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION : public BaseClass
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
         sApChannelSwitch* m_cs_params = nullptr;
-        sWifiChannel* m_supported_channels_list = nullptr;
+        beerocks::message::sWifiChannel* m_supported_channels_list = nullptr;
         size_t m_supported_channels_list_idx__ = 0;
         int m_lock_order_counter__ = 0;
 };

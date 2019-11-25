@@ -147,16 +147,6 @@ sDfsChannelAvailable:
   bandwidth: uint8_t      #beerocks::eWiFiBandwidth
   vht_center_frequency: uint16_t  
 
-sWifiChannel:
-  _type: struct
-  channel: uint8_t 
-  noise: int8_t
-  tx_pow: uint8_t 
-  bss_overlap: uint8_t 
-  channel_bandwidth: uint8_t 
-  is_dfs_channel: uint8_t 
-  radar_affected: uint8_t 
-
 sClientAssociationParams:
   _type: struct
   mac: sMacAddr
@@ -286,7 +276,7 @@ sNodeHostap:
     _type: char  
     _length: [ "beerocks::message::WIFI_DRIVER_VER_LENGTH" ]
   supported_channels:
-    _type: sWifiChannel 
+    _type: beerocks::message::sWifiChannel 
     _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]          
 
 sVapsList:

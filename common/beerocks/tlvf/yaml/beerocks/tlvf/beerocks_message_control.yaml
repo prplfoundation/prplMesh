@@ -135,7 +135,7 @@ cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION:
   _type: class
   cs_params: sApChannelSwitch 
   supported_channels:
-    _type: sWifiChannel
+    _type: beerocks::message::sWifiChannel
     _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
 
 cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION:
