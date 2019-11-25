@@ -303,7 +303,10 @@ int test_parser()
     // tlv4->add_var1(tlv4->create_var1());
 
     LOG(DEBUG) << "Finalize";
-    msg.finalize(true);
+    if (!msg.finalize(true)) {
+        LOG(ERROR) << "Finalize step failed";
+        errors++;
+    }
 
     LOG(DEBUG) << "TX: " << std::endl << utils::dump_buffer(tx_buffer, msg.getMessageLength());
 
