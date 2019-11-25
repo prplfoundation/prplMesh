@@ -893,6 +893,46 @@ class cACTION_APMANAGER_HEARTBEAT_NOTIFICATION : public BaseClass
         eActionOp_APMANAGER* m_action_op = nullptr;
 };
 
+class cACTION_APMANAGER_READ_ACS_REPORT_REQUEST : public BaseClass
+{
+    public:
+        cACTION_APMANAGER_READ_ACS_REPORT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_APMANAGER_READ_ACS_REPORT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_APMANAGER_READ_ACS_REPORT_REQUEST();
+
+        static eActionOp_APMANAGER get_action_op(){
+            return (eActionOp_APMANAGER)(ACTION_APMANAGER_READ_ACS_REPORT_REQUEST);
+        }
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_APMANAGER* m_action_op = nullptr;
+};
+
+class cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE();
+
+        static eActionOp_APMANAGER get_action_op(){
+            return (eActionOp_APMANAGER)(ACTION_APMANAGER_READ_ACS_REPORT_RESPONSE);
+        }
+        std::tuple<bool, beerocks::message::sWifiChannel&> supported_channels_list(size_t idx);
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_APMANAGER* m_action_op = nullptr;
+        beerocks::message::sWifiChannel* m_supported_channels_list = nullptr;
+        size_t m_supported_channels_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+};
+
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_APMANAGER_H_
