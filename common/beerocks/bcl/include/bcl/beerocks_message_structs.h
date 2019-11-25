@@ -93,6 +93,26 @@ typedef struct sRadioCapabilities {
     }
 } __attribute__((packed)) sRadioCapabilities;
 
+typedef struct sPreference {
+    uint8_t oper_class = 0;
+    uint8_t preference = 0;
+    uint8_t reason     = 0;
+    sPreference(){};
+    sPreference(uint8_t oper_class_, uint8_t preference_, uint8_t reason_)
+    {
+        oper_class = oper_class_;
+        preference = preference_;
+        reason     = reason_;
+    }
+    void struct_swap() {}
+    void struct_init()
+    {
+        oper_class = 0;
+        preference = 0;
+        reason     = 0;
+    }
+} __attribute__((packed)) sPreference;
+
 //////////////////// tlvf includes - END/////////////////////////////
 
 #define MACRO_IS_ENABLE                                                                            \

@@ -99,6 +99,11 @@ public:
         double bit_rate_max_mbps;
     } sPhyRateBitRateEntry;
 
+    typedef struct {
+        beerocks::message::sPreference preference;
+        std::vector<beerocks::message::sWifiChannel> channels;
+    } sChannelPreference;
+
     static sPhyUlParams
     estimate_ul_params(int ul_rssi, uint16_t sta_phy_tx_rate_100kb,
                        const beerocks::message::sRadioCapabilities *capabilities,
@@ -135,6 +140,16 @@ public:
     static std::string wsc_to_bwl_authentication(WSC::eWscAuth authtype);
     static std::string wsc_to_bwl_encryption(WSC::eWscEncr enctype);
     static beerocks::eBssType wsc_to_bwl_bss_type(WSC::eWscVendorExtSubelementBssType bss_type);
+    static std::vector<uint8_t>
+    get_supported_operating_classes(beerocks::message::sWifiChannel supported_channels[]);
+    static uint8_t
+    get_operating_class_max_tx_power(beerocks::message::sWifiChannel supported_channels[],
+                                     uint8_t operating_class);
+    static std::vector<uint8_t>
+    get_operating_class_non_oper_channels(beerocks::message::sWifiChannel supported_channels[],
+                                          uint8_t operating_class);
+    static std::list<sChannelPreference>
+    get_channel_preferences(beerocks::message::sWifiChannel supported_channels[]);
 
 private:
     enum eAntennaFactor {
