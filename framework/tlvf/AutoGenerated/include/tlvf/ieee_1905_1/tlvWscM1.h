@@ -88,6 +88,7 @@ class tlvWscM1 : public BaseClass
         WSC::sWscAttrDevicePasswordID& device_password_id_attr();
         WSC::sWscAttrConfigurationError& configuration_error_attr();
         WSC::sWscAttrOsVersion& os_version_attr();
+        bool isPostInitSucceeded();
         std::shared_ptr<WSC::cWscVendorExtWfa> create_vendor_ext();
         bool add_vendor_ext(std::shared_ptr<WSC::cWscVendorExtWfa> ptr);
         std::shared_ptr<WSC::cWscVendorExtWfa> vendor_ext() { return m_vendor_ext_ptr; }
@@ -138,6 +139,7 @@ class tlvWscM1 : public BaseClass
         WSC::sWscAttrOsVersion* m_os_version_attr = nullptr;
         WSC::cWscVendorExtWfa *m_vendor_ext = nullptr;
         std::shared_ptr<WSC::cWscVendorExtWfa> m_vendor_ext_ptr = nullptr;
+        bool m_vendor_ext_init = false;
         bool m_lock_allocation__ = false;
 };
 

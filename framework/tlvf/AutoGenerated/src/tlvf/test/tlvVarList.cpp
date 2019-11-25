@@ -225,6 +225,14 @@ bool tlvTestVarList::add_complex_list(std::shared_ptr<cInner> ptr) {
     return true;
 }
 
+bool tlvTestVarList::isPostInitSucceeded() {
+    if (!m_var1_init) {
+        TLVF_LOG(ERROR) << "var1 is not initialized";
+        return false;
+    }
+    return true; 
+}
+
 std::shared_ptr<cInner> tlvTestVarList::create_var1() {
     if (m_lock_order_counter__ > 3) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list var1, abort!";
@@ -266,6 +274,7 @@ bool tlvTestVarList::add_var1(std::shared_ptr<cInner> ptr) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return false;
     }
+    m_var1_init = true;
     size_t len = ptr->getLen();
     m_var2 = (uint32_t *)((uint8_t *)(m_var2) + len - ptr->get_initial_size());
     m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len - ptr->get_initial_size());

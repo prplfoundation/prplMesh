@@ -475,6 +475,14 @@ WSC::sWscAttrVersion2& tlvWscM2::version2_attr() {
     return (WSC::sWscAttrVersion2&)(*m_version2_attr);
 }
 
+bool tlvWscM2::isPostInitSucceeded() {
+    if (!m_encrypted_settings_init) {
+        TLVF_LOG(ERROR) << "encrypted_settings is not initialized";
+        return false;
+    }
+    return true; 
+}
+
 std::shared_ptr<WSC::cWscAttrEncryptedSettings> tlvWscM2::create_encrypted_settings() {
     if (m_lock_order_counter__ > 5) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list encrypted_settings, abort!";
@@ -515,6 +523,7 @@ bool tlvWscM2::add_encrypted_settings(std::shared_ptr<WSC::cWscAttrEncryptedSett
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return false;
     }
+    m_encrypted_settings_init = true;
     size_t len = ptr->getLen();
     m_authenticator = (WSC::sWscAttrAuthenticator *)((uint8_t *)(m_authenticator) + len - ptr->get_initial_size());
     m_encrypted_settings_ptr = ptr;
