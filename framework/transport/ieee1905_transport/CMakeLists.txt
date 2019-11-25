@@ -4,7 +4,6 @@ add_library(ieee1905_transport_lib SHARED ieee1905_transport.cpp ieee1905_transp
 set_target_properties(ieee1905_transport_lib PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
 target_link_libraries(ieee1905_transport_lib PUBLIC ieee1905_transport_messages common PRIVATE mapf::elpp)
 target_include_directories(ieee1905_transport_lib PUBLIC include/)
-install(TARGETS ieee1905_transport_lib DESTINATION lib)
 
 add_library(ieee1905_transport_messages SHARED ieee1905_transport_messages.cpp)
 set_target_properties(ieee1905_transport_messages PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
@@ -12,13 +11,13 @@ target_link_libraries(ieee1905_transport_messages PUBLIC common PRIVATE mapf::el
 target_include_directories(ieee1905_transport_messages PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     )
-install(TARGETS ieee1905_transport_messages
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_executable(ieee1905_transport main.cpp)
 target_link_libraries(ieee1905_transport PUBLIC ieee1905_transport_lib PRIVATE mapf::elpp)
-install(TARGETS ieee1905_transport DESTINATION bin)
+
+install(TARGETS ieee1905_transport_messages ieee1905_transport_lib ieee1905_transport
+    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_subdirectory(test)
