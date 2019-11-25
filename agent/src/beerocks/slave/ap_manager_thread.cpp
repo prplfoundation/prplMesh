@@ -698,6 +698,25 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         ap_wlan_hal->sta_allow(sta_mac, bssid);
         break;
     }
+    case beerocks_message::ACTION_APMANAGER_READ_ACS_REPORT_REQUEST: {
+        if (!ap_wlan_hal->read_acs_report()) {
+            LOG(ERROR) << "Failed to read acs report";
+            return false;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE>(cmdu_tx,
+                                                                          beerocks_header->id());
+        if (!response) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        auto tuple_supported_channels = response->supported_channels_list(0);
+        copy_radio_supported_channels(ap_wlan_hal, &std::get<1>(tuple_supported_channels));
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+        break;
+    }
     case beerocks_message::ACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST: {
         auto request =
             cmdu_rx
