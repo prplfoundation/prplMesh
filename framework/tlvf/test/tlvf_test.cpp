@@ -300,7 +300,7 @@ int test_parser()
     tlv3->add_vendor_ext(tlv3->create_vendor_ext());
     auto tlv4 = msg.addClass<tlvTestVarList>();
     // TODO https://github.com/prplfoundation/prplMesh/issues/480
-    // tlv4->add_var1(tlv4->create_var1());
+    tlv4->add_var1(tlv4->create_var1());
 
     LOG(DEBUG) << "Finalize";
     if (!msg.finalize(true)) {
