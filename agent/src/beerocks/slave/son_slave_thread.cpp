@@ -2182,6 +2182,82 @@ bool slave_thread::handle_cmdu_ap_manager_message(
         send_cmdu_to_controller(cmdu_tx);
         break;
     }
+    case beerocks_message::ACTION_APMANAGER_READ_ACS_REPORT_RESPONSE: {
+        LOG(TRACE) << "received ACTION_APMANAGER_READ_ACS_REPORT_RESPONSE";
+        auto response =
+            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE>();
+        if (!response) {
+            LOG(ERROR) << "addClass cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE failed";
+            return false;
+        }
+
+        auto tuple_supported_channels = response->supported_channels_list(0);
+        std::copy_n(&std::get<1>(tuple_supported_channels), message::SUPPORTED_CHANNELS_LENGTH,
+                    hostap_params.supported_channels);
+
+        // build channel preference report
+        auto cmdu_tx_header = cmdu_tx.create(
+            beerocks_header->id(), ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE);
+
+        if (!cmdu_tx_header) {
+            LOG(ERROR) << "cmdu creation of type CHANNEL_PREFERENCE_REPORT_MESSAGE, has failed";
+            return false;
+        }
+
+        auto preferences =
+            wireless_utils::get_channel_preferences(hostap_params.supported_channels);
+
+        auto channel_preference_tlv = cmdu_tx.addClass<wfa_map::tlvChannelPreference>();
+        if (!channel_preference_tlv) {
+            LOG(ERROR) << "addClass ieee1905_1::tlvChannelPreference has failed";
+            return false;
+        }
+
+        channel_preference_tlv->radio_uid() =
+            network_utils::mac_from_string(config.radio_identifier);
+
+        for (auto preference : preferences) {
+            // Create operating class object
+            auto op_class_channels = channel_preference_tlv->create_operating_classes_list();
+            if (!op_class_channels) {
+                LOG(ERROR) << "create_operating_classes_list() has failed!";
+                return false;
+            }
+            // TODO: check that the data is parsed properly after fixing the following bug:
+            // Since sFlags is defined after dynamic list cPreferenceOperatingClasses it cause data override
+            // on the first channel on the list and sFlags itself.
+            // See: https://github.com/prplfoundation/prplMesh/issues/8
+
+            op_class_channels->operating_class() = preference.preference.oper_class;
+            if (!op_class_channels->alloc_channel_list(preference.channels.size())) {
+                LOG(ERROR) << "alloc_channel_list() has failed!";
+                return false;
+            }
+
+            uint8_t idx = 0;
+            for (auto wifi_channel : preference.channels) {
+                *op_class_channels->channel_list(idx) = wifi_channel.channel;
+                idx++;
+            }
+
+            // Update channel list flags
+            op_class_channels->flags().preference = preference.preference.preference;
+            op_class_channels->flags().reason_code =
+                (wfa_map::cPreferenceOperatingClasses::eReasonCode)preference.preference.reason;
+
+            // Push operating class object to the list of operating class objects
+            if (!channel_preference_tlv->add_operating_classes_list(op_class_channels)) {
+                LOG(ERROR) << "add_operating_classes_list() has failed!";
+                return false;
+            }
+        }
+
+        LOG(DEBUG) << "sending channel preference report for ruid=" << config.radio_identifier;
+
+        send_cmdu_to_controller(cmdu_tx);
+
+        break;
+    }
     default: {
         LOG(ERROR) << "Unknown AP_MANAGER message, action_op: "
                    << int(beerocks_header->action_op());
@@ -4216,68 +4292,15 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received CHANNEL_PREFERENCE_QUERY_MESSAGE, mid=" << std::dec << int(mid);
 
-    // build channel preference report
-    auto cmdu_tx_header =
-        cmdu_tx.create(mid, ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE);
+    auto request_out =
+        message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_READ_ACS_REPORT_REQUEST>(
+            cmdu_tx, mid);
 
-    if (!cmdu_tx_header) {
-        LOG(ERROR) << "cmdu creation of type CHANNEL_PREFERENCE_REPORT_MESSAGE, has failed";
+    if (!request_out) {
+        LOG(ERROR) << "Failed building message ACTION_APMANAGER_READ_ACS_REPORT_REQUEST!";
         return false;
     }
-
-    auto channel_preference_tlv = cmdu_tx.addClass<wfa_map::tlvChannelPreference>();
-    if (!channel_preference_tlv) {
-        LOG(ERROR) << "addClass ieee1905_1::tlvChannelPreference has failed";
-        return false;
-    }
-
-    channel_preference_tlv->radio_uid() = network_utils::mac_from_string(config.radio_identifier);
-
-    // Create operating class object
-    auto op_class_channels = channel_preference_tlv->create_operating_classes_list();
-    if (!op_class_channels) {
-        LOG(ERROR) << "create_operating_classes_list() has failed!";
-        return false;
-    }
-
-    // TODO: check that the data is parsed properly after fixing the following bug:
-    // Since sFlags is defined after dynamic list cPreferenceOperatingClasses it cause data override
-    // on the first channel on the list and sFlags itself.
-    // See: https://github.com/prplfoundation/prplMesh/issues/8
-
-    // Fill operating class object
-    op_class_channels->operating_class() = 80; // random operating class for test purpose
-
-    // Fill up channels list in operating class object, with test values
-    for (uint8_t ch = 36; ch < 50; ch += 2) {
-        // allocate 1 channel
-        if (!op_class_channels->alloc_channel_list()) {
-            LOG(ERROR) << "alloc_channel_list() has failed!";
-            return false;
-        }
-        auto channel_idx = op_class_channels->channel_list_length();
-        auto channel     = op_class_channels->channel_list(channel_idx - 1);
-        if (!channel) {
-            LOG(ERROR) << "getting channel entry has failed!";
-            return false;
-        }
-        *channel = ch;
-    }
-
-    // Update channel list flags
-    op_class_channels->flags().preference = 15; // channels preference
-    op_class_channels->flags().reason_code =
-        wfa_map::cPreferenceOperatingClasses::eReasonCode::UNSPECIFIED;
-
-    // Push operating class object to the list of operating class objects
-    if (!channel_preference_tlv->add_operating_classes_list(op_class_channels)) {
-        LOG(ERROR) << "add_operating_classes_list() has failed!";
-        return false;
-    }
-
-    LOG(DEBUG) << "sending channel preference report for ruid=" << config.radio_identifier;
-
-    return send_cmdu_to_controller(cmdu_tx);
+    return message_com::send_cmdu(ap_manager_socket, cmdu_tx);
 }
 
 bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
