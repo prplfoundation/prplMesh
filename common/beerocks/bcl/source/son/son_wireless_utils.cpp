@@ -16,6 +16,36 @@
 
 using namespace son;
 
+struct sOperatingClass {
+    std::set<uint8_t> channels;
+    beerocks::eWiFiBandwidth band;
+};
+
+//Based on hostapd global_op_class struct, file ieee802_11_common.c
+// clang-format off
+static const std::map<uint8_t, sOperatingClass> operating_classes_list = {
+//  {OP Class   {Channels List,                                                Bandwidth             }}
+    {81,        {{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13},                  beerocks::BANDWIDTH_20}},
+    {82,        {{14},                                                         beerocks::BANDWIDTH_20}},
+    {83,        {{1, 2, 3, 4, 5, 6, 7, 8, 9},                                  beerocks::BANDWIDTH_40}},
+    {115,       {{36, 40, 44, 48},                                             beerocks::BANDWIDTH_20}},
+    {116,       {{36, 44},                                                     beerocks::BANDWIDTH_40}},
+    {117,       {{40, 48},                                                     beerocks::BANDWIDTH_40}},
+    {118,       {{52, 56, 60, 64},                                             beerocks::BANDWIDTH_20}},
+    {119,       {{52, 60},                                                     beerocks::BANDWIDTH_40}},
+    {120,       {{56, 64},                                                     beerocks::BANDWIDTH_40}},
+    {121,       {{100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144}, beerocks::BANDWIDTH_20}},
+    {122,       {{100, 108, 116, 124, 132, 140},                               beerocks::BANDWIDTH_40}},
+    {123,       {{104, 112, 120, 128, 136, 144},                               beerocks::BANDWIDTH_40}},
+    {124,       {{149, 153, 157, 161},                                         beerocks::BANDWIDTH_20}},
+    {125,       {{149, 153, 157, 161, 165, 169},                               beerocks::BANDWIDTH_20}},
+    {126,       {{149, 157},                                                   beerocks::BANDWIDTH_40}},
+    {127,       {{153, 161},                                                   beerocks::BANDWIDTH_40}},
+    {128,       {{36,  40,  44,  48,  52,  56,  60,  64,  100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161}, beerocks::BANDWIDTH_80}},
+    {129,       {{50, 66, 82, 98, 114},                                        beerocks::BANDWIDTH_160}},
+    {130,       {{36,  40,  44,  48,  52,  56,  60,  64,  100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161}, beerocks::BANDWIDTH_160}}};
+// clang-format on
+
 constexpr beerocks::eWiFiAntNum
     wireless_utils::phy_rate_table_mode_to_ant_num[PHY_RATE_TABLE_ANT_MODE_MAX];
 constexpr beerocks::eWiFiSS wireless_utils::phy_rate_table_mode_to_ss[PHY_RATE_TABLE_ANT_MODE_MAX];
@@ -532,51 +562,16 @@ std::vector<uint8_t> wireless_utils::calc_5g_20MHz_subband_channels(
  * @param operating_class operating class
  * @return std::set<uint8_t> set of supported channels by the operating class or empty if failure
  */
-std::set<uint8_t> wireless_utils::operating_class_to_channel_set(uint8_t operating_class)
+const std::set<uint8_t> &wireless_utils::operating_class_to_channel_set(uint8_t operating_class)
 {
-    static const std::map<uint8_t, std::set<uint8_t>> operating_class_to_channel_set = {
-        {81, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}},
-        {82, {14}},
-        {83, {1, 2, 3, 4, 5, 6, 7, 8, 9}},
-        // TODO channels for operating classes 85,96,87 should be taken from the regulatory domain
-        {94, {133, 137}},
-        {95, {132, 134, 136, 138}},
-        {96, {131, 132, 133, 134, 135, 136, 137, 138}},
-        {101, {21, 25}},
-        {102, {11, 13, 15, 17, 19}},
-        {103, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
-        {104, {184, 192}},
-        {105, {188, 196}},
-        {106, {191, 195}},
-        {107, {189, 191, 193, 195, 197}},
-        {108, {188, 189, 190, 191, 192, 193, 194, 195, 196, 197}},
-        {109, {184, 188, 192, 196}},
-        {110, {183, 184, 185, 186, 187, 189}},
-        {111, {182, 183, 184, 185, 186, 187, 189}},
-        {112, {8, 12, 16}},
-        {113, {7, 8, 9, 10, 11}},
-        {114, {6, 7, 8, 9, 10, 11}},
-        {115, {36, 40, 44, 48}},
-        {116, {36, 44}},
-        {117, {40, 48}},
-        {118, {52, 56, 60, 64}},
-        {119, {52, 60}},
-        {120, {56, 64}},
-        {121, {100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144}},
-        {122, {100, 108, 116, 124, 132, 140}},
-        {123, {104, 112, 120, 128, 136, 144}},
-        {124, {149, 153, 157, 161}},
-        {125, {149, 153, 157, 161, 165, 169}},
-        {126, {149, 157}},
-        {127, {153, 161}},
-        {180, {1, 2, 3, 4, 5, 6}}};
+    static const std::set<uint8_t> empty_set = {};
 
-    auto it = operating_class_to_channel_set.find(operating_class);
-    if (it == operating_class_to_channel_set.end()) {
+    auto it = operating_classes_list.find(operating_class);
+    if (it == operating_classes_list.end()) {
         LOG(ERROR) << "reserved operating class " << int(operating_class);
-        return std::set<uint8_t>();
+        return empty_set;
     }
-    return it->second;
+    return it->second.channels;
 }
 
 std::string wireless_utils::wsc_to_bwl_authentication(WSC::eWscAuth authtype)
