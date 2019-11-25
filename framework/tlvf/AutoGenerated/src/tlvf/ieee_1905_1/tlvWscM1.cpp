@@ -465,6 +465,14 @@ WSC::sWscAttrOsVersion& tlvWscM1::os_version_attr() {
     return (WSC::sWscAttrOsVersion&)(*m_os_version_attr);
 }
 
+bool tlvWscM1::isPostInitSucceeded() {
+    if (!m_vendor_ext_init) {
+        TLVF_LOG(ERROR) << "vendor_ext is not initialized";
+        return false;
+    }
+    return true; 
+}
+
 std::shared_ptr<WSC::cWscVendorExtWfa> tlvWscM1::create_vendor_ext() {
     if (m_lock_order_counter__ > 5) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list vendor_ext, abort!";
@@ -504,6 +512,7 @@ bool tlvWscM1::add_vendor_ext(std::shared_ptr<WSC::cWscVendorExtWfa> ptr) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer";
         return false;
     }
+    m_vendor_ext_init = true;
     size_t len = ptr->getLen();
     m_vendor_ext_ptr = ptr;
     if (!buffPtrIncrementSafe(len)) { return false; }

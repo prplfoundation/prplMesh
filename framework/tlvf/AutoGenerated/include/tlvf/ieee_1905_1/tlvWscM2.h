@@ -88,6 +88,7 @@ class tlvWscM2 : public BaseClass
         WSC::sWscAttrDevicePasswordID& device_password_id_attr();
         WSC::sWscAttrOsVersion& os_version_attr();
         WSC::sWscAttrVersion2& version2_attr();
+        bool isPostInitSucceeded();
         std::shared_ptr<WSC::cWscAttrEncryptedSettings> create_encrypted_settings();
         bool add_encrypted_settings(std::shared_ptr<WSC::cWscAttrEncryptedSettings> ptr);
         std::shared_ptr<WSC::cWscAttrEncryptedSettings> encrypted_settings() { return m_encrypted_settings_ptr; }
@@ -139,6 +140,7 @@ class tlvWscM2 : public BaseClass
         WSC::sWscAttrVersion2* m_version2_attr = nullptr;
         WSC::cWscAttrEncryptedSettings *m_encrypted_settings = nullptr;
         std::shared_ptr<WSC::cWscAttrEncryptedSettings> m_encrypted_settings_ptr = nullptr;
+        bool m_encrypted_settings_init = false;
         bool m_lock_allocation__ = false;
         WSC::sWscAttrAuthenticator* m_authenticator = nullptr;
 };

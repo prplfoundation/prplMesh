@@ -47,6 +47,7 @@ class tlvTestVarList : public BaseClass
         std::tuple<bool, cInner&> complex_list(size_t idx);
         std::shared_ptr<cInner> create_complex_list();
         bool add_complex_list(std::shared_ptr<cInner> ptr);
+        bool isPostInitSucceeded();
         std::shared_ptr<cInner> create_var1();
         bool add_var1(std::shared_ptr<cInner> ptr);
         std::shared_ptr<cInner> var1() { return m_var1_ptr; }
@@ -77,6 +78,7 @@ class tlvTestVarList : public BaseClass
         bool m_lock_allocation__ = false;
         cInner *m_var1 = nullptr;
         std::shared_ptr<cInner> m_var1_ptr = nullptr;
+        bool m_var1_init = false;
         uint32_t* m_var2 = nullptr;
         cInner* m_unknown_length_list = nullptr;
         size_t m_unknown_length_list_idx__ = 0;

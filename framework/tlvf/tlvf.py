@@ -209,6 +209,7 @@ class MetaData:
         self.list_index = 0
         self.lock_allocation_member_added = False
         self.lock_order_member_added = False
+        self.marker_post_init_method_added = False
         
     def errPrefix(self):
         return "%s.yaml, param name=%s --> " % (self.fname, self.name)
@@ -336,9 +337,10 @@ class TlvF:
         self.CODE_CLASS_PUBLIC_FUNC_INSERT          = "//~class_public_func_insert"
         self.CODE_CLASS_PRIVATE_FUNC_INSERT         = "//~class_private_func_insert"
         self.CODE_CLASS_INIT_FUNC_INSERT            = "//~class_init_func_insert"
-        self.CODE_CLASS_INIT_FUNC_SWAP_INSERT            = "//~class_init_func_swap_insert"
+        self.CODE_CLASS_INIT_FUNC_SWAP_INSERT       = "//~class_init_func_swap_insert"
         self.CODE_CLASS_SWAP_FUNC_INSERT            = "//~class_swap_func_insert"
         self.CODE_CLASS_SIZE_FUNC_INSERT            = "//~class_size_func_insert"
+        self.CODE_CLASS_IS_INIT_FUNC                = "//~class_is_init_func"
         self.CODE_ENUM_INSERT                       = "//~enum_insert"
         self.CODE_ENUM_VALIDATION_INSERT            = "//~enum_validation_insert"
         self.CODE_STRUCT_INSERT                     = "//~struct_insert"
@@ -581,6 +583,60 @@ class TlvF:
         else:
             self.insertLineH(obj_meta.name, self.CODE_STRUCT_INSERT, line)
 
+    ##########################################################################################
+    # Empty class member initialization support
+    # 
+    # In order to make sure that a class that contains a class member is fully
+    # initialized, the virtual method isPostInitSucceeded is overridden to
+    # validate that and return true or false to indicate.
+    #
+    # For each TLV that contains a member of a type class, a private bool member
+    # is created (for each class member) which indicates if that member class is
+    # initialized. This bool variable is initialized to FALSE.
+    #
+    # When the user calls the add_member method, the value of the bool is set to TRUE.
+    # In those cases, the method isPostInitSucceeded is overridden to include
+    # more conditions to validate that each of the members of the type class
+    # in TLV is fully initialized.
+    #
+    ##########################################################################################
+    def overrideIsPostInitSucceeded(self, obj_meta, param_name,lines_h):
+        #for each TLV member of type class add a bool variable to indicate if it is initialized 
+        lines_h.append("bool m_%s_init = false;" % (param_name))
+        lines_cpp = []
+        #if this is the first member of type class override the method 
+        if not obj_meta.marker_post_init_method_added:
+            #Add decleration in header file
+            line_h = "bool isPostInitSucceeded();" 
+            self.insertLineH(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, line_h)
+                    
+            #Override isPostInitSucceeded method to verify the class is completly initialized
+            lines_cpp.append("bool %s::isPostInitSucceeded() {" % (obj_meta.name))
+            #if this member is not added by the user return false
+            lines_cpp.append("%sif (!m_%s_init) {" % (self.getIndentation(1) ,param_name))
+            lines_cpp.append("%sTLVF_LOG(ERROR) << \"%s is not initialized\";" %(self.getIndentation(2), param_name))
+            lines_cpp.append("%sreturn false;" % (self.getIndentation(2)))
+            lines_cpp.append("%s}" % (self.getIndentation(1)))
+
+            #in case there is more than one member of type class, add a marker 
+            #before the return statement
+            marker = "%s_%s" %(self.CODE_CLASS_IS_INIT_FUNC, obj_meta.name)
+            lines_cpp.append(marker)
+            lines_cpp.append("%sreturn true; " % self.getIndentation(1))
+            lines_cpp.append("}")
+            lines_cpp.append("")
+            obj_meta.marker_post_init_method_added= True
+            self.insertLineCpp(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, lines_cpp)
+
+        #if the method is already overridden, just add the right condition
+        else:
+            #add a condition to validate the user added this member      
+            lines_cpp.append("%sif (!m_%s_init) {" % (self.getIndentation(1) ,param_name))
+            lines_cpp.append("%sTLVF_LOG(ERROR) << \"%s is not initialized\";" %(self.getIndentation(2), param_name))
+            lines_cpp.append("%sreturn false;" % (self.getIndentation(2)))
+            lines_cpp.append("%s}" % (self.getIndentation(1)))
+            self.insertLineCpp(obj_meta.name, self.CODE_CLASS_IS_INIT_FUNC, lines_cpp)
+
     def addClassParam(self, obj_meta, param_name, param_type, param_type_info, param_meta=None):
         param_val_const = None
         param_val = None
@@ -644,6 +700,8 @@ class TlvF:
             if TypeInfo(param_type).type == TypeInfo.CLASS:                
                 lines_h.append("%s *m_%s = nullptr;" % (param_type, param_name))
                 lines_h.append("std::shared_ptr<%s> m_%s_ptr = nullptr;" % (param_type, param_name))
+                self.overrideIsPostInitSucceeded(obj_meta,param_name,lines_h)
+                
                 if not obj_meta.lock_allocation_member_added:
                     lines_h.append("bool m_%s__ = false;" % self.MEMBER_LOCK_ALLOCATION)
                     obj_meta.lock_allocation_member_added = True
@@ -1057,6 +1115,10 @@ class TlvF:
                 lines_cpp.append( "%sm_%s_idx__++;" % (self.getIndentation(1), param_name) )
                 if is_var_len:
                     lines_cpp.append( "%sif (!m_parse__) { (*m_%s)++; }" % (self.getIndentation(1), param_length) )
+            else: 
+                # When the user calls the add_member method, the value of the bool variable is set to TRUE.
+                # For more information, please read overrideIsPostInitSucceeded method documentation 
+                lines_cpp.append("%sm_%s_init = true;" %(self.getIndentation(1),param_meta.name))
             lines_cpp.append( "%ssize_t len = ptr->getLen();" % (self.getIndentation(1) ))
             lines_cpp.extend(self.addAllocationMarkersAdd(obj_meta, param_meta, param_length, False)) # Variable length lists support
             if param_length or is_dynamic_len:
@@ -1176,7 +1238,7 @@ class TlvF:
             marker = "%s_%s_%s_%s" %(self.CODE_CLASS_ALLOC_INSERT, obj_meta.name, "add", param_meta.name)
             obj_meta.alloc_list.append((marker, "add"))
             lines_cpp.append(marker)
-
+            
         return lines_cpp
 
     def getCommentLines(self, comment):
