@@ -171,9 +171,8 @@ private:
     const int MONITOR_HEARTBEAT_RETRIES                               = 10;
     const int AP_MANAGER_HEARTBEAT_TIMEOUT_SEC                        = 10;
     const int AP_MANAGER_HEARTBEAT_RETRIES                            = 10;
-
-    const int CONNECT_PLATFORM_RETRY_SLEEP     = 1000;
-    const int CONNECT_PLATFORM_RETRY_COUNT_MAX = 5;
+    const int CONNECT_PLATFORM_RETRY_SLEEP                            = 1000;
+    const int CONNECT_PLATFORM_RETRY_COUNT_MAX                        = 5;
 
     int connect_platform_retry_counter = 0;
 
