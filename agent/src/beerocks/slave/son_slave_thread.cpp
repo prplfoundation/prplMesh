@@ -4454,6 +4454,8 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
 
 bool slave_thread::add_radio_basic_capabilities()
 {
+    std::vector<uint8_t> operating_classes;
+
     auto radio_basic_caps = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
     if (!radio_basic_caps) {
         LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
@@ -4463,22 +4465,39 @@ bool slave_thread::add_radio_basic_capabilities()
     //TODO get maximum supported VAPs from DWPAL
     radio_basic_caps->maximum_number_of_bsss_supported() = 2;
 
-    auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
-    if (!operationClassesInfo) {
-        LOG(ERROR) << "Failed creating operating classes info list";
-        return false;
-    }
+    operating_classes =
+        wireless_utils::get_supported_operating_classes(hostap_params.supported_channels);
 
-    // TODO: Currently sending dummy values, just one operating class based on the band. Need
-    // to read them from DWPAL and use the correct WiFi Parameters based on the regulatory
-    // domain
-    uint8_t operating_class                            = hostap_params.iface_is_5ghz ? 110 : 81;
-    operationClassesInfo->operating_class()            = operating_class;
-    operationClassesInfo->maximum_transmit_power_dbm() = 0;
+    for (auto op_class : operating_classes) {
+        auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
+        if (!operationClassesInfo) {
+            LOG(ERROR) << "Failed creating operating classes info list";
+            return false;
+        }
 
-    if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
-        LOG(ERROR) << "add_operating_classes_info_list failed";
-        return false;
+        operationClassesInfo->operating_class() = op_class;
+        operationClassesInfo->maximum_transmit_power_dbm() =
+            wireless_utils::get_operating_class_max_tx_power(hostap_params.supported_channels,
+                                                             op_class);
+
+        std::vector<uint8_t> non_oper_channels;
+        non_oper_channels = wireless_utils::get_operating_class_non_oper_channels(
+            hostap_params.supported_channels, op_class);
+        // Create list of statically non-oper channels
+        if (!non_oper_channels.empty()) {
+            operationClassesInfo->alloc_statically_non_operable_channels_list(
+                non_oper_channels.size());
+            uint8_t idx = 0;
+            for (auto non_oper : non_oper_channels) {
+                *operationClassesInfo->statically_non_operable_channels_list(idx) = non_oper;
+                idx++;
+            }
+        }
+
+        if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
+            LOG(ERROR) << "add_operating_classes_info_list failed";
+            return false;
+        }
     }
 
     return true;
