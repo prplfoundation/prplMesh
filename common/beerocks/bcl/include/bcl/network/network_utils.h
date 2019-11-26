@@ -80,7 +80,6 @@ public:
 
     static std::string mac_to_string(const sMacAddr &mac);
     static std::string mac_to_string(const uint8_t *mac_address);
-    static uint64_t mac_to_uint64(const uint8_t *mac_address);
 
     static sMacAddr mac_from_string(const std::string &mac);
     static void mac_from_string(uint8_t *buf, const std::string &mac);

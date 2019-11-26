@@ -97,23 +97,6 @@ std::string network_utils::mac_to_string(const sMacAddr &mac)
     return mac_to_string((const uint8_t *)mac.oct);
 }
 
-uint64_t network_utils::mac_to_uint64(const uint8_t *mac_address)
-{
-    uint64_t mac = 0;
-
-#ifdef BEEROCKS_UGW
-    mac = (uint64_t(mac_address[0]) << 56) | (uint64_t(mac_address[1]) << 48) |
-          (uint64_t(mac_address[2]) << 40) | (uint64_t(mac_address[3]) << 32) |
-          (uint64_t(mac_address[4]) << 24) | (uint64_t(mac_address[5]) << 16);
-#elif BEEROCKS_BRCM
-    mac = (uint64_t(mac_address[0]) << 16) | (uint64_t(mac_address[1]) << 24) |
-          (uint64_t(mac_address[2]) << 32) | (uint64_t(mac_address[3]) << 40) |
-          (uint64_t(mac_address[4]) << 48) | (uint64_t(mac_address[5]) << 56);
-#endif
-
-    return (mac);
-}
-
 sMacAddr network_utils::mac_from_string(const std::string &mac)
 {
     sMacAddr ret;
