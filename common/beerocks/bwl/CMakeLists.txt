@@ -43,7 +43,7 @@ elseif(TARGET_PLATFORM STREQUAL "rdkb")
     include_directories(${PLATFORM_INCLUDE_DIR}/wav-dpal)
 
 # Turris Omnia
-elseif(TARGET_PLATFORM STREQUAL "turris-omnia")
+elseif(TARGET_PLATFORM STREQUAL "openwrt")
 
     set(BWL_TYPE "NL80211")
 
