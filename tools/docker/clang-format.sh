@@ -51,7 +51,7 @@ main() {
                 --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)}
                 --name prplMesh-clang-format"
 
-    DOCKEROPTS="$DOCKEROPTS --interactive --tty --rm"
+    DOCKEROPTS="$DOCKEROPTS --rm"
     
     run docker container run --entrypoint "${sourcesdir}/clang-format.sh" ${DOCKEROPTS} prplmesh-runner$TAG "$@"
 }
