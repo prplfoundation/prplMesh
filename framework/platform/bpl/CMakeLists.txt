@@ -62,7 +62,7 @@ elseif (TARGET_PLATFORM STREQUAL "linux")
     add_definitions(-DPLATFORM_DB_PATH_TEMP="${PLATFORM_DB_PATH_TEMP}/prplmesh_platform_db")
     install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 
-elseif (TARGET_PLATFORM STREQUAL "turris-omnia")
+elseif (TARGET_PLATFORM STREQUAL "openwrt")
 
     file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
 

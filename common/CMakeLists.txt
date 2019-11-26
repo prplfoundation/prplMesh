@@ -35,7 +35,7 @@ elseif (TARGET_PLATFORM STREQUAL "linux")
     set(BEEROCKS_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}")
     set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
     set(BEEROCKS_PLATFORM_INIT "true")
-elseif (TARGET_PLATFORM STREQUAL "turris-omnia")
+elseif (TARGET_PLATFORM STREQUAL "openwrt")
     set(BEEROCKS_BH_WIRE_IFACE "eth1")
 endif()
 
