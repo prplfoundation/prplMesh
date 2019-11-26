@@ -889,17 +889,17 @@ bool network_utils::arp_send(const std::string &iface, const std::string &dst_ip
     uint32_t src_ip_uint = network_utils::uint_ipv4_from_string(src_ip);
 
     // Fill out sockaddr_ll.
-    sock = {};
-    sock.sll_family = AF_PACKET;
+    sock             = {};
+    sock.sll_family  = AF_PACKET;
     sock.sll_ifindex = if_nametoindex(iface.c_str());
-    sock.sll_halen = MAC_ADDR_LEN;
+    sock.sll_halen   = MAC_ADDR_LEN;
     std::copy_n(dst_mac.oct, MAC_ADDR_LEN, sock.sll_addr);
 
     // build ARP header
-    arphdr.htype = htons(1);        //type: 1 for ethernet
-    arphdr.ptype = htons(ETH_P_IP); // proto
-    arphdr.hlen = MAC_ADDR_LEN;     // mac addr len
-    arphdr.plen = IP_ADDR_LEN;      // ip addr len
+    arphdr.htype  = htons(1);        //type: 1 for ethernet
+    arphdr.ptype  = htons(ETH_P_IP); // proto
+    arphdr.hlen   = MAC_ADDR_LEN;    // mac addr len
+    arphdr.plen   = IP_ADDR_LEN;     // ip addr len
     arphdr.opcode = htons(ARPOP_REQUEST);
     std::copy_n(src_mac.oct, MAC_ADDR_LEN, arphdr.sender_mac);
     std::copy_n((uint8_t *)&src_ip_uint, IP_ADDR_LEN, arphdr.sender_ip);
@@ -948,15 +948,15 @@ bool network_utils::icmp_send(const std::string &ip, uint16_t id, int count, int
         return false;
     }
 
-    pingaddr = {};
-    pingaddr.sin_family = AF_INET;
+    pingaddr                 = {};
+    pingaddr.sin_family      = AF_INET;
     pingaddr.sin_addr.s_addr = inet_addr(ip.c_str());
 
     for (int i = 0; i < count; i++) {
-        icmphdr *pkt = (icmphdr *)packet_buffer;
-        pkt->type = ICMP_ECHO;
-        pkt->code = 0;
-        pkt->un.echo.id = htons(id);
+        icmphdr *pkt          = (icmphdr *)packet_buffer;
+        pkt->type             = ICMP_ECHO;
+        pkt->code             = 0;
+        pkt->un.echo.id       = htons(id);
         pkt->un.echo.sequence = htons(i);
         pkt->checksum =
             0; //keep cheksum = 0 before calling icmp_checksum -> needed for checksum calculation
@@ -977,9 +977,9 @@ bool network_utils::icmp_send(const std::string &ip, uint16_t id, int count, int
 
 uint16_t network_utils::icmp_checksum(uint16_t *buf, int32_t len)
 {
-    int32_t nleft = len;
-    int32_t sum = 0;
-    uint16_t *w = buf;
+    int32_t nleft   = len;
+    int32_t sum     = 0;
+    uint16_t *w     = buf;
     uint16_t answer = 0;
 
     while (nleft > 1) {
