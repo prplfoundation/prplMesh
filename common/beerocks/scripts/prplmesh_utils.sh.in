@@ -81,18 +81,18 @@ prplmesh_platform_db_init() {
     management_mode=${1-Multi-AP-Controller-and-Agent}
     operating_mode=${2-Gateway}
 
-    mkdir -p @PLATFORM_DB_PATH_TEMP@
+    mkdir -p @TMP_PATH@
     {
         echo "management_mode=${management_mode}"
         echo "operating_mode=${operating_mode}"
         echo "wired_backhaul=1"
-    } > @PLATFORM_DB_PATH_TEMP@/prplmesh_platform_db
+    } > @TMP_PATH@/prplmesh_platform_db
 }
 
 prplmesh_framework_init() {
     echo "prplmesh_framework_init - starting local_bus and ieee1905_transport processes..."
-    @BEEROCKS_INSTALL_PATH@/bin/local_bus &
-    @BEEROCKS_INSTALL_PATH@/bin/ieee1905_transport &
+    @INSTALL_PATH@/bin/local_bus &
+    @INSTALL_PATH@/bin/ieee1905_transport &
 }
 
 prplmesh_framework_deinit() {
@@ -103,7 +103,7 @@ prplmesh_framework_deinit() {
 
 prplmesh_controller_start() {
     echo "prplmesh_controller_start - start beerocks_controller process..."
-    @BEEROCKS_INSTALL_PATH@/bin/beerocks_controller &
+    @INSTALL_PATH@/bin/beerocks_controller &
 }
 
 prplmesh_controller_stop() {
@@ -113,7 +113,7 @@ prplmesh_controller_stop() {
 
 prplmesh_agent_start() {
     echo "prplmesh_agent_start - start beerocks_agent process..."
-    @BEEROCKS_INSTALL_PATH@/bin/beerocks_agent &
+    @INSTALL_PATH@/bin/beerocks_agent &
 }
 
 prplmesh_agent_stop() {
@@ -190,7 +190,7 @@ status_function() {
     pgrep -la local_bus
 
     # check for operational status
-    LOGS_PATH=@BEEROCKS_TMP_PATH@/logs/
+    LOGS_PATH=@TMP_PATH@/logs/
 
     error=0
     report "Main agent operational" main_agent_operational $LOGS_PATH
@@ -265,6 +265,6 @@ DATA_IFACE=enx00ee22aa28ef
 PRPLMESH_MODE="CA" # CA = Controller & Agent, A = Agent only, C = Controller only
 
 # Export MultiAP libs folder
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@BEEROCKS_INSTALL_PATH@/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@INSTALL_PATH@/lib
 
 main $@

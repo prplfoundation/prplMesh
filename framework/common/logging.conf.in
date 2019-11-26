@@ -6,7 +6,7 @@
 			"console" : false,
 			"file" : {
 				"enable" : true,
-				"path" : "@TMP_PATH@/mapf/logs/",
+				"path" : "@TMP_PATH@/logs/",
 				"size" : "1000000"
 			},
 			"flushthreshold" : 1

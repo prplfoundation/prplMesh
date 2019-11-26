@@ -10,7 +10,7 @@
 
 [global]
 platform=@BEEROCKS_PLATFORM@
-temp_path=@BEEROCKS_TMP_PATH@
+temp_path=@TMP_PATH@
 vendor=Intel
 model=prplMesh
 ucc_listener_port=8002 # 0 - disabled
@@ -55,7 +55,7 @@ enable_repeater_mode=0
 #sta_iface_filter_low=1
 
 [log]
-log_path=@BEEROCKS_TMP_PATH@/logs/
+log_path=@TMP_PATH@/logs/
 log_global_levels=error,info,warning,fatal,trace,debug
 log_global_syslog_levels=error,info,warning,fatal,trace,debug
 log_global_size=1000000
