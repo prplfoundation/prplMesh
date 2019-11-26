@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 project (prplmesh C CXX)
 
+include(cmake/multiap-helpers.cmake)
+
 if(NOT DEFINED TARGET_PLATFORM)
 set(TARGET_PLATFORM "linux")
 endif()
