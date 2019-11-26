@@ -1,11 +1,4 @@
 set(PROJECT CONTROLLER)
-cmake_minimum_required(VERSION 2.8)
-include(GNUInstallDirs)
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release")
-endif()
-message(STATUS "Beerocks Build Type: ${CMAKE_BUILD_TYPE}")
 
 # Default values
 set(BEEROCKS_TMP_PATH "/tmp/beerocks")
@@ -24,12 +17,6 @@ elseif (TARGET_PLATFORM STREQUAL "openwrt")
     set(BEEROCKS_TMP_PATH "/tmp/beerocks")
     set(BEEROCKS_WLAN2_IFACE "wlan1")
 endif()
-
-list (FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
-if ("${isSystemDir}" STREQUAL "-1")
-    set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-endif ("${isSystemDir}" STREQUAL "-1")
-set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)

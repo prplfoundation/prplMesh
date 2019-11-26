@@ -1,11 +1,4 @@
 set(PROJECT AGENT)
-cmake_minimum_required(VERSION 2.8)
-include(GNUInstallDirs)
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release")
-endif()
-message(STATUS "Beerocks Build Type: ${CMAKE_BUILD_TYPE}")
 
 # Default values
 set(BEEROCKS_WLAN1_IFACE "wlan0")
