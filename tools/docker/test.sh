@@ -34,7 +34,7 @@ main() {
         esac
     done
 
-    run docker container exec -it ${NAME} ${topdir}/build/install/scripts/prplmesh_utils.sh status $OPT
+    run docker container exec ${NAME} ${topdir}/build/install/scripts/prplmesh_utils.sh status $OPT
 }
 
 VERBOSE=false

@@ -19,7 +19,7 @@ main() {
 
     run docker container run --workdir=$topdir --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)} \
         -e USER=${SUDO_USER:-${USER}} -v ${topdir}:${topdir} \
-        --interactive --tty --rm prplmesh-builder $@
+        --rm prplmesh-builder $@
 }
 
 main $@

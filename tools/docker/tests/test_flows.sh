@@ -30,7 +30,7 @@ container_CAPI_port() {
 }
 
 send_bml_command() {
-    docker exec -it gateway ${installdir}/bin/beerocks_cli -c "$*"
+    docker exec gateway ${installdir}/bin/beerocks_cli -c "$*"
 }
 
 send_CAPI_command() {
@@ -42,17 +42,17 @@ test_initial_ap_config() {
     status "test initial autoconfig"
 
     check_error=0
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "WSC Global authentication success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "WSC Global authentication success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "KWA (Key Wrap Auth) success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "KWA (Key Wrap Auth) success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     # Regression test: MAC address should be case insensitive
@@ -66,11 +66,11 @@ test_initial_ap_config() {
     # Wait a bit for the renew to complete
     sleep 3
 
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "ssid: Multi-AP-24G-1, .* fronthaul" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "ssid: Multi-AP-24G-2, .* backhaul" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "ssid: .* teardown" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     return $check_error
@@ -93,9 +93,9 @@ test_ap_config_bss_tear_down() {
     send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x000A,tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}" $redirect
 
     sleep 3
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "ssid: Multi-AP-24G-1, .* fronthaul" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "ssid: .* teardown" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     # SSIDs have been removed for the CTT Agent1's front radio
@@ -104,7 +104,7 @@ test_ap_config_bss_tear_down() {
     send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x000A,tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}" $redirect
 
     sleep 3
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "ssid: .* teardown" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
     
     return $check_error
@@ -118,25 +118,25 @@ test_channel_selection() {
     send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8004" $redirect
     sleep 1
     dbg "Confirming channel preference query has been received on agent"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "CHANNEL_PREFERENCE_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "CHANNEL_PREFERENCE_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
     
     dbg "Send channel selection request"
     send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8006" $redirect
     sleep 1
     dbg "Confirming channel selection request has been received on agent"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "CHANNEL_SELECTION_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "CHANNEL_SELECTION_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
     
     dbg "Confirming 1905.1 Ack Message request was received on agent"
     # TODO: When creating handler for the ACK message on the agent, replace lookup of this string
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     return $check_error
@@ -150,9 +150,9 @@ test_client_capability_query() {
     sleep 1
     dbg "Confirming client capability query has been received on agent"
     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "CLIENT_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 }
 test_ap_capability_query() {
@@ -161,7 +161,7 @@ test_ap_capability_query() {
     check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8001" $redirect
     sleep 1
     dbg "Confirming ap capability query has been received on agent"
-    check docker exec -it repeater1 sh -c 'grep -i -q "AP_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec repeater1 sh -c 'grep -i -q "AP_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
     return $check_error
 }
 test_combined_infra_metrics() {
@@ -176,14 +176,14 @@ test_client_steering_mandate() {
     check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
     sleep 1
     dbg "Confirming topology query was received"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Send topology request to agent 2"
     check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent2,MessageTypeValue,0x0002" $redirect
     sleep 1
     dbg "Confirming topology query was received"
-    check docker exec -it repeater2 sh -c \
+    check docker exec repeater2 sh -c \
         'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Send Client Steering Request message for Steering Mandate to CTT Agent1"
@@ -191,34 +191,34 @@ test_client_steering_mandate() {
 0x001b,tlv_value,{$mac_agent1_wlan0 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {$mac_agent2_wlan0 0x73 0x24}}" $redirect
     sleep 1
     dbg "Confirming Client Steering Request message was received - mandate"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "Got steer request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
     
     dbg "Confirming BTM Report message was received"
-    check docker exec -it gateway sh -c \
+    check docker exec gateway sh -c \
         'grep -i -q "CLIENT_STEERING_BTM_REPORT_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
 
     dbg "Confirming ACK message was received"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 
     check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
 0x000C,tlv_value,{$mac_agent1_wlan0 0x00 0x000A 0x0000 0x00}" $redirect
     sleep 1
     dbg "Confirming Client Steering Request message was received - Opportunity"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "CLIENT_STEERING_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 
     dbg "Confirming ACK message was received"
-    check docker exec -it gateway sh -c \
+    check docker exec gateway sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
 
     dbg "Confirming steering completed message was received"
-    check docker exec -it gateway sh -c \
+    check docker exec gateway sh -c \
         'grep -i -q "STEERING_COMPLETED_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
 
     dbg "Confirming ACK message was received"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
     return $check_error
 }
@@ -229,7 +229,7 @@ test_client_association_dummy(){
     sta_mac=11:11:33:44:55:66
 
     dbg "Connect dummy STA to wlan0"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         "echo 'AP-STA-CONNECTED ${sta_mac}' >> /tmp/\$USER/beerocks/wlan0/EVENT"
     
     dbg "Send client association control request to the chosen BSSID to steer the client (UNBLOCK) "
@@ -237,7 +237,7 @@ test_client_association_dummy(){
     sleep 1
 
     dbg "Confirming Client Association Control Request message was received (UNBLOCK)"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         "grep -i -q 'Got client allow request for ${sta_mac}' /tmp/\$USER/beerocks/logs/beerocks_agent_wlan2.log"
 
     dbg "Send client association control request to all other (BLOCK) "
@@ -245,7 +245,7 @@ test_client_association_dummy(){
     sleep 1
 
     dbg "Confirming Client Association Control Request message was received (BLOCK)"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         "grep -i -q 'Got client disallow request for ${sta_mac}' /tmp/\$USER/beerocks/logs/beerocks_agent_wlan0.log"
     return $check_error
 }
@@ -256,7 +256,7 @@ test_client_steering_dummy() {
     sta_mac=11:22:33:44:55:66
 
     dbg "Connect dummy STA to wlan0"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         "echo 'AP-STA-CONNECTED ${sta_mac}' >> /tmp/\$USER/beerocks/wlan0/EVENT"
 
     dbg "Send steer request "
@@ -264,45 +264,45 @@ test_client_steering_dummy() {
     sleep 1
 
     dbg "Confirming Client Association Control Request message was received (UNBLOCK)"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "Got client allow request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     dbg "Confirming Client Association Control Request message was received (BLOCK)"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "Got client disallow request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 
     dbg "Confirming Client Association Control Request message was received (BLOCK)"
-    check docker exec -it repeater2 sh -c \
+    check docker exec repeater2 sh -c \
         'grep -i -q "Got client disallow request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 
     dbg "Confirming Client Association Control Request message was received (BLOCK)"
-    check docker exec -it repeater2 sh -c \
+    check docker exec repeater2 sh -c \
         'grep -i -q "Got client disallow request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     dbg "Confirming Client Steering Request message was received - mandate"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "Got steer request" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 
     dbg "Confirming BTM Report message was received"
-    check docker exec -it gateway sh -c \
+    check docker exec gateway sh -c \
         'grep -i -q "CLIENT_STEERING_BTM_REPORT_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
 
     dbg "Confirming ACK message was received"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
 
     dbg "Disconnect dummy STA from wlan0"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         "echo 'AP-STA-DISCONNECTED ${sta_mac}' >> /tmp/\$USER/beerocks/wlan0/EVENT"
 
     #TODO// check for "disconnected after successful steering, proceeding to unblock" message 
 
     dbg "Connect dummy STA to wlan2"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         "echo 'AP-STA-CONNECTED ${sta_mac}' >> /tmp/\$USER/beerocks/wlan2/EVENT"
 
     dbg "Confirm steering success by client connected"
-    check docker exec -it gateway sh -c \
+    check docker exec gateway sh -c \
         "grep -i -q 'steering successful for sta ${sta_mac}' /tmp/\$USER/beerocks/logs/beerocks_controller.log"
     return $check_error
 }
@@ -319,10 +319,10 @@ test_client_steering_policy() {
     MID1_STR=$(grep -Po "(?<=mid,0x).*[^\s]" /tmp/catch)
     dbg "Confirming client steering policy has been received on agent"
     
-    check docker exec -it repeater1 sh -c 'grep -i -q "MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log > /tmp/catch'
+    check docker exec repeater1 sh -c 'grep -i -q "MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log > /tmp/catch'
     sleep 1
     dbg "Confirming client steering policy ack message has been received on the controller"
-    TMP="$(docker exec -it gateway sh -c 'grep -i "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log')"
+    TMP="$(docker exec gateway sh -c 'grep -i "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log')"
     MID2_STR="$(echo "$TMP" | tr ' ' '\n' | grep -Po "(?<=mid=).*[^\s]" | tail -n 1)"
 
     check [ "$MID1_STR" = "$MID2_STR" ]
@@ -335,7 +335,7 @@ test_client_association() {
     dbg "Send topology request to agent 1"
     check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
     dbg "Confirming topology query was received"
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Send client association control message"
@@ -344,13 +344,13 @@ test_client_association() {
 
     dbg "Confirming client association control message has been received on agent"
     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     dbg "Confirming ACK message was received on controller"
-    check docker exec -it gateway sh -c \
+    check docker exec gateway sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
     return $check_error
 }
@@ -376,18 +376,18 @@ test_higher_layer_data_payload_trigger() {
 
     dbg "Confirming higher layer data message was received in the agent" 
     
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "HIGHER_LAYER_DATA_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Confirming matching protocol and payload length"
 
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "protocol: 0" /tmp/$USER/beerocks/logs/beerocks_agent.log'
-    check docker exec -it repeater1 sh -c \
+    check docker exec repeater1 sh -c \
         'grep -i -q "payload_length: 4b0" /tmp/$USER/beerocks/logs/beerocks_agent.log'
 
     dbg "Confirming ACK message was received in the controller"
-    check docker exec -it gateway sh -c \
+    check docker exec gateway sh -c \
         'grep -i -q "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log'
     return $check_error
 }
@@ -401,7 +401,7 @@ test_topology() {
     check_error=0
     check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
     dbg "Confirming topology query was received"
-    docker exec -it repeater1 sh -c 'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
+    docker exec repeater1 sh -c 'grep -i -q "TOPOLOGY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
     return $check_error
 }
 test_init() {
@@ -414,7 +414,7 @@ test_init() {
     connmap=$(mktemp)
     [ -z "$connmap" ] && { err "Failed to create temp file"; exit 1; }
     trap "rm -f $connmap" EXIT
-    docker exec -it gateway ${installdir}/bin/beerocks_cli -c bml_conn_map > "$connmap"
+    docker exec gateway ${installdir}/bin/beerocks_cli -c bml_conn_map > "$connmap"
 
     mac_gateway=$(grep "GW_BRIDGE" "$connmap" | head -1 | awk '{print $5}' | cut -d ',' -f 1)
     dbg "mac_gateway = ${mac_gateway}"
