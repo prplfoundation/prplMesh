@@ -114,7 +114,7 @@ private:
     std::unordered_map<std::string, SIfaceParams> m_mapIfaces; // key=iface_name
 
     // ARP entries by source MAC (uint64_t) address
-    std::unordered_map<uint64_t, std::shared_ptr<SArpEntry>> m_mapArpEntries;
+    std::unordered_map<sMacAddr, std::shared_ptr<SArpEntry>> m_mapArpEntries;
     std::chrono::steady_clock::time_point m_tpArpEntriesCleanup;
 
     // Pointer to the backhaul manager slave

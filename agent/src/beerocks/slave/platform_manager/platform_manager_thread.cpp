@@ -988,8 +988,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
 
         // Add the MAC to the arp entries map
-        uint64_t uiMAC = network_utils::mac_to_uint64(request->params().mac.oct);
-        if (m_mapArpEntries.find(uiMAC) == m_mapArpEntries.end()) {
+        if (m_mapArpEntries.find(request->params().mac) == m_mapArpEntries.end()) {
             auto pArpEntry = std::make_shared<SArpEntry>();
 
             // Only the IP address is initialized at this point
@@ -1003,7 +1002,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             LOG(DEBUG) << "Adding MAC " << network_utils::mac_to_string(request->params().mac)
                        << " to the ARP list...";
 
-            m_mapArpEntries[uiMAC] = pArpEntry;
+            m_mapArpEntries[request->params().mac] = pArpEntry;
         }
 
     } break;
@@ -1901,8 +1900,7 @@ bool main_thread::handle_arp_monitor()
     // Check if the master should be notified
     bool fSendNotif = true;
     if (entry.type != ARP_TYPE_DELNEIGH) {
-        uint64_t uiMAC = network_utils::mac_to_uint64(arp_notif->params().mac.oct);
-        auto pArpEntry = m_mapArpEntries.find(uiMAC);
+        auto pArpEntry = m_mapArpEntries.find(arp_notif->params().mac);
 
         if (pArpEntry != m_mapArpEntries.end()) {
 
@@ -2010,8 +2008,7 @@ bool main_thread::handle_arp_raw()
                << strIface << "' (" << strSource << ")";
 
     // Update ARP entry parameters
-    uint64_t uiMAC = network_utils::mac_to_uint64(arp_resp->params().mac.oct);
-    auto pArpEntry = m_mapArpEntries.find(uiMAC);
+    auto pArpEntry = m_mapArpEntries.find(arp_resp->params().mac);
 
     if (pArpEntry != m_mapArpEntries.end()) {
         pArpEntry->second->ip = network_utils::uint_ipv4_from_array(arp_resp->params().ipv4.oct);
