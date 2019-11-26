@@ -31,12 +31,6 @@ if ("${isSystemDir}" STREQUAL "-1")
 endif ("${isSystemDir}" STREQUAL "-1")
 set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-# Use beerocks intel ip patent
-option (BUILD_PATENTS "build with patents enabled" ON)
-if (BUILD_PATENTS)
-    add_definitions(-DBEEROCKS_PATENTS)
-endif()
-
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/lib)

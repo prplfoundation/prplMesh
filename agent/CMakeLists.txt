@@ -43,12 +43,6 @@ elseif (TARGET_PLATFORM STREQUAL "openwrt")
     set(BEEROCKS_WLAN2_IFACE "wlan1")
 endif()
 
-# Use beerocks intel ip patent
-option (BUILD_PATENTS "build with patents enabled" ON)
-if (BUILD_PATENTS)
-    add_definitions(-DBEEROCKS_PATENTS)
-endif()
-
 # Default Compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pthread -std=c++11 -Wno-unused-parameter -Wno-missing-field-initializers -Wno-address-of-packed-member -fpermissive")
 
