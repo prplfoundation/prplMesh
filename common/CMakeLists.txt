@@ -4,8 +4,6 @@ message("${BoldWhite}Preparing ${BoldGreen}MULTIAP_${PROJECT}${BoldWhite} for th
 # Default values
 set(BEEROCKS_BRIDGE_IFACE "br-lan")
 set(BEEROCKS_PLATFORM_INIT "false")
-set(BEEROCKS_INSTALL_PATH "/opt/prplmesh")
-set(BEEROCKS_TMP_PATH "/tmp/beerocks")
 set(BEEROCKS_WLAN1_IFACE "wlan0")
 set(BEEROCKS_WLAN2_IFACE "wlan2")
 
@@ -21,8 +19,6 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
 elseif (TARGET_PLATFORM STREQUAL "linux")
     add_definitions(-DBEEROCKS_LINUX)
     set(BEEROCKS_BH_WIRE_IFACE "sim-eth0")
-    set(BEEROCKS_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}")
-    set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
     set(BEEROCKS_PLATFORM_INIT "true")
 elseif (TARGET_PLATFORM STREQUAL "openwrt")
     set(BEEROCKS_BH_WIRE_IFACE "eth1")

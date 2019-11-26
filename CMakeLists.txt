@@ -39,6 +39,18 @@ if ("${isSystemDir}" STREQUAL "-1")
 endif ("${isSystemDir}" STREQUAL "-1")
 set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+set(INSTALL_PATH "/opt/prplmesh")
+set(TMP_PATH "/tmp/beerocks")
+
+if(TARGET_PLATFORM STREQUAL "linux")
+    set(INSTALL_PATH "${CMAKE_INSTALL_PREFIX}")
+    option(USE_USER_TMP_PATH "use /tmp/$USER instead of /tmp path" ON)
+    if(USE_USER_TMP_PATH)
+        set(USER "$ENV{USER}")
+        set(TMP_PATH "/tmp/${USER}/beerocks")
+    endif()
+endif()
+
 ## Components
 
 add_subdirectory(framework)

@@ -27,21 +27,6 @@ if (TARGET_PLATFORM STREQUAL "rdkb")
     set(CMAKE_SKIP_RPATH TRUE)
 endif()
 
-set(MAPF_ROOT "/opt/multiap/framework")
-set(TMP_PATH "/tmp")
-
-if(TARGET_PLATFORM STREQUAL "linux")
-    set(MAPF_ROOT "${CMAKE_INSTALL_PREFIX}")
-    option(USE_USER_TMP_PATH "use /tmp/$USER instead of /tmp path" ON)
-    if(USE_USER_TMP_PATH)
-        set(USER "$ENV{USER}")
-        set(TMP_PATH "/tmp/${USER}")
-    endif()
-elseif (TARGET_PLATFORM STREQUAL "openwrt")
-    set(MAPF_ROOT "/opt/prplmesh")
-    set(TMP_PATH "/tmp/beerocks")
-endif()
-
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/lib)

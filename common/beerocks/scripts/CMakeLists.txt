@@ -1,12 +1,3 @@
-# Platform specific definitions
-if (TARGET_PLATFORM STREQUAL "linux")
-    set(PLATFORM_DB_PATH ${CMAKE_INSTALL_PREFIX}/share)
-    set(PLATFORM_DB_PATH_TEMP /tmp)
-elseif (TARGET_PLATFORM STREQUAL "openwrt")
-    set(PLATFORM_DB_PATH "/opt/prplmesh/share")
-    set(PLATFORM_DB_PATH_TEMP "/tmp/beerocks")
-endif()
-
 # Configure the prplMesh helper script
 configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/prplmesh_utils.sh.in"

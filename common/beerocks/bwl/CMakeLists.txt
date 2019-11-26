@@ -14,11 +14,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
 # Default defaults
 set(BWL_TYPE "DUMMY")
-set(BEEROCKS_TMP_PATH "/tmp/beerocks")
-if(TARGET_PLATFORM STREQUAL "linux")
-    set(BEEROCKS_TMP_PATH "/tmp/$ENV{USER}/beerocks")
-endif()
-add_definitions(-DBEEROCKS_TMP_PATH="${BEEROCKS_TMP_PATH}")
+add_definitions(-DBEEROCKS_TMP_PATH="${TMP_PATH}")
 
 # UGW
 if (TARGET_PLATFORM STREQUAL "ugw")
