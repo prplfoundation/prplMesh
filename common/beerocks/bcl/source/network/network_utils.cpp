@@ -876,8 +876,6 @@ std::vector<network_utils::ip_info> network_utils::get_ip_list()
     return ip_list;
 }
 
-#ifdef __ANDROID__
-#else // Linux
 bool network_utils::arp_send(const std::string &iface, const std::string &dst_ip,
                              const std::string &src_ip, sMacAddr dst_mac, sMacAddr src_mac,
                              int count, int arp_socket)
@@ -999,4 +997,3 @@ uint16_t network_utils::icmp_checksum(uint16_t *buf, int32_t len)
     answer = ~sum;
     return answer;
 }
-#endif

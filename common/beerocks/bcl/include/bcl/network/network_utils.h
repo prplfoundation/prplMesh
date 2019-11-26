@@ -114,15 +114,12 @@ public:
     static bool linux_iface_is_up(const std::string &iface);
     static bool linux_iface_is_up_and_running(const std::string &iface);
 
-#ifdef __ANDROID__
-#else // Linux
     static bool arp_send(const std::string &iface, const std::string &dst_ip,
                          const std::string &src_ip, sMacAddr dst_mac, sMacAddr src_mac, int count,
                          int arp_socket = -1);
 
     static bool icmp_send(const std::string &ip, uint16_t id, int count, int icmp_socket);
     static uint16_t icmp_checksum(uint16_t *buf, int32_t len);
-#endif
 };
 } // namespace net
 } // namespace beerocks
