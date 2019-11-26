@@ -1,32 +1,13 @@
 set(PROJECT FRAMEWORK)
 project (multiap_framework C CXX)
-cmake_minimum_required (VERSION 2.8.12)
 
-include(FindPkgConfig)
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.0")
-      message(FATAL_ERROR "gcc version (${CMAKE_CXX_COMPILER_VERSION} not supported, minumum is 4.8.0")
-    endif()
-endif()
-
-include(GNUInstallDirs)
 enable_testing()
-
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set (CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "default install path" FORCE)
-endif()
-message("-- prefix=${CMAKE_INSTALL_PREFIX}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -pthread -Wall -Wextra -Werror -Wno-comment -Wno-unused-parameter -Wno-missing-field-initializers -Wno-address-of-packed-member -fpermissive" CACHE STRING "" FORCE)
 if(CMAKE_VERSION VERSION_LESS "3.1")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 else()
 	set(CMAKE_CXX_STANDARD 11)
-endif()
-
-if(NOT CMAKE_BUILD_TYPE)
-set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -45,12 +26,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}
 if (TARGET_PLATFORM STREQUAL "rdkb")
     set(CMAKE_SKIP_RPATH TRUE)
 endif()
-
-list (FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
-if ("${isSystemDir}" STREQUAL "-1")
-    set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-endif ("${isSystemDir}" STREQUAL "-1")
-set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 set(MAPF_ROOT "/opt/multiap/framework")
 set(TMP_PATH "/tmp")
@@ -77,6 +52,7 @@ message(STATUS "CMAKE_PREFIX_PATH - ${CMAKE_PREFIX_PATH}")
 message(STATUS "CMAKE_MODULE_PATH - ${CMAKE_MODULE_PATH}")
 message(STATUS "CMAKE_PROGRAM_PATH - ${CMAKE_PROGRAM_PATH}")
 message(STATUS "CMAKE_MULTIAP_OUTPUT_DIRECTORY - ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}")
+
 include(multiap-helpers)
 
 option(BUILD_EXAMPLES "build examples" OFF)

@@ -1,17 +1,6 @@
 set(PROJECT COMMON)
 message("${BoldWhite}Preparing ${BoldGreen}MULTIAP_${PROJECT}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
-include(FindPkgConfig)
-cmake_minimum_required (VERSION 2.8.12)
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.0")
-      message(FATAL_ERROR "gcc version (${CMAKE_CXX_COMPILER_VERSION} not supported, minumum is 4.8.0")
-    endif()
-endif()
-
-include(GNUInstallDirs)
-
 # Default values
 set(BEEROCKS_BRIDGE_IFACE "br-lan")
 set(BEEROCKS_PLATFORM_INIT "false")
@@ -39,12 +28,6 @@ elseif (TARGET_PLATFORM STREQUAL "openwrt")
     set(BEEROCKS_BH_WIRE_IFACE "eth1")
 endif()
 
-list (FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
-if ("${isSystemDir}" STREQUAL "-1")
-    set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-endif ("${isSystemDir}" STREQUAL "-1")
-set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
- 
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/lib)
@@ -73,10 +56,6 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s -O2 -D_FORTIFY_SOURCE=2 -
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}")
 
 message(STATUS "Prefix=${CMAKE_INSTALL_PREFIX}")
-
-if(NOT CMAKE_BUILD_TYPE)
-set(CMAKE_BUILD_TYPE "Release")
-endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
