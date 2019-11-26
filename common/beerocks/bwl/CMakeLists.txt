@@ -62,40 +62,7 @@ message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} (${BoldBl
 ##########################################################################
 ##########################################################################
 
-if (BWL_TYPE STREQUAL "WAV_FAPI")
-
-    add_definitions(-DUSE_FAPI_DAEMON)
-
-    file(GLOB bwl_platform_sources
-        ${bwl_platform_sources}
-        ${MODULE_PATH}/wav_fapi/*.c*
-    )
-
-elseif(BWL_TYPE STREQUAL "WAV")
-
-    include_directories(
-        ${HOSTAPD_DIR}/src/utils
-        ${HOSTAPD_DIR}/src/common
-        ${HOSTAPD_DIR}/src/drivers
-    )
-
-    add_definitions(
-        -DCONFIG_CTRL_IFACE
-        -DCONFIG_CTRL_IFACE_UNIX
-    )
-
-    # WPA Control Interface
-    file(GLOB bwl_platform_sources
-        ${HOSTAPD_DIR}/src/common/wpa_ctrl.c
-        ${HOSTAPD_DIR}/src/utils/os_unix.c
-    )
-
-    file(GLOB bwl_platform_sources
-        ${bwl_platform_sources}
-        ${MODULE_PATH}/wav/*.c*
-    )
-
-elseif(BWL_TYPE STREQUAL "DWPAL")
+if(BWL_TYPE STREQUAL "DWPAL")
     
     include_directories(
         ${HOSTAPD_DIR}/src/drivers
