@@ -19,7 +19,7 @@ if (safec_FOUND)
 
     # Includes
     set_target_properties(safec PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${SAFEC_INCLUDE_DIRS}/libsafec"
+        INTERFACE_INCLUDE_DIRECTORIES "${SAFEC_INCLUDE_DIRS}"
     )
 
     # Library
