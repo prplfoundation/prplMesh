@@ -447,19 +447,19 @@ bool slave_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         switch (beerocks_header->action()) {
         case beerocks_message::ACTION_CONTROL: {
-            return handle_cmdu_control_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
+            return handle_cmdu_control_message(sd, beerocks_header, cmdu_rx);
         } break;
         case beerocks_message::ACTION_BACKHAUL: {
-            return handle_cmdu_backhaul_manager_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
+            return handle_cmdu_backhaul_manager_message(sd, beerocks_header, cmdu_rx);
         } break;
         case beerocks_message::ACTION_PLATFORM: {
-            return handle_cmdu_platform_manager_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
+            return handle_cmdu_platform_manager_message(sd, beerocks_header, cmdu_rx);
         } break;
         case beerocks_message::ACTION_APMANAGER: {
-            return handle_cmdu_ap_manager_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
+            return handle_cmdu_ap_manager_message(sd, beerocks_header, cmdu_rx);
         } break;
         case beerocks_message::ACTION_MONITOR: {
-            return handle_cmdu_monitor_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
+            return handle_cmdu_monitor_message(sd, beerocks_header, cmdu_rx);
         } break;
         default: {
             LOG(ERROR) << "Unknown message, action: " << int(beerocks_header->action());
@@ -536,18 +536,18 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
 }
 
 bool slave_thread::handle_cmdu_control_message(
-    Socket *sd, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     // LOG(DEBUG) << "handle_cmdu_control_message(), INTEL_VS: action=" + std::to_string(beerocks_header->action()) + ", action_op=" + std::to_string(beerocks_header->action_op());
     // LOG(DEBUG) << "received radio_mac=" << network_utils::mac_to_string(beerocks_header->radio_mac()) << ", local radio_mac=" << network_utils::mac_to_string(hostap_params.iface_mac);
 
     // to me or not to me, this is the question...
-    if (beerocks_header->radio_mac() != hostap_params.iface_mac) {
+    if (beerocks_header->m_header->radio_mac() != hostap_params.iface_mac) {
         return true;
     }
 
-    if (beerocks_header->direction() == beerocks::BEEROCKS_DIRECTION_CONTROLLER) {
+    if (beerocks_header->m_header->direction() == beerocks::BEEROCKS_DIRECTION_CONTROLLER) {
         return true;
     }
 
@@ -1337,7 +1337,7 @@ bool slave_thread::handle_cmdu_control_message(
 }
 
 bool slave_thread::handle_cmdu_backhaul_manager_message(
-    Socket *sd, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (backhaul_manager_socket == nullptr) {
@@ -1631,7 +1631,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 }
 
 bool slave_thread::handle_cmdu_platform_manager_message(
-    Socket *sd, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (platform_manager_socket != sd) {
@@ -1992,7 +1992,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
     }
     case beerocks_message::ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE: {
         LOG(TRACE) << "ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE";
-        auto response = cmdu_rx.addClass<
+        auto response = beerocks_header->addClass<
             beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE>();
         if (response == nullptr) {
             LOG(ERROR) << "addClass ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE failed";
@@ -2090,7 +2090,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 }
 
 bool slave_thread::handle_cmdu_ap_manager_message(
-    Socket *sd, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (ap_manager_socket == nullptr) {
@@ -2675,7 +2675,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
 }
 
 bool slave_thread::handle_cmdu_monitor_message(
-    Socket *sd, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (monitor_socket == nullptr) {

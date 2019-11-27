@@ -65,6 +65,7 @@ public:
         {}
         beerocks_message::eAction action() { return m_header->action(); }
         uint8_t action_op() { return m_header->action_op(); };
+        uint16_t id(){return m_header->id();}
         template <class T> std::shared_ptr<T> addClass()
         {
             return m_contents.addClass<T>();
@@ -99,9 +100,9 @@ public:
         // the others. Perhaps in finalize, like it was done before.
         size_t payload_length = beerocks_message::cACTION_HEADER::get_initial_size() +
                 T::get_initial_size();
-        uint8_t *vs_buf = vs_tlv->alloc_payload(payload_length);
+        bool alloc_success = vs_tlv->alloc_payload(payload_length);
         // TODO check success
-        ieee1905_1::TlvList actions(vs_buf, payload_length);
+        ieee1905_1::TlvList actions(vs_tlv->getStartBuffPtr(), payload_length);
         auto actionhdr = actions.addClass<beerocks_message::cACTION_HEADER>();
         if (!actionhdr) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
