@@ -78,14 +78,6 @@ public:
     static std::string version_to_string(const sBinaryVersion &version);
     static sBinaryVersion version_from_string(const std::string &version);
 
-    static std::string get_bootloader_version();
-    static std::string get_ugw_version();
-    static std::string get_cpuid();
-    static std::string get_kernel_version();
-    static std::string get_wave_version();
-
-    static beerocks::ePlatform get_platform();
-
 private:
     // Version, Build Date, GIT Revision
     typedef std::map<std::string, std::tuple<std::string, std::string, std::string>>
