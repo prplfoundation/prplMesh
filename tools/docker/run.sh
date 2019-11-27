@@ -121,7 +121,9 @@ main() {
             exit 1
         fi
     fi
-    
+
+    # Save the container name so that it can easily be stopped/removed later
+    echo "$NAME" >> "${scriptdir}/.test_containers"
     run docker container run ${DOCKEROPTS} prplmesh-runner$TAG $IPADDR "$BASE_MAC" "$@"
 }
 
