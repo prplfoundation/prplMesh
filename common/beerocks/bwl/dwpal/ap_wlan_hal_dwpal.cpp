@@ -19,11 +19,13 @@
 
 #include <math.h>
 
-#ifdef BEEROCKS_UGW
+#ifdef USE_LIBSAFEC
 #define restrict __restrict
 #include <libsafec/safe_str_lib.h>
-#elif BEEROCKS_RDKB
+#elif USE_SLIBC
 #include <slibc/string.h>
+#else
+#error "No safe C library defined, define either USE_LIBSAFEC or USE_SLIBC"
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
