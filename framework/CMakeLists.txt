@@ -31,8 +31,6 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
-else()
-    add_definitions(-DDEBUG)
 endif()
 message("-- Build Type=${CMAKE_BUILD_TYPE}")
 
