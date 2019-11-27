@@ -31,6 +31,7 @@ tlvTestVarList:
     _length: [ complex_list_length ]
 
   var1: cInner
+  var3: cInner
   var2: uint32_t
   unknown_length_list:
     _type: cInner

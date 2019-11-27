@@ -51,6 +51,9 @@ class tlvTestVarList : public BaseClass
         std::shared_ptr<cInner> create_var1();
         bool add_var1(std::shared_ptr<cInner> ptr);
         std::shared_ptr<cInner> var1() { return m_var1_ptr; }
+        std::shared_ptr<cInner> create_var3();
+        bool add_var3(std::shared_ptr<cInner> ptr);
+        std::shared_ptr<cInner> var3() { return m_var3_ptr; }
         uint32_t& var2();
         size_t unknown_length_list_length();
         std::tuple<bool, cInner&> unknown_length_list(size_t idx);
@@ -79,6 +82,9 @@ class tlvTestVarList : public BaseClass
         cInner *m_var1 = nullptr;
         std::shared_ptr<cInner> m_var1_ptr = nullptr;
         bool m_var1_init = false;
+        cInner *m_var3 = nullptr;
+        std::shared_ptr<cInner> m_var3_ptr = nullptr;
+        bool m_var3_init = false;
         uint32_t* m_var2 = nullptr;
         cInner* m_unknown_length_list = nullptr;
         size_t m_unknown_length_list_idx__ = 0;
