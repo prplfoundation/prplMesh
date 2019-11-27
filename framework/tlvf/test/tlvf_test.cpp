@@ -140,11 +140,21 @@ int test_complex_list()
         errors++;
     }
 
+    cmplx         = fourthTlv->create_var3();
+    cmplx->var1() = 0xb11b;
+    if (!fourthTlv->add_var3(cmplx)) {
+        LOG(ERROR) << "Failed to add var3";
+        errors++;
+    }
+
     LOG(DEBUG) << "TLV 4 length " << fourthTlv->length();
 
     LOG(DEBUG) << "Finalize";
     //MANDATORY - swaps to little indian.
-    msg.finalize(true);
+    if (!msg.finalize(true)) {
+        LOG(ERROR) << "Finalize step failed";
+        errors++;
+    }
 
     LOG(DEBUG) << "TX: " << std::endl << utils::dump_buffer(tx_buffer, msg.getMessageLength());
 
@@ -302,6 +312,13 @@ int test_parser()
     // TODO https://github.com/prplfoundation/prplMesh/issues/480
     tlv4->add_var1(tlv4->create_var1());
 
+    LOG(DEBUG) << "Finalize";
+    if (msg.finalize(true)) {
+        LOG(ERROR) << "Finalize should fail since the CMDU is not fully initialized";
+        errors++;
+    }
+
+    tlv4->add_var3(tlv4->create_var3());
     LOG(DEBUG) << "Finalize";
     if (!msg.finalize(true)) {
         LOG(ERROR) << "Finalize step failed";
@@ -509,6 +526,18 @@ int test_all()
         errors++;
     }
 
+    cmplx         = fourthTlv->create_var3();
+    cmplx->var1() = 0xeeee;
+
+    if (!fourthTlv->add_var3(cmplx)) {
+        LOG(ERROR) << "Failed to add var3";
+        errors++;
+    }
+    if (fourthTlv->add_var3(cmplx)) {
+        LOG(ERROR) << "Could add var3 a second time";
+        errors++;
+    }
+
     LOG(DEBUG) << "TLV 4 length " << fourthTlv->length();
     auto unknown    = fourthTlv->create_unknown_length_list();
     unknown->var1() = 0xbbbbaaaa;
@@ -521,7 +550,10 @@ int test_all()
 
     LOG(DEBUG) << "Finalize";
     //MANDATORY - swaps to little indian.
-    msg.finalize(true);
+    if (!msg.finalize(true)) {
+        LOG(ERROR) << "Finalize step failed";
+        errors++;
+    }
 
     LOG(DEBUG) << "TX: " << std::endl << utils::dump_buffer(tx_buffer, msg.getMessageLength());
 
