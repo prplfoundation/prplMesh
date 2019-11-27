@@ -73,6 +73,21 @@ if(BWL_TYPE STREQUAL "DWPAL")
 
     list(APPEND BWL_LIBS dwpal)
 
+    # safec library can come from either libsafec or slibc
+    find_package(safec QUIET)
+    if (safec_FOUND)
+        list(APPEND BWL_LIBS safec)
+        add_definitions(-DUSE_LIBSAFEC)
+
+        # Signal libsafec that we support the C99 standard
+        add_definitions(-DHAVE_C99)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+    else()
+        find_package(slibc REQUIRED)
+        list(APPEND BWL_LIBS slibc)
+        add_definitions(-DUSE_SLIBC)
+    endif()
+
 elseif(BWL_TYPE STREQUAL "NL80211")
 
     file(GLOB bwl_platform_sources
