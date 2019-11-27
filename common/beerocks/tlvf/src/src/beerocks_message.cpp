@@ -66,7 +66,7 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
         return nullptr;
     if (!intel_oui(tlv_header))
         return nullptr;
-    ieee1905_1::TlvList vs_contents(tlv_header->payload(), tlv_header->payload_length());
+    ieee1905_1::TlvList vs_contents(tlv_header->payload(), tlv_header->payload_length());//TODO: this probably causes the errors with buffer size
     auto header = vs_contents.addClass<beerocks_message::cACTION_HEADER>();
     if (!header)
         return nullptr;
