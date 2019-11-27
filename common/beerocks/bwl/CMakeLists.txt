@@ -71,6 +71,7 @@ if(BWL_TYPE STREQUAL "DWPAL")
         ${MODULE_PATH}/dwpal/*.c*
     )
 
+    find_package(dwpal REQUIRED)
     list(APPEND BWL_LIBS dwpal)
 
     # safec library can come from either libsafec or slibc
