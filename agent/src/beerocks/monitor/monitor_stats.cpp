@@ -128,9 +128,9 @@ void monitor_stats::process()
             return;
         }
 
-        auto beerocks_header = message_com::get_vs_class_header(cmdu_tx);
-        if (!beerocks_header) {
-            LOG(ERROR) << "Failed getting beerocks_header!";
+        auto action_header = message_com::get_vs_class_header(cmdu_tx);
+        if (!action_header) {
+            LOG(ERROR) << "Failed getting action_header!";
             return;
         }
 
@@ -181,7 +181,7 @@ void monitor_stats::process()
             sta_stats_msg.rx_rssi           = sta_stats.rx_rssi_curr;
         }
 
-        beerocks_header->id() = requests_list.front();
+        action_header->id() = requests_list.front();
         requests_list.pop_front();
         message_com::send_cmdu(slave_socket, cmdu_tx);
     }

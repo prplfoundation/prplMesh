@@ -633,7 +633,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks::message_com::bee
             }
         } break;
         case beerocks_message::ACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE: {
-            auto response = cmdu_rx.addClass<
+            auto response = beerocks_header->addClass<
                 beerocks_message::cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE>();
 
             //Signal any waiting threads
@@ -784,7 +784,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks::message_com::bee
             LOG(TRACE) << "ACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE";
 
             if (m_prmSetVapListCreds) {
-                auto response = cmdu_rx.addClass<
+                auto response = beerocks_header->addClass<
                     beerocks_message::cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE>();
                 if (response == nullptr) {
                     LOG(ERROR) << "addClass cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE failed";

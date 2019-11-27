@@ -58,7 +58,7 @@ bool message_com::intel_oui(
            ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL;
 }
 
-std::shared_ptr<message_com::beerocks_header>
+std::shared_ptr<beerocks::message_com::beerocks_header>
 message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (!cmdu_rx.getMessageLength()) {

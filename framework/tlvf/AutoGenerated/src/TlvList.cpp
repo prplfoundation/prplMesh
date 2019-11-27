@@ -14,6 +14,11 @@
 using namespace ieee1905_1;
 
 TlvList::TlvList() {}
+TlvList::TlvList(uint8_t *buff, size_t buff_len)
+    {
+        m_buff=buff;
+        m_buff_len=buff_len;
+    }
 
 TlvList::~TlvList() {}
 

@@ -17,12 +17,12 @@ class son_management {
 public:
     static void
     handle_cli_message(Socket *sd,
-                       std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
+                       std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
                        ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx,
                        db &database, task_pool &tasks);
     static void
     handle_bml_message(Socket *sd,
-                       std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
+                       std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
                        ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx,
                        db &database, task_pool &tasks);
 };
