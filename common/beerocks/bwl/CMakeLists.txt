@@ -44,7 +44,7 @@ elseif(TARGET_PLATFORM STREQUAL "openwrt")
     set(BWL_TYPE "NL80211")
 
     # hostapd directory
-    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd-full*/hostapd-*")
+    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd*/hostapd-*")
     find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS "${HOSTAPD_SEARCH_PATHS}" NO_CMAKE_FIND_ROOT_PATH)
     set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
 
