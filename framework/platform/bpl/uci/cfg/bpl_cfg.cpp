@@ -24,7 +24,7 @@ using namespace beerocks::bpl;
 int bpl_cfg_is_enabled()
 {
     int retVal = -1;
-    if (bpl_cfg_get_beerocks_param_int("enable", &retVal) == RETURN_ERR) {
+    if (bpl_cfg_get_prplmesh_param_int("enable", &retVal) == RETURN_ERR) {
         MAPF_ERR("bpl_cfg_is_enabled: Failed to read Enable parameter\n");
         return RETURN_ERR;
     }
@@ -35,7 +35,7 @@ int bpl_cfg_is_master()
 {
     int retVal                               = 0;
     char man_mode[BPL_GW_DB_MANAGE_MODE_LEN] = {0};
-    if (bpl_cfg_get_beerocks_param("management_mode", man_mode, BPL_GW_DB_MANAGE_MODE_LEN) < 0) {
+    if (bpl_cfg_get_prplmesh_param("management_mode", man_mode, BPL_GW_DB_MANAGE_MODE_LEN) < 0) {
         MAPF_ERR("bpl_cfg_is_master: Failed to read ManagementMode\n");
         retVal = -1;
     } else {
@@ -58,7 +58,7 @@ int bpl_cfg_get_operating_mode()
 {
     int retVal                            = 0;
     char op_mode[BPL_GW_DB_OPER_MODE_LEN] = {0};
-    if (bpl_cfg_get_beerocks_param("operating_mode", op_mode, BPL_GW_DB_OPER_MODE_LEN) < 0) {
+    if (bpl_cfg_get_prplmesh_param("operating_mode", op_mode, BPL_GW_DB_OPER_MODE_LEN) < 0) {
         MAPF_ERR("bpl_cfg_get_operating_mode: Failed to read OperatingMode\n");
         retVal = -1;
     } else {
@@ -84,7 +84,7 @@ int bpl_cfg_get_operating_mode()
 int bpl_cfg_is_onboarding()
 {
     int retVal = -1;
-    if (bpl_cfg_get_beerocks_param_int("onboarding", &retVal) == RETURN_ERR) {
+    if (bpl_cfg_get_prplmesh_param_int("onboarding", &retVal) == RETURN_ERR) {
         MAPF_ERR("bpl_cfg_is_onboarding: Failed to read Onboarding parameter\n");
         return RETURN_ERR;
     }
@@ -94,7 +94,7 @@ int bpl_cfg_is_onboarding()
 int bpl_cfg_is_wired_backhaul()
 {
     int retVal = -1;
-    if (bpl_cfg_get_beerocks_param_int("wired_backhaul", &retVal) == RETURN_ERR) {
+    if (bpl_cfg_get_prplmesh_param_int("wired_backhaul", &retVal) == RETURN_ERR) {
         MAPF_ERR("bpl_cfg_is_wired_backhaul: Failed to read WiredBackhaul parameter\n");
         return RETURN_ERR;
     }
@@ -104,7 +104,7 @@ int bpl_cfg_is_wired_backhaul()
 int bpl_cfg_get_rdkb_extensions()
 {
     int retVal = -1;
-    if (bpl_cfg_get_beerocks_param_int("rdkb_extensions", &retVal) == RETURN_ERR) {
+    if (bpl_cfg_get_prplmesh_param_int("rdkb_extensions", &retVal) == RETURN_ERR) {
         printf("bpl_cfg_get_rdkb_extensions: Failed to read RDKB Extensions parameter\n");
         return RETURN_ERR;
     }
@@ -114,7 +114,7 @@ int bpl_cfg_get_rdkb_extensions()
 int bpl_cfg_get_band_steering()
 {
     int retVal = -1;
-    if (bpl_cfg_get_beerocks_param_int("band_steering", &retVal) == RETURN_ERR) {
+    if (bpl_cfg_get_prplmesh_param_int("band_steering", &retVal) == RETURN_ERR) {
         MAPF_ERR("bpl_cfg_get_band_steering: Failed to read BandSteering parameter\n");
         return RETURN_ERR;
     }
@@ -124,7 +124,7 @@ int bpl_cfg_get_band_steering()
 int bpl_cfg_get_dfs_reentry()
 {
     int retVal = -1;
-    if (bpl_cfg_get_beerocks_param_int("dfs_reentry", &retVal) == RETURN_ERR) {
+    if (bpl_cfg_get_prplmesh_param_int("dfs_reentry", &retVal) == RETURN_ERR) {
         printf("bpl_cfg_get_dfs_reentry: Failed to read DfsReentry parameter\n");
         return RETURN_ERR;
     }
@@ -134,7 +134,7 @@ int bpl_cfg_get_dfs_reentry()
 int bpl_cfg_get_passive_mode()
 {
     int retVal = -1;
-    if (bpl_cfg_get_beerocks_param_int("passive_mode", &retVal) == RETURN_ERR) {
+    if (bpl_cfg_get_prplmesh_param_int("passive_mode", &retVal) == RETURN_ERR) {
         printf("bpl_cfg_get_passive_mode: Failed to read PassiveMode parameter\n");
         return RETURN_ERR;
     }
@@ -144,7 +144,7 @@ int bpl_cfg_get_passive_mode()
 int bpl_cfg_get_client_roaming()
 {
     int retVal = -1;
-    if (bpl_cfg_get_beerocks_param_int("client_roaming", &retVal) == RETURN_ERR) {
+    if (bpl_cfg_get_prplmesh_param_int("client_roaming", &retVal) == RETURN_ERR) {
         MAPF_ERR("bpl_cfg_get_client_roaming: Failed to read ClientRoaming parameter\n");
         return RETURN_ERR;
     }
@@ -208,7 +208,7 @@ int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefer
     if (preferred_radio_band) {
         char backhaul_band[BPL_BACKHAUL_BAND_LEN] = {0};
         //get preferred_radio_band
-        retVal = bpl_cfg_get_beerocks_param("backhaul_band", backhaul_band, BPL_BACKHAUL_BAND_LEN);
+        retVal = bpl_cfg_get_prplmesh_param("backhaul_band", backhaul_band, BPL_BACKHAUL_BAND_LEN);
         if (retVal == RETURN_ERR) {
             MAPF_ERR("bpl_cfg_get_backhaul_params: Failed to read backhaul_band parameter\n");
             return RETURN_ERR;
@@ -236,12 +236,12 @@ int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN
 {
     int retVal = 0;
 
-    retVal |= bpl_cfg_get_beerocks_param("ssid", ssid, BPL_SSID_LEN);
-    retVal |= bpl_cfg_get_beerocks_param("mode_enabled", sec, BPL_SEC_LEN);
+    retVal |= bpl_cfg_get_prplmesh_param("ssid", ssid, BPL_SSID_LEN);
+    retVal |= bpl_cfg_get_prplmesh_param("mode_enabled", sec, BPL_SEC_LEN);
     if (!strcmp(sec, "WEP-64") || !strcmp(sec, "WEP-128")) {
-        retVal |= bpl_cfg_get_beerocks_param("wep_key", pass, BPL_PASS_LEN);
+        retVal |= bpl_cfg_get_prplmesh_param("wep_key", pass, BPL_PASS_LEN);
     } else {
-        retVal |= bpl_cfg_get_beerocks_param("key_passphrase", pass, BPL_PASS_LEN);
+        retVal |= bpl_cfg_get_prplmesh_param("key_passphrase", pass, BPL_PASS_LEN);
     }
 
     return retVal;
@@ -250,7 +250,7 @@ int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN
 int bpl_cfg_get_security_policy()
 {
     int retVal = -1;
-    if (bpl_cfg_get_beerocks_param_int("mem_only_psk", &retVal) == RETURN_ERR) {
+    if (bpl_cfg_get_prplmesh_param_int("mem_only_psk", &retVal) == RETURN_ERR) {
         MAPF_ERR("bpl_cfg_get_security_policy: Failed to read mem_only_psk parameter\n");
         return RETURN_ERR;
     }
