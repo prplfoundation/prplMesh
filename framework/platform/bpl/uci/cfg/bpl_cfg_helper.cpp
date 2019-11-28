@@ -291,7 +291,7 @@ int bpl_cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex
     return RETURN_OK;
 }
 
-int bpl_cfg_get_beerocks_param(const std::string &param, char *buf, size_t buf_len)
+int bpl_cfg_get_prplmesh_param(const std::string &param, char *buf, size_t buf_len)
 {
     char path[MAX_UCI_BUF_LEN] = {0};
 
@@ -299,18 +299,18 @@ int bpl_cfg_get_beerocks_param(const std::string &param, char *buf, size_t buf_l
         buf_len = MAX_UCI_BUF_LEN;
     }
 
-    if (snprintf_s(path, MAX_UCI_BUF_LEN, "beerocks.config.%s", param.c_str()) <= 0)
+    if (snprintf_s(path, MAX_UCI_BUF_LEN, "prplmesh.config.%s", param.c_str()) <= 0)
         return RETURN_ERR;
 
     return bpl_cfg_uci_get(path, buf, buf_len);
 }
 
-int bpl_cfg_get_beerocks_param_int(const std::string &param, int *buf)
+int bpl_cfg_get_prplmesh_param_int(const std::string &param, int *buf)
 {
     int status;
     char val[MAX_UCI_BUF_LEN] = "";
 
-    status = bpl_cfg_get_beerocks_param(param, val, MAX_UCI_BUF_LEN);
+    status = bpl_cfg_get_prplmesh_param(param, val, MAX_UCI_BUF_LEN);
     if (status == RETURN_ERR)
         return RETURN_ERR;
 

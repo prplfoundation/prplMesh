@@ -26,23 +26,23 @@ int bpl_cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex
 /**
  * Returns the value of requested param from DB
  *
- * @param [in] param beerocks param key string
+ * @param [in] param prplmesh param key string
  * @param [out] buf buffer to get value of requested param
  * @param [in]  buf_len buffer length.
  *
  * @return 0 on success or -1 on error.
  **/
-int bpl_cfg_get_beerocks_param(const std::string &param, char *buf, size_t buf_len);
+int bpl_cfg_get_prplmesh_param(const std::string &param, char *buf, size_t buf_len);
 
 /**
  * Returns the value of requested integer type param from DB
  *
- * @param [in] param beerocks param key string
+ * @param [in] param prplmesh param key string
  * @param [out] buf buffer to get value of requested param
  *
  * @return 0 on success or -1 on error.
  **/
-int bpl_cfg_get_beerocks_param_int(const std::string &param, int *buf);
+int bpl_cfg_get_prplmesh_param_int(const std::string &param, int *buf);
 
 /**
  * Returns the value of ACS from DB
