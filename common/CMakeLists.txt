@@ -2,27 +2,7 @@ set(PROJECT COMMON)
 message("${BoldWhite}Preparing ${BoldGreen}MULTIAP_${PROJECT}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 # Default values
-set(BEEROCKS_BRIDGE_IFACE "br-lan")
 set(BEEROCKS_PLATFORM_INIT "false")
-set(BEEROCKS_WLAN1_IFACE "wlan0")
-set(BEEROCKS_WLAN2_IFACE "wlan2")
-
-# Platform specific overrides
-if (TARGET_PLATFORM STREQUAL "ugw")
-    add_definitions(-DBEEROCKS_UGW)
-    set(BEEROCKS_BH_WIRE_IFACE "eth1")
-elseif (TARGET_PLATFORM STREQUAL "rdkb")
-    add_definitions(-DBEEROCKS_RDKB)
-    set(BEEROCKS_BRIDGE_IFACE "brlan0")
-    set(BEEROCKS_BH_WIRE_IFACE "nsgmii0")
-    set(CMAKE_SKIP_RPATH TRUE)
-elseif (TARGET_PLATFORM STREQUAL "linux")
-    add_definitions(-DBEEROCKS_LINUX)
-    set(BEEROCKS_BH_WIRE_IFACE "sim-eth0")
-    set(BEEROCKS_PLATFORM_INIT "true")
-elseif (TARGET_PLATFORM STREQUAL "openwrt")
-    set(BEEROCKS_BH_WIRE_IFACE "eth1")
-endif()
 
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
