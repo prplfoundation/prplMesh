@@ -1,23 +1,5 @@
 set(PROJECT CONTROLLER)
 
-# Default values
-set(BEEROCKS_WLAN1_IFACE "wlan0")
-set(BEEROCKS_WLAN2_IFACE "wlan2")
-
-# Platform specific flags
-if (TARGET_PLATFORM STREQUAL "openwrt")
-    # UGW
-    if (TARGET_PLATFORM_TYPE STREQUAL "ugw")
-        add_definitions(-DBEEROCKS_UGW)
-    # Turris Omnia
-    elseif (TARGET_PLATFORM_TYPE STREQUAL "turris-omnia")
-        set(BEEROCKS_WLAN2_IFACE "wlan1")
-    endif()    
-elseif(TARGET_PLATFORM STREQUAL "rdkb")
-    add_definitions(-DBEEROCKS_RDKB)
-    set(CMAKE_SKIP_RPATH TRUE)
-endif()
-
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/lib)

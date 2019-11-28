@@ -1,39 +1,5 @@
 set(PROJECT AGENT)
 
-# Default values
-set(BEEROCKS_WLAN1_IFACE "wlan0")
-set(BEEROCKS_WLAN2_IFACE "wlan2")
-set(BEEROCKS_WLAN3_IFACE "wlan4")
-set(BEEROCKS_BRIDGE_IFACE "br-lan")
-set(BEEROCKS_STOP_ON_FAILURE_ATTEMPTS 1)
-set(BEEROCKS_AUTOMATIC_CREDENTIALS_UNIFY 0)
-set(BEEROCKS_NOTIFY 0)
-set(BEEROCKS_REPEATER_MODE 0)
-
-# Platform specific flags
-if (TARGET_PLATFORM STREQUAL "ugw")
-    add_definitions(-DBEEROCKS_UGW)
-    set(BEEROCKS_PLATFORM "GRX_350")
-    set(BEEROCKS_NOTIFY 1)
-    set(BEEROCKS_BH_WIRE_IFACE "eth1")
-    set(BEEROCKS_REPEATER_MODE 1)
-    set(BEEROCKS_AUTOMATIC_CREDENTIALS_UNIFY 1)
-elseif (TARGET_PLATFORM STREQUAL "rdkb")
-    add_definitions(-DBEEROCKS_RDKB)
-    set(BEEROCKS_PLATFORM "GRX_750")
-    set(BEEROCKS_BRIDGE_IFACE "brlan0")
-    set(BEEROCKS_BH_WIRE_IFACE "nsgmii0")
-elseif (TARGET_PLATFORM STREQUAL "linux")
-    add_definitions(-DBEEROCKS_LINUX)
-    set(BEEROCKS_PLATFORM "linux")
-    set(BEEROCKS_BH_WIRE_IFACE "sim-eth0")
-elseif (TARGET_PLATFORM STREQUAL "openwrt")
-    # add_definitions(-DBEEROCKS_LINUX)
-    set(BEEROCKS_PLATFORM "openwrt")
-    set(BEEROCKS_BH_WIRE_IFACE "eth1")
-    set(BEEROCKS_WLAN2_IFACE "wlan1")
-endif()
-
 # Default Compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pthread -std=c++11 -Wno-unused-parameter -Wno-missing-field-initializers -Wno-address-of-packed-member -fpermissive")
 
