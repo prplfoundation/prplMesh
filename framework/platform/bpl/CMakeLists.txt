@@ -59,10 +59,8 @@ if (TARGET_PLATFORM STREQUAL "openwrt")
 
         file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
 
-        set(PLATFORM_DB_PATH "/opt/prplMesh/share")
-        set(PLATFORM_DB_PATH_TEMP "/tmp/beerocks")
-        add_definitions(-DPLATFORM_DB_PATH="${PLATFORM_DB_PATH}/prplmesh_platform_db")
-        add_definitions(-DPLATFORM_DB_PATH_TEMP="${PLATFORM_DB_PATH_TEMP}/prplmesh_platform_db")
+        add_definitions(-DPLATFORM_DB_PATH="${INSTALL_PATH}/share/prplmesh_platform_db")
+        add_definitions(-DPLATFORM_DB_PATH_TEMP="${TMP_PATH}/prplmesh_platform_db")
         install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 
     endif()
@@ -97,10 +95,8 @@ elseif (TARGET_PLATFORM STREQUAL "linux")
 
     file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
 
-    set(PLATFORM_DB_PATH ${CMAKE_INSTALL_PREFIX}/share)
-    set(PLATFORM_DB_PATH_TEMP /tmp)
-    add_definitions(-DPLATFORM_DB_PATH="${PLATFORM_DB_PATH}/prplmesh_platform_db")
-    add_definitions(-DPLATFORM_DB_PATH_TEMP="${PLATFORM_DB_PATH_TEMP}/prplmesh_platform_db")
+    add_definitions(-DPLATFORM_DB_PATH="${INSTALL_PATH}/share/prplmesh_platform_db")
+    add_definitions(-DPLATFORM_DB_PATH_TEMP="${TMP_PATH}/prplmesh_platform_db")
     install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 
 else()
