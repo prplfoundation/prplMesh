@@ -1023,7 +1023,28 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
             break;
         }
 
-        bool success = true;
+        bool success                     = true;
+        bool preferred_band_is_available = false;
+
+        // Check if backhaul preferred band is supported (supporting radio is available)
+        if (m_sConfig.backhaul_preferred_radio_band == beerocks::eFreqType::FREQ_AUTO) {
+            preferred_band_is_available = true;
+        } else {
+            for (auto soc : slaves_sockets) {
+                if (soc->sta_iface.empty())
+                    continue;
+                if (!soc->sta_wlan_hal) {
+                    LOG(WARNING) << "Sta_hal of " << soc->sta_iface << " is null";
+                    continue;
+                }
+                if (m_sConfig.backhaul_preferred_radio_band == soc->freq_type) {
+                    preferred_band_is_available = true;
+                }
+            }
+        }
+
+        LOG_IF(!preferred_band_is_available, DEBUG) << "Preferred backhaul band is not available";
+
         for (auto soc : slaves_sockets) {
             if (soc->sta_iface.empty())
                 continue;
@@ -1033,7 +1054,8 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
                 continue;
             }
 
-            if (m_sConfig.backhaul_preferred_radio_band != beerocks::eFreqType::FREQ_AUTO &&
+            if (preferred_band_is_available &&
+                m_sConfig.backhaul_preferred_radio_band != beerocks::eFreqType::FREQ_AUTO &&
                 m_sConfig.backhaul_preferred_radio_band != soc->freq_type) {
                 LOG(DEBUG) << "slave iface=" << soc->sta_iface
                            << " is not of the preferred backhaul band";
