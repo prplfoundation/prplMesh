@@ -16,32 +16,19 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 set(BWL_TYPE "DUMMY")
 add_definitions(-DBEEROCKS_TMP_PATH="${TMP_PATH}")
 
-# UGW
-if (TARGET_PLATFORM STREQUAL "ugw")
-
-    set(BWL_TYPE "DWPAL")
-    # Extra libraries
-    list(APPEND BWL_LIBS rt fapiwlancommon dl helper ugwhelper blobmsg_json)
-    # UGW platform libraries
-    link_directories(${PLATFORM_STAGING_DIR}/usr/lib)
-    # Extra libraries (for dwpal)
-    link_directories(${PLATFORM_STAGING_DIR}/opt/lantiq/lib)
-    # hostap dir
-    set(HOSTAPD_DIR "${PLATFORM_BUILD_DIR}/iwlwav-hostap-2.6")
-    
-# RDKB
-elseif(TARGET_PLATFORM STREQUAL "rdkb")
+if (TARGET_PLATFORM STREQUAL "rdkb")
 
     set(BWL_TYPE "DWPAL")
     # Extra libraries
     list(APPEND BWL_LIBS rt dl)
-    # Extre directories
-    include_directories(${PLATFORM_INCLUDE_DIR}/wav-dpal)
 
-# Turris Omnia
 elseif(TARGET_PLATFORM STREQUAL "openwrt")
 
-    set(BWL_TYPE "NL80211")
+    if (TARGET_PLATFORM_TYPE STREQUAL "ugw")
+        set(BWL_TYPE "DWPAL")
+    else()
+        set(BWL_TYPE "NL80211")
+    endif()
 
     # hostapd directory
     file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd-full*/hostapd-*")
