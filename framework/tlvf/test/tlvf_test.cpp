@@ -780,16 +780,23 @@ int test_all()
     return errors;
 }
 
+int coral(){
+    
+    system("/home/cor/work/dev1/prplMesh/framework/tlvf/test/script.sh");
+    return 1;
+}
+
 int main(int argc, char *argv[])
 {
     mapf::Logger::Instance().LoggerInit("tlvf_test");
     int errors = 0;
 
     MAPF_INFO(__FUNCTION__ << " Starting tests");
-    errors += test_int_len_list();
+    // errors += test_int_len_list();
     errors += test_complex_list();
-    errors += test_all();
-    errors += test_parser();
+    // errors += test_all();
+    // errors += test_parser();
+    // coral();
     MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
     return errors;
 }

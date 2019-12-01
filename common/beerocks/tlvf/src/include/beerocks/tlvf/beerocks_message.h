@@ -98,7 +98,10 @@ public:
         size_t payload_length = beerocks_message::cACTION_HEADER::get_initial_size() +
                 T::get_initial_size();
         bool alloc_success = vs_tlv->alloc_payload(payload_length);
+        if( alloc_success){
         // TODO check success
+
+        }
         ieee1905_1::TlvList actions(vs_tlv->getStartBuffPtr(), payload_length);
         auto actionhdr = actions.addClass<beerocks_message::cACTION_HEADER>();
         if (!actionhdr) {
@@ -147,6 +150,7 @@ public:
     template <class T>
     static std::shared_ptr<T> create_vs_message(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
     {
+        std::cout  << "message_com::create_vs_message";
         auto cmduhdr = cmdu_tx.create(id, ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE);
         if (!cmduhdr) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;

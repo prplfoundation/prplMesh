@@ -13,7 +13,9 @@
 
 using namespace ieee1905_1;
 
-CmduMessage::CmduMessage() {}
+CmduMessage::CmduMessage(uint8_t *buff, size_t buff_len) : 
+    m_buff(buff), m_buff_len(buff_len),
+    tlvs(buff + kCmduHeaderLength, buff_len - kCmduHeaderLength) {}
 
 CmduMessage::~CmduMessage() {}
 
