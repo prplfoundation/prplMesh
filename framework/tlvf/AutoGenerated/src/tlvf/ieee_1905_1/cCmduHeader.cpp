@@ -71,7 +71,9 @@ size_t cCmduHeader::get_initial_size()
 bool cCmduHeader::init()
 {
     if (getBuffRemainingBytes() < kMinimumLength) {
+
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        TLVF_LOG(ERROR) << "Remaining bytes: "<<getBuffRemainingBytes();
         return false;
     }
     m_message_version = (uint8_t*)m_buff_ptr__;

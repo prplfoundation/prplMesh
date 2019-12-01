@@ -26,6 +26,7 @@ CmduMessageTx::~CmduMessageTx() {}
 
 std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType message_type)
 {
+    LOG(DEBUG)<<"CmduMessageTx::create";
     if (!m_buff || !m_buff_len)
         return nullptr;
 
@@ -43,6 +44,7 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType mes
 
 std::shared_ptr<cCmduHeader> CmduMessageTx::load()
 {
+    LOG(DEBUG)<<"CmduMessageTx::load";
     if (!m_buff || !m_buff_len)
         return nullptr;
 

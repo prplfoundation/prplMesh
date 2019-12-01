@@ -101,7 +101,10 @@ public:
         size_t payload_length = beerocks_message::cACTION_HEADER::get_initial_size() +
                 T::get_initial_size();
         bool alloc_success = vs_tlv->alloc_payload(payload_length);
+        if( alloc_success){
         // TODO check success
+
+        }
         ieee1905_1::TlvList actions(vs_tlv->getStartBuffPtr(), payload_length);
         auto actionhdr = actions.addClass<beerocks_message::cACTION_HEADER>();
         if (!actionhdr) {
