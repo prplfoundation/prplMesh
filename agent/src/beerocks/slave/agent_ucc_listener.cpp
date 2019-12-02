@@ -61,6 +61,8 @@ void agent_ucc_listener::clear_configuration()
 {
     // TODO implement clearing of agent configuration.
     // As part of task: https://github.com/prplfoundation/prplMesh/issues/336
+    reply_ucc(eWfaCaStatus::RUNNING);
+    reply_ucc(eWfaCaStatus::COMPLETE);
 }
 
 /**

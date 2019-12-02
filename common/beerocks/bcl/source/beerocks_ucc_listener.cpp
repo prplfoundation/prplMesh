@@ -731,17 +731,7 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
 
         // TODO: Find out what to do with value of param "name".
 
-        // send back first reply
-        if (!reply_ucc(eWfaCaStatus::RUNNING)) {
-            LOG(ERROR) << "failed to send reply";
-            break;
-        }
-
         clear_configuration();
-
-        // Send back second reply
-        reply_ucc(eWfaCaStatus::COMPLETE);
-
         break;
     }
     case eWfaCaCommand::DEV_SEND_1905: {

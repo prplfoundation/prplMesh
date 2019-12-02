@@ -34,7 +34,12 @@ std::string controller_ucc_listener::fill_version_reply_string()
  * 
  * @return None.
  */
-void controller_ucc_listener::clear_configuration() { m_database.clear_bss_info_configuration(); }
+void controller_ucc_listener::clear_configuration()
+{
+    reply_ucc(eWfaCaStatus::RUNNING);
+    m_database.clear_bss_info_configuration();
+    reply_ucc(eWfaCaStatus::COMPLETE);
+}
 
 /**
  * @brief Return socket to Agent with bridge 'dest_alid` MAC address.
