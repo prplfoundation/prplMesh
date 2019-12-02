@@ -32,12 +32,14 @@ public:
     {
         m_dev_reset_default            = false;
         m_dev_reset_default_inprogress = true;
+        m_dev_set_config_onboarding    = false;
     }
     void set_dev_reset_default_complete()
     {
         m_dev_reset_default_inprogress = false;
         reply_ucc(eWfaCaStatus::COMPLETE);
     }
+    bool dev_set_config_onboarding() { return m_dev_set_config_onboarding; }
 
 private:
     std::string fill_version_reply_string() override;
@@ -55,6 +57,7 @@ private:
     SocketClient **const m_controller_sd;
     bool m_dev_reset_default            = false;
     bool m_dev_reset_default_inprogress = false;
+    bool m_dev_set_config_onboarding    = true;
 
     std::mutex mutex;
 };

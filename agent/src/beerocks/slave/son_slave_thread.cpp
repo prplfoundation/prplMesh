@@ -3556,14 +3556,22 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             error = true;
         }
 
-        if (error) {
-            stop_on_failure_attempts--;
-            slave_reset();
+        // If we are in progress of dev_reset_defaults, send COMPLETE
+        if (m_agent_ucc_listener && m_agent_ucc_listener->dev_reset_default_inprogress()) {
+            m_agent_ucc_listener->set_dev_reset_default_complete();
+            // Now wait for onboading command from UCC, so don't send backhaul manager enable yet
+        } else if (m_agent_ucc_listener && !m_agent_ucc_listener->dev_set_config_onboarding()) {
+            slave_state = STATE_BACKHAUL_ENABLE;
         } else {
-            // backhaul manager will request for backhaul iface and tx enable after receiving ACTION_BACKHAUL_ENABLE,
-            // when wireless connection is required
-            LOG(TRACE) << "goto STATE_SEND_BACKHAUL_MANAGER_ENABLE";
-            slave_state = STATE_SEND_BACKHAUL_MANAGER_ENABLE;
+            if (error) {
+                stop_on_failure_attempts--;
+                slave_reset();
+            } else {
+                // backhaul manager will request for backhaul iface and tx enable after receiving ACTION_BACKHAUL_ENABLE,
+                // when wireless connection is required
+                LOG(TRACE) << "goto STATE_SEND_BACKHAUL_MANAGER_ENABLE";
+                slave_state = STATE_SEND_BACKHAUL_MANAGER_ENABLE;
+            }
         }
         break;
     }
@@ -3623,10 +3631,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                    << network_utils::mac_to_string(bh_enable->iface_mac());
         if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
             slave_reset();
-        }
-        // If we are in progress of dev_reset_defaults, send COMPLETE
-        if (m_agent_ucc_listener && m_agent_ucc_listener->dev_reset_default_inprogress()) {
-            m_agent_ucc_listener->set_dev_reset_default_complete();
         }
 
         // Next state
