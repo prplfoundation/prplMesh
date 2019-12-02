@@ -308,20 +308,25 @@ int test_parser()
 
     auto tlv1 = msg.addClass<tlvNon1905neighborDeviceList>();
     auto tlv2 = msg.addClass<tlvLinkMetricQuery>();
-    auto tlv3 = msg.addClass<tlvWscM1>();
+    // auto tlv3 = msg.addClass<tlvWscM1>();
     // TODO https://github.com/prplfoundation/prplMesh/issues/480
-    tlv3->add_vendor_ext(tlv3->create_vendor_ext());
+    // tlv3->add_vendor_ext(tlv3->create_vendor_ext());
     auto tlv4 = msg.addClass<tlvTestVarList>();
     // TODO https://github.com/prplfoundation/prplMesh/issues/480
     tlv4->add_var1(tlv4->create_var1());
 
-    LOG(DEBUG) << "Finalize";
-    if (msg.finalize(true)) {
-        LOG(ERROR) << "Finalize should fail since the CMDU is not fully initialized";
-        errors++;
-    }
+    // LOG(DEBUG) << "Finalize";
+    // if (msg.finalize(true)) {
+    //     LOG(ERROR) << "Finalize should fail since the CMDU is not fully initialized";
+    //     errors++;
+    // }
 
     tlv4->add_var3(tlv4->create_var3());
+    // LOG(DEBUG) << "Finalize";
+    // if (!msg.finalize(true)) {
+    //     LOG(ERROR) << "Finalize step failed";
+    //     errors++;
+    // }
     LOG(DEBUG) << "Finalize";
     if (!msg.finalize(true)) {
         LOG(ERROR) << "Finalize step failed";
@@ -340,11 +345,11 @@ int test_parser()
         LOG(ERROR) << "getClass<tlvUnknown> failed";
         errors++;
     }
-    auto tlv3_ = received_message.getClass<tlvWscM1>();
-    if (!tlv3_) {
-        LOG(ERROR) << "getClass<tlvWscM1> failed";
-        errors++;
-    }
+    // auto tlv3_ = received_message.getClass<tlvWscM1>();
+    // if (!tlv3_) {
+    //     LOG(ERROR) << "getClass<tlvWscM1> failed";
+    //     errors++;
+    // }
     auto tlv2_ = received_message.getClass<tlvLinkMetricQuery>();
     if (!tlv2_) {
         LOG(ERROR) << "getClass<tlvLinkMetricQuery> failed";
@@ -783,10 +788,155 @@ int test_all()
     return errors;
 }
 
-int coral(){
-    
-    system("/home/cor/work/dev1/prplMesh/framework/tlvf/test/script.sh");
-    return 1;
+int coral()
+{
+    int errors = 0;
+    uint8_t tx_buffer[4096];
+    //creating cmdu message class and setting the header
+    CmduMessageTx msg = CmduMessageTx(tx_buffer, sizeof(tx_buffer));
+
+    //create method initializes the buffer and returns shared pointer to the message header
+    auto header = msg.create(0, eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE);
+    header->flags().last_fragment_indicator = 1;
+    header->flags().relay_indicator         = 1;
+
+    auto tlv1 = msg.addClass<tlvNon1905neighborDeviceList>();
+    // tlv3->add_vendor_ext(tlv3->create_vendor_ext());
+
+
+    LOG(DEBUG) << "Finalize";
+    if (!msg.finalize(true)) {
+        LOG(ERROR) << "Finalize step failed";
+        errors++;
+    }
+
+    LOG(DEBUG) << "TX: " << std::endl << utils::dump_buffer(tx_buffer, msg.getMessageLength());
+
+    uint8_t recv_buffer[sizeof(tx_buffer)];
+    memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
+
+    CmduMessageRx received_message = CmduMessageRx(recv_buffer,sizeof(recv_buffer)) ;
+
+    auto tlv1_rx = received_message.addClass<tlvNon1905neighborDeviceList>();
+    if(!tlv1_rx){
+         LOG(ERROR) << "addClass tlvNon1905neighborDeviceList failed";
+        errors++;
+    }
+
+    auto len = tlv1_rx->getLen();
+    auto mac = tlv1_rx->mac_local_iface();
+
+    mac=mac;
+    LOG(DEBUG) << "len: "<<len;
+    // received_message.parse( true, true);
+    // // auto tlv4_ = received_message.getClass<tlvUnknown>();
+    // // if (!tlv4_) {
+    // //     LOG(ERROR) << "getClass<tlvUnknown> failed";
+    // //     errors++;
+    // // }
+    // auto tlv3_ = received_message.getClass<tlvWscM1>();
+    // if (!tlv3_) {
+    //     LOG(ERROR) << "getClass<tlvWscM1> failed";
+    //     errors++;
+    // }
+    // auto tlv2_ = received_message.getClass<tlvLinkMetricQuery>();
+    // if (!tlv2_) {
+    //     LOG(ERROR) << "getClass<tlvLinkMetricQuery> failed";
+    //     errors++;
+    // }
+    // auto tlv1_ = received_message.getClass<tlvNon1905neighborDeviceList>();
+    // if (!tlv1_) {
+    //     LOG(ERROR) << "getClass<tlvNon1905neighborDeviceList> failed";
+    //     errors++;
+    // }
+
+    MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
+    return errors;
+}
+
+int test_add_tlvWscM1(){
+    int errors = 0;
+    uint8_t tx_buffer[4096];
+    //creating cmdu message class and setting the header
+    CmduMessageTx msg = CmduMessageTx(tx_buffer, sizeof(tx_buffer));
+
+    //create method initializes the buffer and returns shared pointer to the message header
+    auto header = msg.create(0, eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE);
+    header->flags().last_fragment_indicator = 1;
+    header->flags().relay_indicator         = 1;
+
+    auto tlv1 = msg.addClass<tlvWscM1>();
+
+
+    LOG(DEBUG) << "Finalize";
+    if (!msg.finalize(true)) {
+        LOG(ERROR) << "Finalize step failed";
+        errors++;
+    }
+
+    LOG(DEBUG) << "TX: " << std::endl << utils::dump_buffer(tx_buffer, msg.getMessageLength());
+
+    uint8_t recv_buffer[sizeof(tx_buffer)];
+    memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
+
+    CmduMessageRx received_message = CmduMessageRx(recv_buffer,sizeof(recv_buffer)) ;
+
+    auto tlv1_rx = received_message.addClass<tlvWscM1>();
+    if(!tlv1_rx){
+         LOG(ERROR) << "addClass tlvWscM1 failed";
+        errors++;
+    }
+
+    auto mac = tlv1_rx->mac_attr();
+    mac = mac;
+    auto len = tlv1_rx->getLen();
+    len = len;
+
+    MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
+    return errors;
+}
+
+int test_smart_parsing_tlvWscM1(){
+    int errors = 0;
+    uint8_t tx_buffer[4096];
+    //creating cmdu message class and setting the header
+    CmduMessageTx msg = CmduMessageTx(tx_buffer, sizeof(tx_buffer));
+
+    //create method initializes the buffer and returns shared pointer to the message header
+    auto header = msg.create(0, eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE);
+    header->flags().last_fragment_indicator = 1;
+    header->flags().relay_indicator         = 1;
+
+    auto tlv1 = msg.addClass<tlvWscM1>();
+    tlv1->add_vendor_ext(tlv1->create_vendor_ext());
+
+    LOG(DEBUG) << "Finalize";
+    if (!msg.finalize(true)) {
+        LOG(ERROR) << "Finalize step failed";
+        errors++;
+    }
+
+    LOG(DEBUG) << "TX: " << std::endl << utils::dump_buffer(tx_buffer, msg.getMessageLength());
+
+    uint8_t recv_buffer[sizeof(tx_buffer)];
+    memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
+
+    CmduMessageRx received_message = CmduMessageRx(recv_buffer,sizeof(recv_buffer)) ;
+
+    received_message.parse( true, true);
+    auto tlv1_rx = received_message.getClass<tlvWscM1>();
+    if (!tlv1_rx) {
+        LOG(ERROR) << "getClass<tlvWscM1> failed";
+        errors++;
+    }
+
+    auto mac = tlv1_rx->mac_attr();
+    mac = mac;
+    auto len = tlv1_rx->getLen();
+    len = len;
+
+    MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
+    return errors;
 }
 
 int main(int argc, char *argv[])
@@ -798,7 +948,9 @@ int main(int argc, char *argv[])
     // errors += test_int_len_list();
     // errors += test_complex_list();
     // errors += test_all();
-    errors += test_parser();
+    // errors += test_parser();
+    // errors += test_add_tlvWscM1();
+    errors += test_smart_parsing_tlvWscM1();
     // coral();
     MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
     return errors;

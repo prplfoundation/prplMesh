@@ -16,10 +16,7 @@
 
 using namespace ieee1905_1;
 
-CmduMessageTx::CmduMessageTx(uint8_t *buff, size_t buff_len) : CmduMessage(buff, buff_len) 
-{
-    buff_len = buff_len;
-}
+CmduMessageTx::CmduMessageTx(uint8_t *buff, size_t buff_len) : CmduMessage(buff, buff_len) {}
 
 CmduMessageTx::~CmduMessageTx() {}
 

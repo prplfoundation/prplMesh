@@ -74,7 +74,10 @@ std::shared_ptr<BaseClass> CmduTlvParser::parseWscTlv()
     if (eTlvType(cmdu_.getNextTlvType()) != eTlvType::TLV_WSC)
         return nullptr;
 
-    bool swap = cmdu_.swap_needed();
+    // bool swap = cmdu_.swap_needed();
+    //TODO: need to get the correct value from method parameters CmduMessageRx::parse(bool swap_needed, bool parse_tlvs)
+    bool swap = true;
+
     wscAttr *wsc = reinterpret_cast<wscAttr*>(cmdu_.getNextTlvData());
     uint16_t type = wsc->type(swap);
     while (type != WSC::ATTR_MSG_TYPE) {

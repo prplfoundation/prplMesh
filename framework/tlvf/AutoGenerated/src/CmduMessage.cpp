@@ -19,7 +19,7 @@ const uint16_t CmduMessage::kTlvHeaderLength = 3;
 // CmduMessage::CmduMessage(){};
 CmduMessage::CmduMessage(uint8_t *buff, size_t buff_len) : 
     m_buff(buff), m_buff_len(buff_len),
-    tlvs(buff + kCmduHeaderLength, buff_len - kCmduHeaderLength)
+    tlvs(buff + kCmduHeaderLength, buff_len - kCmduHeaderLength) 
 {
     buff_len = buff_len;
 }
@@ -86,9 +86,12 @@ uint16_t CmduMessage::getNextTlvLength() const
 uint8_t *CmduMessage::getNextTlvData() const
 {
     uint8_t *tlvData = nullptr;
-    if (m_cmdu_header && (m_cmdu_header->getBuffRemainingBytes() > kTlvHeaderLength)) {
+    if (m_cmdu_header ) {
         if (tlvs.getClassVector().size() == 0) {
-            tlvData = m_cmdu_header->getBuffPtr() + sizeof(uint8_t) + sizeof(uint16_t);
+            // tlvData = m_cmdu_header->getBuffPtr();
+            tlvData = tlvs.getMessageBuff()+ sizeof(uint8_t) + sizeof(uint16_t);
+            //  uint8_t *tlvData = m_cmdu_header->getBuffPtr() ;
+
         } else {
             tlvData = tlvs.getClassVector().back()->getBuffPtr() + sizeof(uint8_t) + sizeof(uint16_t);
         }
