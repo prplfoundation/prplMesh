@@ -29,7 +29,6 @@ public:
     typedef struct {
         // from slave config file //
         std::string temp_path;
-        beerocks::ePlatform platform;
         std::string vendor;
         std::string model;
         uint16_t ucc_listener_port;

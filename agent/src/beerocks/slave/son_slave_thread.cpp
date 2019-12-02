@@ -111,7 +111,6 @@ bool slave_thread::init()
     LOG(INFO) << "Slave Info:";
     LOG(INFO) << "hostap_iface=" << config.hostap_iface;
     LOG(INFO) << "hostap_iface_type=" << config.hostap_iface_type;
-    LOG(INFO) << "platform=" << int(config.platform);
     LOG(INFO) << "ruid=" << config.radio_identifier;
 
     if (config.hostap_iface_type == beerocks::IFACE_TYPE_UNSUPPORTED) {
@@ -3791,7 +3790,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                   BEEROCKS_VERSION, message::VERSION_LENGTH);
 
         // Platform Configuration
-        notification->platform()             = config.platform;
         notification->low_pass_filter_on()   = config.backhaul_wireless_iface_filter_low;
         notification->enable_repeater_mode() = config.enable_repeater_mode;
         notification->radio_identifier() = network_utils::mac_from_string(config.radio_identifier);

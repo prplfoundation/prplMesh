@@ -147,8 +147,6 @@ static bool parse_arguments(int argc, char *argv[])
 static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_slave_conf,
                                   son::slave_thread::sSlaveConfig &son_slave_conf, int slave_num)
 {
-    son_slave_conf.platform =
-        beerocks::utils::get_platform_from_string(beerocks_slave_conf.platform);
     son_slave_conf.temp_path = beerocks_slave_conf.temp_path;
     son_slave_conf.vendor    = beerocks_slave_conf.vendor;
     son_slave_conf.model     = beerocks_slave_conf.model;

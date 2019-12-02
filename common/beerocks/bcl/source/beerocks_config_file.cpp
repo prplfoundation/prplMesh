@@ -147,7 +147,6 @@ bool config_file::read_slave_config_file(std::string config_file_path, sConfigSl
 
     {
         tConfig slave_global_conf_args = {
-            std::make_tuple("platform=", &conf.platform, mandatory_slave),
             std::make_tuple("temp_path=", &conf.temp_path, mandatory_slave),
             std::make_tuple("vendor=", &conf.vendor, mandatory_slave),
             std::make_tuple("model=", &conf.model, mandatory_slave),
