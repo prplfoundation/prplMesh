@@ -5,11 +5,9 @@
 # See LICENSE file for more details.
 #############################################################################
 
-#Supported platform: LINUX, GRX_350, GRX_350_LVP_1_0,  
 #iface_type: ETHERNET, GW_BRIDGE, WAVE_512, WAVE_513, WAVE_514, WAVE_522, WAVE_523, WAVE_524, STA_8265, STA_8260
 
 [global]
-platform=@BEEROCKS_PLATFORM@
 temp_path=@TMP_PATH@
 vendor=Intel
 model=prplMesh
