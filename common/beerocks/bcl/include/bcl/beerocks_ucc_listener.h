@@ -41,6 +41,8 @@ protected:
     virtual bool send_cmdu_to_destination(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx) = 0;
     virtual bool handle_dev_set_config(std::unordered_map<std::string, std::string> &params,
                                        std::string &err_string)                           = 0;
+    enum class eWfaCaStatus : uint8_t { RUNNING, INVALID, ERROR, COMPLETE };
+    bool reply_ucc(eWfaCaStatus status, const std::string &description = std::string());
 
     enum class eUccListenerRunOn : uint8_t {
         CONTROLLER,
@@ -74,7 +76,6 @@ private:
     };
     static eWfaCaCommand wfa_ca_command_from_string(std::string command);
 
-    enum class eWfaCaStatus : uint8_t { RUNNING, INVALID, ERROR, COMPLETE };
     static const std::string wfa_ca_status_to_string(eWfaCaStatus status);
 
     static bool parse_params(const std::vector<std::string> &command_tokens,
@@ -94,7 +95,6 @@ private:
 
     // Class functions
     void handle_wfa_ca_command(const std::string &command);
-    bool reply_ucc(eWfaCaStatus status, const std::string &description = std::string());
 
     friend class tlvPrefilledData;
 
