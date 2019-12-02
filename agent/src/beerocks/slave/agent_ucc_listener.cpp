@@ -59,10 +59,10 @@ std::string agent_ucc_listener::fill_version_reply_string()
  */
 void agent_ucc_listener::clear_configuration()
 {
-    // TODO implement clearing of agent configuration.
-    // As part of task: https://github.com/prplfoundation/prplMesh/issues/336
+    // set flag that dev_reset_default is required.
+    // son_slave will monitor this flag and trigger slave_reset.
+    m_dev_reset_default = true;
     reply_ucc(eWfaCaStatus::RUNNING);
-    reply_ucc(eWfaCaStatus::COMPLETE);
 }
 
 /**

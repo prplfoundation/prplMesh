@@ -283,6 +283,8 @@ bool slave_thread::work()
 {
     bool call_slave_select = true;
 
+    handle_ucc_listener_reset_defaults();
+
     if (!monitor_heartbeat_check() || !ap_manager_heartbeat_check()) {
         slave_reset();
     }
@@ -3622,6 +3624,10 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
             slave_reset();
         }
+        // If we are in progress of dev_reset_defaults, send COMPLETE
+        if (m_agent_ucc_listener && m_agent_ucc_listener->dev_reset_default_inprogress()) {
+            m_agent_ucc_listener->set_dev_reset_default_complete();
+        }
 
         // Next state
         LOG(TRACE) << "goto STATE_WAIT_FOR_BACKHAUL_MANAGER_CONNECTED_NOTIFICATION";
@@ -4255,6 +4261,23 @@ bool slave_thread::monitor_heartbeat_check()
         return false;
     }
     return true;
+}
+
+void slave_thread::handle_ucc_listener_reset_defaults()
+{
+    if (m_agent_ucc_listener && m_agent_ucc_listener->dev_reset_default_needed()) {
+        LOG(INFO) << "UCC listener received dev_reset_default, trigger slave_reset !!";
+        m_agent_ucc_listener->set_dev_reset_default_inprogress();
+        // Send BACKHHAUL_RESET so full reset is done
+        LOG(TRACE) << "send ACTION_BACKHAUL_RESET";
+        auto request =
+            message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_RESET>(cmdu_tx);
+        if (request == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return;
+        }
+        message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
+    }
 }
 
 bool slave_thread::ap_manager_heartbeat_check()

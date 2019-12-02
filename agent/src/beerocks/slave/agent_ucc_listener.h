@@ -26,6 +26,19 @@ public:
     void lock() override { mutex.lock(); }
     void unlock() override { mutex.unlock(); }
 
+    bool dev_reset_default_needed() { return m_dev_reset_default; }
+    bool dev_reset_default_inprogress() { return m_dev_reset_default_inprogress; }
+    void set_dev_reset_default_inprogress()
+    {
+        m_dev_reset_default            = false;
+        m_dev_reset_default_inprogress = true;
+    }
+    void set_dev_reset_default_complete()
+    {
+        m_dev_reset_default_inprogress = false;
+        reply_ucc(eWfaCaStatus::COMPLETE);
+    }
+
 private:
     std::string fill_version_reply_string() override;
     void clear_configuration() override;
@@ -40,6 +53,8 @@ private:
     const std::string &m_bridge_iface;
     std::string m_bridge_mac;
     SocketClient **const m_controller_sd;
+    bool m_dev_reset_default            = false;
+    bool m_dev_reset_default_inprogress = false;
 
     std::mutex mutex;
 };

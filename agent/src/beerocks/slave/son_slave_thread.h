@@ -174,6 +174,7 @@ private:
                                           bool status_operational);
     bool monitor_heartbeat_check();
     bool ap_manager_heartbeat_check();
+    void handle_ucc_listener_reset_defaults();
     bool send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx);
 
 private:
