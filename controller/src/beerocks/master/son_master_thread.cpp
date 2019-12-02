@@ -1776,8 +1776,7 @@ bool master_thread::handle_intel_slave_join(
         network_utils::mac_to_string(notification->backhaul_params().bridge_mac);
     std::string bridge_ipv4 =
         network_utils::ipv4_to_string(notification->backhaul_params().bridge_ipv4);
-    bool backhaul_manager            = (bool)notification->backhaul_params().is_backhaul_manager;
-    beerocks::ePlatform ire_platform = (beerocks::ePlatform)notification->platform();
+    bool backhaul_manager        = (bool)notification->backhaul_params().is_backhaul_manager;
     std::string radio_identifier = network_utils::mac_to_string(notification->radio_identifier());
     bool acs_enabled             = (notification->wlan_settings().channel == 0);
 
@@ -1807,7 +1806,6 @@ bool master_thread::handle_intel_slave_join(
               << "    backhaul_manager=" << int(backhaul_manager) << std::endl
               << "    backhaul_type=" << utils::get_iface_type_string(backhaul_iface_type)
               << std::endl
-              << "    platform=" << utils::get_platform_string(ire_platform) << std::endl
               << "    low_pass_filter_on = " << int(notification->low_pass_filter_on()) << std::endl
               << "    radio_identifier = " << radio_identifier << std::endl
               << "    radio_mac = " << radio_mac << std::endl
@@ -1912,9 +1910,6 @@ bool master_thread::handle_intel_slave_join(
         /*
         * handle the IRE node itself, representing the backhaul
         */
-        database.set_node_platform(backhaul_mac, ire_platform);
-        database.set_node_platform(bridge_mac, ire_platform);
-
         database.set_node_backhaul_iface_type(backhaul_mac, backhaul_iface_type);
         database.set_node_backhaul_iface_type(bridge_mac, beerocks::IFACE_TYPE_BRIDGE);
 
@@ -2342,8 +2337,6 @@ bool master_thread::handle_non_intel_slave_join(
                       network_utils::mac_from_string(backhaul_mac), ire_type);
     database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
     database.set_node_socket(bridge_mac, sd);
-    database.set_node_platform(backhaul_mac, beerocks::ePlatform::PLATFORM_LINUX);
-    database.set_node_platform(bridge_mac, beerocks::ePlatform::PLATFORM_LINUX);
     database.set_node_backhaul_iface_type(backhaul_mac, beerocks::eIfaceType::IFACE_TYPE_ETHERNET);
     database.set_node_backhaul_iface_type(bridge_mac, beerocks::IFACE_TYPE_BRIDGE);
     database.set_node_manufacturer(backhaul_mac, manufacturer);

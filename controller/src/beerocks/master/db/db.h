@@ -356,9 +356,6 @@ public:
     bool set_node_backhaul_iface_type(std::string mac, beerocks::eIfaceType iface_type);
     beerocks::eIfaceType get_node_backhaul_iface_type(std::string mac);
 
-    bool set_node_platform(std::string mac, beerocks::ePlatform platform);
-    beerocks::ePlatform get_node_platform(std::string mac);
-
     std::string get_5ghz_sibling_hostap(std::string mac);
 
     bool set_cs_op_flag(std::string mac, bool flag);

@@ -113,8 +113,7 @@ std::ostream &operator<<(std::ostream &os, const node &n)
            << "[sec]" << std::endl;
 
         if (node_type == beerocks::TYPE_IRE_BACKHAUL) {
-            os << "   Platform: " << utils::get_platform_string(n.platform) << std::endl
-               << "   IfaceType: " << utils::get_iface_type_string(n.iface_type) << std::endl
+            os << "   IfaceType: " << utils::get_iface_type_string(n.iface_type) << std::endl
                << "   IreHandoff: " << bool(n.ire_handoff) << std::endl;
         } else if (node_type == beerocks::TYPE_CLIENT) {
             os << "   Handoff: " << bool(n.handoff) << std::endl

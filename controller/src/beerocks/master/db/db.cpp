@@ -1831,27 +1831,6 @@ beerocks::eIfaceType db::get_node_backhaul_iface_type(std::string mac)
     return n->iface_type;
 }
 
-bool db::set_node_platform(std::string mac, beerocks::ePlatform platform)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return false;
-    }
-    n->platform = platform;
-    return true;
-}
-
-beerocks::ePlatform db::get_node_platform(std::string mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return beerocks::PLATFORM_UNSUPPORTED;
-    }
-    return n->platform;
-}
-
 std::string db::get_5ghz_sibling_hostap(std::string mac)
 {
     auto siblings = get_node_siblings(mac, beerocks::TYPE_SLAVE);

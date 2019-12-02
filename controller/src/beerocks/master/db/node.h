@@ -222,7 +222,6 @@ public:
 
     beerocks::eBandType band_type   = beerocks::eBandType::INVALID_BAND;
     beerocks::eIfaceType iface_type = beerocks::IFACE_TYPE_ETHERNET;
-    beerocks::ePlatform platform    = beerocks::PLATFORM_UNSUPPORTED;
     std::chrono::steady_clock::time_point last_seen;
     std::chrono::steady_clock::time_point last_ping_sent;
     std::chrono::steady_clock::time_point last_ping_received;
