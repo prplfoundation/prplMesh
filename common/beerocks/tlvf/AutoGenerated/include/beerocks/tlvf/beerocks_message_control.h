@@ -45,7 +45,6 @@ class cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION : public BaseClass
         sBackhaulParams& backhaul_params();
         sNodeHostap& hostap();
         sApChannelSwitch& cs_params();
-        uint8_t& platform();
         uint8_t& low_pass_filter_on();
         uint8_t& enable_repeater_mode();
         sMacAddr& radio_identifier();
@@ -64,7 +63,6 @@ class cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION : public BaseClass
         sBackhaulParams* m_backhaul_params = nullptr;
         sNodeHostap* m_hostap = nullptr;
         sApChannelSwitch* m_cs_params = nullptr;
-        uint8_t* m_platform = nullptr;
         uint8_t* m_low_pass_filter_on = nullptr;
         uint8_t* m_enable_repeater_mode = nullptr;
         sMacAddr* m_radio_identifier = nullptr;

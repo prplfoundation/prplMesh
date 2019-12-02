@@ -26,7 +26,6 @@ cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION:
   backhaul_params: sBackhaulParams 
   hostap: sNodeHostap 
   cs_params: sApChannelSwitch 
-  platform: uint8_t            # configuration, beerocks::ePlatform
   low_pass_filter_on: uint8_t  # configuration
   enable_repeater_mode: uint8_t 
   radio_identifier: sMacAddr

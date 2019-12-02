@@ -72,10 +72,6 @@ sApChannelSwitch& cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::cs_params() {
     return (sApChannelSwitch&)(*m_cs_params);
 }
 
-uint8_t& cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::platform() {
-    return (uint8_t&)(*m_platform);
-}
-
 uint8_t& cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::low_pass_filter_on() {
     return (uint8_t&)(*m_low_pass_filter_on);
 }
@@ -111,7 +107,6 @@ size_t cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::get_initial_size()
     class_size += sizeof(sBackhaulParams); // backhaul_params
     class_size += sizeof(sNodeHostap); // hostap
     class_size += sizeof(sApChannelSwitch); // cs_params
-    class_size += sizeof(uint8_t); // platform
     class_size += sizeof(uint8_t); // low_pass_filter_on
     class_size += sizeof(uint8_t); // enable_repeater_mode
     class_size += sizeof(sMacAddr); // radio_identifier
@@ -143,8 +138,6 @@ bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::init()
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    m_platform = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_low_pass_filter_on = (uint8_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
     m_enable_repeater_mode = (uint8_t*)m_buff_ptr__;
