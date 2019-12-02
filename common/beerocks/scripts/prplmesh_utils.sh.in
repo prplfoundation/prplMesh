@@ -207,11 +207,11 @@ status_function() {
 }
 
 usage() {
-    echo "usage: $(basename $0) {start|stop|restart|status} [-hvsmdCD]"
+    echo "usage: $(basename $0) {start|stop|restart|status} [-hvpmdCD]"
 }
 
 main() {
-    OPTS=`getopt -o 'hvm:sdC:D:' --long verbose,help,mode:skip-platform,delete-logs,iface-ctrl,iface-data -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvm:pdC:D:' --long verbose,help,mode:platform-init,delete-logs,iface-ctrl,iface-data -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -222,7 +222,7 @@ main() {
             -v | --verbose)       VERBOSE=true; shift ;;
             -h | --help)          usage; exit 0; shift ;;
             -m | --mode)          PRPLMESH_MODE="$2"; shift; shift ;;
-            -s | --skip-platform) PLATFORM_INIT=false; shift ;;
+            -p | --platform-init) PLATFORM_INIT=true; shift ;;
             -d | --delete-logs)   DELETE_LOGS=true; shift ;;
             -C | --iface-ctrl)    CONTROL_IFACE="$2"; shift; shift ;;
             -D | --iface-data)    DATA_IFACE="$2"; shift; shift ;;
