@@ -3907,6 +3907,10 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     case STATE_OPERATIONAL: {
         stop_on_failure_attempts = configuration_stop_on_failure_attempts;
         process_keep_alive();
+        if (m_agent_ucc_listener && m_agent_ucc_listener->dev_set_config_onboarding_inprogress()) {
+            LOG(TRACE) << "UCC onboading complete";
+            m_agent_ucc_listener->set_dev_set_config_onboarding_complete();
+        }
         break;
     }
     case STATE_ONBOARDING: {

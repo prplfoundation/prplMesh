@@ -86,6 +86,7 @@ bool controller_ucc_listener::send_cmdu_to_destination(Socket *sd,
 bool controller_ucc_listener::handle_dev_set_config(
     std::unordered_map<std::string, std::string> &params, std::string &err_string)
 {
+    reply_ucc(eWfaCaStatus::RUNNING);
     std::unordered_set<sMacAddr> al_mac_cleared_conf;
     if (params.find("backhaul") != params.end()) {
         err_string = "parameter 'backhaul' is not relevant to the controller";
@@ -122,6 +123,7 @@ bool controller_ucc_listener::handle_dev_set_config(
         }
         m_database.add_bss_info_configuration(mac, bss_info_conf);
     }
+    reply_ucc(eWfaCaStatus::COMPLETE);
     return true;
 }
 

@@ -40,6 +40,12 @@ public:
         reply_ucc(eWfaCaStatus::COMPLETE);
     }
     bool dev_set_config_onboarding() { return m_dev_set_config_onboarding; }
+    void set_dev_set_config_onboarding_complete()
+    {
+        m_dev_set_config_onboarding_inprogress = false;
+        reply_ucc(eWfaCaStatus::COMPLETE);
+    }
+    bool dev_set_config_onboarding_inprogress() { return m_dev_set_config_onboarding_inprogress; }
 
 private:
     std::string fill_version_reply_string() override;
@@ -55,9 +61,10 @@ private:
     const std::string &m_bridge_iface;
     std::string m_bridge_mac;
     SocketClient **const m_controller_sd;
-    bool m_dev_reset_default            = false;
-    bool m_dev_reset_default_inprogress = false;
-    bool m_dev_set_config_onboarding    = true;
+    bool m_dev_reset_default                    = false;
+    bool m_dev_reset_default_inprogress         = false;
+    bool m_dev_set_config_onboarding            = true;
+    bool m_dev_set_config_onboarding_inprogress = false;
 
     std::mutex mutex;
 };

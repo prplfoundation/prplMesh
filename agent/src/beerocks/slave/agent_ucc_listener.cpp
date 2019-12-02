@@ -118,7 +118,7 @@ bool agent_ucc_listener::send_cmdu_to_destination(Socket *sd, ieee1905_1::CmduMe
 bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, std::string> &params,
                                                std::string &err_string)
 {
-
+    reply_ucc(eWfaCaStatus::RUNNING);
     if (params.find("bss_info") != params.end()) {
         err_string = "parameter 'bss_info' is not relevant to the agent";
         return false;
@@ -129,8 +129,7 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
         return false;
     }
 
-    // TODO implement seting of agent configuration.
-    // As part of task: https://github.com/prplfoundation/prplMesh/issues/336
-
+    m_dev_set_config_onboarding            = true;
+    m_dev_set_config_onboarding_inprogress = true;
     return true;
 }
