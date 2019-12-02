@@ -189,23 +189,6 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
     // Fill the common fields
     node->type = node_type;
 
-    // Platform
-    switch (n->platform) {
-    // UGW
-    case beerocks::PLATFORM_GRX_350: {
-        node->platform = BML_PLATFORM_GRX_350;
-        break;
-    }
-    case beerocks::PLATFORM_IRE_220: {
-        node->platform = BML_PLATFORM_IRE_220;
-        break;
-    }
-    // Unknown
-    default: {
-        node->platform = BML_PLATFORM_UNKNOWN;
-    }
-    }
-
     if (force_client_disconnect) {
         node->state = BML_NODE_STATE_DISCONNECTED;
     } else {

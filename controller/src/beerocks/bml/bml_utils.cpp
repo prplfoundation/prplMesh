@@ -42,24 +42,6 @@ static std::string node_type_to_string(uint8_t type)
     return ret;
 }
 
-static std::string node_platform_to_string(uint8_t platform)
-{
-    std::string ret;
-
-    switch (platform) {
-    case BML_PLATFORM_GRX_350:
-        ret = "GRX_350";
-        break;
-    case BML_PLATFORM_IRE_220:
-        ret = "IRE_220";
-        break;
-    default:
-        ret = "Unknown";
-    }
-
-    return ret;
-}
-
 static std::string node_state_to_string(uint8_t state)
 {
     std::string ret;
@@ -107,8 +89,6 @@ int bml_utils_node_to_string(const struct BML_NODE *node, char *buffer, int buff
     ss << "Name: " << ((node->name[0]) ? node->name : "N/A");
 
     ss << ", Type: " << node_type_to_string(node->type) << " (" << std::to_string(node->type) << ")"
-       << ", Platform: " << node_platform_to_string(node->platform) << " ("
-       << std::to_string(node->platform) << ")"
        << ", State: " << node_state_to_string(node->state) << " (" << std::to_string(node->state)
        << ")"
        << ", MAC: " << network_utils::mac_to_string(node->mac)

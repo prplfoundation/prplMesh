@@ -33,11 +33,6 @@ extern "C" {
 #define BML_RET_CMDU_FAIL 10       /* cmdu message failure */
 #define BML_RET_END 11             /* end of error return codes */
 
-/* Platforms */
-#define BML_PLATFORM_UNKNOWN 0 /* Unknown/Unsupported platform */
-#define BML_PLATFORM_GRX_350 1 /* GRX-350, UGW based platform */
-#define BML_PLATFORM_IRE_220 2 /* IRE220, UGW based platform */
-
 /* General Definitions */
 #define BML_MAC_ADDR_LEN 6          /* MAC Address Length */
 #define BML_IP_ADDR_LEN 4           /* IP Address Length */
@@ -207,9 +202,6 @@ struct BML_NODE {
 
     /* The type of the node (GW, IRE or CLIENT) */
     uint8_t type;
-
-    /* Current platform (e.g. BML_PLATFORM_xxx) */
-    uint8_t platform;
 
     /* Current node state (e.g. BLM_NODE_STATE_xxx) */
     uint8_t state;
