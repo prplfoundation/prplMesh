@@ -30,7 +30,7 @@ load_ire_roaming=1
 load_load_balancing=0
 
 #   Measurement feature:  
-load_diagnostics_measurements=1
+load_diagnostics_measurements=0
 load_backhaul_measurements=0
 load_front_measurements=1
 load_monitor_on_vaps=1
