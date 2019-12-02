@@ -41,6 +41,8 @@ killall_program() {
 
 platform_init() {
     echo "platform init..."
+    [ -z "$DATA_IFACE" ] && err "DATA_IFACE not set, abort" && exit 1
+    [ -z "$CONTROL_IFACE" ] && err "CONTROL_IFACE not set, abort" && exit 1
     base_mac=46:55:66:77
     bridge_ip=192.168.100.140
     control_ip=192.168.250.140
@@ -65,6 +67,8 @@ platform_init() {
 
 platform_deinit() {
     echo "platform deinit"
+    [ -z "$DATA_IFACE" ] && err "DATA_IFACE not set, abort" && exit 1
+    [ -z "$CONTROL_IFACE" ] && err "CONTROL_IFACE not set, abort" && exit 1
     for iface in wlan0 wlan2 @BEEROCKS_BH_WIRE_IFACE@ $DATA_IFACE
     do
         echo "remove $iface from @BEEROCKS_BRIDGE_IFACE@"
@@ -262,8 +266,8 @@ main() {
 VERBOSE=false
 PLATFORM_INIT=@BEEROCKS_PLATFORM_INIT@
 DELETE_LOGS=false
-CONTROL_IFACE=enp0s25
-DATA_IFACE=enx00ee22aa28ef
+CONTROL_IFACE=
+DATA_IFACE=
 PRPLMESH_MODE="CA" # CA = Controller & Agent, A = Agent only, C = Controller only
 
 # Export MultiAP libs folder
