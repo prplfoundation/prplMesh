@@ -25,36 +25,6 @@ int utils::write_to_file(std::string full_path, std::string val)
     }
 }
 
-beerocks::ePlatform utils::get_platform_from_string(std::string platform_name)
-{
-    if (platform_name.find(PLATFORM_STR_GRX_350) != std::string::npos)
-        return beerocks::PLATFORM_GRX_350;
-    if (platform_name.find(PLATFORM_STR_IRE_220) != std::string::npos)
-        return beerocks::PLATFORM_IRE_220;
-    if (platform_name.find(PLATFORM_STR_BRCM) != std::string::npos)
-        return beerocks::PLATFORM_BRCM;
-    if (platform_name.find(PLATFORM_STR_LINUX) != std::string::npos)
-        return beerocks::PLATFORM_LINUX;
-    return beerocks::PLATFORM_UNSUPPORTED;
-}
-
-std::string utils::get_platform_string(beerocks::ePlatform platform)
-{
-    switch (platform) {
-    case beerocks::PLATFORM_GRX_350:
-        return std::string(PLATFORM_STR_GRX_350);
-    case beerocks::PLATFORM_IRE_220:
-        return std::string(PLATFORM_STR_IRE_220);
-    case beerocks::PLATFORM_BRCM:
-        return std::string(PLATFORM_STR_BRCM);
-    case beerocks::PLATFORM_LINUX:
-        return std::string(PLATFORM_STR_LINUX);
-    default: {
-        return std::string(PLATFORM_STR_UNSUPPORTED);
-    }
-    }
-}
-
 beerocks::eIfaceType utils::get_iface_type_from_string(std::string iface_type_name)
 {
     if (!iface_type_name.compare(0, sizeof(IFACE_TYPE_STR_WIFI_INTEL), IFACE_TYPE_STR_WIFI_INTEL))

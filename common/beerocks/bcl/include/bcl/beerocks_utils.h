@@ -55,8 +55,6 @@ public:
 
     static int write_to_file(std::string full_path, std::string val);
 
-    static beerocks::ePlatform get_platform_from_string(std::string platform_name);
-    static std::string get_platform_string(beerocks::ePlatform platform);
     static beerocks::eIfaceType get_iface_type_from_string(std::string iface_type_name);
     static std::string get_iface_type_string(beerocks::eIfaceType iface_type);
     static bool is_node_wireless(beerocks::eIfaceType iface_type);
