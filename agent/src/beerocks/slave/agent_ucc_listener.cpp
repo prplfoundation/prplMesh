@@ -22,7 +22,7 @@ agent_ucc_listener::agent_ucc_listener(uint16_t port, const std::string &vendor,
     : beerocks_ucc_listener(port), m_vendor(vendor), m_model(model), m_bridge_iface(bridge_iface),
       m_controller_sd(controller_sd)
 {
-    m_ucc_listener_run_on = eUccListenerRunOn::CONTROLLER;
+    m_ucc_listener_run_on = eUccListenerRunOn::AGENT;
 }
 
 bool agent_ucc_listener::init()
