@@ -13,9 +13,8 @@
 
 using namespace ieee1905_1;
 
-CmduMessageTx::CmduMessageTx(uint8_t *buff, size_t buff_len) : CmduMessage(buff, buff_len)
-{
-}
+CmduMessageTx::CmduMessageTx(uint8_t *buff, size_t buff_len) : CmduMessage(buff, buff_len) {}
+
 CmduMessageTx::~CmduMessageTx() {}
 
 std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType message_type)
@@ -24,7 +23,7 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType mes
     if (!m_buff || !m_buff_len)
         return nullptr;
 
-    memset(m_buff, 0, getMessageBuffLength());
+    memset(m_buff, 0, m_buff_len);
     reset();
     m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, kCmduHeaderLength);
     if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
@@ -43,7 +42,8 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::load()
         return nullptr;
     
     reset();
-    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, kCmduHeaderLength);
+    
+    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, ieee1905_1::CmduMessage::kCmduHeaderLength);
     if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
         return nullptr;
     }
@@ -78,7 +78,7 @@ bool CmduMessageTx::finalize(bool swap_needed)
     if (!m_cmdu_header)
         return false; 
 
-    if (!addClass<tlvEndOfMessage>())
+    if (!tlvs.addClass<tlvEndOfMessage>())
         return false;
 
     if (swap_needed)

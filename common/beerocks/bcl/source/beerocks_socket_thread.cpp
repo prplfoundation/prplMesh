@@ -26,6 +26,7 @@ typedef struct sTlvHeader {
 #define TX_BUFFER_UDS (tx_buffer + sizeof(beerocks::message::sUdsHeader))
 #define TX_BUFFER_UDS_SIZE (sizeof(tx_buffer) - sizeof(beerocks::message::sUdsHeader))
 
+
 socket_thread::socket_thread(const std::string &unix_socket_path_)
     : thread_base(), cmdu_tx(TX_BUFFER_UDS, TX_BUFFER_UDS_SIZE),
       unix_socket_path(unix_socket_path_), server_socket(nullptr),
@@ -167,15 +168,20 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
         return false;
     }
 
-    if (!cmdu_rx.parse(rx_buffer + sizeof(message::sUdsHeader), uds_header->length,
-                       uds_header->swap_needed)) {
+    // ieee1905_1::CmduMessageRx cmdu_rx = ieee1905_1::CmduMessageRx(rx_buffer + sizeof(message::sUdsHeader), uds_header->length) ;
+    // cmdu_rx = ieee1905_1::CmduMessageRx(rx_buffer + sizeof(message::sUdsHeader), uds_header->length) ;
+
+    cmdu_rx = std::make_shared<ieee1905_1::CmduMessageRx>(rx_buffer + sizeof(message::sUdsHeader), int(uds_header->length));
+
+
+    if (!(*cmdu_rx).parse(uds_header->swap_needed)) {
         THREAD_LOG(ERROR) << "parsing cmdu failure, rx_buffer" << std::hex << rx_buffer << std::dec
                           << ", uds_header->length=" << int(uds_header->length)
                           << ", uds_header->swap_needed=" << int(uds_header->swap_needed);
         return false;
     }
 
-    if (!handle_cmdu(sd, cmdu_rx)) {
+    if (!handle_cmdu(sd, *cmdu_rx)) {
         return false;
     }
 

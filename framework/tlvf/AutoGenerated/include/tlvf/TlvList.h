@@ -22,7 +22,7 @@ namespace ieee1905_1 {
 class TlvList {
 
 public:
-    TlvList();
+    TlvList() = delete;
     TlvList(uint8_t *buff, size_t buff_len);
 
     ~TlvList();
@@ -33,7 +33,7 @@ public:
         std::shared_ptr<T> ptr;
         if (m_buff) {
             if (m_class_vector.size() == 0) {
-                ptr = std::make_shared<T>(m_buff, m_parse, m_swap);
+                ptr = std::make_shared<T>(m_buff, m_buff_len, m_parse, m_swap);
             } else {
                 ptr = std::make_shared<T>(m_class_vector.back(), m_parse, m_swap);
             }

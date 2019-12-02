@@ -13,9 +13,16 @@
 
 using namespace ieee1905_1;
 
+const uint16_t CmduMessage::kCmduHeaderLength = 8;
+const uint16_t CmduMessage::kTlvHeaderLength = 3;
+
+// CmduMessage::CmduMessage(){};
 CmduMessage::CmduMessage(uint8_t *buff, size_t buff_len) : 
     m_buff(buff), m_buff_len(buff_len),
-    tlvs(buff + kCmduHeaderLength, buff_len - kCmduHeaderLength) {}
+    tlvs(buff + kCmduHeaderLength, buff_len - kCmduHeaderLength)
+{
+    buff_len = buff_len;
+}
 
 CmduMessage::~CmduMessage() {}
 
@@ -99,9 +106,11 @@ size_t CmduMessage::getMessageLength() const
     }
     return msg_len;
 }
-//TODO: this might cause issues, maybe because it doesnt count in the length of the header?
+
+//TODO change name to getTlvsBuffLen and check where its used and why
 size_t CmduMessage::getMessageBuffLength() const { return tlvs.getMessageBuffLength(); }
 
+//TODO broken API - need to fix
 uint8_t *CmduMessage::getMessageBuff() const
 {
     return (m_cmdu_header ? m_cmdu_header->getStartBuffPtr() : nullptr);

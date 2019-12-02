@@ -69,7 +69,8 @@ private:
     std::string unix_socket_path;
     uint8_t rx_buffer[message::MESSAGE_BUFFER_LENGTH];
     uint8_t tx_buffer[message::MESSAGE_BUFFER_LENGTH];
-    ieee1905_1::CmduMessageRx cmdu_rx;
+    // static ieee1905_1::CmduMessageRx cmdu_rx;
+    std::shared_ptr<ieee1905_1::CmduMessageRx> cmdu_rx;
 
     std::unique_ptr<SocketServer> server_socket;
     std::vector<Socket *> sockets;

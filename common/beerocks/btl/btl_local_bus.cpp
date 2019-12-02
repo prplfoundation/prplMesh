@@ -206,15 +206,14 @@ bool transport_socket_thread::handle_cmdu_message_bus()
         return false;
     }
 
-    if (!cmdu_rx.parse(rx_buffer + sizeof(message::sUdsHeader), uds_header->length,
-                       uds_header->swap_needed)) {
+    if (!(*cmdu_rx).parse(uds_header->swap_needed)) {
         THREAD_LOG(ERROR) << "parsing cmdu failure, rx_buffer" << std::hex << rx_buffer << std::dec
                           << ", uds_header->length=" << int(uds_header->length)
                           << ", uds_header->swap_needed=" << int(uds_header->swap_needed);
         return false;
     }
 
-    if (!handle_cmdu(nullptr, cmdu_rx)) {
+    if (!handle_cmdu(nullptr, *cmdu_rx)) {
         return false;
     }
 

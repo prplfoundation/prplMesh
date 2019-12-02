@@ -23,13 +23,14 @@ namespace ieee1905_1 {
 class CmduMessage {
 
 public:
+    CmduMessage() = delete;
     CmduMessage(uint8_t *buff, size_t buff_len);
-    ~CmduMessage();
+    virtual ~CmduMessage();
 
 public:
     std::shared_ptr<cCmduHeader> getCmduHeader() const;
 
-    ieee1905_1::TlvList tlvs;
+    // ieee1905_1::TlvList tlvs;
 
     template <class T> std::shared_ptr<T> addClass() { return tlvs.addClass<T>(); }
     template <class T> std::shared_ptr<T> dynamicCast(std::shared_ptr<BaseClass> ptr) const
@@ -95,10 +96,12 @@ protected:
     void reset();
 
     uint8_t *m_buff              = nullptr;
-    size_t m_buff_len          = 0;
+    size_t m_buff_len          ;
+    ieee1905_1::TlvList tlvs;
+
     std::shared_ptr<cCmduHeader> m_cmdu_header;
-    static const uint16_t kCmduHeaderLength = 8;
-    static const uint16_t kTlvHeaderLength  = 3;
+    static const uint16_t kCmduHeaderLength;
+    static const uint16_t kTlvHeaderLength;
 };
 
 }; // close namespace: ieee1905_1

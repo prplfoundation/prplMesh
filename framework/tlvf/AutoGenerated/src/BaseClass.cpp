@@ -22,7 +22,9 @@ uint8_t *BaseClass::getBuffPtr() { return m_buff_ptr__; }
 uint8_t *BaseClass::getStartBuffPtr() { return m_buff__; }
 size_t BaseClass::getBuffRemainingBytes(void *start)
 {
-    return (m_buff_len__ - (size_t)(((uint8_t *)(start ? start : m_buff_ptr__)) - ((uint8_t *)m_buff__)));
+    auto x = (m_buff_len__ - (size_t)(((uint8_t *)(start ? start : m_buff_ptr__)) - ((uint8_t *)m_buff__)));
+    // return (m_buff_len__ - (size_t)(((uint8_t *)(start ? start : m_buff_ptr__)) - ((uint8_t *)m_buff__)));
+    return x;
 }
 
 size_t BaseClass::getLen() { return (size_t)((uint8_t *)m_buff_ptr__ - (uint8_t *)m_buff__); }
@@ -38,7 +40,7 @@ bool BaseClass::isInitialized() { return m_init_succeeded; }
  */
 bool BaseClass::buffPtrIncrementSafe(size_t length)
 {
-    if (getBuffRemainingBytes() <= length) {
+    if (getBuffRemainingBytes() < length) {
         return false;
     }
     m_buff_ptr__ += length;

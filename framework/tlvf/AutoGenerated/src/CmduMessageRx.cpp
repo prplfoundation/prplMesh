@@ -15,35 +15,21 @@
 
 using namespace ieee1905_1;
 
-CmduMessageRx::CmduMessageRx() : CmduMessage()
+CmduMessageRx::CmduMessageRx(uint8_t *buff, size_t buff_len) : CmduMessage(buff, buff_len)
 {
     parsers_.emplace_back(std::make_shared<CmduTlvParser>(*this)); // default parser
 }
 
-CmduMessageRx::CmduMessageRx(CmduMessageRx &original) : CmduMessage()
-{
-    size_t buff_len         = original.getMessageBuffLength();
-    m_buff                  = new uint8_t[buff_len];
-    std::copy(original.getMessageBuff(), original.getMessageBuff() + buff_len, m_buff);
-    parse(m_buff, buff_len, original.tlvs.swap_needed());
-    if (original.swap_needed()) {
-        m_cmdu_header->class_swap();
-    }
-}
 
 CmduMessageRx::~CmduMessageRx()
 {
-    //TODO: Do we need to check for anything?
-    // if (m_dynamically_allocated) {
-        delete m_buff;
-    // }
 }
 
-bool CmduMessageRx::parse(uint8_t *buff, size_t buff_len, bool swap_needed, bool parse_tlvs)
+bool CmduMessageRx::parse(bool swap_needed, bool parse_tlvs)
 {
     reset();
-    m_buff        = buff;
-    m_cmdu_header = std::make_shared<cCmduHeader>(buff, buff_len, true, false);
+    // m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, kCmduHeaderLength);
+    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, kCmduHeaderLength, true, false);
     if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
         m_cmdu_header = nullptr;
         return false;
