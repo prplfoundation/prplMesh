@@ -796,7 +796,7 @@ std::ptrdiff_t network_map::fill_bml_node_statistics(db &database, std::shared_p
         sta_stats_bulk->measurement_window_msec = n->stats_info->stats_delta_ms;
         sta_stats_bulk->retrans_count           = n->stats_info->retrans_count;
 
-        // These COMMON params are not available for station from FAPI
+        // These COMMON params are not available for station from bwl
         sta_stats_bulk->errors_sent     = 0;
         sta_stats_bulk->errors_received = 0;
 

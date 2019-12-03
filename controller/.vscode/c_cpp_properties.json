@@ -36,8 +36,7 @@
                 "_DEBUG",
                 "ELPP_FORCE_USE_STD_THREAD",
                 "ELPP_NO_DEFAULT_LOG_FILE",
-                "ELPP_THREAD_SAFE",
-                "USE_FAPI_DAEMON"
+                "ELPP_THREAD_SAFE"
             ],
             "browse": {
                 "path": [

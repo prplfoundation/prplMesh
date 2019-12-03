@@ -332,7 +332,7 @@ void ap_manager_thread::after_select(bool timeout)
             // enable first vap
             if (enable_backhaul_vap(ap_wlan_hal, backhaul_vaps_list, connected_ires, true)) {
                 // update master about the updated vap list
-                // Note: this could be removed if fapi vap list will contain disabled backhaul vaps
+                // Note: this could be removed if bwl vap list will contain disabled backhaul vaps
                 ap_wlan_hal->refresh_vaps_info();
             }
 
@@ -528,7 +528,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         }
 
         if (failsafe_channel != 0) {
-            // Send channel_switch_request to FAPI
+            // Send channel_switch_request to bwl
             LOG(INFO) << " Calling failsafe_channel_set - "
                       << "failsafe_channel: " << failsafe_channel << ", channel_bandwidth: "
                       << beerocks::utils::convert_bandwidth_to_int(
@@ -712,8 +712,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         LOG(DEBUG) << "APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST cross, curr id="
                    << sta_unassociated_rssi_measurement_header_id
                    << " request id=" << int(beerocks_header->id());
-        bool ap_busy    = false;
-        bool fapi_error = false;
+        bool ap_busy   = false;
+        bool bwl_error = false;
         if (sta_unassociated_rssi_measurement_header_id == -1) {
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE>(
@@ -736,7 +736,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                     request->params().vht_center_frequency, request->params().measurement_delay,
                     request->params().mon_ping_burst_pkt_num)) {
             } else {
-                fapi_error = true;
+                bwl_error = true;
                 LOG(ERROR) << "sta_unassociated_rssi_measurement failed!";
             }
 
@@ -753,7 +753,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 << sta_mac;
         }
 
-        if (ap_busy || fapi_error) {
+        if (ap_busy || bwl_error) {
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE>(
                 cmdu_tx, beerocks_header->id());
@@ -1008,7 +1008,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
             pending_disable_vaps.erase(it);
             if (enable_backhaul_vap(ap_wlan_hal, backhaul_vaps_list, connected_ires, true)) {
                 // update master about the updated vap list
-                // Note: this could be removed if fapi vap list will contain disabled backhaul vaps
+                // Note: this could be removed if bwl vap list will contain disabled backhaul vaps
             }
         }
 

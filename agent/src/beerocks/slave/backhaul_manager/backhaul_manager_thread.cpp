@@ -1518,7 +1518,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
         }
         std::string sta_mac = network_utils::mac_to_string(request->params().mac);
         bool ap_busy        = false;
-        bool fapi_error     = false;
+        bool bwl_error      = false;
         if (unassociated_rssi_measurement_header_id == -1) {
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE>(
@@ -1540,7 +1540,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
                     request->params().mon_ping_burst_pkt_num)) {
                 unassociated_measurement_slave_soc = soc->slave;
             } else {
-                fapi_error = true;
+                bwl_error = true;
                 LOG(ERROR) << "unassociated_sta_rssi_measurement failed!";
             }
 
@@ -1556,7 +1556,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
                 << sta_mac;
         }
 
-        if (ap_busy || fapi_error) {
+        if (ap_busy || bwl_error) {
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE>(
                 cmdu_tx, beerocks_header->id());
