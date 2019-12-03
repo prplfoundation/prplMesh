@@ -2863,17 +2863,14 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
 
         LOG(INFO) << "STATE_START_AP_MANAGER";
         if (ap_manager_start()) {
-            LOG(TRACE) << "goto STATE_WAIT_FOR_AP_MANAGER_INIT_DONE_NOTIFICATION";
-            slave_state = STATE_WAIT_FOR_AP_MANAGER_INIT_DONE_NOTIFICATION;
+            LOG(TRACE) << "goto STATE_WAIT_FOR_AP_MANAGER_JOINED";
+            slave_state = STATE_WAIT_FOR_AP_MANAGER_JOINED;
         } else {
             LOG(ERROR) << "ap_manager_start() failed!";
             platform_notify_error(BPL_ERR_AP_MANAGER_START, "");
             stop_on_failure_attempts--;
             slave_reset();
         }
-        break;
-    }
-    case STATE_WAIT_FOR_AP_MANAGER_INIT_DONE_NOTIFICATION: {
         break;
     }
     case STATE_WAIT_FOR_AP_MANAGER_JOINED: {
