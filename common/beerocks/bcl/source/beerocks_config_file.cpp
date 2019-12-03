@@ -155,8 +155,6 @@ bool config_file::read_slave_config_file(std::string config_file_path, sConfigSl
                             &conf.ucc_listener_slave_hostap_iface, mandatory_slave),
             std::make_tuple("enable_arp_monitor=", &conf.enable_arp_monitor, mandatory_slave),
             std::make_tuple("enable_keep_alive=", &conf.enable_keep_alive, mandatory_slave),
-            std::make_tuple("enable_credentials_automatic_unify=",
-                            &conf.enable_credentials_automatic_unify, mandatory_slave),
             std::make_tuple("debug_disable_arp=", &conf.debug_disable_arp, 0),
             std::make_tuple("enable_bpl_iface_status_notifications=",
                             &conf.enable_bpl_iface_status_notifications, mandatory_slave),
