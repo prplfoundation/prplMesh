@@ -73,9 +73,6 @@ void channel_selection_task::handle_events_timeout(std::multiset<int> pending_ev
         case eState::WAIT_FOR_CSA_NOTIFICATION: {
             break;
         }
-        case eState::WAIT_HOSTAP_TX_ON_RESPONSE: {
-            break;
-        }
         default: {
             TASK_LOG(ERROR) << "Unexpected event timeout!";
             break;
@@ -114,14 +111,6 @@ void channel_selection_task::handle_event(int event_type, void *obj)
                 TASK_LOG(DEBUG) << " event: " << EVENT_STR(eEvent(event_type))
                                 << " in state: " << FSM_CURR_STATE_STR;
                 queue_push_event(eEvent(event_type), (uint8_t *)obj);
-            }
-            break;
-        }
-        case eEvent::TX_ON_RESPONSE_EVENT: {
-            if (FSM_IS_IN_STATE(WAIT_HOSTAP_TX_ON_RESPONSE)) {
-                handle_event   = true;
-                tx_on_response = (sTxOnResponse_event *)obj;
-                FSM_MOVE_STATE(ON_HOSTAP_TX_ON_RESPONSE);
             }
             break;
         }
@@ -207,7 +196,6 @@ void channel_selection_task::clear_events()
     restricted_channel_response_event = nullptr;
     acs_response_event                = nullptr;
     csa_event                         = nullptr;
-    tx_on_response                    = nullptr;
 }
 
 void channel_selection_task::work()
@@ -1092,57 +1080,6 @@ void channel_selection_task::work()
                           son_actions::steer_sta(database, cmdu_tx, tasks, set_reentry_client,
                                                  hostap_mac, disassoc_imminent, disassoc_timer_ms);
                       });
-        FSM_MOVE_STATE(GOTO_IDLE);
-        break;
-    }
-    case eState::SEND_HOSTAP_TX_ON_REQUEST: {
-
-        Socket *hostap_mac_sd = database.get_node_socket(hostap_mac);
-        auto request =
-            message_com::create_vs_message<beerocks_message::cACTION_CONTROL_HOSTAP_TX_ON_REQUEST>(
-                cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return;
-        }
-        TASK_LOG(DEBUG) << "send ACTION_CONTROL_HOSTAP_TX_ON_REQUEST for ,mac " << hostap_mac;
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, hostap_mac);
-
-        cs_wait_for_event(eEvent::TX_ON_RESPONSE_EVENT);
-        set_events_timeout(TX_ON_RESPONSE_WAIT_TIME);
-
-        FSM_MOVE_STATE(WAIT_HOSTAP_TX_ON_RESPONSE);
-        break;
-    }
-    case eState::WAIT_HOSTAP_TX_ON_RESPONSE: {
-        TASK_LOG(ERROR) << "This should not happen!";
-        FSM_MOVE_STATE(GOTO_IDLE);
-        break;
-    }
-    case eState::ON_HOSTAP_TX_ON_RESPONSE: {
-        if (!son_actions::set_hostap_active(database, tasks, hostap_mac, true)) {
-            TASK_LOG(ERROR) << "set node hostap active failed, mac=" << hostap_mac;
-        }
-        //the connected looks irelevant for the hostap - adding this line so it would appear on network map
-        if (!database.set_node_state(hostap_mac, beerocks::STATE_CONNECTED)) {
-            TASK_LOG(ERROR) << "set node state failed, mac=" << hostap_mac;
-        }
-        if (database.settings_ire_roaming()) {
-            TASK_LOG(DEBUG) << "add ire_network_optimization_task";
-            auto new_task = std::make_shared<ire_network_optimization_task>(
-                database, cmdu_tx, tasks, "hostapd_tx_on_ack - ire_network_optimization");
-            tasks.add_task(new_task);
-        }
-
-        if (channel_switch_required) { //for all other APs move on to TX ON
-            //checks if acs report matches least used channel result.
-            channel_switch_required = false;
-            if (!acs_result_match()) {
-                FSM_MOVE_STATE(SEND_CHANNEL_SWITCH);
-                ;
-                break;
-            }
-        }
         FSM_MOVE_STATE(GOTO_IDLE);
         break;
     }

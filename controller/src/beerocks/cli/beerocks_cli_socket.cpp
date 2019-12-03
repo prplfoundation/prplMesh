@@ -157,9 +157,6 @@ void cli_socket::setFunctionsMapAndArray()
                        static_cast<pFunction>(&cli_socket::ire_network_optimization_task_caller), 0,
                        0, STRING_ARG, STRING_ARG);
     insertCommandToMap(
-        "hostap_tx_on", "<hostap_mac> <1 or 0>", "AP TX on(1) or off(0) for 'hostap_mac' ",
-        static_cast<pFunction>(&cli_socket::hostap_tx_on_caller), 2, 2, STRING_ARG, INT_ARG);
-    insertCommandToMap(
         "client_channel_load_11k_req", "<hostap_mac> <client_mac> <channel>",
         "sends to 'hostap_mac' 11k channel load request for 'client_mac' on 'channel' number",
         static_cast<pFunction>(&cli_socket::client_channel_load_11k_req_caller), 2, 3, STRING_ARG,
@@ -402,14 +399,6 @@ int cli_socket::load_balancer_task_caller(int numOfArgs)
 int cli_socket::ire_network_optimization_task_caller(int numOfArgs)
 {
     return ire_network_optimization_task();
-}
-
-int cli_socket::hostap_tx_on_caller(int numOfArgs)
-{
-    if (numOfArgs == 2) {
-        return hostap_tx_on(args.stringArgs[0], args.intArgs[1]);
-    }
-    return -1;
 }
 
 int cli_socket::client_channel_load_11k_req_caller(int numOfArgs)
@@ -766,33 +755,6 @@ int cli_socket::ire_network_optimization_task()
     if (request == nullptr) {
         LOG(ERROR) << "Failed building cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK message!";
         return -1;
-    }
-    wait_response = true;
-    message_com::send_cmdu(master_socket, cmdu_tx);
-    waitResponseReady();
-    return 0;
-}
-
-int cli_socket::hostap_tx_on(std::string ap_mac, int enable)
-{
-    if (enable) {
-        auto request =
-            message_com::create_vs_message<beerocks_message::cACTION_CLI_HOSTAP_TX_ON_REQUEST>(
-                cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building cACTION_CLI_HOSTAP_TX_ON_REQUEST message!";
-            return -1;
-        }
-        request->ap_mac() = network_utils::mac_from_string(ap_mac);
-    } else {
-        auto request =
-            message_com::create_vs_message<beerocks_message::cACTION_CLI_HOSTAP_TX_OFF_REQUEST>(
-                cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building cACTION_CLI_HOSTAP_TX_OFF_REQUEST message!";
-            return -1;
-        }
-        request->ap_mac() = network_utils::mac_from_string(ap_mac);
     }
     wait_response = true;
     message_com::send_cmdu(master_socket, cmdu_tx);

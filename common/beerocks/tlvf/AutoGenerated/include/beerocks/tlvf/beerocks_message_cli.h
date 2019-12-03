@@ -573,46 +573,6 @@ class cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST : public BaseClass
         sApChannelSwitch* m_cs_params = nullptr;
 };
 
-class cACTION_CLI_HOSTAP_TX_ON_REQUEST : public BaseClass
-{
-    public:
-        cACTION_CLI_HOSTAP_TX_ON_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_HOSTAP_TX_ON_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_CLI_HOSTAP_TX_ON_REQUEST();
-
-        static eActionOp_CLI get_action_op(){
-            return (eActionOp_CLI)(ACTION_CLI_HOSTAP_TX_ON_REQUEST);
-        }
-        sMacAddr& ap_mac();
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CLI* m_action_op = nullptr;
-        sMacAddr* m_ap_mac = nullptr;
-};
-
-class cACTION_CLI_HOSTAP_TX_OFF_REQUEST : public BaseClass
-{
-    public:
-        cACTION_CLI_HOSTAP_TX_OFF_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_HOSTAP_TX_OFF_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_CLI_HOSTAP_TX_OFF_REQUEST();
-
-        static eActionOp_CLI get_action_op(){
-            return (eActionOp_CLI)(ACTION_CLI_HOSTAP_TX_OFF_REQUEST);
-        }
-        sMacAddr& ap_mac();
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CLI* m_action_op = nullptr;
-        sMacAddr* m_ap_mac = nullptr;
-};
-
 class cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST : public BaseClass
 {
     public:

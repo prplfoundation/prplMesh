@@ -406,60 +406,6 @@ class cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL : public BaseClass
         sLoggingLevelChange* m_params = nullptr;
 };
 
-class cACTION_CONTROL_HOSTAP_TX_ON_REQUEST : public BaseClass
-{
-    public:
-        cACTION_CONTROL_HOSTAP_TX_ON_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_TX_ON_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_CONTROL_HOSTAP_TX_ON_REQUEST();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_HOSTAP_TX_ON_REQUEST);
-        }
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-};
-
-class cACTION_CONTROL_HOSTAP_TX_OFF_REQUEST : public BaseClass
-{
-    public:
-        cACTION_CONTROL_HOSTAP_TX_OFF_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_TX_OFF_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_CONTROL_HOSTAP_TX_OFF_REQUEST();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_HOSTAP_TX_OFF_REQUEST);
-        }
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-};
-
-class cACTION_CONTROL_HOSTAP_TX_ON_RESPONSE : public BaseClass
-{
-    public:
-        cACTION_CONTROL_HOSTAP_TX_ON_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_TX_ON_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_CONTROL_HOSTAP_TX_ON_RESPONSE();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_HOSTAP_TX_ON_RESPONSE);
-        }
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-};
-
 class cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION : public BaseClass
 {
     public:

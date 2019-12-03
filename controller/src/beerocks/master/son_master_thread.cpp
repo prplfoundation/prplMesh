@@ -2415,17 +2415,6 @@ bool master_thread::handle_cmdu_control_message(
     }
 
     switch (beerocks_header->action_op()) {
-    case beerocks_message::ACTION_CONTROL_HOSTAP_TX_ON_RESPONSE: {
-        LOG(DEBUG) << "received ACTION_CONTROL_HOSTAP_TX_ON_RESPONSE hostap_mac=" << hostap_mac;
-
-        auto new_event =
-            CHANNEL_SELECTION_ALLOCATE_EVENT(channel_selection_task::sTxOnResponse_event);
-        new_event->hostap_mac = network_utils::mac_from_string(hostap_mac);
-        tasks.push_event(database.get_channel_selection_task_id(),
-                         (int)channel_selection_task::eEvent::TX_ON_RESPONSE_EVENT,
-                         (void *)new_event);
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE: {
         LOG(DEBUG)
             << "received ACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE from "

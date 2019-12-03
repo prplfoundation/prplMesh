@@ -119,15 +119,6 @@ cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL:
 # HOSTAP
 #################################################
 
-cACTION_CONTROL_HOSTAP_TX_ON_REQUEST:
-  _type: class
-
-cACTION_CONTROL_HOSTAP_TX_OFF_REQUEST:
-  _type: class
-
-cACTION_CONTROL_HOSTAP_TX_ON_RESPONSE:
-  _type: class
-
 cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION:
   _type: class
   cs_params: sApChannelSwitch 

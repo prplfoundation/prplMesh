@@ -89,8 +89,6 @@ private:
 
     int client_statistics_11k_req_caller(int numOfArgs);
 
-    int hostap_tx_on_caller(int numOfArgs);
-
     // Functions
 
     int enable_debug(int8_t isEnable = -1);
@@ -146,8 +144,6 @@ private:
     int client_statistics_11k_req(std::string hostap_mac, std::string client_mac,
                                   uint8_t group_identity,
                                   std::string peer_mac = net::network_utils::WILD_MAC_STRING);
-
-    int hostap_tx_on(std::string ap_mac, int enable);
 
     // Variables
     std::string temp_path;
