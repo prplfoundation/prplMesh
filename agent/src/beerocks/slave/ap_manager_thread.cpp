@@ -10,6 +10,7 @@
 
 #include <bcl/beerocks_utils.h>
 #include <bcl/network/network_utils.h>
+#include <bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
@@ -813,6 +814,41 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                                    (disassoc_imminent) ? request->params().disassoc_timer_ms : 0,
                                    (disassoc_imminent) ? bss_steer_imminent_valid_int
                                                        : bss_steer_valid_int);
+        break;
+    }
+    case beerocks_message::ACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST: {
+        auto request =
+            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass ACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST failed";
+            return false;
+        }
+
+        std::list<son::wireless_utils::sBssInfoConf> bss_info_conf_list;
+        auto wifi_credentials_size = request->wifi_credentials_size();
+
+        for (auto i = 0; i < wifi_credentials_size; i++) {
+            son::wireless_utils::sBssInfoConf bss_info_conf;
+            auto config_data_tuple = request->wifi_credentials(i);
+            if (!std::get<0>(config_data_tuple)) {
+                LOG(ERROR) << "getting config data entry has failed!";
+                return false;
+            }
+            auto &config_data = std::get<1>(config_data_tuple);
+            config_data.class_swap();
+
+            bss_info_conf.ssid                = config_data.ssid_str();
+            bss_info_conf.authentication_type = config_data.authentication_type_attr().data;
+            bss_info_conf.encryption_type     = config_data.encryption_type_attr().data;
+            bss_info_conf.network_key         = config_data.network_key_str();
+            bss_info_conf.bss_type            = static_cast<WSC::eWscVendorExtSubelementBssType>(
+                config_data.multiap_attr().subelement_value);
+
+            bss_info_conf_list.push_back(bss_info_conf);
+        }
+
+        ap_wlan_hal->update_vap_credentials(bss_info_conf_list);
+
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION: {

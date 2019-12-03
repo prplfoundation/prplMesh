@@ -241,10 +241,8 @@ private:
                                        uint8_t authkey[32], uint8_t keywrapkey[16]);
     bool autoconfig_wsc_parse_m2_encrypted_settings(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
                                                     uint8_t authkey[32], uint8_t keywrapkey[16],
-                                                    std::string &ssid, sMacAddr &bssid,
-                                                    WSC::eWscAuth &auth_type,
-                                                    WSC::eWscEncr &encr_type, bool &backhaul,
-                                                    bool &fronthaul, bool &teardown);
+                                                    bool &backhaul, bool &fronthaul, bool &teardown,
+                                                    std::shared_ptr<WSC::cConfigData> &credentials);
     bool autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWscM2> m2, uint8_t authkey[32]);
 
     std::unique_ptr<mapf::encryption::diffie_hellman> dh = nullptr;
