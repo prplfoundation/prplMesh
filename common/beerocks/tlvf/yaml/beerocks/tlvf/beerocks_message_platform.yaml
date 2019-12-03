@@ -98,28 +98,6 @@ cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE:
     _type: uint32_t
     _comment: # 0 - Failure, 1 - Success
 
-cACTION_PLATFORM_WIFI_CREDENTIALS_SET_REQUEST:
-  _type: class
-  iface_name: 
-    _type: char 
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
-  ssid:
-    _type: char    
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
-  pass:
-    _type: char    
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
-  security_type:
-    _type: char    
-    _length: [ "beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH" ]
-
-cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE:
-  _type: class
-  iface_name: 
-    _type: char 
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
-  success: uint8_t
-
 cACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST:
   _type: class
 

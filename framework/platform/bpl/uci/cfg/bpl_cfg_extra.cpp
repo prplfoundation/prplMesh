@@ -76,30 +76,6 @@ static int bpl_cfg_iface_config_down(int index)
 
 //============================================ STATIC END ============================================
 
-int bpl_cfg_set_wifi_credentials(const char iface[BPL_IFNAME_LEN], const char ssid[BPL_SSID_LEN],
-                                 const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])
-{
-    int index  = 0;
-    int retVal = 0;
-
-    if (!iface || !ssid || !pass || !sec) {
-        return RETURN_ERR;
-    }
-
-    retVal = bpl_cfg_get_index_from_interface(iface, &index);
-    if (retVal) {
-        return retVal;
-    }
-
-    if (!strcmp(sec, "WEP-64") || !strcmp(sec, "WEP-128")) {
-        /* Set pass as WepKey */
-        return bpl_cfg_set_vap_credentials(index, ssid, sec, pass, NULL);
-    } else {
-        /* Set pass as KeyPassphrase */
-        return bpl_cfg_set_vap_credentials(index, ssid, sec, NULL, pass);
-    }
-}
-
 int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SSID_LEN],
                                      const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])
 {
@@ -170,12 +146,6 @@ int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable
 }
 
 #else //PASSIVE_MODE is on
-
-int bpl_cfg_set_wifi_credentials(const char iface[BPL_IFNAME_LEN], const char ssid[BPL_SSID_LEN],
-                                 const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])
-{
-    return 0;
-}
 
 int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SSID_LEN],
                                      const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])

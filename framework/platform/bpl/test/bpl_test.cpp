@@ -42,7 +42,7 @@ void getString(char *s, int size)
 int main()
 {
     int return_status;
-    char inputInterface[32], ssid[32], password[32], userInputS[10];
+    char inputInterface[32], userInputS[10];
     struct BPL_WLAN_PARAMS wlan_params;
 
     while (1) {
@@ -135,23 +135,6 @@ int main()
                 MAPF_ERR("WLAN recovery failed.\n");
             } else {
                 MAPF_INFO("WLAN recovery succeeded.\n");
-            }
-            break;
-        case 8:
-            printf("Interface : ");
-            fflush(stdin);
-            getString(inputInterface, sizeof(inputInterface));
-            printf("SSID: ");
-            fflush(stdin);
-            getString(ssid, sizeof(ssid));
-            printf("Password: ");
-            fflush(stdin);
-            getString(password, sizeof(password));
-            if (bpl_cfg_set_wifi_credentials(inputInterface, ssid, password, "WPA2-Personal") !=
-                0) {
-                MAPF_ERR("Failed to set WiFi credentials for " << inputInterface << "\n");
-            } else {
-                MAPF_INFO("Succeeded to set WiFi credentials for " << inputInterface << "\n");
             }
             break;
         case 9:
