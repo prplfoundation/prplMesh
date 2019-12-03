@@ -36,6 +36,7 @@ protected:
     virtual void unlock()                                                                 = 0;
     virtual std::string fill_version_reply_string()                                       = 0;
     virtual void clear_configuration()                                                    = 0;
+    virtual void get_parameter()                                                          = 0;
     virtual Socket *get_dev_send_1905_destination_socket(const std::string &dest_alid)    = 0;
     virtual std::shared_ptr<uint8_t> get_buffer_filled_with_cmdu()                        = 0;
     virtual bool send_cmdu_to_destination(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx) = 0;

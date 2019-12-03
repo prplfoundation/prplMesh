@@ -41,6 +41,19 @@ void controller_ucc_listener::clear_configuration()
     reply_ucc(eWfaCaStatus::COMPLETE);
 }
 
+void controller_ucc_listener::get_parameter()
+{
+    // For controller certification, the following command is received to get the ALid:
+    // DUT (127.0.0.1:5000) ---> dev_get_parameter,program,map,parameter,ALid
+    reply_ucc(eWfaCaStatus::RUNNING);
+    std::string alid;
+    if (!net::network_utils::linux_iface_get_mac("br-lan", alid)) {
+        reply_ucc(eWfaCaStatus::INVALID, "FAIL");
+        return;
+    }
+    reply_ucc(eWfaCaStatus::COMPLETE, std::string("aLid,") + alid);
+}
+
 /**
  * @brief Return socket to Agent with bridge 'dest_alid` MAC address.
  * 

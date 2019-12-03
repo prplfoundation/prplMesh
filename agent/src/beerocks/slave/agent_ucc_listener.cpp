@@ -65,6 +65,16 @@ void agent_ucc_listener::clear_configuration()
     reply_ucc(eWfaCaStatus::RUNNING);
 }
 
+void agent_ucc_listener::get_parameter()
+{
+    reply_ucc(eWfaCaStatus::RUNNING);
+    std::string alid;
+    if (!net::network_utils::linux_iface_get_mac("br-lan", alid)) {
+        reply_ucc(eWfaCaStatus::INVALID, "FAIL");
+        return;
+    }
+    reply_ucc(eWfaCaStatus::COMPLETE, std::string("aLid,") + alid);
+}
 /**
  * @brief Return socket to Agent with bridge 'dest_alid` MAC address.
  * 

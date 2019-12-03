@@ -651,21 +651,7 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         break;
     }
     case eWfaCaCommand::DEV_GET_PARAMETER: {
-
-        // For controller certification, the following command is received to get the ALid:
-        // DUT (127.0.0.1:5000) ---> dev_get_parameter,program,map,parameter,ALid
-
-        if (!reply_ucc(eWfaCaStatus::RUNNING)) {
-            LOG(ERROR) << "failed to send reply";
-            break;
-        }
-
-        std::string alid;
-        if (!net::network_utils::linux_iface_get_mac("br-lan", alid)) {
-            reply_ucc(eWfaCaStatus::INVALID, "FAIL");
-        }
-
-        reply_ucc(eWfaCaStatus::COMPLETE, std::string("aLid,") + alid);
+        get_parameter();
         break;
     }
     case eWfaCaCommand::DEV_RESET_DEFAULT: {

@@ -26,6 +26,7 @@ private:
     void unlock() override { m_database.unlock(); }
     std::string fill_version_reply_string() override;
     void clear_configuration() override;
+    void get_parameter() override;
     Socket *get_dev_send_1905_destination_socket(const std::string &dest_alid) override;
     std::shared_ptr<uint8_t> get_buffer_filled_with_cmdu() override;
     bool send_cmdu_to_destination(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx) override;
