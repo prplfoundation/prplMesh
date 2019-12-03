@@ -13,6 +13,7 @@
 #include "base_wlan_hal_types.h"
 
 #include <bcl/beerocks_thread_safe_queue.h>
+#include <bcl/son/son_wireless_utils.h>
 
 #include <functional>
 #include <memory>

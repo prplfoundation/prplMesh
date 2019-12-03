@@ -160,6 +160,17 @@ public:
                                int disassoc_timer, int valid_int) = 0;
 
     /*!
+     * Update wifi credentials.
+     *
+     * @param [in] List of wifi credentials.
+     *
+     * @return true on success or false on error.
+     */
+
+    virtual bool
+    update_vap_credentials(std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list) = 0;
+
+    /*!
      * TODO: Move to the base class?
      * 
      * Measure the RSSI of an unassociated station.
