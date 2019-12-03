@@ -99,8 +99,6 @@ public:
         STATE_UPDATE_MONITOR_SON_CONFIG,
         STATE_OPERATIONAL,
         STATE_ONBOARDING,
-        STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE,
-        STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE,
         STATE_VERSION_MISMATCH,
         STATE_SSID_MISMATCH,
         STATE_STOPPED,
@@ -165,18 +163,16 @@ private:
     bool send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx);
 
 private:
-    const int SELECT_TIMEOUT_MSEC                                           = 200;
-    const int SLAVE_INIT_DELAY_SEC                                          = 4;
-    const int WAIT_FOR_JOINED_RESPONSE_TIMEOUT_SEC                          = 30;
-    const int WAIT_BEFORE_SEND_SLAVE_JOINED_NOTIFICATION_SEC                = 1;
-    const int WAIT_BEFORE_SEND_BH_ENABLE_NOTIFICATION_SEC                   = 1;
-    const int WAIT_FOR_PLATFORM_MANAGER_REGISTER_RESPONSE_TIMEOUT_SEC       = 600;
-    const int STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE_TIMEOUT_SEC = 120;
-    const int STATE_WAIT_FOR_RETRY_CONNECT_TO_BACKHAUL_MANAGER_SEC          = 2;
-    const int MONITOR_HEARTBEAT_TIMEOUT_SEC                                 = 10;
-    const int MONITOR_HEARTBEAT_RETRIES                                     = 10;
-    const int AP_MANAGER_HEARTBEAT_TIMEOUT_SEC                              = 10;
-    const int AP_MANAGER_HEARTBEAT_RETRIES                                  = 10;
+    const int SELECT_TIMEOUT_MSEC                                     = 200;
+    const int SLAVE_INIT_DELAY_SEC                                    = 4;
+    const int WAIT_FOR_JOINED_RESPONSE_TIMEOUT_SEC                    = 30;
+    const int WAIT_BEFORE_SEND_SLAVE_JOINED_NOTIFICATION_SEC          = 1;
+    const int WAIT_BEFORE_SEND_BH_ENABLE_NOTIFICATION_SEC             = 1;
+    const int WAIT_FOR_PLATFORM_MANAGER_REGISTER_RESPONSE_TIMEOUT_SEC = 600;
+    const int MONITOR_HEARTBEAT_TIMEOUT_SEC                           = 10;
+    const int MONITOR_HEARTBEAT_RETRIES                               = 10;
+    const int AP_MANAGER_HEARTBEAT_TIMEOUT_SEC                        = 10;
+    const int AP_MANAGER_HEARTBEAT_RETRIES                            = 10;
 
     const int CONNECT_PLATFORM_RETRY_SLEEP     = 1000;
     const int CONNECT_PLATFORM_RETRY_COUNT_MAX = 5;
@@ -209,7 +205,6 @@ private:
     std::chrono::steady_clock::time_point slave_state_timer;
     int keep_alive_retries = 0;
     bool hostap_params_available;
-    bool wifi_configuration_in_progress;
     int slave_resets_counter = 0;
 
     sSlaveBackhaulParams backhaul_params;

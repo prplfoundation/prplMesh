@@ -154,16 +154,7 @@ cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION:
   status_bh: uint8_t 
   status_bh_wired: uint8_t 
   is_bh_manager: uint8_t 
-  status_operational: uint8_t 
-
-cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST:
-  _type: class
-  config_start:
-    _type: uint8_t
-    _comment: # 0 - configuration end, 1 - configuration start
-
-cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_RESPONSE:
-  _type: class
+  status_operational: uint8_t
 
 cACTION_PLATFORM_OPERATIONAL_NOTIFICATION:
   _type: class

@@ -63,29 +63,28 @@ enum eMessageConsts {
 } //namespace message
 
 enum eGlobals {
-    HIERARCHY_MAX                               = 14,
-    IRE_MAX_SLAVES                              = 3,
-    KEEP_ALIVE_INTERVAL_MSC                     = 20000,
-    RSSI_MAX                                    = 20,
-    RSSI_MIN                                    = -100,
-    RSSI_INVALID                                = -127,
-    SNR_MIN                                     = 1,
-    SNR_INVALID                                 = 0,
-    BRIDGE_RATE_100KB                           = 20000,
-    PHY_RATE_100KB_MAX                          = 8666,
-    PHY_RATE_100KB_MIN                          = 72,
-    PHY_RATE_100KB_INVALID                      = 0,
-    BSS_STEER_DISASSOC_TIMER_MS                 = 15000, // ~15sec
-    BSS_STEER_IMMINENT_VALID_INT                = 100,
-    BSS_STEER_VALID_INT                         = 50,
-    SON_SLAVE_WATCHDOG_INTERVAL_MSC             = 5000,
-    SON_SLAVE_INTERFACE_STATUS_INTERVAL_MSC     = 2000,
-    SON_SLAVE_WAIT_AFTER_WIFI_CONFIG_UPDATE_SEC = 10,
-    IRE_MAX_WIRELESS_RECONNECTION_TIME_MSC      = 6000,
-    BH_SIGNAL_RSSI_THRESHOLD_LOW                = -75,
-    BH_SIGNAL_RSSI_THRESHOLD_HIGH               = -40,
-    BH_SIGNAL_RSSI_THRESHOLD_HYSTERESIS         = 8,
-    TOUCH_PID_TIMEOUT_SECONDS                   = 4, // beerocks_watchdog cycle (10 secs) / 2 - 1
+    HIERARCHY_MAX                           = 14,
+    IRE_MAX_SLAVES                          = 3,
+    KEEP_ALIVE_INTERVAL_MSC                 = 20000,
+    RSSI_MAX                                = 20,
+    RSSI_MIN                                = -100,
+    RSSI_INVALID                            = -127,
+    SNR_MIN                                 = 1,
+    SNR_INVALID                             = 0,
+    BRIDGE_RATE_100KB                       = 20000,
+    PHY_RATE_100KB_MAX                      = 8666,
+    PHY_RATE_100KB_MIN                      = 72,
+    PHY_RATE_100KB_INVALID                  = 0,
+    BSS_STEER_DISASSOC_TIMER_MS             = 15000, // ~15sec
+    BSS_STEER_IMMINENT_VALID_INT            = 100,
+    BSS_STEER_VALID_INT                     = 50,
+    SON_SLAVE_WATCHDOG_INTERVAL_MSC         = 5000,
+    SON_SLAVE_INTERFACE_STATUS_INTERVAL_MSC = 2000,
+    IRE_MAX_WIRELESS_RECONNECTION_TIME_MSC  = 6000,
+    BH_SIGNAL_RSSI_THRESHOLD_LOW            = -75,
+    BH_SIGNAL_RSSI_THRESHOLD_HIGH           = -40,
+    BH_SIGNAL_RSSI_THRESHOLD_HYSTERESIS     = 8,
+    TOUCH_PID_TIMEOUT_SECONDS               = 4, // beerocks_watchdog cycle (10 secs) / 2 - 1
 };
 
 enum eBeeRocksProcesses : uint8_t {

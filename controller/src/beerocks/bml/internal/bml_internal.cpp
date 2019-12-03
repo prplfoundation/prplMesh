@@ -944,16 +944,6 @@ int bml_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
                     << "Received WIFI_CREDENTIALS_GET_RESPONSE response, but no one is waiting...";
             }
         } break;
-        case beerocks_message::ACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_RESPONSE: {
-            // Signal any waiting threads
-            if (m_prmWiFiConfigurationUpdate) {
-                m_prmWiFiConfigurationUpdate->set_value(0);
-                m_prmWiFiConfigurationUpdate = nullptr;
-            } else {
-                LOG(WARNING)
-                    << "Received WIFI_CONFIGURATION_UPDATE_RESPONSE, but no one is waiting...";
-            }
-        } break;
         case beerocks_message::ACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE: {
             auto response =
                 cmdu_rx
@@ -1785,57 +1775,6 @@ int bml_internal::bml_wps_onboarding(const char *iface)
     // We are not expected to receive response
     m_prmOnboard = nullptr;
     return (BML_RET_OK);
-}
-
-int bml_internal::set_wifi_configuration_start() { return set_wifi_configuration(true); }
-
-int bml_internal::set_wifi_configuration_end() { return set_wifi_configuration(false); }
-
-int bml_internal::set_wifi_configuration(bool config_start)
-{
-    // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockPlatform == nullptr && !connect_to_platform()) {
-        return (-BML_RET_CONNECT_FAIL);
-    }
-
-    // Initialize the promise for receiving the response
-    beerocks::promise<bool> prmWiFiConfigurationUpdate;
-    m_prmWiFiConfigurationUpdate = &prmWiFiConfigurationUpdate;
-    int iOpTimeout               = RESPONSE_TIMEOUT; // Default timeout
-
-    auto request = message_com::create_vs_message<
-        beerocks_message::cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST>(cmdu_tx);
-
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST message!";
-        return (-BML_RET_OP_FAILED);
-    }
-
-    request->config_start() = config_start ? 1 : 0;
-
-    // Build and send the message
-    if (!message_com::send_cmdu(m_sockPlatform, cmdu_tx)) {
-        LOG(ERROR) << "Failed sending wifi configuration " << (config_start ? 1 : 0) << " message!";
-        m_prmWiFiConfigurationUpdate = nullptr;
-        return (-BML_RET_OP_FAILED);
-    }
-
-    int iRet = BML_RET_OK;
-
-    if (!prmWiFiConfigurationUpdate.wait_for(iOpTimeout)) {
-        LOG(WARNING) << "Timeout while waiting for configuration get response...";
-        iRet = -BML_RET_TIMEOUT;
-    }
-
-    // Clear the promise holder
-    m_prmWiFiConfigurationUpdate = nullptr;
-
-    if (iRet != BML_RET_OK) {
-        LOG(ERROR) << "Configuration get failed!";
-        return (iRet);
-    }
-
-    return (iRet);
 }
 
 int bml_internal::get_administrator_credentials(char *user_password)
