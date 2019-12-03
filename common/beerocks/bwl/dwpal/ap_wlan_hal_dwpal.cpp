@@ -646,6 +646,13 @@ bool ap_wlan_hal_dwpal::sta_bss_steer(const std::string &mac, const std::string 
     return true;
 }
 
+bool ap_wlan_hal_dwpal::update_vap_credentials(
+    std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list)
+{
+    //TODO Implement #346
+    return true;
+}
+
 bool ap_wlan_hal_dwpal::sta_unassoc_rssi_measurement(const std::string &mac, int chan, int bw,
                                                      int vht_center_frequency, int delay,
                                                      int window_size)

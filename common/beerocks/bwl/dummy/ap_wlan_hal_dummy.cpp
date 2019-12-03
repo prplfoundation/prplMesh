@@ -173,6 +173,22 @@ bool ap_wlan_hal_dummy::sta_bss_steer(const std::string &mac, const std::string 
     return true;
 }
 
+bool ap_wlan_hal_dummy::update_vap_credentials(
+    std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list)
+{
+    for (auto bss_info_conf : bss_info_conf_list) {
+        LOG(DEBUG) << "Received credentials for ssid: " << bss_info_conf.ssid << " auth_type: "
+                   << son::wireless_utils::wsc_to_bwl_authentication(
+                          bss_info_conf.authentication_type)
+                   << " encr_type: "
+                   << son::wireless_utils::wsc_to_bwl_encryption(bss_info_conf.encryption_type)
+                   << " network_key: " << bss_info_conf.network_key << " bss_type: "
+                   << son::wireless_utils::wsc_to_bwl_bss_type(bss_info_conf.bss_type);
+    }
+
+    return true;
+}
+
 bool ap_wlan_hal_dummy::sta_unassoc_rssi_measurement(const std::string &mac, int chan, int bw,
                                                      int vht_center_frequency, int delay,
                                                      int window_size)

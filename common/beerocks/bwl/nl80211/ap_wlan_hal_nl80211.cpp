@@ -239,6 +239,13 @@ bool ap_wlan_hal_nl80211::sta_bss_steer(const std::string &mac, const std::strin
     return true;
 }
 
+bool ap_wlan_hal_nl80211::update_vap_credentials(
+    std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list)
+{
+    //TODO Implement #346
+    return true;
+}
+
 bool ap_wlan_hal_nl80211::sta_unassoc_rssi_measurement(const std::string &mac, int chan, int bw,
                                                        int vht_center_frequency, int delay,
                                                        int window_size)
