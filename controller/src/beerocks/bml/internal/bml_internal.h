@@ -67,15 +67,6 @@ public:
     // wps onboarding
     int bml_wps_onboarding(const char *iface);
 
-    // notify platform wifi configuration start
-    int set_wifi_configuration_start();
-
-    // notify platform wifi configuration end
-    int set_wifi_configuration_end();
-
-    //local helper function
-    int set_wifi_configuration(bool config_start);
-
     // Get administrator user credentials
     int get_administrator_credentials(char *user_password);
 
@@ -215,19 +206,18 @@ private:
     SocketClient *m_sockPlatform = nullptr;
 
     std::mutex m_mtxLock;
-    beerocks::promise<bool> *m_prmPing                    = nullptr;
-    beerocks::promise<bool> *m_prmGetVapListCreds         = nullptr;
-    beerocks::promise<bool> *m_prmSetVapListCreds         = nullptr;
-    beerocks::promise<bool> *m_prmOnboard                 = nullptr;
-    beerocks::promise<bool> *m_prmWiFiCredentialsUpdate   = nullptr;
-    beerocks::promise<bool> *m_prmWiFiCredentialsGet      = nullptr;
-    beerocks::promise<bool> *m_prmWiFiConfigurationUpdate = nullptr;
-    beerocks::promise<bool> *m_prmAdminCredentialsGet     = nullptr;
-    beerocks::promise<bool> *m_prmDeviceInfoGet           = nullptr;
-    beerocks::promise<bool> *m_prmMasterSlaveVersions     = nullptr;
-    beerocks::promise<bool> *m_prmLocalMasterGet          = nullptr;
-    beerocks::promise<bool> *m_prmRestrictedChannelsGet   = nullptr;
-    beerocks::promise<int> *m_prmRdkbWlan                 = nullptr;
+    beerocks::promise<bool> *m_prmPing                  = nullptr;
+    beerocks::promise<bool> *m_prmGetVapListCreds       = nullptr;
+    beerocks::promise<bool> *m_prmSetVapListCreds       = nullptr;
+    beerocks::promise<bool> *m_prmOnboard               = nullptr;
+    beerocks::promise<bool> *m_prmWiFiCredentialsUpdate = nullptr;
+    beerocks::promise<bool> *m_prmWiFiCredentialsGet    = nullptr;
+    beerocks::promise<bool> *m_prmAdminCredentialsGet   = nullptr;
+    beerocks::promise<bool> *m_prmDeviceInfoGet         = nullptr;
+    beerocks::promise<bool> *m_prmMasterSlaveVersions   = nullptr;
+    beerocks::promise<bool> *m_prmLocalMasterGet        = nullptr;
+    beerocks::promise<bool> *m_prmRestrictedChannelsGet = nullptr;
+    beerocks::promise<int> *m_prmRdkbWlan               = nullptr;
 
     std::map<uint8_t, beerocks::promise<int> *> m_prmCliResponses;
 

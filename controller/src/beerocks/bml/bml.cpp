@@ -223,20 +223,6 @@ int bml_wps_onboarding(BML_CTX ctx, const char *iface)
     return pBML->bml_wps_onboarding(iface);
 }
 
-int bml_set_wifi_configuration_start(BML_CTX ctx)
-{
-    bml_internal *pBML = (bml_internal *)ctx;
-
-    return pBML->set_wifi_configuration_start();
-}
-
-int bml_set_wifi_configuration_end(BML_CTX ctx)
-{
-    bml_internal *pBML = (bml_internal *)ctx;
-
-    return pBML->set_wifi_configuration_end();
-}
-
 int bml_get_administrator_credentials(BML_CTX ctx, char *user_password)
 {
     // Validate input parameters

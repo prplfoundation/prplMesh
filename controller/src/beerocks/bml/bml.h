@@ -189,24 +189,6 @@ int bml_set_onboarding_state(BML_CTX ctx, int enable);
 int bml_wps_onboarding(BML_CTX ctx, const char *iface);
 
 /**
-* Notification to BeeRocks on Wi-Fi configuration start. It is expected that Hostapd will be down during configuration.
-*
-* @param [in] ctx BML Context.
-*
-* @return BML_RET_OK on success.
-*/
-int bml_set_wifi_configuration_start(BML_CTX ctx);
-
-/**
-* Notification to BeeRocks on Wi-Fi configuration end. It is expected that Hostapd is down and ready for re-activation.
-*
-* @param [in] ctx BML Context.
-*
-* @return BML_RET_OK on success.
-*/
-int bml_set_wifi_configuration_end(BML_CTX ctx);
-
-/**
  * Get administrator credentials (admin user password).
  *
  * @param [in] ctx BML Context.

@@ -206,7 +206,7 @@ void slave_thread::on_thread_stop() { stop_slave_thread(); }
 bool slave_thread::socket_disconnected(Socket *sd)
 {
     if (configuration_in_progress) {
-        LOG(DEBUG) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
+        LOG(DEBUG) << "configuration is in progress, ignoring";
         detach_on_conf_change = true;
         if (sd == ap_manager_socket || sd == monitor_socket) {
             ap_manager_stop();
@@ -1592,49 +1592,6 @@ bool slave_thread::handle_cmdu_platform_manager_message(
         }
         break;
     }
-    case beerocks_message::ACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST: {
-        auto response =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST failed";
-            return false;
-        }
-        LOG(INFO) << "ACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST config_start="
-                  << int(response->config_start());
-
-        if (slave_state != STATE_OPERATIONAL &&
-            slave_state != STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE &&
-            slave_state != STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE) {
-            LOG(DEBUG) << "invalid slave state - ignore wifi configuration notification";
-        } else if (!response->config_start()) {
-            LOG(DEBUG) << "WIFI_CONFIGURATION_UPDATE_COMPLETE";
-            if (detach_on_conf_change) {
-                LOG(DEBUG) << "detach occurred on wifi conf change, slave reset!";
-                slave_reset();
-            } else if (
-                master_socket) { // if backhaul disconnects before we get WIFI_CONFIGURATION_UPDATE_COMPLETE, so the slave will continue on its current state
-                LOG(DEBUG) << "WIFI_CONFIGURATION_UPDATE_COMPLETE! goto STATE_OPERATIONAL";
-                slave_state = STATE_OPERATIONAL;
-            }
-
-        } else if (slave_state == STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE) {
-            // response->config_start == 1, but prev conf change is not finished yet
-            slave_state_timer =
-                std::chrono::steady_clock::now() +
-                std::chrono::seconds(beerocks::SON_SLAVE_WAIT_AFTER_WIFI_CONFIG_UPDATE_SEC);
-            LOG(DEBUG) << "goto STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE";
-            slave_state = STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE;
-
-        } else { // response->config_start == 1, new conf update request
-            slave_state_timer =
-                std::chrono::steady_clock::now() +
-                std::chrono::seconds(STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE_TIMEOUT_SEC);
-            LOG(DEBUG) << "goto STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE";
-            slave_state = STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE;
-        }
-        break;
-    }
     case beerocks_message::ACTION_PLATFORM_ARP_QUERY_RESPONSE: {
         LOG(TRACE) << "ACTION_PLATFORM_ARP_QUERY_RESPONSE";
         if (master_socket) {
@@ -1756,7 +1713,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
         if (response_in->vap_id() == beerocks::IFACE_RADIO_ID) {
             LOG(WARNING) << __FUNCTION__ << "AP_Disabled on radio, slave reset";
             if (configuration_in_progress) {
-                LOG(INFO) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
+                LOG(INFO) << "configuration in progress, ignoring";
                 detach_on_conf_change = true;
                 break;
             }
@@ -2302,7 +2259,7 @@ bool slave_thread::handle_cmdu_monitor_message(
         if (response_in->vap_id() == beerocks::IFACE_RADIO_ID) {
             LOG(WARNING) << __FUNCTION__ << "AP_Disabled on radio, slave reset";
             if (configuration_in_progress) {
-                LOG(INFO) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
+                LOG(INFO) << "configuration is in progress, ignoring";
                 detach_on_conf_change = true;
                 break;
             }
@@ -2594,7 +2551,7 @@ bool slave_thread::handle_cmdu_monitor_message(
                   << int(notification->error_code());
 
         if (configuration_in_progress) {
-            LOG(INFO) << "WIFI_CONFIGURATION_UPDATE is in progress, ignoring";
+            LOG(INFO) << "configuration is in progress, ignoring";
             detach_on_conf_change = true;
             break;
         }
@@ -3284,23 +3241,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         break;
     }
     case STATE_ONBOARDING: {
-        break;
-    }
-    case STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE: {
-        if (std::chrono::steady_clock::now() > slave_state_timer) {
-            LOG(INFO) << "STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE timeout!";
-            platform_notify_error(BPL_ERR_WIFI_CONFIGURATION_CHANGE_TIMEOUT,
-                                  "WIFI configuration timeout!");
-            slave_reset();
-        }
-        break;
-    }
-    case STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE: {
-        if (std::chrono::steady_clock::now() > slave_state_timer) {
-            //this is ok, not an error
-            LOG(INFO) << "STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE timeout!";
-            slave_reset();
-        }
         break;
     }
     case STATE_VERSION_MISMATCH: {

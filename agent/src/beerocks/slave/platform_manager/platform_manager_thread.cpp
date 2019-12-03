@@ -1211,49 +1211,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
     } break;
 
-    case beerocks_message::ACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST: {
-        LOG(TRACE) << "ACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST";
-
-        auto request =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST failed";
-            break;
-        }
-
-        auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_REQUEST>(cmdu_tx);
-
-        if (request_out == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            break;
-        }
-
-        request_out->config_start() = request->config_start();
-
-        // Forward message to slaves
-        for (const auto &iter : m_mapSlaves) {
-            if (iter.first != nullptr) {
-                //iter.first is a slave socket
-                send_cmdu_safe(iter.first, cmdu_tx);
-            }
-        }
-
-        auto response = message_com::create_vs_message<
-            beerocks_message::cACTION_PLATFORM_WIFI_CONFIGURATION_UPDATE_RESPONSE>(cmdu_tx);
-
-        if (response == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            break;
-        }
-
-        // send responce
-        // Sent with unsafe because BML is reachable only on platform thread
-        message_com::send_cmdu(sd, cmdu_tx);
-
-    } break;
-
     case beerocks_message::ACTION_PLATFORM_ERROR_NOTIFICATION: {
         auto error = cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_ERROR_NOTIFICATION>();
         if (error == nullptr) {
