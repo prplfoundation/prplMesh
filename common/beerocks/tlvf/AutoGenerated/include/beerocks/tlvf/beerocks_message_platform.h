@@ -466,46 +466,6 @@ class cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE : public BaseClass
         uint8_t* m_success = nullptr;
 };
 
-class cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST : public BaseClass
-{
-    public:
-        cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST();
-
-        static eActionOp_PLATFORM get_action_op(){
-            return (eActionOp_PLATFORM)(ACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST);
-        }
-        uint32_t& flag();
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_PLATFORM* m_action_op = nullptr;
-        uint32_t* m_flag = nullptr;
-};
-
-class cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE : public BaseClass
-{
-    public:
-        cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
-        ~cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE();
-
-        static eActionOp_PLATFORM get_action_op(){
-            return (eActionOp_PLATFORM)(ACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE);
-        }
-        uint32_t& result();
-        void class_swap();
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_PLATFORM* m_action_op = nullptr;
-        uint32_t* m_result = nullptr;
-};
-
 class cACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST : public BaseClass
 {
     public:
