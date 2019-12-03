@@ -25,8 +25,6 @@
 namespace beerocks {
 namespace platform_manager {
 
-extern bool extern_set_iface_state(std::string iface, bool state);
-extern bool extern_set_radio_state(std::string iface, bool state); //to be removed in WLANRTSYS-6776
 extern std::string extern_query_db(std::string parameter);
 
 class main_thread : public socket_thread {

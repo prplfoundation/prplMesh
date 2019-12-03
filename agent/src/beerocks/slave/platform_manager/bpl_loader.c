@@ -53,7 +53,6 @@ struct SModuleSymbols {
                                                const char *, const int);
     int (*bpl_cfg_notify_fw_version_mismatch)();
     int (*bpl_cfg_notify_error)(int, const char *);
-    int (*bpl_cfg_set_wifi_radio_tx_state)(const char *, int);
     int (*bpl_cfg_notify_iface_status)(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif);
     int (*bpl_cfg_get_administrator_credentials)(char *);
     int (*bpl_cfg_get_device_info)(struct BPL_DEVICE_INFO *);
@@ -74,20 +73,6 @@ struct SModuleSymbols {
     int (*bpl_arp_mon_get_mac_for_ip)(BPL_ARP_MON_CTX, const uint8_t *, uint8_t *);
     int (*bpl_arp_mon_get_ip_for_mac)(BPL_ARP_MON_CTX, const uint8_t *, uint8_t *);
     int (*bpl_arp_get_bridge_iface)(const char *, const uint8_t *, char *);
-
-    // BPL WLAN SYMBOLS
-    int (*bpl_wlan_ap_start)(const char *iface);
-    int (*bpl_wlan_ap_stop)(const char *iface);
-    int (*bpl_wlan_sta_start)(const char *iface);
-    int (*bpl_wlan_sta_stop)(const char *iface);
-    int (*bpl_wlan_ap_enable)(const char *iface);
-    int (*bpl_wlan_ap_disable)(const char *iface);
-    int (*bpl_wlan_sta_enable)(const char *iface);
-    int (*bpl_wlan_sta_disable)(const char *iface);
-    int (*bpl_wlan_ready)();
-    int (*bpl_wlan_sta_acs)(const char *iface);
-    int (*bpl_wlan_restore)(const char *iface);
-    int (*bpl_wlan_ap_postinit)(const char *iface);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -235,11 +220,6 @@ int bpl_cfg_notify_fw_version_mismatch()
     return (BPL_EXEC_SYM(bpl_cfg_notify_fw_version_mismatch));
 }
 
-int bpl_cfg_set_wifi_radio_tx_state(const char *iface, int enable)
-{
-    return (BPL_EXEC_SYM(bpl_cfg_set_wifi_radio_tx_state, iface, enable));
-}
-
 int bpl_cfg_notify_error(int code, const char *str)
 {
     return (BPL_EXEC_SYM(bpl_cfg_notify_error, code, str));
@@ -314,27 +294,3 @@ int bpl_arp_get_bridge_iface(const char bridge[BPL_ARP_IFACE_NAME_LEN],
 {
     return (BPL_EXEC_SYM(bpl_arp_get_bridge_iface, bridge, mac, iface));
 }
-
-int bpl_wlan_ap_start(const char *iface) { return (BPL_EXEC_SYM(bpl_wlan_ap_start, iface)); }
-
-int bpl_wlan_ap_stop(const char *iface) { return (BPL_EXEC_SYM(bpl_wlan_ap_stop, iface)); }
-
-int bpl_wlan_sta_start(const char *iface) { return (BPL_EXEC_SYM(bpl_wlan_sta_start, iface)); }
-
-int bpl_wlan_sta_stop(const char *iface) { return (BPL_EXEC_SYM(bpl_wlan_sta_stop, iface)); }
-
-int bpl_wlan_ap_enable(const char *iface) { return (BPL_EXEC_SYM(bpl_wlan_ap_enable, iface)); }
-
-int bpl_wlan_ap_disable(const char *iface) { return (BPL_EXEC_SYM(bpl_wlan_ap_disable, iface)); }
-
-int bpl_wlan_sta_enable(const char *iface) { return (BPL_EXEC_SYM(bpl_wlan_sta_enable, iface)); }
-
-int bpl_wlan_sta_disable(const char *iface) { return (BPL_EXEC_SYM(bpl_wlan_sta_disable, iface)); }
-
-int bpl_wlan_ready() { return (BPL_EXEC_SYM(bpl_wlan_ready)); }
-
-int bpl_wlan_sta_acs(const char *iface) { return (BPL_EXEC_SYM(bpl_wlan_sta_acs, iface)); }
-
-int bpl_wlan_restore(const char *iface) { return (BPL_EXEC_SYM(bpl_wlan_restore, iface)); }
-
-int bpl_wlan_ap_postinit(const char *iface) { return (BPL_EXEC_SYM(bpl_wlan_ap_postinit, iface)); }

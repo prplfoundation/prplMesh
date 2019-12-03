@@ -63,11 +63,6 @@ extern "C" {
 #define BPL_NOTIF_MNS_OPER 4     /* MNS operation request */
 #define BPL_NOTIF_WPS_COMPLETE 5 /* Set WPS Status */
 
-/* Platform messages types */
-#define BPL_MSG_SET_WIFI_IFACE_STATE 11      /* Set Wi-Fi Interface state (ON/OFF/RESET) */
-#define BPL_MSG_SET_WIFI_RADIO_TX_STATE 12   /* Set Wi-Fi Radio TX state (ON/OFF) */
-#define BPL_MSG_SET_WIFI_INTERFACE_STATUS 13 /* Set the Radio status */
-
 /* Wi-Fi Security Mode Strings */
 #define BPL_WLAN_SEC_NONE_STR "None"
 #define BPL_WLAN_SEC_WEP64_STR "WEP-64"
@@ -136,26 +131,6 @@ struct BPL_WIFI_CREDENTIALS {
 
     /* Wi-Fi Security Mode */
     char sec[BPL_SEC_LEN];
-};
-
-/* Wi-Fi Interface state  */
-struct BPL_WIFI_IFACE_STATE {
-
-    /* Wi-Fi interface name */
-    char ifname[BPL_IFNAME_LEN];
-
-    /* Wi-Fi interface operation */
-    int op;
-};
-
-/* Wi-Fi Radio enable state  */
-struct BPL_WIFI_RADIO_TX_STATE {
-
-    /* Wi-Fi interface name */
-    char ifname[BPL_IFNAME_LEN];
-
-    /* Wi-Fi Radio operation */
-    int enable;
 };
 
 /* Interface state for the platform*/
@@ -439,28 +414,6 @@ int bpl_cfg_set_onboarding(int enable);
 int bpl_cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN],
                                         const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN],
                                         const char iface_name[BPL_IFNAME_LEN], const int success);
-
-/**
- * Set Wi-Fi interface (wpa_supplicant or hostapd) up or down.
- *
- * @param [in] iface, the interface name.
- * @param [in] op, 0= disable, 1 = enable 
- *
- * @return 0 Success.
- * @return -1 Error.
- */
-int bpl_cfg_set_wifi_iface_state(const char iface[BPL_IFNAME_LEN], int op);
-
-/**
- * Set Wi-Fi radio tx (wpa_supplicant or hostapd) enable or disable.
- *
- * @param [in] iface, the interface name.
- * @param [in] enable, 0= disable, 1 = enable 
- *
- * @return 0 Success.
- * @return -1 Error.
- */
-int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable);
 
 /**
  * Notify the platform about a FW version mismatch.

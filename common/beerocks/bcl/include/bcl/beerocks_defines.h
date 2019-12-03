@@ -441,14 +441,6 @@ enum eRadioStatus : uint8_t {
 
 enum eApActiveMode : uint8_t { AP_IDLE_MODE = 0, AP_ACTIVE_MODE, AP_INVALID_MODE };
 
-enum eWifiIfaceOperation {
-    WIFI_IFACE_OPER_NO_CHANGE = -1,
-    WIFI_IFACE_OPER_DISABLE   = 0,
-    WIFI_IFACE_OPER_ENABLE    = 1,
-    WIFI_IFACE_OPER_RESTORE   = 2,
-    WIFI_IFACE_OPER_RESTART   = 3,
-    WIFI_IFACE_OPER_INVALID
-};
 } // namespace beerocks
 
 #endif //_BEEROCKS_DEFINES_H_

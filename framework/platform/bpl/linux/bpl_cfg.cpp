@@ -200,13 +200,6 @@ int bpl_cfg_notify_fw_version_mismatch() { return RETURN_ERR; }
 
 int bpl_cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return RETURN_ERR; }
 
-int bpl_cfg_set_wifi_iface_state(const char iface[BPL_IFNAME_LEN], int op) { return RETURN_ERR; }
-
-int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable)
-{
-    return RETURN_ERR;
-}
-
 int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif)
 {
     return RETURN_ERR;
