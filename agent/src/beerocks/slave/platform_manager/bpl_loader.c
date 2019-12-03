@@ -37,7 +37,6 @@ struct SModuleSymbols {
     int (*bpl_cfg_is_master)();
     int (*bpl_cfg_get_operating_mode)();
     int (*bpl_cfg_is_onboarding)();
-    int (*bpl_cfg_is_wired_backhaul)();
     int (*bpl_cfg_get_rdkb_extensions)();
     int (*bpl_cfg_get_band_steering)();
     int (*bpl_cfg_get_dfs_reentry)();
@@ -169,8 +168,6 @@ int bpl_cfg_get_operating_mode() { return (BPL_EXEC_SYM(bpl_cfg_get_operating_mo
 int bpl_cfg_is_master() { return (BPL_EXEC_SYM(bpl_cfg_is_master)); }
 
 int bpl_cfg_is_onboarding() { return (BPL_EXEC_SYM(bpl_cfg_is_onboarding)); }
-
-int bpl_cfg_is_wired_backhaul() { return (BPL_EXEC_SYM(bpl_cfg_is_wired_backhaul)); }
 
 int bpl_cfg_get_rdkb_extensions() { return (BPL_EXEC_SYM(bpl_cfg_get_rdkb_extensions)); }
 

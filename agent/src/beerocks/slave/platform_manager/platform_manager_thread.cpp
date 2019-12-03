@@ -155,10 +155,6 @@ static bool fill_platform_settings(
             LOG(ERROR) << "Failed reading 'client_roaming";
             return false;
         }
-        if ((platform_common_conf.wired_backhaul = bpl_cfg_is_wired_backhaul()) < 0) {
-            LOG(ERROR) << "Failed reading 'wired_backhaul'";
-            return false;
-        }
         if ((platform_common_conf.local_master = bpl_cfg_is_master()) < 0) {
             LOG(ERROR) << "Failed reading 'local_master'";
             return false;
@@ -215,7 +211,6 @@ static bool fill_platform_settings(
         0; // TODO add platform DB flag
     msg->platform_settings().client_11k_roaming_enabled =
         uint8_t(platform_common_conf.client_roaming || platform_common_conf.band_steering);
-    msg->platform_settings().wired_backhaul    = uint8_t(platform_common_conf.wired_backhaul);
     msg->platform_settings().local_gw          = uint8_t(platform_common_conf.local_gw);
     msg->platform_settings().operating_mode    = uint8_t(platform_common_conf.operating_mode);
     msg->platform_settings().local_master      = uint8_t(platform_common_conf.local_master);
@@ -237,7 +232,6 @@ static bool fill_platform_settings(
     LOG(DEBUG) << "client_optimal_path_roaming_prefer_signal_strength_enabled: "
                << (unsigned)msg->platform_settings()
                       .client_optimal_path_roaming_prefer_signal_strength_enabled;
-    LOG(DEBUG) << "wired_backhaul: " << (unsigned)msg->platform_settings().wired_backhaul;
     LOG(DEBUG) << "band_enabled: " << (unsigned)msg->wlan_settings().band_enabled;
     LOG(DEBUG) << "local_gw: " << (unsigned)msg->platform_settings().local_gw;
     LOG(DEBUG) << "local_master: " << (unsigned)msg->platform_settings().local_master;

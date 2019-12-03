@@ -88,7 +88,6 @@ sPlatformSettings:
 
   rdkb_extensions_enabled: uint8_t
 
-  wired_backhaul: uint8_t 
   backhaul_max_vaps: uint8_t 
   backhaul_network_enabled: uint8_t 
   backhaul_preferred_radio_band: uint8_t 

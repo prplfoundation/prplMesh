@@ -89,7 +89,6 @@ prplmesh_platform_db_init() {
     {
         echo "management_mode=${management_mode}"
         echo "operating_mode=${operating_mode}"
-        echo "wired_backhaul=1"
     } > @TMP_PATH@/prplmesh_platform_db
 }
 

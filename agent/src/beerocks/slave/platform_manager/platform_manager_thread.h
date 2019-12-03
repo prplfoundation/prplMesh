@@ -39,7 +39,6 @@ public:
         int band_steering;
         int client_roaming;
         int onboarding;
-        int wired_backhaul;
         int operating_mode;
         int local_gw;
         int local_master;

@@ -267,15 +267,6 @@ int bpl_cfg_get_operating_mode();
 int bpl_cfg_is_onboarding();
 
 /**
- * Returns the state of the wired_backhaul.
- *
- * @return 1 wired_backhaul is enabled.
- * @return 0 wired_backhaul is enabled..
- * @return -1 Error.
- */
-int bpl_cfg_is_wired_backhaul();
-
-/**
  * Checks the state of the RDKB Extensions feature.
  *
  * @return 1 Enabled.

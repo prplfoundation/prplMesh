@@ -2950,19 +2950,12 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             bh_enable->backhaul_preferred_radio_band() =
                 platform_settings.backhaul_preferred_radio_band;
 
-            // Interfaces
-            if (platform_settings.wired_backhaul) {
-                string_utils::copy_string(bh_enable->wire_iface(message::IFACE_NAME_LENGTH),
-                                          config.backhaul_wire_iface.c_str(),
-                                          message::IFACE_NAME_LENGTH);
-            } else {
-                memset(bh_enable->wire_iface(message::WIFI_SSID_MAX_LENGTH), 0,
-                       message::IFACE_NAME_LENGTH);
-            }
+            string_utils::copy_string(bh_enable->wire_iface(message::IFACE_NAME_LENGTH),
+                                      config.backhaul_wire_iface.c_str(),
+                                      message::IFACE_NAME_LENGTH);
 
             bh_enable->wire_iface_type()     = config.backhaul_wire_iface_type;
             bh_enable->wireless_iface_type() = config.backhaul_wireless_iface_type;
-            bh_enable->wired_backhaul()      = platform_settings.wired_backhaul;
         }
 
         bh_enable->iface_mac()     = hostap_params.iface_mac;
