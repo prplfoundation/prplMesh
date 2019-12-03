@@ -37,6 +37,23 @@ std::string controller_ucc_listener::fill_version_reply_string()
 void controller_ucc_listener::clear_configuration() { m_database.clear_bss_info_configuration(); }
 
 /**
+ * @brief get parameter command
+ *
+ * get controller parameter
+ *
+ * @param[in] params command parsed parameter map
+ * @param[out] value returned parameter or error on failure
+ * @return true on success
+ * @return false on failure
+ */
+bool controller_ucc_listener::handle_dev_get_param(
+    std::unordered_map<std::string, std::string> &params, std::string &value)
+{
+    value = "parameter " + params["parameter"] + " not supported";
+    return false;
+}
+
+/**
  * @brief Validate if the 'dest_alid` MAC address matches one of known Agents MAC addresses.
  * 
  * @param[in] dest_alid Agent bridge MAC address.

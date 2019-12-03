@@ -58,6 +58,8 @@ private:
                                   const std::string &dest_mac = std::string()) override;
     bool handle_dev_set_config(std::unordered_map<std::string, std::string> &params,
                                std::string &err_string) override;
+    bool handle_dev_get_param(std::unordered_map<std::string, std::string> &params,
+                              std::string &value) override;
 
     backhaul_manager &m_backhaul_manager_ctx;
 

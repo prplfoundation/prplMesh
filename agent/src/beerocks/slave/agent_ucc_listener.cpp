@@ -97,6 +97,22 @@ void agent_ucc_listener::update_vaps_list(std::string ruid, beerocks_message::sV
 }
 
 /**
+ * @brief get parameter command
+ *
+ * get agent parameter
+ *
+ * @param[in] params command parsed parameter map
+ * @param[out] value returned parameter or error on failure
+ * @return true on success
+ * @return false on failure
+ */
+bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, std::string> &params,
+                                              std::string &value)
+{
+    value = "parameter " + params["parameter"] + " not supported";
+    return false;
+}
+/**
  * @brief Validate if the 'dest_alid` MAC address matches the controllers MAC address.
  * 
  * @param[in] dest_alid Agent bridge MAC address.
