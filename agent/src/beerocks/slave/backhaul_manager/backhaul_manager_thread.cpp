@@ -586,8 +586,7 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
 
             // If a wired (WAN) interface was provided, try it first, check if the interface is UP
             if ((!m_sConfig.wire_iface.empty()) &&
-                (wan_mon.initialize(m_sConfig.wire_iface) == wan_monitor::ELinkState::eUp) &&
-                (m_sConfig.wired_backhaul)) {
+                (wan_mon.initialize(m_sConfig.wire_iface) == wan_monitor::ELinkState::eUp)) {
 
                 auto it = std::find(ifaces.begin(), ifaces.end(), m_sConfig.wire_iface);
                 if (it == ifaces.end()) {
@@ -1451,7 +1450,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
                     }
                     m_sConfig.wire_iface.assign(request->wire_iface(message::IFACE_NAME_LENGTH));
                     m_sConfig.wire_iface_type = (beerocks::eIfaceType)request->wire_iface_type();
-                    m_sConfig.wired_backhaul  = request->wired_backhaul();
+
                     LOG(DEBUG) << "All slaves ready, proceeding" << std::endl
                                << "SSID: " << m_sConfig.ssid << ", Pass: ****"
                                << ", Security: " << int(m_sConfig.security_type)

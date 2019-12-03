@@ -115,8 +115,6 @@ private:
 
         } eType;
 
-        bool wired_backhaul;
-
         std::string ssid;
         std::string pass;
         std::string bridge_iface;

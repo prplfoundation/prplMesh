@@ -127,16 +127,6 @@ int bpl_cfg_get_operating_mode()
 
 int bpl_cfg_is_onboarding() { return 0; }
 
-int bpl_cfg_is_wired_backhaul()
-{
-    int retVal = 0;
-    if (bpl_cfg_get_param_int("wired_backhaul=", retVal) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_is_wired_backhaul: Failed to read wired_backhaul");
-        return RETURN_ERR;
-    }
-    return retVal;
-}
-
 int bpl_cfg_get_rdkb_extensions() { return 0; }
 
 int bpl_cfg_get_band_steering() { return 1; }

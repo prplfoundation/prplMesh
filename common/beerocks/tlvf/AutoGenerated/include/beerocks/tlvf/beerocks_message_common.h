@@ -92,7 +92,6 @@ typedef struct sPlatformSettings {
     uint8_t load_balancing_enabled;
     uint8_t service_fairness_enabled;
     uint8_t rdkb_extensions_enabled;
-    uint8_t wired_backhaul;
     uint8_t backhaul_max_vaps;
     uint8_t backhaul_network_enabled;
     uint8_t backhaul_preferred_radio_band;

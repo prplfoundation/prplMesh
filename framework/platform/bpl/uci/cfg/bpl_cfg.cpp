@@ -91,16 +91,6 @@ int bpl_cfg_is_onboarding()
     return retVal;
 }
 
-int bpl_cfg_is_wired_backhaul()
-{
-    int retVal = -1;
-    if (bpl_cfg_get_prplmesh_param_int("wired_backhaul", &retVal) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_is_wired_backhaul: Failed to read WiredBackhaul parameter\n");
-        return RETURN_ERR;
-    }
-    return retVal;
-}
-
 int bpl_cfg_get_rdkb_extensions()
 {
     int retVal = -1;
