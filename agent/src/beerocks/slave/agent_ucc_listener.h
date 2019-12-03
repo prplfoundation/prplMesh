@@ -11,6 +11,7 @@
 
 #include <bcl/beerocks_config_file.h>
 #include <bcl/beerocks_ucc_listener.h>
+#include <beerocks/tlvf/beerocks_message.h>
 
 #include <mutex>
 
@@ -46,6 +47,7 @@ public:
         reply_ucc(eWfaCaStatus::COMPLETE);
     }
     bool dev_set_config_onboarding_inprogress() { return m_dev_set_config_onboarding_inprogress; }
+    void update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps);
 
 private:
     std::string fill_version_reply_string() override;
@@ -66,6 +68,7 @@ private:
     bool m_dev_reset_default_inprogress         = false;
     bool m_dev_set_config_onboarding            = true;
     bool m_dev_set_config_onboarding_inprogress = false;
+    std::unordered_map<std::string, beerocks_message::sVapsList> vaps_map;
 
     std::mutex mutex;
 };

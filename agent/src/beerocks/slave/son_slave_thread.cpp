@@ -1622,6 +1622,22 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 
         break;
     }
+    case beerocks_message::ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION: {
+        LOG(DEBUG) << "ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION";
+        if (m_agent_ucc_listener) {
+            auto msg = cmdu_rx.addClass<
+                beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>();
+            if (!msg) {
+                LOG(ERROR)
+                    << "Failed building ACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION message!";
+                return false;
+            }
+
+            m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(msg->ruid()),
+                                                   msg->params());
+        }
+        break;
+    }
     default: {
         LOG(ERROR) << "Unknown BACKHAUL_MANAGER message, action_op: "
                    << int(beerocks_header->action_op());
@@ -2258,7 +2274,20 @@ bool slave_thread::handle_cmdu_ap_manager_message(
         }
 
         notification_out->params() = notification_in->params();
+        LOG(TRACE) << "send ACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION";
         send_cmdu_to_controller(cmdu_tx);
+
+        auto notification_out2 = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>(cmdu_tx);
+        if (notification_out2 == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+
+        notification_out2->params() = notification_in->params();
+        notification_out2->ruid()   = network_utils::mac_from_string(config.radio_identifier);
+        LOG(TRACE) << "send ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION";
+        message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION: {

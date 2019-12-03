@@ -65,6 +65,14 @@ void agent_ucc_listener::clear_configuration()
     reply_ucc(eWfaCaStatus::RUNNING);
 }
 
+void agent_ucc_listener::update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps)
+{
+    LOG(INFO) << "Update VAP map for ruid " << ruid << " bssid "
+              << network_utils::mac_to_string(vaps.vaps->mac) << " ssid "
+              << std::string(vaps.vaps->ssid, 36);
+    vaps_map[ruid] = vaps;
+}
+
 void agent_ucc_listener::get_parameter()
 {
     reply_ucc(eWfaCaStatus::RUNNING);

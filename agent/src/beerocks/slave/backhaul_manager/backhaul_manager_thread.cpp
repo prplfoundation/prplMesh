@@ -1578,6 +1578,20 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
         }
         break;
     }
+    case beerocks_message::ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION: {
+        LOG(DEBUG) << "ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION received from iface "
+                   << soc->hostap_iface;
+        // Forward cmdu to all slaves how it is on UDS, without changing it so it will be handled by the ucc listener
+        for (auto soc_iter : slaves_sockets) {
+            if (!message_com::forward_cmdu_to_uds(soc_iter->slave, cmdu_rx,
+                                                  message_com::get_uds_header(cmdu_rx)->length)) {
+                LOG(ERROR) << "forward_cmdu_to_uds() failed - "
+                           << print_cmdu_types(message_com::get_uds_header(cmdu_rx))
+                           << " sd=" << intptr_t(soc_iter->slave);
+            }
+        }
+        break;
+    }
     default: {
         LOG(ERROR) << "Unhandled message received from master: "
                    << int(beerocks_header->action_op());
