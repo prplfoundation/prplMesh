@@ -651,21 +651,32 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         break;
     }
     case eWfaCaCommand::DEV_GET_PARAMETER: {
-
-        // For controller certification, the following command is received to get the ALid:
-        // DUT (127.0.0.1:5000) ---> dev_get_parameter,program,map,parameter,ALid
-
+        std::unordered_map<std::string, std::string> params{{"parameter", ""}};
+        if (!parse_params(cmd_tokens_vec, params, err_string)) {
+            LOG(ERROR) << err_string;
+            reply_ucc(eWfaCaStatus::INVALID, err_string);
+            break;
+        }
         if (!reply_ucc(eWfaCaStatus::RUNNING)) {
             LOG(ERROR) << "failed to send reply";
             break;
         }
-
-        std::string alid;
-        if (!net::network_utils::linux_iface_get_mac("br-lan", alid)) {
-            reply_ucc(eWfaCaStatus::INVALID, "FAIL");
+        auto parameter = params["parameter"];
+        std::transform(parameter.begin(), parameter.end(), parameter.begin(), ::tolower);
+        std::string value;
+        if (parameter == "alid") {
+            if (!net::network_utils::linux_iface_get_mac("br-lan", value)) {
+                LOG(ERROR) << "failed to get br-lan mac address";
+                reply_ucc(eWfaCaStatus::ERROR, "failed to get br-lan mac address");
+                break;
+            }
+        } else if (!handle_dev_get_param(params, value)) {
+            LOG(ERROR) << "failed to get parameter " << parameter << "error: " << value;
+            reply_ucc(eWfaCaStatus::ERROR, value);
+            break;
         }
-
-        reply_ucc(eWfaCaStatus::COMPLETE, std::string("aLid,") + alid);
+        // Success
+        reply_ucc(eWfaCaStatus::COMPLETE, parameter + "," + value);
         break;
     }
     case eWfaCaCommand::DEV_RESET_DEFAULT: {

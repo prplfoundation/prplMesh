@@ -46,6 +46,8 @@ protected:
                                           const std::string &dest_mac = std::string()) = 0;
     virtual bool handle_dev_set_config(std::unordered_map<std::string, std::string> &params,
                                        std::string &err_string)                        = 0;
+    virtual bool handle_dev_get_param(std::unordered_map<std::string, std::string> &params,
+                                      std::string &value)                              = 0;
 
     enum class eUccListenerRunOn : uint8_t {
         CONTROLLER,

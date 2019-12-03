@@ -32,7 +32,8 @@ private:
                                   const std::string &dest_mac = std::string()) override;
     bool handle_dev_set_config(std::unordered_map<std::string, std::string> &params,
                                std::string &err_string) override;
-
+    bool handle_dev_get_param(std::unordered_map<std::string, std::string> &params,
+                              std::string &value) override;
     static std::string parse_bss_info(const std::string &bss_info_str,
                                       son::wireless_utils::sBssInfoConf &bss_info_conf,
                                       std::string &err_string);
