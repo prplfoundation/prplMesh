@@ -75,10 +75,6 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
     include_directories(${PLATFORM_INCLUDE_DIR}/libnl3)
     include_directories(${PLATFORM_INCLUDE_DIR}/bridge-utils)
 
-    if (PASSIVE_MODE)
-        add_definitions(-DBPL_PASSIVE_MODE)
-    endif()
-
     # UCI BPL
     file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/uci/*.c*)
 
