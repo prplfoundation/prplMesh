@@ -160,11 +160,11 @@ void slave_thread::slave_reset()
         stopped = true;
     }
 
-    if ((stopped) && (!is_credentials_changed_on_db) && (slave_state != STATE_INIT)) {
+    if (stopped && slave_state != STATE_INIT) {
         platform_notify_error(BPL_ERR_SLAVE_STOPPED, "");
         LOG(DEBUG) << "goto STATE_STOPPED";
         slave_state = STATE_STOPPED;
-    } else if (is_credentials_changed_on_db || is_backhaul_disconnected) {
+    } else if (is_backhaul_disconnected) {
         slave_state_timer =
             std::chrono::steady_clock::now() + std::chrono::seconds(SLAVE_INIT_DELAY_SEC);
         LOG(DEBUG) << "goto STATE_WAIT_BEFORE_INIT";
@@ -1122,107 +1122,6 @@ bool slave_thread::handle_cmdu_control_message(
         iface_status_operational_state = true;
         break;
     }
-    case beerocks_message::ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PREPARE_REQUEST: {
-        LOG(TRACE) << "ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PREPARE_REQUEST - ID: "
-                   << beerocks_header->id();
-        auto request_in = cmdu_rx.addClass<
-            beerocks_message::cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PREPARE_REQUEST>();
-        if (request_in == nullptr) {
-            LOG(ERROR) << "addClass cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PREPARE_REQUEST failed";
-            return false;
-        }
-        new_credentials  = request_in->params();
-        auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PREPARE_RESPONSE>(
-            cmdu_tx, beerocks_header->id());
-        if (request_out == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-        send_cmdu_to_controller(cmdu_tx);
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PRE_COMMIT_REQUEST: {
-        LOG(TRACE) << "ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PRE_COMMIT_REQUEST - ID: "
-                   << beerocks_header->id();
-        if (new_credentials.ssid[0] == '\0') {
-            LOG(ERROR) << "New sWifiCredentials is not valid";
-        } else {
-            auto bpl_request = message_com::create_vs_message<
-                beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST>(
-                cmdu_tx, beerocks_header->id());
-            if (bpl_request == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return false;
-            }
-            bpl_request->params() = new_credentials;
-            LOG(INFO) << "Sending WiFi credentials update request to platform manager";
-            message_com::send_cmdu(platform_manager_socket, cmdu_tx);
-
-            // response
-            auto response = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_PRE_COMMIT_RESPONSE>(
-                cmdu_tx, beerocks_header->id());
-            if (response == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return false;
-            }
-
-            send_cmdu_to_controller(cmdu_tx);
-        }
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_COMMIT_REQUEST: {
-        LOG(TRACE) << "ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_COMMIT_REQUEST";
-
-        slave_state_timer =
-            std::chrono::steady_clock::now() +
-            std::chrono::seconds(
-                STATE_WAIT_FOR_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE_TIMEOUT_SEC);
-        LOG(DEBUG) << "goto STATE_WAIT_FOR_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE";
-        slave_state = STATE_WAIT_FOR_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE;
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_ABORT_REQUEST: {
-        LOG(TRACE) << "ACTION_CONTROL_WIFI_CREDENTIALS_UPDATE_ABORT_REQUEST";
-        if (is_credentials_changed_on_db) {
-            auto bpl_request = message_com::create_vs_message<
-                beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST>(
-                cmdu_tx, beerocks_header->id());
-            if (bpl_request == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return false;
-            }
-            string_utils::copy_string(new_credentials.ssid, platform_settings.front_ssid,
-                                      sizeof(new_credentials.ssid));
-            string_utils::copy_string(new_credentials.pass, platform_settings.front_pass,
-                                      sizeof(new_credentials.pass));
-            std::string sec_str(platform_settings.front_security_type);
-
-            if (sec_str == BPL_WLAN_SEC_NONE_STR) {
-                new_credentials.sec = beerocks_message::eWiFiSec_None;
-            } else if (sec_str == BPL_WLAN_SEC_WEP64_STR) {
-                new_credentials.sec = beerocks_message::eWiFiSec_WEP64;
-            } else if (sec_str == BPL_WLAN_SEC_WEP128_STR) {
-                new_credentials.sec = beerocks_message::eWiFiSec_WEP128;
-            } else if (sec_str == BPL_WLAN_SEC_WPA_PSK_STR) {
-                new_credentials.sec = beerocks_message::eWiFiSec_WPA_PSK;
-            } else if (sec_str == BPL_WLAN_SEC_WPA2_PSK_STR) {
-                new_credentials.sec = beerocks_message::eWiFiSec_WPA2_PSK;
-            } else if (sec_str == BPL_WLAN_SEC_WPA_WPA2_PSK_STR) {
-                new_credentials.sec = beerocks_message::eWiFiSec_WPA_WPA2_PSK;
-            } else {
-                LOG(WARNING) << "Unsupported Wi-Fi Security: " << sec_str
-                             << " credentials rollover failed!";
-                break;
-            }
-
-            bpl_request->params() = new_credentials;
-            LOG(INFO) << "Sending WiFi credentials update request to platform manager";
-            message_com::send_cmdu(platform_manager_socket, cmdu_tx);
-        }
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST: {
         LOG(TRACE) << "ACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST";
         auto update =
@@ -1514,10 +1413,6 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
             std::chrono::milliseconds(beerocks::IRE_MAX_WIRELESS_RECONNECTION_TIME_MSC);
 
         master_socket = nullptr;
-
-        if (slave_state == STATE_WAIT_FOR_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE) {
-            break;
-        }
 
         slave_reset();
         break;
@@ -1905,25 +1800,6 @@ bool slave_thread::handle_cmdu_platform_manager_message(
             LOG(DEBUG) << "ACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION op " << notification->op()
                        << " mac " << network_utils::mac_to_string(notification->mac())
                        << " ip = " << network_utils::ipv4_to_string(notification->ipv4());
-        }
-        break;
-    }
-    case beerocks_message::ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE: {
-        LOG(TRACE) << "ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE";
-        auto response = cmdu_rx.addClass<
-            beerocks_message::cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass ACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE failed";
-            return false;
-        }
-        if (response->result()) {
-            is_credentials_changed_on_db = true;
-        } else {
-            LOG(ERROR) << "platform manager failed to update wifi credentials on DB!!!";
-            is_credentials_changed_on_db = false;
-            platform_notify_error(BPL_ERR_SLAVE_UPDATE_CREDENTIALS_FAILED, "");
-            stop_on_failure_attempts--;
-            slave_reset();
         }
         break;
     }
@@ -3094,8 +2970,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     switch (slave_state) {
     case STATE_WAIT_BERFORE_INIT: {
         if (std::chrono::steady_clock::now() > slave_state_timer) {
-            is_backhaul_disconnected     = false;
-            is_credentials_changed_on_db = false;
+            is_backhaul_disconnected = false;
             LOG(TRACE) << "goto STATE_INIT";
             slave_state = STATE_INIT;
         }
@@ -3439,6 +3314,10 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
 
         if (!platform_settings.local_gw) {
             // Wireless config
+
+            // TODO: On passive mode, mem_only_psk is always be set, so supplying the credentials
+            // to the backhaul manager will no longer be necessary, and therefore should be be
+            // removed completely from beerocks including the BPL.
             string_utils::copy_string(bh_enable->ssid(message::WIFI_SSID_MAX_LENGTH),
                                       platform_settings.back_ssid, message::WIFI_SSID_MAX_LENGTH);
             string_utils::copy_string(bh_enable->pass(message::WIFI_PASS_MAX_LENGTH),
@@ -3761,21 +3640,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         break;
     }
     case STATE_ONBOARDING: {
-        break;
-    }
-    case STATE_WAIT_FOR_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE: {
-        if (is_credentials_changed_on_db) {
-            // after slave reset credentials will update
-            slave_state_timer =
-                std::chrono::steady_clock::now() +
-                std::chrono::milliseconds(beerocks::IRE_MAX_WIRELESS_RECONNECTION_TIME_MSC);
-            LOG(INFO) << "credentials changed on DB, reset the slave!";
-            slave_reset();
-        }
-        if (std::chrono::steady_clock::now() > slave_state_timer) {
-            LOG(ERROR) << "TIMEOUT on STATE_WAIT_FOR_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE";
-            slave_reset();
-        }
         break;
     }
     case STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE: {

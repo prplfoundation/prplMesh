@@ -3153,14 +3153,6 @@ bool db::assign_rdkb_wlan_task_id(int new_task_id)
 
 int db::get_rdkb_wlan_task_id() { return rdkb_wlan_task_id; }
 
-bool db::assign_bml_config_update_task_id(int new_task_id)
-{
-    config_update_task_id = new_task_id;
-    return true;
-}
-
-int db::get_bml_config_update_task_id() { return config_update_task_id; }
-
 void db::lock() { db_mutex.lock(); }
 
 void db::unlock() { db_mutex.unlock(); }

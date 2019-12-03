@@ -76,28 +76,6 @@ static int bpl_cfg_iface_config_down(int index)
 
 //============================================ STATIC END ============================================
 
-int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SSID_LEN],
-                                     const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])
-{
-    int retVal                  = 0;
-    char ssid_str[BPL_SSID_LEN] = {0}, sec_str[BPL_SEC_LEN] = {0}, pass_str[BPL_PASS_LEN] = {0};
-    char wireless_beerocks_path[MAX_UCI_BUF_LEN] = "wireless.beerocks";
-
-    utils::copy_string(ssid_str, ssid, BPL_SSID_LEN);
-    utils::copy_string(sec_str, sec, BPL_SEC_LEN);
-    utils::copy_string(pass_str, pass, BPL_PASS_LEN);
-
-    retVal |= uci_converter_set(wireless_beerocks_path, "ssid", ssid_str);
-    retVal |= uci_converter_set(wireless_beerocks_path, "mode_enabled", sec_str);
-    if (!strcmp(sec, "WEP-64") || !strcmp(sec, "WEP-128")) {
-        retVal |= uci_converter_set(wireless_beerocks_path, "wep_key", pass_str);
-    } else {
-        retVal |= uci_converter_set(wireless_beerocks_path, "key_passphrase", pass_str);
-    }
-
-    return retVal;
-}
-
 int bpl_cfg_set_onboarding(int enable) { return 0; }
 
 int bpl_cfg_set_wifi_iface_state(const char iface[BPL_IFNAME_LEN], int op)
@@ -146,12 +124,6 @@ int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable
 }
 
 #else //PASSIVE_MODE is on
-
-int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SSID_LEN],
-                                     const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN])
-{
-    return 0;
-}
 
 int bpl_cfg_set_onboarding(int enable) { return 0; }
 

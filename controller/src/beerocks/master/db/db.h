@@ -576,9 +576,6 @@ public:
     bool assign_channel_selection_task_id(int new_task_id);
     int get_channel_selection_task_id();
 
-    bool assign_bml_config_update_task_id(int new_task_id);
-    int get_bml_config_update_task_id();
-
     void lock();
     void unlock();
 

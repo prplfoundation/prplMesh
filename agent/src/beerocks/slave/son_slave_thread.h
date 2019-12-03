@@ -103,7 +103,6 @@ public:
         STATE_UPDATE_MONITOR_SON_CONFIG,
         STATE_OPERATIONAL,
         STATE_ONBOARDING,
-        STATE_WAIT_FOR_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE,
         STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE,
         STATE_WAIT_FOR_ANOTHER_WIFI_CONFIGURATION_UPDATE,
         STATE_VERSION_MISMATCH,
@@ -173,21 +172,20 @@ private:
     bool send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx);
 
 private:
-    const int SELECT_TIMEOUT_MSEC                                                      = 200;
-    const int SLAVE_INIT_DELAY_SEC                                                     = 4;
-    const int WAIT_FOR_JOINED_RESPONSE_TIMEOUT_SEC                                     = 30;
-    const int WAIT_BEFORE_SEND_SLAVE_JOINED_NOTIFICATION_SEC                           = 1;
-    const int WAIT_BEFORE_SEND_BH_ENABLE_NOTIFICATION_SEC                              = 1;
-    const int IFACE_ACTION_TIMEOUT_SEC                                                 = 600;
-    const int WAIT_FOR_PLATFORM_MANAGER_REGISTER_RESPONSE_TIMEOUT_SEC                  = 600;
-    const int STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE_TIMEOUT_SEC            = 120;
-    const int STATE_WAIT_FOR_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE_TIMEOUT_SEC = 602;
-    const int STATE_WAIT_FOR_RETRY_CONNECT_TO_BACKHAUL_MANAGER_SEC                     = 2;
-    const int MONITOR_HEARTBEAT_TIMEOUT_SEC                                            = 10;
-    const int MONITOR_HEARTBEAT_RETRIES                                                = 10;
-    const int AP_MANAGER_HEARTBEAT_TIMEOUT_SEC                                         = 10;
-    const int AP_MANAGER_HEARTBEAT_RETRIES                                             = 10;
-    const int STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE_TIMEOUT_SEC                    = 4;
+    const int SELECT_TIMEOUT_MSEC                                           = 200;
+    const int SLAVE_INIT_DELAY_SEC                                          = 4;
+    const int WAIT_FOR_JOINED_RESPONSE_TIMEOUT_SEC                          = 30;
+    const int WAIT_BEFORE_SEND_SLAVE_JOINED_NOTIFICATION_SEC                = 1;
+    const int WAIT_BEFORE_SEND_BH_ENABLE_NOTIFICATION_SEC                   = 1;
+    const int IFACE_ACTION_TIMEOUT_SEC                                      = 600;
+    const int WAIT_FOR_PLATFORM_MANAGER_REGISTER_RESPONSE_TIMEOUT_SEC       = 600;
+    const int STATE_WAIT_FOR_WIFI_CONFIGURATION_UPDATE_COMPLETE_TIMEOUT_SEC = 120;
+    const int STATE_WAIT_FOR_RETRY_CONNECT_TO_BACKHAUL_MANAGER_SEC          = 2;
+    const int MONITOR_HEARTBEAT_TIMEOUT_SEC                                 = 10;
+    const int MONITOR_HEARTBEAT_RETRIES                                     = 10;
+    const int AP_MANAGER_HEARTBEAT_TIMEOUT_SEC                              = 10;
+    const int AP_MANAGER_HEARTBEAT_RETRIES                                  = 10;
+    const int STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE_TIMEOUT_SEC         = 4;
 
     const int CONNECT_PLATFORM_RETRY_SLEEP     = 1000;
     const int CONNECT_PLATFORM_RETRY_COUNT_MAX = 5;
@@ -205,14 +203,12 @@ private:
     std::string master_version;
     bool configuration_stop_on_failure_attempts;
     int stop_on_failure_attempts;
-    bool stopped                                       = false;
-    bool is_backhaul_disconnected                      = false;
-    bool is_credentials_changed_on_db                  = false;
-    bool is_slave_reset                                = false;
-    bool is_backhual_reconf                            = false;
-    bool detach_on_conf_change                         = false;
-    bool configuration_in_progress                     = false;
-    beerocks_message::sWifiCredentials new_credentials = {};
+    bool stopped                   = false;
+    bool is_backhaul_disconnected  = false;
+    bool is_slave_reset            = false;
+    bool is_backhual_reconf        = false;
+    bool detach_on_conf_change     = false;
+    bool configuration_in_progress = false;
 
     bool is_backhaul_manager = false;
 
