@@ -17,22 +17,6 @@ declare REPO_PATH
 declare ROOT_PATH
 declare PLATFORM_TYPE
 
-# set an initial value for the flag
-PASSIVE_MODE=false
-
-# read the options
-OPTS=$(getopt -o p -n 'kw.sh' -- "$@")
-eval set -- "$OPTS"
-
-# extract options and their arguments into variables.
-while true ; do
-      case "$1" in
-            "") break ;;
-            -p) PASSIVE_MODE=true; shift; break ;;
-            * ) break ;;
-      esac   
-done
-
 ################################################################
 ####################### Local Functions ########################
 ################################################################
@@ -98,21 +82,13 @@ prepare_kw()
 
       else # linux/other
 
-            PASSIVE_MODE_OPT=""
-            if $PASSIVE_MODE ; then
-                  PASSIVE_MODE_OPT="-f PASSIVE_MODE=ON"
-                  echo "PASSIVE_MODE=ON"
-            else
-                  echo "PASSIVE_MODE=OFF"
-            fi
-
             # Generate compilation script using maptools script to be used by klocwork checker
             {
                   echo -e "#!/bin/bash"
                   echo -e "cd ../"
                   echo -e "echo starting kw from folder: \`pwd\`"
-                  echo -e "echo ./maptools.py build $REPO $PASSIVE_MODE_OPT -c clean make"
-                  echo -e "./maptools.py build $REPO $PASSIVE_MODE_OPT -c clean make"
+                  echo -e "echo ./maptools.py build $REPO -c clean make"
+                  echo -e "./maptools.py build -c clean make"
                   echo -e "exit"
             } > _GO_KW
 
