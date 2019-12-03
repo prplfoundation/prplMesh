@@ -41,7 +41,7 @@ void controller_ucc_listener::clear_configuration()
     reply_ucc(eWfaCaStatus::COMPLETE);
 }
 
-void controller_ucc_listener::get_parameter()
+void controller_ucc_listener::get_parameter(std::unordered_map<std::string, std::string> params)
 {
     // For controller certification, the following command is received to get the ALid:
     // DUT (127.0.0.1:5000) ---> dev_get_parameter,program,map,parameter,ALid

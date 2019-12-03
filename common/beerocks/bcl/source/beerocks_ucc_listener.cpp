@@ -651,7 +651,14 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         break;
     }
     case eWfaCaCommand::DEV_GET_PARAMETER: {
-        get_parameter();
+        std::unordered_map<std::string, std::string> params{};
+
+        if (!parse_params(cmd_tokens_vec, params, err_string)) {
+            LOG(ERROR) << err_string;
+            reply_ucc(eWfaCaStatus::INVALID, err_string);
+            break;
+        }
+        get_parameter(params);
         break;
     }
     case eWfaCaCommand::DEV_RESET_DEFAULT: {

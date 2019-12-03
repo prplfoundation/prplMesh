@@ -73,15 +73,53 @@ void agent_ucc_listener::update_vaps_list(std::string ruid, beerocks_message::sV
     vaps_map[ruid] = vaps;
 }
 
-void agent_ucc_listener::get_parameter()
+#include <stdio.h>
+#include <inttypes.h>
+#include <limits.h>
+/** Convert uint64_t mac address to hex
+ * @param[in] mac uint64_t mac address
+ * @param[out] hwaddr hex mac address
+ */
+void int2mac(const uint64_t mac, uint8_t *hwaddr)
+{
+    int8_t i;
+    uint8_t *p = hwaddr;
+
+    for (i = 5; i >= 0; i--) {
+        *p++ = mac >> (CHAR_BIT * i);
+    }
+}
+
+void agent_ucc_listener::get_parameter(std::unordered_map<std::string, std::string> params)
 {
     reply_ucc(eWfaCaStatus::RUNNING);
-    std::string alid;
-    if (!net::network_utils::linux_iface_get_mac("br-lan", alid)) {
-        reply_ucc(eWfaCaStatus::INVALID, "FAIL");
-        return;
+    if (params["parameter"] == "ALid") {
+        std::string alid;
+        if (!net::network_utils::linux_iface_get_mac("br-lan", alid)) {
+            reply_ucc(eWfaCaStatus::INVALID, "FAIL");
+            return;
+        }
+        reply_ucc(eWfaCaStatus::COMPLETE, std::string("aLid,") + alid);
+    } else if (params["parameter"] == "macaddr") {
+        // assume dev_get_parameter,program,map,ruid,riod
+        uint64_t ruid_int = std::stoull(params["ruid"], nullptr, 16);
+        LOG(DEBUG) << "ruid_int=" << ruid_int;
+        uint8_t oct[6] = {0};
+        int2mac(ruid_int, oct);
+        auto ruid = network_utils::mac_to_string(oct);
+        std::string ssid      = params["ssid"];
+        LOG(INFO) << "dev_get_parameter: ruid " << ruid << " ssid " << ssid;
+
+        for (auto vap : vaps_map[ruid].vaps) {
+            if (std::string(vap.ssid) == ssid) {
+                reply_ucc(eWfaCaStatus::COMPLETE,
+                        std::string("macaddr,") + network_utils::mac_to_string(vap.mac));
+                return;
+            }
+        }
+        reply_ucc(eWfaCaStatus::ERROR,
+                std::string("macaddr not found for ruid ") + ruid + std::string(" ssid ") + ssid);
     }
-    reply_ucc(eWfaCaStatus::COMPLETE, std::string("aLid,") + alid);
 }
 /**
  * @brief Return socket to Agent with bridge 'dest_alid` MAC address.
