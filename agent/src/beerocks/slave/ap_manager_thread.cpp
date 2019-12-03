@@ -337,8 +337,6 @@ void ap_manager_thread::after_select(bool timeout)
             }
 
             // Set the time for the first radio info polling
-            next_tx_polling_timestamp =
-                std::chrono::steady_clock::now() + std::chrono::seconds(TX_POLLING_DELAY_SEC);
             next_heartbeat_notification_timestamp =
                 std::chrono::steady_clock::now() +
                 std::chrono::seconds(HEARTBEAT_NOTIFICATION_DELAY_SEC);
