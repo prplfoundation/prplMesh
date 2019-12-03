@@ -78,10 +78,6 @@ public:
 
     typedef struct {
         sMacAddr hostap_mac;
-    } sTxOnResponse_event;
-
-    typedef struct {
-        sMacAddr hostap_mac;
     } sApActivityIdle_event;
 
     typedef struct {
@@ -110,7 +106,6 @@ public:
     EVENT(CSA_EVENT)                                                                               \
     EVENT(CAC_COMPLETED_EVENT)                                                                     \
     EVENT(DFS_CHANNEL_AVAILABLE_EVENT)                                                             \
-    EVENT(TX_ON_RESPONSE_EVENT)                                                                    \
     EVENT(AP_ACTIVITY_IDLE_EVENT)                                                                  \
     EVENT(DELETED_EVENT)                                                                           \
     EVENT(DFS_REENTRY_PENDING_STEERED_CLIENT)                                                      \
@@ -188,9 +183,6 @@ private:
     STATE(WAIT_FOR_CSA_NOTIFICATION)                                                               \
     STATE(ON_CSA_NOTIFICATION)                                                                     \
     STATE(ON_CSA_UNEXPECTED_NOTIFICATION)                                                          \
-    STATE(SEND_HOSTAP_TX_ON_REQUEST)                                                               \
-    STATE(WAIT_HOSTAP_TX_ON_RESPONSE)                                                              \
-    STATE(ON_HOSTAP_TX_ON_RESPONSE)                                                                \
     STATE(ACTIVATE_SLAVE)                                                                          \
     STATE(ON_CAC_COMPLETED_NOTIFICATION)                                                           \
     STATE(ON_DFS_CHANNEL_AVAILABLE)                                                                \
@@ -208,7 +200,6 @@ private:
 
     eState fsm_state;
 
-    const static int TX_ON_RESPONSE_WAIT_TIME              = 60000;
     const static int ACS_RESPONSE_WAIT_TIME                = 30000;
     const static int CSA_NOTIFICATION_RESPONSE_WAIT_TIME   = 20000;
     const static int RESTRICTED_CHANNEL_RESPONSE_WAIT_TIME = 20000;
@@ -259,7 +250,6 @@ private:
     sCsa_event *csa_event                                                      = nullptr;
     sCacCompleted_event *cac_completed_event                                   = nullptr;
     sDfsChannelAvailable_event *dfs_channel_available                          = nullptr;
-    sTxOnResponse_event *tx_on_response                                        = nullptr;
     sApActivityIdle_event *ap_activity_idle                                    = nullptr;
     sDfsReEntrySampleSteeredClients_event *dfs_reentry_pending_steered_clients = nullptr;
     sDfsCacPendinghostap_event *dfs_cac_pending_hostap                         = nullptr;

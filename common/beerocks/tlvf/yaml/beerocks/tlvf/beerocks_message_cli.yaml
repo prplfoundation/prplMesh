@@ -156,14 +156,6 @@ cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST:
   mac: sMacAddr
   cs_params: sApChannelSwitch
 
-cACTION_CLI_HOSTAP_TX_ON_REQUEST:
-  _type: class
-  ap_mac: sMacAddr
-
-cACTION_CLI_HOSTAP_TX_OFF_REQUEST:
-  _type: class
-  ap_mac: sMacAddr
-
 cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST:
   _type: class
   ap_mac: sMacAddr

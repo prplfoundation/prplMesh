@@ -145,53 +145,6 @@ void son_management::handle_cli_message(Socket *sd,
         }
         break;
     }
-    case beerocks_message::ACTION_CLI_HOSTAP_TX_ON_REQUEST: {
-        auto cli_request = cmdu_rx.addClass<beerocks_message::cACTION_CLI_HOSTAP_TX_ON_REQUEST>();
-        if (cli_request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_CLI_HOSTAP_TX_ON_REQUEST failed";
-            isOK = false;
-            break;
-        }
-
-        auto request =
-            message_com::create_vs_message<beerocks_message::cACTION_CONTROL_HOSTAP_TX_OFF_REQUEST>(
-                cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            isOK = false;
-            break;
-        }
-
-        std::string hostap_mac  = network_utils::mac_to_string(cli_request->ap_mac());
-        Socket *hostap_mac_sd   = database.get_node_socket(hostap_mac);
-        const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
-        break;
-    }
-    case beerocks_message::ACTION_CLI_HOSTAP_TX_OFF_REQUEST: {
-        auto cli_request = cmdu_rx.addClass<beerocks_message::cACTION_CLI_HOSTAP_TX_OFF_REQUEST>();
-        if (cli_request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_CLI_HOSTAP_TX_OFF_REQUEST failed";
-            isOK = false;
-            break;
-        }
-
-        auto request =
-            message_com::create_vs_message<beerocks_message::cACTION_CONTROL_HOSTAP_TX_ON_REQUEST>(
-                cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            isOK = false;
-            break;
-        }
-
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->ap_mac());
-        Socket *hostap_mac_sd  = database.get_node_socket(hostap_mac);
-
-        const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
-        break;
-    }
     case beerocks_message::ACTION_CLI_HOSTAP_STATS_MEASUREMENT: {
         auto request_in =
             cmdu_rx.addClass<beerocks_message::cACTION_CLI_HOSTAP_STATS_MEASUREMENT>();
