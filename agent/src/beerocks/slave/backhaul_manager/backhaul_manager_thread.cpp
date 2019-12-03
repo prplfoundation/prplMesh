@@ -582,31 +582,26 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
             FSM_MOVE_STATE(MASTER_DISCOVERY);
         } else { // link establish
 
+            auto ifaces = network_utils::linux_get_iface_list_from_bridge(m_sConfig.bridge_iface);
+
             // If a wired (WAN) interface was provided, try it first, check if the interface is UP
             if ((!m_sConfig.wire_iface.empty()) &&
                 (wan_mon.initialize(m_sConfig.wire_iface) == wan_monitor::ELinkState::eUp) &&
                 (m_sConfig.wired_backhaul)) {
 
+                auto it = std::find(ifaces.begin(), ifaces.end(), m_sConfig.wire_iface);
+                if (it == ifaces.end()) {
+                    LOG(ERROR) << "wire iface " << m_sConfig.wire_iface << " is not on the bridge";
+                    FSM_MOVE_STATE(RESTART);
+                    break;
+                }
+
                 // Mark the connection as WIRED
                 m_sConfig.eType = SBackhaulConfig::EType::Wired;
-
-                LOG(DEBUG) << "add wired_backhaul to bridge " << m_sConfig.wire_iface;
-                if (!network_utils::linux_add_iface_to_bridge(m_sConfig.bridge_iface,
-                                                              m_sConfig.wire_iface)) {
-                    LOG(ERROR) << "linux_add_iface_to_bridge failed!";
-                }
 
             } else {
                 // Mark the connection as WIRELESS
                 m_sConfig.eType = SBackhaulConfig::EType::Wireless;
-
-                if (m_sConfig.wired_backhaul) {
-                    LOG(DEBUG) << "remove wired_backhaul to bridge " << m_sConfig.wire_iface;
-                    if (!network_utils::linux_remove_iface_from_bridge(m_sConfig.bridge_iface,
-                                                                       m_sConfig.wire_iface)) {
-                        LOG(ERROR) << "linux_remove_iface_to_bridge failed!";
-                    }
-                }
             }
 
             // Move to the next state immediately
