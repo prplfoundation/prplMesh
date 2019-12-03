@@ -15,7 +15,6 @@
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
 #include <bpl/bpl_dhcp.h>
-#include <bpl/bpl_wlan.h>
 
 #include <net/if.h> // if_nametoindex
 
@@ -254,107 +253,6 @@ static bool fill_platform_settings(
                << (unsigned)msg->platform_settings().backhaul_preferred_radio_band;
 
     return true;
-}
-
-static bool set_iface_state(std::string iface, eWifiIfaceOperation operation, bool is_ap_iface)
-{
-    LOG(TRACE) << "set iface '" << iface << "' state, operation=" << operation << " start";
-
-    switch (operation) {
-    case WIFI_IFACE_OPER_NO_CHANGE: {
-        LOG(DEBUG) << "No state change for interface '" << iface << "'";
-
-        return true;
-    } break;
-
-    case WIFI_IFACE_OPER_DISABLE: {
-        LOG(DEBUG) << "Changing interface '" << iface << "' state to DISABLE, interface "
-                   << ((is_ap_iface) ? "is " : "is not ") << "an AP iface";
-
-        auto result =
-            ((is_ap_iface) ? bpl_wlan_ap_stop(iface.c_str()) : bpl_wlan_sta_stop(iface.c_str()));
-        return (0 == result);
-    } break;
-
-    case WIFI_IFACE_OPER_ENABLE: {
-        LOG(DEBUG) << "Changing interface '" << iface << "' state to ENABLE, interface "
-                   << ((is_ap_iface) ? "is " : "is not ") << "an AP iface";
-
-        auto result =
-            ((is_ap_iface) ? bpl_wlan_ap_start(iface.c_str()) : bpl_wlan_sta_start(iface.c_str()));
-
-        LOG(DEBUG) << "enable iface=" << iface
-                   << ", result=" << ((0 == result) ? "success" : "failure");
-
-        return (0 == result);
-    } break;
-
-    case WIFI_IFACE_OPER_RESTORE: {
-        LOG(DEBUG) << "Restoring interface '" << iface << "' - start";
-
-        //TODO: replace ap_stop with ap_restore when API supports per iface operation
-        //auto result = bpl_wlan_restore(iface.c_str());
-
-        LOG(DEBUG) << "performing bpl_wlan_ap_stop instead of bpl_wlan_restore '" << iface;
-        auto result =
-            ((is_ap_iface) ? bpl_wlan_ap_stop(iface.c_str()) : bpl_wlan_sta_stop(iface.c_str()));
-
-        LOG(DEBUG) << "Restoring interface '" << iface
-                   << "' - done, result=" << ((0 == result) ? "success" : "failure");
-
-        return (0 == result);
-    } break;
-
-    case WIFI_IFACE_OPER_RESTART: {
-        LOG(DEBUG) << "TODO: Restarting interface '" << iface << "'";
-        // add support when IRE flow is supported
-        return true;
-    } break;
-
-    default: {
-        LOG(ERROR) << "Unknown operation(" << operation << ") for interface '" << iface << "'";
-    } break;
-    }
-    return false;
-}
-
-bool extern_set_iface_state(std::string iface, bool state)
-{
-    //check if interface is in ap interfaces array
-    bool is_ap_iface = iface.compare("wlan0") || iface.compare("wlan2") || iface.compare("wlan4");
-    if (bpl_init() < 0) {
-        LOG(ERROR) << "Failed to initialize BPL!";
-        return false;
-    } else {
-        set_iface_state(iface, ((state) ? WIFI_IFACE_OPER_ENABLE : WIFI_IFACE_OPER_DISABLE),
-                        is_ap_iface);
-        return true;
-    }
-}
-
-static bool set_radio_state(std::string iface, bool state)
-{
-    LOG(INFO) << "Changing interface '" << iface << "' Radio to " << (state ? "ON" : "OFF");
-
-    int bpl_result = bpl_cfg_set_wifi_radio_tx_state(iface.c_str(), (state) ? 1 : 0);
-
-    if (bpl_result == 0) {
-        LOG(INFO) << "Interface '" << iface << "' Radio is " << (state ? "ON" : "OFF");
-    } else {
-        LOG(ERROR) << "Failed setting Interface '" << iface << "' Radio TX state: " << bpl_result;
-    }
-
-    return (bpl_result == 0);
-}
-
-bool extern_set_radio_state(std::string iface, bool state)
-{
-    if (bpl_init() < 0) {
-        LOG(ERROR) << "Failed to initialize BPL!";
-        return false;
-    } else {
-        return set_radio_state(iface, state);
-    }
 }
 
 std::string extern_query_db(std::string parameter)
@@ -767,16 +665,6 @@ void main_thread::on_thread_stop()
     LOG(DEBUG) << "Stopping asynchronous work queue...";
     work_queue.stop(true);
 
-    // DO NOT USE THIS LOGIC -----
-    // disable all wifi ifaces (now in stop_ap_manager_thread)
-    // for(int i=0; i<IRE_MAX_SLAVES; i++){
-    //     // queue a bpl_cfg_set_wifi_iface_state request
-    //     std::string iface(config.hostap_iface[i]);
-    //     if(iface.empty()) continue;
-    //     set_iface_state(iface, false);
-    // }
-    //------------------------------
-
     if (bpl_dhcp_mon_stop() == false) {
         LOG(ERROR) << "Failed stopping DHCP Monitor!";
     } else {
@@ -989,135 +877,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         *(volatile char *)pass = *(volatile char *)pass;
 
     } break;
-
-    case beerocks_message::ACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST: {
-        // LOG(TRACE) << "ACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST";
-
-        auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST failed";
-            return false;
-        }
-
-        // Add a job to the async work queue
-        work_queue.enqueue<void>([this, sd]() {
-            size_t headroom = sizeof(beerocks::message::sUdsHeader);
-            size_t buffer_size =
-                headroom + message_com::get_vs_cmdu_size_on_buffer<
-                               beerocks_message::cACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE>();
-            uint8_t tx_buffer[buffer_size];
-            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
-
-            auto response = message_com::create_vs_message<
-                beerocks_message::cACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE>(cmdu_tx);
-
-            if (response == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return;
-            }
-            // check wlan status
-            int result = bpl_wlan_ready();
-
-            // LOG(DEBUG) << "bpl_wlan_ready() returned:" << ( (0 == result) ? "success":"failure" );
-            LOG_IF(result == 0, DEBUG) << "bpl_wlan_ready() returned success, WLAN is ready";
-
-            response->result() = (0 == result) ? 1 : 0;
-            send_cmdu_safe(sd, cmdu_tx);
-        });
-
-    } break;
-
-    case beerocks_message::ACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST: {
-        auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST failed";
-            return false;
-        }
-
-        std::string iface(request->iface_name(message::IFACE_NAME_LENGTH));
-        eWifiIfaceOperation iface_operation = eWifiIfaceOperation(request->iface_operation());
-        LOG(DEBUG) << "ACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST - iface=" << iface
-                   << ", iface_operation = " << iface_operation;
-
-        // Add a job to the async work queue
-        work_queue.enqueue<void>([this, iface, iface_operation, sd]() {
-            bool success = true;
-
-            bool is_iface_an_ap_iface = false;
-            if (ap_ifaces.find(iface) != ap_ifaces.end()) {
-                is_iface_an_ap_iface = true;
-            };
-
-            if (iface_operation != WIFI_IFACE_OPER_NO_CHANGE) {
-                success = set_iface_state(iface, iface_operation, is_iface_an_ap_iface);
-            }
-
-            size_t headroom = sizeof(beerocks::message::sUdsHeader);
-            size_t buffer_size =
-                headroom + message_com::get_vs_cmdu_size_on_buffer<
-                               beerocks_message::cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE>();
-            uint8_t tx_buffer[buffer_size];
-            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
-
-            auto response = message_com::create_vs_message<
-                beerocks_message::cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE>(cmdu_tx);
-
-            if (response == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return;
-            }
-
-            string_utils::copy_string(response->iface_name(message::IFACE_NAME_LENGTH),
-                                      iface.c_str(), message::IFACE_NAME_LENGTH);
-            response->iface_operation() = iface_operation;
-            response->success()         = (success ? 1 : 0);
-
-            send_cmdu_safe(sd, cmdu_tx);
-        });
-
-    } break;
-
-    case beerocks_message::ACTION_PLATFORM_POST_INIT_CONFIG_REQUEST: {
-        LOG(TRACE) << "ACTION_PLATFORM_POST_INIT_CONFIG_REQUEST";
-
-        auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST failed";
-            return false;
-        }
-
-        std::string iface(request->iface_name(message::IFACE_NAME_LENGTH));
-
-        // Add a job to the async work queue
-        work_queue.enqueue<void>([this, iface, sd]() {
-            size_t headroom = sizeof(beerocks::message::sUdsHeader);
-            size_t buffer_size =
-                headroom + message_com::get_vs_cmdu_size_on_buffer<
-                               beerocks_message::cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE>();
-            uint8_t tx_buffer[buffer_size];
-            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
-
-            auto response = message_com::create_vs_message<
-                beerocks_message::cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE>(cmdu_tx);
-            if (response == nullptr) {
-                LOG(ERROR) << "Failed building cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE message!";
-                return;
-            }
-
-            // check wlan status
-            int result = bpl_wlan_ap_postinit(iface.c_str());
-
-            LOG(DEBUG) << "bpl_wlan_ap_postinit() for iface=" << iface
-                       << " returned:" << ((0 == result) ? "success" : "failure");
-
-            response->result() = (0 == result) ? 1 : 0;
-            send_cmdu_safe(sd, cmdu_tx);
-        });
-
-    } break;
     case beerocks_message::ACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST: {
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE>(cmdu_tx);
@@ -1223,49 +982,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
             send_slave_iface_status_to_bpl(true);
         }
-    } break;
-
-    case beerocks_message::ACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST: {
-        auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST failed";
-            return false;
-        }
-
-        std::string iface(request->iface_name(message::IFACE_NAME_LENGTH));
-        int op = request->enable() ? 1 : 0;
-        LOG(DEBUG) << "ACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST, iface=" << iface
-                   << " op=" << op;
-
-        // Add a job to the async work queue
-        work_queue.enqueue<void>([this, iface, op, sd]() {
-            auto success = set_radio_state(iface, op);
-
-            size_t headroom = sizeof(beerocks::message::sUdsHeader);
-            size_t buffer_size =
-                headroom +
-                message_com::get_vs_cmdu_size_on_buffer<
-                    beerocks_message::cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE>();
-            uint8_t tx_buffer[buffer_size];
-            ieee1905_1::CmduMessageTx cmdu_tx(tx_buffer + headroom, sizeof(tx_buffer) - headroom);
-
-            auto response = message_com::create_vs_message<
-                beerocks_message::cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE>(cmdu_tx);
-
-            if (response == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return;
-            }
-
-            string_utils::copy_string(response->iface_name(message::IFACE_NAME_LENGTH),
-                                      iface.c_str(), message::IFACE_NAME_LENGTH);
-            response->enable()  = op;
-            response->success() = (success ? 1 : 0);
-
-            send_cmdu_safe(sd, cmdu_tx);
-        });
-
     } break;
 
     case beerocks_message::ACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION: {

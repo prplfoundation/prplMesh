@@ -150,7 +150,6 @@ void slave_thread::slave_reset()
     hostap_services_off();
     ap_manager_stop();
     monitor_stop();
-    pending_iface_actions.clear();
     is_backhaul_manager            = false;
     iface_status_operational_state = false;
     detach_on_conf_change          = false;
@@ -283,57 +282,16 @@ bool slave_thread::work()
     if (!monitor_heartbeat_check() || !ap_manager_heartbeat_check()) {
         slave_reset();
     }
-    /*
-     * wait for all pending iface actions to complete
-     * otherwise, continue to FSM
-     * no FSM until all actions are successful
-     */
-    if (!pending_iface_actions.empty()) {
-        auto now = std::chrono::steady_clock::now();
-        for (auto pending_action : pending_iface_actions) {
-            std::string iface = pending_action.first;
-            auto action       = pending_action.second;
 
-            int time_elapsed_secs =
-                std::chrono::duration_cast<std::chrono::seconds>(now - action.timestamp).count();
-            if (time_elapsed_secs > IFACE_ACTION_TIMEOUT_SEC) {
-                LOG(ERROR) << "iface " << iface << " operation: " << action.operation
-                           << " timed out! " << time_elapsed_secs << " seconds passed";
-
-                auto operation_to_err_code = [&](int8_t operation) -> int {
-                    if (WIFI_IFACE_OPER_DISABLE == operation) {
-                        return BPL_ERR_SLAVE_TIMEOUT_IFACE_ENABLE_REQUEST;
-                    } else if (WIFI_IFACE_OPER_ENABLE == operation) {
-                        return BPL_ERR_SLAVE_TIMEOUT_IFACE_DISABLE_REQUEST;
-                    } else if (WIFI_IFACE_OPER_RESTORE == operation) {
-                        return BPL_ERR_SLAVE_TIMEOUT_IFACE_RESTORE_REQUEST;
-                    } else if (WIFI_IFACE_OPER_RESTART == operation) {
-                        return BPL_ERR_SLAVE_TIMEOUT_IFACE_RESTART_REQUEST;
-                    } else {
-                        LOG(ERROR) << "ERROR: Unexpected operation:" << operation;
-                        return BPL_ERR_NONE;
-                    }
-                };
-
-                if (operation_to_err_code(action.operation) != BPL_ERR_NONE) {
-                    platform_notify_error(operation_to_err_code(action.operation), iface.c_str());
-                }
-
-                LOG(DEBUG) << "reset slave";
-                stop_on_failure_attempts--;
-                slave_reset();
-                break;
-            }
-        }
-    } else {
-        if (!slave_fsm(call_slave_select)) {
-            return false;
-        }
-        if (config.enable_bpl_iface_status_notifications && platform_manager_socket &&
-            !platform_settings.onboarding) {
-            send_iface_status();
-        }
+    if (!slave_fsm(call_slave_select)) {
+        return false;
     }
+
+    if (config.enable_bpl_iface_status_notifications && platform_manager_socket &&
+        !platform_settings.onboarding) {
+        send_iface_status();
+    }
+
     if (call_slave_select) {
         if (!socket_thread::work()) {
             return false;
@@ -925,16 +883,6 @@ bool slave_thread::handle_cmdu_control_message(
             return false;
         }
         message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_HOSTAP_TX_ON_REQUEST: {
-        LOG(TRACE) << "received ACTION_CONTROL_HOSTAP_TX_ON_REQUEST";
-        set_radio_tx_enable(config.hostap_iface, true);
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_HOSTAP_TX_OFF_REQUEST: {
-        LOG(TRACE) << "received ACTION_CONTROL_HOSTAP_TX_OFF_REQUEST";
-        set_radio_tx_enable(config.hostap_iface, false);
         break;
     }
     case beerocks_message::ACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST: {
@@ -1561,140 +1509,6 @@ bool slave_thread::handle_cmdu_platform_manager_message(
             slave_state = STATE_CONNECT_TO_BACKHAUL_MANAGER;
         } else {
             LOG(ERROR) << "slave_state != STATE_WAIT_FOR_PLATFORM_MANAGER_REGISTER_RESPONSE";
-        }
-        break;
-    }
-
-    case beerocks_message::ACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE: {
-        LOG(TRACE) << "received ACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE";
-        if (slave_state == STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE) {
-            auto response =
-                cmdu_rx
-                    .addClass<beerocks_message::cACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE>();
-            if (response == nullptr) {
-                LOG(ERROR) << "addClass cACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE failed";
-                return false;
-            }
-            bool success = (1 == response->result()) ? true : false;
-
-            LOG(DEBUG) << "received ACTION_PLATFORM_GET_WLAN_READY_STATUS_RESPONSE, result="
-                       << (success ? "success" : "failure");
-
-            if (success) {
-                LOG(TRACE) << "goto STATE_JOIN_INIT_BRING_UP_INTERFACES";
-                slave_state = STATE_JOIN_INIT_BRING_UP_INTERFACES;
-            } else {
-                // LOG(TRACE) << "goto STATE_GET_WLAN_READY_STATUS";
-                slave_state = STATE_GET_WLAN_READY_STATUS;
-            }
-        } else {
-            LOG(ERROR) << "slave_state != STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE";
-        }
-        break;
-    }
-
-    case beerocks_message::ACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE: {
-        auto response =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE failed";
-            return false;
-        }
-        std::string iface = response->iface_name(message::IFACE_NAME_LENGTH);
-
-        auto operation_to_string = [&](int8_t operation) -> std::string {
-            if (WIFI_IFACE_OPER_NO_CHANGE == operation) {
-                return "not change";
-            } else if (WIFI_IFACE_OPER_DISABLE == operation) {
-                return "disable";
-            } else if (WIFI_IFACE_OPER_ENABLE == operation) {
-                return "enable";
-            } else if (WIFI_IFACE_OPER_RESTORE == operation) {
-                return "restore";
-            } else if (WIFI_IFACE_OPER_RESTART == operation) {
-                return "restart";
-            } else {
-                return "ERROR! unknown operation!";
-            }
-        };
-
-        bool success = (response->success() != 0);
-        LOG(DEBUG) << "received ACTION_PLATFORM_WIFI_SET_IFACE_STATE_RESPONSE for iface=" << iface
-                   << ", operation:" << operation_to_string(response->iface_operation()) << ", "
-                   << (success ? "success" : "failure");
-
-        if (success) {
-            pending_iface_actions.erase(iface);
-            if (WIFI_IFACE_OPER_NO_CHANGE != response->iface_operation()) {
-                update_iface_status(
-                    (ap_manager_socket != nullptr),
-                    ((WIFI_IFACE_OPER_DISABLE == response->iface_operation()) ? false : true));
-            }
-        } else {
-            platform_notify_error(BPL_ERR_SLAVE_IFACE_CHANGE_STATE_FAILED, iface.c_str());
-            stop_on_failure_attempts--;
-            slave_reset();
-        }
-        break;
-    }
-    case beerocks_message::ACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE: {
-        LOG(TRACE) << "received ACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE";
-        //make sure slave reset didn't occur while we performed post init configurations
-        if (slave_state == STATE_OPERATIONAL) {
-            auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE>();
-            if (response == nullptr) {
-                LOG(ERROR) << "addClass cACTION_PLATFORM_POST_INIT_CONFIG_RESPONSE failed";
-                return false;
-            }
-            bool success = (1 == response->result()) ? true : false;
-
-            LOG(DEBUG) << "post init config result=" << (success ? "success" : "failure");
-
-            if (!success) {
-                platform_notify_error(BPL_ERR_SLAVE_POST_INIT_CONFIG_FAILED,
-                                      config.hostap_iface.c_str());
-                stop_on_failure_attempts--;
-                LOG(DEBUG) << "post init configurations failed, slave reset!";
-                slave_reset();
-            }
-        } else {
-            LOG(DEBUG) << "slave_state != STATE_OPERATIONAL";
-        }
-    } break;
-
-    case beerocks_message::ACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE: {
-        auto response =
-            cmdu_rx.addClass<beerocks_message::cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE failed";
-            return false;
-        }
-        LOG(DEBUG) << "received ACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_RESPONSE iface="
-                   << response->iface_name(message::IFACE_NAME_LENGTH)
-                   << (response->enable() ? " enable" : " disable")
-                   << (response->success() ? " success" : " failure");
-
-        if (!response->success()) {
-            LOG(ERROR) << "slave reset, RADIO_TX_STATE fail";
-            stop_on_failure_attempts--;
-            platform_notify_error(BPL_ERR_SLAVE_TX_CHANGE_STATE_FAILED,
-                                  response->iface_name(message::IFACE_NAME_LENGTH));
-            slave_reset();
-        } else {
-            update_iface_status((ap_manager_socket != nullptr), response->enable());
-
-            if (master_socket && response->enable()) {
-                auto notification = message_com::create_vs_message<
-                    beerocks_message::cACTION_CONTROL_HOSTAP_TX_ON_RESPONSE>(cmdu_tx);
-
-                if (notification == nullptr) {
-                    LOG(ERROR) << "Failed building message!";
-                    return false;
-                }
-
-                send_cmdu_to_controller(cmdu_tx);
-            }
         }
         break;
     }
@@ -2542,17 +2356,6 @@ bool slave_thread::handle_cmdu_monitor_message(
 
         if (slave_state == STATE_OPERATIONAL && notification_in->new_tx_state() == 1 &&
             notification_in->new_hostap_enabled_state() == 1) {
-            // post init configurations
-            auto request = message_com::create_vs_message<
-                beerocks_message::cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST>(cmdu_tx);
-            if (request == nullptr) {
-                LOG(ERROR) << "Failed building cACTION_PLATFORM_POST_INIT_CONFIG_REQUEST message!";
-                return false;
-            }
-
-            string_utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH),
-                                      config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
-            message_com::send_cmdu(platform_manager_socket, cmdu_tx);
 
             // marking slave as operational if it is on operational state with tx on and hostap is enabled
             iface_status_operational_state = true;
@@ -2561,17 +2364,6 @@ bool slave_thread::handle_cmdu_monitor_message(
             iface_status_operational_state = false;
         }
 
-        if (slave_state == STATE_OPERATIONAL && notification_in->new_tx_state() == 0 &&
-            notification_in->new_hostap_enabled_state() == 1) {
-            if (!set_wifi_iface_state(config.hostap_iface, WIFI_IFACE_OPER_ENABLE)) {
-                LOG(ERROR) << "error enabling hostap tx --> slave_reset();";
-                platform_notify_error(BPL_ERR_SLAVE_IFACE_CHANGE_STATE_FAILED,
-                                      config.hostap_iface.c_str());
-                stop_on_failure_attempts--;
-                slave_reset();
-                break;
-            }
-        }
         break;
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
@@ -3114,120 +2906,21 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         if (platform_settings.onboarding) {
             LOG(TRACE) << "goto STATE_ONBOARDING";
             slave_state = STATE_ONBOARDING;
+            break;
         } else if (!wlan_settings.band_enabled) {
             LOG(DEBUG) << "wlan_settings.band_enabled=false";
             LOG(TRACE) << "goto STATE_BACKHAUL_ENABLE";
             slave_state = STATE_BACKHAUL_ENABLE;
-        } else {
-            if (is_slave_reset) {
-                LOG(DEBUG) << "performing performing WIFI_IFACE_OPER_RESTORE, iface="
-                           << config.hostap_iface;
-
-                // restore interface to a state where is ready for interface enable
-                if (!set_wifi_iface_state(config.hostap_iface, WIFI_IFACE_OPER_RESTORE)) {
-                    LOG(ERROR) << "error changing iface state --> slave_reset();";
-                    platform_notify_error(BPL_ERR_SLAVE_IFACE_CHANGE_STATE_FAILED,
-                                          config.hostap_iface.c_str());
-                    stop_on_failure_attempts--;
-                    slave_reset();
-                    break;
-                }
-
-                if (!config.backhaul_wireless_iface.empty() && !platform_settings.local_gw) {
-                    LOG(DEBUG) << "slave reset: performing wireless backhaul "
-                                  "WIFI_IFACE_OPER_RESTORE, iface="
-                               << config.hostap_iface;
-                    if (!set_wifi_iface_state(config.backhaul_wireless_iface,
-                                              WIFI_IFACE_OPER_RESTORE)) {
-                        LOG(ERROR)
-                            << "error changing backhaul wireless iface state --> slave_reset();";
-                        platform_notify_error(BPL_ERR_SLAVE_IFACE_CHANGE_STATE_FAILED,
-                                              config.backhaul_wireless_iface.c_str());
-                        stop_on_failure_attempts--;
-                        slave_reset();
-                        break;
-                    }
-                }
-            }
-
-            if (!platform_settings.local_gw) {
-                is_backhaul_manager   = false;
-                iface_status_bh_wired = eRadioStatus::OFF;
-            }
-
-            // mark slave as in non operational state
-            iface_status_operational_state = false;
-
-            LOG(TRACE) << "goto STATE_GET_WLAN_READY_STATUS";
-            slave_state = STATE_GET_WLAN_READY_STATUS;
-        }
-
-        break;
-    }
-    case STATE_GET_WLAN_READY_STATUS: {
-
-        auto request = message_com::create_vs_message<
-            beerocks_message::cACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST>(cmdu_tx);
-
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-
-        //LOG(DEBUG) << "Sending cACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST";
-
-        if (!message_com::send_cmdu(platform_manager_socket, cmdu_tx)) {
-            LOG(ERROR) << "can't send message to platform manager!";
-            return false;
-        }
-
-        slave_state_timer =
-            std::chrono::steady_clock::now() +
-            std::chrono::seconds(STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE_TIMEOUT_SEC);
-
-        //LOG(DEBUG) << "goto STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE";
-        slave_state = STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE;
-
-    } break;
-    case STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE: {
-
-        //if timeout passed perform slave reset
-        if (std::chrono::steady_clock::now() > slave_state_timer) {
-            LOG(ERROR) << "STATE_WAIT_FOR_WLAN_READY_STATUS_RESPONSE timeout!";
-            platform_notify_error(BPL_ERR_SLAVE_TIMEOUT_GET_WLAN_READY_STATUS_REQUEST, "");
-            stop_on_failure_attempts--;
-            slave_reset();
-        }
-
-    } break;
-    case STATE_JOIN_INIT_BRING_UP_INTERFACES: {
-
-        if (!set_wifi_iface_state(config.hostap_iface, WIFI_IFACE_OPER_ENABLE)) {
-            LOG(ERROR) << "error changing iface state --> slave_reset();";
-            platform_notify_error(BPL_ERR_SLAVE_IFACE_CHANGE_STATE_FAILED,
-                                  config.hostap_iface.c_str());
-            stop_on_failure_attempts--;
-            slave_reset();
             break;
         }
 
-        if (!config.backhaul_wireless_iface.empty() && !platform_settings.local_gw) {
-            if (!set_wifi_iface_state(config.backhaul_wireless_iface, WIFI_IFACE_OPER_ENABLE)) {
-                LOG(ERROR) << "error changing backhaul wireless iface state --> slave_reset();";
-                platform_notify_error(BPL_ERR_SLAVE_IFACE_CHANGE_STATE_FAILED,
-                                      config.backhaul_wireless_iface.c_str());
-                stop_on_failure_attempts--;
-                slave_reset();
-                break;
-            }
+        if (!platform_settings.local_gw) {
+            is_backhaul_manager   = false;
+            iface_status_bh_wired = eRadioStatus::OFF;
         }
 
-        LOG(TRACE) << "goto STATE_JOIN_INIT_WAIT_FOR_IFACE_CHANGE_DONE";
-        slave_state = STATE_JOIN_INIT_WAIT_FOR_IFACE_CHANGE_DONE;
-
-        break;
-    }
-    case STATE_JOIN_INIT_WAIT_FOR_IFACE_CHANGE_DONE: {
+        // mark slave as in non operational state
+        iface_status_operational_state = false;
 
         LOG(TRACE) << "goto STATE_START_AP_MANAGER";
         is_slave_reset = false;
@@ -3392,30 +3085,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             LOG(TRACE) << "goto STATE_OPERATIONAL";
             slave_state = STATE_OPERATIONAL;
             break;
-        }
-        if (is_backhaul_manager) {
-            if (backhaul_params.backhaul_iface == config.backhaul_wire_iface &&
-                !config.backhaul_wireless_iface.empty()) {
-                LOG(DEBUG) << "wire backhaul, disable iface " << config.backhaul_wireless_iface;
-                if (!set_wifi_iface_state(config.backhaul_wireless_iface,
-                                          WIFI_IFACE_OPER_DISABLE)) {
-                    LOG(ERROR) << "error disabling backhaul wireless iface --> slave_reset()";
-                    slave_reset();
-                    break;
-                }
-            }
-        } else {
-            if (!config.backhaul_wireless_iface.empty()) {
-                if (!set_wifi_iface_state(config.backhaul_wireless_iface,
-                                          WIFI_IFACE_OPER_DISABLE)) {
-                    LOG(ERROR) << "error disabling backhaul wireless iface --> slave_reset()";
-                    platform_notify_error(BPL_ERR_SLAVE_IFACE_CHANGE_STATE_FAILED,
-                                          config.backhaul_wireless_iface.c_str());
-                    stop_on_failure_attempts--;
-                    slave_reset();
-                    break;
-                }
-            }
         }
 
         if (platform_settings.local_gw) {
@@ -3817,105 +3486,6 @@ void slave_thread::log_son_config()
                << "monitor_disable_initiative_arp="
                << int(son_config.monitor_disable_initiative_arp) << std::endl
                << "slave_keep_alive_retries=" << int(son_config.slave_keep_alive_retries);
-}
-
-/*
- * this function will add a pending action to the pending_iface_actions
- * and will prevent re-entry to the FSM until all the pending actions are complete
- */
-bool slave_thread::set_wifi_iface_state(const std::string iface,
-                                        beerocks::eWifiIfaceOperation iface_operation)
-{
-    auto operation_to_string = [&](int8_t operation) -> std::string {
-        if (WIFI_IFACE_OPER_NO_CHANGE == operation) {
-            return "no_change";
-        } else if (WIFI_IFACE_OPER_DISABLE == operation) {
-            return "disable";
-        } else if (WIFI_IFACE_OPER_ENABLE == operation) {
-            return "enable";
-        } else if (WIFI_IFACE_OPER_RESTORE == operation) {
-            return "restore";
-        } else if (WIFI_IFACE_OPER_RESTART == operation) {
-            return "restart";
-        } else {
-            return "ERROR! unknown operation!";
-        }
-    };
-
-    LOG(DEBUG) << "Request iface " << iface
-               << " Operation: " << operation_to_string(iface_operation);
-
-    if (iface.empty()) {
-        LOG(ERROR) << "iface is empty";
-        return false;
-    }
-
-    if (pending_iface_actions.find(iface) != pending_iface_actions.end()) {
-        if (pending_iface_actions[iface].operation == iface_operation) {
-            LOG(ERROR) << "Same iface action is already pending for " << iface
-                       << " operation: " << pending_iface_actions[iface].operation << " continue!";
-            return true;
-        } else {
-            LOG(ERROR)
-                << "!!! There is already a pending iface action for iface in the same FSM state"
-                << iface << ", aborting!";
-            return false;
-        }
-    } else {
-        pending_iface_actions[iface] = {iface, iface_operation, std::chrono::steady_clock::now()};
-
-        // CMDU Message
-        auto request = message_com::create_vs_message<
-            beerocks_message::cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST>(cmdu_tx);
-
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-
-        string_utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH), iface.c_str(),
-                                  message::IFACE_NAME_LENGTH);
-        request->iface_operation() = iface_operation;
-
-        LOG(DEBUG) << "Sending cACTION_PLATFORM_WIFI_SET_IFACE_STATE_REQUEST, iface=" << iface;
-
-        if (!message_com::send_cmdu(platform_manager_socket, cmdu_tx)) {
-            LOG(ERROR) << "can't send message to platform manager!";
-            return false;
-        }
-    }
-
-    return true;
-}
-
-bool slave_thread::set_radio_tx_enable(const std::string iface, bool enable)
-{
-    LOG(DEBUG) << "Request iface " << iface << " radio " << (enable ? "enable" : "disable");
-
-    if (iface.empty()) {
-        LOG(ERROR) << "iface is empty";
-        return false;
-    }
-
-    // CMDU Message
-    auto request = message_com::create_vs_message<
-        beerocks_message::cACTION_PLATFORM_WIFI_SET_RADIO_TX_STATE_REQUEST>(cmdu_tx);
-
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building message!";
-        return false;
-    }
-
-    string_utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH), iface.c_str(),
-                              message::IFACE_NAME_LENGTH);
-    request->enable() = enable;
-
-    if (!message_com::send_cmdu(platform_manager_socket, cmdu_tx)) {
-        LOG(ERROR) << "can't send message to platform manager!";
-        return false;
-    }
-
-    return true;
 }
 
 void slave_thread::send_platform_iface_status_notif(eRadioStatus radio_status,

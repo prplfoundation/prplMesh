@@ -95,30 +95,11 @@ static void init_signals()
 static bool parse_arguments(int argc, char *argv[])
 {
     int opt;
-    while ((opt = getopt(argc, argv, "i:w:t:q:")) != -1) {
+    while ((opt = getopt(argc, argv, "i:q:")) != -1) {
         switch (opt) {
         case 'i': {
             g_son_slave_iface.assign(optarg);
             break;
-        }
-        case 't': // enable radio Tx using platform API, example: -t waln0 1
-        case 'w': // enable radio interfce using platform API, example: -w waln0 1
-        {
-            std::string iface;
-            std::string en = "0";
-            int index      = optind;
-            if (index >= argc) {
-                std::cout << "Error, bad arg";
-                exit(1);
-            }
-            iface.assign(optarg);
-            en.assign(argv[index]);
-
-            if (opt == 'w')
-                beerocks::platform_manager::extern_set_iface_state(iface, en == "1" ? true : false);
-            if (opt == 't')
-                beerocks::platform_manager::extern_set_radio_state(iface, en == "1" ? true : false);
-            exit(0);
         }
         case 'q': // quary platfrom: is_master, is_gateway, is_onboarding
         {

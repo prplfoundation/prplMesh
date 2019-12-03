@@ -74,25 +74,4 @@ int bpl_cfg_notify_fw_version_mismatch() { return -1; }
 
 int bpl_cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return -1; }
 
-int bpl_cfg_set_wifi_iface_state(const char iface[BPL_IFNAME_LEN], int op) { return 0; }
-
-int bpl_cfg_set_wifi_radio_tx_state(const char iface[BPL_IFNAME_LEN], int enable)
-{
-    uint32_t val = 0;
-
-    if (enable) {
-        val |= WL_RADIO_SW_DISABLE << 16;
-    } else {
-        val = WL_RADIO_SW_DISABLE << 16 | WL_RADIO_SW_DISABLE;
-    }
-
-    int ret = bwl_wl_ioctl((char *)iface, WLC_SET_RADIO, &val, sizeof(val));
-    if (ret < 0) {
-        MAPF_DBG("WLC_SET_RADIO failed: " << ret);
-        return -1;
-    }
-
-    return 0;
-}
-
 int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif) { return 0; }
