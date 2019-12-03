@@ -41,7 +41,6 @@ struct SModuleSymbols {
     int (*bpl_cfg_get_rdkb_extensions)();
     int (*bpl_cfg_get_band_steering)();
     int (*bpl_cfg_get_dfs_reentry)();
-    int (*bpl_cfg_get_passive_mode)();
     int (*bpl_cfg_get_client_roaming)();
     int (*bpl_cfg_get_wifi_params)(const char *iface, struct BPL_WLAN_PARAMS *wlan_params);
     int (*bpl_cfg_get_backhaul_params)(int *, int *, int *);
@@ -178,8 +177,6 @@ int bpl_cfg_get_rdkb_extensions() { return (BPL_EXEC_SYM(bpl_cfg_get_rdkb_extens
 int bpl_cfg_get_band_steering() { return (BPL_EXEC_SYM(bpl_cfg_get_band_steering)); }
 
 int bpl_cfg_get_dfs_reentry() { return (BPL_EXEC_SYM(bpl_cfg_get_dfs_reentry)); }
-
-int bpl_cfg_get_passive_mode() { return (BPL_EXEC_SYM(bpl_cfg_get_passive_mode)); }
 
 int bpl_cfg_get_client_roaming() { return (BPL_EXEC_SYM(bpl_cfg_get_client_roaming)); }
 

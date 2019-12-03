@@ -186,8 +186,6 @@ bool base_wlan_hal_dwpal::fsm_setup()
                 auto fixed_dfs_channel =
                     (!get_hal_conf().ap_acs_enabled && m_radio_info.is_dfs_channel);
                 LOG(DEBUG) << "hal_conf.ap_acs_enabled=" << int(get_hal_conf().ap_acs_enabled)
-                           << ", hal_conf.ap_passive_mode_enabled="
-                           << int(get_hal_conf().ap_passive_mode_enabled)
                            << ", m_radio_info.is_dfs_channel=" << int(m_radio_info.is_dfs_channel)
                            << ", fixed_dfs_channel=" << int(fixed_dfs_channel)
                            << ", fixed_channel=" << int(fixed_channel);
@@ -215,36 +213,19 @@ bool base_wlan_hal_dwpal::fsm_setup()
                         }
                     }
                 } else { // Auto Channel
-                    if (get_hal_conf().ap_passive_mode_enabled) {
-                        if (m_radio_info.wifi_ctrl_enabled == 1) {
-                            if (m_radio_info.tx_enabled) {
-                                LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
-                                return true;
-                            } else {
-                                LOG(ERROR) << "ap_enabled with tx OFF!";
-                                error = true;
-                            }
-                        } else if (m_radio_info.wifi_ctrl_enabled == 2) {
-                            LOG(ERROR)
-                                << "Auto channel with passive_mode=on, wifi_ctrl_enabled = 2";
+                    if (m_radio_info.wifi_ctrl_enabled == 1) {
+                        if (m_radio_info.tx_enabled) {
+                            LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
+                            return true;
+                        } else {
+                            LOG(ERROR) << "ap_enabled with tx OFF!";
                             error = true;
                         }
-                    } else { // ap_passive_mode_enabled == false
-
-                        if (m_radio_info.wifi_ctrl_enabled == 2) {
-
-                            if (m_radio_info.tx_enabled) {
-                                LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
-                                return true;
-                            } else {
-                                LOG(ERROR) << "ap_enabled with tx OFF!";
-                                error = true;
-                            }
-                        } else if (m_radio_info.wifi_ctrl_enabled == 1) {
-                            LOG(ERROR)
-                                << "Auto channel with passive_mode=off, wifi_ctrl_enabled = 1";
-                            error = true;
-                        }
+                    } else if (m_radio_info.wifi_ctrl_enabled != 0) {
+                        LOG(ERROR)
+                            << "Auto channel, invalid wifi_ctrl_enabled value. wifi_ctrl_enabled="
+                            << m_radio_info.wifi_ctrl_enabled;
+                        error = true;
                     }
                 }
 

@@ -2043,8 +2043,6 @@ bool master_thread::handle_intel_slave_join(
                           network_utils::mac_from_string(radio_identifier));
     }
     database.set_hostap_is_acs_enabled(radio_mac, acs_enabled);
-    database.set_hostap_passive_mode_enabled(
-        radio_mac, notification->platform_settings().passive_mode_enabled);
 
     if (!notification->is_slave_reconf()) {
         son_actions::set_hostap_active(database, tasks, radio_mac,

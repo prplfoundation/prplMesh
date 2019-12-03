@@ -648,13 +648,7 @@ void channel_selection_task::work()
     }
     case eState::ON_RESTRICTED_FAIL_SAFE_CHANNEL_RESPONSE: {
         if (restricted_channel_response_event->success) {
-            if (!database.get_hostap_passive_mode_enabled(hostap_mac) &&
-                database.get_hostap_is_acs_enabled(hostap_mac)) {
-                FSM_MOVE_STATE(SEND_ACS);
-            } else {
-                FSM_MOVE_STATE(ACTIVATE_SLAVE);
-            }
-
+            FSM_MOVE_STATE(ACTIVATE_SLAVE);
         } else {
             FSM_MOVE_STATE(GOTO_IDLE);
         }
@@ -844,11 +838,9 @@ void channel_selection_task::work()
             } else {
                 TASK_LOG(DEBUG) << "2G AP ignore";
             }
-        } else if (database.get_hostap_passive_mode_enabled(hostap_mac)) {
+        } else {
             // CAC completed will not arrive in passive mode, so set the indication to 'completed'
             database.set_hostap_cac_completed(hostap_mac, true);
-        } else if (wireless_utils::is_dfs_channel(hostap_params.channel)) {
-            wait_for_cac_completed(hostap_params.channel, hostap_params.bandwidth);
         }
         FSM_MOVE_STATE(GOTO_IDLE);
         break;

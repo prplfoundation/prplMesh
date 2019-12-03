@@ -397,9 +397,6 @@ public:
     bool set_hostap_is_acs_enabled(std::string mac, bool enable);
     bool get_hostap_is_acs_enabled(std::string mac);
 
-    bool set_hostap_passive_mode_enabled(std::string mac, bool enable);
-    bool get_hostap_passive_mode_enabled(std::string mac);
-
     //
     // CLI
     //

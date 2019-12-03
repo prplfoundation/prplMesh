@@ -87,7 +87,6 @@ typedef struct sPlatformSettings {
     uint8_t client_band_steering_enabled;
     uint8_t client_optimal_path_roaming_enabled;
     uint8_t dfs_reentry_enabled;
-    uint8_t passive_mode_enabled;
     uint8_t client_optimal_path_roaming_prefer_signal_strength_enabled;
     uint8_t client_11k_roaming_enabled;
     uint8_t load_balancing_enabled;
