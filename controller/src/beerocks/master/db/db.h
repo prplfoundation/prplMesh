@@ -347,9 +347,6 @@ public:
     std::string get_node_parent_radio(const std::string &mac);
     int8_t get_hostap_vap_id(const std::string &mac);
 
-    bool get_hostap_advertise_ssid_flag(std::string mac);
-    bool set_hostap_advertise_ssid_flag(std::string mac, bool flag);
-
     bool set_hostap_repeater_mode_flag(std::string mac, bool flag);
     bool get_hostap_repeater_mode_flag(std::string mac);
 

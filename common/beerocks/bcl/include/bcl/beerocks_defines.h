@@ -424,7 +424,6 @@ enum eSlaveJoinResponseErrCode {
     JOIN_RESP_VERSION_MISMATCH,
     JOIN_RESP_SSID_MISMATCH,
     JOIN_RESP_REJECT,
-    JOIN_RESP_ADVERTISE_SSID_FLAG_MISMATCH,
 };
 
 // if this enum is changed here, it must be change also on "bpl_cfg.h"

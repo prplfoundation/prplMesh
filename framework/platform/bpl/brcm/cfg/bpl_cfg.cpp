@@ -39,12 +39,10 @@ int bpl_cfg_get_passive_mode() { return 0; }
 
 int bpl_cfg_get_client_roaming() { return 0; }
 
-int bpl_cfg_get_wifi_params(const char *iface, int *enabled, int *acs, int *advertise_ssid)
+int bpl_cfg_get_wifi_params(const char *iface, int *enabled, int *acs)
 {
-    *enabled        = 1;
-    *acs            = 0;
-    *advertise_ssid = 1;
-
+    *enabled = 1;
+    *acs     = 0;
     return 0;
 }
 

@@ -103,7 +103,6 @@ sWlanSettings:
   band_enabled:
     _type: uint8_t
   channel: uint8_t 
-  advertise_ssid: uint8_t 
   ssid:
     _type: char    
     _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]

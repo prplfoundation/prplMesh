@@ -54,17 +54,6 @@ int bpl_cfg_get_prplmesh_param_int(const std::string &param, int *buf);
  **/
 int bpl_cfg_get_channel(int index, int *channel);
 
-/**
- * Returns the value of ssid-advertisement from DB
- *
- * @param [in] index interface index
- * @param [out] enabled value of ssid advertisement configuration (1=enabled,
- *0=disabled)
- *
- * @return 0 on success or -1 on error.
- **/
-int bpl_cfg_get_ssid_advertisement_enabled(int index, int *enabled);
-
 /** API currently not implemented **/
 int bpl_cfg_get_wep_key(int index, int keyIndex, char *key);
 
@@ -79,11 +68,5 @@ int bpl_cfg_get_wep_key(int index, int keyIndex, char *key);
  *
  * @return 0 on success or -1 on error.
  **/
-
-#ifndef BPL_PASSIVE_MODE
-int bpl_cfg_set_vap_credentials(int index, const char ssid[BPL_SSID_LEN],
-                                const char sec[BPL_SEC_LEN], const char key[BPL_PASS_LEN],
-                                const char psk[BPL_PASS_LEN]);
-#endif
 
 #endif // _BPL_CFG_HELPER_H

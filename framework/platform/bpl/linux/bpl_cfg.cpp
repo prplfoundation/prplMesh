@@ -154,9 +154,8 @@ int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_para
     if (!iface || !wlan_params) {
         return RETURN_ERR;
     }
-    wlan_params->enabled        = 1;
-    wlan_params->channel        = 0;
-    wlan_params->advertise_ssid = 1;
+    wlan_params->enabled = 1;
+    wlan_params->channel = 0;
     utils::copy_string(wlan_params->ssid, "test_ssid", BPL_SSID_LEN);
     utils::copy_string(wlan_params->passphrase, "test_pass", BPL_PASS_LEN);
     utils::copy_string(wlan_params->security, "None", BPL_SEC_LEN);
@@ -177,8 +176,6 @@ int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len)
     memset(backhaul_vaps_buf, 0, buf_len);
     return RETURN_OK;
 }
-
-int bpl_cfg_set_wifi_advertise_ssid(const char *iface, int advertise_ssid) { return RETURN_ERR; }
 
 int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
                                      char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN])

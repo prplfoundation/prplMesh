@@ -120,14 +120,6 @@ cACTION_PLATFORM_WIFI_CREDENTIALS_SET_RESPONSE:
     _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
   success: uint8_t
 
-cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_REQUEST:
-  _type: class
-  flag: uint32_t 
-
-cACTION_PLATFORM_ADVERTISE_SSID_FLAG_UPDATE_RESPONSE:
-  _type: class
-  result: uint32_t 
-
 cACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST:
   _type: class
 

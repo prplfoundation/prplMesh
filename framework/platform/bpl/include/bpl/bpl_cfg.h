@@ -68,7 +68,6 @@ extern "C" {
 #define BPL_MSG_SET_WIFI_IFACE_STATE 11      /* Set Wi-Fi Interface state (ON/OFF/RESET) */
 #define BPL_MSG_SET_WIFI_RADIO_TX_STATE 12   /* Set Wi-Fi Radio TX state (ON/OFF) */
 #define BPL_MSG_SET_WIFI_INTERFACE_STATUS 13 /* Set the Radio status */
-#define BPL_MSG_SET_WIFI_ADVERTISE_SSID 14   /* Set Wi-Fi SSID Advertisement */
 
 /* Wi-Fi Security Mode Strings */
 #define BPL_WLAN_SEC_NONE_STR "None"
@@ -160,16 +159,6 @@ struct BPL_WIFI_RADIO_TX_STATE {
     int enable;
 };
 
-/* Wi-Fi Access point SSID advertisement */
-struct BPL_WIFI_ADVERTISE_SSID_FLAG {
-
-    /* Wi-Fi interface name */
-    char ifname[BPL_IFNAME_LEN];
-
-    /* Wi-Fi SSID advertisement flag */
-    int advertise_ssid;
-};
-
 /* Interface state for the platform*/
 typedef struct {
 
@@ -248,9 +237,6 @@ struct BPL_WLAN_PARAMS {
 
     /* Wi-Fi Channel (0 for ACS) */
     int channel;
-
-    /* Wi-Fi SSID advertising */
-    int advertise_ssid;
 
     /* Wi-Fi SSID */
     char ssid[BPL_SSID_LEN];
@@ -405,17 +391,6 @@ int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefer
  * @return -1 Error.
  */
 int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len);
-
-/**
- * Update the SSID advertisement flag
- *
- * @param [in] iface Interface name for the requested parameters.
- * @param [in] advertise_ssid SSID Advertisement flag
- *
- * @return 0 Success.
- * @return -1 Error.
- */
-int bpl_cfg_set_wifi_advertise_ssid(const char *iface, int advertise_ssid);
 
 /**
  * Returns the platform Wi-Fi settings.
