@@ -269,9 +269,6 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
                 case beerocks::eIfaceType::IFACE_TYPE_WIFI_INTEL:
                     node->data.gw_ire.radio[i].vendor = BML_WLAN_VENDOR_INTEL;
                     break;
-                case beerocks::eIfaceType::IFACE_TYPE_WIFI_BRCM:
-                    node->data.gw_ire.radio[i].vendor = BML_WLAN_VENDOR_BROADCOM;
-                    break;
                 default:
                     node->data.gw_ire.radio[i].vendor = BML_WLAN_VENDOR_UNKNOWN;
                 }

@@ -71,8 +71,6 @@ static std::string radio_vendor_to_string(uint8_t vendor)
     switch (vendor) {
     case BML_WLAN_VENDOR_INTEL:
         return ("Intel");
-    case BML_WLAN_VENDOR_BROADCOM:
-        return ("Broadcom");
     default:
         return ("Unknown");
     }

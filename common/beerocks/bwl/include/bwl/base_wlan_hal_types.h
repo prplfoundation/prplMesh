@@ -32,7 +32,6 @@ enum class HALType {
 enum class IfaceType {
     Unsupported = 0x00,
     Intel       = 0x01,
-    Broadcom    = 0x12,
 };
 
 enum class HALState {

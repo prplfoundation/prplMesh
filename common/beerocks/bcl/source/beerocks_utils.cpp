@@ -29,8 +29,6 @@ beerocks::eIfaceType utils::get_iface_type_from_string(std::string iface_type_na
 {
     if (!iface_type_name.compare(0, sizeof(IFACE_TYPE_STR_WIFI_INTEL), IFACE_TYPE_STR_WIFI_INTEL))
         return beerocks::IFACE_TYPE_WIFI_INTEL;
-    if (!iface_type_name.compare(0, sizeof(IFACE_TYPE_STR_WIFI_BRCM), IFACE_TYPE_STR_WIFI_BRCM))
-        return beerocks::IFACE_TYPE_WIFI_BRCM;
     if (!iface_type_name.compare(0, sizeof(IFACE_TYPE_STR_WIFI_UNSPECIFIED),
                                  IFACE_TYPE_STR_WIFI_UNSPECIFIED))
         return beerocks::IFACE_TYPE_WIFI_UNSPECIFIED;
@@ -49,10 +47,6 @@ std::string utils::get_iface_type_string(beerocks::eIfaceType iface_type)
     switch (iface_type) {
     case beerocks::IFACE_TYPE_WIFI_INTEL: {
         result = std::string(IFACE_TYPE_STR_WIFI_INTEL);
-        break;
-    }
-    case beerocks::IFACE_TYPE_WIFI_BRCM: {
-        result = std::string(IFACE_TYPE_STR_WIFI_BRCM);
         break;
     }
     case beerocks::IFACE_TYPE_WIFI_UNSPECIFIED: {
