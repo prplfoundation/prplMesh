@@ -953,4 +953,52 @@ bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
     return true;
 }
 
+cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::~cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION() {
+}
+sMacAddr& cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::ruid() {
+    return (sMacAddr&)(*m_ruid);
+}
+
+sVapsList& cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::params() {
+    return (sVapsList&)(*m_params);
+}
+
+void cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::class_swap()
+{
+    m_ruid->struct_swap();
+    m_params->struct_swap();
+}
+
+size_t cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // ruid
+    class_size += sizeof(sVapsList); // params
+    return class_size;
+}
+
+bool cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < kMinimumLength) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_ruid = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!m_parse__) { m_ruid->struct_init(); }
+    m_params = (sVapsList*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sVapsList))) { return false; }
+    if (!m_parse__) { m_params->struct_init(); }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
 

@@ -418,6 +418,28 @@ class cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseClas
         sMacAddr* m_mac = nullptr;
 };
 
+class cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION();
+
+        static eActionOp_BACKHAUL get_action_op(){
+            return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION);
+        }
+        sMacAddr& ruid();
+        sVapsList& params();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BACKHAUL* m_action_op = nullptr;
+        sMacAddr* m_ruid = nullptr;
+        sVapsList* m_params = nullptr;
+};
+
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_BACKHAUL_H_
