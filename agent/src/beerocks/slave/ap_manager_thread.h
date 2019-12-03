@@ -113,11 +113,9 @@ private:
     std::chrono::steady_clock::time_point next_heartbeat_notification_timestamp;
     std::chrono::steady_clock::time_point next_tx_polling_timestamp;
 
-    const uint8_t TX_POLLING_DELAY_SEC             = 5;
     const uint8_t HEARTBEAT_NOTIFICATION_DELAY_SEC = 1;
-    int8_t last_tx_state                           = -1;
-    int8_t last_hostap_enabled_state               = -1;
-    bool acs_completed_vap_update                  = false;
+
+    bool acs_completed_vap_update = false;
 };
 
 } // namespace son
