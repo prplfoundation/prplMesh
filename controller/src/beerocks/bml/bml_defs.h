@@ -73,9 +73,8 @@ extern "C" {
     (64 + 1 + 3) /* maximum network encryption key string length, including null termination */
 
 /* BML Wi-Fi Vendor */
-#define BML_WLAN_VENDOR_UNKNOWN 0  /* Unknown vendor */
-#define BML_WLAN_VENDOR_INTEL 1    /* Intel Corporation */
-#define BML_WLAN_VENDOR_BROADCOM 2 /* Broadcom */
+#define BML_WLAN_VENDOR_UNKNOWN 0 /* Unknown vendor */
+#define BML_WLAN_VENDOR_INTEL 1   /* Intel Corporation */
 
 /* BML Wi-Fi Security Modes */
 #define BML_WLAN_SEC_NONE 0         /* No Wi-Fi Security */
