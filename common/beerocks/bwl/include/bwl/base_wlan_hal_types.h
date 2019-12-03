@@ -96,8 +96,7 @@ struct RadioInfo {
 };
 
 struct hal_conf_t {
-    bool ap_acs_enabled          = false;
-    bool ap_passive_mode_enabled = false;
+    bool ap_acs_enabled = false;
 };
 
 //sta_wlan_hal

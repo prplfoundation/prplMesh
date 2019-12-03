@@ -17,11 +17,6 @@ find_package(elpp REQUIRED)
 # OpenWRT
 if (TARGET_PLATFORM STREQUAL "openwrt")
 
-    # Platform definitions
-    add_definitions(
-        -DBPL_PASSIVE_MODE
-    )
-
     # UGW
     if (TARGET_PLATFORM_TYPE STREQUAL "ugw")
 

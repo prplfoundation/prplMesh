@@ -28,7 +28,6 @@ public:
     struct ap_manager_conf_t {
         std::string hostap_iface;
         beerocks::eIfaceType hostap_iface_type;
-        bool passive_mode_enabled;
         int channel;
         bool iface_filter_low;
         sMacAddr *backhaul_vaps_bssid; // array
