@@ -13,7 +13,6 @@
 #include "tasks/rdkb/rdkb_wlan_task.h"
 #endif
 #include "db/network_map.h"
-#include "tasks/bml_wifi_credentials_update_task.h"
 #include "tasks/channel_selection_task.h"
 #include "tasks/ire_network_optimization_task.h"
 #include "tasks/load_balancer_task.h"
@@ -1554,27 +1553,8 @@ void son_management::handle_bml_message(
     }
     case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST: {
         LOG(TRACE) << "ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST";
-        auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST failed";
-            return;
-        }
-
-        int prev_task_id = database.get_bml_config_update_task_id();
-        if (tasks.is_task_running(prev_task_id)) {
-            LOG(DEBUG)
-                << "BML Config update task is already running, adding request tot task queue";
-            bml_wifi_credentials_update_task::new_credential_event_t event;
-            event.cred = request->params();
-            event.sd   = sd;
-            tasks.push_event(prev_task_id,
-                             bml_wifi_credentials_update_task::NEW_CREDENTIALS_REQUEST, &event);
-        } else {
-            auto new_task = std::make_shared<bml_wifi_credentials_update_task>(
-                database, cmdu_tx, tasks, sd, request->params());
-            tasks.add_task(new_task);
-        }
+        // TODO: trigger auto-config, probaly it will be a good idea to change the message to
+        // "ACTION_BML_UPDATE_CONFIGURATION_REQUEST"
         break;
     }
     case beerocks_message::ACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST: {

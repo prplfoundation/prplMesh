@@ -88,16 +88,6 @@ cACTION_PLATFORM_WPS_ONBOARDING_REQUEST:
     _type: char 
     _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
 
-cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_REQUEST:
-  _type: class
-  params: sWifiCredentials 
-
-cACTION_PLATFORM_BEEROCKS_CREDENTIALS_UPDATE_RESPONSE:
-  _type: class
-  result:
-    _type: uint32_t
-    _comment: # 0 - Failure, 1 - Success
-
 cACTION_PLATFORM_GET_WLAN_READY_STATUS_REQUEST:
   _type: class
 

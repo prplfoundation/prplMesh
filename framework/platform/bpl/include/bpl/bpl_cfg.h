@@ -408,20 +408,6 @@ int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN
                                      char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN]);
 
 /**
- * Update the platform Wi-Fi settings.
- *
- * @param [in] radio_dir radio direction (BPL_RADIO_FRONT/BPL_RADIO_BACK)
- * @param [in] ssid SSID (up to 32 bytes in length).
- * @param [in] pass Password (up to 64 bytes in length).
- * @param [in] sec Secutiry Mode (up to 32 bytes in length).
- *
- * @return 0 Success.
- * @return -1 Error.
- */
-int bpl_cfg_set_beerocks_credentials(const int radio_dir, const char ssid[BPL_SSID_LEN],
-                                     const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN]);
-
-/**
  * @brief Returns the platform SDL policy which is represented by 'mem_only_psk' flag.
  * 'mem_only_psk' flag sets whether the platform shall save the credentials in some encrypted DB so 
  * the wpa-supplicant will get from there in runtime, without supply it on `connect` API, or not.
