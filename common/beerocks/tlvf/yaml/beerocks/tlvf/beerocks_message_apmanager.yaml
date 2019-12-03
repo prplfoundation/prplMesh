@@ -1,6 +1,10 @@
 #
 ---
-_include: beerocks/tlvf/beerocks_message_common.h
+_include: {
+  beerocks/tlvf/beerocks_message_common.h,
+  tlvf/WSC/WSC_Attributes.h,
+}
+
 _namespace: beerocks_message
 _multi_class: True
 _multi_class_auto_insert:
@@ -184,6 +188,15 @@ cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION:
 cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION:
   _type: class
   params: sSteeringEvAuthFail
+
+cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST:
+  _type: class
+  wifi_credentials_size:
+    _type: uint8_t
+    _length_var: True
+  wifi_credentials:
+    _type: WSC::cConfigData
+    _length: [ wifi_credentials_size ]
 
 cACTION_APMANAGER_HEARTBEAT_NOTIFICATION:
   _type: class
