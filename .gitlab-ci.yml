@@ -19,7 +19,6 @@ build-in-docker:
     - git update-index -q --refresh
     - git diff-index --exit-code HEAD
   tags:
-    - shell
     - dockerbuild
 
 run-tests:
@@ -29,5 +28,4 @@ run-tests:
     - ./run.sh -f -d --entrypoint "$PWD/../../../build/install/bin/tests/tlvf_test"
     - ./tests/test_flows.sh -v
   tags:
-    - shell
     - dockerbuild
