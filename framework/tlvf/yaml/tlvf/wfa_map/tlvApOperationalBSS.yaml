@@ -13,23 +13,23 @@ tlvApOperationalBSS:
     _type: uint8_t
     _length_var: True
   radio_list:
-    _type: sRadioInfo
+    _type: cRadioInfo
     _length: [ radio_list_length ]
 
-sRadioInfo:
-  _type: struct
+cRadioInfo:
+  _type: class
   radio_uid: sMacAddr
   radio_bss_list_length:
     _type: uint8_t
     _length_var: True
   radio_bss_list:
-    _type: sRadioBssInfo
+    _type: cRadioBssInfo
     _length: [ radio_bss_list_length ]
 
-sRadioBssInfo:
-  _type: struct
+cRadioBssInfo:
+  _type: class
   radio_bssid: sMacAddr
   ssid_length: uint8_t
   ssid:
-    _type: uint8_t
-    _length: []
+    _type: char
+    _length: [ssid_length]
