@@ -30,6 +30,8 @@
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
+#include <tlvf/wfa_map/tlvApOperationalBSS.h>
+#include <tlvf/wfa_map/tlvAssociatedClients.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
@@ -1730,7 +1732,7 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return false;
     }
     case ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE: {
-        return handle_1905_discovery_query(cmdu_rx);
+        return handle_1905_discovery_query(cmdu_rx, src_mac);
         //LOG(INFO) << "I got the Topology Query message!";
     }
     case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE: {
@@ -1750,13 +1752,87 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
  * @return true on success
  * @return false on failure
  */
-bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cmdu_rx)
+bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                   const std::string &src_mac)
 {
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received TOPOLOGY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
-    //TODO - this should be part of the discovery agent, will be done as part of
-    //       agent certification
-    return true;
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "Failed creating topology discovery response header! mid=" << std::hex
+                   << (int)mid;
+        return false;
+    }
+
+    auto tlvSupportedService = cmdu_tx.addClass<wfa_map::tlvSupportedService>();
+    if (!tlvSupportedService) {
+        LOG(ERROR) << "addClass wfa_map::tlvSupportedService failed, mid=" << std::hex << (int)mid;
+        return false;
+    }
+
+    if (!tlvSupportedService->alloc_supported_service_list()) {
+        LOG(ERROR) << "alloc_supported_service_list failed";
+        return false;
+    }
+
+    auto supportedServiceTuple = tlvSupportedService->supported_service_list(0);
+    if (!std::get<0>(supportedServiceTuple)) {
+        LOG(ERROR) << "Failed accessing supported_service_list";
+        return false;
+    }
+
+    std::get<1>(supportedServiceTuple) =
+        wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER;
+
+    auto tlvApOperationalBSS = cmdu_tx.addClass<wfa_map::tlvApOperationalBSS>();
+    if (!tlvApOperationalBSS) {
+        LOG(ERROR) << "addClass wfa_map::tlvApOperationalBSS failed, mid=" << std::hex << (int)mid;
+        return false;
+    }
+    //add dummy data
+    auto radio_list     = tlvApOperationalBSS->create_radio_list();
+    auto radio_bss_list = radio_list->create_radio_bss_list();
+    radio_bss_list->set_ssid("wlan_0");
+    radio_list->add_radio_bss_list(radio_bss_list);
+    radio_bss_list = radio_list->create_radio_bss_list();
+    radio_bss_list->set_ssid("wlan_2");
+    radio_list->add_radio_bss_list(radio_bss_list);
+    tlvApOperationalBSS->add_radio_list(radio_list);
+
+    auto tlvAssociatedClients = cmdu_tx.addClass<wfa_map::tlvAssociatedClients>();
+    if (!tlvAssociatedClients) {
+        LOG(ERROR) << "addClass wfa_map::tlvAssociatedClients failed, mid=" << std::hex << (int)mid;
+        return false;
+    }
+    auto bss_list   = tlvAssociatedClients->create_bss_list();
+    auto client_1   = bss_list->create_clients_associated_list();
+    client_1->mac() = network_utils::mac_from_string("aa:bb:cc:dd:ee:ff");
+    client_1->time_since_last_association_sec() = 5;
+    bss_list->add_clients_associated_list(client_1);
+    auto client_2   = bss_list->create_clients_associated_list();
+    client_2->mac() = network_utils::mac_from_string("00:11:22:33:44:55");
+    client_2->time_since_last_association_sec() = 1;
+    bss_list->add_clients_associated_list(client_2);
+    tlvAssociatedClients->add_bss_list(bss_list);
+
+    bss_list->bssid() = network_utils::mac_from_string("ab:cd:ef:01:23:45");
+
+#if 0
+    // //TODO: the Operational BSS and Associated Clients TLVs are temporary dummies.
+    // //later to be updated by real platfrom data from bpl
+    auto tlvApOperationalBSS = cmdu_tx.addClass<wfa_map::tlvApOperationalBSS>();
+    if (!tlvApOperationalBSS) {
+        LOG(ERROR) << "addClass wfa_map::tlvApOperationalBSS failed, mid=" << std::hex << (int)mid;
+        return false;
+    }
+    auto tlvAssociatedClients = cmdu_tx.addClass<wfa_map::tlvAssociatedClients>();
+    if (!tlvAssociatedClients) {
+        LOG(ERROR) << "addClass wfa_map::tlvAssociatedClients failed, mid=" << std::hex << (int)mid;
+        return false;
+    }
+#endif
+    LOG(DEBUG) << "Sending topology response message, mid: " << std::hex << (int)mid;
+    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::handle_1905_higher_layer_data_message(ieee1905_1::CmduMessageRx &cmdu_rx,
