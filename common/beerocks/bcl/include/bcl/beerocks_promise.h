@@ -49,6 +49,20 @@ public:
         struct timeval now;
         struct timespec timeout;
 
+        /**
+         * MMZ:
+         * pthread_cond_timedwait returns [EINVAL] when the abstime argument
+         * specified a nanosecond value less than zero or greater than or equal
+         * to 1000 million.
+         * The clock_gettime system call has higher precision than its successor
+         * the gettimeofday(). Decide on whether to use it with CLOCK_REALTIME
+         * or CLOCK_MONOTONIC. If CLOCK_MONOTONIC is used, condition variable
+         * attributes must then be initialized accordingly.
+         *
+         * Alternatively and maybe better off, use std::mutex and
+         * std::condition_variable, where wait_for() method accepts a duration
+         * parameter.
+         */
         // set the absolut timeout
         gettimeofday(&now, NULL);
         timeout.tv_sec  = now.tv_sec + (timeout_ms / 1000);
@@ -72,9 +86,15 @@ public:
         return true;
     }
 
+    /**
+     * MMZ: Mutex should also be used to protect the read operation on value
+     */
     T get_value() { return m_value; }
 
 private:
+    /**
+     * MMZ: use C++ std::mutex and std::condition_variable
+     */
     pthread_cond_t m_cond = PTHREAD_COND_INITIALIZER;
     pthread_mutex_t m_mut = PTHREAD_MUTEX_INITIALIZER;
     T m_value;

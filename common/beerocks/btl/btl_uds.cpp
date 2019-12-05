@@ -20,13 +20,16 @@ bool transport_socket_thread::configure_ieee1905_transport_interfaces(
     return true;
 }
 
+// MMZ No need to reimplement this method because behavior is the same
 void transport_socket_thread::add_socket(Socket *s, bool add_to_vector)
 {
     socket_thread::add_socket(s, add_to_vector);
 }
 
+// MMZ No need to reimplement this method because behavior is the same
 void transport_socket_thread::remove_socket(Socket *s) { socket_thread::remove_socket(s); }
 
+// MMZ No need to reimplement this method because behavior is the same
 bool transport_socket_thread::read_ready(Socket *s) { return socket_thread::read_ready(s); }
 
 bool transport_socket_thread::bus_subscribe(const std::vector<ieee1905_1::eMessageType> &msg_types)
@@ -100,6 +103,9 @@ bool transport_socket_thread::from_bus(Socket *sd) { return sd == bus; }
 
 bool transport_socket_thread::work()
 {
+    /**
+     * MMZ: This method is copy&paste of socket_thread::work() (the one at base class)
+     */
     before_select();
 
     int sel_ret = select.selectSocket();

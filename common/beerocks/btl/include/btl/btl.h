@@ -54,6 +54,7 @@ protected:
 
 private:
     void bus_init();
+    // MMZ: cmdu parameter should be const&
     bool bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
                   const std::string &src_mac, uint16_t length);
     bool handle_cmdu_message_bus();

@@ -137,6 +137,13 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
         return false;
     }
 
+    /**
+     * MMZ
+     * The cost of byte reversal on modern processors is normally negligible.
+     * IMHO, Network Byte Order should always be used for the sake of having a
+     * simpler code (swap_needed could be removed as an option and finalize()
+     * and parse() methods would always swap bytes)
+     */
     bool swap = !dst_mac.empty();
 
     if (!cmdu_tx.finalize(swap)) {

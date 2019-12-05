@@ -116,6 +116,10 @@ public:
     {
         m_init_succeeded = true;
     };
+    /**
+     * MMZ: Destructor should be virtual because this class has virtual method(s)
+     * (detected by static source code analyzer in Eclipse)
+     */
     ~tlvPrefilledData(){};
 
     // No swapping is needed for a prefilled TLV list

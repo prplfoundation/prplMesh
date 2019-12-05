@@ -512,6 +512,9 @@ bool beerocks_ucc_listener::socket_disconnected(Socket *sd)
     LOG(DEBUG) << "Client has disconnected";
     if (sd != m_ucc_sd) {
         LOG(DEBUG) << "Unfamiliar socket has disconnected";
+        /**
+         * MMZ redundant code
+         */
         m_ucc_sd = nullptr;
         return true;
     }
@@ -534,7 +537,23 @@ bool beerocks_ucc_listener::custom_message_handler(Socket *sd, uint8_t *rx_buffe
                                                    size_t rx_buffer_size)
 {
     std::string command_string;
+    /**
+     * MMZ readBytes might return an incomplete command without that being an
+     * error. Remaining bytes could successfully be read in next call to readBytes.
+     * New line character should be used to know if received string contains one
+     * full command or, on the contrary, some bytes are yet to be read.
+     * If bytes were read without a new line ending char and a timeout expires before receiving
+     * remaining bytes, then those bytes should be discarded as an incomplete command
+     */
+    /**
+     * MMZ readBytes could return two or more commands in a row and they would
+     * be treated as if just one command had been received, others being ignored
+     */
     auto available_bytes       = sd->readBytes(rx_buffer, rx_buffer_size, true);
+    /**
+     * MMZ if available_bytes == rx_buffer_size, then end char is written past
+     * the end of buffer
+     */
     rx_buffer[available_bytes] = '\0';
     command_string.assign(reinterpret_cast<char *>(rx_buffer));
 

@@ -14,6 +14,9 @@ thread_base::~thread_base() { stop(); }
 
 bool thread_base::start(std::string name)
 {
+    /**
+     * MMZ: A mutex is required to read/write synchronization variables
+     */
     bool init_ok = init();
     if (!init_ok) {
         should_stop = true;

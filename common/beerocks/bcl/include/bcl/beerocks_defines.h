@@ -36,6 +36,13 @@ namespace beerocks {
 
 namespace message {
 
+  /**
+   * MMZ: It is not clear from the name of the consts if there is room for the
+   * null termination char or not. The suffix SIZE should be used to mean that
+   * it is a buffer size, including termination char. The suffix LENGTH or
+   * MAX_LENGTH should be used for values that can be compared to the strlen()
+   * return value, that is, not including a termination char.
+   */
 enum eStructsConsts {
     VERSION_LENGTH                = 16,
     NODE_NAME_LENGTH              = 32,

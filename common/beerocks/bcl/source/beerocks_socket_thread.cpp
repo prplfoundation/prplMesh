@@ -53,6 +53,11 @@ bool socket_thread::init()
     if (unix_socket_path.empty()) {
         int port = server_port();
         if (port > 0) {
+          /**
+           * MMZ: This server will listen for connection requests in all
+           * available interfaces ¿was this done on purpose or shall we bind
+           * server socket to a particular interface?
+           */
             server_socket = std::make_unique<SocketServer>(port, server_max_connections);
             if (!server_socket) {
                 THREAD_LOG(ERROR) << "server_socket == nullptr";
@@ -153,6 +158,9 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
     size_t message_size             = uds_header->length + sizeof(message::sUdsHeader);
 
     // Try to read all message
+    // MMZ: Maybe not all bytes in message are ready to be read at this moment
+    // and that's not necessarily an error as those pending bytes would be
+    // eventually received if iterating.
     available_bytes =
         sd->readBytes(rx_buffer, sizeof(rx_buffer), true, message_size); // blocking read
 
@@ -312,6 +320,11 @@ bool socket_thread::work()
                     break;
                 }
 
+                /**
+                 * MMZ: contents of rx_buffer are undetermined when calling
+                 * custom_message_handler() and not used here after the function
+                 * returns. So rx_buffer should not be an argument of custom_message_handler
+                 */
                 if (custom_message_handler(sd, rx_buffer, sizeof(rx_buffer))) {
                     continue;
                 }

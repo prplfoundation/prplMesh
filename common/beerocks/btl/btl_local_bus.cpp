@@ -80,6 +80,16 @@ bool transport_socket_thread::bus_subscribe(const std::vector<ieee1905_1::eMessa
     LOG_IF(!poller, FATAL) << "Poller is not allocaed!";
     bus->Init();
     for_each(msg_types.begin(), msg_types.end(), [&](const ieee1905_1::eMessageType msg_type) {
+        /**
+         * MMZ
+         * What is the actual intention here? Subscribe to as many topics as
+         * possible or stop subscribing on first error?
+         * Bitwise AND never does short-circuit so subscribe_topic_to_bus is
+         * invoked on each iteration, no matter the result.
+         * A logical AND would do short-circuit and thus it would be more
+         * efficient if the intention is to stop on error:
+         * ret = ret && ...
+         */
         ret &= subscribe_topic_to_bus(bus, poller, msg_type);
     });
 

@@ -29,6 +29,16 @@ public:
         std::string netlog_port;
     };
 
+    /**
+     * MMZ: Master and slave configuration structures as well as methods to
+     * read configuration file and fill in such structures should not be defined
+     * in this class but in their respective applications.
+     * If we had to modify master or slave configuration or create a brand new
+     * application, then we would have to modify this class and recompile all
+     * the applications that use it.
+     * For the sake of cleanliness and reusability, this module should not know
+     * anything about the modules that depend on it.
+     */
     // config file parameters master / slave
     typedef struct { // master
         //[master]

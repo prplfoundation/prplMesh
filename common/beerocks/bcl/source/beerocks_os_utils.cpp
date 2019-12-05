@@ -97,6 +97,14 @@ void os_utils::kill_pid(std::string path, std::string file_name)
 
 bool os_utils::is_pid_running(std::string path, std::string file_name, int *pid_out)
 {
+  /**
+   * MMZ: a function called get_pid_file_name() should be created and used all
+   * over the project instead of using "pid/" so if path to file ever changes
+   * then nothing will break
+   */
+  /**
+   * MMZ: Using hard coded paths is considered bad practice in general
+   */
     std::string pid_file_name = path + "pid/" + file_name;
     std::string pid_str;
     std::string cmdline;
@@ -112,6 +120,9 @@ bool os_utils::is_pid_running(std::string path, std::string file_name, int *pid_
         //check pid program name
         {
             std::string proc_file_path = "/proc/" + pid_str + "/cmdline";
+            /**
+             * MMZ: use PATH_MAX
+             */
             char buffer[1024]          = {0};
             std::ifstream proc_file(proc_file_path);
             if (proc_file.is_open()) {
@@ -188,6 +199,13 @@ int os_utils::redirect_console_std(std::string log_file_name)
 
 void os_utils::close_file(int fd)
 {
+  /**
+   * MMZ: All non-zero integers cast to true so if descriptor were -1, then it
+   * would also try to be closed.
+   * Since we are not interested in return code from close() we could call it
+   * directly, without previously checking file descriptor's value (probably it
+   * is already being being checked inside the close() function).
+   */
     if (fd) {
         close(fd);
     }

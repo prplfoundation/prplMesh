@@ -31,8 +31,15 @@ typedef int socklen_t;
 
 int Socket::m_ref = 0;
 
+/**
+ * MMZ: The readTimeout type should be unsigned to disallow negative values with
+ * the method signature itself
+ */
 Socket::Socket(const std::string &uds_path, long readTimeout)
 {
+  /**
+   * MMZ: Windows code should be removed for better readability
+   */
 #ifdef IS_WINDOWS
     if (!uds_path.empty()) {
         m_error = std::string("unix socket not supported");
@@ -134,6 +141,9 @@ bool Socket::setReadTimeout(long msec)
 #else
     long sec  = 0;
     long usec = 0;
+    /**
+     * MMZ Should be != instead of ==
+     */
     if (msec == 0) {
         sec  = (msec / 1000);
         usec = (msec % 1000) * 1000;
@@ -182,6 +192,8 @@ ssize_t Socket::readBytes(uint8_t *buf, size_t buf_size, bool blocking, size_t b
             buf_len = buf_size;
     }
 
+    // MMZ: Comparison might be true if there were two or more messages ready to
+    // be read, one after the other. This case should not be considered an error
     if (buf_len > buf_size) {
         LOG(WARNING) << "message truncated, buffer too small!!! buf_size=" << buf_size
                      << " buf_len=" << buf_len;
