@@ -1,0 +1,9 @@
+CONFIG_PACKAGE_prplmesh=y
+# The default is to build all packages and modules,
+# and we don't want that.
+CONFIG_ALL_NONSHARED=n
+CONFIG_ALL_KMODS=n
+CONFIG_ALL=n
+# Do not remove package sources once built:
+CONFIG_AUTOREMOVE=n
+
