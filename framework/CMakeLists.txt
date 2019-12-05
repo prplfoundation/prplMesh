@@ -77,6 +77,12 @@ elseif (TARGET_PLATFORM STREQUAL "glinet-b1300")
     # Add library search path explicitly through options
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${PLATFORM_STAGING_DIR}/usr/lib")
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${PLATFORM_STAGING_DIR}/usr/lib")
+elseif (TARGET_PLATFORM STREQUAL "owrt")
+    set(BEEROCKS_TMP_PATH "${TARGET_TMP_PATH}")
+    # MAPF_ROOT is used in the framwork headers to access some .conf files
+    # that might be useful for developers under .../share/ folder, so set
+    # it basing on the path to share folder.
+    get_filename_component(MAPF_ROOT ${PKG_PRPL_SHARE_PATH} DIRECTORY)
 endif()
 
 

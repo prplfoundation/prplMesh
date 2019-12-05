@@ -45,6 +45,16 @@ elseif (TARGET_PLATFORM STREQUAL "glinet-b1300")
     # Add library search path explicitly through options
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${PLATFORM_STAGING_DIR}/usr/lib")
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${PLATFORM_STAGING_DIR}/usr/lib")
+elseif (TARGET_PLATFORM STREQUAL "owrt")
+    set(BEEROCKS_BRIDGE_IFACE "dummy_br-lan")
+    set(BEEROCKS_BH_WIRE_IFACE "dummy_eth")
+    set(BEEROCKS_WLAN1_IFACE "dummy_wlan0")
+    set(BEEROCKS_WLAN2_IFACE "dummy_wlan1")
+    set(BEEROCKS_PLATFORM_INIT "false")
+    set(BEEROCKS_TMP_PATH "${TARGET_TMP_PATH}")
+    # BEEROCKS_INSTALL_PATH is used in the prplmesh_utils.sh to build path to
+    # various binaries, so set it basing on the bin path passed to us.
+    get_filename_component(BEEROCKS_INSTALL_PATH ${PKG_PRPL_BIN_PATH} DIRECTORY)
 endif()
 
 list (FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)

@@ -10,7 +10,7 @@ set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON)
 set(CMAKE_CROSS_COMPILING ON)
 
 # Platform specific
-set(TARGET_PLATFORM             "glinet-b1300" CACHE STRING "Target Platform")
+set(TARGET_PLATFORM             "owrt" CACHE STRING "Target Platform")
 set(PLATFORM_BASE_DIR           $ENV{TOPDIR} CACHE STRING "Platform Base Directory")
 set(PLATFORM_TOOLCHAIN_PREFIX   $ENV{TARGET_CROSS} CACHE STRING "Platform Toolchain Prefix")
 
@@ -19,6 +19,14 @@ set(PLATFORM_STAGING_DIR        $ENV{STAGING_DIR} CACHE STRING "Platform Staging
 set(PLATFORM_TOOLCHAIN_DIR      $ENV{TOOLCHAIN_DIR} CACHE STRING "Platform Toolchain Directory")
 set(PLATFORM_INCLUDE_DIR        ${PLATFORM_STAGING_DIR}/usr/include CACHE STRING "Platform Include Directory")
 set(ENV{PKG_CONFIG_PATH}        "${PLATFORM_STAGING_DIR}/usr/lib/pkgconfig")
+
+set(PKG_PRPL_BIN_PATH           $ENV{PKG_PRPL_BIN_PATH} CACHE STRING "Package Install Bins")
+set(PKG_PRPL_LIB_PATH           $ENV{PKG_PRPL_LIB_PATH} CACHE STRING "Package Install Libs")
+set(PKG_PRPL_CFG_PATH           $ENV{PKG_PRPL_CFG_PATH} CACHE STRING "Package Install Config")
+set(PKG_PRPL_SHARE_PATH         $ENV{PKG_PRPL_SHARE_PATH} CACHE STRING "Package Install Database")
+
+set(TARGET_TMP_PATH             $ENV{TARGET_TMP_PATH}  CACHE STRING "Temporary Files Path on Target")
+set(TARGET_BWL_TYPE             $ENV{TARGET_BWL_TYPE}  CACHE STRING "Target BWL Type")
 
 # Compiler Definitions
 add_definitions(-DOPENWRT_BASED_PLATFORM)

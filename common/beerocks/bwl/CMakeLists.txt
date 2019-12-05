@@ -55,6 +55,15 @@ elseif(TARGET_PLATFORM STREQUAL "glinet-b1300")
     find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS "${HOSTAPD_SEARCH_PATHS}" NO_CMAKE_FIND_ROOT_PATH)
     set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
 
+elseif(TARGET_PLATFORM STREQUAL "owrt")
+
+    set(BWL_TYPE "${TARGET_BWL_TYPE}")
+
+    # hostapd directory
+    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd-full*/hostapd-*")
+    find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS "${HOSTAPD_SEARCH_PATHS}" NO_CMAKE_FIND_ROOT_PATH)
+    set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
+
 endif()
 
 set(BWL_TYPE ${BWL_TYPE} CACHE STRING "Which BWL backend to use")

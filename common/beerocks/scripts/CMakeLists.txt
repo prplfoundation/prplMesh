@@ -16,6 +16,11 @@ elseif (TARGET_PLATFORM STREQUAL "glinet-b1300")
     set(PLATFORM_DB_PATH_TEMP "/tmp/beerocks")
     set(PS_CMD "ps")
     set(AWK_CMD "awk '{print $1}'")
+elseif (TARGET_PLATFORM STREQUAL "owrt")
+    set(PLATFORM_DB_PATH "${PKG_PRPL_SHARE_PATH}")
+    set(PLATFORM_DB_PATH_TEMP "${TARGET_TMP_PATH}")
+    set(PS_CMD "ps")
+    set(AWK_CMD "awk '{print $1}'")
 endif()
 
 # Configure the prplMesh helper script
