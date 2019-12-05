@@ -19,6 +19,16 @@
 ////////////////////////// Local Module Definitions //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+ * MMZ:
+ * It is not necessary to dynamically load this library during execution since
+ * it is available during compile/link phase.
+ *
+ * Dynamic load is suitable/required for plug-in libraries but I think it adds an
+ * unnecessary overhead in this case. Moreover, code readability and
+ * maintainability are more difficult.
+ */
+
 // The file name of the BPL shared library
 #ifndef BPL_MODULE_NAME
 #define BPL_MODULE_NAME "libbpl.so"

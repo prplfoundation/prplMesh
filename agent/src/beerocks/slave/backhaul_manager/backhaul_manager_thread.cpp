@@ -66,6 +66,10 @@ const char *main_thread::s_arrStates[] = {FOREACH_STATE(GENERATE_STRING)};
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+ * MMZ: Eclipse complains about uninitialized member variables.
+ * Should use CppCheck or some other static analysis tool to check code.
+ */
 main_thread::main_thread(const config_file::sConfigSlave &config,
                          const std::set<std::string> &slave_ap_ifaces_,
                          const std::set<std::string> &slave_sta_ifaces_)
@@ -585,6 +589,14 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
             auto ifaces = network_utils::linux_get_iface_list_from_bridge(m_sConfig.bridge_iface);
 
             // If a wired (WAN) interface was provided, try it first, check if the interface is UP
+            /**
+             * MMZ
+             * When the wired connection uses G.hn, link quality has to be
+             * considered to decide if such wired connection must be used or not
+             * instead of the wireless one.
+             * Moreover, such link quality may vary over time so it should be
+             * regularly checked to select the best backhaul link available.
+             */
             if ((!m_sConfig.wire_iface.empty()) &&
                 (wan_mon.initialize(m_sConfig.wire_iface) == wan_monitor::ELinkState::eUp)) {
 
@@ -679,6 +691,9 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
         }
         break;
     }
+    /**
+     * MMZ this is a transient state and thus could be removed
+     */
     case EState::CONNECT_TO_MASTER: {
         FSM_MOVE_STATE(CONNECTED);
         break;
@@ -696,6 +711,10 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
         LOG(DEBUG) << "Sent notifications, goto OPERATIONAL state";
 
         eth_link_poll_timer = std::chrono::steady_clock::now();
+        /**
+         * MMZ  m_sConfig.wire_iface could be empty or m_sConfig.wired_backhaul could
+         * be false. iface status should not be checked in either case.
+         */
         m_eth_link_up       = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
         FSM_MOVE_STATE(OPERATIONAL);
         break;
@@ -707,11 +726,27 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
             std::chrono::duration_cast<std::chrono::milliseconds>(now - eth_link_poll_timer)
                 .count();
         //pooling eth link status every seconed to notice if there been a change.
+        /**
+         * MMZ
+         * When the wired connection uses G.hn, link quality has to be
+         * considered to decide if such wired connection must be used or not
+         * instead of the wireless one.
+         * Moreover, such link quality may vary over time so it should be
+         * regularly checked to select the best backhaul link available.
+         */
         if (time_elapsed_ms > POLL_TIMER_TIMEOUT_MS) {
 
             eth_link_poll_timer = now;
+            /**
+             * MMZ  m_sConfig.wire_iface could be empty or m_sConfig.wired_backhaul could
+             * be false. iface status should not be checked in either case.
+             */
             bool eth_link_up = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
             if (eth_link_up != m_eth_link_up) {
+              /**
+               * MMZ  there is no need to compute m_sConfig.wire_iface status back again
+               * as the result is already in eth_link_up variable
+               */
                 m_eth_link_up = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
                 FSM_MOVE_STATE(RESTART);
             }
@@ -1686,6 +1721,10 @@ bool main_thread::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessage
         return true;
     }
 
+    /**
+     * MMZ maybe supported service TLV should be checked prior to assigning
+     * controller_bridge_mac variable
+     */
     controller_bridge_mac = src_mac;
     LOG(INFO) << "update controller_bridge_mac=" << controller_bridge_mac;
 
@@ -1703,6 +1742,9 @@ bool main_thread::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessage
                                    << soc->hostap_iface;
                         LOG(DEBUG) << FSM_CURR_STATE_STR;
                         soc->controller_discovered = true;
+                        /**
+                         * MMZ there is no need to assign variable again
+                         */
                         controller_bridge_mac      = src_mac;
                         // the backhaul was operational on slave registration.
                         // This means that it was restarted and sending backhaul connected event
@@ -1714,6 +1756,9 @@ bool main_thread::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessage
                 }
             }
         } else if (tlvSupportedFreqBand->value() == ieee1905_1::tlvSupportedFreqBand::BAND_5G) {
+          /**
+           * MMZ this code is duplicated except for the frequency value
+           */
             LOG(DEBUG) << "received auto-config reply for 5GHz band";
             for (auto soc : slaves_sockets) {
                 if (soc->freq_type == beerocks::eFreqType::FREQ_5G) {
@@ -1723,6 +1768,9 @@ bool main_thread::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessage
                                    << soc->hostap_iface;
                         LOG(DEBUG) << FSM_CURR_STATE_STR;
                         soc->controller_discovered = true;
+                        /**
+                         * MMZ there is no need to assign variable again
+                         */
                         controller_bridge_mac      = src_mac;
                         // the backhaul was operational on slave registration.
                         // This means that it was restarted and sending backhaul connected event
