@@ -74,11 +74,24 @@ public:
         return Subscribe(topic);
     }
     int Subscribe(const std::initializer_list<std::string> &topics);
+    /**
+     * MMZ
+     * Parameters that are not modified inside the method should be passed as
+     * const reference
+     */
     template <class T> int Subscribe(std::initializer_list<std::string> topics)
     {
         mapf_assert(topics.size() > 0);
         for (const auto &topic : topics)
+          /**
+           * MMZ
+           * Method return value is ignored
+           */
             Subscribe<T>(topic);
+        /**
+         * MMZ
+         * Method should return a value
+         */
     }
 
     int Unsubscribe(const std::string &topic);
@@ -86,12 +99,25 @@ public:
     {
         return Unsubscribe(topic);
     }
+    /**
+     * MMZ
+     * Parameters that are not modified inside the method should be passed as
+     * const reference
+     */
     int Unsubscribe(std::initializer_list<std::string> topics);
     template <class T> int Unsubscribe(std::initializer_list<std::string> topics)
     {
         mapf_assert(topics.size() > 0);
+        /**
+         * MMZ
+         * Method returns on first iteration
+         */
         for (const auto &topic : topics)
             return Unsubscribe<T>(topic);
+        /**
+         * MMZ
+         * Method should return a value
+         */
     }
 
     /** Receive APIs - prefer unique_ptr versions (uses factory) */

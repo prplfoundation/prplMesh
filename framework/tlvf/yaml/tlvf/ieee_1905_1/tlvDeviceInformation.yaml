@@ -21,5 +21,8 @@ sInfo:
   _type: struct
   mac: sMacAddr
   media_type: eMediaType
+# MMZ Media-specific information
+# 1 octet: Number of octets in ensuing field
+# n octets: Media-specific information of the local interface (as defined in the "Media-specific information" column of Table 6-12.
   media_info_length: uint8_t
   media_info: eMediaType

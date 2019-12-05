@@ -52,6 +52,10 @@ bool CmduMessageRx::parse(uint8_t *buff, size_t buff_len, bool swap_needed, bool
     if (!parse_tlvs)
         return true;
 
+    /**
+     * MMZ
+     * Why using a list of parsers? It seems like just one parser should suffice
+     */
     for (auto parser : parsers_) {
         if (parser->parse())
             return true;

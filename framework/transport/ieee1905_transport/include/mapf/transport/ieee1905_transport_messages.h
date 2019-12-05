@@ -151,6 +151,10 @@ public:
         return build_topic(kTopicPrefix, ETH_P_1905_1, msg_type);
     }
 
+    /**
+     * MMZ: LLDP packets are not IEEE 1905.1 CMDUs (maybe base class should be
+     * renamed to avoid confusion)
+     */
     static const std::string lldp_topic() { return build_topic(kTopicPrefix, ETH_P_LLDP, 0x0000); }
 };
 

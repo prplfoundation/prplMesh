@@ -10,6 +10,9 @@
 
 namespace mapf {
 
+  /**
+   * MMZ: This code is duplicated in ieee1905_transport
+   */
 bool DiscAgent::get_interface_mac_addr(unsigned int if_index, uint8_t *addr)
 {
     int sockfd;
@@ -305,6 +308,11 @@ int DiscAgent::HandleLldpDiscovery(CmduRxMessage *rxmsg)
     int return_value                             = 0;
     struct lldp_discovery_format *lldp_discovery = (struct lldp_discovery_format *)rxmsg->data();
 
+    /**
+     * MMZ
+     * Received message integrity/validity is not checked before accessing its contents.
+     * (so we might be reading garbage)
+     */
     return_value =
         UpdateNeighborEntry(rxmsg->metadata()->if_index, NULL, lldp_discovery->port_id.id,
                             NEIGHBOR_1905, 2); // oper is update
@@ -376,6 +384,12 @@ int DiscAgent::SendDiscoveryMessage(struct interface_list_item interfacelistitem
     topology_discovery_message.metadata()->if_type  = CmduXxMessage::IF_TYPE_NET;
     topology_discovery_message.metadata()->if_index = interfacelistitem.instance.index;
 
+    /**
+     * MMZ:
+     * TLVF should be used to avoid errors and duplicated code as well as to facilitate maintenance.
+     * Endianness?
+     * If this code is not being used then it should be removed as dead code.
+     */
     topology_discovery_message.metadata()->length =
         sizeof(ieee1905_header) + sizeof(topology_discovery) + 3; // end of message tlv : 3
 

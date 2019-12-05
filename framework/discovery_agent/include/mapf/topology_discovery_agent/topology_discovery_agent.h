@@ -159,6 +159,9 @@ public:
         } bss_list[MAX_BSS];
     };
 
+    /**
+     * MMZ This structure is defined several times in the project
+     */
     struct Ieee1905CmduHeader {
         uint8_t messageVersion;
         uint8_t reservedField0;
@@ -195,6 +198,11 @@ public:
             rc = bus_.subscriber().Subscribe(da_topics[i]);
             mapf_assert(rc == 0);
         }
+        /**
+         * MMZ
+         * rc variable is being overwritten on each assignment so only the last
+         * subscription result will be asserted
+         */
         rc = bus_.subscriber().Subscribe<InterfaceConfigurationIndicationMessage>();
         rc = bus_.subscriber().Subscribe<CmduRxMessage>(
             CmduRxMessage::ieee1905_topic(TOPOLOGY_QUERY_MESSAGE));
