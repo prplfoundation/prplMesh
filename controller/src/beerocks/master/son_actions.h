@@ -49,7 +49,7 @@ public:
     static bool validate_beacon_measurement_report(beerocks_message::sBeaconResponse11k report,
                                                    std::string sta_mac, std::string bssid);
     static bool has_matching_operating_class(wfa_map::tlvApRadioBasicCapabilities &radio_basic_caps,
-                                             const db::bss_info_conf_t &bss_info_conf);
+                                             const wireless_utils::sBssInfoConf &bss_info_conf);
     static bool send_cmdu_to_agent(const std::string &dest_mac, ieee1905_1::CmduMessageTx &cmdu_tx,
                                    db &database, const std::string &radio_mac = std::string());
 

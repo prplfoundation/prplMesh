@@ -12,7 +12,12 @@
 #include "../beerocks_defines.h"
 #include "../beerocks_message_structs.h"
 
+#include <tlvf/WSC/eWscAuth.h>
+#include <tlvf/WSC/eWscEncr.h>
+#include <tlvf/WSC/eWscVendorExt.h>
+
 #include <iostream>
+#include <list>
 #include <set>
 #include <string>
 #include <vector>
@@ -78,6 +83,15 @@ public:
         int ant_gain;
         int conducted_power;
     } sPhyApParams;
+
+    typedef struct {
+        std::list<uint8_t> operating_class;
+        std::string ssid;
+        WSC::eWscAuth authentication_type;
+        WSC::eWscEncr encryption_type;
+        std::string network_key;
+        WSC::eWscVendorExtSubelementBssType bss_type;
+    } sBssInfoConf;
 
     typedef struct {
         uint16_t phy_rate_100kb;
