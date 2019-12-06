@@ -131,6 +131,9 @@ public:
                                                                beerocks::eWiFiBandwidth bw,
                                                                uint16_t vht_center_frequency);
     static std::set<uint8_t> operating_class_to_channel_set(uint8_t operating_class);
+    static std::string wsc_to_bwl_authentication(WSC::eWscAuth authtype);
+    static std::string wsc_to_bwl_encryption(WSC::eWscEncr enctype);
+    static beerocks::eBssType wsc_to_bwl_bss_type(WSC::eWscVendorExtSubelementBssType bss_type);
 
 private:
     enum eAntennaFactor {

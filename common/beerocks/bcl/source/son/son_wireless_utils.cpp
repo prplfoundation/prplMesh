@@ -578,3 +578,54 @@ std::set<uint8_t> wireless_utils::operating_class_to_channel_set(uint8_t operati
     }
     return it->second;
 }
+
+std::string wireless_utils::wsc_to_bwl_authentication(WSC::eWscAuth authtype)
+{
+    switch (authtype) {
+    case WSC::eWscAuth::WSC_AUTH_OPEN:
+        return "NONE";
+    case WSC::eWscAuth::WSC_AUTH_WPAPSK:
+        return "WPA-PSK";
+    case WSC::eWscAuth::WSC_AUTH_SHARED:
+        return "SHARED";
+    case WSC::eWscAuth::WSC_AUTH_WPA:
+        return "WPA";
+    case WSC::eWscAuth::WSC_AUTH_WPA2:
+        return "WPA2";
+    case WSC::eWscAuth::WSC_AUTH_WPA2PSK:
+        return "WPA2-PSK";
+    default:
+        return "INVALID";
+    }
+}
+
+std::string wireless_utils::wsc_to_bwl_encryption(WSC::eWscEncr enctype)
+{
+    switch (enctype) {
+    case WSC::eWscEncr::WSC_ENCR_NONE:
+        return "NONE";
+    case WSC::eWscEncr::WSC_ENCR_WEP:
+        return "WEP";
+    case WSC::eWscEncr::WSC_ENCR_TKIP:
+        return "TKIP";
+    case WSC::eWscEncr::WSC_ENCR_AES:
+        return "AES";
+    default:
+        return "INVALID";
+    }
+}
+
+beerocks::eBssType wireless_utils::wsc_to_bwl_bss_type(WSC::eWscVendorExtSubelementBssType bss_type)
+{
+    if ((bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS) &&
+        (bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS)) {
+        return beerocks::BSS_TYPE_BACK_FRONTHAUL;
+    } else if (bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS)
+        return beerocks::BSS_TYPE_BACKHAUL;
+    else if (bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS)
+        return beerocks::BSS_TYPE_FRONTHAUL;
+    else if (bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN)
+        return beerocks::BSS_TYPE_TEARDOWN;
+
+    return beerocks::BSS_TYPE_INVALID;
+}
