@@ -439,7 +439,7 @@ bool son_actions::validate_beacon_measurement_report(beerocks_message::sBeaconRe
  */
 bool son_actions::has_matching_operating_class(
     wfa_map::tlvApRadioBasicCapabilities &radio_basic_caps,
-    const db::bss_info_conf_t &bss_info_conf)
+    const wireless_utils::sBssInfoConf &bss_info_conf)
 {
     for (uint8_t i = 0; i < radio_basic_caps.operating_classes_info_list_length(); i++) {
         auto operating_class_info = std::get<1>(radio_basic_caps.operating_classes_info_list(i));

@@ -638,7 +638,7 @@ bool master_thread::autoconfig_wsc_authentication(std::shared_ptr<ieee1905_1::tl
  * @return false on failure
  */
 bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> tlvWscM1,
-                                          const db::bss_info_conf_t *bss_info_conf)
+                                          const wireless_utils::sBssInfoConf *bss_info_conf)
 {
     if (!tlvWscM1) {
         LOG(ERROR) << "Invalid M1";

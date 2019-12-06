@@ -34,7 +34,8 @@ private:
                                std::string &err_string) override;
 
     static std::string parse_bss_info(const std::string &bss_info_str,
-                                      db::bss_info_conf_t &bss_info_conf, std::string &err_string);
+                                      son::wireless_utils::sBssInfoConf &bss_info_conf,
+                                      std::string &err_string);
 
     db &m_database;
 };

@@ -14,10 +14,8 @@
 #include <bcl/beerocks_defines.h>
 #include <bcl/beerocks_logging.h>
 #include <bcl/network/network_utils.h>
+#include <bcl/son/son_wireless_utils.h>
 
-#include <tlvf/WSC/eWscAuth.h>
-#include <tlvf/WSC/eWscEncr.h>
-#include <tlvf/WSC/eWscVendorExt.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 
 #include <mutex>
@@ -526,16 +524,9 @@ public:
                     certification_tx_buffer.get());
     };
 
-    struct bss_info_conf_t {
-        std::list<uint8_t> operating_class;
-        std::string ssid;
-        WSC::eWscAuth authentication_type;
-        WSC::eWscEncr encryption_type;
-        std::string network_key;
-        WSC::eWscVendorExtSubelementBssType bss_type;
-    };
-    void add_bss_info_configuration(const sMacAddr &al_mac, const bss_info_conf_t &bss_info);
-    std::list<db::bss_info_conf_t> &get_bss_info_configuration(const sMacAddr &al_mac);
+    void add_bss_info_configuration(const sMacAddr &al_mac,
+                                    const wireless_utils::sBssInfoConf &bss_info);
+    std::list<wireless_utils::sBssInfoConf> &get_bss_info_configuration(const sMacAddr &al_mac);
     void clear_bss_info_configuration();
     void clear_bss_info_configuration(const sMacAddr &al_mac);
 
@@ -754,7 +745,7 @@ private:
 
     // certification
     std::shared_ptr<uint8_t> certification_tx_buffer;
-    std::unordered_map<sMacAddr, std::list<bss_info_conf_t>> bss_infos; // key=al_mac
+    std::unordered_map<sMacAddr, std::list<wireless_utils::sBssInfoConf>> bss_infos; // key=al_mac
 
     master_thread *m_master_thread_ctx;
     const std::string m_local_bridge_mac;

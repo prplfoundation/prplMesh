@@ -99,7 +99,7 @@ bool controller_ucc_listener::handle_dev_set_config(
             break;
         }
 
-        db::bss_info_conf_t bss_info_conf;
+        son::wireless_utils::sBssInfoConf bss_info_conf;
         auto al_mac = parse_bss_info(params[key], bss_info_conf, err_string);
         if (al_mac.empty()) {
             err_string += (" on " + key);
@@ -129,9 +129,10 @@ bool controller_ucc_listener::handle_dev_set_config(
  * @param[out] err_string Contains an error description if the function fails.
  * @return al_mac on success, empty string if not.
  */
-std::string controller_ucc_listener::parse_bss_info(const std::string &bss_info_str,
-                                                    db::bss_info_conf_t &bss_info_conf,
-                                                    std::string &err_string)
+std::string
+controller_ucc_listener::parse_bss_info(const std::string &bss_info_str,
+                                        son::wireless_utils::sBssInfoConf &bss_info_conf,
+                                        std::string &err_string)
 {
     auto confs = string_utils::str_split(bss_info_str, ' ');
 
