@@ -1,3 +1,6 @@
+///////////////////////////////////////
+// AUTO GENERATED FILE - DO NOT EDIT //
+///////////////////////////////////////
 /* SPDX-License-Identifier: BSD-2-Clause-Patent
  *
  * Copyright (c) 2016-2019 Intel Corporation

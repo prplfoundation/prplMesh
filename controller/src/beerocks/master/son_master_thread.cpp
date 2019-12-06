@@ -201,15 +201,15 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
         switch (beerocks_header->action()) {
         case beerocks_message::ACTION_CLI: {
-            son_management::handle_cli_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx, cmdu_tx, database,
+            son_management::handle_cli_message(sd, beerocks_header, cmdu_rx, cmdu_tx, database,
                                                tasks);
         } break;
         case beerocks_message::ACTION_BML: {
-            son_management::handle_bml_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx, cmdu_tx, database,
+            son_management::handle_bml_message(sd, beerocks_header, cmdu_rx, cmdu_tx, database,
                                                tasks);
         } break;
         case beerocks_message::ACTION_CONTROL: {
-            handle_cmdu_control_message(sd, beerocks_header->m_header, beerocks_header->m_cmdu_rx);
+            handle_cmdu_control_message(sd, beerocks_header);
         } break;
         default: {
             LOG(ERROR) << "Unknown message, action: " << int(beerocks_header->action());
@@ -1592,7 +1592,7 @@ bool master_thread::handle_cmdu_1905_topology_notification(Socket *sd,
 
     std::shared_ptr<wfa_map::tlvClientAssociationEvent> client_association_event_tlv = nullptr;
     std::shared_ptr<beerocks_message::tlvVsClientAssociationEvent> vs_tlv            = nullptr;
-
+    std::shared_ptr<message_com::beerocks_header> beerocks_header                    = nullptr;
     int tlvType;
     while ((tlvType = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
         switch (tlvType) {
@@ -1606,8 +1606,8 @@ bool master_thread::handle_cmdu_1905_topology_notification(Socket *sd,
             break;
         case int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC):
             LOG(DEBUG) << "Found TLV_VENDOR_SPECIFIC TLV";
-
-            if (!message_com::parse_intel_vs_message(cmdu_rx)) {
+            beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
+            if (!beerocks_header) {
                 LOG(DEBUG) << "Failed to parse intel vs message (not Intel?)";
                 continue;
             }
@@ -2393,14 +2393,14 @@ bool master_thread::handle_non_intel_slave_join(
 }
 
 bool master_thread::handle_cmdu_control_message(
-    Socket *sd, std::shared_ptr<message_com::beerocks_header> beerocks_header)
+    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
 {
-    auto& cmdu_rx = beerocks_header->m_cmdu_rx;
+    //auto& cmdu_rx = beerocks_header->m_cmdu_rx;
     std::string hostap_mac = network_utils::mac_to_string(beerocks_header->m_header->radio_mac());
 
     // Sanity tests
     if (hostap_mac.empty()) {
-        LOG(ERROR) << "CMDU received with id=" << int(beerocks_header->m_header->id())
+        LOG(ERROR) << "CMDU received with id=" << int(beerocks_header->id())
                    << " op=" << int(beerocks_header->action_op()) << " with empty mac!";
         return false;
     }
@@ -2728,7 +2728,7 @@ bool master_thread::handle_cmdu_control_message(
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION: {
-        auto notification = cmdu_rx.addClass<
+        auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR)
@@ -2739,8 +2739,8 @@ bool master_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
         auto notification =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE>();
+            beerocks_header
+            ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE failed";
             return false;
@@ -2797,8 +2797,8 @@ bool master_thread::handle_cmdu_control_message(
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION: {
-        auto notification = cmdu_rx.addClass<
-            beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION>();
+        auto notification = beerocks_header
+        ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION failed";
             return false;
@@ -3033,7 +3033,7 @@ bool master_thread::handle_cmdu_control_message(
         break;
     }
     case beerocks_message::ACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION: {
-        auto notification = cmdu_rx.addClass<
+        auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION failed";
@@ -3053,7 +3053,7 @@ bool master_thread::handle_cmdu_control_message(
         break;
     }
     case beerocks_message::ACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION: {
-        auto notification = cmdu_rx.addClass<
+        auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR)
@@ -3197,7 +3197,7 @@ bool master_thread::handle_cmdu_control_message(
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE: {
-        auto response = cmdu_rx.addClass<
+        auto response = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE>();
         if (response == nullptr) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE failed";
@@ -3233,7 +3233,7 @@ bool master_thread::handle_cmdu_control_message(
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE: {
-        auto response = cmdu_rx.addClass<
+        auto response = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE>();
         if (response == nullptr) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE failed";
@@ -3432,8 +3432,8 @@ bool master_thread::handle_cmdu_control_message(
 
     // If this is a response message to a task (header->id() == task id), send it to it directly - cmdu_rx is owned by the task
     // e.g. only the task may call addClass
-    if (beerocks_header->m_header->id()) {
-        tasks.response_received(beerocks_header->m_header->id(), hostap_mac,
+    if (beerocks_header->id()) {
+        tasks.response_received(beerocks_header->id(), hostap_mac,
                                 (beerocks_message::eActionOp_CONTROL)beerocks_header->action_op(),
                                 beerocks_header);
         return true;

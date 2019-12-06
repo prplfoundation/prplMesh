@@ -14,12 +14,14 @@
 #include "tasks/optimal_path_task.h"
 #include "tasks/task_pool.h"
 
-#include <beerocks/bcl/beerocks_defines.h>
-#include <beerocks/bcl/beerocks_logging.h>
-#include <beerocks/bcl/beerocks_message_structs.h>
-#include <beerocks/bcl/beerocks_socket_thread.h>
-#include <beerocks/bcl/network/network_utils.h>
+
+#include <bcl/beerocks_defines.h>
+#include <bcl/beerocks_logging.h>
+#include <bcl/beerocks_message_structs.h>
+#include <bcl/beerocks_socket_thread.h>
+#include <bcl/network/network_utils.h>
 #include <beerocks/tlvf/beerocks_message.h>
+// #include <tlvf/beerocks_message.h>
 
 #include <mapf/common/encryption.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
@@ -52,7 +54,7 @@ private:
     bool handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool
     handle_cmdu_control_message(Socket *sd,
-                                std::shared_ptr<message_com::beerocks_header> beerocks_header);
+                                std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header);
     void handle_cmdu_control_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_intel_slave_join(Socket *sd,
                                  std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,

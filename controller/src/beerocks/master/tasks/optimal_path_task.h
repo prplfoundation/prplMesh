@@ -14,9 +14,9 @@
 #include "task_pool.h"
 
 #define MEAS_MAX_DELAY_ALLOWED 10
+using namespace beerocks;
 
 namespace son {
-
 class optimal_path_task : public task {
 public:
     optimal_path_task(db &database_, ieee1905_1::CmduMessageTx &cmdu_tx_, task_pool &tasks_,
@@ -34,7 +34,7 @@ protected:
     virtual void work() override;
     virtual void handle_response(std::string slave_mac,
                                  beerocks_message::eActionOp_CONTROL action_op,
-                                 std::shared_ptr<message_com::beerocks_header> beerocks_header) override;
+                                 std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header) override;
     virtual void handle_responses_timeout(
         std::unordered_multimap<std::string, beerocks_message::eActionOp_CONTROL> timed_out_macs)
         override;

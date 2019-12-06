@@ -374,7 +374,7 @@ bool bml_rdkb_internal::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     return (ret == BML_RET_OK);
 }
 
-int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
+int bml_rdkb_internal::process_cmdu_header(beerocks::message_com::beerocks_header beerocks_header,
                                            ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto action    = beerocks_header->action();
@@ -435,7 +435,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
             }
         } break;
         case beerocks_message::ACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE: {
-            auto response = cmdu_rx.addClass<
+            auto response = beerocks_header->addClass<
                 beerocks_message::cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE>();
             if (!response) {
                 LOG(ERROR)

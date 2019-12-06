@@ -30,7 +30,7 @@ using namespace net;
 using namespace son;
 
 void son_management::handle_cli_message(Socket *sd,
-                                        std::shared_ptr<beerocks_message::cACTION_HEADER> header,
+                                        std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
                                         ieee1905_1::CmduMessageRx &cmdu_rx,
                                         ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
                                         task_pool &tasks)
@@ -40,7 +40,7 @@ void son_management::handle_cli_message(Socket *sd,
 
     //LOG(DEBUG) << "NEW CLI action=" << int(header->action()) << " action_op=" << int(header->action_op());
 
-    switch (header->action_op()) {
+    switch (beerocks_header->action_op()) {
 
     case beerocks_message::ACTION_CLI_PING_SLAVE_REQUEST: {
         LOG(DEBUG) << "PING_SLAVE_REQUEST from CLI";
@@ -896,7 +896,7 @@ void son_management::handle_cli_message(Socket *sd,
         break;
     }
     default: {
-        LOG(ERROR) << "Unsupported CLI action_op:" << int(header->action_op());
+        LOG(ERROR) << "Unsupported CLI action_op:" << int(beerocks_header->action_op());
         isOK = false;
         break;
     }
@@ -918,7 +918,7 @@ void son_management::handle_cli_message(Socket *sd,
 }
 
 void son_management::handle_bml_message(
-    Socket *sd, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
     task_pool &tasks)
 {

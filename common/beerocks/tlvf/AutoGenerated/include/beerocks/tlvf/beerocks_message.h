@@ -12,10 +12,12 @@
 #ifndef _TLVF_BEEROCKS_MESSAGE_H_
 #define _TLVF_BEEROCKS_MESSAGE_H_
 
+
 #include <beerocks/tlvf/beerocks_message_header.h>
 #include <tlvf/CmduMessageRx.h>
 #include <tlvf/CmduMessageTx.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
+#include <tlvf/TlvList.h>
 
 #include <bcl/beerocks_message_structs.h>
 #include <bcl/network/socket.h>
@@ -55,13 +57,30 @@ public:
      * should this be removed and replaced by parse_intel_vs_message() ?
      */
 
-    static std::shared_ptr<beerocks_message::cACTION_HEADER>
-    parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx);
+    class beerocks_header {
+    public:
+        beerocks_header(ieee1905_1::TlvList contents,
+                        std::shared_ptr<beerocks_message::cACTION_HEADER> header)
+            : m_header(header),m_contents(contents)
+        {}
+        beerocks_message::eAction action() { return m_header->action(); }
+        uint8_t action_op() { return m_header->action_op(); };
+        uint16_t id(){return m_header->id();}
+        template <class T> std::shared_ptr<T> addClass()
+        {
+            return m_contents.addClass<T>();
+        }
+        template <class T> std::shared_ptr<T> get_vs_class()
+        {
+            return m_contents.getClass<T>(2);
+        }
+        std::shared_ptr<beerocks_message::cACTION_HEADER> m_header;
+    private:
+        ieee1905_1::TlvList &m_contents;
+    };
 
-    template <class T> static std::shared_ptr<T> get_vs_class(ieee1905_1::CmduMessage &cmdu)
-    {
-        return std::dynamic_pointer_cast<T>(cmdu.getClass(2));
-    }
+    static std::shared_ptr<beerocks_header>
+    parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx);
 
     static std::shared_ptr<beerocks_message::cACTION_HEADER>
     get_vs_class_header(ieee1905_1::CmduMessage &cmdu)
@@ -73,17 +92,27 @@ public:
     static std::shared_ptr<T> add_intel_vs_data(ieee1905_1::CmduMessageTx &cmdu_tx,
                 std::shared_ptr<ieee1905_1::tlvVendorSpecific> vs_tlv, uint16_t id = 0)
     {
+        // TODO cmdu_tx parameter is no longer needed and should be removed
         beerocks_message::eAction action;
         std::shared_ptr<T> p_class = nullptr;
+        // TODO This fixed payload length only works for fixed-size payload.
+        // Most of the beerocks messages are fixed size, but we need to find a solution for
+        // the others. Perhaps in finalize, like it was done before.
+        size_t payload_length = beerocks_message::cACTION_HEADER::get_initial_size() +
+                T::get_initial_size();
+        bool alloc_success = vs_tlv->alloc_payload(payload_length);
+        if( alloc_success){
+        // TODO check success
 
-        auto actionhdr = cmdu_tx.addClass<beerocks_message::cACTION_HEADER>();
+        }
+        ieee1905_1::TlvList actions(vs_tlv->getStartBuffPtr(), payload_length);
+        auto actionhdr = actions.addClass<beerocks_message::cACTION_HEADER>();
         if (!actionhdr) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
             return nullptr;
         }
-        vs_tlv->length() += beerocks_message::cACTION_HEADER::get_initial_size();
 
-        p_class = cmdu_tx.addClass<T>();
+        p_class = actions.addClass<T>();
         if (!p_class) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
             return nullptr;

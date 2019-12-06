@@ -243,7 +243,7 @@ void association_handling_task::work()
 
 void association_handling_task::handle_response(std::string mac,
                                                 beerocks_message::eActionOp_CONTROL action_op,
-                                                std::shared_ptr<message_com::beerocks_header> beerocks_header)
+                                                std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
 {
     switch (action_op) {
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
