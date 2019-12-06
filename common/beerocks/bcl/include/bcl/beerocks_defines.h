@@ -435,6 +435,14 @@ enum eRadioStatus : uint8_t {
 
 enum eApActiveMode : uint8_t { AP_IDLE_MODE = 0, AP_ACTIVE_MODE, AP_INVALID_MODE };
 
+enum eBssType {
+    BSS_TYPE_TEARDOWN = 0,
+    BSS_TYPE_BACKHAUL,
+    BSS_TYPE_FRONTHAUL,
+    BSS_TYPE_BACK_FRONTHAUL,
+    BSS_TYPE_INVALID
+};
+
 } // namespace beerocks
 
 #endif //_BEEROCKS_DEFINES_H_
