@@ -38,7 +38,7 @@ bool BaseClass::isInitialized() { return m_init_succeeded; }
  */
 bool BaseClass::buffPtrIncrementSafe(size_t length)
 {
-    if (getBuffRemainingBytes() <= length) {
+    if (getBuffRemainingBytes() < length) {
         return false;
     }
     m_buff_ptr__ += length;
