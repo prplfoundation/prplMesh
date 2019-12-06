@@ -13,12 +13,8 @@
 
 using namespace ieee1905_1;
 
-TlvList::TlvList() {}
-TlvList::TlvList(uint8_t *buff, size_t buff_len)
-    {
-        m_buff=buff;
-        m_buff_len=buff_len;
-    }
+TlvList::TlvList(uint8_t *buff, size_t buff_len, bool parse, bool swap)
+    : m_buff(buff), m_buff_len(buff_len), m_parse(parse), m_swap(swap) {}
 
 TlvList::~TlvList() {}
 
@@ -61,6 +57,9 @@ void TlvList::swap()
     if (!m_buff)
         return;
 
+    if (!m_swap)
+        return;
+
     // call all tlv finalize functions
     for (auto const &c : m_class_vector) {
         c->class_swap();
@@ -73,7 +72,6 @@ void TlvList::reset()
 {
     m_finalized = false;
     m_swapped   = false;
-    m_swap      = false;
     for (auto &c : m_class_vector) {
         c.reset();
     }

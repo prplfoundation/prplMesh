@@ -61,9 +61,9 @@ void task_pool::pending_task_ended(int task_id)
     }
 }
 
-void task_pool::response_received(int id, std::string mac,
-                                  beerocks_message::eActionOp_CONTROL action_op,
-                                  std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
+void task_pool::response_received(
+    int id, std::string mac, beerocks_message::eActionOp_CONTROL action_op,
+    std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
 {
     std::unordered_map<int, std::shared_ptr<task>>::const_iterator got = scheduled_tasks.find(id);
     if (got != scheduled_tasks.end()) {

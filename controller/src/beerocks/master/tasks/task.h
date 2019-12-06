@@ -57,9 +57,9 @@ protected:
     virtual void handle_pending_task_timeout(int task_id) {}
     virtual void handle_task_end() {}
     virtual void handle_event(int event_type, void *obj) {}
-    virtual void handle_response(std::string slave_mac,
-                                 beerocks_message::eActionOp_CONTROL action_op,
-                                 std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
+    virtual void
+    handle_response(std::string slave_mac, beerocks_message::eActionOp_CONTROL action_op,
+                    std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
     {
     }
     virtual void handle_responses_timeout(

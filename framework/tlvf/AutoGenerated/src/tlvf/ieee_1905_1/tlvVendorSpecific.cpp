@@ -29,8 +29,8 @@ const eTlvType& tlvVendorSpecific::type() {
     return (const eTlvType&)(*m_type);
 }
 
-uint16_t& tlvVendorSpecific::length() {
-    return (uint16_t&)(*m_length);
+const uint16_t& tlvVendorSpecific::length() {
+    return (const uint16_t&)(*m_length);
 }
 
 sVendorOUI& tlvVendorSpecific::vendor_oui() {
@@ -68,6 +68,7 @@ bool tlvVendorSpecific::alloc_payload(size_t count) {
     }
     m_payload_idx__ += count;
     if (!buffPtrIncrementSafe(len)) { return false; }
+    if(m_length){ (*m_length) += len; }
     return true;
 }
 
@@ -96,13 +97,27 @@ bool tlvVendorSpecific::init()
     if (!m_parse__) *m_type = eTlvType::TLV_VENDOR_SPECIFIC;
     if (!buffPtrIncrementSafe(sizeof(eTlvType))) { return false; }
     m_length = (uint16_t*)m_buff_ptr__;
-    if (!m_parse__) *m_length = 0x3;
+    if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
     m_vendor_oui = (sVendorOUI*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sVendorOUI))) { return false; }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sVendorOUI); }
     if (!m_parse__) { m_vendor_oui->struct_init(); }
     m_payload = (uint8_t*)m_buff_ptr__;
+    if (m_length && m_parse__) {
+        size_t len = *m_length;
+        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
+        len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
+        m_payload_idx__ = len/sizeof(uint8_t);
+        if (!buffPtrIncrementSafe(len)) { return false; }
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) {
+        if (*m_type != eTlvType::TLV_VENDOR_SPECIFIC) {
+            TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_VENDOR_SPECIFIC) << ", received value: " << int(*m_type);
+            return false;
+        }
+    }
     return true;
 }
 

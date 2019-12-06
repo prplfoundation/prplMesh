@@ -22,14 +22,14 @@ class CmduParser;
 class CmduMessageRx : public CmduMessage {
 
 public:
-    CmduMessageRx();
-    CmduMessageRx(CmduMessageRx &original);
+    CmduMessageRx() = delete;
+    CmduMessageRx(uint8_t *buff, size_t buff_len, bool swap = true);
     ~CmduMessageRx();
-    bool parse(uint8_t *buff, size_t buff_len, bool swap_needed = true, bool parse_tlvs = false);
+    bool parse(bool swap_needed = true, bool parse_tlvs = false);
     CmduMessageRx &operator=(const CmduMessageRx &) = delete;
 
 private:
-    std::list<std::shared_ptr<CmduParser>> parsers_;
+    std::shared_ptr<CmduParser> parser;
 };
 
 }; // close namespace: ieee1905_1

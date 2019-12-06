@@ -24,8 +24,9 @@ task::task(std::string task_name_, std::string node_mac)
     TASK_LOG(DEBUG) << "start new task: " << task_name << ", id=" << id;
 }
 
-void task::response_received(std::string mac,beerocks_message::eActionOp_CONTROL action_op,
-                             std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
+void task::response_received(
+    std::string mac, beerocks_message::eActionOp_CONTROL action_op,
+    std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
 {
     // removing the responding mac with specific action_op from pending_macs
     auto range = pending_macs.equal_range(mac);

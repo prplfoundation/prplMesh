@@ -22,8 +22,8 @@ namespace ieee1905_1 {
 class TlvList {
 
 public:
-    TlvList();
-    TlvList(uint8_t *buff, size_t buff_len);
+    TlvList() = delete;
+    TlvList(uint8_t *buff, size_t buff_len, bool parse, bool swap);
 
     ~TlvList();
 
@@ -33,7 +33,7 @@ public:
         std::shared_ptr<T> ptr;
         if (m_buff) {
             if (m_class_vector.size() == 0) {
-                ptr = std::make_shared<T>(m_buff, m_parse, m_swap);
+                ptr = std::make_shared<T>(m_buff, m_buff_len, m_parse, m_swap);
             } else {
                 ptr = std::make_shared<T>(m_class_vector.back(), m_parse, m_swap);
             }
@@ -126,13 +126,14 @@ public:
 
 protected:
 
-    size_t m_buff_len            = 0;
+    uint8_t * const m_buff;
+    size_t m_buff_len;
+    bool m_parse;
+    bool m_swap;
+
     bool m_finalized             = false;
     bool m_swapped               = false;
-    bool m_parse                 = false;
-    bool m_swap                  = false;
     bool m_dynamically_allocated = false;
-    uint8_t *m_buff              = nullptr;
     std::vector<std::shared_ptr<BaseClass>> m_class_vector;
 };
 

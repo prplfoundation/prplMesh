@@ -1352,7 +1352,8 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
     // Handle messages
     switch (beerocks_header->action_op()) {
     case beerocks_message::ACTION_BACKHAUL_REGISTER_REQUEST: {
-        auto request = beerocks_header->addClass<beerocks_message::cACTION_BACKHAUL_REGISTER_REQUEST>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BACKHAUL_REGISTER_REQUEST>();
         if (!request) {
             LOG(ERROR) << "addClass cACTION_BACKHAUL_REGISTER_REQUEST failed";
             return false;

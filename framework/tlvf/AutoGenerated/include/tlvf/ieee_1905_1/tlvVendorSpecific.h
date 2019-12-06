@@ -39,7 +39,7 @@ class tlvVendorSpecific : public BaseClass
         };
         
         const eTlvType& type();
-        uint16_t& length();
+        const uint16_t& length();
         sVendorOUI& vendor_oui();
         size_t payload_length() { return m_payload_idx__ * sizeof(uint8_t); }
         uint8_t* payload(size_t idx = 0);

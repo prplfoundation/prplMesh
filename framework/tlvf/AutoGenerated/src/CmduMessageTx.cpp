@@ -16,23 +16,15 @@
 
 using namespace ieee1905_1;
 
-CmduMessageTx::CmduMessageTx(uint8_t *buff, size_t buff_len) : CmduMessage()
-{
-    m_buff     = buff;
-    m_buff_len = buff_len;
-}
+CmduMessageTx::CmduMessageTx(uint8_t *buff, size_t buff_len, bool swap) : CmduMessage(buff, buff_len, swap, false) {}
 
 CmduMessageTx::~CmduMessageTx() {}
 
 std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType message_type)
 {
-    LOG(DEBUG)<<"CmduMessageTx::create";
-    if (!m_buff || !m_buff_len)
-        return nullptr;
-
-    memset(m_buff, 0, getMessageBuffLength());
+    memset(m_buff, 0, m_buff_len);
     reset();
-    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, getMessageBuffLength());
+    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, kCmduHeaderLength);
     if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
         return nullptr;
     }
@@ -45,12 +37,8 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType mes
 std::shared_ptr<cCmduHeader> CmduMessageTx::load()
 {
     LOG(DEBUG)<<"CmduMessageTx::load";
-    if (!m_buff || !m_buff_len)
-        return nullptr;
-
-    
     reset();
-    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, getMessageBuffLength());
+    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, kCmduHeaderLength);
     if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
         return nullptr;
     }
@@ -60,9 +48,6 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::load()
 
 std::shared_ptr<tlvVendorSpecific> CmduMessageTx::add_vs_tlv(tlvVendorSpecific::eVendorOUI voui)
 {
-    if (!m_buff || !m_buff_len)
-        return nullptr;
-
     if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
         return nullptr;
     }

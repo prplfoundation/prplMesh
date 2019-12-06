@@ -10,9 +10,9 @@
 #define _NETWORK_HEALTH_CHECK_TASK_H_
 
 #include "../db/db.h"
+#include "beerocks/tlvf/beerocks_message.h"
 #include "task.h"
 #include "task_pool.h"
-#include "beerocks/tlvf/beerocks_message.h"
 
 // #include <bcl/network/network_utils.h>
 
@@ -26,9 +26,9 @@ public:
 
 protected:
     virtual void work() override;
-    virtual void handle_response(std::string slave_mac,
-                                 beerocks_message::eActionOp_CONTROL action_op,
-                                 std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header) override;
+    virtual void handle_response(
+        std::string slave_mac, beerocks_message::eActionOp_CONTROL action_op,
+        std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header) override;
     virtual void handle_responses_timeout(
         std::unordered_multimap<std::string, beerocks_message::eActionOp_CONTROL> timed_out_macs)
         override;

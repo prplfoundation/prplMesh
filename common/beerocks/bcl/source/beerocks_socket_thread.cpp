@@ -27,9 +27,10 @@ typedef struct sTlvHeader {
 #define TX_BUFFER_UDS_SIZE (sizeof(tx_buffer) - sizeof(beerocks::message::sUdsHeader))
 
 socket_thread::socket_thread(const std::string &unix_socket_path_)
-    : thread_base(), cmdu_tx(TX_BUFFER_UDS, TX_BUFFER_UDS_SIZE),
-      unix_socket_path(unix_socket_path_), server_socket(nullptr),
-      server_max_connections(DEFAULT_MAX_SOCKET_CONNECTIONS)
+    : thread_base(), cmdu_tx(TX_BUFFER_UDS, TX_BUFFER_UDS_SIZE, false), //TODO override in BTL so swap=true!
+      unix_socket_path(unix_socket_path_), cmdu_rx(rx_buffer + sizeof(message::sUdsHeader),
+                                                   sizeof(rx_buffer) - sizeof(message::sUdsHeader), false), //TODO same
+      server_socket(nullptr), server_max_connections(DEFAULT_MAX_SOCKET_CONNECTIONS)
 {
     memset(TX_BUFFER_UDS, 0, TX_BUFFER_UDS_SIZE);
     set_select_timeout(500);
@@ -167,8 +168,7 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
         return false;
     }
 
-    if (!cmdu_rx.parse(rx_buffer + sizeof(message::sUdsHeader), uds_header->length,
-                       uds_header->swap_needed)) {
+    if (!cmdu_rx.parse(uds_header->swap_needed)) {
         THREAD_LOG(ERROR) << "parsing cmdu failure, rx_buffer" << std::hex << rx_buffer << std::dec
                           << ", uds_header->length=" << int(uds_header->length)
                           << ", uds_header->swap_needed=" << int(uds_header->swap_needed);
@@ -208,8 +208,7 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
             if (tlv_vendor_specific.vendor_oui() ==
                 ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL) {
                 // assuming that the magic is the first data on the beerocks header
-                auto beerocks_magic = *(
-                    uint32_t *)(tlv_vendor_specific.payload());
+                auto beerocks_magic = *(uint32_t *)(tlv_vendor_specific.payload());
                 if (uds_header->swap_needed) {
                     swap_32(beerocks_magic);
                 }

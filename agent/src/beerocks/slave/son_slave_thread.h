@@ -16,8 +16,8 @@
 #include <bcl/beerocks_logging.h>
 #include <bcl/beerocks_socket_thread.h>
 
-#include <beerocks/tlvf/beerocks_message_header.h>
 #include <beerocks/tlvf/beerocks_message.h>
+#include <beerocks/tlvf/beerocks_message_header.h>
 
 #include <mapf/common/encryption.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
@@ -117,9 +117,8 @@ protected:
     virtual std::string print_cmdu_types(const beerocks::message::sUdsHeader *cmdu_header) override;
 
 private:
-    bool
-    handle_cmdu_control_message(Socket *sd,
-        std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+    bool handle_cmdu_control_message(
+        Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
         ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_backhaul_manager_message(
         Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
@@ -130,10 +129,9 @@ private:
     bool handle_cmdu_ap_manager_message(
         Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
         ieee1905_1::CmduMessageRx &cmdu_rx);
-    bool
-    handle_cmdu_monitor_message(Socket *sd,
-                                std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
-                                ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_monitor_message(
+        Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+        ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_control_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 
     void process_keep_alive();

@@ -241,9 +241,9 @@ void association_handling_task::work()
     }
 }
 
-void association_handling_task::handle_response(std::string mac,
-                                                beerocks_message::eActionOp_CONTROL action_op,
-                                                std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
+void association_handling_task::handle_response(
+    std::string mac, beerocks_message::eActionOp_CONTROL action_op,
+    std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
 {
     switch (action_op) {
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
@@ -252,7 +252,8 @@ void association_handling_task::handle_response(std::string mac,
     case beerocks_message::ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE: {
         const std::string parent_mac = database.get_node_parent(sta_mac);
         auto response =
-            beerocks_header->get_vs_class<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>();
+            beerocks_header
+                ->get_vs_class<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>();
         if (!response) {
             TASK_LOG(ERROR) << "getClass failed for cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE";
             return;

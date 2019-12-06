@@ -23,7 +23,8 @@ namespace ieee1905_1 {
 class CmduMessage {
 
 public:
-    CmduMessage();
+    CmduMessage() = delete;
+    CmduMessage(uint8_t *buff, size_t buff_len, bool parse, bool swap);
     ~CmduMessage();
 
 public:
@@ -94,11 +95,13 @@ public:
 protected:
     void reset();
 
-    uint8_t *m_buff              = nullptr;
-    size_t m_buff_len          = 0;
+    uint8_t * const m_buff;
+    size_t m_buff_len;
+    bool m_swap;
+
     std::shared_ptr<cCmduHeader> m_cmdu_header;
-    static const uint16_t kCmduHeaderLength = 8;
-    static const uint16_t kTlvHeaderLength  = 3;
+    static const uint16_t kCmduHeaderLength;
+    static const uint16_t kTlvHeaderLength;
 };
 
 }; // close namespace: ieee1905_1

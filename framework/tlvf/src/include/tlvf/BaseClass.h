@@ -38,7 +38,17 @@ protected:
     const bool m_parse__;
     const bool m_swap__;
     bool m_init_succeeded = false;
-    static const size_t kMinimumLength = 3; // tlv header length
+    // This  is generated  for every class, even non TLV classes,
+    // and is used in every init() function to check if there is
+    // "enough" room in the buffer - this is wrong.
+    // Need to check this in the init() function only for TLV classes.
+    // For other classes, need to use a different minimum length.
+    // For example, for CmduHeader, the minimum length should be 8.
+    // For non TLV classes - it should be 0, since it can be a message without
+    // any parameter.
+    // So - we need to remove this from the base class and move it to tlvf.py
+    // which will generate the correct check.
+    static const size_t kMinimumLength = 3;
 };
 
 #endif //_BaseClass_H_

@@ -719,7 +719,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST: {
         LOG(TRACE) << "ACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST";
         auto request =
-            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST failed";
             return false;
@@ -780,7 +781,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL: {
         LOG(TRACE) << "ACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL";
         auto request =
-            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass ACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL failed";
             return false;
@@ -793,7 +795,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_PLATFORM_ARP_QUERY_REQUEST: {
         LOG(TRACE) << "ACTION_PLATFORM_ARP_QUERY_REQUEST";
 
-        auto request = beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ARP_QUERY_REQUEST>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ARP_QUERY_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_ARP_QUERY_REQUEST failed";
             return false;
@@ -886,7 +889,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     } break;
     case beerocks_message::ACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION: {
         auto notification =
-            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION failed";
             return false;
@@ -1039,7 +1043,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST: {
         // Request message
         auto request =
-            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST failed";
             break;
@@ -1124,7 +1129,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_PLATFORM_ONBOARD_SET_REQUEST: {
         LOG(TRACE) << "ACTION_PLATFORM_ONBOARD_SET_REQUEST";
         // Request message
-        auto request = beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ONBOARD_SET_REQUEST>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ONBOARD_SET_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_ONBOARD_SET_REQUEST failed";
             break;
@@ -1206,7 +1212,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     } break;
 
     case beerocks_message::ACTION_PLATFORM_ERROR_NOTIFICATION: {
-        auto error = beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ERROR_NOTIFICATION>();
+        auto error =
+            beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ERROR_NOTIFICATION>();
         if (error == nullptr) {
             LOG(ERROR) << "addClass failed";
             break;

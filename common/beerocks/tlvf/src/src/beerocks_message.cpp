@@ -67,20 +67,22 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
     if (!intel_oui(tlv_header))
         return nullptr;
     
-    ieee1905_1::TlvList vs_contents(tlv_header->payload(), tlv_header->getLen());//TODO: this probably causes the errors with buffer size
-    auto header = vs_contents.addClass<beerocks_message::cACTION_HEADER>();
+    std::unique_ptr<ieee1905_1::TlvList> vs_contents =
+        std::make_unique<ieee1905_1::TlvList>(tlv_header->payload(), tlv_header->getLen(), true, cmdu_rx.swap_needed());
+    if (!vs_contents)
+        return nullptr;
+    auto header = vs_contents->addClass<beerocks_message::cACTION_HEADER>();
     if (!header)
         return nullptr;
-    return std::make_shared<beerocks_header>(vs_contents, header);
+    return std::make_shared<beerocks_header>(std::move(vs_contents), header);
 }
 
 std::string message_com::print_cmdu_types(const message::sUdsHeader *uds_header,
                                           sCmduInfo *cmdu_info)
 {
-    ieee1905_1::CmduMessageRx cmdu_rx;
+    ieee1905_1::CmduMessageRx cmdu_rx((uint8_t *)uds_header + sizeof(message::sUdsHeader), uds_header->length);
 
-    auto cmdu_header = cmdu_rx.parse((uint8_t *)uds_header + sizeof(message::sUdsHeader),
-                                     uds_header->length, uds_header->swap_needed);
+    auto cmdu_header = cmdu_rx.parse(uds_header->swap_needed);
 
     if (!cmdu_header) {
         LOG(ERROR) << "cmdu parse failed!";
@@ -110,7 +112,7 @@ std::string message_com::print_cmdu_types(ieee1905_1::CmduMessageRx &cmdu_rx, sC
             LOG(ERROR) << "addClass<tlvVendorSpecific> failed!";
             return info;
         }
-        ieee1905_1::TlvList actions(tlv_header->payload(), tlv_header->payload_length());
+        ieee1905_1::TlvList actions(tlv_header->payload(), tlv_header->payload_length(), true, true);
         auto beerocks_header = actions.addClass<beerocks_message::cACTION_HEADER>();
         if (!beerocks_header) {
             LOG(ERROR) << "addClass<cACTION_HEADER> failed!";
