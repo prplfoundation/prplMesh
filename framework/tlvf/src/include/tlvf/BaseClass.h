@@ -38,7 +38,6 @@ protected:
     const bool m_parse__;
     const bool m_swap__;
     bool m_init_succeeded = false;
-    static const size_t kMinimumLength = 3; // tlv header length
 };
 
 #endif //_BaseClass_H_
