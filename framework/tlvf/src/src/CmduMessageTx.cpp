@@ -77,6 +77,13 @@ bool CmduMessageTx::finalize(bool swap_needed)
 
     if (!m_cmdu_header)
         return false; 
+    
+    for (auto &it: tlvs.getClassVector()){
+        if(!(it->isPostInitSucceeded())){
+            TLVF_LOG(ERROR) << "TLV post init failed";
+            return false;
+        }
+    }
 
     if (!tlvs.addClass<tlvEndOfMessage>())
         return false;

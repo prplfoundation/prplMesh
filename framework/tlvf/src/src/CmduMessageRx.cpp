@@ -31,6 +31,8 @@ bool CmduMessageRx::parse(bool swap_needed, bool parse_tlvs)
         m_cmdu_header = nullptr;
         return false;
     }
+
+    tlvs.set_swap_value(swap_needed);
     
     if (!parse_tlvs)
         return true;

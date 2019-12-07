@@ -122,6 +122,7 @@ public:
     bool swap_needed() {return m_swap; }
     bool is_finalized() const { return m_finalized; };
     bool is_swapped() const { return m_swapped; };
+    void set_swap_value(bool swap_needed) {m_swap = swap_needed;}
     void reset();
 
 protected:
