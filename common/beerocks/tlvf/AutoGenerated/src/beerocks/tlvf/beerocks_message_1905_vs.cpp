@@ -75,7 +75,7 @@ size_t tlvVsClientAssociationEvent::get_initial_size()
 
 bool tlvVsClientAssociationEvent::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -128,7 +128,7 @@ size_t tlvVsClientAssociationControlRequest::get_initial_size()
 
 bool tlvVsClientAssociationControlRequest::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }

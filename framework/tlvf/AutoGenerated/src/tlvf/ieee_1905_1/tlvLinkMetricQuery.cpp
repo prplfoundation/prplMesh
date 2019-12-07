@@ -64,7 +64,7 @@ size_t tlvLinkMetricQuery::get_initial_size()
 
 bool tlvLinkMetricQuery::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }

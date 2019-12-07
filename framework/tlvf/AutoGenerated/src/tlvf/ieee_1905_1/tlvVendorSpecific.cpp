@@ -89,7 +89,7 @@ size_t tlvVendorSpecific::get_initial_size()
 
 bool tlvVendorSpecific::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
