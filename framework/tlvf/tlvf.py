@@ -355,7 +355,6 @@ class TlvF:
         self.MEMBER_LOCK_ORDER_COUNTER = "lock_order_counter"
         self.MEMBER_BUFF = "buff"
         self.MEMBER_BUFF_PTR = "buff_ptr"
-        self.MEMBER_CONST_MINIMUM_LENGTH = "kMinimumLength"
 
         self.src_path = os.path.abspath(src_path)
         self.yaml_root_path = os.path.abspath(yaml_path)
@@ -1506,7 +1505,7 @@ class TlvF:
 
         self.insertLineCpp(insert_name, insert_marker, "bool %s::init()" % (name))
         self.insertLineCpp(insert_name, insert_marker, "{")
-        self.insertLineCpp(insert_name, insert_marker, "%sif (getBuffRemainingBytes() < %s) {" % (self.getIndentation(1), self.MEMBER_CONST_MINIMUM_LENGTH))
+        self.insertLineCpp(insert_name, insert_marker, "%sif (getBuffRemainingBytes() < get_initial_size()) {" % (self.getIndentation(1)))
         self.insertLineCpp(insert_name, insert_marker, '%sTLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";' %  self.getIndentation(2) )
         self.insertLineCpp(insert_name, insert_marker, "%sreturn false;" % self.getIndentation(2))
         self.insertLineCpp(insert_name, insert_marker, "%s}" % self.getIndentation(1) )
