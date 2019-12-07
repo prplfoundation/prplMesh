@@ -72,7 +72,7 @@ size_t tlvPushButtonJoinNotification::get_initial_size()
 
 bool tlvPushButtonJoinNotification::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }

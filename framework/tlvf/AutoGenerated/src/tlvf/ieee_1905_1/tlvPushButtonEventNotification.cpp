@@ -96,7 +96,7 @@ size_t tlvPushButtonEventNotification::get_initial_size()
 
 bool tlvPushButtonEventNotification::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }

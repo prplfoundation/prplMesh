@@ -126,7 +126,7 @@ size_t tlvChannelPreference::get_initial_size()
 
 bool tlvChannelPreference::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -244,7 +244,7 @@ size_t cPreferenceOperatingClasses::get_initial_size()
 
 bool cPreferenceOperatingClasses::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }

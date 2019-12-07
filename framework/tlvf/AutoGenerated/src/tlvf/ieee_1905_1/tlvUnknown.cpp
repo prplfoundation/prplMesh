@@ -83,7 +83,7 @@ size_t tlvUnknown::get_initial_size()
 
 bool tlvUnknown::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
