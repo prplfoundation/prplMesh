@@ -126,7 +126,7 @@ size_t tlvRadioOperationRestriction::get_initial_size()
 
 bool tlvRadioOperationRestriction::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -244,7 +244,7 @@ size_t cRestrictedOperatingClasses::get_initial_size()
 
 bool cRestrictedOperatingClasses::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }

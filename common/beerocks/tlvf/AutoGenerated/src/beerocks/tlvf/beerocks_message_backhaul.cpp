@@ -113,7 +113,7 @@ size_t cACTION_BACKHAUL_REGISTER_REQUEST::get_initial_size()
 
 bool cACTION_BACKHAUL_REGISTER_REQUEST::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -162,7 +162,7 @@ size_t cACTION_BACKHAUL_REGISTER_RESPONSE::get_initial_size()
 
 bool cACTION_BACKHAUL_REGISTER_RESPONSE::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -194,7 +194,7 @@ size_t cACTION_BACKHAUL_BUSY_NOTIFICATION::get_initial_size()
 
 bool cACTION_BACKHAUL_BUSY_NOTIFICATION::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -435,7 +435,7 @@ size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
 
 bool cACTION_BACKHAUL_ENABLE::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -507,7 +507,7 @@ size_t cACTION_BACKHAUL_CONNECTED_NOTIFICATION::get_initial_size()
 
 bool cACTION_BACKHAUL_CONNECTED_NOTIFICATION::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -545,7 +545,7 @@ size_t cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION::get_initial_size()
 
 bool cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -593,7 +593,7 @@ size_t cACTION_BACKHAUL_ENABLE_APS_REQUEST::get_initial_size()
 
 bool cACTION_BACKHAUL_ENABLE_APS_REQUEST::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -635,7 +635,7 @@ size_t cACTION_BACKHAUL_ROAM_REQUEST::get_initial_size()
 
 bool cACTION_BACKHAUL_ROAM_REQUEST::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -673,7 +673,7 @@ size_t cACTION_BACKHAUL_ROAM_RESPONSE::get_initial_size()
 
 bool cACTION_BACKHAUL_ROAM_RESPONSE::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -705,7 +705,7 @@ size_t cACTION_BACKHAUL_RESET::get_initial_size()
 
 bool cACTION_BACKHAUL_RESET::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -741,7 +741,7 @@ size_t cACTION_BACKHAUL_4ADDR_CONNECTED::get_initial_size()
 
 bool cACTION_BACKHAUL_4ADDR_CONNECTED::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -780,7 +780,7 @@ size_t cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::get_initial_size()
 
 bool cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -819,7 +819,7 @@ size_t cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::get_initial_siz
 
 bool cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -857,7 +857,7 @@ size_t cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::get_initial_size()
 
 bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -896,7 +896,7 @@ size_t cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::get_initial_size()
 
 bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -935,7 +935,7 @@ size_t cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::get_initial_siz
 
 bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }

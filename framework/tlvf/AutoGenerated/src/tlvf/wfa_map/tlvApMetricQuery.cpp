@@ -96,7 +96,7 @@ size_t tlvApMetricQuery::get_initial_size()
 
 bool tlvApMetricQuery::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }

@@ -212,7 +212,7 @@ size_t cConfigData::get_initial_size()
 
 bool cConfigData::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -367,7 +367,7 @@ size_t cWscAttrEncryptedSettings::get_initial_size()
 
 bool cWscAttrEncryptedSettings::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
@@ -485,7 +485,7 @@ size_t cWscVendorExtWfa::get_initial_size()
 
 bool cWscVendorExtWfa::init()
 {
-    if (getBuffRemainingBytes() < kMinimumLength) {
+    if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
