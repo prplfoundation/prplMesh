@@ -20,7 +20,7 @@ class TlvList {
 
 public:
     TlvList() = delete;
-    TlvList(uint8_t *buff, size_t buff_len, bool parse, bool swap);
+    TlvList(uint8_t *buff, size_t buff_len, bool parse = false, bool swap = false);
 
     ~TlvList();
 
@@ -119,15 +119,16 @@ public:
     bool swap_needed() {return m_swap; }
     bool is_finalized() const { return m_finalized; };
     bool is_swapped() const { return m_swapped; };
-    void reset();
+    bool finalize(bool swap_needed);
+    void reset(bool parse, bool swap);
 
 protected:
 
     uint8_t * const m_buff;
     size_t m_buff_len;
-    bool m_parse;
-    bool m_swap;
-
+    
+    bool m_parse                 = false;
+    bool m_swap                  = false;
     bool m_finalized             = false;
     bool m_swapped               = false;
     bool m_dynamically_allocated = false;

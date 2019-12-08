@@ -17,15 +17,15 @@ namespace ieee1905_1 {
 class CmduMessageTx : public CmduMessage {
 
 public:
-    CmduMessageTx(uint8_t *buff, size_t buff_len, bool swap = true);
+    CmduMessageTx(uint8_t *buff, size_t buff_len);
     ~CmduMessageTx();
 
-public:
     std::shared_ptr<cCmduHeader> create(uint16_t id, eMessageType message_type);
     std::shared_ptr<cCmduHeader> load();
     std::shared_ptr<tlvVendorSpecific> add_vs_tlv(tlvVendorSpecific::eVendorOUI voui);
 
-    bool finalize(bool swap_needed);};
+    bool finalize(bool swap_needed);
+};
 
 }; // close namespace: ieee1905_1
 

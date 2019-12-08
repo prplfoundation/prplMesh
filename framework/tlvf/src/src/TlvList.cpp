@@ -7,6 +7,7 @@
  */
 
 #include <tlvf/TlvList.h>
+#include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
 
 using namespace ieee1905_1;
 
@@ -54,9 +55,6 @@ void TlvList::swap()
     if (!m_buff)
         return;
 
-    if (!m_swap)
-        return;
-
     // call all tlv finalize functions
     for (auto const &c : m_class_vector) {
         c->class_swap();
@@ -65,12 +63,29 @@ void TlvList::swap()
     m_swapped = !m_swapped;
 }
 
-void TlvList::reset()
+void TlvList::reset(bool parse, bool swap)
 {
+    m_parse = parse;
+    m_swap = swap;
     m_finalized = false;
     m_swapped   = false;
     for (auto &c : m_class_vector) {
         c.reset();
     }
     m_class_vector.clear();
+}
+
+bool TlvList::finalize(bool swap_needed)
+{
+    if (m_finalized)
+        return true;
+
+    if (!addClass<tlvEndOfMessage>())
+        return false;
+
+    if (swap_needed)
+        swap();
+
+    m_finalized = true;
+    return true;
 }

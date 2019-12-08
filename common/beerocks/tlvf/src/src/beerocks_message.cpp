@@ -172,7 +172,7 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
     }
 
     uds_header->length      = cmdu_tx.getMessageLength();
-    uds_header->swap_needed = swap;
+    uds_header->swap_needed = false; //swap;
 
     return send_data(sd, cmdu_tx.getMessageBuff() - sizeof(message::sUdsHeader),
                      uds_header->length + sizeof(message::sUdsHeader));

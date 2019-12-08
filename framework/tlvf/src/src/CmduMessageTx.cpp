@@ -13,14 +13,18 @@
 
 using namespace ieee1905_1;
 
-CmduMessageTx::CmduMessageTx(uint8_t *buff, size_t buff_len, bool swap) : CmduMessage(buff, buff_len, swap, false) {}
+CmduMessageTx::CmduMessageTx(uint8_t *buff, size_t buff_len) : CmduMessage(buff, buff_len) {}
 
 CmduMessageTx::~CmduMessageTx() {}
 
 std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType message_type)
 {
     memset(m_buff, 0, m_buff_len);
-    reset();
+    // we set swap = true so that each class will have swap = true,
+    // but since parse = false, no swap will be done till we explicitely
+    // call tlvs.swap() in Finalize(), and there, we do swapping based on
+    // the caller swap_needed parameter
+    tlvs.reset(false, false);
     auto cmduhdr = addClass<cCmduHeader>();
     if (!cmduhdr)
         return nullptr;
@@ -33,7 +37,7 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType mes
 std::shared_ptr<cCmduHeader> CmduMessageTx::load()
 {
     LOG(DEBUG)<<"CmduMessageTx::load";
-    reset();
+    tlvs.reset(true, false);
     return addClass<cCmduHeader>();
 }
 
@@ -54,15 +58,5 @@ std::shared_ptr<tlvVendorSpecific> CmduMessageTx::add_vs_tlv(tlvVendorSpecific::
 
 bool CmduMessageTx::finalize(bool swap_needed)
 {
-
-    if (!getCmduHeader())
-        return false; 
-
-    if (!addClass<tlvEndOfMessage>())
-        return false;
-
-    if (swap_needed)
-        swap();
-
-    return true;
+    return tlvs.finalize(swap_needed);
 }

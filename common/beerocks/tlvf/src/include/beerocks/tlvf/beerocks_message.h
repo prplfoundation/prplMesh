@@ -87,7 +87,7 @@ public:
     }
 
     template <class T>
-    static std::shared_ptr<T> add_intel_vs_data(std::shared_ptr<ieee1905_1::tlvVendorSpecific> vs_tlv, bool swap, uint16_t id = 0)
+    static std::shared_ptr<T> add_intel_vs_data(std::shared_ptr<ieee1905_1::tlvVendorSpecific> vs_tlv, uint16_t id = 0)
     {
         beerocks_message::eAction action;
         std::shared_ptr<T> p_class = nullptr;
@@ -101,7 +101,7 @@ public:
             return nullptr;
         }
     
-        ieee1905_1::TlvList actions(vs_tlv->payload(), payload_length, false, swap);
+        ieee1905_1::TlvList actions(vs_tlv->payload(), payload_length, false, false);
         auto actionhdr = actions.addClass<beerocks_message::cACTION_HEADER>();
         if (!actionhdr) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
@@ -142,7 +142,7 @@ public:
         actionhdr->action()    = (beerocks_message::eAction)action;
         actionhdr->action_op() = action_op;
         actionhdr->id()        = id;
-        actions.swap();
+        // actions.swap(); //Problem - we don't know here if we need to call swap or not.
 
         return p_class;
     }

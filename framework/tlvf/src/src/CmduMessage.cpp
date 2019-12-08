@@ -13,9 +13,9 @@ using namespace ieee1905_1;
 const uint16_t CmduMessage::kCmduHeaderLength = 8;
 const uint16_t CmduMessage::kTlvHeaderLength = 3;
 
-CmduMessage::CmduMessage(uint8_t *buff, size_t buff_len, bool swap, bool parse)
-    : tlvs(buff, buff_len, parse, swap),
-      m_buff(buff), m_buff_len(buff_len), m_swap(swap) {}
+CmduMessage::CmduMessage(uint8_t *buff, size_t buff_len)
+    : tlvs(buff, buff_len),
+      m_buff(buff), m_buff_len(buff_len) {}
 
 CmduMessage::~CmduMessage() {}
 
@@ -71,11 +71,6 @@ uint8_t *CmduMessage::getMessageBuff() const { return tlvs.getMessageBuff(); }
 void CmduMessage::swap()
 {
     tlvs.swap();
-}
-
-void CmduMessage::reset()
-{
-    tlvs.reset();
 }
 
 eMessageType CmduMessage::getMessageType()

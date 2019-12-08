@@ -27,9 +27,9 @@ typedef struct sTlvHeader {
 #define TX_BUFFER_UDS_SIZE (sizeof(tx_buffer) - sizeof(beerocks::message::sUdsHeader))
 
 socket_thread::socket_thread(const std::string &unix_socket_path_)
-    : thread_base(), cmdu_tx(TX_BUFFER_UDS, TX_BUFFER_UDS_SIZE, false), //TODO override in BTL so swap=true!
+    : thread_base(), cmdu_tx(TX_BUFFER_UDS, TX_BUFFER_UDS_SIZE),
       unix_socket_path(unix_socket_path_), cmdu_rx(rx_buffer + sizeof(message::sUdsHeader),
-                                                   sizeof(rx_buffer) - sizeof(message::sUdsHeader), false), //TODO same
+                                                   sizeof(rx_buffer) - sizeof(message::sUdsHeader)),
       server_socket(nullptr), server_max_connections(DEFAULT_MAX_SOCKET_CONNECTIONS)
 {
     memset(TX_BUFFER_UDS, 0, TX_BUFFER_UDS_SIZE);
@@ -163,10 +163,10 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
         return false;
     }
 
-    if (!verify_cmdu(uds_header)) {
-        THREAD_LOG(ERROR) << "unable to verify cmdu!";
-        return false;
-    }
+    // if (!verify_cmdu(uds_header)) {
+    //     THREAD_LOG(ERROR) << "unable to verify cmdu!";
+    //     return false;
+    // }
 
     if (!cmdu_rx.parse(uds_header->swap_needed)) {
         THREAD_LOG(ERROR) << "parsing cmdu failure, rx_buffer" << std::hex << rx_buffer << std::dec

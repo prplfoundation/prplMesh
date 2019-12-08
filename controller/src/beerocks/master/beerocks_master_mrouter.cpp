@@ -199,7 +199,7 @@ bool master_mrouter::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
 
     } else { //from uds to bus
-        // LOG(DEBUG) << "forwarding master->slave message, dst_mac=" << soc->slave_bridge_mac << ", src_mac=" << local_bridge_mac;
+        LOG(DEBUG) << "forwarding master->slave message, dst_mac=" << soc->slave_bridge_mac << ", src_mac=" << local_bridge_mac;
 
         if (!soc) {
             LOG(ERROR) << "soc=nullptr! Received message from unknown uds socket!";

@@ -23,7 +23,7 @@ class CmduMessageRx : public CmduMessage {
 
 public:
     CmduMessageRx() = delete;
-    CmduMessageRx(uint8_t *buff, size_t buff_len, bool swap = true);
+    CmduMessageRx(uint8_t *buff, size_t buff_len);
     ~CmduMessageRx();
     bool parse(bool swap_needed = true, bool parse_tlvs = false);
     CmduMessageRx &operator=(const CmduMessageRx &) = delete;
