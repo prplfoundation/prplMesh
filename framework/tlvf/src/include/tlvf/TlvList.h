@@ -9,7 +9,7 @@
 #ifndef _TlvList_H_
 #define _TlvList_H_
 
-#include "ieee_1905_1/eTlvType.h"
+#include <tlvf/ieee_1905_1/eTlvType.h>
 #include <memory>
 #include <vector>
 #include <tlvf/BaseClass.h>

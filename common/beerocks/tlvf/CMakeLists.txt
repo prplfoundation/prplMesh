@@ -38,16 +38,15 @@ add_custom_command(
     COMMENT "Generating the tlvf files."
 )
 
-add_library(${PROJECT_NAME} SHARED ${TLVF_OUTPUTS})
+file(GLOB TLVF_SOURCES ${TLVF_DIR}/src/src/*.c*)
+add_library(${PROJECT_NAME} SHARED ${TLVF_OUTPUTS} ${TLVF_SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
 target_include_directories(${PROJECT_NAME}
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${TLVF_OUT}/include
     PUBLIC
         $<TARGET_PROPERTY:tlvf,INTERFACE_INCLUDE_DIRECTORIES>
         $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
         $<BUILD_INTERFACE:${TLVF_OUT}/include>
+        $<BUILD_INTERFACE:${TLVF_DIR}/src/include>
         $<INSTALL_INTERFACE:include>
     )
 
@@ -59,4 +58,5 @@ install(TARGETS ${PROJECT_NAME} EXPORT btlvfConfig
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY ${TLVF_OUT}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY ${TLVF_DIR}/src/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT btlvfConfig NAMESPACE beerocks:: DESTINATION lib/cmake/beerocks/${PROJECT_NAME})

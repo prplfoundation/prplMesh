@@ -385,7 +385,7 @@ class TlvF:
             sys.exit(0)
 
         self.loadAllYamlFilesToDB()
-        self.copyIncludeSource()
+        #self.copyIncludeSource()
         self.generateCode()
 
         if self.print_outputs:
