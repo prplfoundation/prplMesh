@@ -48,7 +48,7 @@ Use standard CMake to build prplMesh, with a configure-build-install cycle.
 To build prplMesh natively in debug mode (for being able to debug with gdb), with all features and tests, and installed in a local directory, run
 
 ```bash
-cmake -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=../build/install -H . -B ../build -G Ninja
+cmake -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=../build/install -H. -B../build -G Ninja
 ninja -C ../build install
 ```
 
