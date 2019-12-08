@@ -14,19 +14,18 @@ const uint16_t CmduMessage::kCmduHeaderLength = 8;
 const uint16_t CmduMessage::kTlvHeaderLength = 3;
 
 CmduMessage::CmduMessage(uint8_t *buff, size_t buff_len, bool swap, bool parse)
-    : tlvs(buff + kCmduHeaderLength, buff_len - kCmduHeaderLength, parse, swap),
+    : tlvs(buff, buff_len, parse, swap),
       m_buff(buff), m_buff_len(buff_len), m_swap(swap) {}
 
 CmduMessage::~CmduMessage() {}
 
-std::shared_ptr<cCmduHeader> CmduMessage::getCmduHeader() const { return m_cmdu_header; }
+std::shared_ptr<cCmduHeader> CmduMessage::getCmduHeader() const { return tlvs.getClass<cCmduHeader>(); }
 
 int CmduMessage::getNextTlvType() const
 {
-    if (!m_cmdu_header)
+    if (!getCmduHeader())
         return -1;
-    uint8_t *tlv = (tlvs.getClassVector().size() == 0) ?
-        tlvs.getMessageBuff() : tlvs.getClassVector().back()->getBuffPtr();
+    uint8_t *tlv = tlvs.getClassVector().back()->getBuffPtr();
     return *tlv;
 }
 
@@ -41,55 +40,41 @@ bool CmduMessage::getNextTlvType(eTlvType &tlvType) const
 
 uint16_t CmduMessage::getNextTlvLength() const
 {
-    if (!m_cmdu_header)
+    if (!getCmduHeader())
         return -1;
-    uint8_t *tlv = (tlvs.getClassVector().size() == 0) ?
-        tlvs.getMessageBuff() : tlvs.getClassVector().back()->getBuffPtr();
-
+    uint8_t *tlv = tlvs.getClassVector().back()->getBuffPtr();
     return *(uint16_t *)(tlv + sizeof(uint8_t));
 }
 
 uint8_t *CmduMessage::getNextTlvData() const
 {
-    if (!m_cmdu_header)
+    if (!getCmduHeader())
         return nullptr;
 
-    uint8_t *tlv = (tlvs.getClassVector().size() == 0) ?
-        tlvs.getMessageBuff() : tlvs.getClassVector().back()->getBuffPtr();
+    uint8_t *tlv = tlvs.getClassVector().back()->getBuffPtr();
     return tlv + kTlvHeaderLength;
 }
 
 size_t CmduMessage::getMessageLength() const
 {
-    if (!m_cmdu_header)
-        return 0;
-    size_t msg_len = m_cmdu_header->getLen();
+    size_t msg_len = 0;
     for (auto const &c : tlvs.getClassVector()) {
         msg_len += c->getLen();
     }
     return msg_len;
 }
 
-size_t CmduMessage::getMessageBuffLength() const { return m_buff_len; }
+size_t CmduMessage::getMessageBuffLength() const { return tlvs.getMessageBuffLength(); }
 
-uint8_t *CmduMessage::getMessageBuff() const { return const_cast<uint8_t*>(m_buff); }
+uint8_t *CmduMessage::getMessageBuff() const { return tlvs.getMessageBuff(); }
 
 void CmduMessage::swap()
 {
-    if (!m_cmdu_header)
-        return;
-
-    // the header isn't part of the tlvs.getClassVector(), so we should swap it separately
-    m_cmdu_header->class_swap();
-
-    // call all tlv swap functions
     tlvs.swap();
 }
 
 void CmduMessage::reset()
 {
-    if (m_cmdu_header)
-        m_cmdu_header.reset();
     tlvs.reset();
 }
 

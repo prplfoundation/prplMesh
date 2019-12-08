@@ -21,40 +21,31 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType mes
 {
     memset(m_buff, 0, m_buff_len);
     reset();
-    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, kCmduHeaderLength);
-    if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
+    auto cmduhdr = addClass<cCmduHeader>();
+    if (!cmduhdr)
         return nullptr;
-    }
 
-    m_cmdu_header->message_type() = message_type;
-    m_cmdu_header->message_id()   = id;
-    return m_cmdu_header;
+    cmduhdr->message_type() = message_type;
+    cmduhdr->message_id()   = id;
+    return cmduhdr;
 }
 
 std::shared_ptr<cCmduHeader> CmduMessageTx::load()
 {
     LOG(DEBUG)<<"CmduMessageTx::load";
     reset();
-    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, kCmduHeaderLength);
-    if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
-        return nullptr;
-    }
-
-    return m_cmdu_header;
+    return addClass<cCmduHeader>();
 }
 
 std::shared_ptr<tlvVendorSpecific> CmduMessageTx::add_vs_tlv(tlvVendorSpecific::eVendorOUI voui)
 {
-    if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
+    if (!getCmduHeader())
         return nullptr;
-    }
 
     auto tlv = addClass<tlvVendorSpecific>();
-    if (!tlv) {
-        m_cmdu_header.reset();
-        m_cmdu_header = nullptr;
+    if (!tlv)
         return nullptr;
-    }
+
     //set vendor specific oui
     tlv->vendor_oui() = (uint32_t)voui;
 
@@ -64,7 +55,7 @@ std::shared_ptr<tlvVendorSpecific> CmduMessageTx::add_vs_tlv(tlvVendorSpecific::
 bool CmduMessageTx::finalize(bool swap_needed)
 {
 
-    if (!m_cmdu_header)
+    if (!getCmduHeader())
         return false; 
 
     if (!addClass<tlvEndOfMessage>())

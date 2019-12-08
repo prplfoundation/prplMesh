@@ -20,11 +20,9 @@ CmduMessageRx::~CmduMessageRx() {}
 bool CmduMessageRx::parse(bool swap_needed, bool parse_tlvs)
 {
     reset();
-    m_cmdu_header = std::make_shared<cCmduHeader>(m_buff, kCmduHeaderLength, true, swap_needed);
-    if (!m_cmdu_header || m_cmdu_header->isInitialized() == false) {
-        m_cmdu_header = nullptr;
+    auto cmduhdr = addClass<cCmduHeader>();
+    if (!cmduhdr)
         return false;
-    }
     
     if (!parse_tlvs)
         return true;

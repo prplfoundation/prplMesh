@@ -35,8 +35,6 @@ public:
         return tlvs.dynamicCast<T>(ptr);
     }
 
-    static uint16_t getCmduHeaderLength() { return kCmduHeaderLength; }
-
     /**
      * @brief Get the Class object at index idx in the all classes array
      * 
