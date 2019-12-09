@@ -253,7 +253,7 @@ void association_handling_task::handle_response(
         const std::string parent_mac = database.get_node_parent(sta_mac);
         auto response =
             beerocks_header
-                ->get_vs_class<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>();
+                ->getClass<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>();
         if (!response) {
             TASK_LOG(ERROR) << "getClass failed for cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE";
             return;

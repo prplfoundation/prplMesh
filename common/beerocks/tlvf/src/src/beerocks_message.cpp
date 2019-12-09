@@ -74,7 +74,7 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
     auto header = vs_contents->addClass<beerocks_message::cACTION_HEADER>();
     if (!header)
         return nullptr;
-    return std::make_shared<beerocks_header>(std::move(vs_contents), header);
+    return std::make_shared<beerocks_header>(std::move(vs_contents));
 }
 
 std::string message_com::print_cmdu_types(const message::sUdsHeader *uds_header,

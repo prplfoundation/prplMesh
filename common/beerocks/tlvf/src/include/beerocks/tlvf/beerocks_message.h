@@ -57,22 +57,24 @@ public:
 
     class beerocks_header {
     public:
-        beerocks_header(std::unique_ptr<ieee1905_1::TlvList> contents,
-                        std::shared_ptr<beerocks_message::cACTION_HEADER> header)
-            : m_header(header),m_contents(std::move(contents))
+        beerocks_header(std::unique_ptr<ieee1905_1::TlvList> contents)
+            : m_contents(std::move(contents))
         {}
-        beerocks_message::eAction action() { return m_header->action(); }
-        uint8_t action_op() { return m_header->action_op(); };
-        uint16_t id(){return m_header->id();}
+        beerocks_message::eAction action() { return actionhdr()->action(); }
+        uint8_t action_op() { return actionhdr()->action_op(); };
+        uint16_t id() { return actionhdr()->id(); }
         template <class T> std::shared_ptr<T> addClass()
         {
             return m_contents->addClass<T>();
         }
-        template <class T> std::shared_ptr<T> get_vs_class()
+        template <class T> std::shared_ptr<T> getClass()
         {
-            return m_contents->getClass<T>(2);
+            return m_contents->getClass<T>();
         }
-        std::shared_ptr<beerocks_message::cACTION_HEADER> m_header;
+        std::shared_ptr<beerocks_message::cACTION_HEADER> actionhdr()
+        {
+            return getClass<beerocks_message::cACTION_HEADER>();
+        }
     private:
         std::unique_ptr<ieee1905_1::TlvList> m_contents;
     };

@@ -514,7 +514,7 @@ int bml_internal::process_cmdu_header(
 {
 
     // BML messages
-    if (beerocks_header->m_header->action() == beerocks_message::ACTION_BML) {
+    if (beerocks_header->action() == beerocks_message::ACTION_BML) {
         //uint32_t num_of_nodes;
         // Process BML messages
         switch (beerocks_header->action_op()) {
@@ -537,7 +537,7 @@ int bml_internal::process_cmdu_header(
             char *firstNode       = (num_of_nodes > 0) ? response->buffer(0) : nullptr;
 
             // Process the message
-            handle_nw_map_query_update(num_of_nodes, (int)(beerocks_header->m_header->last()),
+            handle_nw_map_query_update(num_of_nodes, (int)(beerocks_header->actionhdr()->last()),
                                        firstNode, true);
 
         } break;
@@ -549,7 +549,7 @@ int bml_internal::process_cmdu_header(
 
             auto firstNode = response->buffer(0);
             // Process the message
-            handle_nw_map_query_update(num_of_nodes, (int)beerocks_header->m_header->last(),
+            handle_nw_map_query_update(num_of_nodes, (int)beerocks_header->actionhdr()->last(),
                                        firstNode, false);
         } break;
         // statistics update

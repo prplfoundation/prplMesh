@@ -117,7 +117,7 @@ void network_health_check_task::handle_response(
     switch (action_op) {
     case beerocks_message::ACTION_CONTROL_ARP_QUERY_RESPONSE: {
         auto response =
-            beerocks_header->get_vs_class<beerocks_message::cACTION_CONTROL_ARP_QUERY_RESPONSE>();
+            beerocks_header->getClass<beerocks_message::cACTION_CONTROL_ARP_QUERY_RESPONSE>();
 
         if (!response) {
             TASK_LOG(ERROR) << "getClass failed for cACTION_CONTROL_ARP_QUERY_RESPONSE";

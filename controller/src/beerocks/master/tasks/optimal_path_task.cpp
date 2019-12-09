@@ -1148,7 +1148,7 @@ void optimal_path_task::handle_response(
 
     switch (action_op) {
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION: {
-        auto notification = beerocks_header->get_vs_class<
+        auto notification = beerocks_header->getClass<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION>();
 
         if (!notification) {
@@ -1187,7 +1187,7 @@ void optimal_path_task::handle_response(
     case beerocks_message::ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE: {
         auto response =
             beerocks_header
-                ->get_vs_class<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>();
+                ->getClass<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>();
 
         if (!response) {
             TASK_LOG(ERROR) << "getClass failed for ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE";

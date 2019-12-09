@@ -473,11 +473,11 @@ bool slave_thread::handle_cmdu_control_message(
     // LOG(DEBUG) << "received radio_mac=" << network_utils::mac_to_string(beerocks_header->radio_mac()) << ", local radio_mac=" << network_utils::mac_to_string(hostap_params.iface_mac);
 
     // to me or not to me, this is the question...
-    if (beerocks_header->m_header->radio_mac() != hostap_params.iface_mac) {
+    if (beerocks_header->actionhdr()->radio_mac() != hostap_params.iface_mac) {
         return true;
     }
 
-    if (beerocks_header->m_header->direction() == beerocks::BEEROCKS_DIRECTION_CONTROLLER) {
+    if (beerocks_header->actionhdr()->direction() == beerocks::BEEROCKS_DIRECTION_CONTROLLER) {
         return true;
     }
 

@@ -2396,7 +2396,8 @@ bool master_thread::handle_cmdu_control_message(
     Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
 {
     //auto& cmdu_rx = beerocks_header->m_cmdu_rx;
-    std::string hostap_mac = network_utils::mac_to_string(beerocks_header->m_header->radio_mac());
+    std::string hostap_mac =
+        network_utils::mac_to_string(beerocks_header->actionhdr()->radio_mac());
 
     // Sanity tests
     if (hostap_mac.empty()) {
@@ -2405,7 +2406,7 @@ bool master_thread::handle_cmdu_control_message(
         return false;
     }
 
-    if (beerocks_header->m_header->direction() == beerocks::BEEROCKS_DIRECTION_AGENT) {
+    if (beerocks_header->actionhdr()->direction() == beerocks::BEEROCKS_DIRECTION_AGENT) {
         return true;
     }
 
@@ -2429,7 +2430,7 @@ bool master_thread::handle_cmdu_control_message(
 
         auto new_event = CHANNEL_SELECTION_ALLOCATE_EVENT(
             channel_selection_task::sRestrictedChannelResponse_event);
-        new_event->hostap_mac = beerocks_header->m_header->radio_mac();
+        new_event->hostap_mac = beerocks_header->actionhdr()->radio_mac();
         new_event->success    = response->success();
         tasks.push_event(database.get_channel_selection_task_id(),
                          (int)channel_selection_task::eEvent::RESTRICTED_CHANNEL_RESPONSE_EVENT,
@@ -2514,7 +2515,7 @@ bool master_thread::handle_cmdu_control_message(
 
         LOG(DEBUG) << "CS_task,sending CSA_EVENT for mac " << hostap_mac;
         auto new_event = CHANNEL_SELECTION_ALLOCATE_EVENT(channel_selection_task::sCsa_event);
-        new_event->hostap_mac = beerocks_header->m_header->radio_mac();
+        new_event->hostap_mac = beerocks_header->actionhdr()->radio_mac();
         new_event->cs_params  = notification->cs_params();
         tasks.push_event(database.get_channel_selection_task_id(),
                          (int)channel_selection_task::eEvent::CSA_EVENT, (void *)new_event);
