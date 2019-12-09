@@ -590,6 +590,7 @@ class cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_DISALLOW_REQUEST);
         }
         sMacAddr& mac();
+        sMacAddr& bssid();
         void class_swap();
         static size_t get_initial_size();
 
@@ -597,6 +598,7 @@ class cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST : public BaseClass
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
         sMacAddr* m_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
 };
 
 class cACTION_APMANAGER_CLIENT_ALLOW_REQUEST : public BaseClass
@@ -610,7 +612,7 @@ class cACTION_APMANAGER_CLIENT_ALLOW_REQUEST : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_ALLOW_REQUEST);
         }
         sMacAddr& mac();
-        beerocks::net::sIpv4Addr& ipv4();
+        sMacAddr& bssid();
         void class_swap();
         static size_t get_initial_size();
 
@@ -618,7 +620,7 @@ class cACTION_APMANAGER_CLIENT_ALLOW_REQUEST : public BaseClass
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
         sMacAddr* m_mac = nullptr;
-        beerocks::net::sIpv4Addr* m_ipv4 = nullptr;
+        sMacAddr* m_bssid = nullptr;
 };
 
 class cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
