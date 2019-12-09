@@ -23,7 +23,7 @@ class UCCSocket:
     CAPI commands from it.
     """
 
-    def __init__(self, host: str, port: int):
+    def __init__(self, host: str, port: int, timeout : int = 10):
         """Constructor for UCCSocket
 
         Parameters
@@ -32,14 +32,17 @@ class UCCSocket:
             The host to connect to. Can either be an ip or a hostname.
         port: str
             The port to connect to.
+        timeout: int
+            (optional) The timeout for both creating a connection,
+            and receiving or sending data.
         """
         self.host = host
         self.port = port
+        self.timeout = timeout
         self.conn: socket.socket
 
     def __enter__(self):
-        self.conn = socket.create_connection((self.host, self.port))
-        self.conn.settimeout(None)
+        self.conn = socket.create_connection((self.host, self.port), self.timeout)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
