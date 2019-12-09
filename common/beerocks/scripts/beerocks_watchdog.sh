@@ -13,6 +13,7 @@ fi
 
 BEEROCKS_PATH=/opt/beerocks
 
+BEEROCKS_LOG_PATH=/rdklogs/logs
 
 BEEROCKS_TMP_PATH=/tmp/beerocks
 
@@ -77,10 +78,10 @@ do
         PID=`cat $BEEROCKS_TMP_PATH/pid/$PID_FILE`
         if [ -f /proc/$PID/exe ] && [ $NOW_EPOCH -gt $FILE_EPOCH_TIMEOUT ]; then
             echo "$0: WARNING [`date`]: Process $PID_FILE detected system slow down!"
-            echo "$0: WARNING [`date`]: Process $PID_FILE detected system slow down!" >> $BEEROCKS_TMP_PATH/logs/slow_down.log
-            top -b -n1 >> $BEEROCKS_TMP_PATH/logs/slow_down.log
+            echo "$0: WARNING [`date`]: Process $PID_FILE detected system slow down!" >> $BEEROCKS_LOG_PATH/logs/slow_down.log
+            top -b -n1 >> $BEEROCKS_LOG_PATH/logs/slow_down.log
             echo " "
-            df >> $BEEROCKS_TMP_PATH/logs/slow_down.log
+            df >> $BEEROCKS_LOG_PATH/logs/slow_down.log
             echo " "
             PID_STUCK=true
         fi
@@ -89,10 +90,10 @@ do
      [ "$PID_STUCK" == "true" ] && {
         let PID_STUCK_RETRIES++
         echo "$0: WARNING [`date`]: Beerocks processes stuck retry count=$PID_STUCK_RETRIES"
-        echo "$0: WARNING [`date`]: Beerocks processes stuck retry count=$PID_STUCK_RETRIES"  >> $BEEROCKS_TMP_PATH/logs/slow_down.log
-        top -b -n1 >> $BEEROCKS_TMP_PATH/logs/slow_down.log                                                               
+        echo "$0: WARNING [`date`]: Beerocks processes stuck retry count=$PID_STUCK_RETRIES"  >> $BEEROCKS_LOG_PATH/logs/slow_down.log
+        top -b -n1 >> $BEEROCKS_LOG_PATH/logs/slow_down.log                                                               
         echo " "                                                                                                     
-        df >> $BEEROCKS_TMP_PATH/logs/slow_down.log
+        df >> $BEEROCKS_LOG_PATH/logs/slow_down.log
         echo " "  
     } || PID_STUCK_RETRIES=0
 

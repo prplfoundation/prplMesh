@@ -81,7 +81,7 @@ fail_safe_5G_bw=80
 fail_safe_5G_vht_frequency=5210
 
 [log]
-log_path=@TMP_PATH@/logs
+log_path=@BEEROCKS_LOG_PATH@
 log_global_levels=error,info,warning,fatal,trace,debug
 log_global_syslog_levels=error,info,warning,fatal,trace,debug
 log_global_size=1000000
