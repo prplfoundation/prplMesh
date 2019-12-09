@@ -579,7 +579,7 @@ bool ap_wlan_hal_dwpal::sta_disassoc(int8_t vap_id, const std::string &mac, uint
     // Build command string
     const std::string ifname =
         beerocks::utils::get_iface_string_from_iface_vap_ids(m_radio_info.iface_name, vap_id);
-    std::string cmd = "DISASSOCIATE " + ifname + " " + mac + " tx=0";
+    std::string cmd = "DISASSOCIATE " + ifname + " " + mac;
 
     if (reason) {
         cmd += " reason=" + std::to_string(reason);
