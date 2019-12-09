@@ -130,15 +130,16 @@ bool ap_wlan_hal_dummy::set_start_disabled(bool enable, int vap_id) { return tru
 
 bool ap_wlan_hal_dummy::set_channel(int chan, int bw, int center_channel) { return true; }
 
-bool ap_wlan_hal_dummy::sta_allow(const std::string &mac)
+bool ap_wlan_hal_dummy::sta_allow(const std::string &mac, const std::string &bssid)
 {
-    LOG(DEBUG) << "Got client allow request for " << mac;
+    LOG(DEBUG) << "Got client allow request for " << mac << " on bssid " << bssid;
     return true;
 }
 
-bool ap_wlan_hal_dummy::sta_deny(const std::string &mac)
+bool ap_wlan_hal_dummy::sta_deny(const std::string &mac, const std::string &bssid)
 {
-    LOG(DEBUG) << "Got client disallow request for " << mac << " reject_sta: 33";
+    LOG(DEBUG) << "Got client disallow request for " << mac << " on bssid " << bssid
+               << " reject_sta: 33";
     return true;
 }
 

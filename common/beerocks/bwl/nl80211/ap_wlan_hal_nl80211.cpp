@@ -136,9 +136,9 @@ bool ap_wlan_hal_nl80211::set_channel(int chan, int bw, int center_channel)
     return true;
 }
 
-bool ap_wlan_hal_nl80211::sta_allow(const std::string &mac)
+bool ap_wlan_hal_nl80211::sta_allow(const std::string &mac, const std::string &bssid)
 {
-    LOG(TRACE) << __func__ << " mac: " << mac;
+    LOG(TRACE) << __func__ << " mac: " << mac << ", bssid: " << bssid;
 
     // Build command string
     // We use the DENY_ACL list only
@@ -153,9 +153,9 @@ bool ap_wlan_hal_nl80211::sta_allow(const std::string &mac)
     return true;
 }
 
-bool ap_wlan_hal_nl80211::sta_deny(const std::string &mac)
+bool ap_wlan_hal_nl80211::sta_deny(const std::string &mac, const std::string &bssid)
 {
-    LOG(TRACE) << __func__ << " mac: " << mac;
+    LOG(TRACE) << __func__ << " mac: " << mac << ", bssid: " << bssid;
 
     // Build command string
     // We use the DENY_ACL list only

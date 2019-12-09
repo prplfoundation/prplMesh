@@ -104,19 +104,21 @@ public:
      * Allow the station with the given MAC address to connect.
      *
      * @param [in] mac The MAC address of the station.
+     * @param [in] bssid The BSSID to which the operation is applicable.
      *
      * @return true on success or false on error.
      */
-    virtual bool sta_allow(const std::string &mac) = 0;
+    virtual bool sta_allow(const std::string &mac, const std::string &bssid) = 0;
 
     /*!
      * Deny the station with the given MAC address from connecting to the AP.
      *
      * @param [in] mac The MAC address of the station.        
+     * @param [in] bssid The BSSID to which the operation is applicable.
      * 
      * @return true on success or false on error.
      */
-    virtual bool sta_deny(const std::string &mac) = 0;
+    virtual bool sta_deny(const std::string &mac, const std::string &bssid) = 0;
 
     /*!
      * Disassociate the station with the given MAC address.
