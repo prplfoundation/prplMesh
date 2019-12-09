@@ -112,7 +112,7 @@ void client_steering_task::steer_sta()
     }
 
     association_control_request_tlv->bssid_to_block_client() =
-        network_utils::mac_from_string(current_ap_mac);
+        network_utils::mac_from_string(hostap_mac);
     association_control_request_tlv->association_control() =
         wfa_map::tlvClientAssociationControlRequest::UNBLOCK;
     association_control_request_tlv->validity_period_sec() = 0;
@@ -120,17 +120,9 @@ void client_steering_task::steer_sta()
     auto sta_list_unblock         = association_control_request_tlv->sta_list(0);
     std::get<1>(sta_list_unblock) = network_utils::mac_from_string(sta_mac);
 
-    //Add vendor-specific tlv
-    auto vs_tlv =
-        message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationControlRequest>(cmdu_tx);
-    if (!vs_tlv) {
-        LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationControlRequest failed";
-        return;
-    }
-    vs_tlv->ipv4() = network_utils::ipv4_from_string(database.get_node_ipv4(sta_mac));
-    Socket *sd     = database.get_node_socket(radio_mac);
-    TASK_LOG(DEBUG) << "sending Client Association Control Request for " << sta_mac << " to "
-                    << radio_mac << " id=" << int(id);
+    Socket *sd = database.get_node_socket(radio_mac);
+    TASK_LOG(DEBUG) << "sending allow request for " << sta_mac << " to " << radio_mac
+                    << " id=" << int(id);
     son_actions::send_cmdu_to_agent(sd, cmdu_tx, radio_mac);
 
     // update bml listeners
@@ -188,22 +180,13 @@ void client_steering_task::steer_sta()
         }
 
         association_control_block_request_tlv->bssid_to_block_client() =
-            network_utils::mac_from_string(current_ap_mac);
+            network_utils::mac_from_string(hostap);
         association_control_block_request_tlv->association_control() =
             wfa_map::tlvClientAssociationControlRequest::BLOCK;
         association_control_block_request_tlv->validity_period_sec() = steering_wait_time_ms / 1000;
         association_control_block_request_tlv->alloc_sta_list();
         auto sta_list_block         = association_control_block_request_tlv->sta_list(0);
         std::get<1>(sta_list_block) = network_utils::mac_from_string(sta_mac);
-
-        //Add vendor-specific tlv
-        auto vs_tlv =
-            message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationControlRequest>(
-                cmdu_tx);
-        if (!vs_tlv) {
-            LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationControlRequest failed";
-            return;
-        }
 
         son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap);
         TASK_LOG(DEBUG) << "sending disallow request for " << sta_mac << " to " << hostap
