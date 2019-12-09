@@ -33,19 +33,14 @@ wireless_utils::estimate_ul_params(int ul_rssi, uint16_t sta_phy_tx_rate_100kb,
     int estimated_ul_rssi_lut;
     int estimated_ul_rssi_lut_delta;
     int estimated_ul_rssi_lut_delta_min = 120 * 10;
-    sPhyUlParams estimation             = {0, beerocks::RSSI_INVALID};
+    sPhyUlParams estimation = {0, beerocks::RSSI_INVALID, ESTIMATION_FAILURE_INVALID_RSSI};
 
-    if (ul_rssi == beerocks::RSSI_INVALID) {
-        LOG(DEBUG) << "estimate_sta_ul_params: RSSI_INVALID";
-        return estimation;
-    }
-
-    int max_ant_mode = (sta_capabilities->ant_num == beerocks::ANT_1X1)
-                           ? beerocks::ANT_MODE_1X1_SS1
-                           : beerocks::ANT_MODE_2X2_SS2;
-    int max_mcs = (is_5ghz && (sta_capabilities->wifi_standard & int(beerocks::STANDARD_AC)))
-                      ? sta_capabilities->vht_mcs
-                      : sta_capabilities->ht_mcs;
+    const int max_ant_mode = (sta_capabilities->ant_num == beerocks::ANT_1X1)
+                                 ? beerocks::ANT_MODE_1X1_SS1
+                                 : beerocks::ANT_MODE_2X2_SS2;
+    const int max_mcs = (is_5ghz && (sta_capabilities->wifi_standard & int(beerocks::STANDARD_AC)))
+                            ? sta_capabilities->vht_mcs
+                            : sta_capabilities->ht_mcs;
     int max_bw = (is_5ghz && (sta_capabilities->wifi_standard & int(beerocks::STANDARD_AC)))
                      ? sta_capabilities->vht_bw
                      : sta_capabilities->ht_bw;
@@ -55,41 +50,111 @@ wireless_utils::estimate_ul_params(int ul_rssi, uint16_t sta_phy_tx_rate_100kb,
 
     max_bw = (max_bw > beerocks::BANDWIDTH_160 ? beerocks::BANDWIDTH_160 : max_bw);
 
-    for (int ant_mode = max_ant_mode; ant_mode > -1; ant_mode--) { // filter by ant_num
-        for (int bw = max_bw; bw > -1; bw--) {                     // filter by mac_bw
+    LOG(DEBUG) << "UL RSSI:" << ul_rssi << " | sta_phy_tx_rate:" << sta_phy_tx_rate_100kb / 10
+               << " Mbps | AP BW:"
+               << beerocks::utils::convert_bandwidth_to_int((beerocks::eWiFiBandwidth)ap_bw)
+               << " | is_5ghz:" << is_5ghz << " | ant_num:" << int(sta_capabilities->ant_num)
+               << " | max_ant_mode:" << max_ant_mode << " | max MCS:" << max_mcs << " | max BW:"
+               << beerocks::utils::convert_bandwidth_to_int((beerocks::eWiFiBandwidth)max_bw);
+
+    if (ul_rssi == beerocks::RSSI_INVALID) {
+        LOG(DEBUG) << "Can not estimate UL parameters (invalid RSSI)";
+        return estimation;
+    }
+
+    // If station phyrate value is below table's minimum, return minimal estimation
+    if (sta_phy_tx_rate_100kb < phy_rate_table[0][0].bw_values[0].gi_long_rate) {
+        LOG(DEBUG) << "Can not estimate UL parameters (STA phyrate is too low)";
+        estimation.tx_power =
+            is_5ghz ? phy_rate_table[0][0].tx_power_5 : phy_rate_table[0][0].tx_power_2_4;
+        estimation.rssi   = int(ceil(phy_rate_table[0][0].bw_values[0].rssi / 10.0));
+        estimation.status = ESTIMATION_FAILURE_BELOW_RANGE;
+
+        return estimation;
+    }
+
+    // If station phyrate value is above table's maximum, return maximal estimation
+    if (sta_phy_tx_rate_100kb >
+        phy_rate_table[max_ant_mode][max_mcs].bw_values[max_bw].gi_short_rate) {
+        LOG(DEBUG) << "STA phy rate (" << sta_phy_tx_rate_100kb / 10
+                   << " Mbps) is above maximum possible in current MCS/NSS/BW mode ("
+                   << phy_rate_table[max_ant_mode][max_mcs].bw_values[max_bw].gi_short_rate / 10
+                   << " Mbps)";
+
+        estimation.status   = ESTIMATION_SUCCESS;
+        estimation.tx_power = is_5ghz ? phy_rate_table[max_ant_mode][max_mcs].tx_power_5
+                                      : phy_rate_table[max_ant_mode][max_mcs].tx_power_2_4;
+        estimation.rssi =
+            int(ceil(phy_rate_table[max_ant_mode][max_mcs].bw_values[max_bw].rssi / 10.0));
+
+        LOG(DEBUG) << "Return maximal estimation values | tx_power:" << estimation.tx_power
+                   << " | RSSI:" << estimation.rssi;
+
+        return estimation;
+    }
+
+    for (int ant_mode = max_ant_mode; ant_mode > -1; ant_mode--) { // filter by ant_mode
+        for (int bw = max_bw; bw > -1; bw--) {                     // filter by max_bw
             for (int mcs = max_mcs; mcs > -1; mcs--) {             // filter by mcs
 
-                estimated_ul_rssi_lut = phy_rate_table[ant_mode][mcs].bw_values[bw].rssi;
-                estimated_ul_rssi_lut_delta =
-                    (int)std::abs((float)(ul_rssi_lut - estimated_ul_rssi_lut));
+                estimated_ul_rssi_lut       = phy_rate_table[ant_mode][mcs].bw_values[bw].rssi;
+                estimated_ul_rssi_lut_delta = std::abs(ul_rssi_lut - estimated_ul_rssi_lut);
 
-                // same rate && min rssi_delta
-                if ((sta_phy_tx_rate_100kb ==
-                     phy_rate_table[ant_mode][mcs].bw_values[bw].gi_long_rate) ||
-                    (sta_phy_tx_rate_100kb ==
-                     phy_rate_table[ant_mode][mcs].bw_values[bw].gi_short_rate)) {
+                auto gi_long_rate  = phy_rate_table[ant_mode][mcs].bw_values[bw].gi_long_rate;
+                auto gi_short_rate = phy_rate_table[ant_mode][mcs].bw_values[bw].gi_short_rate;
+
+                // Check if the current rate is between the gi_long_rate to the gi_short_rate
+                if ((sta_phy_tx_rate_100kb >= gi_long_rate) &&
+                    (sta_phy_tx_rate_100kb <= gi_short_rate)) {
+                    // phyrate is in range - use table values
                     if (estimated_ul_rssi_lut_delta <= estimated_ul_rssi_lut_delta_min) {
                         estimated_ul_rssi_lut_delta_min = estimated_ul_rssi_lut_delta;
                         estimation.tx_power = is_5ghz ? phy_rate_table[ant_mode][mcs].tx_power_5
                                                       : phy_rate_table[ant_mode][mcs].tx_power_2_4;
-                        estimation.rssi =
-                            int(float(estimated_ul_rssi_lut) / 10.0 + 0.5); //round value
+                        estimation.rssi = int(ceil(estimated_ul_rssi_lut / 10.0));
                     }
+                    continue;
+                }
+
+                // phyrate is not in range - use average rssi delta
+
+                // Since we use the avarage, and using the [mcs -1], continue in case of mcs=0
+                // to prevent segfault.
+                if (mcs == 0) {
+                    continue;
+                }
+
+                // Skip if the current rate is not between current gi_long_rate to the
+                // (mcs -1) gi_short_rate.
+                if (!((sta_phy_tx_rate_100kb <= gi_long_rate) &&
+                      (sta_phy_tx_rate_100kb >=
+                       phy_rate_table[ant_mode][mcs - 1].bw_values[bw].gi_short_rate))) {
+                    continue;
+                }
+
+                // update rssi estimation and delta
+                estimated_ul_rssi_lut = (phy_rate_table[ant_mode][mcs].bw_values[bw].rssi +
+                                         phy_rate_table[ant_mode][mcs - 1].bw_values[bw].rssi) /
+                                        2;
+
+                estimated_ul_rssi_lut_delta = std::abs(ul_rssi_lut - estimated_ul_rssi_lut);
+
+                if (estimated_ul_rssi_lut_delta <= estimated_ul_rssi_lut_delta_min) {
+                    estimated_ul_rssi_lut_delta_min = estimated_ul_rssi_lut_delta;
+
+                    estimation.tx_power = is_5ghz ? phy_rate_table[ant_mode][mcs].tx_power_5
+                                                  : phy_rate_table[ant_mode][mcs].tx_power_2_4;
+
+                    estimation.rssi = int(ceil(estimated_ul_rssi_lut / 10.0));
                 }
             }
         }
     }
 
-    float rssi_delta = float(estimated_ul_rssi_lut_delta_min) / 10.0;
-    LOG(DEBUG) << "estimate_sta_ul_params:" << std::endl
-               << "  ul_rssi = " << ul_rssi
-               << "  sta_phy_tx_rate [Mbps] = " << (double(sta_phy_tx_rate_100kb) / 10.0f)
-               << "  sta_ant_num = " << int(sta_capabilities->ant_num)
-               << " sta_max_mcs = " << max_mcs << "  is_5ghz = " << is_5ghz
-               << "  max_bw = " << max_bw << std::endl
-               << "  estimation: delta_rssi = " << rssi_delta
-               << "  tx_power = " << estimation.tx_power << " ul_rssi = " << estimation.rssi
-               << std::endl;
+    estimation.status = ESTIMATION_SUCCESS;
+
+    LOG(DEBUG) << "Successful estimation | tx_power:" << estimation.tx_power
+               << " | RSSI:" << estimation.rssi;
 
     return estimation;
 }
