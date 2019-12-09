@@ -37,12 +37,12 @@ iprand(){
 }
 
 generate_container_random_ip() {
-    gateway_ip=$(docker network inspect $1 | jq -r '.[0].IPAM.Config'[0].Gateway)
-    echo $(iprand ${gateway_ip})
+    gateway_ip="$(docker network inspect "$1" --format "{{(index .IPAM.Config 0).Gateway}}")"
+    iprand "${gateway_ip}"
 }
 
 gateway_netid_length() {
-    echo $(docker network inspect prplMesh-net | jq -r '.[0].IPAM.Config'[0].Subnet | sed -rn 's/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{2})$/\1/p')
+    docker network inspect prplMesh-net --format "{{(index .IPAM.Config 0).Subnet}}" | sed -rn 's/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{2})$/\1/p'
 }
 
 main() {
