@@ -1103,15 +1103,19 @@ void optimal_path_task::work()
         }
 
         if (database.settings_client_optimal_path_roaming_prefer_signal_strength()) {
+            // Select 5GHz HostAP in case UL RSSI towards it is above cutoff
             if (best_ul_rssi_5g > database.config.roaming_rssi_cutoff_db) {
                 chosen_hostap = best_ul_rssi_hostap_5g;
                 best_ul_rssi  = best_ul_rssi_5g;
-            } else if (best_ul_rssi_2g > database.config.roaming_rssi_cutoff_db) {
+            } else {
+                // In any other case select 2.4GHz HostAP
                 chosen_hostap = best_ul_rssi_hostap_2g;
                 best_ul_rssi  = best_ul_rssi_2g;
-            } else {
-                chosen_hostap = best_ul_rssi_hostap_5g;
-                best_ul_rssi  = best_ul_rssi_5g;
+                LOG_CLI(DEBUG,
+                        "Change selected HostAP to 2.4GHz band as 5GHz band is below cutoff"
+                            << " | Roaming RSSI cutoff:" << database.config.roaming_rssi_cutoff_db
+                            << " | 5GHz best UL RSSI:" << best_ul_rssi_5g
+                            << " | 2.4GHz best UL RSSI:" << best_ul_rssi_2g);
             }
         }
 
