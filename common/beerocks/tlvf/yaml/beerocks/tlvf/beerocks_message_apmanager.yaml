@@ -133,11 +133,12 @@ cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE:
 cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST:
   _type: class
   mac: sMacAddr
+  bssid: sMacAddr
 
 cACTION_APMANAGER_CLIENT_ALLOW_REQUEST:
   _type: class
   mac: sMacAddr
-  ipv4: beerocks::net::sIpv4Addr
+  bssid: sMacAddr
 
 cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST:
   _type: class

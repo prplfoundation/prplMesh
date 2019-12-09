@@ -1129,15 +1129,21 @@ sMacAddr& cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::mac() {
     return (sMacAddr&)(*m_mac);
 }
 
+sMacAddr& cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::bssid() {
+    return (sMacAddr&)(*m_bssid);
+}
+
 void cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::class_swap()
 {
     m_mac->struct_swap();
+    m_bssid->struct_swap();
 }
 
 size_t cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // mac
+    class_size += sizeof(sMacAddr); // bssid
     return class_size;
 }
 
@@ -1150,6 +1156,9 @@ bool cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::init()
     m_mac = (sMacAddr*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
+    m_bssid = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!m_parse__) { m_bssid->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1168,21 +1177,21 @@ sMacAddr& cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::mac() {
     return (sMacAddr&)(*m_mac);
 }
 
-beerocks::net::sIpv4Addr& cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::ipv4() {
-    return (beerocks::net::sIpv4Addr&)(*m_ipv4);
+sMacAddr& cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::bssid() {
+    return (sMacAddr&)(*m_bssid);
 }
 
 void cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::class_swap()
 {
     m_mac->struct_swap();
-    m_ipv4->struct_swap();
+    m_bssid->struct_swap();
 }
 
 size_t cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // mac
-    class_size += sizeof(beerocks::net::sIpv4Addr); // ipv4
+    class_size += sizeof(sMacAddr); // bssid
     return class_size;
 }
 
@@ -1195,9 +1204,9 @@ bool cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::init()
     m_mac = (sMacAddr*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
     if (!m_parse__) { m_mac->struct_init(); }
-    m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) { return false; }
-    if (!m_parse__) { m_ipv4->struct_init(); }
+    m_bssid = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!m_parse__) { m_bssid->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
