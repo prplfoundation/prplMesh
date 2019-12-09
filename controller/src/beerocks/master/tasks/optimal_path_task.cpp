@@ -903,7 +903,6 @@ void optimal_path_task::work()
         bool current_hostap_is_5ghz   = database.is_node_5ghz(current_hostap);
         bool all_hostaps_below_cutoff = true;
         std::string chosen_hostap_below_cutoff;
-
         sticky_roaming_rssi = 0;
 
         for (auto it :
@@ -912,6 +911,7 @@ void optimal_path_task::work()
             auto hostap_sibling = it.second;
 
             int hostap_channel    = database.get_node_channel(hostap);
+            auto skip_estimation  = false; // initialise for each HostAP candidate
             hostap_params.is_5ghz = database.is_node_5ghz(hostap);
 
             if ((hostap_params.is_5ghz && !database.get_node_5ghz_support(sta_mac)) ||
@@ -967,6 +967,9 @@ void optimal_path_task::work()
                     current_ul_params   = son::wireless_utils::estimate_ul_params(
                         ul_rssi, sta_phy_tx_rate_100kb, sta_capabilities, hostap_params.bw,
                         hostap_params.is_5ghz);
+
+                    skip_estimation = true; // indicate estimation is done and can be skipped later
+
                     TASK_LOG(DEBUG)
                         << "hostap_candidate: estimated ul_tx_power=" << current_ul_params.tx_power
                         << " ul_rssi=" << int(current_ul_params.rssi);
@@ -995,16 +998,17 @@ void optimal_path_task::work()
                 estimated_ul_rssi = ul_rssi;
             }
 
-            bool use_11_measurement = false;
+            if (!skip_estimation) {
+                current_ul_params = son::wireless_utils::estimate_ul_params(
+                    ul_rssi, sta_phy_tx_rate_100kb, sta_capabilities, hostap_params.bw,
+                    hostap_params.is_5ghz);
+            }
+            if (!database.settings_client_optimal_path_roaming_prefer_signal_strength() &&
+                (current_ul_params.status == son::wireless_utils::ESTIMATION_SUCCESS)) {
 
-            if (!database.settings_client_optimal_path_roaming_prefer_signal_strength()) {
-                if (!use_11_measurement) {
-                    current_ul_params = son::wireless_utils::estimate_ul_params(
-                        ul_rssi, sta_phy_tx_rate_100kb, sta_capabilities, hostap_params.bw,
-                        hostap_params.is_5ghz);
-                    estimated_dl_rssi = son::wireless_utils::estimate_dl_rssi(
-                        estimated_ul_rssi, current_ul_params.tx_power, hostap_params);
-                }
+                estimated_dl_rssi = son::wireless_utils::estimate_dl_rssi(
+                    estimated_ul_rssi, current_ul_params.tx_power, hostap_params);
+
                 hostap_phy_rate = son::wireless_utils::estimate_ap_tx_phy_rate(
                     estimated_dl_rssi, sta_capabilities, hostap_params.bw, hostap_params.is_5ghz);
                 database.set_node_cross_estimated_tx_phy_rate(sta_mac,
