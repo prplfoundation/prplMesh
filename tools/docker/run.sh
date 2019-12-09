@@ -110,7 +110,7 @@ main() {
 
     [ -n "$ENTRYPOINT" ] && DOCKEROPTS="$DOCKEROPTS --entrypoint $ENTRYPOINT"
     if [ "$DETACH" = "false" ]; then
-        DOCKEROPTS="$DOCKEROPTS --interactive --tty --rm"
+        DOCKEROPTS="$DOCKEROPTS --rm"
     else
         DOCKEROPTS="$DOCKEROPTS -d"
     fi
