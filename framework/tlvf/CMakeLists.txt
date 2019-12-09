@@ -45,12 +45,14 @@ add_custom_command(
     COMMENT "Generating the tlvf files."
 )
 
-add_library(tlvf SHARED ${TLVF_OUTPUTS})
+file(GLOB TLVF_SOURCES ${TLVF_DIR}/src/src/*.c*)
+add_library(tlvf SHARED ${TLVF_OUTPUTS} ${TLVF_SOURCES})
 set_target_properties(tlvf PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
 target_link_libraries(tlvf PRIVATE mapf::elpp)
 target_include_directories(tlvf
     PUBLIC
         $<BUILD_INTERFACE:${TLVF_OUT}/include>
+        $<BUILD_INTERFACE:${TLVF_DIR}/src/include>
         $<INSTALL_INTERFACE:include>
     )
 
@@ -62,6 +64,7 @@ install(TARGETS tlvf EXPORT TlvfConfig
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY ${TLVF_OUT}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY ${TLVF_DIR}/src/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT TlvfConfig DESTINATION lib/cmake/Tlvf)
 install(PROGRAMS ${TLVF_DIR}/tlvf.py DESTINATION host/bin)
 
