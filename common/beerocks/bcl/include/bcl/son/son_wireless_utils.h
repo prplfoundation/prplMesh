@@ -59,9 +59,16 @@
 namespace son {
 class wireless_utils {
 public:
+    enum eEstimationStatus {
+        ESTIMATION_SUCCESS              = 0,
+        ESTIMATION_FAILURE_BELOW_RANGE  = 1,
+        ESTIMATION_FAILURE_INVALID_RSSI = 2
+    };
+
     typedef struct {
         int tx_power;
         int rssi;
+        eEstimationStatus status;
     } sPhyUlParams;
 
     typedef struct {
@@ -140,7 +147,7 @@ private:
 
     // clang-format off
     static constexpr sPhyRateTableEntry phy_rate_table[PHY_RATE_TABLE_ANT_MODE_MAX][PHY_RATE_TABLE_MCS_MAX] = {
-            // 1X1_SS1_table
+        // 1X1_SS1_table
         {//MCS 0-9:{TX_power 2.4/5 ,{{20_rate_long/short,20_RSSI},{40_rate_long/short,40_RSSI},{80_rate_long/short,80_RSSI},{160_rate_long/short,160_RSSI}}}
         {18, 16,    {{65,   72,  -892},     {135,     150,    -860},	{293,   325,    -824}, {585,   650,    -794}}},
         {18, 16,    {{130,  144, -865},     {270,     300,    -841},	{585,   650,    -805}, {1170,  1300,   -775}}},
@@ -152,8 +159,8 @@ private:
         {16, 13,    {{650,  722, -673},     {1350,    1500,   -647},	{2925,  3250,   -632}, {5850,  6500,   -602}}},
         {0,  10,    {{780,  867, -644},     {1620,    1800,   -619},	{3510,  3900,   -587}, {7020,  7800,   -557}}},
         {0,  8,     {{0,    0,   0},        {1800,    2000,   -599},	{3900,  4333,   -558}, {7800,  8667,   -528}}},
-            },
-            // 2X2_SS1_table
+        },
+        // 2X2_SS1_table
         {//MCS 0-9:{TX_power,{{20_rate_long/short,20_RSSI},{40_rate_long/short,40_RSSI},{80_rate_long/short,80_RSSI},{160_rate_long/short,160_RSSI}}}
         {18, 16,    {{65,  72,  -912},      {135,     150,    -894},    {293,     325,    -855}, {585,   650,    -825}}},
         {18, 16,    {{130, 144, -900},      {270,     300,    -879},    {585,     650,    -840}, {1170,  1300,   -810}}},
@@ -165,8 +172,8 @@ private:
         {16, 13,    {{650, 722, -735},      {1350,    1500,   -709},    {2925,    3250,   -684}, {5850,  6500,   -654}}},
         {0,  10,    {{780, 867, -699},      {1620,    1800,   -674},    {3510,    3900,   -637}, {7020,  7800,   -607}}},
         {0,  8,     {{0,   0,   0},         {1800,    2000,   -659},    {3900,    4333,   -614}, {7800,  8667,   -584}}},
-            },
-            // 2X2_SS2_table
+        },
+        // 2X2_SS2_table
         {//MCS 0-9:{TX_power,{{20_rate_long/short,20_RSSI},{40_rate_long/short,40_RSSI},{80_rate_long/short,80_RSSI},{160_rate_long/short,160_RSSI}}}
         {18, 16,    {{130,  144,	-890},  {270,   300,    -861},      {585,   650,    -834}, {1170,    1300,    -804}}},
         {18, 16,    {{260,  288,	-855},  {540,   600,    -828},      {1170,  1300,   -795}, {2340,    2600,    -765}}},
