@@ -7,9 +7,9 @@
 ###############################################################
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-topdir="${scriptdir%/*/*/*}"
+rootdir="${scriptdir%/*/*}"
 
-. ${topdir}/prplMesh/tools/docker/functions.sh
+. ${rootdir}/tools/docker/functions.sh
 
 usage() {
     echo "usage: $(basename $0) [-hvd] [-i ip] [-n name] [-N network]"
@@ -104,7 +104,7 @@ main() {
                 --network ${NETWORK}
                 --expose ${PORT}
                 -v ${installdir}:${installdir}
-                -v ${sourcesdir}:${sourcesdir}
+                -v ${rootdir}:${rootdir}
                 --name ${NAME}"
 
     [ -n "$ENTRYPOINT" ] && DOCKEROPTS="$DOCKEROPTS --entrypoint $ENTRYPOINT"

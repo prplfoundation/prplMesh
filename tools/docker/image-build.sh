@@ -7,9 +7,9 @@
 ###############################################################
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-topdir="${scriptdir%/*/*/*}"
+rootdir="${scriptdir%/*/*}"
 
-. ${topdir}/prplMesh/tools/docker/functions.sh
+. ${rootdir}/tools/docker/functions.sh
 
 usage() {
     echo "usage: $(basename $0) [-hvbt]"
@@ -48,7 +48,7 @@ main() {
 
     dbg IMAGE=$IMAGE
     dbg TAG=$TAG
-    dbg topdir=$topdir
+    dbg rootdir=$rootdir
 
     info "Base docker image $IMAGE"
     info "Generating builder docker image (prplmesh-builder$TAG)"

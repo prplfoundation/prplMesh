@@ -7,9 +7,9 @@
 ###############################################################
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-topdir="${scriptdir%/*/*/*}"
+rootdir="${scriptdir%/*/*}"
 
-. ${topdir}/prplMesh/tools/docker/functions.sh
+. ${rootdir}/tools/docker/functions.sh
 
 main() {
     docker image inspect prplmesh-builder >/dev/null 2>&1 || {
@@ -17,8 +17,8 @@ main() {
         run ${scriptdir}/image-build.sh
     }
 
-    run docker container run --workdir=$topdir --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)} \
-        -e USER=${SUDO_USER:-${USER}} -v ${topdir}:${topdir} \
+    run docker container run --workdir=$rootdir --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)} \
+        -e USER=${SUDO_USER:-${USER}} -v ${rootdir}:${rootdir} \
         --rm prplmesh-builder $@
 }
 

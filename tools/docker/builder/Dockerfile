@@ -34,4 +34,4 @@ RUN apt-get update && apt-get install -y \
 	vim \
     && rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT ["./prplMesh/tools/maptools.py", "build"]
+ENTRYPOINT ["./tools/maptools.py", "build"]

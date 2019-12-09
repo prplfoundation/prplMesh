@@ -7,9 +7,9 @@
 ###############################################################
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-topdir="${scriptdir%/*/*/*}"
+rootdir="${scriptdir%/*/*}"
 
-. ${topdir}/prplMesh/tools/docker/functions.sh
+. ${rootdir}/tools/docker/functions.sh
 
 usage() {
     echo "usage: $(basename $0) [-hvd] [-i ip] [-n name] [-N network]"
@@ -46,14 +46,14 @@ main() {
     dbg "IMAGE=prplmesh-runner$TAG"
 
     DOCKEROPTS="-e USER=${SUDO_USER:-${USER}}
-                -e SOURCES_DIR=${sourcesdir}
-                -v ${sourcesdir}:${sourcesdir}
+                -e SOURCES_DIR=${rootdir}
+                -v ${rootdir}:${rootdir}
                 --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)}
                 --name prplMesh-clang-format"
 
     DOCKEROPTS="$DOCKEROPTS --rm"
     
-    run docker container run --entrypoint "${sourcesdir}/clang-format.sh" ${DOCKEROPTS} prplmesh-runner$TAG "$@"
+    run docker container run --entrypoint "${rootdir}/clang-format.sh" ${DOCKEROPTS} prplmesh-runner$TAG "$@"
 }
 
 VERBOSE=false

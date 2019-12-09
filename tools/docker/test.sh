@@ -7,9 +7,9 @@
 ###############################################################
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-topdir="${scriptdir%/*/*/*}"
+rootdir="${scriptdir%/*/*}"
 
-. ${topdir}/prplMesh/tools/docker/functions.sh
+. ${rootdir}/tools/docker/functions.sh
 
 usage() {
     echo "usage: $(basename $0) [-hv] [-n name]"
@@ -34,7 +34,7 @@ main() {
         esac
     done
 
-    run docker container exec ${NAME} ${topdir}/build/install/scripts/prplmesh_utils.sh status $OPT
+    run docker container exec ${NAME} ${rootdir}/build/install/scripts/prplmesh_utils.sh status $OPT
 }
 
 VERBOSE=false

@@ -14,14 +14,14 @@ build-in-docker:
 
   artifacts:
     paths:
-      - ../build
+      - build
 run-tests:
   stage: test
   script:
     - cd tools/docker
     # Try to pull from dockerhub, build the container images if that fails
     - ./image-pull.sh || ./image-build.sh
-    - ./run.sh -f -d --entrypoint "$PWD/../../../build/install/bin/tests/tlvf_test"
+    - ./run.sh -f -d --entrypoint "$PWD/../../build/install/bin/tests/tlvf_test"
     - ./tests/test_flows.sh -v
 
   before_script:

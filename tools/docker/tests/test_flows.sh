@@ -12,8 +12,8 @@ ALL_TESTS="topology initial_ap_config ap_config_renew ap_config_bss_tear_down ch
            higher_layer_data_payload_trigger higher_layer_data_payload"
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-topdir="${scriptdir%/*/*/*/*}"
-. ${topdir}/prplMesh/tools/docker/functions.sh
+rootdir="${scriptdir%/*/*/*}"
+. ${rootdir}/tools/docker/functions.sh
 
 redirect="> /dev/null 2>&1"
 error=0
@@ -35,7 +35,7 @@ send_bml_command() {
 
 send_CAPI_command() {
     # send a CAPI command to a container.
-    ${topdir}/prplMesh/tools/docker/tests/send_CAPI_command.py $(container_ip "$1") $(container_CAPI_port "$1") "$2"
+    ${rootdir}/tools/docker/tests/send_CAPI_command.py $(container_ip "$1") $(container_CAPI_port "$1") "$2"
 }
 
 test_initial_ap_config() {

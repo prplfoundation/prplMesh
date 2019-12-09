@@ -169,7 +169,7 @@ class mapbuild(object):
 
         logger.info("{} {}".format(commands, ["map"] + _dep_modules))
 
-        build_dir = os.path.realpath(os.path.join(args.map_path, '..', 'build'))
+        build_dir = os.path.realpath(os.path.join(args.map_path, 'build'))
         install_dir = os.path.join(build_dir, 'install')
 
         # build dep modules

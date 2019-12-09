@@ -5,8 +5,7 @@
 # See LICENSE file for more details.
 ###############################################################
 
-installdir="${topdir}/build/install"
-sourcesdir="${topdir}/prplMesh"
+installdir="${rootdir}/build/install"
 
 dbg() {
     if [ "$VERBOSE" = "true" ]; then echo "$(basename $0): $*"; fi
