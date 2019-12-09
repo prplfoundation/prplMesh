@@ -1056,7 +1056,10 @@ void optimal_path_task::work()
                             << " [Mbps]"
                             << " weighted_phy_rate=" << (weighted_phy_rate / (1024.0 * 1024.0))
                             << " [Mbps]");
-            } else {
+            } else if (current_ul_params.status ==
+                       son::wireless_utils::ESTIMATION_FAILURE_BELOW_RANGE) {
+                TASK_LOG(DEBUG) << "Switch to signal-strength-estimation method";
+
                 all_hostaps_below_cutoff = false;
                 if (hostap == current_hostap) {
                     int hysteresis_bonus =
@@ -1087,6 +1090,8 @@ void optimal_path_task::work()
                                    << (estimated_ul_rssi <= database.config.roaming_rssi_cutoff_db
                                            ? "  ** below cutoff"
                                            : ""));
+            } else {
+                continue; // in case of estimation returns ESTIMATION_FAILURE_INVALID_RSSI
             }
         }
 
