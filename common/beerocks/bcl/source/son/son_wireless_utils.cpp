@@ -235,6 +235,11 @@ double wireless_utils::estimate_ap_tx_phy_rate(
     if (estimated_phy_rate == 0) {
         estimated_phy_rate = 1e+5 * double(phy_rate_table[0][0].bw_values[0].gi_short_rate);
     }
+
+    LOG(DEBUG) << "estimated DL RSSI:" << int(estimated_dl_rssi)
+               << " | AP BW:" << beerocks::utils::convert_bandwidth_to_int(ap_bw)
+               << " | Return estimated PHY RATE:" << int(estimated_phy_rate / 1e+6) << " Mbps";
+
     return estimated_phy_rate;
 }
 
@@ -298,6 +303,10 @@ bool wireless_utils::get_mcs_from_rate(const uint16_t rate, const beerocks::eWiF
             short_gi     = 0;
         }
     }
+
+    LOG(DEBUG) << "rate:" << rate << " | BW:" << beerocks::utils::convert_bandwidth_to_int(bw)
+               << " | ant_mode:" << ant_mode << " | Return MCS:" << mcs << " and GI:" << short_gi;
+
     return false;
 }
 
@@ -471,7 +480,7 @@ std::vector<uint8_t> wireless_utils::get_5g_20MHz_channels(beerocks::eWiFiBandwi
         break;
     }
     default: {
-        LOG(INFO) << "bw not valid";
+        LOG(ERROR) << "INVALID BW:" << bw;
     }
     }
     std::for_each(std::begin(channels), std::end(channels),
@@ -507,8 +516,10 @@ std::vector<uint8_t> wireless_utils::calc_5g_20MHz_subband_channels(
     } else if (prev_bw <= bw) {
         channels = get_5g_20MHz_channels(prev_bw, prev_vht_center_frequency);
     }
-    LOG(DEBUG) << "prev_bw = " << int(prev_bw) << " bw = " << int(bw)
-               << " channels empty = " << int(channels.empty());
+    LOG(DEBUG) << "prev_bw:" << beerocks::utils::convert_bandwidth_to_int(prev_bw)
+               << " | BW:" << beerocks::utils::convert_bandwidth_to_int(bw)
+               << " | channels empty:" << int(channels.empty());
+
     std::for_each(std::begin(channels), std::end(channels),
                   [](uint8_t channel) { LOG(DEBUG) << "channel:" << int(channel); });
 
