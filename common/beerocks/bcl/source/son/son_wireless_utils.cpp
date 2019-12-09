@@ -161,26 +161,31 @@ wireless_utils::estimate_ul_params(int ul_rssi, uint16_t sta_phy_tx_rate_100kb,
 
 int wireless_utils::estimate_dl_rssi(int ul_rssi, int tx_power, const sPhyApParams &ap_params)
 {
-    int eirp_sta = tx_power;
-    int eirp_ap  = ap_params.ant_gain + ap_params.conducted_power;
-    int ant_factor;
-
-    int noise_figure = NOISE_FIGURE;
+    int eirp_sta   = tx_power;
+    int eirp_ap    = ap_params.ant_gain + ap_params.conducted_power;
+    int ant_factor = ANT_FACTOR_2X2;
     float pathloss;
     int dl_rssi;
 
-    //ant_factor
     if (ap_params.ant_num == beerocks::ANT_4X4) {
         ant_factor = ANT_FACTOR_4X4;
     } else if (ap_params.ant_num == beerocks::ANT_3X3) {
         ant_factor = ANT_FACTOR_3X3;
-    } else { // ap_params.ant_num == ANT_1X1 | ANT_2X2
-        ant_factor = ANT_FACTOR_2X2;
     }
 
-    //pathloss
-    pathloss = eirp_sta - ul_rssi + noise_figure - ant_factor - ap_params.ant_gain;
-    dl_rssi  = eirp_ap - pathloss;
+    pathloss = eirp_sta - (ul_rssi - ant_factor - ap_params.ant_gain);
+
+    if (ap_params.is_5ghz) {
+        pathloss += NOISE_FIGURE; // 5GHz extra loss
+    }
+
+    dl_rssi = eirp_ap - pathloss;
+
+    LOG(DEBUG) << " eirp_sta:" << eirp_sta << " | UL RSSI:" << int(ul_rssi)
+               << " | ant_factor:" << ant_factor << " | ant_gain:" << ap_params.ant_gain
+               << " | eirp_ap:" << eirp_ap << " | pathloss:" << int(pathloss)
+               << " | Returns estimated DL RSSI:" << int(dl_rssi);
+
     return dl_rssi;
 }
 
