@@ -24,8 +24,9 @@ fi
 
 BEEROCKS_TMP_PATH=/tmp/beerocks
 
-BEEROCKS_LOGS_PATH=$BEEROCKS_TMP_PATH/logs
-BEEROCKS_ERRORS_FILE=$BEEROCKS_TMP_PATH/beerocks_errors.log
+BEEROCKS_LOGS_PATH=/rdklogs/logs
+
+BEEROCKS_ERRORS_FILE=$BEEROCKS_LOGS_PATH/beerocks_errors.log
 UGW_DB_BEEROCKS="object:Device.X_INTEL_COM_BEEROCKS"
 UGW_DB_BEEROCKS_WIFI="object:Device.X_INTEL_COM_BEEROCKS.WiFi"
 # Default values
@@ -114,7 +115,7 @@ reset_hostapd()
     for IFACE in $IFACE_LIST ; do
         echo "Restart /tmp/hostapd_$IFACE"
         iwpriv $IFACE sEnableRadio 0
-        /tmp/hostapd_$IFACE /tmp/wlan_wave/hostapd_$IFACE.conf -t 2>&1 > $BEEROCKS_TMP_PATH/logs/hostapd_$IFACE.log &
+        /tmp/hostapd_$IFACE /tmp/wlan_wave/hostapd_$IFACE.conf -t 2>&1 > $BEEROCKS_LOGS_PATH/logs/hostapd_$IFACE.log &
     done
 }
 
@@ -587,8 +588,8 @@ start_beerocks()
         /opt/beerocks/beerocks_endurance_test.sh&
     fi
 
-    rm -f $BEEROCKS_TMP_PATH/logs/*.log
-    rm -f $BEEROCKS_TMP_PATH/logs/*roll_in_progress*
+    rm -f $BEEROCKS_LOGS_PATH/*.log
+    rm -f $BEEROCKS_LOGS_PATH/*roll_in_progress*
 
     # if [ -f "/usr/lib/fapi_wlan_daemon" ]; then
     #     echo "*** start fapi daemon ***"
@@ -841,7 +842,7 @@ if [ "$1" == "start" ] || [ "$1" == "start_wd" ] || [ "$1" == "start_wd_forced" 
     if [ $BEEROCKS_INIT == "1" ]; then
         echo "******* beerocks_utils.sh init started *******"
         mkdir -p $BEEROCKS_TMP_PATH/pid
-        mkdir -p $BEEROCKS_TMP_PATH/logs
+        mkdir -p $BEEROCKS_LOGS_PATH
       
         chmod +x /opt/beerocks/udhcpc.script.alt
 
