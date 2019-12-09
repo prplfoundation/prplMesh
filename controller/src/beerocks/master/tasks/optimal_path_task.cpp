@@ -54,15 +54,14 @@ void optimal_path_task::work()
         (!database.settings_client_band_steering()) &&
         (!database.settings_client_optimal_path_roaming()) &&
         (!database.settings_client_11k_roaming())) {
-        LOG_CLI(DEBUG, sta_mac << " band_steering and client_roaming disabled"
-                               << "get_node_type" << database.get_node_type(sta_mac)
-                               << "settings_client_band_steering"
-                               << database.settings_client_band_steering()
-                               << "settings_client_optimal_path_roaming"
-                               << database.settings_client_optimal_path_roaming()
-                               << "settings_client_11k_roaming"
-                               << database.settings_client_11k_roaming());
-
+        LOG_CLI(DEBUG, "Band steering:"
+                           << database.settings_client_band_steering() << " | Optimal path roaming:"
+                           << database.settings_client_optimal_path_roaming()
+                           << " | 11k client roaming:" << database.settings_client_11k_roaming()
+                           << " | Roaming decision on signal strength preference:"
+                           << database.settings_client_optimal_path_roaming_prefer_signal_strength()
+                           << " | Roaming RX RSSI cutoff:"
+                           << database.config.roaming_rssi_cutoff_db);
         task_enabled = false;
     } else if (database.get_node_type(sta_mac) == beerocks::TYPE_IRE_BACKHAUL) {
         if (started_as_client) {
@@ -509,12 +508,12 @@ void optimal_path_task::work()
                     "optimal_path_task:"
                         << std::endl
                         << "   hostap_candidate: channel " << hostap_channel << " mac=" << hostap
-                        << ((hostap == current_hostap) ? " <-- current AP" : "") << std::endl
+                        << ((hostap == current_hostap) ? " (current)" : " (neighbor)")
                         << "   dl_rssi=" << int(dl_rssi)
                         << (dl_rssi <= database.config.roaming_rssi_cutoff_db ? "  ** below cutoff"
                                                                               : "")
                         << std::endl
-                        << "   Bandwidth of" << hostap_bw << std::endl
+                        << "   Bandwidth=" << beerocks::utils::convert_bandwidth_to_int(hostap_bw)
                         << "   estimated_phy_rate=" << (hostap_phy_rate / (1024.0 * 1024.0))
                         << " [Mbps]"
                         << " weighted_phy_rate=" << (weighted_phy_rate / (1024.0 * 1024.0))
@@ -890,8 +889,9 @@ void optimal_path_task::work()
         son::wireless_utils::sPhyUlParams current_ul_params;
         const beerocks::message::sRadioCapabilities *sta_capabilities;
         beerocks::message::sRadioCapabilities default_sta_cap;
-        int estimated_ul_rssi = beerocks::RSSI_INVALID, ul_rssi = beerocks::RSSI_INVALID,
-            estimated_dl_rssi = beerocks::RSSI_INVALID;
+        int ul_rssi           = beerocks::RSSI_INVALID;
+        int estimated_ul_rssi = beerocks::RSSI_INVALID;
+        int estimated_dl_rssi = beerocks::RSSI_INVALID;
         double hostap_phy_rate;
         double best_weighted_phy_rate              = 0;
         double best_weighted_phy_rate_below_cutoff = 0;
@@ -905,8 +905,8 @@ void optimal_path_task::work()
         std::string chosen_hostap_below_cutoff;
         sticky_roaming_rssi = 0;
 
-        for (auto it :
-             hostap_candidates) { // hostap's in this list are in order, current_hostap is first
+        // hostap's in this list are in order, current_hostap is first
+        for (auto it : hostap_candidates) {
             auto hostap         = it.first;
             auto hostap_sibling = it.second;
 
@@ -916,15 +916,15 @@ void optimal_path_task::work()
 
             if ((hostap_params.is_5ghz && !database.get_node_5ghz_support(sta_mac)) ||
                 (!hostap_params.is_5ghz && !database.get_node_24ghz_support(sta_mac)) ||
-                (database.get_hostap_exclude_from_steering_flag(hostap) == true)) {
-                TASK_LOG(DEBUG) << "hostap_candidate: sta " << sta_mac
-                                << " does not support 5ghz, skipping candidate " << hostap;
+                database.get_hostap_exclude_from_steering_flag(hostap)) {
+                TASK_LOG(DEBUG) << "AP candidate and STA must support same band | SKIP " << hostap;
                 continue;
             }
 
             //get sta capabilities....
             sta_capabilities = database.get_station_capabilities(sta_mac, hostap_params.is_5ghz);
             if (sta_capabilities == nullptr) {
+                TASK_LOG(WARNING) << "STA capabilities are empty - use default capabilities";
                 get_station_default_capabilities(hostap_params.is_5ghz, default_sta_cap);
                 sta_capabilities = &default_sta_cap;
             }
@@ -974,9 +974,8 @@ void optimal_path_task::work()
                         << "hostap_candidate: estimated ul_tx_power=" << current_ul_params.tx_power
                         << " ul_rssi=" << int(current_ul_params.rssi);
                 } else if (database.config.roaming_unconnected_client_rssi_compensation_db != 0) {
-                    ul_rssi +=
-                        database.config
-                            .roaming_unconnected_client_rssi_compensation_db; //add compensation for an ap who is not on the same IRE as the client
+                    // add compensation for an AP who is not on the same IRE as the client
+                    ul_rssi += database.config.roaming_unconnected_client_rssi_compensation_db;
                     TASK_LOG(DEBUG)
                         << "hostap_candidate: add roaming_unconnected_sta_rssi_compensation of "
                         << database.config.roaming_unconnected_client_rssi_compensation_db << " db";
@@ -998,22 +997,33 @@ void optimal_path_task::work()
                 estimated_ul_rssi = ul_rssi;
             }
 
+            // 1. Estimate UL parameters if not yet done
             if (!skip_estimation) {
                 current_ul_params = son::wireless_utils::estimate_ul_params(
                     ul_rssi, sta_phy_tx_rate_100kb, sta_capabilities, hostap_params.bw,
                     hostap_params.is_5ghz);
             }
+
+            // Check if estimated UL phyrate is below table range and switch to
+            // signal-strength-estimation if allowed. Otherwise continue with phyrate estimation.
             if (!database.settings_client_optimal_path_roaming_prefer_signal_strength() &&
                 (current_ul_params.status == son::wireless_utils::ESTIMATION_SUCCESS)) {
 
+                TASK_LOG(DEBUG) << "Stay with phyrate-estimation method";
+
+                // 2. Estimate DL RSSI
                 estimated_dl_rssi = son::wireless_utils::estimate_dl_rssi(
                     estimated_ul_rssi, current_ul_params.tx_power, hostap_params);
 
+                // 3. Estimate AP TX PHY RATE
                 hostap_phy_rate = son::wireless_utils::estimate_ap_tx_phy_rate(
                     estimated_dl_rssi, sta_capabilities, hostap_params.bw, hostap_params.is_5ghz);
-                database.set_node_cross_estimated_tx_phy_rate(sta_mac,
-                                                              hostap_phy_rate); // save to DB
+
+                database.set_node_cross_estimated_tx_phy_rate(sta_mac, hostap_phy_rate);
+
+                // 4. Calculate weighed PHY RATE
                 double weighted_phy_rate = calculate_weighted_phy_rate(sta_mac, hostap);
+
                 if (hostap == current_hostap) {
                     weighted_phy_rate *=
                         (100.0 + roaming_hysteresis_percent_bonus) / 100.0; //adds stability
@@ -1033,12 +1043,14 @@ void optimal_path_task::work()
                         chosen_hostap          = hostap;
                     }
                 }
+
                 LOG_CLI(DEBUG,
                         "optimal_path_task:"
                             << std::endl
                             << "   hostap_candidate: channel " << hostap_channel
                             << " mac=" << hostap
-                            << ((hostap == current_hostap) ? " <-- current AP" : "") << std::endl
+                            << ((hostap == current_hostap) ? " (current) | " : " (neighbor) | ")
+                            << std::endl
                             << (ul_rssi == estimated_ul_rssi ? "    ul_rssi="
                                                              : "    estimated_ul_rssi=")
                             << estimated_ul_rssi
@@ -1051,7 +1063,8 @@ void optimal_path_task::work()
                                     ? "  ** below cutoff"
                                     : "")
                             << std::endl
-                            << "Bandwidth of" << hostap_params.bw << std::endl
+                            << "Bandwidth=" << utils::convert_bandwidth_to_int(hostap_params.bw)
+                            << std::endl
                             << "    estimated_phy_rate=" << (hostap_phy_rate / (1024.0 * 1024.0))
                             << " [Mbps]"
                             << " weighted_phy_rate=" << (weighted_phy_rate / (1024.0 * 1024.0))
@@ -1082,7 +1095,7 @@ void optimal_path_task::work()
                                    << std::endl
                                    << "   hostap_candidate: channel " << hostap_channel
                                    << " mac=" << hostap
-                                   << ((hostap == current_hostap) ? " <-- current AP" : "")
+                                   << ((hostap == current_hostap) ? " (current)" : " (neighbor)")
                                    << std::endl
                                    << (ul_rssi == estimated_ul_rssi ? "    ul_rssi="
                                                                     : "    estimated_ul_rssi=")
@@ -1422,8 +1435,7 @@ bool optimal_path_task::is_measurement_valid(std::set<std::string> temp_cross_ho
         }
         if (hostap_tmp.empty() ||
             !database.get_node_cross_rx_rssi(sta_mac, hostap_tmp, rx_rssi, rx_packets)) {
-            TASK_LOG(ERROR) << "can't get cross_rx_rssi for hostap =" << hostap_tmp
-                            << "res = true!";
+            TASK_LOG(ERROR) << "can't get cross_rx_rssi for hostap =" << hostap_tmp;
             return false;
         } else if (rx_packets <= -1) {
             change_measurement_window_size(current_hostap, true);
@@ -1450,7 +1462,7 @@ bool optimal_path_task::all_measurement_succeed(std::set<std::string> temp_cross
         }
         if (hostap_tmp.empty() ||
             !database.get_node_cross_rx_rssi(sta_mac, hostap_tmp, rx_rssi, rx_packets)) {
-            TASK_LOG(ERROR) << "can't get cross_rx_rssi for hostap =" << hostap_tmp << "res=true!";
+            TASK_LOG(ERROR) << "can't get cross_rx_rssi for hostap =" << hostap_tmp;
             all_hostapd_got_packets = false;
             break;
         } else if (rx_packets > 4) {
@@ -1646,7 +1658,10 @@ double optimal_path_task::calculate_weighted_phy_rate(std::string client_mac,
 {
     auto type    = database.get_node_type(client_mac);
     auto if_type = database.get_node_backhaul_iface_type(client_mac);
-    //TASK_LOG(DEBUG) << "calculate_weighted_phy_rate() sta_mac=" << client_mac << " type=" << int(type) << " backhaul_iface_type=" << if_type;
+
+    // TASK_LOG(DEBUG) << "calculate_weighted_phy_rate | STA " << client_mac << " | type=" << int(type)
+    //                << " backhaul_iface_type:" << if_type;
+
     if ((type == beerocks::TYPE_GW) || (type == beerocks::TYPE_SLAVE)) {
         TASK_LOG(DEBUG) << "Can't run calculate_weighted_phy_rate() on none client node!";
         return 0;
@@ -1659,7 +1674,8 @@ double optimal_path_task::calculate_weighted_phy_rate(std::string client_mac,
             phy_rate_to_node = database.get_node_cross_estimated_tx_phy_rate(client_mac);
         }
 
-        //TASK_LOG(DEBUG) << "phy_rate_to_node=" << phy_rate_to_node;
+        // TASK_LOG(DEBUG) << "calculate_weighted_phy_rate | Calculated weighted phy rate:"
+        //                << int(phy_rate_to_node / 1e+6) << " Mbps";
 
         return phy_rate_to_node;
     }
