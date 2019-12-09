@@ -475,7 +475,7 @@ std::vector<uint8_t> wireless_utils::get_5g_20MHz_channels(beerocks::eWiFiBandwi
     }
     }
     std::for_each(std::begin(channels), std::end(channels),
-                  [](uint8_t channnel) { LOG(DEBUG) << "channnel = " << int(channnel); });
+                  [](uint8_t channel) { LOG(DEBUG) << "channel:" << int(channel); });
     return channels;
 }
 
@@ -510,7 +510,7 @@ std::vector<uint8_t> wireless_utils::calc_5g_20MHz_subband_channels(
     LOG(DEBUG) << "prev_bw = " << int(prev_bw) << " bw = " << int(bw)
                << " channels empty = " << int(channels.empty());
     std::for_each(std::begin(channels), std::end(channels),
-                  [](uint8_t channnel) { LOG(DEBUG) << "channnel = " << int(channnel); });
+                  [](uint8_t channel) { LOG(DEBUG) << "channel:" << int(channel); });
 
     return channels;
 }
