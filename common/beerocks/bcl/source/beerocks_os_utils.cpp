@@ -9,6 +9,7 @@
 #include <bcl/beerocks_os_utils.h>
 #include <bcl/beerocks_string_utils.h>
 
+#include <chrono>
 #include <fcntl.h>
 #include <linux/limits.h>
 #include <sys/stat.h>
@@ -86,10 +87,15 @@ void os_utils::kill_pid(std::string path, std::string file_name)
 {
     int pid_out;
     if (is_pid_running(path, file_name, &pid_out)) {
-        std::cout << "kill_pid() kill pid=" << pid_out << std::endl;
+        LOG(DEBUG) << __FUNCTION__ << " SIGTERM pid=" << pid_out << std::endl;
         kill(pid_out, SIGTERM);
-        sleep(2); //TODO: find alternative solution
+        auto timeout = std::chrono::steady_clock::now() + std::chrono::seconds(15);
+        // wait until the process is down or timeout expires
+        while (getpgid(pid_out) >= 0 && std::chrono::steady_clock::now() < timeout)
+            ;
+
         if (getpgid(pid_out) >= 0) {
+            LOG(DEBUG) << __FUNCTION__ << " SIGKILL pid=" << pid_out << std::endl;
             kill(pid_out, SIGKILL);
         }
     }
