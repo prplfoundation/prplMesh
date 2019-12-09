@@ -28,7 +28,6 @@ main() {
     OPTS=$(getopt -o 'hkr' --long help,kill,remove -n 'parse-options' -- "$@")
 
     if [ ! -f "$containers_file" ] ; then
-        echo "\"$containers_file\" does not exist, no container to stop."
         exit 0
     fi
 
@@ -45,9 +44,9 @@ main() {
     done
 
     while read -r container; do
-        docker "$stop_cmd" "${container}"
+        docker "$stop_cmd" "${container}" >/dev/null 2>&1
         if [ "$remove" = true ] ; then
-            docker rm "${container}"
+            docker rm "${container}" >/dev/null 2>&1
         fi
     done <"$containers_file"
 
