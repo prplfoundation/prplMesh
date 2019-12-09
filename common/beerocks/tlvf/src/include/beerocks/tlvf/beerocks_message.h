@@ -89,10 +89,8 @@ public:
     }
 
     template <class T>
-    static std::shared_ptr<T> add_intel_vs_data(std::shared_ptr<ieee1905_1::tlvVendorSpecific> vs_tlv, uint16_t id = 0)
+    static std::shared_ptr<beerocks_header> add_intel_vs_data(std::shared_ptr<ieee1905_1::tlvVendorSpecific> vs_tlv, uint16_t id = 0)
     {
-        beerocks_message::eAction action;
-        std::shared_ptr<T> p_class = nullptr;
         // TODO This fixed payload length only works for fixed-size payload.
         // Most of the beerocks messages are fixed size, but we need to find a solution for
         // the others. Perhaps in finalize, like it was done before.
@@ -103,20 +101,20 @@ public:
             return nullptr;
         }
     
-        ieee1905_1::TlvList actions(vs_tlv->payload(), payload_length, false, false);
-        auto actionhdr = actions.addClass<beerocks_message::cACTION_HEADER>();
-        if (!actionhdr) {
-            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+        std::unique_ptr<ieee1905_1::TlvList> actions =
+        std::make_unique<ieee1905_1::TlvList>(vs_tlv->payload(), payload_length, false, false);
+        if (!actions)
             return nullptr;
-        }
-
-        p_class = actions.addClass<T>();
-        if (!p_class) {
-            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+        std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(std::move(actions));
+        if (!hdr)
             return nullptr;
-        }
+        if (!hdr->addClass<beerocks_message::cACTION_HEADER>())
+            return nullptr;
+        if (!hdr->addClass<T>())
+            return nullptr;
 
-        auto action_op = p_class->get_action_op();
+        beerocks_message::eAction action = beerocks_message::eAction::ACTION_NONE;
+        auto action_op = hdr->getClass<T>()->get_action_op();
         if (typeid(action_op) == typeid(beerocks_message::eActionOp_1905_VS))
             action = beerocks_message::eAction::ACTION_1905_VS;
         else if (typeid(action_op) == typeid(beerocks_message::eActionOp_CONTROL))
@@ -133,20 +131,18 @@ public:
             action = beerocks_message::eAction::ACTION_CLI;
         else if (typeid(action_op) == typeid(beerocks_message::eActionOp_BML))
             action = beerocks_message::eAction::ACTION_BML;
-        else
-            action = beerocks_message::eAction::ACTION_NONE;
 
         if (action == beerocks_message::eAction::ACTION_NONE) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
             return nullptr;
         }
 
-        actionhdr->action()    = (beerocks_message::eAction)action;
-        actionhdr->action_op() = action_op;
-        actionhdr->id()        = id;
+        hdr->actionhdr()->action()    = (beerocks_message::eAction)action;
+        hdr->actionhdr()->action_op() = action_op;
+        hdr->actionhdr()->id()        = id;
         // actions.swap(); //Problem - we don't know here if we need to call swap or not.
 
-        return p_class;
+        return hdr;
     }
 
     template <class T>
@@ -170,7 +166,14 @@ public:
             return nullptr;
         }
 
-        return add_intel_vs_data<T>(tlvhdr, id);
+        auto beerocks_header = add_intel_vs_data<T>(tlvhdr, id);
+
+        // According to C++'03 Standard 14.2/4:
+        // When the name of a member template specialization appears after . or -> in a postfix-expression,
+        // or after nested-name-specifier in a qualified-id, and the postfix-expression or qualified-id
+        // explicitly depends on a template-parameter (14.6.2), the member template name must be prefixed by
+        // the keyword template. Otherwise the name is assumed to name a non-template.
+        return beerocks_header->template getClass<T>();
     }
 
     typedef struct sCmduInfo {
