@@ -2389,6 +2389,25 @@ bool slave_thread::handle_cmdu_monitor_message(
         send_cmdu_to_controller(cmdu_tx);
         break;
     }
+    case beerocks_message::ACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION: {
+        auto notification_in =
+            cmdu_rx
+                .addClass<beerocks_message::cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION>();
+        if (!notification_in) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION failed";
+            return false;
+        }
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION>(
+            cmdu_tx, beerocks_header->id());
+        if (!notification_out) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        notification_out->params() = notification_in->params();
+        send_cmdu_to_controller(cmdu_tx);
+        break;
+    }
     case beerocks_message::ACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION: {
         auto notification_in =
             cmdu_rx.addClass<beerocks_message::cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION>();

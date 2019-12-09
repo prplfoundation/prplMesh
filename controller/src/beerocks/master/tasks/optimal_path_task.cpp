@@ -636,6 +636,91 @@ void optimal_path_task::work()
             return;
         }
         hostaps.clear();
+
+        auto sta_bridge = database.get_node_parent(current_hostap);
+        if (!database.settings_client_optimal_path_roaming()) {
+            state = REQUEST_CROSS_RSSI_MEASUREMENTS;
+            break;
+        }
+        //build pending mac list //
+        auto ires    = database.get_all_connected_ires();
+        auto subtree = database.get_node_subtree(sta_mac);
+
+        std::set<std::string> ires_outside_subtree;
+        // insert all ires that outside the subtree to "ires_outside_subtree" , because it is impossible to move ire to a child ire. station doesn't has subtree.
+        std::set_difference(ires.begin(), ires.end(), subtree.begin(), subtree.end(),
+                            std::inserter(ires_outside_subtree, ires_outside_subtree.end()));
+        ires_outside_subtree.erase(sta_mac);
+        auto channel = database.get_node_channel(sta_mac);
+        bool found_band_match;
+
+        //searching for sub band hostap /backhaul(client) measurement match for each ire
+        for (auto &ire : ires_outside_subtree) {
+            found_band_match = false;
+            auto ire_hostaps = database.get_node_children(ire, beerocks::TYPE_SLAVE);
+            std::string hostap_backhaul_manager;
+            std::string hostap_backhaul;
+            if (sta_bridge == ire) {
+                continue;
+            }
+            //searching for hostap 5Ghz Low/High direct match ,2.4Ghz auto picked when sta is 2.4
+            for (auto &hostap : ire_hostaps) {
+                hostap_backhaul = database.get_node_parent_backhaul(hostap);
+                hostap_backhaul_manager =
+                    database.is_hostap_backhaul_manager(hostap) ? hostap : hostap_backhaul_manager;
+                int hostap_channel = database.get_node_channel(hostap);
+                if (database.is_ap_out_of_band(hostap, sta_mac) ||
+                    (!database.is_hostap_active(hostap)) || is_hostap_on_cs_process(hostap)) {
+                    TASK_LOG(DEBUG) << "continue " << hostap;
+                    continue;
+                }
+                bool hostap_meas = ((!database.get_node_5ghz_support(hostap)) ||
+                                    (wireless_utils::which_subband(channel)) ==
+                                        (wireless_utils::which_subband(hostap_channel)));
+                if (hostap_meas) {
+                    TASK_LOG(DEBUG) << "sub band match insert to list, hostap  = " << hostap;
+                    hostaps.insert(hostap);
+                    found_band_match = true;
+                    break;
+                }
+            }
+
+            //when there is no 5Ghz hostap and backhaul direct Low/High match, searching for hostap Low/High support match
+            if (!found_band_match && database.settings_front_measurements()) {
+                if (database.is_node_wireless(hostap_backhaul) &&
+                    (database.get_node_type(hostap_backhaul) != beerocks::TYPE_GW) &&
+                    database.is_node_5ghz(sta_mac)) {
+                    auto backhaul_channel = database.get_node_channel(hostap_backhaul);
+                    auto hostap_meas      = ((wireless_utils::which_subband(channel)) ==
+                                        (wireless_utils::which_subband(backhaul_channel)));
+                    if (hostap_meas) {
+                        TASK_LOG(DEBUG)
+                            << "sub band match insert to list, hostap_backhaul_manager = "
+                            << hostap_backhaul_manager;
+                        hostaps.insert(hostap_backhaul_manager);
+                        found_band_match = true;
+                        continue;
+                    }
+                }
+            }
+            //when there is no 5Ghz hostap and backhaul Low/High match searching for
+            if (!found_band_match) {
+                for (auto hostap : ire_hostaps) {
+                    if (hostap == current_hostap || database.is_ap_out_of_band(hostap, sta_mac) ||
+                        (!database.is_hostap_active(hostap))) {
+                        continue;
+                    }
+                    if (database.capability_check(hostap, channel)) {
+                        TASK_LOG(DEBUG)
+                            << "sub band support match insert to list, hostap = " << hostap;
+                        hostaps.insert(hostap);
+                        found_band_match = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         // Check if hostapd has suitable ssid
         auto it = hostaps.begin();
         while (it != hostaps.end()) {
@@ -740,6 +825,47 @@ void optimal_path_task::work()
                     continue;
                 }
                 hostap_candidates.push_back({sibling, true});
+            }
+        }
+
+        //add all other ap's
+        for (auto &hostap : hostaps) {
+            if (hostap == current_hostap)
+                continue;
+            //when hostap is backhaul manager , the mathing candidate is his same band sibling
+            if (database.is_hostap_backhaul_manager(hostap) &&
+                database.get_node_type(database.get_node_parent(hostap)) != beerocks::TYPE_GW) {
+                auto sibling_backhaul_manager = database.get_node_siblings(hostap);
+                for (auto &sibling : sibling_backhaul_manager) {
+                    if (!database.is_ap_out_of_band(sibling, sta_mac)) {
+                        //actual ap candidate (is case measured through backhaul)
+                        hostap_candidates.push_back({sibling, false});
+                    } else {
+                        //adding the backhaul_manager band_steering candidate
+                        if (database.settings_client_band_steering()) {
+                            //band steering candidate
+                            if (database.is_hostap_active(sibling) ||
+                                !is_hostap_on_cs_process(sibling)) {
+                                hostap_candidates.push_back({sibling, true});
+                            } else {
+                                TASK_LOG(DEBUG) << "continue " << sibling;
+                            }
+                        }
+                    }
+                }
+            } else {
+                hostap_candidates.push_back({hostap, false});
+                if (database.settings_client_band_steering()) {
+                    auto hostap_siblings = database.get_node_siblings(hostap);
+                    for (auto &sibling : hostap_siblings) {
+                        if (!database.is_hostap_active(sibling) ||
+                            is_hostap_on_cs_process(sibling)) {
+                            TASK_LOG(DEBUG) << "continue " << sibling;
+                            continue;
+                        }
+                        hostap_candidates.push_back({sibling, true});
+                    }
+                }
             }
         }
 
