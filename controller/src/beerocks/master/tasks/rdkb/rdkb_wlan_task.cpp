@@ -56,7 +56,6 @@ void rdkb_wlan_task::work()
 
 void rdkb_wlan_task::handle_event(int event_type, void *obj)
 {
-    TASK_LOG(DEBUG) << "event_type " << event_type << " was received";
     std::vector<Socket *> events_updates_listeners;
     uint32_t idx = 0;
     Socket *sd;
@@ -266,10 +265,11 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
         if (obj) {
             auto event_obj         = (steering_client_disconnect_request_event *)obj;
             std::string client_mac = net::network_utils::mac_to_string(event_obj->client_mac);
-            TASK_LOG(INFO) << "STEERING_CLIENT_DISCONNECT_REQUEST event was received client_mac "
-                           << client_mac;
+            TASK_LOG(INFO) << "STEERING_CLIENT_DISCONNECT_REQUEST received for " << client_mac;
             son_actions::disconnect_client(database, cmdu_tx, client_mac, event_obj->bssid,
                                            event_obj->type, event_obj->reason);
+
+            add_pending_events(int(STEERING_CLIENT_DISCONNECT_RESPONSE), event_obj->sd);
         }
         break;
     }
@@ -369,6 +369,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
     }
     case STEERING_RSSI_MEASUREMENT_RESPONSE: {
         if (obj) {
+            TASK_LOG(DEBUG) << "STEERING_RSSI_MEASUREMENT_RESPONSE received";
             //TODO consider add response from monitor.
             break;
         }
