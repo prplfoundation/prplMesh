@@ -682,9 +682,12 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST failed";
             return false;
         }
+
         std::string sta_mac = network_utils::mac_to_string(request->mac());
-        LOG(DEBUG) << "CLIENT_DISALLOW, mac = " << sta_mac;
-        ap_wlan_hal->sta_deny(sta_mac);
+        std::string bssid   = network_utils::mac_to_string(request->bssid());
+        LOG(DEBUG) << "CLIENT_DISALLOW: mac = " << sta_mac << ", bssid = " << bssid;
+
+        ap_wlan_hal->sta_deny(sta_mac, bssid);
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_ALLOW_REQUEST: {
@@ -693,11 +696,12 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_ALLOW_REQUEST failed";
             return false;
         }
-        std::string sta_mac = network_utils::mac_to_string(request->mac());
-        LOG(DEBUG) << "CLIENT_ALLOW, mac = " << sta_mac
-                   << ", ip = " << network_utils::ipv4_to_string(request->ipv4());
 
-        ap_wlan_hal->sta_allow(sta_mac);
+        std::string sta_mac = network_utils::mac_to_string(request->mac());
+        std::string bssid   = network_utils::mac_to_string(request->bssid());
+        LOG(DEBUG) << "CLIENT_ALLOW: mac = " << sta_mac << ", bssid = " << bssid;
+
+        ap_wlan_hal->sta_allow(sta_mac, bssid);
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST: {
@@ -802,9 +806,9 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         std::string target_bssid  = network_utils::mac_to_string(request->params().target.bssid);
         uint8_t disassoc_imminent = request->params().disassoc_imminent;
 
-        LOG(DEBUG) << " CLIENT_BSS_STEER (802.11v) for sta_mac = " << sta_mac
+        LOG(DEBUG) << "CLIENT_BSS_STEER (802.11v) for sta_mac = " << sta_mac
                    << " to bssid = " << target_bssid
-                   << " channel =" << int(request->params().target.channel);
+                   << " channel = " << int(request->params().target.channel);
         ap_wlan_hal->sta_bss_steer(sta_mac, target_bssid, request->params().target.channel,
                                    (disassoc_imminent) ? request->params().disassoc_timer_ms : 0,
                                    (disassoc_imminent) ? bss_steer_imminent_valid_int

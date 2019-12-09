@@ -4034,8 +4034,6 @@ bool slave_thread::handle_multi_ap_policy_config_request(Socket *sd,
 
 bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    //TODO - this is a stub handler for the purpose of controller certification testing,
-    //       will be implemented later on agent certification
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE, mid=" << std::dec
                << int(mid);
@@ -4046,14 +4044,9 @@ bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::Cmd
         LOG(ERROR) << "addClass wfa_map::tlvClientAssociationControlRequest failed";
         return false;
     }
-    auto sta_mac = std::get<1>(association_control_request_tlv->sta_list(0));
 
-    //Add VS tlv
-    auto vs_tlv =
-        message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationControlRequest>(cmdu_tx);
-    if (!vs_tlv) {
-        LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationControlRequest failed";
-    }
+    const auto &bssid   = association_control_request_tlv->bssid_to_block_client();
+    const auto &sta_mac = std::get<1>(association_control_request_tlv->sta_list(0));
 
     auto block = association_control_request_tlv->association_control();
     if (block == wfa_map::tlvClientAssociationControlRequest::UNBLOCK) {
@@ -4063,10 +4056,9 @@ bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::Cmd
             LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_ALLOW_REQUEST message!";
             return false;
         }
-        if (vs_tlv) {
-            request_out->ipv4() = vs_tlv->ipv4();
-        }
-        request_out->mac() = sta_mac;
+
+        request_out->mac()   = sta_mac;
+        request_out->bssid() = bssid;
     } else if (block == wfa_map::tlvClientAssociationControlRequest::BLOCK) {
         auto request_out = message_com::create_vs_message<
             beerocks_message::cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST>(cmdu_tx, mid);
@@ -4074,14 +4066,18 @@ bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::Cmd
             LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_DISALLOW_REQUEST message!";
             return false;
         }
-        request_out->mac() = sta_mac;
+
+        request_out->mac()   = sta_mac;
+        request_out->bssid() = bssid;
     }
+
     message_com::send_cmdu(ap_manager_socket, cmdu_tx);
 
     if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
         LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
         return false;
     }
+
     LOG(DEBUG) << "sending ACK message back to controller";
     return send_cmdu_to_controller(cmdu_tx);
 }
