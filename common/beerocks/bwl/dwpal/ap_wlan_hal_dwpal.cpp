@@ -534,31 +534,43 @@ bool ap_wlan_hal_dwpal::set_channel(int chan, int bw, int center_channel)
     return true;
 }
 
-bool ap_wlan_hal_dwpal::sta_allow(const std::string &mac)
+bool ap_wlan_hal_dwpal::sta_allow(const std::string &mac, const std::string &bssid)
 {
-    // Build command string
-    std::string cmd = "STA_ALLOW " + mac;
+    // Check if the requested BSSID is part of this radio
+    for (const auto &vap : m_radio_info.available_vaps) {
+        if (vap.second.mac == bssid) {
+            // Send the command
+            std::string cmd = "STA_ALLOW " + mac;
+            if (!dwpal_send_cmd(cmd, vap.first)) {
+                LOG(ERROR) << "sta_allow() failed!";
+                return false;
+            }
 
-    // Send command
-    if (!dwpal_send_cmd(cmd)) {
-        LOG(ERROR) << "sta_allow() failed!";
-        return false;
+            return true;
+        }
     }
 
+    // If the requested BSSID is not part of this radio, return silently
     return true;
 }
 
-bool ap_wlan_hal_dwpal::sta_deny(const std::string &mac)
+bool ap_wlan_hal_dwpal::sta_deny(const std::string &mac, const std::string &bssid)
 {
-    // Build command string
-    std::string cmd = "DENY_MAC " + mac + " reject_sta=33";
+    // Check if the requested BSSID is part of this radio
+    for (const auto &vap : m_radio_info.available_vaps) {
+        if (vap.second.mac == bssid) {
+            // Send the command
+            std::string cmd = "DENY_MAC " + mac + " reject_sta=33";
+            if (!dwpal_send_cmd(cmd, vap.first)) {
+                LOG(ERROR) << "sta_allow() failed!";
+                return false;
+            }
 
-    // Send command
-    if (!dwpal_send_cmd(cmd)) {
-        LOG(ERROR) << "sta_deny() failed!";
-        return false;
+            return true;
+        }
     }
 
+    // If the requested BSSID is not part of this radio, return silently
     return true;
 }
 
