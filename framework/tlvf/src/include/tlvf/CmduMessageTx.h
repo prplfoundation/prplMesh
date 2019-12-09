@@ -9,9 +9,8 @@
 #ifndef _CmduMessageTX_H_
 #define _CmduMessageTX_H_
 
-#include "CmduMessage.h"
-
-#include "ieee_1905_1/tlvVendorSpecific.h"
+#include <tlvf/CmduMessage.h>
+#include <tlvf/ieee_1905_1/tlvVendorSpecific.h>
 
 namespace ieee1905_1 {
 
