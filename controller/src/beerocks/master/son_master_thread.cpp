@@ -1592,7 +1592,7 @@ bool master_thread::handle_cmdu_1905_topology_notification(Socket *sd,
 
     std::shared_ptr<wfa_map::tlvClientAssociationEvent> client_association_event_tlv = nullptr;
     std::shared_ptr<beerocks_message::tlvVsClientAssociationEvent> vs_tlv            = nullptr;
-    std::shared_ptr<message_com::beerocks_header> beerocks_header                    = nullptr;
+    std::shared_ptr<beerocks_header> beerocks_header                    = nullptr;
     int tlvType;
     while ((tlvType = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
         switch (tlvType) {
@@ -2393,7 +2393,7 @@ bool master_thread::handle_non_intel_slave_join(
 }
 
 bool master_thread::handle_cmdu_control_message(
-    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header)
+    Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header)
 {
     //auto& cmdu_rx = beerocks_header->m_cmdu_rx;
     std::string hostap_mac =

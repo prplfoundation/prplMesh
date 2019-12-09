@@ -509,7 +509,7 @@ bool bml_internal::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 }
 
 int bml_internal::process_cmdu_header(
-    std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+    std::shared_ptr<beerocks::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
 

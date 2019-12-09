@@ -30,7 +30,7 @@ using namespace net;
 using namespace son;
 
 void son_management::handle_cli_message(
-    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
     task_pool &tasks)
 {
@@ -931,7 +931,7 @@ void son_management::handle_cli_message(
 }
 
 void son_management::handle_bml_message(
-    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
     task_pool &tasks)
 {

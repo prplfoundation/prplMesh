@@ -118,19 +118,19 @@ protected:
 
 private:
     bool handle_cmdu_control_message(
-        Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+        Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
         ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_backhaul_manager_message(
-        Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+        Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
         ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_platform_manager_message(
-        Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+        Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
         ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_ap_manager_message(
-        Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+        Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
         ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_monitor_message(
-        Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+        Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
         ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_control_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 

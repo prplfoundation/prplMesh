@@ -466,7 +466,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
 }
 
 bool slave_thread::handle_cmdu_control_message(
-    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     // LOG(DEBUG) << "handle_cmdu_control_message(), INTEL_VS: action=" + std::to_string(beerocks_header->action()) + ", action_op=" + std::to_string(beerocks_header->action_op());
@@ -1171,7 +1171,7 @@ bool slave_thread::handle_cmdu_control_message(
 }
 
 bool slave_thread::handle_cmdu_backhaul_manager_message(
-    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (backhaul_manager_socket == nullptr) {
@@ -1463,7 +1463,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 }
 
 bool slave_thread::handle_cmdu_platform_manager_message(
-    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (platform_manager_socket != sd) {
@@ -1649,7 +1649,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 }
 
 bool slave_thread::handle_cmdu_ap_manager_message(
-    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (ap_manager_socket == nullptr) {
@@ -2243,7 +2243,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(
 }
 
 bool slave_thread::handle_cmdu_monitor_message(
-    Socket *sd, std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+    Socket *sd, std::shared_ptr<beerocks::beerocks_header> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (monitor_socket == nullptr) {

@@ -374,7 +374,7 @@ bool bml_rdkb_internal::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     return (ret == BML_RET_OK);
 }
 
-int bml_rdkb_internal::process_cmdu_header(beerocks::message_com::beerocks_header beerocks_header,
+int bml_rdkb_internal::process_cmdu_header(beerocks::beerocks_header beerocks_header,
                                            ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto action    = beerocks_header->action();

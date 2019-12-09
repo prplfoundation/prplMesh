@@ -180,7 +180,7 @@ protected:
     bool wake_up(uint8_t action_opcode, int value);
     bool connect_to_master();
     virtual int
-    process_cmdu_header(std::shared_ptr<beerocks::message_com::beerocks_header> beerocks_header,
+    process_cmdu_header(std::shared_ptr<beerocks::beerocks_header> beerocks_header,
                         ieee1905_1::CmduMessageRx &cmdu_rx);
 
     SocketClient *m_sockMaster = nullptr;
