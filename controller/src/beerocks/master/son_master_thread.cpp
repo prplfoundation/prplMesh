@@ -3105,6 +3105,83 @@ bool master_thread::handle_cmdu_control_message(
         database.set_hostap_stats_info(hostap_mac, &response->ap_stats());
         break;
     }
+    case beerocks_message::ACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION: {
+        auto ire_mac = database.get_node_parent_ire(hostap_mac);
+        auto notification =
+            cmdu_rx
+                .addClass<beerocks_message::cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION>();
+        if (!notification) {
+            LOG(ERROR) << "addClass cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION failed";
+            return false;
+        }
+        int active_client_count = notification->params().active_client_count;
+        int client_load_percent = notification->params().client_tx_load_percent +
+                                  notification->params().client_rx_load_percent;
+
+        LOG(DEBUG) << "load notification from hostap " << hostap_mac << " ire mac=" << ire_mac
+                   << " active_client_count=" << active_client_count
+                   << " client_load=" << client_load_percent;
+
+        /*
+            * start load balancing
+            */
+        if (active_client_count > database.config.monitor_min_active_clients &&
+            client_load_percent >
+                database.config.monitor_total_ch_load_notification_hi_th_percent &&
+            database.settings_load_balancing() && database.is_hostap_active(hostap_mac) &&
+            database.get_node_state(ire_mac) == beerocks::STATE_CONNECTED &&
+            database.get_node_type(ire_mac) != beerocks::TYPE_CLIENT) {
+            /*
+                * when a notification arrives, it means a large change in rx_rssi occurred (above the defined thershold)
+                * therefore, we need to create a load balancing task to optimize the network
+                */
+            LOG(DEBUG) << "high load conditions, starting load balancer for ire " << ire_mac;
+            int prev_task_id = database.get_load_balancer_task_id(ire_mac);
+            if (tasks.is_task_running(prev_task_id)) {
+                LOG(DEBUG) << "load balancer task already running for " << ire_mac;
+            } else {
+                auto new_task = std::make_shared<load_balancer_task>(
+                    database, cmdu_tx, tasks, ire_mac, "load notif (high)- load_balancer");
+                tasks.add_task(new_task);
+            }
+        } else if ((active_client_count < database.config.monitor_min_active_clients) &&
+                   (client_load_percent <
+                    database.config.monitor_total_ch_load_notification_lo_th_percent)) {
+            LOG(DEBUG) << "low load conditions, removing confinements from STAs on ire " << ire_mac;
+            /*
+                * need to free and move previously confined sta
+                * TODO
+                * need to improve this logic and make it more robust
+                */
+            auto hostaps = database.get_node_children(ire_mac);
+            for (auto &hostap : hostaps) {
+                auto stations = database.get_node_children(hostap);
+                for (auto sta : stations) {
+                    if (database.get_node_confined_flag(sta)) {
+                        LOG(DEBUG) << "removing confined flag from sta " << sta;
+                        database.set_node_confined_flag(sta, false);
+                        /*
+                            * launch optimal path task
+                            */
+                        if (database.get_node_state(sta) == beerocks::STATE_CONNECTED) {
+                            int prev_task_id = database.get_roaming_task_id(sta);
+                            if (tasks.is_task_running(prev_task_id)) {
+                                LOG(DEBUG) << "roaming task already running for " << sta;
+                            } else {
+                                auto new_task = std::make_shared<optimal_path_task>(
+                                    database, cmdu_tx, tasks, sta, 0,
+                                    "load notif (low) - optimal_path");
+                                tasks.add_task(new_task);
+                            }
+                        } else {
+                            database.set_node_handoff_flag(sta, false);
+                        }
+                    }
+                }
+            }
+        }
+        break;
+    }
     case beerocks_message::ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE: {
         auto response =
             cmdu_rx.addClass<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>();

@@ -185,6 +185,150 @@ void monitor_stats::process()
         requests_list.pop_front();
         message_com::send_cmdu(slave_socket, cmdu_tx);
     }
+
+    int delta_val;
+
+    if (radio_stats.channel_load_tot_curr > 100) {
+        LOG(DEBUG)
+            << "radio channel_load_tot_curr > 100, changing to radio channel_load_tot_curr = 100 "
+            << std::endl;
+        radio_stats.channel_load_tot_curr = 100;
+    }
+    radio_stats.channel_load_tot_prev = radio_stats.channel_load_tot_curr;
+
+    radio_stats.client_tx_load_tot_prev  = radio_stats.client_tx_load_tot_curr;
+    radio_stats.client_rx_load_tot_prev  = radio_stats.client_rx_load_tot_curr;
+    radio_stats.active_client_count_prev = radio_stats.active_client_count_curr;
+
+    // clear stats
+    radio_stats.client_tx_load_tot_curr  = 0;
+    radio_stats.client_rx_load_tot_curr  = 0;
+    radio_stats.active_client_count_curr = 0;
+
+    //calculations for each sta on the radio
+    for (auto it = mon_db->sta_begin(); it != mon_db->sta_end(); ++it) {
+        auto sta_mac  = it->first;
+        auto sta_node = it->second;
+        if (sta_node == nullptr) {
+            LOG(ERROR) << "sta_node == nullptr !";
+            return;
+        }
+
+        calculate_client_load(sta_node, radio_node, conf_active_client_th);
+        // LOG(DEBUG) << "STATS_MEASUREMENT sta_mac=" << sta_mac << " tx_phy_rate= " << sta_node->get_load_tx_phy_rate() <<
+        //                       " , tx_load = " << sta_node->get_load_tx_percentage() << "[%]" <<
+        //                       " , tx_packets = " << sta_node->get_stats().tx_packets <<
+        //                       " , tx_bytes = " << sta_node->get_stats().tx_bytes << std::endl;
+        //" , tx_bit_rate = " << sta_node->get_stats().tx_bit_rate() <<
+    }
+
+    if (radio_stats.client_tx_load_tot_curr > 100) {
+        LOG(DEBUG)
+            << "vap client_tx_load_tot_curr > 100, changing to vap client_tx_load_tot_curr = 100 "
+            << std::endl;
+        radio_stats.client_tx_load_tot_curr = 100;
+    }
+    if (radio_stats.client_rx_load_tot_curr > 100) {
+        LOG(DEBUG)
+            << "vap client_rx_load_tot_curr > 100, changing to radio client_rx_load_tot_curr = 100 "
+            << std::endl;
+        radio_stats.client_rx_load_tot_curr = 100;
+    }
+
+    radio_stats.channel_load_idle = 100 - radio_stats.channel_load_tot_curr;
+    radio_stats.channel_load_others =
+        radio_stats.channel_load_tot_curr -
+        (radio_stats.client_tx_load_tot_curr + radio_stats.client_rx_load_tot_curr);
+
+    //send notifications
+    bool send_notification = false;
+    /*
+    *    channel load
+    */
+    //check if channel load passed monitor_channel_load_notification_th_percent
+    if ((radio_stats.channel_load_tot_curr >= conf_total_ch_load_notification_hi_th_percent) &&
+        (!radio_stats.channel_load_tot_is_above_hi_th)) {
+        radio_stats.channel_load_tot_is_above_hi_th = true;
+        send_notification                           = true;
+        LOG(DEBUG) << "LOAD_NOTIFICATION, Th up, channel_load="
+                   << int(radio_stats.channel_load_tot_curr);
+    } else if ((radio_stats.channel_load_tot_curr <
+                conf_total_ch_load_notification_lo_th_percent) &&
+               (radio_stats.channel_load_tot_is_above_hi_th)) {
+        radio_stats.channel_load_tot_is_above_hi_th = false;
+        send_notification                           = true;
+        LOG(DEBUG) << "LOAD_NOTIFICATION, Th down, channel_load="
+                   << int(radio_stats.channel_load_tot_curr);
+    }
+    //check if current channel load delta passed monitor_channel_load_notification_delta_th_percent
+    if (radio_stats.channel_load_tot_is_above_hi_th) {
+        delta_val = abs(radio_stats.channel_load_tot_prev - radio_stats.channel_load_tot_curr);
+        if (delta_val >= conf_total_ch_load_notification_delta_th_percent) {
+            send_notification = true;
+            LOG(DEBUG) << "LOAD_NOTIFICATION, Th delta, channel_load delta_val=" << int(delta_val);
+        }
+    }
+
+    /*
+    *    radio_stats active STA count
+    */
+    //check if current number of active STAs passed min_active_sta_count
+    if ((radio_stats.active_client_count_curr < conf_min_active_client_count) &&
+        (radio_stats.active_client_count_is_above_th)) {
+        radio_stats.active_client_count_is_above_th = false;
+        send_notification                           = true;
+        LOG(DEBUG) << "LOAD_NOTIFICATION, Th down, vap active_sta_count="
+                   << int(radio_stats.active_client_count_curr);
+    } else if ((radio_stats.active_client_count_curr >= conf_min_active_client_count) &&
+               (!radio_stats.active_client_count_is_above_th)) {
+        radio_stats.active_client_count_is_above_th = true;
+        send_notification                           = true;
+        LOG(DEBUG) << "LOAD_NOTIFICATION, Th up, vap  active_sta_count="
+                   << int(radio_stats.active_client_count_curr);
+    } else if ((radio_stats.active_client_count_curr < conf_min_active_client_count) &&
+               (!radio_stats.active_client_count_is_above_th)) {
+        send_notification = false;
+    }
+    //check if new active_sta was added
+    if (radio_stats.active_client_count_is_above_th) {
+        delta_val = radio_stats.active_client_count_curr - radio_stats.active_client_count_prev;
+        if (delta_val > 0) {
+            send_notification = true;
+            LOG(DEBUG) << "LOAD_NOTIFICATION, change, vap  active_sta_count="
+                       << int(radio_stats.active_client_count_curr);
+        }
+    }
+
+    /*
+    *    active STA tx/rx load
+    */
+    //check if STAs load delta passed sta_load_notification_delta_th_percent
+    if (radio_stats.active_client_count_is_above_th) {
+        delta_val =
+            abs((radio_stats.client_tx_load_tot_prev + radio_stats.client_rx_load_tot_prev) -
+                (radio_stats.client_tx_load_tot_curr + radio_stats.client_rx_load_tot_curr));
+        if (delta_val >= conf_client_load_notification_delta_th_percent) {
+            send_notification = true;
+            LOG(DEBUG) << "LOAD_NOTIFICATION, change, vap  sta load delta Th, delta_val="
+                       << int(delta_val);
+        }
+    }
+
+    if (send_notification) {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION>(cmdu_tx);
+        if (!notification) {
+            LOG(ERROR)
+                << "Failed building cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION message!";
+            return;
+        }
+        notification->params().stats_delta_ms         = radio_stats.delta_ms;
+        notification->params().active_client_count    = radio_stats.active_client_count_curr;
+        notification->params().client_tx_load_percent = radio_stats.client_tx_load_tot_curr;
+        notification->params().client_rx_load_percent = radio_stats.client_rx_load_tot_curr;
+        notification->params().channel_load_percent   = radio_stats.channel_load_tot_curr;
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+    }
 }
 
 void monitor_stats::calculate_client_load(monitor_sta_node *sta_node,
