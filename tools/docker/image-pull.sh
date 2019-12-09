@@ -7,9 +7,9 @@
 ###############################################################
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-topdir="${scriptdir%/*/*/*}"
+rootdir="${scriptdir%/*/*}"
 
-. ${topdir}/prplMesh/tools/docker/functions.sh
+. ${rootdir}/tools/docker/functions.sh
 
 usage() {
     echo "usage: $(basename $0) [-hvbt]"
@@ -57,7 +57,7 @@ main() {
     done
 
     dbg "TAG=$TAG"
-    dbg "topdir=$topdir"
+    dbg "rootdir=$rootdir"
 
     # The tag used in dockerhub is the base image with : converted to -
     upstream_tag="$(echo "$IMAGE" | tr : -)"

@@ -20,5 +20,5 @@ script:
   - git update-index -q --refresh
   - git diff-index --exit-code HEAD
   # Tests
-  - ./run.sh --entrypoint "$PWD/../../../build/install/bin/tests/tlvf_test"
+  - ./run.sh --entrypoint "$PWD/../../build/install/bin/tests/tlvf_test"
   - ./tests/test_flows.sh -v
