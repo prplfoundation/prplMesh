@@ -307,11 +307,11 @@ beerocks::eFreqType wireless_utils::which_freq(uint32_t chn)
         return beerocks::eFreqType::FREQ_24G;
     }
 
-    if (36 <= chn) {
+    if (START_OF_LOW_BAND_NON_DFS <= chn) {
         return beerocks::eFreqType::FREQ_5G;
     }
 
-    LOG(ERROR) << " Something incorrect in which_freq chn = " << int(chn);
+    LOG(ERROR) << "Unsupported channel:" << int(chn);
     return beerocks::eFreqType::FREQ_UNKNOWN;
 }
 
@@ -332,39 +332,28 @@ bool wireless_utils::is_same_interface(const std::string &ifname1, const std::st
 
 beerocks::eSubbandType wireless_utils::which_subband(uint32_t chn)
 {
-
-    if ((36 <= chn) && (chn <= 64)) {
+    if ((START_OF_LOW_BAND_NON_DFS <= chn) && (chn <= END_OF_LOW_BAND)) {
         return beerocks::eSubbandType::LOW_SUBBAND;
     }
 
-    if ((100 <= chn) && (chn <= 165)) {
+    if ((START_OF_HIGH_BAND <= chn) && (chn <= END_OF_HIGH_BAND)) {
         return beerocks::eSubbandType::HIGH_SUBBAND;
     }
 
-    LOG(WARNING) << " Something incorrect in which_subband chn = " << (int)chn;
+    LOG(ERROR) << "Unsupported channel:" << (int)chn;
     return beerocks::eSubbandType::SUBBAND_UNKNOWN;
 }
 
 bool wireless_utils::is_low_subband(const uint32_t chn)
 {
-    if (chn <= END_OF_LOW_BAND) {
-        LOG(DEBUG) << "is_low_subband:: channel: " << (int)chn << " is LOW_SUBBAND ";
-        return true;
-    }
-
-    LOG(INFO) << "is_low_subband: chn = " << (int)chn << " returns false ";
-    return false;
+    return (which_subband(chn) == beerocks::eSubbandType::LOW_SUBBAND);
 }
+
 bool wireless_utils::is_high_subband(const uint32_t chn)
 {
-    if ((chn >= START_OF_HIGH_BAND)) {
-        LOG(DEBUG) << "is_high_subband:: channel: " << (int)chn << " is HIGH_SUBBAND ";
-        return true;
-    }
-
-    LOG(INFO) << "is_high_subband:: chn = " << (int)chn << " returns false ";
-    return false;
+    return (which_subband(chn) == beerocks::eSubbandType::HIGH_SUBBAND);
 }
+
 bool wireless_utils::is_dfs_channel(const uint32_t chn)
 {
     if (((chn >= START_OF_LOW_DFS_SUBBAND) && chn <= (END_OF_LOW_DFS_SUBBAND)) ||
