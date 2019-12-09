@@ -401,8 +401,7 @@ static std::shared_ptr<char> generate_client_assoc_event(const std::string &even
     msg->params.vap_id = vap_id;
     msg->params.mac    = beerocks::net::network_utils::mac_from_string(client_mac);
 
-    memset(&msg->params.capabilities, 0, sizeof(beerocks::message::sRadioCapabilities));
-
+    msg->params.capabilities = {};
     std::string ht_cap_str(ht_cap);
     get_ht_mcs_capabilities(HT_MCS, ht_cap_str, msg->params.capabilities);
 
