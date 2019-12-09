@@ -283,7 +283,6 @@ void son_management::handle_cli_message(Socket *sd,
         std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
         LOG(DEBUG) << "CLI client allow request for " << client_mac << " to " << hostap_mac;
 
-        auto current_ap_mac   = database.get_node_parent(client_mac);
         Socket *hostap_mac_sd = database.get_node_socket(hostap_mac);
         if (!cmdu_tx.create(0,
                             ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
@@ -301,7 +300,7 @@ void son_management::handle_cli_message(Socket *sd,
         }
 
         association_control_request_tlv->bssid_to_block_client() =
-            network_utils::mac_from_string(current_ap_mac);
+            network_utils::mac_from_string(hostap_mac);
         association_control_request_tlv->association_control() =
             wfa_map::tlvClientAssociationControlRequest::UNBLOCK;
         //TODO: Get real validity_period_sec
@@ -309,16 +308,6 @@ void son_management::handle_cli_message(Socket *sd,
         association_control_request_tlv->alloc_sta_list();
         auto sta_list         = association_control_request_tlv->sta_list(0);
         std::get<1>(sta_list) = network_utils::mac_from_string(client_mac);
-
-        auto vs_tlv =
-            message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationControlRequest>(
-                cmdu_tx);
-        if (!vs_tlv) {
-            LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationControlRequest failed";
-            isOK = false;
-            break;
-        }
-        vs_tlv->ipv4() = network_utils::ipv4_from_string(database.get_node_ipv4(client_mac));
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
         son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
@@ -377,7 +366,6 @@ void son_management::handle_cli_message(Socket *sd,
         LOG(DEBUG) << "CLI client disallow request for " << client_mac << " to " << hostap_mac;
 
         Socket *hostap_mac_sd = database.get_node_socket(hostap_mac);
-        auto current_ap_mac   = database.get_node_parent(client_mac);
         if (!cmdu_tx.create(0,
                             ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
             LOG(ERROR)
@@ -395,7 +383,7 @@ void son_management::handle_cli_message(Socket *sd,
         }
 
         association_control_request_tlv->bssid_to_block_client() =
-            network_utils::mac_from_string(current_ap_mac);
+            network_utils::mac_from_string(hostap_mac);
         association_control_request_tlv->association_control() =
             wfa_map::tlvClientAssociationControlRequest::BLOCK;
         //TODO: Get real validity_period_sec
