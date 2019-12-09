@@ -35,8 +35,3 @@ tlvVsClientAssociationEvent:
   disconnect_type: 
     _type: uint8_t
     _comment: relevant only on disconnect event
-
-
-tlvVsClientAssociationControlRequest:
-  _type: class
-  ipv4: beerocks::net::sIpv4Addr 
