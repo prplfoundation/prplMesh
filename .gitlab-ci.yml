@@ -15,6 +15,9 @@ build-in-docker:
   artifacts:
     paths:
       - build/install
+  tags:
+    - docker
+
 run-tests:
   stage: test
   image: $CI_REGISTRY_IMAGE/tests-runner:18.09.7-dind
@@ -31,7 +34,8 @@ run-tests:
     when: always
 
   tags:
-    - privileged
+    - docker
+    - docker-build
 
   after_script:
     - tools/docker/stop.sh -k -r
