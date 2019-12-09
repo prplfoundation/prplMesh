@@ -386,7 +386,6 @@ class TlvF:
             sys.exit(0)
 
         self.loadAllYamlFilesToDB()
-        self.copyIncludeSource()
         self.generateCode()
 
         if self.print_outputs:
@@ -1697,38 +1696,6 @@ class TlvF:
                 f.write(line + "\n")
             f.close()
 
-    def copyIncludeSource(self):
-        logConsole("Copy include source to output...")
-        if self.conf_include_source_files:
-            copy_list = []
-            for path in self.conf_include_source_files:
-                full_path = os.path.join(self.src_path, path).strip()
-                if full_path.endswith(".h") or full_path.endswith(".cpp"):
-                    if os.path.isfile(full_path):
-                        copy_list.append([full_path, path])
-                    else:
-                        self.abort("Can't open file: %s" % full_path)
-                else:
-                    
-                    for (dirpath, dirnames, filenames) in os.walk(full_path):
-                        for fname in filenames:
-                            f_path = os.path.join(dirpath, fname)
-                            if os.path.isfile(f_path) and (f_path.endswith(".h") or f_path.endswith(".cpp")):
-                                path = os.path.relpath(f_path, self.src_path)
-                                copy_list.append([f_path, path])
-
-            for copy_item in copy_list:
-                src = copy_item[0]
-                dst = os.path.join(self.conf_output_path, copy_item[1])
-                if src.endswith(".h"): self.output_directories_h.append(os.path.dirname(copy_item[1]))
-                elif src.endswith(".cpp"): self.output_directories_cpp.append(os.path.dirname(copy_item[1]))
-                self.logger.debug("Copy source files:\n  %s -->\n  %s" % (src, dst))
-                self.mkdir_p( os.path.dirname( dst ) )
-                with open(src, 'r') as infile, open(dst, 'w') as outfile:
-                    outfile.write(self.AUTO_GENERATED_MESSAGE)
-                    outfile.write(infile.read())
-                self.copied_file_list.append(src)
-            logConsole("Done\n")
 
     def logObject(self, obj, name=""):    
         self.logger.debug("=======%s=========" % name)
