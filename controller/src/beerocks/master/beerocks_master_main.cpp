@@ -304,7 +304,14 @@ int main(int argc, char *argv[])
     std::string master_uds  = beerocks_master_conf.temp_path + std::string(BEEROCKS_MASTER_UDS);
     std::string mrouter_uds = beerocks_master_conf.temp_path + std::string(BEEROCKS_MROUTER_UDS);
 
-    son::db master_db(master_conf, logger);
+    beerocks::net::network_utils::iface_info bridge_info;
+    auto &bridge_iface = beerocks_slave_conf.bridge_iface;
+    if (beerocks::net::network_utils::get_iface_info(bridge_info, bridge_iface) != 0) {
+        LOG(ERROR) << "Failed reading addresses from the bridge!";
+        return 0;
+    }
+
+    son::db master_db(master_conf, logger, bridge_info.mac);
     LOG(DEBUG) << "slave_keep_alive_retries=" << master_db.config.slave_keep_alive_retries;
     // diagnostics_thread diagnostics(master_db);
     son::master_thread son_master(master_uds, master_db);
