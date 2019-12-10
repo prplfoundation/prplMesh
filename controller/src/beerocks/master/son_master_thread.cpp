@@ -78,6 +78,32 @@ bool master_thread::init()
     set_server_max_connections(SOCKET_MAX_CONNECTIONS);
     set_select_timeout(SOCKETS_SELECT_TIMEOUT_MSEC);
 
+    if (!transport_socket_thread::init()) {
+        LOG(ERROR) << "Failed init of transport_socket_thread";
+        stop();
+        return false;
+    }
+
+    if (!bus_subscribe(std::vector<ieee1905_1::eMessageType>{
+            ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE,
+            ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE,
+            ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE,
+            ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE,
+            ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE,
+            ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE,
+            ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE,
+            ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE,
+            ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE,
+            ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE,
+            ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE,
+            ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE,
+            ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE,
+            ieee1905_1::eMessageType::ACK_MESSAGE,
+
+        })) {
+        LOG(ERROR) << "Failed subscribing to the Bus";
+    }
+
     auto new_statistics_polling_task =
         std::make_shared<statistics_polling_task>(database, cmdu_tx, tasks);
     tasks.add_task(new_statistics_polling_task);
@@ -112,7 +138,7 @@ bool master_thread::init()
         }
     }
 
-    return transport_socket_thread::init();
+    return true;
 }
 
 bool master_thread::work()
