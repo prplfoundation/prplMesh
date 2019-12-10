@@ -20,7 +20,6 @@ namespace beerocks {
 #define BEEROCKS_MONITOR "beerocks_monitor"
 #define BEEROCKS_CLI "beerocks_cli"
 
-#define BEEROCKS_MROUTER_UDS "uds_mrouter"
 #define BEEROCKS_SLAVE_UDS "uds_slave"
 #define BEEROCKS_MASTER_UDS "uds_master"
 #define BEEROCKS_PLAT_MGR_UDS "uds_platform_manager"

@@ -9,12 +9,11 @@
 #include <bcl/beerocks_config_file.h>
 #include <bcl/beerocks_logging.h>
 #include <bcl/beerocks_version.h>
+#include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
 #include "db/db.h"
 #include "son_master_thread.h"
-
-#include "beerocks_master_mrouter.h"
 
 // #include <string>
 
@@ -301,9 +300,7 @@ int main(int argc, char *argv[])
     son::db::sDbMasterConfig master_conf;
     fill_master_config(master_conf, beerocks_master_conf);
 
-    std::string master_uds  = beerocks_master_conf.temp_path + std::string(BEEROCKS_MASTER_UDS);
-    std::string mrouter_uds = beerocks_master_conf.temp_path + std::string(BEEROCKS_MROUTER_UDS);
-
+    std::string master_uds = beerocks_master_conf.temp_path + std::string(BEEROCKS_MASTER_UDS);
     beerocks::net::network_utils::iface_info bridge_info;
     auto &bridge_iface = beerocks_slave_conf.bridge_iface;
     if (beerocks::net::network_utils::get_iface_info(bridge_info, bridge_iface) != 0) {
@@ -315,13 +312,8 @@ int main(int argc, char *argv[])
     LOG(DEBUG) << "slave_keep_alive_retries=" << master_db.config.slave_keep_alive_retries;
     // diagnostics_thread diagnostics(master_db);
     son::master_thread son_master(master_uds, master_db);
-    beerocks::master_mrouter master_mrouter(mrouter_uds, master_uds,
-                                            beerocks_slave_conf.bridge_iface);
 
-    if (!master_mrouter.start()) {
-        LOG(ERROR) << "master_mrouter.start() ";
-        g_running = false;
-    } else if (!son_master.init()) {
+    if (!son_master.init()) {
         LOG(ERROR) << "son_master.init() ";
         g_running = false;
     }
@@ -349,7 +341,6 @@ int main(int argc, char *argv[])
     s_pLogger = nullptr;
 
     son_master.stop();
-    master_mrouter.stop();
 
     beerocks::os_utils::close_file(fd_log_file_std);
 

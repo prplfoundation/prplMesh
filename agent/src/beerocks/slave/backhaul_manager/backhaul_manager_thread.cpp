@@ -179,7 +179,7 @@ void main_thread::socket_connected(Socket *sd)
 bool main_thread::socket_disconnected(Socket *sd)
 {
     if (from_bus(sd)) {
-        LOG(ERROR) << "bus socket to mrouter disconnected " << intptr_t(sd)
+        LOG(ERROR) << "bus socket to the controller disconnected " << intptr_t(sd)
                    << " restarting backhaul manager";
         FSM_MOVE_STATE(RESTART);
         return true;
@@ -1275,8 +1275,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         // TODO: Add optimization of PID filtering for cases like the following:
         // 1. If VS message was sent by Controllers local agent to the controller, it is looped back.
-        // 2. If IRE is sending message to the mrouter of the Controller, it will be received in Controllers backhaul manager as well,
-        //    and should ignored.
+        // 2. If IRE is sending message to the Controller of the Controller, it will be received in
+        //    Controllers backhaul manager as well, and should ignored.
 
         // Handle the CMDU message. If the message was processed locally
         // (by the Backhaul Manager), this function will return 'true'.
