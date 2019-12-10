@@ -61,6 +61,7 @@ bool transport_socket_thread::bus_subscribe(const std::vector<ieee1905_1::eMessa
 bool transport_socket_thread::bus_connect(const std::string &beerocks_temp_path,
                                           const bool local_master)
 {
+    // This function must be use by the Agent side only to open UDS Bus socket to the controller
     if (!local_master) {
         LOG(FATAL) << "UDS_BUS is defined on non local master platform! STOPPING!";
         should_stop = true;
@@ -77,7 +78,7 @@ bool transport_socket_thread::bus_connect(const std::string &beerocks_temp_path,
     // Open a new connection to the master TCP
     THREAD_LOG(DEBUG) << "Connecting to controller on UDS...";
     std::string mrouter_uds =
-        beerocks_temp_path + std::string(BEEROCKS_MROUTER_UDS + std::string("_bus"));
+        beerocks_temp_path + std::string(BEEROCKS_MASTER_UDS + std::string("_bus"));
 
     bus             = new SocketClient(mrouter_uds);
     std::string err = bus->getError();
