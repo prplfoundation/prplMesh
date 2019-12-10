@@ -757,9 +757,8 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         // Input check
         auto &dest_alid = params["destalid"];
         std::transform(dest_alid.begin(), dest_alid.end(), dest_alid.begin(), ::tolower);
-        auto dest_sd = get_dev_send_1905_destination_socket(dest_alid);
 
-        if (dest_sd == nullptr) {
+        if (!validate_destination_alid(dest_alid)) {
             err_string = "invalid param value '" + params["destalid"] +
                          "' for param name 'DestALID', destination not found";
             LOG(ERROR) << err_string;
@@ -803,7 +802,7 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
             message::MESSAGE_BUFFER_LENGTH - sizeof(beerocks::message::sUdsHeader));
         if (create_cmdu(external_cmdu_tx, ieee1905_1::eMessageType(message_type), err_string)) {
             // Success
-            if (!send_cmdu_to_destination(dest_sd, external_cmdu_tx)) {
+            if (!send_cmdu_to_destination(external_cmdu_tx, dest_alid)) {
                 LOG(ERROR) << "Failed to send CMDU";
                 reply_ucc(eWfaCaStatus::ERROR, err_internal);
                 break;
@@ -845,7 +844,7 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
             LOG(INFO) << "Send TLV CMDU " << message_type << " with " << tlv_hex_list.size()
                       << " TLVs, length " << cmdu_tx.getMessageLength();
 
-            if (!send_cmdu_to_destination(dest_sd, cmdu_tx)) {
+            if (!send_cmdu_to_destination(cmdu_tx, dest_alid)) {
                 LOG(ERROR) << "Failed to send CMDU";
                 reply_ucc(eWfaCaStatus::ERROR, err_internal);
                 break;
