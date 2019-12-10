@@ -25,7 +25,11 @@ transport_socket_thread::~transport_socket_thread() {}
 
 bool transport_socket_thread::init()
 {
-    bus_init();
+    if (!bus_init()) {
+        THREAD_LOG(ERROR) << "bus_init failed";
+        return false;
+    }
+
     if (!socket_thread::init()) {
         THREAD_LOG(ERROR) << "Failed to init socket_thread";
         return false;
