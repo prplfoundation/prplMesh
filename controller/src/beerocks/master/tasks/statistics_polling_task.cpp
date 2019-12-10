@@ -42,8 +42,8 @@ void statistics_polling_task::work()
                 return;
             }
 
-            Socket *sd = database.get_node_socket(hostap);
-            son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap);
+            auto agent_mac = database.get_node_parent_ire(hostap);
+            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
             add_pending_mac(hostap,
                             beerocks_message::ACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE);
         }

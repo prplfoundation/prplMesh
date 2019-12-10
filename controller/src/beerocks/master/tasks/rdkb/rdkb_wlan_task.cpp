@@ -149,8 +149,8 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
                 } else { //(database.is_node_2.4ghz(hostap))
                     update->params().cfg = cfg_2;
                 }
-                auto sd_hostap = database.get_node_socket(radio_mac);
-                if (!son_actions::send_cmdu_to_agent(sd_hostap, cmdu_tx, radio_mac)) {
+                auto agent_mac = database.get_node_parent_ire(radio_mac);
+                if (!son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac)) {
                     send_bml_response(int(STEERING_SET_GROUP_RESPONSE), event_obj->sd,
                                       -BML_RET_CMDU_FAIL);
                     break;
@@ -230,8 +230,8 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
 
             LOG(DEBUG) << "Sending ACTION_CONTROL_STEERING_CLIENT_SET_REQUEST to radio "
                        << radio_mac;
-            auto sd = database.get_node_socket(radio_mac);
-            if (!son_actions::send_cmdu_to_agent(sd, cmdu_tx, radio_mac)) {
+            auto agent_mac = database.get_node_parent_ire(radio_mac);
+            if (!son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac)) {
                 send_bml_response(int(STEERING_SET_GROUP_RESPONSE), event_obj->sd,
                                   -BML_RET_CMDU_FAIL);
                 break;
@@ -353,8 +353,8 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
                 break;
             }
 
-            auto sd_hostap = database.get_node_socket(radio_mac);
-            if (!son_actions::send_cmdu_to_agent(sd_hostap, cmdu_tx, radio_mac)) {
+            auto agent_mac = database.get_node_parent_ire(radio_mac);
+            if (!son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac)) {
                 send_bml_response(int(STEERING_SET_GROUP_RESPONSE), event_obj->sd,
                                   -BML_RET_CMDU_FAIL);
                 break;
@@ -922,7 +922,7 @@ void rdkb_wlan_task::send_bml_event_to_listeners(ieee1905_1::CmduMessageTx &cmdu
 
 bool rdkb_wlan_task::send_steering_conf_to_agent(const std::string &radio_mac)
 {
-    auto sd            = database.get_node_socket(radio_mac);
+    auto agent_mac     = database.get_node_parent_ire(radio_mac);
     auto is_radio_5ghz = database.is_node_5ghz(radio_mac);
 
     for (const auto &steering_group : rdkb_db.get_steering_group_list()) {
@@ -942,9 +942,9 @@ bool rdkb_wlan_task::send_steering_conf_to_agent(const std::string &radio_mac)
                                    : steering_group.second->get_config_2ghz().get_ap_config();
         auto bssid = is_radio_5ghz ? steering_group.second->get_config_5ghz().bssid
                                    : steering_group.second->get_config_2ghz().bssid;
-        TASK_LOG(DEBUG) << "send cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST to agent sd "
-                        << sd << " radio_mac " << radio_mac;
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, radio_mac);
+        TASK_LOG(DEBUG) << "send cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST to agent "
+                        << agent_mac << " radio_mac " << radio_mac;
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
         //sending client configuration for specifc group
         for (auto client_entry : client_list) {
             auto update = message_com::create_vs_message<
@@ -961,7 +961,7 @@ bool rdkb_wlan_task::send_steering_conf_to_agent(const std::string &radio_mac)
             update->params().config = *(client_entry.second->get_client_config());
             TASK_LOG(DEBUG) << "send cACTION_CONTROL_STEERING_CLIENT_SET to agent sd " << sd
                             << " radio_mac " << radio_mac;
-            son_actions::send_cmdu_to_agent(sd, cmdu_tx, radio_mac);
+            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
         }
     }
     return true;

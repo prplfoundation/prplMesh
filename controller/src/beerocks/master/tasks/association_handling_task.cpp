@@ -109,8 +109,8 @@ void association_handling_task::work()
             }
 
             auto radio_mac = database.get_node_parent_radio(new_hostap_mac);
-            Socket *sd     = database.get_node_socket(radio_mac);
-            son_actions::send_cmdu_to_agent(sd, cmdu_tx, radio_mac);
+            auto agent_mac = database.get_node_parent_ire(radio_mac);
+            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
         }
 
         if (database.settings_client_11k_roaming() &&
@@ -132,7 +132,7 @@ void association_handling_task::work()
     case CHECK_11K_BEACON_MEASURE_CAP: {
         std::string parent_mac = database.get_node_parent(sta_mac);
         std::string radio_mac  = database.get_node_parent_radio(parent_mac);
-        Socket *slave_sd       = database.get_node_socket(parent_mac);
+        auto agent_mac         = database.get_node_parent_ire(parent_mac);
 
         auto measurement_request = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST>(cmdu_tx, id);
@@ -158,7 +158,7 @@ void association_handling_task::work()
         TASK_LOG(DEBUG) << "requested beacon measurement request from sta: " << sta_mac
                         << " on hostap: " << parent_mac;
 
-        son_actions::send_cmdu_to_agent(slave_sd, cmdu_tx, radio_mac);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
         set_responses_timeout(BEACON_MEASURE_REQ_TIME_SPAN);
         break;
     }
@@ -189,7 +189,7 @@ void association_handling_task::work()
              * send measurement request to get a valid RSSI reading
              */
         std::string hostap_mac = database.get_node_parent(sta_mac);
-        Socket *hostap_sd      = database.get_node_socket(hostap_mac);
+        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
 
         if (hostap_mac != original_parent_mac ||
             database.get_node_state(sta_mac) != beerocks::STATE_CONNECTED) {
@@ -215,7 +215,7 @@ void association_handling_task::work()
         measurement_request->params().cross     = 0;
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
 
         TASK_LOG(DEBUG) << "requested rx rssi measurement from " << hostap_mac << " for sta "
                         << sta_mac;
