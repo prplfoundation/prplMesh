@@ -6,6 +6,7 @@
  * See LICENSE file for more details.
  */
 
+#include <bcl/beerocks_backport.h>
 #include <bcl/network/network_utils.h>
 #include <btl/btl.h>
 #include <easylogging++.h>
@@ -13,7 +14,30 @@
 using namespace beerocks::btl;
 using namespace beerocks::net;
 
-void transport_socket_thread::bus_init() {}
+bool transport_socket_thread::bus_init()
+{
+    if (bus_server_socket) {
+        remove_socket(bus_server_socket.get());
+        bus_server_socket->closeSocket();
+        bus_server_socket.reset(nullptr);
+    }
+
+    auto unix_socket_path_bus = unix_socket_path + "_bus";
+
+    bus_server_socket = std::make_unique<SocketServer>(unix_socket_path_bus, 1);
+    if (!bus_server_socket) {
+        LOG(ERROR) << "bus_server_socket == nullptr";
+        return false;
+    } else if (!bus_server_socket->getError().empty()) {
+        LOG(ERROR) << "failed to create server_socket, error:" << server_socket->getError();
+        return false;
+    }
+
+    LOG(DEBUG) << "new SocketServer on BUS " << unix_socket_path_bus;
+    add_socket(bus_server_socket.get(), false);
+    return true;
+}
+
 bool transport_socket_thread::configure_ieee1905_transport_interfaces(
     const std::string &bridge_iface, const std::vector<std::string> &ifaces)
 {
@@ -52,9 +76,11 @@ bool transport_socket_thread::bus_connect(const std::string &beerocks_temp_path,
 
     // Open a new connection to the master TCP
     THREAD_LOG(DEBUG) << "Connecting to controller on UDS...";
-    std::string mrouter_uds = beerocks_temp_path + std::string(BEEROCKS_MROUTER_UDS);
-    bus                     = new SocketClient(mrouter_uds);
-    std::string err         = bus->getError();
+    std::string mrouter_uds =
+        beerocks_temp_path + std::string(BEEROCKS_MROUTER_UDS + std::string("_bus"));
+
+    bus             = new SocketClient(mrouter_uds);
+    std::string err = bus->getError();
     if (!err.empty()) {
         delete bus;
         bus = nullptr;
@@ -120,7 +146,21 @@ bool transport_socket_thread::work()
         return true;
     }
 
-    //If something happened on the server socket , then its an incoming connection
+    //If something happened on the server socket (BUS), then its an incoming connection
+    if (bus_server_socket && read_ready(bus_server_socket.get())) {
+        clear_ready(bus_server_socket.get());
+        THREAD_LOG(DEBUG) << "accept new connection on BUS server socket sd="
+                          << bus_server_socket.get();
+        Socket *sd = bus_server_socket->acceptConnections();
+        if (sd == nullptr || (!bus_server_socket->getError().empty())) {
+            THREAD_LOG(ERROR) << "acceptConnections == nullptr: " << bus_server_socket->getError();
+            return false;
+        }
+        THREAD_LOG(DEBUG) << "new connection on " << unix_socket_path << "_bus, sd=" << sd;
+        bus_connected(sd);
+    }
+
+    //If something happened on the server socket (UDS), then its an incoming connection
     if (server_socket && read_ready(server_socket.get())) {
         clear_ready(server_socket.get());
         THREAD_LOG(DEBUG) << "accept new connection on server socket sd=" << server_socket.get();

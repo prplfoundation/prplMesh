@@ -53,7 +53,7 @@ protected:
     static const std::string MULTICAST_MAC_ADDR;
 
 private:
-    void bus_init();
+    bool bus_init();
     bool bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
                   const std::string &src_mac, uint16_t length);
     bool handle_cmdu_message_bus();
@@ -62,6 +62,7 @@ private:
 
 #ifdef UDS_BUS
     Socket *bus = nullptr;
+    std::unique_ptr<SocketServer> bus_server_socket;
 #else
     std::shared_ptr<mapf::LocalBusInterface> bus = nullptr;
     std::shared_ptr<mapf::Poller> poller         = nullptr;

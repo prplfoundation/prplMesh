@@ -56,6 +56,7 @@ protected:
     virtual bool read_ready(Socket *s) { return select.readReady(s); }
 
     ieee1905_1::CmduMessageTx cmdu_tx;
+    const std::string unix_socket_path;
 
 private:
     // Only mapf_socket thread need to access these functions and memebers, other classes should not
@@ -66,7 +67,6 @@ private:
     bool handle_cmdu_message_uds(Socket *sd);
     bool verify_cmdu(message::sUdsHeader *uds_header);
 
-    std::string unix_socket_path;
     uint8_t rx_buffer[message::MESSAGE_BUFFER_LENGTH];
     uint8_t tx_buffer[message::MESSAGE_BUFFER_LENGTH];
     ieee1905_1::CmduMessageRx cmdu_rx;

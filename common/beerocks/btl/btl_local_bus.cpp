@@ -63,13 +63,21 @@ static bool subscribe_topic_to_bus(std::shared_ptr<mapf::LocalBusInterface> bus,
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// Implementation ///////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void transport_socket_thread::bus_init()
+bool transport_socket_thread::bus_init()
 {
     bus = std::make_shared<mapf::LocalBusInterface>(mapf::Context::Instance());
-    LOG_IF(!bus, FATAL) << "Failed allocating bus!";
+    if (!bus) {
+        LOG(FATAL) << "Failed allocating bus!";
+        return false;
+    }
 
     poller = std::make_shared<mapf::Poller>();
-    LOG_IF(!poller, FATAL) << "Failed allocating Poller!";
+    if (!poller) {
+        LOG(FATAL) << "Failed allocating Poller!";
+        return false;
+    }
+
+    return true;
 }
 
 bool transport_socket_thread::bus_subscribe(const std::vector<ieee1905_1::eMessageType> &msg_types)
