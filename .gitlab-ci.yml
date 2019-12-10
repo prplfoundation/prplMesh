@@ -17,6 +17,7 @@ build-in-docker:
       - build/install
 run-tests:
   stage: test
+  image: $CI_REGISTRY_IMAGE/tests-runner:18.09.7-dind
   script:
     - cd tools/docker
     # Try to pull from dockerhub, build the container images if that fails
@@ -24,12 +25,13 @@ run-tests:
     - ./run.sh -f --entrypoint "$PWD/../../build/install/bin/tests/tlvf_test"
     - ./tests/test_flows.sh -v
 
-  before_script:
-    # check the availability of some commands:
-    - command >/dev/null -v python3
+  artifacts:
+    paths:
+      - logs
+    when: always
+
+  tags:
+    - privileged
 
   after_script:
     - tools/docker/stop.sh -k -r
-
-  tags:
-    - dockerbuild
