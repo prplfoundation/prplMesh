@@ -237,10 +237,6 @@ public:
 
     Socket *get_node_socket(std::string mac);
     bool set_node_socket(std::string mac, Socket *socket);
-
-    bool disconnected_slave_mac_queue_empty();
-    std::string disconnected_slave_mac_queue_pop();
-    void disconnected_slave_mac_queue_push(std::string node_mac);
     std::string node_to_string(std::string mac);
 
     /**

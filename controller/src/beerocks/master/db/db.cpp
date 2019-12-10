@@ -781,23 +781,6 @@ bool db::set_node_socket(std::string mac, Socket *socket)
     return true;
 }
 
-bool db::disconnected_slave_mac_queue_empty() { return disconnected_slave_mac_queue.empty(); }
-
-std::string db::disconnected_slave_mac_queue_pop()
-{
-    std::string node_mac;
-    if (disconnected_slave_mac_queue.size() != 0) {
-        node_mac = disconnected_slave_mac_queue.front();
-        disconnected_slave_mac_queue.pop();
-    }
-    return node_mac;
-}
-
-void db::disconnected_slave_mac_queue_push(std::string node_mac)
-{
-    disconnected_slave_mac_queue.push(node_mac);
-}
-
 std::string db::node_to_string(std::string mac)
 {
     auto n = get_node(mac);
