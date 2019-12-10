@@ -49,7 +49,6 @@ protected:
     virtual std::string print_cmdu_types(const beerocks::message::sUdsHeader *cmdu_header) override;
 
 private:
-    void disconnected_slave_cleanup();
     bool handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool
     handle_cmdu_control_message(Socket *sd,

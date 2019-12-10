@@ -162,55 +162,27 @@ std::string master_thread::print_cmdu_types(const message::sUdsHeader *cmdu_head
 
 bool master_thread::socket_disconnected(Socket *sd)
 {
-    std::string mac = sd->getPeerMac();
-
-    if (database.get_node_socket(mac) == sd) {
-        LOG(DEBUG) << "socket disconnected, mac=" << mac << ", sd=" << intptr_t(sd);
-
-        auto backhaul = database.get_node_parent_backhaul(mac);
-        if (database.get_node_socket(backhaul) == sd) {
-            son_actions::handle_dead_node(backhaul, database.get_node_parent(backhaul), database,
-                                          cmdu_tx, tasks);
-        } else {
-            son_actions::handle_dead_node(mac, database.get_node_parent(mac), database, cmdu_tx,
-                                          tasks);
-        }
-
-        disconnected_slave_cleanup();
+    if (sd == nullptr) {
+        LOG(DEBUG) << "sd == nullptr, ignore";
         return false;
-    } else {
-        if (mac.empty()) {
-            LOG(DEBUG) << "socket with no mac disconnect sd=" << intptr_t(sd);
-            database.remove_cli_socket(sd);
-            database.remove_bml_socket(sd);
-#ifdef BEEROCKS_RDKB
-            if (database.settings_rdkb_extensions()) {
-                //TODO - use rdkb_wlan_hal_db instead of task event
-                rdkb_wlan_task::listener_general_register_unregister_event new_event;
-                new_event.sd = sd;
-                tasks.push_event(database.get_rdkb_wlan_task_id(),
-                                 rdkb_wlan_task::events::STEERING_REMOVE_SOCKET, &new_event);
-            }
-#endif
-        } else {
-            LOG(DEBUG) << "old socket disconnected of mac " << mac
-                       << ", ignoring. sd=" << intptr_t(sd);
-        }
     }
-    return true;
-}
 
-void master_thread::disconnected_slave_cleanup()
-{
-    while (!database.disconnected_slave_mac_queue_empty()) {
-        std::string slave_mac = database.disconnected_slave_mac_queue_pop();
-        auto sd               = database.get_node_socket(slave_mac);
-        if (sd) {
-            LOG(DEBUG) << "closing socket sd=" << intptr_t(sd) << " of node " << slave_mac;
-            remove_socket(sd);
-            delete sd;
-        }
+    // Removing the socket only from the vector of socket in the database if exists,
+    // not from socket thread.
+    database.remove_cli_socket(sd);
+    database.remove_bml_socket(sd);
+
+#ifdef BEEROCKS_RDKB
+    if (database.settings_rdkb_extensions()) {
+        //TODO - use rdkb_wlan_hal_db instead of task event
+        rdkb_wlan_task::listener_general_register_unregister_event new_event;
+        new_event.sd = sd;
+        tasks.push_event(database.get_rdkb_wlan_task_id(),
+                         rdkb_wlan_task::events::STEERING_REMOVE_SOCKET, &new_event);
     }
+#endif
+    // Returning true so the socket_thread will handle the socket removal.
+    return true;
 }
 
 bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
@@ -247,8 +219,6 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         LOG(DEBUG) << "received 1905.1 cmdu message";
         handle_cmdu_1905_1_message(sd, cmdu_rx);
     }
-
-    disconnected_slave_cleanup();
 
     return true;
 }

@@ -340,14 +340,6 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
         // close slave socket
         if (mac_type == beerocks::TYPE_SLAVE) {
             auto slave_parent = database.get_node_parent(mac);
-            if (database.is_node_wireless(mac) && database.is_hostap_backhaul_manager(mac)) {
-                Socket *sd = database.get_node_socket(slave_parent);
-                if (sd != nullptr) {
-                    if (sd->isOpen()) {
-                        database.disconnected_slave_mac_queue_push(slave_parent);
-                    }
-                }
-            }
             LOG(DEBUG) << "slave_parent: " << slave_parent
                        << " slave_parent_type=" << int(database.get_node_type(slave_parent));
             if (database.get_node_type(slave_parent) == beerocks::TYPE_GW) {
@@ -367,18 +359,7 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
 
             auto nodes = database.get_node_subtree(mac);
             for (auto &node_mac : nodes) {
-                if (database.get_node_type(node_mac) == beerocks::TYPE_SLAVE) {
-                    auto slave_parent = database.get_node_parent(mac);
-                    if (database.is_node_wireless(mac) &&
-                        database.is_hostap_backhaul_manager(mac)) {
-                        Socket *sd = database.get_node_socket(slave_parent);
-                        if (sd != nullptr) {
-                            if (sd->isOpen()) {
-                                database.disconnected_slave_mac_queue_push(slave_parent);
-                            }
-                        }
-                    }
-                } else if (database.get_node_type(node_mac) == beerocks::TYPE_IRE) {
+                if (database.get_node_type(node_mac) == beerocks::TYPE_IRE) {
                     // get in here when handling dead node on IRE backhaul
                     // set all platform bridges as non operational
                     LOG(DEBUG) << "setting platform with bridge mac " << node_mac
