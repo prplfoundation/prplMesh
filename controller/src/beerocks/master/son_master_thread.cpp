@@ -187,6 +187,39 @@ bool master_thread::socket_disconnected(Socket *sd)
 
 bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
+    auto uds_header = message_com::get_uds_header(cmdu_rx);
+    if (uds_header == nullptr) {
+        LOG(ERROR) << "get_uds_header() returns nullptr";
+        return false;
+    }
+
+    std::string src_mac = network_utils::mac_to_string(uds_header->src_bridge_mac);
+    std::string dst_mac = network_utils::mac_to_string(uds_header->dst_bridge_mac);
+
+    // LOG(DEBUG) << "handle_cmdu() - received msg from " << std::string(from_bus(sd) ? "bus" : "uds") << ", src=" << src_mac
+    //            << ", dst=" << dst_mac << ", " << print_cmdu_types(uds_header); // floods the log
+
+    if (from_bus(sd)) {
+
+        if (src_mac == network_utils::ZERO_MAC_STRING) {
+            LOG(ERROR) << "src_mac is zero!";
+            return false;
+        }
+
+        if (dst_mac == network_utils::ZERO_MAC_STRING) {
+            LOG(ERROR) << "dst_mac is zero!";
+            return false;
+        }
+
+        // Filter messages which are not destined to the controller
+        if (dst_mac != MULTICAST_MAC_ADDR && dst_mac != database.get_local_bridge_mac()) {
+            return true;
+        }
+
+        // TODO: Add optimization of PID filtering for cases like the following:
+        // If VS message was sent by Controllers local agent to the controller, it is looped back.
+    }
+
     bool vendor_specific = false;
 
     if (cmdu_rx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
