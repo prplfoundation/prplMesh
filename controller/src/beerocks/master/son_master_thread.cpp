@@ -106,18 +106,34 @@ bool master_thread::init()
 
     auto new_statistics_polling_task =
         std::make_shared<statistics_polling_task>(database, cmdu_tx, tasks);
+    if (!new_statistics_polling_task) {
+        LOG(FATAL) << "Failed allocating memory";
+        return false;
+    }
     tasks.add_task(new_statistics_polling_task);
 
     auto new_bml_task = std::make_shared<bml_task>(database, cmdu_tx, tasks);
+    if (!new_bml_task) {
+        LOG(FATAL) << "Failed allocating memory";
+        return false;
+    }
     tasks.add_task(new_bml_task);
 
     auto new_channel_selection_task =
         std::make_shared<channel_selection_task>(database, cmdu_tx, tasks);
+    if (!new_channel_selection_task) {
+        LOG(FATAL) << "Failed allocating memory";
+        return false;
+    }
     tasks.add_task(new_channel_selection_task);
 
     if (database.settings_health_check()) {
         auto new_network_health_check_task = std::make_shared<network_health_check_task>(
             database, cmdu_tx, tasks, 0, "network_health_check_task");
+        if (!new_network_health_check_task) {
+            LOG(FATAL) << "Failed allocating memory";
+            return false;
+        }
         tasks.add_task(new_network_health_check_task);
     } else {
         LOG(DEBUG) << "Health check is DISABLED!";
@@ -133,7 +149,7 @@ bool master_thread::init()
     if (database.config.ucc_listener_port != 0) {
         m_controller_ucc_listener = std::make_unique<controller_ucc_listener>(database);
         if (m_controller_ucc_listener && !m_controller_ucc_listener->start("ucc_listener")) {
-            LOG(ERROR) << "failed start controller_ucc_listener";
+            LOG(FATAL) << "failed start controller_ucc_listener";
             return false;
         }
     }
