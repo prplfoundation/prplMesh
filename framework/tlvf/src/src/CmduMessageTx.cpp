@@ -19,10 +19,8 @@ CmduMessageTx::~CmduMessageTx() {}
 
 std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType message_type)
 {
-    // we set swap = true so that each class will have swap = true,
-    // but since parse = false, no swap will be done till we explicitely
-    // call tlvs.swap() in Finalize(), and there, we do swapping based on
-    // the caller swap_needed parameter
+    // parse - false since this is for TX
+    // swap - false since on TX we do swap in Finalize(swap_needed)
     tlvs.reset(false, false);
     header = nullptr;
     auto cmduhdr = tlvs.addClass<cCmduHeader>();

@@ -50,6 +50,11 @@ class beerocks_header {
         {
             return getClass<beerocks_message::cACTION_HEADER>();
         }
+        void swap(bool swap_needed)
+        {
+            if (swap_needed)
+                m_contents->swap();
+        }
     private:
         std::unique_ptr<ieee1905_1::TlvList> m_contents;
     };
@@ -145,7 +150,6 @@ public:
         hdr->actionhdr()->action()    = (beerocks_message::eAction)action;
         hdr->actionhdr()->action_op() = action_op;
         hdr->actionhdr()->id()        = id;
-        // actions.swap(); //Problem - we don't know here if we need to call swap or not.
 
         return hdr;
     }
