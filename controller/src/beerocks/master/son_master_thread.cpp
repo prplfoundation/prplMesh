@@ -242,7 +242,7 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                                                tasks);
         } break;
         case beerocks_message::ACTION_CONTROL: {
-            handle_cmdu_control_message(sd, beerocks_header, cmdu_rx);
+            handle_cmdu_control_message(src_mac, beerocks_header, cmdu_rx);
         } break;
         default: {
             LOG(ERROR) << "Unknown message, action: " << int(beerocks_header->action());
@@ -250,41 +250,42 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
     } else {
         LOG(DEBUG) << "received 1905.1 cmdu message";
-        handle_cmdu_1905_1_message(sd, cmdu_rx);
+        handle_cmdu_1905_1_message(src_mac, cmdu_rx);
     }
 
     return true;
 }
 
-bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
+                                               ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     switch (cmdu_rx.getMessageType()) {
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE:
-        return handle_cmdu_1905_autoconfiguration_search(sd, cmdu_rx);
+        return handle_cmdu_1905_autoconfiguration_search(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE:
-        return handle_cmdu_1905_autoconfiguration_WSC(sd, cmdu_rx);
+        return handle_cmdu_1905_autoconfiguration_WSC(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE:
-        return handle_cmdu_1905_channel_preference_report(sd, cmdu_rx);
+        return handle_cmdu_1905_channel_preference_report(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE:
-        return handle_cmdu_1905_channel_selection_response(sd, cmdu_rx);
+        return handle_cmdu_1905_channel_selection_response(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE:
-        return handle_cmdu_1905_steering_completed_message(sd, cmdu_rx);
+        return handle_cmdu_1905_steering_completed_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::ACK_MESSAGE:
-        return handle_cmdu_1905_ack_message(sd, cmdu_rx);
+        return handle_cmdu_1905_ack_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE:
-        return handle_cmdu_1905_client_steering_btm_report_message(sd, cmdu_rx);
+        return handle_cmdu_1905_client_steering_btm_report_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE:
-        return handle_cmdu_1905_operating_channel_report(sd, cmdu_rx);
+        return handle_cmdu_1905_operating_channel_report(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE:
-        return handle_cmdu_1905_topology_discovery(sd, cmdu_rx);
+        return handle_cmdu_1905_topology_discovery(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE:
-        return handle_cmdu_1905_higher_layer_data_message(sd, cmdu_rx);
+        return handle_cmdu_1905_higher_layer_data_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE:
-        return handle_cmdu_1905_topology_notification(sd, cmdu_rx);
+        return handle_cmdu_1905_topology_notification(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE:
-        return handle_cmdu_1905_link_metric_response(sd, cmdu_rx);
+        return handle_cmdu_1905_link_metric_response(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE:
-        return handle_cmdu_1905_ap_metric_response(sd, cmdu_rx);
+        return handle_cmdu_1905_ap_metric_response(src_mac, cmdu_rx);
     default:
         break;
     }
@@ -293,7 +294,7 @@ bool master_thread::handle_cmdu_1905_1_message(Socket *sd, ieee1905_1::CmduMessa
     return true;
 }
 
-bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
+bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string &src_mac,
                                                               ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     std::string al_mac;
@@ -461,7 +462,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(Socket *sd,
         wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER;
 
     LOG(DEBUG) << "sending autoconfig response message";
-    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+    return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
 }
 
 /**
@@ -737,7 +738,7 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
  * @return true on success
  * @return false on failure
  */
-bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
+bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &src_mac,
                                                            ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
@@ -861,7 +862,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
 
     if (intel_agent) {
         LOG(INFO) << "Intel radio agent join (al_mac=" << al_mac << " ruid=" << ruid;
-        if (!handle_intel_slave_join(sd, radio_basic_caps, cmdu_rx, cmdu_tx)) {
+        if (!handle_intel_slave_join(src_mac, radio_basic_caps, cmdu_rx, cmdu_tx)) {
             LOG(ERROR) << "Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid
                        << ")";
             return false;
@@ -871,7 +872,8 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
         // Multi-AP Agent doesn't say anything about the bridge, so we have to rely on Intel Slave Join for that.
         // We'll use AL-MAC as the bridge
         // TODO convert source address into AL-MAC address
-        if (!handle_non_intel_slave_join(sd, radio_basic_caps, tlvwscM1, al_mac, ruid, cmdu_tx)) {
+        if (!handle_non_intel_slave_join(src_mac, radio_basic_caps, tlvwscM1, al_mac, ruid,
+                                         cmdu_tx)) {
             LOG(ERROR) << "Non-Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid
                        << ")";
             return false;
@@ -884,13 +886,13 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(Socket *sd,
             LOG(ERROR) << "Failed building message!";
             return false;
         }
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+        son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
     }
 
     return true;
 }
 
-bool master_thread::handle_cmdu_1905_channel_preference_report(Socket *sd,
+bool master_thread::handle_cmdu_1905_channel_preference_report(const std::string &src_mac,
                                                                ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
@@ -1061,10 +1063,11 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(Socket *sd,
         return true;
     }
 
-    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+    return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
 }
 
-bool master_thread::handle_cmdu_1905_ack_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+bool master_thread::handle_cmdu_1905_ack_message(const std::string &src_mac,
+                                                 ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
     //TODO: the ACK should be sent to the correct task and will be done as part of agent certification
@@ -1072,7 +1075,7 @@ bool master_thread::handle_cmdu_1905_ack_message(Socket *sd, ieee1905_1::CmduMes
     return true;
 }
 
-bool master_thread::handle_cmdu_1905_steering_completed_message(Socket *sd,
+bool master_thread::handle_cmdu_1905_steering_completed_message(const std::string &src_mac,
                                                                 ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
@@ -1085,11 +1088,11 @@ bool master_thread::handle_cmdu_1905_steering_completed_message(Socket *sd,
         return false;
     }
     LOG(DEBUG) << "sending ACK message back to agent, mid=" << std::hex << int(mid);
-    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+    return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
 }
 
 bool master_thread::handle_cmdu_1905_client_steering_btm_report_message(
-    Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+    const std::string &src_mac, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
     LOG(INFO) << "Received CLIENT_STEERING_BTM_REPORT_MESSAGE, mid=" << std::hex << int(mid);
@@ -1108,7 +1111,7 @@ bool master_thread::handle_cmdu_1905_client_steering_btm_report_message(
         return false;
     }
     LOG(DEBUG) << "sending ACK message back to agent";
-    son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+    son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
 
     std::string client_mac = network_utils::mac_to_string(steering_btm_report->sta_mac());
     uint8_t status_code    = steering_btm_report->btm_status_code();
@@ -1133,7 +1136,7 @@ bool master_thread::handle_cmdu_1905_client_steering_btm_report_message(
     return true;
 }
 
-bool master_thread::handle_cmdu_1905_channel_selection_response(Socket *sd,
+bool master_thread::handle_cmdu_1905_channel_selection_response(const std::string &src_mac,
                                                                 ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
@@ -1251,7 +1254,7 @@ print_ap_metric_map(std::unordered_map<sMacAddr, son::node::ap_metrics_data> &ap
     }
 }
 
-bool master_thread::handle_cmdu_1905_link_metric_response(Socket *sd,
+bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src_mac,
                                                           ieee1905_1::CmduMessageRx &cmdu_rx)
 {
 
@@ -1467,7 +1470,7 @@ bool master_thread::construct_combined_infra_metric()
     return true;
 }
 
-bool master_thread::handle_cmdu_1905_ap_metric_response(Socket *sd,
+bool master_thread::handle_cmdu_1905_ap_metric_response(const std::string &src_mac,
                                                         ieee1905_1::CmduMessageRx &cmdu_rx)
 {
 
@@ -1515,7 +1518,7 @@ bool master_thread::handle_cmdu_1905_ap_metric_response(Socket *sd,
     return true;
 }
 
-bool master_thread::handle_cmdu_1905_operating_channel_report(Socket *sd,
+bool master_thread::handle_cmdu_1905_operating_channel_report(const std::string &src_mac,
                                                               ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
@@ -1559,10 +1562,10 @@ bool master_thread::handle_cmdu_1905_operating_channel_report(Socket *sd,
         return false;
     }
 
-    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+    return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
 }
 
-bool master_thread::handle_cmdu_1905_topology_discovery(Socket *sd,
+bool master_thread::handle_cmdu_1905_topology_discovery(const std::string &src_mac,
                                                         ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
@@ -1582,12 +1585,11 @@ bool master_thread::handle_cmdu_1905_topology_discovery(Socket *sd,
     database.add_node(network_utils::mac_from_string(al_mac), network_utils::ZERO_MAC,
                       beerocks::TYPE_IRE);
     database.set_node_state(al_mac, beerocks::STATE_CONNECTED);
-    database.set_node_socket(al_mac, sd);
 
     return true;
 }
 
-bool master_thread::handle_cmdu_1905_higher_layer_data_message(Socket *sd,
+bool master_thread::handle_cmdu_1905_higher_layer_data_message(const std::string &src_mac,
                                                                ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     const auto mid = cmdu_rx.getMessageId();
@@ -1611,10 +1613,10 @@ bool master_thread::handle_cmdu_1905_higher_layer_data_message(Socket *sd,
         return false;
     }
     LOG(DEBUG) << "sending ACK message to the agent, mid=" << std::hex << int(mid);
-    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+    return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
 }
 
-bool master_thread::handle_cmdu_1905_topology_notification(Socket *sd,
+bool master_thread::handle_cmdu_1905_topology_notification(const std::string &src_mac,
                                                            ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
@@ -1754,7 +1756,7 @@ bool master_thread::handle_cmdu_1905_topology_notification(Socket *sd,
 }
 
 bool master_thread::handle_intel_slave_join(
-    Socket *sd, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
+    const std::string &src_mac, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
     ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx)
 {
     // Prepare outcoming response vs tlv
@@ -1822,7 +1824,7 @@ bool master_thread::handle_intel_slave_join(
                (notification->platform_settings().local_master ? "MASTER_" : std::string()) +
                bridge_mac.substr(bridge_mac.size() - 5, bridge_mac.size() - 1));
 
-    LOG(INFO) << "IRE Slave joined, sd=" << intptr_t(sd) << std::endl
+    LOG(INFO) << "IRE Slave joined" << std::endl
               << "    slave_version=" << slave_version << std::endl
               << "    gw_ipv4=" << gw_ipv4 << std::endl
               << "    gw_bridge_mac=" << gw_bridge_mac << std::endl
@@ -1853,7 +1855,7 @@ bool master_thread::handle_intel_slave_join(
                               network_utils::mac_from_string(parent_bssid_mac)));
 
             join_response->err_code() = beerocks::JOIN_RESP_REJECT;
-            return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+            return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
         }
 
         // sending to BML listeners, client disconnect notification on ire backhaul before changing it type from TYPE_CLIENT to TYPE_IRE_BACKHAUL
@@ -1982,8 +1984,7 @@ bool master_thread::handle_intel_slave_join(
                 continue;
             }
             auto ire_backhaul_mac = database.get_node_parent_backhaul(ire);
-            if (!database.is_node_wireless(ire_backhaul_mac) &&
-                nullptr != database.get_node_socket(ire)) {
+            if (!database.is_node_wireless(ire_backhaul_mac)) {
                 LOG(DEBUG) << "run_client_locating_task client_mac = " << ire;
                 auto new_task = std::make_shared<client_locating_task>(database, cmdu_tx, tasks,
                                                                        ire, true, 2000);
@@ -2010,7 +2011,7 @@ bool master_thread::handle_intel_slave_join(
         join_response->err_code() = beerocks::JOIN_RESP_VERSION_MISMATCH;
         string_utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
                                   BEEROCKS_VERSION, message::VERSION_LENGTH);
-        return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+        return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
     }
 
     beerocks::eIfaceType hostap_iface_type =
@@ -2155,7 +2156,7 @@ bool master_thread::handle_intel_slave_join(
         join_response->config().ire_rssi_report_rate_sec = database.config.ire_rssi_report_rate_sec;
 
         LOG(DEBUG) << "send SLAVE_JOINED_RESPONSE";
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+        son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
     }
 
     // calling this function to update arp monitor with new ip addr (bridge ip), which is diffrent from the ip received from, dhcp on the backhaul
@@ -2283,7 +2284,7 @@ bool master_thread::autoconfig_wsc_parse_radio_caps(
 }
 
 bool master_thread::handle_non_intel_slave_join(
-    Socket *sd, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
+    const std::string &src_mac, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
     std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1, std::string bridge_mac, std::string radio_mac,
     ieee1905_1::CmduMessageTx &cmdu_tx)
 {
@@ -2298,7 +2299,7 @@ bool master_thread::handle_non_intel_slave_join(
     std::string eth_switch_mac   = network_utils::mac_to_string(mac);
     std::string parent_bssid_mac = network_utils::ZERO_MAC_STRING;
     auto manufacturer            = tlvwscM1->manufacturer_str();
-    LOG(INFO) << "IRE generic Slave joined, sd=" << intptr_t(sd) << std::endl
+    LOG(INFO) << "IRE generic Slave joined" << std::endl
               << "    manufacturer=" << manufacturer << std::endl
               << "    parent_bssid_mac=" << parent_bssid_mac << std::endl
               << "    al_mac=" << bridge_mac << std::endl
@@ -2419,11 +2420,11 @@ bool master_thread::handle_non_intel_slave_join(
     LOG(DEBUG) << "BML, sending IRE connect CONNECTION_CHANGE for mac " << bml_new_event.mac;
 
     LOG(DEBUG) << "send AP_AUTOCONFIG_WSC M2";
-    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+    return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
 }
 
 bool master_thread::handle_cmdu_control_message(
-    Socket *sd, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
+    const std::string &src_mac, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     std::string hostap_mac = network_utils::mac_to_string(beerocks_header->radio_mac());
@@ -2907,7 +2908,7 @@ bool master_thread::handle_cmdu_control_message(
             memset(request->data(), 0, request->data_length());
         }
 
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap_mac);
+        son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database, hostap_mac);
         break;
     }
     case beerocks_message::ACTION_CONTROL_CONTROLLER_PING_RESPONSE: {
@@ -2953,7 +2954,7 @@ bool master_thread::handle_cmdu_control_message(
                     LOG(DEBUG) << "sending PING_MSG_REQUEST for slave " << hostap_mac
                                << " , can't update last ping sent time for ";
                 }
-                son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap_mac);
+                son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database, hostap_mac);
             } else if (response->seq() == (response->total() - 1)) {
                 if (!database.update_node_last_ping_received_avg(hostap_mac, response->total())) {
                     LOG(DEBUG) << "last PING_MSG_RESPONSE received from slave " << hostap_mac

@@ -89,13 +89,9 @@ void client_locating_task::work()
                 TASK_LOG(WARNING) << "backhaul_manager_hostap.empty()!";
                 continue;
             }
-            Socket *sd = database.get_node_socket(backhaul_manager_hostap);
-            if (sd == nullptr) {
-                TASK_LOG(WARNING) << "NULL socket for connected backhaul_manager_hostap!";
-                continue;
-            }
+            auto agent_mac = database.get_node_parent_ire(backhaul_manager_hostap);
 
-            son_actions::send_cmdu_to_agent(sd, cmdu_tx, backhaul_manager_hostap);
+            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, backhaul_manager_hostap);
 
             add_pending_mac(backhaul_manager_hostap,
                             beerocks_message::ACTION_CONTROL_ARP_QUERY_RESPONSE);

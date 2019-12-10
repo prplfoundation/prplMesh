@@ -171,18 +171,14 @@ bool network_health_check_task::send_arp_query(std::string mac)
 
     const auto parent_radio = database.get_node_parent_radio(mac);
 
-    Socket *sd = database.get_node_socket(parent_radio);
+    auto agent_mac = database.get_node_parent_ire(parent_radio);
 
-    if (sd == nullptr) {
-        LOG(WARNING) << "NULL socket for connected client!, parent_mac = " << parent_radio;
-        return false;
-    }
     if (database.get_node_state(parent_radio) != beerocks::STATE_CONNECTED) {
         LOG(WARNING) << "parent_mac not connected , parent_mac = " << parent_radio;
         return false;
     }
 
-    if (!son_actions::send_cmdu_to_agent(sd, cmdu_tx, parent_radio)) {
+    if (!son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio)) {
         LOG(ERROR) << "send_message failed - parent_mac " << parent_radio << " client " << mac;
         return false;
     }

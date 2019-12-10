@@ -73,7 +73,8 @@ void load_balancer_task::work()
                      */
                 TASK_LOG(DEBUG) << "load info outdated, requestsing load measurement from hostap "
                                 << hostap;
-                son_actions::send_cmdu_to_agent(database.get_node_socket(hostap), cmdu_tx, hostap);
+                son_actions::send_cmdu_to_agent(database.get_node_parent_ire(hostap), cmdu_tx,
+                                                database, hostap);
                 add_pending_mac(hostap,
                                 beerocks_message::ACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE);
                 load_info_valid = false;

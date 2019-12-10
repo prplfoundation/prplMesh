@@ -217,7 +217,7 @@ void optimal_path_task::work()
         measurement_request.rand_ival = beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
         measurement_request.duration  = beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
         measurement_request.sta_mac   = network_utils::mac_from_string(sta_mac);
-        current_hostap_sd             = database.get_node_socket(current_hostap);
+        current_agent_mac             = database.get_node_parent_ire(current_hostap);
 
         iterator_element_counter = 1; // initialize counter value
         state                    = REQUEST_11K_MEASUREMENTS_BY_BSSID;
@@ -306,7 +306,8 @@ void optimal_path_task::work()
                     }
                     request->params() = measurement_request;
 
-                    son_actions::send_cmdu_to_agent(current_hostap_sd, cmdu_tx, current_hostap);
+                    son_actions::send_cmdu_to_agent(current_agent_mac, cmdu_tx, database,
+                                                    current_hostap);
 
                     set_responses_timeout(BEACON_MEASUREMENT_REQUEST_TIMEOUT_MSEC);
 
@@ -744,8 +745,8 @@ void optimal_path_task::work()
         }
 
         // send req to sta hostap //
-        Socket *sd   = database.get_node_socket(current_hostap);
-        auto request = message_com::create_vs_message<
+        auto agent_mac = database.get_node_parent_ire(current_hostap);
+        auto request   = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>(cmdu_tx, id);
         if (request == nullptr) {
             LOG(ERROR)
@@ -764,7 +765,7 @@ void optimal_path_task::work()
         //set ap associated ire timestamp
         database.set_measurement_sent_timestamp(current_hostap);
 
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, current_hostap);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, current_hostap);
         add_pending_mac(current_hostap,
                         beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE);
         if (request->params().cross) {
@@ -1239,45 +1240,36 @@ bool optimal_path_task::check_if_sta_can_steer_to_ap(std::string ap_mac)
     return true;
 }
 
-void optimal_path_task::send_rssi_measurement_request(Socket *sd, std::string client_mac,
-                                                      int channel, std::string hostap, int id)
+void optimal_path_task::send_rssi_measurement_request(const std::string &agent_mac,
+                                                      std::string client_mac, int channel,
+                                                      std::string hostap, int id)
 {
-    if (sd) {
-
-        auto hostap_mac = database.get_node_parent(client_mac);
-        auto request    = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>(cmdu_tx, id);
-        if (request == nullptr) {
-            LOG(ERROR)
-                << "Failed building ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST message!";
-            return;
-        }
-        database.get_node_parent_backhaul(hostap);
-        request->params().mac       = network_utils::mac_from_string(client_mac);
-        request->params().ipv4      = network_utils::ipv4_from_string("0.0.0.0");
-        request->params().cross     = 1;
-        request->params().channel   = channel;
-        request->params().bandwidth = database.get_node_bw(hostap_mac);
-        request->params().mon_ping_burst_pkt_num =
-            database.get_measurement_window_size(current_hostap);
-        request->params().vht_center_frequency =
-            database.get_hostap_vht_center_frequency(hostap_mac);
-        TASK_LOG(DEBUG) << "vht_center_frequency = " << int(request->params().vht_center_frequency);
-        //taking measurement request time stamp
-        database.set_measurement_sent_timestamp(hostap);
-        //sending delay parameter to measurement request
-        request->params().measurement_delay = database.get_measurement_delay(hostap);
-
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap);
-
-        add_pending_mac(hostap,
-                        beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE);
-        TASK_LOG(DEBUG) << "sending cross rx_rssi measurement request to " << hostap
-                        << " for sta=" << client_mac << " channel=" << channel;
-    } else {
-        TASK_LOG(ERROR) << "sd == nullptr (sd error /no match found), sending cross rx_rssi "
-                           "measurement request to ";
+    auto hostap_mac = database.get_node_parent(client_mac);
+    auto request    = message_com::create_vs_message<
+        beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>(cmdu_tx, id);
+    if (request == nullptr) {
+        LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST message!";
+        return;
     }
+    database.get_node_parent_backhaul(hostap);
+    request->params().mac                    = network_utils::mac_from_string(client_mac);
+    request->params().ipv4                   = network_utils::ipv4_from_string("0.0.0.0");
+    request->params().cross                  = 1;
+    request->params().channel                = channel;
+    request->params().bandwidth              = database.get_node_bw(hostap_mac);
+    request->params().mon_ping_burst_pkt_num = database.get_measurement_window_size(current_hostap);
+    request->params().vht_center_frequency   = database.get_hostap_vht_center_frequency(hostap_mac);
+    TASK_LOG(DEBUG) << "vht_center_frequency = " << int(request->params().vht_center_frequency);
+    //taking measurement request time stamp
+    database.set_measurement_sent_timestamp(hostap);
+    //sending delay parameter to measurement request
+    request->params().measurement_delay = database.get_measurement_delay(hostap);
+
+    son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
+
+    add_pending_mac(hostap, beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE);
+    TASK_LOG(DEBUG) << "sending cross rx_rssi measurement request to " << hostap
+                    << " for sta=" << client_mac << " channel=" << channel;
     return;
 }
 
@@ -1322,14 +1314,10 @@ void optimal_path_task::handle_response(std::string mac,
         LOG_CLI(DEBUG, "ACTION_CONTROL_CLIENT_MEASUREMENT_START connected AP, client_mac="
                            << client_mac << " received from hostap " << hostap_mac
                            << " channel=" << channel);
-        Socket *sd = nullptr;
+
         for (auto &hostap : hostaps) {
-            sd = database.get_node_socket(hostap);
-            if (!sd) {
-                TASK_LOG(ERROR) << "sd is NULL!!!";
-                return;
-            }
-            send_rssi_measurement_request(sd, client_mac, channel, hostap, id);
+            auto agent_mac = database.get_node_parent_ire(hostap);
+            send_rssi_measurement_request(agent_mac, client_mac, channel, hostap, id);
         }
 
         break;

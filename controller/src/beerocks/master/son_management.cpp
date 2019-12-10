@@ -52,7 +52,7 @@ void son_management::handle_cli_message(Socket *sd,
         }
         std::string slave = network_utils::mac_to_string(cli_request->mac());
         if (database.is_hostap_active(slave)) {
-            Socket *hostap_mac_sd = database.get_node_socket(slave);
+            auto agent_mac = database.get_node_parent_ire(slave);
 
             auto request = message_com::create_vs_message<
                 beerocks_message::cACTION_CONTROL_CONTROLLER_PING_REQUEST>(cmdu_tx);
@@ -88,7 +88,7 @@ void son_management::handle_cli_message(Socket *sd,
             }
 
             const auto parent_radio = database.get_node_parent_radio(slave);
-            son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
         }
         break;
     }
@@ -134,13 +134,13 @@ void son_management::handle_cli_message(Socket *sd,
         for (const auto &slave : slaves) {
             LOG(DEBUG) << "tending to send PING_MSG_REQUEST to " << slave;
             if (database.is_hostap_active(slave)) {
-                Socket *hostap_mac_sd = database.get_node_socket(slave);
+                auto agent_mac = database.get_node_parent_ire(slave);
                 if (!database.update_node_last_ping_sent(slave)) {
                     LOG(DEBUG) << "PING_MSG_REQUEST received for slave " << slave
                                << " , can't update last ping sent time for ";
                 }
                 LOG(DEBUG) << "send PING_MSG_REQUEST to " << slave;
-                son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, slave);
+                son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, slave);
             }
         }
         break;
@@ -170,13 +170,14 @@ void son_management::handle_cli_message(Socket *sd,
             auto hostaps = database.get_active_hostaps();
             for (auto hostap : hostaps) {
                 LOG(DEBUG) << "CLI requesting stats measurement from " << hostap;
-                son_actions::send_cmdu_to_agent(database.get_node_socket(hostap), cmdu_tx, hostap);
+                son_actions::send_cmdu_to_agent(database.get_node_parent_ire(hostap), cmdu_tx,
+                                                database, hostap);
             }
         } else {
             LOG(DEBUG) << "CLI requesting stats measurements from " << hostap_mac;
             const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-            son_actions::send_cmdu_to_agent(database.get_node_socket(hostap_mac), cmdu_tx,
-                                            parent_radio);
+            son_actions::send_cmdu_to_agent(database.get_node_parent_ire(hostap_mac), cmdu_tx,
+                                            database, parent_radio);
         }
         break;
     }
@@ -188,8 +189,8 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        auto hostap_mac       = network_utils::mac_to_string(cli_request->ap_mac());
-        Socket *hostap_mac_sd = database.get_node_socket(hostap_mac);
+        auto hostap_mac = network_utils::mac_to_string(cli_request->ap_mac());
+        auto agent_mac  = database.get_node_parent_ire(hostap_mac);
 
         auto request = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST>(cmdu_tx);
@@ -204,7 +205,7 @@ void son_management::handle_cli_message(Socket *sd,
         request->params().vap_id  = cli_request->vap_id();
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
         break;
     }
     case beerocks_message::ACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST: {
@@ -216,7 +217,7 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
         std::string hostap_mac = network_utils::mac_to_string(cli_request->ap_mac());
-        Socket *hostap_mac_sd  = database.get_node_socket(hostap_mac);
+        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
 
         auto request = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST>(cmdu_tx);
@@ -230,7 +231,7 @@ void son_management::handle_cli_message(Socket *sd,
         request->params().vap_id = cli_request->vap_id();
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
 
         break;
     }
@@ -260,11 +261,10 @@ void son_management::handle_cli_message(Socket *sd,
             for (auto ire : ires) {
                 auto slaves = database.get_node_children(ire, beerocks::TYPE_SLAVE);
                 for (const auto &slave : slaves) {
-                    auto slave_sd = database.get_node_socket(slave);
-                    if (database.get_node_state(slave) != beerocks::STATE_DISCONNECTED &&
-                        slave_sd != nullptr) {
+                    auto agent_mac = database.get_node_parent_ire(slave);
+                    if (database.get_node_state(slave) != beerocks::STATE_DISCONNECTED) {
                         const auto parent_radio = database.get_node_parent_radio(slave);
-                        son_actions::send_cmdu_to_agent(slave_sd, cmdu_tx, parent_radio);
+                        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
                     }
                 }
             }
@@ -283,7 +283,8 @@ void son_management::handle_cli_message(Socket *sd,
         std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
         LOG(DEBUG) << "CLI client allow request for " << client_mac << " to " << hostap_mac;
 
-        Socket *hostap_mac_sd = database.get_node_socket(hostap_mac);
+        auto current_ap_mac = database.get_node_parent(client_mac);
+        auto agent_mac      = database.get_node_parent_ire(hostap_mac);
         if (!cmdu_tx.create(0,
                             ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
             LOG(ERROR)
@@ -310,7 +311,7 @@ void son_management::handle_cli_message(Socket *sd,
         std::get<1>(sta_list) = network_utils::mac_from_string(client_mac);
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
         break;
     }
     case beerocks_message::ACTION_CLI_CROSS_RX_RSSI_MEASUREMENT: {
@@ -326,7 +327,7 @@ void son_management::handle_cli_message(Socket *sd,
         std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
         std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
         std::string sta_parent = database.get_node_parent(client_mac);
-        Socket *hostap_mac_sd  = database.get_node_socket(hostap_mac);
+        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
 
         auto request = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>(cmdu_tx);
@@ -348,7 +349,7 @@ void son_management::handle_cli_message(Socket *sd,
         request->params().mon_ping_burst_pkt_num = 0;
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
         LOG(DEBUG) << "CLI cross rx_rssi measurement request for sta=" << client_mac
                    << " hostap=" << hostap_mac;
         break;
@@ -365,7 +366,8 @@ void son_management::handle_cli_message(Socket *sd,
         std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
         LOG(DEBUG) << "CLI client disallow request for " << client_mac << " to " << hostap_mac;
 
-        Socket *hostap_mac_sd = database.get_node_socket(hostap_mac);
+        auto agent_mac      = database.get_node_parent_ire(hostap_mac);
+        auto current_ap_mac = database.get_node_parent(client_mac);
         if (!cmdu_tx.create(0,
                             ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
             LOG(ERROR)
@@ -393,7 +395,7 @@ void son_management::handle_cli_message(Socket *sd,
         std::get<1>(sta_list) = network_utils::mac_from_string(client_mac);
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
         break;
     }
     case beerocks_message::ACTION_CLI_CLIENT_DISCONNECT_REQUEST: {
@@ -409,8 +411,8 @@ void son_management::handle_cli_message(Socket *sd,
         LOG(DEBUG) << "CLI client disassociate request, client " << client_mac << " hostap "
                    << hostap_mac;
 
-        Socket *hostap_mac_sd = database.get_node_socket(hostap_mac);
-        auto request          = message_com::create_vs_message<
+        auto agent_mac = database.get_node_parent_ire(hostap_mac);
+        auto request   = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST>(cmdu_tx);
         if (request == nullptr) {
             LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_DISCONNECT_REQUEST message!";
@@ -423,7 +425,7 @@ void son_management::handle_cli_message(Socket *sd,
         request->type()   = cli_request->type();
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
         break;
     }
     case beerocks_message::ACTION_CLI_CLIENT_BEACON_11K_REQUEST: {
@@ -455,7 +457,7 @@ void son_management::handle_cli_message(Socket *sd,
         ///////////////////////////////////////////////
 
         std::string hostap_mac = database.get_node_parent(client_mac);
-        Socket *hostap_mac_sd  = database.get_node_socket(hostap_mac);
+        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI beacon request for " << client_mac << " to " << hostap_mac;
 
         auto request = message_com::create_vs_message<
@@ -496,7 +498,7 @@ void son_management::handle_cli_message(Socket *sd,
         }
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
 
         break;
     }
@@ -511,7 +513,7 @@ void son_management::handle_cli_message(Socket *sd,
 
         std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
         std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
-        Socket *hostap_mac_sd  = database.get_node_socket(hostap_mac);
+        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI channel load request for " << client_mac << " to " << hostap_mac;
 
         auto request = message_com::create_vs_message<
@@ -546,7 +548,7 @@ void son_management::handle_cli_message(Socket *sd,
         request->params().new_ch_center_freq_seg_1         = 0;
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
 
         break;
     }
@@ -561,7 +563,7 @@ void son_management::handle_cli_message(Socket *sd,
 
         std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
         std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
-        Socket *hostap_mac_sd  = database.get_node_socket(hostap_mac);
+        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI statistics request for " << client_mac << " to " << hostap_mac;
 
         auto request = message_com::create_vs_message<
@@ -634,7 +636,7 @@ void son_management::handle_cli_message(Socket *sd,
         // request.params.dot11RSNAStatsCCMPReplaysThreshold;
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
 
         break;
     }
@@ -649,7 +651,7 @@ void son_management::handle_cli_message(Socket *sd,
 
         std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
         std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
-        Socket *hostap_mac_sd  = database.get_node_socket(hostap_mac);
+        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI link measurement request for " << client_mac << " to " << hostap_mac;
 
         auto request = message_com::create_vs_message<
@@ -664,7 +666,7 @@ void son_management::handle_cli_message(Socket *sd,
         request->mac() = cli_request->client_mac();
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
         break;
     }
     case beerocks_message::ACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST: {
@@ -676,7 +678,7 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
         std::string hostap_mac = network_utils::mac_to_string(cli_request->mac());
-        Socket *hostap_mac_sd  = database.get_node_socket(hostap_mac);
+        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI ap channel switch request for " << hostap_mac;
 
         auto request = message_com::create_vs_message<
@@ -691,7 +693,7 @@ void son_management::handle_cli_message(Socket *sd,
         request->cs_params() = cli_request->cs_params();
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
         break;
     }
     case beerocks_message::ACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS: {
@@ -796,7 +798,7 @@ void son_management::handle_cli_message(Socket *sd,
                     tasks.add_task(new_task);
                 } else if (database.get_node_type(client_mac) == beerocks::TYPE_IRE_BACKHAUL) {
                     LOG(TRACE) << "CLI start roaming task for " << client_mac;
-                    //auto new_task = std::make_shared<optimize_ire_task>(database,  cmdu_tx, tasks, client_mac, "");
+                    //auto new_task = std::make_shared<optimize_ire_task>(database, cmdu_tx, tasks, client_mac, "");
                     auto new_task = std::make_shared<optimal_path_task>(database, cmdu_tx, tasks,
                                                                         client_mac, 0, "");
                     tasks.add_task(new_task);
@@ -1472,14 +1474,14 @@ void son_management::handle_bml_message(
                 auto slaves = database.get_active_hostaps();
                 for (const auto &slave : slaves) {
                     if (database.is_hostap_active(slave)) {
-                        Socket *slave_sd = database.get_node_socket(slave);
-                        son_actions::send_cmdu_to_agent(slave_sd, cmdu_tx, slave);
+                        auto agent_mac = database.get_node_parent_ire(slave);
+                        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, slave);
                     }
                 }
             } else {
-                Socket *slave_sd        = database.get_node_socket(dst_mac);
+                auto agent_mac          = database.get_node_parent_ire(dst_mac);
                 const auto parent_radio = database.get_node_parent_radio(dst_mac);
-                son_actions::send_cmdu_to_agent(slave_sd, cmdu_tx, parent_radio);
+                son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
             }
         }
         // send response
@@ -1735,13 +1737,9 @@ void son_management::handle_bml_message(
             return;
         }
 
-        auto agent_sd = database.get_node_socket(al_mac);
-        if (!agent_sd) {
-            LOG(ERROR) << "Failed to get node socket for al_mac " << al_mac;
-            return;
-        }
+        auto agent_mac = database.get_node_parent_ire(al_mac);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database);
 
-        son_actions::send_cmdu_to_agent(agent_sd, cmdu_tx);
     } break;
 
     case beerocks_message::ACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST: {
@@ -1757,12 +1755,7 @@ void son_management::handle_bml_message(
         std::string al_mac   = network_utils::mac_to_string(bml_request->al_mac());
         std::string ruid_mac = network_utils::mac_to_string(bml_request->ruid());
         std::string key      = database.get_node_key(al_mac, ruid_mac);
-        Socket *son_slave_sd = database.get_node_socket(key);
-
-        if (son_slave_sd == nullptr) {
-            LOG(ERROR) << "Could not find socket for al_mac=" << al_mac << ", ruid=" << ruid_mac;
-            return;
-        }
+        auto agent_mac       = database.get_node_parent_ire(key);
 
         LOG(INFO) << "ACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST "
                   << ", al_mac=" << al_mac << ", ruid=" << ruid_mac;
@@ -1775,7 +1768,7 @@ void son_management::handle_bml_message(
             return;
         }
 
-        son_actions::send_cmdu_to_agent(son_slave_sd, cmdu_tx);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database);
         break;
     }
     default: {

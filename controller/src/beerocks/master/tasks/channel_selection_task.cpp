@@ -518,8 +518,8 @@ void channel_selection_task::work()
         request->params().failsafe_channel_bandwidth = database.config.fail_safe_5G_bw;
         request->params().vht_center_frequency       = database.config.fail_safe_5G_vht_frequency;
         memset(request->params().restricted_channels, 0, message::RESTRICTED_CHANNEL_LENGTH);
-        Socket *sd = database.get_node_socket(hostap_mac);
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap_mac);
+        auto agent_mac = database.get_node_parent_ire(hostap_mac);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap_mac);
 
         set_events_timeout(RESTRICTED_CHANNEL_RESPONSE_WAIT_TIME);
         cs_wait_for_event(eEvent::RESTRICTED_CHANNEL_RESPONSE_EVENT);
@@ -555,8 +555,8 @@ void channel_selection_task::work()
             TASK_LOG(INFO) << " restricted_channels: "
                            << int(request->params().restricted_channels[i]);
         }
-        Socket *sd = database.get_node_socket(hostap_mac);
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap_mac);
+        auto agent_mac = database.get_node_parent_ire(hostap_mac);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap_mac);
 
         set_events_timeout(RESTRICTED_CHANNEL_RESPONSE_WAIT_TIME);
         cs_wait_for_event(eEvent::RESTRICTED_CHANNEL_RESPONSE_EVENT);
@@ -578,8 +578,8 @@ void channel_selection_task::work()
         request->params().failsafe_channel_bandwidth = 0;
         memset(request->params().restricted_channels, 0, message::RESTRICTED_CHANNEL_LENGTH);
         TASK_LOG(INFO) << "***** clear 2.4G restricted channel for " << hostap_mac;
-        Socket *sd = database.get_node_socket(hostap_mac);
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap_mac);
+        auto agent_mac = database.get_node_parent_ire(hostap_mac);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap_mac);
 
         set_events_timeout(RESTRICTED_CHANNEL_RESPONSE_WAIT_TIME);
         cs_wait_for_event(eEvent::RESTRICTED_CHANNEL_RESPONSE_EVENT);
@@ -615,8 +615,8 @@ void channel_selection_task::work()
             TASK_LOG(INFO) << " restricted_channels: "
                            << int(request->params().restricted_channels[i]);
         }
-        Socket *sd = database.get_node_socket(hostap_mac);
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap_mac);
+        auto agent_mac = database.get_node_parent_ire(hostap_mac);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap_mac);
 
         set_events_timeout(RESTRICTED_CHANNEL_RESPONSE_WAIT_TIME);
         cs_wait_for_event(eEvent::RESTRICTED_CHANNEL_RESPONSE_EVENT);
@@ -654,8 +654,8 @@ void channel_selection_task::work()
         request->cs_params().channel              = 0;
         request->cs_params().bandwidth            = beerocks::BANDWIDTH_20;
         request->cs_params().vht_center_frequency = 0;
-        Socket *sd                                = database.get_node_socket(hostap_mac);
-        if (!son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap_mac)) {
+        auto agent_mac                            = database.get_node_parent_ire(hostap_mac);
+        if (!son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap_mac)) {
             LOG(ERROR) << "Send cmdu failed!";
             FSM_MOVE_STATE(GOTO_IDLE);
             break;
@@ -674,7 +674,7 @@ void channel_selection_task::work()
         break;
     }
     case eState::SEND_CHANNEL_SWITCH: {
-        Socket *sd = database.get_node_socket(hostap_mac);
+        auto agent_mac = database.get_node_parent_ire(hostap_mac);
 
         // CMDU Message
         auto request = message_com::create_vs_message<
@@ -685,7 +685,7 @@ void channel_selection_task::work()
         }
 
         request->cs_params() = channel_switch_request;
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap_mac);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap_mac);
 
         set_events_timeout(ACS_RESPONSE_WAIT_TIME);
         cs_wait_for_event(eEvent::CSA_EVENT);
@@ -1673,25 +1673,21 @@ bool channel_selection_task::find_all_scan_hostap(const std::string &hostap_pare
 void channel_selection_task::send_backhaul_reset()
 {
     TASK_LOG(DEBUG) << "*****************send_backhaul_reset**************************** :";
-    Socket *sd             = nullptr;
     auto hostap_parent_mac = database.get_node_parent(hostap_mac);
     std::string backhaul_manager_slave_mac;
     TASK_LOG(DEBUG) << "insert ire_mac_should_reset to hostap_parent_mac = " << hostap_parent_mac
                     << " hostap_mac = " << hostap_mac;
     if (get_backhaul_manager_slave(backhaul_manager_slave_mac)) {
-        sd = database.get_node_socket(backhaul_manager_slave_mac);
-        if (sd != nullptr) {
-            auto request =
-                message_com::create_vs_message<beerocks_message::cACTION_CONTROL_BACKHAUL_RESET>(
-                    cmdu_tx);
-            if (request == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return;
-            }
-            son_actions::send_cmdu_to_agent(sd, cmdu_tx, backhaul_manager_slave_mac);
-        } else {
-            TASK_LOG(INFO) << " sd == nullptr!!! ";
+        auto agent_mac = database.get_node_parent_ire(backhaul_manager_slave_mac);
+
+        auto request =
+            message_com::create_vs_message<beerocks_message::cACTION_CONTROL_BACKHAUL_RESET>(
+                cmdu_tx);
+        if (request == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return;
         }
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, backhaul_manager_slave_mac);
     } else {
         TASK_LOG(INFO) << " hostap_backhaul manager, not joined yet, hostap = " << hostap_mac;
     }
@@ -1820,7 +1816,7 @@ void channel_selection_task::align_channel_to_80Mhz()
 
 void channel_selection_task::send_ap_disabled_notification()
 {
-    Socket *hostap_mac_sd = database.get_node_socket(hostap_mac);
+    auto agent_mac = database.get_node_parent_ire(hostap_mac);
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER>(
             cmdu_tx);
@@ -1829,7 +1825,7 @@ void channel_selection_task::send_ap_disabled_notification()
         return;
     }
     TASK_LOG(DEBUG) << "send ACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER to mac " << hostap_mac;
-    son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, hostap_mac);
+    son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap_mac);
 }
 
 void channel_selection_task::cs_wait_for_event(eEvent cs_event)

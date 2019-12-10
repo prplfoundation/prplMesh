@@ -23,6 +23,8 @@
 #include <beerocks/tlvf/beerocks_message_cli.h>
 #include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
 
+#include "son_master_thread.h"
+
 using namespace beerocks;
 using namespace net;
 using namespace son;
@@ -57,7 +59,7 @@ void son_actions::handle_completed_connection(db &database, ieee1905_1::CmduMess
          * stop monitoring on all other APs
          */
         for (auto &hostap : hostaps) {
-            Socket *hostap_sd = database.get_node_socket(hostap);
+            auto agent_mac = database.get_node_parent_ire(hostap);
 
             LOG(DEBUG) << "STOP_MONITORING_REQUEST hostap_mac=" << hostap << " sta_mac "
                        << client_mac;
@@ -71,15 +73,15 @@ void son_actions::handle_completed_connection(db &database, ieee1905_1::CmduMess
             }
 
             stop_request->mac() = network_utils::mac_from_string(client_mac);
-            son_actions::send_cmdu_to_agent(hostap_sd, cmdu_tx, hostap);
+            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
         }
 
         /*
          * send disassociate request to previous hostap to clear STA mac from its list
          */
         if (!previous_hostap_mac.empty() && previous_hostap_mac != new_hostap_mac) {
-            Socket *previous_hostap_sd = database.get_node_socket(previous_hostap_mac);
-            auto disassoc_request      = message_com::create_vs_message<
+            auto previous_agent_mac = database.get_node_parent_ire(previous_hostap_mac);
+            auto disassoc_request   = message_com::create_vs_message<
                 beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST>(cmdu_tx);
 
             if (disassoc_request == nullptr) {
@@ -91,7 +93,7 @@ void son_actions::handle_completed_connection(db &database, ieee1905_1::CmduMess
             disassoc_request->type()   = beerocks_message::eDisconnect_Type_Disassoc;
 
             const auto parent_radio = database.get_node_parent_radio(previous_hostap_mac);
-            son_actions::send_cmdu_to_agent(previous_hostap_sd, cmdu_tx, parent_radio);
+            son_actions::send_cmdu_to_agent(previous_agent_mac, cmdu_tx, database, parent_radio);
             LOG(DEBUG) << "sending DISASSOCIATE request, client " << client_mac << " hostap "
                        << previous_hostap_mac;
         }
@@ -153,7 +155,7 @@ void son_actions::unblock_sta(db &database, ieee1905_1::CmduMessageTx &cmdu_tx, 
             LOG(DEBUG) << "hostap " << hostap << " is excluded from steering, skipping";
             continue;
         }
-        Socket *sd = database.get_node_socket(hostap);
+        auto agent_mac = database.get_node_parent_ire(hostap);
         if (!cmdu_tx.create(0,
                             ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
             LOG(ERROR)
@@ -180,7 +182,7 @@ void son_actions::unblock_sta(db &database, ieee1905_1::CmduMessageTx &cmdu_tx, 
         auto sta_list         = association_control_request_tlv->sta_list(0);
         std::get<1>(sta_list) = network_utils::mac_from_string(sta_mac);
 
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
         LOG(DEBUG) << "sending allow request for " << sta_mac << " to " << hostap;
     }
 }
@@ -218,7 +220,7 @@ void son_actions::disconnect_client(db &database, ieee1905_1::CmduMessageTx &cmd
                                     uint32_t reason)
 {
 
-    Socket *sd = database.get_node_socket(bssid);
+    auto agent_mac = database.get_node_parent_ire(bssid);
 
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST>(
@@ -234,7 +236,7 @@ void son_actions::disconnect_client(db &database, ieee1905_1::CmduMessageTx &cmd
     request->reason() = reason;
 
     const auto parent_radio = database.get_node_parent_radio(bssid);
-    son_actions::send_cmdu_to_agent(sd, cmdu_tx, parent_radio);
+    son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
     LOG(DEBUG) << "sending DISASSOCIATE request, client " << client_mac << " bssid " << bssid;
 }
 
@@ -294,23 +296,18 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
      */
     if ((mac_type == beerocks::TYPE_IRE_BACKHAUL || mac_type == beerocks::TYPE_CLIENT) &&
         database.is_node_wireless(mac)) {
-        Socket *hostap_mac_sd = database.get_node_socket(hostap_mac);
-        if (hostap_mac_sd) {
-            LOG(DEBUG) << "STOP_MONITORING mac " << mac << " hostapd " << parent_hostap_mac;
-            auto stop_request = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST>(cmdu_tx);
-            if (stop_request == nullptr) {
-                LOG(ERROR)
-                    << "Failed building ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST message!";
-                return;
-            }
-            stop_request->mac() = network_utils::mac_from_string(mac);
-
-            const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-            son_actions::send_cmdu_to_agent(hostap_mac_sd, cmdu_tx, parent_radio);
-        } else {
-            LOG(ERROR) << "hostap_mac_sd == nullptr";
+        auto agent_mac = database.get_node_parent_ire(hostap_mac);
+        LOG(DEBUG) << "STOP_MONITORING mac " << mac << " hostapd " << parent_hostap_mac;
+        auto stop_request = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST>(cmdu_tx);
+        if (stop_request == nullptr) {
+            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST message!";
+            return;
         }
+        stop_request->mac() = network_utils::mac_from_string(mac);
+
+        const auto parent_radio = database.get_node_parent_radio(hostap_mac);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
     }
     if (parent_hostap_mac == hostap_mac) {
         if (mac_type == beerocks::TYPE_IRE_BACKHAUL || mac_type == beerocks::TYPE_CLIENT) {
@@ -366,7 +363,8 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
                                << " as non operational";
                     database.set_node_operational_state(node_mac, false);
 
-                } else { // beerocks::TYPE_IRE_BACKHAUL or beerocks::TYPE_CLIENT
+                } else if (database.get_node_type(node_mac) == beerocks::TYPE_IRE_BACKHAUL ||
+                           database.get_node_type(node_mac) == beerocks::TYPE_CLIENT) {
                     // kill old roaming task
                     prev_task_id = database.get_roaming_task_id(node_mac);
                     if (tasks.is_task_running(prev_task_id)) {
@@ -454,14 +452,10 @@ bool son_actions::has_matching_operating_class(
     return false;
 }
 
-bool son_actions::send_cmdu_to_agent(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
+bool son_actions::send_cmdu_to_agent(const std::string &dest_mac,
+                                     ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
                                      const std::string &radio_mac)
 {
-    if (!sd) {
-        LOG(ERROR) << "socket to agent is nullptr";
-        return false;
-    }
-
     if (cmdu_tx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
         auto beerocks_header = message_com::get_vs_class_header(cmdu_tx);
         if (!beerocks_header) {
@@ -472,7 +466,12 @@ bool son_actions::send_cmdu_to_agent(Socket *sd, ieee1905_1::CmduMessageTx &cmdu
         beerocks_header->radio_mac() = network_utils::mac_from_string(radio_mac);
         beerocks_header->direction() = beerocks::BEEROCKS_DIRECTION_AGENT;
     }
-    // mrouter will fill src/dst bridge macs, sending ZERO_MAC_STRING now and not leaving empty, because if it will be empty, the cmdu will not be swapped
-    return message_com::send_cmdu(sd, cmdu_tx, network_utils::ZERO_MAC_STRING,
-                                  network_utils::ZERO_MAC_STRING);
+
+    auto master_thread_ctx = database.get_master_thread_ctx();
+    if (master_thread_ctx == nullptr) {
+        LOG(ERROR) << "master_thread_context == nullptr";
+        return false;
+    }
+
+    return master_thread_ctx->send_cmdu_to_bus(cmdu_tx, dest_mac, database.get_local_bridge_mac());
 }

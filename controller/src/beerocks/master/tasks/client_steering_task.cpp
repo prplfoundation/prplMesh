@@ -87,7 +87,6 @@ void client_steering_task::work()
 
 void client_steering_task::steer_sta()
 {
-    Socket *sta_socket = database.get_node_socket(sta_mac);
     if (database.get_node_type(sta_mac) != beerocks::TYPE_IRE_BACKHAUL) {
         if (!database.set_node_handoff_flag(sta_mac, true)) {
             LOG(ERROR) << "can't set handoff flag for " << sta_mac;
@@ -120,10 +119,10 @@ void client_steering_task::steer_sta()
     auto sta_list_unblock         = association_control_request_tlv->sta_list(0);
     std::get<1>(sta_list_unblock) = network_utils::mac_from_string(sta_mac);
 
-    Socket *sd = database.get_node_socket(radio_mac);
+    auto agent_mac = database.get_node_parent_ire(radio_mac);
     TASK_LOG(DEBUG) << "sending allow request for " << sta_mac << " to " << radio_mac
                     << " id=" << int(id);
-    son_actions::send_cmdu_to_agent(sd, cmdu_tx, radio_mac);
+    son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
 
     // update bml listeners
     bml_task::client_allow_req_available_event client_allow_event;
@@ -133,7 +132,7 @@ void client_steering_task::steer_sta()
     tasks.push_event(database.get_bml_task_id(), bml_task::CLIENT_ALLOW_REQ_EVENT_AVAILABLE,
                      &client_allow_event);
 
-    if (sta_socket != nullptr && sta_socket->isOpen()) {
+    if (database.get_node_type(sta_mac) == beerocks::TYPE_IRE_BACKHAUL) {
         TASK_LOG(DEBUG) << "SLAVE " << sta_mac
                         << " has an active socket, sending BACKHAUL_ROAM_REQUEST";
         auto roam_request =
@@ -145,7 +144,7 @@ void client_steering_task::steer_sta()
         }
         roam_request->params().bssid   = network_utils::mac_from_string(hostap_mac);
         roam_request->params().channel = database.get_node_channel(hostap_mac);
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, radio_mac);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
 
         // update bml listeners
         bml_task::bh_roam_req_available_event bh_roam_event;
@@ -164,7 +163,7 @@ void client_steering_task::steer_sta()
         /*
         * send disallow to all others
         */
-        Socket *sd = database.get_node_socket(hostap);
+        agent_mac = database.get_node_parent_ire(hostap);
         if (!cmdu_tx.create(0,
                             ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
             LOG(ERROR)
@@ -188,7 +187,7 @@ void client_steering_task::steer_sta()
         auto sta_list_block         = association_control_block_request_tlv->sta_list(0);
         std::get<1>(sta_list_block) = network_utils::mac_from_string(sta_mac);
 
-        son_actions::send_cmdu_to_agent(sd, cmdu_tx, hostap);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
         TASK_LOG(DEBUG) << "sending disallow request for " << sta_mac << " to " << hostap
                         << " id=" << int(id);
 
@@ -231,8 +230,8 @@ void client_steering_task::steer_sta()
         database.get_hostap_operating_class(network_utils::mac_from_string(hostap_mac));
     std::get<1>(bssid_list).target_bss_channel_number = database.get_node_channel(hostap_mac);
 
-    sd = database.get_node_socket(current_ap_mac);
-    son_actions::send_cmdu_to_agent(sd, cmdu_tx, original_radio_mac);
+    agent_mac = database.get_node_parent_ire(current_ap_mac);
+    son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, original_radio_mac);
     TASK_LOG(DEBUG) << "sending steering request, sta " << sta_mac << " steer from AP "
                     << current_ap_mac << " to AP " << hostap_mac << " channel "
                     << std::to_string(std::get<1>(bssid_list).target_bss_channel_number)
