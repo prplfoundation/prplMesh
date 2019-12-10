@@ -63,8 +63,8 @@ using namespace beerocks;
 using namespace net;
 using namespace son;
 
-master_thread::master_thread(std::string master_uds_, db &database_)
-    : beerocks::socket_thread(master_uds_), database(database_)
+master_thread::master_thread(const std::string &master_uds_, db &database_)
+    : transport_socket_thread(master_uds_), database(database_)
 {
     thread_name = "master";
 }
@@ -110,12 +110,12 @@ bool master_thread::init()
         }
     }
 
-    return socket_thread::init();
+    return transport_socket_thread::init();
 }
 
 bool master_thread::work()
 {
-    if (!socket_thread::work()) {
+    if (!transport_socket_thread::work()) {
         return false;
     }
 

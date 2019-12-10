@@ -25,15 +25,17 @@
 #include <tlvf/ieee_1905_1/tlvWscM2.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 
+#include <btl/btl.h>
+
 #include <cstddef>
 #include <ctime>
 #include <stdint.h>
 
 namespace son {
-class master_thread : public beerocks::socket_thread {
+class master_thread : public beerocks::btl::transport_socket_thread {
 
 public:
-    master_thread(std::string master_uds_, db &database_);
+    master_thread(const std::string &master_uds_, db &database_);
     virtual ~master_thread();
 
     virtual bool init() override;
