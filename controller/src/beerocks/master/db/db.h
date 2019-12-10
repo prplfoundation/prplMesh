@@ -136,7 +136,8 @@ public:
         bool client_optimal_path_roaming_prefer_signal_strength = false;
     } sDbMasterSettings;
 
-    db(sDbMasterConfig &config_, beerocks::logging &logger_) : config(config_), logger(logger_)
+    db(sDbMasterConfig &config_, beerocks::logging &logger_, const std::string &local_bridge_mac)
+        : config(config_), logger(logger_), m_local_bridge_mac(local_bridge_mac)
     {
         settings.enable_dfs_reentry &= config_.load_dfs_reentry;
         settings.client_band_steering &= config_.load_client_band_steering;
@@ -677,6 +678,8 @@ public:
     void set_master_thread_ctx(master_thread *ctx) { m_master_thread_ctx = ctx; }
     master_thread *get_master_thread_ctx() { return m_master_thread_ctx; }
 
+    const std::string &get_local_bridge_mac() { return m_local_bridge_mac; }
+
     //
     // vars
     //
@@ -760,6 +763,7 @@ private:
     std::unordered_map<sMacAddr, std::list<bss_info_conf_t>> bss_infos; // key=al_mac
 
     master_thread *m_master_thread_ctx;
+    const std::string m_local_bridge_mac;
 };
 
 } // namespace son
