@@ -14,8 +14,7 @@ const uint16_t CmduMessage::kCmduHeaderLength = 8;
 const uint16_t CmduMessage::kTlvHeaderLength = 3;
 
 CmduMessage::CmduMessage(uint8_t *buff, size_t buff_len)
-    : tlvs(buff, buff_len),
-      m_buff(buff), m_buff_len(buff_len) {}
+    : tlvs(buff, buff_len) {}
 
 CmduMessage::~CmduMessage() {}
 

@@ -68,7 +68,7 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
         return nullptr;
     
     std::unique_ptr<ieee1905_1::TlvList> vs_contents =
-        std::make_unique<ieee1905_1::TlvList>(tlv_header->payload(), tlv_header->getLen(), true, cmdu_rx.swap_needed());
+        std::make_unique<ieee1905_1::TlvList>(tlv_header->payload(), tlv_header->payload_length(), true, cmdu_rx.swap_needed());
     if (!vs_contents)
         return nullptr;
     auto header = vs_contents->addClass<beerocks_message::cACTION_HEADER>();

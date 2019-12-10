@@ -88,9 +88,6 @@ public:
     uint16_t getMessageId();
 
 protected:
-    uint8_t * const m_buff;
-    size_t m_buff_len;
-
     static const uint16_t kCmduHeaderLength;
     static const uint16_t kTlvHeaderLength;
 };

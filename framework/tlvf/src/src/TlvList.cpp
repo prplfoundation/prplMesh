@@ -65,6 +65,8 @@ void TlvList::swap()
 
 void TlvList::reset(bool parse, bool swap)
 {
+    if (!parse)
+        memset(m_buff, 0, m_buff_len);
     m_parse = parse;
     m_swap = swap;
     m_finalized = false;

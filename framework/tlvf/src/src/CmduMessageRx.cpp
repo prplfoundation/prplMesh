@@ -20,7 +20,7 @@ CmduMessageRx::~CmduMessageRx() {}
 bool CmduMessageRx::parse(bool swap_needed, bool parse_tlvs)
 {
     tlvs.reset(true, swap_needed);
-    auto cmduhdr = addClass<cCmduHeader>();
+    auto cmduhdr = tlvs.addClass<cCmduHeader>();
     if (!cmduhdr)
         return false;
     if (swap_needed)
