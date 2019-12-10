@@ -33,6 +33,9 @@ public:
     virtual void set_select_timeout(unsigned msec) override;
     virtual bool work() override;
 
+    bool send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu, const std::string &dst_mac,
+                          const std::string &src_mac);
+
 protected:
     void add_socket(Socket *s, bool add_to_vector = true) override;
     void remove_socket(Socket *s) override;
@@ -45,8 +48,6 @@ protected:
     bool bus_connect(const std::string &beerocks_temp_path, const bool local_master);
     void bus_connected(Socket *sd);
 
-    bool send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu, const std::string &dst_mac,
-                          const std::string &src_mac);
     bool send_cmdu_to_bus(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
                           const std::string &src_mac, uint16_t length);
 
