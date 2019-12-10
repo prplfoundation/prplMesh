@@ -1931,7 +1931,6 @@ bool master_thread::handle_intel_slave_join(
     database.add_node(network_utils::mac_from_string(bridge_mac),
                       network_utils::mac_from_string(backhaul_mac), ire_type);
     database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
-    database.set_node_socket(bridge_mac, sd);
 
     /*
     * Set IRE backhaul manager slave
@@ -2106,9 +2105,6 @@ bool master_thread::handle_intel_slave_join(
     database.set_node_name(radio_mac, slave_name + "_AP");
     database.set_node_ipv4(radio_mac, bridge_ipv4);
     database.set_node_manufacturer(radio_mac, "Intel");
-
-    // sd is assigned to src bridge mac
-    sd->setPeerMac(bridge_mac);
 
     database.set_hostap_supported_channels(radio_mac, notification->hostap().supported_channels,
                                            message::SUPPORTED_CHANNELS_LENGTH);
@@ -2346,7 +2342,6 @@ bool master_thread::handle_non_intel_slave_join(
     database.add_node(network_utils::mac_from_string(bridge_mac),
                       network_utils::mac_from_string(backhaul_mac), ire_type);
     database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
-    database.set_node_socket(bridge_mac, sd);
     database.set_node_backhaul_iface_type(backhaul_mac, beerocks::eIfaceType::IFACE_TYPE_ETHERNET);
     database.set_node_backhaul_iface_type(bridge_mac, beerocks::IFACE_TYPE_BRIDGE);
     database.set_node_manufacturer(backhaul_mac, manufacturer);
@@ -2395,9 +2390,6 @@ bool master_thread::handle_non_intel_slave_join(
     database.set_node_name(radio_mac, manufacturer + "_AP");
     database.set_node_manufacturer(radio_mac, manufacturer);
     // TODO ipv4 will not be set
-
-    // sd is assigned to src bridge mac
-    sd->setPeerMac(bridge_mac);
 
     autoconfig_wsc_parse_radio_caps(radio_mac, radio_caps);
     // TODO assume SSIDs are not hidden

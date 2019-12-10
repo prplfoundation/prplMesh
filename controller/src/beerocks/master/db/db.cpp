@@ -748,39 +748,6 @@ bool db::is_node_wireless(std::string mac)
     return utils::is_node_wireless(n->iface_type);
 }
 
-Socket *db::get_node_socket(std::string mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return nullptr;
-    }
-    if (n->get_type() == beerocks::TYPE_SLAVE || n->get_type() == TYPE_ETH_SWITCH) {
-        const auto parent_mac = get_node_parent(mac);
-        n                     = get_node(parent_mac);
-        if (!n) {
-            LOG(WARNING) << __FUNCTION__ << " - node " << parent_mac << " does not exist!";
-            return nullptr;
-        }
-    }
-    return n->socket;
-}
-
-bool db::set_node_socket(std::string mac, Socket *socket)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return false;
-    } else if (n->get_type() != beerocks::TYPE_GW && n->get_type() != beerocks::TYPE_IRE) {
-        LOG(ERROR) << __FUNCTION__ << " - node " << mac << " is not a bridge type=!"
-                   << int(n->get_type());
-        return false;
-    }
-    n->socket = socket;
-    return true;
-}
-
 std::string db::node_to_string(std::string mac)
 {
     auto n = get_node(mac);

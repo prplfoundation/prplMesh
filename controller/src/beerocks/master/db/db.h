@@ -235,8 +235,6 @@ public:
 
     bool is_node_wireless(std::string mac);
 
-    Socket *get_node_socket(std::string mac);
-    bool set_node_socket(std::string mac, Socket *socket);
     std::string node_to_string(std::string mac);
 
     /**
