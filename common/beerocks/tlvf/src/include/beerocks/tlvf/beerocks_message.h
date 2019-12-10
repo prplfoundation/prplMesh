@@ -83,9 +83,14 @@ public:
     parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx);
 
     static std::shared_ptr<beerocks_message::cACTION_HEADER>
-    get_vs_class_header(ieee1905_1::CmduMessage &cmdu)
+    get_vs_class_header(ieee1905_1::CmduMessageTx &cmdu_tx)
     {
-        return std::dynamic_pointer_cast<beerocks_message::cACTION_HEADER>(cmdu.getClass(1));
+        auto beerocks_header = cmdu_tx.header;
+        if (!beerocks_header) {
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            return nullptr;
+        }
+        return beerocks_header->actionhdr();
     }
 
     template <class T>
@@ -167,6 +172,7 @@ public:
         }
 
         auto beerocks_header = add_intel_vs_data<T>(tlvhdr, id);
+        cmdu_tx.header = beerocks_header;
 
         // According to C++'03 Standard 14.2/4:
         // When the name of a member template specialization appears after . or -> in a postfix-expression,
