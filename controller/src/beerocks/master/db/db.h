@@ -24,6 +24,10 @@
 #include <queue>
 
 namespace son {
+
+// Forward decleration for master_thread context saving
+class master_thread;
+
 class db {
 
     /*
@@ -668,6 +672,12 @@ public:
     }
 
     //
+    // master_thread context
+    //
+    void set_master_thread_ctx(master_thread *ctx) { m_master_thread_ctx = ctx; }
+    master_thread *get_master_thread_ctx() { return m_master_thread_ctx; }
+
+    //
     // vars
     //
     sDbMasterConfig &config;
@@ -748,6 +758,8 @@ private:
     // certification
     std::shared_ptr<uint8_t> certification_tx_buffer;
     std::unordered_map<sMacAddr, std::list<bss_info_conf_t>> bss_infos; // key=al_mac
+
+    master_thread *m_master_thread_ctx;
 };
 
 } // namespace son

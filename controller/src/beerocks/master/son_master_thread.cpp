@@ -67,6 +67,8 @@ master_thread::master_thread(const std::string &master_uds_, db &database_)
     : transport_socket_thread(master_uds_), database(database_)
 {
     thread_name = "master";
+
+    database.set_master_thread_ctx(this);
 }
 
 master_thread::~master_thread() { LOG(DEBUG) << "closing"; }
