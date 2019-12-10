@@ -105,6 +105,7 @@ main() {
                 --expose ${PORT}
                 -v ${installdir}:${installdir}
                 -v ${rootdir}:${rootdir}
+                -v ${rootdir}/logs/${NAME}:/tmp/${SUDO_USER:-${USER}}/beerocks/logs
                 --name ${NAME}"
 
     [ -n "$ENTRYPOINT" ] && DOCKEROPTS="$DOCKEROPTS --entrypoint $ENTRYPOINT"

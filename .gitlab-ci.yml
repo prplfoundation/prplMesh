@@ -33,6 +33,11 @@ run-tests:
       - logs
     when: always
 
+  artifacts:
+    paths:
+      - logs
+    when: always
+
   tags:
     - docker
     - docker-build
