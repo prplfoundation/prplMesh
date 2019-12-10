@@ -37,14 +37,15 @@ std::string controller_ucc_listener::fill_version_reply_string()
 void controller_ucc_listener::clear_configuration() { m_database.clear_bss_info_configuration(); }
 
 /**
- * @brief Return socket to Agent with bridge 'dest_alid` MAC address.
+ * @brief Validate if the 'dest_alid` MAC address matches one of known Agents MAC addresses.
  * 
  * @param[in] dest_alid Agent bridge MAC address.
- * @return Socket* Socket to the Agent.
+ * @return true if successful, false if not.
  */
-Socket *controller_ucc_listener::get_dev_send_1905_destination_socket(const std::string &dest_alid)
+bool controller_ucc_listener::validate_destination_alid(const std::string &dest_alid)
 {
-    return m_database.get_node_socket(dest_alid);
+    auto agents = m_database.get_all_connected_ires();
+    return agents.find(dest_alid) != agents.end();
 }
 
 /**
@@ -60,14 +61,14 @@ std::shared_ptr<uint8_t> controller_ucc_listener::get_buffer_filled_with_cmdu()
 /**
  * @brief Send CMDU to destined Agent.
  * 
- * @param[in] sd Agent socket.
+ * @param[in] dest_mac Agents mac address.
  * @param[in] cmdu_tx CMDU object.
  * @return true if successful, false if not.
  */
-bool controller_ucc_listener::send_cmdu_to_destination(Socket *sd,
-                                                       ieee1905_1::CmduMessageTx &cmdu_tx)
+bool controller_ucc_listener::send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmdu_tx,
+                                                       const std::string &dest_mac)
 {
-    return son_actions::send_cmdu_to_agent(sd, cmdu_tx);
+    return son_actions::send_cmdu_to_agent(dest_mac, cmdu_tx, m_database);
 }
 
 /**

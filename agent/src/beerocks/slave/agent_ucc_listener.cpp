@@ -64,16 +64,16 @@ void agent_ucc_listener::clear_configuration()
 }
 
 /**
- * @brief Return socket to Agent with bridge 'dest_alid` MAC address.
+ * @brief Validate if the 'dest_alid` MAC address matches the controllers MAC address.
  * 
  * @param[in] dest_alid Agent bridge MAC address.
- * @return Socket* Socket to the Agent.
+ * @return true if successful, false if not.
  */
-Socket *agent_ucc_listener::get_dev_send_1905_destination_socket(const std::string &dest_alid)
+bool agent_ucc_listener::validate_destination_alid(const std::string &dest_alid)
 {
     // On the agent side, the dest_alid is not really needed since the destination socket will
     // always be the controller socket.
-    return *m_controller_sd;
+    return (*m_controller_sd)->getPeerMac() == dest_alid;
 }
 
 /**
@@ -90,11 +90,12 @@ std::shared_ptr<uint8_t> agent_ucc_listener::get_buffer_filled_with_cmdu()
 /**
  * @brief Send CMDU to destined Agent.
  * 
- * @param[in] sd Agent socket
+ * @param[in] dest_mac Controllers mac address
  * @param[in] cmdu_tx CMDU object
  * @return true if successful, false if not.
  */
-bool agent_ucc_listener::send_cmdu_to_destination(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx)
+bool agent_ucc_listener::send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmdu_tx,
+                                                  const std::string &dest_mac)
 {
     if (*m_controller_sd == nullptr) {
         LOG(ERROR) << "socket to controller is nullptr";
