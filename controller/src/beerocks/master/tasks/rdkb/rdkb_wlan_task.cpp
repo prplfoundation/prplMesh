@@ -959,7 +959,7 @@ bool rdkb_wlan_task::send_steering_conf_to_agent(const std::string &radio_mac)
             update->params().client_mac = net::network_utils::mac_from_string(client_entry.first);
             ;
             update->params().config = *(client_entry.second->get_client_config());
-            TASK_LOG(DEBUG) << "send cACTION_CONTROL_STEERING_CLIENT_SET to agent sd " << sd
+            TASK_LOG(DEBUG) << "send cACTION_CONTROL_STEERING_CLIENT_SET to agent " << agent_mac
                             << " radio_mac " << radio_mac;
             son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
         }
