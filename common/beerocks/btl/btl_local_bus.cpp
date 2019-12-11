@@ -37,7 +37,6 @@ static bool local_bus_read_ready(std::shared_ptr<mapf::LocalBusInterface> bus,
 }
 
 static bool subscribe_topic_to_bus(std::shared_ptr<mapf::LocalBusInterface> bus,
-                                   std::shared_ptr<mapf::Poller> poller,
                                    const ieee1905_1::eMessageType msg_type)
 {
     LOG(INFO) << "subscribing topic=" << (int)msg_type;
@@ -47,16 +46,6 @@ static bool subscribe_topic_to_bus(std::shared_ptr<mapf::LocalBusInterface> bus,
         LOG(ERROR) << "Subscribe error rc=" << rc << ", on topic=" << (int)msg_type;
         return false;
     }
-
-    rc = poller->Add(bus->subscriber());
-    if (rc && errno != EEXIST) {
-        LOG(ERROR) << "Add to poller error rc=" << rc;
-        return false;
-    } else if (errno == EEXIST) {
-        LOG(DEBUG) << "Adding subscriber already exist";
-    }
-
-    bus->Sync(); //TODO - check return value after mapf asserts refactor
     return true;
 }
 
@@ -82,16 +71,26 @@ bool transport_socket_thread::bus_init()
 
 bool transport_socket_thread::bus_subscribe(const std::vector<ieee1905_1::eMessageType> &msg_types)
 {
-    bool ret = true;
-
     LOG_IF(!bus, FATAL) << "Bus is not allocated!";
     LOG_IF(!poller, FATAL) << "Poller is not allocaed!";
     bus->Init();
-    for_each(msg_types.begin(), msg_types.end(), [&](const ieee1905_1::eMessageType msg_type) {
-        ret &= subscribe_topic_to_bus(bus, poller, msg_type);
-    });
+    for (const auto &msg_type : msg_types) {
+        if (!subscribe_topic_to_bus(bus, msg_type)) {
+            LOG(ERROR) << "failed to subscribe msg_type=" << std::hex << int(msg_type) << std::dec;
+            return false;
+        }
+    }
 
-    return ret;
+    LOG(ERROR) << "Adding bus to poller";
+    auto rc = poller->Add(bus->subscriber());
+    if (rc && errno != EEXIST) {
+        LOG(ERROR) << "Add to poller error rc=" << rc;
+        return false;
+    } else if (errno == EEXIST) {
+        LOG(DEBUG) << "Adding subscriber already exist";
+    }
+
+    return true;
 }
 
 bool transport_socket_thread::bus_connect(const std::string &beerocks_temp_path,
