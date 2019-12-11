@@ -95,7 +95,10 @@ bool cConfigData::alloc_ssid(size_t count) {
     m_multiap_attr = (sWscAttrVendorExtMultiAp *)((uint8_t *)(m_multiap_attr) + len);
     m_ssid_idx__ += count;
     *m_ssid_length += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     return true;
 }
 
@@ -172,7 +175,10 @@ bool cConfigData::alloc_network_key(size_t count) {
     m_multiap_attr = (sWscAttrVendorExtMultiAp *)((uint8_t *)(m_multiap_attr) + len);
     m_network_key_idx__ += count;
     *m_network_key_length += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     return true;
 }
 
@@ -218,37 +224,67 @@ bool cConfigData::init()
     }
     m_ssid_type = (eWscAttributes*)m_buff_ptr__;
     if (!m_parse__) *m_ssid_type = ATTR_SSID;
-    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
+        return false;
+    }
     m_ssid_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_ssid_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_ssid = (char*)m_buff_ptr__;
     uint16_t ssid_length = *m_ssid_length;
     if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&ssid_length)); }
     m_ssid_idx__ = ssid_length;
-    if (!buffPtrIncrementSafe(sizeof(char)*(ssid_length))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (ssid_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (ssid_length) << ") Failed!";
+        return false;
+    }
     m_authentication_type_attr = (sWscAttrAuthenticationType*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sWscAttrAuthenticationType))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sWscAttrAuthenticationType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWscAttrAuthenticationType) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_authentication_type_attr->struct_init(); }
     m_encryption_type_attr = (sWscAttrEncryptionType*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sWscAttrEncryptionType))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sWscAttrEncryptionType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWscAttrEncryptionType) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_encryption_type_attr->struct_init(); }
     m_network_key_type = (eWscAttributes*)m_buff_ptr__;
     if (!m_parse__) *m_network_key_type = ATTR_NETWORK_KEY;
-    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
+        return false;
+    }
     m_network_key_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_network_key_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_network_key = (char*)m_buff_ptr__;
     uint16_t network_key_length = *m_network_key_length;
     if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&network_key_length)); }
     m_network_key_idx__ = network_key_length;
-    if (!buffPtrIncrementSafe(sizeof(char)*(network_key_length))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (network_key_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (network_key_length) << ") Failed!";
+        return false;
+    }
     m_bssid_attr = (sWscAttrBssid*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sWscAttrBssid))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sWscAttrBssid))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWscAttrBssid) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_bssid_attr->struct_init(); }
     m_multiap_attr = (sWscAttrVendorExtMultiAp*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sWscAttrVendorExtMultiAp))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sWscAttrVendorExtMultiAp))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWscAttrVendorExtMultiAp) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_multiap_attr->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -345,7 +381,10 @@ bool cWscAttrEncryptedSettings::alloc_encrypted_settings(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_encrypted_settings_idx__ += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(m_length){ (*m_length) += len; }
     return true;
 }
@@ -373,12 +412,21 @@ bool cWscAttrEncryptedSettings::init()
     }
     m_type = (eWscAttributes*)m_buff_ptr__;
     if (!m_parse__) *m_type = eWscAttributes::ATTR_ENCR_SETTINGS;
-    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_iv = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(WSC_ENCRYPTED_SETTINGS_IV_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (WSC_ENCRYPTED_SETTINGS_IV_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (WSC_ENCRYPTED_SETTINGS_IV_LENGTH) << ") Failed!";
+        return false;
+    }
     m_iv_idx__  = WSC_ENCRYPTED_SETTINGS_IV_LENGTH;
     if (!m_parse__) {
         if (m_length) { (*m_length) += (sizeof(char) * WSC_ENCRYPTED_SETTINGS_IV_LENGTH); }
@@ -389,7 +437,10 @@ bool cWscAttrEncryptedSettings::init()
         if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_encrypted_settings_idx__ = len/sizeof(char);
-        if (!buffPtrIncrementSafe(len)) { return false; }
+        if (!buffPtrIncrementSafe(len)) {
+            LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+            return false;
+        }
     }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {
@@ -461,7 +512,10 @@ bool cWscVendorExtWfa::alloc_vs_data(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_vs_data_idx__ += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(m_length){ (*m_length) += len; }
     return true;
 }
@@ -491,21 +545,36 @@ bool cWscVendorExtWfa::init()
     }
     m_type = (eWscAttributes*)m_buff_ptr__;
     if (!m_parse__) *m_type = ATTR_VENDOR_EXTENSION;
-    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_vendor_id_0 = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_vendor_id_0 = WSC_VENDOR_ID_WFA_1;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_vendor_id_1 = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_vendor_id_1 = WSC_VENDOR_ID_WFA_2;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_vendor_id_2 = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_vendor_id_2 = WSC_VENDOR_ID_WFA_3;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_vs_data = (uint8_t*)m_buff_ptr__;
     if (m_length && m_parse__) {
@@ -513,7 +582,10 @@ bool cWscVendorExtWfa::init()
         if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_vs_data_idx__ = len/sizeof(uint8_t);
-        if (!buffPtrIncrementSafe(len)) { return false; }
+        if (!buffPtrIncrementSafe(len)) {
+            LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+            return false;
+        }
     }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;

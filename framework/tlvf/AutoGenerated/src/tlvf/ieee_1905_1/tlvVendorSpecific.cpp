@@ -60,12 +60,21 @@ bool tlvVendorSpecific::init()
     }
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_VENDOR_SPECIFIC;
-    if (!buffPtrIncrementSafe(sizeof(eTlvType))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvType) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0x3;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_vendor_oui = (sVendorOUI*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sVendorOUI))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sVendorOUI))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sVendorOUI) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_vendor_oui->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;

@@ -68,7 +68,10 @@ bool tlvNon1905neighborDeviceList::alloc_mac_non_1905_device(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_mac_non_1905_device_idx__ += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(m_length){ (*m_length) += len; }
     if (!m_parse__) { 
         for (size_t i = m_mac_non_1905_device_idx__ - count; i < m_mac_non_1905_device_idx__; i++) { m_mac_non_1905_device[i].struct_init(); }
@@ -102,12 +105,21 @@ bool tlvNon1905neighborDeviceList::init()
     }
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_NON_1905_NEIGHBOR_DEVICE_LIST;
-    if (!buffPtrIncrementSafe(sizeof(eTlvType))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvType) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_mac_local_iface = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_mac_local_iface->struct_init(); }
     m_mac_non_1905_device = (sMacAddr*)m_buff_ptr__;
@@ -116,7 +128,10 @@ bool tlvNon1905neighborDeviceList::init()
         if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_mac_non_1905_device_idx__ = len/sizeof(sMacAddr);
-        if (!buffPtrIncrementSafe(len)) { return false; }
+        if (!buffPtrIncrementSafe(len)) {
+            LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+            return false;
+        }
     }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {

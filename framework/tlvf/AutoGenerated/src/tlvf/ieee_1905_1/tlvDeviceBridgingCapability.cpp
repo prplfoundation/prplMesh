@@ -95,7 +95,10 @@ bool tlvDeviceBridgingCapability::add_bridging_tuples_list(std::shared_ptr<cMacL
     if (!m_parse__) { (*m_bridging_tuples_list_length)++; }
     size_t len = ptr->getLen();
     m_bridging_tuples_list_vector.push_back(ptr);
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(!m_parse__ && m_length){ (*m_length) += len; }
     m_lock_allocation__ = false;
     return true;
@@ -126,13 +129,22 @@ bool tlvDeviceBridgingCapability::init()
     }
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_DEVICE_BRIDGING_CAPABILITY;
-    if (!buffPtrIncrementSafe(sizeof(eTlvType))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvType) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_bridging_tuples_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_bridging_tuples_list_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_bridging_tuples_list = (cMacList*)m_buff_ptr__;
     uint8_t bridging_tuples_list_length = *m_bridging_tuples_list_length;
@@ -206,7 +218,10 @@ bool cMacList::alloc_mac_list(size_t count) {
     }
     m_mac_list_idx__ += count;
     *m_mac_list_length += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { 
         for (size_t i = m_mac_list_idx__ - count; i < m_mac_list_idx__; i++) { m_mac_list[i].struct_init(); }
     }
@@ -235,11 +250,17 @@ bool cMacList::init()
     }
     m_mac_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_mac_list_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_mac_list = (sMacAddr*)m_buff_ptr__;
     uint8_t mac_list_length = *m_mac_list_length;
     m_mac_list_idx__ = mac_list_length;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr)*(mac_list_length))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr) * (mac_list_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) * (mac_list_length) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }

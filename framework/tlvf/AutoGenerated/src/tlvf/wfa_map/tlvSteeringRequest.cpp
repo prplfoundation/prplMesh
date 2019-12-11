@@ -87,7 +87,10 @@ bool tlvSteeringRequest::alloc_sta_list(size_t count) {
     m_target_bssid_list = (sTargetBssidInfo *)((uint8_t *)(m_target_bssid_list) + len);
     m_sta_list_idx__ += count;
     *m_sta_list_length += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(m_length){ (*m_length) += len; }
     if (!m_parse__) { 
         for (size_t i = m_sta_list_idx__ - count; i < m_sta_list_idx__; i++) { m_sta_list[i].struct_init(); }
@@ -131,7 +134,10 @@ bool tlvSteeringRequest::alloc_target_bssid_list(size_t count) {
     }
     m_target_bssid_list_idx__ += count;
     *m_target_bssid_list_length += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(m_length){ (*m_length) += len; }
     if (!m_parse__) { 
         for (size_t i = m_target_bssid_list_idx__ - count; i < m_target_bssid_list_idx__; i++) { m_target_bssid_list[i].struct_init(); }
@@ -176,39 +182,69 @@ bool tlvSteeringRequest::init()
     }
     m_type = (eTlvTypeMap*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_STEERING_REQUEST;
-    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_bssid = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_bssid->struct_init(); }
     m_request_flags = (sRequestFlags*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sRequestFlags))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sRequestFlags))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sRequestFlags) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sRequestFlags); }
     if (!m_parse__) { m_request_flags->struct_init(); }
     m_steering_opportunity_window_sec = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_btm_disassociation_timer_ms = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_sta_list_length = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_sta_list = (sMacAddr*)m_buff_ptr__;
     uint8_t sta_list_length = *m_sta_list_length;
     m_sta_list_idx__ = sta_list_length;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr)*(sta_list_length))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr) * (sta_list_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) * (sta_list_length) << ") Failed!";
+        return false;
+    }
     m_target_bssid_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_target_bssid_list_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_target_bssid_list = (sTargetBssidInfo*)m_buff_ptr__;
     uint8_t target_bssid_list_length = *m_target_bssid_list_length;
     m_target_bssid_list_idx__ = target_bssid_list_length;
-    if (!buffPtrIncrementSafe(sizeof(sTargetBssidInfo)*(target_bssid_list_length))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sTargetBssidInfo) * (target_bssid_list_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sTargetBssidInfo) * (target_bssid_list_length) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvTypeMap::TLV_STEERING_REQUEST) {

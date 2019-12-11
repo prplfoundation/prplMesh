@@ -121,32 +121,62 @@ bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::init()
         return false;
     }
     m_slave_version = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::VERSION_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::VERSION_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::VERSION_LENGTH) << ") Failed!";
+        return false;
+    }
     m_slave_version_idx__  = beerocks::message::VERSION_LENGTH;
     m_platform_settings = (sPlatformSettings*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sPlatformSettings))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sPlatformSettings))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sPlatformSettings) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_platform_settings->struct_init(); }
     m_wlan_settings = (sWlanSettings*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sWlanSettings))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sWlanSettings))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWlanSettings) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_wlan_settings->struct_init(); }
     m_backhaul_params = (sBackhaulParams*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sBackhaulParams))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sBackhaulParams))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBackhaulParams) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_backhaul_params->struct_init(); }
     m_hostap = (sNodeHostap*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sNodeHostap))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sNodeHostap))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeHostap) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_hostap->struct_init(); }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApChannelSwitch) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_cs_params->struct_init(); }
     m_low_pass_filter_on = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_enable_repeater_mode = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_radio_identifier = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_radio_identifier->struct_init(); }
     m_is_slave_reconf = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -217,12 +247,21 @@ bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::init()
         return false;
     }
     m_master_version = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::VERSION_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::VERSION_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::VERSION_LENGTH) << ") Failed!";
+        return false;
+    }
     m_master_version_idx__  = beerocks::message::VERSION_LENGTH;
     m_err_code = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_config = (sSonConfig*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sSonConfig))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sSonConfig))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSonConfig) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_config->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -285,19 +324,34 @@ bool cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::init()
         return false;
     }
     m_backhaul_iface_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_backhaul_iface_mac->struct_init(); }
     m_backhaul_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::net::sIpv4Addr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_backhaul_ipv4->struct_init(); }
     m_bridge_iface_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_bridge_iface_mac->struct_init(); }
     m_bridge_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::net::sIpv4Addr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_bridge_ipv4->struct_init(); }
     m_hostap = (sNodeHostap*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sNodeHostap))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sNodeHostap))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeHostap) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_hostap->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -336,7 +390,10 @@ bool cACTION_CONTROL_SON_CONFIG_UPDATE::init()
         return false;
     }
     m_config = (sSonConfig*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sSonConfig))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sSonConfig))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSonConfig) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_config->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -394,7 +451,10 @@ bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::alloc_data(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_data_idx__ += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     return true;
 }
 
@@ -421,11 +481,20 @@ bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::init()
         return false;
     }
     m_total = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_seq = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_size = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_data = (uint8_t*)m_buff_ptr__;
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -483,7 +552,10 @@ bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::alloc_data(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_data_idx__ += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     return true;
 }
 
@@ -510,11 +582,20 @@ bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::init()
         return false;
     }
     m_total = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_seq = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_size = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_data = (uint8_t*)m_buff_ptr__;
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -572,7 +653,10 @@ bool cACTION_CONTROL_AGENT_PING_REQUEST::alloc_data(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_data_idx__ += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     return true;
 }
 
@@ -599,11 +683,20 @@ bool cACTION_CONTROL_AGENT_PING_REQUEST::init()
         return false;
     }
     m_total = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_seq = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_size = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_data = (uint8_t*)m_buff_ptr__;
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -661,7 +754,10 @@ bool cACTION_CONTROL_AGENT_PING_RESPONSE::alloc_data(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_data_idx__ += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     return true;
 }
 
@@ -688,11 +784,20 @@ bool cACTION_CONTROL_AGENT_PING_RESPONSE::init()
         return false;
     }
     m_total = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_seq = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_size = (uint16_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_data = (uint8_t*)m_buff_ptr__;
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -731,7 +836,10 @@ bool cACTION_CONTROL_ARP_QUERY_REQUEST::init()
         return false;
     }
     m_params = (sArpQuery*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sArpQuery))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sArpQuery))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sArpQuery) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -770,7 +878,10 @@ bool cACTION_CONTROL_ARP_QUERY_RESPONSE::init()
         return false;
     }
     m_params = (sArpMonitorData*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sArpMonitorData))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sArpMonitorData))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sArpMonitorData) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -814,10 +925,16 @@ bool cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION::init()
         return false;
     }
     m_bridge_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_bridge_mac->struct_init(); }
     m_operational = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -855,7 +972,10 @@ bool cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::init()
         return false;
     }
     m_params = (sBackhaulRssi*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sBackhaulRssi))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sBackhaulRssi))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBackhaulRssi) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -924,7 +1044,10 @@ bool cACTION_CONTROL_BACKHAUL_ROAM_REQUEST::init()
         return false;
     }
     m_params = (sBackhaulRoam*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sBackhaulRoam))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sBackhaulRoam))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBackhaulRoam) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -963,7 +1086,10 @@ bool cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL::init()
         return false;
     }
     m_params = (sLoggingLevelChange*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sLoggingLevelChange))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sLoggingLevelChange))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sLoggingLevelChange) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1002,7 +1128,10 @@ bool cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApChannelSwitch) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_cs_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1041,7 +1170,10 @@ bool cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApChannelSwitch) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_cs_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1080,7 +1212,10 @@ bool cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApChannelSwitch) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_cs_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1132,10 +1267,16 @@ bool cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApChannelSwitch) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_cs_params->struct_init(); }
     m_supported_channels = (sWifiChannel*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sWifiChannel)*(beerocks::message::SUPPORTED_CHANNELS_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
+        return false;
+    }
     m_supported_channels_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
     if (!m_parse__) {
         for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels->struct_init(); }
@@ -1177,7 +1318,10 @@ bool cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::init()
         return false;
     }
     m_params = (sDfsCacCompleted*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sDfsCacCompleted))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sDfsCacCompleted))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sDfsCacCompleted) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1216,7 +1360,10 @@ bool cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::init()
         return false;
     }
     m_params = (sDfsChannelAvailable*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sDfsChannelAvailable))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sDfsChannelAvailable))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sDfsChannelAvailable) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1255,7 +1402,10 @@ bool cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::init()
         return false;
     }
     m_params = (sApSetRestrictedFailsafe*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApSetRestrictedFailsafe))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sApSetRestrictedFailsafe))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApSetRestrictedFailsafe) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1293,7 +1443,10 @@ bool cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::init()
         return false;
     }
     m_success = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1331,7 +1484,10 @@ bool cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApChannelSwitch) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_cs_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1370,7 +1526,10 @@ bool cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::init()
         return false;
     }
     m_attempts = (uint32_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1438,7 +1597,10 @@ bool cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST::init()
         return false;
     }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApChannelSwitch) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_cs_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1476,7 +1638,10 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST::init()
         return false;
     }
     m_sync = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1531,7 +1696,10 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
     }
     m_sta_stats_idx__ += count;
     *m_sta_stats_size += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { 
         for (size_t i = m_sta_stats_idx__ - count; i < m_sta_stats_idx__; i++) { m_sta_stats[i].struct_init(); }
     }
@@ -1561,15 +1729,24 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::init()
         return false;
     }
     m_ap_stats = (sApStatsParams*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApStatsParams))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sApStatsParams))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApStatsParams) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_ap_stats->struct_init(); }
     m_sta_stats_size = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_sta_stats_size = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_sta_stats = (sStaStatsParams*)m_buff_ptr__;
     uint8_t sta_stats_size = *m_sta_stats_size;
     m_sta_stats_idx__ = sta_stats_size;
-    if (!buffPtrIncrementSafe(sizeof(sStaStatsParams)*(sta_stats_size))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sStaStatsParams) * (sta_stats_size))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sStaStatsParams) * (sta_stats_size) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1607,7 +1784,10 @@ bool cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::init()
         return false;
     }
     m_params = (sApLoadNotificationParams*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApLoadNotificationParams))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sApLoadNotificationParams))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApLoadNotificationParams) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1646,7 +1826,10 @@ bool cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST::init()
         return false;
     }
     m_params = (sNeighborSetParams11k*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sNeighborSetParams11k))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sNeighborSetParams11k))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNeighborSetParams11k) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1685,7 +1868,10 @@ bool cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::init()
         return false;
     }
     m_params = (sNeighborRemoveParams11k*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sNeighborRemoveParams11k))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sNeighborRemoveParams11k))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNeighborRemoveParams11k) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1724,7 +1910,10 @@ bool cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     m_params = (sApActivityNotificationParams*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApActivityNotificationParams))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sApActivityNotificationParams))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApActivityNotificationParams) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1763,7 +1952,10 @@ bool cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::init()
         return false;
     }
     m_params = (sVapsList*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sVapsList))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sVapsList))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sVapsList) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1801,7 +1993,10 @@ bool cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION::init()
         return false;
     }
     m_vap_id = (int8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(int8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -1844,9 +2039,15 @@ bool cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION::init()
         return false;
     }
     m_vap_id = (int8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(int8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
+        return false;
+    }
     m_vap_info = (sVapInfo*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sVapInfo))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sVapInfo))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sVapInfo) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_vap_info->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1885,7 +2086,10 @@ bool cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::init()
         return false;
     }
     m_params = (sClientMonitoringParams*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sClientMonitoringParams))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sClientMonitoringParams))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sClientMonitoringParams) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1924,7 +2128,10 @@ bool cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -1963,7 +2170,10 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::init()
         return false;
     }
     m_params = (sNodeRssiMeasurementRequest*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurementRequest))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurementRequest))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeRssiMeasurementRequest) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2002,7 +2212,10 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::init()
         return false;
     }
     m_params = (sNodeRssiMeasurement*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurement))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurement))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeRssiMeasurement) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2041,7 +2254,10 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2080,7 +2296,10 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2119,7 +2338,10 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::init()
         return false;
     }
     m_params = (sNodeRssiMeasurement*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurement))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurement))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeRssiMeasurement) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2158,7 +2380,10 @@ bool cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2197,7 +2422,10 @@ bool cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2253,14 +2481,26 @@ bool cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_mac->struct_init(); }
     m_vap_id = (int8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(int8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
+        return false;
+    }
     m_type = (uint32_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+        return false;
+    }
     m_reason = (uint32_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -2298,7 +2538,10 @@ bool cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE::init()
         return false;
     }
     m_params = (sClientDisconnectResponse*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sClientDisconnectResponse))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sClientDisconnectResponse))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sClientDisconnectResponse) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2371,13 +2614,22 @@ bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_mac->struct_init(); }
     m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::net::sIpv4Addr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_ipv4->struct_init(); }
     m_name = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::NODE_NAME_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::NODE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::NODE_NAME_LENGTH) << ") Failed!";
+        return false;
+    }
     m_name_idx__  = beerocks::message::NODE_NAME_LENGTH;
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2416,7 +2668,10 @@ bool cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION::init()
         return false;
     }
     m_params = (sArpMonitorData*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sArpMonitorData))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sArpMonitorData))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sArpMonitorData) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2455,7 +2710,10 @@ bool cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST::init()
         return false;
     }
     m_params = (sBeaconRequest11k*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sBeaconRequest11k))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sBeaconRequest11k))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBeaconRequest11k) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2494,7 +2752,10 @@ bool cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE::init()
         return false;
     }
     m_params = (sBeaconResponse11k*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sBeaconResponse11k))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sBeaconResponse11k))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBeaconResponse11k) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2533,7 +2794,10 @@ bool cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST::init()
         return false;
     }
     m_params = (sStaChannelLoadRequest11k*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sStaChannelLoadRequest11k))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sStaChannelLoadRequest11k))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sStaChannelLoadRequest11k) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2572,7 +2836,10 @@ bool cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE::init()
         return false;
     }
     m_params = (sStaChannelLoadResponse11k*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sStaChannelLoadResponse11k))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sStaChannelLoadResponse11k))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sStaChannelLoadResponse11k) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2611,7 +2878,10 @@ bool cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST::init()
         return false;
     }
     m_params = (sStatisticsRequest11k*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sStatisticsRequest11k))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sStatisticsRequest11k))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sStatisticsRequest11k) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2650,7 +2920,10 @@ bool cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE::init()
         return false;
     }
     m_params = (sStatisticsResponse11k*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sStatisticsResponse11k))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sStatisticsResponse11k))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sStatisticsResponse11k) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2689,7 +2962,10 @@ bool cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2728,7 +3004,10 @@ bool cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::init()
         return false;
     }
     m_params = (sLinkMeasurementsResponse11k*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sLinkMeasurementsResponse11k))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sLinkMeasurementsResponse11k))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sLinkMeasurementsResponse11k) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2767,7 +3046,10 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST::init()
         return false;
     }
     m_params = (sSteeringSetGroupRequest*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sSteeringSetGroupRequest))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sSteeringSetGroupRequest))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringSetGroupRequest) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2806,7 +3088,10 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE::init()
         return false;
     }
     m_params = (sSteeringSetGroupResponse*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sSteeringSetGroupResponse))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sSteeringSetGroupResponse))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringSetGroupResponse) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2845,7 +3130,10 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST::init()
         return false;
     }
     m_params = (sSteeringClientSetRequest*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sSteeringClientSetRequest))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sSteeringClientSetRequest))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringClientSetRequest) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2884,7 +3172,10 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE::init()
         return false;
     }
     m_params = (sSteeringClientSetResponse*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sSteeringClientSetResponse))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sSteeringClientSetResponse))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringClientSetResponse) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2923,7 +3214,10 @@ bool cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     m_params = (sSteeringEvActivity*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sSteeringEvActivity))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sSteeringEvActivity))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringEvActivity) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -2962,7 +3256,10 @@ bool cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION::init()
         return false;
     }
     m_params = (sSteeringEvSnrXing*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sSteeringEvSnrXing))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sSteeringEvSnrXing))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringEvSnrXing) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -3001,7 +3298,10 @@ bool cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION::init()
         return false;
     }
     m_params = (sSteeringEvProbeReq*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sSteeringEvProbeReq))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sSteeringEvProbeReq))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringEvProbeReq) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -3040,7 +3340,10 @@ bool cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::init()
         return false;
     }
     m_params = (sSteeringEvAuthFail*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sSteeringEvAuthFail))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sSteeringEvAuthFail))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringEvAuthFail) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;

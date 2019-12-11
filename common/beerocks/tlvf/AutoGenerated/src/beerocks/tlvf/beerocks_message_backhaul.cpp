@@ -118,19 +118,37 @@ bool cACTION_BACKHAUL_REGISTER_REQUEST::init()
         return false;
     }
     m_sta_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::IFACE_NAME_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+        return false;
+    }
     m_sta_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
     m_hostap_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::IFACE_NAME_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+        return false;
+    }
     m_hostap_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
     m_local_master = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_local_gw = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_sta_iface_filter_low = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_onboarding = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -167,7 +185,10 @@ bool cACTION_BACKHAUL_REGISTER_RESPONSE::init()
         return false;
     }
     m_is_backhaul_manager = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -440,41 +461,83 @@ bool cACTION_BACKHAUL_ENABLE::init()
         return false;
     }
     m_bridge_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::IFACE_NAME_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+        return false;
+    }
     m_bridge_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
     m_iface_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_iface_mac->struct_init(); }
     m_iface_is_5ghz = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_wire_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::IFACE_NAME_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+        return false;
+    }
     m_wire_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
     m_sta_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::IFACE_NAME_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+        return false;
+    }
     m_sta_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
     m_ap_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::IFACE_NAME_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+        return false;
+    }
     m_ap_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
     m_ssid = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::WIFI_SSID_MAX_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::WIFI_SSID_MAX_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::WIFI_SSID_MAX_LENGTH) << ") Failed!";
+        return false;
+    }
     m_ssid_idx__  = beerocks::message::WIFI_SSID_MAX_LENGTH;
     m_pass = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char)*(beerocks::message::WIFI_PASS_MAX_LENGTH))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::WIFI_PASS_MAX_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::WIFI_PASS_MAX_LENGTH) << ") Failed!";
+        return false;
+    }
     m_pass_idx__  = beerocks::message::WIFI_PASS_MAX_LENGTH;
     m_security_type = (uint32_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+        return false;
+    }
     m_preferred_bssid = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_preferred_bssid->struct_init(); }
     m_wire_iface_type = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_wireless_iface_type = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_mem_only_psk = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_backhaul_preferred_radio_band = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -512,7 +575,10 @@ bool cACTION_BACKHAUL_CONNECTED_NOTIFICATION::init()
         return false;
     }
     m_params = (sBackhaulParams*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sBackhaulParams))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sBackhaulParams))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBackhaulParams) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -550,7 +616,10 @@ bool cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION::init()
         return false;
     }
     m_stopped = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -598,11 +667,20 @@ bool cACTION_BACKHAUL_ENABLE_APS_REQUEST::init()
         return false;
     }
     m_channel = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_bandwidth = (uint32_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+        return false;
+    }
     m_center_channel = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -640,7 +718,10 @@ bool cACTION_BACKHAUL_ROAM_REQUEST::init()
         return false;
     }
     m_params = (sBackhaulRoam*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sBackhaulRoam))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sBackhaulRoam))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBackhaulRoam) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -678,7 +759,10 @@ bool cACTION_BACKHAUL_ROAM_RESPONSE::init()
         return false;
     }
     m_connected = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -746,7 +830,10 @@ bool cACTION_BACKHAUL_4ADDR_CONNECTED::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -785,7 +872,10 @@ bool cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::init()
         return false;
     }
     m_params = (sBackhaulRssi*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sBackhaulRssi))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sBackhaulRssi))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBackhaulRssi) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -824,7 +914,10 @@ bool cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::init()
         return false;
     }
     m_attempts = (uint32_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }
@@ -862,7 +955,10 @@ bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::init()
         return false;
     }
     m_params = (sNodeRssiMeasurementRequest*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurementRequest))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurementRequest))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeRssiMeasurementRequest) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -901,7 +997,10 @@ bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::init()
         return false;
     }
     m_params = (sNodeRssiMeasurement*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurement))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurement))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeRssiMeasurement) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_params->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
@@ -940,7 +1039,10 @@ bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_mac->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;

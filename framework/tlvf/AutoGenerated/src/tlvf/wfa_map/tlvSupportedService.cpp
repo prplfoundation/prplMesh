@@ -69,7 +69,10 @@ bool tlvSupportedService::alloc_supported_service_list(size_t count) {
     }
     m_supported_service_list_idx__ += count;
     *m_supported_service_list_length += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(m_length){ (*m_length) += len; }
     return true;
 }
@@ -96,18 +99,30 @@ bool tlvSupportedService::init()
     }
     m_type = (eTlvTypeMap*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_SUPPORTED_SERVICE;
-    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_supported_service_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_supported_service_list_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_supported_service_list = (eSupportedService*)m_buff_ptr__;
     uint8_t supported_service_list_length = *m_supported_service_list_length;
     m_supported_service_list_idx__ = supported_service_list_length;
-    if (!buffPtrIncrementSafe(sizeof(eSupportedService)*(supported_service_list_length))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eSupportedService) * (supported_service_list_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eSupportedService) * (supported_service_list_length) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvTypeMap::TLV_SUPPORTED_SERVICE) {
