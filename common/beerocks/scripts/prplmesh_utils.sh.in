@@ -188,9 +188,9 @@ report() {
 status_function() {
     echo "$0: status"
 
-    pgrep -la beerocks
-    pgrep -la ieee1905_transport
-    pgrep -la local_bus
+    pgrep -l beerocks
+    pgrep -l ieee1905_transport
+    pgrep -l local_bus
 
     # check for operational status
     LOGS_PATH=@TMP_PATH@/logs/
