@@ -99,7 +99,10 @@ bool tlvChannelPreference::add_operating_classes_list(std::shared_ptr<cPreferenc
     if (!m_parse__) { (*m_operating_classes_list_length)++; }
     size_t len = ptr->getLen();
     m_operating_classes_list_vector.push_back(ptr);
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(!m_parse__ && m_length){ (*m_length) += len; }
     m_lock_allocation__ = false;
     return true;
@@ -132,17 +135,29 @@ bool tlvChannelPreference::init()
     }
     m_type = (eTlvTypeMap*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_CHANNEL_PREFERENCE;
-    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_radio_uid = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_radio_uid->struct_init(); }
     m_operating_classes_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_operating_classes_list_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_operating_classes_list = (cPreferenceOperatingClasses*)m_buff_ptr__;
     uint8_t operating_classes_list_length = *m_operating_classes_list_length;
@@ -220,7 +235,10 @@ bool cPreferenceOperatingClasses::alloc_channel_list(size_t count) {
     m_flags = (sFlags *)((uint8_t *)(m_flags) + len);
     m_channel_list_idx__ += count;
     *m_channel_list_length += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     return true;
 }
 
@@ -249,16 +267,28 @@ bool cPreferenceOperatingClasses::init()
         return false;
     }
     m_operating_class = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_channel_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_channel_list_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_channel_list = (uint8_t*)m_buff_ptr__;
     uint8_t channel_list_length = *m_channel_list_length;
     m_channel_list_idx__ = channel_list_length;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t)*(channel_list_length))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t) * (channel_list_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (channel_list_length) << ") Failed!";
+        return false;
+    }
     m_flags = (sFlags*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sFlags))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sFlags))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sFlags) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_flags->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;

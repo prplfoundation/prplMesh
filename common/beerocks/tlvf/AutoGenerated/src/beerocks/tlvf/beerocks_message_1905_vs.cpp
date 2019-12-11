@@ -80,22 +80,43 @@ bool tlvVsClientAssociationEvent::init()
         return false;
     }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_mac->struct_init(); }
     m_bssid = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_bssid->struct_init(); }
     m_vap_id = (int8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(int8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
+        return false;
+    }
     m_capabilities = (beerocks::message::sRadioCapabilities*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sRadioCapabilities))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sRadioCapabilities))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sRadioCapabilities) << ") Failed!";
+        return false;
+    }
     if (!m_parse__) { m_capabilities->struct_init(); }
     m_disconnect_reason = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_disconnect_source = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_disconnect_type = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }

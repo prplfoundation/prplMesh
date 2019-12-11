@@ -103,7 +103,10 @@ bool tlvApRadioBasicCapabilities::add_operating_classes_info_list(std::shared_pt
     if (!m_parse__) { (*m_operating_classes_info_list_length)++; }
     size_t len = ptr->getLen();
     m_operating_classes_info_list_vector.push_back(ptr);
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(!m_parse__ && m_length){ (*m_length) += len; }
     m_lock_allocation__ = false;
     return true;
@@ -137,20 +140,35 @@ bool tlvApRadioBasicCapabilities::init()
     }
     m_type = (eTlvTypeMap*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES;
-    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_radio_uid = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_radio_uid->struct_init(); }
     m_maximum_number_of_bsss_supported = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_operating_classes_info_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_operating_classes_info_list_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_operating_classes_info_list = (cOperatingClassesInfo*)m_buff_ptr__;
     uint8_t operating_classes_info_list_length = *m_operating_classes_info_list_length;
@@ -231,7 +249,10 @@ bool cOperatingClassesInfo::alloc_statically_non_operable_channels_list(size_t c
     }
     m_statically_non_operable_channels_list_idx__ += count;
     *m_statically_non_operable_channels_list_length += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     return true;
 }
 
@@ -255,16 +276,28 @@ bool cOperatingClassesInfo::init()
         return false;
     }
     m_operating_class = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_maximum_transmit_power_dbm = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_statically_non_operable_channels_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_statically_non_operable_channels_list_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_statically_non_operable_channels_list = (uint8_t*)m_buff_ptr__;
     uint8_t statically_non_operable_channels_list_length = *m_statically_non_operable_channels_list_length;
     m_statically_non_operable_channels_list_idx__ = statically_non_operable_channels_list_length;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t)*(statically_non_operable_channels_list_length))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t) * (statically_non_operable_channels_list_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (statically_non_operable_channels_list_length) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;
 }

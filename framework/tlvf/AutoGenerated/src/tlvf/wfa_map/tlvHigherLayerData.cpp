@@ -67,7 +67,10 @@ bool tlvHigherLayerData::alloc_payload(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_payload_idx__ += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(m_length){ (*m_length) += len; }
     return true;
 }
@@ -94,12 +97,21 @@ bool tlvHigherLayerData::init()
     }
     m_type = (eTlvTypeMap*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_HIGHER_LAYER_DATA;
-    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_protocol = (eProtocol*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(eProtocol))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eProtocol))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eProtocol) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eProtocol); }
     m_payload = (uint8_t*)m_buff_ptr__;
     if (m_length && m_parse__) {
@@ -107,7 +119,10 @@ bool tlvHigherLayerData::init()
         if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_payload_idx__ = len/sizeof(uint8_t);
-        if (!buffPtrIncrementSafe(len)) { return false; }
+        if (!buffPtrIncrementSafe(len)) {
+            LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+            return false;
+        }
     }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {

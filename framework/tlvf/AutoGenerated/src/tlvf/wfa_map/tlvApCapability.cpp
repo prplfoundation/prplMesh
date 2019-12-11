@@ -60,12 +60,21 @@ bool tlvApCapability::init()
     }
     m_type = (eTlvTypeMap*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_AP_CAPABILITY;
-    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_value = (sValue*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sValue))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sValue))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sValue) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sValue); }
     if (!m_parse__) { m_value->struct_init(); }
     if (m_parse__ && m_swap__) { class_swap(); }
