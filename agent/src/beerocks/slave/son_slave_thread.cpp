@@ -3586,6 +3586,13 @@ bool slave_thread::autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWs
 
     if (!std::equal(kwa, kwa + sizeof(kwa),
                     reinterpret_cast<uint8_t *>(m2->authenticator().data))) {
+        LOG(ERROR) << "WSC Global authentication failed";
+        LOG(DEBUG) << "authenticator: "
+                   << utils::dump_buffer(reinterpret_cast<uint8_t *>(m2->authenticator().data),
+                                         WSC::WSC_AUTHENTICATOR_LENGTH);
+        LOG(DEBUG) << "calculated:    " << utils::dump_buffer(kwa, WSC::WSC_AUTHENTICATOR_LENGTH);
+        LOG(DEBUG) << "authenticator key: " << utils::dump_buffer(authkey, 32);
+        LOG(DEBUG) << "authenticator buf:" << std::endl << utils::dump_buffer(buf, sizeof(buf));
         return false;
     }
 
