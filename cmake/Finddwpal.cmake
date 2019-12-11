@@ -6,7 +6,10 @@
 # See LICENSE file for more details.
 
 find_library(DWPAL_LIBRARY "libdwpal.so")
-find_path(DWPAL_INCLUDE_DIRS dwpal.h)
+find_path(DWPAL_INCLUDE_DIRS 
+    NAMES dwpal.h 
+    PATH_SUFFIXES wav-dpal
+)
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(dwpal DEFAULT_MSG
