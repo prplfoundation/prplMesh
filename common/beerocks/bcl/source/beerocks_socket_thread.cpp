@@ -202,8 +202,13 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
         }
 
         if (static_cast<ieee1905_1::eTlvType>(type) == ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC) {
-            auto tlv_vendor_specific = ieee1905_1::tlvVendorSpecific((uint8_t *)tlv, length, true,
-                                                                     uds_header->swap_needed);
+            auto tlv_vendor_specific = ieee1905_1::tlvVendorSpecific(
+                (uint8_t *)tlv, length + sizeof(sTlvHeader), true, uds_header->swap_needed);
+            if (!tlv_vendor_specific.isInitialized()) {
+                LOG(ERROR) << "tlvVendorSpecific init() failure";
+                ret = false;
+                break;
+            }
 
             if (tlv_vendor_specific.vendor_oui() ==
                 ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL) {
