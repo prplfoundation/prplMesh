@@ -63,7 +63,10 @@ bool tlvUnknown::alloc_data(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_data_idx__ += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(m_length){ (*m_length) += len; }
     return true;
 }
@@ -88,17 +91,26 @@ bool tlvUnknown::init()
         return false;
     }
     m_type = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_data = (uint8_t*)m_buff_ptr__;
     if (m_length && m_parse__) {
         size_t len = *m_length;
         if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_data_idx__ = len/sizeof(uint8_t);
-        if (!buffPtrIncrementSafe(len)) { return false; }
+        if (!buffPtrIncrementSafe(len)) {
+            LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+            return false;
+        }
     }
     if (m_parse__ && m_swap__) { class_swap(); }
     return true;

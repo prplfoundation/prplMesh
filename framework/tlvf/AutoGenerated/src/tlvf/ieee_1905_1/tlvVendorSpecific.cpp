@@ -67,7 +67,10 @@ bool tlvVendorSpecific::alloc_payload(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_payload_idx__ += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(m_length){ (*m_length) += len; }
     return true;
 }
@@ -95,12 +98,21 @@ bool tlvVendorSpecific::init()
     }
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_VENDOR_SPECIFIC;
-    if (!buffPtrIncrementSafe(sizeof(eTlvType))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvType) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_vendor_oui = (sVendorOUI*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sVendorOUI))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sVendorOUI))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sVendorOUI) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sVendorOUI); }
     if (!m_parse__) { m_vendor_oui->struct_init(); }
     m_payload = (uint8_t*)m_buff_ptr__;
@@ -109,7 +121,10 @@ bool tlvVendorSpecific::init()
         if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_payload_idx__ = len/sizeof(uint8_t);
-        if (!buffPtrIncrementSafe(len)) { return false; }
+        if (!buffPtrIncrementSafe(len)) {
+            LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+            return false;
+        }
     }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {

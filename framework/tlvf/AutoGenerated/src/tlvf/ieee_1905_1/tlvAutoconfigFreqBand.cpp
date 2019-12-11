@@ -59,12 +59,21 @@ bool tlvAutoconfigFreqBand::init()
     }
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_AUTOCONFIG_FREQ_BAND;
-    if (!buffPtrIncrementSafe(sizeof(eTlvType))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvType) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_value = (eValue*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(eValue))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eValue))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eValue) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eValue); }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {

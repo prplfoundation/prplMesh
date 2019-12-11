@@ -74,7 +74,10 @@ bool tlvOperatingChannelReport::alloc_operating_classes_list(size_t count) {
     m_current_transmit_power = (int8_t *)((uint8_t *)(m_current_transmit_power) + len);
     m_operating_classes_list_idx__ += count;
     *m_operating_classes_list_length += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(m_length){ (*m_length) += len; }
     if (!m_parse__) { 
         for (size_t i = m_operating_classes_list_idx__ - count; i < m_operating_classes_list_idx__; i++) { m_operating_classes_list[i].struct_init(); }
@@ -114,24 +117,42 @@ bool tlvOperatingChannelReport::init()
     }
     m_type = (eTlvTypeMap*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_OPERATING_CHANNEL_REPORT;
-    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_radio_uid = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_radio_uid->struct_init(); }
     m_operating_classes_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_operating_classes_list_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_operating_classes_list = (sOperatingClasses*)m_buff_ptr__;
     uint8_t operating_classes_list_length = *m_operating_classes_list_length;
     m_operating_classes_list_idx__ = operating_classes_list_length;
-    if (!buffPtrIncrementSafe(sizeof(sOperatingClasses)*(operating_classes_list_length))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sOperatingClasses) * (operating_classes_list_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sOperatingClasses) * (operating_classes_list_length) << ") Failed!";
+        return false;
+    }
     m_current_transmit_power = (int8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(int8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(int8_t); }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {

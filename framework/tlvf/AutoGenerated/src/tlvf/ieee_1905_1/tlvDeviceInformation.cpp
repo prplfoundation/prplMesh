@@ -73,7 +73,10 @@ bool tlvDeviceInformation::alloc_info(size_t count) {
     }
     m_info_idx__ += count;
     *m_info_length += count;
-    if (!buffPtrIncrementSafe(len)) { return false; }
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
     if(m_length){ (*m_length) += len; }
     if (!m_parse__) { 
         for (size_t i = m_info_idx__ - count; i < m_info_idx__; i++) { m_info[i].struct_init(); }
@@ -108,22 +111,37 @@ bool tlvDeviceInformation::init()
     }
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_DEVICE_INFORMATION;
-    if (!buffPtrIncrementSafe(sizeof(eTlvType))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvType) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_mac->struct_init(); }
     m_info_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_info_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_info = (sInfo*)m_buff_ptr__;
     uint8_t info_length = *m_info_length;
     m_info_idx__ = info_length;
-    if (!buffPtrIncrementSafe(sizeof(sInfo)*(info_length))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sInfo) * (info_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sInfo) * (info_length) << ") Failed!";
+        return false;
+    }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvType::TLV_DEVICE_INFORMATION) {

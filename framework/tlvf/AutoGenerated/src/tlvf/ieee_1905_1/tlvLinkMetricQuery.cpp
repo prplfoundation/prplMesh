@@ -70,19 +70,34 @@ bool tlvLinkMetricQuery::init()
     }
     m_type = (eTlvType*)m_buff_ptr__;
     if (!m_parse__) *m_type = eTlvType::TLV_LINK_METRIC_QUERY;
-    if (!buffPtrIncrementSafe(sizeof(eTlvType))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eTlvType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvType) << ") Failed!";
+        return false;
+    }
     m_length = (uint16_t*)m_buff_ptr__;
     if (!m_parse__) *m_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint16_t))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     m_neighbor_type = (eNeighborType*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(eNeighborType))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eNeighborType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eNeighborType) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eNeighborType); }
     m_mac_al_1905_device = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_mac_al_1905_device->struct_init(); }
     m_link_metrics = (eLinkMetricsType*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(eLinkMetricsType))) { return false; }
+    if (!buffPtrIncrementSafe(sizeof(eLinkMetricsType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eLinkMetricsType) << ") Failed!";
+        return false;
+    }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eLinkMetricsType); }
     if (m_parse__ && m_swap__) { class_swap(); }
     if (m_parse__) {
