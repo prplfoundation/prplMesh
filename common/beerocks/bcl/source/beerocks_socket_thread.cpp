@@ -124,8 +124,8 @@ int socket_thread::socket_disconnected_uds(Socket *sd)
 
     // handle disconnection
     if (socket_disconnected(sd)) {
-        sd->closeSocket();
         remove_socket(sd);
+        sd->closeSocket();
         if (sd->isAcceptedSocket()) {
             delete sd;
         }
