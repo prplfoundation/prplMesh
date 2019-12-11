@@ -557,10 +557,6 @@ bool master_thread::autoconfig_wsc_authentication(std::shared_ptr<ieee1905_1::tl
     auto next = std::copy_n(m1->getStartBuffPtr() + 3, m1->getLen() - 3, buf);
     std::copy_n(m2->getStartBuffPtr() + 3, m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator),
                 next);
-    LOG(DEBUG) << "m1 buf:" << std::endl
-               << utils::dump_buffer(m1->getStartBuffPtr() + 3, m1->getLen() - 3);
-    LOG(DEBUG) << "m2 buf:" << std::endl
-               << utils::dump_buffer(m2->getStartBuffPtr() + 3, m2->getLen() - 3);
     // swap back
     m1->class_swap();
     m2->class_swap();
@@ -570,6 +566,9 @@ bool master_thread::autoconfig_wsc_authentication(std::shared_ptr<ieee1905_1::tl
         LOG(ERROR) << "kwa_compute failure";
         return false;
     }
+    LOG(DEBUG) << "authenticator: " << utils::dump_buffer(kwa, WSC::WSC_AUTHENTICATOR_LENGTH);
+    LOG(DEBUG) << "authenticator key: " << utils::dump_buffer(authkey, 32);
+    LOG(DEBUG) << "authenticator buf:" << std::endl << utils::dump_buffer(buf, sizeof(buf));
 
     return true;
 }
