@@ -125,6 +125,32 @@ int bpl_cfg_get_operating_mode()
     return retVal;
 }
 
+int bpl_cfg_get_certification_mode()
+{
+    int retVal = 0;
+    std::string certification_mode;
+    if (bpl_cfg_get_param("certification_mode=", certification_mode) < 0) {
+        MAPF_ERR("bpl_cfg_get_certification_mode: Failed to read certification_mode");
+        retVal = RETURN_ERR;
+    } else if (certification_mode == "0") {
+        retVal = BPL_CERTIFICATION_MODE_OFF;
+    } else {
+        // if "0" then disabled, anything else for enabled
+        retVal = BPL_CERTIFICATION_MODE_ON;
+    }
+
+    return retVal;
+}
+
+int bpl_cfg_get_stop_on_failure_attempts()
+{
+    int retVal = -1;
+    if (bpl_cfg_get_param_int("stop_on_failure_attempts", retVal) == RETURN_ERR) {
+        retVal = RETURN_ERR;
+    }
+    return retVal;
+}
+
 int bpl_cfg_is_onboarding() { return 0; }
 
 int bpl_cfg_get_rdkb_extensions() { return 0; }

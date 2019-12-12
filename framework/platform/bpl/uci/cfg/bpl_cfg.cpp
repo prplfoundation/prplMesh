@@ -81,6 +81,27 @@ int bpl_cfg_get_operating_mode()
     return retVal;
 }
 
+int bpl_cfg_get_certification_mode()
+{
+    int retVal = -1;
+    if (bpl_cfg_get_prplmesh_param_int("certification_mode", &retVal) == RETURN_ERR) {
+        MAPF_ERR("bpl_cfg_get_certification_mode: Failed to read certification_mode parameter\n");
+        return RETURN_ERR;
+    }
+    return retVal;
+}
+
+int bpl_cfg_get_stop_on_failure_attempts()
+{
+    int retVal = -1;
+    if (bpl_cfg_get_prplmesh_param_int("stop_on_failure_attempts", &retVal) == RETURN_ERR) {
+        MAPF_ERR("bpl_cfg_get_stop_on_failure_attempts: Failed to read stop_on_failure_attempts "
+                 "parameter\n");
+        return RETURN_ERR;
+    }
+    return retVal;
+}
+
 int bpl_cfg_is_onboarding()
 {
     int retVal = -1;

@@ -84,6 +84,8 @@ typedef struct sPlatformSettings {
     uint8_t local_gw;
     uint8_t operating_mode;
     uint8_t mem_only_psk;
+    uint8_t certification_mode;
+    uint8_t stop_on_failure_attempts;
     uint8_t client_band_steering_enabled;
     uint8_t client_optimal_path_roaming_enabled;
     uint8_t dfs_reentry_enabled;
