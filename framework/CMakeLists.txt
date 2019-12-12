@@ -15,7 +15,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 message("-- Build Type=${CMAKE_BUILD_TYPE}")
 
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security -Wl,-S -fPIE -fPIC")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -Wformat -Wformat-security -Wl,-S -fPIE -fPIC")
 if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector-strong")
 else()

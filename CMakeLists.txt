@@ -33,6 +33,17 @@ if(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  # When compiling with openWrt, FORTIFY_SOURCE=1 always gets added.
+  # Since we anyway use FORTIFY_SOURCE=2 and it cannot be set two times
+  # with a different value, we remove the one set externally, and add our own
+  string(REGEX REPLACE "-D_FORTIFY_SOURCE=[0-9]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  string(REGEX REPLACE "-D_FORTIFY_SOURCE=[0-9]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  string(REGEX REPLACE "-D_FORTIFY_SOURCE=[0-9]" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+  string(REGEX REPLACE "-D_FORTIFY_SOURCE=[0-9]" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+  add_definitions("-D_FORTIFY_SOURCE=2")
+endif()
+
 list (FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" isSystemDir)
 if ("${isSystemDir}" STREQUAL "-1")
     set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
