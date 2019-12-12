@@ -51,7 +51,6 @@ public:
         std::string load_health_check;
         std::string load_monitor_on_vaps;
         std::string load_rdkb_extensions;
-        std::string certification_mode;
         std::string global_restricted_channels;
         std::string diagnostics_measurements_polling_rate_sec;
         std::string ire_rssi_report_rate_sec;
