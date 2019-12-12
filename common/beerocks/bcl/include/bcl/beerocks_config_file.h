@@ -102,7 +102,6 @@ public:
         std::string backhaul_preferred_bssid;
         std::string backhaul_wire_iface;
         std::string backhaul_wire_iface_type;
-        std::string stop_on_failure_attempts;
         std::string enable_system_hang_test;
         std::string enable_son_slaves_watchdog;
         std::string const_backhaul_slave;

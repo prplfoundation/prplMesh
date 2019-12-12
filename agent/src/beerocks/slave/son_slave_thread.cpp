@@ -998,6 +998,7 @@ bool slave_thread::handle_cmdu_control_message(
             return false;
         }
         configuration_stop_on_failure_attempts = request_in->attempts();
+        stop_on_failure_attempts               = configuration_stop_on_failure_attempts;
         LOG(DEBUG) << "stop_on_failure_attempts new value: "
                    << configuration_stop_on_failure_attempts;
 
@@ -1451,6 +1452,10 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 
             platform_settings = response->platform_settings();
             wlan_settings     = response->wlan_settings();
+
+            configuration_stop_on_failure_attempts =
+                response->platform_settings().stop_on_failure_attempts;
+            stop_on_failure_attempts = configuration_stop_on_failure_attempts;
 
             LOG(INFO) << "local_master=" << (int)platform_settings.local_master;
             LOG(INFO) << "local_gw=" << (int)platform_settings.local_gw;

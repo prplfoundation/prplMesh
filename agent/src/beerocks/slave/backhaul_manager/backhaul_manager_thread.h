@@ -32,7 +32,7 @@ class backhaul_manager : public btl::transport_socket_thread {
 public:
     backhaul_manager(const config_file::sConfigSlave &config,
                      const std::set<std::string> &slave_ap_ifaces_,
-                     const std::set<std::string> &slave_sta_ifaces_);
+                     const std::set<std::string> &slave_sta_ifaces_, int stop_on_failure_attempts_);
     ~backhaul_manager();
 
     virtual bool init() override;

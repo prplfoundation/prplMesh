@@ -67,16 +67,17 @@ const char *backhaul_manager::s_arrStates[] = {FOREACH_STATE(GENERATE_STRING)};
 
 backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
                                    const std::set<std::string> &slave_ap_ifaces_,
-                                   const std::set<std::string> &slave_sta_ifaces_)
+                                   const std::set<std::string> &slave_sta_ifaces_,
+                                   int stop_on_failure_attempts_)
     : transport_socket_thread(config.temp_path + std::string(BEEROCKS_BACKHAUL_MGR_UDS)),
       beerocks_temp_path(config.temp_path), slave_ap_ifaces(slave_ap_ifaces_),
       slave_sta_ifaces(slave_sta_ifaces_), config_const_bh_slave(config.const_backhaul_slave)
 {
     thread_name                            = "backhaul_manager";
     pending_slave_ifaces                   = slave_ap_ifaces_;
-    configuration_stop_on_failure_attempts = string_utils::stoi(config.stop_on_failure_attempts);
-    stop_on_failure_attempts               = configuration_stop_on_failure_attempts;
-    LOG(DEBUG) << "stop_on_failure_attempts=" << configuration_stop_on_failure_attempts;
+    configuration_stop_on_failure_attempts = stop_on_failure_attempts_;
+    stop_on_failure_attempts               = stop_on_failure_attempts_;
+    LOG(DEBUG) << "stop_on_failure_attempts=" << stop_on_failure_attempts;
     m_sConfig.ucc_listener_port = string_utils::stoi(config.ucc_listener_port);
     m_sConfig.bridge_iface      = config.bridge_iface;
     m_sConfig.vendor            = config.vendor;
