@@ -82,15 +82,15 @@ public:
     static std::shared_ptr<beerocks_header>
     parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx);
 
-    static std::shared_ptr<beerocks_message::cACTION_HEADER>
-    get_vs_class_header(ieee1905_1::CmduMessageTx &cmdu_tx)
+    static std::shared_ptr<beerocks_header>
+    get_beerocks_header(ieee1905_1::CmduMessageTx &cmdu_tx)
     {
         auto beerocks_header = cmdu_tx.header;
         if (!beerocks_header) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
             return nullptr;
         }
-        return beerocks_header->actionhdr();
+        return beerocks_header;
     }
 
     template <class T>

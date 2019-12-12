@@ -482,14 +482,14 @@ bool son_actions::send_cmdu_to_agent(Socket *sd, ieee1905_1::CmduMessageTx &cmdu
     }
 
     if (cmdu_tx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
-        auto beerocks_header = message_com::get_vs_class_header(cmdu_tx);
+        auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
         if (!beerocks_header) {
             LOG(ERROR) << "Failed getting beerocks_header!";
             return false;
         }
 
-        beerocks_header->radio_mac() = network_utils::mac_from_string(radio_mac);
-        beerocks_header->direction() = beerocks::BEEROCKS_DIRECTION_AGENT;
+        beerocks_header->actionhdr()->radio_mac() = network_utils::mac_from_string(radio_mac);
+        beerocks_header->actionhdr()->direction() = beerocks::BEEROCKS_DIRECTION_AGENT;
     }
     // mrouter will fill src/dst bridge macs, sending ZERO_MAC_STRING now and not leaving empty, because if it will be empty, the cmdu will not be swapped
     return message_com::send_cmdu(sd, cmdu_tx, network_utils::ZERO_MAC_STRING,
