@@ -34,10 +34,7 @@ endif()
 
 add_executable(${PROJECT_NAME} ${beerocks_monitor_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
-target_link_libraries(${PROJECT_NAME} bcl btlvf rt dl tlvf elpp ${LIBS})
-target_include_directories(${PROJECT_NAME} PRIVATE 
-    $<TARGET_PROPERTY:bwl,INTERFACE_INCLUDE_DIRECTORIES>
-)
+target_link_libraries(${PROJECT_NAME} bcl btlvf rt dl tlvf elpp bwl ${LIBS})
 
 # Install
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
