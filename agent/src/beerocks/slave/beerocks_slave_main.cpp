@@ -137,9 +137,7 @@ static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_
     son_slave_conf.debug_disable_arp = beerocks_slave_conf.debug_disable_arp == "1";
     son_slave_conf.enable_bpl_iface_status_notifications =
         beerocks_slave_conf.enable_bpl_iface_status_notifications == "1";
-    son_slave_conf.bridge_iface = beerocks_slave_conf.bridge_iface;
-    son_slave_conf.stop_on_failure_attempts =
-        beerocks::string_utils::stoi(beerocks_slave_conf.stop_on_failure_attempts);
+    son_slave_conf.bridge_iface             = beerocks_slave_conf.bridge_iface;
     son_slave_conf.backhaul_preferred_bssid = beerocks_slave_conf.backhaul_preferred_bssid;
     son_slave_conf.backhaul_wire_iface      = beerocks_slave_conf.backhaul_wire_iface;
     son_slave_conf.backhaul_wire_iface_type =
@@ -290,63 +288,64 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
         }
     }
 
-    // fill configuration (only to read stop on failure attempts)
-    son::slave_thread::sSlaveConfig son_slave_conf;
-    fill_son_slave_config(beerocks_slave_conf, son_slave_conf, 0);
-
-    beerocks::backhaul_manager backhaul_mgr(beerocks_slave_conf, slave_ap_ifaces, slave_sta_ifaces);
-
     beerocks::platform_manager::main_thread platform_mgr(beerocks_slave_conf, slave_logger);
 
-    // Start backhaul manager
-    if (!backhaul_mgr.start()) {
-        LOG(ERROR) << "backhaul_mgr.start()";
-    }
     //start platform_manager
-    else if (platform_mgr.init()) {
-        //initialize watchdog timers
-        int son_slave_watchdog_time_elapsed_ms = 0;
-        std::chrono::steady_clock::time_point son_slave_watchdog_time =
-            std::chrono::steady_clock::now();
+    if (platform_mgr.init()) {
+        // read the number of failures allowed before stopping agent from platform configuration
+        int stop_on_failure_attempts = bpl_cfg_get_stop_on_failure_attempts();
 
-        auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
-        while (g_running) {
+        beerocks::backhaul_manager backhaul_mgr(beerocks_slave_conf, slave_ap_ifaces,
+                                                slave_sta_ifaces, stop_on_failure_attempts);
 
-            // Handle signals
-            if (s_signal) {
-                handle_signal();
-                continue;
-            }
+        // Start backhaul manager
+        if (!backhaul_mgr.start()) {
+            LOG(ERROR) << "backhaul_mgr.start()";
+        } else {
+            //initialize watchdog timers
+            int son_slave_watchdog_time_elapsed_ms = 0;
+            std::chrono::steady_clock::time_point son_slave_watchdog_time =
+                std::chrono::steady_clock::now();
 
-            if (std::chrono::steady_clock::now() > touch_time_stamp_timeout) {
-                beerocks::os_utils::touch_pid_file(pid_file_path);
-                touch_time_stamp_timeout =
-                    std::chrono::steady_clock::now() +
-                    std::chrono::seconds(beerocks::TOUCH_PID_TIMEOUT_SECONDS);
-            }
+            auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
+            while (g_running) {
 
-            if (son_slave_conf.stop_on_failure_attempts > 0 &&
-                beerocks_slave_conf.enable_son_slaves_watchdog == "1") {
-                //son_slave_watchdog periodic check son_slave pids are running
-                son_slave_watchdog_time_elapsed_ms =
-                    std::chrono::duration_cast<std::chrono::milliseconds>(
-                        std::chrono::steady_clock::now() - son_slave_watchdog_time)
-                        .count();
-                if (son_slave_watchdog_time_elapsed_ms >=
-                    beerocks::SON_SLAVE_WATCHDOG_INTERVAL_MSC) {
-                    son_slave_watchdog(beerocks_slave_conf);
-                    son_slave_watchdog_time = std::chrono::steady_clock::now();
+                // Handle signals
+                if (s_signal) {
+                    handle_signal();
+                    continue;
                 }
-            }
 
-            // Check if backhaul manager still running and break on error
-            if (!backhaul_mgr.is_running()) {
-                break;
-            }
+                if (std::chrono::steady_clock::now() > touch_time_stamp_timeout) {
+                    beerocks::os_utils::touch_pid_file(pid_file_path);
+                    touch_time_stamp_timeout =
+                        std::chrono::steady_clock::now() +
+                        std::chrono::seconds(beerocks::TOUCH_PID_TIMEOUT_SECONDS);
+                }
 
-            //call platform manager work task and break on error
-            if (!platform_mgr.work()) {
-                break;
+                if (stop_on_failure_attempts > 0 &&
+                    beerocks_slave_conf.enable_son_slaves_watchdog == "1") {
+                    //son_slave_watchdog periodic check son_slave pids are running
+                    son_slave_watchdog_time_elapsed_ms =
+                        std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::steady_clock::now() - son_slave_watchdog_time)
+                            .count();
+                    if (son_slave_watchdog_time_elapsed_ms >=
+                        beerocks::SON_SLAVE_WATCHDOG_INTERVAL_MSC) {
+                        son_slave_watchdog(beerocks_slave_conf);
+                        son_slave_watchdog_time = std::chrono::steady_clock::now();
+                    }
+                }
+
+                // Check if backhaul manager still running and break on error
+                if (!backhaul_mgr.is_running()) {
+                    break;
+                }
+
+                //call platform manager work task and break on error
+                if (!platform_mgr.work()) {
+                    break;
+                }
             }
         }
 
@@ -391,6 +390,10 @@ static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &bee
     // fill configuration
     son::slave_thread::sSlaveConfig son_slave_conf;
     fill_son_slave_config(beerocks_slave_conf, son_slave_conf, slave_num);
+
+    // disable stopping on failure initially. Later on, it will be read from BPL as part of
+    // cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE
+    son_slave_conf.stop_on_failure_attempts = 0;
 
     son::slave_thread son_slave(son_slave_conf, slave_logger);
     if (son_slave.init()) {
