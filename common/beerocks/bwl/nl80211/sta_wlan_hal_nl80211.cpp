@@ -68,10 +68,6 @@ bool sta_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj) {
 bool sta_wlan_hal_nl80211::update_status() { return false; }
 
 } // namespace nl80211
-} // namespace bwl
-
-// AP FAPI HAL Factory Functions
-extern "C" {
 
 bwl::sta_wlan_hal *sta_wlan_hal_create(std::string iface_name,
                                        bwl::base_wlan_hal::hal_event_cb_t callback)
@@ -80,4 +76,5 @@ bwl::sta_wlan_hal *sta_wlan_hal_create(std::string iface_name,
 }
 
 void sta_wlan_hal_destroy(bwl::sta_wlan_hal *obj) { delete obj; }
-}
+
+} // namespace bwl

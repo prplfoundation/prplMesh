@@ -436,10 +436,6 @@ bool ap_wlan_hal_dummy::set(const std::string &param, const std::string &value, 
 }
 
 } // namespace dummy
-} // namespace bwl
-
-// AP dummy HAL Factory Functions
-extern "C" {
 
 bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bwl::hal_conf_t hal_conf,
                                      bwl::base_wlan_hal::hal_event_cb_t callback)
@@ -448,4 +444,5 @@ bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bwl::hal_conf_t hal
 }
 
 void ap_wlan_hal_destroy(bwl::ap_wlan_hal *obj) { delete obj; }
-}
+
+} // namespace bwl

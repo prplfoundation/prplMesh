@@ -338,20 +338,11 @@ public:
     virtual bool generate_connected_clients_events() = 0;
 };
 
-} // namespace bwl
-
 // AP HAL factory types
-extern "C" {
-
-// Types
-typedef bwl::ap_wlan_hal *(*ap_wlan_hal_create_t)(std::string, bwl::hal_conf_t,
-                                                  bwl::base_wlan_hal::hal_event_cb_t);
-typedef void (*ap_wlan_hal_destroy_t)(bwl::ap_wlan_hal *);
-
-// Prototypes
 bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bwl::hal_conf_t hal_conf,
                                      bwl::base_wlan_hal::hal_event_cb_t cb);
 void ap_wlan_hal_destroy(bwl::ap_wlan_hal *obj);
-}
+
+} // namespace bwl
 
 #endif // _BWL_AP_WLAN_HAL_H_

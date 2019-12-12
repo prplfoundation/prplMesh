@@ -530,10 +530,6 @@ bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
 }
 
 } // namespace nl80211
-} // namespace bwl
-
-// AP WAV HAL Factory Functions
-extern "C" {
 
 bwl::mon_wlan_hal *mon_wlan_hal_create(std::string iface_name,
                                        bwl::base_wlan_hal::hal_event_cb_t callback)
@@ -542,4 +538,5 @@ bwl::mon_wlan_hal *mon_wlan_hal_create(std::string iface_name,
 }
 
 void mon_wlan_hal_destroy(bwl::mon_wlan_hal *obj) { delete obj; }
-}
+
+} // namespace bwl

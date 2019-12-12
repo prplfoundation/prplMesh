@@ -66,20 +66,11 @@ public:
     virtual std::string get_bssid() = 0;
 };
 
-} // namespace bwl
-
 // STA HAL factory types
-extern "C" {
-
-// Types
-typedef bwl::sta_wlan_hal *(*sta_wlan_hal_create_t)(std::string,
-                                                    bwl::base_wlan_hal::hal_event_cb_t);
-typedef void (*sta_wlan_hal_destroy_t)(bwl::sta_wlan_hal *);
-
-// Prototypes
 bwl::sta_wlan_hal *sta_wlan_hal_create(std::string iface_name,
                                        bwl::base_wlan_hal::hal_event_cb_t cb);
 void sta_wlan_hal_destroy(bwl::sta_wlan_hal *obj);
-}
+
+} // namespace bwl
 
 #endif // _BWL_STA_WLAN_HAL_H_
