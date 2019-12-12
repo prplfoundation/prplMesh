@@ -24,7 +24,6 @@ public:
     CmduMessage(uint8_t *buff, size_t buff_len);
     ~CmduMessage();
 
-public:
     std::shared_ptr<cCmduHeader> getCmduHeader() const;
 
     ieee1905_1::TlvList tlvs;
@@ -87,9 +86,9 @@ public:
     eMessageType getMessageType();
     uint16_t getMessageId();
 
-protected:
     static const uint16_t kCmduHeaderLength;
     static const uint16_t kTlvHeaderLength;
+    static const size_t kMaxCmduLength;
 };
 
 }; // close namespace: ieee1905_1
