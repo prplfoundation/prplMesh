@@ -33,30 +33,24 @@ namespace beerocks {
 class beerocks_header {
     public:
         beerocks_header(std::unique_ptr<ieee1905_1::TlvList> contents)
-            : m_contents(std::move(contents))
+            : actions(std::move(contents))
         {}
         beerocks_message::eAction action() { return actionhdr()->action(); }
         uint8_t action_op() { return actionhdr()->action_op(); };
         uint16_t id() { return actionhdr()->id(); }
         template <class T> std::shared_ptr<T> addClass()
         {
-            return m_contents->addClass<T>();
+            return actions->addClass<T>();
         }
         template <class T> std::shared_ptr<T> getClass()
         {
-            return m_contents->getClass<T>();
+            return actions->getClass<T>();
         }
         std::shared_ptr<beerocks_message::cACTION_HEADER> actionhdr()
         {
-            return getClass<beerocks_message::cACTION_HEADER>();
+            return actions->getClass<beerocks_message::cACTION_HEADER>();
         }
-        void swap(bool swap_needed)
-        {
-            if (swap_needed)
-                m_contents->swap();
-        }
-    private:
-        std::unique_ptr<ieee1905_1::TlvList> m_contents;
+        std::unique_ptr<ieee1905_1::TlvList> actions;
     };
 
 class message_com {

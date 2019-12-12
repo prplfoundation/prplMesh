@@ -147,8 +147,8 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
 
     bool swap = !dst_mac.empty();
 
-    if (cmdu_tx.header)
-        cmdu_tx.header->swap(swap);
+    if (swap && cmdu_tx.header && cmdu_tx.header->actions)
+        cmdu_tx.header->actions->swap();
     if (!cmdu_tx.finalize(swap)) {
         LOG(ERROR) << "finalize failed -> " << print_cmdu_types(uds_header);
         LOG(DEBUG) << "hex_dump(" + std::to_string(cmdu_tx.getMessageLength()) + "):" << std::endl
