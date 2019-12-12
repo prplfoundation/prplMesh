@@ -52,6 +52,10 @@ extern "C" {
 #define BPL_OPER_MODE_WDS_REPEATER 3
 #define BPL_OPER_MODE_L2NAT_CLIENT 4
 
+/* Platform Certification Mode */
+#define BPL_CERTIFICATION_MODE_OFF 0
+#define BPL_CERTIFICATION_MODE_ON 1
+
 /* Platform Information */
 #define BPL_USER_PASS_LEN (64 + 1)     /* Maximal length of USER_PASS */
 #define BPL_SERIAL_NUMBER_LEN (64 + 1) /* Maximal length of SERIAL_NUMBER */
@@ -256,6 +260,23 @@ int bpl_cfg_is_master();
  * @return -1 Error.
  */
 int bpl_cfg_get_operating_mode();
+
+/**
+ * Returns certification mode value.
+ *
+ * @return BPL_CERTIFICATION_MODE_ON Certification mode is ON.
+ * @return BPL_CERTIFICATION_MODE_OFF Certification mode is OFF.
+ * @return -1 Error.
+ */
+int bpl_cfg_get_certification_mode();
+
+/**
+ * Returns the maximum number of failures allowed on agent before stopping its execution.
+ *
+ * @return Maximum number of failures allowed or 0 to retry indefinitely.
+ * @return -1 Error.
+ */
+int bpl_cfg_get_stop_on_failure_attempts();
 
 /**
  * Returns whether the platform is in onboarding state.

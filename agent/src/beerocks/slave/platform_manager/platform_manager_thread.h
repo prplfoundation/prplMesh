@@ -40,6 +40,8 @@ public:
         int client_roaming;
         int onboarding;
         int operating_mode;
+        int certification_mode;
+        int stop_on_failure_attempts;
         int local_gw;
         int local_master;
         int backhaul_max_vaps;

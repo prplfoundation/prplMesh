@@ -84,11 +84,15 @@ platform_deinit() {
 prplmesh_platform_db_init() {
     management_mode=${1-Multi-AP-Controller-and-Agent}
     operating_mode=${2-Gateway}
-
+    
     mkdir -p @TMP_PATH@
     {
         echo "management_mode=${management_mode}"
         echo "operating_mode=${operating_mode}"
+
+        # In certification, agent must retry onboarding indefinitely
+        echo "certification_mode=1"
+        echo "stop_on_failure_attempts=0" 
     } > @TMP_PATH@/prplmesh_platform_db
 }
 
