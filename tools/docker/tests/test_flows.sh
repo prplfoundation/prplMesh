@@ -35,7 +35,10 @@ send_bml_command() {
 
 send_CAPI_command() {
     # send a CAPI command to a container.
-    ${rootdir}/tools/docker/tests/send_CAPI_command.py $(container_ip "$1") $(container_CAPI_port "$1") "$2"
+    ip="$(container_ip "$1")"
+    port="$(container_CAPI_port "$1")"
+    dbg "Sending to $ip:$port. Command: $2"
+    "${rootdir}/tools/docker/tests/send_CAPI_command.py" "$ip" "$port" "$2"
 }
 
 test_initial_ap_config() {
