@@ -14,7 +14,7 @@ build-in-docker:
 
   artifacts:
     paths:
-      - build
+      - build/install
 run-tests:
   stage: test
   script:
