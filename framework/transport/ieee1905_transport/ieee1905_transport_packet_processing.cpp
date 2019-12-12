@@ -309,7 +309,7 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
             }
             if (sizeof(Ieee1905CmduHeader) + nextTlv->size() > kIeee1905FragmentationThreashold) {
                 // this TLV is too large to fit in any fragment
-                MAPF_WARN("bad packet format - oversized TLV found.");
+                MAPF_WARN("bad packet format - oversized TLV found. TLV size=" << nextTlv->size());
                 return false;
             }
             if (int(nextTlv->size()) > remainingPacketLength) {
