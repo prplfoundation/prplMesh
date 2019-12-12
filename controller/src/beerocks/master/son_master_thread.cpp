@@ -1783,7 +1783,7 @@ bool master_thread::handle_intel_slave_join(
         return false;
     }
 
-    // Parse incomeing vs_tlv
+    // Parse incoming vs_tlv
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
     if (!beerocks_header) {
         LOG(ERROR) << "Failed to parse intel vs message (not Intel?)";
@@ -2059,6 +2059,7 @@ bool master_thread::handle_intel_slave_join(
             }
         }
 #endif
+        database.setting_certification_mode(notification->platform_settings().certification_mode);
         database.settings_client_band_steering(
             notification->platform_settings().client_band_steering_enabled);
         database.settings_client_optimal_path_roaming(
