@@ -909,8 +909,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     } break;
     case beerocks_message::ACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION: {
         auto notification =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass ACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION failed";
             return false;
@@ -921,8 +921,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION: {
 
         auto notification =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION failed";
             return false;
@@ -977,7 +977,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
     case beerocks_message::ACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION: {
         LOG(DEBUG) << "ACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION";
-        auto notification = cmdu_rx.addClass<
+        auto notification = beerocks_header->addClass<
             beerocks_message::
                 cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION>();
         if (notification == nullptr) {

@@ -457,8 +457,7 @@ int bml_rdkb_internal::process_cmdu_header(beerocks::beerocks_header beerocks_he
         } break;
         case beerocks_message::ACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE: {
             auto response =
-                cmdu_rx
-                    .addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE failed";
                 return BML_RET_OP_FAILED;

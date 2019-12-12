@@ -442,7 +442,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         LOG(TRACE) << "ACTION_APMANAGER_ENABLE_APS_REQUEST";
 
         auto notification =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_ENABLE_APS_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_ENABLE_APS_REQUEST>();
         if (!notification) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_ENABLE_APS_REQUEST failed";
             return false;
@@ -504,7 +504,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST: {
 
-        auto request = cmdu_rx.addClass<
+        auto request = beerocks_header->addClass<
             beerocks_message::cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass "
@@ -707,9 +707,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST: {
-        auto request =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>();
+        auto request = beerocks_header->addClass<
+            beerocks_message::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST failed";
             return false;
@@ -820,8 +819,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION: {
         auto update =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION>();
         if (update == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION failed";
             return false;

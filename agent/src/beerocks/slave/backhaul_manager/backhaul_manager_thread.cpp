@@ -1491,7 +1491,7 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
     case beerocks_message::ACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST: {
         LOG(DEBUG) << "ACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST received from iface "
                    << soc->sta_iface;
-        auto request_in = cmdu_rx.addClass<
+        auto request_in = beerocks_header->addClass<
             beerocks_message::cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST>();
         if (!request_in) {
             LOG(ERROR)
@@ -1510,8 +1510,8 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
         LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST";
 
         auto request =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>();
         if (!request) {
             LOG(ERROR) << "addClass cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST failed";
             return false;

@@ -618,8 +618,7 @@ int bml_internal::process_cmdu_header(
         } break;
         case beerocks_message::ACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE: {
             auto response =
-                cmdu_rx
-                    .addClass<beerocks_message::cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE>();
 
             //Signal any waiting threads
             if (!wake_up(beerocks_message::ACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST,
@@ -940,8 +939,7 @@ int bml_internal::process_cmdu_header(
         } break;
         case beerocks_message::ACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE: {
             auto response =
-                cmdu_rx
-                    .addClass<beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE>();
             if (response == nullptr) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -962,8 +960,7 @@ int bml_internal::process_cmdu_header(
         } break;
         case beerocks_message::ACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE: {
             auto response =
-                cmdu_rx
-                    .addClass<beerocks_message::cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE>();
+                beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE>();
             if (response == nullptr) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -1006,7 +1003,7 @@ int bml_internal::process_cmdu_header(
             return BML_RET_OP_FAILED;
         } break;
         case beerocks_message::ACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE: {
-            auto response = cmdu_rx.addClass<
+            auto response = beerocks_header->addClass<
                 beerocks_message::cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE>();
             if (response == nullptr) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE failed";

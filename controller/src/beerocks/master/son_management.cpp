@@ -1132,7 +1132,7 @@ void son_management::handle_bml_message(
     } break;
 
     case beerocks_message::ACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST: {
-        auto request = cmdu_rx.addClass<
+        auto request = beerocks_header->addClass<
             beerocks_message::cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR)
@@ -1686,7 +1686,7 @@ void son_management::handle_bml_message(
     }
     case beerocks_message::ACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST: {
         LOG(TRACE) << "ACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST";
-        auto request = cmdu_rx.addClass<
+        auto request = beerocks_header->addClass<
             beerocks_message::cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST failed";

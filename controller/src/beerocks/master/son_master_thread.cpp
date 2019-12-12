@@ -3318,7 +3318,7 @@ bool master_thread::handle_cmdu_control_message(
     }
 #ifdef BEEROCKS_RDKB
     case beerocks_message::ACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION: {
-        auto notification = cmdu_rx.addClass<
+        auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR)
@@ -3337,8 +3337,7 @@ bool master_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION: {
         auto notification =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION failed";
             return false;
@@ -3353,7 +3352,7 @@ bool master_thread::handle_cmdu_control_message(
         break;
     }
     case beerocks_message::ACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION: {
-        auto notification = cmdu_rx.addClass<
+        auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION failed";
@@ -3388,8 +3387,7 @@ bool master_thread::handle_cmdu_control_message(
     }
     case beerocks_message::ACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE: {
         auto notification =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE>();
+            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST failed";
             return false;
