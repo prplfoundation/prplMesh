@@ -824,10 +824,6 @@ bool sta_wlan_hal_dwpal::parse_fapi_event(const std::string& opcode, std::shared
 #endif
 
 } // namespace dwpal
-} // namespace bwl
-
-// AP FAPI HAL Factory Functions
-extern "C" {
 
 bwl::sta_wlan_hal *sta_wlan_hal_create(std::string iface_name,
                                        bwl::base_wlan_hal::hal_event_cb_t callback)
@@ -836,4 +832,5 @@ bwl::sta_wlan_hal *sta_wlan_hal_create(std::string iface_name,
 }
 
 void sta_wlan_hal_destroy(bwl::sta_wlan_hal *obj) { delete obj; }
-}
+
+} // namespace bwl
