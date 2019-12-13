@@ -67,14 +67,16 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
     if (!intel_oui(tlv_header))
         return nullptr;
     
-    std::unique_ptr<ieee1905_1::TlvList> vs_contents =
-        std::make_unique<ieee1905_1::TlvList>(tlv_header->payload(), tlv_header->payload_length(), true, cmdu_rx.swap_needed());
-    if (!vs_contents)
+    std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(tlv_header->payload(),
+                                                tlv_header->payload_length(), true, cmdu_rx.swap_needed());
+    if (!hdr)
         return nullptr;
-    auto header = vs_contents->addClass<beerocks_message::cACTION_HEADER>();
-    if (!header)
+    auto actionhdr = hdr->addClass<beerocks_message::cACTION_HEADER>();
+    if (!actionhdr)
         return nullptr;
-    return std::make_shared<beerocks_header>(std::move(vs_contents));
+    if (hdr)
+        cmdu_rx.tlvs.addInnerTlvList(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC, hdr);
+    return hdr;
 }
 
 std::string message_com::print_cmdu_types(const message::sUdsHeader *uds_header,
@@ -147,8 +149,6 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
 
     bool swap = !dst_mac.empty();
 
-    if (swap && cmdu_tx.header && cmdu_tx.header->actions)
-        cmdu_tx.header->actions->swap();
     if (!cmdu_tx.finalize(swap)) {
         LOG(ERROR) << "finalize failed -> " << print_cmdu_types(uds_header);
         LOG(DEBUG) << "hex_dump(" + std::to_string(cmdu_tx.getMessageLength()) + "):" << std::endl

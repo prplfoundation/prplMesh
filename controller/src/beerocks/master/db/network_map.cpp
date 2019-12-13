@@ -84,7 +84,7 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
                 continue;
             }
         }
-        size_left = beerocks_header->actions->getMessageBuffLength() - beerocks_header->actions->getMessageLength() - tlvEndSize;
+        size_left = beerocks_header->getMessageBuffLength() - beerocks_header->getMessageLength() - tlvEndSize;
 
         // LOG(DEBUG) << "num_of_nodes = " << num_of_nodes << ", size = " << int(size) << ", size_left = " << int(size_left);
 

@@ -13,10 +13,6 @@
 #include <tlvf/ieee_1905_1/tlvVendorSpecific.h>
 #include <memory>
 
-namespace beerocks {
-    class beerocks_header;
-}
-
 namespace ieee1905_1 {
 
 class CmduMessageTx : public CmduMessage {
@@ -30,7 +26,6 @@ public:
     std::shared_ptr<tlvVendorSpecific> add_vs_tlv(tlvVendorSpecific::eVendorOUI voui);
 
     bool finalize(bool swap_needed);
-    std::shared_ptr<beerocks::beerocks_header> header;
 };
 
 }; // close namespace: ieee1905_1

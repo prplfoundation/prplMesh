@@ -30,29 +30,52 @@
 #define MTU_SIZE (size_t)1500
 
 namespace beerocks {
-
-class beerocks_header {
-    public:
-        beerocks_header(std::unique_ptr<ieee1905_1::TlvList> contents)
-            : actions(std::move(contents))
-        {}
-        beerocks_message::eAction action() { return actionhdr()->action(); }
-        uint8_t action_op() { return actionhdr()->action_op(); };
-        uint16_t id() { return actionhdr()->id(); }
-        template <class T> std::shared_ptr<T> addClass()
-        {
-            return actions->addClass<T>();
-        }
-        template <class T> std::shared_ptr<T> getClass()
-        {
-            return actions->getClass<T>();
-        }
-        std::shared_ptr<beerocks_message::cACTION_HEADER> actionhdr()
-        {
-            return actions->getClass<beerocks_message::cACTION_HEADER>();
-        }
-        std::unique_ptr<ieee1905_1::TlvList> actions;
+/**
+ * @brief beerocks_header
+ *
+ * Each vendor specific message used for internal and external communication
+ * between the different components in prplMesh, via UDS or the BTL, includes
+ * an action header and the actual message data.
+ * These stored in the vendor specific TLV payload as a separate TLVlist.
+ *
+ * Note that this is not really a "header", a more appropriate name would be
+ * beerocks_actions - but since the name beerocks_header is widely used, we keep
+ * it for backward comparability. Same goes to all the getter functions.
+ *
+ */
+class beerocks_header : public ieee1905_1::TlvList {
+public:
+    beerocks_header() = delete;
+    beerocks_header(uint8_t *buff, size_t buff_len, bool parse, bool swap) :
+        TlvList(buff, buff_len, parse, swap) {}
+    std::shared_ptr<beerocks_message::cACTION_HEADER> actionhdr()
+    {
+        return getClass<beerocks_message::cACTION_HEADER>();
+    }
+    beerocks_message::eAction action()
+    {
+        return actionhdr() ? actionhdr()->action() : beerocks_message::ACTION_NONE;
+    }
+    uint8_t action_op()
+    {
+        return actionhdr() ? actionhdr()->action_op() : 0;
     };
+    uint16_t id()
+    {
+        return actionhdr() ? actionhdr()->id() : 0;
+    }
+    virtual bool finalize(bool swap_needed) override
+    {
+        if (m_finalized)
+            return true;
+
+        if (swap_needed)
+            swap();
+
+        m_finalized = true;
+        return true;
+    }
+};
 
 class message_com {
 public:
@@ -85,12 +108,7 @@ public:
     static std::shared_ptr<beerocks_header>
     get_beerocks_header(ieee1905_1::CmduMessageTx &cmdu_tx)
     {
-        auto beerocks_header = cmdu_tx.header;
-        if (!beerocks_header) {
-            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
-            return nullptr;
-        }
-        return beerocks_header;
+        return cmdu_tx.tlvs.getInnerTlvList<beerocks_header>(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC);
     }
 
     template <class T>
@@ -128,12 +146,8 @@ public:
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
             return false;
         }
-    
-        std::unique_ptr<ieee1905_1::TlvList> actions =
-        std::make_unique<ieee1905_1::TlvList>(vs_tlv->payload(), payload_length, false, false);
-        if (!actions)
-            return false;
-        std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(std::move(actions));
+        std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(vs_tlv->payload(),
+                                                            vs_tlv->payload_length(), false, false);
         if (!hdr)
             return false;
         if (!hdr->addClass<beerocks_message::cACTION_HEADER>())
@@ -168,7 +182,7 @@ public:
         hdr->actionhdr()->action()    = (beerocks_message::eAction)action;
         hdr->actionhdr()->action_op() = action_op;
         hdr->actionhdr()->id()        = id;
-        cmdu_tx.header = hdr;
+        cmdu_tx.tlvs.addInnerTlvList(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC, hdr);
 
         return true;
     }
