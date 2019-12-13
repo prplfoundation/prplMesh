@@ -16,18 +16,18 @@ namespace bwl {
 namespace dummy {
 
 /*!
-     * Hardware abstraction layer for WLAN Station/Client.
-     */
+ * Hardware abstraction layer for WLAN Station/Client.
+ */
 class sta_wlan_hal_dummy : public base_wlan_hal_dummy, public sta_wlan_hal {
 
     // Public methods
 public:
     /*!
-             * Constructor.
-             *
-             * @param [in] iface_name STA/Client interface name.
-             * @param [in] callback Callback for handling internal events.
-             */
+     * Constructor.
+     *
+     * @param [in] iface_name STA/Client interface name.
+     * @param [in] callback Callback for handling internal events.
+     */
     sta_wlan_hal_dummy(std::string iface_name, hal_event_cb_t callback);
     virtual ~sta_wlan_hal_dummy();
 
