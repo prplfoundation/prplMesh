@@ -291,7 +291,7 @@ struct ConnectionStatus {
 //////////////////////////////////////////////////////////////////////////////
 
 sta_wlan_hal_dummy::sta_wlan_hal_dummy(std::string iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(), base_wlan_hal_dummy(bwl::HALType::Station, iface_name, true, callback, 1024)
+    : base_wlan_hal(), base_wlan_hal_dummy(bwl::HALType::Station, iface_name, callback, {})
 {
 }
 
