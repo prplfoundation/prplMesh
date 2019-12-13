@@ -584,12 +584,10 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
 
 } // namespace dwpal
 
-bwl::mon_wlan_hal *mon_wlan_hal_create(std::string iface_name,
-                                       bwl::base_wlan_hal::hal_event_cb_t callback)
+std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
+                                                  base_wlan_hal::hal_event_cb_t callback)
 {
-    return new bwl::dwpal::mon_wlan_hal_dwpal(iface_name, callback);
+    return std::make_shared<dwpal::mon_wlan_hal_dwpal>(iface_name, callback);
 }
-
-void mon_wlan_hal_destroy(bwl::mon_wlan_hal *obj) { delete obj; }
 
 } // namespace bwl

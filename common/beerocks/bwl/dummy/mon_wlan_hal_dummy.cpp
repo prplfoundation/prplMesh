@@ -115,12 +115,10 @@ bool mon_wlan_hal_dummy::set(const std::string &param, const std::string &value,
 
 } // namespace dummy
 
-// AP dummy HAL Factory Functions
-bwl::mon_wlan_hal *mon_wlan_hal_create(std::string iface_name,
-                                       bwl::base_wlan_hal::hal_event_cb_t callback)
+std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
+                                                  base_wlan_hal::hal_event_cb_t callback)
 {
-    return new bwl::dummy::mon_wlan_hal_dummy(iface_name, callback);
+    return std::make_shared<dummy::mon_wlan_hal_dummy>(iface_name, callback);
 }
 
-void mon_wlan_hal_destroy(bwl::mon_wlan_hal *obj) { delete obj; }
 } // namespace bwl

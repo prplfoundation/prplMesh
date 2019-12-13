@@ -936,14 +936,8 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
             // Create a HAL instance if doesn't exists
             if (!soc->sta_wlan_hal) {
                 using namespace std::placeholders; // for `_1`
-                soc->sta_wlan_hal = std::shared_ptr<bwl::sta_wlan_hal>(
-                    bwl::sta_wlan_hal_create(
-                        iface, std::bind(&backhaul_manager::hal_event_handler, this, _1, iface)),
-                    [](bwl::sta_wlan_hal *obj) {
-                        if (obj)
-                            bwl::sta_wlan_hal_destroy(obj);
-                    });
-
+                soc->sta_wlan_hal = bwl::sta_wlan_hal_create(
+                    iface, std::bind(&backhaul_manager::hal_event_handler, this, _1, iface));
                 LOG_IF(!soc->sta_wlan_hal, FATAL) << "Failed creating HAL instance!";
             } else {
                 LOG(DEBUG) << "STA HAL exists...";
