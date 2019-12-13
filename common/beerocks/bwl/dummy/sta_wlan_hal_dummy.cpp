@@ -360,7 +360,8 @@ int sta_wlan_hal_dummy::get_scan_results(const std::string &ssid, std::vector<SS
 }
 
 bool sta_wlan_hal_dummy::connect(const std::string &ssid, const std::string &pass, WiFiSec sec,
-                                 const std::string &bssid, uint8_t channel, bool hidden_ssid)
+                                 bool mem_only_psk, const std::string &bssid, uint8_t channel,
+                                 bool hidden_ssid)
 {
     /*
         LOG(DEBUG) << __func__ << ": iface " << get_iface_name() << " to SSID = " << ssid 
@@ -606,8 +607,6 @@ bool sta_wlan_hal_dummy::is_connected()
     return true;
 }
 
-int sta_wlan_hal_dummy::get_rssi() { return beerocks::RSSI_INVALID; }
-
 int sta_wlan_hal_dummy::get_channel() { return m_active_channel; }
 
 std::string sta_wlan_hal_dummy::get_ssid() { return m_active_ssid; }
@@ -782,6 +781,8 @@ bool sta_wlan_hal_dummy::process_dummy_event(char *buffer, int bufLen, const std
         return true;
     }
 #endif
+
+bool sta_wlan_hal_dummy::update_status() { return false; }
 
 } // namespace dummy
 } // namespace bwl

@@ -38,7 +38,8 @@ public:
                                  bool parse_vsie = false) override;
 
     virtual bool connect(const std::string &ssid, const std::string &pass, WiFiSec sec,
-                         const std::string &bssid, uint8_t channel, bool hidden_ssid) override;
+                         bool mem_only_psk, const std::string &bssid, uint8_t channel,
+                         bool hidden_ssid) override;
 
     virtual bool disconnect() override;
 
@@ -52,8 +53,8 @@ public:
                                           int window_size) override;
 
     virtual bool is_connected() override;
-    virtual int get_rssi() override;
     virtual int get_channel() override;
+    virtual bool update_status() override;
 
     std::string get_ssid() override;
     std::string get_bssid() override;
