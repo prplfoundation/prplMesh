@@ -40,13 +40,8 @@ monitor_thread::monitor_thread(const std::string &slave_uds_, const std::string 
     using namespace std::placeholders; // for `_1`
 
     // Create new Monitor HAL instance
-    mon_wlan_hal = std::shared_ptr<bwl::mon_wlan_hal>(
-        bwl::mon_wlan_hal_create(monitor_iface_,
-                                 std::bind(&monitor_thread::hal_event_handler, this, _1)),
-        [](bwl::mon_wlan_hal *obj) {
-            if (obj)
-                mon_wlan_hal_destroy(obj);
-        });
+    mon_wlan_hal = bwl::mon_wlan_hal_create(
+        monitor_iface_, std::bind(&monitor_thread::hal_event_handler, this, _1));
 
     LOG_IF(!mon_wlan_hal, FATAL) << "Failed creating HAL instance!";
 }

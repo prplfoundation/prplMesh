@@ -339,10 +339,8 @@ public:
 };
 
 // AP HAL factory types
-bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bwl::hal_conf_t hal_conf,
-                                     bwl::base_wlan_hal::hal_event_cb_t cb);
-void ap_wlan_hal_destroy(bwl::ap_wlan_hal *obj);
-
+std::shared_ptr<ap_wlan_hal> ap_wlan_hal_create(std::string iface_name, hal_conf_t hal_conf,
+                                                base_wlan_hal::hal_event_cb_t cb);
 } // namespace bwl
 
 #endif // _BWL_AP_WLAN_HAL_H_

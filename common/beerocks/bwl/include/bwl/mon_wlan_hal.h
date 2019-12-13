@@ -50,10 +50,9 @@ public:
     virtual bool sta_link_measurements_11k_request(const std::string &sta_mac)           = 0;
 };
 
-// Prototypes
-bwl::mon_wlan_hal *mon_wlan_hal_create(std::string iface_name,
-                                       bwl::base_wlan_hal::hal_event_cb_t cb);
-void mon_wlan_hal_destroy(bwl::mon_wlan_hal *obj);
+// mon HAL factory types
+std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
+                                                  base_wlan_hal::hal_event_cb_t cb);
 
 } // namespace bwl
 

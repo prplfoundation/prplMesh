@@ -552,12 +552,10 @@ bool ap_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
 
 } // namespace nl80211
 
-bwl::ap_wlan_hal *ap_wlan_hal_create(std::string iface_name, bwl::hal_conf_t hal_conf,
-                                     bwl::base_wlan_hal::hal_event_cb_t callback)
+std::shared_ptr<ap_wlan_hal> ap_wlan_hal_create(std::string iface_name, hal_conf_t hal_conf,
+                                                base_wlan_hal::hal_event_cb_t callback)
 {
-    return new bwl::nl80211::ap_wlan_hal_nl80211(iface_name, callback, hal_conf);
+    return std::make_shared<nl80211::ap_wlan_hal_nl80211>(iface_name, callback, hal_conf);
 }
-
-void ap_wlan_hal_destroy(bwl::ap_wlan_hal *obj) { delete obj; }
 
 } // namespace bwl
