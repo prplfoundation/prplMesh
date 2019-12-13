@@ -613,10 +613,7 @@ std::string sta_wlan_hal_dummy::get_ssid() { return m_active_ssid; }
 
 std::string sta_wlan_hal_dummy::get_bssid() { return m_active_bssid; }
 
-bool sta_wlan_hal_dummy::process_dummy_event(char *buffer, int bufLen, const std::string &opcode)
-{
-    return true;
-}
+bool sta_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj) { return true; }
 
 #if 0
     bool sta_wlan_hal_dummy::parse_fapi_event(const std::string& opcode, std::shared_ptr<void> obj)
