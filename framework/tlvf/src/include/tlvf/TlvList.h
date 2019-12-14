@@ -174,6 +174,31 @@ private:
         }
         return nullptr;
     }
+
+    /**
+     * @brief resize all inner TLV lists
+     *
+     * Inner TLV lists are using outer TLV unknown length uint8_t list, which is
+     * allocated the maximum allowed TLV size since we don't know in advance the
+     * size of the needed allocation due to inner TLVlist TLVs unknown / variable
+     * length lists.
+     *
+     * It is illegal for some TLV lists to have a longer buffer than actually used
+     * (such as WSC AttrList), so this function resizes the TLVs and moves the buffer.
+     * It is *private* and expected to only be called from finalize() when no more
+     * modifications to the buffer are made.
+     *
+     * The way it works is by iterating through all the inner tlv lists, and calculating
+     * the tailroom for each.
+     * If an inner TLV has tailroom, it is reduced from the parent TLV length, and the
+     * rest of the TLVlist buffer is moved accordingly to the new end of the current TLV.
+     *
+     * @param swap_needed swap_needed
+     * @return true on success
+     * @return false on error
+     */
+    bool resizeTlvs(bool swap_needed);
+    friend void trim(BaseClass &obj, size_t tailroom);
 };
 
 }; // close namespace: ieee1905_1

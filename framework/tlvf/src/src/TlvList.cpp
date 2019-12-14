@@ -8,6 +8,9 @@
 
 #include <tlvf/TlvList.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
+#include <tlvf/tlvflogging.h>
+
+#include <algorithm>
 
 using namespace ieee1905_1;
 
@@ -78,6 +81,34 @@ void TlvList::reset(bool parse, bool swap)
     m_inner_tlv_lists.clear();
 }
 
+bool TlvList::resizeTlvs(bool swap_needed)
+{
+    for (auto list : m_inner_tlv_lists) {
+        size_t tailroom = list.second->getMessageBuffLength() - list.second->getMessageLength();
+        if (!tailroom)
+            continue;
+        auto tlv = getTlv(list.first);
+        if (!tlv)
+            return false;
+        TlvHeader *tlvhdr = reinterpret_cast<TlvHeader *>(tlv->getStartBuffPtr());
+        if (swap_needed)
+            tlvf_swap(16, reinterpret_cast<uint8_t*>(&tlvhdr->length));
+        tlvhdr->length -= tailroom;
+        // move the rest of the buffer
+        uint8_t *dst = reinterpret_cast<uint8_t *>(tlvhdr) + tlvhdr->length + sizeof(*tlvhdr);
+        uint8_t *src = dst + tailroom;
+        uint8_t *end = m_class_vector.back()->getBuffPtr();
+        size_t len = end - src;
+        if (swap_needed)
+            tlvf_swap(16, reinterpret_cast<uint8_t*>(&tlvhdr->length));
+        std::copy_n(src, len, dst);
+        // update parent TLV class size by trimming the end of the buffer (m_buff_ptr__)
+        trim(*tlv, tailroom);
+    }
+
+    return true;
+}
+
 bool TlvList::finalize(bool swap_needed)
 {
     if (m_finalized)
@@ -91,6 +122,10 @@ bool TlvList::finalize(bool swap_needed)
 
     if (swap_needed)
         swap();
+
+    // shrink back inner tlv lists
+    if (!resizeTlvs(swap_needed))
+        return false;
 
     m_finalized = true;
     return true;
