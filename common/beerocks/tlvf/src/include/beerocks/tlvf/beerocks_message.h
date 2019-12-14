@@ -112,36 +112,24 @@ public:
     }
 
     template <class T>
-    static bool add_intel_vs_data(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0, bool resize = false)
+    static bool add_intel_vs_data(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
     {
         auto vs_tlv = cmdu_tx.getClass<ieee1905_1::tlvVendorSpecific>();
         if (!vs_tlv) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
             return false;
         }
-        // TODO This fixed payload length only works for fixed-size payload.
-        // Most of the beerocks messages are fixed size, but we need to find a solution for
-        // the others. Perhaps in finalize, like it was done before.
-        // So the solution here for now is to allocate the whole buffer excluding the EOM TLV size which will
-        // be added in Finalize. This however is done only for vendor specific *CMDUs* until a proper solution
-        // is added to the Finalize() API which will shrink the buffer back to its real size.
-        // The reason we do this for VS messages only is because VS TLVs which are added as part of a standard CMDU
-        // can't be this big cause fragmantaion in the ieee transport is done on TLV boundary, and CMDU size cannot be
-        // larget then the MTU.
-        // resize is used only for VS CMDUs so that it won't be used for VS TLVs which are part of a 1905 CMDU, such as
-        // WSC autoconfiguration.
+        // Allocate maximum allowed length for the payload, so it can accommodate variable length
+        // data inside the internal TLV list.
+        // On finalize(), the buffer is shrunk back to its real size.
         size_t payload_length;
-        if (resize) {
-            const size_t max_vs_tlv_length = ieee1905_1::CmduMessage::kMaxCmduLength -
-                                             ieee1905_1::CmduMessage::kCmduHeaderLength -
-                                             ieee1905_1::tlvVendorSpecific::get_initial_size() -
-                                             ieee1905_1::tlvEndOfMessage::get_initial_size();
-            payload_length = std::min(vs_tlv->getBuffRemainingBytes() -
-                                      ieee1905_1::tlvEndOfMessage::get_initial_size(),
-                                      max_vs_tlv_length);
-        } else {
-            payload_length = beerocks_message::cACTION_HEADER::get_initial_size() + T::get_initial_size();
-        }
+        const size_t max_vs_tlv_length = ieee1905_1::CmduMessage::kMaxCmduLength -
+                                            ieee1905_1::CmduMessage::kCmduHeaderLength -
+                                            ieee1905_1::tlvVendorSpecific::get_initial_size() -
+                                            ieee1905_1::tlvEndOfMessage::get_initial_size();
+        payload_length = std::min(vs_tlv->getBuffRemainingBytes() -
+                                    ieee1905_1::tlvEndOfMessage::get_initial_size(),
+                                    max_vs_tlv_length);
         if (!vs_tlv->alloc_payload(payload_length)) {
             std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
             return false;
@@ -196,11 +184,11 @@ public:
             return nullptr;
         }
 
-        return add_vs_tlv<T>(cmdu_tx, id, true);
+        return add_vs_tlv<T>(cmdu_tx, id);
     }
 
     template <class T>
-    static std::shared_ptr<T> add_vs_tlv(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0, bool resize = false)
+    static std::shared_ptr<T> add_vs_tlv(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
     {
         auto tlvhdr = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
         if (!tlvhdr) {
@@ -208,7 +196,7 @@ public:
             return nullptr;
         }
 
-        if (!add_intel_vs_data<T>(cmdu_tx, id, resize))
+        if (!add_intel_vs_data<T>(cmdu_tx, id))
             return nullptr;
 
         auto beerocks_header = get_beerocks_header(cmdu_tx);
