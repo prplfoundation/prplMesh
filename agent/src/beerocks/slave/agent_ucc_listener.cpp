@@ -24,7 +24,7 @@ agent_ucc_listener::agent_ucc_listener(backhaul_manager &backhaul_manager_ctx, u
     : beerocks_ucc_listener(port), m_backhaul_manager_ctx(backhaul_manager_ctx), m_vendor(vendor),
       m_model(model), m_bridge_iface(bridge_iface)
 {
-    m_ucc_listener_run_on = eUccListenerRunOn::CONTROLLER;
+    m_ucc_listener_run_on = eUccListenerRunOn::AGENT;
 }
 
 bool agent_ucc_listener::init()
