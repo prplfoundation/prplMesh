@@ -77,6 +77,10 @@ backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
     configuration_stop_on_failure_attempts = string_utils::stoi(config.stop_on_failure_attempts);
     stop_on_failure_attempts               = configuration_stop_on_failure_attempts;
     LOG(DEBUG) << "stop_on_failure_attempts=" << configuration_stop_on_failure_attempts;
+    m_sConfig.ucc_listener_port = string_utils::stoi(config.ucc_listener_port);
+    m_sConfig.bridge_iface      = config.bridge_iface;
+    m_sConfig.vendor            = config.vendor;
+    m_sConfig.model             = config.model;
 
     m_eFSMState = EState::INIT;
     set_select_timeout(SELECT_TIMEOUT_MSC);
