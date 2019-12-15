@@ -11,7 +11,6 @@
 #include <string>
 
 namespace beerocks {
-namespace backhaul_manager {
 
 /*!
  * \brief Monitors the wired WAN port.
@@ -51,7 +50,6 @@ private:
     char m_arrNLBuff[4096];
 };
 
-} // namespace backhaul_manager
 } // namespace beerocks
 
 #endif

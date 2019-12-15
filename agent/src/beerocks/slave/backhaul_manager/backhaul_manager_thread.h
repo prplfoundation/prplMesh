@@ -23,15 +23,14 @@
 #include <list>
 
 namespace beerocks {
-namespace backhaul_manager {
 
-class main_thread : public btl::transport_socket_thread {
+class backhaul_manager : public btl::transport_socket_thread {
 
 public:
-    main_thread(const config_file::sConfigSlave &config,
-                const std::set<std::string> &slave_ap_ifaces_,
-                const std::set<std::string> &slave_sta_ifaces_);
-    ~main_thread();
+    backhaul_manager(const config_file::sConfigSlave &config,
+                     const std::set<std::string> &slave_ap_ifaces_,
+                     const std::set<std::string> &slave_sta_ifaces_);
+    ~backhaul_manager();
 
     virtual bool init() override;
     virtual bool work() override;
@@ -255,7 +254,6 @@ private:
     EState m_eFSMState;
 };
 
-} // namespace backhaul_manager
 } // namespace beerocks
 
 #endif // _BACKHAUL_MANAGER_THREAD_H

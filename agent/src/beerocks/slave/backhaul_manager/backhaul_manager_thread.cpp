@@ -40,7 +40,6 @@
 using namespace beerocks::net;
 
 namespace beerocks {
-namespace backhaul_manager {
 
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////// Local Module Definitions //////////////////////////
@@ -60,15 +59,15 @@ namespace backhaul_manager {
 /////////////////////////////// Static Members ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-const char *main_thread::s_arrStates[] = {FOREACH_STATE(GENERATE_STRING)};
+const char *backhaul_manager::s_arrStates[] = {FOREACH_STATE(GENERATE_STRING)};
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-main_thread::main_thread(const config_file::sConfigSlave &config,
-                         const std::set<std::string> &slave_ap_ifaces_,
-                         const std::set<std::string> &slave_sta_ifaces_)
+backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
+                                   const std::set<std::string> &slave_ap_ifaces_,
+                                   const std::set<std::string> &slave_sta_ifaces_)
     : transport_socket_thread(config.temp_path + std::string(BEEROCKS_BACKHAUL_MGR_UDS)),
       beerocks_temp_path(config.temp_path), slave_ap_ifaces(slave_ap_ifaces_),
       slave_sta_ifaces(slave_sta_ifaces_), config_const_bh_slave(config.const_backhaul_slave)
@@ -83,9 +82,9 @@ main_thread::main_thread(const config_file::sConfigSlave &config,
     set_select_timeout(SELECT_TIMEOUT_MSC);
 }
 
-main_thread::~main_thread() { on_thread_stop(); }
+backhaul_manager::~backhaul_manager() { on_thread_stop(); }
 
-bool main_thread::init()
+bool backhaul_manager::init()
 {
     on_thread_stop();
     if (!transport_socket_thread::init()) {
@@ -120,7 +119,7 @@ bool main_thread::init()
     return true;
 }
 
-bool main_thread::work()
+bool backhaul_manager::work()
 {
     bool skip_select = false;
     if (!backhaul_fsm_main(skip_select))
@@ -133,7 +132,7 @@ bool main_thread::work()
     return true;
 }
 
-void main_thread::on_thread_stop()
+void backhaul_manager::on_thread_stop()
 {
     // Close the socket with the platform manager
     if (m_scPlatform) {
@@ -167,7 +166,7 @@ void main_thread::on_thread_stop()
     }
 }
 
-void main_thread::socket_connected(Socket *sd)
+void backhaul_manager::socket_connected(Socket *sd)
 {
     LOG(DEBUG) << "new slave_socket, sd=" << intptr_t(sd);
     auto soc   = std::make_shared<SSlaveSockets>();
@@ -176,7 +175,7 @@ void main_thread::socket_connected(Socket *sd)
     add_socket(soc->slave);
 }
 
-bool main_thread::socket_disconnected(Socket *sd)
+bool backhaul_manager::socket_disconnected(Socket *sd)
 {
     if (from_bus(sd)) {
         LOG(ERROR) << "bus socket to the controller disconnected " << intptr_t(sd)
@@ -251,12 +250,12 @@ bool main_thread::socket_disconnected(Socket *sd)
     return true;
 }
 
-std::string main_thread::print_cmdu_types(const message::sUdsHeader *cmdu_header)
+std::string backhaul_manager::print_cmdu_types(const message::sUdsHeader *cmdu_header)
 {
     return message_com::print_cmdu_types(cmdu_header);
 }
 
-void main_thread::platform_notify_error(int code, const std::string &error_data)
+void backhaul_manager::platform_notify_error(int code, const std::string &error_data)
 {
     if (!m_scPlatform) {
         LOG(ERROR) << "Invalid Platform Manager socket!";
@@ -283,7 +282,7 @@ void main_thread::platform_notify_error(int code, const std::string &error_data)
     message_com::send_cmdu(m_scPlatform.get(), cmdu_tx);
 }
 
-void main_thread::after_select(bool timeout)
+void backhaul_manager::after_select(bool timeout)
 {
     for (auto &soc : slaves_sockets) {
         if (soc->sta_iface.empty() || !soc->sta_wlan_hal)
@@ -315,8 +314,8 @@ void main_thread::after_select(bool timeout)
     }
 }
 
-bool main_thread::finalize_slaves_connect_state(bool fConnected,
-                                                std::shared_ptr<SSlaveSockets> pSocket)
+bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
+                                                     std::shared_ptr<SSlaveSockets> pSocket)
 {
     LOG(TRACE) << __func__ << ": fConnected=" << int(fConnected) << std::hex
                << ", pSocket=" << pSocket;
@@ -526,7 +525,7 @@ bool main_thread::finalize_slaves_connect_state(bool fConnected,
     return true;
 }
 
-bool main_thread::backhaul_fsm_main(bool &skip_select)
+bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 {
     // Process internal FSMs before the main one, to prevent
     // falling into the "default" case...
@@ -784,7 +783,7 @@ bool main_thread::backhaul_fsm_main(bool &skip_select)
     return (true);
 }
 
-bool main_thread::send_1905_topology_discovery_message()
+bool backhaul_manager::send_1905_topology_discovery_message()
 {
     auto cmdu_hdr = cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE);
     if (!cmdu_hdr) {
@@ -808,7 +807,7 @@ bool main_thread::send_1905_topology_discovery_message()
     return send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
 }
 
-bool main_thread::send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> soc)
+bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> soc)
 {
     ieee1905_1::tlvAutoconfigFreqBand::eValue freq_band =
         ieee1905_1::tlvAutoconfigFreqBand::IEEE_802_11_2_4_GHZ;
@@ -887,7 +886,7 @@ bool main_thread::send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> 
     return send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
 }
 
-bool main_thread::backhaul_fsm_wireless(bool &skip_select)
+bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
 {
     switch (m_eFSMState) {
     case EState::INIT_HAL: {
@@ -914,7 +913,7 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
                 using namespace std::placeholders; // for `_1`
                 soc->sta_wlan_hal = std::shared_ptr<bwl::sta_wlan_hal>(
                     sta_wlan_hal_create(
-                        iface, std::bind(&main_thread::hal_event_handler, this, _1, iface)),
+                        iface, std::bind(&backhaul_manager::hal_event_handler, this, _1, iface)),
                     [](bwl::sta_wlan_hal *obj) {
                         if (obj)
                             sta_wlan_hal_destroy(obj);
@@ -1248,7 +1247,7 @@ bool main_thread::backhaul_fsm_wireless(bool &skip_select)
     return (true);
 }
 
-bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto uds_header = message_com::get_uds_header(cmdu_rx);
 
@@ -1327,8 +1326,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     return true;
 }
 
-bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> soc,
-                                                ieee1905_1::CmduMessageRx &cmdu_rx)
+bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> soc,
+                                                     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     // Validate Socket
     if (!soc) {
@@ -1582,8 +1581,8 @@ bool main_thread::handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> s
     return true;
 }
 
-bool main_thread::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                        const std::string &src_mac)
+bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                             const std::string &src_mac)
 {
     /*
      * return values:
@@ -1627,7 +1626,7 @@ bool main_thread::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
  * @return true on success
  * @return false on failure
  */
-bool main_thread::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cmdu_rx)
+bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received TOPOLOGY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
@@ -1636,8 +1635,8 @@ bool main_thread::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cmdu_rx
     return true;
 }
 
-bool main_thread::handle_1905_higher_layer_data_message(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                                        const std::string &src_mac)
+bool backhaul_manager::handle_1905_higher_layer_data_message(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                             const std::string &src_mac)
 {
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received HIGHER_LAYER_DATA_MESSAGE , mid=" << std::hex << int(mid);
@@ -1663,8 +1662,8 @@ bool main_thread::handle_1905_higher_layer_data_message(ieee1905_1::CmduMessageR
     return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
 }
 
-bool main_thread::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                                         const std::string &src_mac)
+bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                              const std::string &src_mac)
 {
     LOG(DEBUG) << "received autoconfig response message";
 
@@ -1777,7 +1776,7 @@ bool main_thread::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessage
     return true;
 }
 
-bool main_thread::send_slaves_enable()
+bool backhaul_manager::send_slaves_enable()
 {
     auto iface_hal = get_wireless_hal();
     iface_hal->refresh_radio_info();
@@ -1805,8 +1804,8 @@ bool main_thread::send_slaves_enable()
     return true;
 }
 
-bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr,
-                                    std::string iface)
+bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr,
+                                         std::string iface)
 {
     if (!event_ptr) {
         LOG(ERROR) << "Invalid event!";
@@ -2032,7 +2031,7 @@ bool main_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_pt
     return true;
 }
 
-bool main_thread::select_bssid()
+bool backhaul_manager::select_bssid()
 {
     int max_rssi_24     = beerocks::RSSI_INVALID;
     int max_rssi_5_best = beerocks::RSSI_INVALID;
@@ -2236,7 +2235,7 @@ bool main_thread::select_bssid()
     return true;
 }
 
-void main_thread::get_scan_measurement()
+void backhaul_manager::get_scan_measurement()
 {
     // Support up to 256 scan results
     std::vector<bwl::SScanResult> scan_results;
@@ -2296,7 +2295,7 @@ void main_thread::get_scan_measurement()
     }
 }
 
-std::shared_ptr<bwl::sta_wlan_hal> main_thread::get_wireless_hal(std::string iface)
+std::shared_ptr<bwl::sta_wlan_hal> backhaul_manager::get_wireless_hal(std::string iface)
 {
     // If the iface argument is empty, use the default wireless interface
     if (iface.empty()) {
@@ -2311,5 +2310,4 @@ std::shared_ptr<bwl::sta_wlan_hal> main_thread::get_wireless_hal(std::string ifa
     return slave_sk->second->sta_wlan_hal;
 }
 
-} // namespace backhaul_manager
 } // namespace beerocks
