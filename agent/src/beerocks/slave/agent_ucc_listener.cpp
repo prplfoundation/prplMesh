@@ -75,7 +75,7 @@ bool agent_ucc_listener::validate_destination_alid(const std::string &dest_alid)
 {
     // On the agent side, the dest_alid is not really needed since the destination socket will
     // always be the controller socket.
-    return (*m_controller_sd)->getPeerMac() == dest_alid;
+    return m_backhaul_manager_ctx.get_controller_bridge_mac() == dest_alid;
 }
 
 /**
@@ -99,14 +99,7 @@ std::shared_ptr<uint8_t> agent_ucc_listener::get_buffer_filled_with_cmdu()
 bool agent_ucc_listener::send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmdu_tx,
                                                   const std::string &dest_mac)
 {
-    if (*m_controller_sd == nullptr) {
-        LOG(ERROR) << "socket to controller is nullptr";
-        return false;
-    }
-
-    return message_com::send_cmdu(*m_controller_sd, cmdu_tx, (*m_controller_sd)->getPeerMac(),
-                                  m_bridge_mac);
-    return true;
+    return m_backhaul_manager_ctx.send_cmdu_to_bus(cmdu_tx, dest_mac, m_bridge_mac);
 }
 
 /**
