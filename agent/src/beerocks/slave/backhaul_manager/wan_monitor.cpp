@@ -23,7 +23,6 @@
 using namespace beerocks::net;
 
 namespace beerocks {
-namespace backhaul_manager {
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// Local Module Functions ///////////////////////////
@@ -158,5 +157,4 @@ wan_monitor::ELinkState wan_monitor::process()
     return (ELinkState::eInvalid);
 }
 
-} // namespace backhaul_manager
 } // namespace beerocks

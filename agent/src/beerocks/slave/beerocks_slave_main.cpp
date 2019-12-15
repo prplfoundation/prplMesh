@@ -292,8 +292,7 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
     son::slave_thread::sSlaveConfig son_slave_conf;
     fill_son_slave_config(beerocks_slave_conf, son_slave_conf, 0);
 
-    beerocks::backhaul_manager::main_thread backhaul_mgr(beerocks_slave_conf, slave_ap_ifaces,
-                                                         slave_sta_ifaces);
+    beerocks::backhaul_manager backhaul_mgr(beerocks_slave_conf, slave_ap_ifaces, slave_sta_ifaces);
 
     beerocks::platform_manager::main_thread platform_mgr(beerocks_slave_conf, slave_logger);
 
