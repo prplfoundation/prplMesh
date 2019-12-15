@@ -151,8 +151,6 @@ bool config_file::read_slave_config_file(std::string config_file_path, sConfigSl
             std::make_tuple("vendor=", &conf.vendor, mandatory_slave),
             std::make_tuple("model=", &conf.model, mandatory_slave),
             std::make_tuple("ucc_listener_port=", &conf.ucc_listener_port, mandatory_slave),
-            std::make_tuple("ucc_listener_slave_hostap_iface=",
-                            &conf.ucc_listener_slave_hostap_iface, mandatory_slave),
             std::make_tuple("enable_arp_monitor=", &conf.enable_arp_monitor, mandatory_slave),
             std::make_tuple("enable_keep_alive=", &conf.enable_keep_alive, mandatory_slave),
             std::make_tuple("debug_disable_arp=", &conf.debug_disable_arp, 0),

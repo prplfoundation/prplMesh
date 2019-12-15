@@ -94,7 +94,6 @@ public:
         std::string vendor;
         std::string model;
         std::string ucc_listener_port;
-        std::string ucc_listener_slave_hostap_iface;
         std::string enable_arp_monitor;
         std::string enable_keep_alive;
         std::string debug_disable_arp;
