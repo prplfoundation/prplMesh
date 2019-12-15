@@ -47,10 +47,7 @@ if (TARGET_PLATFORM STREQUAL "openwrt")
         add_definitions(-DHAVE_C99)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
-    elseif (TARGET_PLATFORM_TYPE STREQUAL "turris-omnia")
-
-        # Platform definitions
-        add_definitions(-DBEEROCKS_TURRIS_OMNIA)
+    else()
 
         file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
 
