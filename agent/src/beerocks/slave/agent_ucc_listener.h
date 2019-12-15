@@ -15,10 +15,15 @@
 #include <mutex>
 
 namespace beerocks {
+
+// Forward decleration for backhaul_manager context saving
+class backhaul_manager;
+
 class agent_ucc_listener : public beerocks_ucc_listener {
 public:
-    agent_ucc_listener(uint16_t port, const std::string &vendor, const std::string &model,
-                       const std::string &bridge_iface, SocketClient **controller_sd);
+    agent_ucc_listener(backhaul_manager &backhaul_manager_ctx, uint16_t port,
+                       const std::string &vendor, const std::string &model,
+                       const std::string &bridge_iface);
     ~agent_ucc_listener(){};
 
     bool init() override;
@@ -36,11 +41,12 @@ private:
     bool handle_dev_set_config(std::unordered_map<std::string, std::string> &params,
                                std::string &err_string) override;
 
+    backhaul_manager &m_backhaul_manager_ctx;
+
     const std::string &m_vendor;
     const std::string &m_model;
     const std::string &m_bridge_iface;
     std::string m_bridge_mac;
-    SocketClient **const m_controller_sd;
 
     std::mutex mutex;
 };
