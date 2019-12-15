@@ -11,6 +11,7 @@
 
 #include "wan_monitor.h"
 
+#include <bcl/beerocks_backport.h>
 #include <bcl/beerocks_config_file.h>
 #include <bcl/beerocks_socket_thread.h>
 #include <bcl/network/network_utils.h>
@@ -18,6 +19,8 @@
 #include <bwl/sta_wlan_hal.h>
 
 #include <beerocks/tlvf/beerocks_message_header.h>
+
+#include "../agent_ucc_listener.h"
 
 #include <future>
 #include <list>
@@ -217,6 +220,8 @@ private:
 
     std::string controller_bridge_mac;
     std::string bssid_bridge_mac;
+
+    std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
 
     /*
  * State Machines
