@@ -286,6 +286,8 @@ void backhaul_manager::platform_notify_error(int code, const std::string &error_
     message_com::send_cmdu(m_scPlatform.get(), cmdu_tx);
 }
 
+void backhaul_manager::before_select() {}
+
 void backhaul_manager::after_select(bool timeout)
 {
     for (auto &soc : slaves_sockets) {
