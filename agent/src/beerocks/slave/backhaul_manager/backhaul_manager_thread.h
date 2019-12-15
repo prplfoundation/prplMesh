@@ -38,16 +38,17 @@ public:
     // For agent_ucc_listener
     const std::string &get_controller_bridge_mac() { return controller_bridge_mac; }
 
+private:
+    // Forward declaration
+    struct SSlaveSockets;
+
     virtual bool handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx) override;
+    virtual void before_select() override;
     virtual void after_select(bool timeout) override;
     virtual void on_thread_stop() override;
     virtual void socket_connected(Socket *sd) override;
     virtual bool socket_disconnected(Socket *sd) override;
     virtual std::string print_cmdu_types(const beerocks::message::sUdsHeader *cmdu_header) override;
-
-private:
-    // Forward declaration
-    struct SSlaveSockets;
 
     bool backhaul_fsm_main(bool &skip_select);
     bool backhaul_fsm_wired(bool &skip_select);
