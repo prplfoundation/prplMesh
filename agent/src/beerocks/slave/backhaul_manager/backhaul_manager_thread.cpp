@@ -120,6 +120,16 @@ bool backhaul_manager::init()
         return false;
     }
 
+    if (m_sConfig.ucc_listener_port != 0) {
+        m_agent_ucc_listener = std::make_unique<agent_ucc_listener>(
+            *this, m_sConfig.ucc_listener_port, m_sConfig.vendor, m_sConfig.model,
+            m_sConfig.bridge_iface);
+        if (m_agent_ucc_listener && !m_agent_ucc_listener->start("ucc_listener")) {
+            LOG(ERROR) << "failed start agent_ucc_listener";
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -286,10 +296,19 @@ void backhaul_manager::platform_notify_error(int code, const std::string &error_
     message_com::send_cmdu(m_scPlatform.get(), cmdu_tx);
 }
 
-void backhaul_manager::before_select() {}
+void backhaul_manager::before_select()
+{
+    if (m_agent_ucc_listener) {
+        m_agent_ucc_listener->unlock();
+    }
+}
 
 void backhaul_manager::after_select(bool timeout)
 {
+    if (m_agent_ucc_listener) {
+        m_agent_ucc_listener->lock();
+    }
+
     for (auto &soc : slaves_sockets) {
         if (soc->sta_iface.empty() || !soc->sta_wlan_hal)
             continue;
