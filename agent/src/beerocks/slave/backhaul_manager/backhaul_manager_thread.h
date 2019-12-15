@@ -120,6 +120,9 @@ private:
         std::string wire_iface;
         std::string wireless_iface;
         std::string preferred_bssid;
+        std::string vendor;
+        std::string model;
+        int ucc_listener_port;
         beerocks::eIfaceType wire_iface_type;
         beerocks::eIfaceType wireless_iface_type;
         bwl::WiFiSec security_type;
