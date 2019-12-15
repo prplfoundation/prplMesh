@@ -113,10 +113,6 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         static eActionOp_BACKHAUL get_action_op(){
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_ENABLE);
         }
-        std::string bridge_iface_str();
-        char* bridge_iface(size_t length = 0);
-        bool set_bridge_iface(const std::string& str);
-        bool set_bridge_iface(const char buffer[], size_t size);
         sMacAddr& iface_mac();
         uint8_t& iface_is_5ghz();
         std::string wire_iface_str();
@@ -151,13 +147,11 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
     private:
         bool init();
         eActionOp_BACKHAUL* m_action_op = nullptr;
-        char* m_bridge_iface = nullptr;
-        size_t m_bridge_iface_idx__ = 0;
-        int m_lock_order_counter__ = 0;
         sMacAddr* m_iface_mac = nullptr;
         uint8_t* m_iface_is_5ghz = nullptr;
         char* m_wire_iface = nullptr;
         size_t m_wire_iface_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         char* m_sta_iface = nullptr;
         size_t m_sta_iface_idx__ = 0;
         char* m_ap_iface = nullptr;

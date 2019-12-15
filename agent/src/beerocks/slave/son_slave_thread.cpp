@@ -2963,8 +2963,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         string_utils::copy_string(bh_enable->sta_iface(message::IFACE_NAME_LENGTH),
                                   config.backhaul_wireless_iface.c_str(),
                                   message::IFACE_NAME_LENGTH);
-        string_utils::copy_string(bh_enable->bridge_iface(message::IFACE_NAME_LENGTH),
-                                  config.bridge_iface.c_str(), message::IFACE_NAME_LENGTH);
 
         // Send the message
         LOG(DEBUG) << "send ACTION_BACKHAUL_ENABLE for mac "

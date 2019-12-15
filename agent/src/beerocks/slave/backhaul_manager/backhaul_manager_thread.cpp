@@ -1427,8 +1427,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
                      */
                 pending_enable = true;
 
-                m_sConfig.bridge_iface.assign(request->bridge_iface(message::IFACE_NAME_LENGTH));
-
                 if (local_gw) {
                     LOG(DEBUG) << "All slaves ready, proceeding, local GW, Bridge: "
                                << m_sConfig.bridge_iface;

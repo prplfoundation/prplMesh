@@ -233,33 +233,6 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
 }
 cACTION_BACKHAUL_ENABLE::~cACTION_BACKHAUL_ENABLE() {
 }
-std::string cACTION_BACKHAUL_ENABLE::bridge_iface_str() {
-    char *bridge_iface_ = bridge_iface();
-    if (!bridge_iface_) { return std::string(); }
-    return std::string(bridge_iface_, m_bridge_iface_idx__);
-}
-
-char* cACTION_BACKHAUL_ENABLE::bridge_iface(size_t length) {
-    if( (m_bridge_iface_idx__ <= 0) || (m_bridge_iface_idx__ < length) ) {
-        TLVF_LOG(ERROR) << "bridge_iface length is smaller than requested length";
-        return nullptr;
-    }
-    return ((char*)m_bridge_iface);
-}
-
-bool cACTION_BACKHAUL_ENABLE::set_bridge_iface(const std::string& str) { return set_bridge_iface(str.c_str(), str.size()); }
-bool cACTION_BACKHAUL_ENABLE::set_bridge_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_bridge_iface received an empty string.";
-        return false;
-    }
-    if (size > beerocks::message::IFACE_NAME_LENGTH) {
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    std::copy(str, str + size, m_bridge_iface);
-    return true;
-}
 sMacAddr& cACTION_BACKHAUL_ENABLE::iface_mac() {
     return (sMacAddr&)(*m_iface_mac);
 }
@@ -437,7 +410,6 @@ void cACTION_BACKHAUL_ENABLE::class_swap()
 size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // bridge_iface
     class_size += sizeof(sMacAddr); // iface_mac
     class_size += sizeof(uint8_t); // iface_is_5ghz
     class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // wire_iface
@@ -460,12 +432,6 @@ bool cACTION_BACKHAUL_ENABLE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_bridge_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
-        return false;
-    }
-    m_bridge_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
     m_iface_mac = (sMacAddr*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
