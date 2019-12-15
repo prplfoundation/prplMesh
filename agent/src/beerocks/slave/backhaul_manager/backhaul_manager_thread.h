@@ -35,7 +35,9 @@ public:
     virtual bool init() override;
     virtual bool work() override;
 
-protected:
+    // For agent_ucc_listener
+    const std::string &get_controller_bridge_mac() { return controller_bridge_mac; }
+
     virtual bool handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx) override;
     virtual void after_select(bool timeout) override;
     virtual void on_thread_stop() override;
