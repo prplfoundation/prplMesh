@@ -34,9 +34,6 @@ cACTION_BACKHAUL_BUSY_NOTIFICATION:
 
 cACTION_BACKHAUL_ENABLE:
   _type: class
-  bridge_iface:
-    _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
   iface_mac: sMacAddr
   iface_is_5ghz: uint8_t
   wire_iface:
