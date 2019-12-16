@@ -1,0 +1,15 @@
+#
+---
+_namespace: ieee1905_1
+
+tlvWsc:
+  _type: class
+  _is_tlv_class : True
+  type:
+    _type: eTlvType
+    _value_const: TLV_WSC
+  length: uint16_t
+  # M2 attributes are stored in an inner TlvList
+  payload:
+    _type: uint8_t
+    _length: []
