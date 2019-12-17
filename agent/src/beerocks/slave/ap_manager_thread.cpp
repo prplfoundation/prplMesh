@@ -1405,19 +1405,7 @@ void ap_manager_thread::handle_hostapd_attached()
     LOG(DEBUG) << "handling enabled hostapd";
 
     if (acs_enabled) {
-        LOG(DEBUG) << "retrieving ACS report";
-        int read_acs_attempt = 0;
-        while (!ap_wlan_hal->read_acs_report()) {
-            read_acs_attempt++;
-            if (read_acs_attempt >= READ_ACS_ATTEMPT_MAX) {
-                LOG(ERROR) << "retrieving ACS report fails " << int(READ_ACS_ATTEMPT_MAX)
-                           << " times - stop ap_manager_thread";
-                stop_ap_manager_thread();
-                break;
-            }
-
-            usleep(ACS_READ_SLEEP_USC);
-        }
+        ap_wlan_hal->read_supported_channels();
     }
 
     auto notification =
