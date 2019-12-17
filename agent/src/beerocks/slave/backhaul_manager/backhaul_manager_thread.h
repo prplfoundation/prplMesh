@@ -25,6 +25,10 @@
 #include <future>
 #include <list>
 
+namespace bpl {
+enum class eErrorCode;
+}
+
 namespace beerocks {
 
 class backhaul_manager : public btl::transport_socket_thread {
@@ -83,7 +87,7 @@ private:
     bool is_eth_link_up();
     void get_scan_measurement();
     bool select_bssid();
-    void platform_notify_error(int code, const std::string &error_data);
+    void platform_notify_error(bpl::eErrorCode code, const std::string &error_data);
     bool send_slaves_enable();
 
     std::shared_ptr<bwl::sta_wlan_hal> get_wireless_hal(std::string iface = "");
