@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <tlvf/ieee_1905_1/cCmduHeader.h>
+#include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
 #include <tlvf/ieee_1905_1/eTlvType.h>
 #include <tlvf/TlvList.h>
 #include <memory>
@@ -86,10 +87,20 @@ public:
     bool is_swapped() const { return tlvs.is_swapped(); };
     eMessageType getMessageType();
     uint16_t getMessageId();
+    void set_max_tlv_length(size_t length) { m_max_tlv_length = length; };
+    size_t max_tlv_length() { return m_max_tlv_length; };
 
     static const uint16_t kCmduHeaderLength;
     static const uint16_t kTlvHeaderLength;
     static const size_t kMaxCmduLength;
+
+private:
+    // By default, we assume that the CMDU will be sent over the ieee1905_1 transport.
+    // Since the ieee1905_1 transport only supports CMDU fragmantation on TLVs boundaries,
+    // a TLV max size can't be larger than the MTU - CMDU header length - EOM TLV length.
+    // However, when the CMDU is sent internally via UDS, this restriction does not apply.
+    // So we allo changing it via set_max_tlv_length() API.
+    size_t m_max_tlv_length = kMaxCmduLength - kCmduHeaderLength - ieee1905_1::tlvEndOfMessage::get_initial_size();
 };
 
 }; // namespace ieee1905_1

@@ -73,10 +73,7 @@ public:
         // data inside the internal TLV list.
         // On finalize(), the buffer is shrunk back to its real size.
         size_t payload_length;
-        const size_t max_vs_tlv_length = ieee1905_1::CmduMessage::kMaxCmduLength -
-                                            ieee1905_1::CmduMessage::kCmduHeaderLength -
-                                            ieee1905_1::tlvVendorSpecific::get_initial_size() -
-                                            ieee1905_1::tlvEndOfMessage::get_initial_size();
+        const size_t max_vs_tlv_length = cmdu_tx.max_tlv_length() - ieee1905_1::tlvVendorSpecific::get_initial_size();
         payload_length = std::min(vs_tlv->getBuffRemainingBytes() -
                                     ieee1905_1::tlvEndOfMessage::get_initial_size(),
                                     max_vs_tlv_length);
@@ -123,6 +120,35 @@ public:
         cmdu_tx.tlvs.addInnerTlvList(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC, hdr);
 
         return true;
+    }
+
+    /**
+     * @brief Create a jumbo vs message object
+     *
+     * create_vs_message preallocates the maximum tlv size for each vendor
+     * specific TLV payload, based on the maximum tlv size in CmduMessage.
+     *
+     * This method allows the creation of "jumbo" CMDUs which are meant to
+     * be only sent internally over UDS by setting the maximum TLV size
+     * of the CMDU to be bigger than the MTU, based on the actual buffer size.
+     *
+     * @tparam T beerocks operation template type
+     * @param cmdu_tx Transmit CMDU descriptor
+     * @param id message id
+     * @return std::shared_ptr<T> to the created operation class
+     */
+    template <class T>
+    static std::shared_ptr<T> create_jumbo_vs_message(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
+    {
+        auto max_tlv_length = cmdu_tx.max_tlv_length();
+
+        cmdu_tx.set_max_tlv_length(cmdu_tx.tlvs.getMessageBuffLength() -
+                                   ieee1905_1::CmduMessage::kCmduHeaderLength -
+                                   ieee1905_1::tlvEndOfMessage::get_initial_size());
+        auto ret = create_vs_message(cmdu_tx, id);
+        cmdu_tx.set_max_tlv_length(max_tlv_length);
+
+        return ret;
     }
 
     template <class T>
