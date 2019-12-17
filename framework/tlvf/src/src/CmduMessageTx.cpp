@@ -83,12 +83,17 @@ bool CmduMessageTx::finalize(bool swap_needed)
     if (!m_cmdu_header)
         return false;
 
-    // Update vendor specific length which is seperated to 3 classes
-    for (auto class_it = m_class_vector.begin(); class_it != m_class_vector.end(); class_it++) {
-        if (!(*class_it)->isPostInitSucceeded()) {
+    // validate that last tlv of the CMDU is fully initialized
+    auto last_tlv = m_class_vector.empty() ? nullptr : m_class_vector.back();
+    if (last_tlv) {
+        if (!last_tlv->isPostInitSucceeded()) {
             TLVF_LOG(ERROR) << "TLV post init failed";
             return false;
         }
+    }
+
+    // Update vendor specific length which is seperated to 3 classes
+    for (auto class_it = m_class_vector.begin(); class_it != m_class_vector.end(); class_it++) {
         // Type is the first byte in the tlv buffer
         uint8_t tlv_type = *(*class_it)->getStartBuffPtr();
         if (tlv_type == uint8_t(eTlvType::TLV_VENDOR_SPECIFIC)) {
