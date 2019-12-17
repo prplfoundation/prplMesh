@@ -24,15 +24,15 @@ task::task(std::string task_name_, std::string node_mac)
     TASK_LOG(DEBUG) << "start new task: " << task_name << ", id=" << id;
 }
 
-void task::response_received(std::string mac, beerocks_message::eActionOp_CONTROL action_op,
-                             ieee1905_1::CmduMessageRx &cmdu_rx)
+void task::response_received(std::string mac,
+                             std::shared_ptr<beerocks::beerocks_header> beerocks_header)
 {
     // removing the responding mac with specific action_op from pending_macs
     auto range = pending_macs.equal_range(mac);
     for (auto it = range.first; it != range.second;) {
-        if ((it->second == action_op) && (it->first == mac)) {
+        if ((it->second == beerocks_header->action_op()) && (it->first == mac)) {
             it = pending_macs.erase(it);
-            handle_response(mac, action_op, cmdu_rx);
+            handle_response(mac, beerocks_header);
             return;
         } else {
             it++;
@@ -40,7 +40,7 @@ void task::response_received(std::string mac, beerocks_message::eActionOp_CONTRO
     }
 
     // Handle the response even if we are not expecting it
-    handle_response(mac, action_op, cmdu_rx);
+    handle_response(mac, beerocks_header);
 }
 
 void task::event_received(int event_type, void *obj)

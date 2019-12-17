@@ -30,8 +30,7 @@ using namespace net;
 using namespace son;
 
 void son_management::handle_cli_message(Socket *sd,
-                                        std::shared_ptr<beerocks_message::cACTION_HEADER> header,
-                                        ieee1905_1::CmduMessageRx &cmdu_rx,
+                                        std::shared_ptr<beerocks_header> beerocks_header,
                                         ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
                                         task_pool &tasks)
 {
@@ -40,11 +39,12 @@ void son_management::handle_cli_message(Socket *sd,
 
     //LOG(DEBUG) << "NEW CLI action=" << int(header->action()) << " action_op=" << int(header->action_op());
 
-    switch (header->action_op()) {
+    switch (beerocks_header->action_op()) {
 
     case beerocks_message::ACTION_CLI_PING_SLAVE_REQUEST: {
         LOG(DEBUG) << "PING_SLAVE_REQUEST from CLI";
-        auto cli_request = cmdu_rx.addClass<beerocks_message::cACTION_CLI_PING_SLAVE_REQUEST>();
+        auto cli_request =
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_PING_SLAVE_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_PING_SLAVE_REQUEST failed";
             isOK = false;
@@ -95,7 +95,7 @@ void son_management::handle_cli_message(Socket *sd,
     case beerocks_message::ACTION_CLI_PING_ALL_SLAVES_REQUEST: {
         LOG(DEBUG) << "PING_ALL_SLAVES_REQUEST from CLI";
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_PING_ALL_SLAVES_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_PING_ALL_SLAVES_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_PING_SLAVE_REQUEST failed";
             isOK = false;
@@ -147,7 +147,7 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_HOSTAP_STATS_MEASUREMENT: {
         auto request_in =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_HOSTAP_STATS_MEASUREMENT>();
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_HOSTAP_STATS_MEASUREMENT>();
         if (request_in == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_HOSTAP_STATS_MEASUREMENT failed";
             isOK = false;
@@ -183,7 +183,8 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST: {
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST failed";
             isOK = false;
@@ -210,7 +211,8 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST: {
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST failed";
             isOK = false;
@@ -237,7 +239,8 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS: {
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS failed";
             isOK = false;
@@ -273,7 +276,8 @@ void son_management::handle_cli_message(Socket *sd,
         break;
     }
     case beerocks_message::ACTION_CLI_CLIENT_ALLOW_REQUEST: {
-        auto cli_request = cmdu_rx.addClass<beerocks_message::cACTION_CLI_CLIENT_ALLOW_REQUEST>();
+        auto cli_request =
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_CLIENT_ALLOW_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass ACTION_CLI_CLIENT_ALLOW_REQUEST failed";
             isOK = false;
@@ -317,7 +321,7 @@ void son_management::handle_cli_message(Socket *sd,
     case beerocks_message::ACTION_CLI_CROSS_RX_RSSI_MEASUREMENT: {
 
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT>();
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass ACTION_CLI_CROSS_RX_RSSI_MEASUREMENT failed";
             isOK = false;
@@ -356,7 +360,7 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_CLIENT_DISALLOW_REQUEST: {
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_CLIENT_DISALLOW_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_CLIENT_DISALLOW_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass ACTION_CLI_CLIENT_DISALLOW_REQUEST failed";
             isOK = false;
@@ -400,7 +404,7 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_CLIENT_DISCONNECT_REQUEST: {
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_CLIENT_DISCONNECT_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_CLIENT_DISCONNECT_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass ACTION_CLI_CLIENT_DISCONNECT_REQUEST failed";
             isOK = false;
@@ -430,7 +434,7 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_CLIENT_BEACON_11K_REQUEST: {
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_CLIENT_BEACON_11K_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_CLIENT_BEACON_11K_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass ACTION_CLI_CLIENT_BEACON_11K_REQUEST failed";
             isOK = false;
@@ -504,7 +508,8 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST: {
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass ACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST failed";
             isOK = false;
@@ -554,7 +559,8 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_CLIENT_STATISTICS_11K_REQUEST: {
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass ACTION_CLI_CLIENT_STATISTICS_11K_REQUEST failed";
             isOK = false;
@@ -642,7 +648,8 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST: {
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass ACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST failed";
             isOK = false;
@@ -671,7 +678,8 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST: {
         auto cli_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST failed";
             isOK = false;
@@ -698,7 +706,8 @@ void son_management::handle_cli_message(Socket *sd,
     }
     case beerocks_message::ACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS failed";
             isOK = false;
@@ -713,7 +722,7 @@ void son_management::handle_cli_message(Socket *sd,
         break;
     }
     case beerocks_message::ACTION_CLI_ENABLE_DEBUG: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_CLI_ENABLE_DEBUG>();
+        auto request = beerocks_header->addClass<beerocks_message::cACTION_CLI_ENABLE_DEBUG>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_ENABLE_DEBUG failed";
             isOK = false;
@@ -731,7 +740,8 @@ void son_management::handle_cli_message(Socket *sd,
         break;
     }
     case beerocks_message::ACTION_CLI_DUMP_NODE_INFO: {
-        auto cli_request = cmdu_rx.addClass<beerocks_message::cACTION_CLI_DUMP_NODE_INFO>();
+        auto cli_request =
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_DUMP_NODE_INFO>();
         if (cli_request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_DUMP_NODE_INFO failed";
             isOK = false;
@@ -777,7 +787,7 @@ void son_management::handle_cli_message(Socket *sd,
         break;
     }
     case beerocks_message::ACTION_CLI_OPTIMAL_PATH_TASK: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_CLI_OPTIMAL_PATH_TASK>();
+        auto request = beerocks_header->addClass<beerocks_message::cACTION_CLI_OPTIMAL_PATH_TASK>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_OPTIMAL_PATH_TASK failed";
             isOK = false;
@@ -810,7 +820,8 @@ void son_management::handle_cli_message(Socket *sd,
         break;
     }
     case beerocks_message::ACTION_CLI_LOAD_BALANCER_TASK: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_CLI_LOAD_BALANCER_TASK>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_LOAD_BALANCER_TASK>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_LOAD_BALANCER_TASK failed";
             isOK = false;
@@ -851,7 +862,8 @@ void son_management::handle_cli_message(Socket *sd,
         break;
     }
     case beerocks_message::ACTION_CLI_BACKHAUL_ROAM_REQUEST: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_CLI_BACKHAUL_ROAM_REQUEST>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_BACKHAUL_ROAM_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_BACKHAUL_ROAM_REQUEST failed";
             isOK = false;
@@ -867,7 +879,8 @@ void son_management::handle_cli_message(Socket *sd,
         break;
     }
     case beerocks_message::ACTION_CLI_CLIENT_BSS_STEER_REQUEST: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_CLI_CLIENT_BSS_STEER_REQUEST>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_CLI_CLIENT_BSS_STEER_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_CLI_CLIENT_BSS_STEER_REQUEST failed";
             isOK = false;
@@ -886,7 +899,7 @@ void son_management::handle_cli_message(Socket *sd,
         break;
     }
     default: {
-        LOG(ERROR) << "Unsupported CLI action_op:" << int(header->action_op());
+        LOG(ERROR) << "Unsupported CLI action_op:" << int(beerocks_header->action_op());
         isOK = false;
         break;
     }
@@ -907,10 +920,10 @@ void son_management::handle_cli_message(Socket *sd,
     }
 }
 
-void son_management::handle_bml_message(
-    Socket *sd, std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header,
-    ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
-    task_pool &tasks)
+void son_management::handle_bml_message(Socket *sd,
+                                        std::shared_ptr<beerocks_header> beerocks_header,
+                                        ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
+                                        task_pool &tasks)
 {
     switch (beerocks_header->action_op()) {
     case beerocks_message::ACTION_BML_PING_REQUEST: {
@@ -1036,7 +1049,8 @@ void son_management::handle_bml_message(
     } break;
 
     case beerocks_message::ACTION_BML_SET_CLIENT_ROAMING_REQUEST: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_CLIENT_ROAMING_REQUEST>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_SET_CLIENT_ROAMING_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_BML_SET_CLIENT_ROAMING_REQUEST failed";
             break;
@@ -1073,7 +1087,8 @@ void son_management::handle_bml_message(
 
     case beerocks_message::ACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST failed";
             break;
@@ -1107,7 +1122,7 @@ void son_management::handle_bml_message(
     } break;
 
     case beerocks_message::ACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST: {
-        auto request = cmdu_rx.addClass<
+        auto request = beerocks_header->addClass<
             beerocks_message::cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR)
@@ -1151,7 +1166,8 @@ void son_management::handle_bml_message(
 
     case beerocks_message::ACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass ACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST failed";
             break;
@@ -1190,7 +1206,8 @@ void son_management::handle_bml_message(
     } break;
 
     case beerocks_message::ACTION_BML_SET_IRE_ROAMING_REQUEST: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_IRE_ROAMING_REQUEST>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_SET_IRE_ROAMING_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass ACTION_BML_SET_IRE_ROAMING_REQUEST failed";
             break;
@@ -1228,7 +1245,8 @@ void son_management::handle_bml_message(
     } break;
 
     case beerocks_message::ACTION_BML_SET_LOAD_BALANCER_REQUEST: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_LOAD_BALANCER_REQUEST>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_SET_LOAD_BALANCER_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass ACTION_BML_SET_LOAD_BALANCER_REQUEST failed";
             break;
@@ -1265,7 +1283,7 @@ void son_management::handle_bml_message(
 
     case beerocks_message::ACTION_BML_SET_SERVICE_FAIRNESS_REQUEST: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass ACTION_BML_SET_SERVICE_FAIRNESS_REQUEST failed";
             break;
@@ -1301,7 +1319,8 @@ void son_management::handle_bml_message(
     } break;
 
     case beerocks_message::ACTION_BML_SET_DFS_REENTRY_REQUEST: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_DFS_REENTRY_REQUEST>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_SET_DFS_REENTRY_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_BML_SET_DFS_REENTRY_REQUEST failed";
             break;
@@ -1339,7 +1358,8 @@ void son_management::handle_bml_message(
 
     case beerocks_message::ACTION_BML_SET_CERTIFICATION_MODE_REQUEST: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_CERTIFICATION_MODE_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_SET_CERTIFICATION_MODE_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_BML_SET_CERTIFICATION_MODE_REQUEST failed";
             break;
@@ -1378,7 +1398,8 @@ void son_management::handle_bml_message(
         LOG(TRACE) << "ACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST";
 
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass ACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST failed";
             break;
@@ -1418,7 +1439,8 @@ void son_management::handle_bml_message(
     case beerocks_message::ACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST: {
         LOG(TRACE) << "ACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST";
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass ACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST failed";
             break;
@@ -1445,7 +1467,8 @@ void son_management::handle_bml_message(
     } break;
     case beerocks_message::ACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST: {
         auto bml_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST>();
         if (bml_request == nullptr) {
             LOG(ERROR) << "addClass ACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST failed";
             break;
@@ -1505,7 +1528,8 @@ void son_management::handle_bml_message(
         uint32_t result = 1; //1-fail 0-success
 
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST failed";
             return;
@@ -1610,7 +1634,8 @@ void son_management::handle_bml_message(
 #ifdef BEEROCKS_RDKB
     case beerocks_message::ACTION_BML_STEERING_SET_GROUP_REQUEST: {
         LOG(TRACE) << "ACTION_BML_STEERING_SET_GROUP_REQUEST";
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_SET_GROUP_REQUEST>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_STEERING_SET_GROUP_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass ACTION_BML_STEERING_SET_GROUP_REQUEST failed";
             break;
@@ -1630,7 +1655,7 @@ void son_management::handle_bml_message(
     case beerocks_message::ACTION_BML_STEERING_CLIENT_SET_REQUEST: {
         LOG(TRACE) << "cACTION_BML_STEERING_CLIENT_SET_REQUEST";
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_SET_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_SET_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_SET_REQUEST failed";
             break;
@@ -1651,7 +1676,7 @@ void son_management::handle_bml_message(
     }
     case beerocks_message::ACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST: {
         LOG(TRACE) << "ACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST";
-        auto request = cmdu_rx.addClass<
+        auto request = beerocks_header->addClass<
             beerocks_message::cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST failed";
@@ -1674,7 +1699,8 @@ void son_management::handle_bml_message(
     case beerocks_message::ACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST: {
         LOG(TRACE) << "ACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST";
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST failed";
             break;
@@ -1695,7 +1721,8 @@ void son_management::handle_bml_message(
     case beerocks_message::ACTION_BML_STEERING_CLIENT_MEASURE_REQUEST: {
         LOG(TRACE) << "ACTION_BML_STEERING_CLIENT_MEASURE_REQUEST";
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST failed";
             break;
@@ -1724,7 +1751,8 @@ void son_management::handle_bml_message(
 
     case beerocks_message::ACTION_BML_TRIGGER_TOPOLOGY_QUERY: {
 
-        auto bml_request = cmdu_rx.addClass<beerocks_message::cACTION_BML_TRIGGER_TOPOLOGY_QUERY>();
+        auto bml_request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_TRIGGER_TOPOLOGY_QUERY>();
 
         auto al_mac = network_utils::mac_to_string(bml_request->al_mac());
 
@@ -1745,7 +1773,8 @@ void son_management::handle_bml_message(
     case beerocks_message::ACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST: {
 
         auto bml_request =
-            cmdu_rx.addClass<beerocks_message::cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST>();
 
         if (bml_request == nullptr) {
             LOG(ERROR) << "addClass cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST failed";

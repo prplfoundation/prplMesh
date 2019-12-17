@@ -48,7 +48,7 @@ channel_selection_task::channel_selection_task(db &database_, ieee1905_1::CmduMe
 //     //DO NOT USE THIS FUNCTION, ONLY USE handle_event FUNCTION
 // }
 
-// void channel_selection_task::handle_response(std::string mac, beerocks::message::eActionOp_CONTROL action_op, uint8_t *buffer)
+// void channel_selection_task::handle_response(std::string mac, std::shared_ptr<beerocks_header> beerocks_header)
 // {
 //     //DO NOT USE THIS FUNCTION, ONLY USE handle_event FUNCTION
 // }

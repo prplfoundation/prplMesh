@@ -32,7 +32,7 @@ public:
     bool isInitialized();
     virtual bool isPostInitSucceeded() { return true; };
     virtual void class_swap() = 0;
-    virtual bool finalize() = 0;
+    virtual bool finalize()   = 0;
     bool is_finalized() { return m_finalized__; };
     void addInnerClassList(std::shared_ptr<ClassList> list) { m_inner__ = list; };
     std::shared_ptr<ClassList> getInnerClassList() { return m_inner__; };
