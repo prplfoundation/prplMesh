@@ -26,8 +26,6 @@ using namespace beerocks::bpl;
 #define RETURN_OK 0
 #define RETURN_ERR -1
 
-const char *s_error_strings[] = {FOREACH_ERROR_CODE(GENERATE_ERROR_STRING)};
-
 namespace bpl {
 
 int bpl_cfg_get_param(const std::string &param, std::string &value)
