@@ -1784,8 +1784,6 @@ class TlvF:
         
         try: self.conf_include_yaml_path = yaml_conf["include_yaml_path"]
         except: self.conf_include_yaml_path = None
-        try: self.conf_include_source_files = yaml_conf["include_source_path"]
-        except: self.conf_include_source_files = None
 
         try: self.conf_source_license_header = yaml_conf["source_license_header"]
         except: self.conf_source_license_header = None
