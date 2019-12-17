@@ -25,7 +25,6 @@ public:
     uint8_t *getStartBuffPtr();
     size_t getBuffRemainingBytes(void *start = nullptr);
     bool buffPtrIncrementSafe(size_t length);
-
     size_t getLen();
     bool isInitialized();
     virtual bool isPostInitSucceeded() { return true; };
@@ -38,6 +37,19 @@ protected:
     const bool m_parse__;
     const bool m_swap__;
     bool m_init_succeeded = false;
+
+private:
+    /**
+     * @brief trim buffer by tailroom size
+     *
+     * This is intended to be used __only__ by friend class TlvList on finalize
+     * When resizing buffers.
+     *
+     * @param tailroom size to trim
+     * @return true on success
+     * @return false on failure
+     */
+    friend void trim(BaseClass &obj, size_t tailroom) { obj.m_buff_ptr__ -= tailroom; };
 };
 
 #endif //_BaseClass_H_
