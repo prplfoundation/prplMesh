@@ -1,5 +1,6 @@
 project(elpp VERSION ${prplmesh_VERSION})
 
+add_definitions(-DAUTO_INITIALIZE_EASYLOGGINGPP)
 add_definitions(-DELPP_THREAD_SAFE)
 add_definitions(-DELPP_FORCE_USE_STD_THREAD)
 add_definitions(-DELPP_NO_DEFAULT_LOG_FILE)

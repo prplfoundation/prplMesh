@@ -14,7 +14,6 @@
 
 using namespace std;
 using namespace mapf;
-MAPF_INITIALIZE_LOGGER
 
 void getString(char *s, int size)
 {

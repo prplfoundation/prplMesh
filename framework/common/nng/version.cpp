@@ -10,8 +10,6 @@
 #include <mapf/common/logger.h>
 #include <nng/nng.h>
 
-MAPF_INITIALIZE_LOGGER
-
 int main(void)
 {
     printf("Current nng version: %s\n", nng_version());

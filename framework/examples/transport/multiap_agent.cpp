@@ -12,7 +12,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <unistd.h>
-MAPF_INITIALIZE_LOGGER
+
 namespace mapf {
 
 class MultiApAgent : public MultiApBase {

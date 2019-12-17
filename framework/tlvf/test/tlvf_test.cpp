@@ -37,8 +37,6 @@
 using namespace ieee1905_1;
 using namespace wfa_map;
 
-MAPF_INITIALIZE_LOGGER
-
 using namespace mapf;
 
 int test_int_len_list()

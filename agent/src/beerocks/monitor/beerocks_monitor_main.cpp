@@ -13,11 +13,6 @@
 #include <bcl/beerocks_version.h>
 #include <easylogging++.h>
 
-/// Do not use this macro anywhere else in gateway process
-/// It should only be there in one place and easylogging++ recommends to be in the file where
-/// main function is defined.
-INITIALIZE_EASYLOGGINGPP
-
 // Do not use this macro anywhere else in ire process
 // It should only be there in one place in each executable module
 BEEROCKS_INIT_BEEROCKS_VERSION

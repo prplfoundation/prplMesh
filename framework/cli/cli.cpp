@@ -9,7 +9,7 @@
 #include <iostream>
 #include <mapf/local_bus.h>
 #include <unistd.h>
-MAPF_INITIALIZE_LOGGER
+
 int main(int argc, char *argv[])
 {
     // TODO
