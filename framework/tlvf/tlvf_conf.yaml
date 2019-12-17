@@ -29,25 +29,6 @@ include_yaml_path: {
 }
 
 # Relative to tlvf.py src_path variable
-include_source_path: {
-  "include/tlvf/swap.h",
-  "include/tlvf/tlvfutils.h",
-  "include/tlvf/tlvflogging.h",
-  "include/tlvf/BaseClass.h",
-  "src/BaseClass.cpp",
-  "include/tlvf/CmduMessage.h",
-  "src/CmduMessage.cpp",
-  "include/tlvf/CmduMessageTx.h",
-  "src/CmduMessageTx.cpp",
-  "include/tlvf/CmduMessageRx.h",
-  "src/CmduMessageRx.cpp",
-  "include/tlvf/CmduParser.h",
-  "include/tlvf/CmduTlvParser.h",
-  "src/CmduTlvParser.cpp",
-  "include/tlvf/ieee_1905_1/sVendorOUI.h",
-}
-
-# Relative to tlvf.py src_path variable
 source_license_header: "intel/license.txt"
 
 debug:
