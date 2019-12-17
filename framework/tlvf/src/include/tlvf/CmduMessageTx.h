@@ -20,7 +20,6 @@ public:
     CmduMessageTx(uint8_t *buff, size_t buff_len);
     ~CmduMessageTx();
 
-public:
     std::shared_ptr<cCmduHeader> create(uint16_t id, eMessageType message_type);
     std::shared_ptr<cCmduHeader> load();
     std::shared_ptr<tlvVendorSpecific> add_vs_tlv(tlvVendorSpecific::eVendorOUI voui);
