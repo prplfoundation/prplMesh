@@ -34,18 +34,17 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
         return;
     }
 
-    auto beerocks_header = message_com::get_vs_class_header(cmdu_tx);
+    auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
 
     if (!beerocks_header) {
         LOG(ERROR) << "Failed getting beerocks_header!";
         return;
     }
 
-    beerocks_header->last() = 0;
+    beerocks_header->actionhdr()->last() = 0;
 
     uint8_t *data_start = nullptr;
     // std::ptrdiff_t size=0, size_left=0, node_len=0;
-    const size_t tlvEndSize     = ieee1905_1::tlvEndOfMessage::get_initial_size();
     const size_t gwIreNodeSize  = sizeof(BML_NODE);
     const size_t clientNodeSize = sizeof(BML_NODE) - sizeof(BML_NODE::N_DATA::N_GW_IRE);
 
@@ -85,7 +84,7 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
                 continue;
             }
         }
-        size_left = cmdu_tx.getMessageBuffLength() - cmdu_tx.getMessageLength() - tlvEndSize;
+        size_left = beerocks_header->getMessageBuffLength() - beerocks_header->getMessageLength();
 
         // LOG(DEBUG) << "num_of_nodes = " << num_of_nodes << ", size = " << int(size) << ", size_left = " << int(size_left);
 
@@ -110,12 +109,12 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
                 response =
                     message_com::create_vs_message<beerocks_message::cACTION_BML_NW_MAP_RESPONSE>(
                         cmdu_tx, id);
-                beerocks_header         = message_com::get_vs_class_header(cmdu_tx);
-                beerocks_header->last() = 0;
-                num_of_nodes            = response->node_num(); // prepare for next message
-                num_of_nodes            = 0;
-                data_start              = nullptr;
-                size                    = 0;
+                beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
+                beerocks_header->actionhdr()->last() = 0;
+                num_of_nodes = response->node_num(); // prepare for next message
+                num_of_nodes = 0;
+                data_start   = nullptr;
+                size         = 0;
             } else {
                 if (!response->alloc_buffer(node_len)) {
                     LOG(ERROR) << "Failed allocating buffer!";
@@ -135,7 +134,7 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
         }
     }
 
-    beerocks_header->last() = 1;
+    beerocks_header->actionhdr()->last() = 1;
     message_com::send_cmdu(sd, cmdu_tx);
     //LOG(DEBUG) << "sending message, last=1";
 }
@@ -317,12 +316,12 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
         return;
     }
 
-    auto beerocks_header = message_com::get_vs_class_header(cmdu_tx);
+    auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
     if (!beerocks_header) {
         LOG(ERROR) << "Failed getting beerocks_header!";
         return;
     }
-    beerocks_header->last() = 0;
+    beerocks_header->actionhdr()->last() = 0;
 
     // nodes iterating
     //LOG(DEBUG) << "send_bml_nodes_statistics_message, buf_size " << int(tx_buffer_size);
@@ -374,12 +373,12 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
             response =
                 message_com::create_vs_message<beerocks_message::cACTION_BML_STATS_UPDATE>(cmdu_tx);
 
-            beerocks_header         = message_com::get_vs_class_header(cmdu_tx);
-            beerocks_header->last() = 0;
-            num_of_stats_bulks      = response->num_of_stats_bulks();
-            num_of_stats_bulks      = 0;
-            get_next_node           = 0;
-            size                    = 0;
+            beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
+            beerocks_header->actionhdr()->last() = 0;
+            num_of_stats_bulks                   = response->num_of_stats_bulks();
+            num_of_stats_bulks                   = 0;
+            get_next_node                        = 0;
+            size                                 = 0;
         } else {
             //LOG(DEBUG) << "node_len = " << int(node_len);
             num_of_stats_bulks++;
@@ -441,7 +440,7 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
         }
     }
 
-    beerocks_header->last() = 1;
+    beerocks_header->actionhdr()->last() = 1;
 
     //LOG(DEBUG) << "sending message, last=0";
     // sending to all listeners
