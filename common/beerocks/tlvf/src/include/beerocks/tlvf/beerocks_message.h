@@ -47,11 +47,6 @@ public:
     static bool
     intel_oui(std::shared_ptr<ieee1905_1::tlvVendorSpecific> tlv_vendor_specific_header);
 
-    /*
-     * TODO
-     * should this be removed and replaced by parse_intel_vs_message() ?
-     */
-
     static std::shared_ptr<beerocks_message::cACTION_HEADER>
     parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx);
 
