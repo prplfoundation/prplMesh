@@ -209,8 +209,7 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
             if (tlv_vendor_specific.vendor_oui() ==
                 ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL) {
                 // assuming that the magic is the first data on the beerocks header
-                auto beerocks_magic = *(
-                    uint32_t *)((uint8_t *)tlv + ieee1905_1::tlvVendorSpecific::get_initial_size());
+                auto beerocks_magic = *(uint32_t *)(tlv_vendor_specific.payload());
                 if (uds_header->swap_needed) {
                     swap_32(beerocks_magic);
                 }
