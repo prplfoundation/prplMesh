@@ -20,7 +20,7 @@
 
 namespace bpl {
 
-int bpl_cfg_uci_get(char *path, char *value, size_t length)
+int cfg_uci_get(char *path, char *value, size_t length)
 {
     struct uci_ptr ptr;
     struct uci_context *cont = uci_alloc_context();
@@ -40,12 +40,12 @@ int bpl_cfg_uci_get(char *path, char *value, size_t length)
     return RETURN_OK;
 }
 
-int bpl_cfg_uci_get_wireless_int(enum paramType type, int index, const char param[], int *value)
+int cfg_uci_get_wireless_int(enum paramType type, int index, const char param[], int *value)
 {
     int status;
     char val[MAX_UCI_BUF_LEN] = "";
 
-    status = bpl_cfg_uci_get_wireless(type, index, param, val);
+    status = cfg_uci_get_wireless(type, index, param, val);
     if (status == RETURN_ERR)
         return RETURN_ERR;
 
@@ -56,7 +56,7 @@ int bpl_cfg_uci_get_wireless_int(enum paramType type, int index, const char para
     return RETURN_OK;
 }
 
-int bpl_cfg_uci_get_radio_param(int index, const char param[], char *value, size_t buf_len)
+int cfg_uci_get_radio_param(int index, const char param[], char *value, size_t buf_len)
 {
     int status;
     char path[MAX_UCI_BUF_LEN] = "";
@@ -67,7 +67,7 @@ int bpl_cfg_uci_get_radio_param(int index, const char param[], char *value, size
         return RETURN_ERR;
     }
 
-    status = bpl_cfg_uci_get(path, value, buf_len);
+    status = cfg_uci_get(path, value, buf_len);
     if (status == RETURN_OK) {
         // DEBUG("%s index=%d %s=%s\n", __func__, index, param, value);
     } else {
@@ -77,12 +77,12 @@ int bpl_cfg_uci_get_radio_param(int index, const char param[], char *value, size
     return status;
 }
 
-int bpl_cfg_uci_get_radio_param_int(int index, const char param[], int *value)
+int cfg_uci_get_radio_param_int(int index, const char param[], int *value)
 {
     int status;
     char val[MAX_UCI_BUF_LEN] = "";
 
-    status = bpl_cfg_uci_get_radio_param(index, param, val, MAX_UCI_BUF_LEN);
+    status = cfg_uci_get_radio_param(index, param, val, MAX_UCI_BUF_LEN);
     if (status == RETURN_ERR)
         return RETURN_ERR;
 
@@ -93,12 +93,12 @@ int bpl_cfg_uci_get_radio_param_int(int index, const char param[], int *value)
     return RETURN_OK;
 }
 
-int bpl_cfg_uci_get_radio_param_ulong(int index, const char param[], unsigned long *value)
+int cfg_uci_get_radio_param_ulong(int index, const char param[], unsigned long *value)
 {
     int status;
     char val[MAX_UCI_BUF_LEN] = "";
 
-    status = bpl_cfg_uci_get_radio_param(index, param, val, MAX_UCI_BUF_LEN);
+    status = cfg_uci_get_radio_param(index, param, val, MAX_UCI_BUF_LEN);
     if (status == RETURN_ERR)
         return RETURN_ERR;
 
@@ -109,7 +109,7 @@ int bpl_cfg_uci_get_radio_param_ulong(int index, const char param[], unsigned lo
     return RETURN_OK;
 }
 
-int bpl_cfg_uci_get_wireless(enum paramType type, int index, const char param[], char *value)
+int cfg_uci_get_wireless(enum paramType type, int index, const char param[], char *value)
 {
     int status;
     char path[MAX_UCI_BUF_LEN] = "";
@@ -126,7 +126,7 @@ int bpl_cfg_uci_get_wireless(enum paramType type, int index, const char param[],
         return RETURN_ERR;
     }
 
-    status = bpl_cfg_uci_get(path, value, MAX_UCI_BUF_LEN);
+    status = cfg_uci_get(path, value, MAX_UCI_BUF_LEN);
     if (status == RETURN_OK) {
         // DEBUG("%s index=%d %s=%s\n", __func__, index, param, value);
     } else {
@@ -136,7 +136,7 @@ int bpl_cfg_uci_get_wireless(enum paramType type, int index, const char param[],
     return status;
 }
 
-int bpl_cfg_uci_get_wireless_radio_idx(const char *interfaceName, int *radio_index)
+int cfg_uci_get_wireless_radio_idx(const char *interfaceName, int *radio_index)
 {
     struct uci_ptr ptr;
     struct uci_context *ctx;
@@ -207,7 +207,7 @@ int bpl_cfg_uci_get_wireless_radio_idx(const char *interfaceName, int *radio_ind
     return RETURN_ERR;
 }
 
-int bpl_cfg_uci_get_wireless_idx(char *interfaceName, int *rpc_index)
+int cfg_uci_get_wireless_idx(char *interfaceName, int *rpc_index)
 {
     struct uci_ptr ptr;
     struct uci_context *ctx;
@@ -271,12 +271,12 @@ int bpl_cfg_uci_get_wireless_idx(char *interfaceName, int *rpc_index)
     return RETURN_ERR;
 }
 
-int bpl_cfg_uci_get_wireless_bool(enum paramType type, int index, const char param[], bool *value)
+int cfg_uci_get_wireless_bool(enum paramType type, int index, const char param[], bool *value)
 {
     int status;
     int res;
 
-    status = bpl_cfg_uci_get_wireless_int(type, index, param, &res);
+    status = cfg_uci_get_wireless_int(type, index, param, &res);
     if (status == RETURN_ERR)
         return RETURN_ERR;
 

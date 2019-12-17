@@ -28,7 +28,7 @@ using namespace beerocks::bpl;
 
 namespace bpl {
 
-int bpl_cfg_get_param(const std::string &param, std::string &value)
+int cfg_get_param(const std::string &param, std::string &value)
 {
     std::ifstream in_conf_file;
     std::string line;
@@ -66,11 +66,11 @@ int bpl_cfg_get_param(const std::string &param, std::string &value)
     return RETURN_ERR;
 }
 
-int bpl_cfg_get_param_int(const std::string &param, int &value)
+int cfg_get_param_int(const std::string &param, int &value)
 {
     std::string str_value;
 
-    if (bpl_cfg_get_param(param, str_value) < 0) {
+    if (cfg_get_param(param, str_value) < 0) {
         MAPF_ERR("Failed reading param " << param);
         return RETURN_ERR;
     }
@@ -80,13 +80,13 @@ int bpl_cfg_get_param_int(const std::string &param, int &value)
     return RETURN_OK;
 }
 
-int bpl_cfg_is_enabled() { return 1; }
+int cfg_is_enabled() { return 1; }
 
-int bpl_cfg_is_master()
+int cfg_is_master()
 {
     std::string mode_str;
-    if (bpl_cfg_get_param("management_mode=", mode_str) < 0) {
-        MAPF_ERR("bpl_cfg_is_master: Failed to read ManagementMode");
+    if (cfg_get_param("management_mode=", mode_str) < 0) {
+        MAPF_ERR("cfg_is_master: Failed to read ManagementMode");
         return RETURN_ERR;
     }
 
@@ -95,17 +95,17 @@ int bpl_cfg_is_master()
     else if (mode_str == "Multi-AP-Agent")
         return 0;
 
-    MAPF_ERR("bpl_cfg_is_master: Unexpected management_mode " << mode_str);
+    MAPF_ERR("cfg_is_master: Unexpected management_mode " << mode_str);
 
     return RETURN_ERR;
 }
 
-int bpl_cfg_get_operating_mode()
+int cfg_get_operating_mode()
 {
     int retVal = 0;
     std::string op_mode;
-    if (bpl_cfg_get_param("operating_mode=", op_mode) < 0) {
-        MAPF_ERR("bpl_cfg_get_operating_mode: Failed to read operating_mode");
+    if (cfg_get_param("operating_mode=", op_mode) < 0) {
+        MAPF_ERR("cfg_get_operating_mode: Failed to read operating_mode");
         return -1;
     }
 
@@ -121,16 +121,16 @@ int bpl_cfg_get_operating_mode()
         return BPL_OPER_MODE_L2NAT_CLIENT;
     }
 
-    MAPF_ERR("bpl_cfg_get_operating_mode: Unexpected operating_mode");
+    MAPF_ERR("cfg_get_operating_mode: Unexpected operating_mode");
     return retVal;
 }
 
-int bpl_cfg_get_certification_mode()
+int cfg_get_certification_mode()
 {
     int retVal = 0;
     std::string certification_mode;
-    if (bpl_cfg_get_param("certification_mode=", certification_mode) < 0) {
-        MAPF_ERR("bpl_cfg_get_certification_mode: Failed to read certification_mode");
+    if (cfg_get_param("certification_mode=", certification_mode) < 0) {
+        MAPF_ERR("cfg_get_certification_mode: Failed to read certification_mode");
         retVal = RETURN_ERR;
     } else if (certification_mode == "0") {
         retVal = BPL_CERTIFICATION_MODE_OFF;
@@ -142,28 +142,28 @@ int bpl_cfg_get_certification_mode()
     return retVal;
 }
 
-int bpl_cfg_get_stop_on_failure_attempts()
+int cfg_get_stop_on_failure_attempts()
 {
     int retVal = -1;
-    if (bpl_cfg_get_param_int("stop_on_failure_attempts", retVal) == RETURN_ERR) {
+    if (cfg_get_param_int("stop_on_failure_attempts", retVal) == RETURN_ERR) {
         retVal = RETURN_ERR;
     }
     return retVal;
 }
 
-int bpl_cfg_is_onboarding() { return 0; }
+int cfg_is_onboarding() { return 0; }
 
-int bpl_cfg_get_rdkb_extensions() { return 0; }
+int cfg_get_rdkb_extensions() { return 0; }
 
-int bpl_cfg_get_band_steering() { return 1; }
+int cfg_get_band_steering() { return 1; }
 
-int bpl_cfg_get_dfs_reentry() { return 0; }
+int cfg_get_dfs_reentry() { return 0; }
 
-int bpl_cfg_get_client_roaming() { return 1; }
+int cfg_get_client_roaming() { return 1; }
 
-int bpl_cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return RETURN_ERR; }
+int cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return RETURN_ERR; }
 
-int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params)
+int cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params)
 {
     if (!iface || !wlan_params) {
         return RETURN_ERR;
@@ -177,7 +177,7 @@ int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_para
     return RETURN_OK;
 }
 
-int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefered_radio_band)
+int cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefered_radio_band)
 {
     *max_vaps            = 0;
     *network_enabled     = 0;
@@ -185,40 +185,40 @@ int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefer
     return RETURN_OK;
 }
 
-int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len)
+int cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len)
 {
     memset(backhaul_vaps_buf, 0, buf_len);
     return RETURN_OK;
 }
 
-int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
-                                     char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN])
+int cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
+                                 char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN])
 {
     utils::copy_string(ssid, "test_beerocks_ssid", BPL_SSID_LEN);
     utils::copy_string(sec, "None", BPL_SEC_LEN);
     return RETURN_OK;
 }
 
-int bpl_cfg_get_security_policy() { return 0; }
+int cfg_get_security_policy() { return 0; }
 
-int bpl_cfg_set_onboarding(int enable) { return RETURN_ERR; }
+int cfg_set_onboarding(int enable) { return RETURN_ERR; }
 
-int bpl_cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN],
-                                        const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN],
-                                        const char iface_name[BPL_IFNAME_LEN], const int success)
+int cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN], const char pass[BPL_PASS_LEN],
+                                    const char sec[BPL_SEC_LEN],
+                                    const char iface_name[BPL_IFNAME_LEN], const int success)
 {
     return RETURN_ERR;
 }
 
-int bpl_cfg_notify_fw_version_mismatch() { return RETURN_ERR; }
+int cfg_notify_fw_version_mismatch() { return RETURN_ERR; }
 
-int bpl_cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return RETURN_ERR; }
+int cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return RETURN_ERR; }
 
-int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif)
+int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif)
 {
     return RETURN_ERR;
 }
 
-int bpl_cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return RETURN_ERR; }
+int cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return RETURN_ERR; }
 
 } // namespace bpl

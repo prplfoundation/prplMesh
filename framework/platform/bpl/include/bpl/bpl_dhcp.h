@@ -31,8 +31,7 @@ Example for sending an event using the "ubus" shell command ubus call:
  * @param [in] ip Client's IP address
  * @param [in] hostname Client's host name
  */
-typedef void (*bpl_dhcp_mon_cb)(const char *op, const char *mac, const char *ip,
-                                const char *hostname);
+typedef void (*dhcp_mon_cb)(const char *op, const char *mac, const char *ip, const char *hostname);
 
 /****************************************************************************/
 /******************************** Functions *********************************/
@@ -46,7 +45,7 @@ typedef void (*bpl_dhcp_mon_cb)(const char *op, const char *mac, const char *ip,
  * @return File descriptor to the socket used for monitoring the UBUS.
  * @return -1 Error.
  */
-int bpl_dhcp_mon_start(bpl_dhcp_mon_cb cb);
+int dhcp_mon_start(dhcp_mon_cb cb);
 
 /** 
  * Handle UBUS event.
@@ -55,14 +54,14 @@ int bpl_dhcp_mon_start(bpl_dhcp_mon_cb cb);
  *
  * @return 0 On success of -1 on failure.
  */
-int bpl_dhcp_mon_handle_event();
+int dhcp_mon_handle_event();
 
 /**
  * Stop the DHCP monitor.
  *
  * @return 0 On success of -1 on failure.
  */
-int bpl_dhcp_mon_stop();
+int dhcp_mon_stop();
 
 } // namespace bpl
 

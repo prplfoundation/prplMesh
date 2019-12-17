@@ -26,7 +26,7 @@ using namespace beerocks::bpl;
 
 namespace bpl {
 
-int bpl_arp_mon_start(BPL_ARP_MON_CTX *ctx, const char *iface)
+int arp_mon_start(BPL_ARP_MON_CTX *ctx, const char *iface)
 {
     if (!ctx || !iface) {
         LOG(ERROR) << "Invalid arguments: ctx = " << ctx << ", iface = " << iface;
@@ -53,7 +53,7 @@ int bpl_arp_mon_start(BPL_ARP_MON_CTX *ctx, const char *iface)
     return 0;
 }
 
-int bpl_arp_mon_stop(BPL_ARP_MON_CTX ctx)
+int arp_mon_stop(BPL_ARP_MON_CTX ctx)
 {
     if (!ctx) {
         LOG(ERROR) << "Invalid argument: ctx = " << ctx;
@@ -72,7 +72,7 @@ int bpl_arp_mon_stop(BPL_ARP_MON_CTX ctx)
     return 0;
 }
 
-int bpl_arp_mon_get_fd(BPL_ARP_MON_CTX ctx)
+int arp_mon_get_fd(BPL_ARP_MON_CTX ctx)
 {
     if (!ctx) {
         LOG(ERROR) << "Invalid argument: ctx = " << ctx;
@@ -84,7 +84,7 @@ int bpl_arp_mon_get_fd(BPL_ARP_MON_CTX ctx)
     return pArpMon->get_mon_fd();
 }
 
-int bpl_arp_mon_get_raw_arp_fd(BPL_ARP_MON_CTX ctx)
+int arp_mon_get_raw_arp_fd(BPL_ARP_MON_CTX ctx)
 {
     if (!ctx) {
         LOG(ERROR) << "Invalid argument: ctx = " << ctx;
@@ -96,7 +96,7 @@ int bpl_arp_mon_get_raw_arp_fd(BPL_ARP_MON_CTX ctx)
     return pArpMon->get_arp_fd();
 }
 
-int bpl_arp_mon_process(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry)
+int arp_mon_process(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry)
 {
     if (!ctx || !entry) {
         LOG(ERROR) << "Invalid argument: ctx = " << ctx << ", entry = " << entry;
@@ -111,7 +111,7 @@ int bpl_arp_mon_process(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry)
     return 0;
 }
 
-int bpl_arp_mon_process_raw_arp(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry)
+int arp_mon_process_raw_arp(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry)
 {
     if (!ctx || !entry) {
         LOG(ERROR) << "Invalid argument: ctx = " << ctx << ", entry = " << entry;
@@ -123,8 +123,8 @@ int bpl_arp_mon_process_raw_arp(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *e
     return (pArpMon->process_arp(*entry));
 }
 
-int bpl_arp_mon_probe(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN],
-                      const uint8_t ip[BPL_ARP_MON_IP_LEN], int task_id)
+int arp_mon_probe(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                  const uint8_t ip[BPL_ARP_MON_IP_LEN], int task_id)
 {
     if (!ctx || !mac || !ip) {
         LOG(ERROR) << "Invalid argument: ctx = " << ctx << ", mac = " << mac << ", ip = " << ip;
@@ -136,8 +136,8 @@ int bpl_arp_mon_probe(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN
     return (pArpMon->probe(mac, ip, task_id) ? 0 : -1);
 }
 
-int bpl_arp_mon_get_mac_for_ip(BPL_ARP_MON_CTX ctx, const uint8_t ip[BPL_ARP_MON_IP_LEN],
-                               uint8_t mac[BPL_ARP_MON_MAC_LEN])
+int arp_mon_get_mac_for_ip(BPL_ARP_MON_CTX ctx, const uint8_t ip[BPL_ARP_MON_IP_LEN],
+                           uint8_t mac[BPL_ARP_MON_MAC_LEN])
 {
     if (!ctx || !ip || !mac) {
         LOG(ERROR) << "Invalid argument: ctx = " << ctx << ", ip = " << ip << ", mac = " << mac;
@@ -150,8 +150,8 @@ int bpl_arp_mon_get_mac_for_ip(BPL_ARP_MON_CTX ctx, const uint8_t ip[BPL_ARP_MON
     return (pArpMon->get_mac_for_ip(ip, mac) ? 0 : -1);
 }
 
-int bpl_arp_mon_get_ip_for_mac(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN],
-                               uint8_t ip[BPL_ARP_MON_IP_LEN])
+int arp_mon_get_ip_for_mac(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                           uint8_t ip[BPL_ARP_MON_IP_LEN])
 {
     if (!ctx || !mac || !ip) {
         LOG(ERROR) << "Invalid argument: ctx = " << ctx << ", mac = " << mac << ", ip = " << ip;
@@ -164,9 +164,8 @@ int bpl_arp_mon_get_ip_for_mac(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MO
     return (pArpMon->get_ip_for_mac(mac, ip) ? 0 : -1);
 }
 
-int bpl_arp_get_bridge_iface(const char bridge[BPL_ARP_IFACE_NAME_LEN],
-                             const uint8_t mac[BPL_ARP_MON_MAC_LEN],
-                             char iface[BPL_ARP_IFACE_NAME_LEN])
+int arp_get_bridge_iface(const char bridge[BPL_ARP_IFACE_NAME_LEN],
+                         const uint8_t mac[BPL_ARP_MON_MAC_LEN], char iface[BPL_ARP_IFACE_NAME_LEN])
 {
     if (!bridge || !mac || !iface) {
         LOG(ERROR) << "Invalid argument: bridge = " << (void *)bridge << ", mac = " << (void *)mac

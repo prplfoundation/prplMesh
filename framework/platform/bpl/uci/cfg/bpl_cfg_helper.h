@@ -23,7 +23,7 @@ namespace bpl {
  *
  * @return 0 on success or -1 on error.
  **/
-int bpl_cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex);
+int cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex);
 
 /**
  * Returns the value of requested param from DB
@@ -34,7 +34,7 @@ int bpl_cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex
  *
  * @return 0 on success or -1 on error.
  **/
-int bpl_cfg_get_prplmesh_param(const std::string &param, char *buf, size_t buf_len);
+int cfg_get_prplmesh_param(const std::string &param, char *buf, size_t buf_len);
 
 /**
  * Returns the value of requested integer type param from DB
@@ -44,7 +44,7 @@ int bpl_cfg_get_prplmesh_param(const std::string &param, char *buf, size_t buf_l
  *
  * @return 0 on success or -1 on error.
  **/
-int bpl_cfg_get_prplmesh_param_int(const std::string &param, int *buf);
+int cfg_get_prplmesh_param_int(const std::string &param, int *buf);
 
 /**
  * Returns the value of ACS from DB
@@ -54,10 +54,10 @@ int bpl_cfg_get_prplmesh_param_int(const std::string &param, int *buf);
  *
  * @return 0 on success or -1 on error.
  **/
-int bpl_cfg_get_channel(int index, int *channel);
+int cfg_get_channel(int index, int *channel);
 
 /** API currently not implemented **/
-int bpl_cfg_get_wep_key(int index, int keyIndex, char *key);
+int cfg_get_wep_key(int index, int keyIndex, char *key);
 
 /**
  * set the VAP credentials

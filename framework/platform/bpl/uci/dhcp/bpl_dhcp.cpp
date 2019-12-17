@@ -19,7 +19,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 static struct ubus_context *s_pUbusCtx = NULL;
-static bpl_dhcp_mon_cb s_pCallback     = NULL;
+static bpl::dhcp_mon_cb s_pCallback    = NULL;
 
 enum {
     DHCP_EVENT_ID,
@@ -116,7 +116,7 @@ static struct ubus_object dhcp_ubus_object = {
 
 namespace bpl {
 
-int bpl_dhcp_mon_start(bpl_dhcp_mon_cb cb)
+int dhcp_mon_start(dhcp_mon_cb cb)
 {
     // Modules doesn't support multiple starts
     if ((s_pUbusCtx != NULL) /*|| (pCallback == NULL)*/)
@@ -136,7 +136,7 @@ int bpl_dhcp_mon_start(bpl_dhcp_mon_cb cb)
     return (s_pUbusCtx->sock.fd);
 }
 
-int bpl_dhcp_mon_handle_event()
+int dhcp_mon_handle_event()
 {
     if (s_pUbusCtx == NULL)
         return -1;
@@ -147,7 +147,7 @@ int bpl_dhcp_mon_handle_event()
     return 0;
 }
 
-int bpl_dhcp_mon_stop()
+int dhcp_mon_stop()
 {
     // If the modules wasn't started, exit quitely
     if (!s_pUbusCtx)

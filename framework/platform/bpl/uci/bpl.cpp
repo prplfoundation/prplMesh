@@ -19,13 +19,13 @@ SHARE_EASYLOGGINGPP(el::Helpers::storage())
 
 namespace bpl {
 
-int bpl_init()
+int init()
 {
     // Do nothing
     return 0;
 }
 
-void bpl_close()
+void close()
 {
     // Do nothing
 }
