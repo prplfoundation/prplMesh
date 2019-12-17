@@ -1037,7 +1037,6 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
             break;
         }
 
-        bool success                     = true;
         bool preferred_band_is_available = false;
 
         // Check if backhaul preferred band is supported (supporting radio is available)
@@ -1058,6 +1057,9 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
         }
 
         LOG_IF(!preferred_band_is_available, DEBUG) << "Preferred backhaul band is not available";
+
+        bool success        = true;
+        bool scan_triggered = false;
 
         for (auto soc : slaves_sockets) {
             if (soc->sta_iface.empty())
@@ -1086,10 +1088,12 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                 success = false;
                 break;
             }
+            scan_triggered = true;
             LOG(INFO) << "wait for scan results on iface " << iface;
         }
 
-        if (!success) {
+        if (!success || !scan_triggered) {
+            LOG_IF(!scan_triggered, DEBUG) << "no sta hal is available for scan";
             FSM_MOVE_STATE(RESTART);
         } else {
             FSM_MOVE_STATE(WAIT_FOR_SCAN_RESULTS);
