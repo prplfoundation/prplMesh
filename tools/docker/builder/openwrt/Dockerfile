@@ -73,6 +73,8 @@ COPY --chown=openwrt:openwrt configs/prplmesh_config /home/openwrt/prplmesh_conf
 ARG TARGET_PLATFORM_TYPE
 # The feed to use to build prplMesh.
 ARG PRPL_FEED
+# The variant to build (nl80211 or dwpal)
+ARG PRPLMESH_VARIANT
 
 USER openwrt
 
@@ -80,6 +82,7 @@ RUN echo "src-git prpl ${PRPL_FEED}" >> feeds.conf.default \
     && scripts/feeds update -a \
     && scripts/feeds install -a \
     && cp "/home/openwrt/prplmesh_config" .config \
+    && echo "CONFIG_PACKAGE_prplmesh${PRPLMESH_VARIANT}=y" >> .config \
     && make defconfig \
     && cat .config \
     && make package/feeds/prpl/prplmesh/compile -j$(nproc) V=sc \

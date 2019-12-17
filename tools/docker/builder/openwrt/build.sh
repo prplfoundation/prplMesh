@@ -27,6 +27,7 @@ build_image() {
            --build-arg OPENWRT_VERSION \
            --build-arg TARGET \
            --build-arg PRPL_FEED \
+           --build-arg PRPLMESH_VARIANT \
            $BUILD_OPTIONS \
            "$scriptdir/"
 }
@@ -118,6 +119,7 @@ main() {
     PRPLMESH_VERSION="$(git describe --always --dirty | sed -e 's/.*-g//')"
     export PRPLMESH_VERSION
     export PRPL_FEED
+    export PRPLMESH_VARIANT
 
     if [ $IMAGE_ONLY = true ] ; then
         build_image
