@@ -1559,7 +1559,7 @@ bool main_thread::init_arp_monitor()
 
         int ret = bpl::arp_mon_start(&m_ctxArpMon, config.bridge_iface.c_str());
         if (ret < 0) {
-            if (ret == -bpl::BPL_ERR_OPERATION_NOT_SUPPORTED) {
+            if (ret == -int(bpl::eErrorCode::OPERATION_NOT_SUPPORTED)) {
                 LOG(INFO) << "Skip starting ARP monitor (not supported)";
                 return (true);
             }
@@ -1639,7 +1639,7 @@ bool main_thread::init_dhcp_monitor()
                 dhcp_monitor_cb_wrapper(op, mac, ip, hostname);
             });
         if (dhcp_mon_fd < 0) {
-            if (dhcp_mon_fd == -bpl::BPL_ERR_OPERATION_NOT_SUPPORTED) {
+            if (dhcp_mon_fd == -int(bpl::eErrorCode::OPERATION_NOT_SUPPORTED)) {
                 LOG(INFO) << "Skip starting DHCP monitor (not supported)";
                 return (true);
             }

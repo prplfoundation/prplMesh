@@ -149,7 +149,7 @@ void slave_thread::slave_reset()
     }
 
     if (stopped && slave_state != STATE_INIT) {
-        platform_notify_error(bpl::BPL_ERR_SLAVE_STOPPED, "");
+        platform_notify_error(bpl::eErrorCode::SLAVE_STOPPED, "");
         LOG(DEBUG) << "goto STATE_STOPPED";
         slave_state = STATE_STOPPED;
     } else if (is_backhaul_disconnected) {
@@ -166,7 +166,7 @@ void slave_thread::slave_reset()
     LOG(DEBUG) << "slave_reset() #" << slave_resets_counter << " - done";
 }
 
-void slave_thread::platform_notify_error(int code, const std::string &error_data)
+void slave_thread::platform_notify_error(bpl::eErrorCode code, const std::string &error_data)
 {
     if (platform_manager_socket == nullptr) {
         LOG(ERROR) << "Invalid Platform Manager socket!";
@@ -182,7 +182,7 @@ void slave_thread::platform_notify_error(int code, const std::string &error_data
         return;
     }
 
-    error->code() = code;
+    error->code() = uint32_t(code);
     string_utils::copy_string(error->data(0), error_data.c_str(),
                               message::PLATFORM_ERROR_DATA_SIZE);
 
@@ -207,7 +207,7 @@ bool slave_thread::socket_disconnected(Socket *sd)
 
     if (sd == backhaul_manager_socket) {
         LOG(DEBUG) << "backhaul manager & master socket disconnected! - slave_reset()";
-        platform_notify_error(bpl::BPL_ERR_SLAVE_SLAVE_BACKHAUL_MANAGER_DISCONNECTED, "");
+        platform_notify_error(bpl::eErrorCode::SLAVE_SLAVE_BACKHAUL_MANAGER_DISCONNECTED, "");
         stop_slave_thread();
         return false;
     } else if (sd == platform_manager_socket) {
@@ -283,7 +283,7 @@ void slave_thread::process_keep_alive()
             LOG(DEBUG) << "exceeded keep_alive_retries " << keep_alive_retries
                        << " - slave_reset()";
 
-            platform_notify_error(bpl::BPL_ERR_SLAVE_MASTER_KEEP_ALIVE_TIMEOUT,
+            platform_notify_error(bpl::eErrorCode::SLAVE_MASTER_KEEP_ALIVE_TIMEOUT,
                                   "Reached master keep-alive retries limit: " +
                                       std::to_string(keep_alive_retries));
 
@@ -1444,8 +1444,8 @@ bool slave_thread::handle_cmdu_platform_manager_message(
             // Configuration is invalid
             if (response->valid() == 0) {
                 LOG(ERROR) << "response->valid == 0";
-                platform_notify_error(bpl::BPL_ERR_CONFIG_PLATFORM_REPORTED_INVALID_CONFIGURATION,
-                                      "");
+                platform_notify_error(
+                    bpl::eErrorCode::CONFIG_PLATFORM_REPORTED_INVALID_CONFIGURATION, "");
                 stop_on_failure_attempts--;
                 slave_reset();
                 return true;
@@ -2559,17 +2559,17 @@ bool slave_thread::handle_cmdu_monitor_message(
         monitor_thread::eThreadErrors err_code =
             monitor_thread::eThreadErrors(notification->error_code());
         if (err_code == monitor_thread::eThreadErrors::MONITOR_THREAD_ERROR_HOSTAP_DISABLED) {
-            platform_notify_error(bpl::BPL_ERR_MONITOR_HOSTAP_DISABLED, "");
+            platform_notify_error(bpl::eErrorCode::MONITOR_HOSTAP_DISABLED, "");
         } else if (err_code == monitor_thread::eThreadErrors::MONITOR_THREAD_ERROR_ATTACH_FAIL) {
-            platform_notify_error(bpl::BPL_ERR_MONITOR_ATTACH_FAIL, "");
+            platform_notify_error(bpl::eErrorCode::MONITOR_ATTACH_FAIL, "");
         } else if (err_code == monitor_thread::eThreadErrors::MONITOR_THREAD_ERROR_SUDDEN_DETACH) {
-            platform_notify_error(bpl::BPL_ERR_MONITOR_SUDDEN_DETACH, "");
+            platform_notify_error(bpl::eErrorCode::MONITOR_SUDDEN_DETACH, "");
         } else if (err_code ==
                    monitor_thread::eThreadErrors::MONITOR_THREAD_ERROR_HAL_DISCONNECTED) {
-            platform_notify_error(bpl::BPL_ERR_MONITOR_HAL_DISCONNECTED, "");
+            platform_notify_error(bpl::eErrorCode::MONITOR_HAL_DISCONNECTED, "");
         } else if (err_code ==
                    monitor_thread::eThreadErrors::MONITOR_THREAD_ERROR_REPORT_PROCESS_FAIL) {
-            platform_notify_error(bpl::BPL_ERR_MONITOR_REPORT_PROCESS_FAIL, "");
+            platform_notify_error(bpl::eErrorCode::MONITOR_REPORT_PROCESS_FAIL, "");
         }
 
         auto response_out = message_com::create_vs_message<
@@ -2715,7 +2715,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             LOG(WARNING) << "Unable to connect to Platform Manager: " << err;
             if (++connect_platform_retry_counter >= CONNECT_PLATFORM_RETRY_COUNT_MAX) {
                 LOG(ERROR) << "Failed connecting to Platform Manager! Resetting...";
-                platform_notify_error(bpl::BPL_ERR_SLAVE_FAILED_CONNECT_TO_PLATFORM_MANAGER, "");
+                platform_notify_error(bpl::eErrorCode::SLAVE_FAILED_CONNECT_TO_PLATFORM_MANAGER,
+                                      "");
                 stop_on_failure_attempts--;
                 slave_reset();
                 connect_platform_retry_counter = 0;
@@ -2756,7 +2757,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     case STATE_WAIT_FOR_PLATFORM_MANAGER_REGISTER_RESPONSE: {
         if (std::chrono::steady_clock::now() > slave_state_timer) {
             LOG(ERROR) << "STATE_WAIT_FOR_PLATFORM_MANAGER_REGISTER_RESPONSE timeout!";
-            platform_notify_error(bpl::BPL_ERR_SLAVE_PLATFORM_MANAGER_REGISTER_TIMEOUT, "");
+            platform_notify_error(bpl::eErrorCode::SLAVE_PLATFORM_MANAGER_REGISTER_TIMEOUT, "");
             stop_on_failure_attempts--;
             slave_reset();
         }
@@ -2770,7 +2771,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             if (!err.empty()) {
                 LOG(ERROR) << "backhaul_manager_socket: " << err;
                 backhaul_manager_stop();
-                platform_notify_error(bpl::BPL_ERR_SLAVE_CONNECTING_TO_BACKHAUL_MANAGER,
+                platform_notify_error(bpl::eErrorCode::SLAVE_CONNECTING_TO_BACKHAUL_MANAGER,
                                       "iface=" + config.backhaul_wireless_iface);
                 stop_on_failure_attempts--;
                 slave_reset();
@@ -2867,7 +2868,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             slave_state = STATE_WAIT_FOR_AP_MANAGER_JOINED;
         } else {
             LOG(ERROR) << "ap_manager_start() failed!";
-            platform_notify_error(bpl::BPL_ERR_AP_MANAGER_START, "");
+            platform_notify_error(bpl::eErrorCode::AP_MANAGER_START, "");
             stop_on_failure_attempts--;
             slave_reset();
         }
@@ -2895,8 +2896,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         if (!config.backhaul_wire_iface.empty()) {
             if (config.backhaul_wire_iface_type == beerocks::IFACE_TYPE_UNSUPPORTED) {
                 LOG(DEBUG) << "backhaul_wire_iface_type is UNSUPPORTED";
-                platform_notify_error(bpl::BPL_ERR_CONFIG_BACKHAUL_WIRED_INTERFACE_IS_UNSUPPORTED,
-                                      "");
+                platform_notify_error(
+                    bpl::eErrorCode::CONFIG_BACKHAUL_WIRED_INTERFACE_IS_UNSUPPORTED, "");
                 error = true;
             }
         }
@@ -2904,13 +2905,13 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             if (config.backhaul_wireless_iface_type == beerocks::IFACE_TYPE_UNSUPPORTED) {
                 LOG(DEBUG) << "backhaul_wireless_iface is UNSUPPORTED";
                 platform_notify_error(
-                    bpl::BPL_ERR_CONFIG_BACKHAUL_WIRELESS_INTERFACE_IS_UNSUPPORTED, "");
+                    bpl::eErrorCode::CONFIG_BACKHAUL_WIRELESS_INTERFACE_IS_UNSUPPORTED, "");
                 error = true;
             }
         }
         if (config.backhaul_wire_iface.empty() && config.backhaul_wireless_iface.empty()) {
             LOG(DEBUG) << "No valid backhaul iface!";
-            platform_notify_error(bpl::BPL_ERR_CONFIG_NO_VALID_BACKHAUL_INTERFACE, "");
+            platform_notify_error(bpl::eErrorCode::CONFIG_NO_VALID_BACKHAUL_INTERFACE, "");
             error = true;
         }
 
@@ -3084,7 +3085,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
 
         if (master_socket == nullptr) {
             LOG(ERROR) << "master_socket == nullptr";
-            platform_notify_error(bpl::BPL_ERR_SLAVE_INVALID_MASTER_SOCKET,
+            platform_notify_error(bpl::eErrorCode::SLAVE_INVALID_MASTER_SOCKET,
                                   "Invalid master socket");
             stop_on_failure_attempts--;
             slave_reset();
