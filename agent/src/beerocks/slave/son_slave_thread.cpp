@@ -3567,14 +3567,14 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
     }
 
     if (cmdu_tx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
-        auto beerocks_header = message_com::get_vs_class_header(cmdu_tx);
+        auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
         if (!beerocks_header) {
             LOG(ERROR) << "Failed getting beerocks_header!";
             return false;
         }
 
-        beerocks_header->radio_mac() = hostap_params.iface_mac;
-        beerocks_header->direction() = beerocks::BEEROCKS_DIRECTION_CONTROLLER;
+        beerocks_header->actionhdr()->radio_mac() = hostap_params.iface_mac;
+        beerocks_header->actionhdr()->direction() = beerocks::BEEROCKS_DIRECTION_CONTROLLER;
     }
     return message_com::send_cmdu(master_socket, cmdu_tx, backhaul_params.controller_bridge_mac,
                                   backhaul_params.bridge_mac);

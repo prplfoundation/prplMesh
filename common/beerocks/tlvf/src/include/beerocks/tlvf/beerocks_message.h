@@ -55,13 +55,8 @@ public:
         return std::dynamic_pointer_cast<T>(cmdu.getClass(2));
     }
 
-    static std::shared_ptr<beerocks_message::cACTION_HEADER>
-    get_vs_class_header(ieee1905_1::CmduMessage &cmdu)
-    {
-        return std::dynamic_pointer_cast<beerocks_message::cACTION_HEADER>(cmdu.getClass(1));
-    }
-
-    static std::shared_ptr<beerocks_header> get_beerocks_header(ieee1905_1::CmduMessage &cmdu)
+    static std::shared_ptr<beerocks_header>
+    get_beerocks_header(ieee1905_1::CmduMessage &cmdu)
     {
         auto tlv = cmdu.msg.getClass<ieee1905_1::tlvVendorSpecific>();
         if (!tlv)
