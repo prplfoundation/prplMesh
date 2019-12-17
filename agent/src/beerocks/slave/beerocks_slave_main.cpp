@@ -293,7 +293,7 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
     //start platform_manager
     if (platform_mgr.init()) {
         // read the number of failures allowed before stopping agent from platform configuration
-        int stop_on_failure_attempts = bpl_cfg_get_stop_on_failure_attempts();
+        int stop_on_failure_attempts = bpl::bpl_cfg_get_stop_on_failure_attempts();
 
         beerocks::backhaul_manager backhaul_mgr(beerocks_slave_conf, slave_ap_ifaces,
                                                 slave_sta_ifaces, stop_on_failure_attempts);

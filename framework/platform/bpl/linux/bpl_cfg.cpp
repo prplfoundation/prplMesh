@@ -28,6 +28,8 @@ using namespace beerocks::bpl;
 
 const char *s_error_strings[] = {FOREACH_ERROR_CODE(GENERATE_ERROR_STRING)};
 
+namespace bpl {
+
 int bpl_cfg_get_param(const std::string &param, std::string &value)
 {
     std::ifstream in_conf_file;
@@ -220,3 +222,5 @@ int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_
 }
 
 int bpl_cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return RETURN_ERR; }
+
+} // namespace bpl

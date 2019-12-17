@@ -18,6 +18,8 @@
 
 #define PRINTF(LEVEL, fmt, args...) printf(LEVEL ":{%s, %d}:" fmt, __func__, __LINE__, ##args)
 
+namespace bpl {
+
 int bpl_cfg_uci_get(char *path, char *value, size_t length)
 {
     struct uci_ptr ptr;
@@ -282,3 +284,5 @@ int bpl_cfg_uci_get_wireless_bool(enum paramType type, int index, const char par
 
     return RETURN_OK;
 }
+
+} // namespace bpl

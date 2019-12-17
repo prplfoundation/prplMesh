@@ -114,6 +114,8 @@ static struct ubus_object dhcp_ubus_object = {
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+namespace bpl {
+
 int bpl_dhcp_mon_start(bpl_dhcp_mon_cb cb)
 {
     // Modules doesn't support multiple starts
@@ -160,3 +162,5 @@ int bpl_dhcp_mon_stop()
 
     return 0;
 }
+
+} // namespace bpl

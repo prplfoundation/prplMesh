@@ -21,6 +21,8 @@ using namespace mapf;
 
 using namespace beerocks::bpl;
 
+namespace bpl {
+
 int bpl_cfg_is_enabled()
 {
     int retVal = -1;
@@ -272,3 +274,5 @@ int bpl_cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { retu
 int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif) { return 0; }
 
 int bpl_cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return 0; }
+
+} // namespace bpl

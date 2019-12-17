@@ -11,9 +11,7 @@
 
 #include "bpl.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace bpl {
 
 /****************************************************************************/
 /******************************* Definitions ********************************/
@@ -66,8 +64,6 @@ int bpl_dhcp_mon_handle_event();
  */
 int bpl_dhcp_mon_stop();
 
-#ifdef __cplusplus
-}
-#endif
+} // namespace bpl
 
 #endif // _BPL_DHCP_H_

@@ -239,7 +239,7 @@ bool backhaul_manager::socket_disconnected(Socket *sd)
             m_sConfig.slave_iface_socket.erase(iface);
 
             LOG(INFO) << "sending platform_notify: slave socket disconnected " << iface;
-            platform_notify_error(BPL_ERR_BH_SLAVE_SOCKET_DISCONNECTED,
+            platform_notify_error(bpl::BPL_ERR_BH_SLAVE_SOCKET_DISCONNECTED,
                                   "slave socket disconnected " + iface);
 
             it = slaves_sockets.erase(it);
@@ -642,7 +642,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     case EState::MASTER_DISCOVERY: {
         if (network_utils::get_iface_info(bridge_info, m_sConfig.bridge_iface) != 0) {
             LOG(ERROR) << "Failed reading addresses from the bridge!";
-            platform_notify_error(BPL_ERR_BH_READING_DATA_FROM_THE_BRIDGE, "");
+            platform_notify_error(bpl::BPL_ERR_BH_READING_DATA_FROM_THE_BRIDGE, "");
             stop_on_failure_attempts--;
             FSM_MOVE_STATE(RESTART);
             break;
@@ -656,7 +656,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         }
 
         if (!bus_connect(beerocks_temp_path, local_master)) {
-            platform_notify_error(BPL_ERR_BH_CONNECTING_TO_MASTER, "");
+            platform_notify_error(bpl::BPL_ERR_BH_CONNECTING_TO_MASTER, "");
             FSM_MOVE_STATE(RESTART);
             break;
         }
@@ -787,7 +787,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
         if (configuration_stop_on_failure_attempts && !stop_on_failure_attempts) {
             LOG(ERROR) << "Reached to max stop on failure attempts!";
-            platform_notify_error(BPL_ERR_BH_STOPPED, "backhaul manager stopped");
+            platform_notify_error(bpl::BPL_ERR_BH_STOPPED, "backhaul manager stopped");
             FSM_MOVE_STATE(STOPPED);
         } else {
             FSM_MOVE_STATE(INIT);
@@ -992,7 +992,7 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
         if (!success) {
             if (std::chrono::steady_clock::now() > state_time_stamp_timeout) {
                 LOG(ERROR) << "attach wpa timeout";
-                platform_notify_error(BPL_ERR_BH_TIMEOUT_ATTACHING_TO_WPA_SUPPLICANT, "");
+                platform_notify_error(bpl::BPL_ERR_BH_TIMEOUT_ATTACHING_TO_WPA_SUPPLICANT, "");
                 stop_on_failure_attempts--;
                 FSM_MOVE_STATE(RESTART);
             } else {
@@ -1080,7 +1080,7 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
 
             if (!soc->sta_wlan_hal->initiate_scan()) {
                 LOG(ERROR) << "initiate_scan for iface " << iface << " failed!";
-                platform_notify_error(BPL_ERR_BH_SCAN_FAILED_TO_INITIATE_SCAN,
+                platform_notify_error(bpl::BPL_ERR_BH_SCAN_FAILED_TO_INITIATE_SCAN,
                                       "iface='" + iface + "'");
                 success = false;
                 break;
@@ -1101,7 +1101,7 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
     case EState::WAIT_FOR_SCAN_RESULTS: {
         if (std::chrono::steady_clock::now() > state_time_stamp_timeout) {
             LOG(DEBUG) << "scan timed out";
-            platform_notify_error(BPL_ERR_BH_SCAN_TIMEOUT, "SSID='" + m_sConfig.ssid + "'");
+            platform_notify_error(bpl::BPL_ERR_BH_SCAN_TIMEOUT, "SSID='" + m_sConfig.ssid + "'");
 
             state_attempts++;
             FSM_MOVE_STATE(INITIATE_SCAN);
@@ -1140,7 +1140,7 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
             selected_bssid         = roam_selected_bssid;
             selected_bssid_channel = roam_selected_bssid_channel;
             if (!active_hal->roam(selected_bssid, selected_bssid_channel)) {
-                platform_notify_error(BPL_ERR_BH_ROAMING, "BSSID='" + selected_bssid + "'");
+                platform_notify_error(bpl::BPL_ERR_BH_ROAMING, "BSSID='" + selected_bssid + "'");
                 stop_on_failure_attempts--;
                 FSM_MOVE_STATE(RESTART);
                 break;
@@ -1207,9 +1207,10 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
             if (hidden_ssid) {
                 if (pending_slave_sta_ifaces.empty()) {
                     LOG(ERROR) << "hidden ssid association failed for all ifaces";
-                    platform_notify_error(BPL_ERR_BH_SCAN_EXCEEDED_MAXIMUM_FAILED_SCAN_ATTEMPTS,
-                                          "attempts=" + std::to_string(MAX_FAILED_SCAN_ATTEMPTS) +
-                                              ", SSID='" + m_sConfig.ssid + "'");
+                    platform_notify_error(
+                        bpl::BPL_ERR_BH_SCAN_EXCEEDED_MAXIMUM_FAILED_SCAN_ATTEMPTS,
+                        "attempts=" + std::to_string(MAX_FAILED_SCAN_ATTEMPTS) + ", SSID='" +
+                            m_sConfig.ssid + "'");
                 } else {
                     FSM_MOVE_STATE(WIRELESS_ASSOCIATE_4ADDR);
                     break;
@@ -1223,7 +1224,7 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                 }
 
                 stop_on_failure_attempts--;
-                platform_notify_error(BPL_ERR_BH_ASSOCIATE_4ADDR_TIMEOUT,
+                platform_notify_error(bpl::BPL_ERR_BH_ASSOCIATE_4ADDR_TIMEOUT,
                                       "SSID='" + m_sConfig.ssid + "', iface='" +
                                           m_sConfig.wireless_iface + "'");
 
@@ -1917,7 +1918,7 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
 
         if (iface == m_sConfig.wireless_iface) {
             if (FSM_IS_IN_STATE(OPERATIONAL) || FSM_IS_IN_STATE(CONNECTED)) {
-                platform_notify_error(BPL_ERR_BH_DISCONNECTED,
+                platform_notify_error(bpl::BPL_ERR_BH_DISCONNECTED,
                                       "Backhaul disconnected on operational state");
                 stop_on_failure_attempts--;
                 state_time_stamp_timeout =
@@ -1941,7 +1942,7 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
                     entry.timestamp           = local_time_stamp;
                     entry.attempts            = AP_BLACK_LIST_FAILED_ATTEMPTS_THRESHOLD;
                     ap_blacklist[local_bssid] = entry;
-                    platform_notify_error(BPL_ERR_BH_ASSOCIATE_4ADDR_FAILURE,
+                    platform_notify_error(bpl::BPL_ERR_BH_ASSOCIATE_4ADDR_FAILURE,
                                           "SSID='" + m_sConfig.ssid + "', BSSID='" + local_bssid +
                                               "', DEAUTH_REASON='" +
                                               std::to_string(msg->disconnect_reason));
@@ -1950,7 +1951,7 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
                 }
 
             } else {
-                platform_notify_error(BPL_ERR_BH_DISCONNECTED,
+                platform_notify_error(bpl::BPL_ERR_BH_DISCONNECTED,
                                       "Backhaul disconnected non operational state");
                 stop_on_failure_attempts--;
                 FSM_MOVE_STATE(RESTART);
@@ -1962,7 +1963,8 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
     case Event::Terminating: {
 
         LOG(DEBUG) << "wpa_supplicant terminated, restarting";
-        platform_notify_error(BPL_ERR_BH_WPA_SUPPLICANT_TERMINATED, "wpa_supplicant terminated");
+        platform_notify_error(bpl::BPL_ERR_BH_WPA_SUPPLICANT_TERMINATED,
+                              "wpa_supplicant terminated");
         stop_on_failure_attempts--;
         FSM_MOVE_STATE(RESTART);
 

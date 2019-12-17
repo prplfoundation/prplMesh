@@ -14,9 +14,7 @@
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace bpl {
 
 /****************************************************************************/
 /******************************* Definitions ********************************/
@@ -457,8 +455,6 @@ int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_
  */
 int bpl_cfg_get_administrator_credentials(char pass[BPL_USER_PASS_LEN]);
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
+} // namespace bpl
 
 #endif /* _BPL_CFG_H_ */
