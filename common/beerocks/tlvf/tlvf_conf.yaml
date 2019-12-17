@@ -6,13 +6,6 @@ include_yaml_path: {
 }
 
 # Relative to tlvf.py src_path variable
-include_source_path: {
-  "src/beerocks_message.cpp",
-  "include/beerocks/tlvf/beerocks_message.h",
-  "include/beerocks/tlvf/beerocks_header.h",
-}
-
-# Relative to tlvf.py src_path variable
 source_license_header: "intel/license.txt"
 
 debug:
