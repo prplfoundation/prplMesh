@@ -28,7 +28,8 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
                                                ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id)
 {
     auto response =
-        message_com::create_vs_message<beerocks_message::cACTION_BML_NW_MAP_RESPONSE>(cmdu_tx, id);
+        message_com::create_jumbo_vs_message<beerocks_message::cACTION_BML_NW_MAP_RESPONSE>(cmdu_tx,
+                                                                                            id);
     if (response == nullptr) {
         LOG(ERROR) << "Failed building ACTION_BML_NW_MAP_BRIDGE_RESPONSE message!";
         return;
@@ -106,9 +107,8 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
                 message_com::send_cmdu(sd, cmdu_tx);
 
                 get_next_node = false;
-                response =
-                    message_com::create_vs_message<beerocks_message::cACTION_BML_NW_MAP_RESPONSE>(
-                        cmdu_tx, id);
+                response      = message_com::create_jumbo_vs_message<
+                    beerocks_message::cACTION_BML_NW_MAP_RESPONSE>(cmdu_tx, id);
                 beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
                 beerocks_header->actionhdr()->last() = 0;
                 num_of_nodes = response->node_num(); // prepare for next message
@@ -310,7 +310,7 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
     std::set<std::string> valid_hostaps)
 {
     auto response =
-        message_com::create_vs_message<beerocks_message::cACTION_BML_STATS_UPDATE>(cmdu_tx);
+        message_com::create_jumbo_vs_message<beerocks_message::cACTION_BML_STATS_UPDATE>(cmdu_tx);
     if (response == nullptr) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
@@ -371,7 +371,8 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
 
             // prepare for next message
             response =
-                message_com::create_vs_message<beerocks_message::cACTION_BML_STATS_UPDATE>(cmdu_tx);
+                message_com::create_jumbo_vs_message<beerocks_message::cACTION_BML_STATS_UPDATE>(
+                    cmdu_tx);
 
             beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
             beerocks_header->actionhdr()->last() = 0;
@@ -465,7 +466,7 @@ void network_map::send_bml_bss_tm_req_message_to_listeners(db &database,
                                                            uint8_t disassoc_imminent)
 {
     auto response =
-        message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
+        message_com::create_jumbo_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
     if (response == nullptr) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
@@ -499,7 +500,7 @@ void network_map::send_bml_bh_roam_req_message_to_listeners(db &database,
                                                             std::string bssid, uint8_t channel)
 {
     auto response =
-        message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
+        message_com::create_jumbo_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
     if (response == nullptr) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
@@ -532,7 +533,7 @@ void network_map::send_bml_client_allow_req_message_to_listeners(
     std::string sta_mac, std::string hostap_mac, std::string ip)
 {
     auto response =
-        message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
+        message_com::create_jumbo_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
     if (response == nullptr) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
@@ -566,7 +567,7 @@ void network_map::send_bml_client_disallow_req_message_to_listeners(
     std::string sta_mac, std::string hostap_mac)
 {
     auto response =
-        message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
+        message_com::create_jumbo_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
     if (response == nullptr) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
@@ -600,7 +601,7 @@ void network_map::send_bml_acs_start_message_to_listeners(db &database,
                                                           std::string hostap_mac)
 {
     auto response =
-        message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
+        message_com::create_jumbo_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
     if (response == nullptr) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
@@ -634,7 +635,7 @@ void network_map::send_bml_csa_notification_message_to_listeners(
     uint16_t vht_center_frequency)
 {
     auto response =
-        message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
+        message_com::create_jumbo_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
     if (response == nullptr) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
@@ -670,7 +671,7 @@ void network_map::send_bml_cac_status_changed_notification_message_to_listeners(
     std::string hostap_mac, uint8_t cac_completed)
 {
     auto response =
-        message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
+        message_com::create_jumbo_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
     if (response == nullptr) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;

@@ -145,7 +145,7 @@ public:
         cmdu_tx.set_max_tlv_length(cmdu_tx.tlvs.getMessageBuffLength() -
                                    ieee1905_1::CmduMessage::kCmduHeaderLength -
                                    ieee1905_1::tlvEndOfMessage::get_initial_size());
-        auto ret = create_vs_message(cmdu_tx, id);
+        auto ret = create_vs_message<T>(cmdu_tx, id);
         cmdu_tx.set_max_tlv_length(max_tlv_length);
 
         return ret;
