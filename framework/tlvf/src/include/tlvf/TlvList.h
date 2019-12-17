@@ -53,14 +53,6 @@ public:
     }
 
     /**
-     * @brief Get the Class object at index idx in the all classes array
-     *
-     * @param idx index in the all classes array
-     * @return std::shared_ptr<BaseClass> to the class object at index idx, nullptr if not found
-     */
-    std::shared_ptr<BaseClass> getClass(size_t idx) const;
-
-    /**
      * @brief Get the (first) Class object
      *
      * @tparam T class template
@@ -68,11 +60,7 @@ public:
      */
     template <class T> std::shared_ptr<T> getClass() const
     {
-        for (size_t idx = 0; idx < getClassCount(); idx++) {
-            if (auto c = std::dynamic_pointer_cast<T>(getClass(idx)))
-                return c;
-        }
-        return nullptr;
+        return getClass<T>(0);
     }
 
     /**
@@ -86,8 +74,8 @@ public:
     template <class T> std::shared_ptr<T> getClass(size_t idx) const
     {
         size_t idx_ = 0;
-        for (size_t i = 0; i < getClassCount(); i++) {
-            if (auto c = std::dynamic_pointer_cast<T>(getClass(i))) {
+        for (auto it : m_class_vector) {
+            if (auto c = std::dynamic_pointer_cast<T>(it)) {
                 if (idx_++ == idx)
                     return c;
             }
@@ -104,10 +92,9 @@ public:
     template <class T> size_t getClassCount() const
     {
         size_t count = 0;
-        for (size_t i = 0; i < getClassCount(); i++) {
-            if (auto c = std::dynamic_pointer_cast<T>(getClass(i))) {
+        for (auto it : m_class_vector) {
+            if (auto c = std::dynamic_pointer_cast<T>(it))
                 count++;
-            }
         }
         return count;
     }
@@ -162,11 +149,10 @@ private:
     getTlv(eTlvType type, size_t idx = 0)
     {
         size_t idx_ = 0;
-        for (size_t i = 0; i < getClassCount(); i++) {
-            auto c = getClass(i);
-            TlvHeader *tlvhdr = (TlvHeader *)c->getStartBuffPtr();
+        for (auto it : m_class_vector) {
+            TlvHeader *tlvhdr = (TlvHeader *)it->getStartBuffPtr();
             if ((static_cast<eTlvType>(tlvhdr->type) == type) && (idx_++ == idx))
-                return c;
+                return it;
         }
         return nullptr;
     }

@@ -33,14 +33,6 @@ public:
     template <class T> std::shared_ptr<T> addClass() { return tlvs.addClass<T>(); }
 
     /**
-     * @brief Get the Class object at index idx in the all classes array
-     * 
-     * @param idx index in the all classes array
-     * @return std::shared_ptr<BaseClass> to the class object at index idx, nullptr if not found
-     */
-    std::shared_ptr<BaseClass> getClass(size_t idx) const { return tlvs.getClass(idx);}
-
-    /**
      * @brief Get the (first) Class object
      * 
      * @tparam T class template
@@ -65,7 +57,7 @@ public:
      * @return size_t number of classes of type T
      */
     template <class T> size_t getClassCount() const { return tlvs.getClassCount<T>(); }
-    size_t getClassCount() const { return tlvs.getClassCount(); }
+
     const std::vector<std::shared_ptr<BaseClass>> &getClassVector() const
     {
         return tlvs.getClassVector();

@@ -19,17 +19,6 @@ TlvList::TlvList(uint8_t *buff, size_t buff_len, bool parse, bool swap)
 
 TlvList::~TlvList() {}
 
-std::shared_ptr<BaseClass> TlvList::getClass(size_t idx) const
-{
-    if (m_class_vector.size() > idx) {
-        return std::shared_ptr<BaseClass>(m_class_vector.at(idx));
-    } else {
-        return nullptr;
-    }
-}
-
-size_t TlvList::getClassCount() const { return m_class_vector.size(); }
-
 const std::vector<std::shared_ptr<BaseClass>> &TlvList::getClassVector() const
 {
     return (const std::vector<std::shared_ptr<BaseClass>> &)m_class_vector;
