@@ -20,7 +20,7 @@
 /// Do not use this macro anywhere else in gateway process
 /// It should only be there in one place and easylogging++ recommends to be in the file where
 /// main function is defined.
-INITIALIZE_EASYLOGGINGPP
+SHARE_EASYLOGGINGPP(el::Helpers::storage())
 
 // Do not use this macro anywhere else in ire process
 // It should only be there in one place in each executable module

@@ -29,7 +29,7 @@
 
 #define CONF_FILE_PATH std::string(MAPF_ROOT) + "/share/logging.conf"
 #define CONF_FILE_TMP_PATH std::string("/tmp/share/logging.conf")
-#define MAPF_INITIALIZE_LOGGER INITIALIZE_EASYLOGGINGPP
+#define MAPF_INITIALIZE_LOGGER SHARE_EASYLOGGINGPP(el::Helpers::storage())
 
 extern char *__progname;
 struct json_object;
