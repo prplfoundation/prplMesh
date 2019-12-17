@@ -9,8 +9,8 @@
 #ifndef _CmduTlvParser_H_
 #define _CmduTlvParser_H_
 
-#include <tlvf/CmduParser.h>
 #include <tlvf/BaseClass.h>
+#include <tlvf/CmduParser.h>
 
 #include <memory>
 
@@ -30,6 +30,6 @@ private:
     std::shared_ptr<BaseClass> parseNextTlv();
 };
 
-}; // close namespace: ieee1905_1
+}; // namespace ieee1905_1
 
 #endif //_CmduTlvParser_H_

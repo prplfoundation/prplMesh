@@ -37,7 +37,7 @@ int CmduMessage::getNextTlvType() const
     } else {
         tlvValue = *m_class_vector.back()->getBuffPtr();
     }
-    
+
     return int(tlvValue);
 }
 

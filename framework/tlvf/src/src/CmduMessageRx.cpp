@@ -48,7 +48,7 @@ bool CmduMessageRx::parse(uint8_t *buff, size_t buff_len, bool swap_needed, bool
         m_cmdu_header = nullptr;
         return false;
     }
-    
+
     if (!parse_tlvs)
         return true;
 
@@ -57,6 +57,5 @@ bool CmduMessageRx::parse(uint8_t *buff, size_t buff_len, bool swap_needed, bool
             return true;
     }
 
-    
     return false;
 }
