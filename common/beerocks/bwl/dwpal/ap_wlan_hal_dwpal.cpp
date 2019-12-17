@@ -2051,7 +2051,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
 std::shared_ptr<ap_wlan_hal> ap_wlan_hal_create(std::string iface_name, hal_conf_t hal_conf,
                                                 base_wlan_hal::hal_event_cb_t callback)
 {
-    return std::make_shared<adwpal::ap_wlan_hal_dwpal>(iface_name, callback, hal_conf);
+    return std::make_shared<dwpal::ap_wlan_hal_dwpal>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl
