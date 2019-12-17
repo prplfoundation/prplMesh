@@ -2,7 +2,7 @@ project(elpp VERSION ${prplmesh_VERSION})
 
 set(ELPP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_library(${PROJECT_NAME} SHARED ${CMAKE_CURRENT_SOURCE_DIR}/easylogging++.cc)
+add_library(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/easylogging++.cc)
 
 target_compile_definitions(${PROJECT_NAME}
     PUBLIC

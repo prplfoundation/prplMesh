@@ -63,7 +63,6 @@ class cmakebuilder(builder):
         cmd = ["cmake",
                "-H" + self.src_path,
                "-B" + self.build_path,
-               "-DBUILD_SHARED_LIBS=ON",
                "-DCMAKE_INSTALL_PREFIX=" + self.install_path]
         cmd.extend(['-D%s' %f for f in self.cmake_flags])
         if self.cmake_verbose:
