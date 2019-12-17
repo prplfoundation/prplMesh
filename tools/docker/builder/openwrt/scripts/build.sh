@@ -8,4 +8,4 @@ rm -rf /home/openwrt/prplMesh/build
 
 make package/feeds/prpl/prplmesh/prepare USE_SOURCE_DIR="/home/openwrt/prplMesh" V=s
 make package/feeds/prpl/prplmesh/compile V=sc -j"$(nproc)"
-find bin -name 'prplmesh_*.ipk' -exec cp -v {} "prplmesh-${TARGET}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" \;
+find bin -name 'prplmesh*.ipk' -exec cp -v {} "prplmesh-${TARGET}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" \;
