@@ -374,8 +374,7 @@ bool bml_rdkb_internal::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     return (ret == BML_RET_OK);
 }
 
-int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
-                                           ieee1905_1::CmduMessageRx &cmdu_rx)
+int bml_rdkb_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_header)
 {
     auto action    = beerocks_header->action();
     auto action_op = beerocks_header->action_op();
@@ -386,7 +385,8 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
         // Process BML messages
         switch (action_op) {
         case beerocks_message::ACTION_BML_STEERING_EVENTS_UPDATE: {
-            auto response = cmdu_rx.addClass<beerocks_message::cACTION_BML_EVENTS_UPDATE>();
+            auto response =
+                beerocks_header->addClass<beerocks_message::cACTION_BML_EVENTS_UPDATE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_EVENTS_UPDATE failed";
                 return BML_RET_OP_FAILED;
@@ -402,7 +402,8 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
         } break;
         case beerocks_message::ACTION_BML_STEERING_SET_GROUP_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_SET_GROUP_RESPONSE>();
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_STEERING_SET_GROUP_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_SET_GROUP_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -419,7 +420,8 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
         } break;
         case beerocks_message::ACTION_BML_STEERING_CLIENT_SET_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_SET_RESPONSE>();
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_SET_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_SET_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -435,7 +437,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
             }
         } break;
         case beerocks_message::ACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE: {
-            auto response = cmdu_rx.addClass<
+            auto response = beerocks_header->addClass<
                 beerocks_message::cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE>();
             if (!response) {
                 LOG(ERROR)
@@ -454,8 +456,8 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
         } break;
         case beerocks_message::ACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE: {
             auto response =
-                cmdu_rx
-                    .addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE>();
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -472,7 +474,8 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
         } break;
         case beerocks_message::ACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE: {
             auto response =
-                cmdu_rx.addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE>();
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE failed";
                 return BML_RET_OP_FAILED;
@@ -488,7 +491,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
             }
         } break;
         default: {
-            if ((ret = bml_internal::process_cmdu_header(beerocks_header, cmdu_rx)) != BML_RET_OK) {
+            if ((ret = bml_internal::process_cmdu_header(beerocks_header)) != BML_RET_OK) {
                 LOG(WARNING) << "unhandled extended cmdu header action bml type 0x" << std::hex
                              << action_op;
                 return ret;
@@ -496,7 +499,7 @@ int bml_rdkb_internal::process_cmdu_header(cmdu_vs_action_header_t beerocks_head
         }
         }
     } else {
-        if ((ret = bml_internal::process_cmdu_header(beerocks_header, cmdu_rx)) != BML_RET_OK) {
+        if ((ret = bml_internal::process_cmdu_header(beerocks_header)) != BML_RET_OK) {
             LOG(WARNING) << "unhandled extended cmdu header action type 0x" << std::hex << action;
             return ret;
         }

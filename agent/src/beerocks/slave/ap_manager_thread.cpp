@@ -436,7 +436,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         LOG(TRACE) << "ACTION_APMANAGER_ENABLE_APS_REQUEST";
 
         auto notification =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_ENABLE_APS_REQUEST>();
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_ENABLE_APS_REQUEST>();
         if (!notification) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_ENABLE_APS_REQUEST failed";
             return false;
@@ -498,7 +498,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST: {
 
-        auto request = cmdu_rx.addClass<
+        auto request = beerocks_header->addClass<
             beerocks_message::cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass "
@@ -557,7 +557,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START failed";
             return false;
@@ -619,7 +620,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE: {
         auto update =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE>();
         if (update == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE failed";
             return false;
@@ -631,7 +633,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE: {
         auto update =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE>();
         if (update == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE failed";
             return false;
@@ -643,7 +646,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST failed";
             send_steering_return_status(
@@ -671,7 +675,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_DISALLOW_REQUEST: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST failed";
             return false;
@@ -685,7 +690,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_ALLOW_REQUEST: {
-        auto request = cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_CLIENT_ALLOW_REQUEST>();
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_CLIENT_ALLOW_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_ALLOW_REQUEST failed";
             return false;
@@ -718,9 +724,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST: {
-        auto request =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>();
+        auto request = beerocks_header->addClass<
+            beerocks_message::cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST failed";
             return false;
@@ -788,7 +793,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST failed";
             return false;
@@ -830,7 +836,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST>();
         if (!request) {
             LOG(ERROR) << "addClass ACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST failed";
             return false;
@@ -865,8 +872,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION: {
         auto update =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION>();
         if (update == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION failed";
             return false;
@@ -878,7 +885,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST: {
         auto request =
-            cmdu_rx.addClass<beerocks_message::cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST>();
         if (request == nullptr) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST failed";
             send_steering_return_status(

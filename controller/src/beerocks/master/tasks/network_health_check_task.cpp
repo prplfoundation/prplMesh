@@ -111,15 +111,12 @@ void network_health_check_task::work()
 }
 
 void network_health_check_task::handle_response(std::string mac,
-                                                beerocks_message::eActionOp_CONTROL action_op,
-                                                ieee1905_1::CmduMessageRx &cmdu_rx)
+                                                std::shared_ptr<beerocks_header> beerocks_header)
 {
-    switch (action_op) {
+    switch (beerocks_header->action_op()) {
     case beerocks_message::ACTION_CONTROL_ARP_QUERY_RESPONSE: {
         auto response =
-            message_com::get_vs_class<beerocks_message::cACTION_CONTROL_ARP_QUERY_RESPONSE>(
-                cmdu_rx);
-
+            beerocks_header->getClass<beerocks_message::cACTION_CONTROL_ARP_QUERY_RESPONSE>();
         if (!response) {
             TASK_LOG(ERROR) << "getClass failed for cACTION_CONTROL_ARP_QUERY_RESPONSE";
             return;
@@ -149,7 +146,7 @@ void network_health_check_task::handle_response(std::string mac,
         break;
     }
     default: {
-        TASK_LOG(ERROR) << "Unsupported action_op:" << int(action_op);
+        TASK_LOG(ERROR) << "Unsupported action_op:" << int(beerocks_header->action_op());
         break;
     }
     }

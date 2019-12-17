@@ -172,15 +172,13 @@ public:
     bool is_local_master() const { return (m_fLocal_Master); }
 
 protected:
-    typedef std::shared_ptr<beerocks_message::cACTION_HEADER> cmdu_vs_action_header_t;
     virtual bool init() override;
     virtual void on_thread_stop() override;
     virtual bool socket_disconnected(Socket *sd) override;
     virtual std::string print_cmdu_types(const beerocks::message::sUdsHeader *cmdu_header) override;
     bool wake_up(uint8_t action_opcode, int value);
     bool connect_to_master();
-    virtual int process_cmdu_header(cmdu_vs_action_header_t beerocks_header,
-                                    ieee1905_1::CmduMessageRx &cmdu_rx);
+    virtual int process_cmdu_header(std::shared_ptr<beerocks::beerocks_header> beerocks_header);
 
     SocketClient *m_sockMaster = nullptr;
 

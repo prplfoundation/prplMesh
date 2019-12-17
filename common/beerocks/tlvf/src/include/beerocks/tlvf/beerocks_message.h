@@ -47,7 +47,7 @@ public:
     static bool
     intel_oui(std::shared_ptr<ieee1905_1::tlvVendorSpecific> tlv_vendor_specific_header);
 
-    static std::shared_ptr<beerocks_message::cACTION_HEADER>
+    static std::shared_ptr<beerocks_header>
     parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx);
 
     template <class T> static std::shared_ptr<T> get_vs_class(ieee1905_1::CmduMessage &cmdu)

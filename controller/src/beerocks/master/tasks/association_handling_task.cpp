@@ -242,18 +242,17 @@ void association_handling_task::work()
 }
 
 void association_handling_task::handle_response(std::string mac,
-                                                beerocks_message::eActionOp_CONTROL action_op,
-                                                ieee1905_1::CmduMessageRx &cmdu_rx)
+                                                std::shared_ptr<beerocks_header> beerocks_header)
 {
-    switch (action_op) {
+    switch (beerocks_header->action_op()) {
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE: {
         const std::string parent_mac = database.get_node_parent(sta_mac);
         auto response =
-            message_com::get_vs_class<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>(
-                cmdu_rx);
+            beerocks_header
+                ->getClass<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>();
         if (!response) {
             TASK_LOG(ERROR) << "getClass failed for cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE";
             return;
@@ -312,7 +311,7 @@ void association_handling_task::handle_response(std::string mac,
         break;
     }
     default: {
-        LOG(ERROR) << "Unsupported action_op:" << int(action_op);
+        LOG(ERROR) << "Unsupported action_op:" << int(beerocks_header->action_op());
         break;
     }
     }
