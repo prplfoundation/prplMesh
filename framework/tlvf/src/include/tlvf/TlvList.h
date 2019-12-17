@@ -13,6 +13,7 @@
 #include <tlvf/ieee_1905_1/eTlvType.h>
 #include <memory>
 #include <vector>
+#include <unordered_map>
 #include <tlvf/BaseClass.h>
 
 namespace ieee1905_1 {
@@ -122,6 +123,15 @@ public:
     bool is_swapped() const { return m_swapped; };
     bool finalize(bool swap_needed);
     void reset(bool parse, bool swap);
+    void addInnerTlvList(eTlvType type, std::shared_ptr<TlvList> list)
+    {
+        m_inner_tlv_lists[type] = list;
+    }
+    template <class T> std::shared_ptr<T>
+    getInnerTlvList(eTlvType type)
+    {
+        return std::dynamic_pointer_cast<T>(m_inner_tlv_lists[type]);
+    }
 
 protected:
 
@@ -134,6 +144,7 @@ protected:
     bool m_swapped               = false;
     bool m_dynamically_allocated = false;
     std::vector<std::shared_ptr<BaseClass>> m_class_vector;
+    std::unordered_map<eTlvType, std::shared_ptr<TlvList>> m_inner_tlv_lists;
 };
 
 }; // close namespace: ieee1905_1

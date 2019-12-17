@@ -77,6 +77,7 @@ void TlvList::reset(bool parse, bool swap)
         c.reset();
     }
     m_class_vector.clear();
+    m_inner_tlv_lists.clear();
 }
 
 bool TlvList::finalize(bool swap_needed)
@@ -90,6 +91,9 @@ bool TlvList::finalize(bool swap_needed)
             return false;
         }
     }
+
+    for (auto list : m_inner_tlv_lists)
+        list.second->finalize(swap_needed);
 
     if (!addClass<tlvEndOfMessage>())
         return false;
