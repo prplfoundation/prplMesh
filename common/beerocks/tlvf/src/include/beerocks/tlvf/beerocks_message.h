@@ -176,12 +176,7 @@ public:
         if (!beerocks_header)
             return nullptr;
 
-        // According to C++'03 Standard 14.2/4:
-        // When the name of a member template specialization appears after . or -> in a postfix-expression,
-        // or after nested-name-specifier in a qualified-id, and the postfix-expression or qualified-id
-        // explicitly depends on a template-parameter (14.6.2), the member template name must be prefixed by
-        // the keyword template. Otherwise the name is assumed to name a non-template.
-        return beerocks_header->template getClass<T>();
+        return beerocks_header->getClass<T>();
     }
 
     typedef struct sCmduInfo {
