@@ -126,7 +126,7 @@ public:
     bool swap_needed() {return m_swap; }
     bool is_finalized() const { return m_finalized; };
     bool is_swapped() const { return m_swapped; };
-    bool finalize(bool swap_needed);
+    virtual bool finalize(bool swap_needed);
     void reset(bool parse, bool swap);
     void addInnerTlvList(eTlvType type, std::shared_ptr<TlvList> list)
     {
