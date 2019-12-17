@@ -18,6 +18,11 @@
 
 namespace ieee1905_1 {
 
+typedef struct TlvHeader {
+    uint8_t type;
+    uint16_t length;
+} __attribute__((packed)) TlvHeader;
+
 class TlvList {
 
 public:
