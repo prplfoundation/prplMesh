@@ -13,6 +13,8 @@
 
 using namespace beerocks::bpl;
 
+namespace bpl {
+
 int bpl_cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex)
 {
     char ifname[BPL_IFNAME_LEN] = {0};
@@ -90,3 +92,5 @@ int bpl_cfg_get_wep_key(int index, int keyIndex, char *key)
     /*TODO: implement using d/s-pal apis*/
     return RETURN_OK;
 }
+
+} // namespace bpl

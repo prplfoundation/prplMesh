@@ -13,6 +13,8 @@
 
 #include <bpl/bpl_cfg.h>
 
+namespace bpl {
+
 /**
  * Returns the index of interface from DB
  *
@@ -68,5 +70,7 @@ int bpl_cfg_get_wep_key(int index, int keyIndex, char *key);
  *
  * @return 0 on success or -1 on error.
  **/
+
+} // namespace bpl
 
 #endif // _BPL_CFG_HELPER_H

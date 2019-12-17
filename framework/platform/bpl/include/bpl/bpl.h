@@ -9,9 +9,7 @@
 #ifndef _BPL_H_
 #define _BPL_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace bpl {
 
 /**
  * Initialize the BPL (Beerocks Platform Library).
@@ -26,8 +24,6 @@ int bpl_init();
  */
 void bpl_close();
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
+} // namespace bpl
 
 #endif /* _BPL_H_ */

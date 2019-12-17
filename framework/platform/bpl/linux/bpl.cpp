@@ -17,6 +17,8 @@ SHARE_EASYLOGGINGPP(el::Helpers::storage())
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+namespace bpl {
+
 int bpl_init()
 {
     // Do nothing
@@ -27,3 +29,5 @@ void bpl_close()
 {
     // Do nothing
 }
+
+} // namespace bpl

@@ -13,9 +13,7 @@
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace bpl {
 
 /****************************************************************************/
 /******************************* Definitions ********************************/
@@ -162,8 +160,6 @@ int bpl_arp_get_bridge_iface(const char bridge[BPL_ARP_IFACE_NAME_LEN],
                              const uint8_t mac[BPL_ARP_MON_MAC_LEN],
                              char iface[BPL_ARP_IFACE_NAME_LEN]);
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
+} // namespace bpl
 
 #endif /* _BPL_ARP_H_ */

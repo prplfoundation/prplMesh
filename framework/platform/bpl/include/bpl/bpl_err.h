@@ -9,9 +9,7 @@
 #ifndef _BPL_ERR_H_
 #define _BPL_ERR_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace bpl {
 
 /****************************************************************************/
 /******************************* Definitions ********************************/
@@ -78,8 +76,6 @@ extern "C" {
 // States ENUM
 enum eErrorCode { FOREACH_ERROR_CODE(GENERATE_ERROR_ENUM) };
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
+} // namespace bpl
 
 #endif /* _BPL_ERR_H_ */

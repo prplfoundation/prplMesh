@@ -118,10 +118,10 @@ private:
     // Pointer to the backhaul manager slave
     Socket *m_pBackhaulManagerSlave = nullptr;
 
-    BPL_ARP_MON_CTX m_ctxArpMon = nullptr;
-    Socket *m_pArpMonSocket     = nullptr;
-    Socket *m_pArpRawSocket     = nullptr;
-    Socket *m_pDHCPMonSocket    = nullptr;
+    bpl::BPL_ARP_MON_CTX m_ctxArpMon = nullptr;
+    Socket *m_pArpMonSocket          = nullptr;
+    Socket *m_pArpRawSocket          = nullptr;
+    Socket *m_pDHCPMonSocket         = nullptr;
 
     uint32_t m_uiArpMonIP;
     uint32_t m_uiArpMonMask;
@@ -153,7 +153,7 @@ private:
     std::unordered_map<std::string, std::shared_ptr<beerocks_message::sWlanSettings>>
         bpl_iface_wlan_params_map;
     std::unordered_set<std::string> ap_ifaces;
-    BPL_INTERFACE_STATUS_NOTIFICATION bpl_iface_status;
+    bpl::BPL_INTERFACE_STATUS_NOTIFICATION bpl_iface_status;
 
     platform_common_conf_t platform_common_conf;
 };

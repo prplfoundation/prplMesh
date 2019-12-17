@@ -18,4 +18,8 @@ using namespace mapf;
 
 using namespace beerocks::bpl;
 
+namespace bpl {
+
 int bpl_cfg_set_onboarding(int enable) { return 0; }
+
+} // namespace bpl
