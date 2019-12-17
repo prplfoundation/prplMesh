@@ -92,7 +92,7 @@ else()
 endif()
 
 # Build the library
-add_library(${PROJECT_NAME} SHARED ${bpl_common_sources} ${bpl_platform_sources})
+add_library(${PROJECT_NAME} ${bpl_common_sources} ${bpl_platform_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,nodefs")
 target_link_libraries(${PROJECT_NAME} PRIVATE mapf::elpp common ${BPL_LIBS})

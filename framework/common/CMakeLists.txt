@@ -46,7 +46,7 @@ if(NOT OpenSSL_FOUND)
 endif()
 
 # Create a single common library
-add_library(common SHARED ${sources})
+add_library(common ${sources})
 set_target_properties(common PROPERTIES PREFIX "mapf" VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 target_link_libraries(common 
 	PRIVATE 

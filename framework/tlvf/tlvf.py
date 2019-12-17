@@ -1655,7 +1655,7 @@ class TlvF:
         code.append('')
         
         code += [
-            'add_library(${PROJET_NAME} SHARED ${tlvf_sources})', 
+            'add_library(${PROJET_NAME} ${tlvf_sources})', 
             'target_link_libraries(${PROJET_NAME} dl)',
             '', 
             '# set_target_properties(${PROJET_NAME} PROPERTIES VERSION "%s" SOVERSION "%s")' % (self.CMAKE_PROPERTIES_VERSION, self.CMAKE_SO_VERSION) ,
