@@ -22,6 +22,7 @@ namespace WSC {
 enum eWscMessageType: uint8_t {
     WSC_MSG_TYPE_M1 = 0x4,
     WSC_MSG_TYPE_M2 = 0x5,
+    WSC_MSG_TYPE_INVALID = 0xff,
 };
 
 

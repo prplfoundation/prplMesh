@@ -7,4 +7,5 @@ eWscMessageType:
   _enum_storage: uint8_t
   WSC_MSG_TYPE_M1: 0x04
   WSC_MSG_TYPE_M2: 0x05
+  WSC_MSG_TYPE_INVALID: 0xFF
   
