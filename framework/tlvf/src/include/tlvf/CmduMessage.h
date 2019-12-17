@@ -9,9 +9,9 @@
 #ifndef _CmduMessage_H_
 #define _CmduMessage_H_
 
+#include <memory>
 #include <tlvf/ieee_1905_1/cCmduHeader.h>
 #include <tlvf/ieee_1905_1/eTlvType.h>
-#include <memory>
 #include <vector>
 
 namespace ieee1905_1 {
@@ -24,7 +24,7 @@ public:
 
 public:
     std::shared_ptr<cCmduHeader> getCmduHeader() const;
-    
+
     template <class T, class = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
     std::shared_ptr<T> addClass()
     {
@@ -45,7 +45,7 @@ public:
         }
         return ptr;
     }
-    
+
     static uint16_t getCmduHeaderLength() { return kCmduHeaderLength; }
 
     /**
@@ -118,7 +118,7 @@ public:
     uint16_t getNextTlvLength() const;
     uint8_t *getNextTlvData() const;
     void swap();
-    bool swap_needed() {return m_swap; }
+    bool swap_needed() { return m_swap; }
     bool is_finalized() const { return m_finalized; };
     bool is_swapped() const { return m_swapped; };
     eMessageType getMessageType();
@@ -140,6 +140,6 @@ protected:
     static const uint16_t kTlvHeaderLength  = 3;
 };
 
-}; // close namespace: ieee1905_1
+}; // namespace ieee1905_1
 
 #endif //_CmduMessage_H_

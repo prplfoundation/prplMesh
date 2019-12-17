@@ -9,8 +9,8 @@
 #ifndef _SVENDOR_OUI_H_
 #define _SVENDOR_OUI_H_
 
-#include <stdint.h>
 #include <algorithm>
+#include <stdint.h>
 
 typedef struct sVendorOUI {
     uint8_t upper;
@@ -18,23 +18,16 @@ typedef struct sVendorOUI {
     uint8_t lower;
     sVendorOUI(uint32_t val)
     {
-        lower = val & 0xFF;
-        middle = (val >> 8 ) & 0xFF;
-        upper = (val >> 16 ) & 0xFF;
+        lower  = val & 0xFF;
+        middle = (val >> 8) & 0xFF;
+        upper  = (val >> 16) & 0xFF;
     }
 
-    operator uint32_t() const
-    {
-        return (upper << 16) + (middle << 8) + lower;
-    }
+    operator uint32_t() const { return (upper << 16) + (middle << 8) + lower; }
 
-    void struct_swap()
-    {
-        std::swap(upper, lower);
-    }
+    void struct_swap() { std::swap(upper, lower); }
 
-    void struct_init() { }
+    void struct_init() {}
 } __attribute__((packed)) sVendorOUI;
-
 
 #endif //_SVENDOR_OUI_H_

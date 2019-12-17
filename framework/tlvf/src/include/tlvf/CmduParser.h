@@ -18,7 +18,7 @@ class CmduParser {
 public:
     CmduParser() = delete;
     CmduParser(CmduMessageRx &cmdu) : cmdu_(cmdu) {}
-    ~CmduParser() {};
+    ~CmduParser(){};
     virtual bool parse() = 0;
     CmduParser &operator=(const CmduParser &) = delete;
 
@@ -26,6 +26,6 @@ protected:
     CmduMessageRx &cmdu_;
 };
 
-}; // close namespace: ieee1905_1
+}; // namespace ieee1905_1
 
 #endif //_CmduParser_H_

@@ -9,8 +9,8 @@
 #ifndef _CmduMessageRX_H_
 #define _CmduMessageRX_H_
 
-#include <tlvf/ieee_1905_1/cCmduHeader.h>
 #include <tlvf/CmduMessage.h>
+#include <tlvf/ieee_1905_1/cCmduHeader.h>
 
 #include <list>
 #include <memory>
@@ -32,6 +32,6 @@ private:
     std::list<std::shared_ptr<CmduParser>> parsers_;
 };
 
-}; // close namespace: ieee1905_1
+}; // namespace ieee1905_1
 
 #endif //_CmduMessageRX_H_
