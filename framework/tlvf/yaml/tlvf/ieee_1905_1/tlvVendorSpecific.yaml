@@ -3,20 +3,20 @@
 _namespace: ieee1905_1
 
 tlvVendorSpecific:
-  _type: class  
+  _type: class
+  _is_tlv_class: True
   type:
     _type: eTlvType
     _value_const: TLV_VENDOR_SPECIFIC
-  length:
-    _type: uint16_t
-    _value: 3
-    _length_var: True
+  length: uint16_t
   vendor_oui:
     _type: sVendorOUI
+  payload:
+    _type: uint8_t
+    _length: [ ]
 
 eVendorOUI:
   _type: enum
   _enum_storage: uint32_t
-  # FIXME: https://github.com/prplfoundation/prplMesh/issues/33
   OUI_BYTES: 3
   OUI_INTEL: 0x470300
