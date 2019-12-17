@@ -715,6 +715,8 @@ Add an object of type <T> to the array.
 - For parsed message - parse this type from the buffer.
 - For created messages – allocate this type on the buffer.
 
+it is not allowed to use addClass method if the last tlv is not fully initialized!
+
 Returns a pointer to the added class.
 In case of an error, this pointer will point to null.
 
