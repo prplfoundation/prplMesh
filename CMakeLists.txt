@@ -13,6 +13,8 @@ endif()
 option (BUILD_AGENT "Build EasyMesh agent" ON)
 option (BUILD_CONTROLLER "Build EasyMesh controller" ON)
 
+option(BUILD_SHARED_LIBS "Build shared libraries (.so) instead of static ones (.a)" ON)
+
 ## Generic checks and defaults
 
 include(FindPkgConfig)
