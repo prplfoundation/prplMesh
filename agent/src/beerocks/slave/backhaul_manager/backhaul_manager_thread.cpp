@@ -998,14 +998,15 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
             } else {
                 UTILS_SLEEP_MSEC(1000);
             }
+            break;
         }
+
+        state_attempts = 0; // for next state
 
         if (connected) {
             FSM_MOVE_STATE(MASTER_DISCOVERY);
-            state_attempts = 0; // for next state
         } else {
             FSM_MOVE_STATE(INITIATE_SCAN);
-            state_attempts = 0; // for next state
         }
 
         break;
