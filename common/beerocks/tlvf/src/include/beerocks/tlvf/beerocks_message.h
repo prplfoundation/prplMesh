@@ -9,7 +9,7 @@
 #ifndef _TLVF_BEEROCKS_MESSAGE_H_
 #define _TLVF_BEEROCKS_MESSAGE_H_
 
-#include <beerocks/tlvf/beerocks_message_header.h>
+#include <beerocks/tlvf/beerocks_header.h>
 #include <tlvf/CmduMessageRx.h>
 #include <tlvf/CmduMessageTx.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
@@ -61,30 +61,46 @@ public:
         return std::dynamic_pointer_cast<beerocks_message::cACTION_HEADER>(cmdu.getClass(1));
     }
 
-    template <class T>
-    static std::shared_ptr<T>
-    add_intel_vs_data(ieee1905_1::CmduMessageTx &cmdu_tx,
-                      std::shared_ptr<ieee1905_1::tlvVendorSpecific> vs_tlv, uint16_t id = 0)
+    static std::shared_ptr<beerocks_header>
+    get_beerocks_header(ieee1905_1::CmduMessage &cmdu)
     {
-        beerocks_message::eAction action;
-        std::shared_ptr<T> p_class = nullptr;
+        return cmdu.tlvs.getInnerTlvList<beerocks_header>(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC);
+    }
 
-        auto actionhdr = cmdu_tx.addClass<beerocks_message::cACTION_HEADER>();
-        if (!actionhdr) {
-            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!"
-                      << std::endl;
-            return nullptr;
+    template <class T>
+    static bool add_intel_vs_data(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
+    {
+        auto vs_tlv = cmdu_tx.getClass<ieee1905_1::tlvVendorSpecific>();
+        if (!vs_tlv) {
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            return false;
         }
-        vs_tlv->length() += beerocks_message::cACTION_HEADER::get_initial_size();
-
-        p_class = cmdu_tx.addClass<T>();
-        if (!p_class) {
-            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!"
-                      << std::endl;
-            return nullptr;
+        // Allocate maximum allowed length for the payload, so it can accommodate variable length
+        // data inside the internal TLV list.
+        // On finalize(), the buffer is shrunk back to its real size.
+        size_t payload_length;
+        const size_t max_vs_tlv_length = ieee1905_1::CmduMessage::kMaxCmduLength -
+                                            ieee1905_1::CmduMessage::kCmduHeaderLength -
+                                            ieee1905_1::tlvVendorSpecific::get_initial_size() -
+                                            ieee1905_1::tlvEndOfMessage::get_initial_size();
+        payload_length = std::min(vs_tlv->getBuffRemainingBytes() -
+                                    ieee1905_1::tlvEndOfMessage::get_initial_size(),
+                                    max_vs_tlv_length);
+        if (!vs_tlv->alloc_payload(payload_length)) {
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            return false;
         }
+        std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(vs_tlv->payload(),
+                                                            vs_tlv->payload_length(), false, false);
+        if (!hdr)
+            return false;
+        if (!hdr->addClass<beerocks_message::cACTION_HEADER>())
+            return false;
+        if (!hdr->addClass<T>())
+            return false;
 
-        auto action_op = p_class->get_action_op();
+        beerocks_message::eAction action = beerocks_message::eAction::ACTION_NONE;
+        auto action_op = hdr->getClass<T>()->get_action_op();
         if (typeid(action_op) == typeid(beerocks_message::eActionOp_1905_VS))
             action = beerocks_message::eAction::ACTION_1905_VS;
         else if (typeid(action_op) == typeid(beerocks_message::eActionOp_CONTROL))
@@ -101,20 +117,18 @@ public:
             action = beerocks_message::eAction::ACTION_CLI;
         else if (typeid(action_op) == typeid(beerocks_message::eActionOp_BML))
             action = beerocks_message::eAction::ACTION_BML;
-        else
-            action = beerocks_message::eAction::ACTION_NONE;
 
         if (action == beerocks_message::eAction::ACTION_NONE) {
-            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!"
-                      << std::endl;
-            return nullptr;
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            return false;
         }
 
-        actionhdr->action()    = (beerocks_message::eAction)action;
-        actionhdr->action_op() = action_op;
-        actionhdr->id()        = id;
+        hdr->actionhdr()->action()    = (beerocks_message::eAction)action;
+        hdr->actionhdr()->action_op() = action_op;
+        hdr->actionhdr()->id()        = id;
+        cmdu_tx.tlvs.addInnerTlvList(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC, hdr);
 
-        return p_class;
+        return true;
     }
 
     template <class T>
@@ -140,7 +154,19 @@ public:
             return nullptr;
         }
 
-        return add_intel_vs_data<T>(cmdu_tx, tlvhdr, id);
+        if (!add_intel_vs_data<T>(cmdu_tx, id))
+            return nullptr;
+
+        auto beerocks_header = get_beerocks_header(cmdu_tx);
+        if (!beerocks_header)
+            return nullptr;
+
+        // According to C++'03 Standard 14.2/4:
+        // When the name of a member template specialization appears after . or -> in a postfix-expression,
+        // or after nested-name-specifier in a qualified-id, and the postfix-expression or qualified-id
+        // explicitly depends on a template-parameter (14.6.2), the member template name must be prefixed by
+        // the keyword template. Otherwise the name is assumed to name a non-template.
+        return beerocks_header->template getClass<T>();
     }
 
     typedef struct sCmduInfo {

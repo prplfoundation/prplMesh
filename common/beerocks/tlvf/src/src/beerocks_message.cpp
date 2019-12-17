@@ -66,7 +66,16 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
         return nullptr;
     if (!intel_oui(tlv_header))
         return nullptr;
-    return cmdu_rx.addClass<beerocks_message::cACTION_HEADER>();
+
+    std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(tlv_header->payload(),
+                                                tlv_header->payload_length(), true, cmdu_rx.swap_needed());
+    if (!hdr)
+        return nullptr;
+    auto actionhdr = hdr->addClass<beerocks_message::cACTION_HEADER>();
+    if (!actionhdr)
+        return nullptr;
+    cmdu_rx.tlvs.addInnerTlvList(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC, hdr);
+    return hdr->getClass<beerocks_message::cACTION_HEADER>();
 }
 
 std::string message_com::print_cmdu_types(const message::sUdsHeader *uds_header,
