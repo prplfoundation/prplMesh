@@ -61,12 +61,21 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
     if (!cmdu_rx.getMessageLength()) {
         LOG(ERROR) << "cmdu is not initialized!";
     }
-    auto tlv_header = cmdu_rx.addClass<ieee1905_1::tlvVendorSpecific>();
-    if (!tlv_header)
+    auto tlv = cmdu_rx.addClass<ieee1905_1::tlvVendorSpecific>();
+    if (!tlv)
         return nullptr;
-    if (!intel_oui(tlv_header))
+    if (!intel_oui(tlv))
         return nullptr;
-    return cmdu_rx.addClass<beerocks_message::cACTION_HEADER>();
+
+    std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(
+        tlv->payload(), tlv->payload_length(), true);
+    if (!hdr)
+        return nullptr;
+    auto actionhdr = hdr->addClass<beerocks_message::cACTION_HEADER>();
+    if (!actionhdr)
+        return nullptr;
+    tlv->addInnerClassList(hdr);
+    return hdr->getClass<beerocks_message::cACTION_HEADER>();
 }
 
 std::string message_com::print_cmdu_types(const message::sUdsHeader *uds_header,
