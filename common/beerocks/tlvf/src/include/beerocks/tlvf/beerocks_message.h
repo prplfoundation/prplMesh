@@ -47,7 +47,7 @@ public:
     static bool
     intel_oui(std::shared_ptr<ieee1905_1::tlvVendorSpecific> tlv_vendor_specific_header);
 
-    static std::shared_ptr<beerocks_message::cACTION_HEADER>
+    static std::shared_ptr<beerocks_header>
     parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx);
 
     template <class T> static std::shared_ptr<T> get_vs_class(ieee1905_1::CmduMessage &cmdu)
@@ -55,8 +55,7 @@ public:
         return std::dynamic_pointer_cast<T>(cmdu.getClass(2));
     }
 
-    static std::shared_ptr<beerocks_header>
-    get_beerocks_header(ieee1905_1::CmduMessage &cmdu)
+    static std::shared_ptr<beerocks_header> get_beerocks_header(ieee1905_1::CmduMessage &cmdu)
     {
         auto tlv = cmdu.msg.getClass<ieee1905_1::tlvVendorSpecific>();
         if (!tlv)
@@ -68,8 +67,7 @@ public:
 
     template <class T>
     static std::shared_ptr<beerocks_header>
-    add_intel_vs_data(std::shared_ptr<ieee1905_1::tlvVendorSpecific> tlv,
-                                  uint16_t id = 0)
+    add_intel_vs_data(std::shared_ptr<ieee1905_1::tlvVendorSpecific> tlv, uint16_t id = 0)
     {
         // Allocate maximum allowed length for the payload, so it can accommodate variable length
         // data inside the internal TLV list.

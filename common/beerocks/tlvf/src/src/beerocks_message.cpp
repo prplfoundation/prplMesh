@@ -55,7 +55,7 @@ bool message_com::intel_oui(
            ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL;
 }
 
-std::shared_ptr<beerocks_message::cACTION_HEADER>
+std::shared_ptr<beerocks_header>
 message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (!cmdu_rx.getMessageLength()) {
@@ -67,15 +67,15 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
     if (!intel_oui(tlv))
         return nullptr;
 
-    std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(
-        tlv->payload(), tlv->payload_length(), true);
+    std::shared_ptr<beerocks_header> hdr =
+        std::make_shared<beerocks_header>(tlv->payload(), tlv->payload_length(), true);
     if (!hdr)
         return nullptr;
     auto actionhdr = hdr->addClass<beerocks_message::cACTION_HEADER>();
     if (!actionhdr)
         return nullptr;
     tlv->addInnerClassList(hdr);
-    return hdr->getClass<beerocks_message::cACTION_HEADER>();
+    return hdr;
 }
 
 std::string message_com::print_cmdu_types(const message::sUdsHeader *uds_header,
@@ -114,19 +114,20 @@ std::string message_com::print_cmdu_types(ieee1905_1::CmduMessageRx &cmdu_rx, sC
             LOG(ERROR) << "addClass<tlvVendorSpecific> failed!";
             return info;
         }
-        auto beerocks_header = cmdu_rx.addClass<beerocks_message::cACTION_HEADER>();
-        if (!beerocks_header) {
+        auto hdr = std::make_shared<beerocks_header>(tlv_header->payload(),
+                                                     tlv_header->payload_length(), true);
+        if (!hdr) {
             LOG(ERROR) << "addClass<cACTION_HEADER> failed!";
             return info;
         }
 
         if (cmdu_info) {
-            cmdu_info->intel_vs_action    = beerocks_header->action();
-            cmdu_info->intel_vs_action_op = beerocks_header->action_op();
+            cmdu_info->intel_vs_action    = hdr->action();
+            cmdu_info->intel_vs_action_op = hdr->action_op();
         }
 
-        info += ", INTEL_VS: action=" + std::to_string(beerocks_header->action()) +
-                ", action_op=" + std::to_string(beerocks_header->action_op());
+        info += ", INTEL_VS: action=" + std::to_string(hdr->action()) +
+                ", action_op=" + std::to_string(hdr->action_op());
     }
 
     // swap back

@@ -118,7 +118,7 @@ public:
 protected:
     virtual void work() override;
     // virtual void handle_responses_timeout(std::unordered_multimap<std::string, beerocks::message::eActionOp_CONTROL> timed_out_macs) override;
-    // virtual void handle_response(std::string mac, beerocks::message::eActionOp_CONTROL action_op, uint8_t *buffer) override;
+    // virtual void handle_response(std::string mac, std::shared_ptr<beerocks_header> beerocks_header) override;
     virtual void handle_event(int event_type, void *obj) override;
     virtual void handle_events_timeout(std::multiset<int> pending_events) override;
     /*
