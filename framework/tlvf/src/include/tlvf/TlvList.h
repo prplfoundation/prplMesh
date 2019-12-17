@@ -52,11 +52,6 @@ public:
         return ptr;
     }
 
-    template <class T> std::shared_ptr<T> dynamicCast(std::shared_ptr<BaseClass> ptr) const
-    {
-        return std::dynamic_pointer_cast<T>(ptr);
-    }
-
     /**
      * @brief Get the Class object at index idx in the all classes array
      *
