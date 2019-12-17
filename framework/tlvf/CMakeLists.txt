@@ -46,7 +46,7 @@ add_custom_command(
 )
 
 file(GLOB TLVF_SOURCES ${TLVF_DIR}/src/src/*.c*)
-add_library(tlvf SHARED ${TLVF_OUTPUTS} ${TLVF_SOURCES})
+add_library(tlvf ${TLVF_OUTPUTS} ${TLVF_SOURCES})
 set_target_properties(tlvf PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
 target_link_libraries(tlvf PRIVATE mapf::elpp)
 target_include_directories(tlvf

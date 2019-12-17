@@ -21,7 +21,7 @@ find_package(elpp REQUIRED)
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 # Build the library
-add_library(${PROJECT_NAME} SHARED ${btl_sources})
+add_library(${PROJECT_NAME} ${btl_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
 target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf elpp btlvf common)
 if (NOT MSGLIB STREQUAL "None")
