@@ -229,7 +229,7 @@ class MetaData:
                         else:
                             self.type = value
                 elif key == MetaData.DECELERATION_IS_TLV_CLASS:
-                    self.is_tlv_class = True
+                    self.is_tlv_class = value
                 elif key == MetaData.KEY_ENUM_STORAGE:
                     self.enum_storage = value
                     self.type_info = TypeInfo(value)
