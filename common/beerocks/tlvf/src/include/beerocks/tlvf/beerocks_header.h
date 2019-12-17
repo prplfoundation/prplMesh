@@ -31,8 +31,10 @@ namespace beerocks {
 class beerocks_header : public ieee1905_1::TlvList {
 public:
     beerocks_header() = delete;
-    beerocks_header(uint8_t *buff, size_t buff_len, bool parse, bool swap) :
-        TlvList(buff, buff_len, parse, swap) {}
+    beerocks_header(uint8_t *buff, size_t buff_len, bool parse, bool swap)
+        : TlvList(buff, buff_len, parse, swap)
+    {
+    }
     std::shared_ptr<beerocks_message::cACTION_HEADER> actionhdr()
     {
         return getClass<beerocks_message::cACTION_HEADER>();
@@ -41,26 +43,20 @@ public:
     {
         return actionhdr() ? actionhdr()->action() : beerocks_message::ACTION_NONE;
     }
-    uint8_t action_op()
-    {
-        return actionhdr() ? actionhdr()->action_op() : 0;
-    };
-    uint16_t id()
-    {
-        return actionhdr() ? actionhdr()->id() : 0;
-    }
+    uint8_t action_op() { return actionhdr() ? actionhdr()->action_op() : 0; };
+    uint16_t id() { return actionhdr() ? actionhdr()->id() : 0; }
     virtual bool finalize(bool swap_needed) override
     {
         if (m_finalized)
             return true;
-        
-        for (auto &it: m_class_vector){
-            if(!(it->isPostInitSucceeded())){
+
+        for (auto &it : m_class_vector) {
+            if (!(it->isPostInitSucceeded())) {
                 TLVF_LOG(ERROR) << "TLV post init failed";
                 return false;
             }
         }
-                
+
         if (swap_needed)
             swap();
 

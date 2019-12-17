@@ -33,7 +33,7 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType mes
 
 std::shared_ptr<cCmduHeader> CmduMessageTx::load()
 {
-    LOG(DEBUG)<<"CmduMessageTx::load";
+    LOG(DEBUG) << "CmduMessageTx::load";
     tlvs.reset(true, false);
     return addClass<cCmduHeader>();
 }
@@ -53,7 +53,4 @@ std::shared_ptr<tlvVendorSpecific> CmduMessageTx::add_vs_tlv(tlvVendorSpecific::
     return tlv;
 }
 
-bool CmduMessageTx::finalize(bool swap_needed)
-{
-    return tlvs.finalize(swap_needed);
-}
+bool CmduMessageTx::finalize(bool swap_needed) { return tlvs.finalize(swap_needed); }

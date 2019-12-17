@@ -50,10 +50,10 @@ public:
     static std::shared_ptr<beerocks_header>
     parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx);
 
-    static std::shared_ptr<beerocks_header>
-    get_beerocks_header(ieee1905_1::CmduMessage &cmdu)
+    static std::shared_ptr<beerocks_header> get_beerocks_header(ieee1905_1::CmduMessage &cmdu)
     {
-        return cmdu.tlvs.getInnerTlvList<beerocks_header>(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC);
+        return cmdu.tlvs.getInnerTlvList<beerocks_header>(
+            ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC);
     }
 
     template <class T>
@@ -61,23 +61,26 @@ public:
     {
         auto vs_tlv = cmdu_tx.getClass<ieee1905_1::tlvVendorSpecific>();
         if (!vs_tlv) {
-            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!"
+                      << std::endl;
             return false;
         }
         // Allocate maximum allowed length for the payload, so it can accommodate variable length
         // data inside the internal TLV list.
         // On finalize(), the buffer is shrunk back to its real size.
         size_t payload_length;
-        const size_t max_vs_tlv_length = cmdu_tx.max_tlv_length() - ieee1905_1::tlvVendorSpecific::get_initial_size();
+        const size_t max_vs_tlv_length =
+            cmdu_tx.max_tlv_length() - ieee1905_1::tlvVendorSpecific::get_initial_size();
         payload_length = std::min(vs_tlv->getBuffRemainingBytes() -
-                                    ieee1905_1::tlvEndOfMessage::get_initial_size(),
-                                    max_vs_tlv_length);
+                                      ieee1905_1::tlvEndOfMessage::get_initial_size(),
+                                  max_vs_tlv_length);
         if (!vs_tlv->alloc_payload(payload_length)) {
-            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!"
+                      << std::endl;
             return false;
         }
-        std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(vs_tlv->payload(),
-                                                            vs_tlv->payload_length(), false, false);
+        std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(
+            vs_tlv->payload(), vs_tlv->payload_length(), false, false);
         if (!hdr)
             return false;
         if (!hdr->addClass<beerocks_message::cACTION_HEADER>())
@@ -86,7 +89,7 @@ public:
             return false;
 
         beerocks_message::eAction action = beerocks_message::eAction::ACTION_NONE;
-        auto action_op = hdr->getClass<T>()->get_action_op();
+        auto action_op                   = hdr->getClass<T>()->get_action_op();
         if (typeid(action_op) == typeid(beerocks_message::eActionOp_1905_VS))
             action = beerocks_message::eAction::ACTION_1905_VS;
         else if (typeid(action_op) == typeid(beerocks_message::eActionOp_CONTROL))
@@ -105,7 +108,8 @@ public:
             action = beerocks_message::eAction::ACTION_BML;
 
         if (action == beerocks_message::eAction::ACTION_NONE) {
-            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!" << std::endl;
+            std::cout << "beerocks_message.h[ " << __LINE__ << "]: " << __FUNCTION__ << " failed!"
+                      << std::endl;
             return false;
         }
 
@@ -133,7 +137,8 @@ public:
      * @return std::shared_ptr<T> to the created operation class
      */
     template <class T>
-    static std::shared_ptr<T> create_jumbo_vs_message(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
+    static std::shared_ptr<T> create_jumbo_vs_message(ieee1905_1::CmduMessageTx &cmdu_tx,
+                                                      uint16_t id = 0)
     {
         auto max_tlv_length = cmdu_tx.max_tlv_length();
 

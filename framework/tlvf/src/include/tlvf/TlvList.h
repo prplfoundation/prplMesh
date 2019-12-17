@@ -10,11 +10,11 @@
 #ifndef _TlvList_H_
 #define _TlvList_H_
 
-#include <tlvf/ieee_1905_1/eTlvType.h>
 #include <memory>
-#include <vector>
-#include <unordered_map>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ieee_1905_1/eTlvType.h>
+#include <unordered_map>
+#include <vector>
 
 namespace ieee1905_1 {
 
@@ -58,10 +58,7 @@ public:
      * @tparam T class template
      * @return std::shared_ptr<T> to the first object found of type T, nullptr if not found
      */
-    template <class T> std::shared_ptr<T> getClass() const
-    {
-        return getClass<T>(0);
-    }
+    template <class T> std::shared_ptr<T> getClass() const { return getClass<T>(0); }
 
     /**
      * @brief Get a class object of type T in index `idx` in the logical array containing
@@ -105,7 +102,7 @@ public:
     size_t getMessageBuffLength() const;
     uint8_t *getMessageBuff() const;
     void swap();
-    bool swap_needed() {return m_swap; }
+    bool swap_needed() { return m_swap; }
     bool is_finalized() const { return m_finalized; };
     bool is_swapped() const { return m_swapped; };
     virtual bool finalize(bool swap_needed);
@@ -114,17 +111,15 @@ public:
     {
         m_inner_tlv_lists[type] = list;
     }
-    template <class T> std::shared_ptr<T>
-    getInnerTlvList(eTlvType type)
+    template <class T> std::shared_ptr<T> getInnerTlvList(eTlvType type)
     {
         return std::dynamic_pointer_cast<T>(m_inner_tlv_lists[type]);
     }
 
 protected:
-
-    uint8_t * const m_buff;
+    uint8_t *const m_buff;
     size_t m_buff_len;
-    
+
     bool m_parse                 = false;
     bool m_swap                  = false;
     bool m_finalized             = false;
@@ -145,8 +140,7 @@ private:
      * @param idx TLV index out of all TLVs with the same type
      * @return pointer to a TlvHeader structure if found, nullptr otherwise
      */
-    std::shared_ptr<BaseClass>
-    getTlv(eTlvType type, size_t idx = 0)
+    std::shared_ptr<BaseClass> getTlv(eTlvType type, size_t idx = 0)
     {
         size_t idx_ = 0;
         for (auto it : m_class_vector) {
@@ -183,6 +177,6 @@ private:
     friend void trim(BaseClass &obj, size_t tailroom);
 };
 
-}; // close namespace: ieee1905_1
+}; // namespace ieee1905_1
 
 #endif //_TlvList_H_

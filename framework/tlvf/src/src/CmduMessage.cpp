@@ -11,17 +11,19 @@
 using namespace ieee1905_1;
 
 const uint16_t CmduMessage::kCmduHeaderLength = 8;
-const uint16_t CmduMessage::kTlvHeaderLength = 3;
+const uint16_t CmduMessage::kTlvHeaderLength  = 3;
 // CMDUs are fragmanted on TLV boundary so they can't be larger than the MTU.
 // In most cases the MTU is 1500 - so use this value as the default.
 const size_t CmduMessage::kMaxCmduLength = 1500;
 
-CmduMessage::CmduMessage(uint8_t *buff, size_t buff_len)
-    : tlvs(buff, buff_len) {}
+CmduMessage::CmduMessage(uint8_t *buff, size_t buff_len) : tlvs(buff, buff_len) {}
 
 CmduMessage::~CmduMessage() {}
 
-std::shared_ptr<cCmduHeader> CmduMessage::getCmduHeader() const { return tlvs.getClass<cCmduHeader>(); }
+std::shared_ptr<cCmduHeader> CmduMessage::getCmduHeader() const
+{
+    return tlvs.getClass<cCmduHeader>();
+}
 
 int CmduMessage::getNextTlvType() const
 {
@@ -70,10 +72,7 @@ size_t CmduMessage::getMessageBuffLength() const { return tlvs.getMessageBuffLen
 
 uint8_t *CmduMessage::getMessageBuff() const { return tlvs.getMessageBuff(); }
 
-void CmduMessage::swap()
-{
-    tlvs.swap();
-}
+void CmduMessage::swap() { tlvs.swap(); }
 
 eMessageType CmduMessage::getMessageType()
 {

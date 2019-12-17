@@ -12,8 +12,10 @@
 
 using namespace ieee1905_1;
 
-CmduMessageRx::CmduMessageRx(uint8_t *buff, size_t buff_len) 
-    : CmduMessage(buff, buff_len), parser(std::make_shared<CmduTlvParser>(*this)) {}
+CmduMessageRx::CmduMessageRx(uint8_t *buff, size_t buff_len)
+    : CmduMessage(buff, buff_len), parser(std::make_shared<CmduTlvParser>(*this))
+{
+}
 
 CmduMessageRx::~CmduMessageRx() {}
 
@@ -24,13 +26,13 @@ bool CmduMessageRx::parse(bool swap_needed, bool parse_tlvs)
     if (!cmduhdr)
         return false;
     if (swap_needed)
-        cmduhdr->class_swap(); //swap back cmduheader 
-    
+        cmduhdr->class_swap(); //swap back cmduheader
+
     if (!parse_tlvs)
         return true;
 
     if (parser->parse())
         return true;
-    
+
     return false;
 }
