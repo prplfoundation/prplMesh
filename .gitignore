@@ -1,2 +1,3 @@
 analyzer-venv
 build/*
+*.log
