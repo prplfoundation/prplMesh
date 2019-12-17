@@ -150,6 +150,31 @@ protected:
     bool m_dynamically_allocated = false;
     std::vector<std::shared_ptr<BaseClass>> m_class_vector;
     std::unordered_map<eTlvType, std::shared_ptr<TlvList>> m_inner_tlv_lists;
+
+private:
+    /**
+     * @brief Get the Tlv. If multiple exist, get the one at index idx
+     *
+     * This method returns the n'th TLV header by comparing the startBuffPtr
+     * to the type parameter. It has no meaning when using on non-TLV classes.
+     * TODO add is_tlv_class to the TLVF BaseClass and set it to true for TLV classes.
+     *
+     * @param type TLV type
+     * @param idx TLV index out of all TLVs with the same type
+     * @return pointer to a TlvHeader structure if found, nullptr otherwise
+     */
+    std::shared_ptr<BaseClass>
+    getTlv(eTlvType type, size_t idx = 0)
+    {
+        size_t idx_ = 0;
+        for (size_t i = 0; i < getClassCount(); i++) {
+            auto c = getClass(i);
+            TlvHeader *tlvhdr = (TlvHeader *)c->getStartBuffPtr();
+            if ((static_cast<eTlvType>(tlvhdr->type) == type) && (idx_++ == idx))
+                return c;
+        }
+        return nullptr;
+    }
 };
 
 }; // close namespace: ieee1905_1
