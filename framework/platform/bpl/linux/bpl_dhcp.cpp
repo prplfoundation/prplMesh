@@ -10,10 +10,10 @@
 
 namespace bpl {
 
-int bpl_dhcp_mon_start(bpl_dhcp_mon_cb cb) { return -2; }
+int dhcp_mon_start(dhcp_mon_cb cb) { return -2; }
 
-int bpl_dhcp_mon_handle_event() { return 0; }
+int dhcp_mon_handle_event() { return 0; }
 
-int bpl_dhcp_mon_stop() { return 0; }
+int dhcp_mon_stop() { return 0; }
 
 } // namespace bpl

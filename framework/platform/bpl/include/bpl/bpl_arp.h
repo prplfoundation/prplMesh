@@ -59,7 +59,7 @@ struct BPL_ARP_MON_ENTRY {
  *
  * @return 0 on success or -1 on error.
  */
-int bpl_arp_mon_start(BPL_ARP_MON_CTX *ctx, const char *iface);
+int arp_mon_start(BPL_ARP_MON_CTX *ctx, const char *iface);
 
 /**
  * Stop the ARP monitor.
@@ -68,7 +68,7 @@ int bpl_arp_mon_start(BPL_ARP_MON_CTX *ctx, const char *iface);
  *
  * @return 0 on success or -1 on error.
  */
-int bpl_arp_mon_stop(BPL_ARP_MON_CTX ctx);
+int arp_mon_stop(BPL_ARP_MON_CTX ctx);
 
 /**
  * Get the file descriptor of the monitoring interface.
@@ -77,7 +77,7 @@ int bpl_arp_mon_stop(BPL_ARP_MON_CTX ctx);
  *
  * @return file descriptor on success or -1 on error.
  */
-int bpl_arp_mon_get_fd(BPL_ARP_MON_CTX ctx);
+int arp_mon_get_fd(BPL_ARP_MON_CTX ctx);
 
 /**
  * Get the file descriptor of the raw arp interface.
@@ -86,7 +86,7 @@ int bpl_arp_mon_get_fd(BPL_ARP_MON_CTX ctx);
  *
  * @return file descriptor on success or -1 on error.
  */
-int bpl_arp_mon_get_raw_arp_fd(BPL_ARP_MON_CTX ctx);
+int arp_mon_get_raw_arp_fd(BPL_ARP_MON_CTX ctx);
 
 /**
  * Process data from the monitoring socket.
@@ -96,7 +96,7 @@ int bpl_arp_mon_get_raw_arp_fd(BPL_ARP_MON_CTX ctx);
  *
  * @return 0 on success or -1 on error.
  */
-int bpl_arp_mon_process(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry);
+int arp_mon_process(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry);
 
 /**
  * Process data from the raw arp socket.
@@ -107,7 +107,7 @@ int bpl_arp_mon_process(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry);
  * @return -1  on error.
  * @return >=0 Value of the task_id that generated the ARP query/probe.
  */
-int bpl_arp_mon_process_raw_arp(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry);
+int arp_mon_process_raw_arp(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *entry);
 
 /**
  * Send unicast ARP message to the specified MAC & IP addresses.
@@ -119,8 +119,8 @@ int bpl_arp_mon_process_raw_arp(BPL_ARP_MON_CTX ctx, struct BPL_ARP_MON_ENTRY *e
  *
  * @return 0 on success or -1 on error.
  */
-int bpl_arp_mon_probe(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN],
-                      const uint8_t ip[BPL_ARP_MON_IP_LEN], int task_id);
+int arp_mon_probe(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                  const uint8_t ip[BPL_ARP_MON_IP_LEN], int task_id);
 
 /**
  * Query the ARP table for the MAC address of a given IP.
@@ -131,8 +131,8 @@ int bpl_arp_mon_probe(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN
  *
  * @return 0 on success or -1 on error.
  */
-int bpl_arp_mon_get_mac_for_ip(BPL_ARP_MON_CTX ctx, const uint8_t ip[BPL_ARP_MON_IP_LEN],
-                               uint8_t mac[BPL_ARP_MON_MAC_LEN]);
+int arp_mon_get_mac_for_ip(BPL_ARP_MON_CTX ctx, const uint8_t ip[BPL_ARP_MON_IP_LEN],
+                           uint8_t mac[BPL_ARP_MON_MAC_LEN]);
 
 /**
  * Query the ARP table for the IP address of a given MAC.
@@ -143,8 +143,8 @@ int bpl_arp_mon_get_mac_for_ip(BPL_ARP_MON_CTX ctx, const uint8_t ip[BPL_ARP_MON
  *
  * @return 0 on success or -1 on error.
  */
-int bpl_arp_mon_get_ip_for_mac(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN],
-                               uint8_t ip[BPL_ARP_MON_IP_LEN]);
+int arp_mon_get_ip_for_mac(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                           uint8_t ip[BPL_ARP_MON_IP_LEN]);
 
 /**
  * Queries the given bridge for the given MAC address and 
@@ -156,9 +156,9 @@ int bpl_arp_mon_get_ip_for_mac(BPL_ARP_MON_CTX ctx, const uint8_t mac[BPL_ARP_MO
  *
  * @return 0 on success or -1 on error.
  */
-int bpl_arp_get_bridge_iface(const char bridge[BPL_ARP_IFACE_NAME_LEN],
-                             const uint8_t mac[BPL_ARP_MON_MAC_LEN],
-                             char iface[BPL_ARP_IFACE_NAME_LEN]);
+int arp_get_bridge_iface(const char bridge[BPL_ARP_IFACE_NAME_LEN],
+                         const uint8_t mac[BPL_ARP_MON_MAC_LEN],
+                         char iface[BPL_ARP_IFACE_NAME_LEN]);
 
 } // namespace bpl
 

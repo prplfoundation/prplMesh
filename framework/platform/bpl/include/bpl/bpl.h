@@ -17,12 +17,12 @@ namespace bpl {
  *
  * @return 0 on success or a negative value on error.
  */
-int bpl_init();
+int init();
 
 /**
  * Un-initialize the BPL.
  */
-void bpl_close();
+void close();
 
 } // namespace bpl
 

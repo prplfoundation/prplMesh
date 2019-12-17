@@ -60,9 +60,9 @@ static bool fill_platform_settings(
         &iface_wlan_params_map,
     Socket *sd)
 {
-    if (bpl::bpl_cfg_get_beerocks_credentials(BPL_RADIO_FRONT, msg->platform_settings().front_ssid,
-                                              msg->platform_settings().front_pass,
-                                              msg->platform_settings().front_security_type) < 0) {
+    if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_FRONT, msg->platform_settings().front_ssid,
+                                          msg->platform_settings().front_pass,
+                                          msg->platform_settings().front_security_type) < 0) {
         LOG(ERROR) << "Failed reading front Wi-Fi credentials!";
         return false;
     }
@@ -71,14 +71,14 @@ static bool fill_platform_settings(
                << " ssid=" << msg->platform_settings().front_ssid
                << " sec=" << msg->platform_settings().front_security_type << " pass=***";
 
-    if (bpl::bpl_cfg_get_beerocks_credentials(BPL_RADIO_BACK, msg->platform_settings().back_ssid,
-                                              msg->platform_settings().back_pass,
-                                              msg->platform_settings().back_security_type) < 0) {
+    if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_BACK, msg->platform_settings().back_ssid,
+                                          msg->platform_settings().back_pass,
+                                          msg->platform_settings().back_security_type) < 0) {
         LOG(ERROR) << "Failed reading Wi-Fi back credentials!";
         return false;
     }
 
-    int mem_only_psk = bpl::bpl_cfg_get_security_policy();
+    int mem_only_psk = bpl::cfg_get_security_policy();
     if (mem_only_psk < 0) {
         LOG(ERROR) << "Failed reading Wi-Fi security policy!";
         return false;
@@ -92,7 +92,7 @@ static bool fill_platform_settings(
                << " mem_only_psk=" << int(msg->platform_settings().mem_only_psk) << " pass=***";
 
     struct bpl::BPL_WLAN_PARAMS params;
-    if (bpl::bpl_cfg_get_wifi_params(iface_name.c_str(), &params) < 0) {
+    if (bpl::cfg_get_wifi_params(iface_name.c_str(), &params) < 0) {
         LOG(ERROR) << "Failed reading '" << iface_name << "' parameters!";
         return false;
     }
@@ -139,53 +139,52 @@ static bool fill_platform_settings(
             BPL_BACK_VAPS_GROUPS * BPL_BACK_VAPS_IN_GROUP * BPL_MAC_ADDR_OCTETS_LEN;
         char back_vaps[back_vaps_buff_len];
 
-        if ((platform_common_conf.onboarding = bpl::bpl_cfg_is_onboarding()) < 0) {
+        if ((platform_common_conf.onboarding = bpl::cfg_is_onboarding()) < 0) {
             LOG(ERROR) << "Failed reading 'onboarding'";
             return false;
         }
-        if ((platform_common_conf.rdkb_extensions = bpl::bpl_cfg_get_rdkb_extensions()) < 0) {
+        if ((platform_common_conf.rdkb_extensions = bpl::cfg_get_rdkb_extensions()) < 0) {
             LOG(ERROR) << "Failed reading 'rdkb_extensions'";
             return false;
         }
-        if ((platform_common_conf.band_steering = bpl::bpl_cfg_get_band_steering()) < 0) {
+        if ((platform_common_conf.band_steering = bpl::cfg_get_band_steering()) < 0) {
             LOG(ERROR) << "Failed reading 'band_steering'";
             return false;
         }
-        if ((platform_common_conf.client_roaming = bpl::bpl_cfg_get_client_roaming()) < 0) {
+        if ((platform_common_conf.client_roaming = bpl::cfg_get_client_roaming()) < 0) {
             LOG(ERROR) << "Failed reading 'client_roaming";
             return false;
         }
-        if ((platform_common_conf.local_master = bpl::bpl_cfg_is_master()) < 0) {
+        if ((platform_common_conf.local_master = bpl::cfg_is_master()) < 0) {
             LOG(ERROR) << "Failed reading 'local_master'";
             return false;
         }
-        if ((platform_common_conf.operating_mode = bpl::bpl_cfg_get_operating_mode()) < 0) {
+        if ((platform_common_conf.operating_mode = bpl::cfg_get_operating_mode()) < 0) {
             LOG(ERROR) << "Failed reading 'operating_mode'";
             return false;
         }
-        if ((platform_common_conf.certification_mode = bpl::bpl_cfg_get_certification_mode()) < 0) {
+        if ((platform_common_conf.certification_mode = bpl::cfg_get_certification_mode()) < 0) {
             LOG(ERROR) << "Failed reading 'certification_mode'";
             return false;
         }
         if ((platform_common_conf.stop_on_failure_attempts =
-                 bpl::bpl_cfg_get_stop_on_failure_attempts()) < 0) {
+                 bpl::cfg_get_stop_on_failure_attempts()) < 0) {
             LOG(ERROR) << "Failed reading 'stop_on_failure_attempts'";
             return false;
         }
-        if ((platform_common_conf.dfs_reentry = bpl::bpl_cfg_get_dfs_reentry()) < 0) {
+        if ((platform_common_conf.dfs_reentry = bpl::cfg_get_dfs_reentry()) < 0) {
             LOG(ERROR) << "Failed reading 'dfs_reentry'";
             return false;
         }
 
-        if (bpl::bpl_cfg_get_backhaul_params(&platform_common_conf.backhaul_max_vaps,
-                                             &platform_common_conf.backhaul_network_enabled,
-                                             &platform_common_conf.backhaul_preferred_radio_band) <
-            0) {
+        if (bpl::cfg_get_backhaul_params(&platform_common_conf.backhaul_max_vaps,
+                                         &platform_common_conf.backhaul_network_enabled,
+                                         &platform_common_conf.backhaul_preferred_radio_band) < 0) {
             LOG(ERROR) << "Failed reading 'backhaul_max_vaps, backhaul_network_enabled, "
                           "backhaul_preferred_radio_band'!";
         }
 
-        if (bpl::bpl_cfg_get_backhaul_vaps(back_vaps, back_vaps_buff_len) < 0) {
+        if (bpl::cfg_get_backhaul_vaps(back_vaps, back_vaps_buff_len) < 0) {
             LOG(ERROR) << "Failed reading beerocks backhaul_vaps parameters!";
             return false;
         }
@@ -258,19 +257,19 @@ static bool fill_platform_settings(
 std::string extern_query_db(std::string parameter)
 {
     std::string ret;
-    if (bpl::bpl_init() < 0) {
+    if (bpl::init() < 0) {
         ret = "Failed to initialize BPL!";
     } else {
         if (parameter == "is_master") {
-            ret = (bpl::bpl_cfg_is_master() > 0 ? "true" : "false");
+            ret = (bpl::cfg_is_master() > 0 ? "true" : "false");
         } else if (parameter == "is_gateway") {
-            auto operating_mode = bpl::bpl_cfg_get_operating_mode();
+            auto operating_mode = bpl::cfg_get_operating_mode();
             ret                 = (operating_mode == BPL_OPER_MODE_GATEWAY ||
                            operating_mode == BPL_OPER_MODE_GATEWAY_WISP
                        ? "true"
                        : "false");
         } else if (parameter == "is_onboarding") {
-            ret = (bpl::bpl_cfg_is_onboarding() > 0 ? "true" : "false");
+            ret = (bpl::cfg_is_onboarding() > 0 ? "true" : "false");
         } else {
             ret = "Error, bad parameter.\n"
                   "Allowed parameters: \n"
@@ -440,7 +439,7 @@ std::string main_thread::bridge_iface_from_mac(const sMacAddr &sMac)
     char iface_name[BPL_ARP_IFACE_NAME_LEN];
 
     // Read the interface name using BPL
-    if (bpl::bpl_arp_get_bridge_iface(config.bridge_iface.c_str(), sMac.oct, iface_name) == -1) {
+    if (bpl::arp_get_bridge_iface(config.bridge_iface.c_str(), sMac.oct, iface_name) == -1) {
         return {};
     }
 
@@ -483,13 +482,13 @@ void main_thread::send_dhcp_notification(std::string op, std::string mac, std::s
 bool main_thread::init()
 {
     // Initialize the BPL (Beerocks Platform Library)
-    if (bpl::bpl_init() < 0) {
+    if (bpl::init() < 0) {
         LOG(ERROR) << "Failed to initialize BPL!";
         return (false);
     }
 
     // Bridge & Backhaul interface
-    is_onboarding_on_init = bpl::bpl_cfg_is_onboarding();
+    is_onboarding_on_init = bpl::cfg_is_onboarding();
     if (is_onboarding_on_init) {
         LOG(DEBUG) << "Onboarding state.";
         for (int slave_num = 0; slave_num < IRE_MAX_SLAVES; slave_num++) {
@@ -566,7 +565,7 @@ bool main_thread::wlan_params_changed_check()
         }
         bool wlan_params_changed = false;
         struct bpl::BPL_WLAN_PARAMS params;
-        if (bpl::bpl_cfg_get_wifi_params(elm.first.c_str(), &params) < 0) {
+        if (bpl::cfg_get_wifi_params(elm.first.c_str(), &params) < 0) {
             LOG(ERROR) << "Failed reading '" << elm.first << "' parameters!";
             return false;
         }
@@ -653,7 +652,7 @@ void main_thread::send_slave_iface_status_to_bpl(bool bforce)
     // Notify the SL asynchronously
     work_queue.enqueue<void>(
         [](bpl::BPL_INTERFACE_STATUS_NOTIFICATION bpl_iface_status) {
-            bpl::bpl_cfg_notify_iface_status(&bpl_iface_status);
+            bpl::cfg_notify_iface_status(&bpl_iface_status);
         },
         bpl_iface_status);
 }
@@ -665,7 +664,7 @@ void main_thread::on_thread_stop()
     LOG(DEBUG) << "Stopping asynchronous work queue...";
     work_queue.stop(true);
 
-    if (bpl::bpl_dhcp_mon_stop() == false) {
+    if (bpl::dhcp_mon_stop() == false) {
         LOG(ERROR) << "Failed stopping DHCP Monitor!";
     } else {
         LOG(DEBUG) << "DHCP Monitor Stopped.";
@@ -680,7 +679,7 @@ void main_thread::on_thread_stop()
         m_pDHCPMonSocket = nullptr;
     }
 
-    bpl::bpl_close();
+    bpl::close();
     LOG(DEBUG) << "Closed BPL.";
 
     bpl_iface_status_map.clear();
@@ -818,8 +817,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             break;
         }
 
-        if (bpl::bpl_arp_mon_probe(m_ctxArpMon, request->params().mac.oct,
-                                   request->params().ipv4.oct, beerocks_header->id()) != 0) {
+        if (bpl::arp_mon_probe(m_ctxArpMon, request->params().mac.oct, request->params().ipv4.oct,
+                               beerocks_header->id()) != 0) {
             LOG(DEBUG) << "ARP probe failed!";
             break;
         }
@@ -859,7 +858,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         char pass[BPL_USER_PASS_LEN];
 
-        if (bpl::bpl_cfg_get_administrator_credentials(pass) < 0) {
+        if (bpl::cfg_get_administrator_credentials(pass) < 0) {
             LOG(ERROR) << "Failed reading administrator credentials!";
             response->result() = 0;
         } else {
@@ -912,7 +911,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             LOG(DEBUG) << "call bpl_version_mismatch_notification"
                        << ", master = " << master_version << ", slave = " << slave_version;
 
-            bpl::bpl_cfg_notify_fw_version_mismatch();
+            bpl::cfg_notify_fw_version_mismatch();
         });
 
     } break;
@@ -1025,7 +1024,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             LOG(ERROR) << "Failed building ONBOARD RESPONSE message!";
             return false;
         }
-        response->params().onboarding = bpl::bpl_cfg_is_onboarding();
+        response->params().onboarding = bpl::cfg_is_onboarding();
 
         // Sent with unsafe because BML is reachable only on platform thread
         message_com::send_cmdu(sd, cmdu_tx);
@@ -1042,7 +1041,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
 
         // Read the value from CAL
-        response->local_master() = bpl::bpl_cfg_is_master();
+        response->local_master() = bpl::cfg_is_master();
 
         // Sent with unsafe because BML is reachable only on platform thread
         message_com::send_cmdu(sd, cmdu_tx);
@@ -1079,7 +1078,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             char pass[BPL_PASS_LEN];
             char sec[BPL_SEC_LEN];
 
-            if (bpl::bpl_cfg_get_beerocks_credentials(radio_dir, ssid, pass, sec) < 0) {
+            if (bpl::cfg_get_beerocks_credentials(radio_dir, ssid, pass, sec) < 0) {
                 LOG(ERROR) << "Failed reading Wi-Fi credentials!";
                 return false;
             } else {
@@ -1144,9 +1143,9 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
 
         LOG(INFO) << "Set onboarding to " << std::to_string(request->params().onboarding);
-        bpl::bpl_cfg_set_onboarding(int(request->params().onboarding));
+        bpl::cfg_set_onboarding(int(request->params().onboarding));
 
-        LOG(INFO) << "Success onboarding " << std::to_string(bpl::bpl_cfg_is_onboarding());
+        LOG(INFO) << "Success onboarding " << std::to_string(bpl::cfg_is_onboarding());
         // No response message is needed
     } break;
 
@@ -1164,8 +1163,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         work_queue.enqueue<void>(
             [this](std::string iface) {
-                bpl::bpl_cfg_notify_onboarding_completed("SSID", "PASSWORD", "SECURITY",
-                                                         iface.c_str(), 0);
+                bpl::cfg_notify_onboarding_completed("SSID", "PASSWORD", "SECURITY", iface.c_str(),
+                                                     0);
             },
             iface);
     } break;
@@ -1187,7 +1186,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         bpl::BPL_DEVICE_INFO bpl_device_info;
 
-        if (bpl::bpl_cfg_get_device_info(&bpl_device_info) < 0) {
+        if (bpl::cfg_get_device_info(&bpl_device_info) < 0) {
             LOG(ERROR) << "Failed reading device information!";
             response->result() = 0;
         } else {
@@ -1233,7 +1232,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             LOG(DEBUG) << "PLATFORM ERROR NOTIFICATION - Code: " << error_code
                        << ", Data: " << error_data;
 
-            bpl::bpl_cfg_notify_error(error_code, error_data.c_str());
+            bpl::cfg_notify_error(error_code, error_data.c_str());
         });
 
     } break;
@@ -1259,7 +1258,7 @@ bool main_thread::handle_arp_monitor()
 
     // Process the message
     bpl::BPL_ARP_MON_ENTRY entry;
-    if (bpl::bpl_arp_mon_process(m_ctxArpMon, &entry) != 0) {
+    if (bpl::arp_mon_process(m_ctxArpMon, &entry) != 0) {
         LOG(ERROR) << "Failed processing ARP monitor message!";
         return (false);
     }
@@ -1385,7 +1384,7 @@ bool main_thread::handle_arp_raw()
 {
     // Skip invalid ARP packets
     bpl::BPL_ARP_MON_ENTRY entry;
-    int task_id = bpl::bpl_arp_mon_process_raw_arp(m_ctxArpMon, &entry);
+    int task_id = bpl::arp_mon_process_raw_arp(m_ctxArpMon, &entry);
     if (task_id == 0) {
         // task-id equals to 0  means nodes list is empty
         // not an error, but no further work is required
@@ -1517,7 +1516,7 @@ void main_thread::after_select(bool timeout)
     // DHCP Monitor
     if (m_pDHCPMonSocket && read_ready(m_pDHCPMonSocket)) {
         clear_ready(m_pDHCPMonSocket);
-        bpl::bpl_dhcp_mon_handle_event();
+        bpl::dhcp_mon_handle_event();
     }
 
     // ARP Monitor
@@ -1558,7 +1557,7 @@ bool main_thread::init_arp_monitor()
             return false;
         }
 
-        int ret = bpl::bpl_arp_mon_start(&m_ctxArpMon, config.bridge_iface.c_str());
+        int ret = bpl::arp_mon_start(&m_ctxArpMon, config.bridge_iface.c_str());
         if (ret < 0) {
             if (ret == -bpl::BPL_ERR_OPERATION_NOT_SUPPORTED) {
                 LOG(INFO) << "Skip starting ARP monitor (not supported)";
@@ -1573,12 +1572,12 @@ bool main_thread::init_arp_monitor()
 
         // Create wrapper socket classes
         if (!m_pArpRawSocket) {
-            m_pArpRawSocket = new Socket(bpl::bpl_arp_mon_get_raw_arp_fd(m_ctxArpMon));
+            m_pArpRawSocket = new Socket(bpl::arp_mon_get_raw_arp_fd(m_ctxArpMon));
             add_socket(m_pArpRawSocket);
         }
 
         if (!m_pArpMonSocket) {
-            m_pArpMonSocket = new Socket(bpl::bpl_arp_mon_get_fd(m_ctxArpMon));
+            m_pArpMonSocket = new Socket(bpl::arp_mon_get_fd(m_ctxArpMon));
             add_socket(m_pArpMonSocket);
         }
 
@@ -1596,7 +1595,7 @@ bool main_thread::init_arp_monitor()
 void main_thread::stop_arp_monitor()
 {
     if (m_ctxArpMon) {
-        bpl::bpl_arp_mon_stop(m_ctxArpMon);
+        bpl::arp_mon_stop(m_ctxArpMon);
         LOG(DEBUG) << "ARP Monitor Stopped.";
         m_ctxArpMon = nullptr;
     }
@@ -1635,7 +1634,7 @@ bool main_thread::init_dhcp_monitor()
 
     if (!m_pDHCPMonSocket) {
 
-        int dhcp_mon_fd = bpl::bpl_dhcp_mon_start(
+        int dhcp_mon_fd = bpl::dhcp_mon_start(
             [](const char *op, const char *mac, const char *ip, const char *hostname) {
                 dhcp_monitor_cb_wrapper(op, mac, ip, hostname);
             });

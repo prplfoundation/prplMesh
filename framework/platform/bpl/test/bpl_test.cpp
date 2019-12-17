@@ -42,7 +42,7 @@ int main()
             printf("Interface : ");
             fflush(stdin);
             getString(inputInterface, sizeof(inputInterface));
-            if (bpl::bpl_cfg_get_wifi_params(inputInterface, &wlan_params) != 0) {
+            if (bpl::cfg_get_wifi_params(inputInterface, &wlan_params) != 0) {
                 MAPF_ERR("Failed to retrieve WiFi params for " << inputInterface << "\n");
             } else {
                 MAPF_INFO("SSID " << wlan_params.ssid << " Security mode " << wlan_params.security

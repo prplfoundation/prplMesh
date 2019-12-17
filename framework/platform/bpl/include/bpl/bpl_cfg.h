@@ -235,7 +235,7 @@ struct BPL_WLAN_PARAMS {
  * @return 0 if disabled.
  * @return -1 Error.
  */
-int bpl_cfg_is_enabled();
+int cfg_is_enabled();
 
 /**
  * Returns whether the current platform is configured as Master.
@@ -244,7 +244,7 @@ int bpl_cfg_is_enabled();
  * @return 0 IRE.
  * @return -1 Error.
  */
-int bpl_cfg_is_master();
+int cfg_is_master();
 
 /**
  * Returns whether the current platform is configured as Gateway.
@@ -257,7 +257,7 @@ int bpl_cfg_is_master();
  *   BPL_OPER_MODE_L2NAT_CLIENT
  * @return -1 Error.
  */
-int bpl_cfg_get_operating_mode();
+int cfg_get_operating_mode();
 
 /**
  * Returns certification mode value.
@@ -266,7 +266,7 @@ int bpl_cfg_get_operating_mode();
  * @return BPL_CERTIFICATION_MODE_OFF Certification mode is OFF.
  * @return -1 Error.
  */
-int bpl_cfg_get_certification_mode();
+int cfg_get_certification_mode();
 
 /**
  * Returns the maximum number of failures allowed on agent before stopping its execution.
@@ -274,7 +274,7 @@ int bpl_cfg_get_certification_mode();
  * @return Maximum number of failures allowed or 0 to retry indefinitely.
  * @return -1 Error.
  */
-int bpl_cfg_get_stop_on_failure_attempts();
+int cfg_get_stop_on_failure_attempts();
 
 /**
  * Returns whether the platform is in onboarding state.
@@ -283,7 +283,7 @@ int bpl_cfg_get_stop_on_failure_attempts();
  * @return 0 Platform is NOT in onboarding state.
  * @return -1 Error.
  */
-int bpl_cfg_is_onboarding();
+int cfg_is_onboarding();
 
 /**
  * Checks the state of the RDKB Extensions feature.
@@ -292,7 +292,7 @@ int bpl_cfg_is_onboarding();
  * @return 0 Disabled.
  * @return -1 Error.
  */
-int bpl_cfg_get_rdkb_extensions();
+int cfg_get_rdkb_extensions();
 
 /**
  * Checks the state of the Band Steering feature.
@@ -301,7 +301,7 @@ int bpl_cfg_get_rdkb_extensions();
  * @return 0 Disabled.
  * @return -1 Error.
  */
-int bpl_cfg_get_band_steering();
+int cfg_get_band_steering();
 
 /**
  * Checks the state of the DFS Reentry feature.
@@ -310,7 +310,7 @@ int bpl_cfg_get_band_steering();
  * @return 0 Disabled.
  * @return -1 Error.
  */
-int bpl_cfg_get_dfs_reentry();
+int cfg_get_dfs_reentry();
 
 /**
  * Checks the state of the Client Roaming feature.
@@ -319,7 +319,7 @@ int bpl_cfg_get_dfs_reentry();
  * @return 0 Disabled.
  * @return -1 Error.
  */
-int bpl_cfg_get_client_roaming();
+int cfg_get_client_roaming();
 
 /**
  * Returns generic device information.
@@ -329,7 +329,7 @@ int bpl_cfg_get_client_roaming();
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_device_info(struct BPL_DEVICE_INFO *device_info);
+int cfg_get_device_info(struct BPL_DEVICE_INFO *device_info);
 
 /**
  * Returns miscellaneous Wi-Fi parameters. 
@@ -342,7 +342,7 @@ int bpl_cfg_get_device_info(struct BPL_DEVICE_INFO *device_info);
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params);
+int cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params);
 
 /**
  * Returns backhaul vaps configuration. 
@@ -354,7 +354,7 @@ int bpl_cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_para
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *preferred_radio_band);
+int cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *preferred_radio_band);
 
 /**
  * Returns backhaul vaps list. 
@@ -365,7 +365,7 @@ int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefer
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len);
+int cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len);
 
 /**
  * Returns the platform Wi-Fi settings.
@@ -380,8 +380,8 @@ int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len);
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
-                                     char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN]);
+int cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
+                                 char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN]);
 
 /**
  * @brief Returns the platform SDL policy which is represented by 'mem_only_psk' flag.
@@ -391,7 +391,7 @@ int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN
  * @return mem_only_psk flag on success.
  * @return -1 Error.
  */
-int bpl_cfg_get_security_policy();
+int cfg_get_security_policy();
 
 /**
  * Set platform onboarding state.
@@ -401,7 +401,7 @@ int bpl_cfg_get_security_policy();
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_set_onboarding(int enable);
+int cfg_set_onboarding(int enable);
 
 /**
  * Notify the platform on onboarding completed.
@@ -412,9 +412,9 @@ int bpl_cfg_set_onboarding(int enable);
  * @param [in] iface_name Interface name (up to 32 bytes in length).
  * @param [in] success Success of onboarding (0 - failure, 1 - success).
  */
-int bpl_cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN],
-                                        const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN],
-                                        const char iface_name[BPL_IFNAME_LEN], const int success);
+int cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN], const char pass[BPL_PASS_LEN],
+                                    const char sec[BPL_SEC_LEN],
+                                    const char iface_name[BPL_IFNAME_LEN], const int success);
 
 /**
  * Notify the platform about a FW version mismatch.
@@ -422,7 +422,7 @@ int bpl_cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN],
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_notify_fw_version_mismatch();
+int cfg_notify_fw_version_mismatch();
 
 /**
  * Notify the platform about an error.
@@ -433,7 +433,7 @@ int bpl_cfg_notify_fw_version_mismatch();
  * @return 0 Success.
  * @return -1 Error. 
  */
-int bpl_cfg_notify_error(int code, const char str[BPL_ERROR_STRING_LEN]);
+int cfg_notify_error(int code, const char str[BPL_ERROR_STRING_LEN]);
 
 /**
  * Notify the platform about the interface status.
@@ -443,7 +443,7 @@ int bpl_cfg_notify_error(int code, const char str[BPL_ERROR_STRING_LEN]);
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif);
+int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif);
 
 /**
  * Returns the platform administrator password.
@@ -453,7 +453,7 @@ int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_
  * @return 0 Success.
  * @return -1 Error.
  */
-int bpl_cfg_get_administrator_credentials(char pass[BPL_USER_PASS_LEN]);
+int cfg_get_administrator_credentials(char pass[BPL_USER_PASS_LEN]);
 
 } // namespace bpl
 

@@ -23,22 +23,22 @@ using namespace beerocks::bpl;
 
 namespace bpl {
 
-int bpl_cfg_is_enabled()
+int cfg_is_enabled()
 {
     int retVal = -1;
-    if (bpl_cfg_get_prplmesh_param_int("enable", &retVal) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_is_enabled: Failed to read Enable parameter\n");
+    if (cfg_get_prplmesh_param_int("enable", &retVal) == RETURN_ERR) {
+        MAPF_ERR("cfg_is_enabled: Failed to read Enable parameter\n");
         return RETURN_ERR;
     }
     return retVal;
 }
 
-int bpl_cfg_is_master()
+int cfg_is_master()
 {
     int retVal                               = 0;
     char man_mode[BPL_GW_DB_MANAGE_MODE_LEN] = {0};
-    if (bpl_cfg_get_prplmesh_param("management_mode", man_mode, BPL_GW_DB_MANAGE_MODE_LEN) < 0) {
-        MAPF_ERR("bpl_cfg_is_master: Failed to read ManagementMode\n");
+    if (cfg_get_prplmesh_param("management_mode", man_mode, BPL_GW_DB_MANAGE_MODE_LEN) < 0) {
+        MAPF_ERR("cfg_is_master: Failed to read ManagementMode\n");
         retVal = -1;
     } else {
         std::string mode_str(man_mode);
@@ -49,19 +49,19 @@ int bpl_cfg_is_master()
         } else if (mode_str == "Multi-AP-Agent") {
             retVal = 0;
         } else {
-            MAPF_ERR("bpl_cfg_is_master: Unexpected ManagementMode\n");
+            MAPF_ERR("cfg_is_master: Unexpected ManagementMode\n");
             retVal = -1;
         }
     }
     return retVal;
 }
 
-int bpl_cfg_get_operating_mode()
+int cfg_get_operating_mode()
 {
     int retVal                            = 0;
     char op_mode[BPL_GW_DB_OPER_MODE_LEN] = {0};
-    if (bpl_cfg_get_prplmesh_param("operating_mode", op_mode, BPL_GW_DB_OPER_MODE_LEN) < 0) {
-        MAPF_ERR("bpl_cfg_get_operating_mode: Failed to read OperatingMode\n");
+    if (cfg_get_prplmesh_param("operating_mode", op_mode, BPL_GW_DB_OPER_MODE_LEN) < 0) {
+        MAPF_ERR("cfg_get_operating_mode: Failed to read OperatingMode\n");
         retVal = -1;
     } else {
         std::string mode_str(op_mode);
@@ -76,87 +76,87 @@ int bpl_cfg_get_operating_mode()
         } else if (mode_str == "L2NAT-Client") {
             retVal = BPL_OPER_MODE_L2NAT_CLIENT;
         } else {
-            MAPF_ERR("bpl_cfg_get_operating_mode: Unexpected OperatingMode\n");
+            MAPF_ERR("cfg_get_operating_mode: Unexpected OperatingMode\n");
             retVal = -1;
         }
     }
     return retVal;
 }
 
-int bpl_cfg_get_certification_mode()
+int cfg_get_certification_mode()
 {
     int retVal = -1;
-    if (bpl_cfg_get_prplmesh_param_int("certification_mode", &retVal) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_get_certification_mode: Failed to read certification_mode parameter\n");
+    if (cfg_get_prplmesh_param_int("certification_mode", &retVal) == RETURN_ERR) {
+        MAPF_ERR("cfg_get_certification_mode: Failed to read certification_mode parameter\n");
         return RETURN_ERR;
     }
     return retVal;
 }
 
-int bpl_cfg_get_stop_on_failure_attempts()
+int cfg_get_stop_on_failure_attempts()
 {
     int retVal = -1;
-    if (bpl_cfg_get_prplmesh_param_int("stop_on_failure_attempts", &retVal) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_get_stop_on_failure_attempts: Failed to read stop_on_failure_attempts "
+    if (cfg_get_prplmesh_param_int("stop_on_failure_attempts", &retVal) == RETURN_ERR) {
+        MAPF_ERR("cfg_get_stop_on_failure_attempts: Failed to read stop_on_failure_attempts "
                  "parameter\n");
         return RETURN_ERR;
     }
     return retVal;
 }
 
-int bpl_cfg_is_onboarding()
+int cfg_is_onboarding()
 {
     int retVal = -1;
-    if (bpl_cfg_get_prplmesh_param_int("onboarding", &retVal) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_is_onboarding: Failed to read Onboarding parameter\n");
+    if (cfg_get_prplmesh_param_int("onboarding", &retVal) == RETURN_ERR) {
+        MAPF_ERR("cfg_is_onboarding: Failed to read Onboarding parameter\n");
         return RETURN_ERR;
     }
     return retVal;
 }
 
-int bpl_cfg_get_rdkb_extensions()
+int cfg_get_rdkb_extensions()
 {
     int retVal = -1;
-    if (bpl_cfg_get_prplmesh_param_int("rdkb_extensions", &retVal) == RETURN_ERR) {
-        printf("bpl_cfg_get_rdkb_extensions: Failed to read RDKB Extensions parameter\n");
+    if (cfg_get_prplmesh_param_int("rdkb_extensions", &retVal) == RETURN_ERR) {
+        printf("cfg_get_rdkb_extensions: Failed to read RDKB Extensions parameter\n");
         return RETURN_ERR;
     }
     return retVal;
 }
 
-int bpl_cfg_get_band_steering()
+int cfg_get_band_steering()
 {
     int retVal = -1;
-    if (bpl_cfg_get_prplmesh_param_int("band_steering", &retVal) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_get_band_steering: Failed to read BandSteering parameter\n");
+    if (cfg_get_prplmesh_param_int("band_steering", &retVal) == RETURN_ERR) {
+        MAPF_ERR("cfg_get_band_steering: Failed to read BandSteering parameter\n");
         return RETURN_ERR;
     }
     return retVal;
 }
 
-int bpl_cfg_get_dfs_reentry()
+int cfg_get_dfs_reentry()
 {
     int retVal = -1;
-    if (bpl_cfg_get_prplmesh_param_int("dfs_reentry", &retVal) == RETURN_ERR) {
-        printf("bpl_cfg_get_dfs_reentry: Failed to read DfsReentry parameter\n");
+    if (cfg_get_prplmesh_param_int("dfs_reentry", &retVal) == RETURN_ERR) {
+        printf("cfg_get_dfs_reentry: Failed to read DfsReentry parameter\n");
         return RETURN_ERR;
     }
     return retVal;
 }
 
-int bpl_cfg_get_client_roaming()
+int cfg_get_client_roaming()
 {
     int retVal = -1;
-    if (bpl_cfg_get_prplmesh_param_int("client_roaming", &retVal) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_get_client_roaming: Failed to read ClientRoaming parameter\n");
+    if (cfg_get_prplmesh_param_int("client_roaming", &retVal) == RETURN_ERR) {
+        MAPF_ERR("cfg_get_client_roaming: Failed to read ClientRoaming parameter\n");
         return RETURN_ERR;
     }
     return retVal;
 }
 
-int bpl_cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return 0; }
+int cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return 0; }
 
-int bpl_cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PARAMS *wlan_params)
+int cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PARAMS *wlan_params)
 {
     int retVal    = 0;
     bool disabled = false;
@@ -166,26 +166,26 @@ int bpl_cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PA
         return RETURN_ERR;
     }
 
-    retVal = bpl_cfg_get_index_from_interface(iface, &index);
+    retVal = cfg_get_index_from_interface(iface, &index);
     if (retVal) {
         return retVal;
     }
 
-    retVal |= bpl_cfg_uci_get_wireless_bool(TYPE_RADIO, index, "disabled", &disabled);
+    retVal |= cfg_uci_get_wireless_bool(TYPE_RADIO, index, "disabled", &disabled);
     if (!retVal) {
         wlan_params->enabled = !disabled;
     }
-    retVal |= bpl_cfg_get_channel(index, &wlan_params->channel);
+    retVal |= cfg_get_channel(index, &wlan_params->channel);
 
     char ssid[MAX_UCI_BUF_LEN] = {0}, security[MAX_UCI_BUF_LEN] = {0},
          passphrase[MAX_UCI_BUF_LEN] = {0};
-    retVal |= bpl_cfg_uci_get_wireless(TYPE_VAP, index, "ssid", ssid);
-    retVal |= bpl_cfg_uci_get_wireless(TYPE_VAP, index, "wav_security_mode", security);
+    retVal |= cfg_uci_get_wireless(TYPE_VAP, index, "ssid", ssid);
+    retVal |= cfg_uci_get_wireless(TYPE_VAP, index, "wav_security_mode", security);
     std::string mode = std::string(security);
     if (mode == BPL_WLAN_SEC_WEP64_STR || mode == BPL_WLAN_SEC_WEP128_STR) {
-        retVal |= bpl_cfg_get_wep_key(index, -1, passphrase);
+        retVal |= cfg_get_wep_key(index, -1, passphrase);
     } else if (mode != BPL_WLAN_SEC_NONE_STR) {
-        retVal |= bpl_cfg_uci_get_wireless(TYPE_VAP, index, "key", passphrase);
+        retVal |= cfg_uci_get_wireless(TYPE_VAP, index, "key", passphrase);
     }
 
     utils::copy_string(wlan_params->ssid, ssid, BPL_SSID_LEN);
@@ -195,7 +195,7 @@ int bpl_cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PA
     return retVal;
 }
 
-int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *preferred_radio_band)
+int cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *preferred_radio_band)
 {
     int retVal = 0;
 
@@ -210,9 +210,9 @@ int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefer
     if (preferred_radio_band) {
         char backhaul_band[BPL_BACKHAUL_BAND_LEN] = {0};
         //get preferred_radio_band
-        retVal = bpl_cfg_get_prplmesh_param("backhaul_band", backhaul_band, BPL_BACKHAUL_BAND_LEN);
+        retVal = cfg_get_prplmesh_param("backhaul_band", backhaul_band, BPL_BACKHAUL_BAND_LEN);
         if (retVal == RETURN_ERR) {
-            MAPF_ERR("bpl_cfg_get_backhaul_params: Failed to read backhaul_band parameter\n");
+            MAPF_ERR("cfg_get_backhaul_params: Failed to read backhaul_band parameter\n");
             return RETURN_ERR;
         }
         std::string preferred_bh_band(backhaul_band);
@@ -223,7 +223,7 @@ int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefer
         } else if (preferred_bh_band.compare("auto") == 0) {
             *preferred_radio_band = BPL_RADIO_BAND_AUTO;
         } else {
-            MAPF_ERR("bpl_cfg_get_backhaul_params: unknown backhaul_band parameter value\n");
+            MAPF_ERR("cfg_get_backhaul_params: unknown backhaul_band parameter value\n");
             return RETURN_ERR;
         }
     }
@@ -231,48 +231,48 @@ int bpl_cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefer
     return RETURN_OK;
 }
 
-int bpl_cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len) { return 0; }
+int cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len) { return 0; }
 
-int bpl_cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
-                                     char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN])
+int cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
+                                 char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN])
 {
     int retVal = 0;
 
-    retVal |= bpl_cfg_get_prplmesh_param("ssid", ssid, BPL_SSID_LEN);
-    retVal |= bpl_cfg_get_prplmesh_param("mode_enabled", sec, BPL_SEC_LEN);
+    retVal |= cfg_get_prplmesh_param("ssid", ssid, BPL_SSID_LEN);
+    retVal |= cfg_get_prplmesh_param("mode_enabled", sec, BPL_SEC_LEN);
     if (!strcmp(sec, "WEP-64") || !strcmp(sec, "WEP-128")) {
-        retVal |= bpl_cfg_get_prplmesh_param("wep_key", pass, BPL_PASS_LEN);
+        retVal |= cfg_get_prplmesh_param("wep_key", pass, BPL_PASS_LEN);
     } else {
-        retVal |= bpl_cfg_get_prplmesh_param("key_passphrase", pass, BPL_PASS_LEN);
+        retVal |= cfg_get_prplmesh_param("key_passphrase", pass, BPL_PASS_LEN);
     }
 
     return retVal;
 }
 
-int bpl_cfg_get_security_policy()
+int cfg_get_security_policy()
 {
     int retVal = -1;
-    if (bpl_cfg_get_prplmesh_param_int("mem_only_psk", &retVal) == RETURN_ERR) {
-        MAPF_ERR("bpl_cfg_get_security_policy: Failed to read mem_only_psk parameter\n");
+    if (cfg_get_prplmesh_param_int("mem_only_psk", &retVal) == RETURN_ERR) {
+        MAPF_ERR("cfg_get_security_policy: Failed to read mem_only_psk parameter\n");
         return RETURN_ERR;
     }
     return retVal;
 }
 
-int bpl_cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN],
-                                        const char pass[BPL_PASS_LEN], const char sec[BPL_SEC_LEN],
-                                        const char iface_name[BPL_IFNAME_LEN], const int success)
+int cfg_notify_onboarding_completed(const char ssid[BPL_SSID_LEN], const char pass[BPL_PASS_LEN],
+                                    const char sec[BPL_SEC_LEN],
+                                    const char iface_name[BPL_IFNAME_LEN], const int success)
 {
     //return (sl_beerocks_notify_onboarding_completed(ssid, pass, sec, iface_name, success) ? 0 : -1);
     return 0;
 }
 
-int bpl_cfg_notify_fw_version_mismatch() { return 0; }
+int cfg_notify_fw_version_mismatch() { return 0; }
 
-int bpl_cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return 0; }
+int cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return 0; }
 
-int bpl_cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif) { return 0; }
+int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif) { return 0; }
 
-int bpl_cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return 0; }
+int cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return 0; }
 
 } // namespace bpl
