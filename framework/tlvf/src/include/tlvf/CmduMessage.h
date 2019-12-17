@@ -12,6 +12,7 @@
 #include <memory>
 #include <tlvf/ieee_1905_1/cCmduHeader.h>
 #include <tlvf/ieee_1905_1/eTlvType.h>
+#include <tlvf/tlvflogging.h>
 #include <vector>
 
 namespace ieee1905_1 {
@@ -28,6 +29,16 @@ public:
     template <class T, class = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
     std::shared_ptr<T> addClass()
     {
+
+        auto last_tlv = m_class_vector.empty() ? nullptr : m_class_vector.back();
+        // do not allow to use addClass method if the last tlv is not fully initialized
+        if (last_tlv) {
+            if (!last_tlv->isPostInitSucceeded()) {
+                TLVF_LOG(ERROR) << "TLV post init failed";
+                return nullptr;
+            }
+        }
+
         std::shared_ptr<T> ptr;
         if (m_cmdu_header) {
             if (m_class_vector.size() == 0) {
