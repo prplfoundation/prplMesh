@@ -87,6 +87,11 @@ build-for-glinet-b1300:
   variables:
     TARGET_DEVICE: "glinet-b1300"
 
+build-for-netgear-rax40:
+  extends: .build-for-openwrt
+  variables:
+    TARGET_DEVICE: "netgear-rax40"
+
 test-on-turris-omnia:
   extends: .test-on-target
   variables:

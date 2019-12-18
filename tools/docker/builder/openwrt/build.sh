@@ -86,6 +86,12 @@ main() {
         glinet-b1300)
             TARGET=ipq40xx
             ;;
+        netgear-rax40)
+            TARGET=intel_mips
+            PRPLMESH_VARIANT="-dwpal"
+            PRPL_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^e9ee6b109764dbb91b6cb399ccc0f78e5b04e260"
+            INTEL_FEED="https://git.prpl.dev/prplmesh/feed-intel.git^e3eca4e93286eb4346f0196b2816a3be97287482"
+            ;;
         *)
             err "Unknown target device: $TARGET_DEVICE"
             info "Currently supported targets are:"
