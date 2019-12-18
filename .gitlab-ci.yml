@@ -36,14 +36,30 @@ run-tests:
       - logs
     when: always
 
-  artifacts:
-    paths:
-      - logs
-    when: always
-
   tags:
     - docker
     - docker-build
 
   after_script:
     - tools/docker/stop.sh -k -r
+  needs:
+    - job: build-in-docker
+
+.build-for-openwrt:
+  stage: build
+  script:
+    - cd tools/docker/builder/openwrt
+    - ./build.sh targets/$TARGET.args 2>&1 | tee build.log | grep -E '^make\[[12]\]|^Step' --color=never --line-buffered
+  artifacts:
+    paths:
+      - tools/docker/builder/openwrt/*.ipk
+      - tools/docker/builder/openwrt/build.log
+    when: always
+  tags:
+    - shell
+    - docker-build
+
+build-for-turris-omnia:
+  extends: .build-for-openwrt
+  variables:
+    TARGET: turris-omnia
