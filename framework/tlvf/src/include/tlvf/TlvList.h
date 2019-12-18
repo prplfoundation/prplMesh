@@ -27,7 +27,7 @@ class TlvList {
 
 public:
     TlvList() = delete;
-    TlvList(uint8_t *buff, size_t buff_len, bool parse = false, bool swap = false);
+    TlvList(uint8_t *buff, size_t buff_len, bool parse = false);
 
     ~TlvList();
 
@@ -37,9 +37,9 @@ public:
         std::shared_ptr<T> ptr;
         if (m_buff) {
             if (m_class_vector.size() == 0) {
-                ptr = std::make_shared<T>(m_buff, m_buff_len, m_parse, m_swap);
+                ptr = std::make_shared<T>(m_buff, m_buff_len, m_parse, true);
             } else {
-                ptr = std::make_shared<T>(m_class_vector.back(), m_parse, m_swap);
+                ptr = std::make_shared<T>(m_class_vector.back(), m_parse, true);
             }
             if (!ptr || ptr->isInitialized() == false) {
                 return std::shared_ptr<T>();
@@ -102,11 +102,10 @@ public:
     size_t getMessageBuffLength() const;
     uint8_t *getMessageBuff() const;
     void swap();
-    bool swap_needed() { return m_swap; }
     bool is_finalized() const { return m_finalized; };
     bool is_swapped() const { return m_swapped; };
-    virtual bool finalize(bool swap_needed);
-    void reset(bool parse, bool swap);
+    virtual bool finalize();
+    void reset(bool parse);
     void addInnerTlvList(eTlvType type, std::shared_ptr<TlvList> list)
     {
         m_inner_tlv_lists[type] = list;
@@ -121,7 +120,6 @@ protected:
     size_t m_buff_len;
 
     bool m_parse                 = false;
-    bool m_swap                  = false;
     bool m_finalized             = false;
     bool m_swapped               = false;
     bool m_dynamically_allocated = false;
@@ -169,11 +167,10 @@ private:
      * If an inner TLV has tailroom, it is reduced from the parent TLV length, and the
      * rest of the TLVlist buffer is moved accordingly to the new end of the current TLV.
      *
-     * @param swap_needed swap_needed
      * @return true on success
      * @return false on error
      */
-    bool resizeTlvs(bool swap_needed);
+    bool resizeTlvs();
     friend void trim(BaseClass &obj, size_t tailroom);
 };
 

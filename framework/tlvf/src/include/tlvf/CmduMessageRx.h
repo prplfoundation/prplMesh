@@ -25,7 +25,7 @@ public:
     CmduMessageRx() = delete;
     CmduMessageRx(uint8_t *buff, size_t buff_len);
     ~CmduMessageRx();
-    bool parse(bool swap_needed = true, bool parse_tlvs = false);
+    bool parse(bool parse_tlvs = false);
     CmduMessageRx &operator=(const CmduMessageRx &) = delete;
 
 private:

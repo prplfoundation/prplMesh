@@ -2211,7 +2211,8 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
     case beerocks_message::ACTION_APMANAGER_READ_ACS_REPORT_RESPONSE: {
         LOG(TRACE) << "received ACTION_APMANAGER_READ_ACS_REPORT_RESPONSE";
         auto response =
-            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE>();
         if (!response) {
             LOG(ERROR) << "addClass cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE failed";
             return false;

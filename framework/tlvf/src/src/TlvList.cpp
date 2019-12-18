@@ -14,8 +14,8 @@
 
 using namespace ieee1905_1;
 
-TlvList::TlvList(uint8_t *buff, size_t buff_len, bool parse, bool swap)
-    : m_buff(buff), m_buff_len(buff_len), m_parse(parse), m_swap(swap)
+TlvList::TlvList(uint8_t *buff, size_t buff_len, bool parse)
+    : m_buff(buff), m_buff_len(buff_len), m_parse(parse)
 {
 }
 
@@ -54,12 +54,11 @@ void TlvList::swap()
     m_swapped = !m_swapped;
 }
 
-void TlvList::reset(bool parse, bool swap)
+void TlvList::reset(bool parse)
 {
     if (!parse)
         memset(m_buff, 0, m_buff_len);
     m_parse     = parse;
-    m_swap      = swap;
     m_finalized = false;
     m_swapped   = false;
     for (auto &c : m_class_vector) {
@@ -69,7 +68,7 @@ void TlvList::reset(bool parse, bool swap)
     m_inner_tlv_lists.clear();
 }
 
-bool TlvList::resizeTlvs(bool swap_needed)
+bool TlvList::resizeTlvs()
 {
     for (auto list : m_inner_tlv_lists) {
         size_t tailroom = list.second->getMessageBuffLength() - list.second->getMessageLength();
@@ -79,16 +78,14 @@ bool TlvList::resizeTlvs(bool swap_needed)
         if (!tlv)
             return false;
         TlvHeader *tlvhdr = reinterpret_cast<TlvHeader *>(tlv->getStartBuffPtr());
-        if (swap_needed)
-            tlvf_swap(16, reinterpret_cast<uint8_t *>(&tlvhdr->length));
+        tlvf_swap(16, reinterpret_cast<uint8_t *>(&tlvhdr->length));
         tlvhdr->length -= tailroom;
         // move the rest of the buffer
         uint8_t *dst = reinterpret_cast<uint8_t *>(tlvhdr) + tlvhdr->length + sizeof(*tlvhdr);
         uint8_t *src = dst + tailroom;
         uint8_t *end = m_class_vector.back()->getBuffPtr();
         size_t len   = end - src;
-        if (swap_needed)
-            tlvf_swap(16, reinterpret_cast<uint8_t *>(&tlvhdr->length));
+        tlvf_swap(16, reinterpret_cast<uint8_t *>(&tlvhdr->length));
         std::copy_n(src, len, dst);
         // update parent TLV class size by trimming the end of the buffer (m_buff_ptr__)
         trim(*tlv, tailroom);
@@ -97,7 +94,7 @@ bool TlvList::resizeTlvs(bool swap_needed)
     return true;
 }
 
-bool TlvList::finalize(bool swap_needed)
+bool TlvList::finalize()
 {
     if (m_finalized)
         return true;
@@ -110,16 +107,15 @@ bool TlvList::finalize(bool swap_needed)
     }
 
     for (auto list : m_inner_tlv_lists)
-        list.second->finalize(swap_needed);
+        list.second->finalize();
 
     if (!addClass<tlvEndOfMessage>())
         return false;
 
-    if (swap_needed)
-        swap();
+    swap();
 
     // shrink back inner tlv lists
-    if (!resizeTlvs(swap_needed))
+    if (!resizeTlvs())
         return false;
 
     m_finalized = true;

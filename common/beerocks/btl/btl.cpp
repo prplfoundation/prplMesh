@@ -44,7 +44,7 @@ bool transport_socket_thread::send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu_t
                                                const std::string &dst_mac,
                                                const std::string &src_mac)
 {
-    if (!cmdu_tx.finalize(true)) {
+    if (!cmdu_tx.finalize()) {
         THREAD_LOG(ERROR) << "finalize failed";
         return false;
     }

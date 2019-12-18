@@ -72,7 +72,6 @@ public:
     uint16_t getNextTlvLength() const;
     uint8_t *getNextTlvData() const;
     void swap();
-    bool swap_needed() { return tlvs.swap_needed(); }
     bool is_finalized() const { return tlvs.is_finalized(); };
     bool is_swapped() const { return tlvs.is_swapped(); };
     eMessageType getMessageType();

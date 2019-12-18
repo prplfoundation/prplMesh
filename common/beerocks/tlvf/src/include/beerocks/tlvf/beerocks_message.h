@@ -79,8 +79,8 @@ public:
                       << std::endl;
             return false;
         }
-        std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(
-            vs_tlv->payload(), vs_tlv->payload_length(), false, false);
+        std::shared_ptr<beerocks_header> hdr =
+            std::make_shared<beerocks_header>(vs_tlv->payload(), vs_tlv->payload_length(), false);
         if (!hdr)
             return false;
         if (!hdr->addClass<beerocks_message::cACTION_HEADER>())

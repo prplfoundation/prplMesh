@@ -19,14 +19,13 @@ CmduMessageRx::CmduMessageRx(uint8_t *buff, size_t buff_len)
 
 CmduMessageRx::~CmduMessageRx() {}
 
-bool CmduMessageRx::parse(bool swap_needed, bool parse_tlvs)
+bool CmduMessageRx::parse(bool parse_tlvs)
 {
-    tlvs.reset(true, swap_needed);
+    tlvs.reset(true);
     auto cmduhdr = tlvs.addClass<cCmduHeader>();
     if (!cmduhdr)
         return false;
-    if (swap_needed)
-        cmduhdr->class_swap(); //swap back cmduheader
+    cmduhdr->class_swap(); //swap back cmduheader
 
     if (!parse_tlvs)
         return true;

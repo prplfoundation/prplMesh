@@ -75,12 +75,11 @@ std::shared_ptr<BaseClass> CmduTlvParser::parseWscTlv()
     if (eTlvType(cmdu_.getNextTlvType()) != eTlvType::TLV_WSC)
         return nullptr;
 
-    bool swap     = cmdu_.swap_needed();
     wscAttr *wsc  = reinterpret_cast<wscAttr *>(cmdu_.getNextTlvData());
-    uint16_t type = wsc->type(swap);
+    uint16_t type = wsc->type(true);
     while (type != WSC::ATTR_MSG_TYPE) {
-        wsc  = wsc->next(swap);
-        type = wsc->type(swap);
+        wsc  = wsc->next(true);
+        type = wsc->type(true);
     }
     if (*wsc->data() == WSC::WSC_MSG_TYPE_M2)
         return cmdu_.addClass<tlvWscM2>();

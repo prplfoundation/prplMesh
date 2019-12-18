@@ -31,10 +31,7 @@ namespace beerocks {
 class beerocks_header : public ieee1905_1::TlvList {
 public:
     beerocks_header() = delete;
-    beerocks_header(uint8_t *buff, size_t buff_len, bool parse, bool swap)
-        : TlvList(buff, buff_len, parse, swap)
-    {
-    }
+    beerocks_header(uint8_t *buff, size_t buff_len, bool parse) : TlvList(buff, buff_len, parse) {}
     std::shared_ptr<beerocks_message::cACTION_HEADER> actionhdr()
     {
         return getClass<beerocks_message::cACTION_HEADER>();
@@ -45,7 +42,7 @@ public:
     }
     uint8_t action_op() { return actionhdr() ? actionhdr()->action_op() : 0; };
     uint16_t id() { return actionhdr() ? actionhdr()->id() : 0; }
-    virtual bool finalize(bool swap_needed) override
+    virtual bool finalize() override
     {
         if (m_finalized)
             return true;
@@ -57,8 +54,7 @@ public:
             }
         }
 
-        if (swap_needed)
-            swap();
+        swap();
 
         m_finalized = true;
         return true;

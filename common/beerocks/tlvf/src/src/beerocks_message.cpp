@@ -68,7 +68,7 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
         return nullptr;
 
     std::shared_ptr<beerocks_header> hdr = std::make_shared<beerocks_header>(
-        tlv_header->payload(), tlv_header->payload_length(), true, cmdu_rx.swap_needed());
+        tlv_header->payload(), tlv_header->payload_length(), true);
     if (!hdr)
         return nullptr;
     auto actionhdr = hdr->addClass<beerocks_message::cACTION_HEADER>();
@@ -84,7 +84,7 @@ std::string message_com::print_cmdu_types(const message::sUdsHeader *uds_header,
     ieee1905_1::CmduMessageRx cmdu_rx((uint8_t *)uds_header + sizeof(message::sUdsHeader),
                                       uds_header->length);
 
-    auto cmdu_header = cmdu_rx.parse(uds_header->swap_needed);
+    auto cmdu_header = cmdu_rx.parse();
 
     if (!cmdu_header) {
         LOG(ERROR) << "cmdu parse failed!";
@@ -114,8 +114,7 @@ std::string message_com::print_cmdu_types(ieee1905_1::CmduMessageRx &cmdu_rx, sC
             LOG(ERROR) << "addClass<tlvVendorSpecific> failed!";
             return info;
         }
-        ieee1905_1::TlvList actions(tlv_header->payload(), tlv_header->payload_length(), true,
-                                    true);
+        ieee1905_1::TlvList actions(tlv_header->payload(), tlv_header->payload_length(), true);
         auto beerocks_header = actions.addClass<beerocks_message::cACTION_HEADER>();
         if (!beerocks_header) {
             LOG(ERROR) << "addClass<cACTION_HEADER> failed!";
@@ -131,10 +130,9 @@ std::string message_com::print_cmdu_types(ieee1905_1::CmduMessageRx &cmdu_rx, sC
                 ", action_op=" + std::to_string(beerocks_header->action_op());
     }
 
-    if (uds_header->swap_needed) {
-        // swap back
-        cmdu_rx.swap();
-    }
+    // swap back
+    cmdu_rx.swap();
+
     return info;
 }
 
@@ -148,7 +146,7 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
         return false;
     }
 
-    if (!cmdu_tx.finalize(true)) {
+    if (!cmdu_tx.finalize()) {
         LOG(ERROR) << "finalize failed -> " << print_cmdu_types(uds_header);
         LOG(DEBUG) << "hex_dump(" + std::to_string(cmdu_tx.getMessageLength()) + "):" << std::endl
                    << utils::dump_buffer(
@@ -158,7 +156,6 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
     }
 
     // update src & dst bridge mac on uds_header
-    // swap is true if dst_mac is not empty so no need to verify it
     if (!dst_mac.empty()) {
         if (src_mac.empty()) {
             LOG(ERROR) << "src_mac is empty!";
@@ -172,8 +169,7 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
         memset(uds_header->dst_bridge_mac, 0, sizeof(message::sUdsHeader::dst_bridge_mac));
     }
 
-    uds_header->length      = cmdu_tx.getMessageLength();
-    uds_header->swap_needed = true;
+    uds_header->length = cmdu_tx.getMessageLength();
 
     return send_data(sd, cmdu_tx.getMessageBuff() - sizeof(message::sUdsHeader),
                      uds_header->length + sizeof(message::sUdsHeader));

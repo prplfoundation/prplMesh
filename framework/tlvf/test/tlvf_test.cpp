@@ -151,7 +151,7 @@ int test_complex_list()
 
     LOG(DEBUG) << "Finalize";
     //MANDATORY - swaps to little indian.
-    if (!msg.finalize(true)) {
+    if (!msg.finalize()) {
         LOG(ERROR) << "Finalize step failed";
         errors++;
     }
@@ -162,7 +162,7 @@ int test_complex_list()
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
 
     CmduMessageRx received_message(recv_buffer, sizeof(recv_buffer));
-    received_message.parse(true);
+    received_message.parse();
 
     auto tlv4 = received_message.addClass<tlvTestVarList>();
     if (tlv4 == nullptr) {
@@ -313,14 +313,14 @@ int test_parser()
     tlv4->add_var1(tlv4->create_var1());
 
     LOG(DEBUG) << "Finalize";
-    if (msg.finalize(true)) {
+    if (msg.finalize()) {
         LOG(ERROR) << "Finalize should fail since the CMDU is not fully initialized";
         errors++;
     }
 
     tlv4->add_var3(tlv4->create_var3());
     LOG(DEBUG) << "Finalize";
-    if (!msg.finalize(true)) {
+    if (!msg.finalize()) {
         LOG(ERROR) << "Finalize step failed";
         errors++;
     }
@@ -331,7 +331,7 @@ int test_parser()
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
 
     CmduMessageRx received_message(recv_buffer, sizeof(recv_buffer));
-    received_message.parse(true, true);
+    received_message.parse(true);
     auto tlv4_ = received_message.getClass<tlvUnknown>();
     if (!tlv4_) {
         LOG(ERROR) << "getClass<tlvUnknown> failed";
@@ -549,8 +549,8 @@ int test_all()
     LOG(DEBUG) << "Total Message length=" << int(msg.getMessageLength());
 
     LOG(DEBUG) << "Finalize";
-    //MANDATORY - swaps to little indian.
-    if (!msg.finalize(true)) {
+
+    if (!msg.finalize()) {
         LOG(ERROR) << "Finalize step failed";
         errors++;
     }
@@ -561,7 +561,7 @@ int test_all()
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
 
     CmduMessageRx received_message(recv_buffer, sizeof(recv_buffer));
-    received_message.parse(true);
+    received_message.parse();
 
     eTlvType type;
     if (received_message.getNextTlvType(type) &&
