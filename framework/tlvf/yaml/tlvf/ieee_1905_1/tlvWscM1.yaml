@@ -24,7 +24,7 @@ tlvWscM1:
   message_type_attr: WSC::sWscAttrMessageType
   uuid_e_attr: WSC::sWscAttrUuidE
   mac_attr: WSC::sWscAttrMac
-  enrolee_nonce_attr: WSC::sWscAttrEnroleeNonce
+  enrolee_nonce_attr: WSC::sWscAttrEnrolleeNonce
   public_key_attr: WSC::sWscAttrPublicKey
   authentication_type_flags_attr: WSC::sWscAttrAuthenticationTypeFlags
   encryption_type_flags_attr: WSC::sWscAttrEncryptionTypeFlags

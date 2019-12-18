@@ -68,7 +68,7 @@ sWscAttrMac:
     _value: WSC_MAC_LENGTH
   data: sMacAddr
 
-sWscAttrEnroleeNonce:
+sWscAttrEnrolleeNonce:
   _type: struct
   attribute_type: 
     _type: eWscAttributes
@@ -429,3 +429,254 @@ cWscVendorExtWfa:
   vs_data:
     _type: uint8_t
     _length: []
+
+cWscAttrVersion:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_VERSION
+  length:
+    _type: uint16_t
+    _value_const: 1
+  data:
+    _type: eWscValues8
+    _value: WSC_VERSION
+
+cWscAttrMessageType:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_MSG_TYPE
+  length:
+    _type: uint16_t
+    _value_const: 1
+  msg_type:
+    _type: eWscMessageType
+    _value: WSC_MSG_TYPE_INVALID
+
+cWscAttrEnrolleeNonce:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_ENROLLEE_NONCE
+  length:
+    _type: uint16_t
+    _value_const: WSC_NONCE_LENGTH
+  nonce:
+    _type: uint8_t
+    _length: [ WSC_NONCE_LENGTH ]
+
+cWscAttrPublicKey:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_PUBLIC_KEY
+  length:
+    _type: uint16_t
+    _value_const: WSC_PUBLIC_KEY_LENGTH
+  public_key:
+    _type: uint8_t
+    _length: [ WSC_PUBLIC_KEY_LENGTH ]
+
+cWscAttrAuthenticationTypeFlags:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_AUTH_TYPE_FLAGS
+  length: 
+    _type: uint16_t
+    _value_const: 2
+  auth_type_flags: 
+    _type: uint16_t
+    _value: uint16_t(eWscAuth::WSC_AUTH_OPEN) | uint16_t(eWscAuth::WSC_AUTH_WPA2PSK)
+
+cWscAttrEncryptionTypeFlags:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_ENCR_TYPE_FLAGS
+  length:
+    _type: uint16_t
+    _value_const: 2
+  encr_type_flags:
+    _type: uint16_t
+    _value: uint16_t(eWscEncr::WSC_ENCR_NONE) | uint16_t(eWscEncr::WSC_ENCR_AES)
+  
+cWscAttrConnectionTypeFlags:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_CONN_TYPE_FLAGS
+  length:
+    _type: uint16_t
+    _value_const: 1
+  conn_type_flags:
+    _type: eWscConn
+    _value: WSC_CONN_ESS
+  
+cWscAttrConfigurationMethods:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_CONFIG_METHODS
+  length:
+    _type: uint16_t
+    _value_const: 2
+  conf_methods:
+    _type: uint16_t
+    _value: (WSC_CONFIG_PHY_PUSHBUTTON | WSC_CONFIG_VIRT_PUSHBUTTON)
+
+cWscAttrManufacturer:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_MANUFACTURER
+  length:
+    _type: uint16_t
+    _length_var: True
+  manufacturer:
+    _type: char
+    _length: [ length ]
+
+cWscAttrModelName:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_MODEL_NAME
+  length:
+    _type: uint16_t
+    _length_var: True
+  model:
+    _type: char
+    _length: [ length ]
+
+cWscAttrModelNumber:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_MODEL_NUMBER
+  length:
+    _type: uint16_t
+    _length_var: True
+  model_number:
+    _type: char
+    _length: [ length ]
+
+cWscAttrSerialNumber:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_SERIAL_NUMBER
+  length:
+    _type: uint16_t
+    _length_var: True
+  model_number:
+    _type: char
+    _length: [ length ]
+
+cWscAttrPrimaryDeviceType:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_PRIMARY_DEV_TYPE
+  length:
+    _type: uint16_t
+    _value_const: WSC_PRIMARY_DEV_TYPE_LENGTH
+  category_id:
+    _type: uint16_t 
+    _value: WSC_DEV_NETWORK_INFRA
+  oui:
+    _type: uint32_t
+    _value: 0x0050F204
+  sub_category_id:
+    _type: uint16_t
+
+cWscAttrDeviceName:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_DEV_NAME
+  length:
+    _type: uint16_t
+    _length_var: True
+  device_name:
+    _type: char
+    _length: [ length ]
+
+cWscAttrRfBands:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_RF_BANDS
+  length:
+    _type: uint16_t
+    _value_const: 1
+  bands:
+    _type: eWscRfBands
+
+cWscAttrAssociationState:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_ASSOC_STATE
+  length:
+    _type: uint16_t
+    _value_const: 2
+  assoc_state:
+    _type: eWscAssoc
+    _value: WSC_ASSOC_NOT_ASSOC
+
+cWscAttrDevicePasswordID:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_DEV_PASSWORD_ID
+  length:
+    _type: uint16_t
+    _value_const: 2
+  pw:
+    _type: eWscValues16
+    _value: DEV_PW_PUSHBUTTON
+
+cWscAttrConfigurationError:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_CONFIG_ERROR
+  length:
+    _type: uint16_t
+    _value_const: 2
+  cfg_err:
+    _type: eWscValues16
+    _value: WSC_CFG_NO_ERROR
+
+cWscAttrOsVersion:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_OS_VERSION
+  length:
+    _type: uint16_t
+    _value_const: WSC_OS_VERSION_LENGTH
+  os_version:
+    _type: uint32_t
+    _value: 0x80000001
