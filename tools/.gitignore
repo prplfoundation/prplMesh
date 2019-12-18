@@ -1,9 +1,4 @@
 *.pyc
-agent/
-beerocks/
-common/
-controller/
-framework/
 
 #klocwork files
 .kw*/
