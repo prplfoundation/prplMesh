@@ -11,13 +11,18 @@ usage() {
     echo "      -h|--help - show this help menu"
     echo "      -b|--build-options - add docker build options"
     echo "      -d|--target-device the device to build for"
-    echo "      -f|--prpl-feed the prpl feed to use"
     echo "      -i|--image - build the docker image only"
     echo "      -o|--openwrt-version - the openwrt version to use"
     echo "      -r|--openwrt-repository - the openwrt repository to use"
     echo "      -t|--tag - the tag to use for the builder image"
     echo "      -v|--verbose - verbosity on"
     echo " -d is always required."
+    echo ""
+    echo "The following environment variables will affect the build:"
+    echo " - PRPL_FEED: the prpl feed that will be used to install prplMesh."
+    echo "   default: $PRPL_FEED"
+    echo " - INTEL_FEED: only used for targets which needs the additional intel feed."
+    echo "   default: empty"
 }
 
 build_image() {
@@ -28,6 +33,7 @@ build_image() {
            --build-arg TARGET \
            --build-arg PRPL_FEED \
            --build-arg PRPLMESH_VARIANT \
+           --build-arg INTEL_FEED \
            $BUILD_OPTIONS \
            "$scriptdir/"
 }
@@ -50,7 +56,7 @@ build_prplmesh() {
 }
 
 main() {
-    OPTS=`getopt -o 'hb:d:f:io:r:t:v' --long help,build-options:,device:,prpl-feed:,image,openwrt-version:,openwrt-repository:,tag:,verbose -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hb:d:io:r:t:v' --long help,build-options:,device:,image,openwrt-version:,openwrt-repository:,tag:,verbose -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -63,7 +69,6 @@ main() {
             -h | --help)               usage; exit 0; shift ;;
             -b | --build-options)      BUILD_OPTIONS="$2"; shift; shift ;;
             -d | --target-device)      TARGET_DEVICE="$2"; shift ; shift ;;
-            -f | --prpl-feed)          PRPL_FEED="$2"; shift; shift ;;
             -i | --image)              IMAGE_ONLY=true; shift ;;
             -o | --openwrt-version)    OPENWRT_VERSION="$2"; shift; shift ;;
             -r | --openwrt-repository) OPENWRT_REPOSITORY="$2"; shift; shift ;;
@@ -120,6 +125,7 @@ main() {
     export PRPLMESH_VERSION
     export PRPL_FEED
     export PRPLMESH_VARIANT
+    export INTEL_FEED
 
     if [ $IMAGE_ONLY = true ] ; then
         build_image
@@ -137,5 +143,6 @@ BUILD_OPTIONS=""
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='9d2efd'
 PRPL_FEED='https://git.prpl.dev/prplmesh/iwlwav.git^06a0126d5fb53b1d65bad90757a5f9f5f77419ca'
+INTEL_FEED=""
 
 main "$@"

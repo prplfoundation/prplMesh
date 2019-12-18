@@ -23,6 +23,9 @@ FROM openwrt-prerequisites as openwrt-prebuilt
 
 USER openwrt
 
+# optional: intel feed to use.
+ARG INTEL_FEED
+
 # The following args are mandatory, do not expect the build to
 # succeed without specifying them on the command line.
 #
@@ -41,7 +44,12 @@ RUN git clone "$OPENWRT_REPOSITORY" openwrt \
 
 WORKDIR /home/openwrt/openwrt
 
-RUN echo "CONFIG_SDK=y" > .config \
+RUN if [ -n "$INTEL_FEED" ] ; then \
+	echo "src-git intel $INTEL_FEED" >> feeds.conf.default \
+	&& scripts/feeds update intel \
+	&& scripts/feeds install intel_mips ; \
+    fi ; \
+    echo "CONFIG_SDK=y" > .config \
     && echo "CONFIG_TARGET_${TARGET}=y" >> .config \
     && make defconfig \
     && make -j$(nproc)
@@ -78,8 +86,12 @@ ARG PRPLMESH_VARIANT
 
 USER openwrt
 
+# We first install from the intel feed preferably, because
+# it replaces some packages from the "packages" feed.
+# If no intel feed is present, nothing will be done so it's still ok.
 RUN echo "src-git prpl ${PRPL_FEED}" >> feeds.conf.default \
     && scripts/feeds update -a \
+    && scripts/feeds install -a -p intel \
     && scripts/feeds install -a \
     && cp "/home/openwrt/prplmesh_config" .config \
     && echo "CONFIG_PACKAGE_prplmesh${PRPLMESH_VARIANT}=y" >> .config \
