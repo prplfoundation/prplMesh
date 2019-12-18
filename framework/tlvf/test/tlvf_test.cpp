@@ -161,8 +161,8 @@ int test_complex_list()
     uint8_t recv_buffer[sizeof(tx_buffer)];
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
 
-    CmduMessageRx received_message;
-    received_message.parse(recv_buffer, sizeof(recv_buffer), true);
+    CmduMessageRx received_message(recv_buffer, sizeof(recv_buffer));
+    received_message.parse(true);
 
     auto tlv4 = received_message.addClass<tlvTestVarList>();
     if (tlv4 == nullptr) {
@@ -337,8 +337,8 @@ int test_parser()
     uint8_t recv_buffer[sizeof(tx_buffer)];
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
 
-    CmduMessageRx received_message;
-    received_message.parse(recv_buffer, sizeof(recv_buffer), true, true);
+    CmduMessageRx received_message(recv_buffer, sizeof(recv_buffer));
+    received_message.parse(true, true);
     auto tlv4_ = received_message.getClass<tlvUnknown>();
     if (!tlv4_) {
         LOG(ERROR) << "getClass<tlvUnknown> failed";
@@ -567,8 +567,8 @@ int test_all()
     uint8_t recv_buffer[sizeof(tx_buffer)];
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
 
-    CmduMessageRx received_message;
-    received_message.parse(recv_buffer, sizeof(recv_buffer), true);
+    CmduMessageRx received_message(recv_buffer, sizeof(recv_buffer));
+    received_message.parse(true);
 
     eTlvType type;
     if (received_message.getNextTlvType(type) &&
@@ -767,8 +767,8 @@ int test_all()
     uint8_t invalidBuffer[invalidBufferSize];
     memcpy(invalidBuffer, recv_buffer, 26);
 
-    CmduMessageRx invmsg;
-    if (!invmsg.parse(invalidBuffer, invalidBufferSize, false)) {
+    CmduMessageRx invmsg(invalidBuffer, invalidBufferSize);
+    if (!invmsg.parse(false)) {
         MAPF_DBG("HEADER PROTECTION SUCCESS");
     }
 

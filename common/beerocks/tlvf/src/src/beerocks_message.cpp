@@ -72,10 +72,10 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
 std::string message_com::print_cmdu_types(const message::sUdsHeader *uds_header,
                                           sCmduInfo *cmdu_info)
 {
-    ieee1905_1::CmduMessageRx cmdu_rx;
+    ieee1905_1::CmduMessageRx cmdu_rx((uint8_t *)uds_header + sizeof(message::sUdsHeader),
+                                      uds_header->length);
 
-    auto cmdu_header = cmdu_rx.parse((uint8_t *)uds_header + sizeof(message::sUdsHeader),
-                                     uds_header->length, uds_header->swap_needed);
+    auto cmdu_header = cmdu_rx.parse(uds_header->swap_needed);
 
     if (!cmdu_header) {
         LOG(ERROR) << "cmdu parse failed!";
