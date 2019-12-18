@@ -137,9 +137,7 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
         return false;
     }
 
-    bool swap = !dst_mac.empty();
-
-    if (!cmdu_tx.finalize(swap)) {
+    if (!cmdu_tx.finalize(true)) {
         LOG(ERROR) << "finalize failed -> " << print_cmdu_types(uds_header);
         LOG(DEBUG) << "hex_dump(" + std::to_string(cmdu_tx.getMessageLength()) + "):" << std::endl
                    << utils::dump_buffer(
@@ -150,7 +148,7 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
 
     // update src & dst bridge mac on uds_header
     // swap is true if dst_mac is not empty so no need to verify it
-    if (swap) {
+    if (!dst_mac.empty()) {
         if (src_mac.empty()) {
             LOG(ERROR) << "src_mac is empty!";
             return false;
@@ -164,7 +162,7 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
     }
 
     uds_header->length      = cmdu_tx.getMessageLength();
-    uds_header->swap_needed = swap;
+    uds_header->swap_needed = true;
 
     return send_data(sd, cmdu_tx.getMessageBuff() - sizeof(message::sUdsHeader),
                      uds_header->length + sizeof(message::sUdsHeader));
