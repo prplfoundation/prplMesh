@@ -39,7 +39,7 @@ class tlvWscM2 : public BaseClass
         const uint16_t& length();
         WSC::sWscAttrVersion& version_attr();
         WSC::sWscAttrMessageType& message_type_attr();
-        WSC::sWscAttrEnroleeNonce& enrolee_nonce_attr();
+        WSC::sWscAttrEnrolleeNonce& enrolee_nonce_attr();
         WSC::sWscAttrRegistrarNonce& registrar_nonce_attr();
         WSC::sWscAttrUuidR& uuid_r_attr();
         WSC::sWscAttrPublicKey& public_key_attr();
@@ -104,7 +104,7 @@ class tlvWscM2 : public BaseClass
         uint16_t* m_length = nullptr;
         WSC::sWscAttrVersion* m_version_attr = nullptr;
         WSC::sWscAttrMessageType* m_message_type_attr = nullptr;
-        WSC::sWscAttrEnroleeNonce* m_enrolee_nonce_attr = nullptr;
+        WSC::sWscAttrEnrolleeNonce* m_enrolee_nonce_attr = nullptr;
         WSC::sWscAttrRegistrarNonce* m_registrar_nonce_attr = nullptr;
         WSC::sWscAttrUuidR* m_uuid_r_attr = nullptr;
         WSC::sWscAttrPublicKey* m_public_key_attr = nullptr;

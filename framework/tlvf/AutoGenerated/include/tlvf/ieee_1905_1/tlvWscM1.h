@@ -41,7 +41,7 @@ class tlvWscM1 : public BaseClass
         WSC::sWscAttrMessageType& message_type_attr();
         WSC::sWscAttrUuidE& uuid_e_attr();
         WSC::sWscAttrMac& mac_attr();
-        WSC::sWscAttrEnroleeNonce& enrolee_nonce_attr();
+        WSC::sWscAttrEnrolleeNonce& enrolee_nonce_attr();
         WSC::sWscAttrPublicKey& public_key_attr();
         WSC::sWscAttrAuthenticationTypeFlags& authentication_type_flags_attr();
         WSC::sWscAttrEncryptionTypeFlags& encryption_type_flags_attr();
@@ -105,7 +105,7 @@ class tlvWscM1 : public BaseClass
         WSC::sWscAttrMessageType* m_message_type_attr = nullptr;
         WSC::sWscAttrUuidE* m_uuid_e_attr = nullptr;
         WSC::sWscAttrMac* m_mac_attr = nullptr;
-        WSC::sWscAttrEnroleeNonce* m_enrolee_nonce_attr = nullptr;
+        WSC::sWscAttrEnrolleeNonce* m_enrolee_nonce_attr = nullptr;
         WSC::sWscAttrPublicKey* m_public_key_attr = nullptr;
         WSC::sWscAttrAuthenticationTypeFlags* m_authentication_type_flags_attr = nullptr;
         WSC::sWscAttrEncryptionTypeFlags* m_encryption_type_flags_attr = nullptr;

@@ -49,8 +49,8 @@ WSC::sWscAttrMac& tlvWscM1::mac_attr() {
     return (WSC::sWscAttrMac&)(*m_mac_attr);
 }
 
-WSC::sWscAttrEnroleeNonce& tlvWscM1::enrolee_nonce_attr() {
-    return (WSC::sWscAttrEnroleeNonce&)(*m_enrolee_nonce_attr);
+WSC::sWscAttrEnrolleeNonce& tlvWscM1::enrolee_nonce_attr() {
+    return (WSC::sWscAttrEnrolleeNonce&)(*m_enrolee_nonce_attr);
 }
 
 WSC::sWscAttrPublicKey& tlvWscM1::public_key_attr() {
@@ -609,7 +609,7 @@ size_t tlvWscM1::get_initial_size()
     class_size += sizeof(WSC::sWscAttrMessageType); // message_type_attr
     class_size += sizeof(WSC::sWscAttrUuidE); // uuid_e_attr
     class_size += sizeof(WSC::sWscAttrMac); // mac_attr
-    class_size += sizeof(WSC::sWscAttrEnroleeNonce); // enrolee_nonce_attr
+    class_size += sizeof(WSC::sWscAttrEnrolleeNonce); // enrolee_nonce_attr
     class_size += sizeof(WSC::sWscAttrPublicKey); // public_key_attr
     class_size += sizeof(WSC::sWscAttrAuthenticationTypeFlags); // authentication_type_flags_attr
     class_size += sizeof(WSC::sWscAttrEncryptionTypeFlags); // encryption_type_flags_attr
@@ -681,12 +681,12 @@ bool tlvWscM1::init()
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(WSC::sWscAttrMac); }
     if (!m_parse__) { m_mac_attr->struct_init(); }
-    m_enrolee_nonce_attr = (WSC::sWscAttrEnroleeNonce*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(WSC::sWscAttrEnroleeNonce))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(WSC::sWscAttrEnroleeNonce) << ") Failed!";
+    m_enrolee_nonce_attr = (WSC::sWscAttrEnrolleeNonce*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(WSC::sWscAttrEnrolleeNonce))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(WSC::sWscAttrEnrolleeNonce) << ") Failed!";
         return false;
     }
-    if(m_length && !m_parse__){ (*m_length) += sizeof(WSC::sWscAttrEnroleeNonce); }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(WSC::sWscAttrEnrolleeNonce); }
     if (!m_parse__) { m_enrolee_nonce_attr->struct_init(); }
     m_public_key_attr = (WSC::sWscAttrPublicKey*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(WSC::sWscAttrPublicKey))) {

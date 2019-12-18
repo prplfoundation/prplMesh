@@ -41,8 +41,8 @@ WSC::sWscAttrMessageType& tlvWscM2::message_type_attr() {
     return (WSC::sWscAttrMessageType&)(*m_message_type_attr);
 }
 
-WSC::sWscAttrEnroleeNonce& tlvWscM2::enrolee_nonce_attr() {
-    return (WSC::sWscAttrEnroleeNonce&)(*m_enrolee_nonce_attr);
+WSC::sWscAttrEnrolleeNonce& tlvWscM2::enrolee_nonce_attr() {
+    return (WSC::sWscAttrEnrolleeNonce&)(*m_enrolee_nonce_attr);
 }
 
 WSC::sWscAttrRegistrarNonce& tlvWscM2::registrar_nonce_attr() {
@@ -624,7 +624,7 @@ size_t tlvWscM2::get_initial_size()
     class_size += sizeof(uint16_t); // length
     class_size += sizeof(WSC::sWscAttrVersion); // version_attr
     class_size += sizeof(WSC::sWscAttrMessageType); // message_type_attr
-    class_size += sizeof(WSC::sWscAttrEnroleeNonce); // enrolee_nonce_attr
+    class_size += sizeof(WSC::sWscAttrEnrolleeNonce); // enrolee_nonce_attr
     class_size += sizeof(WSC::sWscAttrRegistrarNonce); // registrar_nonce_attr
     class_size += sizeof(WSC::sWscAttrUuidR); // uuid_r_attr
     class_size += sizeof(WSC::sWscAttrPublicKey); // public_key_attr
@@ -685,12 +685,12 @@ bool tlvWscM2::init()
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(WSC::sWscAttrMessageType); }
     if (!m_parse__) { m_message_type_attr->struct_init(); }
-    m_enrolee_nonce_attr = (WSC::sWscAttrEnroleeNonce*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(WSC::sWscAttrEnroleeNonce))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(WSC::sWscAttrEnroleeNonce) << ") Failed!";
+    m_enrolee_nonce_attr = (WSC::sWscAttrEnrolleeNonce*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(WSC::sWscAttrEnrolleeNonce))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(WSC::sWscAttrEnrolleeNonce) << ") Failed!";
         return false;
     }
-    if(m_length && !m_parse__){ (*m_length) += sizeof(WSC::sWscAttrEnroleeNonce); }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(WSC::sWscAttrEnrolleeNonce); }
     if (!m_parse__) { m_enrolee_nonce_attr->struct_init(); }
     m_registrar_nonce_attr = (WSC::sWscAttrRegistrarNonce*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(WSC::sWscAttrRegistrarNonce))) {
