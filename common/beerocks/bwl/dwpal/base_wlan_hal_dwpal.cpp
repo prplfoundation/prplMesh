@@ -19,6 +19,8 @@ extern "C" {
 #include <dwpal.h>
 }
 
+#include <slibc/string.h>
+
 #define UNHANDLED_EVENTS_LOGS 20
 
 namespace bwl {
@@ -136,6 +138,21 @@ bool base_wlan_hal_dwpal::fsm_setup()
                     attached = true;
                 }
 
+                //Attach NL interface
+                if (m_dwpal_nl_ctx == nullptr) {
+                    //Attach nl interface
+                    if (dwpal_driver_nl_attach(&m_dwpal_nl_ctx) == DWPAL_FAILURE) {
+                        LOG(ERROR) << "dwpal_driver_nl_attach returned ERROR for interface ="
+                                   << m_radio_info.iface_name;
+                        return (transition.change_destination(dwpal_fsm_state::Detach));
+                    }
+                    LOG(DEBUG) << "dwpal_driver_nl_attach() success for radio ="
+                               << m_radio_info.iface_name;
+                } else {
+                    //Already attached
+                    attached = true;
+                    LOG(DEBUG) << "dwpal_driver_nl_attach() already attached";
+                }
                 if (attached) {
                     if (get_type() != HALType::Station) {
                         transition.change_destination(dwpal_fsm_state::GetRadioInfo);
@@ -288,10 +305,27 @@ bool base_wlan_hal_dwpal::fsm_setup()
                     LOG(ERROR) << "Can't get event fd since dwpal ctx is NULL!";
                     return (transition.change_destination(dwpal_fsm_state::Detach));
                 }
-
                 // Success
                 LOG(DEBUG)
                     << "Open and attach an event interface to wpa_supplicant/hostapd - SUCCESS!";
+
+                // Get the nl event interface file descriptor
+                if (m_dwpal_nl_ctx != nullptr) {
+                    LOG(DEBUG) << "new  nl interface";
+                    if (dwpal_driver_nl_fd_get(m_dwpal_nl_ctx, &m_fd_nl_events, &m_fd_nl_cmd_get)) {
+                        LOG(ERROR)
+                            << "dwpal_driver_nl_fd_get() failed for: " << m_radio_info.iface_name;
+                        return (transition.change_destination(dwpal_fsm_state::Detach));
+                    }
+                    LOG(DEBUG) << "dwpal_driver_nl_fd_get() success for radio ="
+                               << m_radio_info.iface_name << " nl_fd =  " << m_fd_nl_events
+                               << " fdcmdget_nl = " << m_fd_nl_cmd_get;
+                } else {
+                    LOG(ERROR) << "Can't get event fd since dwpal ctx is NULL!";
+                    return (transition.change_destination(dwpal_fsm_state::Detach));
+                }
+
+                LOG(DEBUG) << "Open and attach an event interface to nl - SUCCESS!";
                 return true;
             })
 
@@ -330,6 +364,17 @@ bool base_wlan_hal_dwpal::fsm_setup()
             }
 
             m_fd_ext_events = -1;
+
+            // detach nl socket from main vap
+            if (!m_dwpal_nl_ctx) {
+                LOG(DEBUG) << "detaching nl interface";
+                if (dwpal_driver_nl_detach(&m_dwpal_nl_ctx) == DWPAL_FAILURE) {
+                    LOG(DEBUG) << "dwpal_driver_nl_detach() success for radio ="
+                               << m_radio_info.iface_name;
+                }
+                m_fd_nl_events  = -1;
+                m_fd_nl_cmd_get = -1;
+            }
 
             return success;
         })
@@ -505,6 +550,154 @@ bool base_wlan_hal_dwpal::attach_ctrl_interface(int vap_id)
     }
 
     return true;
+}
+
+bool base_wlan_hal_dwpal::process_nl_events()
+{
+    // process all NL events
+    if (!m_dwpal_nl_ctx) {
+        LOG(ERROR) << "Invalid WPA Control socket used for nl events (m_dwpal_ctx == nullptr)";
+        return false;
+    }
+
+    // Passing a lambda with capture is not supported for standard C function
+    // pointers. As a workaround, we create a static (but thread local) wrapper
+    // function that calls the capturing lambda function.
+    static __thread std::function<DWPAL_Ret(struct nl_msg * msg)> nl_handler_cb_wrapper;
+    nl_handler_cb_wrapper = [&](struct nl_msg *msg) -> DWPAL_Ret {
+        if (process_dwpal_nl_event(msg) != true) {
+            LOG(ERROR) << "User's netlink handler function failed!";
+            return DWPAL_FAILURE;
+        }
+        return DWPAL_SUCCESS;
+    };
+    auto nl_handler_cb = [](struct nl_msg *msg) -> DWPAL_Ret { return nl_handler_cb_wrapper(msg); };
+
+    if (m_fd_nl_events > 0) {
+        //parsing will be done in callback function
+        if (dwpal_driver_nl_msg_get(m_dwpal_nl_ctx, DWPAL_NL_UNSOLICITED_EVENT, NULL,
+                                    nl_handler_cb) == DWPAL_FAILURE) {
+            LOG(ERROR) << " dwpal_driver_nl_msg_get failed,"
+                       << " ctx=" << m_dwpal_nl_ctx;
+            detach();
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool base_wlan_hal_dwpal::dwpal_nl_cmd_set(const std::string &ifname, unsigned int nl_cmd,
+                                           unsigned char *vendor_data, size_t vendor_data_size)
+{
+    bool err = true;
+    if ((vendor_data_size > 0) && (vendor_data == NULL)) {
+        LOG(ERROR) << __FUNCTION__ << "ifname or vendor_data is NULL ==> Abort!\n";
+        return false;
+    }
+
+    if (dwpal_driver_nl_cmd_send(m_dwpal_nl_ctx, DWPAL_NL_UNSOLICITED_EVENT, (char *)ifname.c_str(),
+                                 NL80211_CMD_VENDOR, DWPAL_NETDEV_ID,
+                                 (enum ltq_nl80211_vendor_subcmds)nl_cmd, vendor_data,
+                                 vendor_data_size) != DWPAL_SUCCESS) {
+        err = false;
+    }
+
+    return err;
+}
+
+bool base_wlan_hal_dwpal::dwpal_nl_cmd_get(const std::string &ifname, unsigned int nl_cmd,
+                                           unsigned char *out_buffer, size_t *out_buffer_size,
+                                           const size_t max_buffer_size)
+{
+
+    if ((out_buffer_size == NULL) || (out_buffer == NULL)) {
+        LOG(ERROR) << __FUNCTION__ << "out_buffer or out_buffer_size incorrect ==> Abort!\n";
+        return false;
+    }
+
+    /* Handle a command which invokes an event with the output data */
+    if (dwpal_driver_nl_cmd_send(
+            m_dwpal_nl_ctx, DWPAL_NL_SOLICITED_EVENT, (char *)ifname.c_str(), NL80211_CMD_VENDOR,
+            DWPAL_NETDEV_ID, (enum ltq_nl80211_vendor_subcmds)nl_cmd, NULL, 0) == DWPAL_FAILURE) {
+        LOG(DEBUG) << __FUNCTION__ << "ERROR for cmd = " << nl_cmd;
+        return false;
+    }
+
+    // Passing a lambda with capture is not supported for standard C function
+    // pointers. As a workaround, we create a static (but thread local) wrapper
+    // function that calls the capturing lambda function.
+    static __thread std::function<DWPAL_Ret(char *ifname, int event, int subevent, size_t len,
+                                            unsigned char *data)>
+        nl_handler_cb_wrapper;
+    nl_handler_cb_wrapper = [&](char *ifname, int event, int subevent, size_t len,
+                                unsigned char *data) -> DWPAL_Ret {
+        LOG(DEBUG) << __func__ << " ifname = " << std::string(ifname) << " event = " << event
+                   << " subevent = " << subevent << " len = " << len;
+
+        if ((len == 0) || (data == NULL)) {
+            LOG(DEBUG) << __func__ << "len=0 and/or data is NULL ==> Abort!\n";
+            return DWPAL_FAILURE;
+        }
+        if (event == NL80211_CMD_VENDOR) {
+            if (len >= max_buffer_size) {
+                LOG(DEBUG) << __func__ << "NL size exceeds out_buffer size ==> Abort!\n";
+                return DWPAL_FAILURE;
+            }
+            // copy get result from nl buffer (data[i])
+            for (int i = 0; i < (int)len; i++) {
+                out_buffer[i] = data[i];
+            }
+            *out_buffer_size = len;
+
+        } else {
+            LOG(DEBUG) << __func__ << "non vendor event not handled ";
+            return DWPAL_FAILURE;
+        }
+        return DWPAL_SUCCESS;
+    };
+    auto nl_handler_cb = [](char *ifname, int event, int subevent, size_t len,
+                            unsigned char *data) -> DWPAL_Ret {
+        return nl_handler_cb_wrapper(ifname, event, subevent, len, data);
+    };
+
+    while (*out_buffer_size == 0) { /* wait for reply with valid data */
+
+        //parsing will be done in callback func
+        if (dwpal_driver_nl_msg_get(m_dwpal_nl_ctx, DWPAL_NL_SOLICITED_EVENT, nl_handler_cb,
+                                    NULL) == DWPAL_FAILURE) {
+            LOG(ERROR) << " dwpal_driver_nl_msg_get failed,"
+                       << " ctx=" << m_dwpal_nl_ctx;
+            detach();
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool base_wlan_hal_dwpal::dwpal_nl_cmd_scan_dump()
+{
+    bool err = true;
+    // Passing a lambda with capture is not supported for standard C function
+    // pointers. As a workaround, we create a static (but thread local) wrapper
+    // function that calls the capturing lambda function.
+    static __thread std::function<DWPAL_Ret(struct nl_msg * msg)> nl_handler_cb_wrapper;
+    nl_handler_cb_wrapper = [&](struct nl_msg *msg) -> DWPAL_Ret {
+        if (process_dwpal_nl_event(msg) != true) {
+            LOG(ERROR) << "User's netlink handler function failed!";
+            return DWPAL_FAILURE;
+        }
+        return DWPAL_SUCCESS;
+    };
+    auto nl_handler_cb = [](struct nl_msg *msg) -> DWPAL_Ret { return nl_handler_cb_wrapper(msg); };
+
+    if (dwpal_driver_nl_scan_dump(m_dwpal_nl_ctx, (char *)m_radio_info.iface_name.c_str(),
+                                  nl_handler_cb) != DWPAL_SUCCESS) {
+        err = false;
+    }
+
+    return err;
 }
 
 bool base_wlan_hal_dwpal::refresh_radio_info()
@@ -730,6 +923,12 @@ std::string base_wlan_hal_dwpal::get_radio_mac()
         LOG(ERROR) << "Failed to get radio mac from ifname " << m_radio_info.iface_name;
     }
     return mac;
+}
+
+bool base_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
+{
+    LOG(DEBUG) << __func__ << "isn't implemented by derived and shouldn't be called";
+    return true;
 }
 
 } // namespace dwpal

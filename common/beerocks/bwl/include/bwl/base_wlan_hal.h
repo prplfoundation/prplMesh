@@ -93,6 +93,15 @@ public:
     virtual bool process_ext_events() = 0;
 
     /*!
+     * Process incoming nl events from the underlying hardware/middleware.
+     * This method should be called if the file descriptor returned by
+     * get_nl_events_fd() generated an event.
+     *
+     * @return true on success or false on error.
+     */
+    virtual bool process_nl_events() = 0;
+
+    /*!
      * Process internal events (queued by the underlying hardware/middleware).
      * This method should be called if the file descriptor returned by
      * get_int_events_fd() generated an event.
@@ -127,6 +136,15 @@ public:
      * The returned file descriptor supports select(), poll() and epoll().
      */
     int get_int_events_fd() const { return (m_fd_int_events); }
+
+    /*!
+     * Returns a file descriptor to the nl events, 0 is events
+     * should processed synchronously (by directly calling the process method),
+     * or -1 on error.
+     * 
+     * The returned file descriptor supports select(), poll() and epoll().
+     */
+    int get_nl_events_fd() const { return (m_fd_nl_events); }
 
     /*!
      * Returns the interface name.
@@ -198,6 +216,7 @@ protected:
     HALState m_hal_state = HALState::Uninitialized;
 
     int m_fd_ext_events = -1;
+    int m_fd_nl_events  = -1;
 
     hal_conf_t m_hal_conf;
 

@@ -27,7 +27,7 @@ base_wlan_hal::base_wlan_hal(HALType type, std::string iface_name, IfaceType ifa
     // Initialize radio info structure
     m_radio_info.iface_name = iface_name;
     m_radio_info.iface_type = iface_type;
-
+    
     // Create an eventfd for internal events
     if ((m_fd_int_events = eventfd(0, EFD_SEMAPHORE)) < 0) {
         LOG(FATAL) << "Failed creating eventfd: " << strerror(errno);

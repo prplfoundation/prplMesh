@@ -10,6 +10,7 @@
 #define _BWL_MON_WLAN_HAL_DWPAL_H_
 
 #include "base_wlan_hal_dwpal.h"
+#include "mon_wlan_hal_dwpal_types.h"
 #include <bwl/mon_wlan_hal.h>
 
 namespace bwl {
@@ -39,10 +40,13 @@ public:
     virtual bool sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token) override;
     virtual bool sta_statistics_11k_request(const SStatisticsRequest11k &req) override;
     virtual bool sta_link_measurements_11k_request(const std::string &sta_mac) override;
-
+    virtual bool dcs_scan_trigger(int dwell_time_msec,
+                                  const std::vector<unsigned int> &channel_pool) override;
+    virtual bool dcs_scan_dump_results() override;
     // Protected methods:
 protected:
     virtual bool process_dwpal_event(char *buffer, int bufLen, const std::string &opcode) override;
+    virtual bool process_dwpal_nl_event(struct nl_msg *msg) override;
 
     // Overload for Monitor events
     bool event_queue_push(mon_wlan_hal::Event event, std::shared_ptr<void> data = {})
@@ -53,6 +57,8 @@ protected:
     // Private data-members:
 private:
     std::shared_ptr<char> m_temp_dwpal_value;
+    bool m_waiting_for_results_ready = false;
+    uint32_t m_nl_seq                = 0;
 };
 
 } // namespace dwpal
