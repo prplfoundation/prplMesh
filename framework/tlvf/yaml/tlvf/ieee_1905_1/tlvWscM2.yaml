@@ -21,7 +21,7 @@ tlvWscM2:
   # a variable length list.
   version_attr: WSC::sWscAttrVersion
   message_type_attr: WSC::sWscAttrMessageType
-  enrolee_nonce_attr: WSC::sWscAttrEnroleeNonce
+  enrolee_nonce_attr: WSC::sWscAttrEnrolleeNonce
   registrar_nonce_attr: WSC::sWscAttrRegistrarNonce
   uuid_r_attr: WSC::sWscAttrUuidR
   public_key_attr: WSC::sWscAttrPublicKey
