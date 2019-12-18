@@ -255,6 +255,7 @@ main() {
             ;;
         "status")
             status_function
+	    return $?
             ;;
         *)
             err "unsupported argument \"$1\""; usage; exit 1 ;;
