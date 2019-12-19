@@ -16,8 +16,7 @@
 
 class BaseClass {
 protected:
-    BaseClass(uint8_t *buff_, const size_t buff_len_, const bool parse_ = false,
-              const bool swap_needed = false);
+    BaseClass(uint8_t *buff_, const size_t buff_len_, const bool parse_ = false);
     ~BaseClass();
 
 public:
@@ -35,7 +34,6 @@ protected:
     uint8_t *m_buff_ptr__;
     const size_t m_buff_len__;
     const bool m_parse__;
-    const bool m_swap__;
     bool m_init_succeeded = false;
 
 private:

@@ -49,7 +49,7 @@ int test_int_len_list()
     MAPF_INFO(__FUNCTION__ << " start");
     memset(tx_buffer, 0, sizeof(tx_buffer));
     {
-        auto tlv = tlvMacAddress(tx_buffer, sizeof(tx_buffer), false, true);
+        auto tlv = tlvMacAddress(tx_buffer, sizeof(tx_buffer), false);
         std::copy_n(gTlvMacAddress, 6, tlv.mac().oct);
         tlv.class_swap(); //finalize
         LOG(DEBUG) << "TX: " << std::endl << utils::dump_buffer(tx_buffer, tlv.getLen());
@@ -58,7 +58,7 @@ int test_int_len_list()
     uint8_t rx_buffer[sizeof(tx_buffer)];
     memcpy(rx_buffer, tx_buffer, sizeof(rx_buffer));
     {
-        auto tlv = tlvMacAddress(tx_buffer, sizeof(tx_buffer), true, true);
+        auto tlv = tlvMacAddress(tx_buffer, sizeof(tx_buffer), true);
         auto mac = tlv.mac();
         if (!std::equal(mac.oct, mac.oct + 6, gTlvMacAddress)) {
             MAPF_ERR("MAC address in received TLV does not match expected result");
@@ -213,7 +213,7 @@ bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, u
     // Then copy it to the encrypted data, add an IV and encrypt.
     // Finally, add HMAC
     uint8_t buf[1024];
-    WSC::cConfigData config_data(buf, sizeof(buf), false, true);
+    WSC::cConfigData config_data(buf, sizeof(buf), false);
     config_data.set_ssid("test_ssid");
     config_data.authentication_type_attr().data = WSC::eWscAuth::WSC_AUTH_WPA2; //DUMMY
     config_data.encryption_type_attr().data     = WSC::eWscEncr::WSC_ENCR_AES;
@@ -275,7 +275,7 @@ bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey,
     mapf::encryption::aes_decrypt(keywrapkey, iv,
                                   (uint8_t *)encrypted_settings->encrypted_settings(),
                                   encrypted_settings->encrypted_settings_length(), buf, dlen);
-    WSC::cConfigData config_data(buf, dlen, true, true);
+    WSC::cConfigData config_data(buf, dlen, true);
 
     LOG(DEBUG) << "WSC config_data:" << std::endl
                << "     ssid: " << config_data.ssid() << std::endl
