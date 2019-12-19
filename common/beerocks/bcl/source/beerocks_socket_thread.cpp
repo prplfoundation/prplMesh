@@ -168,10 +168,9 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
         return false;
     }
 
-    if (!cmdu_rx.parse(uds_header->length, uds_header->swap_needed)) {
+    if (!cmdu_rx.parse()) {
         THREAD_LOG(ERROR) << "parsing cmdu failure, rx_buffer" << std::hex << rx_buffer << std::dec
-                          << ", uds_header->length=" << int(uds_header->length)
-                          << ", uds_header->swap_needed=" << int(uds_header->swap_needed);
+                          << ", uds_header->length=" << int(uds_header->length);
         return false;
     }
 
@@ -197,13 +196,10 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
 
     do {
 
-        if (uds_header->swap_needed) {
-            swap_16(length);
-        }
-
+        swap_16(length);
         if (static_cast<ieee1905_1::eTlvType>(type) == ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC) {
             auto tlv_vendor_specific = ieee1905_1::tlvVendorSpecific(
-                (uint8_t *)tlv, length + sizeof(sTlvHeader), true, uds_header->swap_needed);
+                (uint8_t *)tlv, length + sizeof(sTlvHeader), true, true);
             if (!tlv_vendor_specific.isInitialized()) {
                 LOG(ERROR) << "tlvVendorSpecific init() failure";
                 ret = false;
@@ -215,10 +211,8 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
                 // assuming that the magic is the first data on the beerocks header
                 auto beerocks_magic = *(
                     uint32_t *)((uint8_t *)tlv + ieee1905_1::tlvVendorSpecific::get_initial_size());
-                if (uds_header->swap_needed) {
-                    swap_32(beerocks_magic);
-                }
 
+                swap_32(beerocks_magic);
                 if (beerocks_magic != message::MESSAGE_MAGIC) {
                     THREAD_LOG(WARNING) << "mismatch magic " << std::hex << int(beerocks_magic)
                                         << " != " << int(message::MESSAGE_MAGIC) << std::dec;
@@ -230,10 +224,8 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
                 THREAD_LOG(INFO) << "Not an Intel vendor specific message!";
             }
 
-            if (uds_header->swap_needed) {
-                // cancel the swap we did
-                tlv_vendor_specific.class_swap();
-            }
+            // cancel the swap we did
+            tlv_vendor_specific.class_swap();
         } else if (static_cast<ieee1905_1::eTlvType>(type) ==
                        ieee1905_1::eTlvType::TLV_END_OF_MESSAGE &&
                    length == 0) {

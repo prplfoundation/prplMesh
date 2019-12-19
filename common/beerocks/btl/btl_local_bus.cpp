@@ -205,18 +205,16 @@ bool transport_socket_thread::handle_cmdu_message_bus()
                 uds_header->src_bridge_mac);
     std::copy_n((uint8_t *)cmdu_rx_msg->metadata()->dst, sizeof(mapf::CmduRxMessage::Metadata::dst),
                 uds_header->dst_bridge_mac);
-    uds_header->length      = cmdu_rx_msg->metadata()->length;
-    uds_header->swap_needed = true;
+    uds_header->length = cmdu_rx_msg->metadata()->length;
 
     if (!verify_cmdu(uds_header)) {
         THREAD_LOG(ERROR) << "Failed verifying cmdu header";
         return false;
     }
 
-    if (!cmdu_rx.parse(uds_header->swap_needed)) {
+    if (!cmdu_rx.parse()) {
         THREAD_LOG(ERROR) << "parsing cmdu failure, rx_buffer" << std::hex << rx_buffer << std::dec
-                          << ", uds_header->length=" << int(uds_header->length)
-                          << ", uds_header->swap_needed=" << int(uds_header->swap_needed);
+                          << ", uds_header->length=" << int(uds_header->length);
         return false;
     }
 

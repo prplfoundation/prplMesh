@@ -49,7 +49,7 @@ eMessageType CmduMessage::getMessageType()
     uint16_t msgValue = 0;
 
     msgValue = (uint16_t)getCmduHeader()->message_type();
-    if (msg.swap_needed() && !msg.is_swapped()) {
+    if (!msg.is_swapped()) {
         swap_16((uint16_t &)msgValue);
     }
 
@@ -60,7 +60,7 @@ uint16_t CmduMessage::getMessageId()
 {
     uint16_t mid = getCmduHeader()->message_id();
 
-    if (msg.swap_needed() && !msg.is_swapped()) {
+    if (!msg.is_swapped()) {
         swap_16((uint16_t &)mid);
     }
 

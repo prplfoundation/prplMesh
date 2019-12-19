@@ -50,7 +50,6 @@ public:
     size_t getMessageBuffLength() const { return msg.getMessageBuffLength(); };
     uint8_t *getMessageBuff() const { return msg.getMessageBuff(); };
     void swap() { msg.swap(); };
-    bool swap_needed() { return msg.swap_needed(); }
     bool is_finalized() const { return msg.is_finalized(); };
     bool is_swapped() const { return msg.is_swapped(); };
 
