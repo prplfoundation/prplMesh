@@ -47,22 +47,21 @@ uint8_t *CmduMessage::getNextTlvData() const
 eMessageType CmduMessage::getMessageType()
 {
     uint16_t msgValue = 0;
-
-    msgValue = (uint16_t)getCmduHeader()->message_type();
-    if (!msg.is_swapped()) {
+    auto cmduhdr      = getCmduHeader();
+    msgValue          = (uint16_t)cmduhdr->message_type();
+    if (cmduhdr->is_finalized())
         swap_16((uint16_t &)msgValue);
-    }
 
     return (eMessageType)msgValue;
 }
 
 uint16_t CmduMessage::getMessageId()
 {
-    uint16_t mid = getCmduHeader()->message_id();
+    auto cmduhdr = getCmduHeader();
+    uint16_t mid = cmduhdr->message_id();
 
-    if (!msg.is_swapped()) {
+    if (cmduhdr->is_finalized())
         swap_16((uint16_t &)mid);
-    }
 
     return mid;
 }

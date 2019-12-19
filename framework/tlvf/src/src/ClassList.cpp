@@ -72,12 +72,11 @@ bool ClassList::finalize()
     if (m_finalized)
         return true;
 
-    if (!m_class_vector.back()->isPostInitSucceeded()) {
-        TLVF_LOG(ERROR) << "TLV post init failed";
+    // On every addClass, we call finalize for the previous added class.
+    // We need to call it here manually for the last class added for which
+    // we didn't call finalize() yet.
+    if (!m_class_vector.back()->finalize())
         return false;
-    }
-
-    swap();
 
     m_finalized = true;
     return true;

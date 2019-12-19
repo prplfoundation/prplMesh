@@ -29,12 +29,15 @@ public:
     bool isInitialized();
     virtual bool isPostInitSucceeded() { return true; };
     virtual void class_swap() = 0;
+    bool finalize();
+    bool is_finalized() { return m_finalized; };
 
 protected:
     uint8_t *m_buff__;
     uint8_t *m_buff_ptr__;
     const size_t m_buff_len__;
     const bool m_parse__;
+    bool m_finalized;
     bool m_init_succeeded = false;
 };
 
