@@ -20,7 +20,7 @@ class ClassList {
 
 public:
     ClassList() = delete;
-    ClassList(uint8_t *buff, size_t buff_len, bool parse = false, bool swap = false);
+    ClassList(uint8_t *buff, size_t buff_len, bool parse = false);
     virtual ~ClassList() = default;
 
 public:
@@ -34,14 +34,14 @@ public:
         std::shared_ptr<T> ptr;
         if (m_buff) {
             if (m_class_vector.size() == 0) {
-                ptr = std::make_shared<T>(m_buff, m_buff_len, m_parse, m_swap);
+                ptr = std::make_shared<T>(m_buff, m_buff_len, m_parse, true);
             } else {
                 // do not allow to use addClass method if the previous tlv is not fully initialized
                 if (!m_class_vector.back()->isPostInitSucceeded()) {
                     TLVF_LOG(ERROR) << "TLV post init failed";
                     return nullptr;
                 }
-                ptr = std::make_shared<T>(m_class_vector.back(), m_parse, m_swap);
+                ptr = std::make_shared<T>(m_class_vector.back(), m_parse, true);
             }
             if (!ptr || ptr->isInitialized() == false) {
                 return std::shared_ptr<T>();
@@ -131,18 +131,16 @@ public:
     size_t getMessageBuffLength() const { return m_buff_len; };
     uint8_t *getMessageBuff() const { return m_buff; };
     void swap();
-    bool swap_needed() { return m_swap; }
     bool is_finalized() const { return m_finalized; };
     bool is_swapped() const { return m_swapped; };
-    bool finalize(bool swap_needed);
-    void reset(bool parse, bool swap);
+    bool finalize();
+    void reset(bool parse);
 
 protected:
     uint8_t *const m_buff;
     size_t m_buff_len;
 
     bool m_parse     = false;
-    bool m_swap      = false;
     bool m_finalized = false;
     bool m_swapped   = false;
     std::vector<std::shared_ptr<BaseClass>> m_class_vector;

@@ -115,8 +115,7 @@ bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std:
         THREAD_LOG(ERROR) << "uds_header=nullptr";
         return false;
     }
-    uds_header->length      = length;
-    uds_header->swap_needed = true;
+    uds_header->length = length;
     net::network_utils::mac_from_string(uds_header->src_bridge_mac, src_mac);
     net::network_utils::mac_from_string(uds_header->dst_bridge_mac, dst_mac);
     return message_com::send_data(bus, cmdu.getMessageBuff() - sizeof(message::sUdsHeader),

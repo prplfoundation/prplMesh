@@ -11,8 +11,8 @@
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
 #include <tlvf/tlvflogging.h>
 
-ClassList::ClassList(uint8_t *buff, size_t buff_len, bool parse, bool swap)
-    : m_buff(buff), m_buff_len(buff_len), m_parse(parse), m_swap(swap)
+ClassList::ClassList(uint8_t *buff, size_t buff_len, bool parse)
+    : m_buff(buff), m_buff_len(buff_len), m_parse(parse)
 {
 }
 
@@ -49,12 +49,11 @@ void ClassList::swap()
     m_swapped = !m_swapped;
 }
 
-void ClassList::reset(bool parse, bool swap)
+void ClassList::reset(bool parse)
 {
     if (!parse)
         memset(m_buff, 0, m_buff_len);
     m_parse     = parse;
-    m_swap      = swap;
     m_finalized = false;
     m_swapped   = false;
     for (auto &c : m_class_vector) {
@@ -63,7 +62,7 @@ void ClassList::reset(bool parse, bool swap)
     m_class_vector.clear();
 }
 
-bool ClassList::finalize(bool swap_needed)
+bool ClassList::finalize()
 {
     if (m_class_vector.empty()) {
         TLVF_LOG(ERROR) << "Finalize() called on an empty ClassList!";
@@ -78,8 +77,7 @@ bool ClassList::finalize(bool swap_needed)
         return false;
     }
 
-    if (swap_needed)
-        swap();
+    swap();
 
     m_finalized = true;
     return true;

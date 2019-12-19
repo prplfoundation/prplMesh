@@ -20,8 +20,7 @@ CmduMessageTx::~CmduMessageTx() {}
 std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType message_type)
 {
     // parse - false since this is for TX
-    // swap - false since on TX we do swap in Finalize(swap_needed)
-    msg.reset(false, false);
+    msg.reset(false);
     auto cmduhdr = addClass<cCmduHeader>();
     if (!cmduhdr)
         return nullptr;
@@ -33,7 +32,7 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType mes
 
 std::shared_ptr<cCmduHeader> CmduMessageTx::load()
 {
-    msg.reset(true, false);
+    msg.reset(true);
     return addClass<cCmduHeader>();
 }
 
@@ -52,9 +51,9 @@ std::shared_ptr<tlvVendorSpecific> CmduMessageTx::add_vs_tlv(tlvVendorSpecific::
     return tlv;
 }
 
-bool CmduMessageTx::finalize(bool swap_needed)
+bool CmduMessageTx::finalize()
 {
     if (!addClass<tlvEndOfMessage>())
         return false;
-    return msg.finalize(swap_needed);
+    return msg.finalize();
 };

@@ -25,7 +25,7 @@ public:
     std::shared_ptr<cCmduHeader> load();
     std::shared_ptr<tlvVendorSpecific> add_vs_tlv(tlvVendorSpecific::eVendorOUI voui);
 
-    bool finalize(bool swap_needed);
+    bool finalize();
 };
 
 }; // namespace ieee1905_1
