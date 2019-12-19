@@ -21,8 +21,11 @@ extern "C" {
 ////////////////////////// Local Module Definitions //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+namespace beerocks {
+namespace bpl {
+
 static struct ubus_context *s_pUbusCtx = NULL;
-static bpl::dhcp_mon_cb s_pCallback    = NULL;
+static dhcp_mon_cb s_pCallback         = NULL;
 
 enum { DHCP_EVENT_OP, DHCP_EVENT_MAC, DHCP_EVENT_IP, DHCP_EVENT_HOSTNAME, __DHCP_EVENT_MAX };
 
@@ -119,8 +122,6 @@ static struct ubus_object dhcp_ubus_object = {
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-namespace bpl {
-
 int dhcp_mon_start(dhcp_mon_cb cb)
 {
     // Modules doesn't support multiple starts
@@ -169,3 +170,4 @@ int dhcp_mon_stop()
 }
 
 } // namespace bpl
+} // namespace beerocks

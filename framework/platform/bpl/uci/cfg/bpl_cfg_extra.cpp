@@ -14,12 +14,10 @@
 
 #include "mapf/common/logger.h"
 
-using namespace mapf;
-
-using namespace beerocks::bpl;
-
+namespace beerocks {
 namespace bpl {
 
 int cfg_set_onboarding(int enable) { return 0; }
 
 } // namespace bpl
+} // namespace beerocks

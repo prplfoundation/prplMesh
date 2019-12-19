@@ -20,6 +20,7 @@ extern "C" {
 
 #define PRINTF(LEVEL, fmt, args...) printf(LEVEL ":{%s, %d}:" fmt, __func__, __LINE__, ##args)
 
+namespace beerocks {
 namespace bpl {
 
 int cfg_uci_get(char *path, char *value, size_t length)
@@ -288,3 +289,4 @@ int cfg_uci_get_wireless_bool(enum paramType type, int index, const char param[]
 }
 
 } // namespace bpl
+} // namespace beerocks

@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 
+namespace beerocks {
 namespace bpl {
 
 /****************************************************************************/
@@ -161,5 +162,6 @@ int arp_get_bridge_iface(const char bridge[BPL_ARP_IFACE_NAME_LEN],
                          char iface[BPL_ARP_IFACE_NAME_LEN]);
 
 } // namespace bpl
+} // namespace beerocks
 
 #endif /* _BPL_ARP_H_ */

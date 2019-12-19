@@ -22,8 +22,7 @@ extern "C" {
 
 #include <mapf/common/logger.h>
 
-using namespace beerocks::bpl;
-
+namespace beerocks {
 namespace bpl {
 
 int arp_mon_start(BPL_ARP_MON_CTX *ctx, const char *iface)
@@ -224,3 +223,4 @@ int arp_get_bridge_iface(const char bridge[BPL_ARP_IFACE_NAME_LEN],
 }
 
 } // namespace bpl
+} // namespace beerocks

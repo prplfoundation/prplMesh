@@ -9,6 +9,7 @@
 #ifndef _BPL_H_
 #define _BPL_H_
 
+namespace beerocks {
 namespace bpl {
 
 /**
@@ -25,5 +26,6 @@ int bpl_init();
 void bpl_close();
 
 } // namespace bpl
+} // namespace beerocks
 
 #endif /* _BPL_H_ */

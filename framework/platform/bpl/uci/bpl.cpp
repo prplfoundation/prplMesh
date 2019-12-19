@@ -17,6 +17,7 @@ SHARE_EASYLOGGINGPP(el::Helpers::storage())
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+namespace beerocks {
 namespace bpl {
 
 int bpl_init()
@@ -31,3 +32,4 @@ void bpl_close()
 }
 
 } // namespace bpl
+} // namespace beerocks

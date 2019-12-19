@@ -21,9 +21,11 @@
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
 #include <tlvf/ieee_1905_1/tlvWscM2.h>
 
+namespace beerocks {
 namespace bpl {
 enum class eErrorCode;
 }
+} // namespace beerocks
 
 namespace son {
 class slave_thread : public beerocks::socket_thread {
@@ -151,7 +153,7 @@ private:
     void monitor_start();
     void monitor_stop();
     void log_son_config();
-    void platform_notify_error(bpl::eErrorCode code, const std::string &error_data);
+    void platform_notify_error(beerocks::bpl::eErrorCode code, const std::string &error_data);
     void update_iface_status(bool is_ap, int8_t iface_status);
     void send_iface_status();
     void send_platform_iface_status_notif(beerocks::eRadioStatus radio_status,
