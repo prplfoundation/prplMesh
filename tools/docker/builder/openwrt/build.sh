@@ -35,15 +35,14 @@ build_prplmesh() {
     docker run -i \
            --name "$container_name" \
            -e TARGET \
-           -e TARGET_PLATFORM_TYPE \
            -e OPENWRT_VERSION \
            -e PRPLMESH_VERSION \
            -v "$scriptdir/scripts:/home/openwrt/openwrt_sdk/build_scripts/:ro" \
-           -v "${rootdir}:/prplMesh:ro" \
+           -v "${rootdir}:/home/openwrt/prplMesh_source:ro" \
            "$image_tag" \
            ./build_scripts/build.sh
 
-    docker cp "${container_name}:/home/openwrt/openwrt_sdk/prplmesh-${TARGET}-${TARGET_PLATFORM_TYPE}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" .
+    docker cp "${container_name}:/home/openwrt/openwrt_sdk/prplmesh-${TARGET}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" .
 
     docker rm "${container_name}"
 }
@@ -98,7 +97,6 @@ main() {
     export OPENWRT_REPOSITORY
     export OPENWRT_VERSION
     export TARGET
-    export TARGET_PLATFORM_TYPE
     PRPLMESH_VERSION="$(git describe --always --dirty --exclude '*')"
     export PRPLMESH_VERSION
     export PRPL_FEED
