@@ -1355,6 +1355,7 @@ class TlvF:
             self.include_list.append('<string.h>')
             self.include_list.append('<memory>')
             self.include_list.append('<tlvf/BaseClass.h>')
+            self.include_list.append('<tlvf/ClassList.h>')
 
             self.appendLineCpp('#include <%s/%s.h>' % (self.yaml_path, self.yaml_fname) )
             self.appendLineCpp('#include <tlvf/tlvflogging.h>')
@@ -1400,7 +1401,7 @@ class TlvF:
             insert_marker = self.CODE_END_INSERT
 
         if obj_meta.type == MetaData.TYPE_CLASS:
-            self.addClassCode(insert_name, insert_marker, name)
+            self.addClassCode(insert_name, insert_marker, name, obj_meta)
             obj_meta.lock_order_member_added = False
 
             if self.multi_class_auto_insert != None:
@@ -1425,7 +1426,7 @@ class TlvF:
         else:
             self.abort("%s.yaml --> error in _type=%s" % (self.yaml_fname, dict_value))
     
-    def addClassCode(self, insert_name, insert_marker, name):
+    def addClassCode(self, insert_name, insert_marker, name, obj_meta):
         #class start
         self.insertLineH(insert_name, insert_marker, "")
         self.insertLineH(insert_name, insert_marker,"%sclass %s : public BaseClass" % (self.getIndentation(0), name))
@@ -1436,6 +1437,7 @@ class TlvF:
         self.addClassConstructor(insert_name, insert_marker, name)
         self.addClassPublicMembers(insert_name, insert_marker, name)
         self.addClassSwapMethod(insert_name, insert_marker, name)
+        self.addClassFinalizeMethod(insert_name, insert_marker, name, obj_meta)
         self.addClassSizeMethod(insert_name, insert_marker, name)
 
         self.insertLineH(insert_name, insert_marker, "" )
@@ -1532,15 +1534,48 @@ class TlvF:
         self.insertLineCpp(insert_name, insert_marker, "}")
         self.insertLineCpp(insert_name, insert_marker, "")
 
+    def addClassFinalizeMethod(self, insert_name, insert_marker, name, obj_meta):
+        self.insertLineH(insert_name, insert_marker, "%sbool finalize() override;" % self.getIndentation(2))
+
+        self.insertLineCpp(insert_name, insert_marker, "bool %s::finalize()" % (name))
+        self.insertLineCpp(insert_name, insert_marker, "{")
+        self.insertLineCpp(insert_name, insert_marker, "%sif (m_parse__) {" % (self.getIndentation(1)))
+        self.insertLineCpp(insert_name, insert_marker, '%sTLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";' %  self.getIndentation(2) )
+        self.insertLineCpp(insert_name, insert_marker, "%sreturn true;" % self.getIndentation(2))
+        self.insertLineCpp(insert_name, insert_marker, "%s}" % self.getIndentation(1) )
+        self.insertLineCpp(insert_name, insert_marker, "%sif (m_finalized__) {" % (self.getIndentation(1)))
+        self.insertLineCpp(insert_name, insert_marker, '%sTLVF_LOG(DEBUG) << "finalize() called for already finalized class";' %  self.getIndentation(2) )
+        self.insertLineCpp(insert_name, insert_marker, "%sreturn true;" % self.getIndentation(2))
+        self.insertLineCpp(insert_name, insert_marker, "%s}" % self.getIndentation(1) )
+        self.insertLineCpp(insert_name, insert_marker, "%sif (!isPostInitSucceeded()) {" % (self.getIndentation(1)))
+        self.insertLineCpp(insert_name, insert_marker, '%sTLVF_LOG(ERROR) << "post init check failed";' %  self.getIndentation(2) )
+        self.insertLineCpp(insert_name, insert_marker, "%sreturn false;" % self.getIndentation(2))
+        self.insertLineCpp(insert_name, insert_marker, "%s}" % self.getIndentation(1) )
+        self.insertLineCpp(insert_name, insert_marker, "%sif (m_inner__) {" % (self.getIndentation(1)))
+        self.insertLineCpp(insert_name, insert_marker, "%sif (!m_inner__->finalize()) {" % self.getIndentation(2))
+        self.insertLineCpp(insert_name, insert_marker, '%sTLVF_LOG(ERROR) << "m_inner__->finalize() failed";' %  self.getIndentation(3) )
+        self.insertLineCpp(insert_name, insert_marker, "%sreturn false;" % self.getIndentation(3))
+        self.insertLineCpp(insert_name, insert_marker, "%s}" % self.getIndentation(2) )
+        self.insertLineCpp(insert_name, insert_marker, "%sauto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();" % self.getIndentation(2))
+        self.insertLineCpp(insert_name, insert_marker, "%sm_buff_ptr__ -= tailroom;" % (self.getIndentation(2)))
+        if obj_meta.is_tlv_class:
+            self.insertLineCpp(insert_name, insert_marker, "%s*m_length -= tailroom;" % (self.getIndentation(2)))
+        self.insertLineCpp(insert_name, insert_marker, "%s}" % self.getIndentation(1) )
+        self.insertLineCpp(insert_name, insert_marker, "%sclass_swap();" % (self.getIndentation(1)))
+        self.insertLineCpp(insert_name, insert_marker, "%sm_finalized__ = true;" % (self.getIndentation(1)))
+        self.insertLineCpp(insert_name, insert_marker, "%sreturn true;" % (self.getIndentation(1)))
+        self.insertLineCpp(insert_name, insert_marker, "}")
+        self.insertLineCpp(insert_name, insert_marker, "")
+
     def addClassSwapMethod(self, insert_name, insert_marker, name):
-        self.insertLineH(insert_name, insert_marker, "%svoid class_swap();" % self.getIndentation(2))
+        self.insertLineH(insert_name, insert_marker, "%svoid class_swap() override;" % self.getIndentation(2))
 
         self.insertLineCpp(insert_name, insert_marker, "void %s::class_swap()" % (name))
         self.insertLineCpp(insert_name, insert_marker, "{")
         self.insertLineCpp(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(1), self.CODE_CLASS_SWAP_FUNC_INSERT, name))
         self.insertLineCpp(insert_name, insert_marker, "}")
         self.insertLineCpp(insert_name, insert_marker, "")
-
+       
     def addClassSizeMethod(self, insert_name, insert_marker, name):
         self.insertLineH(insert_name, insert_marker, "%sstatic size_t get_initial_size();" % self.getIndentation(2))
 
