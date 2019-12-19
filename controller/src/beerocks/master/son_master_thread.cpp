@@ -697,7 +697,7 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
 
     // Create ConfigData
     uint8_t buf[1024];
-    WSC::cConfigData config_data(buf, sizeof(buf), false, true);
+    WSC::cConfigData config_data(buf, sizeof(buf), false);
     if (bss_info_conf) {
         config_data.set_ssid(bss_info_conf->ssid);
         config_data.authentication_type_attr().data = bss_info_conf->authentication_type;

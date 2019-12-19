@@ -350,7 +350,6 @@ class TlvF:
         self.CODE_STRUCT_INIT_FUNC_INSERT           = "//~struct_init_func_insert"
 
         self.MEMBER_PARSE           = "parse"
-        self.MEMBER_SWAP            = "swap"
         self.MEMBER_LOCK_ALLOCATION = "lock_allocation"
         self.MEMBER_LOCK_ORDER_COUNTER = "lock_order_counter"
         self.MEMBER_BUFF = "buff"
@@ -848,7 +847,7 @@ class TlvF:
             if is_dynamic_len and obj_meta.is_tlv_class:
                 lines_cpp.append("if (m_length && m_%s__) {" % self.MEMBER_PARSE)
                 lines_cpp.append("%ssize_t len = *m_length;" % (self.getIndentation(1)))
-                lines_cpp.append("%sif (m_%s__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }" % (self.getIndentation(1), self.MEMBER_SWAP))
+                lines_cpp.append("%stlvf_swap(16, reinterpret_cast<uint8_t*>(&len));" % (self.getIndentation(1)))
                 lines_cpp.append("%slen -= (m_%s__ - sizeof(*m_type) - sizeof(*m_length) - m_%s__);" % (self.getIndentation(1), self.MEMBER_BUFF_PTR, self.MEMBER_BUFF))
                 if TypeInfo(param_type).type == TypeInfo.CLASS:
                     lines_cpp.append("%swhile (len > 0) {" % (self.getIndentation(1)))
@@ -884,7 +883,7 @@ class TlvF:
                 length_type = obj_meta.children_types[param_length]
                 lines_cpp.append("%s %s = *m_%s;" %(length_type.type_str, param_length, param_length))
                 if length_type.swap_needed:
-                    lines_cpp.append("if (m_%s__ && m_%s__) {  %s&%s%s; }" %(self.MEMBER_PARSE, self.MEMBER_SWAP, length_type.swap_prefix, param_length, length_type.swap_suffix))
+                    lines_cpp.append("if (m_%s__) {  %s&%s%s; }" %(self.MEMBER_PARSE, length_type.swap_prefix, param_length, length_type.swap_suffix))
                 if TypeInfo(param_type).type == TypeInfo.CLASS:
                     lines_cpp.append("m_%s_idx__ = 0;" % (param_name))
                     lines_cpp.append("for (size_t i = 0; i < %s; i++) {" % (param_length))
@@ -1085,9 +1084,9 @@ class TlvF:
             lines_cpp.append( "%sm_%s__ = true;" % (self.getIndentation(1), self.MEMBER_LOCK_ALLOCATION) )
             lines_cpp.extend(self.addAllocationMarkersCreate(obj_meta, param_meta, param_length, True)) # Variable length lists support
             if is_dynamic_len:
-                lines_cpp.append( "%sreturn std::make_shared<%s>(getBuffPtr(), getBuffRemainingBytes(), m_%s__, m_%s__);" % (self.getIndentation(1), param_type, self.MEMBER_PARSE, self.MEMBER_SWAP) )
+                lines_cpp.append( "%sreturn std::make_shared<%s>(getBuffPtr(), getBuffRemainingBytes(), m_%s__);" % (self.getIndentation(1), param_type, self.MEMBER_PARSE) )
             else:
-                lines_cpp.append( "%sreturn std::make_shared<%s>(src, getBuffRemainingBytes(src), m_%s__, m_%s__);" % (self.getIndentation(1), param_type, self.MEMBER_PARSE, self.MEMBER_SWAP) )
+                lines_cpp.append( "%sreturn std::make_shared<%s>(src, getBuffRemainingBytes(src), m_%s__);" % (self.getIndentation(1), param_type, self.MEMBER_PARSE) )
             lines_cpp.append( "}" )
             lines_cpp.append( "" )
 
@@ -1527,7 +1526,7 @@ class TlvF:
         self.insertLineCpp(insert_name, insert_marker, "%sreturn false;" % self.getIndentation(2))
         self.insertLineCpp(insert_name, insert_marker, "%s}" % self.getIndentation(1) )
         self.insertLineCpp(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(1), self.CODE_CLASS_INIT_FUNC_INSERT, name))
-        self.insertLineCpp(insert_name, insert_marker, "%sif (m_%s__ && m_%s__) { class_swap(); }" % (self.getIndentation(1), self.MEMBER_PARSE, self.MEMBER_SWAP))
+        self.insertLineCpp(insert_name, insert_marker, "%sif (m_%s__) { class_swap(); }" % (self.getIndentation(1), self.MEMBER_PARSE))
         self.insertLineCpp(insert_name, insert_marker, "%s%s_%s" % (self.getIndentation(1), self.CODE_CLASS_INIT_FUNC_SWAP_INSERT, name))
         self.insertLineCpp(insert_name, insert_marker, "%sreturn true;" % (self.getIndentation(1)))
         self.insertLineCpp(insert_name, insert_marker, "}")
@@ -1556,16 +1555,16 @@ class TlvF:
     def closeObject(self, obj_meta):
         if obj_meta.type == MetaData.TYPE_CLASS: # add class constractor
             # constractor 1
-            self.insertLineH(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "%s(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);" % (obj_meta.name))
-            self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, ("%s::%s(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :" % (obj_meta.name, obj_meta.name)))
-            self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, ("%sBaseClass(buff, buff_len, parse, swap_needed) {" % self.getIndentation(1) ))
+            self.insertLineH(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "%s(uint8_t* buff, size_t buff_len, bool parse = false);" % (obj_meta.name))
+            self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, ("%s::%s(uint8_t* buff, size_t buff_len, bool parse) :" % (obj_meta.name, obj_meta.name)))
+            self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, ("%sBaseClass(buff, buff_len, parse) {" % self.getIndentation(1) ))
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "%sm_init_succeeded = init();" % self.getIndentation(1))
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "}")
 
             # constractor 2
-            self.insertLineH(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "%s(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);" % (obj_meta.name))
-            self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, ("%s::%s(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :" % (obj_meta.name, obj_meta.name)))
-            self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){" )
+            self.insertLineH(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "%s(std::shared_ptr<BaseClass> base, bool parse = false);" % (obj_meta.name))
+            self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, ("%s::%s(std::shared_ptr<BaseClass> base, bool parse) :" % (obj_meta.name, obj_meta.name)))
+            self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){" )
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "%sm_init_succeeded = init();" % self.getIndentation(1))
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "}")
 
