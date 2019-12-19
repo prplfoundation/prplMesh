@@ -28,8 +28,8 @@ namespace wfa_map {
 class tlvApRadioIdentifier : public BaseClass
 {
     public:
-        tlvApRadioIdentifier(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvApRadioIdentifier(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvApRadioIdentifier(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvApRadioIdentifier(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvApRadioIdentifier();
 
         const eTlvTypeMap& type();

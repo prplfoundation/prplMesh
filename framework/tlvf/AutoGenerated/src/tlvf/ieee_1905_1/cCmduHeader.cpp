@@ -15,12 +15,12 @@
 
 using namespace ieee1905_1;
 
-cCmduHeader::cCmduHeader(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cCmduHeader::cCmduHeader(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cCmduHeader::cCmduHeader(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cCmduHeader::cCmduHeader(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cCmduHeader::~cCmduHeader() {
@@ -109,7 +109,7 @@ bool cCmduHeader::init()
         return false;
     }
     if (!m_parse__) { m_flags->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 

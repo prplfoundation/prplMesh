@@ -28,8 +28,8 @@ namespace wfa_map {
 class tlvHigherLayerData : public BaseClass
 {
     public:
-        tlvHigherLayerData(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvHigherLayerData(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvHigherLayerData(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvHigherLayerData(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvHigherLayerData();
 
         enum eProtocol: uint8_t {

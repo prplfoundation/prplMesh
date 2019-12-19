@@ -15,12 +15,12 @@
 
 using namespace beerocks_message;
 
-cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::~cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS() {
@@ -51,16 +51,16 @@ bool cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_ENABLE_LOAD_BALANCER::cACTION_CLI_ENABLE_LOAD_BALANCER(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_ENABLE_LOAD_BALANCER::cACTION_CLI_ENABLE_LOAD_BALANCER(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_ENABLE_LOAD_BALANCER::cACTION_CLI_ENABLE_LOAD_BALANCER(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_ENABLE_LOAD_BALANCER::cACTION_CLI_ENABLE_LOAD_BALANCER(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_ENABLE_LOAD_BALANCER::~cACTION_CLI_ENABLE_LOAD_BALANCER() {
@@ -91,16 +91,16 @@ bool cACTION_CLI_ENABLE_LOAD_BALANCER::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_ENABLE_DEBUG::cACTION_CLI_ENABLE_DEBUG(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_ENABLE_DEBUG::cACTION_CLI_ENABLE_DEBUG(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_ENABLE_DEBUG::cACTION_CLI_ENABLE_DEBUG(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_ENABLE_DEBUG::cACTION_CLI_ENABLE_DEBUG(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_ENABLE_DEBUG::~cACTION_CLI_ENABLE_DEBUG() {
@@ -131,16 +131,16 @@ bool cACTION_CLI_ENABLE_DEBUG::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::~cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS() {
@@ -172,16 +172,16 @@ bool cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int32_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_RESPONSE_INT::cACTION_CLI_RESPONSE_INT(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_RESPONSE_INT::cACTION_CLI_RESPONSE_INT(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_RESPONSE_INT::cACTION_CLI_RESPONSE_INT(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_RESPONSE_INT::cACTION_CLI_RESPONSE_INT(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_RESPONSE_INT::~cACTION_CLI_RESPONSE_INT() {
@@ -222,16 +222,16 @@ bool cACTION_CLI_RESPONSE_INT::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_RESPONSE_STR::cACTION_CLI_RESPONSE_STR(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_RESPONSE_STR::cACTION_CLI_RESPONSE_STR(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_RESPONSE_STR::cACTION_CLI_RESPONSE_STR(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_RESPONSE_STR::cACTION_CLI_RESPONSE_STR(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_RESPONSE_STR::~cACTION_CLI_RESPONSE_STR() {
@@ -320,22 +320,22 @@ bool cACTION_CLI_RESPONSE_STR::init()
     }
     m_buffer = (char*)m_buff_ptr__;
     uint32_t buffer_size = *m_buffer_size;
-    if (m_parse__ && m_swap__) {  tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size)); }
+    if (m_parse__) {  tlvf_swap(32, reinterpret_cast<uint8_t*>(&buffer_size)); }
     m_buffer_idx__ = buffer_size;
     if (!buffPtrIncrementSafe(sizeof(char) * (buffer_size))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (buffer_size) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::~cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT() {
@@ -392,16 +392,16 @@ bool cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_OPTIMAL_PATH_TASK::cACTION_CLI_OPTIMAL_PATH_TASK(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_OPTIMAL_PATH_TASK::cACTION_CLI_OPTIMAL_PATH_TASK(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_OPTIMAL_PATH_TASK::cACTION_CLI_OPTIMAL_PATH_TASK(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_OPTIMAL_PATH_TASK::cACTION_CLI_OPTIMAL_PATH_TASK(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_OPTIMAL_PATH_TASK::~cACTION_CLI_OPTIMAL_PATH_TASK() {
@@ -434,16 +434,16 @@ bool cACTION_CLI_OPTIMAL_PATH_TASK::init()
         return false;
     }
     if (!m_parse__) { m_client_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_LOAD_BALANCER_TASK::cACTION_CLI_LOAD_BALANCER_TASK(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_LOAD_BALANCER_TASK::cACTION_CLI_LOAD_BALANCER_TASK(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_LOAD_BALANCER_TASK::cACTION_CLI_LOAD_BALANCER_TASK(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_LOAD_BALANCER_TASK::cACTION_CLI_LOAD_BALANCER_TASK(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_LOAD_BALANCER_TASK::~cACTION_CLI_LOAD_BALANCER_TASK() {
@@ -476,16 +476,16 @@ bool cACTION_CLI_LOAD_BALANCER_TASK::init()
         return false;
     }
     if (!m_parse__) { m_ap_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::~cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK() {
@@ -506,16 +506,16 @@ bool cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_DUMP_NODE_INFO::cACTION_CLI_DUMP_NODE_INFO(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_DUMP_NODE_INFO::cACTION_CLI_DUMP_NODE_INFO(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_DUMP_NODE_INFO::cACTION_CLI_DUMP_NODE_INFO(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_DUMP_NODE_INFO::cACTION_CLI_DUMP_NODE_INFO(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_DUMP_NODE_INFO::~cACTION_CLI_DUMP_NODE_INFO() {
@@ -548,16 +548,16 @@ bool cACTION_CLI_DUMP_NODE_INFO::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_PING_SLAVE_REQUEST::cACTION_CLI_PING_SLAVE_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_PING_SLAVE_REQUEST::cACTION_CLI_PING_SLAVE_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_PING_SLAVE_REQUEST::cACTION_CLI_PING_SLAVE_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_PING_SLAVE_REQUEST::cACTION_CLI_PING_SLAVE_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_PING_SLAVE_REQUEST::~cACTION_CLI_PING_SLAVE_REQUEST() {
@@ -612,16 +612,16 @@ bool cACTION_CLI_PING_SLAVE_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_PING_ALL_SLAVES_REQUEST::cACTION_CLI_PING_ALL_SLAVES_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_PING_ALL_SLAVES_REQUEST::cACTION_CLI_PING_ALL_SLAVES_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_PING_ALL_SLAVES_REQUEST::cACTION_CLI_PING_ALL_SLAVES_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_PING_ALL_SLAVES_REQUEST::cACTION_CLI_PING_ALL_SLAVES_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_PING_ALL_SLAVES_REQUEST::~cACTION_CLI_PING_ALL_SLAVES_REQUEST() {
@@ -664,16 +664,16 @@ bool cACTION_CLI_PING_ALL_SLAVES_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_BACKHAUL_SCAN_RESULTS::cACTION_CLI_BACKHAUL_SCAN_RESULTS(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_BACKHAUL_SCAN_RESULTS::cACTION_CLI_BACKHAUL_SCAN_RESULTS(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_BACKHAUL_SCAN_RESULTS::cACTION_CLI_BACKHAUL_SCAN_RESULTS(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_BACKHAUL_SCAN_RESULTS::cACTION_CLI_BACKHAUL_SCAN_RESULTS(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_BACKHAUL_SCAN_RESULTS::~cACTION_CLI_BACKHAUL_SCAN_RESULTS() {
@@ -706,16 +706,16 @@ bool cACTION_CLI_BACKHAUL_SCAN_RESULTS::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_BACKHAUL_ROAM_REQUEST::cACTION_CLI_BACKHAUL_ROAM_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_BACKHAUL_ROAM_REQUEST::cACTION_CLI_BACKHAUL_ROAM_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_BACKHAUL_ROAM_REQUEST::cACTION_CLI_BACKHAUL_ROAM_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_BACKHAUL_ROAM_REQUEST::cACTION_CLI_BACKHAUL_ROAM_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_BACKHAUL_ROAM_REQUEST::~cACTION_CLI_BACKHAUL_ROAM_REQUEST() {
@@ -760,16 +760,16 @@ bool cACTION_CLI_BACKHAUL_ROAM_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_bssid->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_CLIENT_ALLOW_REQUEST::cACTION_CLI_CLIENT_ALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_CLIENT_ALLOW_REQUEST::cACTION_CLI_CLIENT_ALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_CLIENT_ALLOW_REQUEST::cACTION_CLI_CLIENT_ALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_CLIENT_ALLOW_REQUEST::cACTION_CLI_CLIENT_ALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_CLIENT_ALLOW_REQUEST::~cACTION_CLI_CLIENT_ALLOW_REQUEST() {
@@ -814,16 +814,16 @@ bool cACTION_CLI_CLIENT_ALLOW_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_hostap_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_CLIENT_DISALLOW_REQUEST::cACTION_CLI_CLIENT_DISALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_CLIENT_DISALLOW_REQUEST::cACTION_CLI_CLIENT_DISALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_CLIENT_DISALLOW_REQUEST::cACTION_CLI_CLIENT_DISALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_CLIENT_DISALLOW_REQUEST::cACTION_CLI_CLIENT_DISALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_CLIENT_DISALLOW_REQUEST::~cACTION_CLI_CLIENT_DISALLOW_REQUEST() {
@@ -868,16 +868,16 @@ bool cACTION_CLI_CLIENT_DISALLOW_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_hostap_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_CLIENT_DISCONNECT_REQUEST::cACTION_CLI_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_CLIENT_DISCONNECT_REQUEST::cACTION_CLI_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_CLIENT_DISCONNECT_REQUEST::cACTION_CLI_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_CLIENT_DISCONNECT_REQUEST::cACTION_CLI_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_CLIENT_DISCONNECT_REQUEST::~cACTION_CLI_CLIENT_DISCONNECT_REQUEST() {
@@ -932,16 +932,16 @@ bool cACTION_CLI_CLIENT_DISCONNECT_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_CLIENT_BSS_STEER_REQUEST::cACTION_CLI_CLIENT_BSS_STEER_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_CLIENT_BSS_STEER_REQUEST::cACTION_CLI_CLIENT_BSS_STEER_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_CLIENT_BSS_STEER_REQUEST::cACTION_CLI_CLIENT_BSS_STEER_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_CLIENT_BSS_STEER_REQUEST::cACTION_CLI_CLIENT_BSS_STEER_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_CLIENT_BSS_STEER_REQUEST::~cACTION_CLI_CLIENT_BSS_STEER_REQUEST() {
@@ -997,16 +997,16 @@ bool cACTION_CLI_CLIENT_BSS_STEER_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::~cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST() {
@@ -1051,16 +1051,16 @@ bool cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_client_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::~cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST() {
@@ -1115,16 +1115,16 @@ bool cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_CLIENT_BEACON_11K_REQUEST::cACTION_CLI_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_CLIENT_BEACON_11K_REQUEST::cACTION_CLI_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_CLIENT_BEACON_11K_REQUEST::cACTION_CLI_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_CLIENT_BEACON_11K_REQUEST::cACTION_CLI_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_CLIENT_BEACON_11K_REQUEST::~cACTION_CLI_CLIENT_BEACON_11K_REQUEST() {
@@ -1258,16 +1258,16 @@ bool cACTION_CLI_CLIENT_BEACON_11K_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int16_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::~cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST() {
@@ -1334,16 +1334,16 @@ bool cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::~cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST() {
@@ -1388,16 +1388,16 @@ bool cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::~cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST() {
@@ -1462,16 +1462,16 @@ bool cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::~cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST() {
@@ -1526,16 +1526,16 @@ bool cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CLI_HOSTAP_STATS_MEASUREMENT::cACTION_CLI_HOSTAP_STATS_MEASUREMENT(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CLI_HOSTAP_STATS_MEASUREMENT::cACTION_CLI_HOSTAP_STATS_MEASUREMENT(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CLI_HOSTAP_STATS_MEASUREMENT::cACTION_CLI_HOSTAP_STATS_MEASUREMENT(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CLI_HOSTAP_STATS_MEASUREMENT::cACTION_CLI_HOSTAP_STATS_MEASUREMENT(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CLI_HOSTAP_STATS_MEASUREMENT::~cACTION_CLI_HOSTAP_STATS_MEASUREMENT() {
@@ -1568,7 +1568,7 @@ bool cACTION_CLI_HOSTAP_STATS_MEASUREMENT::init()
         return false;
     }
     if (!m_parse__) { m_ap_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 

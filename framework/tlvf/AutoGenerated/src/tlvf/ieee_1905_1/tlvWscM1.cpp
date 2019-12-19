@@ -15,12 +15,12 @@
 
 using namespace ieee1905_1;
 
-tlvWscM1::tlvWscM1(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+tlvWscM1::tlvWscM1(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvWscM1::tlvWscM1(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+tlvWscM1::tlvWscM1(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 tlvWscM1::~tlvWscM1() {
@@ -506,7 +506,7 @@ std::shared_ptr<WSC::cWscVendorExtWfa> tlvWscM1::create_vendor_ext() {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
-    return std::make_shared<WSC::cWscVendorExtWfa>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
+    return std::make_shared<WSC::cWscVendorExtWfa>(src, getBuffRemainingBytes(src), m_parse__);
 }
 
 bool tlvWscM1::add_vendor_ext(std::shared_ptr<WSC::cWscVendorExtWfa> ptr) {
@@ -718,7 +718,7 @@ bool tlvWscM1::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_manufacturer = (char*)m_buff_ptr__;
     uint16_t manufacturer_length = *m_manufacturer_length;
-    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&manufacturer_length)); }
+    if (m_parse__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&manufacturer_length)); }
     m_manufacturer_idx__ = manufacturer_length;
     if (!buffPtrIncrementSafe(sizeof(char) * (manufacturer_length))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (manufacturer_length) << ") Failed!";
@@ -740,7 +740,7 @@ bool tlvWscM1::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_model_name = (char*)m_buff_ptr__;
     uint16_t model_name_length = *m_model_name_length;
-    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&model_name_length)); }
+    if (m_parse__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&model_name_length)); }
     m_model_name_idx__ = model_name_length;
     if (!buffPtrIncrementSafe(sizeof(char) * (model_name_length))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (model_name_length) << ") Failed!";
@@ -762,7 +762,7 @@ bool tlvWscM1::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_model_number = (char*)m_buff_ptr__;
     uint16_t model_number_length = *m_model_number_length;
-    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&model_number_length)); }
+    if (m_parse__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&model_number_length)); }
     m_model_number_idx__ = model_number_length;
     if (!buffPtrIncrementSafe(sizeof(char) * (model_number_length))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (model_number_length) << ") Failed!";
@@ -784,7 +784,7 @@ bool tlvWscM1::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_serial_number = (char*)m_buff_ptr__;
     uint16_t serial_number_length = *m_serial_number_length;
-    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&serial_number_length)); }
+    if (m_parse__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&serial_number_length)); }
     m_serial_number_idx__ = serial_number_length;
     if (!buffPtrIncrementSafe(sizeof(char) * (serial_number_length))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (serial_number_length) << ") Failed!";
@@ -813,7 +813,7 @@ bool tlvWscM1::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
     m_device_name = (char*)m_buff_ptr__;
     uint16_t device_name_length = *m_device_name_length;
-    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&device_name_length)); }
+    if (m_parse__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&device_name_length)); }
     m_device_name_idx__ = device_name_length;
     if (!buffPtrIncrementSafe(sizeof(char) * (device_name_length))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (device_name_length) << ") Failed!";
@@ -868,7 +868,7 @@ bool tlvWscM1::init()
         // swap back since vendor_ext will be swapped as part of the whole class swap
         vendor_ext->class_swap();
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvType::TLV_WSC) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_WSC) << ", received value: " << int(*m_type);

@@ -29,8 +29,8 @@ namespace beerocks_message {
 class cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -72,8 +72,8 @@ class cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_SLAVE_JOINED_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_SLAVE_JOINED_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_SLAVE_JOINED_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_SLAVE_JOINED_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_SLAVE_JOINED_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_SLAVE_JOINED_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -101,8 +101,8 @@ class cACTION_CONTROL_SLAVE_JOINED_RESPONSE : public BaseClass
 class cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -129,8 +129,8 @@ class cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_SON_CONFIG_UPDATE : public BaseClass
 {
     public:
-        cACTION_CONTROL_SON_CONFIG_UPDATE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_SON_CONFIG_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_SON_CONFIG_UPDATE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_SON_CONFIG_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_SON_CONFIG_UPDATE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -149,8 +149,8 @@ class cACTION_CONTROL_SON_CONFIG_UPDATE : public BaseClass
 class cACTION_CONTROL_CONTROLLER_PING_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_CONTROLLER_PING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CONTROLLER_PING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CONTROLLER_PING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CONTROLLER_PING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CONTROLLER_PING_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -179,8 +179,8 @@ class cACTION_CONTROL_CONTROLLER_PING_REQUEST : public BaseClass
 class cACTION_CONTROL_CONTROLLER_PING_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_CONTROLLER_PING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CONTROLLER_PING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CONTROLLER_PING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CONTROLLER_PING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CONTROLLER_PING_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -209,8 +209,8 @@ class cACTION_CONTROL_CONTROLLER_PING_RESPONSE : public BaseClass
 class cACTION_CONTROL_AGENT_PING_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_AGENT_PING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_AGENT_PING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_AGENT_PING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_AGENT_PING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_AGENT_PING_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -239,8 +239,8 @@ class cACTION_CONTROL_AGENT_PING_REQUEST : public BaseClass
 class cACTION_CONTROL_AGENT_PING_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_AGENT_PING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_AGENT_PING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_AGENT_PING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_AGENT_PING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_AGENT_PING_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -269,8 +269,8 @@ class cACTION_CONTROL_AGENT_PING_RESPONSE : public BaseClass
 class cACTION_CONTROL_ARP_QUERY_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_ARP_QUERY_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_ARP_QUERY_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_ARP_QUERY_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_ARP_QUERY_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_ARP_QUERY_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -289,8 +289,8 @@ class cACTION_CONTROL_ARP_QUERY_REQUEST : public BaseClass
 class cACTION_CONTROL_ARP_QUERY_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_ARP_QUERY_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_ARP_QUERY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_ARP_QUERY_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_ARP_QUERY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_ARP_QUERY_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -309,8 +309,8 @@ class cACTION_CONTROL_ARP_QUERY_RESPONSE : public BaseClass
 class cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -331,8 +331,8 @@ class cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -351,8 +351,8 @@ class cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_BACKHAUL_RESET : public BaseClass
 {
     public:
-        cACTION_CONTROL_BACKHAUL_RESET(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_BACKHAUL_RESET(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_BACKHAUL_RESET(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_BACKHAUL_RESET(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_BACKHAUL_RESET();
 
         static eActionOp_CONTROL get_action_op(){
@@ -369,8 +369,8 @@ class cACTION_CONTROL_BACKHAUL_RESET : public BaseClass
 class cACTION_CONTROL_BACKHAUL_ROAM_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_BACKHAUL_ROAM_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_BACKHAUL_ROAM_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_BACKHAUL_ROAM_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_BACKHAUL_ROAM_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_BACKHAUL_ROAM_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -389,8 +389,8 @@ class cACTION_CONTROL_BACKHAUL_ROAM_REQUEST : public BaseClass
 class cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL : public BaseClass
 {
     public:
-        cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL();
 
         static eActionOp_CONTROL get_action_op(){
@@ -409,8 +409,8 @@ class cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL : public BaseClass
 class cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -429,8 +429,8 @@ class cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -449,8 +449,8 @@ class cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -469,8 +469,8 @@ class cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -493,8 +493,8 @@ class cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -513,8 +513,8 @@ class cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -533,8 +533,8 @@ class cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION : public BaseCla
 class cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -553,8 +553,8 @@ class cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST : public Ba
 class cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -573,8 +573,8 @@ class cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE : public B
 class cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START();
 
         static eActionOp_CONTROL get_action_op(){
@@ -593,8 +593,8 @@ class cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START : public BaseClass
 class cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -613,8 +613,8 @@ class cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST : public Ba
 class cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER();
 
         static eActionOp_CONTROL get_action_op(){
@@ -631,8 +631,8 @@ class cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER : public BaseClass
 class cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -651,8 +651,8 @@ class cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST : public BaseClass
 class cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -671,8 +671,8 @@ class cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST : public BaseClass
 class cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -698,8 +698,8 @@ class cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE : public BaseClass
 class cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -718,8 +718,8 @@ class cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -738,8 +738,8 @@ class cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST : public BaseClass
 class cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -758,8 +758,8 @@ class cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST : public BaseClass
 class cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -778,8 +778,8 @@ class cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -798,8 +798,8 @@ class cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -818,8 +818,8 @@ class cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -840,8 +840,8 @@ class cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -860,8 +860,8 @@ class cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST : public BaseClass
 class cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -880,8 +880,8 @@ class cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST : public BaseClass
 class cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -900,8 +900,8 @@ class cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
 class cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -920,8 +920,8 @@ class cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE : public BaseClass
 class cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -940,8 +940,8 @@ class cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION : public Bas
 class cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -960,8 +960,8 @@ class cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseClass
 class cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -980,8 +980,8 @@ class cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1000,8 +1000,8 @@ class cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1020,8 +1020,8 @@ class cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1046,8 +1046,8 @@ class cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST : public BaseClass
 class cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1066,8 +1066,8 @@ class cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE : public BaseClass
 class cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1095,8 +1095,8 @@ class cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1115,8 +1115,8 @@ class cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1135,8 +1135,8 @@ class cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST : public BaseClass
 class cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1155,8 +1155,8 @@ class cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE : public BaseClass
 class cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1175,8 +1175,8 @@ class cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
 class cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1195,8 +1195,8 @@ class cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE : public BaseClass
 class cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1215,8 +1215,8 @@ class cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST : public BaseClass
 class cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1235,8 +1235,8 @@ class cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE : public BaseClass
 class cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1255,8 +1255,8 @@ class cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
 class cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1275,8 +1275,8 @@ class cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE : public BaseClass
 class cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1295,8 +1295,8 @@ class cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST : public BaseClass
 class cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1315,8 +1315,8 @@ class cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE : public BaseClass
 class cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST : public BaseClass
 {
     public:
-        cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1335,8 +1335,8 @@ class cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST : public BaseClass
 class cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE : public BaseClass
 {
     public:
-        cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1355,8 +1355,8 @@ class cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE : public BaseClass
 class cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1375,8 +1375,8 @@ class cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION : public BaseC
 class cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1395,8 +1395,8 @@ class cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
@@ -1415,8 +1415,8 @@ class cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION : public BaseClass
 class cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){

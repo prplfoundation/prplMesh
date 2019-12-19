@@ -30,8 +30,8 @@ namespace beerocks_message {
 class cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS : public BaseClass
 {
     public:
-        cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS();
 
         static eActionOp_CLI get_action_op(){
@@ -50,8 +50,8 @@ class cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS : public BaseClass
 class cACTION_CLI_ENABLE_LOAD_BALANCER : public BaseClass
 {
     public:
-        cACTION_CLI_ENABLE_LOAD_BALANCER(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_ENABLE_LOAD_BALANCER(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_ENABLE_LOAD_BALANCER(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_ENABLE_LOAD_BALANCER(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_ENABLE_LOAD_BALANCER();
 
         static eActionOp_CLI get_action_op(){
@@ -70,8 +70,8 @@ class cACTION_CLI_ENABLE_LOAD_BALANCER : public BaseClass
 class cACTION_CLI_ENABLE_DEBUG : public BaseClass
 {
     public:
-        cACTION_CLI_ENABLE_DEBUG(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_ENABLE_DEBUG(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_ENABLE_DEBUG(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_ENABLE_DEBUG(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_ENABLE_DEBUG();
 
         static eActionOp_CLI get_action_op(){
@@ -90,8 +90,8 @@ class cACTION_CLI_ENABLE_DEBUG : public BaseClass
 class cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS : public BaseClass
 {
     public:
-        cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS();
 
         static eActionOp_CLI get_action_op(){
@@ -110,8 +110,8 @@ class cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS : public BaseClass
 class cACTION_CLI_RESPONSE_INT : public BaseClass
 {
     public:
-        cACTION_CLI_RESPONSE_INT(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_RESPONSE_INT(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_RESPONSE_INT(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_RESPONSE_INT(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_RESPONSE_INT();
 
         static eActionOp_CLI get_action_op(){
@@ -132,8 +132,8 @@ class cACTION_CLI_RESPONSE_INT : public BaseClass
 class cACTION_CLI_RESPONSE_STR : public BaseClass
 {
     public:
-        cACTION_CLI_RESPONSE_STR(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_RESPONSE_STR(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_RESPONSE_STR(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_RESPONSE_STR(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_RESPONSE_STR();
 
         static eActionOp_CLI get_action_op(){
@@ -160,8 +160,8 @@ class cACTION_CLI_RESPONSE_STR : public BaseClass
 class cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT : public BaseClass
 {
     public:
-        cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT();
 
         static eActionOp_CLI get_action_op(){
@@ -184,8 +184,8 @@ class cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT : public BaseClass
 class cACTION_CLI_OPTIMAL_PATH_TASK : public BaseClass
 {
     public:
-        cACTION_CLI_OPTIMAL_PATH_TASK(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_OPTIMAL_PATH_TASK(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_OPTIMAL_PATH_TASK(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_OPTIMAL_PATH_TASK(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_OPTIMAL_PATH_TASK();
 
         static eActionOp_CLI get_action_op(){
@@ -204,8 +204,8 @@ class cACTION_CLI_OPTIMAL_PATH_TASK : public BaseClass
 class cACTION_CLI_LOAD_BALANCER_TASK : public BaseClass
 {
     public:
-        cACTION_CLI_LOAD_BALANCER_TASK(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_LOAD_BALANCER_TASK(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_LOAD_BALANCER_TASK(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_LOAD_BALANCER_TASK(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_LOAD_BALANCER_TASK();
 
         static eActionOp_CLI get_action_op(){
@@ -224,8 +224,8 @@ class cACTION_CLI_LOAD_BALANCER_TASK : public BaseClass
 class cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK : public BaseClass
 {
     public:
-        cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK();
 
         static eActionOp_CLI get_action_op(){
@@ -242,8 +242,8 @@ class cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK : public BaseClass
 class cACTION_CLI_DUMP_NODE_INFO : public BaseClass
 {
     public:
-        cACTION_CLI_DUMP_NODE_INFO(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_DUMP_NODE_INFO(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_DUMP_NODE_INFO(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_DUMP_NODE_INFO(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_DUMP_NODE_INFO();
 
         static eActionOp_CLI get_action_op(){
@@ -262,8 +262,8 @@ class cACTION_CLI_DUMP_NODE_INFO : public BaseClass
 class cACTION_CLI_PING_SLAVE_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_PING_SLAVE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_PING_SLAVE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_PING_SLAVE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_PING_SLAVE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_PING_SLAVE_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -286,8 +286,8 @@ class cACTION_CLI_PING_SLAVE_REQUEST : public BaseClass
 class cACTION_CLI_PING_ALL_SLAVES_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_PING_ALL_SLAVES_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_PING_ALL_SLAVES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_PING_ALL_SLAVES_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_PING_ALL_SLAVES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_PING_ALL_SLAVES_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -308,8 +308,8 @@ class cACTION_CLI_PING_ALL_SLAVES_REQUEST : public BaseClass
 class cACTION_CLI_BACKHAUL_SCAN_RESULTS : public BaseClass
 {
     public:
-        cACTION_CLI_BACKHAUL_SCAN_RESULTS(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_BACKHAUL_SCAN_RESULTS(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_BACKHAUL_SCAN_RESULTS(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_BACKHAUL_SCAN_RESULTS(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_BACKHAUL_SCAN_RESULTS();
 
         static eActionOp_CLI get_action_op(){
@@ -328,8 +328,8 @@ class cACTION_CLI_BACKHAUL_SCAN_RESULTS : public BaseClass
 class cACTION_CLI_BACKHAUL_ROAM_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_BACKHAUL_ROAM_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_BACKHAUL_ROAM_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_BACKHAUL_ROAM_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_BACKHAUL_ROAM_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_BACKHAUL_ROAM_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -350,8 +350,8 @@ class cACTION_CLI_BACKHAUL_ROAM_REQUEST : public BaseClass
 class cACTION_CLI_CLIENT_ALLOW_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_CLIENT_ALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_CLIENT_ALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_CLIENT_ALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_CLIENT_ALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_CLIENT_ALLOW_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -372,8 +372,8 @@ class cACTION_CLI_CLIENT_ALLOW_REQUEST : public BaseClass
 class cACTION_CLI_CLIENT_DISALLOW_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_CLIENT_DISALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_CLIENT_DISALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_CLIENT_DISALLOW_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_CLIENT_DISALLOW_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_CLIENT_DISALLOW_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -394,8 +394,8 @@ class cACTION_CLI_CLIENT_DISALLOW_REQUEST : public BaseClass
 class cACTION_CLI_CLIENT_DISCONNECT_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_CLIENT_DISCONNECT_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -418,8 +418,8 @@ class cACTION_CLI_CLIENT_DISCONNECT_REQUEST : public BaseClass
 class cACTION_CLI_CLIENT_BSS_STEER_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_CLIENT_BSS_STEER_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_CLIENT_BSS_STEER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_CLIENT_BSS_STEER_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_CLIENT_BSS_STEER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_CLIENT_BSS_STEER_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -442,8 +442,8 @@ class cACTION_CLI_CLIENT_BSS_STEER_REQUEST : public BaseClass
 class cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -464,8 +464,8 @@ class cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
 class cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -488,8 +488,8 @@ class cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
 class cACTION_CLI_CLIENT_BEACON_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_CLIENT_BEACON_11K_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -528,8 +528,8 @@ class cACTION_CLI_CLIENT_BEACON_11K_REQUEST : public BaseClass
 class cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -554,8 +554,8 @@ class cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST : public BaseClass
 class cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -576,8 +576,8 @@ class cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST : public BaseClass
 class cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -602,8 +602,8 @@ class cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST : public BaseClass
 class cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST();
 
         static eActionOp_CLI get_action_op(){
@@ -626,8 +626,8 @@ class cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST : public BaseClass
 class cACTION_CLI_HOSTAP_STATS_MEASUREMENT : public BaseClass
 {
     public:
-        cACTION_CLI_HOSTAP_STATS_MEASUREMENT(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_CLI_HOSTAP_STATS_MEASUREMENT(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_CLI_HOSTAP_STATS_MEASUREMENT(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CLI_HOSTAP_STATS_MEASUREMENT(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CLI_HOSTAP_STATS_MEASUREMENT();
 
         static eActionOp_CLI get_action_op(){

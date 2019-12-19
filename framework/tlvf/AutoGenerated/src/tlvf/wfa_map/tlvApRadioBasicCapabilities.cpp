@@ -15,12 +15,12 @@
 
 using namespace wfa_map;
 
-tlvApRadioBasicCapabilities::tlvApRadioBasicCapabilities(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+tlvApRadioBasicCapabilities::tlvApRadioBasicCapabilities(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvApRadioBasicCapabilities::tlvApRadioBasicCapabilities(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+tlvApRadioBasicCapabilities::tlvApRadioBasicCapabilities(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 tlvApRadioBasicCapabilities::~tlvApRadioBasicCapabilities() {
@@ -75,7 +75,7 @@ std::shared_ptr<cOperatingClassesInfo> tlvApRadioBasicCapabilities::create_opera
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
-    return std::make_shared<cOperatingClassesInfo>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
+    return std::make_shared<cOperatingClassesInfo>(src, getBuffRemainingBytes(src), m_parse__);
 }
 
 bool tlvApRadioBasicCapabilities::add_operating_classes_info_list(std::shared_ptr<cOperatingClassesInfo> ptr) {
@@ -186,7 +186,7 @@ bool tlvApRadioBasicCapabilities::init()
         // swap back since operating_classes_info_list will be swapped as part of the whole class swap
         operating_classes_info_list->class_swap();
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES) << ", received value: " << int(*m_type);
@@ -196,12 +196,12 @@ bool tlvApRadioBasicCapabilities::init()
     return true;
 }
 
-cOperatingClassesInfo::cOperatingClassesInfo(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cOperatingClassesInfo::cOperatingClassesInfo(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cOperatingClassesInfo::cOperatingClassesInfo(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cOperatingClassesInfo::cOperatingClassesInfo(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cOperatingClassesInfo::~cOperatingClassesInfo() {
@@ -298,7 +298,7 @@ bool cOperatingClassesInfo::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (statically_non_operable_channels_list_length) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 

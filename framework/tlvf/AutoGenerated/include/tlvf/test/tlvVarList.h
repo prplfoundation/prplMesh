@@ -27,8 +27,8 @@ class cInner;
 class tlvTestVarList : public BaseClass
 {
     public:
-        tlvTestVarList(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvTestVarList(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvTestVarList(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvTestVarList(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvTestVarList();
 
         const uint8_t& type();
@@ -94,8 +94,8 @@ class tlvTestVarList : public BaseClass
 class cInner : public BaseClass
 {
     public:
-        cInner(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cInner(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cInner(uint8_t* buff, size_t buff_len, bool parse = false);
+        cInner(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cInner();
 
         const uint16_t& type();

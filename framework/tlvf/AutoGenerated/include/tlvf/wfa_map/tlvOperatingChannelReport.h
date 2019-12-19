@@ -29,8 +29,8 @@ namespace wfa_map {
 class tlvOperatingChannelReport : public BaseClass
 {
     public:
-        tlvOperatingChannelReport(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvOperatingChannelReport(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvOperatingChannelReport(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvOperatingChannelReport(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvOperatingChannelReport();
 
         typedef struct sOperatingClasses {

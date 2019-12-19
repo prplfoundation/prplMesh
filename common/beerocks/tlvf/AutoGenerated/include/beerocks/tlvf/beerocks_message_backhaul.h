@@ -29,8 +29,8 @@ namespace beerocks_message {
 class cACTION_BACKHAUL_REGISTER_REQUEST : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_REGISTER_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_REGISTER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_REGISTER_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_REGISTER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_REGISTER_REQUEST();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -68,8 +68,8 @@ class cACTION_BACKHAUL_REGISTER_REQUEST : public BaseClass
 class cACTION_BACKHAUL_REGISTER_RESPONSE : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_REGISTER_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_REGISTER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_REGISTER_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_REGISTER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_REGISTER_RESPONSE();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -88,8 +88,8 @@ class cACTION_BACKHAUL_REGISTER_RESPONSE : public BaseClass
 class cACTION_BACKHAUL_BUSY_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_BUSY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_BUSY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_BUSY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_BUSY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_BUSY_NOTIFICATION();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -106,8 +106,8 @@ class cACTION_BACKHAUL_BUSY_NOTIFICATION : public BaseClass
 class cACTION_BACKHAUL_ENABLE : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_ENABLE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_ENABLE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_ENABLE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_ENABLE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_ENABLE();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -171,8 +171,8 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
 class cACTION_BACKHAUL_CONNECTED_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_CONNECTED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_CONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_CONNECTED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_CONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_CONNECTED_NOTIFICATION();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -191,8 +191,8 @@ class cACTION_BACKHAUL_CONNECTED_NOTIFICATION : public BaseClass
 class cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -211,8 +211,8 @@ class cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION : public BaseClass
 class cACTION_BACKHAUL_ENABLE_APS_REQUEST : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_ENABLE_APS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_ENABLE_APS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_ENABLE_APS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_ENABLE_APS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_ENABLE_APS_REQUEST();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -235,8 +235,8 @@ class cACTION_BACKHAUL_ENABLE_APS_REQUEST : public BaseClass
 class cACTION_BACKHAUL_ROAM_REQUEST : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_ROAM_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_ROAM_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_ROAM_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_ROAM_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_ROAM_REQUEST();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -255,8 +255,8 @@ class cACTION_BACKHAUL_ROAM_REQUEST : public BaseClass
 class cACTION_BACKHAUL_ROAM_RESPONSE : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_ROAM_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_ROAM_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_ROAM_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_ROAM_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_ROAM_RESPONSE();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -275,8 +275,8 @@ class cACTION_BACKHAUL_ROAM_RESPONSE : public BaseClass
 class cACTION_BACKHAUL_RESET : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_RESET(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_RESET(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_RESET(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_RESET(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_RESET();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -293,8 +293,8 @@ class cACTION_BACKHAUL_RESET : public BaseClass
 class cACTION_BACKHAUL_4ADDR_CONNECTED : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_4ADDR_CONNECTED(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_4ADDR_CONNECTED(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_4ADDR_CONNECTED(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_4ADDR_CONNECTED(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_4ADDR_CONNECTED();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -313,8 +313,8 @@ class cACTION_BACKHAUL_4ADDR_CONNECTED : public BaseClass
 class cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -333,8 +333,8 @@ class cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION : public BaseClass
 class cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -353,8 +353,8 @@ class cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST : public BaseClas
 class cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -373,8 +373,8 @@ class cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
 class cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE();
 
         static eActionOp_BACKHAUL get_action_op(){
@@ -393,8 +393,8 @@ class cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE : public BaseClass
 class cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE();
 
         static eActionOp_BACKHAUL get_action_op(){

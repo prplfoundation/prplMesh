@@ -28,8 +28,8 @@ namespace beerocks_message {
 class cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -48,8 +48,8 @@ class cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION : public BaseClass
 class cACTION_MONITOR_JOINED_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_JOINED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_JOINED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_JOINED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_JOINED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_JOINED_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -66,8 +66,8 @@ class cACTION_MONITOR_JOINED_NOTIFICATION : public BaseClass
 class cACTION_MONITOR_SON_CONFIG_UPDATE : public BaseClass
 {
     public:
-        cACTION_MONITOR_SON_CONFIG_UPDATE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_SON_CONFIG_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_SON_CONFIG_UPDATE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_SON_CONFIG_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_SON_CONFIG_UPDATE();
 
         static eActionOp_MONITOR get_action_op(){
@@ -86,8 +86,8 @@ class cACTION_MONITOR_SON_CONFIG_UPDATE : public BaseClass
 class cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL : public BaseClass
 {
     public:
-        cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL();
 
         static eActionOp_MONITOR get_action_op(){
@@ -106,8 +106,8 @@ class cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL : public BaseClass
 class cACTION_MONITOR_ERROR_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_ERROR_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -126,8 +126,8 @@ class cACTION_MONITOR_ERROR_NOTIFICATION : public BaseClass
 class cACTION_MONITOR_ERROR_NOTIFICATION_ACK : public BaseClass
 {
     public:
-        cACTION_MONITOR_ERROR_NOTIFICATION_ACK(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_ERROR_NOTIFICATION_ACK(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_ERROR_NOTIFICATION_ACK(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_ERROR_NOTIFICATION_ACK(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_ERROR_NOTIFICATION_ACK();
 
         static eActionOp_MONITOR get_action_op(){
@@ -144,8 +144,8 @@ class cACTION_MONITOR_ERROR_NOTIFICATION_ACK : public BaseClass
 class cACTION_MONITOR_HEARTBEAT_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_HEARTBEAT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_HEARTBEAT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_HEARTBEAT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_HEARTBEAT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_HEARTBEAT_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -162,8 +162,8 @@ class cACTION_MONITOR_HEARTBEAT_NOTIFICATION : public BaseClass
 class cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST();
 
         static eActionOp_MONITOR get_action_op(){
@@ -182,8 +182,8 @@ class cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST : public BaseClass
 class cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST();
 
         static eActionOp_MONITOR get_action_op(){
@@ -202,8 +202,8 @@ class cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST : public BaseClass
 class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST();
 
         static eActionOp_MONITOR get_action_op(){
@@ -222,8 +222,8 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
 class cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST();
 
         static eActionOp_MONITOR get_action_op(){
@@ -246,8 +246,8 @@ class cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST : public BaseClass
 class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -266,8 +266,8 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION : public BaseClass
 class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE();
 
         static eActionOp_MONITOR get_action_op(){
@@ -286,8 +286,8 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE : public BaseClass
 class cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -306,8 +306,8 @@ class cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION : public BaseClass
 class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -326,8 +326,8 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION : public Bas
 class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE();
 
         static eActionOp_MONITOR get_action_op(){
@@ -346,8 +346,8 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseClass
 class cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -366,8 +366,8 @@ class cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION : public BaseClass
 class cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -386,8 +386,8 @@ class cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION : public BaseClass
 class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST : public BaseClass
 {
     public:
-        cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST();
 
         static eActionOp_MONITOR get_action_op(){
@@ -406,8 +406,8 @@ class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST : public BaseClass
 class cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -428,8 +428,8 @@ class cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION : public BaseClass
 class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE : public BaseClass
 {
     public:
-        cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE();
 
         static eActionOp_MONITOR get_action_op(){
@@ -455,8 +455,8 @@ class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE : public BaseClass
 class cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -475,8 +475,8 @@ class cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION : public BaseClass
 class cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST();
 
         static eActionOp_MONITOR get_action_op(){
@@ -495,8 +495,8 @@ class cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST : public BaseClass
 class cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE();
 
         static eActionOp_MONITOR get_action_op(){
@@ -515,8 +515,8 @@ class cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE : public BaseClass
 class cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST();
 
         static eActionOp_MONITOR get_action_op(){
@@ -535,8 +535,8 @@ class cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
 class cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE();
 
         static eActionOp_MONITOR get_action_op(){
@@ -555,8 +555,8 @@ class cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE : public BaseClass
 class cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST();
 
         static eActionOp_MONITOR get_action_op(){
@@ -575,8 +575,8 @@ class cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST : public BaseClass
 class cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE();
 
         static eActionOp_MONITOR get_action_op(){
@@ -595,8 +595,8 @@ class cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE : public BaseClass
 class cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST();
 
         static eActionOp_MONITOR get_action_op(){
@@ -615,8 +615,8 @@ class cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
 class cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE : public BaseClass
 {
     public:
-        cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE();
 
         static eActionOp_MONITOR get_action_op(){
@@ -635,8 +635,8 @@ class cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE : public BaseClass
 class cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST : public BaseClass
 {
     public:
-        cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST();
 
         static eActionOp_MONITOR get_action_op(){
@@ -655,8 +655,8 @@ class cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST : public BaseClass
 class cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE : public BaseClass
 {
     public:
-        cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE();
 
         static eActionOp_MONITOR get_action_op(){
@@ -675,8 +675,8 @@ class cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE : public BaseClass
 class cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST : public BaseClass
 {
     public:
-        cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST();
 
         static eActionOp_MONITOR get_action_op(){
@@ -695,8 +695,8 @@ class cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST : public BaseClass
 class cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE : public BaseClass
 {
     public:
-        cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE();
 
         static eActionOp_MONITOR get_action_op(){
@@ -715,8 +715,8 @@ class cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE : public BaseClass
 class cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){
@@ -735,8 +735,8 @@ class cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION : public BaseC
 class cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION();
 
         static eActionOp_MONITOR get_action_op(){

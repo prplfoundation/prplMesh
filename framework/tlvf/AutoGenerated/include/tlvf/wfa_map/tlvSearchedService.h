@@ -28,8 +28,8 @@ namespace wfa_map {
 class tlvSearchedService : public BaseClass
 {
     public:
-        tlvSearchedService(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvSearchedService(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvSearchedService(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvSearchedService(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvSearchedService();
 
         enum eSearchedService: uint8_t {

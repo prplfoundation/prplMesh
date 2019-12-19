@@ -30,8 +30,8 @@ namespace ieee1905_1 {
 class tlvDeviceInformation : public BaseClass
 {
     public:
-        tlvDeviceInformation(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvDeviceInformation(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvDeviceInformation(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvDeviceInformation(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvDeviceInformation();
 
         typedef struct sInfo {

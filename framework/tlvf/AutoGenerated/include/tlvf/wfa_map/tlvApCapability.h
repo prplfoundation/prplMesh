@@ -28,8 +28,8 @@ namespace wfa_map {
 class tlvApCapability : public BaseClass
 {
     public:
-        tlvApCapability(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvApCapability(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvApCapability(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvApCapability(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvApCapability();
 
         typedef struct sValue {
