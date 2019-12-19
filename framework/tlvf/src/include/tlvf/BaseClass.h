@@ -10,9 +10,12 @@
 #define _BaseClass_H_
 
 #include <cstddef>
+#include <memory>
 #include <stddef.h>
 #include <stdint.h>
 #include <string>
+
+class ClassList;
 
 class BaseClass {
 protected:
@@ -31,6 +34,8 @@ public:
     virtual void class_swap() = 0;
     bool finalize();
     bool is_finalized() { return m_finalized; };
+    void addInnerClassList(std::shared_ptr<ClassList> list) { m_inner__ = list; };
+    std::shared_ptr<ClassList> getInnerClassList() { return m_inner__; };
 
 protected:
     uint8_t *m_buff__;
@@ -39,6 +44,7 @@ protected:
     const bool m_parse__;
     bool m_finalized;
     bool m_init_succeeded = false;
+    std::shared_ptr<ClassList> m_inner__;
 };
 
 #endif //_BaseClass_H_

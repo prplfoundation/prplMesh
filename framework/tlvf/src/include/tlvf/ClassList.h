@@ -12,7 +12,6 @@
 
 #include <memory>
 #include <tlvf/BaseClass.h>
-#include <tlvf/ieee_1905_1/eTlvType.h>
 #include <vector>
 
 class ClassList {
@@ -28,26 +27,36 @@ public:
         return (const std::vector<std::shared_ptr<BaseClass>> &)m_class_vector;
     }
 
+    /**
+     * @brief add class on buffer
+     *
+     * Adds a new class of type T on the ClassList buffer, and
+     * finalizes the previous class. Finalize includes endianess conversion,
+     * sanity checks, etc, and it is not allowed to update previousely the
+     * class after addClass is called for the next class.
+     *
+     * @tparam T class template type
+     * @return std::shared_ptr<T> newly allocated class
+     */
     template <class T> std::shared_ptr<T> addClass()
     {
         std::shared_ptr<T> ptr;
-        if (m_buff) {
-            if (m_class_vector.size() == 0) {
-                ptr = std::make_shared<T>(m_buff, m_buff_len, m_parse);
-            } else {
-                // before adding a new class, finalize the previous one
-                if (!m_class_vector.back()->finalize())
-                    return nullptr;
-                ptr = std::make_shared<T>(m_class_vector.back(), m_parse);
-            }
-            if (!ptr || ptr->isInitialized() == false) {
-                return std::shared_ptr<T>();
-            } else {
-                m_class_vector.push_back(std::shared_ptr<BaseClass>(ptr));
-            }
+        auto prev = m_class_vector.empty() ? nullptr : m_class_vector.back();
+        if (!prev) {
+            ptr = std::make_shared<T>(m_buff, m_buff_len, m_parse);
         } else {
-            return std::shared_ptr<T>();
+            // before adding a new class, finalize the previous one
+            if (!m_parse) {
+                if (!prev->finalize())
+                    return nullptr;
+            }
+            ptr = std::make_shared<T>(prev, m_parse);
         }
+        if (!ptr || ptr->isInitialized() == false) {
+            return nullptr;
+        }
+
+        m_class_vector.push_back(std::shared_ptr<BaseClass>(ptr));
         return ptr;
     }
 
