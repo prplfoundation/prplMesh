@@ -9,6 +9,7 @@
 #ifndef _BPL_ERR_H_
 #define _BPL_ERR_H_
 
+namespace beerocks {
 namespace bpl {
 
 /****************************************************************************/
@@ -77,5 +78,6 @@ namespace bpl {
 enum class eErrorCode { FOREACH_ERROR_CODE(GENERATE_ERROR_ENUM) };
 
 } // namespace bpl
+} // namespace beerocks
 
 #endif /* _BPL_ERR_H_ */

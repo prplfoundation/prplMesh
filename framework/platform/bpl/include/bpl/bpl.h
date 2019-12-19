@@ -9,6 +9,7 @@
 #ifndef _BPL_H_
 #define _BPL_H_
 
+namespace beerocks {
 namespace bpl {
 
 /**
@@ -17,13 +18,14 @@ namespace bpl {
  *
  * @return 0 on success or a negative value on error.
  */
-int init();
+int bpl_init();
 
 /**
  * Un-initialize the BPL.
  */
-void close();
+void bpl_close();
 
 } // namespace bpl
+} // namespace beerocks
 
 #endif /* _BPL_H_ */

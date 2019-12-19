@@ -11,8 +11,7 @@
 #include "bpl_cfg_helper.h"
 #include "bpl_cfg_uci.h"
 
-using namespace beerocks::bpl;
-
+namespace beerocks {
 namespace bpl {
 
 int cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex)
@@ -94,3 +93,4 @@ int cfg_get_wep_key(int index, int keyIndex, char *key)
 }
 
 } // namespace bpl
+} // namespace beerocks

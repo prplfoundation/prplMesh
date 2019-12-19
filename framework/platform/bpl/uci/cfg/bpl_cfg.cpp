@@ -19,8 +19,7 @@
 
 using namespace mapf;
 
-using namespace beerocks::bpl;
-
+namespace beerocks {
 namespace bpl {
 
 int cfg_is_enabled()
@@ -276,3 +275,4 @@ int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_noti
 int cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return 0; }
 
 } // namespace bpl
+} // namespace beerocks

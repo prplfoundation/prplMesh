@@ -27,7 +27,7 @@ void getString(char *s, int size)
 int main()
 {
     char inputInterface[32], userInputS[10];
-    struct bpl::BPL_WLAN_PARAMS wlan_params;
+    struct beerocks::bpl::BPL_WLAN_PARAMS wlan_params;
 
     while (1) {
         memset(inputInterface, 0, sizeof(inputInterface));
@@ -42,7 +42,7 @@ int main()
             printf("Interface : ");
             fflush(stdin);
             getString(inputInterface, sizeof(inputInterface));
-            if (bpl::cfg_get_wifi_params(inputInterface, &wlan_params) != 0) {
+            if (beerocks::bpl::cfg_get_wifi_params(inputInterface, &wlan_params) != 0) {
                 MAPF_ERR("Failed to retrieve WiFi params for " << inputInterface << "\n");
             } else {
                 MAPF_INFO("SSID " << wlan_params.ssid << " Security mode " << wlan_params.security

@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 
+namespace beerocks {
 namespace bpl {
 
 /****************************************************************************/
@@ -456,5 +457,6 @@ int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_noti
 int cfg_get_administrator_credentials(char pass[BPL_USER_PASS_LEN]);
 
 } // namespace bpl
+} // namespace beerocks
 
 #endif /* _BPL_CFG_H_ */

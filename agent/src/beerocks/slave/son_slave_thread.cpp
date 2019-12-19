@@ -149,7 +149,7 @@ void slave_thread::slave_reset()
     }
 
     if (stopped && slave_state != STATE_INIT) {
-        platform_notify_error(bpl::eErrorCode::SLAVE_STOPPED, "");
+        platform_notify_error(beerocks::bpl::eErrorCode::SLAVE_STOPPED, "");
         LOG(DEBUG) << "goto STATE_STOPPED";
         slave_state = STATE_STOPPED;
     } else if (is_backhaul_disconnected) {
@@ -166,7 +166,8 @@ void slave_thread::slave_reset()
     LOG(DEBUG) << "slave_reset() #" << slave_resets_counter << " - done";
 }
 
-void slave_thread::platform_notify_error(bpl::eErrorCode code, const std::string &error_data)
+void slave_thread::platform_notify_error(beerocks::bpl::eErrorCode code,
+                                         const std::string &error_data)
 {
     if (platform_manager_socket == nullptr) {
         LOG(ERROR) << "Invalid Platform Manager socket!";

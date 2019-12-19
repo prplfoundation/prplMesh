@@ -8,18 +8,21 @@
 
 #include <bpl/bpl_dhcp.h>
 
+extern "C" {
 // Ignore some warnings from libubus
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <libubox/blobmsg_json.h>
 #include <libubus.h>
+}
+
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////// Local Module Definitions //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-static struct ubus_context *s_pUbusCtx = NULL;
-static bpl::dhcp_mon_cb s_pCallback    = NULL;
+static struct ubus_context *s_pUbusCtx        = NULL;
+static beerocks::bpl::dhcp_mon_cb s_pCallback = NULL;
 
 enum {
     DHCP_EVENT_ID,
@@ -31,11 +34,12 @@ enum {
 };
 
 static const struct blobmsg_policy dhcp_event_policy[] = {
-    //TODO Remove: [DHCP_EVENT_ID] = { .name = "id", .type = BLOBMSG_TYPE_INT32 },
-    [DHCP_EVENT_OP]       = {.name = "op", .type = BLOBMSG_TYPE_STRING},
-    [DHCP_EVENT_MAC]      = {.name = "mac", .type = BLOBMSG_TYPE_STRING},
-    [DHCP_EVENT_IP]       = {.name = "ip", .type = BLOBMSG_TYPE_STRING},
-    [DHCP_EVENT_HOSTNAME] = {.name = "hostname", .type = BLOBMSG_TYPE_STRING}};
+    {.name = "id", .type = BLOBMSG_TYPE_INT32},       // [DHCP_EVENT_ID]
+    {.name = "op", .type = BLOBMSG_TYPE_STRING},      // [DHCP_EVENT_OP]
+    {.name = "mac", .type = BLOBMSG_TYPE_STRING},     // [DHCP_EVENT_MAC]
+    {.name = "ip", .type = BLOBMSG_TYPE_STRING},      // [DHCP_EVENT_IP]
+    {.name = "hostname", .type = BLOBMSG_TYPE_STRING} // [DHCP_EVENT_HOSTNAME]
+};
 
 struct dhcp_event_request {
     struct ubus_request_data req;
@@ -68,16 +72,16 @@ static int dhcp_event_handler(struct ubus_context *ctx, struct ubus_object *obj,
                   blob_len(msg));
 
     if (tb[DHCP_EVENT_OP]) {
-        op = blobmsg_data(tb[DHCP_EVENT_OP]);
+        op = blobmsg_get_string(tb[DHCP_EVENT_OP]);
     }
     if (tb[DHCP_EVENT_MAC]) {
-        mac = blobmsg_data(tb[DHCP_EVENT_MAC]);
+        mac = blobmsg_get_string(tb[DHCP_EVENT_MAC]);
     }
     if (tb[DHCP_EVENT_IP]) {
-        ip = blobmsg_data(tb[DHCP_EVENT_IP]);
+        ip = blobmsg_get_string(tb[DHCP_EVENT_IP]);
     }
     if (tb[DHCP_EVENT_HOSTNAME]) {
-        hostname = blobmsg_data(tb[DHCP_EVENT_HOSTNAME]);
+        hostname = blobmsg_get_string(tb[DHCP_EVENT_HOSTNAME]);
     }
 
     // Execute the callback
@@ -96,24 +100,35 @@ static int dhcp_event_handler(struct ubus_context *ctx, struct ubus_object *obj,
     return 0;
 }
 
-static const struct ubus_method dhcp_ubus_methods[] = {
-    UBUS_METHOD("dhcp_event", dhcp_event_handler, dhcp_event_policy),
-};
+static const struct ubus_method dhcp_ubus_methods[] = {{.name     = "dhcp_event",
+                                                        .handler  = dhcp_event_handler,
+                                                        .mask     = 0,
+                                                        .tags     = 0,
+                                                        .policy   = dhcp_event_policy,
+                                                        .n_policy = ARRAY_SIZE(dhcp_event_policy)}};
 
-static struct ubus_object_type dhcp_ubus_object_type =
-    UBUS_OBJECT_TYPE("dhcp_event", dhcp_ubus_methods);
+static struct ubus_object_type dhcp_ubus_object_type = {.name      = "dhcp_event",
+                                                        .id        = 0,
+                                                        .methods   = dhcp_ubus_methods,
+                                                        .n_methods = ARRAY_SIZE(dhcp_ubus_methods)};
 
 static struct ubus_object dhcp_ubus_object = {
-    .name      = "dhcp_event",
-    .type      = &dhcp_ubus_object_type,
-    .methods   = dhcp_ubus_methods,
-    .n_methods = ARRAY_SIZE(dhcp_ubus_methods),
+    .avl             = {},
+    .name            = "dhcp_event",
+    .id              = 0,
+    .path            = 0,
+    .type            = &dhcp_ubus_object_type,
+    .subscribe_cb    = 0,
+    .has_subscribers = 0,
+    .methods         = dhcp_ubus_methods,
+    .n_methods       = ARRAY_SIZE(dhcp_ubus_methods),
 };
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+namespace beerocks {
 namespace bpl {
 
 int dhcp_mon_start(dhcp_mon_cb cb)
@@ -164,3 +179,4 @@ int dhcp_mon_stop()
 }
 
 } // namespace bpl
+} // namespace beerocks

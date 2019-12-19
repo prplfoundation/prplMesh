@@ -257,7 +257,7 @@ static bool fill_platform_settings(
 std::string extern_query_db(std::string parameter)
 {
     std::string ret;
-    if (bpl::init() < 0) {
+    if (beerocks::bpl::bpl_init() < 0) {
         ret = "Failed to initialize BPL!";
     } else {
         if (parameter == "is_master") {
@@ -482,7 +482,7 @@ void main_thread::send_dhcp_notification(std::string op, std::string mac, std::s
 bool main_thread::init()
 {
     // Initialize the BPL (Beerocks Platform Library)
-    if (bpl::init() < 0) {
+    if (beerocks::bpl::bpl_init() < 0) {
         LOG(ERROR) << "Failed to initialize BPL!";
         return (false);
     }
@@ -679,7 +679,7 @@ void main_thread::on_thread_stop()
         m_pDHCPMonSocket = nullptr;
     }
 
-    bpl::close();
+    beerocks::bpl::bpl_close();
     LOG(DEBUG) << "Closed BPL.";
 
     bpl_iface_status_map.clear();
