@@ -12,7 +12,7 @@
 
 BaseClass::BaseClass(uint8_t *buff, const size_t buff_len, const bool parse)
     : m_buff__(buff), m_buff_ptr__(buff), m_buff_len__(buff_len), m_parse__(parse),
-      m_finalized(parse)
+      m_finalized__(parse)
 {
 }
 BaseClass::~BaseClass() {}
@@ -42,26 +42,5 @@ bool BaseClass::buffPtrIncrementSafe(size_t length)
         return false;
     }
     m_buff_ptr__ += length;
-    return true;
-}
-
-bool BaseClass::finalize()
-{
-    if (m_parse__) {
-        TLVF_LOG(ERROR) << "finalize() called but m_parse__ is set";
-        return false;
-    }
-    if (m_finalized) {
-        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
-        return true;
-    }
-    if (!isPostInitSucceeded()) {
-        TLVF_LOG(ERROR) << "post init check failed";
-        return false;
-    }
-    if (m_inner)
-        m_inner->finalize();
-    class_swap();
-    m_finalized = true;
     return true;
 }

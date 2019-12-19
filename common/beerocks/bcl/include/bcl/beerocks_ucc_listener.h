@@ -120,7 +120,9 @@ public:
     ~tlvPrefilledData(){};
 
     // No swapping is needed for a prefilled TLV list
-    void class_swap(){};
+    void class_swap() override{};
+    // No finalize is needed for a prefilled TLV list
+    bool finalize() override { return true; };
     static size_t get_initial_size() { return 0; };
 
     bool add_tlv_value_hex_string(const std::string &value, uint16_t &length);
