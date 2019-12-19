@@ -15,7 +15,6 @@ BaseClass::BaseClass(uint8_t *buff, const size_t buff_len, const bool parse)
       m_finalized__(parse)
 {
 }
-BaseClass::~BaseClass() {}
 
 uint8_t *BaseClass::getBuffPtr() { return m_buff_ptr__; }
 uint8_t *BaseClass::getStartBuffPtr() { return m_buff__; }

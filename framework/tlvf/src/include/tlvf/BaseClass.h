@@ -20,7 +20,7 @@ class ClassList;
 class BaseClass {
 protected:
     BaseClass(uint8_t *buff_, const size_t buff_len_, const bool parse_ = false);
-    ~BaseClass();
+    virtual ~BaseClass() = default;
 
 public:
     uint8_t *getBuffPtr();
