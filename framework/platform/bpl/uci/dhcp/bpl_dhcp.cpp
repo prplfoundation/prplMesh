@@ -63,16 +63,16 @@ static int dhcp_event_handler(struct ubus_context *ctx, struct ubus_object *obj,
                   blob_len(msg));
 
     if (tb[DHCP_EVENT_OP]) {
-        op = blobmsg_data(tb[DHCP_EVENT_OP]);
+        op = blobmsg_get_string(tb[DHCP_EVENT_OP]);
     }
     if (tb[DHCP_EVENT_MAC]) {
-        mac = blobmsg_data(tb[DHCP_EVENT_MAC]);
+        mac = blobmsg_get_string(tb[DHCP_EVENT_MAC]);
     }
     if (tb[DHCP_EVENT_IP]) {
-        ip = blobmsg_data(tb[DHCP_EVENT_IP]);
+        ip = blobmsg_get_string(tb[DHCP_EVENT_IP]);
     }
     if (tb[DHCP_EVENT_HOSTNAME]) {
-        hostname = blobmsg_data(tb[DHCP_EVENT_HOSTNAME]);
+        hostname = blobmsg_get_string(tb[DHCP_EVENT_HOSTNAME]);
     }
 
     // Execute the callback
