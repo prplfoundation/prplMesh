@@ -1805,8 +1805,6 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
 bool backhaul_manager::send_slaves_enable()
 {
     auto iface_hal = get_wireless_hal();
-    iface_hal->refresh_radio_info();
-    const auto &radio_info = iface_hal->get_radio_info();
 
     for (auto soc : slaves_sockets) {
         auto notification =
@@ -1814,15 +1812,10 @@ bool backhaul_manager::send_slaves_enable()
                 cmdu_tx);
 
         if (soc->sta_iface == m_sConfig.wireless_iface) {
-            notification->channel()   = iface_hal->get_channel();
-            notification->bandwidth() = radio_info.bandwidth;
-            notification->center_channel() =
-                beerocks::utils::wifi_freq_to_channel(radio_info.vht_center_freq);
+            notification->channel() = iface_hal->get_channel();
         }
         LOG(DEBUG) << "Sending enable to slave " << soc->radio_mac
-                   << ", channel=" << int(notification->channel())
-                   << ", bandwidth=" << int(notification->bandwidth())
-                   << ", center_channel=" << int(notification->center_channel());
+                   << ", channel=" << int(notification->channel());
 
         message_com::send_cmdu(soc->slave, cmdu_tx);
     }
