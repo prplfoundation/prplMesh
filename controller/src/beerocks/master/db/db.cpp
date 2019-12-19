@@ -1191,7 +1191,8 @@ bool db::set_hostap_supported_channels(std::string mac, beerocks::message::sWifi
                eFreqType::FREQ_24G) {
         n->supports_24ghz = true;
     } else {
-        LOG(ERROR) << "unknown frequency! channel:" << n->hostap->supported_channels[0].channel;
+        LOG(ERROR) << "unknown frequency! channel:"
+                   << int(n->hostap->supported_channels[0].channel);
         return false;
     }
 
