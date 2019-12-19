@@ -589,6 +589,34 @@ void tlvWscM2::class_swap()
     m_authenticator->struct_swap();
 }
 
+bool tlvWscM2::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+        *m_length -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t tlvWscM2::get_initial_size()
 {
     size_t class_size = 0;

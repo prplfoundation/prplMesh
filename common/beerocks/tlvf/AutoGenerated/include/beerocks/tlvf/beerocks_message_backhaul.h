@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include <tuple>
 #include <tlvf/tlvfutils.h>
 #include "beerocks/tlvf/beerocks_message_common.h"
@@ -48,7 +49,8 @@ class cACTION_BACKHAUL_REGISTER_REQUEST : public BaseClass
         uint8_t& local_gw();
         uint8_t& sta_iface_filter_low();
         uint8_t& onboarding();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -76,7 +78,8 @@ class cACTION_BACKHAUL_REGISTER_RESPONSE : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_REGISTER_RESPONSE);
         }
         uint8_t& is_backhaul_manager();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -95,7 +98,8 @@ class cACTION_BACKHAUL_BUSY_NOTIFICATION : public BaseClass
         static eActionOp_BACKHAUL get_action_op(){
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_BUSY_NOTIFICATION);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -141,7 +145,8 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         uint8_t& wireless_iface_type();
         uint8_t& mem_only_psk();
         uint8_t& backhaul_preferred_radio_band();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -179,7 +184,8 @@ class cACTION_BACKHAUL_CONNECTED_NOTIFICATION : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_CONNECTED_NOTIFICATION);
         }
         sBackhaulParams& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -199,7 +205,8 @@ class cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_DISCONNECTED_NOTIFICATION);
         }
         uint8_t& stopped();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -221,7 +228,8 @@ class cACTION_BACKHAUL_ENABLE_APS_REQUEST : public BaseClass
         uint8_t& channel();
         uint32_t& bandwidth();
         uint8_t& center_channel();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -243,7 +251,8 @@ class cACTION_BACKHAUL_ROAM_REQUEST : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_ROAM_REQUEST);
         }
         sBackhaulRoam& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -263,7 +272,8 @@ class cACTION_BACKHAUL_ROAM_RESPONSE : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_ROAM_RESPONSE);
         }
         uint8_t& connected();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -282,7 +292,8 @@ class cACTION_BACKHAUL_RESET : public BaseClass
         static eActionOp_BACKHAUL get_action_op(){
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_RESET);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -301,7 +312,8 @@ class cACTION_BACKHAUL_4ADDR_CONNECTED : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_4ADDR_CONNECTED);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -321,7 +333,8 @@ class cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION);
         }
         sBackhaulRssi& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -341,7 +354,8 @@ class cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST : public BaseClas
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST);
         }
         uint32_t& attempts();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -361,7 +375,8 @@ class cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST);
         }
         sNodeRssiMeasurementRequest& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -381,7 +396,8 @@ class cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE);
         }
         sNodeRssiMeasurement& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -401,7 +417,8 @@ class cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseClas
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

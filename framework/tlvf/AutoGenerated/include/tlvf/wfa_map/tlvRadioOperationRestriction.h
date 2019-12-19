@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
 #include "tlvf/common/sMacAddr.h"
 #include <tuple>
@@ -42,7 +43,8 @@ class tlvRadioOperationRestriction : public BaseClass
         std::tuple<bool, cRestrictedOperatingClasses&> operating_classes_list(size_t idx);
         std::shared_ptr<cRestrictedOperatingClasses> create_operating_classes_list();
         bool add_operating_classes_list(std::shared_ptr<cRestrictedOperatingClasses> ptr);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -81,7 +83,8 @@ class cRestrictedOperatingClasses : public BaseClass
         uint8_t& channel_list_length();
         std::tuple<bool, sChannelInfo&> channel_list(size_t idx);
         bool alloc_channel_list(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include <tuple>
 #include "beerocks/tlvf/beerocks_message_common.h"
 
@@ -36,7 +37,8 @@ class cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION);
         }
         int8_t& vap_id();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -55,7 +57,8 @@ class cACTION_MONITOR_JOINED_NOTIFICATION : public BaseClass
         static eActionOp_MONITOR get_action_op(){
             return (eActionOp_MONITOR)(ACTION_MONITOR_JOINED_NOTIFICATION);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -74,7 +77,8 @@ class cACTION_MONITOR_SON_CONFIG_UPDATE : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_SON_CONFIG_UPDATE);
         }
         sSonConfig& config();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -94,7 +98,8 @@ class cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL);
         }
         sLoggingLevelChange& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -114,7 +119,8 @@ class cACTION_MONITOR_ERROR_NOTIFICATION : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_ERROR_NOTIFICATION);
         }
         uint32_t& error_code();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -133,7 +139,8 @@ class cACTION_MONITOR_ERROR_NOTIFICATION_ACK : public BaseClass
         static eActionOp_MONITOR get_action_op(){
             return (eActionOp_MONITOR)(ACTION_MONITOR_ERROR_NOTIFICATION_ACK);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -151,7 +158,8 @@ class cACTION_MONITOR_HEARTBEAT_NOTIFICATION : public BaseClass
         static eActionOp_MONITOR get_action_op(){
             return (eActionOp_MONITOR)(ACTION_MONITOR_HEARTBEAT_NOTIFICATION);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -170,7 +178,8 @@ class cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST);
         }
         sClientMonitoringParams& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -190,7 +199,8 @@ class cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -210,7 +220,8 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST);
         }
         sNodeRssiMeasurementRequest& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -232,7 +243,8 @@ class cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST : public BaseClass
         sMacAddr& mac();
         beerocks::net::sIpv4Addr& ipv4();
         uint8_t& channel();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -254,7 +266,8 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION);
         }
         sNodeRssiMeasurement& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -274,7 +287,8 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE);
         }
         sNodeRssiMeasurement& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -294,7 +308,8 @@ class cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -314,7 +329,8 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION : public Bas
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -334,7 +350,8 @@ class cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -354,7 +371,8 @@ class cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -374,7 +392,8 @@ class cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION);
         }
         sApActivityNotificationParams& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -394,7 +413,8 @@ class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST);
         }
         uint8_t& sync();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -415,7 +435,8 @@ class cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION : public BaseClass
         }
         int8_t& new_tx_state();
         int8_t& new_hostap_enabled_state();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -439,7 +460,8 @@ class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE : public BaseClass
         uint8_t& sta_stats_size();
         std::tuple<bool, sStaStatsParams&> sta_stats(size_t idx);
         bool alloc_sta_stats(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -463,7 +485,8 @@ class cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION);
         }
         sApLoadNotificationParams& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -483,7 +506,8 @@ class cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_BEACON_11K_REQUEST);
         }
         sBeaconRequest11k& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -503,7 +527,8 @@ class cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE);
         }
         sBeaconResponse11k& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -523,7 +548,8 @@ class cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST);
         }
         sStaChannelLoadRequest11k& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -543,7 +569,8 @@ class cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE);
         }
         sStaChannelLoadResponse11k& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -563,7 +590,8 @@ class cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST);
         }
         sStatisticsRequest11k& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -583,7 +611,8 @@ class cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE);
         }
         sStatisticsResponse11k& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -603,7 +632,8 @@ class cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -623,7 +653,8 @@ class cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE);
         }
         sLinkMeasurementsResponse11k& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -643,7 +674,8 @@ class cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST);
         }
         sSteeringSetGroupRequest& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -663,7 +695,8 @@ class cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE);
         }
         sSteeringSetGroupResponse& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -683,7 +716,8 @@ class cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_STEERING_CLIENT_SET_REQUEST);
         }
         sSteeringClientSetRequest& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -703,7 +737,8 @@ class cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE);
         }
         sSteeringClientSetResponse& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -723,7 +758,8 @@ class cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION : public BaseC
             return (eActionOp_MONITOR)(ACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION);
         }
         sSteeringEvActivity& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -743,7 +779,8 @@ class cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION : public BaseClass
             return (eActionOp_MONITOR)(ACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION);
         }
         sSteeringEvSnrXing& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

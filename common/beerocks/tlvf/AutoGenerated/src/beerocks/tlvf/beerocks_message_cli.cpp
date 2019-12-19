@@ -33,6 +33,33 @@ void cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::class_swap()
 {
 }
 
+bool cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::get_initial_size()
 {
     size_t class_size = 0;
@@ -71,6 +98,33 @@ int8_t& cACTION_CLI_ENABLE_LOAD_BALANCER::isEnable() {
 
 void cACTION_CLI_ENABLE_LOAD_BALANCER::class_swap()
 {
+}
+
+bool cACTION_CLI_ENABLE_LOAD_BALANCER::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_ENABLE_LOAD_BALANCER::get_initial_size()
@@ -113,6 +167,33 @@ void cACTION_CLI_ENABLE_DEBUG::class_swap()
 {
 }
 
+bool cACTION_CLI_ENABLE_DEBUG::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_ENABLE_DEBUG::get_initial_size()
 {
     size_t class_size = 0;
@@ -152,6 +233,33 @@ int32_t& cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::attempts() {
 void cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::class_swap()
 {
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_attempts));
+}
+
+bool cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::get_initial_size()
@@ -196,6 +304,33 @@ int8_t& cACTION_CLI_RESPONSE_INT::currentValue() {
 
 void cACTION_CLI_RESPONSE_INT::class_swap()
 {
+}
+
+bool cACTION_CLI_RESPONSE_INT::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_RESPONSE_INT::get_initial_size()
@@ -299,6 +434,33 @@ void cACTION_CLI_RESPONSE_STR::class_swap()
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
 
+bool cACTION_CLI_RESPONSE_STR::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_RESPONSE_STR::get_initial_size()
 {
     size_t class_size = 0;
@@ -359,6 +521,33 @@ void cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::class_swap()
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_center_frequency));
 }
 
+bool cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::get_initial_size()
 {
     size_t class_size = 0;
@@ -415,6 +604,33 @@ void cACTION_CLI_OPTIMAL_PATH_TASK::class_swap()
     m_client_mac->struct_swap();
 }
 
+bool cACTION_CLI_OPTIMAL_PATH_TASK::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_OPTIMAL_PATH_TASK::get_initial_size()
 {
     size_t class_size = 0;
@@ -457,6 +673,33 @@ void cACTION_CLI_LOAD_BALANCER_TASK::class_swap()
     m_ap_mac->struct_swap();
 }
 
+bool cACTION_CLI_LOAD_BALANCER_TASK::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_LOAD_BALANCER_TASK::get_initial_size()
 {
     size_t class_size = 0;
@@ -494,6 +737,33 @@ void cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::class_swap()
 {
 }
 
+bool cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::get_initial_size()
 {
     size_t class_size = 0;
@@ -527,6 +797,33 @@ sMacAddr& cACTION_CLI_DUMP_NODE_INFO::mac() {
 void cACTION_CLI_DUMP_NODE_INFO::class_swap()
 {
     m_mac->struct_swap();
+}
+
+bool cACTION_CLI_DUMP_NODE_INFO::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_DUMP_NODE_INFO::get_initial_size()
@@ -579,6 +876,33 @@ void cACTION_CLI_PING_SLAVE_REQUEST::class_swap()
     m_mac->struct_swap();
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_num_of_req));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_size));
+}
+
+bool cACTION_CLI_PING_SLAVE_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_PING_SLAVE_REQUEST::get_initial_size()
@@ -640,6 +964,33 @@ void cACTION_CLI_PING_ALL_SLAVES_REQUEST::class_swap()
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_size));
 }
 
+bool cACTION_CLI_PING_ALL_SLAVES_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_PING_ALL_SLAVES_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
@@ -687,6 +1038,33 @@ void cACTION_CLI_BACKHAUL_SCAN_RESULTS::class_swap()
     m_mac->struct_swap();
 }
 
+bool cACTION_CLI_BACKHAUL_SCAN_RESULTS::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_BACKHAUL_SCAN_RESULTS::get_initial_size()
 {
     size_t class_size = 0;
@@ -732,6 +1110,33 @@ void cACTION_CLI_BACKHAUL_ROAM_REQUEST::class_swap()
 {
     m_slave_mac->struct_swap();
     m_bssid->struct_swap();
+}
+
+bool cACTION_CLI_BACKHAUL_ROAM_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_BACKHAUL_ROAM_REQUEST::get_initial_size()
@@ -788,6 +1193,33 @@ void cACTION_CLI_CLIENT_ALLOW_REQUEST::class_swap()
     m_hostap_mac->struct_swap();
 }
 
+bool cACTION_CLI_CLIENT_ALLOW_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_CLIENT_ALLOW_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
@@ -840,6 +1272,33 @@ void cACTION_CLI_CLIENT_DISALLOW_REQUEST::class_swap()
 {
     m_client_mac->struct_swap();
     m_hostap_mac->struct_swap();
+}
+
+bool cACTION_CLI_CLIENT_DISALLOW_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_CLIENT_DISALLOW_REQUEST::get_initial_size()
@@ -899,6 +1358,33 @@ void cACTION_CLI_CLIENT_DISCONNECT_REQUEST::class_swap()
     m_client_mac->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_reason));
+}
+
+bool cACTION_CLI_CLIENT_DISCONNECT_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_CLIENT_DISCONNECT_REQUEST::get_initial_size()
@@ -965,6 +1451,33 @@ void cACTION_CLI_CLIENT_BSS_STEER_REQUEST::class_swap()
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_disassoc_timer_ms));
 }
 
+bool cACTION_CLI_CLIENT_BSS_STEER_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_CLIENT_BSS_STEER_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
@@ -1025,6 +1538,33 @@ void cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::class_swap()
     m_client_mac->struct_swap();
 }
 
+bool cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
@@ -1081,6 +1621,33 @@ void cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::class_swap()
 {
     m_hostap_mac->struct_swap();
     m_client_mac->struct_swap();
+}
+
+bool cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::get_initial_size()
@@ -1181,6 +1748,33 @@ void cACTION_CLI_CLIENT_BEACON_11K_REQUEST::class_swap()
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_rand_ival));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_repeats));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_op_class));
+}
+
+bool cACTION_CLI_CLIENT_BEACON_11K_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_CLIENT_BEACON_11K_REQUEST::get_initial_size()
@@ -1295,6 +1889,33 @@ void cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::class_swap()
     m_peer_mac->struct_swap();
 }
 
+bool cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
@@ -1362,6 +1983,33 @@ void cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::class_swap()
     m_cs_params->struct_swap();
 }
 
+bool cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
@@ -1422,6 +2070,33 @@ void cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::class_swap()
 {
     m_ap_mac->struct_swap();
     m_bssid->struct_swap();
+}
+
+bool cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::get_initial_size()
@@ -1494,6 +2169,33 @@ void cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::class_swap()
     m_bssid->struct_swap();
 }
 
+bool cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
 size_t cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
@@ -1547,6 +2249,33 @@ sMacAddr& cACTION_CLI_HOSTAP_STATS_MEASUREMENT::ap_mac() {
 void cACTION_CLI_HOSTAP_STATS_MEASUREMENT::class_swap()
 {
     m_ap_mac->struct_swap();
+}
+
+bool cACTION_CLI_HOSTAP_STATS_MEASUREMENT::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
 }
 
 size_t cACTION_CLI_HOSTAP_STATS_MEASUREMENT::get_initial_size()

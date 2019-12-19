@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include <tuple>
 #include <vector>
 #include "beerocks/tlvf/beerocks_message_common.h"
@@ -39,7 +40,8 @@ class cACTION_APMANAGER_4ADDR_STA_JOINED : public BaseClass
         }
         sMacAddr& src_mac();
         sMacAddr& dst_mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -61,7 +63,8 @@ class cACTION_APMANAGER_JOINED_NOTIFICATION : public BaseClass
         }
         sNodeHostap& params();
         sApChannelSwitch& cs_params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -84,7 +87,8 @@ class cACTION_APMANAGER_ENABLE_APS_REQUEST : public BaseClass
         uint8_t& channel();
         uint32_t& bandwidth();
         uint8_t& center_channel();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -106,7 +110,8 @@ class cACTION_APMANAGER_ENABLE_APS_RESPONSE : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_ENABLE_APS_RESPONSE);
         }
         uint8_t& success();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -125,7 +130,8 @@ class cACTION_APMANAGER_INIT_DONE_NOTIFICATION : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_INIT_DONE_NOTIFICATION);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -144,7 +150,8 @@ class cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST : public 
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST);
         }
         sApSetRestrictedFailsafe& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -164,7 +171,8 @@ class cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE : public
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE);
         }
         uint8_t& success();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -184,7 +192,8 @@ class cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION);
         }
         int8_t& vap_id();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -205,7 +214,8 @@ class cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION : public BaseClass
         }
         int8_t& vap_id();
         sVapInfo& vap_info();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -225,7 +235,8 @@ class cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -243,7 +254,8 @@ class cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -262,7 +274,8 @@ class cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION);
         }
         sVapsList& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -282,7 +295,8 @@ class cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START);
         }
         sApChannelSwitch& cs_params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -302,7 +316,8 @@ class cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION);
         }
         sApChannelSwitch& cs_params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -322,7 +337,8 @@ class cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION);
         }
         sApChannelSwitch& cs_params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -342,7 +358,8 @@ class cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION);
         }
         sApChannelSwitch& cs_params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -363,7 +380,8 @@ class cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION : public BaseClass
         }
         sApChannelSwitch& cs_params();
         std::tuple<bool, beerocks::message::sWifiChannel&> supported_channels_list(size_t idx);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -386,7 +404,8 @@ class cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION);
         }
         sDfsCacCompleted& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -406,7 +425,8 @@ class cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION : public BaseC
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION);
         }
         sDfsChannelAvailable& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -426,7 +446,8 @@ class cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -446,7 +467,8 @@ class cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -466,7 +488,8 @@ class cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST);
         }
         sNeighborSetParams11k& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -486,7 +509,8 @@ class cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST);
         }
         sNeighborRemoveParams11k& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -506,7 +530,8 @@ class cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION);
         }
         sClientAssociationParams& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -526,7 +551,8 @@ class cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION);
         }
         sClientDisconnectionParams& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -549,7 +575,8 @@ class cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST : public BaseClass
         int8_t& vap_id();
         uint32_t& type();
         uint32_t& reason();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -572,7 +599,8 @@ class cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE);
         }
         sClientDisconnectResponse& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -593,7 +621,8 @@ class cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST : public BaseClass
         }
         sMacAddr& mac();
         sMacAddr& bssid();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -615,7 +644,8 @@ class cACTION_APMANAGER_CLIENT_ALLOW_REQUEST : public BaseClass
         }
         sMacAddr& mac();
         sMacAddr& bssid();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -636,7 +666,8 @@ class cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST);
         }
         sNodeRssiMeasurementRequest& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -656,7 +687,8 @@ class cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE);
         }
         sNodeRssiMeasurement& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -676,7 +708,8 @@ class cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -697,7 +730,8 @@ class cACTION_APMANAGER_ACK : public BaseClass
         }
         uint8_t& reason();
         sMacAddr& sta_mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -718,7 +752,8 @@ class cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST);
         }
         sNodeBssSteerRequest& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -738,7 +773,8 @@ class cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE);
         }
         sNodeBssSteerResponse& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -758,7 +794,8 @@ class cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE : public BaseCla
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE);
         }
         sMacAddr& mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -778,7 +815,8 @@ class cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST);
         }
         sSteeringClientSetRequest& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -798,7 +836,8 @@ class cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE);
         }
         sSteeringClientSetResponse& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -818,7 +857,8 @@ class cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION);
         }
         sSteeringEvProbeReq& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -838,7 +878,8 @@ class cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION);
         }
         sSteeringEvAuthFail& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -861,7 +902,8 @@ class cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST : public BaseClass
         std::tuple<bool, WSC::cConfigData&> wifi_credentials(size_t idx);
         std::shared_ptr<WSC::cConfigData> create_wifi_credentials();
         bool add_wifi_credentials(std::shared_ptr<WSC::cConfigData> ptr);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -885,7 +927,8 @@ class cACTION_APMANAGER_HEARTBEAT_NOTIFICATION : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HEARTBEAT_NOTIFICATION);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -903,7 +946,8 @@ class cACTION_APMANAGER_READ_ACS_REPORT_REQUEST : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_READ_ACS_REPORT_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -922,7 +966,8 @@ class cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_READ_ACS_REPORT_RESPONSE);
         }
         std::tuple<bool, beerocks::message::sWifiChannel&> supported_channels_list(size_t idx);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

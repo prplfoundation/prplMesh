@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
 #include <tuple>
 #include <tlvf/tlvfutils.h>
@@ -93,7 +94,8 @@ class tlvWscM2 : public BaseClass
         bool add_encrypted_settings(std::shared_ptr<WSC::cWscAttrEncryptedSettings> ptr);
         std::shared_ptr<WSC::cWscAttrEncryptedSettings> encrypted_settings() { return m_encrypted_settings_ptr; }
         WSC::sWscAttrAuthenticator& authenticator();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

@@ -29,6 +29,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include <tuple>
 #include <tlvf/tlvfutils.h>
 #include "tlvf/WSC/eWscLengths.h"
@@ -496,7 +497,8 @@ class cConfigData : public BaseClass
         bool alloc_network_key(size_t count = 1);
         sWscAttrBssid& bssid_attr();
         sWscAttrVendorExtMultiAp& multiap_attr();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -535,7 +537,8 @@ class cWscAttrEncryptedSettings : public BaseClass
         bool set_encrypted_settings(const std::string& str);
         bool set_encrypted_settings(const char buffer[], size_t size);
         bool alloc_encrypted_settings(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -564,7 +567,8 @@ class cWscVendorExtWfa : public BaseClass
         size_t vs_data_length() { return m_vs_data_idx__ * sizeof(uint8_t); }
         uint8_t* vs_data(size_t idx = 0);
         bool alloc_vs_data(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

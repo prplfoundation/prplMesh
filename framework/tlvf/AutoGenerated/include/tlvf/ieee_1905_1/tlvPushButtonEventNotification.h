@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
 #include <tuple>
 #include "tlvf/ieee_1905_1/eMediaType.h"
@@ -51,7 +52,8 @@ class tlvPushButtonEventNotification : public BaseClass
         uint8_t& media_type_list_length();
         std::tuple<bool, sMediaType&> media_type_list(size_t idx);
         bool alloc_media_type_list(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

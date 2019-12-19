@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
 #include <tuple>
 #include <vector>
@@ -41,7 +42,8 @@ class tlvDeviceBridgingCapability : public BaseClass
         std::tuple<bool, cMacList&> bridging_tuples_list(size_t idx);
         std::shared_ptr<cMacList> create_bridging_tuples_list();
         bool add_bridging_tuples_list(std::shared_ptr<cMacList> ptr);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -66,7 +68,8 @@ class cMacList : public BaseClass
         uint8_t& mac_list_length();
         std::tuple<bool, sMacAddr&> mac_list(size_t idx);
         bool alloc_mac_list(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

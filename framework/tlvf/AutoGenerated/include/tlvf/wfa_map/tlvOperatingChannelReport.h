@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
 #include "tlvf/common/sMacAddr.h"
 #include <tuple>
@@ -52,7 +53,8 @@ class tlvOperatingChannelReport : public BaseClass
         //The field is coded as a 2's complement signed integer in units of decibels relative to 1 mW (dBm).
         //This value is less than or equal to the Maximum Transmit Power specified in the AP Radio Basic Capabilities TLV for the current operating class.    
         int8_t& current_transmit_power();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

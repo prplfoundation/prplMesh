@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
 #include "tlvf/common/sMacAddr.h"
 #include <tuple>
@@ -43,7 +44,8 @@ class tlvChannelPreference : public BaseClass
         std::tuple<bool, cPreferenceOperatingClasses&> operating_classes_list(size_t idx);
         std::shared_ptr<cPreferenceOperatingClasses> create_operating_classes_list();
         bool add_operating_classes_list(std::shared_ptr<cPreferenceOperatingClasses> ptr);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -101,7 +103,8 @@ class cPreferenceOperatingClasses : public BaseClass
         uint8_t* channel_list(size_t idx = 0);
         bool alloc_channel_list(size_t count = 1);
         sFlags& flags();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

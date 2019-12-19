@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "bcl/beerocks_message_structs.h"
 #include "beerocks/tlvf/beerocks_message_action.h"
 
@@ -46,7 +47,8 @@ class tlvVsClientAssociationEvent : public BaseClass
         uint8_t& disconnect_source();
         //relevant only on disconnect event
         uint8_t& disconnect_type();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
 #include "tlvf/common/sMacAddr.h"
 #include <tuple>
@@ -53,7 +54,8 @@ class tlvDeviceInformation : public BaseClass
         uint8_t& info_length();
         std::tuple<bool, sInfo&> info(size_t idx);
         bool alloc_info(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

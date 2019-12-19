@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
 #include "tlvf/common/sMacAddr.h"
 
@@ -42,7 +43,8 @@ class tlvPushButtonJoinNotification : public BaseClass
         //Interface-specific MAC address of the interface of the new device that was
         //joined to the network as a result of the push button configuration sequence.
         sMacAddr& iface_mac_of_new_device_joined();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

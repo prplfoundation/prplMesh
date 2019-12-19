@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include <tuple>
 #include <tlvf/tlvfutils.h>
 #include "beerocks/tlvf/beerocks_message_common.h"
@@ -37,7 +38,8 @@ class cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION : pub
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION);
         }
         uint8_t& is_backhaul_manager();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -60,7 +62,8 @@ class cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST : public BaseClass
         char* iface_name(size_t length = 0);
         bool set_iface_name(const std::string& str);
         bool set_iface_name(const char buffer[], size_t size);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -84,7 +87,8 @@ class cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE : public BaseClass
         sPlatformSettings& platform_settings();
         sWlanSettings& wlan_settings();
         uint32_t& valid();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -106,7 +110,8 @@ class cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_ARP_MONITOR_NOTIFICATION);
         }
         sArpMonitorData& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -126,7 +131,8 @@ class cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION);
         }
         sWlanSettings& wlan_settings();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -153,7 +159,8 @@ class cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION : public BaseClass
         char* hostname(size_t length = 0);
         bool set_hostname(const std::string& str);
         bool set_hostname(const char buffer[], size_t size);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -179,7 +186,8 @@ class cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL);
         }
         sLoggingLevelChange& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -199,7 +207,8 @@ class cACTION_PLATFORM_ARP_QUERY_REQUEST : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_ARP_QUERY_REQUEST);
         }
         sArpQuery& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -219,7 +228,8 @@ class cACTION_PLATFORM_ARP_QUERY_RESPONSE : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_ARP_QUERY_RESPONSE);
         }
         sArpMonitorData& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -238,7 +248,8 @@ class cACTION_PLATFORM_ONBOARD_QUERY_REQUEST : public BaseClass
         static eActionOp_PLATFORM get_action_op(){
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_ONBOARD_QUERY_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -257,7 +268,8 @@ class cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_ONBOARD_QUERY_RESPONSE);
         }
         sOnboarding& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -277,7 +289,8 @@ class cACTION_PLATFORM_ONBOARD_SET_REQUEST : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_ONBOARD_SET_REQUEST);
         }
         sOnboarding& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -300,7 +313,8 @@ class cACTION_PLATFORM_WPS_ONBOARDING_REQUEST : public BaseClass
         char* iface_name(size_t length = 0);
         bool set_iface_name(const std::string& str);
         bool set_iface_name(const char buffer[], size_t size);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -322,7 +336,8 @@ class cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST);
         }
         uint8_t& vap_id();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -344,7 +359,8 @@ class cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE : public BaseClass
         sWifiCredentials& front_params();
         sWifiCredentials& back_params();
         uint32_t& result();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -365,7 +381,8 @@ class cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST : public BaseClass
         static eActionOp_PLATFORM get_action_op(){
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -385,7 +402,8 @@ class cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE : public BaseClass
         }
         sAdminCredentials& params();
         uint32_t& result();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -405,7 +423,8 @@ class cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST : public BaseClass
         static eActionOp_PLATFORM get_action_op(){
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_DEVICE_INFO_GET_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -425,7 +444,8 @@ class cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE : public BaseClass
         }
         sDeviceInfo& params();
         uint32_t& result();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -445,7 +465,8 @@ class cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST : public BaseClass
         static eActionOp_PLATFORM get_action_op(){
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -464,7 +485,8 @@ class cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE);
         }
         uint8_t& local_master();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -484,7 +506,8 @@ class cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION);
         }
         sVersions& versions();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -504,7 +527,8 @@ class cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION);
         }
         sVersions& versions();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -523,7 +547,8 @@ class cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST : public BaseClass
         static eActionOp_PLATFORM get_action_op(){
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -543,7 +568,8 @@ class cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE : public BaseClass
         }
         sVersions& versions();
         uint32_t& result();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -568,7 +594,8 @@ class cACTION_PLATFORM_ERROR_NOTIFICATION : public BaseClass
         char* data(size_t length = 0);
         bool set_data(const std::string& str);
         bool set_data(const char buffer[], size_t size);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -603,7 +630,8 @@ class cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION : public BaseClass
         uint8_t& status_bh_wired();
         uint8_t& is_bh_manager();
         uint8_t& status_operational();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -632,7 +660,8 @@ class cACTION_PLATFORM_OPERATIONAL_NOTIFICATION : public BaseClass
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_OPERATIONAL_NOTIFICATION);
         }
         uint8_t& operational();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
