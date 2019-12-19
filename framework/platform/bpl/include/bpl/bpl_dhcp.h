@@ -11,6 +11,7 @@
 
 #include "bpl.h"
 
+namespace beerocks {
 namespace bpl {
 
 /****************************************************************************/
@@ -64,5 +65,6 @@ int dhcp_mon_handle_event();
 int dhcp_mon_stop();
 
 } // namespace bpl
+} // namespace beerocks
 
 #endif // _BPL_DHCP_H_

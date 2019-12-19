@@ -71,6 +71,7 @@ enum paramType { TYPE_RADIO = 0, TYPE_VAP };
 #include <uci_wrapper.h>
 #endif
 
+namespace beerocks {
 namespace bpl {
 
 int cfg_uci_get_wireless_idx(char *interfaceName, int *rpc_index);
@@ -84,5 +85,6 @@ int cfg_uci_get_wireless_radio_idx(const char *interfaceName, int *radio_index);
 int cfg_uci_get_radio_param_ulong(int index, const char param[], unsigned long *value);
 
 } // namespace bpl
+} // namespace beerocks
 
 #endif // BPL_CFG_UCI_H

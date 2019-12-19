@@ -25,11 +25,11 @@
 #include <future>
 #include <list>
 
+namespace beerocks {
+
 namespace bpl {
 enum class eErrorCode;
 }
-
-namespace beerocks {
 
 class backhaul_manager : public btl::transport_socket_thread {
 

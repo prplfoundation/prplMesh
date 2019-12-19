@@ -13,6 +13,7 @@
 
 #include <bpl/bpl_cfg.h>
 
+namespace beerocks {
 namespace bpl {
 
 /**
@@ -72,5 +73,6 @@ int cfg_get_wep_key(int index, int keyIndex, char *key);
  **/
 
 } // namespace bpl
+} // namespace beerocks
 
 #endif // _BPL_CFG_HELPER_H

@@ -13,8 +13,6 @@
 
 using namespace mapf;
 
-using namespace beerocks::bpl;
-
 #ifndef PLATFORM_DB_PATH
 #error "PLATFORM_DB_PATH not defined!"
 #endif
@@ -26,6 +24,7 @@ using namespace beerocks::bpl;
 #define RETURN_OK 0
 #define RETURN_ERR -1
 
+namespace beerocks {
 namespace bpl {
 
 int cfg_get_param(const std::string &param, std::string &value)
@@ -222,3 +221,4 @@ int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_noti
 int cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return RETURN_ERR; }
 
 } // namespace bpl
+} // namespace beerocks
