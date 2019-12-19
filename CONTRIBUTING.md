@@ -259,6 +259,18 @@ The typical workflow for this is:
 * Push and create a pull request.
 * Check out the development branch and rebase on the hotfix branch. This will automatically remove th fix commit.
 
+Sometimes a pull request looks like it's ready for review or merge (it is not draft, it has an approval) but really it isn't.
+For this purpose, the "don't merge" tag can be added to it.
+Example use cases:
+
+- You found an issue and are going to push more commits.
+- A reviewer has some nitpick comments but already approves it, and the assignee still plans to apply the nitpicks.
+- A PR needs to be split up into several others so eventually it will be closed, but you want to keep it around for reference.
+- It's an oldish PR that needs to be rebased and conflicts need to be resolved.
+- It needs more testing before really approving it for merge.
+
+If a PR is marked "don't merge" and it becomes ready (i.e. you did the necessary fixups and rebased on master), please remember to remove the tag again.
+
 ### Definition of done
 
 Before a pull request can be merged, it must be considered "Done".
