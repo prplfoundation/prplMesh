@@ -17,9 +17,20 @@ main() {
         run ${scriptdir}/image-build.sh
     }
 
-    run docker container run --workdir=$rootdir --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)} \
-        -e USER=${SUDO_USER:-${USER}} -v ${rootdir}:${rootdir} \
-        --rm prplmesh-builder $@
+    # Default docker arguments
+    docker_args="\
+    --workdir=$rootdir --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)} \
+    -e USER=${SUDO_USER:-${USER}} -v ${rootdir}:${rootdir} \
+    "
+
+    # Add platform base directory mapping into the container
+    if [ ! -z "${PRPLMESH_PLATFORM_BASE_DIR}" ]; then
+        docker_args="${docker_args} \
+        -v ${PRPLMESH_PLATFORM_BASE_DIR}:${PRPLMESH_PLATFORM_BASE_DIR} \
+        "
+    fi
+
+    run docker container run ${docker_args} --rm prplmesh-builder $@
 }
 
 main $@
