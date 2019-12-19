@@ -28,8 +28,8 @@ namespace ieee1905_1 {
 class tlvMacAddress : public BaseClass
 {
     public:
-        tlvMacAddress(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvMacAddress(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvMacAddress(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvMacAddress(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvMacAddress();
 
         const eTlvType& type();

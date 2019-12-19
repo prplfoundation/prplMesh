@@ -474,8 +474,8 @@ typedef struct sWscAttrAuthenticator {
 class cConfigData : public BaseClass
 {
     public:
-        cConfigData(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cConfigData(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cConfigData(uint8_t* buff, size_t buff_len, bool parse = false);
+        cConfigData(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cConfigData();
 
         eWscAttributes& ssid_type();
@@ -519,8 +519,8 @@ class cConfigData : public BaseClass
 class cWscAttrEncryptedSettings : public BaseClass
 {
     public:
-        cWscAttrEncryptedSettings(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cWscAttrEncryptedSettings(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cWscAttrEncryptedSettings(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrEncryptedSettings(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrEncryptedSettings();
 
         const eWscAttributes& type();
@@ -552,8 +552,8 @@ class cWscAttrEncryptedSettings : public BaseClass
 class cWscVendorExtWfa : public BaseClass
 {
     public:
-        cWscVendorExtWfa(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cWscVendorExtWfa(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cWscVendorExtWfa(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscVendorExtWfa(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscVendorExtWfa();
 
         eWscAttributes& type();

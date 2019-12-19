@@ -15,12 +15,12 @@
 
 using namespace wfa_map;
 
-tlvTransmitPowerLimit::tlvTransmitPowerLimit(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+tlvTransmitPowerLimit::tlvTransmitPowerLimit(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvTransmitPowerLimit::tlvTransmitPowerLimit(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+tlvTransmitPowerLimit::tlvTransmitPowerLimit(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 tlvTransmitPowerLimit::~tlvTransmitPowerLimit() {
@@ -88,7 +88,7 @@ bool tlvTransmitPowerLimit::init()
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvTypeMap::TLV_TRANSMIT_POWER_LIMIT) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_TRANSMIT_POWER_LIMIT) << ", received value: " << int(*m_type);

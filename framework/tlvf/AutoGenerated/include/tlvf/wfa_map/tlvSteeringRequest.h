@@ -30,8 +30,8 @@ namespace wfa_map {
 class tlvSteeringRequest : public BaseClass
 {
     public:
-        tlvSteeringRequest(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvSteeringRequest(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvSteeringRequest(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvSteeringRequest(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvSteeringRequest();
 
         typedef struct sRequestFlags {

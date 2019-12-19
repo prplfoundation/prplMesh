@@ -30,8 +30,8 @@ namespace ieee1905_1 {
 class tlvWscM1 : public BaseClass
 {
     public:
-        tlvWscM1(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvWscM1(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvWscM1(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvWscM1(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvWscM1();
 
         const eTlvType& type();

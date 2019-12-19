@@ -15,12 +15,12 @@
 
 using namespace ieee1905_1;
 
-tlvSupportedFreqBand::tlvSupportedFreqBand(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+tlvSupportedFreqBand::tlvSupportedFreqBand(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvSupportedFreqBand::tlvSupportedFreqBand(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+tlvSupportedFreqBand::tlvSupportedFreqBand(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 tlvSupportedFreqBand::~tlvSupportedFreqBand() {
@@ -75,7 +75,7 @@ bool tlvSupportedFreqBand::init()
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eValue); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvType::TLV_SUPPORTED_FREQ_BAND) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_SUPPORTED_FREQ_BAND) << ", received value: " << int(*m_type);

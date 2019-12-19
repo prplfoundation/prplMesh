@@ -15,12 +15,12 @@
 
 using namespace WSC;
 
-cConfigData::cConfigData(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cConfigData::cConfigData(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cConfigData::cConfigData(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cConfigData::cConfigData(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cConfigData::~cConfigData() {
@@ -236,7 +236,7 @@ bool cConfigData::init()
     }
     m_ssid = (char*)m_buff_ptr__;
     uint16_t ssid_length = *m_ssid_length;
-    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&ssid_length)); }
+    if (m_parse__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&ssid_length)); }
     m_ssid_idx__ = ssid_length;
     if (!buffPtrIncrementSafe(sizeof(char) * (ssid_length))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (ssid_length) << ") Failed!";
@@ -268,7 +268,7 @@ bool cConfigData::init()
     }
     m_network_key = (char*)m_buff_ptr__;
     uint16_t network_key_length = *m_network_key_length;
-    if (m_parse__ && m_swap__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&network_key_length)); }
+    if (m_parse__) {  tlvf_swap(16, reinterpret_cast<uint8_t*>(&network_key_length)); }
     m_network_key_idx__ = network_key_length;
     if (!buffPtrIncrementSafe(sizeof(char) * (network_key_length))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (network_key_length) << ") Failed!";
@@ -286,16 +286,16 @@ bool cConfigData::init()
         return false;
     }
     if (!m_parse__) { m_multiap_attr->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cWscAttrEncryptedSettings::cWscAttrEncryptedSettings(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cWscAttrEncryptedSettings::cWscAttrEncryptedSettings(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cWscAttrEncryptedSettings::cWscAttrEncryptedSettings(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cWscAttrEncryptedSettings::cWscAttrEncryptedSettings(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cWscAttrEncryptedSettings::~cWscAttrEncryptedSettings() {
@@ -434,7 +434,7 @@ bool cWscAttrEncryptedSettings::init()
     m_encrypted_settings = (char*)m_buff_ptr__;
     if (m_length && m_parse__) {
         size_t len = *m_length;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&len));
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_encrypted_settings_idx__ = len/sizeof(char);
         if (!buffPtrIncrementSafe(len)) {
@@ -442,7 +442,7 @@ bool cWscAttrEncryptedSettings::init()
             return false;
         }
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eWscAttributes::ATTR_ENCR_SETTINGS) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eWscAttributes::ATTR_ENCR_SETTINGS) << ", received value: " << int(*m_type);
@@ -452,12 +452,12 @@ bool cWscAttrEncryptedSettings::init()
     return true;
 }
 
-cWscVendorExtWfa::cWscVendorExtWfa(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cWscVendorExtWfa::cWscVendorExtWfa(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cWscVendorExtWfa::cWscVendorExtWfa(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cWscVendorExtWfa::cWscVendorExtWfa(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cWscVendorExtWfa::~cWscVendorExtWfa() {
@@ -579,7 +579,7 @@ bool cWscVendorExtWfa::init()
     m_vs_data = (uint8_t*)m_buff_ptr__;
     if (m_length && m_parse__) {
         size_t len = *m_length;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&len));
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_vs_data_idx__ = len/sizeof(uint8_t);
         if (!buffPtrIncrementSafe(len)) {
@@ -587,7 +587,7 @@ bool cWscVendorExtWfa::init()
             return false;
         }
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 

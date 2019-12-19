@@ -27,8 +27,8 @@ namespace ieee1905_1 {
 class tlvUnknown : public BaseClass
 {
     public:
-        tlvUnknown(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvUnknown(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvUnknown(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvUnknown(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvUnknown();
 
         uint8_t& type();

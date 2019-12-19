@@ -30,8 +30,8 @@ namespace ieee1905_1 {
 class tlvReceiverLinkMetric : public BaseClass
 {
     public:
-        tlvReceiverLinkMetric(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvReceiverLinkMetric(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvReceiverLinkMetric(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvReceiverLinkMetric(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvReceiverLinkMetric();
 
         typedef struct sLinkMetricInfo {
