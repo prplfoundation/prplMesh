@@ -1435,8 +1435,9 @@ void ap_manager_thread::handle_hostapd_attached()
 
             usleep(ACS_READ_SLEEP_USC);
         }
-    } else
+    } else {
         ap_wlan_hal->read_supported_channels();
+    }
 
     auto notification =
         message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_JOINED_NOTIFICATION>(
