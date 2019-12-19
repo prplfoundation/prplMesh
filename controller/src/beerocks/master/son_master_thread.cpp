@@ -1861,17 +1861,21 @@ bool master_thread::handle_intel_slave_join(
 
     if (!is_gw_slave) {
 
-        // rejecting join if gw haven't joined yet
-        if ((parent_bssid_mac != network_utils::ZERO_MAC_STRING) &&
-            (!database.has_node(network_utils::mac_from_string(parent_bssid_mac)) ||
-             (database.get_node_state(parent_bssid_mac) != beerocks::STATE_CONNECTED))) {
-            LOG(DEBUG) << "sending back join reject!";
-            LOG(DEBUG) << "reject_debug: parent_bssid_has_node="
-                       << (int)(database.has_node(
-                              network_utils::mac_from_string(parent_bssid_mac)));
+        // if not local GW but local master - then the parent bssid is remote AP (aka "far AP")
+        // and is not yet in map
+        if (!notification->platform_settings().local_master) {
+            // rejecting join if gw haven't joined yet
+            if ((parent_bssid_mac != network_utils::ZERO_MAC_STRING) &&
+                (!database.has_node(network_utils::mac_from_string(parent_bssid_mac)) ||
+                 (database.get_node_state(parent_bssid_mac) != beerocks::STATE_CONNECTED))) {
+                LOG(DEBUG) << "sending back join reject!";
+                LOG(DEBUG) << "reject_debug: parent_bssid_has_node="
+                           << (int)(database.has_node(
+                                  network_utils::mac_from_string(parent_bssid_mac)));
 
-            join_response->err_code() = beerocks::JOIN_RESP_REJECT;
-            return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
+                join_response->err_code() = beerocks::JOIN_RESP_REJECT;
+                return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
+            }
         }
 
         // sending to BML listeners, client disconnect notification on ire backhaul before changing it type from TYPE_CLIENT to TYPE_IRE_BACKHAUL
