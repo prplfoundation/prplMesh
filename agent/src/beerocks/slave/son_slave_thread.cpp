@@ -3688,7 +3688,7 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
     // cConfigData constructor, but then parsing will fail since the length
     // will be calculated wrong. TLVF does not support parsing network byte order
     // without full swap, so keep this workaround for now (another future TLVF V2 feature)
-    WSC::cConfigData config_data(decrypted, datalen, true, true);
+    WSC::cConfigData config_data(decrypted, datalen, true);
 
     // get length of config_data for KWA authentication
     size_t len = config_data.getLen();

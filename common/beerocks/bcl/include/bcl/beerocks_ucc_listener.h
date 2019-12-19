@@ -107,13 +107,13 @@ private:
 
 class tlvPrefilledData : public BaseClass {
 public:
-    tlvPrefilledData(uint8_t *buff, size_t buff_len, bool parse = false, bool swap_needed = false)
-        : BaseClass(buff, buff_len, parse, swap_needed)
+    tlvPrefilledData(uint8_t *buff, size_t buff_len, bool parse = false)
+        : BaseClass(buff, buff_len, parse)
     {
         m_init_succeeded = true;
     };
-    tlvPrefilledData(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false)
-        : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed)
+    tlvPrefilledData(std::shared_ptr<BaseClass> base, bool parse = false)
+        : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse)
     {
         m_init_succeeded = true;
     };

@@ -34,14 +34,14 @@ public:
         std::shared_ptr<T> ptr;
         if (m_buff) {
             if (m_class_vector.size() == 0) {
-                ptr = std::make_shared<T>(m_buff, m_buff_len, m_parse, true);
+                ptr = std::make_shared<T>(m_buff, m_buff_len, m_parse);
             } else {
                 // do not allow to use addClass method if the previous tlv is not fully initialized
                 if (!m_class_vector.back()->isPostInitSucceeded()) {
                     TLVF_LOG(ERROR) << "TLV post init failed";
                     return nullptr;
                 }
-                ptr = std::make_shared<T>(m_class_vector.back(), m_parse, true);
+                ptr = std::make_shared<T>(m_class_vector.back(), m_parse);
             }
             if (!ptr || ptr->isInitialized() == false) {
                 return std::shared_ptr<T>();
