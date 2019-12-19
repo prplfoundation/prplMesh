@@ -95,8 +95,9 @@ static const struct ubus_method dhcp_ubus_methods[] = {
     UBUS_METHOD("dhcp_event", dhcp_event_handler, dhcp_event_policy),
 };
 
-static struct ubus_object_type dhcp_ubus_object_type =
-    UBUS_OBJECT_TYPE("dhcp_event", dhcp_ubus_methods);
+// UBUS_OBJECT_TYPE puts the fields in the wrong order
+static struct ubus_object_type dhcp_ubus_object_type = {
+    .name = "dhcp_event", .methods = dhcp_ubus_methods, .n_methods = ARRAY_SIZE(dhcp_ubus_methods)};
 
 static struct ubus_object dhcp_ubus_object = {
     .name      = "dhcp_event",
