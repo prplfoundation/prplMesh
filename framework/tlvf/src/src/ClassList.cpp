@@ -1,14 +1,13 @@
 /* SPDX-License-Identifier: BSD-2-Clause-Patent
  *
- * Copyright (c) 2019 Arnout Vandecappelle (Essensium/Mind)
- * Copyright (c) 2019 Tomer Eliyahu (Intel)
+ * Copyright (c) 2016-2019 Intel Corporation
  *
  * This code is subject to the terms of the BSD+Patent license.
  * See LICENSE file for more details.
  */
 
+#include <tlvf/BaseClass.h>
 #include <tlvf/ClassList.h>
-#include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
 #include <tlvf/tlvflogging.h>
 
 ClassList::ClassList(uint8_t *buff, size_t buff_len, bool parse)

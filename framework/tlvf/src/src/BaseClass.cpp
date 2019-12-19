@@ -7,6 +7,7 @@
  */
 
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include <tlvf/tlvflogging.h>
 
 BaseClass::BaseClass(uint8_t *buff, const size_t buff_len, const bool parse)
@@ -58,6 +59,8 @@ bool BaseClass::finalize()
         TLVF_LOG(ERROR) << "post init check failed";
         return false;
     }
+    if (m_inner)
+        m_inner->finalize();
     class_swap();
     m_finalized = true;
     return true;
