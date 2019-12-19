@@ -59,7 +59,21 @@ run-tests:
     - shell
     - docker-build
 
+.test-on-target:
+  stage: test
+  script:
+    - tools/deploy_ipk.sh $TARGET_DEVICE tools/docker/builder/openwrt/*.ipk
+    - tools/docker/tests/openwrt/test_status.sh $TARGET_DEVICE
+  tags:
+    - targets
+
 build-for-turris-omnia:
   extends: .build-for-openwrt
   variables:
     TARGET: turris-omnia
+
+test-on-turris-omnia:
+  extends: .test-on-target
+  variables:
+    TARGET_DEVICE: turris-omnia-1
+  needs: ["build-for-turris-omnia"]
