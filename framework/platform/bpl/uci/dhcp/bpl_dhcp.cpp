@@ -8,10 +8,13 @@
 
 #include <bpl/bpl_dhcp.h>
 
+extern "C" {
 // Ignore some warnings from libubus
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <libubox/blobmsg_json.h>
 #include <libubus.h>
+}
+
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////////

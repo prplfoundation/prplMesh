@@ -8,7 +8,9 @@
 
 #include "bpl_cfg_uci.h"
 
+extern "C" {
 #include <uci.h>
+}
 
 #define LOGF_LOG_CRIT(args...) PRINTF("CRIT", ##args)
 #define LOGF_LOG_ERROR(args...) PRINTF("ERROR", ##args)
