@@ -24,17 +24,9 @@ extern "C" {
 static struct ubus_context *s_pUbusCtx = NULL;
 static bpl::dhcp_mon_cb s_pCallback    = NULL;
 
-enum {
-    DHCP_EVENT_ID,
-    DHCP_EVENT_OP,
-    DHCP_EVENT_MAC,
-    DHCP_EVENT_IP,
-    DHCP_EVENT_HOSTNAME,
-    __DHCP_EVENT_MAX
-};
+enum { DHCP_EVENT_OP, DHCP_EVENT_MAC, DHCP_EVENT_IP, DHCP_EVENT_HOSTNAME, __DHCP_EVENT_MAX };
 
 static const struct blobmsg_policy dhcp_event_policy[] = {
-    //TODO Remove: [DHCP_EVENT_ID] = { .name = "id", .type = BLOBMSG_TYPE_INT32 },
     [DHCP_EVENT_OP]       = {.name = "op", .type = BLOBMSG_TYPE_STRING},
     [DHCP_EVENT_MAC]      = {.name = "mac", .type = BLOBMSG_TYPE_STRING},
     [DHCP_EVENT_IP]       = {.name = "ip", .type = BLOBMSG_TYPE_STRING},
