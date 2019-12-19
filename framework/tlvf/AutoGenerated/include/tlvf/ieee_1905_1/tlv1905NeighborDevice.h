@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
 #include "tlvf/common/sMacAddr.h"
 #include <tuple>
@@ -55,7 +56,8 @@ class tlv1905NeighborDevice : public BaseClass
         size_t mac_al_1905_device_length() { return m_mac_al_1905_device_idx__ * sizeof(tlv1905NeighborDevice::sMacAl1905Device); }
         std::tuple<bool, sMacAl1905Device&> mac_al_1905_device(size_t idx);
         bool alloc_mac_al_1905_device(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

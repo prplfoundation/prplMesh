@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
 #include <tuple>
 
@@ -42,7 +43,8 @@ class tlvHigherLayerData : public BaseClass
         size_t payload_length() { return m_payload_idx__ * sizeof(uint8_t); }
         uint8_t* payload(size_t idx = 0);
         bool alloc_payload(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
 #include <tuple>
 
@@ -41,7 +42,8 @@ class tlvSearchedService : public BaseClass
         uint8_t& searched_service_list_length();
         std::tuple<bool, eSearchedService&> searched_service_list(size_t idx);
         bool alloc_searched_service_list(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

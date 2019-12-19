@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include <tuple>
 #include <tlvf/tlvfutils.h>
 #include <vector>
@@ -59,7 +60,8 @@ class tlvTestVarList : public BaseClass
         std::tuple<bool, cInner&> unknown_length_list(size_t idx);
         std::shared_ptr<cInner> create_unknown_length_list();
         bool add_unknown_length_list(std::shared_ptr<cInner> ptr);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -110,7 +112,8 @@ class cInner : public BaseClass
         bool set_unknown_length_list_inner(const std::string& str);
         bool set_unknown_length_list_inner(const char buffer[], size_t size);
         bool alloc_unknown_length_list_inner(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

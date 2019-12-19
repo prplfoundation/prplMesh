@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/ieee_1905_1/eMessageType.h"
 #include <asm/byteorder.h>
 
@@ -59,7 +60,8 @@ class cCmduHeader : public BaseClass
         uint16_t& message_id();
         uint8_t& fragment_id();
         sFlags& flags();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

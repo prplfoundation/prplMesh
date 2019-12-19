@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
 #include <tuple>
 #include <tlvf/tlvfutils.h>
@@ -92,7 +93,8 @@ class tlvWscM1 : public BaseClass
         std::shared_ptr<WSC::cWscVendorExtWfa> create_vendor_ext();
         bool add_vendor_ext(std::shared_ptr<WSC::cWscVendorExtWfa> ptr);
         std::shared_ptr<WSC::cWscVendorExtWfa> vendor_ext() { return m_vendor_ext_ptr; }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
 #include "tlvf/common/sMacAddr.h"
 
@@ -48,7 +49,8 @@ class tlvLinkMetricQuery : public BaseClass
         eNeighborType& neighbor_type();
         sMacAddr& mac_al_1905_device();
         eLinkMetricsType& link_metrics();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

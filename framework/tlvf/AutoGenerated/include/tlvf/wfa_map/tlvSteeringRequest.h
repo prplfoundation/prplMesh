@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
 #include "tlvf/common/sMacAddr.h"
 #include <tuple>
@@ -87,7 +88,8 @@ class tlvSteeringRequest : public BaseClass
         uint8_t& target_bssid_list_length();
         std::tuple<bool, sTargetBssidInfo&> target_bssid_list(size_t idx);
         bool alloc_target_bssid_list(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

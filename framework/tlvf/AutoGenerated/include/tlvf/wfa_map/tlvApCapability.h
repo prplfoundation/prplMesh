@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
 #include <asm/byteorder.h>
 
@@ -56,7 +57,8 @@ class tlvApCapability : public BaseClass
         const eTlvTypeMap& type();
         const uint16_t& length();
         sValue& value();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

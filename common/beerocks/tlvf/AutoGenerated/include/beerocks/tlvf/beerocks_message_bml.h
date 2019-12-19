@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include <tuple>
 #include <tlvf/tlvfutils.h>
 #include "beerocks/tlvf/beerocks_message_common.h"
@@ -36,7 +37,8 @@ class cACTION_BML_PING_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_PING_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -54,7 +56,8 @@ class cACTION_BML_PING_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_PING_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -72,7 +75,8 @@ class cACTION_BML_NW_MAP_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_NW_MAP_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -97,7 +101,8 @@ class cACTION_BML_NW_MAP_RESPONSE : public BaseClass
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
         bool alloc_buffer(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -127,7 +132,8 @@ class cACTION_BML_NW_MAP_UPDATE : public BaseClass
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
         bool alloc_buffer(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -157,7 +163,8 @@ class cACTION_BML_STATS_UPDATE : public BaseClass
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
         bool alloc_buffer(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -186,7 +193,8 @@ class cACTION_BML_EVENTS_UPDATE : public BaseClass
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
         bool alloc_buffer(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -208,7 +216,8 @@ class cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -226,7 +235,8 @@ class cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -244,7 +254,8 @@ class cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -262,7 +273,8 @@ class cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -280,7 +292,8 @@ class cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -298,7 +311,8 @@ class cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -316,7 +330,8 @@ class cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -334,7 +349,8 @@ class cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -352,7 +368,8 @@ class cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -370,7 +387,8 @@ class cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -388,7 +406,8 @@ class cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -406,7 +425,8 @@ class cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -424,7 +444,8 @@ class cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -442,7 +463,8 @@ class cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -461,7 +483,8 @@ class cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -481,7 +504,8 @@ class cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -501,7 +525,8 @@ class cACTION_BML_SET_CLIENT_ROAMING_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_SET_CLIENT_ROAMING_REQUEST);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -520,7 +545,8 @@ class cACTION_BML_SET_CLIENT_ROAMING_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_SET_CLIENT_ROAMING_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -538,7 +564,8 @@ class cACTION_BML_GET_CLIENT_ROAMING_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_GET_CLIENT_ROAMING_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -557,7 +584,8 @@ class cACTION_BML_GET_CLIENT_ROAMING_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_GET_CLIENT_ROAMING_RESPONSE);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -577,7 +605,8 @@ class cACTION_BML_SET_DFS_REENTRY_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_SET_DFS_REENTRY_REQUEST);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -596,7 +625,8 @@ class cACTION_BML_SET_DFS_REENTRY_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_SET_DFS_REENTRY_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -614,7 +644,8 @@ class cACTION_BML_GET_DFS_REENTRY_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_GET_DFS_REENTRY_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -633,7 +664,8 @@ class cACTION_BML_GET_DFS_REENTRY_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_GET_DFS_REENTRY_RESPONSE);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -653,7 +685,8 @@ class cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST : public Bas
             return (eActionOp_BML)(ACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -672,7 +705,8 @@ class cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE : public Ba
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -690,7 +724,8 @@ class cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST : public Bas
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -709,7 +744,8 @@ class cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE : public Ba
             return (eActionOp_BML)(ACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -729,7 +765,8 @@ class cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -748,7 +785,8 @@ class cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -766,7 +804,8 @@ class cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -785,7 +824,8 @@ class cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -805,7 +845,8 @@ class cACTION_BML_SET_IRE_ROAMING_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_SET_IRE_ROAMING_REQUEST);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -824,7 +865,8 @@ class cACTION_BML_SET_IRE_ROAMING_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_SET_IRE_ROAMING_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -842,7 +884,8 @@ class cACTION_BML_GET_IRE_ROAMING_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_GET_IRE_ROAMING_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -861,7 +904,8 @@ class cACTION_BML_GET_IRE_ROAMING_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_GET_IRE_ROAMING_RESPONSE);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -881,7 +925,8 @@ class cACTION_BML_SET_LOAD_BALANCER_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_SET_LOAD_BALANCER_REQUEST);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -900,7 +945,8 @@ class cACTION_BML_SET_LOAD_BALANCER_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_SET_LOAD_BALANCER_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -918,7 +964,8 @@ class cACTION_BML_GET_LOAD_BALANCER_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_GET_LOAD_BALANCER_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -937,7 +984,8 @@ class cACTION_BML_GET_LOAD_BALANCER_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_GET_LOAD_BALANCER_RESPONSE);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -957,7 +1005,8 @@ class cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_SET_SERVICE_FAIRNESS_REQUEST);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -976,7 +1025,8 @@ class cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -994,7 +1044,8 @@ class cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_GET_SERVICE_FAIRNESS_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1013,7 +1064,8 @@ class cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1033,7 +1085,8 @@ class cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST);
         }
         sLoggingLevelChange& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1052,7 +1105,8 @@ class cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1071,7 +1125,8 @@ class cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST);
         }
         sWifiCredentials& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1091,7 +1146,8 @@ class cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE);
         }
         uint32_t& error_code();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1111,7 +1167,8 @@ class cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST);
         }
         sRestrictedChannels& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1131,7 +1188,8 @@ class cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE);
         }
         uint32_t& error_code();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1151,7 +1209,8 @@ class cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST);
         }
         sRestrictedChannels& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1171,7 +1230,8 @@ class cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE);
         }
         sRestrictedChannels& params();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1191,7 +1251,8 @@ class cACTION_BML_SET_CERTIFICATION_MODE_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_SET_CERTIFICATION_MODE_REQUEST);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1210,7 +1271,8 @@ class cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_SET_CERTIFICATION_MODE_RESPONSE);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1228,7 +1290,8 @@ class cACTION_BML_GET_CERTIFICATION_MODE_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_GET_CERTIFICATION_MODE_REQUEST);
         }
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1247,7 +1310,8 @@ class cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_GET_CERTIFICATION_MODE_RESPONSE);
         }
         uint8_t& isEnable();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1270,7 +1334,8 @@ class cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST : public BaseClass
         uint8_t& vap_list_size();
         std::tuple<bool, sConfigVapInfo&> vap_list(size_t idx);
         bool alloc_vap_list(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1294,7 +1359,8 @@ class cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE);
         }
         uint32_t& result();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1317,7 +1383,8 @@ class cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE : public BaseClass
         uint8_t& vap_list_size();
         std::tuple<bool, sConfigVapInfo&> vap_list(size_t idx);
         bool alloc_vap_list(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1341,7 +1408,8 @@ class cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST);
         }
         uint32_t& result();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1364,7 +1432,8 @@ class cACTION_BML_STEERING_SET_GROUP_REQUEST : public BaseClass
         sSteeringApConfig& cfg_2();
         sSteeringApConfig& cfg_5();
         uint8_t& remove();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1387,7 +1456,8 @@ class cACTION_BML_STEERING_SET_GROUP_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_STEERING_SET_GROUP_RESPONSE);
         }
         int32_t& error_code();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1411,7 +1481,8 @@ class cACTION_BML_STEERING_CLIENT_SET_REQUEST : public BaseClass
         sMacAddr& client_mac();
         sSteeringClientConfig& config();
         uint8_t& remove();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1435,7 +1506,8 @@ class cACTION_BML_STEERING_CLIENT_SET_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_STEERING_CLIENT_SET_RESPONSE);
         }
         int32_t& error_code();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1455,7 +1527,8 @@ class cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST : public BaseClass
             return (eActionOp_BML)(ACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST);
         }
         uint8_t& unregister();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1475,7 +1548,8 @@ class cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE);
         }
         int32_t& error_code();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1499,7 +1573,8 @@ class cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST : public BaseClass
         sMacAddr& client_mac();
         eDisconnectType& type();
         uint32_t& reason();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1523,7 +1598,8 @@ class cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE);
         }
         int32_t& error_code();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1545,7 +1621,8 @@ class cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST : public BaseClass
         uint32_t& steeringGroupIndex();
         sMacAddr& bssid();
         sMacAddr& client_mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1567,7 +1644,8 @@ class cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE : public BaseClass
             return (eActionOp_BML)(ACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE);
         }
         int32_t& error_code();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1592,7 +1670,8 @@ class cACTION_BML_STEERING_EVENTS_UPDATE : public BaseClass
         bool set_buffer(const std::string& str);
         bool set_buffer(const char buffer[], size_t size);
         bool alloc_buffer(size_t count = 1);
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1615,7 +1694,8 @@ class cACTION_BML_TRIGGER_TOPOLOGY_QUERY : public BaseClass
             return (eActionOp_BML)(ACTION_BML_TRIGGER_TOPOLOGY_QUERY);
         }
         sMacAddr& al_mac();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
@@ -1636,7 +1716,8 @@ class cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST : public BaseClass
         }
         sMacAddr& al_mac();
         sMacAddr& ruid();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

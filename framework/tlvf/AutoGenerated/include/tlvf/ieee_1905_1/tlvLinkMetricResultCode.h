@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/ieee_1905_1/eTlvType.h"
 
 namespace ieee1905_1 {
@@ -38,7 +39,8 @@ class tlvLinkMetricResultCode : public BaseClass
         const eTlvType& type();
         const uint16_t& length();
         eValue& value();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

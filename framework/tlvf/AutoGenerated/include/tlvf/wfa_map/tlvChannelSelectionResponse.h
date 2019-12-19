@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
 #include "tlvf/common/sMacAddr.h"
 
@@ -43,7 +44,8 @@ class tlvChannelSelectionResponse : public BaseClass
         const uint16_t& length();
         sMacAddr& radio_uid();
         eResponseCode& response_code();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

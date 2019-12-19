@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "beerocks/tlvf/beerocks_message_common.h"
 #include "beerocks/tlvf/beerocks_message_action.h"
 
@@ -42,7 +43,8 @@ class cACTION_HEADER : public BaseClass
         uint8_t& last();
         uint16_t& id();
         uint16_t& length();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:

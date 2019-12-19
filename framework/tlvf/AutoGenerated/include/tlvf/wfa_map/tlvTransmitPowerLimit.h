@@ -19,6 +19,7 @@
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
+#include <tlvf/ClassList.h>
 #include "tlvf/wfa_map/eTlvTypeMap.h"
 #include "tlvf/common/sMacAddr.h"
 
@@ -38,7 +39,8 @@ class tlvTransmitPowerLimit : public BaseClass
         //Transmit Power Limit EIRP per 20 MHz bandwidth representing the nominal transmit power limit for this radio.
         //The field is coded as a 2's complement signed integer in units of decibels relative to 1 mW (dBm).
         uint8_t& transmit_power_limit_dbm();
-        void class_swap();
+        void class_swap() override;
+        bool finalize() override;
         static size_t get_initial_size();
 
     private:
