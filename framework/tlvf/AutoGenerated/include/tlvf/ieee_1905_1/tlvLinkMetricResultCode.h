@@ -27,8 +27,8 @@ namespace ieee1905_1 {
 class tlvLinkMetricResultCode : public BaseClass
 {
     public:
-        tlvLinkMetricResultCode(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvLinkMetricResultCode(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvLinkMetricResultCode(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvLinkMetricResultCode(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvLinkMetricResultCode();
 
         enum eValue: uint8_t {

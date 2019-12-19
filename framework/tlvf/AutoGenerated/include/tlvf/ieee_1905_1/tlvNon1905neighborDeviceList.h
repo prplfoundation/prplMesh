@@ -29,8 +29,8 @@ namespace ieee1905_1 {
 class tlvNon1905neighborDeviceList : public BaseClass
 {
     public:
-        tlvNon1905neighborDeviceList(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvNon1905neighborDeviceList(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvNon1905neighborDeviceList(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvNon1905neighborDeviceList(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvNon1905neighborDeviceList();
 
         const eTlvType& type();

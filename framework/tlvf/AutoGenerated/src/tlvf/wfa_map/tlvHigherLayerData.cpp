@@ -15,12 +15,12 @@
 
 using namespace wfa_map;
 
-tlvHigherLayerData::tlvHigherLayerData(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+tlvHigherLayerData::tlvHigherLayerData(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvHigherLayerData::tlvHigherLayerData(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+tlvHigherLayerData::tlvHigherLayerData(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 tlvHigherLayerData::~tlvHigherLayerData() {
@@ -116,7 +116,7 @@ bool tlvHigherLayerData::init()
     m_payload = (uint8_t*)m_buff_ptr__;
     if (m_length && m_parse__) {
         size_t len = *m_length;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&len));
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_payload_idx__ = len/sizeof(uint8_t);
         if (!buffPtrIncrementSafe(len)) {
@@ -124,7 +124,7 @@ bool tlvHigherLayerData::init()
             return false;
         }
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvTypeMap::TLV_HIGHER_LAYER_DATA) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_HIGHER_LAYER_DATA) << ", received value: " << int(*m_type);

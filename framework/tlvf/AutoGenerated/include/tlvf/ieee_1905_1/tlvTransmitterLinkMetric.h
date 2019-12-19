@@ -30,8 +30,8 @@ namespace ieee1905_1 {
 class tlvTransmitterLinkMetric : public BaseClass
 {
     public:
-        tlvTransmitterLinkMetric(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvTransmitterLinkMetric(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvTransmitterLinkMetric(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvTransmitterLinkMetric(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvTransmitterLinkMetric();
 
         enum eIEEE802_1BridgeFlag: uint8_t {

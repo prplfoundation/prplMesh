@@ -15,12 +15,12 @@
 
 using namespace wfa_map;
 
-tlvChannelPreference::tlvChannelPreference(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+tlvChannelPreference::tlvChannelPreference(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvChannelPreference::tlvChannelPreference(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+tlvChannelPreference::tlvChannelPreference(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 tlvChannelPreference::~tlvChannelPreference() {
@@ -71,7 +71,7 @@ std::shared_ptr<cPreferenceOperatingClasses> tlvChannelPreference::create_operat
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
-    return std::make_shared<cPreferenceOperatingClasses>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
+    return std::make_shared<cPreferenceOperatingClasses>(src, getBuffRemainingBytes(src), m_parse__);
 }
 
 bool tlvChannelPreference::add_operating_classes_list(std::shared_ptr<cPreferenceOperatingClasses> ptr) {
@@ -175,7 +175,7 @@ bool tlvChannelPreference::init()
         // swap back since operating_classes_list will be swapped as part of the whole class swap
         operating_classes_list->class_swap();
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvTypeMap::TLV_CHANNEL_PREFERENCE) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_CHANNEL_PREFERENCE) << ", received value: " << int(*m_type);
@@ -185,12 +185,12 @@ bool tlvChannelPreference::init()
     return true;
 }
 
-cPreferenceOperatingClasses::cPreferenceOperatingClasses(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cPreferenceOperatingClasses::cPreferenceOperatingClasses(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cPreferenceOperatingClasses::cPreferenceOperatingClasses(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cPreferenceOperatingClasses::cPreferenceOperatingClasses(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cPreferenceOperatingClasses::~cPreferenceOperatingClasses() {
@@ -290,7 +290,7 @@ bool cPreferenceOperatingClasses::init()
         return false;
     }
     if (!m_parse__) { m_flags->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 

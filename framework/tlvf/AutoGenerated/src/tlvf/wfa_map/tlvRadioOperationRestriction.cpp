@@ -15,12 +15,12 @@
 
 using namespace wfa_map;
 
-tlvRadioOperationRestriction::tlvRadioOperationRestriction(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+tlvRadioOperationRestriction::tlvRadioOperationRestriction(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvRadioOperationRestriction::tlvRadioOperationRestriction(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+tlvRadioOperationRestriction::tlvRadioOperationRestriction(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 tlvRadioOperationRestriction::~tlvRadioOperationRestriction() {
@@ -71,7 +71,7 @@ std::shared_ptr<cRestrictedOperatingClasses> tlvRadioOperationRestriction::creat
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
-    return std::make_shared<cRestrictedOperatingClasses>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
+    return std::make_shared<cRestrictedOperatingClasses>(src, getBuffRemainingBytes(src), m_parse__);
 }
 
 bool tlvRadioOperationRestriction::add_operating_classes_list(std::shared_ptr<cRestrictedOperatingClasses> ptr) {
@@ -175,7 +175,7 @@ bool tlvRadioOperationRestriction::init()
         // swap back since operating_classes_list will be swapped as part of the whole class swap
         operating_classes_list->class_swap();
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvTypeMap::TLV_RADIO_OPERATION_RESTRICTION) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_RADIO_OPERATION_RESTRICTION) << ", received value: " << int(*m_type);
@@ -185,12 +185,12 @@ bool tlvRadioOperationRestriction::init()
     return true;
 }
 
-cRestrictedOperatingClasses::cRestrictedOperatingClasses(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cRestrictedOperatingClasses::cRestrictedOperatingClasses(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cRestrictedOperatingClasses::cRestrictedOperatingClasses(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cRestrictedOperatingClasses::cRestrictedOperatingClasses(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cRestrictedOperatingClasses::~cRestrictedOperatingClasses() {
@@ -284,7 +284,7 @@ bool cRestrictedOperatingClasses::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sChannelInfo) * (channel_list_length) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 

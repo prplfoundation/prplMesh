@@ -15,12 +15,12 @@
 
 using namespace wfa_map;
 
-tlvSteeringRequest::tlvSteeringRequest(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+tlvSteeringRequest::tlvSteeringRequest(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvSteeringRequest::tlvSteeringRequest(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+tlvSteeringRequest::tlvSteeringRequest(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 tlvSteeringRequest::~tlvSteeringRequest() {
@@ -245,7 +245,7 @@ bool tlvSteeringRequest::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sTargetBssidInfo) * (target_bssid_list_length) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvTypeMap::TLV_STEERING_REQUEST) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvTypeMap::TLV_STEERING_REQUEST) << ", received value: " << int(*m_type);

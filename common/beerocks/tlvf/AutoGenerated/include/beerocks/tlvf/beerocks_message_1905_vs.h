@@ -28,8 +28,8 @@ namespace beerocks_message {
 class tlvVsClientAssociationEvent : public BaseClass
 {
     public:
-        tlvVsClientAssociationEvent(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvVsClientAssociationEvent(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvVsClientAssociationEvent(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvVsClientAssociationEvent(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvVsClientAssociationEvent();
 
         static eActionOp_1905_VS get_action_op(){

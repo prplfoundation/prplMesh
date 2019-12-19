@@ -31,8 +31,8 @@ class cRestrictedOperatingClasses;
 class tlvRadioOperationRestriction : public BaseClass
 {
     public:
-        tlvRadioOperationRestriction(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvRadioOperationRestriction(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvRadioOperationRestriction(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvRadioOperationRestriction(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvRadioOperationRestriction();
 
         const eTlvTypeMap& type();
@@ -61,8 +61,8 @@ class tlvRadioOperationRestriction : public BaseClass
 class cRestrictedOperatingClasses : public BaseClass
 {
     public:
-        cRestrictedOperatingClasses(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cRestrictedOperatingClasses(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cRestrictedOperatingClasses(uint8_t* buff, size_t buff_len, bool parse = false);
+        cRestrictedOperatingClasses(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cRestrictedOperatingClasses();
 
         typedef struct sChannelInfo {

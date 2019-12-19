@@ -15,12 +15,12 @@
 
 using namespace beerocks_message;
 
-cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION::cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION::cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION::cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION::cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION::~cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION() {
@@ -51,16 +51,16 @@ bool cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_JOINED_NOTIFICATION::cACTION_MONITOR_JOINED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_JOINED_NOTIFICATION::cACTION_MONITOR_JOINED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_JOINED_NOTIFICATION::cACTION_MONITOR_JOINED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_JOINED_NOTIFICATION::cACTION_MONITOR_JOINED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_JOINED_NOTIFICATION::~cACTION_MONITOR_JOINED_NOTIFICATION() {
@@ -81,16 +81,16 @@ bool cACTION_MONITOR_JOINED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_SON_CONFIG_UPDATE::cACTION_MONITOR_SON_CONFIG_UPDATE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_SON_CONFIG_UPDATE::cACTION_MONITOR_SON_CONFIG_UPDATE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_SON_CONFIG_UPDATE::cACTION_MONITOR_SON_CONFIG_UPDATE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_SON_CONFIG_UPDATE::cACTION_MONITOR_SON_CONFIG_UPDATE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_SON_CONFIG_UPDATE::~cACTION_MONITOR_SON_CONFIG_UPDATE() {
@@ -123,16 +123,16 @@ bool cACTION_MONITOR_SON_CONFIG_UPDATE::init()
         return false;
     }
     if (!m_parse__) { m_config->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL::cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL::cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL::cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL::cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL::~cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL() {
@@ -165,16 +165,16 @@ bool cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_ERROR_NOTIFICATION::cACTION_MONITOR_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_ERROR_NOTIFICATION::cACTION_MONITOR_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_ERROR_NOTIFICATION::cACTION_MONITOR_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_ERROR_NOTIFICATION::cACTION_MONITOR_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_ERROR_NOTIFICATION::~cACTION_MONITOR_ERROR_NOTIFICATION() {
@@ -206,16 +206,16 @@ bool cACTION_MONITOR_ERROR_NOTIFICATION::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_ERROR_NOTIFICATION_ACK::cACTION_MONITOR_ERROR_NOTIFICATION_ACK(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_ERROR_NOTIFICATION_ACK::cACTION_MONITOR_ERROR_NOTIFICATION_ACK(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_ERROR_NOTIFICATION_ACK::cACTION_MONITOR_ERROR_NOTIFICATION_ACK(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_ERROR_NOTIFICATION_ACK::cACTION_MONITOR_ERROR_NOTIFICATION_ACK(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_ERROR_NOTIFICATION_ACK::~cACTION_MONITOR_ERROR_NOTIFICATION_ACK() {
@@ -236,16 +236,16 @@ bool cACTION_MONITOR_ERROR_NOTIFICATION_ACK::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_HEARTBEAT_NOTIFICATION::cACTION_MONITOR_HEARTBEAT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_HEARTBEAT_NOTIFICATION::cACTION_MONITOR_HEARTBEAT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_HEARTBEAT_NOTIFICATION::cACTION_MONITOR_HEARTBEAT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_HEARTBEAT_NOTIFICATION::cACTION_MONITOR_HEARTBEAT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_HEARTBEAT_NOTIFICATION::~cACTION_MONITOR_HEARTBEAT_NOTIFICATION() {
@@ -266,16 +266,16 @@ bool cACTION_MONITOR_HEARTBEAT_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST::~cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST() {
@@ -308,16 +308,16 @@ bool cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::~cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST() {
@@ -350,16 +350,16 @@ bool cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST() {
@@ -392,16 +392,16 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::~cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST() {
@@ -456,16 +456,16 @@ bool cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION() {
@@ -498,16 +498,16 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE() {
@@ -540,16 +540,16 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::~cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION() {
@@ -582,16 +582,16 @@ bool cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION() {
@@ -624,16 +624,16 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::~cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE() {
@@ -666,16 +666,16 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::~cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION() {
@@ -708,16 +708,16 @@ bool cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION::cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION::cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION::cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION::cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION::~cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION() {
@@ -750,16 +750,16 @@ bool cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST::~cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST() {
@@ -790,16 +790,16 @@ bool cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION::cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION::cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION::cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION::cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION::~cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION() {
@@ -840,16 +840,16 @@ bool cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::~cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE() {
@@ -945,16 +945,16 @@ bool cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sStaStatsParams) * (sta_stats_size) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::~cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION() {
@@ -987,16 +987,16 @@ bool cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST::~cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST() {
@@ -1029,16 +1029,16 @@ bool cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE::~cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE() {
@@ -1071,16 +1071,16 @@ bool cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST::~cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST() {
@@ -1113,16 +1113,16 @@ bool cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE::~cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE() {
@@ -1155,16 +1155,16 @@ bool cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST::cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST::cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST::cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST::cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST::~cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST() {
@@ -1197,16 +1197,16 @@ bool cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE::cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE::cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE::cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE::cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE::~cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE() {
@@ -1239,16 +1239,16 @@ bool cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::~cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST() {
@@ -1281,16 +1281,16 @@ bool cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::~cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE() {
@@ -1323,16 +1323,16 @@ bool cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST::~cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST() {
@@ -1365,16 +1365,16 @@ bool cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE::~cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE() {
@@ -1407,16 +1407,16 @@ bool cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST::cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST::cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST::cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST::cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST::~cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST() {
@@ -1449,16 +1449,16 @@ bool cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE::cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE::cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE::cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE::cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE::~cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE() {
@@ -1491,16 +1491,16 @@ bool cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::~cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION() {
@@ -1533,16 +1533,16 @@ bool cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION::cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION::cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION::cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION::cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION::~cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION() {
@@ -1575,7 +1575,7 @@ bool cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 

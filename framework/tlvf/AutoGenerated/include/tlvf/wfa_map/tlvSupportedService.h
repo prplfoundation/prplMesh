@@ -28,8 +28,8 @@ namespace wfa_map {
 class tlvSupportedService : public BaseClass
 {
     public:
-        tlvSupportedService(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvSupportedService(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvSupportedService(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvSupportedService(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvSupportedService();
 
         enum eSupportedService: uint8_t {

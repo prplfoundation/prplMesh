@@ -15,12 +15,12 @@
 
 using namespace ieee1905_1;
 
-tlvLinkMetricQuery::tlvLinkMetricQuery(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+tlvLinkMetricQuery::tlvLinkMetricQuery(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvLinkMetricQuery::tlvLinkMetricQuery(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+tlvLinkMetricQuery::tlvLinkMetricQuery(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 tlvLinkMetricQuery::~tlvLinkMetricQuery() {
@@ -99,7 +99,7 @@ bool tlvLinkMetricQuery::init()
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eLinkMetricsType); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvType::TLV_LINK_METRIC_QUERY) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_LINK_METRIC_QUERY) << ", received value: " << int(*m_type);

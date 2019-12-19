@@ -15,12 +15,12 @@
 
 using namespace beerocks_message;
 
-cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::~cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION() {
@@ -177,16 +177,16 @@ bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_SLAVE_JOINED_RESPONSE::cACTION_CONTROL_SLAVE_JOINED_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_SLAVE_JOINED_RESPONSE::cACTION_CONTROL_SLAVE_JOINED_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_SLAVE_JOINED_RESPONSE::cACTION_CONTROL_SLAVE_JOINED_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_SLAVE_JOINED_RESPONSE::cACTION_CONTROL_SLAVE_JOINED_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_SLAVE_JOINED_RESPONSE::~cACTION_CONTROL_SLAVE_JOINED_RESPONSE() {
@@ -263,16 +263,16 @@ bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_config->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::~cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION() {
@@ -353,16 +353,16 @@ bool cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_hostap->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_SON_CONFIG_UPDATE::cACTION_CONTROL_SON_CONFIG_UPDATE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_SON_CONFIG_UPDATE::cACTION_CONTROL_SON_CONFIG_UPDATE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_SON_CONFIG_UPDATE::cACTION_CONTROL_SON_CONFIG_UPDATE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_SON_CONFIG_UPDATE::cACTION_CONTROL_SON_CONFIG_UPDATE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_SON_CONFIG_UPDATE::~cACTION_CONTROL_SON_CONFIG_UPDATE() {
@@ -395,16 +395,16 @@ bool cACTION_CONTROL_SON_CONFIG_UPDATE::init()
         return false;
     }
     if (!m_parse__) { m_config->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CONTROLLER_PING_REQUEST::cACTION_CONTROL_CONTROLLER_PING_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CONTROLLER_PING_REQUEST::cACTION_CONTROL_CONTROLLER_PING_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CONTROLLER_PING_REQUEST::cACTION_CONTROL_CONTROLLER_PING_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CONTROLLER_PING_REQUEST::cACTION_CONTROL_CONTROLLER_PING_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CONTROLLER_PING_REQUEST::~cACTION_CONTROL_CONTROLLER_PING_REQUEST() {
@@ -496,16 +496,16 @@ bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::init()
         return false;
     }
     m_data = (uint8_t*)m_buff_ptr__;
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CONTROLLER_PING_RESPONSE::cACTION_CONTROL_CONTROLLER_PING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CONTROLLER_PING_RESPONSE::cACTION_CONTROL_CONTROLLER_PING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CONTROLLER_PING_RESPONSE::cACTION_CONTROL_CONTROLLER_PING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CONTROLLER_PING_RESPONSE::cACTION_CONTROL_CONTROLLER_PING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CONTROLLER_PING_RESPONSE::~cACTION_CONTROL_CONTROLLER_PING_RESPONSE() {
@@ -597,16 +597,16 @@ bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::init()
         return false;
     }
     m_data = (uint8_t*)m_buff_ptr__;
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_AGENT_PING_REQUEST::cACTION_CONTROL_AGENT_PING_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_AGENT_PING_REQUEST::cACTION_CONTROL_AGENT_PING_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_AGENT_PING_REQUEST::cACTION_CONTROL_AGENT_PING_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_AGENT_PING_REQUEST::cACTION_CONTROL_AGENT_PING_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_AGENT_PING_REQUEST::~cACTION_CONTROL_AGENT_PING_REQUEST() {
@@ -698,16 +698,16 @@ bool cACTION_CONTROL_AGENT_PING_REQUEST::init()
         return false;
     }
     m_data = (uint8_t*)m_buff_ptr__;
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_AGENT_PING_RESPONSE::cACTION_CONTROL_AGENT_PING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_AGENT_PING_RESPONSE::cACTION_CONTROL_AGENT_PING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_AGENT_PING_RESPONSE::cACTION_CONTROL_AGENT_PING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_AGENT_PING_RESPONSE::cACTION_CONTROL_AGENT_PING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_AGENT_PING_RESPONSE::~cACTION_CONTROL_AGENT_PING_RESPONSE() {
@@ -799,16 +799,16 @@ bool cACTION_CONTROL_AGENT_PING_RESPONSE::init()
         return false;
     }
     m_data = (uint8_t*)m_buff_ptr__;
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_ARP_QUERY_REQUEST::cACTION_CONTROL_ARP_QUERY_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_ARP_QUERY_REQUEST::cACTION_CONTROL_ARP_QUERY_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_ARP_QUERY_REQUEST::cACTION_CONTROL_ARP_QUERY_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_ARP_QUERY_REQUEST::cACTION_CONTROL_ARP_QUERY_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_ARP_QUERY_REQUEST::~cACTION_CONTROL_ARP_QUERY_REQUEST() {
@@ -841,16 +841,16 @@ bool cACTION_CONTROL_ARP_QUERY_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_ARP_QUERY_RESPONSE::cACTION_CONTROL_ARP_QUERY_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_ARP_QUERY_RESPONSE::cACTION_CONTROL_ARP_QUERY_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_ARP_QUERY_RESPONSE::cACTION_CONTROL_ARP_QUERY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_ARP_QUERY_RESPONSE::cACTION_CONTROL_ARP_QUERY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_ARP_QUERY_RESPONSE::~cACTION_CONTROL_ARP_QUERY_RESPONSE() {
@@ -883,16 +883,16 @@ bool cACTION_CONTROL_ARP_QUERY_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION::~cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION() {
@@ -935,16 +935,16 @@ bool cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::~cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION() {
@@ -977,16 +977,16 @@ bool cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_BACKHAUL_RESET::cACTION_CONTROL_BACKHAUL_RESET(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_BACKHAUL_RESET::cACTION_CONTROL_BACKHAUL_RESET(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_BACKHAUL_RESET::cACTION_CONTROL_BACKHAUL_RESET(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_BACKHAUL_RESET::cACTION_CONTROL_BACKHAUL_RESET(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_BACKHAUL_RESET::~cACTION_CONTROL_BACKHAUL_RESET() {
@@ -1007,16 +1007,16 @@ bool cACTION_CONTROL_BACKHAUL_RESET::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_BACKHAUL_ROAM_REQUEST::cACTION_CONTROL_BACKHAUL_ROAM_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_BACKHAUL_ROAM_REQUEST::cACTION_CONTROL_BACKHAUL_ROAM_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_BACKHAUL_ROAM_REQUEST::cACTION_CONTROL_BACKHAUL_ROAM_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_BACKHAUL_ROAM_REQUEST::cACTION_CONTROL_BACKHAUL_ROAM_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_BACKHAUL_ROAM_REQUEST::~cACTION_CONTROL_BACKHAUL_ROAM_REQUEST() {
@@ -1049,16 +1049,16 @@ bool cACTION_CONTROL_BACKHAUL_ROAM_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL::cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL::cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL::cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL::cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL::~cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL() {
@@ -1091,16 +1091,16 @@ bool cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION::cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION::cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION::cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION::cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION::~cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION() {
@@ -1133,16 +1133,16 @@ bool cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION::cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION::cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION::cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION::cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION::~cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION() {
@@ -1175,16 +1175,16 @@ bool cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION::~cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION() {
@@ -1217,16 +1217,16 @@ bool cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::~cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION() {
@@ -1281,16 +1281,16 @@ bool cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::init()
     if (!m_parse__) {
         for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels->struct_init(); }
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::~cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION() {
@@ -1323,16 +1323,16 @@ bool cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::~cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION() {
@@ -1365,16 +1365,16 @@ bool cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::~cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST() {
@@ -1407,16 +1407,16 @@ bool cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::~cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE() {
@@ -1447,16 +1447,16 @@ bool cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START::cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START::cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START::cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START::cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START::~cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START() {
@@ -1489,16 +1489,16 @@ bool cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START::init()
         return false;
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::~cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST() {
@@ -1530,16 +1530,16 @@ bool cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER::cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER::cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER::cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER::cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER::~cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER() {
@@ -1560,16 +1560,16 @@ bool cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST::cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST::cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST::cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST::cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST::~cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST() {
@@ -1602,16 +1602,16 @@ bool cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST::cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST::cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST::cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST::cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST::~cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST() {
@@ -1642,16 +1642,16 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::~cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE() {
@@ -1747,16 +1747,16 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sStaStatsParams) * (sta_stats_size) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::~cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION() {
@@ -1789,16 +1789,16 @@ bool cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST::cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST::cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST::cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST::cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST::~cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST() {
@@ -1831,16 +1831,16 @@ bool cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::~cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST() {
@@ -1873,16 +1873,16 @@ bool cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION::cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION::~cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION() {
@@ -1915,16 +1915,16 @@ bool cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::~cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION() {
@@ -1957,16 +1957,16 @@ bool cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION::cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION::cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION::cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION::cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION::~cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION() {
@@ -1997,16 +1997,16 @@ bool cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION::cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION::cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION::cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION::cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION::~cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION() {
@@ -2049,16 +2049,16 @@ bool cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_vap_info->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::~cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST() {
@@ -2091,16 +2091,16 @@ bool cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::~cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST() {
@@ -2133,16 +2133,16 @@ bool cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::~cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST() {
@@ -2175,16 +2175,16 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::~cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE() {
@@ -2217,16 +2217,16 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::~cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION() {
@@ -2259,16 +2259,16 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::~cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE() {
@@ -2301,16 +2301,16 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::~cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION() {
@@ -2343,16 +2343,16 @@ bool cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION::cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION::cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION::cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION::cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION::~cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION() {
@@ -2385,16 +2385,16 @@ bool cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::~cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION() {
@@ -2427,16 +2427,16 @@ bool cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::~cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST() {
@@ -2501,16 +2501,16 @@ bool cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE::cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE::cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE::cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE::cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE::~cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE() {
@@ -2543,16 +2543,16 @@ bool cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::~cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION() {
@@ -2631,16 +2631,16 @@ bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::init()
         return false;
     }
     m_name_idx__  = beerocks::message::NODE_NAME_LENGTH;
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION::cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION::cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION::cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION::cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION::~cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION() {
@@ -2673,16 +2673,16 @@ bool cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST::~cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST() {
@@ -2715,16 +2715,16 @@ bool cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE::~cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE() {
@@ -2757,16 +2757,16 @@ bool cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST::~cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST() {
@@ -2799,16 +2799,16 @@ bool cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE::~cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE() {
@@ -2841,16 +2841,16 @@ bool cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST::cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST::cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST::cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST::cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST::~cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST() {
@@ -2883,16 +2883,16 @@ bool cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE::cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE::cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE::cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE::cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE::~cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE() {
@@ -2925,16 +2925,16 @@ bool cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST::cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST::~cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST() {
@@ -2967,16 +2967,16 @@ bool cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::~cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE() {
@@ -3009,16 +3009,16 @@ bool cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST::~cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST() {
@@ -3051,16 +3051,16 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE::~cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE() {
@@ -3093,16 +3093,16 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST::cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST::cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST::cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST::cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST::~cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST() {
@@ -3135,16 +3135,16 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE::cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE::cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE::cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE::cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE::~cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE() {
@@ -3177,16 +3177,16 @@ bool cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::~cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION() {
@@ -3219,16 +3219,16 @@ bool cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION::~cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION() {
@@ -3261,16 +3261,16 @@ bool cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION::~cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION() {
@@ -3303,16 +3303,16 @@ bool cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
-cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::~cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION() {
@@ -3345,7 +3345,7 @@ bool cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 

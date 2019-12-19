@@ -15,12 +15,12 @@
 
 using namespace ieee1905_1;
 
-tlvDeviceBridgingCapability::tlvDeviceBridgingCapability(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+tlvDeviceBridgingCapability::tlvDeviceBridgingCapability(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvDeviceBridgingCapability::tlvDeviceBridgingCapability(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+tlvDeviceBridgingCapability::tlvDeviceBridgingCapability(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 tlvDeviceBridgingCapability::~tlvDeviceBridgingCapability() {
@@ -67,7 +67,7 @@ std::shared_ptr<cMacList> tlvDeviceBridgingCapability::create_bridging_tuples_li
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
-    return std::make_shared<cMacList>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
+    return std::make_shared<cMacList>(src, getBuffRemainingBytes(src), m_parse__);
 }
 
 bool tlvDeviceBridgingCapability::add_bridging_tuples_list(std::shared_ptr<cMacList> ptr) {
@@ -162,7 +162,7 @@ bool tlvDeviceBridgingCapability::init()
         // swap back since bridging_tuples_list will be swapped as part of the whole class swap
         bridging_tuples_list->class_swap();
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvType::TLV_DEVICE_BRIDGING_CAPABILITY) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(eTlvType::TLV_DEVICE_BRIDGING_CAPABILITY) << ", received value: " << int(*m_type);
@@ -172,12 +172,12 @@ bool tlvDeviceBridgingCapability::init()
     return true;
 }
 
-cMacList::cMacList(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cMacList::cMacList(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cMacList::cMacList(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cMacList::cMacList(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cMacList::~cMacList() {
@@ -261,7 +261,7 @@ bool cMacList::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) * (mac_list_length) << ") Failed!";
         return false;
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 

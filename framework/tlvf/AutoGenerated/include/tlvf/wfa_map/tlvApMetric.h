@@ -30,8 +30,8 @@ namespace wfa_map {
 class tlvApMetric : public BaseClass
 {
     public:
-        tlvApMetric(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvApMetric(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvApMetric(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvApMetric(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvApMetric();
 
         typedef struct sEstimatedService {

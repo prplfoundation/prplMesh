@@ -27,8 +27,8 @@ namespace ieee1905_1 {
 class tlvSupportedRole : public BaseClass
 {
     public:
-        tlvSupportedRole(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvSupportedRole(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvSupportedRole(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvSupportedRole(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvSupportedRole();
 
         enum eValue: uint8_t {

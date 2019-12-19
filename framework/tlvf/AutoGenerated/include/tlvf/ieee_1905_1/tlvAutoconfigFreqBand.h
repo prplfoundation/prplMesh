@@ -27,8 +27,8 @@ namespace ieee1905_1 {
 class tlvAutoconfigFreqBand : public BaseClass
 {
     public:
-        tlvAutoconfigFreqBand(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvAutoconfigFreqBand(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvAutoconfigFreqBand(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvAutoconfigFreqBand(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvAutoconfigFreqBand();
 
         enum eValue: uint8_t {

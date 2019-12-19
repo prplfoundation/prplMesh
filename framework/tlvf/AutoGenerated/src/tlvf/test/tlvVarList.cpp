@@ -13,12 +13,12 @@
 #include <tlvf/test/tlvVarList.h>
 #include <tlvf/tlvflogging.h>
 
-tlvTestVarList::tlvTestVarList(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+tlvTestVarList::tlvTestVarList(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvTestVarList::tlvTestVarList(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+tlvTestVarList::tlvTestVarList(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 tlvTestVarList::~tlvTestVarList() {
@@ -197,7 +197,7 @@ std::shared_ptr<cInner> tlvTestVarList::create_complex_list() {
     m_var3 = (cInner *)((uint8_t *)(m_var3) + len);
     m_var2 = (uint32_t *)((uint8_t *)(m_var2) + len);
     m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len);
-    return std::make_shared<cInner>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
+    return std::make_shared<cInner>(src, getBuffRemainingBytes(src), m_parse__);
 }
 
 bool tlvTestVarList::add_complex_list(std::shared_ptr<cInner> ptr) {
@@ -271,7 +271,7 @@ std::shared_ptr<cInner> tlvTestVarList::create_var1() {
     m_var3 = (cInner *)((uint8_t *)(m_var3) + len);
     m_var2 = (uint32_t *)((uint8_t *)(m_var2) + len);
     m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len);
-    return std::make_shared<cInner>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
+    return std::make_shared<cInner>(src, getBuffRemainingBytes(src), m_parse__);
 }
 
 bool tlvTestVarList::add_var1(std::shared_ptr<cInner> ptr) {
@@ -327,7 +327,7 @@ std::shared_ptr<cInner> tlvTestVarList::create_var3() {
     }
     m_var2 = (uint32_t *)((uint8_t *)(m_var2) + len);
     m_unknown_length_list = (cInner *)((uint8_t *)(m_unknown_length_list) + len);
-    return std::make_shared<cInner>(src, getBuffRemainingBytes(src), m_parse__, m_swap__);
+    return std::make_shared<cInner>(src, getBuffRemainingBytes(src), m_parse__);
 }
 
 bool tlvTestVarList::add_var3(std::shared_ptr<cInner> ptr) {
@@ -405,7 +405,7 @@ std::shared_ptr<cInner> tlvTestVarList::create_unknown_length_list() {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
-    return std::make_shared<cInner>(getBuffPtr(), getBuffRemainingBytes(), m_parse__, m_swap__);
+    return std::make_shared<cInner>(getBuffPtr(), getBuffRemainingBytes(), m_parse__);
 }
 
 bool tlvTestVarList::add_unknown_length_list(std::shared_ptr<cInner> ptr) {
@@ -581,7 +581,7 @@ bool tlvTestVarList::init()
     m_unknown_length_list = (cInner*)m_buff_ptr__;
     if (m_length && m_parse__) {
         size_t len = *m_length;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&len));
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         while (len > 0) {
             if (len < cInner::get_initial_size()) {
@@ -602,7 +602,7 @@ bool tlvTestVarList::init()
             len -= unknown_length_list->getLen();
         }
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != 0xff) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(0xff) << ", received value: " << int(*m_type);
@@ -612,12 +612,12 @@ bool tlvTestVarList::init()
     return true;
 }
 
-cInner::cInner(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
-    BaseClass(buff, buff_len, parse, swap_needed) {
+cInner::cInner(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cInner::cInner(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+cInner::cInner(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
 cInner::~cInner() {
@@ -790,7 +790,7 @@ bool cInner::init()
     m_unknown_length_list_inner = (char*)m_buff_ptr__;
     if (m_length && m_parse__) {
         size_t len = *m_length;
-        if (m_swap__) { tlvf_swap(16, reinterpret_cast<uint8_t*>(&len)); }
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&len));
         len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
         m_unknown_length_list_inner_idx__ = len/sizeof(char);
         if (!buffPtrIncrementSafe(len)) {
@@ -798,7 +798,7 @@ bool cInner::init()
             return false;
         }
     }
-    if (m_parse__ && m_swap__) { class_swap(); }
+    if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != 0x1) {
             TLVF_LOG(ERROR) << "TLV type mismatch. Expected value: " << int(0x1) << ", received value: " << int(*m_type);

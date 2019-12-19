@@ -31,8 +31,8 @@ class cMacList;
 class tlvDeviceBridgingCapability : public BaseClass
 {
     public:
-        tlvDeviceBridgingCapability(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvDeviceBridgingCapability(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvDeviceBridgingCapability(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvDeviceBridgingCapability(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvDeviceBridgingCapability();
 
         const eTlvType& type();
@@ -59,8 +59,8 @@ class tlvDeviceBridgingCapability : public BaseClass
 class cMacList : public BaseClass
 {
     public:
-        cMacList(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cMacList(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cMacList(uint8_t* buff, size_t buff_len, bool parse = false);
+        cMacList(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cMacList();
 
         uint8_t& mac_list_length();

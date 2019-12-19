@@ -28,8 +28,8 @@ namespace ieee1905_1 {
 class tlvVendorSpecific : public BaseClass
 {
     public:
-        tlvVendorSpecific(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvVendorSpecific(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvVendorSpecific(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvVendorSpecific(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvVendorSpecific();
 
         enum eVendorOUI: uint32_t {

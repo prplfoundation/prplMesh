@@ -28,8 +28,8 @@ namespace wfa_map {
 class tlvSteeringBTMReport : public BaseClass
 {
     public:
-        tlvSteeringBTMReport(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvSteeringBTMReport(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvSteeringBTMReport(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvSteeringBTMReport(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvSteeringBTMReport();
 
         const eTlvTypeMap& type();

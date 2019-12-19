@@ -32,8 +32,8 @@ class cPreferenceOperatingClasses;
 class tlvChannelPreference : public BaseClass
 {
     public:
-        tlvChannelPreference(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        tlvChannelPreference(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        tlvChannelPreference(uint8_t* buff, size_t buff_len, bool parse = false);
+        tlvChannelPreference(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvChannelPreference();
 
         const eTlvTypeMap& type();
@@ -62,8 +62,8 @@ class tlvChannelPreference : public BaseClass
 class cPreferenceOperatingClasses : public BaseClass
 {
     public:
-        cPreferenceOperatingClasses(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
-        cPreferenceOperatingClasses(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        cPreferenceOperatingClasses(uint8_t* buff, size_t buff_len, bool parse = false);
+        cPreferenceOperatingClasses(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cPreferenceOperatingClasses();
 
         enum eReasonCode {
