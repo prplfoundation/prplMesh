@@ -28,7 +28,7 @@ if (TARGET_PLATFORM STREQUAL "openwrt")
         include_directories(${PLATFORM_INCLUDE_DIR})
 
         # libbridge
-        file(GLOB LIBBRIDGE_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/linux-intel_mips*/bridge-utils*/libbridge")
+        file(GLOB LIBBRIDGE_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/*/bridge-utils*/libbridge")
         find_path(LIBBRIDGE_INCLUDE_DIR NAMES "libbridge.h" PATHS "${LIBBRIDGE_SEARCH_PATHS}" NO_CMAKE_FIND_ROOT_PATH)
         include_directories(${LIBBRIDGE_INCLUDE_DIR})
         link_directories(${LIBBRIDGE_INCLUDE_DIR})
