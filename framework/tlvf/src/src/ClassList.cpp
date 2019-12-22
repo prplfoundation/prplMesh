@@ -15,15 +15,6 @@ ClassList::ClassList(uint8_t *buff, size_t buff_len, bool parse)
 {
 }
 
-std::shared_ptr<BaseClass> ClassList::getClass(size_t idx) const
-{
-    if (m_class_vector.size() > idx) {
-        return std::shared_ptr<BaseClass>(m_class_vector.at(idx));
-    } else {
-        return nullptr;
-    }
-}
-
 size_t ClassList::getMessageLength() const
 {
     if (m_buff == nullptr)

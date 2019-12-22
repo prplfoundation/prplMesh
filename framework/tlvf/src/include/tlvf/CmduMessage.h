@@ -39,13 +39,7 @@ public:
     // Forward wrapper functions
     // TODO check which of them can be removed
     template <class T> std::shared_ptr<T> addClass() { return msg.addClass<T>(); }
-    std::shared_ptr<BaseClass> getClass(size_t idx) const { return msg.getClass(idx); };
-    template <class T> std::shared_ptr<T> getClass() const { return msg.template getClass<T>(); };
-    template <class T> std::shared_ptr<T> getClass(size_t idx) const
-    {
-        return msg.template getClass<T>(idx);
-    };
-    template <class T> size_t getClassCount() const { return msg.template getClassCount<T>(); };
+    template <class T> std::shared_ptr<T> getClass() const { return msg.getClass<T>(); };
     size_t getMessageLength() const { return msg.getMessageLength(); };
     size_t getMessageBuffLength() const { return msg.getMessageBuffLength(); };
     uint8_t *getMessageBuff() const { return msg.getMessageBuff(); };
