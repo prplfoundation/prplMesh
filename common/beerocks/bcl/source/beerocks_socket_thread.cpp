@@ -17,11 +17,6 @@
 
 using namespace beerocks;
 
-typedef struct sTlvHeader {
-    uint8_t type;
-    uint16_t length;
-} __attribute__((packed)) sTlvHeader;
-
 #define DEFAULT_MAX_SOCKET_CONNECTIONS 10
 #define TX_BUFFER_UDS (tx_buffer + sizeof(beerocks::message::sUdsHeader))
 #define TX_BUFFER_UDS_SIZE (sizeof(tx_buffer) - sizeof(beerocks::message::sUdsHeader))
@@ -184,10 +179,10 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
 // FIXME - WLANRTSYS-6360 - should be moved to transport
 bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
 {
-    sTlvHeader *tlv =
-        reinterpret_cast<sTlvHeader *>((uint8_t *)uds_header + sizeof(message::sUdsHeader) +
-                                       ieee1905_1::cCmduHeader::get_initial_size());
-    sTlvHeader *first_tlv = tlv;
+    ieee1905_1::sTlvHeader *tlv = reinterpret_cast<ieee1905_1::sTlvHeader *>(
+        (uint8_t *)uds_header + sizeof(message::sUdsHeader) +
+        ieee1905_1::cCmduHeader::get_initial_size());
+    ieee1905_1::sTlvHeader *first_tlv = tlv;
 
     bool ret = true;
 
@@ -198,8 +193,8 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
 
         swap_16(length);
         if (static_cast<ieee1905_1::eTlvType>(type) == ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC) {
-            auto tlv_vendor_specific =
-                ieee1905_1::tlvVendorSpecific((uint8_t *)tlv, length + sizeof(sTlvHeader), true);
+            auto tlv_vendor_specific = ieee1905_1::tlvVendorSpecific(
+                (uint8_t *)tlv, length + sizeof(ieee1905_1::sTlvHeader), true);
             if (!tlv_vendor_specific.isInitialized()) {
                 LOG(ERROR) << "tlvVendorSpecific init() failure";
                 ret = false;
@@ -231,8 +226,8 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
         }
 
         // set the next tlv
-        tlv    = (sTlvHeader *)((uint8_t *)tlv + sizeof(sTlvHeader) + length);
-        type   = tlv->type;
+        tlv  = (ieee1905_1::sTlvHeader *)((uint8_t *)tlv + sizeof(ieee1905_1::sTlvHeader) + length);
+        type = tlv->type;
         length = tlv->length;
 
     } while ((uint8_t *)tlv <= (uint8_t *)first_tlv + uds_header->length);
