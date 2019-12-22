@@ -14,8 +14,8 @@ int CmduMessage::getNextTlvType() const
 {
     if (!getCmduHeader())
         return -1;
-    uint8_t *tlv = msg.getClassVector().back()->getBuffPtr();
-    return *tlv;
+    sTlvHeader *tlv = reinterpret_cast<sTlvHeader *>(msg.prevClass()->getBuffPtr());
+    return tlv->type;
 }
 
 bool CmduMessage::getNextTlvType(eTlvType &tlvType) const
@@ -31,8 +31,8 @@ uint16_t CmduMessage::getNextTlvLength() const
 {
     if (!getCmduHeader())
         return -1;
-    uint8_t *tlv = msg.getClassVector().back()->getBuffPtr();
-    return *(uint16_t *)(tlv + sizeof(uint8_t));
+    sTlvHeader *tlv = reinterpret_cast<sTlvHeader *>(msg.prevClass()->getBuffPtr());
+    return tlv->length;
 }
 
 uint8_t *CmduMessage::getNextTlvData() const
@@ -40,8 +40,8 @@ uint8_t *CmduMessage::getNextTlvData() const
     if (!getCmduHeader())
         return nullptr;
 
-    uint8_t *tlv = msg.getClassVector().back()->getBuffPtr();
-    return tlv + kTlvHeaderLength;
+    sTlvHeader *tlv = reinterpret_cast<sTlvHeader *>(msg.prevClass()->getBuffPtr());
+    return reinterpret_cast<uint8_t *>(tlv) + sizeof(*tlv);
 }
 
 eMessageType CmduMessage::getMessageType()
