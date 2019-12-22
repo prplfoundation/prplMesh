@@ -91,19 +91,28 @@ static int dhcp_event_handler(struct ubus_context *ctx, struct ubus_object *obj,
     return 0;
 }
 
-static const struct ubus_method dhcp_ubus_methods[] = {
-    UBUS_METHOD("dhcp_event", dhcp_event_handler, dhcp_event_policy),
-};
+static const struct ubus_method dhcp_ubus_methods[] = {{.name     = "dhcp_event",
+                                                        .handler  = dhcp_event_handler,
+                                                        .mask     = 0,
+                                                        .tags     = 0,
+                                                        .policy   = dhcp_event_policy,
+                                                        .n_policy = ARRAY_SIZE(dhcp_event_policy)}};
 
-// UBUS_OBJECT_TYPE puts the fields in the wrong order
-static struct ubus_object_type dhcp_ubus_object_type = {
-    .name = "dhcp_event", .methods = dhcp_ubus_methods, .n_methods = ARRAY_SIZE(dhcp_ubus_methods)};
+static struct ubus_object_type dhcp_ubus_object_type = {.name      = "dhcp_event",
+                                                        .id        = 0,
+                                                        .methods   = dhcp_ubus_methods,
+                                                        .n_methods = ARRAY_SIZE(dhcp_ubus_methods)};
 
 static struct ubus_object dhcp_ubus_object = {
-    .name      = "dhcp_event",
-    .type      = &dhcp_ubus_object_type,
-    .methods   = dhcp_ubus_methods,
-    .n_methods = ARRAY_SIZE(dhcp_ubus_methods),
+    .avl             = {},
+    .name            = "dhcp_event",
+    .id              = 0,
+    .path            = 0,
+    .type            = &dhcp_ubus_object_type,
+    .subscribe_cb    = 0,
+    .has_subscribers = 0,
+    .methods         = dhcp_ubus_methods,
+    .n_methods       = ARRAY_SIZE(dhcp_ubus_methods),
 };
 
 //////////////////////////////////////////////////////////////////////////////
