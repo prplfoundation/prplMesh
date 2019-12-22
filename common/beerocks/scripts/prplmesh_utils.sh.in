@@ -246,6 +246,10 @@ main() {
         "start")
             start_function
             ;;
+        "start_wait")
+            start_function
+            wait -n
+            ;;
         "stop")
             stop_function
             ;;
