@@ -61,27 +61,12 @@ public:
     }
 
     /**
-     * @brief Get the Class object at index idx in the all classes array
-     *
-     * @param idx index in the all classes array
-     * @return std::shared_ptr<BaseClass> to the class object at index idx, nullptr if not found
-     */
-    std::shared_ptr<BaseClass> getClass(size_t idx) const;
-
-    /**
      * @brief Get the (first) Class object
      *
      * @tparam T class template
      * @return std::shared_ptr<T> to the first object found of type T, nullptr if not found
      */
-    template <class T> std::shared_ptr<T> getClass() const
-    {
-        for (size_t idx = 0; idx < getClassCount(); idx++) {
-            if (auto c = std::dynamic_pointer_cast<T>(getClass(idx)))
-                return c;
-        }
-        return nullptr;
-    }
+    template <class T> std::shared_ptr<T> getClass() const { return getClass<T>(0); }
 
     /**
      * @brief Get a class object of type T in index `idx` in the logical array containing
@@ -94,8 +79,8 @@ public:
     template <class T> std::shared_ptr<T> getClass(size_t idx) const
     {
         size_t idx_ = 0;
-        for (size_t i = 0; i < getClassCount(); i++) {
-            if (auto c = std::dynamic_pointer_cast<T>(getClass(i))) {
+        for (auto it : m_class_vector) {
+            if (auto c = std::dynamic_pointer_cast<T>(it)) {
                 if (idx_++ == idx)
                     return c;
             }
@@ -112,8 +97,8 @@ public:
     template <class T> size_t getClassCount() const
     {
         size_t count = 0;
-        for (size_t i = 0; i < getClassCount(); i++) {
-            if (auto c = std::dynamic_pointer_cast<T>(getClass(i))) {
+        for (auto it : m_class_vector) {
+            if (auto c = std::dynamic_pointer_cast<T>(it)) {
                 count++;
             }
         }
