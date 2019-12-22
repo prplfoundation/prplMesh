@@ -103,7 +103,7 @@ prplmesh_framework_init() {
 }
 
 prplmesh_framework_deinit() {
-    echo "prplmesh_framework_init - killing local_bus and ieee1905_transport processes..."
+    echo "prplmesh_framework_deinit - killing local_bus and ieee1905_transport processes..."
     killall_program local_bus
     killall_program ieee1905_transport
 }
