@@ -545,7 +545,7 @@ cWscAttrManufacturer:
     _length_var: True
   manufacturer:
     _type: char
-    _length: [ length ]
+    _length: []
 
 cWscAttrModelName:
   _type: class
@@ -558,7 +558,7 @@ cWscAttrModelName:
     _length_var: True
   model:
     _type: char
-    _length: [ length ]
+    _length: []
 
 cWscAttrModelNumber:
   _type: class
@@ -571,7 +571,7 @@ cWscAttrModelNumber:
     _length_var: True
   model_number:
     _type: char
-    _length: [ length ]
+    _length: []
 
 cWscAttrSerialNumber:
   _type: class
@@ -584,7 +584,7 @@ cWscAttrSerialNumber:
     _length_var: True
   serial_number:
     _type: char
-    _length: [ length ]
+    _length: []
 
 cWscAttrPrimaryDeviceType:
   _type: class
@@ -615,7 +615,7 @@ cWscAttrDeviceName:
     _length_var: True
   device_name:
     _type: char
-    _length: [ length ]
+    _length: []
 
 cWscAttrRfBands:
   _type: class
