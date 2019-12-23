@@ -24,3 +24,5 @@ done
 exit 1
 EOF
 
+echo "Stopping prplMesh"
+ssh "$TARGET" /opt/prplmesh/prplmesh_utils.sh stop

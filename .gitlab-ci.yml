@@ -77,8 +77,19 @@ build-for-turris-omnia:
   variables:
     TARGET_DEVICE: "turris-omnia"
 
+build-for-glinet-b1300:
+  extends: .build-for-openwrt
+  variables:
+    TARGET_DEVICE: "glinet-b1300"
+
 test-on-turris-omnia:
   extends: .test-on-target
   variables:
     TARGET_DEVICE_NAME: turris-omnia-1
   needs: ["build-for-turris-omnia"]
+
+test-on-glinet-b1300:
+  extends: .test-on-target
+  variables:
+    TARGET_DEVICE_NAME: glinet-b1300-1
+  needs: ["build-for-glinet-b1300"]
