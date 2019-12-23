@@ -582,7 +582,7 @@ cWscAttrSerialNumber:
   length:
     _type: uint16_t
     _length_var: True
-  model_number:
+  serial_number:
     _type: char
     _length: [ length ]
 
