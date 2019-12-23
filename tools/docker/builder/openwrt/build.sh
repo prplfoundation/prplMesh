@@ -54,6 +54,8 @@ main() {
 
     eval set -- "$OPTS"
 
+    SUPPORTED_TARGETS="turris-omnia glinet-b1300"
+
     while true; do
         case "$1" in
             -h | --help)               usage; exit 0; shift ;;
@@ -63,9 +65,16 @@ main() {
                     turris-omnia)
                         TARGET=mvebu
                         ;;
+                    glinet-b1300)
+                        TARGET=ipq40xx
+                        ;;
                     *)
                         err "Unknown target device: $TARGET_DEVICE"
-                        info "Currently supported targets are: turris-omnia"
+                        info "Currently supported targets are:"
+			for i in $SUPPORTED_TARGETS ; do
+			    info "$i"
+			done
+                        exit 1
                         ;;
                 esac
                 ;;
