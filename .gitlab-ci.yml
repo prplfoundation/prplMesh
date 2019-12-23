@@ -49,7 +49,7 @@ run-tests:
   stage: build
   script:
     - cd tools/docker/builder/openwrt
-    - ./build.sh -v -d "$TARGET" -t "prplmesh-builder-$TARGET:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID" 2>&1 | tee build.log | grep '^make\[[12]\]\|^Step\|^ --->' --color=never --line-buffered
+    - ./build.sh -v -d "$TARGET_DEVICE" -t "prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID" 2>&1 | tee build.log | grep '^make\[[12]\]\|^Step\|^ --->' --color=never --line-buffered
   artifacts:
     paths:
       - tools/docker/builder/openwrt/*.ipk
@@ -62,18 +62,18 @@ run-tests:
 .test-on-target:
   stage: test
   script:
-    - tools/deploy_ipk.sh $TARGET_DEVICE tools/docker/builder/openwrt/*.ipk
-    - tools/docker/tests/openwrt/test_status.sh $TARGET_DEVICE
+    - tools/deploy_ipk.sh $TARGET_DEVICE_NAME tools/docker/builder/openwrt/*.ipk
+    - tools/docker/tests/openwrt/test_status.sh $TARGET_DEVICE_NAME
   tags:
     - targets
 
 build-for-turris-omnia:
   extends: .build-for-openwrt
   variables:
-    TARGET: "turris-omnia"
+    TARGET_DEVICE: "turris-omnia"
 
 test-on-turris-omnia:
   extends: .test-on-target
   variables:
-    TARGET_DEVICE: turris-omnia-1
+    TARGET_DEVICE_NAME: turris-omnia-1
   needs: ["build-for-turris-omnia"]
