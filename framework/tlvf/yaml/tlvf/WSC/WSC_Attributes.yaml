@@ -680,3 +680,107 @@ cWscAttrOsVersion:
   os_version:
     _type: uint32_t
     _value: 0x80000001
+
+cWscAttrMac:
+  _type: class
+  _is_tlv_class: True
+  type: 
+    _type: eWscAttributes
+    _value: ATTR_MAC_ADDR
+  length:
+    _type: uint16_t
+    _value_const: WSC_MAC_LENGTH
+  data: sMacAddr
+
+cWscAttrUuidE:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_UUID_E
+  length:
+    _type: uint16_t
+    _value_const: WSC_UUID_LENGTH
+  data:
+    _type: uint8_t
+    _length: [ WSC_UUID_LENGTH ]
+
+cWscAttrWscState:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_WSC_STATE
+  length:
+    _type: uint16_t
+    _value_const: 1
+  state:
+    _type: eWscState
+    _value: WSC_STATE_NOT_CONFIGURED
+
+cWscAttrUuidR:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_UUID_R
+  length:
+    _type: uint16_t
+    _value_const: WSC_UUID_LENGTH
+  data:
+    _type: uint8_t
+    _length: [ WSC_UUID_LENGTH ]
+
+cWscAttrAuthenticator:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_AUTHENTICATOR
+  length:
+    _type: uint16_t
+    _value: WSC_AUTHENTICATOR_LENGTH
+  data:
+    _type: uint8_t
+    _length: [ WSC_AUTHENTICATOR_LENGTH ]
+
+cWscAttrRegistrarNonce:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_REGISTRAR_NONCE
+  length:
+    _type: uint16_t
+    _value: WSC_NONCE_LENGTH
+  nonce:
+    _type: uint8_t
+    _length: [ WSC_NONCE_LENGTH ]
+
+cWscAttrVersion2:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_VENDOR_EXTENSION
+  length:
+    _type: uint16_t
+    _value_const: WSC_VENDOR_EXTENSIONS_LENGTH
+  vendor_id_0:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_1
+  vendor_id_1:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_2
+  vendor_id_2:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_3
+  subelement_id:
+    _type: uint8_t
+    _value: 0x0
+  subelement_length:
+    _type: uint8_t
+    _value: 0x1
+  subelement_value:
+    _type: uint8_t
+    _value: WSC_VERSION2
