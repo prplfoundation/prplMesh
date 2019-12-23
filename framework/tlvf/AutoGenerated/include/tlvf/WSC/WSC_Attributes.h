@@ -61,6 +61,13 @@ class cWscAttrAssociationState;
 class cWscAttrDevicePasswordID;
 class cWscAttrConfigurationError;
 class cWscAttrOsVersion;
+class cWscAttrMac;
+class cWscAttrUuidE;
+class cWscAttrWscState;
+class cWscAttrUuidR;
+class cWscAttrAuthenticator;
+class cWscAttrRegistrarNonce;
+class cWscAttrVersion2;
 typedef struct sWscAttrVersion {
     eWscAttributes attribute_type;
     uint16_t data_length;
@@ -783,6 +790,7 @@ class cWscAttrManufacturer : public BaseClass
 
         eWscAttributes& type();
         const uint16_t& length();
+        size_t manufacturer_length() { return m_manufacturer_idx__ * sizeof(char); }
         std::string manufacturer_str();
         char* manufacturer(size_t length = 0);
         bool set_manufacturer(const std::string& str);
@@ -810,6 +818,7 @@ class cWscAttrModelName : public BaseClass
 
         eWscAttributes& type();
         const uint16_t& length();
+        size_t model_length() { return m_model_idx__ * sizeof(char); }
         std::string model_str();
         char* model(size_t length = 0);
         bool set_model(const std::string& str);
@@ -837,6 +846,7 @@ class cWscAttrModelNumber : public BaseClass
 
         eWscAttributes& type();
         const uint16_t& length();
+        size_t model_number_length() { return m_model_number_idx__ * sizeof(char); }
         std::string model_number_str();
         char* model_number(size_t length = 0);
         bool set_model_number(const std::string& str);
@@ -864,11 +874,12 @@ class cWscAttrSerialNumber : public BaseClass
 
         eWscAttributes& type();
         const uint16_t& length();
-        std::string model_number_str();
-        char* model_number(size_t length = 0);
-        bool set_model_number(const std::string& str);
-        bool set_model_number(const char buffer[], size_t size);
-        bool alloc_model_number(size_t count = 1);
+        size_t serial_number_length() { return m_serial_number_idx__ * sizeof(char); }
+        std::string serial_number_str();
+        char* serial_number(size_t length = 0);
+        bool set_serial_number(const std::string& str);
+        bool set_serial_number(const char buffer[], size_t size);
+        bool alloc_serial_number(size_t count = 1);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -877,8 +888,8 @@ class cWscAttrSerialNumber : public BaseClass
         bool init();
         eWscAttributes* m_type = nullptr;
         uint16_t* m_length = nullptr;
-        char* m_model_number = nullptr;
-        size_t m_model_number_idx__ = 0;
+        char* m_serial_number = nullptr;
+        size_t m_serial_number_idx__ = 0;
         int m_lock_order_counter__ = 0;
 };
 
@@ -916,6 +927,7 @@ class cWscAttrDeviceName : public BaseClass
 
         eWscAttributes& type();
         const uint16_t& length();
+        size_t device_name_length() { return m_device_name_idx__ * sizeof(char); }
         std::string device_name_str();
         char* device_name(size_t length = 0);
         bool set_device_name(const std::string& str);
@@ -1037,6 +1049,171 @@ class cWscAttrOsVersion : public BaseClass
         eWscAttributes* m_type = nullptr;
         uint16_t* m_length = nullptr;
         uint32_t* m_os_version = nullptr;
+};
+
+class cWscAttrMac : public BaseClass
+{
+    public:
+        cWscAttrMac(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrMac(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrMac();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        sMacAddr& data();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        sMacAddr* m_data = nullptr;
+};
+
+class cWscAttrUuidE : public BaseClass
+{
+    public:
+        cWscAttrUuidE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrUuidE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrUuidE();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        uint8_t* data(size_t idx = 0);
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        uint8_t* m_data = nullptr;
+        size_t m_data_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+};
+
+class cWscAttrWscState : public BaseClass
+{
+    public:
+        cWscAttrWscState(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrWscState(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrWscState();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        eWscState& state();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        eWscState* m_state = nullptr;
+};
+
+class cWscAttrUuidR : public BaseClass
+{
+    public:
+        cWscAttrUuidR(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrUuidR(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrUuidR();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        uint8_t* data(size_t idx = 0);
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        uint8_t* m_data = nullptr;
+        size_t m_data_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+};
+
+class cWscAttrAuthenticator : public BaseClass
+{
+    public:
+        cWscAttrAuthenticator(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrAuthenticator(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrAuthenticator();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        uint8_t* data(size_t idx = 0);
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        uint8_t* m_data = nullptr;
+        size_t m_data_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+};
+
+class cWscAttrRegistrarNonce : public BaseClass
+{
+    public:
+        cWscAttrRegistrarNonce(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrRegistrarNonce(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrRegistrarNonce();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        uint8_t* nonce(size_t idx = 0);
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        uint8_t* m_nonce = nullptr;
+        size_t m_nonce_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+};
+
+class cWscAttrVersion2 : public BaseClass
+{
+    public:
+        cWscAttrVersion2(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrVersion2(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrVersion2();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        uint8_t& vendor_id_0();
+        uint8_t& vendor_id_1();
+        uint8_t& vendor_id_2();
+        uint8_t& subelement_id();
+        uint8_t& subelement_length();
+        uint8_t& subelement_value();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        uint8_t* m_vendor_id_0 = nullptr;
+        uint8_t* m_vendor_id_1 = nullptr;
+        uint8_t* m_vendor_id_2 = nullptr;
+        uint8_t* m_subelement_id = nullptr;
+        uint8_t* m_subelement_length = nullptr;
+        uint8_t* m_subelement_value = nullptr;
 };
 
 }; // close namespace: WSC
