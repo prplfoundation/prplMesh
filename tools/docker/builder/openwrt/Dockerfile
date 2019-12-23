@@ -81,9 +81,12 @@ RUN echo "src-git prpl ${PRPL_FEED}" >> feeds.conf.default \
     && scripts/feeds install -a \
     && cp "/home/openwrt/prplmesh_config" .config \
     && make defconfig \
-    && make -j$(nproc) V=sc \
-    && make -j$(nproc) \
+    && cat .config \
+    && make package/feeds/prpl/prplmesh/compile -j$(nproc) V=sc \
+    && make package/feeds/prpl/prplmesh/compile -j$(nproc) \
     && make package/feeds/prpl/prplmesh/clean
     # For some reason, make has to be run twice because
     # it still rebuilds some packages on the second run.
     # On the third run, it's able to compile prplmesh only.
+    # V=sc turns on verbosity for the first command to
+    # make debugging easier.
