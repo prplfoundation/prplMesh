@@ -490,9 +490,10 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
  * @return true on success
  * @return false on failure
  */
-bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
-    std::shared_ptr<ieee1905_1::tlvWscM2> m2, WSC::cConfigData &config_data, uint8_t authkey[32],
-    uint8_t keywrapkey[16])
+bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(WSC::config &m2_cfg,
+                                                             WSC::cConfigData &config_data,
+                                                             uint8_t authkey[32],
+                                                             uint8_t keywrapkey[16])
 {
     // Step 1 - prepare the plaintext: [config_data | keywrapauth]:
     // We use the config_data buffer as the plaintext buffer for encryption.
@@ -518,30 +519,20 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
     // know the encrypted length after encryption.
     // Calculate initialization vector (IV), and encrypt the plaintext using aes128 cbc.
     // leave room for up to 16 bytes internal padding length - see aes_encrypt()
-    auto encrypted_settings = m2->create_encrypted_settings();
-    if (!encrypted_settings)
-        return false;
+    // Create encrypted_settings
     int cipherlen = plaintextlen + 16;
     uint8_t ciphertext[cipherlen];
-    uint8_t *iv = reinterpret_cast<uint8_t *>(encrypted_settings->iv());
-    if (!mapf::encryption::create_iv(iv, WSC::WSC_ENCRYPTED_SETTINGS_IV_LENGTH)) {
+    if (!mapf::encryption::create_iv(m2_cfg.iv, WSC::WSC_ENCRYPTED_SETTINGS_IV_LENGTH)) {
         LOG(ERROR) << "create iv failure";
         return false;
     }
-    if (!mapf::encryption::aes_encrypt(keywrapkey, iv, plaintext, plaintextlen, ciphertext,
+    if (!mapf::encryption::aes_encrypt(keywrapkey, m2_cfg.iv, plaintext, plaintextlen, ciphertext,
                                        cipherlen)) {
         LOG(ERROR) << "aes encrypt failure";
         return false;
     }
     LOG(DEBUG) << "ciphertext: " << std::endl << utils::dump_buffer(ciphertext, cipherlen);
-
-    // Step 3 - Allocate encrypted settings with the size of the output ciphertext,
-    // and copy the ciphertext to it.
-    if (!encrypted_settings->alloc_encrypted_settings(cipherlen))
-        return false;
-    std::copy_n(ciphertext, cipherlen, encrypted_settings->encrypted_settings());
-    if (!m2->add_encrypted_settings(encrypted_settings))
-        return false;
+    m2_cfg.encrypted_settings = std::vector<uint8_t>(ciphertext, ciphertext + cipherlen);
 
     return true;
 }
@@ -550,28 +541,26 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
  * @brief Calculate keys and update M2 attributes.
  *
  * @param[in] m1 WSC M1 attribute list received from the radio agent
- * @param[in] m2 WSC M2 TLV to be sent to the radio agent
+ * @param[in] m2 WSC configuration struct used for creating WSC::m2
  * @param[in] dh diffie helman key exchange class containing the keypair
  * @param[out] authkey 32 bytes calculated authentication key
  * @param[out] keywrapkey 16 bytes calculated key wrap key
  * @return true on success
  * @return false on failure
  */
-bool master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1,
-                                                  std::shared_ptr<ieee1905_1::tlvWscM2> m2,
+bool master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::config &m2,
                                                   const mapf::encryption::diffie_hellman &dh,
                                                   uint8_t authkey[32], uint8_t keywrapkey[16])
 {
-    std::copy_n(m1.enrollee_nonce(), WSC::eWscLengths::WSC_NONCE_LENGTH,
-                m2->enrolee_nonce_attr().data);
-    std::copy_n(dh.nonce(), dh.nonce_length(), m2->registrar_nonce_attr().data);
+    std::copy_n(m1.enrollee_nonce(), WSC::eWscLengths::WSC_NONCE_LENGTH, m2.enrollee_nonce);
+    std::copy_n(dh.nonce(), dh.nonce_length(), m2.registrar_nonce);
     if (!mapf::encryption::wps_calculate_keys(
             dh, m1.public_key(), WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, m1.enrollee_nonce(),
-            m1.mac_addr().oct, m2->registrar_nonce_attr().data, authkey, keywrapkey)) {
+            m1.mac_addr().oct, m2.registrar_nonce, authkey, keywrapkey)) {
         LOG(ERROR) << "Failed to calculate WPS keys";
         return false;
     }
-    std::copy(dh.pubkey(), dh.pubkey() + dh.pubkey_length(), m2->public_key_attr().data);
+    std::copy(dh.pubkey(), dh.pubkey() + dh.pubkey_length(), m2.pub_key);
 
     return true;
 }
@@ -588,24 +577,23 @@ bool master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1,
  * @return true on success
  * @return false on failure
  */
-bool master_thread::autoconfig_wsc_authentication(WSC::m1 &m1,
-                                                  std::shared_ptr<ieee1905_1::tlvWscM2> m2,
-                                                  uint8_t authkey[32])
+bool master_thread::autoconfig_wsc_authentication(WSC::m1 &m1, WSC::m2 &m2, uint8_t authkey[32])
 {
     // Authentication on Full M1 || M2* (without the authenticator attribute)
     // This is the content of M1 and M2, without the type and length.
-    // Authentication is done on swapped data, so first swap the m1 and m2, calculate authenticator,
-    // then swap back since finalize will do the swapping.
+    // Authentication is done on swapped data.
+    // Since m1 is parsed, it is in host byte order, and needs to be swapped.
+    // m2 is created, and already finalized so its in network byte order, so no
+    // need to swap it.
     m1.swap();
-    m2->class_swap();
-    uint8_t buf[m1.getMessageLength() + m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator)];
+    uint8_t buf[m1.getMessageLength() + m2.getMessageLength() -
+                WSC::cWscAttrAuthenticator::get_initial_size()];
     auto next = std::copy_n(m1.getMessageBuff(), m1.getMessageLength(), buf);
-    std::copy_n(m2->getStartBuffPtr() + 3, m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator),
-                next);
+    std::copy_n(m2.getMessageBuff(),
+                m2.getMessageLength() - WSC::cWscAttrAuthenticator::get_initial_size(), next);
     // swap back
     m1.swap();
-    m2->class_swap();
-    uint8_t *kwa = reinterpret_cast<uint8_t *>(m2->authenticator().data);
+    uint8_t *kwa = reinterpret_cast<uint8_t *>(m2.authenticator());
     // Add KWA which is the 1st 64 bits of HMAC of config_data using AuthKey
     if (!mapf::encryption::kwa_compute(authkey, buf, sizeof(buf), kwa)) {
         LOG(ERROR) << "kwa_compute failure";
@@ -613,6 +601,8 @@ bool master_thread::autoconfig_wsc_authentication(WSC::m1 &m1,
     }
     LOG(DEBUG) << "authenticator: " << utils::dump_buffer(kwa, WSC::WSC_AUTHENTICATOR_LENGTH);
     LOG(DEBUG) << "authenticator key: " << utils::dump_buffer(authkey, 32);
+    LOG(DEBUG) << "m2 buf:" << std::endl
+               << utils::dump_buffer(m2.getMessageBuff(), m2.getMessageLength());
     LOG(DEBUG) << "authenticator buf:" << std::endl << utils::dump_buffer(buf, sizeof(buf));
 
     return true;
@@ -637,38 +627,38 @@ bool master_thread::autoconfig_wsc_authentication(WSC::m1 &m1,
 bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
                                           const wireless_utils::sBssInfoConf *bss_info_conf)
 {
-    auto tlvWscM2 = cmdu_tx.addClass<ieee1905_1::tlvWscM2>();
-    if (!tlvWscM2) {
-        LOG(ERROR) << "Failed creating tlvWscM2";
+    auto tlv = cmdu_tx.addClass<ieee1905_1::tlvWsc>();
+    if (!tlv) {
+        LOG(ERROR) << "Failed creating tlvWsc";
         return false;
     }
+    // Allocate maximum allowed length for the payload, so it can accommodate variable length
+    // data inside the internal TLV list.
+    // On finalize(), the buffer is shrunk back to its real size.
+    size_t payload_length =
+        tlv->getBuffRemainingBytes() - ieee1905_1::tlvEndOfMessage::get_initial_size();
+    tlv->alloc_payload(payload_length);
 
-    tlvWscM2->message_type_attr().data = WSC::WSC_MSG_TYPE_M2;
+    WSC::config m2_cfg;
+    m2_cfg.msg_type = WSC::eWscMessageType::WSC_MSG_TYPE_M2;
     // enrolee_nonce and registrar_nonce are set in autoconfig_wsc_calculate_keys()
-    // TODO the following should be taken from the database
-    std::memset(tlvWscM2->uuid_r_attr().data, 0xee, tlvWscM2->uuid_r_attr().data_length);
     // public_key is set in autoconfig_wsc_calculate_keys()
-    tlvWscM2->authentication_type_flags_attr().data =
-        uint16_t(WSC::eWscAuth::WSC_AUTH_OPEN) | uint16_t(WSC::eWscAuth::WSC_AUTH_WPA2PSK);
-    tlvWscM2->encryption_type_flags_attr().data =
-        uint16_t(WSC::eWscEncr::WSC_ENCR_NONE) | uint16_t(WSC::eWscEncr::WSC_ENCR_AES);
     // connection_type and configuration_methods have default values
     // TODO the following should be taken from the database
-    if (!tlvWscM2->set_manufacturer("Intel"))
-        return false;
-    if (!tlvWscM2->set_model_name("Ubuntu"))
-        return false;
-    if (!tlvWscM2->set_model_number("18.04"))
-        return false;
-    if (!tlvWscM2->set_serial_number("prpl12345"))
-        return false;
-    if (!tlvWscM2->set_device_name("prplMesh-controller"))
-        return false;
-    tlvWscM2->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
-
+    m2_cfg.manufacturer        = "Intel";
+    m2_cfg.model_name          = "Ubuntu";
+    m2_cfg.model_number        = "18.04";
+    m2_cfg.serial_number       = "prpl12345";
+    m2_cfg.primary_dev_type_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
+    m2_cfg.device_name         = "prplmesh-controller";
+    m2_cfg.encr_type_flags =
+        uint16_t(WSC::eWscEncr::WSC_ENCR_NONE) | uint16_t(WSC::eWscEncr::WSC_ENCR_AES);
+    m2_cfg.auth_type_flags =
+        uint16_t(WSC::eWscAuth::WSC_AUTH_OPEN) | uint16_t(WSC::eWscAuth::WSC_AUTH_WPA2PSK);
     // TODO Maybe the band should be taken from bss_info_conf.operating_class instead?
-    tlvWscM2->rf_bands_attr().data =
+    m2_cfg.bands =
         (m1.rf_bands() & WSC::WSC_RF_BAND_5GHZ) ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
+
     // association_state, configuration_error, device_password_id, os_version and vendor_extension
     // have default values
 
@@ -678,7 +668,7 @@ bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
     mapf::encryption::diffie_hellman dh;
     uint8_t authkey[32];
     uint8_t keywrapkey[16];
-    if (!autoconfig_wsc_calculate_keys(m1, tlvWscM2, dh, authkey, keywrapkey))
+    if (!autoconfig_wsc_calculate_keys(m1, m2_cfg, dh, authkey, keywrapkey))
         return false;
 
     // Encrypted settings
@@ -727,10 +717,16 @@ bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
 
     config_data.class_swap();
 
-    if (!autoconfig_wsc_add_m2_encrypted_settings(tlvWscM2, config_data, authkey, keywrapkey))
+    if (!autoconfig_wsc_add_m2_encrypted_settings(m2_cfg, config_data, authkey, keywrapkey))
         return false;
 
-    if (!autoconfig_wsc_authentication(m1, tlvWscM2, authkey))
+    auto m2 = std::dynamic_pointer_cast<WSC::m2>(WSC::AttrList::create(*tlv, m2_cfg));
+    if (!m2)
+        return false;
+
+    // Finalize m2 since it needs to be in network byte order for global authentication
+    m2->finalize();
+    if (!autoconfig_wsc_authentication(m1, *m2, authkey))
         return false;
 
     return true;
