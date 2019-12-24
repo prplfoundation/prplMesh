@@ -364,7 +364,7 @@ bool bml_rdkb_internal::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         return false;
     }
 
-    int ret = process_cmdu_header(beerocks_header, cmdu_rx);
+    int ret = process_cmdu_header(beerocks_header);
     if (ret == BML_RET_OP_FAILED) {
         LOG(ERROR) << "bml_rdkb_internal::process_cmdu_header failed !";
     } else if (ret == BML_RET_OP_NOT_SUPPORTED) {
