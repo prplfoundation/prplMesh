@@ -54,7 +54,7 @@ if(BWL_TYPE STREQUAL "DWPAL")
     )
 
     find_package(dwpal REQUIRED)
-    list(APPEND BWL_LIBS dwpal)
+    list(APPEND BWL_LIBS dwpal nl-3 nl-genl-3)
 
     # safec library can come from either libsafec or slibc
     find_package(safec QUIET)
