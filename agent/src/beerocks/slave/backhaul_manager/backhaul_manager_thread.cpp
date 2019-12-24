@@ -599,11 +599,17 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
         LOG(TRACE) << "backhaul manager state=ENABLED";
 
+        // If reached here without getting DEV_REST_DEFAULT from UCC, 'selected_backhaul' will stay
+        // empty, and the state machine will not be affected.
+        std::string selected_backhaul;
+
         if (m_agent_ucc_listener) {
             auto onboarding_state = m_agent_ucc_listener->get_and_update_onboarding_state();
             if (onboarding_state == eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG) {
                 // Stay in ENABLE state until onboarding_state will change
                 break;
+            } else if (onboarding_state == eOnboardingState::eONBOARDING_IN_PROGRESS) {
+                selected_backhaul = m_agent_ucc_listener->get_selected_backhaul();
             }
         }
 
@@ -621,6 +627,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                        << intptr_t(m_scPlatform.get());
         }
 
+        // Ignore 'selected_backhaul' since this case is not covered by certification flows
         if (local_master && local_gw) {
             LOG(DEBUG) << "local master && local gw";
             FSM_MOVE_STATE(MASTER_DISCOVERY);
@@ -630,7 +637,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
             // If a wired (WAN) interface was provided, try it first, check if the interface is UP
             if ((!m_sConfig.wire_iface.empty()) &&
-                (wan_mon.initialize(m_sConfig.wire_iface) == wan_monitor::ELinkState::eUp)) {
+                (wan_mon.initialize(m_sConfig.wire_iface) == wan_monitor::ELinkState::eUp) &&
+                (selected_backhaul.empty() || selected_backhaul == DEV_SET_ETH)) {
 
                 auto it = std::find(ifaces.begin(), ifaces.end(), m_sConfig.wire_iface);
                 if (it == ifaces.end()) {
@@ -643,6 +651,24 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 m_sConfig.eType = SBackhaulConfig::EType::Wired;
 
             } else {
+                auto selected_ruid_it = std::find_if(
+                    slaves_sockets.begin(), slaves_sockets.end(),
+                    [&selected_backhaul](std::shared_ptr<SSlaveSockets> soc) {
+                        return network_utils::mac_from_string(selected_backhaul) == soc->ruid;
+                    });
+
+                if (!selected_backhaul.empty() && selected_ruid_it == slaves_sockets.end()) {
+                    LOG(ERROR) << "UCC configured backhaul RUID which is not enabled";
+                    // Restart state will update the onboarding status to failure.
+                    FSM_MOVE_STATE(RESTART);
+                    break;
+                }
+
+                // Override backhaul_preferred_radio_band if UCC set it
+                if (selected_ruid_it != slaves_sockets.end()) {
+                    m_sConfig.backhaul_preferred_radio_band = (*selected_ruid_it)->freq_type;
+                }
+
                 // Mark the connection as WIRELESS
                 m_sConfig.eType = SBackhaulConfig::EType::Wireless;
             }
