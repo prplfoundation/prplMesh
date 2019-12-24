@@ -61,7 +61,7 @@ std::string agent_ucc_listener::fill_version_reply_string()
  */
 void agent_ucc_listener::clear_configuration()
 {
-    m_onboarding_state = eOnboardingState::eONBOARDING_RESET_TO_DEFAULT;
+    m_onboarding_state = eOnboardingState::RESET_TO_DEFAULT;
 }
 
 /**
@@ -129,10 +129,10 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
     auto timeout =
         std::chrono::steady_clock::now() + std::chrono::seconds(UCC_REPLY_COMPLETE_TIMEOUT_SEC);
 
-    while (m_onboarding_state == eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG) {
+    while (m_onboarding_state == eOnboardingState::WAIT_FOR_CONFIG) {
         if (std::chrono::steady_clock::now() > timeout) {
             err_string         = "onboarding timeout";
-            m_onboarding_state = eOnboardingState::eONBOARDING_NOT_IN_PROGRESS;
+            m_onboarding_state = eOnboardingState::NOT_IN_PROGRESS;
             m_selected_backhaul.clear();
             return false;
         }
@@ -141,14 +141,14 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
         UTILS_SLEEP_MSEC(1000);
     }
 
-    if (m_onboarding_state != eOnboardingState::eONBOARDING_SUCCESS) {
+    if (m_onboarding_state != eOnboardingState::SUCCESS) {
         err_string         = "onboarding failed";
-        m_onboarding_state = eOnboardingState::eONBOARDING_NOT_IN_PROGRESS;
+        m_onboarding_state = eOnboardingState::NOT_IN_PROGRESS;
         m_selected_backhaul.clear();
         return false;
     }
 
-    m_onboarding_state = eOnboardingState::eONBOARDING_NOT_IN_PROGRESS;
+    m_onboarding_state = eOnboardingState::NOT_IN_PROGRESS;
     m_selected_backhaul.clear();
     return true;
 }
@@ -160,12 +160,12 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
  */
 eOnboardingState agent_ucc_listener::get_and_update_onboarding_state()
 {
-    if (m_onboarding_state == eOnboardingState::eONBOARDING_RESET_TO_DEFAULT) {
-        m_onboarding_state = eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG;
-        return eOnboardingState::eONBOARDING_RESET_TO_DEFAULT;
-    } else if (m_onboarding_state == eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG) {
+    if (m_onboarding_state == eOnboardingState::RESET_TO_DEFAULT) {
+        m_onboarding_state = eOnboardingState::WAIT_FOR_CONFIG;
+        return eOnboardingState::RESET_TO_DEFAULT;
+    } else if (m_onboarding_state == eOnboardingState::WAIT_FOR_CONFIG) {
         if (!m_selected_backhaul.empty()) {
-            m_onboarding_state = eOnboardingState::eONBOARDING_IN_PROGRESS;
+            m_onboarding_state = eOnboardingState::IN_PROGRESS;
         }
     }
 
@@ -181,8 +181,7 @@ eOnboardingState agent_ucc_listener::get_and_update_onboarding_state()
  */
 void agent_ucc_listener::set_onboarding_status(bool success)
 {
-    m_onboarding_state =
-        success ? eOnboardingState::eONBOARDING_SUCCESS : eOnboardingState::eONBOARDING_FAIL;
+    m_onboarding_state = success ? eOnboardingState::SUCCESS : eOnboardingState::FAIL;
 }
 
 /**

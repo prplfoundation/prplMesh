@@ -19,12 +19,12 @@ namespace beerocks {
 static const auto DEV_SET_ETH = std::string("eth");
 
 enum class eOnboardingState {
-    eONBOARDING_NOT_IN_PROGRESS,
-    eONBOARDING_RESET_TO_DEFAULT,
-    eONBOARDING_WAIT_FOR_CONFIG,
-    eONBOARDING_IN_PROGRESS,
-    eONBOARDING_SUCCESS,
-    eONBOARDING_FAIL
+    NOT_IN_PROGRESS,
+    RESET_TO_DEFAULT,
+    WAIT_FOR_CONFIG,
+    IN_PROGRESS,
+    SUCCESS,
+    FAIL
 };
 
 // Forward decleration for backhaul_manager context saving
@@ -63,7 +63,7 @@ private:
     const std::string &m_bridge_iface;
     std::string m_bridge_mac;
 
-    eOnboardingState m_onboarding_state = eOnboardingState::eONBOARDING_NOT_IN_PROGRESS;
+    eOnboardingState m_onboarding_state = eOnboardingState::NOT_IN_PROGRESS;
     std::string m_selected_backhaul; // "ETH" or "<RUID of the selected radio>"
 
     std::mutex mutex;
