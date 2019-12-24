@@ -40,6 +40,8 @@ public:
     void lock() override { mutex.lock(); }
     void unlock() override { mutex.unlock(); }
 
+    eOnboardingState get_and_update_onboarding_state();
+
 private:
     std::string fill_version_reply_string() override;
     void clear_configuration() override;
