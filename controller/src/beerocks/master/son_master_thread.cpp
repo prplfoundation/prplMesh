@@ -549,7 +549,7 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
 /**
  * @brief Calculate keys and update M2 attributes.
  *
- * @param[in] m1 WSC M1 TLV received from the radio agent
+ * @param[in] m1 WSC M1 attribute list received from the radio agent
  * @param[in] m2 WSC M2 TLV to be sent to the radio agent
  * @param[in] dh diffie helman key exchange class containing the keypair
  * @param[out] authkey 32 bytes calculated authentication key
@@ -557,18 +557,17 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(
  * @return true on success
  * @return false on failure
  */
-bool master_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlvWscM1> m1,
+bool master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1,
                                                   std::shared_ptr<ieee1905_1::tlvWscM2> m2,
                                                   const mapf::encryption::diffie_hellman &dh,
                                                   uint8_t authkey[32], uint8_t keywrapkey[16])
 {
-    std::copy_n(m1->enrolee_nonce_attr().data, m1->enrolee_nonce_attr().data_length,
+    std::copy_n(m1.enrollee_nonce(), WSC::eWscLengths::WSC_NONCE_LENGTH,
                 m2->enrolee_nonce_attr().data);
     std::copy_n(dh.nonce(), dh.nonce_length(), m2->registrar_nonce_attr().data);
     if (!mapf::encryption::wps_calculate_keys(
-            dh, m1->public_key_attr().data, m1->public_key_attr().data_length,
-            m1->enrolee_nonce_attr().data, m1->mac_attr().data.oct, m2->registrar_nonce_attr().data,
-            authkey, keywrapkey)) {
+            dh, m1.public_key(), WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, m1.enrollee_nonce(),
+            m1.mac_addr().oct, m2->registrar_nonce_attr().data, authkey, keywrapkey)) {
         LOG(ERROR) << "Failed to calculate WPS keys";
         return false;
     }
@@ -583,13 +582,13 @@ bool master_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tl
  * Calculate authentication on the Full M1 || M2* whereas M2* = M2 without the authenticator
  * attribute.
  * 
- * @param m1 WSC M1 TLV
+ * @param m1 WSC M1 attribute list
  * @param m2 WSC M2 TLV
  * @param authkey authentication key
  * @return true on success
  * @return false on failure
  */
-bool master_thread::autoconfig_wsc_authentication(std::shared_ptr<ieee1905_1::tlvWscM1> m1,
+bool master_thread::autoconfig_wsc_authentication(WSC::m1 &m1,
                                                   std::shared_ptr<ieee1905_1::tlvWscM2> m2,
                                                   uint8_t authkey[32])
 {
@@ -597,14 +596,14 @@ bool master_thread::autoconfig_wsc_authentication(std::shared_ptr<ieee1905_1::tl
     // This is the content of M1 and M2, without the type and length.
     // Authentication is done on swapped data, so first swap the m1 and m2, calculate authenticator,
     // then swap back since finalize will do the swapping.
-    m1->class_swap();
+    m1.swap();
     m2->class_swap();
-    uint8_t buf[m1->getLen() - 3 + m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator)];
-    auto next = std::copy_n(m1->getStartBuffPtr() + 3, m1->getLen() - 3, buf);
+    uint8_t buf[m1.getMessageLength() + m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator)];
+    auto next = std::copy_n(m1.getMessageBuff(), m1.getMessageLength(), buf);
     std::copy_n(m2->getStartBuffPtr() + 3, m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator),
                 next);
     // swap back
-    m1->class_swap();
+    m1.swap();
     m2->class_swap();
     uint8_t *kwa = reinterpret_cast<uint8_t *>(m2->authenticator().data);
     // Add KWA which is the 1st 64 bits of HMAC of config_data using AuthKey
@@ -630,19 +629,14 @@ bool master_thread::autoconfig_wsc_authentication(std::shared_ptr<ieee1905_1::tl
  *        The encrypted config_data blob is copied to the encrypted_data attribute
  *        in the M2 TLV, which marks the WSC M2 TLV ready to be sent to the agent.
  *
- * @param tlvWscM1 WSC M1 TLV received from the radio agent as part of the WSC autoconfiguration
+ * @param m1 WSC M1 attribute list received from the radio agent as part of the WSC autoconfiguration
  *        CMDU
  * @return true on success
  * @return false on failure
  */
-bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> tlvWscM1,
+bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
                                           const wireless_utils::sBssInfoConf *bss_info_conf)
 {
-    if (!tlvWscM1) {
-        LOG(ERROR) << "Invalid M1";
-        return false;
-    }
-
     auto tlvWscM2 = cmdu_tx.addClass<ieee1905_1::tlvWscM2>();
     if (!tlvWscM2) {
         LOG(ERROR) << "Failed creating tlvWscM2";
@@ -673,9 +667,8 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
     tlvWscM2->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
 
     // TODO Maybe the band should be taken from bss_info_conf.operating_class instead?
-    tlvWscM2->rf_bands_attr().data = (tlvWscM1->rf_bands_attr().data & WSC::WSC_RF_BAND_5GHZ)
-                                         ? WSC::WSC_RF_BAND_5GHZ
-                                         : WSC::WSC_RF_BAND_2GHZ;
+    tlvWscM2->rf_bands_attr().data =
+        (m1.rf_bands() & WSC::WSC_RF_BAND_5GHZ) ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
     // association_state, configuration_error, device_password_id, os_version and vendor_extension
     // have default values
 
@@ -685,7 +678,7 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
     mapf::encryption::diffie_hellman dh;
     uint8_t authkey[32];
     uint8_t keywrapkey[16];
-    if (!autoconfig_wsc_calculate_keys(tlvWscM1, tlvWscM2, dh, authkey, keywrapkey))
+    if (!autoconfig_wsc_calculate_keys(m1, tlvWscM2, dh, authkey, keywrapkey))
         return false;
 
     // Encrypted settings
@@ -730,14 +723,14 @@ bool master_thread::autoconfig_wsc_add_m2(std::shared_ptr<ieee1905_1::tlvWscM1> 
     // the closest to the WSC-specified behaviour.
     //
     // Note that the BBF 1905.1 implementation (meshComms) simply ignores the MAC address in M2.
-    config_data.bssid_attr().data = tlvWscM1->mac_attr().data;
+    config_data.bssid_attr().data = m1.mac_addr();
 
     config_data.class_swap();
 
     if (!autoconfig_wsc_add_m2_encrypted_settings(tlvWscM2, config_data, authkey, keywrapkey))
         return false;
 
-    if (!autoconfig_wsc_authentication(tlvWscM1, tlvWscM2, authkey))
+    if (!autoconfig_wsc_authentication(m1, tlvWscM2, authkey))
         return false;
 
     return true;
@@ -758,7 +751,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
 
     std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_basic_caps = nullptr;
-    std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1                         = nullptr;
+    std::shared_ptr<ieee1905_1::tlvWsc> tlvWsc                             = nullptr;
     bool intel_agent                                                       = false;
     int type;
 
@@ -769,10 +762,10 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
                 return false;
             LOG(DEBUG) << "Found TLV_AP_RADIO_BASIC_CAPABILITIES TLV";
         } else if (type == int(ieee1905_1::eTlvType::TLV_WSC)) {
-            tlvwscM1 = cmdu_rx.addClass<ieee1905_1::tlvWscM1>();
-            if (!tlvwscM1)
+            tlvWsc = cmdu_rx.addClass<ieee1905_1::tlvWsc>();
+            if (!tlvWsc)
                 return false;
-            LOG(DEBUG) << "Found TLV_WSC TLV (assuming M1)";
+            LOG(DEBUG) << "Found TLV_WSC TLV";
         } else if (type == int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
             // If this is an Intel Agent, it will have VS TLV as the last TLV.
             // Currently, we don't support skipping TLVs, so if we see a VS TLV, we assume
@@ -803,16 +796,20 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
         return false;
     }
 
-    if (!tlvwscM1) {
-        LOG(ERROR) << "Failed to get TLV_WSC M1 TLV";
+    if (!tlvWsc) {
+        LOG(ERROR) << "Failed to get TLV_WSC TLV";
         return false;
     }
-
-    auto al_mac = network_utils::mac_to_string(tlvwscM1->mac_attr().data.oct);
+    auto m1 = std::dynamic_pointer_cast<WSC::m1>(WSC::AttrList::parse(*tlvWsc));
+    if (!m1) {
+        LOG(ERROR) << "Failed to parse M1 attributes";
+        return false;
+    }
+    auto al_mac = network_utils::mac_to_string(m1->mac_addr());
     auto ruid   = network_utils::mac_to_string(radio_basic_caps->radio_uid());
     LOG(INFO) << "AP_AUTOCONFIGURATION_WSC M1 al_mac=" << al_mac << " ruid=" << ruid;
-    LOG(DEBUG) << "   device " << tlvwscM1->manufacturer_str() << " " << tlvwscM1->model_name_str()
-               << " " << tlvwscM1->device_name_str() << " " << tlvwscM1->serial_number_str();
+    LOG(DEBUG) << "   device " << m1->manufacturer() << " " << m1->model_name() << " "
+               << m1->device_name() << " " << m1->serial_number();
 
     //TODO autoconfig process the rest of the class
     //TODO autoconfig Keep intel agent support only as intel enhancements
@@ -834,7 +831,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
 
     tlvRuid->radio_uid() = network_utils::mac_from_string(ruid);
 
-    const auto &bss_info_confs = database.get_bss_info_configuration(tlvwscM1->mac_attr().data);
+    const auto &bss_info_confs = database.get_bss_info_configuration(m1->mac_addr());
     uint8_t num_bsss           = 0;
 
     for (const auto &bss_info_conf : bss_info_confs) {
@@ -843,23 +840,21 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
             LOG(INFO) << "Skipping " << bss_info_conf.ssid << " due to operclass mismatch";
             continue;
         }
-        if (!(tlvwscM1->authentication_type_flags_attr().data &
-              uint16_t(bss_info_conf.authentication_type))) {
+        if (!(m1->auth_type_flags() & uint16_t(bss_info_conf.authentication_type))) {
             LOG(INFO) << std::hex << "Auth mismatch for " << bss_info_conf.ssid << ": get 0x"
-                      << tlvwscM1->authentication_type_flags_attr().data << " need 0x"
+                      << m1->auth_type_flags() << " need 0x"
                       << uint16_t(bss_info_conf.authentication_type);
         }
-        if (!(tlvwscM1->encryption_type_flags_attr().data &
-              uint16_t(bss_info_conf.encryption_type))) {
+        if (!(m1->encr_type_flags() & uint16_t(bss_info_conf.encryption_type))) {
             LOG(INFO) << std::hex << "Encr mismatch for " << bss_info_conf.ssid << ": get 0x"
-                      << tlvwscM1->encryption_type_flags_attr().data << " need 0x"
+                      << m1->encr_type_flags() << " need 0x"
                       << uint16_t(bss_info_conf.encryption_type);
         }
         if (num_bsss >= radio_basic_caps->maximum_number_of_bsss_supported()) {
             LOG(INFO) << "Configured #BSS exceeds maximum for " << al_mac << " radio " << ruid;
             break;
         }
-        if (!autoconfig_wsc_add_m2(tlvwscM1, &bss_info_conf)) {
+        if (!autoconfig_wsc_add_m2(*m1, &bss_info_conf)) {
             LOG(ERROR) << "Failed setting M2 attributes";
             return false;
         }
@@ -868,7 +863,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
 
     // If no BSS (either because none are configured, or because they don't match), tear down.
     if (num_bsss == 0) {
-        if (!autoconfig_wsc_add_m2(tlvwscM1, nullptr)) {
+        if (!autoconfig_wsc_add_m2(*m1, nullptr)) {
             LOG(ERROR) << "Failed setting M2 attributes";
             return false;
         }
@@ -886,8 +881,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
         // Multi-AP Agent doesn't say anything about the bridge, so we have to rely on Intel Slave Join for that.
         // We'll use AL-MAC as the bridge
         // TODO convert source address into AL-MAC address
-        if (!handle_non_intel_slave_join(src_mac, radio_basic_caps, tlvwscM1, al_mac, ruid,
-                                         cmdu_tx)) {
+        if (!handle_non_intel_slave_join(src_mac, radio_basic_caps, *m1, al_mac, ruid, cmdu_tx)) {
             LOG(ERROR) << "Non-Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid
                        << ")";
             return false;
@@ -2301,8 +2295,7 @@ bool master_thread::autoconfig_wsc_parse_radio_caps(
 
 bool master_thread::handle_non_intel_slave_join(
     const std::string &src_mac, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
-    std::shared_ptr<ieee1905_1::tlvWscM1> tlvwscM1, std::string bridge_mac, std::string radio_mac,
-    ieee1905_1::CmduMessageTx &cmdu_tx)
+    WSC::m1 &m1, std::string bridge_mac, std::string radio_mac, ieee1905_1::CmduMessageTx &cmdu_tx)
 {
 
     // Multi-AP Agent doesn't say anything about the backhaul, so simulate ethernet backhaul to satisfy
@@ -2314,7 +2307,7 @@ bool master_thread::handle_non_intel_slave_join(
     mac.oct[5]++;
     std::string eth_switch_mac   = network_utils::mac_to_string(mac);
     std::string parent_bssid_mac = network_utils::ZERO_MAC_STRING;
-    auto manufacturer            = tlvwscM1->manufacturer_str();
+    auto manufacturer            = m1.manufacturer();
     LOG(INFO) << "IRE generic Slave joined" << std::endl
               << "    manufacturer=" << manufacturer << std::endl
               << "    parent_bssid_mac=" << parent_bssid_mac << std::endl
