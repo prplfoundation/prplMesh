@@ -28,19 +28,6 @@
     > Login: [WIN_USER_NAME]
     > Password: [WIN_PASSWORD]
 
- - Note: Make sure that 'external_toolchain.cfg' is configured properly on your environment.
-    If the file is not configured, config your chdlab to a platform which is configured to the same environment (UGW/RDKB):
-    ```bash
-    # On repo root (where '.repo' folder is):
-    set_git_env
-    chdlab config -s <setup_number>
-    chdlab pull
-    ```
-
-    Use maptools script to configure 'external_toolchain.cfg':
-    ```bash
-    maptools config -g
-    ```
 ### Running Klocwork Linux environment, on non Intel Network
 Make sure that 'external_toolchain.cfg' is not exist on your environment.
 
