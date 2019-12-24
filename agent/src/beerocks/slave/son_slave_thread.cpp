@@ -2918,6 +2918,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         request->local_gw()             = platform_settings.local_gw;
         request->sta_iface_filter_low() = config.backhaul_wireless_iface_filter_low;
         request->onboarding()           = platform_settings.onboarding;
+        request->ruid()                 = network_utils::mac_from_string(config.radio_identifier);
+
         LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST local_master="
                   << int(platform_settings.local_master)
                   << " local_gw=" << int(platform_settings.local_gw)
