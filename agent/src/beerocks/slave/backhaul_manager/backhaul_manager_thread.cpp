@@ -796,6 +796,14 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
         LOG(DEBUG) << "Restarting ...";
 
+        if (m_agent_ucc_listener) {
+            auto onboarding_state = m_agent_ucc_listener->get_and_update_onboarding_state();
+            if (onboarding_state == eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG ||
+                onboarding_state == eOnboardingState::eONBOARDING_IN_PROGRESS) {
+                m_agent_ucc_listener->set_onboarding_status(false);
+            }
+        }
+
         for (auto soc : slaves_sockets) {
             std::string iface = soc->sta_iface;
 
@@ -1642,6 +1650,14 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             response->params().rx_packets = -1;
             message_com::send_cmdu(soc->slave, cmdu_tx);
         }
+        break;
+    }
+    case beerocks_message::ACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION: {
+        LOG(DEBUG) << "ACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION";
+        if (m_agent_ucc_listener) {
+            m_agent_ucc_listener->set_onboarding_status(true);
+        }
+
         break;
     }
     default: {
