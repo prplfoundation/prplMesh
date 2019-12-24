@@ -28,51 +28,50 @@ rm -rf _GO_KW
 
 # Generate input script to klocwork checker
 if [ "$PLATFORM_TYPE" = "rdkb" ]; then
-echo "Platform type is RDKB"
-URL_PATH="https://klocwork3-jf.devtools.intel.com:8140/Atom-Puma7-RDKB"
+      echo "Platform type is RDKB"
+      URL_PATH="https://klocwork3-jf.devtools.intel.com:8140/Atom-Puma7-RDKB"
 
-# Generate compilation script for RDKB tree enviorment to be used by klocwork checker
-{
-      echo -e "#!/bin/bash"
-      echo -e "cd .." #to /tools/
-      echo -e "echo starting kw from folder: \`pwd\`"
-      echo -e "echo cleaning prplMesh build: ./maptools.sh build map -f -c clean"
-      echo -e "./maptools.sh build map -f -c clean"
-      echo -e "echo building prplMesh: ./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
-      echo -e "./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
-      echo -e "exit"
-} > _GO_KW
+      # Generate compilation script for RDKB tree enviorment to be used by klocwork checker
+      {
+            echo -e "#!/bin/bash"
+            echo -e "cd .." #to /tools/
+            echo -e "echo starting kw from folder: \`pwd\`"
+            echo -e "echo cleaning prplMesh build: ./maptools.sh build map -c clean"
+            echo -e "./maptools.sh build map -c clean"
+            echo -e "echo building prplMesh: ./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "exit"
+      } > _GO_KW
 
 elif [ "$PLATFORM_TYPE" = "ugw" ]; then
-echo "Platform type is UGW"
-URL_PATH="https://klocwork-iind4.devtools.intel.com:8105/UGW_master_grx350_rt"
+      echo "Platform type is UGW"
+      URL_PATH="https://klocwork-iind4.devtools.intel.com:8105/UGW_master_grx350_rt"
 
-# Generate compilation script for UGW tree enviorment to be used by klocwork checker
-{
-      echo -e "#!/bin/bash"
-      echo -e "cd .." #to /tools/
-      echo -e "echo starting kw from folder: \`pwd\`"
-      echo -e "echo cleaning prplMesh build: ./maptools.sh build map -f -c clean"
-      echo -e "./maptools.sh build map -f -c clean"
-      echo -e "echo building prplMesh: ./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
-      echo -e "./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
-      echo -e "exit"
-} > _GO_KW
+      # Generate compilation script for UGW tree enviorment to be used by klocwork checker
+      {
+            echo -e "#!/bin/bash"
+            echo -e "cd .." #to /tools/
+            echo -e "echo starting kw from folder: \`pwd\`"
+            echo -e "echo cleaning prplMesh build: ./maptools.sh build map  -c clean"
+            echo -e "./maptools.sh build map -c clean"
+            echo -e "echo building prplMesh: ./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "exit"
+      } > _GO_KW
 
-
-else # ubuntu
-
-# Generate compilation script using maptools script to be used by klocwork checker
-{
-      echo -e "#!/bin/bash"
-      echo -e "cd .." #to /tools/
-      echo -e "echo starting kw from folder: \`pwd\`"
-      echo -e "echo cleaning prplMesh build: ./maptools.sh build map -f -c clean"
-      echo -e "./maptools.sh build map -f -c clean"
-      echo -e "echo building prplMesh: ./maptools.sh build map -f MSGLIB=zmq CMAKE_BUILD_TYPE=DEBUG"
-      echo -e "./maptools.sh build map -f MSGLIB=zmq CMAKE_BUILD_TYPE=DEBUG"
-      echo -e "exit"
-} > _GO_KW
+else # Linux
+      echo "Platform type is Linux"
+      # Generate compilation script using maptools script to be used by klocwork checker
+      {
+            echo -e "#!/bin/bash"
+            echo -e "cd .." #to /tools/
+            echo -e "echo starting kw from folder: \`pwd\`"
+            echo -e "echo cleaning prplMesh build: ./maptools.sh build map  -c clean"
+            echo -e "./maptools.sh build map -c clean"
+            echo -e "echo building prplMesh: ./maptools.sh build map -f MSGLIB=zmq CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "./maptools.sh build map -f MSGLIB=zmq CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "exit"
+      } > _GO_KW
 
 fi
 
@@ -128,8 +127,6 @@ kwcheck import kw_override.h
 kwcheck import klocwork_database.kb
 kwcheck import analysis_profile.pconf
 fi
-
-
 
 # Analyze and generate reports
 kwcheck run -j auto
