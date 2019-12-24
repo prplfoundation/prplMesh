@@ -122,9 +122,34 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
         return false;
     }
 
-    // TODO implement seting of agent configuration.
-    // As part of task: https://github.com/prplfoundation/prplMesh/issues/336
+    auto &backhaul_param = params["backhaul"];
+    std::transform(backhaul_param.begin(), backhaul_param.end(), backhaul_param.begin(), ::tolower);
+    m_selected_backhaul = backhaul_param;
 
+    auto timeout =
+        std::chrono::steady_clock::now() + std::chrono::seconds(UCC_REPLY_COMPLETE_TIMEOUT_SEC);
+
+    while (m_onboarding_state == eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG) {
+        if (std::chrono::steady_clock::now() > timeout) {
+            err_string         = "onboarding timeout";
+            m_onboarding_state = eOnboardingState::eONBOARDING_NOT_IN_PROGRESS;
+            m_selected_backhaul.clear();
+            return false;
+        }
+        // Unlock the thread mutex and allow the Agent thread to work while this thread sleeps
+        unlock();
+        UTILS_SLEEP_MSEC(1000);
+    }
+
+    if (m_onboarding_state != eOnboardingState::eONBOARDING_SUCCESS) {
+        err_string         = "onboarding failed";
+        m_onboarding_state = eOnboardingState::eONBOARDING_NOT_IN_PROGRESS;
+        m_selected_backhaul.clear();
+        return false;
+    }
+
+    m_onboarding_state = eOnboardingState::eONBOARDING_NOT_IN_PROGRESS;
+    m_selected_backhaul.clear();
     return true;
 }
 
