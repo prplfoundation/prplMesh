@@ -138,9 +138,9 @@ bool backhaul_manager::work()
 {
     bool skip_select = false;
 
-    // Calling get_and_update_onboarding_state returns eONBOARDING_RESET_TO_DEFAULT only once
+    // Calling get_and_update_onboarding_state returns RESET_TO_DEFAULT only once
     if (m_agent_ucc_listener && m_agent_ucc_listener->get_and_update_onboarding_state() ==
-                                    eOnboardingState::eONBOARDING_RESET_TO_DEFAULT) {
+                                    eOnboardingState::RESET_TO_DEFAULT) {
         auto active_hal = get_wireless_hal();
         if (active_hal) {
             active_hal->disconnect();
@@ -605,10 +605,10 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
         if (m_agent_ucc_listener) {
             auto onboarding_state = m_agent_ucc_listener->get_and_update_onboarding_state();
-            if (onboarding_state == eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG) {
+            if (onboarding_state == eOnboardingState::WAIT_FOR_CONFIG) {
                 // Stay in ENABLE state until onboarding_state will change
                 break;
-            } else if (onboarding_state == eOnboardingState::eONBOARDING_IN_PROGRESS) {
+            } else if (onboarding_state == eOnboardingState::IN_PROGRESS) {
                 selected_backhaul = m_agent_ucc_listener->get_selected_backhaul();
             }
         }
@@ -798,8 +798,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
         if (m_agent_ucc_listener) {
             auto onboarding_state = m_agent_ucc_listener->get_and_update_onboarding_state();
-            if (onboarding_state == eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG ||
-                onboarding_state == eOnboardingState::eONBOARDING_IN_PROGRESS) {
+            if (onboarding_state == eOnboardingState::WAIT_FOR_CONFIG ||
+                onboarding_state == eOnboardingState::IN_PROGRESS) {
                 m_agent_ucc_listener->set_onboarding_status(false);
             }
         }
