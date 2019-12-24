@@ -366,6 +366,25 @@ class cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST : public BaseClas
         uint32_t* m_attempts = nullptr;
 };
 
+class cACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION();
+
+        static eActionOp_BACKHAUL get_action_op(){
+            return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION);
+        }
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BACKHAUL* m_action_op = nullptr;
+};
+
 class cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST : public BaseClass
 {
     public:
