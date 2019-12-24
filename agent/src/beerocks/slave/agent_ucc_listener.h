@@ -16,6 +16,8 @@
 
 namespace beerocks {
 
+static const auto DEV_SET_ETH = std::string("eth");
+
 enum class eOnboardingState {
     eONBOARDING_NOT_IN_PROGRESS,
     eONBOARDING_RESET_TO_DEFAULT,
@@ -41,6 +43,7 @@ public:
     void unlock() override { mutex.unlock(); }
 
     eOnboardingState get_and_update_onboarding_state();
+    std::string get_selected_backhaul();
 
 private:
     std::string fill_version_reply_string() override;
