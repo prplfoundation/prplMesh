@@ -1407,6 +1407,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
         soc->sta_iface.assign(request->sta_iface(message::IFACE_NAME_LENGTH));
         soc->hostap_iface.assign(request->hostap_iface(message::IFACE_NAME_LENGTH));
+        soc->ruid = request->ruid();
         soc->operational_on_registration =
             FSM_IS_IN_STATE(OPERATIONAL) || FSM_IS_IN_STATE(CONNECTED);
         soc->sta_iface_filter_low = request->sta_iface_filter_low();

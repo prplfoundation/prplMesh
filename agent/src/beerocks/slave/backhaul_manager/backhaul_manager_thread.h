@@ -106,6 +106,7 @@ private:
         bool controller_discovered       = false;
         bool operational_on_registration = false;
         eIfaceType slave_iface_type;
+        sMacAddr ruid;
 
         std::shared_ptr<bwl::sta_wlan_hal> sta_wlan_hal;
         Socket *sta_hal_ext_events = nullptr;
