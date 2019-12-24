@@ -55,14 +55,13 @@ std::string agent_ucc_listener::fill_version_reply_string()
 }
 
 /**
- * @brief Clears configuration on Controller database.
+ * @brief Clear configuration on Agent, and initiate onboarding sequence.
  * 
  * @return None.
  */
 void agent_ucc_listener::clear_configuration()
 {
-    // TODO implement clearing of agent configuration.
-    // As part of task: https://github.com/prplfoundation/prplMesh/issues/336
+    m_onboarding_state = eOnboardingState::eONBOARDING_RESET_TO_DEFAULT;
 }
 
 /**
