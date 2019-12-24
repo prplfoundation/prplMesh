@@ -43,6 +43,7 @@ public:
     void unlock() override { mutex.unlock(); }
 
     eOnboardingState get_and_update_onboarding_state();
+    void set_onboarding_status(bool success);
     std::string get_selected_backhaul();
 
 private:

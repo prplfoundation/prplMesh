@@ -148,6 +148,19 @@ eOnboardingState agent_ucc_listener::get_and_update_onboarding_state()
 }
 
 /**
+ * @brief Set the Agent onboarding status. Calling this function will trigger sending the UCC
+ * COMPLETE/ERROR status.
+ * 
+ * @param success Onboarding success status.
+ * @return None.
+ */
+void agent_ucc_listener::set_onboarding_status(bool success)
+{
+    m_onboarding_state =
+        success ? eOnboardingState::eONBOARDING_SUCCESS : eOnboardingState::eONBOARDING_FAIL;
+}
+
+/**
  * @brief Get the selected backhaul which has been received on "DEV_SET_CONFIG" command from UCC.
  * 
  * @return std::string "eth" or RUID of selected radio or empty string if "DEV_SET_CONFIG" has not 
