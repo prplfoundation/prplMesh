@@ -599,6 +599,14 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
         LOG(TRACE) << "backhaul manager state=ENABLED";
 
+        if (m_agent_ucc_listener) {
+            auto onboarding_state = m_agent_ucc_listener->get_and_update_onboarding_state();
+            if (onboarding_state == eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG) {
+                // Stay in ENABLE state until onboarding_state will change
+                break;
+            }
+        }
+
         // Connect/Reconnect to the platform manager
         if (!m_scPlatform) {
             m_scPlatform = std::make_shared<SocketClient>(
