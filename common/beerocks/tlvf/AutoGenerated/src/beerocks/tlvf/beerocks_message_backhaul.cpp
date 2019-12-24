@@ -95,8 +95,13 @@ uint8_t& cACTION_BACKHAUL_REGISTER_REQUEST::onboarding() {
     return (uint8_t&)(*m_onboarding);
 }
 
+sMacAddr& cACTION_BACKHAUL_REGISTER_REQUEST::ruid() {
+    return (sMacAddr&)(*m_ruid);
+}
+
 void cACTION_BACKHAUL_REGISTER_REQUEST::class_swap()
 {
+    m_ruid->struct_swap();
 }
 
 bool cACTION_BACKHAUL_REGISTER_REQUEST::finalize()
@@ -135,6 +140,7 @@ size_t cACTION_BACKHAUL_REGISTER_REQUEST::get_initial_size()
     class_size += sizeof(uint8_t); // local_gw
     class_size += sizeof(uint8_t); // sta_iface_filter_low
     class_size += sizeof(uint8_t); // onboarding
+    class_size += sizeof(sMacAddr); // ruid
     return class_size;
 }
 
@@ -176,6 +182,12 @@ bool cACTION_BACKHAUL_REGISTER_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
+    m_ruid = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_ruid->struct_init(); }
     if (m_parse__) { class_swap(); }
     return true;
 }
