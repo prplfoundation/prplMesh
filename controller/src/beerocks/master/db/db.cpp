@@ -1275,9 +1275,9 @@ bool db::add_hostap_supported_operating_class(const std::string &radio_mac, uint
 
     set_hostap_supported_channels(radio_mac, &supported_channels[0], supported_channels.size());
     // dump new supported channels state
-    LOG(DEBUG) << "New supported channels for hostap" << radio_mac << " operating class "
-               << int(operating_class) << std::endl
-               << get_hostap_supported_channels_string(radio_mac);
+    // LOG(DEBUG) << "New supported channels for hostap" << radio_mac << " operating class "
+    //            << int(operating_class) << std::endl
+    //            << get_hostap_supported_channels_string(radio_mac);
 
     return true;
 }
