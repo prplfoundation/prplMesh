@@ -137,6 +137,17 @@ bool backhaul_manager::init()
 bool backhaul_manager::work()
 {
     bool skip_select = false;
+
+    // Calling get_and_update_onboarding_state returns eONBOARDING_RESET_TO_DEFAULT only once
+    if (m_agent_ucc_listener && m_agent_ucc_listener->get_and_update_onboarding_state() ==
+                                    eOnboardingState::eONBOARDING_RESET_TO_DEFAULT) {
+        auto active_hal = get_wireless_hal();
+        if (active_hal) {
+            active_hal->disconnect();
+        }
+        FSM_MOVE_STATE(RESTART);
+    }
+
     if (!backhaul_fsm_main(skip_select))
         return false;
 

@@ -127,3 +127,18 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
 
     return true;
 }
+
+/**
+ * @brief Get the onboarding state, and update the state if needed. 
+ * 
+ * @return eOnboardingState The onboarding state.
+ */
+eOnboardingState agent_ucc_listener::get_and_update_onboarding_state()
+{
+    if (m_onboarding_state == eOnboardingState::eONBOARDING_RESET_TO_DEFAULT) {
+        m_onboarding_state = eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG;
+        return eOnboardingState::eONBOARDING_RESET_TO_DEFAULT;
+    }
+
+    return m_onboarding_state;
+}
