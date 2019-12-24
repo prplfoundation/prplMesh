@@ -24,6 +24,7 @@ cACTION_BACKHAUL_REGISTER_REQUEST:
   local_gw: uint8_t
   sta_iface_filter_low: uint8_t
   onboarding: uint8_t
+  ruid: sMacAddr
 
 cACTION_BACKHAUL_REGISTER_RESPONSE:
   _type: class
