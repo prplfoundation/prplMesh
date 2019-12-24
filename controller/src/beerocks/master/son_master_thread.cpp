@@ -3505,8 +3505,8 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     }
     case beerocks_message::ACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE: {
         auto notification =
-            cmdu_rx
-                .addClass<beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE>();
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE>();
         if (notification == nullptr) {
             LOG(ERROR) << "addClass cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST failed";
             return false;
