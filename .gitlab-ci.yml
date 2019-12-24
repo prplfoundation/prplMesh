@@ -69,6 +69,10 @@ run-tests:
   script:
     - tools/deploy_ipk.sh $TARGET_DEVICE_NAME tools/docker/builder/openwrt/*.ipk
     - tools/docker/tests/openwrt/test_status.sh $TARGET_DEVICE_NAME
+  artifacts:
+    paths:
+      - ${TARGET_DEVICE_NAME}_logs.tar.gz
+    when: always
   tags:
     - targets
 

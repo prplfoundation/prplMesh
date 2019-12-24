@@ -1,3 +1,4 @@
 analyzer-venv
+/*.ipk
 /build/
 /logs/
