@@ -3,6 +3,17 @@
 - Request access on ags.intel.com for the role:
     > DevTools - Klocwork - JF - CHD-P - CHD-P Developer
 
+- Make sure you already set the following environment variables:
+   ``` bash
+    export CMAKE_TOOLCHAIN_FILE=/local/$USER/dev1/prplMesh/tools/cmake/toolchain/rdkb.cmake
+    export PRPLMESH_PLATFORM_TYPE=rdkb
+    export PRPLMESH_PLATFORM_BASE_DIR=/local/$USER/dev1/rdkb/atom_rdkbos/
+    export PRPLMESH_PLATFORM_BUILD_NAME=puma7-atom
+    export PRPLMESH_PLATFORM_TOOLCHAIN_PREFIX=i686-rdk-linux
+    export PRPLMESH_PLATFORM_TOOLCHAIN=x86_64-linux
+
+   ```
+
 - Open a new shell and make sure you are using the new path:
     ``` bash
     which kwauth
@@ -28,19 +39,6 @@
     > Login: [WIN_USER_NAME]
     > Password: [WIN_PASSWORD]
 
- - Note: Make sure that 'external_toolchain.cfg' is configured properly on your environment.
-    If the file is not configured, config your chdlab to a platform which is configured to the same environment (UGW/RDKB):
-    ```bash
-    # On repo root (where '.repo' folder is):
-    set_git_env
-    chdlab config -s <setup_number>
-    chdlab pull
-    ```
-
-    Use maptools script to configure 'external_toolchain.cfg':
-    ```bash
-    maptools config -g
-    ```
 ### Running Klocwork Linux environment, on non Intel Network
 Make sure that 'external_toolchain.cfg' is not exist on your environment.
 
