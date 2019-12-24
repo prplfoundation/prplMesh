@@ -17,6 +17,10 @@
 
 namespace beerocks {
 
+// Defined by CAPI specifications:
+static constexpr uint8_t UCC_REPLY_RUNNING_TIMEOUT_SEC  = 1;
+static constexpr uint8_t UCC_REPLY_COMPLETE_TIMEOUT_SEC = 120;
+
 class beerocks_ucc_listener : public socket_thread {
 public:
     beerocks_ucc_listener(uint16_t port);
