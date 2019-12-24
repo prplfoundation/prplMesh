@@ -138,7 +138,19 @@ eOnboardingState agent_ucc_listener::get_and_update_onboarding_state()
     if (m_onboarding_state == eOnboardingState::eONBOARDING_RESET_TO_DEFAULT) {
         m_onboarding_state = eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG;
         return eOnboardingState::eONBOARDING_RESET_TO_DEFAULT;
+    } else if (m_onboarding_state == eOnboardingState::eONBOARDING_WAIT_FOR_CONFIG) {
+        if (!m_selected_backhaul.empty()) {
+            m_onboarding_state = eOnboardingState::eONBOARDING_IN_PROGRESS;
+        }
     }
 
     return m_onboarding_state;
 }
+
+/**
+ * @brief Get the selected backhaul which has been received on "DEV_SET_CONFIG" command from UCC.
+ * 
+ * @return std::string "eth" or RUID of selected radio or empty string if "DEV_SET_CONFIG" has not 
+ * been received.
+ */
+std::string agent_ucc_listener::get_selected_backhaul() { return m_selected_backhaul; }
