@@ -72,6 +72,7 @@ run-tests:
   artifacts:
     paths:
       - ${TARGET_DEVICE_NAME}_logs.tar.gz
+      - ${TARGET_DEVICE_NAME}_diags.log
     when: always
   tags:
     - targets
