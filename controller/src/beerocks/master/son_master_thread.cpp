@@ -2284,7 +2284,7 @@ bool master_thread::autoconfig_wsc_parse_radio_caps(
             non_operable_channels.push_back(*channel);
         }
         ss << " }" << std::endl;
-        LOG(DEBUG) << ss.str();
+        //        LOG(DEBUG) << ss.str();
         // store operating class in the DB for this hostap
         database.add_hostap_supported_operating_class(
             radio_mac, operating_class, maximum_transmit_power_dbm, non_operable_channels);
