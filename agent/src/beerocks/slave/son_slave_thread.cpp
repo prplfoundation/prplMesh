@@ -3622,23 +3622,23 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
  *        class member params authkey and keywrapauth are computed
  *        on success.
  *
- * @param[in] m1 WSC M1 TLV received from the radio agent
+ * @param[in] m2 WSC M2 recived from the controller
  * @param[out] authkey 32 bytes calculated authentication key
  * @param[out] keywrapkey 16 bytes calculated key wrap key
  * @return true on success
  * @return false on failure
  */
-bool slave_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
-                                                 uint8_t authkey[32], uint8_t keywrapkey[16])
+bool slave_thread::autoconfig_wsc_calculate_keys(WSC::m2 &m2, uint8_t authkey[32],
+                                                 uint8_t keywrapkey[16])
 {
-    auto mac = network_utils::mac_from_string(backhaul_params.bridge_mac);
     if (!dh) {
         LOG(ERROR) << "diffie hellman member not initialized";
         return false;
     }
-    if (!mapf::encryption::wps_calculate_keys(
-            *dh, m2->public_key_attr().data, m2->public_key_attr().data_length, dh->nonce(),
-            mac.oct, m2->registrar_nonce_attr().data, authkey, keywrapkey)) {
+    auto mac = network_utils::mac_from_string(backhaul_params.bridge_mac);
+    if (!mapf::encryption::wps_calculate_keys(*dh, m2.public_key(),
+                                              WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, dh->nonce(),
+                                              mac.oct, m2.registrar_nonce(), authkey, keywrapkey)) {
         LOG(ERROR) << "Failed to calculate WPS keys";
         return false;
     }
@@ -3652,13 +3652,12 @@ bool slave_thread::autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlv
  * Calculate authentication on the Full M1 || M2* whereas M2* = M2 without the authenticator
  * attribute. M1 is a saved buffer of the swapped M1 sent in the WSC autoconfig sent by the agent.
  * 
- * @param m2 WSC M2 TLV
+ * @param m2 WSC M2 attribute list from the controller
  * @param authkey authentication key
  * @return true on success
  * @return false on failure
  */
-bool slave_thread::autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
-                                               uint8_t authkey[32])
+bool slave_thread::autoconfig_wsc_authenticate(WSC::m2 &m2, uint8_t authkey[32])
 {
     if (!m1_auth_buf) {
         LOG(ERROR) << "Invalid M1";
@@ -3666,12 +3665,13 @@ bool slave_thread::autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWs
     }
 
     // This is the content of M1 and M2, without the type and length.
-    uint8_t buf[m1_auth_buf_len + m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator)];
+    uint8_t buf[m1_auth_buf_len + m2.getMessageLength() -
+                WSC::cWscAttrAuthenticator::get_initial_size()];
     auto next = std::copy_n(m1_auth_buf, m1_auth_buf_len, buf);
-    m2->class_swap(); //swap to get network byte order
-    std::copy_n(m2->getStartBuffPtr() + 3, m2->getLen() - 3 - sizeof(WSC::sWscAttrAuthenticator),
-                next);
-    m2->class_swap(); //swap back
+    m2.swap(); //swap to get network byte order
+    std::copy_n(m2.getMessageBuff(),
+                m2.getMessageLength() - WSC::cWscAttrAuthenticator::get_initial_size(), next);
+    m2.swap(); //swap back
 
     uint8_t kwa[WSC::WSC_AUTHENTICATOR_LENGTH];
     // Add KWA which is the 1st 64 bits of HMAC of config_data using AuthKey
@@ -3680,11 +3680,10 @@ bool slave_thread::autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWs
         return false;
     }
 
-    if (!std::equal(kwa, kwa + sizeof(kwa),
-                    reinterpret_cast<uint8_t *>(m2->authenticator().data))) {
+    if (!std::equal(kwa, kwa + sizeof(kwa), reinterpret_cast<uint8_t *>(m2.authenticator()))) {
         LOG(ERROR) << "WSC Global authentication failed";
         LOG(DEBUG) << "authenticator: "
-                   << utils::dump_buffer(reinterpret_cast<uint8_t *>(m2->authenticator().data),
+                   << utils::dump_buffer(reinterpret_cast<uint8_t *>(m2.authenticator()),
                                          WSC::WSC_AUTHENTICATOR_LENGTH);
         LOG(DEBUG) << "calculated:    " << utils::dump_buffer(kwa, WSC::WSC_AUTHENTICATOR_LENGTH);
         LOG(DEBUG) << "authenticator key: " << utils::dump_buffer(authkey, 32);
@@ -3697,13 +3696,13 @@ bool slave_thread::autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWs
 }
 
 bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
-    std::shared_ptr<ieee1905_1::tlvWscM2> m2, uint8_t authkey[32], uint8_t keywrapkey[16],
-    bool &backhaul, bool &fronthaul, bool &teardown, std::shared_ptr<WSC::cConfigData> &credentials)
+    WSC::m2 &m2, uint8_t authkey[32], uint8_t keywrapkey[16], bool &backhaul, bool &fronthaul,
+    bool &teardown, std::shared_ptr<WSC::cConfigData> &credentials)
 {
-    auto encrypted_settings = m2->encrypted_settings();
-    uint8_t *iv             = reinterpret_cast<uint8_t *>(encrypted_settings->iv());
-    auto ciphertext         = reinterpret_cast<uint8_t *>(encrypted_settings->encrypted_settings());
-    int cipherlen           = encrypted_settings->encrypted_settings_length();
+    auto encrypted_settings = m2.encrypted_settings();
+    uint8_t *iv             = reinterpret_cast<uint8_t *>(encrypted_settings.iv());
+    auto ciphertext         = reinterpret_cast<uint8_t *>(encrypted_settings.encrypted_settings());
+    int cipherlen           = encrypted_settings.encrypted_settings_length();
     // leave room for up to 16 bytes internal padding length - see aes_decrypt()
     int datalen = cipherlen + 16;
     uint8_t decrypted[datalen];
@@ -3854,7 +3853,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
 
     std::shared_ptr<wfa_map::tlvApRadioIdentifier> ruid = nullptr;
-    std::vector<std::shared_ptr<ieee1905_1::tlvWscM2>> m2_list;
+    std::vector<std::shared_ptr<WSC::m2>> m2_list;
     bool intel_agent = false;
     int type         = cmdu_rx.getNextTlvType();
 
@@ -3867,12 +3866,17 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         } else if (type == int(ieee1905_1::eTlvType::TLV_WSC)) {
             // parse all M2 TLVs
             LOG(DEBUG) << "Found TLV_WSC TLV (assuming M2)";
-            auto tlvWscM2 = cmdu_rx.addClass<ieee1905_1::tlvWscM2>();
-            if (!tlvWscM2) {
-                LOG(ERROR) << "Not an WSC M2 TLV!";
+            auto tlvWsc = cmdu_rx.addClass<ieee1905_1::tlvWsc>();
+            if (!tlvWsc) {
+                LOG(ERROR) << "Not an WSC TLV!";
                 return false;
             }
-            m2_list.push_back(tlvWscM2);
+            auto m2 = std::dynamic_pointer_cast<WSC::m2>(WSC::AttrList::parse(*tlvWsc));
+            if (!m2) {
+                LOG(ERROR) << "Not an M2!";
+                return false;
+            }
+            m2_list.push_back(m2);
         } else if (type == int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
             // If this is an Intel Agent, it will have VS TLV as the last TLV.
             // Currently, we don't support skipping TLVs, so if we see a VS TLV, we assume
@@ -3911,7 +3915,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     }
 
     if (m2_list.empty()) {
-        LOG(ERROR) << "No M2 TLVs present";
+        LOG(ERROR) << "No M2s present";
         return false;
     }
 
@@ -3923,26 +3927,25 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         return false;
     }
 
-    for (auto tlvWscM2 : m2_list) {
+    for (auto m2 : m2_list) {
         uint8_t authkey[32];
         uint8_t keywrapkey[16];
         LOG(DEBUG) << "M2 Parse: calculate keys";
-        if (!autoconfig_wsc_calculate_keys(tlvWscM2, authkey, keywrapkey))
+        if (!autoconfig_wsc_calculate_keys(*m2, authkey, keywrapkey))
             return false;
 
-        if (!autoconfig_wsc_authenticate(tlvWscM2, authkey))
+        if (!autoconfig_wsc_authenticate(*m2, authkey))
             return false;
 
         bool fronthaul, backhaul, teardown;
         auto credentials = request->create_wifi_credentials();
-        if (!autoconfig_wsc_parse_m2_encrypted_settings(tlvWscM2, authkey, keywrapkey, backhaul,
+        if (!autoconfig_wsc_parse_m2_encrypted_settings(*m2, authkey, keywrapkey, backhaul,
                                                         fronthaul, teardown, credentials))
             return false;
 
-        std::string manufacturer = tlvWscM2->manufacturer_str();
-
         LOG(DEBUG) << "Controller configuration (WSC M2 Encrypted Settings)";
-        LOG(DEBUG) << "     Manufacturer: " << manufacturer << ", ssid: " << credentials->ssid_str()
+        LOG(DEBUG) << "     Manufacturer: " << m2->manufacturer()
+                   << ", ssid: " << credentials->ssid_str()
                    << ", bssid: " << network_utils::mac_to_string(credentials->bssid_attr().data)
                    << ", authentication_type: " << std::hex
                    << int(credentials->authentication_type_attr().data)
