@@ -83,7 +83,7 @@ void monitor_rdkb_hal::print_debug_info(mon_rdkb_debug_info_t &mdi, bool pkts_co
 void monitor_rdkb_hal::process()
 {
 
-    if (mon_db == nullptr) {
+    if (!mon_db) {
         LOG(ERROR) << "mon_db not initialized";
         return;
     }
@@ -99,7 +99,7 @@ void monitor_rdkb_hal::process()
 
         auto sta_node = mon_db->sta_find(sta_mac);
         //client not connected.
-        if (sta_node == nullptr) {
+        if (!sta_node) {
             continue;
         }
 
@@ -223,13 +223,13 @@ void monitor_rdkb_hal::send_activity_event(const std::string &sta_mac, bool acti
 
     auto response = message_com::create_vs_message<
         beerocks_message::cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION>(cmdu_tx);
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR) << "Failed building cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION "
                       "message!";
         return;
     }
 
-    if (mon_db == nullptr) {
+    if (!mon_db) {
         LOG(ERROR) << "mon_db not initialized";
         return;
     }
@@ -255,13 +255,13 @@ void monitor_rdkb_hal::send_snr_crossing_event(const std::string &sta_mac,
 
     auto response = message_com::create_vs_message<
         beerocks_message::cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION>(cmdu_tx);
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR)
             << "Failed building cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION message!";
         return;
     }
 
-    if (mon_db == nullptr) {
+    if (!mon_db) {
         LOG(ERROR) << "mon_db not initialized";
         return;
     }
@@ -285,7 +285,7 @@ std::shared_ptr<rdkb_hal_sta_config> monitor_rdkb_hal::conf_add_client(const std
 {
 
     auto cp = conf_find_client(sta_mac);
-    if (cp == nullptr) {
+    if (!cp) {
         auto node = std::make_shared<son::rdkb_hal_sta_config>(sta_mac);
         auto ret  = conf_stas.insert(std::make_pair(sta_mac, node));
         if (ret.second == true) {
@@ -318,7 +318,7 @@ std::shared_ptr<rdkb_hal_ap_config> monitor_rdkb_hal::conf_add_ap(const int8_t v
 {
 
     auto cp = conf_find_ap(vap_id);
-    if (cp == nullptr) {
+    if (!cp) {
         auto ap  = std::make_shared<son::rdkb_hal_ap_config>(vap_id);
         auto ret = conf_aps.insert(std::make_pair(vap_id, ap));
         if (ret.second == false) {

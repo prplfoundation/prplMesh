@@ -299,7 +299,7 @@ void optimal_path_task::work()
                     auto request = message_com::create_vs_message<
                         beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST>(cmdu_tx, id);
 
-                    if (request == nullptr) {
+                    if (!request) {
                         LOG(ERROR)
                             << "Failed building ACTION_CONTROL_CLIENT_BEACON_11K_REQUEST message!";
                         break;
@@ -422,7 +422,7 @@ void optimal_path_task::work()
                 !database.settings_client_optimal_path_roaming_prefer_signal_strength()) {
                 //get sta capabilities....
                 sta_capabilities = database.get_station_capabilities(sta_mac, hostap_is_5ghz);
-                if (sta_capabilities == nullptr) {
+                if (!sta_capabilities) {
                     get_station_default_capabilities(hostap_is_5ghz, default_sta_cap);
                     sta_capabilities = &default_sta_cap;
                 }
@@ -748,7 +748,7 @@ void optimal_path_task::work()
         auto agent_mac = database.get_node_parent_ire(current_hostap);
         auto request   = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>(cmdu_tx, id);
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR)
                 << "Failed building ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST message!";
             return;
@@ -924,7 +924,7 @@ void optimal_path_task::work()
 
             //get sta capabilities....
             sta_capabilities = database.get_station_capabilities(sta_mac, hostap_params.is_5ghz);
-            if (sta_capabilities == nullptr) {
+            if (!sta_capabilities) {
                 TASK_LOG(WARNING) << "STA capabilities are empty - use default capabilities";
                 get_station_default_capabilities(hostap_params.is_5ghz, default_sta_cap);
                 sta_capabilities = &default_sta_cap;
@@ -1247,7 +1247,7 @@ void optimal_path_task::send_rssi_measurement_request(const std::string &agent_m
     auto hostap_mac = database.get_node_parent(client_mac);
     auto request    = message_com::create_vs_message<
         beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>(cmdu_tx, id);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST message!";
         return;
     }

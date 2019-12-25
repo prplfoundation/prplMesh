@@ -157,7 +157,7 @@ bool network_health_check_task::send_arp_query(std::string mac)
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CONTROL_ARP_QUERY_REQUEST>(cmdu_tx,
                                                                                             id);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building message!";
         return false;
     }

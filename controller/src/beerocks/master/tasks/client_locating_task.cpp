@@ -74,7 +74,7 @@ void client_locating_task::work()
             auto request =
                 message_com::create_vs_message<beerocks_message::cACTION_CONTROL_ARP_QUERY_REQUEST>(
                     cmdu_tx, id);
-            if (request == nullptr) {
+            if (!request) {
                 LOG(ERROR) << "Failed building message!";
                 continue;
             }

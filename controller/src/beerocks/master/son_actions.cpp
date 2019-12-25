@@ -66,7 +66,7 @@ void son_actions::handle_completed_connection(db &database, ieee1905_1::CmduMess
 
             auto stop_request = message_com::create_vs_message<
                 beerocks_message::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST>(cmdu_tx);
-            if (stop_request == nullptr) {
+            if (!stop_request) {
                 LOG(ERROR)
                     << "Failed building ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST message!";
                 return;
@@ -84,7 +84,7 @@ void son_actions::handle_completed_connection(db &database, ieee1905_1::CmduMess
             auto disassoc_request   = message_com::create_vs_message<
                 beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST>(cmdu_tx);
 
-            if (disassoc_request == nullptr) {
+            if (!disassoc_request) {
                 LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_DISCONNECT_REQUEST message!";
                 return;
             }
@@ -226,7 +226,7 @@ void son_actions::disconnect_client(db &database, ieee1905_1::CmduMessageTx &cmd
         message_com::create_vs_message<beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_DISCONNECT_REQUEST message!";
         return;
     }
@@ -246,7 +246,7 @@ void son_actions::send_cli_debug_message(db &database, ieee1905_1::CmduMessageTx
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_RESPONSE_STR>(cmdu_tx);
 
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR) << "Failed building cACTION_CLI_RESPONSE_STR message!";
         return;
     }
@@ -300,7 +300,7 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
         LOG(DEBUG) << "STOP_MONITORING mac " << mac << " hostapd " << parent_hostap_mac;
         auto stop_request = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST>(cmdu_tx);
-        if (stop_request == nullptr) {
+        if (!stop_request) {
             LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST message!";
             return;
         }
@@ -463,13 +463,19 @@ bool son_actions::send_cmdu_to_agent(const std::string &dest_mac,
             return false;
         }
 
-        beerocks_header->actionhdr()->radio_mac() = network_utils::mac_from_string(radio_mac);
-        beerocks_header->actionhdr()->direction() = beerocks::BEEROCKS_DIRECTION_AGENT;
+        auto action_header = beerocks_header->actionhdr();
+        if (!action_header) {
+            LOG(ERROR) << "Failed getting action_header!";
+            return false;
+        }
+
+        action_header->radio_mac() = network_utils::mac_from_string(radio_mac);
+        action_header->direction() = beerocks::BEEROCKS_DIRECTION_AGENT;
     }
 
     auto master_thread_ctx = database.get_master_thread_ctx();
-    if (master_thread_ctx == nullptr) {
-        LOG(ERROR) << "master_thread_context == nullptr";
+    if (!master_thread_ctx) {
+        LOG(ERROR) << "get_master_thread_ctx failed ";
         return false;
     }
 

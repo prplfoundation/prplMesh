@@ -29,7 +29,7 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
 {
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_BML_NW_MAP_RESPONSE>(cmdu_tx, id);
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR) << "Failed building ACTION_BML_NW_MAP_BRIDGE_RESPONSE message!";
         return;
     }
@@ -41,7 +41,13 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
         return;
     }
 
-    beerocks_header->actionhdr()->last() = 0;
+    auto beerocks_action_header = beerocks_header->actionhdr();
+    if (!beerocks_action_header) {
+        LOG(ERROR) << "Failed getting beerocks_action_header!";
+        return;
+    }
+
+    beerocks_action_header->last() = 0;
 
     uint8_t *data_start = nullptr;
     // std::ptrdiff_t size=0, size_left=0, node_len=0;
@@ -69,8 +75,8 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
         }
         // LOG(DEBUG) << "last = " << last << " get_next_node=" << get_next_node;
 
-        if (n == nullptr) {
-            // LOG(DEBUG) << "n == nullptr";
+        if (!n) {
+            // LOG(DEBUG) << "!n";
             continue;
         }
 
@@ -109,20 +115,41 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
                 response =
                     message_com::create_vs_message<beerocks_message::cACTION_BML_NW_MAP_RESPONSE>(
                         cmdu_tx, id);
-                beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
-                beerocks_header->actionhdr()->last() = 0;
-                num_of_nodes = response->node_num(); // prepare for next message
-                num_of_nodes = 0;
-                data_start   = nullptr;
-                size         = 0;
+                if (!response) {
+                    LOG(ERROR) << "create_vs_message() failed ";
+                    return;
+                }
+
+                beerocks_header = message_com::get_beerocks_header(cmdu_tx);
+                if (!beerocks_header) {
+                    LOG(ERROR) << "get_beerocks_header() failed ";
+                    return;
+                }
+
+                auto actionhdr = beerocks_header->actionhdr();
+                if (!actionhdr) {
+                    LOG(ERROR) << "actionhdr() failed ";
+                    return;
+                }
+
+                actionhdr->last() = 0;
+                num_of_nodes      = response->node_num(); // prepare for next message
+                num_of_nodes      = 0;
+                data_start        = nullptr;
+                size              = 0;
             } else {
                 if (!response->alloc_buffer(node_len)) {
                     LOG(ERROR) << "Failed allocating buffer!";
                     return;
                 }
 
-                if (data_start == nullptr) {
-                    data_start = (uint8_t *)response->buffer(0);
+                if (!data_start) {
+                    auto buf = response->buffer(0);
+                    if (!buf) {
+                        LOG(ERROR) << "buffer is nullptr";
+                        return;
+                    }
+                    data_start = (uint8_t *)buf;
                 }
 
                 fill_bml_node_data(database, n, data_start + size, size_left);
@@ -134,7 +161,12 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
         }
     }
 
-    beerocks_header->actionhdr()->last() = 1;
+    auto actionhdr = beerocks_header->actionhdr();
+    if (!actionhdr) {
+        LOG(ERROR) << "actionhdr() failed ";
+        return;
+    }
+    actionhdr->last() = 1;
     message_com::send_cmdu(sd, cmdu_tx);
     //LOG(DEBUG) << "sending message, last=1";
 }
@@ -144,8 +176,8 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::string node_ma
                                                bool force_client_disconnect)
 {
     auto n = database.get_node(node_mac);
-    if (n == nullptr) {
-        LOG(ERROR) << "get_node(), node_mac=" << node_mac << " , n == nullptr !!!";
+    if (!n) {
+        LOG(ERROR) << "get_node(), node_mac=" << node_mac << " , !n !!!";
         return 0;
     } else {
         return fill_bml_node_data(database, n, tx_buffer, buffer_size, force_client_disconnect);
@@ -158,8 +190,8 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
 {
     auto node = (BML_NODE *)tx_buffer;
 
-    if (n == nullptr) {
-        LOG(ERROR) << " n == nullptr !!!";
+    if (!n) {
+        LOG(ERROR) << " !n !!!";
         return 0;
     }
 
@@ -311,17 +343,24 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
 {
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_BML_STATS_UPDATE>(cmdu_tx);
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
     }
 
-    auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
-    if (!beerocks_header) {
+    auto beerocks_hdr = message_com::get_beerocks_header(cmdu_tx);
+    if (!beerocks_hdr) {
         LOG(ERROR) << "Failed getting beerocks_header!";
         return;
     }
-    beerocks_header->actionhdr()->last() = 0;
+
+    auto action_hdr = beerocks_hdr->actionhdr();
+    if (!action_hdr) {
+        LOG(ERROR) << "Failed getting action_header!";
+        return;
+    }
+
+    action_hdr->last() = 0;
 
     // nodes iterating
     //LOG(DEBUG) << "send_bml_nodes_statistics_message, buf_size " << int(tx_buffer_size);
@@ -351,8 +390,13 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
         size_t node_size = get_bml_node_statistics_len(n);
         response->alloc_buffer(node_size);
 
-        if (data_start == nullptr) {
-            data_start = (uint8_t *)response->buffer(0);
+        if (!data_start) {
+            auto buf = response->buffer(0);
+            if (!buf) {
+                LOG(ERROR) << "buffer is nullptr";
+                return -1;
+            }
+            data_start = (uint8_t *)buf;
         }
 
         if (((reserved_size + size + node_size) >
@@ -373,12 +417,26 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
             response =
                 message_com::create_vs_message<beerocks_message::cACTION_BML_STATS_UPDATE>(cmdu_tx);
 
-            beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
-            beerocks_header->actionhdr()->last() = 0;
-            num_of_stats_bulks                   = response->num_of_stats_bulks();
-            num_of_stats_bulks                   = 0;
-            get_next_node                        = 0;
-            size                                 = 0;
+            if (!response) {
+                LOG(ERROR) << "create_vs_message() has failed";
+                return -1;
+            }
+
+            auto beerocks_hdr = message_com::get_beerocks_header(cmdu_tx);
+            if (!beerocks_hdr) {
+                LOG(ERROR) << "get_beerocks_header() has failed";
+                return -1;
+            }
+            auto actionhdr = beerocks_hdr->actionhdr();
+            if (!actionhdr) {
+                LOG(ERROR) << "actionhdr() has failed";
+                return -1;
+            }
+            actionhdr->last()  = 0;
+            num_of_stats_bulks = response->num_of_stats_bulks();
+            num_of_stats_bulks = 0;
+            get_next_node      = 0;
+            size               = 0;
         } else {
             //LOG(DEBUG) << "node_len = " << int(node_len);
             num_of_stats_bulks++;
@@ -395,7 +453,7 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
         // LOG(DEBUG) << "radio mac = " << hostap_mac;
         n = database.get_node(hostap_mac);
         if (!n) {
-            LOG(ERROR) << "n == nullptr";
+            LOG(ERROR) << "!n";
             continue;
         }
         n_type = n->get_type();
@@ -415,8 +473,8 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
                 std::string sta_mac = *sta;
                 // LOG(DEBUG) << "sta mac = " << sta_mac;
                 n = database.get_node(sta_mac);
-                if (n == nullptr) {
-                    LOG(ERROR) << "n == nullptr";
+                if (!n) {
+                    LOG(ERROR) << "!n";
                     continue;
                 }
                 if (n != nullptr && n->state == beerocks::STATE_CONNECTED) {
@@ -440,7 +498,12 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
         }
     }
 
-    beerocks_header->actionhdr()->last() = 1;
+    action_hdr = beerocks_hdr->actionhdr();
+    if (!action_hdr) {
+        LOG(ERROR) << "actionhdr() has failed";
+        return;
+    }
+    action_hdr->last() = 1;
 
     //LOG(DEBUG) << "sending message, last=0";
     // sending to all listeners
@@ -466,7 +529,7 @@ void network_map::send_bml_bss_tm_req_message_to_listeners(db &database,
 {
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
     }
@@ -476,15 +539,21 @@ void network_map::send_bml_bss_tm_req_message_to_listeners(db &database,
         return;
     }
 
-    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
-    if (event == nullptr) {
+    auto buf = response->buffer(0);
+    if (!buf) {
+        LOG(ERROR) << "buffer is nullptr";
+        return;
+    }
+
+    auto event = reinterpret_cast<BML_EVENT *>(buf);
+    if (!event) {
         LOG(ERROR) << "event is nullptr";
         return;
     }
 
     event->type = BML_EVENT_TYPE_BSS_TM_REQ;
     auto size   = sizeof(BML_EVENT);
-    event->data = GET_MESSAGE_POINTER(BML_EVENT_BSS_TM_REQ, response->buffer(0), size);
+    event->data = GET_MESSAGE_POINTER(BML_EVENT_BSS_TM_REQ, buf, size);
 
     auto event_bss_tm_req = (BML_EVENT_BSS_TM_REQ *)event->data;
     network_utils::mac_from_string(event_bss_tm_req->target_bssid, target_bssid);
@@ -500,7 +569,7 @@ void network_map::send_bml_bh_roam_req_message_to_listeners(db &database,
 {
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
     }
@@ -510,15 +579,21 @@ void network_map::send_bml_bh_roam_req_message_to_listeners(db &database,
         return;
     }
 
-    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
-    if (event == nullptr) {
+    auto buf = response->buffer(0);
+    if (!buf) {
+        LOG(ERROR) << "buffer is nullptr";
+        return;
+    }
+
+    auto event = reinterpret_cast<BML_EVENT *>(buf);
+    if (!event) {
         LOG(ERROR) << "event is nullptr";
         return;
     }
 
     event->type = BML_EVENT_TYPE_BH_ROAM_REQ;
     auto size   = sizeof(BML_EVENT);
-    event->data = GET_MESSAGE_POINTER(BML_EVENT_BH_ROAM_REQ, response->buffer(0), size);
+    event->data = GET_MESSAGE_POINTER(BML_EVENT_BH_ROAM_REQ, buf, size);
 
     auto event_bh_roam_req = (BML_EVENT_BH_ROAM_REQ *)event->data;
     network_utils::mac_from_string(event_bh_roam_req->bssid, bssid);
@@ -533,7 +608,7 @@ void network_map::send_bml_client_allow_req_message_to_listeners(
 {
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
     }
@@ -543,16 +618,22 @@ void network_map::send_bml_client_allow_req_message_to_listeners(
         return;
     }
 
-    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
-    if (event == nullptr) {
+    auto buf = response->buffer(0);
+    if (!buf) {
+        LOG(ERROR) << "buffer is nullptr";
+        return;
+    }
+
+    auto event = reinterpret_cast<BML_EVENT *>(buf);
+    if (!event) {
         LOG(ERROR) << "event is nullptr";
         return;
     }
 
     event->type = BML_EVENT_TYPE_CLIENT_ALLOW_REQ;
 
-    auto size   = sizeof(BML_EVENT);
-    event->data = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_ALLOW_REQ, response->buffer(0), size);
+    auto size                   = sizeof(BML_EVENT);
+    event->data                 = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_ALLOW_REQ, buf, size);
     auto event_client_allow_req = (BML_EVENT_CLIENT_ALLOW_REQ *)event->data;
     network_utils::mac_from_string(event_client_allow_req->sta_mac, sta_mac);
     network_utils::mac_from_string(event_client_allow_req->hostap_mac, hostap_mac);
@@ -567,7 +648,7 @@ void network_map::send_bml_client_disallow_req_message_to_listeners(
 {
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
     }
@@ -577,15 +658,21 @@ void network_map::send_bml_client_disallow_req_message_to_listeners(
         return;
     }
 
-    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
-    if (event == nullptr) {
+    auto buf = response->buffer(0);
+    if (!buf) {
+        LOG(ERROR) << "buffer is nullptr";
+        return;
+    }
+
+    auto event = reinterpret_cast<BML_EVENT *>(buf);
+    if (!event) {
         LOG(ERROR) << "event is nullptr";
         return;
     }
 
     event->type = BML_EVENT_TYPE_CLIENT_DISALLOW_REQ;
     auto size   = sizeof(BML_EVENT);
-    event->data = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_DISALLOW_REQ, response->buffer(0), size);
+    event->data = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_DISALLOW_REQ, buf, size);
 
     auto event_client_disallow_req = (BML_EVENT_CLIENT_DISALLOW_REQ *)event->data;
     network_utils::mac_from_string(event_client_disallow_req->sta_mac, sta_mac);
@@ -601,7 +688,7 @@ void network_map::send_bml_acs_start_message_to_listeners(db &database,
 {
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
     }
@@ -611,15 +698,21 @@ void network_map::send_bml_acs_start_message_to_listeners(db &database,
         return;
     }
 
-    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
-    if (event == nullptr) {
+    auto buf = response->buffer(0);
+    if (!buf) {
+        LOG(ERROR) << "buffer is nullptr";
+        return;
+    }
+
+    auto event = reinterpret_cast<BML_EVENT *>(buf);
+    if (!event) {
         LOG(ERROR) << "event is nullptr";
         return;
     }
 
     event->type = BML_EVENT_TYPE_ACS_START;
     auto size   = sizeof(BML_EVENT);
-    event->data = GET_MESSAGE_POINTER(BML_EVENT_ACS_START, response->buffer(0), size);
+    event->data = GET_MESSAGE_POINTER(BML_EVENT_ACS_START, buf, size);
 
     auto event_acs_start = (BML_EVENT_ACS_START *)event->data;
 
@@ -635,7 +728,7 @@ void network_map::send_bml_csa_notification_message_to_listeners(
 {
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
     }
@@ -645,15 +738,21 @@ void network_map::send_bml_csa_notification_message_to_listeners(
         return;
     }
 
-    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
-    if (event == nullptr) {
+    auto buf = response->buffer(0);
+    if (!buf) {
+        LOG(ERROR) << "buffer is nullptr";
+        return;
+    }
+
+    auto event = reinterpret_cast<BML_EVENT *>(buf);
+    if (!event) {
         LOG(ERROR) << "event is nullptr";
         return;
     }
 
     event->type = BML_EVENT_TYPE_CSA_NOTIFICATION;
     auto size   = sizeof(BML_EVENT);
-    event->data = GET_MESSAGE_POINTER(BML_EVENT_CSA_NOTIFICATION, response->buffer(0), size);
+    event->data = GET_MESSAGE_POINTER(BML_EVENT_CSA_NOTIFICATION, buf, size);
 
     auto event_csa_notification = (BML_EVENT_CSA_NOTIFICATION *)event->data;
     network_utils::mac_from_string(event_csa_notification->hostap_mac, hostap_mac);
@@ -671,7 +770,7 @@ void network_map::send_bml_cac_status_changed_notification_message_to_listeners(
 {
     auto response =
         message_com::create_vs_message<beerocks_message::cACTION_BML_EVENTS_UPDATE>(cmdu_tx);
-    if (response == nullptr) {
+    if (!response) {
         LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
         return;
     }
@@ -681,17 +780,20 @@ void network_map::send_bml_cac_status_changed_notification_message_to_listeners(
         LOG(ERROR) << "Failed to alloc buffer";
         return;
     }
-
-    auto event = reinterpret_cast<BML_EVENT *>(response->buffer(0));
-    if (event == nullptr) {
+    auto buf = response->buffer(0);
+    if (!buf) {
+        LOG(ERROR) << "buffer is nullptr";
+        return;
+    }
+    auto event = reinterpret_cast<BML_EVENT *>(buf);
+    if (!event) {
         LOG(ERROR) << "event is nullptr";
         return;
     }
 
     event->type = BML_EVENT_TYPE_CAC_STATUS_CHANGED_NOTIFICATION;
     auto size   = sizeof(BML_EVENT);
-    event->data =
-        GET_MESSAGE_POINTER(BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION, response->buffer(0), size);
+    event->data = GET_MESSAGE_POINTER(BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION, buf, size);
 
     auto event_cac_status_changed = (BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION *)event->data;
     network_utils::mac_from_string(event_cac_status_changed->hostap_mac, hostap_mac);
@@ -725,8 +827,8 @@ std::ptrdiff_t network_map::get_bml_node_statistics_len(std::shared_ptr<node> n)
 std::ptrdiff_t network_map::fill_bml_node_statistics(db &database, std::shared_ptr<node> n,
                                                      uint8_t *tx_buffer, std::ptrdiff_t buf_size)
 {
-    if (n == nullptr) {
-        LOG(ERROR) << "n == nullptr";
+    if (!n) {
+        LOG(ERROR) << "!n";
         return 0;
     }
     auto n_type                   = n->get_type();

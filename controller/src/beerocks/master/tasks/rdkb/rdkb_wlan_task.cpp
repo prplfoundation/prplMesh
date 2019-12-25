@@ -136,7 +136,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
             for (const auto &radio_mac : radios) {
                 auto update = message_com::create_vs_message<
                     beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST>(cmdu_tx);
-                if (update == nullptr) {
+                if (!update) {
                     TASK_LOG(ERROR) << "Failed building message!";
                     send_bml_response(int(STEERING_SET_GROUP_RESPONSE), event_obj->sd,
                                       -BML_RET_CMDU_FAIL);
@@ -202,7 +202,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
             }
             auto update = message_com::create_vs_message<
                 beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST>(cmdu_tx);
-            if (update == nullptr) {
+            if (!update) {
                 TASK_LOG(ERROR) << "Failed building message!";
                 send_bml_response(int(STEERING_CLIENT_SET_RESPONSE), event_obj->sd,
                                   -BML_RET_CMDU_FAIL);
@@ -303,7 +303,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
 
             auto update = message_com::create_vs_message<
                 beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>(cmdu_tx, id);
-            if (update == nullptr) {
+            if (!update) {
                 TASK_LOG(ERROR) << "Failed building "
                                    "cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST message!";
                 send_bml_response(int(STEERING_RSSI_MEASUREMENT_RESPONSE), event_obj->sd,
@@ -414,7 +414,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BML_STEERING_EVENTS_UPDATE>(cmdu_tx);
-            if (response == nullptr) {
+            if (!response) {
                 TASK_LOG(ERROR) << "Failed building cACTION_BML_STEERING_EVENTS_UPDATE message!";
                 return;
             }
@@ -469,7 +469,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BML_STEERING_EVENTS_UPDATE>(cmdu_tx);
-            if (response == nullptr) {
+            if (!response) {
                 TASK_LOG(ERROR) << "Failed building cACTION_BML_STEERING_EVENTS_UPDATE message!";
                 return;
             }
@@ -529,7 +529,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BML_STEERING_EVENTS_UPDATE>(cmdu_tx);
-            if (response == nullptr) {
+            if (!response) {
                 TASK_LOG(ERROR) << "Failed building cACTION_BML_STEERING_EVENTS_UPDATE message!";
                 return;
             }
@@ -582,7 +582,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BML_STEERING_EVENTS_UPDATE>(cmdu_tx);
-            if (response == nullptr) {
+            if (!response) {
                 TASK_LOG(ERROR) << "Failed building cACTION_BML_STEERING_EVENTS_UPDATE message!";
                 return;
             }
@@ -638,7 +638,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BML_STEERING_EVENTS_UPDATE>(cmdu_tx);
-            if (response == nullptr) {
+            if (!response) {
                 TASK_LOG(ERROR) << "Failed building cACTION_BML_STEERING_EVENTS_UPDATE message!";
                 return;
             }
@@ -699,7 +699,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BML_STEERING_EVENTS_UPDATE>(cmdu_tx);
-            if (response == nullptr) {
+            if (!response) {
                 TASK_LOG(ERROR) << "Failed building cACTION_BML_STEERING_EVENTS_UPDATE message!";
                 return;
             }
@@ -775,7 +775,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
 
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BML_STEERING_EVENTS_UPDATE>(cmdu_tx);
-            if (response == nullptr) {
+            if (!response) {
                 TASK_LOG(ERROR) << "Failed building cACTION_BML_STEERING_EVENTS_UPDATE message!";
                 return;
             }
@@ -928,7 +928,7 @@ bool rdkb_wlan_task::send_steering_conf_to_agent(const std::string &radio_mac)
     for (const auto &steering_group : rdkb_db.get_steering_group_list()) {
         auto update = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST>(cmdu_tx);
-        if (update == nullptr) {
+        if (!update) {
             TASK_LOG(ERROR) << "Failed building message!";
             return false;
         }
@@ -949,7 +949,7 @@ bool rdkb_wlan_task::send_steering_conf_to_agent(const std::string &radio_mac)
         for (auto client_entry : client_list) {
             auto update = message_com::create_vs_message<
                 beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST>(cmdu_tx);
-            if (update == nullptr) {
+            if (!update) {
                 TASK_LOG(ERROR) << "Failed building message!";
                 return false;
             }
@@ -1013,7 +1013,7 @@ void rdkb_wlan_task::send_bml_response(int event, Socket *sd, int32_t ret)
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE>(cmdu_tx);
 
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building ACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE "
                           "message!";
             break;
@@ -1029,7 +1029,7 @@ void rdkb_wlan_task::send_bml_response(int event, Socket *sd, int32_t ret)
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_BML_STEERING_SET_GROUP_RESPONSE>(cmdu_tx);
 
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building ACTION_BML_STEERING_SET_GROUP_RESPONSE message!";
             break;
         }
@@ -1044,7 +1044,7 @@ void rdkb_wlan_task::send_bml_response(int event, Socket *sd, int32_t ret)
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_BML_STEERING_CLIENT_SET_RESPONSE>(cmdu_tx);
 
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building ACTION_BML_STEERING_SET_GROUP_RESPONSE message!";
             break;
         }
@@ -1059,7 +1059,7 @@ void rdkb_wlan_task::send_bml_response(int event, Socket *sd, int32_t ret)
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE>(cmdu_tx);
 
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR)
                 << "Failed building cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE message!";
             break;
@@ -1075,7 +1075,7 @@ void rdkb_wlan_task::send_bml_response(int event, Socket *sd, int32_t ret)
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE>(cmdu_tx);
 
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building ACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE message!";
             break;
         }

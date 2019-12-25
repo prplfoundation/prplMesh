@@ -461,6 +461,10 @@ bool sta_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
     case Event::Disconnected: {
 
         auto msg_buff = ALLOC_SMART_BUFFER(sizeof(sACTION_BACKHAUL_DISCONNECT_REASON_NOTIFICATION));
+        if (!msg_buff) {
+            LOG(ERROR) << "ALLOC_SMART_BUFFER has failed";
+            return false;
+        }
         auto msg =
             reinterpret_cast<sACTION_BACKHAUL_DISCONNECT_REASON_NOTIFICATION *>(msg_buff.get());
         LOG_IF(!msg, FATAL) << "Memory allocation failed!";

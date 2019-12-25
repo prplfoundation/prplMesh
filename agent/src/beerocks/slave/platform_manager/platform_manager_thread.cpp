@@ -454,7 +454,7 @@ void main_thread::send_dhcp_notification(std::string op, std::string mac, std::s
     auto dhcp_notif = message_com::create_vs_message<
         beerocks_message::cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION>(cmdu_tx);
 
-    if (dhcp_notif == nullptr) {
+    if (!dhcp_notif) {
         LOG(ERROR) << "Failed building ACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION message!";
         return;
     }
@@ -559,7 +559,7 @@ bool main_thread::wlan_params_changed_check()
 {
     bool any_slave_changed = false;
     for (auto &elm : bpl_iface_wlan_params_map) {
-        if (elm.second == nullptr) {
+        if (!elm.second) {
             LOG(ERROR) << "invalid map - pointer to NULL";
             return false;
         }
@@ -607,7 +607,7 @@ bool main_thread::wlan_params_changed_check()
             any_slave_changed = true;
             auto notification = message_com::create_vs_message<
                 beerocks_message::cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION>(cmdu_tx);
-            if (notification == nullptr) {
+            if (!notification) {
                 LOG(ERROR) << "Failed building message!";
                 return false;
             }
@@ -733,7 +733,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST failed";
             return false;
         }
@@ -755,7 +755,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             auto register_response = message_com::create_vs_message<
                 beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE>(cmdu_tx);
 
-            if (register_response == nullptr) {
+            if (!register_response) {
                 LOG(ERROR) << "Failed building message!";
                 return;
             }
@@ -795,7 +795,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass ACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL failed";
             return false;
         }
@@ -809,7 +809,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         auto request =
             beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ARP_QUERY_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_ARP_QUERY_REQUEST failed";
             return false;
         }
@@ -853,7 +853,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE>(cmdu_tx);
 
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
@@ -882,7 +882,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST: {
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE failed";
             return false;
         }
@@ -903,7 +903,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION failed";
             return false;
         }
@@ -923,7 +923,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass ACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION failed";
             return false;
         }
@@ -935,7 +935,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION failed";
             return false;
         }
@@ -973,7 +973,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                 // Response message
                 auto notification = message_com::create_vs_message<
                     beerocks_message::cACTION_PLATFORM_OPERATIONAL_NOTIFICATION>(cmdu_tx);
-                if (notification == nullptr) {
+                if (!notification) {
                     LOG(ERROR) << "Failed building message!";
                     return false;
                 }
@@ -992,7 +992,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto notification = cmdu_rx.addClass<
             beerocks_message::
                 cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass "
                           "cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION "
                           "failed";
@@ -1024,7 +1024,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         LOG(TRACE) << "ACTION_PLATFORM_ONBOARD_QUERY_REQUEST";
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building ONBOARD RESPONSE message!";
             return false;
         }
@@ -1039,7 +1039,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         LOG(TRACE) << "ACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST";
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
@@ -1057,7 +1057,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST failed";
             break;
         }
@@ -1069,7 +1069,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE>(cmdu_tx);
 
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building message!";
             break;
         }
@@ -1143,7 +1143,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         // Request message
         auto request =
             beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ONBOARD_SET_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_PLATFORM_ONBOARD_SET_REQUEST failed";
             break;
         }
@@ -1160,7 +1160,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         auto request =
             beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_WPS_ONBOARDING_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass ACTION_PLATFORM_WPS_ONBOARDING_REQUEST failed";
             break;
         }
@@ -1182,7 +1182,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE>(cmdu_tx);
 
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building message!";
             break;
         }
@@ -1226,7 +1226,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     case beerocks_message::ACTION_PLATFORM_ERROR_NOTIFICATION: {
         auto error =
             beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ERROR_NOTIFICATION>();
-        if (error == nullptr) {
+        if (!error) {
             LOG(ERROR) << "addClass failed";
             break;
         }
@@ -1258,7 +1258,7 @@ bool main_thread::handle_arp_monitor()
     auto arp_notif =
         message_com::create_vs_message<beerocks_message::cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION>(
             cmdu_tx);
-    if (arp_notif == nullptr) {
+    if (!arp_notif) {
         LOG(ERROR) << "Failed building message!";
         return false;
     }
@@ -1312,7 +1312,7 @@ bool main_thread::handle_arp_monitor()
     sd = get_slave_socket_from_hostap_iface_name(strIfaceName);
 
     // Use the Backhaul Manager Slave as the default destination
-    if ((sd == nullptr) && ((sd = get_backhaul_socket()) == nullptr)) {
+    if ((!sd) && ((sd = get_backhaul_socket()))) {
         LOG(WARNING) << "Failed obtaining slave socket";
         return false;
     }
@@ -1404,7 +1404,7 @@ bool main_thread::handle_arp_raw()
         message_com::create_vs_message<beerocks_message::cACTION_PLATFORM_ARP_QUERY_RESPONSE>(
             cmdu_tx, task_id);
 
-    if (arp_resp == nullptr) {
+    if (!arp_resp) {
         LOG(ERROR) << "Failed building cACTION_PLATFORM_ARP_QUERY_RESPONSE message!";
         return false;
     }

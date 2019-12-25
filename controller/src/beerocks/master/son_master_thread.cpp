@@ -178,8 +178,8 @@ std::string master_thread::print_cmdu_types(const message::sUdsHeader *cmdu_head
 
 bool master_thread::socket_disconnected(Socket *sd)
 {
-    if (sd == nullptr) {
-        LOG(DEBUG) << "sd == nullptr, ignore";
+    if (!sd) {
+        LOG(DEBUG) << "!sd, ignore";
         return false;
     }
 
@@ -204,7 +204,7 @@ bool master_thread::socket_disconnected(Socket *sd)
 bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto uds_header = message_com::get_uds_header(cmdu_rx);
-    if (uds_header == nullptr) {
+    if (!uds_header) {
         LOG(ERROR) << "get_uds_header() returns nullptr";
         return false;
     }
@@ -1394,6 +1394,10 @@ bool master_thread::construct_combined_infra_metric()
             auto &vrx = per_neighbor.second.receiverLinkMetrics;
             if (vrx.size()) {
                 auto link_metric_rx_tlv = cmdu_tx.addClass<ieee1905_1::tlvReceiverLinkMetric>();
+                if (!link_metric_rx_tlv) {
+                    LOG(ERROR) << "addClass<ieee1905_1::tlvTransmitterLinkMetric>() has failed!";
+                    return false;
+                }
                 link_metric_rx_tlv->reporter_al_mac() = agent.first;
                 link_metric_rx_tlv->neighbor_al_mac() = per_neighbor.first;
                 if (!link_metric_rx_tlv->alloc_interface_pair_info(vrx.size())) {
@@ -1415,6 +1419,10 @@ bool master_thread::construct_combined_infra_metric()
             auto &vtx = per_neighbor.second.transmitterLinkMetrics;
             if (vtx.size()) {
                 auto link_metric_tx_tlv = cmdu_tx.addClass<ieee1905_1::tlvTransmitterLinkMetric>();
+                if (!link_metric_tx_tlv) {
+                    LOG(ERROR) << "addClass<ieee1905_1::tlvTransmitterLinkMetric>() has failed!";
+                    return false;
+                }
                 link_metric_tx_tlv->reporter_al_mac() = agent.first;
                 link_metric_tx_tlv->neighbor_al_mac() = per_neighbor.first;
                 for (auto &interface_pair_info : vtx) {
@@ -1440,8 +1448,12 @@ bool master_thread::construct_combined_infra_metric()
     //getting reference for ap metric data storage from db
     auto &ap_metric_data = database.get_ap_metric_data_map();
     for (auto &it : ap_metric_data) {
-        auto metric_data_per_agent            = it.second;
-        auto ap_metrics_tlv                   = cmdu_tx.addClass<wfa_map::tlvApMetric>();
+        auto metric_data_per_agent = it.second;
+        auto ap_metrics_tlv        = cmdu_tx.addClass<wfa_map::tlvApMetric>();
+        if (!ap_metrics_tlv) {
+            LOG(ERROR) << "addClass<wfa_map::tlvApMetric>() has failed!";
+            return false;
+        }
         ap_metrics_tlv->bssid()               = metric_data_per_agent.bssid;
         ap_metrics_tlv->channel_utilization() = metric_data_per_agent.channel_utilization;
         ap_metrics_tlv->number_of_stas_currently_associated() =
@@ -2454,7 +2466,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto response = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE>();
 
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
@@ -2473,7 +2485,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION>();
 
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
@@ -2502,7 +2514,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION>();
 
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
@@ -2539,7 +2551,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
 
         auto notification =
             beerocks_header->addClass<beerocks_message::cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION failed";
             return false;
         }
@@ -2557,7 +2569,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
 
         auto notification =
             beerocks_header->addClass<beerocks_message::cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION failed";
             return false;
         }
@@ -2578,7 +2590,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     case beerocks_message::ACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION: {
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION failed";
             return false;
         }
@@ -2626,7 +2638,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION failed";
             return false;
         }
@@ -2752,7 +2764,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION failed";
             return false;
         }
@@ -2766,7 +2778,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION: {
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR)
                 << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION failed";
             return false;
@@ -2777,7 +2789,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE failed";
             return false;
         }
@@ -2835,7 +2847,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION: {
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION failed";
             return false;
         }
@@ -2889,7 +2901,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
 
         auto request =
             beerocks_header->addClass<beerocks_message::cACTION_CONTROL_AGENT_PING_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_CONTROL_AGENT_PING_REQUEST failed";
             return false;
         }
@@ -2897,7 +2909,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto response =
             message_com::create_vs_message<beerocks_message::cACTION_CONTROL_AGENT_PING_RESPONSE>(
                 cmdu_tx);
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
@@ -2923,7 +2935,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             auto response =
                 beerocks_header
                     ->addClass<beerocks_message::cACTION_CONTROL_CONTROLLER_PING_RESPONSE>();
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR) << "addClass cACTION_CONTROL_CONTROLLER_PING_RESPONSE failed";
                 return false;
             }
@@ -2944,7 +2956,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             if (response->seq() < (response->total() - 1)) { //send next ping request
                 auto request = message_com::create_vs_message<
                     beerocks_message::cACTION_CONTROL_CONTROLLER_PING_REQUEST>(cmdu_tx);
-                if (request == nullptr) {
+                if (!request) {
                     LOG(ERROR) << "Failed building message!";
                     return false;
                 }
@@ -2983,7 +2995,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION failed";
             return false;
         }
@@ -3004,7 +3016,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION failed";
             return false;
         }
@@ -3075,7 +3087,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     case beerocks_message::ACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION: {
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION failed";
             return false;
         }
@@ -3095,7 +3107,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     case beerocks_message::ACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION: {
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR)
                 << "addClass cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION failed";
             return false;
@@ -3117,7 +3129,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto response =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE>();
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "addClass cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE failed";
             return false;
         }
@@ -3225,7 +3237,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto response =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>();
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE failed";
             return false;
         }
@@ -3261,7 +3273,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto response =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE>();
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE failed";
             return false;
         }
@@ -3289,7 +3301,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto response =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE>();
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE failed";
             return false;
         }
@@ -3319,7 +3331,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     case beerocks_message::ACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE: {
         auto response = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE>();
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE failed";
             return false;
         }
@@ -3355,7 +3367,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE: {
         auto response = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE>();
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE failed";
             return false;
         }
@@ -3372,7 +3384,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION failed";
             return false;
         }
@@ -3393,7 +3405,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION failed";
             return false;
         }
@@ -3417,7 +3429,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
                    << " id=" << beerocks_header->id();
         auto response =
             beerocks_header->addClass<beerocks_message::cACTION_CONTROL_ARP_QUERY_RESPONSE>();
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "addClass cACTION_CONTROL_ARP_QUERY_RESPONSE failed";
             return false;
         }
@@ -3427,7 +3439,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     case beerocks_message::ACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION: {
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR)
                 << "addClass cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION failed";
             return false;
@@ -3445,7 +3457,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     case beerocks_message::ACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION: {
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION failed";
             return false;
         }
@@ -3461,7 +3473,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     case beerocks_message::ACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION: {
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION failed";
             return false;
         }
@@ -3478,7 +3490,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
     case beerocks_message::ACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION: {
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION failed";
             return false;
         }
@@ -3496,7 +3508,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST failed";
             return false;
         }
@@ -3513,7 +3525,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE failed";
             return false;
         }
@@ -3532,7 +3544,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE>();
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "addClass cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE failed";
             return false;
         }

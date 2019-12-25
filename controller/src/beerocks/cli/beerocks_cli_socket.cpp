@@ -215,7 +215,7 @@ bool cli_socket::waitResponseReady()
 bool cli_socket::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
-    if (beerocks_header == nullptr) {
+    if (!beerocks_header) {
         LOG(ERROR) << "Not a vendor specific message";
         return false;
     }
@@ -516,7 +516,7 @@ int cli_socket::enable_debug(int8_t isEnable)
 {
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_ENABLE_DEBUG>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_ENABLE_DEBUG message!";
         return -1;
     }
@@ -532,7 +532,7 @@ int cli_socket::set_stop_on_failure_attempts(int32_t attempts)
 {
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS message!";
         return -1;
     }
@@ -549,7 +549,7 @@ int cli_socket::enable_diagnostics_measurements(int8_t isEnable)
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS message!";
         return -1;
     }
@@ -565,6 +565,10 @@ int cli_socket::dump_node_info(std::string mac)
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_DUMP_NODE_INFO>(cmdu_tx);
 
+    if (!request) {
+        LOG(ERROR) << "create_vs_message failed !";
+        return -1;
+    }
     request->mac() = network_utils::mac_from_string(mac);
     wait_response  = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
@@ -578,7 +582,7 @@ int cli_socket::cross_rx_rssi_measurement(std::string client_mac, std::string ho
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT message!";
         return -1;
     }
@@ -596,7 +600,7 @@ int cli_socket::steer_client(std::string client_mac, std::string bssid, int disa
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_CLIENT_BSS_STEER_REQUEST>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_BSS_STEER_REQUEST message!";
         return -1;
     }
@@ -614,7 +618,7 @@ int cli_socket::steer_ire(std::string client_mac, std::string bssid)
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_BACKHAUL_ROAM_REQUEST>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_BACKHAUL_ROAM_REQUEST message!";
         return -1;
     }
@@ -630,7 +634,7 @@ int cli_socket::optimal_path(std::string client_mac)
 {
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_OPTIMAL_PATH_TASK>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_OPTIMAL_PATH_TASK message!";
         return -1;
     }
@@ -648,7 +652,7 @@ int cli_socket::ap_channel_switch(std::string ap_mac, uint8_t channel, uint8_t b
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST message!";
         return -1;
     }
@@ -669,7 +673,7 @@ int cli_socket::client_allow(std::string client_mac, std::string hostap_mac)
 {
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_CLIENT_ALLOW_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_ALLOW_REQUEST message!";
         return -1;
     }
@@ -686,7 +690,7 @@ int cli_socket::client_disallow(std::string client_mac, std::string hostap_mac)
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_CLIENT_DISALLOW_REQUEST>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_DISALLOW_REQUEST message!";
         return -1;
     }
@@ -703,7 +707,7 @@ int cli_socket::client_disconnect(std::string client_mac, uint32_t type, uint32_
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_CLIENT_DISCONNECT_REQUEST>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_DISCONNECT_REQUEST message!";
         return -1;
     }
@@ -721,7 +725,7 @@ int cli_socket::hostap_stats_measurement(std::string ap_mac)
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_HOSTAP_STATS_MEASUREMENT>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_HOSTAP_STATS_MEASUREMENT message!";
         return -1;
     }
@@ -736,7 +740,7 @@ int cli_socket::load_balancer_task(std::string ap_mac)
 {
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_LOAD_BALANCER_TASK>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_LOAD_BALANCER_TASK message!";
         return -1;
     }
@@ -752,7 +756,7 @@ int cli_socket::ire_network_optimization_task()
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK message!";
         return -1;
     }
@@ -767,7 +771,7 @@ int cli_socket::client_channel_load_11k_req(std::string hostap_mac, std::string 
 {
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST message!";
         return -1;
     }
@@ -787,7 +791,7 @@ int cli_socket::client_beacon_11k_req(std::string client_mac, std::string bssid,
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_CLIENT_BEACON_11K_REQUEST>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_BEACON_11K_REQUEST message!";
         return -1;
     }
@@ -822,7 +826,7 @@ int cli_socket::client_statistics_11k_req(std::string hostap_mac, std::string cl
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST message!";
         return -1;
     }
@@ -840,7 +844,7 @@ int cli_socket::client_link_measurement_11k_req(std::string hostap_mac, std::str
 {
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST message!";
         return -1;
     }
@@ -858,7 +862,7 @@ int cli_socket::set_neighbor_11k(std::string ap_mac, std::string bssid, uint8_t 
 {
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST message!";
         return -1;
     }
@@ -876,7 +880,7 @@ int cli_socket::rm_neighbor_11k(std::string ap_mac, std::string bssid, int8_t va
 {
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST message!";
         return -1;
     }
@@ -893,7 +897,7 @@ int cli_socket::ping_slave(std::string ire_mac, int num_of_req, int ping_size)
 {
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_PING_SLAVE_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_PING_SLAVE_REQUEST message!";
         return -1;
     }
@@ -911,7 +915,7 @@ int cli_socket::ping_all_slaves(int num_of_req, int ping_size)
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_PING_ALL_SLAVES_REQUEST>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_CLI_PING_ALL_SLAVES_REQUEST message!";
         return -1;
     }

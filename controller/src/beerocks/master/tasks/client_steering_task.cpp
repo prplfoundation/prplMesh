@@ -138,7 +138,7 @@ void client_steering_task::steer_sta()
         auto roam_request =
             message_com::create_vs_message<beerocks_message::cACTION_CONTROL_BACKHAUL_ROAM_REQUEST>(
                 cmdu_tx, 0);
-        if (roam_request == nullptr) {
+        if (!roam_request) {
             LOG(ERROR) << "Failed building message!";
             return;
         }

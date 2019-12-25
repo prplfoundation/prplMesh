@@ -39,10 +39,31 @@ public:
     }
     beerocks_message::eAction action()
     {
-        return actionhdr() ? actionhdr()->action() : beerocks_message::ACTION_NONE;
+        auto action_hdr = actionhdr();
+        if (!action_hdr) {
+            return beerocks_message::ACTION_NONE;
+        } else {
+            return action_hdr->action();
+        }
     }
-    uint8_t action_op() { return actionhdr() ? actionhdr()->action_op() : 0; };
-    uint16_t id() { return actionhdr() ? actionhdr()->id() : 0; }
+    uint8_t action_op()
+    {
+        auto action_hdr = actionhdr();
+        if (!action_hdr) {
+            return 0;
+        } else {
+            return action_hdr->action_op();
+        }
+    };
+    uint16_t id()
+    {
+        auto action_hdr = actionhdr();
+        if (!action_hdr) {
+            return 0;
+        } else {
+            return action_hdr->id();
+        }
+    }
 };
 
 } // namespace beerocks

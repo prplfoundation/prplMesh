@@ -93,7 +93,7 @@ int bml_internal::send_bml_cmdu(int &result, uint8_t action_op)
     }
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr) {
+    if (!m_sockMaster) {
         int iRet = connect_to_master();
         if (iRet != BML_RET_OK)
             return iRet;
@@ -199,7 +199,7 @@ int bml_internal::connect(const std::string beerocks_conf_path)
         message_com::create_vs_message<beerocks_message::cACTION_PLATFORM_ONBOARD_QUERY_REQUEST>(
             cmdu_tx);
 
-    if (header_onboarding == nullptr) {
+    if (!header_onboarding) {
         LOG(ERROR) << "Failed building message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -229,7 +229,7 @@ int bml_internal::connect(const std::string beerocks_conf_path)
     auto header_local_master =
         message_com::create_vs_message<beerocks_message::cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST>(
             cmdu_tx);
-    if (header_local_master == nullptr) {
+    if (!header_local_master) {
         LOG(ERROR) << "Failed building message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -797,7 +797,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             if (m_prmSetVapListCreds) {
                 auto response = beerocks_header->addClass<
                     beerocks_message::cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE>();
-                if (response == nullptr) {
+                if (!response) {
                     LOG(ERROR) << "addClass cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE failed";
                     return BML_RET_OP_FAILED;
                 }
@@ -826,7 +826,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             auto response =
                 beerocks_header
                     ->addClass<beerocks_message::cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE>();
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE failed";
                 return BML_RET_OP_FAILED;
             }
@@ -835,7 +835,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                 m_prmGetVapListCreds = nullptr;
             };
 
-            if (m_vaps == nullptr || m_pvaps_list_size == nullptr) {
+            if (!m_vaps || !m_pvaps_list_size) {
                 LOG(ERROR) << "The pointer to the user data buffer is null!";
                 release_waiting_thread();
                 break;
@@ -900,7 +900,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             auto response =
                 beerocks_header
                     ->addClass<beerocks_message::cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE>();
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE failed";
                 return BML_RET_OP_FAILED;
             }
@@ -920,7 +920,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             auto response =
                 beerocks_header
                     ->addClass<beerocks_message::cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE>();
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE failed";
                 return BML_RET_OP_FAILED;
             }
@@ -940,7 +940,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             auto response =
                 beerocks_header
                     ->addClass<beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE>();
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE failed";
                 return BML_RET_OP_FAILED;
             }
@@ -962,7 +962,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             auto response =
                 beerocks_header
                     ->addClass<beerocks_message::cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE>();
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE failed";
                 return BML_RET_OP_FAILED;
             }
@@ -984,7 +984,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             auto response =
                 beerocks_header
                     ->addClass<beerocks_message::cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE>();
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE failed";
                 return BML_RET_OP_FAILED;
             }
@@ -1006,7 +1006,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
         case beerocks_message::ACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE: {
             auto response = beerocks_header->addClass<
                 beerocks_message::cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE>();
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR) << "addClass cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE failed";
                 return BML_RET_OP_FAILED;
             }
@@ -1021,7 +1021,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                                               message::VERSION_LENGTH);
                     m_prmMasterSlaveVersions->set_value(response->result() == 0);
                 } else {
-                    LOG(DEBUG) << "m_master_slave_versions == nullptr !";
+                    LOG(DEBUG) << "!m_master_slave_versions !";
                     m_prmMasterSlaveVersions->set_value(0);
                 }
                 m_prmMasterSlaveVersions = nullptr;
@@ -1053,8 +1053,8 @@ int bml_internal::bml_set_vap_list_credentials(const BML_VAP_INFO *vaps, const u
         return (-BML_RET_OP_NOT_SUPPORTED);
     }
 
-    if (vaps == nullptr) {
-        LOG(ERROR) << "vaps == nullptr";
+    if (!vaps) {
+        LOG(ERROR) << "!vaps";
         return (-BML_RET_INVALID_ARGS);
     }
 
@@ -1064,7 +1064,7 @@ int bml_internal::bml_set_vap_list_credentials(const BML_VAP_INFO *vaps, const u
     }
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr) {
+    if (!m_sockMaster) {
         int iRet = connect_to_master();
         if (iRet != BML_RET_OK) {
             LOG(ERROR) << "Set VAP list - connect_to_master failed";
@@ -1076,7 +1076,7 @@ int bml_internal::bml_set_vap_list_credentials(const BML_VAP_INFO *vaps, const u
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building SET VAP LIST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1141,7 +1141,7 @@ int bml_internal::bml_get_vap_list_credentials(BML_VAP_INFO *vaps, uint8_t &vaps
         return (-BML_RET_OP_NOT_SUPPORTED);
     }
 
-    if (vaps == nullptr) {
+    if (!vaps) {
         LOG(ERROR) << "Uninitialized vaps pointer!";
         return (-BML_RET_INVALID_ARGS);
     }
@@ -1152,7 +1152,7 @@ int bml_internal::bml_get_vap_list_credentials(BML_VAP_INFO *vaps, uint8_t &vaps
     }
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr) {
+    if (!m_sockMaster) {
         int iRet = connect_to_master();
         if (iRet != BML_RET_OK) {
             LOG(ERROR) << "get VAP list - connect_to_master failed";
@@ -1168,7 +1168,7 @@ int bml_internal::bml_get_vap_list_credentials(BML_VAP_INFO *vaps, uint8_t &vaps
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building GET VAP LIST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1215,7 +1215,7 @@ int bml_internal::ping()
     }
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr) {
+    if (!m_sockMaster) {
         int iRet = connect_to_master();
         if (iRet != BML_RET_OK) {
             LOG(ERROR) << "ping - connect_to_master failed";
@@ -1231,7 +1231,7 @@ int bml_internal::ping()
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_BML_PING_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building PING message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1272,13 +1272,13 @@ int bml_internal::register_nw_map_update_cb(BML_NW_MAP_QUERY_CB pCB)
     }
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr) {
+    if (!m_sockMaster) {
         int iRet = connect_to_master();
         if (iRet != BML_RET_OK)
             return iRet;
     }
 
-    if ((m_cbNetMapUpdate == nullptr) && (pCB == nullptr)) {
+    if ((!m_cbNetMapUpdate) && (!pCB)) {
         LOG(WARNING) << "Network map update callback function was NOT registered...";
         return (-BML_RET_OP_NOT_SUPPORTED);
     }
@@ -1290,7 +1290,7 @@ int bml_internal::register_nw_map_update_cb(BML_NW_MAP_QUERY_CB pCB)
         auto request = message_com::create_vs_message<
             beerocks_message::cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST>(cmdu_tx);
 
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "Failed building ACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST message!";
             return (-BML_RET_OP_FAILED);
         }
@@ -1303,7 +1303,7 @@ int bml_internal::register_nw_map_update_cb(BML_NW_MAP_QUERY_CB pCB)
         auto request = message_com::create_vs_message<
             beerocks_message::cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST>(cmdu_tx);
 
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR)
                 << "Failed building ACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST message!";
             return (-BML_RET_OP_FAILED);
@@ -1328,7 +1328,7 @@ int bml_internal::nw_map_query()
     }
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr) {
+    if (!m_sockMaster) {
         int iRet = connect_to_master();
         if (iRet != BML_RET_OK)
             return iRet;
@@ -1344,7 +1344,7 @@ int bml_internal::nw_map_query()
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_BML_NW_MAP_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_NW_MAP_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1366,13 +1366,13 @@ int bml_internal::register_stats_cb(BML_STATS_UPDATE_CB pCB)
     }
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr) {
+    if (!m_sockMaster) {
         int iRet = connect_to_master();
         if (iRet != BML_RET_OK)
             return iRet;
     }
 
-    if ((m_cbStatsUpdate == nullptr) && (pCB == nullptr)) {
+    if ((!m_cbStatsUpdate) && (!pCB)) {
         LOG(WARNING) << "Statistics update callback function was NOT registered...";
         return (-BML_RET_OP_NOT_SUPPORTED);
     }
@@ -1384,7 +1384,7 @@ int bml_internal::register_stats_cb(BML_STATS_UPDATE_CB pCB)
         auto request = message_com::create_vs_message<
             beerocks_message::cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST>(cmdu_tx);
 
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "Failed building REGISTER_TO_STATS_UPDATES_REQUEST message!";
             return (-BML_RET_OP_FAILED);
         }
@@ -1392,7 +1392,7 @@ int bml_internal::register_stats_cb(BML_STATS_UPDATE_CB pCB)
         auto request = message_com::create_vs_message<
             beerocks_message::cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST>(cmdu_tx);
 
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "Failed building UNREGISTER_TO_STATS_UPDATES_REQUEST message!";
             return (-BML_RET_OP_FAILED);
         }
@@ -1415,13 +1415,13 @@ int bml_internal::register_event_cb(BML_EVENT_CB pCB)
     }
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr) {
+    if (!m_sockMaster) {
         int iRet = connect_to_master();
         if (iRet != BML_RET_OK)
             return iRet;
     }
 
-    if ((m_cbEvent == nullptr) && (pCB == nullptr)) {
+    if ((!m_cbEvent) && (!pCB)) {
         LOG(WARNING) << "Event callback function was NOT registered...";
         return (-BML_RET_OP_FAILED);
     }
@@ -1433,7 +1433,7 @@ int bml_internal::register_event_cb(BML_EVENT_CB pCB)
         auto request = message_com::create_vs_message<
             beerocks_message::cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST>(cmdu_tx);
 
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "Failed building REGISTER_TO_EVENTS_UPDATES_REQUEST message!";
             return (-BML_RET_OP_FAILED);
         }
@@ -1441,7 +1441,7 @@ int bml_internal::register_event_cb(BML_EVENT_CB pCB)
         auto request = message_com::create_vs_message<
             beerocks_message::cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST>(cmdu_tx);
 
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "Failed building UNREGISTER_TO_EVENTS_UPDATES_REQUEST message!";
             return (-BML_RET_OP_FAILED);
         }
@@ -1460,7 +1460,7 @@ int bml_internal::set_wifi_credentials(const std::string ssid, const std::string
                                        int vap_id, int force)
 {
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockPlatform == nullptr && !connect_to_platform()) {
+    if (!m_sockPlatform && !connect_to_platform()) {
         return (-BML_RET_CONNECT_FAIL);
     }
 
@@ -1518,7 +1518,7 @@ int bml_internal::set_wifi_credentials(const std::string ssid, const std::string
     }
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr) {
+    if (!m_sockMaster) {
         int iRet = connect_to_master();
         if (iRet != BML_RET_OK) {
             // Clear the promise holder
@@ -1530,7 +1530,7 @@ int bml_internal::set_wifi_credentials(const std::string ssid, const std::string
     auto config = message_com::create_vs_message<
         beerocks_message::cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST>(cmdu_tx);
 
-    if (config == nullptr) {
+    if (!config) {
         LOG(ERROR) << "Failed building ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST message!";
         // Clear the promise holder
         m_prmWiFiCredentialsUpdate = nullptr;
@@ -1608,18 +1608,18 @@ int bml_internal::set_wifi_credentials(const std::string ssid, const std::string
 int bml_internal::get_wifi_credentials(int vap_id, char *ssid, char *pass, int *sec)
 {
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockPlatform == nullptr && !connect_to_platform()) {
+    if (!m_sockPlatform && !connect_to_platform()) {
         return (-BML_RET_CONNECT_FAIL);
     }
 
     // Validate ssid
-    if (ssid == nullptr) {
+    if (!ssid) {
         LOG(ERROR) << "Invalid ssid ptr";
         return (-BML_RET_INVALID_ARGS);
     }
 
     // Validate ssid
-    if (sec == nullptr) {
+    if (!sec) {
         LOG(ERROR) << "Invalid sec ptr";
         return (-BML_RET_INVALID_ARGS);
     }
@@ -1642,7 +1642,7 @@ int bml_internal::get_wifi_credentials(int vap_id, char *ssid, char *pass, int *
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1689,7 +1689,7 @@ int bml_internal::get_wifi_credentials(int vap_id, char *ssid, char *pass, int *
 int bml_internal::get_onboarding_state(int *enable)
 {
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockPlatform == nullptr && !connect_to_platform()) {
+    if (!m_sockPlatform && !connect_to_platform()) {
         return (-BML_RET_CONNECT_FAIL);
     }
 
@@ -1702,7 +1702,7 @@ int bml_internal::get_onboarding_state(int *enable)
         message_com::create_vs_message<beerocks_message::cACTION_PLATFORM_ONBOARD_QUERY_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_PLATFORM_ONBOARD_QUERY_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1732,7 +1732,7 @@ int bml_internal::get_onboarding_state(int *enable)
 int bml_internal::set_onboarding_state(int enable)
 {
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockPlatform == nullptr && !connect_to_platform()) {
+    if (!m_sockPlatform && !connect_to_platform()) {
         return (-BML_RET_CONNECT_FAIL);
     }
 
@@ -1746,7 +1746,7 @@ int bml_internal::set_onboarding_state(int enable)
         message_com::create_vs_message<beerocks_message::cACTION_PLATFORM_ONBOARD_SET_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_PLATFORM_ONBOARD_SET_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1766,7 +1766,7 @@ int bml_internal::set_onboarding_state(int enable)
 int bml_internal::bml_wps_onboarding(const char *iface)
 {
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockPlatform == nullptr && !connect_to_platform()) {
+    if (!m_sockPlatform && !connect_to_platform()) {
         return (-BML_RET_CONNECT_FAIL);
     }
     // Query the platform manager about the onboarding state
@@ -1774,7 +1774,7 @@ int bml_internal::bml_wps_onboarding(const char *iface)
         message_com::create_vs_message<beerocks_message::cACTION_PLATFORM_WPS_ONBOARDING_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_PLATFORM_WPS_ONBOARDING_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1795,12 +1795,12 @@ int bml_internal::bml_wps_onboarding(const char *iface)
 int bml_internal::get_administrator_credentials(char *user_password)
 {
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockPlatform == nullptr && !connect_to_platform()) {
+    if (!m_sockPlatform && !connect_to_platform()) {
         return (-BML_RET_CONNECT_FAIL);
     }
 
     // Validate user_password
-    if (user_password == nullptr) {
+    if (!user_password) {
         LOG(ERROR) << "Invalid user_password ptr";
         return (-BML_RET_INVALID_ARGS);
     }
@@ -1817,7 +1817,7 @@ int bml_internal::get_administrator_credentials(char *user_password)
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1862,7 +1862,7 @@ int bml_internal::get_administrator_credentials(char *user_password)
 int bml_internal::get_device_info(BML_DEVICE_INFO &device_info)
 {
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockPlatform == nullptr && !connect_to_platform()) {
+    if (!m_sockPlatform && !connect_to_platform()) {
         return (-BML_RET_CONNECT_FAIL);
     }
 
@@ -1879,7 +1879,7 @@ int bml_internal::get_device_info(BML_DEVICE_INFO &device_info)
         message_com::create_vs_message<beerocks_message::cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_PLATFORM_DEVICE_INFO_GET_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1934,7 +1934,7 @@ int bml_internal::set_client_roaming(bool enable)
         message_com::create_vs_message<beerocks_message::cACTION_BML_SET_CLIENT_ROAMING_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_SET_CLIENT_ROAMING_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1954,7 +1954,7 @@ int bml_internal::get_client_roaming(int &result)
         message_com::create_vs_message<beerocks_message::cACTION_BML_GET_CLIENT_ROAMING_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_GET_CLIENT_ROAMING_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1970,7 +1970,7 @@ int bml_internal::set_legacy_client_roaming(bool enable)
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -1989,7 +1989,7 @@ int bml_internal::get_legacy_client_roaming(int &result)
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2004,7 +2004,7 @@ int bml_internal::set_client_band_steering(bool enable)
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2022,7 +2022,7 @@ int bml_internal::get_client_band_steering(int &result)
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2038,7 +2038,7 @@ int bml_internal::set_client_roaming_prefer_signal_strength(bool enable)
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building "
                       "ACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST message!";
         return (-BML_RET_OP_FAILED);
@@ -2057,7 +2057,7 @@ int bml_internal::get_client_roaming_prefer_signal_strength(int &result)
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building "
                       "ACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST message!";
         return (-BML_RET_OP_FAILED);
@@ -2074,7 +2074,7 @@ int bml_internal::set_ire_roaming(bool enable)
         message_com::create_vs_message<beerocks_message::cACTION_BML_SET_IRE_ROAMING_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_SET_IRE_ROAMING_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2093,7 +2093,7 @@ int bml_internal::get_ire_roaming(int &result)
         message_com::create_vs_message<beerocks_message::cACTION_BML_GET_IRE_ROAMING_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_GET_IRE_ROAMING_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2109,7 +2109,7 @@ int bml_internal::set_load_balancer(bool enable)
         message_com::create_vs_message<beerocks_message::cACTION_BML_SET_LOAD_BALANCER_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_SET_LOAD_BALANCER_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2128,7 +2128,7 @@ int bml_internal::get_load_balancer(int &result)
         message_com::create_vs_message<beerocks_message::cACTION_BML_GET_LOAD_BALANCER_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_GET_LOAD_BALANCER_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2144,7 +2144,7 @@ int bml_internal::set_service_fairness(bool enable)
         message_com::create_vs_message<beerocks_message::cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_SET_SERVICE_FAIRNESS_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2163,7 +2163,7 @@ int bml_internal::get_service_fairness(int &result)
         message_com::create_vs_message<beerocks_message::cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_GET_SERVICE_FAIRNESS_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2180,7 +2180,7 @@ int bml_internal::get_dfs_reentry(int &result)
         message_com::create_vs_message<beerocks_message::cACTION_BML_GET_DFS_REENTRY_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_GET_DFS_REENTRY_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2197,7 +2197,7 @@ int bml_internal::set_dfs_reentry(bool enable)
         message_com::create_vs_message<beerocks_message::cACTION_BML_SET_DFS_REENTRY_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_SET_DFS_REENTRY_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2216,7 +2216,7 @@ int bml_internal::get_certification_mode(int &result)
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_GET_CERTIFICATION_MODE_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_GET_CERTIFICATION_MODE_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2232,7 +2232,7 @@ int bml_internal::set_certification_mode(bool enable)
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_SET_CERTIFICATION_MODE_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_SET_CERTIFICATION_MODE_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2252,7 +2252,7 @@ int bml_internal::set_log_level(const std::string module_name, const std::string
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2302,18 +2302,18 @@ int bml_internal::set_log_level(const std::string module_name, const std::string
 int bml_internal::get_master_slave_versions(char *master_version, char *slave_version)
 {
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockPlatform == nullptr && !connect_to_platform()) {
+    if (!m_sockPlatform && !connect_to_platform()) {
         return (-BML_RET_CONNECT_FAIL);
     }
 
     // Validate master_version
-    if (master_version == nullptr) {
+    if (!master_version) {
         LOG(ERROR) << "Invalid master_version ptr";
         return (-BML_RET_INVALID_ARGS);
     }
 
     // Validate slave_version
-    if (slave_version == nullptr) {
+    if (!slave_version) {
         LOG(ERROR) << "Invalid slave_version ptr";
         return (-BML_RET_INVALID_ARGS);
     }
@@ -2330,7 +2330,7 @@ int bml_internal::get_master_slave_versions(char *master_version, char *slave_ve
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2386,12 +2386,12 @@ int bml_internal::set_restricted_channels(const uint8_t *restricted_channels, co
                                           uint8_t is_global, uint8_t size)
 {
     // // If the socket is not valid, attempt to re-establish the connection
-    // if (m_sockPlatform == nullptr && !connect_to_platform()) {
+    // if (!m_sockPlatform && !connect_to_platform()) {
     //     return (-BML_RET_CONNECT_FAIL);
     // }
     LOG(DEBUG) << "bml_internal::set_restricted_channels entry";
     // Validate restricted_channels
-    if (restricted_channels == nullptr) {
+    if (!restricted_channels) {
         LOG(ERROR) << "Invalid restricted_channels ptr";
         return (-BML_RET_INVALID_ARGS);
     }
@@ -2414,7 +2414,7 @@ int bml_internal::set_restricted_channels(const uint8_t *restricted_channels, co
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2443,7 +2443,7 @@ int bml_internal::get_restricted_channels(uint8_t *restricted_channels, const st
     }
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr) {
+    if (!m_sockMaster) {
         int iRet = connect_to_master();
         if (iRet != BML_RET_OK)
             return iRet;
@@ -2469,7 +2469,7 @@ int bml_internal::get_restricted_channels(uint8_t *restricted_channels, const st
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_GET_RESTRICTED_CHANNELS_REQUES message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -2517,7 +2517,7 @@ int bml_internal::topology_discovery(const char *al_mac)
         message_com::create_vs_message<beerocks_message::cACTION_BML_TRIGGER_TOPOLOGY_QUERY>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_TRIGGER_TOPOLOGY_QUERY message";
         return (-BML_RET_OP_FAILED);
     }
@@ -2537,7 +2537,7 @@ int bml_internal::channel_selection(const char *al_mac, const char *ruid)
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST>(cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
