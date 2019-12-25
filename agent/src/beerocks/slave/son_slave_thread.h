@@ -18,6 +18,8 @@
 #include <beerocks/tlvf/beerocks_header.h>
 
 #include <mapf/common/encryption.h>
+#include <tlvf/WSC/AttrList.h>
+#include <tlvf/ieee_1905_1/tlvWsc.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
 #include <tlvf/ieee_1905_1/tlvWscM2.h>
 #include <tlvf/WSC/m1.h>
@@ -233,13 +235,12 @@ private:
     bool iface_status_operational_state_prev          = false;
 
     // Encryption support - move to common library
-    bool autoconfig_wsc_calculate_keys(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
-                                       uint8_t authkey[32], uint8_t keywrapkey[16]);
-    bool autoconfig_wsc_parse_m2_encrypted_settings(std::shared_ptr<ieee1905_1::tlvWscM2> m2,
-                                                    uint8_t authkey[32], uint8_t keywrapkey[16],
-                                                    bool &backhaul, bool &fronthaul, bool &teardown,
+    bool autoconfig_wsc_calculate_keys(WSC::m2 &m2, uint8_t authkey[32], uint8_t keywrapkey[16]);
+    bool autoconfig_wsc_parse_m2_encrypted_settings(WSC::m2 &m2, uint8_t authkey[32],
+                                                    uint8_t keywrapkey[16], bool &backhaul,
+                                                    bool &fronthaul, bool &teardown,
                                                     std::shared_ptr<WSC::cConfigData> &credentials);
-    bool autoconfig_wsc_authenticate(std::shared_ptr<ieee1905_1::tlvWscM2> m2, uint8_t authkey[32]);
+    bool autoconfig_wsc_authenticate(WSC::m2 &m2, uint8_t authkey[32]);
 
     std::unique_ptr<mapf::encryption::diffie_hellman> dh = nullptr;
     //copy of M1 message used for authentication
