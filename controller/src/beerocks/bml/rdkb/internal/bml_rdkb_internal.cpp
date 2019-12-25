@@ -28,7 +28,7 @@ int bml_rdkb_internal::steering_set_group(uint32_t steeringGroupIndex,
 {
     LOG(DEBUG) << "bml_rdkb_internal::steering_set_group - entry";
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr && !connect_to_master()) {
+    if (!m_sockMaster && !connect_to_master()) {
         return (-BML_RET_CONNECT_FAIL);
     }
 
@@ -41,7 +41,7 @@ int bml_rdkb_internal::steering_set_group(uint32_t steeringGroupIndex,
         message_com::create_vs_message<beerocks_message::cACTION_BML_STEERING_SET_GROUP_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_AP_SET_CONFIG message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -101,7 +101,7 @@ int bml_rdkb_internal::steering_client_set(uint32_t steeringGroupIndex, const BM
     LOG(DEBUG) << "bml_rdkb_internal::steering_client_set - entry";
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr && !connect_to_master()) {
+    if (!m_sockMaster && !connect_to_master()) {
         return (-BML_RET_CONNECT_FAIL);
     }
 
@@ -114,7 +114,7 @@ int bml_rdkb_internal::steering_client_set(uint32_t steeringGroupIndex, const BM
         message_com::create_vs_message<beerocks_message::cACTION_BML_STEERING_CLIENT_SET_REQUEST>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_STEERING_CLIENT_SET_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -170,11 +170,11 @@ int bml_rdkb_internal::steering_event_register(BML_EVENT_CB pCB)
     }
 
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr && !connect_to_master()) {
+    if (!m_sockMaster && !connect_to_master()) {
         return (-BML_RET_CONNECT_FAIL);
     }
 
-    if ((m_cbSteeringEvent == nullptr) && (pCB == nullptr)) {
+    if ((!m_cbSteeringEvent) && (!pCB)) {
         LOG(WARNING) << "Event callback function was NOT registered...";
         return (-BML_RET_OP_FAILED);
     }
@@ -188,12 +188,12 @@ int bml_rdkb_internal::steering_event_register(BML_EVENT_CB pCB)
 
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_STEERING_EVENT_REGISTER message!";
         return (-BML_RET_OP_FAILED);
     }
 
-    if (pCB == nullptr) {
+    if (!pCB) {
         request->unregister() = 1;
         LOG(DEBUG) << "Steering events unregister";
     } else {
@@ -231,7 +231,7 @@ int bml_rdkb_internal::steering_client_measure(uint32_t steeringGroupIndex,
 {
     LOG(DEBUG) << "bml_rdkb_internal::steering_client_measure - entry";
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr && !connect_to_master()) {
+    if (!m_sockMaster && !connect_to_master()) {
         return (-BML_RET_CONNECT_FAIL);
     }
     // Initialize the promise for receiving the response
@@ -241,7 +241,7 @@ int bml_rdkb_internal::steering_client_measure(uint32_t steeringGroupIndex,
 
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }
@@ -281,7 +281,7 @@ int bml_rdkb_internal::steering_client_disconnect(uint32_t steeringGroupIndex,
 {
     LOG(DEBUG) << "bml_rdkb_internal::steering_client_disconnect - entry";
     // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockMaster == nullptr && !connect_to_master()) {
+    if (!m_sockMaster && !connect_to_master()) {
         return (-BML_RET_CONNECT_FAIL);
     }
     // Initialize the promise for receiving the response
@@ -291,7 +291,7 @@ int bml_rdkb_internal::steering_client_disconnect(uint32_t steeringGroupIndex,
 
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building ACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST message!";
         return (-BML_RET_OP_FAILED);
     }

@@ -281,7 +281,7 @@ void backhaul_manager::platform_notify_error(bpl::eErrorCode code, const std::st
         message_com::create_vs_message<beerocks_message::cACTION_PLATFORM_ERROR_NOTIFICATION>(
             cmdu_tx);
 
-    if (error == nullptr) {
+    if (!error) {
         LOG(ERROR) << "Failed building message!";
         return;
     }
@@ -352,7 +352,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
         auto notification = message_com::create_vs_message<
             beerocks_message::cACTION_BACKHAUL_CONNECTED_NOTIFICATION>(cmdu_tx);
 
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
@@ -497,7 +497,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
                            << " skipping " << sc->hostap_iface;
                 continue;
             }
-            if (sc->slave == nullptr) {
+            if (!sc->slave) {
                 LOG(ERROR) << "slave " << sc->hostap_iface << " socket is nullptr!";
                 continue;
             }
@@ -528,7 +528,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
                 continue;
             }
 
-            if (sc->slave == nullptr) {
+            if (!sc->slave) {
                 continue;
             }
 
@@ -536,7 +536,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
 
             auto notification = message_com::create_vs_message<
                 beerocks_message::cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION>(cmdu_tx);
-            if (notification == nullptr) {
+            if (!notification) {
                 LOG(ERROR) << "Failed building message!";
                 return false;
             }
@@ -1433,7 +1433,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         } else if (pending_enable) {
             auto notification = message_com::create_vs_message<
                 beerocks_message::cACTION_BACKHAUL_BUSY_NOTIFICATION>(cmdu_tx);
-            if (notification == nullptr) {
+            if (!notification) {
                 LOG(ERROR) << "Failed building cACTION_BACKHAUL_BUSY_NOTIFICATION message!";
                 break;
             }
@@ -1548,7 +1548,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE>(
                 cmdu_tx, beerocks_header->id());
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR) << "Failed building "
                               "ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE message!";
                 break;
@@ -1585,7 +1585,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE>(
                 cmdu_tx, beerocks_header->id());
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE "
                               "message!";
                 break;
@@ -1811,6 +1811,11 @@ bool backhaul_manager::send_slaves_enable()
         auto notification =
             message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_ENABLE_APS_REQUEST>(
                 cmdu_tx);
+
+        if(!notification){
+            LOG(ERROR) << "create_vs_message method failed";
+            return true;
+        }
 
         if (soc->sta_iface == m_sConfig.wireless_iface) {
             notification->channel() = iface_hal->get_channel();

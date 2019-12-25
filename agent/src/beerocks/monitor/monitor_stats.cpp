@@ -109,7 +109,7 @@ void monitor_stats::process()
     if (send_activity_mode_notification) {
         auto notification = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION>(cmdu_tx);
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "Failed building cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION message!";
             return;
         }
@@ -122,7 +122,7 @@ void monitor_stats::process()
     if (!requests_list.empty()) {
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR)
                 << "Failed building cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE message!";
             return;
@@ -153,7 +153,7 @@ void monitor_stats::process()
         for (auto it = mon_db->sta_begin(); it != mon_db->sta_end(); ++it) {
             auto sta_mac  = it->first;
             auto sta_node = it->second;
-            if (sta_node == nullptr) {
+            if (!sta_node) {
                 continue;
             }
 
@@ -181,7 +181,12 @@ void monitor_stats::process()
             sta_stats_msg.rx_rssi           = sta_stats.rx_rssi_curr;
         }
 
-        beerocks_header->actionhdr()->id() = requests_list.front();
+        auto actionhdr = beerocks_header->actionhdr();
+        if(!actionhdr){
+            return;
+        }
+
+        actionhdr->id() = requests_list.front();
         requests_list.pop_front();
         message_com::send_cmdu(slave_socket, cmdu_tx);
     }
@@ -209,8 +214,8 @@ void monitor_stats::process()
     for (auto it = mon_db->sta_begin(); it != mon_db->sta_end(); ++it) {
         auto sta_mac  = it->first;
         auto sta_node = it->second;
-        if (sta_node == nullptr) {
-            LOG(ERROR) << "sta_node == nullptr !";
+        if (!sta_node) {
+            LOG(ERROR) << "!sta_node !";
             return;
         }
 

@@ -83,7 +83,7 @@ void association_handling_task::work()
             auto request = message_com::create_vs_message<
                 beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST>(cmdu_tx);
 
-            if (request == nullptr) {
+            if (!request ) {
                 LOG(ERROR)
                     << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST message!";
                 return;
@@ -137,7 +137,7 @@ void association_handling_task::work()
         auto measurement_request = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST>(cmdu_tx, id);
 
-        if (measurement_request == nullptr) {
+        if (!measurement_request ) {
             LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_BEACON_11K_REQUEST message!";
             return;
         }
@@ -203,7 +203,7 @@ void association_handling_task::work()
 
         auto measurement_request = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>(cmdu_tx, id);
-        if (measurement_request == nullptr) {
+        if (!measurement_request ) {
             LOG(ERROR)
                 << "Failed building ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST message!";
             return;

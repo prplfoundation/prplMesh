@@ -100,11 +100,11 @@ void monitor_rssi::arp_recv()
     std::string sta_mac = network_utils::mac_to_string(arphdr->sender_mac);
     std::string sta_ip  = network_utils::ipv4_to_string(arphdr->sender_ip);
     auto sta_node       = mon_db->sta_find(sta_mac);
-    if (sta_node == nullptr) {
+    if (!sta_node) {
         sta_node = mon_db->sta_find_by_ipv4(sta_ip);
     }
 
-    if (sta_node == nullptr) {
+    if (!sta_node) {
         //LOG(DEBUG) << "can't find node by mac=" << sta_mac << " or by ipv4=" << sta_ip << " in db! dropping arp reply";
         return;
     }
@@ -119,7 +119,7 @@ void monitor_rssi::arp_recv()
             auto notification = message_com::create_vs_message<
                 beerocks_message::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION>(
                 cmdu_tx, request_id);
-            if (notification == nullptr) {
+            if (!notification) {
                 LOG(ERROR) << "Failed building "
                               "cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION "
                               "message!";
@@ -141,7 +141,7 @@ void monitor_rssi::arp_recv()
         // send arp burst
         auto sta_vap_id = sta_node->get_vap_id();
         auto vap_node   = mon_db->vap_get_by_id(sta_vap_id);
-        if (vap_node == nullptr) {
+        if (!vap_node) {
             LOG(ERROR) << "can't find sta vap_id=" << sta_vap_id;
             return;
         }
@@ -222,7 +222,7 @@ void monitor_rssi::process()
                     auto notification = message_com::create_vs_message<
                         beerocks_message::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION>(
                         cmdu_tx);
-                    if (notification == nullptr) {
+                    if (!notification) {
                         LOG(ERROR) << "Failed building "
                                       "ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUES message!";
                         break;
@@ -273,7 +273,7 @@ void monitor_rssi::process()
                 if (sta_node->arp_recv_count_get() == 0) {
                     auto notification = message_com::create_vs_message<
                         beerocks_message::cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION>(cmdu_tx);
-                    if (notification == nullptr) {
+                    if (!notification) {
                         LOG(ERROR) << "Failed building "
                                       "cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION message!";
                         break;
@@ -309,7 +309,7 @@ void monitor_rssi::process()
 
             auto sta_vap_id = sta_node->get_vap_id();
             auto vap_node   = mon_db->vap_get_by_id(sta_vap_id);
-            if (vap_node == nullptr) {
+            if (!vap_node) {
                 LOG(ERROR) << "can't find sta vap_id=" << sta_vap_id;
                 return;
             }
@@ -360,7 +360,7 @@ void monitor_rssi::send_rssi_measurement_response(std::string &sta_mac, monitor_
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE>(cmdu_tx,
                                                                                    request_id);
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR)
                 << "Failed building ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUES message!";
             break;
@@ -403,7 +403,7 @@ void monitor_rssi::monitor_idle_station(std::string &sta_mac, monitor_sta_node *
             LOG(DEBUG) << "IDLE notification MAC: " << sta_mac;
             auto notification = message_com::create_vs_message<
                 beerocks_message::cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION>(cmdu_tx);
-            if (notification == nullptr) {
+            if (!notification) {
                 LOG(ERROR)
                     << "Failed building ACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION message!";
                 return;

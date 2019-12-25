@@ -98,6 +98,10 @@ bool cli_proxy::socket_disconnected(Socket *sd)
 bool cli_proxy::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto uds_header = message_com::get_uds_header(cmdu_rx);
+    if(!uds_header){
+        LOG(ERROR) << "message_com::get_uds_header() failed";
+        return false;
+    }
     uint16_t length = uds_header->length;
 
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);

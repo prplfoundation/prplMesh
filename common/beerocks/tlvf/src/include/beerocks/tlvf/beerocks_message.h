@@ -108,9 +108,14 @@ public:
             return nullptr;
         }
 
-        hdr->actionhdr()->action()    = (beerocks_message::eAction)action;
-        hdr->actionhdr()->action_op() = action_op;
-        hdr->actionhdr()->id()        = id;
+        auto actionhdr = hdr->actionhdr();
+        if(!actionhdr){
+            return nullptr;
+        }
+
+        actionhdr->action()    = (beerocks_message::eAction)action;
+        actionhdr->action_op() = action_op;
+        actionhdr->id()        = id;
         tlv->addInnerClassList(hdr);
 
         return hdr;

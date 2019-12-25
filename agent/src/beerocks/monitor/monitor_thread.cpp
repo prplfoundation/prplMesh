@@ -68,7 +68,7 @@ void monitor_thread::stop_monitor_thread()
         auto notification =
             message_com::create_vs_message<beerocks_message::cACTION_MONITOR_ERROR_NOTIFICATION>(
                 cmdu_tx);
-        if (notification == nullptr) {
+        if (!notification) {
             LOG(ERROR) << "Failed building cACTION_MONITOR_ERROR_NOTIFICATION message!";
             return;
         }
@@ -180,7 +180,7 @@ bool monitor_thread::init()
         message_com::create_vs_message<beerocks_message::cACTION_MONITOR_JOINED_NOTIFICATION>(
             cmdu_tx);
 
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building message!";
         return false;
     }
@@ -195,8 +195,8 @@ bool monitor_thread::init()
 void monitor_thread::after_select(bool timeout)
 {
     // Continue only if slave is connected
-    if (slave_socket == nullptr) {
-        LOG(DEBUG) << "slave_socket == nullptr";
+    if (!slave_socket) {
+        LOG(DEBUG) << "!slave_socket";
         return;
     }
 
@@ -218,7 +218,7 @@ void monitor_thread::after_select(bool timeout)
     }
 
     // If the HAL is not yet attached
-    if (mon_hal_int_events == nullptr) { // monitor not attached
+    if (!mon_hal_int_events) { // monitor not attached
         auto attach_state = mon_wlan_hal->attach();
         if (last_attach_state != attach_state) {
             LOG(DEBUG) << "attach_state = " << int(attach_state);
@@ -390,7 +390,7 @@ void monitor_thread::after_select(bool timeout)
                     LOG(ERROR) << "Failed ping hostap, notify agent...";
                     auto notification = message_com::create_vs_message<
                         beerocks_message::cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION>(cmdu_tx);
-                    if (notification == nullptr) {
+                    if (!notification) {
                         LOG(ERROR) << "Failed building "
                                       "cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION message!";
                         stop_monitor_thread();
@@ -427,7 +427,7 @@ void monitor_thread::after_select(bool timeout)
 
                 auto notification = message_com::create_vs_message<
                     beerocks_message::cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION>(cmdu_tx);
-                if (notification == nullptr) {
+                if (!notification) {
                     LOG(ERROR) << "Failed building message!";
                     return;
                 }
@@ -455,7 +455,7 @@ bool monitor_thread::update_sta_stats()
         auto sta_mac  = it->first;
         auto sta_node = it->second;
 
-        if (sta_node == nullptr) {
+        if (!sta_node) {
             LOG(WARNING) << "Invalid node pointer for STA = " << sta_mac;
             continue;
         }
@@ -598,7 +598,7 @@ bool monitor_thread::update_ap_stats()
 bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
-    if (beerocks_header == nullptr) {
+    if (!beerocks_header) {
         LOG(ERROR) << "Not a vendor specific message";
         return false;
     }
@@ -616,7 +616,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         LOG(TRACE) << "received ACTION_MONITOR_SON_CONFIG_UPDATE";
         auto update =
             beerocks_header->addClass<beerocks_message::cACTION_MONITOR_SON_CONFIG_UPDATE>();
-        if (update == nullptr) {
+        if (!update) {
             LOG(ERROR) << "addClass cACTION_MONITOR_SON_CONFIG_UPDATE failed";
             return false;
         }
@@ -645,7 +645,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST failed";
             return false;
         }
@@ -660,7 +660,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL failed";
             return false;
         }
@@ -678,7 +678,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST failed";
             return false;
         }
@@ -696,7 +696,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
 
         auto vap_node = mon_db.vap_get_by_id(vap_id);
-        if (vap_node == nullptr) {
+        if (!vap_node) {
             LOG(ERROR) << "vap_id " << vap_id << " doesn't not exists";
             return false;
         }
@@ -722,7 +722,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST failed";
             send_steering_return_status(
                 beerocks_message::ACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE,
@@ -765,7 +765,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             break;
         }
         auto ap = mon_rdkb_hal.conf_add_ap(vap_id);
-        if (ap == nullptr) {
+        if (!ap) {
             LOG(ERROR) << "add rdkb_hall ap configuration fail";
             send_steering_return_status(
                 beerocks_message::ACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE,
@@ -789,7 +789,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST failed";
             send_steering_return_status(
                 beerocks_message::ACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE, OPERATION_FAIL);
@@ -826,7 +826,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
 
         auto client = mon_rdkb_hal.conf_add_client(sta_mac);
-        if (client == nullptr) {
+        if (!client) {
             LOG(ERROR) << "add rdkb_hall client configuration fail";
             send_steering_return_status(
                 beerocks_message::ACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE, OPERATION_FAIL);
@@ -848,7 +848,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST failed";
             return false;
         }
@@ -864,13 +864,13 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST failed";
             return false;
         }
         std::string sta_mac = network_utils::mac_to_string(request->params().mac);
         auto sta_node       = mon_db.sta_find(sta_mac);
-        if (sta_node == nullptr) {
+        if (!sta_node) {
             LOG(ERROR) << "RX_RSSI_MEASUREMENT REQUEST sta_mac=" << sta_mac
                        << " sta not assoc, id=" << beerocks_header->id();
             break;
@@ -888,7 +888,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE>(
                 cmdu_tx, beerocks_header->id());
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR) << "Failed building message!";
                 break;
             }
@@ -918,7 +918,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST failed";
             return false;
         }
@@ -973,7 +973,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST failed";
             return false;
         }
@@ -1011,7 +1011,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST failed";
             return false;
         }
@@ -1094,7 +1094,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto request =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST>();
-        if (request == nullptr) {
+        if (!request) {
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST failed";
             return false;
         }
@@ -1123,7 +1123,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
     }
 
     if (!slave_socket) {
-        LOG(ERROR) << "slave_socket == nullptr";
+        LOG(ERROR) << "!slave_socket";
         return false;
     }
 
@@ -1140,7 +1140,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR)
                 << "Failed building cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE message!";
             return false;
@@ -1218,7 +1218,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
                 auto response = message_com::create_vs_message<
                     beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>(cmdu_tx, id);
-                if (response == nullptr) {
+                if (!response) {
                     LOG(ERROR)
                         << "Failed building cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE message!";
                     break;
@@ -1268,7 +1268,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE message!";
             break;
         }
@@ -1300,7 +1300,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
         auto hal_data = static_cast<bwl::SLinkMeasurementsResponse11k *>(data);
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR)
                 << "Failed building cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE message!";
             break;
@@ -1357,7 +1357,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
         if (msg->vap_id == beerocks::IFACE_RADIO_ID) {
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION>(cmdu_tx);
-            if (response == nullptr) {
+            if (!response) {
                 LOG(ERROR)
                     << "Failed building cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION message!";
                 break;
@@ -1571,7 +1571,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
 void monitor_thread::send_heartbeat()
 {
-    if (slave_socket == nullptr) {
+    if (!slave_socket) {
         LOG(ERROR) << "process_keep_alive(): slave_socket is nullptr!";
         return;
     }
@@ -1580,7 +1580,7 @@ void monitor_thread::send_heartbeat()
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_MONITOR_HEARTBEAT_NOTIFICATION>(
             cmdu_tx);
-    if (request == nullptr) {
+    if (!request) {
         LOG(ERROR) << "Failed building message!";
         return;
     }
@@ -1630,7 +1630,7 @@ void monitor_thread::send_steering_return_status(beerocks_message::eActionOp_MON
     case beerocks_message::ACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE: {
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building message!";
             break;
         }
@@ -1641,7 +1641,7 @@ void monitor_thread::send_steering_return_status(beerocks_message::eActionOp_MON
     case beerocks_message::ACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE: {
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building message!";
             break;
         }

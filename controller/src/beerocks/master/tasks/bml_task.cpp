@@ -295,7 +295,7 @@ void bml_task::update_bml_nw_map(std::string mac, bool force_client_disconnect)
         auto response =
             message_com::create_vs_message<beerocks_message::cACTION_BML_NW_MAP_UPDATE>(cmdu_tx);
 
-        if (response == nullptr) {
+        if (!response) {
             LOG(ERROR) << "Failed building ACTION_BML_NW_MAP_UPDATE message!";
             return;
         }
