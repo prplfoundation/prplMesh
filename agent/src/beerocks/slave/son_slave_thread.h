@@ -20,6 +20,9 @@
 #include <mapf/common/encryption.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
 #include <tlvf/ieee_1905_1/tlvWscM2.h>
+#include <tlvf/WSC/m1.h>
+#include <tlvf/WSC/m2.h>
+#include <tlvf/ieee_1905_1/tlvWsc.h>
 
 namespace beerocks {
 namespace bpl {
