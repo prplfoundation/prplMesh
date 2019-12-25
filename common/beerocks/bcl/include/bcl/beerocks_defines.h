@@ -26,7 +26,7 @@ namespace beerocks {
 #define BEEROCKS_BACKHAUL_MGR_UDS "uds_backhaul_manager"
 
 #if __GNUC__ >= 7 || __cplussplus >= 201703L
-#define FALLTHROUGH __attribute((fallthrough))
+#define FALLTHROUGH __attribute__((fallthrough))
 #else
 // clang-format off
 #define FALLTHROUGH do { } while (0)
