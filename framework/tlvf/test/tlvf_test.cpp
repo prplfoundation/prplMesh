@@ -12,14 +12,15 @@
 #include <iostream>
 #include <sstream>
 
+#include "tlvf/WSC/m1.h"
+#include "tlvf/WSC/m2.h"
 #include "tlvf/ieee_1905_1/tlv1905NeighborDevice.h"
 #include "tlvf/ieee_1905_1/tlvLinkMetricQuery.h"
 #include "tlvf/ieee_1905_1/tlvMacAddress.h"
 #include "tlvf/ieee_1905_1/tlvNon1905neighborDeviceList.h"
 #include "tlvf/ieee_1905_1/tlvUnknown.h"
 #include "tlvf/ieee_1905_1/tlvVendorSpecific.h"
-#include "tlvf/ieee_1905_1/tlvWscM1.h"
-#include "tlvf/ieee_1905_1/tlvWscM2.h"
+#include "tlvf/ieee_1905_1/tlvWsc.h"
 #include "tlvf/wfa_map/tlvApCapability.h"
 #include <tlvf/test/tlvVarList.h>
 
@@ -206,7 +207,7 @@ int test_complex_list()
     return errors;
 }
 
-bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, uint8_t *iv)
+bool add_encrypted_settings(tlvWsc &tlv, uint8_t *keywrapkey, WSC::config &cfg)
 {
     // Encrypted settings
     // Encrypted settings are the ConfigData + IV. First create the ConfigData,
@@ -235,46 +236,58 @@ bool add_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, u
     int cipherlen                = datalen + 16;
     uint8_t encrypted[cipherlen] = {0};
     std::copy_n(config_data.getStartBuffPtr(), config_data.getLen(), encrypted);
-    if (!mapf::encryption::aes_encrypt(keywrapkey, iv, encrypted, datalen, encrypted, cipherlen)) {
-        LOG(DEBUG) << "aes encrypt";
+    if (!mapf::encryption::aes_encrypt(keywrapkey, cfg.iv, encrypted, datalen, encrypted,
+                                       cipherlen)) {
+        LOG(ERROR) << "aes encrypt";
         return false;
     }
-
-    std::fill(m2->authenticator().data, m2->authenticator().data + m2->authenticator().data_length,
+    cfg.encrypted_settings = std::vector<uint8_t>(encrypted, encrypted + cipherlen);
+    // Allocate maximum allowed length for the payload, so it can accommodate variable length
+    // data inside the internal TLV list.
+    // On finalize(), the buffer is shrunk back to its real size.
+    size_t payload_length = tlv.getBuffRemainingBytes();
+    tlv.alloc_payload(payload_length);
+    auto m2 = std::dynamic_pointer_cast<WSC::m2>(WSC::AttrList::create(tlv, cfg));
+    if (!m2) {
+        LOG(ERROR) << "create m2";
+        return false;
+    }
+    // Finalize m2 since it needs to be in network byte order for global authentication
+    m2->finalize();
+    std::fill(m2->authenticator(), m2->authenticator() + WSC::eWscLengths::WSC_AUTHENTICATOR_LENGTH,
               0xbb);
 
-    auto encrypted_settings = m2->create_encrypted_settings();
-    encrypted_settings->alloc_encrypted_settings(cipherlen);
-    m2->add_encrypted_settings(encrypted_settings);
-    std::copy_n(encrypted, cipherlen, encrypted_settings->encrypted_settings());
-    std::copy_n(iv, sizeof(iv), encrypted_settings->iv());
-    LOG(DEBUG) << "encrypted settings length: " << encrypted_settings->getLen();
+    LOG(DEBUG) << "encrypted settings length: "
+               << m2->encrypted_settings().encrypted_settings_length();
     LOG(DEBUG) << "encrypted settings buffer: " << std::endl
-               << utils::dump_buffer((uint8_t *)encrypted_settings->encrypted_settings(),
-                                     encrypted_settings->encrypted_settings_length());
+               << utils::dump_buffer((uint8_t *)m2->encrypted_settings().encrypted_settings(),
+                                     m2->encrypted_settings().encrypted_settings_length());
 
-    LOG(DEBUG) << "authenticator type:" << m2->authenticator().attribute_type;
-    LOG(DEBUG) << "authenticator length: " << m2->authenticator().data_length;
     LOG(DEBUG) << "authenticator buffer: " << std::endl
-               << utils::dump_buffer((uint8_t *)m2->authenticator().data,
-                                     m2->authenticator().data_length);
+               << utils::dump_buffer((uint8_t *)m2->authenticator(),
+                                     WSC::eWscLengths::WSC_AUTHENTICATOR_LENGTH);
 
     return true;
 }
 
-bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey, uint8_t *iv)
+bool parse_encrypted_settings(std::shared_ptr<tlvWsc> tlv, uint8_t *keywrapkey, uint8_t *iv)
 {
+    auto m2 = std::dynamic_pointer_cast<WSC::m2>(WSC::AttrList::parse(*tlv));
+    if (!m2) {
+        LOG(ERROR) << "Not an M2!";
+        return false;
+    }
     auto encrypted_settings = m2->encrypted_settings();
-    LOG(DEBUG) << "type: " << encrypted_settings->type();
-    LOG(DEBUG) << "encrypted settings length: " << encrypted_settings->getLen();
+    LOG(DEBUG) << "type: " << encrypted_settings.type();
+    LOG(DEBUG) << "encrypted settings length: " << encrypted_settings.getLen();
     LOG(DEBUG) << "encrypted settings buffer: " << std::endl
-               << utils::dump_buffer((uint8_t *)encrypted_settings->encrypted_settings(),
-                                     encrypted_settings->encrypted_settings_length());
-    int dlen = encrypted_settings->encrypted_settings_length() + 16;
+               << utils::dump_buffer((uint8_t *)encrypted_settings.encrypted_settings(),
+                                     encrypted_settings.encrypted_settings_length());
+    int dlen = encrypted_settings.encrypted_settings_length() + 16;
     uint8_t buf[dlen];
     mapf::encryption::aes_decrypt(keywrapkey, iv,
-                                  (uint8_t *)encrypted_settings->encrypted_settings(),
-                                  encrypted_settings->encrypted_settings_length(), buf, dlen);
+                                  (uint8_t *)encrypted_settings.encrypted_settings(),
+                                  encrypted_settings.encrypted_settings_length(), buf, dlen);
     WSC::cConfigData config_data(buf, dlen, true);
 
     LOG(DEBUG) << "WSC config_data:" << std::endl
@@ -283,11 +296,9 @@ bool parse_encrypted_settings(std::shared_ptr<tlvWscM2> m2, uint8_t *keywrapkey,
                << std::endl
                << "     encryption_type: " << int(config_data.encryption_type_attr().data)
                << std::endl;
-    LOG(DEBUG) << "authenticator type:" << m2->authenticator().attribute_type;
-    LOG(DEBUG) << "authenticator length:" << m2->authenticator().data_length;
     LOG(DEBUG) << "authenticator buffer: " << std::endl
-               << utils::dump_buffer((uint8_t *)m2->authenticator().data,
-                                     m2->authenticator().data_length);
+               << utils::dump_buffer((uint8_t *)m2->authenticator(),
+                                     WSC::eWscLengths::WSC_AUTHENTICATOR_LENGTH);
     return true;
 }
 
@@ -305,17 +316,8 @@ int test_parser()
 
     auto tlv1 = msg.addClass<tlvNon1905neighborDeviceList>();
     auto tlv2 = msg.addClass<tlvLinkMetricQuery>();
-    auto tlv3 = msg.addClass<tlvWscM1>();
-
-    // Trying to add a new class before fully initialize previous class should lead to error
+    auto tlv3 = msg.addClass<tlvWsc>();
     auto tlv4 = msg.addClass<tlvTestVarList>();
-    if (tlv4) {
-        LOG(ERROR) << "addClass should fail since the the previous tlv is not fully initialized";
-        errors++;
-    }
-    // TODO https://github.com/prplfoundation/prplMesh/issues/480
-    tlv3->add_vendor_ext(tlv3->create_vendor_ext());
-    tlv4 = msg.addClass<tlvTestVarList>();
     tlv4->add_var1(tlv4->create_var1());
 
     LOG(DEBUG) << "Finalize";
@@ -344,9 +346,9 @@ int test_parser()
         LOG(ERROR) << "getClass<tlvUnknown> failed";
         errors++;
     }
-    auto tlv3_ = received_message.getClass<tlvWscM1>();
+    auto tlv3_ = received_message.getClass<tlvWsc>();
     if (!tlv3_) {
-        LOG(ERROR) << "getClass<tlvWscM1> failed";
+        LOG(ERROR) << "getClass<tlvWsc> failed";
         errors++;
     }
     auto tlv2_ = received_message.getClass<tlvLinkMetricQuery>();
@@ -445,11 +447,7 @@ int test_all()
     secondTlv->link_metrics() = tlvLinkMetricQuery::eLinkMetricsType::RX_LINK_METRICS_ONLY;
 
     LOG(DEBUG) << "Start WSC M2";
-    auto thirdTlv = msg.addClass<tlvWscM2>();
-
-    thirdTlv->message_type_attr().data = WSC::WSC_MSG_TYPE_M2;
-    if (!thirdTlv->set_manufacturer("Intel"))
-        return false;
+    auto thirdTlv = msg.addClass<tlvWsc>();
 
     /**
      * @brief Diffie helman key exchange
@@ -470,10 +468,20 @@ int test_all()
     uint8_t mac[6] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
     uint8_t authkey[32];
     uint8_t keywrapkey[16];
-    uint8_t iv[16];
-    mapf::encryption::create_iv(iv, sizeof(iv));
+    WSC::config cfg;
+    cfg.msg_type            = WSC::eWscMessageType::WSC_MSG_TYPE_M2;
+    cfg.manufacturer        = "Intel";
+    cfg.model_name          = "Ubuntu";
+    cfg.model_number        = "18.04";
+    cfg.serial_number       = "prpl12345";
+    cfg.primary_dev_type_id = WSC::WSC_DEV_NETWORK_INFRA_GATEWAY;
+    cfg.device_name         = "prplmesh-controller";
+    cfg.encr_type_flags     = uint16_t(WSC::eWscEncr::WSC_ENCR_NONE);
+    cfg.auth_type_flags     = uint16_t(WSC::eWscAuth::WSC_AUTH_OPEN);
+    cfg.bands               = WSC::WSC_RF_BAND_2GHZ;
+    mapf::encryption::create_iv(cfg.iv, sizeof(cfg.iv));
     wps_calculate_keys(m1, key1, key1_length, m1.nonce(), mac, m2.nonce(), authkey, keywrapkey);
-    if (!add_encrypted_settings(thirdTlv, keywrapkey, iv)) {
+    if (!add_encrypted_settings(*thirdTlv, keywrapkey, cfg)) {
         MAPF_ERR("add encrypted settings failed");
         return false;
     }
@@ -629,14 +637,14 @@ int test_all()
         errors++;
     }
 
-    auto tlv3 = received_message.addClass<tlvWscM2>();
+    auto tlv3 = received_message.addClass<tlvWsc>();
     if (tlv3 != nullptr) {
         MAPF_DBG("TLV3 LENGTH AFTER INIT: " << tlv3->length());
     } else {
         MAPF_ERR("TLV3 IS NULL");
         errors++;
     }
-    if (!parse_encrypted_settings(tlv3, keywrapkey, iv)) {
+    if (!parse_encrypted_settings(tlv3, keywrapkey, cfg.iv)) {
         MAPF_ERR("TLV3 parse encrypted settings failed");
         errors++;
     }
