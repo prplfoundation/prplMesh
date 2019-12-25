@@ -8,6 +8,7 @@
 
 #include <tlvf/CmduMessageRx.h>
 #include <tlvf/CmduTlvParser.h>
+#include <tlvf/WSC/AttrList.h>
 #include <tlvf/ieee_1905_1/tlv1905NeighborDevice.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
@@ -27,6 +28,7 @@
 #include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
 #include <tlvf/ieee_1905_1/tlvUnknown.h>
 #include <tlvf/ieee_1905_1/tlvVendorSpecific.h>
+#include <tlvf/ieee_1905_1/tlvWsc.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
 #include <tlvf/wfa_map/tlvApMetricQuery.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
@@ -45,49 +47,12 @@
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
 #include <iostream>
-#include <tlvf/WSC/eWscAttributes.h>
-#include <tlvf/ieee_1905_1/tlvWscM1.h>
-#include <tlvf/ieee_1905_1/tlvWscM2.h>
 
 using namespace ieee1905_1;
 
 CmduTlvParser::CmduTlvParser(CmduMessageRx &cmdu) : CmduParser(cmdu) {}
 
 CmduTlvParser::~CmduTlvParser() {}
-
-// TODO - Remove once #471 is implemented
-class wscAttr {
-    uint16_t type_;
-    uint16_t length_;
-
-public:
-    uint16_t type(bool swap) { return swap ? ntohs(type_) : type_; }
-    wscAttr *next(bool swap)
-    {
-        return reinterpret_cast<wscAttr *>(reinterpret_cast<uint8_t *>(this) + size(swap));
-    }
-    uint8_t *data() { return reinterpret_cast<uint8_t *>(this) + sizeof(wscAttr); }
-    size_t size(bool swap) { return sizeof(wscAttr) + (swap ? ntohs(length_) : length_); }
-};
-
-std::shared_ptr<BaseClass> CmduTlvParser::parseWscTlv()
-{
-    if (eTlvType(cmdu_.getNextTlvType()) != eTlvType::TLV_WSC)
-        return nullptr;
-
-    wscAttr *wsc  = reinterpret_cast<wscAttr *>(cmdu_.getNextTlvData());
-    uint16_t type = wsc->type(true);
-    while (type != WSC::ATTR_MSG_TYPE) {
-        wsc  = wsc->next(true);
-        type = wsc->type(true);
-    }
-    if (*wsc->data() == WSC::WSC_MSG_TYPE_M2)
-        return cmdu_.addClass<tlvWscM2>();
-    else
-        return cmdu_.addClass<tlvWscM1>();
-
-    return nullptr;
-}
 
 std::shared_ptr<BaseClass> CmduTlvParser::parseNextTlv()
 {
@@ -141,7 +106,10 @@ std::shared_ptr<BaseClass> CmduTlvParser::parseNextTlv()
         return cmdu_.addClass<tlvSupportedFreqBand>();
     }
     case (17): {
-        return parseWscTlv(); // TODO change once #471 is implemented
+        auto tlv = cmdu_.addClass<ieee1905_1::tlvWsc>();
+        if (tlv)
+            WSC::AttrList::parse(*tlv);
+        return tlv;
     }
     case (18): {
         return cmdu_.addClass<tlvPushButtonEventNotification>();
