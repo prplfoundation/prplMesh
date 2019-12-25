@@ -28,9 +28,6 @@
 #include <tlvf/ieee_1905_1/tlvLinkMetricQuery.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
-#include <tlvf/ieee_1905_1/tlvWsc.h>
-#include <tlvf/ieee_1905_1/tlvWscM1.h>
-#include <tlvf/ieee_1905_1/tlvWscM2.h>
 #include <tlvf/wfa_map/tlvApMetricQuery.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
