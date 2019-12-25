@@ -23,10 +23,12 @@
 #include <beerocks/tlvf/beerocks_message_monitor.h>
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
+#include <tlvf/WSC/AttrList.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvLinkMetricQuery.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
+#include <tlvf/ieee_1905_1/tlvWsc.h>
 #include <tlvf/ieee_1905_1/tlvWscM1.h>
 #include <tlvf/ieee_1905_1/tlvWscM2.h>
 #include <tlvf/wfa_map/tlvApMetricQuery.h>
@@ -4569,65 +4571,45 @@ bool slave_thread::add_radio_basic_capabilities()
 
 bool slave_thread::autoconfig_wsc_add_m1()
 {
-    auto tlvWscM1 = cmdu_tx.addClass<ieee1905_1::tlvWscM1>();
-    if (tlvWscM1 == nullptr) {
-        LOG(ERROR) << "Error creating tlvWscM1";
+    auto tlv = cmdu_tx.addClass<ieee1905_1::tlvWsc>();
+    if (tlv == nullptr) {
+        LOG(ERROR) << "Error creating tlvWsc";
         return false;
     }
 
-    // All attributes which are not explicitely set below are set to default by the TLV factory,
-    // see WSC_Attributes.yml
-    tlvWscM1->mac_attr().data = network_utils::mac_from_string(backhaul_params.bridge_mac);
-    // TODO: read manufactured, name, model and device name from BPL
-    if (!tlvWscM1->set_manufacturer("Intel"))
-        return false;
-    if (!tlvWscM1->set_model_name("Ubuntu"))
-        return false;
-    if (!tlvWscM1->set_model_number("18.04"))
-        return false;
-    if (!tlvWscM1->set_serial_number("prpl12345"))
-        return false;
-    if (!tlvWscM1->set_device_name("prplMesh-agent"))
-        return false;
-    std::memset(tlvWscM1->uuid_e_attr().data, 0xff, tlvWscM1->uuid_e_attr().data_length);
-    tlvWscM1->rf_bands_attr().data =
-        hostap_params.iface_is_5ghz ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
-    tlvWscM1->primary_device_type_attr().sub_category_id = WSC::WSC_DEV_NETWORK_INFRA_AP;
+    // Allocate maximum allowed length for the payload, so it can accommodate variable length
+    // data inside the internal TLV list.
+    // On finalize(), the buffer is shrunk back to its real size.
+    size_t payload_length =
+        tlv->getBuffRemainingBytes() - ieee1905_1::tlvEndOfMessage::get_initial_size();
+    tlv->alloc_payload(payload_length);
 
-    auto vendor_ext = tlvWscM1->create_vendor_ext();
-    if (!vendor_ext) {
-        LOG(ERROR) << "Failed to create the vendor_ext attribute";
-        return false;
-    }
-
-    if (!vendor_ext->alloc_vs_data(sizeof(WSC::sWscAttrVersion2))) {
-        LOG(ERROR) << "buffer allocation failed for version2 attribute";
-        return false;
-    }
-
-    WSC::sWscAttrVersion2 version2;
-    version2.struct_swap();
-    uint8_t *version2_buf = reinterpret_cast<uint8_t *>(&version2);
-    std::copy(version2_buf, version2_buf + sizeof(version2), vendor_ext->vs_data());
-    tlvWscM1->add_vendor_ext(vendor_ext);
-
-    // encryption support - diffie-helman key-exchange
-    dh = std::make_unique<mapf::encryption::diffie_hellman>();
-    std::copy(dh->pubkey(), dh->pubkey() + dh->pubkey_length(), tlvWscM1->public_key_attr().data);
-    std::copy(dh->nonce(), dh->nonce() + dh->nonce_length(), tlvWscM1->enrolee_nonce_attr().data);
-    tlvWscM1->authentication_type_flags_attr().data =
+    WSC::config cfg;
+    cfg.msg_type = WSC::eWscMessageType::WSC_MSG_TYPE_M1;
+    cfg.mac      = network_utils::mac_from_string(backhaul_params.bridge_mac);
+    dh           = std::make_unique<mapf::encryption::diffie_hellman>();
+    std::copy(dh->nonce(), dh->nonce() + dh->nonce_length(), cfg.enrollee_nonce);
+    std::copy(dh->pubkey(), dh->pubkey() + dh->pubkey_length(), cfg.pub_key);
+    cfg.auth_type_flags =
         uint16_t(WSC::eWscAuth::WSC_AUTH_OPEN) | uint16_t(WSC::eWscAuth::WSC_AUTH_WPA2PSK);
-    tlvWscM1->encryption_type_flags_attr().data = uint16_t(WSC::eWscEncr::WSC_ENCR_AES);
+    cfg.encr_type_flags     = uint16_t(WSC::eWscEncr::WSC_ENCR_AES);
+    cfg.manufacturer        = "Intel";
+    cfg.model_name          = "Ubuntu";
+    cfg.model_number        = "18.04";
+    cfg.serial_number       = "prpl12345";
+    cfg.primary_dev_type_id = WSC::WSC_DEV_NETWORK_INFRA_AP;
+    cfg.device_name         = "prplmesh-agent";
+    cfg.bands       = hostap_params.iface_is_5ghz ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
+    auto attributes = WSC::AttrList::create(*tlv, cfg);
+    if (!attributes)
+        return false;
 
     // Authentication support - store swapped M1 for later M1 || M2* authentication
     // This is the content of M1, without the type and length.
     if (m1_auth_buf)
         delete[] m1_auth_buf;
-    m1_auth_buf_len = tlvWscM1->getLen() - 3;
+    m1_auth_buf_len = attributes->len();
     m1_auth_buf     = new uint8_t[m1_auth_buf_len];
-    tlvWscM1->class_swap(); //swap before store
-    std::copy_n(tlvWscM1->getStartBuffPtr() + 3, m1_auth_buf_len, m1_auth_buf);
-    tlvWscM1->class_swap(); //swap after store (will be swapped in Finalize)
-
+    std::copy_n(attributes->buffer(), m1_auth_buf_len, m1_auth_buf);
     return true;
 }
