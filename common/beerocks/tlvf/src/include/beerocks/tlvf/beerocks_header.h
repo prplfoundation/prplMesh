@@ -57,11 +57,11 @@ public:
     };
     uint16_t id() 
     {
-        auto actionhdr = actionhdr();
-        if(!actionhdr){
+        auto action_hdr = actionhdr();
+        if(!action_hdr){
             return 0;
         }else{
-            return actionhdr->id();
+            return action_hdr->id();
         }         
     }
 };

@@ -4049,8 +4049,12 @@ bool slave_thread::parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessage
         return false;
     }
     message_com::send_cmdu(ap_manager_socket, cmdu_tx);
-
-    master_version.assign(joined_response->master_version(message::VERSION_LENGTH));
+    auto master_ver = joined_response->master_version(message::VERSION_LENGTH);
+    if(!master_ver){
+        LOG(ERROR) << "master_version() has failed !";
+        return false;
+    }
+    master_version.assign(master_ver);
 
     LOG(DEBUG) << "Version (Master/Slave): " << master_version << "/" << BEEROCKS_VERSION;
     auto slave_version_s  = version::version_from_string(BEEROCKS_VERSION);

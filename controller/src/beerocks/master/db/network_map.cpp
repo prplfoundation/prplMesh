@@ -348,12 +348,19 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
         return;
     }
 
-    auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
-    if (!beerocks_header) {
+    auto beerocks_hdr = message_com::get_beerocks_header(cmdu_tx);
+    if (!beerocks_hdr) {
         LOG(ERROR) << "Failed getting beerocks_header!";
         return;
     }
-    beerocks_header->actionhdr()->last() = 0;
+
+    auto action_hdr = beerocks_hdr->actionhdr();
+    if(!action_hdr){
+        LOG(ERROR) << "Failed getting action_header!";
+        return;
+    }
+    
+    action_hdr->last() = 0;
 
     // nodes iterating
     //LOG(DEBUG) << "send_bml_nodes_statistics_message, buf_size " << int(tx_buffer_size);
@@ -387,7 +394,7 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
             auto buf = response->buffer(0);
             if(!buf){
                 LOG(ERROR) << "buffer is nullptr";
-                return;
+                return -1;
             }
             data_start = (uint8_t *)buf;
         }
@@ -415,13 +422,17 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
                return -1; 
             }
 
-            auto actionhdr = beerocks_header->actionhdr();
+           
+            auto  beerocks_hdr                      = message_com::get_beerocks_header(cmdu_tx);
+            if(!beerocks_hdr){
+                LOG(ERROR) << "get_beerocks_header() has failed";
+                return -1;
+            }
+            auto actionhdr = beerocks_hdr->actionhdr();
             if(!actionhdr){
                 LOG(ERROR) << "actionhdr() has failed";
                 return -1; 
             }
-
-            beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
             actionhdr->last() = 0;
             num_of_stats_bulks                   = response->num_of_stats_bulks();
             num_of_stats_bulks                   = 0;
@@ -488,7 +499,12 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
         }
     }
 
-    beerocks_header->actionhdr()->last() = 1;
+    action_hdr = beerocks_hdr->actionhdr();
+    if(!action_hdr){
+        LOG(ERROR) << "actionhdr() has failed";
+        return; 
+    }
+    action_hdr->last() = 1;
 
     //LOG(DEBUG) << "sending message, last=0";
     // sending to all listeners

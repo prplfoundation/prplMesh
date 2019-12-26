@@ -203,8 +203,14 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
 
             if (tlv_vendor_specific.vendor_oui() ==
                 ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL) {
+                auto payload = tlv_vendor_specific.payload();
+                if(!payload){
+                    LOG(ERROR) << "payload() failed";
+                    ret = false;
+                    break; 
+                }
                 // assuming that the magic is the first data on the beerocks header
-                auto beerocks_magic = *(uint32_t *)(tlv_vendor_specific.payload());
+                auto beerocks_magic = *(uint32_t *)(payload);
                 swap_32(beerocks_magic);
                 if (beerocks_magic != message::MESSAGE_MAGIC) {
                     THREAD_LOG(WARNING) << "mismatch magic " << std::hex << int(beerocks_magic)
