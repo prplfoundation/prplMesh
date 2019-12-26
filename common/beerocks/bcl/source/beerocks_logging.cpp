@@ -288,12 +288,12 @@ bool log_levels::trace_enabled() { return (m_level_set.end() != m_level_set.find
 // logging
 //====================================================================================
 const std::string logging::format("%level %datetime{%H:%m:%s:%g} <%thread> %fbase[%line] --> %msg");
-const std::string logging::syslogFormat("[beerocks] <%thread> %fbase[%line] --> %msg");
+const std::string logging::syslogFormat("<%thread> %fbase[%line] --> %msg");
 
 logging::logging(const std::string config_path, std::string module_name)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
-      m_netlog_host(""), m_netlog_port(0), m_syslog_enabled("false")
+      m_stdout_enabled("true"), m_syslog_enabled("false")
 {
     bool found_settings = false;
 
@@ -314,7 +314,7 @@ logging::logging(const std::string config_path, std::string module_name)
 logging::logging(const settings_t &settings, bool cache_settings, std::string module_name)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
-      m_netlog_host(""), m_netlog_port(0), m_syslog_enabled("false")
+      m_stdout_enabled(true), m_syslog_enabled(false)
 {
     for (auto &setting : settings) {
         if (0 == setting.first.find("log_")) {
@@ -333,20 +333,22 @@ logging::logging(const beerocks::config_file::SConfigLog &settings, std::string 
                  bool cache_settings)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
-      m_netlog_host(""), m_netlog_port(0), m_syslog_enabled("false")
+      m_stdout_enabled(true), m_syslog_enabled(false)
 {
-    m_settings_map.insert({"log_path", settings.path});
+    m_settings_map.insert(
+        {"log_files_enabled", settings.files_enabled.empty() ? "true" : settings.files_enabled});
+    m_settings_map.insert({"log_files_path", settings.files_path});
+    m_settings_map.insert({"log_files_auto_roll",
+                           settings.files_auto_roll.empty() ? "true" : settings.files_auto_roll});
     m_settings_map.insert({"log_global_levels", settings.global_levels});
     m_settings_map.insert({"log_global_syslog_levels", settings.syslog_levels});
     m_settings_map.insert({"log_global_size", settings.global_size});
+    m_settings_map.insert(
+        {"log_stdout_enabled", settings.stdout_enabled.empty() ? "true" : settings.stdout_enabled});
     if (!settings.syslog_enabled.empty()) {
         m_settings_map.insert({"log_syslog_enabled", settings.syslog_enabled});
     } else {
         m_settings_map.insert({"log_syslog_enabled", "false"});
-    }
-    if (!settings.netlog_host.empty()) {
-        m_settings_map.insert({"log_netlog_host", settings.netlog_host});
-        m_settings_map.insert({"log_netlog_port", settings.netlog_port});
     }
 
     eval_settings();
@@ -379,17 +381,19 @@ std::string logging::get_cache_path()
     return os_utils::get_process_dir() + "/." + m_module_name + ".cache.conf";
 }
 
-std::string logging::get_log_path()
+bool logging::get_log_files_enabled() { return m_log_files_enabled; }
+
+std::string logging::get_log_files_path()
 {
-    if (m_log_path.size() > 0) {
-        return m_log_path;
+    if (m_log_files_path.size() > 0) {
+        return m_log_files_path;
     }
     return os_utils::get_process_dir();
 }
 
 std::string logging::get_log_filepath()
 {
-    auto path     = get_log_path();
+    auto path     = get_log_files_path();
     auto filename = get_log_filename();
 
     return path + "/" + filename;
@@ -402,6 +406,8 @@ std::string logging::get_log_filename()
     }
     return m_module_name + ".%datetime{%Y%M%d_%H%m%s}.log";
 }
+
+bool logging::get_log_files_auto_roll() { return m_log_files_auto_roll; }
 
 std::string logging::get_log_max_size_setting()
 {
@@ -420,7 +426,9 @@ log_levels logging::get_log_levels() { return m_levels; }
 
 log_levels logging::get_syslog_levels() { return m_syslog_levels; }
 
-std::string logging::get_syslog_enabled() { return m_syslog_enabled; }
+bool logging::get_stdout_enabled() { return m_stdout_enabled; }
+
+bool logging::get_syslog_enabled() { return m_syslog_enabled; }
 
 void logging::set_log_level_state(const eLogLevel &log_level, const bool &new_state)
 {
@@ -440,10 +448,11 @@ void logging::handle_logging_rollover(const char *log_name, std::size_t)
     remove(rollover_name.c_str());
     rename(log_name, rollover_name.c_str());
 }
+
 void logging::apply_settings()
 {
     // Disable The instance of RollMonitor to start fresh
-    {
+    if (m_log_files_auto_roll) {
         auto roll_monitor = el::Helpers::logDispatchCallback<RollMonitor>("RollMonitor");
         if (roll_monitor) {
             roll_monitor->enable(false);
@@ -453,12 +462,20 @@ void logging::apply_settings()
     el::Configurations defaultConf;
     defaultConf.setToDefault();
     defaultConf.setGlobally(el::ConfigurationType::Format, format);
-    defaultConf.setGlobally(el::ConfigurationType::ToFile, "true");
-    defaultConf.setGlobally(el::ConfigurationType::Filename, get_log_filepath().c_str());
-    defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "false");
-    defaultConf.setGlobally(el::ConfigurationType::ToSyslog, get_syslog_enabled().c_str());
-    defaultConf.setGlobally(el::ConfigurationType::MaxLogFileSize,
-                            get_log_max_size_setting().c_str());
+    defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput,
+                            string_utils::bool_str(m_stdout_enabled));
+    defaultConf.setGlobally(el::ConfigurationType::ToSyslog,
+                            string_utils::bool_str(m_syslog_enabled));
+
+    // Only configure file settings if log files are actually enabled
+    // This to prevent easylogging from creating an empty file even if
+    // the "ToFile" setting is set to "false"
+    if (m_log_files_enabled) {
+        defaultConf.setGlobally(el::ConfigurationType::ToFile,
+                                string_utils::bool_str(m_log_files_enabled));
+        defaultConf.setGlobally(el::ConfigurationType::Filename, get_log_filepath());
+        defaultConf.setGlobally(el::ConfigurationType::MaxLogFileSize, get_log_max_size_setting());
+    }
 
     defaultConf.set(el::Level::Fatal, el::ConfigurationType::Enabled,
                     string_utils::bool_str(m_levels.fatal_enabled()));
@@ -476,7 +493,10 @@ void logging::apply_settings()
     // configure syslog settings
     el::Configurations syslogConf;
     syslogConf.setToDefault();
-    syslogConf.setGlobally(el::ConfigurationType::Format, syslogFormat);
+
+    // Prepend the module name to the syslog message format.
+    // This can help splitting module specific logs into separate files
+    syslogConf.setGlobally(el::ConfigurationType::Format, m_module_name + ": " + syslogFormat);
 
     syslogConf.set(el::Level::Fatal, el::ConfigurationType::Enabled,
                    string_utils::bool_str(m_syslog_levels.fatal_enabled()));
@@ -499,7 +519,6 @@ void logging::apply_settings()
     el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
     el::Loggers::addFlag(el::LoggingFlag::StrictLogFileSizeCheck);
 
-    // Create symbolic links to the log file
     auto logger = el::Loggers::getLogger("default");
     if (!logger) {
         LOG(ERROR) << "invalid logger!";
@@ -510,34 +529,26 @@ void logging::apply_settings()
         LOG(ERROR) << "invalid typedConfigurations!";
         return;
     }
-    auto logFilePath = typedConfigurations->filename(el::Level::Info);
-    auto logFileName = logFilePath.substr(logFilePath.find_last_of("/") + 1);
-    auto symLinkName = get_log_path() + "/" + m_module_name + ".log";
-    unlink(symLinkName.c_str());
-    if (symlink(logFileName.c_str(), symLinkName.c_str()) != 0) {
-        LOG(ERROR) << "Failed creating symbolic link. errno: " << strerror(errno);
+
+    // Create symbolic links to the current log file
+    if (m_log_files_enabled) {
+        auto logFilePath = typedConfigurations->filename(el::Level::Info);
+        auto logFileName = logFilePath.substr(logFilePath.find_last_of("/") + 1);
+        auto symLinkName = get_log_files_path() + "/" + m_module_name + ".log";
+        unlink(symLinkName.c_str());
+        if (symlink(logFileName.c_str(), symLinkName.c_str()) != 0) {
+            LOG(ERROR) << "Failed creating symbolic link. errno: " << strerror(errno);
+        }
     }
 
-    {
-        // Enable roll monitor
+    // Enable roll monitor
+    if (m_log_files_auto_roll) {
         auto roll_monitor = el::Helpers::logDispatchCallback<RollMonitor>("RollMonitor");
         if (roll_monitor) {
             roll_monitor->enable(true);
         } else {
             el::Helpers::installLogDispatchCallback<RollMonitor>("RollMonitor");
         }
-    }
-
-    if (m_netlog_host != "" && m_netlog_port > 0) {
-        //network logging
-        el::Helpers::installLogDispatchCallback<NetLogger>("NetLogger");
-        auto nlg = el::Helpers::logDispatchCallback<NetLogger>("NetLogger");
-        if (!nlg) {
-            LOG(ERROR) << "invalid NetLogger!";
-            return;
-        }
-        nlg->enable(m_netlog_host, m_netlog_port, m_module_name);
-        LOG(INFO) << "Netlogger enabled.";
     }
 }
 
@@ -601,19 +612,29 @@ bool logging::save_settings(const std::string &config_file_path)
 void logging::set_log_path(std::string log_path)
 {
     if (log_path[0] == '/') {
-        m_log_path = log_path;
+        m_log_files_path = log_path;
     } else {
-        m_log_path = os_utils::get_process_dir() + "/" + log_path;
+        m_log_files_path = os_utils::get_process_dir() + "/" + log_path;
     }
 }
 
 void logging::eval_settings()
 {
-    // log_path
-    auto setting = m_settings_map.find("log_path");
+    // log files
+    auto setting = m_settings_map.find("log_files_enabled");
+    if (setting != m_settings_map.end()) {
+        m_log_files_enabled = string_utils::trimmed_substr(setting->second) == "true";
+    }
+
+    setting = m_settings_map.find("log_files_path");
     if (setting != m_settings_map.end()) {
         auto log_path = string_utils::trimmed_substr(setting->second);
         set_log_path(log_path);
+    }
+
+    setting = m_settings_map.find("log_files_auto_roll");
+    if (setting != m_settings_map.end()) {
+        m_log_files_auto_roll = string_utils::trimmed_substr(setting->second) == "true";
     }
 
     // module log filename - must be a non-path filename
@@ -668,23 +689,23 @@ void logging::eval_settings()
     if (module_setting != m_settings_map.end()) {
         module_levels = module_setting->second;
     }
-    m_syslog_levels       = levels & module_levels;
-    auto netlog_host_pair = m_settings_map.find("log_netlog_host");
-    auto netlog_port_pair = m_settings_map.find("log_netlog_port");
-    if (netlog_host_pair != m_settings_map.end() && netlog_port_pair != m_settings_map.end()) {
-        m_netlog_host = netlog_host_pair->second;
-        m_netlog_port = string_utils::stoi(netlog_port_pair->second);
+    m_syslog_levels = levels & module_levels;
+
+    // stdout_enabled
+    setting = m_settings_map.find("log_stdout_enabled");
+    if (setting != m_settings_map.end()) {
+        m_stdout_enabled = string_utils::trimmed_substr(setting->second) == "true";
     }
 
-    //syslog_enabled
+    // syslog_enabled
     setting             = m_settings_map.find("log_syslog_enabled");
     module_setting_name = std::string("log_") + m_module_name + std::string("_syslog_enabled");
     module_setting      = m_settings_map.find(module_setting_name);
 
     if (module_setting != m_settings_map.end()) {
-        m_syslog_enabled = module_setting->second;
+        m_syslog_enabled = module_setting->second == "true";
     } else if (setting != m_settings_map.end()) {
-        m_syslog_enabled = setting->second;
+        m_syslog_enabled = setting->second == "true";
     } else {
         m_syslog_enabled = "false"; // If no module specific setting, accept a global, then default
     }

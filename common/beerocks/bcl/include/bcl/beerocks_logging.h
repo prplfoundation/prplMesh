@@ -84,13 +84,16 @@ public:
     void apply_settings();
 
     std::string get_module_name();
-    std::string get_log_path();
-    std::string get_log_filepath();
-    std::string get_log_filename();
-    std::string get_log_max_size_setting();
     log_levels get_log_levels();
     log_levels get_syslog_levels();
-    std::string get_syslog_enabled();
+    std::string get_log_max_size_setting();
+    bool get_log_files_enabled();
+    std::string get_log_files_path();
+    std::string get_log_filepath();
+    std::string get_log_filename();
+    bool get_log_files_auto_roll();
+    bool get_stdout_enabled();
+    bool get_syslog_enabled();
 
     void set_log_level_state(const eLogLevel &log_level, const bool &new_state);
 
@@ -116,13 +119,14 @@ private:
     std::string m_module_name;
 
     size_t m_logfile_size;
-    std::string m_log_path;
+    bool m_log_files_enabled;
+    std::string m_log_files_path;
     std::string m_log_filename;
+    bool m_log_files_auto_roll;
     log_levels m_levels;
     log_levels m_syslog_levels;
-    std::string m_netlog_host;
-    uint16_t m_netlog_port;
-    std::string m_syslog_enabled;
+    bool m_stdout_enabled;
+    bool m_syslog_enabled;
 
     settings_t m_settings_map;
 };
