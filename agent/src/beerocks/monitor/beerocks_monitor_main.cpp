@@ -163,10 +163,11 @@ int main(int argc, char *argv[])
               << std::endl;
     beerocks::version::log_version(argc, argv);
 
-    //redirect stdout / stderr to file
-    // int fd_log_file_std = beerocks::os_utils::redirect_console_std("/dev/null");
-    int fd_log_file_std = beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.path +
-                                                                   base_monitor_name + "_std.log");
+    // Redirect stdout / stderr to file
+    if (logger.get_log_files_enabled()) {
+        beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.files_path +
+                                                 base_monitor_name + "_std.log");
+    }
 
     //kill running monitor and write pid file
     beerocks::os_utils::kill_pid(beerocks_slave_conf.temp_path, base_monitor_name);
@@ -204,7 +205,6 @@ int main(int argc, char *argv[])
         LOG(ERROR) << "monitor.init(), iface=" << monitor_iface << " slave_uds=" << slave_uds;
     }
 
-    beerocks::os_utils::close_file(fd_log_file_std);
     s_pLogger = nullptr;
 
     return 0;
