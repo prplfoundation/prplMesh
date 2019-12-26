@@ -266,8 +266,6 @@ bool beerocks_ucc_listener::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx,
 {
     std::shared_ptr<ieee1905_1::cCmduHeader> cmdu_header;
 
-    int tlv_type;
-
     switch (message_type) {
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE: {
 
@@ -277,23 +275,18 @@ bool beerocks_ucc_listener::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx,
             return false;
         }
 
-        tlv_type = cmdu_tx.getNextTlvType();
-        while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
-            if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_CHANNEL_PREFERENCE)) {
-                if (!cmdu_tx.addClass<wfa_map::tlvChannelPreference>()) {
-                    LOG(ERROR) << "addClass tlvChannelPreference has failed";
-                    err_string = err_internal;
-                    return false;
-                }
-            } else if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_TRANSMIT_POWER_LIMIT)) {
-                if (!cmdu_tx.addClass<wfa_map::tlvTransmitPowerLimit>()) {
-                    LOG(ERROR) << "addClass tlvTransmitPowerLimit has failed";
-                    err_string = err_internal;
-                    return false;
-                }
-            }
-            tlv_type = cmdu_tx.getNextTlvType();
+        auto tlvChannelPreference = cmdu_tx.getClass<wfa_map::tlvChannelPreference>();
+        if (!tlvChannelPreference) {
+            LOG(ERROR) << "getClass<tlvChannelPreference> failed";
+            return false;
         }
+
+        auto tlvTransmitPowerLimit = cmdu_tx.getClass<wfa_map::tlvTransmitPowerLimit>();
+        if (!tlvTransmitPowerLimit) {
+            LOG(ERROR) << "getClass<tlvTransmitPowerLimit> failed";
+            return false;
+        }
+
         break;
     }
     case ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE: {
@@ -303,29 +296,23 @@ bool beerocks_ucc_listener::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx,
             LOG(ERROR) << "load cmdu has failed";
             return false;
         }
-        tlv_type = cmdu_tx.getNextTlvType();
-        while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
-            if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_AP_METRIC)) {
-                if (!cmdu_tx.addClass<wfa_map::tlvApMetric>()) {
-                    LOG(ERROR) << "addClass tlvApMetric has failed";
-                    err_string = err_internal;
-                    return false;
-                }
-            } else if (tlv_type == int(ieee1905_1::eTlvType::TLV_RECEIVER_LINK_METRIC)) {
-                if (!cmdu_tx.addClass<ieee1905_1::tlvReceiverLinkMetric>()) {
-                    LOG(ERROR) << "addClass tlvReceiverLinkMetric has failed";
-                    err_string = err_internal;
-                    return false;
-                }
-            } else if (tlv_type == int(ieee1905_1::eTlvType::TLV_TRANSMITTER_LINK_METRIC)) {
-                if (!cmdu_tx.addClass<ieee1905_1::tlvTransmitterLinkMetric>()) {
-                    LOG(ERROR) << "addClass tlvTransmitterLinkMetric has failed";
-                    err_string = err_internal;
-                    return false;
-                }
-            }
-            tlv_type = cmdu_tx.getNextTlvType();
+        auto tlvApMetric = cmdu_tx.getClass<wfa_map::tlvApMetric>();
+        if (!tlvApMetric) {
+            LOG(ERROR) << "getClass<tlvApMetric> failed";
+            return false;
         }
+        auto tlvRxLimkMetric = cmdu_tx.getClass<ieee1905_1::tlvReceiverLinkMetric>();
+        if (!tlvRxLimkMetric) {
+            LOG(ERROR) << "getClass<tlvReceiverLinkMetric> failed";
+            return false;
+        }
+
+        auto tlvTxLimkMetric = cmdu_tx.getClass<ieee1905_1::tlvTransmitterLinkMetric>();
+        if (!tlvTxLimkMetric) {
+            LOG(ERROR) << "getClass<tlvTransmitterLinkMetric> failed";
+            return false;
+        }
+
         break;
     }
     default:
