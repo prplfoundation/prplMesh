@@ -2,10 +2,11 @@ set(ELPP_LIB_NAME "mapf::elpp")
 set(ELPP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/framework/external/easylogging)
 set(ELPP_LIBRARY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libelpp.so.1.4.0)
 
-add_definitions(-DELPP_THREAD_SAFE)
-add_definitions(-DELPP_FORCE_USE_STD_THREAD)
-add_definitions(-DELPP_NO_DEFAULT_LOG_FILE)
 add_library(${ELPP_LIB_NAME} UNKNOWN IMPORTED)
+
+set_target_properties(${ELPP_LIB_NAME} PROPERTIES
+    INTERFACE_COMPILE_DEFINITIONS "ELPP_SYSLOG;ELPP_THREAD_SAFE;ELPP_NO_DEFAULT_LOG_FILE;ELPP_FORCE_USE_STD_THREAD"
+)
 
 # Include directory
 set_target_properties(${ELPP_LIB_NAME} PROPERTIES

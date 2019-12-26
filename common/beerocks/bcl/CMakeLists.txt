@@ -36,6 +36,7 @@ target_compile_definitions(${PROJECT_NAME}
         ELPP_FORCE_USE_STD_THREAD
         ELPP_NO_DEFAULT_LOG_FILE
         ELPP_THREAD_SAFE
+        ELPP_SYSLOG
 )
 
 install(TARGETS ${PROJECT_NAME} EXPORT bclConfig
