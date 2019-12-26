@@ -20,13 +20,14 @@ public:
 
     struct SConfigLog {
         //[log]
-        std::string path;
         std::string global_levels;
         std::string syslog_levels;
         std::string global_size;
+        std::string files_enabled;
+        std::string files_path;
+        std::string files_auto_roll;
+        std::string stdout_enabled;
         std::string syslog_enabled;
-        std::string netlog_host;
-        std::string netlog_port;
     };
 
     // config file parameters master / slave

@@ -21,20 +21,21 @@ static bool read_log_section(std::string config_file_path, config_file::SConfigL
     int optional  = 0;
 
     config_file::tConfig log_conf_args = {
-        std::make_tuple("log_path=", &sLogConf.path, mandatory),
         std::make_tuple("log_global_levels=", &sLogConf.global_levels, mandatory),
         std::make_tuple("log_global_syslog_levels=", &sLogConf.syslog_levels, mandatory),
         std::make_tuple("log_global_size=", &sLogConf.global_size, mandatory),
-        std::make_tuple("log_syslog_enabled=", &sLogConf.syslog_enabled, optional),
-        std::make_tuple("log_netlog_host=", &sLogConf.netlog_host, optional),
-        std::make_tuple("log_netlog_port=", &sLogConf.netlog_port, optional)};
+        std::make_tuple("log_files_enabled=", &sLogConf.files_enabled, mandatory),
+        std::make_tuple("log_files_path=", &sLogConf.files_path, mandatory),
+        std::make_tuple("log_files_auto_roll=", &sLogConf.files_auto_roll, mandatory),
+        std::make_tuple("log_stdout_enabled=", &sLogConf.stdout_enabled, mandatory),
+        std::make_tuple("log_syslog_enabled=", &sLogConf.syslog_enabled, optional)};
 
     std::string section = "log";
     bool ret_val        = config_file::read_config_file(config_file_path, log_conf_args, section);
 
     // check path has trailing slash
-    if (sLogConf.path.back() != '/') {
-        sLogConf.path += '/';
+    if (sLogConf.files_path.back() != '/') {
+        sLogConf.files_path += '/';
     }
     return ret_val;
 }
