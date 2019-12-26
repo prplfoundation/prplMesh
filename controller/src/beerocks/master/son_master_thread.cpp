@@ -832,148 +832,120 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(const std::string
     // Define ruid list in order to create only one reply of tlvChannelPreference per ruid
     std::list<sMacAddr> ruid_list;
     // parse all tlvs in cmdu
-    int tlvType;
-    while ((tlvType = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
+    // parse channel preference report message
+    auto channel_preference_tlv_rx = cmdu_rx.getClass<wfa_map::tlvChannelPreference>();
+    if (!channel_preference_tlv_rx) {
+        LOG(ERROR) << "addClass wfa_map::tlvChannelPreference has failed";
+        return false;
+    }
 
-        if (tlvType < 0) {
-            LOG(ERROR) << "getNextTlvType has failed";
+    // read all operating class list
+    auto operating_classes_list_length = channel_preference_tlv_rx->operating_classes_list_length();
+
+    for (int oc_idx = 0; oc_idx < operating_classes_list_length; oc_idx++) {
+        std::stringstream ss;
+        auto operating_class_tuple = channel_preference_tlv_rx->operating_classes_list(oc_idx);
+        if (!std::get<0>(operating_class_tuple)) {
+            LOG(ERROR) << "getting operating class entry has failed!";
             return false;
         }
+        auto &op_class_channels_rx = std::get<1>(operating_class_tuple);
+        auto operating_class       = op_class_channels_rx.operating_class();
+        ss << "operating class=" << int(operating_class);
 
-        if (tlvType == int(wfa_map::eTlvTypeMap::TLV_CHANNEL_PREFERENCE)) {
+        const auto &flags = op_class_channels_rx.flags();
+        auto preference   = flags.preference;
+        auto reason_code  = flags.reason_code;
+        ss << ", preference=" << int(preference) << ", reason=" << int(reason_code);
+        ss << ", channel_list={";
 
-            // parse channel preference report message
-            auto channel_preference_tlv_rx = cmdu_rx.addClass<wfa_map::tlvChannelPreference>();
-            if (!channel_preference_tlv_rx) {
-                LOG(ERROR) << "addClass wfa_map::tlvChannelPreference has failed";
+        auto channel_list_length = op_class_channels_rx.channel_list_length();
+        for (int ch_idx = 0; ch_idx < channel_list_length; ch_idx++) {
+            auto channel_rx = op_class_channels_rx.channel_list(ch_idx);
+            if (!channel_rx) {
+                LOG(ERROR) << "getting channel entry has failed!";
                 return false;
             }
 
-            // read all operating class list
-            auto operating_classes_list_length =
-                channel_preference_tlv_rx->operating_classes_list_length();
+            ss << int(*channel_rx);
 
-            for (int oc_idx = 0; oc_idx < operating_classes_list_length; oc_idx++) {
-                std::stringstream ss;
-                auto operating_class_tuple =
-                    channel_preference_tlv_rx->operating_classes_list(oc_idx);
-                if (!std::get<0>(operating_class_tuple)) {
-                    LOG(ERROR) << "getting operating class entry has failed!";
-                    return false;
-                }
-                auto &op_class_channels_rx = std::get<1>(operating_class_tuple);
-                auto operating_class       = op_class_channels_rx.operating_class();
-                ss << "operating class=" << int(operating_class);
+            // add comma if not last channel in the list, else close list by add curl brackets
+            ss << (((ch_idx + 1) != channel_list_length) ? "," : "}");
 
-                const auto &flags = op_class_channels_rx.flags();
-                auto preference   = flags.preference;
-                auto reason_code  = flags.reason_code;
-                ss << ", preference=" << int(preference) << ", reason=" << int(reason_code);
-                ss << ", channel_list={";
+            // If reply tlvChannelPreference was not created for this ruid, then:
+            // mark first supported non-dfs channel as selected channel
+            // TODO: need to check that selected channel does not violate radio restriction
+            const auto &ruid = channel_preference_tlv_rx->radio_uid();
 
-                auto channel_list_length = op_class_channels_rx.channel_list_length();
-                for (int ch_idx = 0; ch_idx < channel_list_length; ch_idx++) {
-                    auto channel_rx = op_class_channels_rx.channel_list(ch_idx);
-                    if (!channel_rx) {
-                        LOG(ERROR) << "getting channel entry has failed!";
-                        return false;
-                    }
-
-                    ss << int(*channel_rx);
-
-                    // add comma if not last channel in the list, else close list by add curl brackets
-                    ss << (((ch_idx + 1) != channel_list_length) ? "," : "}");
-
-                    // If reply tlvChannelPreference was not created for this ruid, then:
-                    // mark first supported non-dfs channel as selected channel
-                    // TODO: need to check that selected channel does not violate radio restriction
-                    const auto &ruid = channel_preference_tlv_rx->radio_uid();
-
-                    if (std::find(ruid_list.begin(), ruid_list.end(), ruid) != ruid_list.end() ||
-                        preference == 0 || wireless_utils::is_dfs_channel(*channel_rx)) {
-                        continue;
-                    }
-
-                    LOG(INFO) << "ruid=" << network_utils::mac_to_string(ruid);
-                    LOG(INFO) << "selected_operating_class=" << std::dec << int(operating_class);
-                    LOG(INFO) << "selected_channel=" << int(*channel_rx);
-
-                    ruid_list.push_back(ruid);
-
-                    // send one channel preference report for each ruid
-                    auto channel_preference_tlv_tx =
-                        cmdu_tx.addClass<wfa_map::tlvChannelPreference>();
-                    if (!channel_preference_tlv_tx) {
-                        LOG(ERROR) << "addClass ieee1905_1::tlvChannelPreference has failed";
-                        return false;
-                    }
-
-                    channel_preference_tlv_tx->radio_uid() = ruid;
-
-                    // Create operating class object
-                    auto op_class_channels_tx =
-                        channel_preference_tlv_tx->create_operating_classes_list();
-                    if (!op_class_channels_tx) {
-                        LOG(ERROR) << "create_operating_classes_list() has failed!";
-                        return false;
-                    }
-
-                    // TODO: check that the data is parsed properly after fixing the following bug:
-                    // Since sFlags is defined after dynamic list cPreferenceOperatingClasses it cause data override
-                    // on the first channel on the list and sFlags itself.
-                    // See: https://github.com/prplfoundation/prplMesh/issues/8
-
-                    // Fill operating class object
-                    op_class_channels_tx->operating_class() = operating_class;
-
-                    // allocate 1 channel
-                    if (!op_class_channels_tx->alloc_channel_list()) {
-                        LOG(ERROR) << "alloc_channel_list() has failed!";
-                        return false;
-                    }
-                    auto channel_idx = op_class_channels_tx->channel_list_length();
-                    auto channel_tx  = op_class_channels_tx->channel_list(channel_idx - 1);
-                    if (!channel_tx) {
-                        LOG(ERROR) << "getting channel entry has failed!";
-                        return false;
-                    }
-                    *channel_tx = *channel_rx;
-
-                    op_class_channels_tx->flags() = op_class_channels_rx.flags();
-
-                    // Push operating class object to the list of operating class objects
-                    if (!channel_preference_tlv_tx->add_operating_classes_list(
-                            op_class_channels_tx)) {
-                        LOG(ERROR) << "add_operating_classes_list() has failed!";
-                        return false;
-                    }
-                }
-                LOG(DEBUG) << ss.str();
+            if (std::find(ruid_list.begin(), ruid_list.end(), ruid) != ruid_list.end() ||
+                preference == 0 || wireless_utils::is_dfs_channel(*channel_rx)) {
+                continue;
             }
-        } else if (tlvType == int(wfa_map::eTlvTypeMap::TLV_RADIO_OPERATION_RESTRICTION)) {
-            // parse radio operation restriction tlv
-            auto radio_operation_restriction_tlv_rx =
-                cmdu_rx.addClass<wfa_map::tlvRadioOperationRestriction>();
-            if (!radio_operation_restriction_tlv_rx) {
-                LOG(ERROR) << "addClass wfa_map::tlvRadioOperationRestriction has failed";
+
+            LOG(INFO) << "ruid=" << network_utils::mac_to_string(ruid);
+            LOG(INFO) << "selected_operating_class=" << std::dec << int(operating_class);
+            LOG(INFO) << "selected_channel=" << int(*channel_rx);
+
+            ruid_list.push_back(ruid);
+
+            // send one channel preference report for each ruid
+            auto channel_preference_tlv_tx = cmdu_tx.addClass<wfa_map::tlvChannelPreference>();
+            if (!channel_preference_tlv_tx) {
+                LOG(ERROR) << "addClass ieee1905_1::tlvChannelPreference has failed";
                 return false;
             }
 
-            // TODO: continute to parse this tlv
-            // This TLV contains radio restriction in channel selection that must be considered
-            // in channel selection request message. Since this is a dummy message, this TLV is
-            // ignored. Full implemtation will be as part of channel selection task.
+            channel_preference_tlv_tx->radio_uid() = ruid;
 
-        } else {
-            LOG(ERROR) << "Unexpected tlv type in CHANNEL_PREFERENCE_QUERY_MESSAGE, type="
-                       << int(tlvType);
-            // TODO: replace return statement with function that skip s unexpected tlv
-            // see: https://github.com/prplfoundation/prplMesh/issues/107
+            // Create operating class object
+            auto op_class_channels_tx = channel_preference_tlv_tx->create_operating_classes_list();
+            if (!op_class_channels_tx) {
+                LOG(ERROR) << "create_operating_classes_list() has failed!";
+                return false;
+            }
 
-            return false;
-        } // close if (tlvType == some_tlv_type)
+            // TODO: check that the data is parsed properly after fixing the following bug:
+            // Since sFlags is defined after dynamic list cPreferenceOperatingClasses it cause data override
+            // on the first channel on the list and sFlags itself.
+            // See: https://github.com/prplfoundation/prplMesh/issues/8
 
-    } //close while (cmdu_rx.getNextTlvType(tlvType))
+            // Fill operating class object
+            op_class_channels_tx->operating_class() = operating_class;
+
+            // allocate 1 channel
+            if (!op_class_channels_tx->alloc_channel_list()) {
+                LOG(ERROR) << "alloc_channel_list() has failed!";
+                return false;
+            }
+            auto channel_idx = op_class_channels_tx->channel_list_length();
+            auto channel_tx  = op_class_channels_tx->channel_list(channel_idx - 1);
+            if (!channel_tx) {
+                LOG(ERROR) << "getting channel entry has failed!";
+                return false;
+            }
+            *channel_tx = *channel_rx;
+
+            op_class_channels_tx->flags() = op_class_channels_rx.flags();
+
+            // Push operating class object to the list of operating class objects
+            if (!channel_preference_tlv_tx->add_operating_classes_list(op_class_channels_tx)) {
+                LOG(ERROR) << "add_operating_classes_list() has failed!";
+                return false;
+            }
+        }
+        LOG(DEBUG) << ss.str();
+    }
+
+    // parse radio operation restriction tlv
+    auto radio_operation_restriction_tlv_rx =
+        cmdu_rx.getClass<wfa_map::tlvRadioOperationRestriction>();
+    if (radio_operation_restriction_tlv_rx) {
+        LOG(DEBUG) << "Found tlvRadioOperationRestriction";
+        // TODO: continute to parse this tlv
+        // This TLV contains radio restriction in channel selection that must be considered
+        // in channel selection request message. Since this is a dummy message, this TLV is
+        // ignored. Full implemtation will be as part of channel selection task.
+    }
 
     if (database.setting_certification_mode()) {
         auto certification_tx_buffer = database.get_certification_tx_buffer();
@@ -1019,7 +991,7 @@ bool master_thread::handle_cmdu_1905_client_steering_btm_report_message(
     auto mid = cmdu_rx.getMessageId();
     LOG(INFO) << "Received CLIENT_STEERING_BTM_REPORT_MESSAGE, mid=" << std::hex << int(mid);
 
-    auto steering_btm_report = cmdu_rx.addClass<wfa_map::tlvSteeringBTMReport>();
+    auto steering_btm_report = cmdu_rx.getClass<wfa_map::tlvSteeringBTMReport>();
     if (!steering_btm_report) {
         LOG(ERROR) << "addClass wfa_map::tlvSteeringBTMReportfailed";
         return false;
@@ -1063,14 +1035,9 @@ bool master_thread::handle_cmdu_1905_channel_selection_response(const std::strin
 {
     auto mid = cmdu_rx.getMessageId();
     LOG(INFO) << "Received CHANNEL_SELECTION_RESPONSE_MESSAGE, mid=" << std::dec << int(mid);
-    do {
-        auto channel_selection_response_tlv =
-            cmdu_rx.addClass<wfa_map::tlvChannelSelectionResponse>();
-        if (!channel_selection_response_tlv) {
-            LOG(ERROR) << "addClass ieee1905_1::tlvChannelSelectionResponse has failed";
-            return false;
-        }
 
+    for (auto channel_selection_response_tlv :
+         cmdu_rx.msg.getClassList<wfa_map::tlvChannelSelectionResponse>()) {
         auto &ruid         = channel_selection_response_tlv->radio_uid();
         auto response_code = channel_selection_response_tlv->response_code();
 
@@ -1101,8 +1068,7 @@ bool master_thread::handle_cmdu_1905_channel_selection_response(const std::strin
                    }
                    return ret_str;
                })(response_code);
-
-    } while (cmdu_rx.getNextTlvType() != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE));
+    }
 
     return true;
 }
@@ -1191,84 +1157,64 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
 
     bool old_link_metrics_removed = false;
 
-    int tlvType;
     // holds mac address of the reporting agent, used as link_metric_data key
     sMacAddr reporting_agent_al_mac;
 
-    //TODO: Use cmdu_rx.parse() instead
-    // parse all tlvs in cmdu and save ap metric data to database
-    while ((tlvType = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
+    auto TxLinkMetricData = cmdu_rx.getClass<ieee1905_1::tlvTransmitterLinkMetric>();
+    if (!TxLinkMetricData) {
+        LOG(ERROR) << "addClass ieee1905_1::tx_Link_metric_data has failed";
+        return false;
+    }
 
-        if (tlvType < 0) {
-            LOG(ERROR) << "getNextTlvType has failed";
-            return false;
+    reporting_agent_al_mac = TxLinkMetricData->reporter_al_mac();
+    if (reporting_agent_al_mac != network_utils::ZERO_MAC) {
+        //clear agent reports when recieving a new link metric from that agent
+        if (!old_link_metrics_removed) {
+            //clear agent reports when recieving a new link metric from that agent
+            link_metric_data[reporting_agent_al_mac].clear();
+            old_link_metrics_removed = true;
         }
 
-        if (tlvType == int(ieee1905_1::eTlvType::TLV_TRANSMITTER_LINK_METRIC)) {
-            // parse tx_Link_metric_data
-            auto TxLinkMetricData = cmdu_rx.addClass<ieee1905_1::tlvTransmitterLinkMetric>();
-            if (!TxLinkMetricData) {
-                LOG(ERROR) << "addClass ieee1905_1::tx_Link_metric_data has failed";
-                return false;
-            }
+        LOG(DEBUG) << "recieved  tlvTransmitterLinkMetric from al_mac ="
+                   << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
+                   << "reported  al_mac ="
+                   << network_utils::mac_to_string(TxLinkMetricData->neighbor_al_mac())
+                   << std::endl;
 
-            reporting_agent_al_mac = TxLinkMetricData->reporter_al_mac();
-            if (reporting_agent_al_mac != network_utils::ZERO_MAC) {
-                //clear agent reports when recieving a new link metric from that agent
-                if (!old_link_metrics_removed) {
-                    //clear agent reports when recieving a new link metric from that agent
-                    link_metric_data[reporting_agent_al_mac].clear();
-                    old_link_metrics_removed = true;
-                }
+        //fill tx data from TLV
+        if (!new_link_metric_data.add_transmitter_link_metric(TxLinkMetricData)) {
+            LOG(ERROR) << "adding TxLinkMetricData has failed";
+            return false;
+        }
+    }
 
-                LOG(DEBUG) << "recieved  tlvTransmitterLinkMetric from al_mac ="
-                           << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
-                           << "reported  al_mac ="
-                           << network_utils::mac_to_string(TxLinkMetricData->neighbor_al_mac())
-                           << std::endl;
+    auto RxLinkMetricData = cmdu_rx.getClass<ieee1905_1::tlvReceiverLinkMetric>();
+    if (!RxLinkMetricData) {
+        LOG(ERROR) << "addClass ieee1905_1::tlvReceiverLinkMetric has failed";
+        return false;
+    }
 
-                //fill tx data from TLV
-                if (!new_link_metric_data.add_transmitter_link_metric(TxLinkMetricData)) {
-                    LOG(ERROR) << "adding TxLinkMetricData has failed";
-                    return false;
-                }
-            }
-
-        } else if (tlvType == int(ieee1905_1::eTlvType::TLV_RECEIVER_LINK_METRIC)) {
-            // parse tlvReceiverLinkMetric
-            auto RxLinkMetricData = cmdu_rx.addClass<ieee1905_1::tlvReceiverLinkMetric>();
-            if (!RxLinkMetricData) {
-                LOG(ERROR) << "addClass ieee1905_1::tlvReceiverLinkMetric has failed";
-                return false;
-            }
-
-            if (reporting_agent_al_mac != network_utils::ZERO_MAC) {
-                if (reporting_agent_al_mac != RxLinkMetricData->reporter_al_mac()) {
-                    LOG(ERROR) << "TLV_RECEIVER_LINK_METRIC reporter al_mac ="
-                               << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
-                               << " and TLV_TRANSMITTER_LINK_METRIC reporter al_mac ="
-                               << network_utils::mac_to_string(RxLinkMetricData->reporter_al_mac())
-                               << std::endl
-                               << " not the same";
-                    return false;
-                }
-            }
-
-            LOG(DEBUG) << "recieved tlvReceiverLinkMetric from al_mac="
+    if (reporting_agent_al_mac != network_utils::ZERO_MAC) {
+        if (reporting_agent_al_mac != RxLinkMetricData->reporter_al_mac()) {
+            LOG(ERROR) << "TLV_RECEIVER_LINK_METRIC reporter al_mac ="
                        << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
-                       << "reported  al_mac ="
-                       << network_utils::mac_to_string(RxLinkMetricData->neighbor_al_mac())
-                       << std::endl;
-
-            //fill rx data from TLV
-            if (!new_link_metric_data.add_receiver_link_metric(RxLinkMetricData)) {
-                LOG(ERROR) << "adding RxLinkMetricData has failed";
-                return false;
-            }
-        } else {
-            LOG(ERROR) << " unexpected tlv is recieved ";
+                       << " and TLV_TRANSMITTER_LINK_METRIC reporter al_mac ="
+                       << network_utils::mac_to_string(RxLinkMetricData->reporter_al_mac())
+                       << std::endl
+                       << " not the same";
             return false;
         }
+    }
+
+    LOG(DEBUG) << "recieved tlvReceiverLinkMetric from al_mac="
+               << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
+               << "reported  al_mac ="
+               << network_utils::mac_to_string(RxLinkMetricData->neighbor_al_mac()) << std::endl;
+
+    //fill rx data from TLV
+    if (!new_link_metric_data.add_receiver_link_metric(RxLinkMetricData)) {
+        LOG(ERROR) << "adding RxLinkMetricData has failed";
+        return false;
     }
 
     link_metric_data[reporting_agent_al_mac][reporting_agent_al_mac] = new_link_metric_data;
@@ -1401,36 +1347,17 @@ bool master_thread::handle_cmdu_1905_ap_metric_response(const std::string &src_m
 
     //getting reference for ap metric data storage from db
     auto &ap_metric_data = database.get_ap_metric_data_map();
-    int tlvType;
 
-    // parse all tlvs in cmdu and save ap metric data to database
-    while ((tlvType = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
+    for (auto ap_metric_tlv : cmdu_rx.msg.getClassList<wfa_map::tlvApMetric>()) {
+        //parse tx_ap_metric_data
+        sMacAddr reporting_agent_bssid = ap_metric_tlv->bssid();
 
-        if (tlvType < 0) {
-            LOG(ERROR) << "getNextTlvType has failed";
-            return false;
-        }
+        LOG(DEBUG) << "recieved tlvApMetric from BSSID ="
+                   << network_utils::mac_to_string(reporting_agent_bssid);
 
-        if (tlvType == int(wfa_map::eTlvTypeMap::TLV_AP_METRIC)) {
-            //parse tx_ap_metric_data
-            auto ap_metric_tlv = cmdu_rx.addClass<wfa_map::tlvApMetric>();
-            if (!ap_metric_tlv) {
-                LOG(ERROR) << "addClass wfa_map::tlvApMetric has failed";
-                return false;
-            }
-
-            sMacAddr reporting_agent_bssid = ap_metric_tlv->bssid();
-
-            LOG(DEBUG) << "recieved tlvApMetric from BSSID ="
-                       << network_utils::mac_to_string(reporting_agent_bssid);
-
-            //fill tx data from TLV
-            if (!ap_metric_data[reporting_agent_bssid].add_ap_metric_data(ap_metric_tlv)) {
-                LOG(ERROR) << "adding apMetricData from tlv has failed";
-                return false;
-            }
-        } else {
-            LOG(ERROR) << " unexpected tlv is recieved ";
+        //fill tx data from TLV
+        if (!ap_metric_data[reporting_agent_bssid].add_ap_metric_data(ap_metric_tlv)) {
+            LOG(ERROR) << "adding apMetricData from tlv has failed";
             return false;
         }
     }
@@ -1446,13 +1373,8 @@ bool master_thread::handle_cmdu_1905_operating_channel_report(const std::string 
     auto mid = cmdu_rx.getMessageId();
     LOG(INFO) << "Received OPERATING_CHANNEL_REPORT_MESSAGE, mid=" << std::dec << int(mid);
 
-    do {
-        auto operating_channel_report_tlv = cmdu_rx.addClass<wfa_map::tlvOperatingChannelReport>();
-        if (!operating_channel_report_tlv) {
-            LOG(ERROR) << "addClass ieee1905_1::operating_channel_report_tlv has failed";
-            return false;
-        }
-
+    for (auto operating_channel_report_tlv :
+         cmdu_rx.msg.getClassList<wfa_map::tlvOperatingChannelReport>()) {
         auto &ruid    = operating_channel_report_tlv->radio_uid();
         auto tx_power = operating_channel_report_tlv->current_transmit_power();
 
@@ -1475,8 +1397,7 @@ bool master_thread::handle_cmdu_1905_operating_channel_report(const std::string 
             LOG(INFO) << "operating_class=" << int(operating_class)
                       << ", operating_channel=" << int(channel);
         }
-
-    } while (cmdu_rx.getNextTlvType() != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE));
+    }
 
     // send ACK_MESSAGE back to the Agent
     if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
@@ -1492,7 +1413,7 @@ bool master_thread::handle_cmdu_1905_topology_discovery(const std::string &src_m
 {
     auto mid = cmdu_rx.getMessageId();
     LOG(INFO) << "Received TOPOLOGY_DISCOVERY_MESSAGE, mid=" << std::dec << int(mid);
-    auto tlvAlMac = cmdu_rx.addClass<ieee1905_1::tlvAlMacAddressType>();
+    auto tlvAlMac = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddressType>();
     if (!tlvAlMac) {
         LOG(ERROR) << "addClass tlvAlMacAddressType failed";
         return false;
@@ -1517,7 +1438,7 @@ bool master_thread::handle_cmdu_1905_higher_layer_data_message(const std::string
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received HIGHER_LAYER_DATA_MESSAGE , mid=" << std::hex << int(mid);
 
-    auto tlvHigherLayerData = cmdu_rx.addClass<wfa_map::tlvHigherLayerData>();
+    auto tlvHigherLayerData = cmdu_rx.getClass<wfa_map::tlvHigherLayerData>();
     if (!tlvHigherLayerData) {
         LOG(ERROR) << "addClass wfa_map::tlvHigherLayerData failed";
         return false;
@@ -1544,49 +1465,22 @@ bool master_thread::handle_cmdu_1905_topology_notification(const std::string &sr
     auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received TOPOLOGY_NOTIFICATION_MESSAGE, mid=" << std::hex << int(mid);
 
-    std::shared_ptr<wfa_map::tlvClientAssociationEvent> client_association_event_tlv = nullptr;
-    std::shared_ptr<beerocks_message::tlvVsClientAssociationEvent> vs_tlv            = nullptr;
-
-    int tlvType;
-    while ((tlvType = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
-        switch (tlvType) {
-        case int(wfa_map::eTlvTypeMap::TLV_CLIENT_ASSOCIATION_EVENT):
-            LOG(DEBUG) << "Found TLV_CLIENT_ASSOCIATION_EVENT TLV";
-            client_association_event_tlv = cmdu_rx.addClass<wfa_map::tlvClientAssociationEvent>();
-            if (!client_association_event_tlv) {
-                LOG(ERROR) << "addClass wfa_map::tlvClientAssociationEvent failed";
-                return false;
-            }
-            break;
-        case int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC): {
-            LOG(DEBUG) << "Found TLV_VENDOR_SPECIFIC TLV";
-
-            auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
-            if (!beerocks_header) {
-                LOG(DEBUG) << "Failed to parse intel vs message (not Intel?)";
-                continue;
-            }
-
-            vs_tlv = beerocks_header->addClass<beerocks_message::tlvVsClientAssociationEvent>();
-            if (!vs_tlv) {
-                LOG(ERROR) << "addClass wfa_map::tlvVsClientAssociationEvent failed";
-                return false;
-            }
-        } break;
-        default:
-            LOG(ERROR) << "Unexpected tlv type in TOPOLOGY_NOTIFICATION_MESSAGE, type="
-                       << int(tlvType);
-            // TODO: replace return statement with function that skip s unexpected tlv
-            // see: https://github.com/prplfoundation/prplMesh/issues/107
-            return false;
-        }
-    }
-
+    auto client_association_event_tlv = cmdu_rx.getClass<wfa_map::tlvClientAssociationEvent>();
     if (!client_association_event_tlv) {
         // The standard allows having zero TLV_CLIENT_ASSOCIATION_EVENT, in that case, there is no
         // point to continue the handling of this message.
         LOG(INFO) << "wfa_map::tlvClientAssociationEvent not found";
         return true;
+    }
+
+    std::shared_ptr<beerocks_message::tlvVsClientAssociationEvent> vs_tlv = nullptr;
+    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
+    if (beerocks_header) {
+        vs_tlv = beerocks_header->addClass<beerocks_message::tlvVsClientAssociationEvent>();
+        if (!vs_tlv) {
+            LOG(ERROR) << "addClass wfa_map::tlvVsClientAssociationEvent failed";
+            return false;
+        }
     }
 
     auto &client_mac    = client_association_event_tlv->client_mac();
