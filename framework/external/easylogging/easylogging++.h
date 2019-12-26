@@ -752,7 +752,7 @@ static const char* kPerformanceLoggerId                    =      "performance";
 #endif
 
 #if defined(ELPP_SYSLOG)
-static const char* kSysLogLoggerId                         =      "syslog";
+static const char* kSysLogLoggerId __attribute__((unused)) =      "syslog";
 #endif  // defined(ELPP_SYSLOG)
 
 #if ELPP_OS_WINDOWS
