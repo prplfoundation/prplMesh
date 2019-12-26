@@ -1781,7 +1781,7 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
         return true;
     }
 
-    auto tlvSupportedRole = cmdu_rx.addClass<ieee1905_1::tlvSupportedRole>();
+    auto tlvSupportedRole = cmdu_rx.getClass<ieee1905_1::tlvSupportedRole>();
     if (tlvSupportedRole) {
         LOG(DEBUG) << "tlvSupportedRole->value()=" << int(tlvSupportedRole->value());
         if (tlvSupportedRole->value() != ieee1905_1::tlvSupportedRole::REGISTRAR) {
@@ -1796,7 +1796,7 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
     controller_bridge_mac = src_mac;
     LOG(INFO) << "update controller_bridge_mac=" << controller_bridge_mac;
 
-    auto tlvSupportedFreqBand = cmdu_rx.addClass<ieee1905_1::tlvSupportedFreqBand>();
+    auto tlvSupportedFreqBand = cmdu_rx.getClass<ieee1905_1::tlvSupportedFreqBand>();
     if (tlvSupportedFreqBand) {
         LOG(DEBUG) << "tlvSupportedFreqBand->value()=" << int(tlvSupportedFreqBand->value());
 
@@ -1852,7 +1852,7 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
         return true;
     }
 
-    auto tlvSupportedService = cmdu_rx.addClass<wfa_map::tlvSupportedService>();
+    auto tlvSupportedService = cmdu_rx.getClass<wfa_map::tlvSupportedService>();
     if (tlvSupportedService) {
         bool controllerFound = false;
         for (int i = 0; i < tlvSupportedService->supported_service_list_length(); i++) {
