@@ -1515,4 +1515,85 @@ bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
     return true;
 }
 
+cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::~cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION() {
+}
+sMacAddr& cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::ruid() {
+    return (sMacAddr&)(*m_ruid);
+}
+
+sVapsList& cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::params() {
+    return (sVapsList&)(*m_params);
+}
+
+void cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::class_swap()
+{
+    m_ruid->struct_swap();
+    m_params->struct_swap();
+}
+
+bool cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // ruid
+    class_size += sizeof(sVapsList); // params
+    return class_size;
+}
+
+bool cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_ruid = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_ruid->struct_init(); }
+    m_params = (sVapsList*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sVapsList))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sVapsList) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_params->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
 
