@@ -19,15 +19,12 @@ CmduMessageRx::CmduMessageRx(uint8_t *buff, size_t buff_len) : CmduMessage(buff,
 
 CmduMessageRx::~CmduMessageRx() {}
 
-bool CmduMessageRx::parse(bool parse_tlvs)
+bool CmduMessageRx::parse()
 {
     msg.reset(true);
     auto cmduhdr = msg.addClass<cCmduHeader>();
     if (!cmduhdr)
         return false;
-
-    if (!parse_tlvs)
-        return true;
 
     if (parser) {
         if (parser->parse())

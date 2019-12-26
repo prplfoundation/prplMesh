@@ -340,7 +340,7 @@ int test_parser()
     memcpy(recv_buffer, tx_buffer, sizeof(recv_buffer));
 
     CmduMessageRx received_message(recv_buffer, sizeof(recv_buffer));
-    received_message.parse(true);
+    received_message.parse();
     auto tlv4_ = received_message.getClass<tlvUnknown>();
     if (!tlv4_) {
         LOG(ERROR) << "getClass<tlvUnknown> failed";

@@ -212,7 +212,7 @@ bool transport_socket_thread::handle_cmdu_message_bus()
         return false;
     }
 
-    if (!cmdu_rx.parse(true)) {
+    if (!cmdu_rx.parse()) {
         THREAD_LOG(ERROR) << "parsing cmdu failure, rx_buffer" << std::hex << rx_buffer << std::dec
                           << ", uds_header->length=" << int(uds_header->length);
         return false;
