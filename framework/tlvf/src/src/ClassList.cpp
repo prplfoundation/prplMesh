@@ -34,6 +34,8 @@ void ClassList::swap()
     // call all tlv finalize functions
     for (auto const &c : m_class_vector) {
         c->class_swap();
+        if (c->getInnerClassList())
+            c->getInnerClassList()->swap();
     }
 
     m_swapped = !m_swapped;
