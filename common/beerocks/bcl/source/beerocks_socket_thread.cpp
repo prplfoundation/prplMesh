@@ -163,7 +163,7 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
         return false;
     }
 
-    if (!cmdu_rx.parse()) {
+    if (!cmdu_rx.parse(true)) {
         THREAD_LOG(ERROR) << "parsing cmdu failure, rx_buffer" << std::hex << rx_buffer << std::dec
                           << ", uds_header->length=" << int(uds_header->length);
         return false;

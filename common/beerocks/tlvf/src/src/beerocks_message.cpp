@@ -84,7 +84,7 @@ std::string message_com::print_cmdu_types(const message::sUdsHeader *uds_header,
     ieee1905_1::CmduMessageRx cmdu_rx((uint8_t *)uds_header + sizeof(message::sUdsHeader),
                                       uds_header->length);
 
-    auto cmdu_header = cmdu_rx.parse();
+    auto cmdu_header = cmdu_rx.parse(true);
 
     if (!cmdu_header) {
         LOG(ERROR) << "cmdu parse failed!";
