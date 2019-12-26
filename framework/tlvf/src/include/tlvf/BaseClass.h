@@ -42,7 +42,7 @@ protected:
     uint8_t *m_buff_ptr__;
     const size_t m_buff_len__;
     const bool m_parse__;
-    bool m_finalized__;
+    bool m_finalized__    = false;
     bool m_init_succeeded = false;
     std::shared_ptr<ClassList> m_inner__;
 };

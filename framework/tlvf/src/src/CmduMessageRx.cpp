@@ -26,8 +26,6 @@ bool CmduMessageRx::parse(bool parse_tlvs)
     if (!cmduhdr)
         return false;
 
-    cmduhdr->class_swap(); //swap back cmduheader
-
     if (!parse_tlvs)
         return true;
 
