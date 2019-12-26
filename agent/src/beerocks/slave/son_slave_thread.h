@@ -243,7 +243,7 @@ private:
     uint8_t *m1_auth_buf   = nullptr;
     size_t m1_auth_buf_len = 0;
 
-    bool parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool parse_intel_join_response(Socket *sd, beerocks::beerocks_header &beerocks_header);
     bool parse_non_intel_join_response(Socket *sd);
     bool handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_autoconfiguration_renew(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);

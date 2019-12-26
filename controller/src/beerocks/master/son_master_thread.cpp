@@ -703,60 +703,19 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
                                                            ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
-
-    std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_basic_caps = nullptr;
-    std::shared_ptr<ieee1905_1::tlvWsc> tlvWsc                             = nullptr;
-    bool intel_agent                                                       = false;
-    int type;
-
-    while ((type = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
-        if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES)) {
-            radio_basic_caps = cmdu_rx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
-            if (!radio_basic_caps)
-                return false;
-            LOG(DEBUG) << "Found TLV_AP_RADIO_BASIC_CAPABILITIES TLV";
-        } else if (type == int(ieee1905_1::eTlvType::TLV_WSC)) {
-            tlvWsc = cmdu_rx.addClass<ieee1905_1::tlvWsc>();
-            if (!tlvWsc)
-                return false;
-            LOG(DEBUG) << "Found TLV_WSC TLV";
-        } else if (type == int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
-            // If this is an Intel Agent, it will have VS TLV as the last TLV.
-            // Currently, we don't support skipping TLVs, so if we see a VS TLV, we assume
-            // It is an Intel agent, and will add the class in the Intel agent handling below.
-            intel_agent = true;
-            break;
-        } else if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_IDENTIFIER)) {
-            // Check if this is a M2 message that we sent to the agent, which was just looped back.
-            // The M1 and M2 messages are both of CMDU type AP_Autoconfiguration_WSC. Thus,
-            // when we send the M2 to the local agent, it will be published back on the local bus because
-            // the destination is our AL-MAC, and the controller does listen to this CMDU.
-            // Ideally, we should use the message type attribute from the WSC payload to distinguish.
-            // Unfortunately, that is a bit complicated with the current tlv parser. However, there is another
-            // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
-            // while the M2 has the AP_Radio_Identifier TLV.
-            // If this is a looped back M2 CMDU, we can treat is as handled successfully.
-            LOG(DEBUG) << "Loopbed back M2 CMDU";
-            return true;
-        } else {
-            LOG(ERROR) << "Unknown TLV, type " << std::hex << type;
-            return false;
-        }
-        type = cmdu_rx.getNextTlvType();
-    }
-
-    if (!radio_basic_caps) {
-        LOG(ERROR) << "Failed to get APRadioBasicCapabilities TLV";
-        return false;
-    }
-
+    auto tlvWsc = cmdu_rx.getClass<ieee1905_1::tlvWsc>();
     if (!tlvWsc) {
-        LOG(ERROR) << "Failed to get TLV_WSC TLV";
+        LOG(ERROR) << "getClass<ieee1905_1::tlvWsc> failed";
         return false;
     }
     auto m1 = std::dynamic_pointer_cast<WSC::m1>(WSC::AttrList::parse(*tlvWsc));
     if (!m1) {
-        LOG(ERROR) << "Failed to parse M1 attributes";
+        LOG(INFO) << "Not a valid M1 - Ignoring WSC CMDU";
+        return false;
+    }
+    auto radio_basic_caps = cmdu_rx.getClass<wfa_map::tlvApRadioBasicCapabilities>();
+    if (!radio_basic_caps) {
+        LOG(ERROR) << "getClass<wfa_map::tlvApRadioBasicCapabilities> failed";
         return false;
     }
     auto al_mac = network_utils::mac_to_string(m1->mac_addr());
@@ -823,9 +782,10 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
         }
     }
 
-    if (intel_agent) {
+    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
+    if (beerocks_header) {
         LOG(INFO) << "Intel radio agent join (al_mac=" << al_mac << " ruid=" << ruid;
-        if (!handle_intel_slave_join(src_mac, radio_basic_caps, cmdu_rx, cmdu_tx)) {
+        if (!handle_intel_slave_join(src_mac, radio_basic_caps, *beerocks_header, cmdu_tx)) {
             LOG(ERROR) << "Intel radio agent join failed (al_mac=" << al_mac << " ruid=" << ruid
                        << ")";
             return false;
@@ -1720,7 +1680,7 @@ bool master_thread::handle_cmdu_1905_topology_notification(const std::string &sr
 
 bool master_thread::handle_intel_slave_join(
     const std::string &src_mac, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
-    ieee1905_1::CmduMessageRx &cmdu_rx, ieee1905_1::CmduMessageTx &cmdu_tx)
+    beerocks::beerocks_header &beerocks_header, ieee1905_1::CmduMessageTx &cmdu_tx)
 {
     // Prepare outcoming response vs tlv
     auto join_response =
@@ -1730,21 +1690,13 @@ bool master_thread::handle_intel_slave_join(
         return false;
     }
 
-    // Parse incoming vs_tlv
-    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
-    if (!beerocks_header) {
-        LOG(ERROR) << "Failed to parse intel vs message (not Intel?)";
-        return false;
-    }
-
-    if (beerocks_header->action_op() !=
-        beerocks_message::ACTION_CONTROL_SLAVE_JOINED_NOTIFICATION) {
-        LOG(ERROR) << "Unexpected Intel action op " << beerocks_header->action_op();
+    if (beerocks_header.action_op() != beerocks_message::ACTION_CONTROL_SLAVE_JOINED_NOTIFICATION) {
+        LOG(ERROR) << "Unexpected Intel action op " << beerocks_header.action_op();
         return false;
     }
 
     auto notification =
-        beerocks_header->addClass<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>();
+        beerocks_header.addClass<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>();
     if (!notification) {
         LOG(ERROR) << "addClass cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION failed";
         return false;
