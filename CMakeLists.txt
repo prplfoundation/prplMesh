@@ -73,7 +73,13 @@ endif()
 set(BEEROCKS_NOTIFY 0)
 set(BEEROCKS_REPEATER_MODE 0)
 set(BEEROCKS_ENABLE_ARP_MONITOR 1)
-set(BEEROCKS_LOG_PATH "${TMP_PATH}/logs")
+
+# Logging configuration
+set(BEEROCKS_LOG_FILES_ENABLED      "true")
+set(BEEROCKS_LOG_FILES_PATH         "${TMP_PATH}/logs")
+set(BEEROCKS_LOG_FILES_AUTO_ROLL    "true")
+set(BEEROCKS_LOG_STDOUT_ENABLED     "false")
+set(BEEROCKS_LOG_SYSLOG_ENABLED     "false")
 
 # Platform specific flags
 if (TARGET_PLATFORM STREQUAL "openwrt")
@@ -89,7 +95,9 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
     set(BEEROCKS_BRIDGE_IFACE "brlan0")
     set(BEEROCKS_BH_WIRE_IFACE "nsgmii0")
     set(BEEROCKS_ENABLE_ARP_MONITOR 0)
-    set(BEEROCKS_LOG_PATH "/rdklogs/logs/")
+    # Disable file and enable syslog logging
+    set(BEEROCKS_LOG_FILES_ENABLED "false")
+    set(BEEROCKS_LOG_SYSLOG_ENABLED "true")
     set(CMAKE_SKIP_RPATH TRUE)
 elseif (TARGET_PLATFORM STREQUAL "linux")
     add_definitions(-DBEEROCKS_LINUX)

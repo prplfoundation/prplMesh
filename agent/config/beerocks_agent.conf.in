@@ -50,9 +50,11 @@ enable_repeater_mode=0
 #sta_iface_filter_low=1
 
 [log]
-log_path=@BEEROCKS_LOG_PATH@
 log_global_levels=error,info,warning,fatal,trace,debug
 log_global_syslog_levels=error,info,warning,fatal,trace,debug
 log_global_size=1000000
-log_syslog_enabled=false
-
+log_files_enabled=@BEEROCKS_LOG_FILES_ENABLED@
+log_files_path=@BEEROCKS_LOG_FILES_PATH@
+log_files_auto_roll=@BEEROCKS_LOG_FILES_AUTO_ROLL@
+log_stdout_enabled=@BEEROCKS_LOG_STDOUT_ENABLED@
+log_syslog_enabled=@BEEROCKS_LOG_SYSLOG_ENABLED@
