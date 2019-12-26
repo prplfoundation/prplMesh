@@ -494,8 +494,15 @@ int main(int argc, char *argv[])
 
     int status_return = 0;
 
-    std::string log_file = beerocks_slave_conf.sLog.path + std::string(BEEROCKS_CLI) + ".log";
-    init_logger(cli_role == CLI_PROXY, log_file);
+    bool log_stdout =
+        ((beerocks_slave_conf.sLog.stdout_enabled == "true") || (cli_role == CLI_PROXY));
+
+    std::string log_file;
+    if (beerocks_slave_conf.sLog.files_enabled == "true") {
+        log_file = beerocks_slave_conf.sLog.files_path + std::string(BEEROCKS_CLI) + ".log";
+    }
+
+    init_logger(log_stdout, log_file);
     switch (cli_role) {
     case CLI_PROXY: {
         cli_tcp_proxy(beerocks_slave_conf.temp_path);
