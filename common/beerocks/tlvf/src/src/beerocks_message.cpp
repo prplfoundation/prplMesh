@@ -156,7 +156,6 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
     }
 
     // update src & dst bridge mac on uds_header
-    // swap is true if dst_mac is not empty so no need to verify it
     if (!dst_mac.empty()) {
         if (src_mac.empty()) {
             LOG(ERROR) << "src_mac is empty!";
