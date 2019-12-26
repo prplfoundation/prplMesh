@@ -1793,7 +1793,21 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
 
         notification_out->params() = notification_in->params();
+        LOG(TRACE) << "send ACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION";
         send_cmdu_to_controller(cmdu_tx);
+
+        auto notification_out2 = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>(cmdu_tx);
+        if (notification_out2 == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+
+        notification_out2->params() = notification_in->params();
+        notification_out2->ruid()   = network_utils::mac_from_string(config.radio_identifier);
+        LOG(TRACE) << "send ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION";
+        message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
+
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION: {

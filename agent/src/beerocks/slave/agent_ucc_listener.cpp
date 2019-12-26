@@ -65,6 +65,25 @@ void agent_ucc_listener::clear_configuration()
 }
 
 /**
+ * @brief Update list of VAPs for ruid.
+ * 
+ * @return None.
+ */
+
+typedef struct {
+    std::string mac;
+    std::string ssid;
+    bool backhaul_vap;
+} sVapElement;
+void agent_ucc_listener::update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps)
+{
+    LOG(INFO) << "Update VAP map for ruid " << ruid << " bssid "
+              << network_utils::mac_to_string(vaps.vaps->mac) << " ssid "
+              << std::string(vaps.vaps->ssid, 36);
+    vaps_map[ruid] = vaps;
+}
+
+/**
  * @brief Validate if the 'dest_alid` MAC address matches the controllers MAC address.
  * 
  * @param[in] dest_alid Agent bridge MAC address.
