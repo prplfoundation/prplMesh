@@ -106,10 +106,7 @@ std::shared_ptr<BaseClass> CmduTlvParser::parseNextTlv()
         return cmdu_.addClass<tlvSupportedFreqBand>();
     }
     case (17): {
-        auto tlv = cmdu_.addClass<ieee1905_1::tlvWsc>();
-        if (tlv)
-            WSC::AttrList::parse(*tlv);
-        return tlv;
+        return cmdu_.addClass<ieee1905_1::tlvWsc>();
     }
     case (18): {
         return cmdu_.addClass<tlvPushButtonEventNotification>();
