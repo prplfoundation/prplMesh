@@ -285,10 +285,11 @@ int main(int argc, char *argv[])
     versionfile << BEEROCKS_VERSION << std::endl << BEEROCKS_REVISION;
     versionfile.close();
 
-    //redirect stdout / stderr
-    // int fd_log_file_std = beerocks::os_utils::redirect_console_std("/dev/null");
-    int fd_log_file_std = beerocks::os_utils::redirect_console_std(beerocks_master_conf.sLog.path +
-                                                                   base_master_name + "_std.log");
+    // Redirect stdout / stderr
+    if (logger.get_log_files_enabled()) {
+        beerocks::os_utils::redirect_console_std(beerocks_master_conf.sLog.files_path +
+                                                 base_master_name + "_std.log");
+    }
 
     //write pid file
     beerocks::os_utils::write_pid_file(beerocks_master_conf.temp_path, base_master_name);
@@ -340,8 +341,6 @@ int main(int argc, char *argv[])
     s_pLogger = nullptr;
 
     son_master.stop();
-
-    beerocks::os_utils::close_file(fd_log_file_std);
 
     return 0;
 }

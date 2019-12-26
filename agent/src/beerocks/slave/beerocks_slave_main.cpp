@@ -199,9 +199,11 @@ static int system_hang_test(beerocks::config_file::sConfigSlave &beerocks_slave_
               << std::endl;
     beerocks::version::log_version(argc, argv);
 
-    //redirect stdout / stderr to file
-    //beerocks::os_utils::redirect_console_std("/dev/null");
-    beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.path + name + "_std.log");
+    // Redirect stdout / stderr to file
+    if (logger.get_log_files_enabled()) {
+        beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.files_path + name +
+                                                 "_std.log");
+    }
 
     //write pid file
     beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, name);
@@ -265,8 +267,10 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
 
     //redirect stdout / stderr to file
     // int fd_log_file_std = beerocks::os_utils::redirect_console_std("/dev/null");
-    int fd_log_file_std = beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.path +
-                                                                   base_slave_name + "_std.log");
+    if (slave_logger.get_log_files_enabled()) {
+        beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.files_path +
+                                                 base_slave_name + "_std.log");
+    }
 
     //write pid file
     beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, base_slave_name);
@@ -353,8 +357,6 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
         platform_mgr.stop(false);
     }
 
-    LOG(DEBUG) << "Closing process PID file";
-    beerocks::os_utils::close_file(fd_log_file_std);
     LOG(DEBUG) << "Bye Bye!";
     s_pLogger = nullptr;
 
@@ -379,8 +381,10 @@ static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &bee
 
     //redirect stdout / stderr to file
     //int fd_log_file_std = beerocks::os_utils::redirect_console_std("/dev/null");
-    int fd_log_file_std = beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.path +
-                                                                   base_slave_name + "_std.log");
+    if (slave_logger.get_log_files_enabled()) {
+        beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.files_path +
+                                                 base_slave_name + "_std.log");
+    }
 
     //write pid file
     beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, base_slave_name);
@@ -422,7 +426,6 @@ static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &bee
         LOG(ERROR) << "son_slave.init(), slave_num=" << slave_num;
     }
 
-    beerocks::os_utils::close_file(fd_log_file_std);
     s_pLogger = nullptr;
 
     return 0;
