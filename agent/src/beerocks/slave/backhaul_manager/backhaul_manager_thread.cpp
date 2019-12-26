@@ -1660,6 +1660,23 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
         break;
     }
+    case beerocks_message::ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION: {
+        LOG(DEBUG) << "ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION received from iface "
+                   << soc->hostap_iface;
+        if (m_agent_ucc_listener) {
+            auto msg = cmdu_rx.addClass<
+                beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>();
+            if (!msg) {
+                LOG(ERROR)
+                    << "Failed building ACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION message!";
+                return false;
+            }
+
+            m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(msg->ruid()),
+                                                   msg->params());
+        }
+        break;
+    }
     default: {
         LOG(ERROR) << "Unhandled message received from master: "
                    << int(beerocks_header->action_op());

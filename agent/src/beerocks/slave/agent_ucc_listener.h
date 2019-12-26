@@ -11,6 +11,7 @@
 
 #include <bcl/beerocks_config_file.h>
 #include <bcl/beerocks_ucc_listener.h>
+#include <beerocks/tlvf/beerocks_message.h>
 
 #include <mutex>
 
@@ -45,6 +46,7 @@ public:
     eOnboardingState get_and_update_onboarding_state();
     void set_onboarding_status(bool success);
     std::string get_selected_backhaul();
+    void update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps);
 
 private:
     std::string fill_version_reply_string() override;
@@ -65,6 +67,7 @@ private:
 
     eOnboardingState m_onboarding_state = eOnboardingState::NOT_IN_PROGRESS;
     std::string m_selected_backhaul; // "ETH" or "<RUID of the selected radio>"
+    std::unordered_map<std::string, beerocks_message::sVapsList> vaps_map;
 
     std::mutex mutex;
 };
