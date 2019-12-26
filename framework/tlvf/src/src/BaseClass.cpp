@@ -11,8 +11,7 @@
 #include <tlvf/tlvflogging.h>
 
 BaseClass::BaseClass(uint8_t *buff, const size_t buff_len, const bool parse)
-    : m_buff__(buff), m_buff_ptr__(buff), m_buff_len__(buff_len), m_parse__(parse),
-      m_finalized__(parse)
+    : m_buff__(buff), m_buff_ptr__(buff), m_buff_len__(buff_len), m_parse__(parse)
 {
 }
 

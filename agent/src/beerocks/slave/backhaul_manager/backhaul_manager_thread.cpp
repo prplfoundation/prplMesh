@@ -1372,6 +1372,7 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
         // Send the data (uds_header + cmdu) how it is on UDS, without changing it
 
         // Forward cmdu to all slaves how it is on UDS, without changing it
+        cmdu_rx.swap(); // swap back before forwarding
         for (auto soc_iter : slaves_sockets) {
             if (!message_com::forward_cmdu_to_uds(soc_iter->slave, cmdu_rx, length)) {
                 LOG(ERROR) << "forward_cmdu_to_uds() failed - " << print_cmdu_types(uds_header)
@@ -1399,7 +1400,8 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
             }
 
         } else { // Forward the data (cmdu) to bus
-            // LOG(DEBUG) << "forwarding slave->master message, controller_bridge_mac=" << controller_bridge_mac << " radio_mac=" << soc->radio_mac;
+            // LOG(DEBUG) << "forwarding slave->master message, controller_bridge_mac=" << controller_bridge_mac;
+            cmdu_rx.swap(); //swap back before forwarding
             send_cmdu_to_bus(cmdu_rx, controller_bridge_mac, bridge_info.mac, length);
         }
     }
