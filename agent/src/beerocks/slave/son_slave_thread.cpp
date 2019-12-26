@@ -3850,7 +3850,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
 
     std::shared_ptr<wfa_map::tlvApRadioIdentifier> ruid = nullptr;
-    std::vector<std::shared_ptr<WSC::m2>> m2_list;
+    std::list<std::shared_ptr<WSC::m2>> m2_list;
     bool intel_agent = false;
     int type         = cmdu_rx.getNextTlvType();
 
