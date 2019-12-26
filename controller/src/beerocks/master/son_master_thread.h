@@ -57,7 +57,7 @@ private:
                                                 ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_intel_slave_join(const std::string &src_mac,
                                  std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
-                                 ieee1905_1::CmduMessageRx &cmdu_rx,
+                                 beerocks::beerocks_header &beerocks_header,
                                  ieee1905_1::CmduMessageTx &cmdu_tx);
     bool
     handle_non_intel_slave_join(const std::string &src_mac,

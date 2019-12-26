@@ -403,13 +403,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
 
     switch (cmdu_message_type) {
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE:
-        if (!handle_autoconfiguration_wsc(sd, cmdu_rx)) {
-            LOG(ERROR) << "Autoconfiguration WSC failure, slave reset";
-            stop_on_failure_attempts--;
-            slave_reset();
-            return false;
-        }
-        return true;
+        return handle_autoconfiguration_wsc(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE:
         return handle_autoconfiguration_renew(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE:
@@ -3863,61 +3857,25 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
 {
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
 
-    std::shared_ptr<wfa_map::tlvApRadioIdentifier> ruid = nullptr;
-    std::list<std::shared_ptr<WSC::m2>> m2_list;
-    bool intel_agent = false;
-    int type         = cmdu_rx.getNextTlvType();
-
-    while ((type = cmdu_rx.getNextTlvType()) != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
-        if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_IDENTIFIER)) {
-            ruid = cmdu_rx.addClass<wfa_map::tlvApRadioIdentifier>();
-            if (!ruid)
-                return false;
-            LOG(DEBUG) << "Found TLV_AP_RADIO_IDENTIFIER TLV";
-        } else if (type == int(ieee1905_1::eTlvType::TLV_WSC)) {
-            // parse all M2 TLVs
-            LOG(DEBUG) << "Found TLV_WSC TLV (assuming M2)";
-            auto tlvWsc = cmdu_rx.addClass<ieee1905_1::tlvWsc>();
-            if (!tlvWsc) {
-                LOG(ERROR) << "Not an WSC TLV!";
-                return false;
-            }
-            auto m2 = std::dynamic_pointer_cast<WSC::m2>(WSC::AttrList::parse(*tlvWsc));
-            if (!m2) {
-                LOG(ERROR) << "Not an M2!";
-                return false;
-            }
-            m2_list.push_back(m2);
-        } else if (type == int(ieee1905_1::eTlvType::TLV_VENDOR_SPECIFIC)) {
-            // If this is an Intel Agent, it will have VS TLV as the last TLV.
-            // Currently, we don't support skipping TLVs, so if we see a VS TLV, we assume
-            // It is an Intel agent, and will add the class in the Intel agent handling below.
-            intel_agent = true;
-            break;
-        } else if (type == int(wfa_map::eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES)) {
-            // Check if this is a M1 message that we sent to the controller, which was just looped back.
-            // The M1 and M2 messages are both of CMDU type AP_Autoconfiguration_WSC. Thus,
-            // when we send the M2 to the local agent, it will be published back on the local bus because
-            // the destination is our AL-MAC, and the controller does listen to this CMDU.
-            // Ideally, we should use the message type attribute from the WSC payload to distinguish.
-            // Unfortunately, that is a bit complicated with the current tlv parser. However, there is another
-            // way to distinguish them: the M1 message has the AP_Radio_Basic_Capabilities TLV,
-            // while the M2 has the AP_Radio_Identifier TLV.
-            // If this is a looped back M1 CMDU, we can treat is as handled successfully.
-            LOG(DEBUG) << "Loopbed back M1 CMDU";
-            return true;
-        } else {
-            LOG(ERROR) << "Uknown TLV, type " << std::hex << type;
-            return false;
+    std::list<WSC::m2> m2_list;
+    for (auto tlv : cmdu_rx.msg.getClassList<ieee1905_1::tlvWsc>()) {
+        auto m2 = std::dynamic_pointer_cast<WSC::m2>(WSC::AttrList::parse(*tlv));
+        if (!m2) {
+            LOG(INFO) << "Not a valid M2 - Ignoring WSC CMDU";
+            continue;
         }
-        type = cmdu_rx.getNextTlvType();
+        m2_list.push_back(*m2);
     }
-
-    if (!ruid) {
-        LOG(ERROR) << "Failed to get tlvApRadioIdentifier TLV";
+    if (m2_list.empty()) {
+        LOG(ERROR) << "No M2s present";
         return false;
     }
 
+    auto ruid = cmdu_rx.getClass<wfa_map::tlvApRadioIdentifier>();
+    if (!ruid) {
+        LOG(ERROR) << "getClass<wfa_map::tlvApRadioIdentifier> failed";
+        return false;
+    }
     // Check if the message is for this radio agent by comparing the ruid
     if (network_utils::mac_from_string(config.radio_identifier) != ruid->radio_uid()) {
         LOG(DEBUG) << "not to me - ruid " << config.radio_identifier
@@ -3925,14 +3883,8 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         return true;
     }
 
-    if (m2_list.empty()) {
-        LOG(ERROR) << "No M2s present";
-        return false;
-    }
-
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST>(cmdu_tx);
-
     if (!request) {
         LOG(ERROR) << "Failed building message!";
         return false;
@@ -3942,20 +3894,20 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         uint8_t authkey[32];
         uint8_t keywrapkey[16];
         LOG(DEBUG) << "M2 Parse: calculate keys";
-        if (!autoconfig_wsc_calculate_keys(*m2, authkey, keywrapkey))
+        if (!autoconfig_wsc_calculate_keys(m2, authkey, keywrapkey))
             return false;
 
-        if (!autoconfig_wsc_authenticate(*m2, authkey))
+        if (!autoconfig_wsc_authenticate(m2, authkey))
             return false;
 
         bool fronthaul, backhaul, teardown;
         auto credentials = request->create_wifi_credentials();
-        if (!autoconfig_wsc_parse_m2_encrypted_settings(*m2, authkey, keywrapkey, backhaul,
+        if (!autoconfig_wsc_parse_m2_encrypted_settings(m2, authkey, keywrapkey, backhaul,
                                                         fronthaul, teardown, credentials))
             return false;
 
         LOG(DEBUG) << "Controller configuration (WSC M2 Encrypted Settings)";
-        LOG(DEBUG) << "     Manufacturer: " << m2->manufacturer()
+        LOG(DEBUG) << "     Manufacturer: " << m2.manufacturer()
                    << ", ssid: " << credentials->ssid_str()
                    << ", bssid: " << network_utils::mac_to_string(credentials->bssid_attr().data)
                    << ", authentication_type: " << std::hex
@@ -3988,9 +3940,10 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         return false;
     }
 
-    if (intel_agent) {
+    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
+    if (beerocks_header) {
         LOG(INFO) << "Intel controller join response";
-        if (!parse_intel_join_response(sd, cmdu_rx)) {
+        if (!parse_intel_join_response(sd, *beerocks_header)) {
             LOG(ERROR) << "Parse join response failed";
             return false;
         }
@@ -4005,7 +3958,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     return true;
 }
 
-bool slave_thread::parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+bool slave_thread::parse_intel_join_response(Socket *sd, beerocks::beerocks_header &beerocks_header)
 {
     LOG(DEBUG) << "ACTION_CONTROL_SLAVE_JOINED_RESPONSE sd=" << intptr_t(sd);
     if (slave_state != STATE_WAIT_FOR_JOINED_RESPONSE) {
@@ -4013,19 +3966,13 @@ bool slave_thread::parse_intel_join_response(Socket *sd, ieee1905_1::CmduMessage
         return false;
     }
 
-    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
-    if (!beerocks_header) {
-        LOG(ERROR) << "Failed to parse intel vs message (not Intel?)";
-        return false;
-    }
-
-    if (beerocks_header->action_op() != beerocks_message::ACTION_CONTROL_SLAVE_JOINED_RESPONSE) {
-        LOG(ERROR) << "Unexpected Intel action op " << beerocks_header->action_op();
+    if (beerocks_header.action_op() != beerocks_message::ACTION_CONTROL_SLAVE_JOINED_RESPONSE) {
+        LOG(ERROR) << "Unexpected Intel action op " << beerocks_header.action_op();
         return false;
     }
 
     auto joined_response =
-        beerocks_header->addClass<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>();
+        beerocks_header.addClass<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_RESPONSE>();
     if (joined_response == nullptr) {
         LOG(ERROR) << "addClass cACTION_CONTROL_SLAVE_JOINED_RESPONSE failed";
         return false;
