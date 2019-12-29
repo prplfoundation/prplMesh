@@ -724,8 +724,6 @@ In case of an error, this pointer will point to null.
 
 `std::shared_ptr<cBaseClass> getClass(size_t idx)` - get a shared pointer to the element in the idx location in the class array.
 
-`const std::vector<std::shared_ptr<cBaseClass>>& getClassVector()` – get the class array.
-
 `size_t getMessageLength()` – get the entire message length.
 
 `const uint8_t* getMessageBuff()` – get the buffer of the message.

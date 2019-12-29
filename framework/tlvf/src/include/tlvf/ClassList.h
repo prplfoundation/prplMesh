@@ -23,11 +23,6 @@ public:
     virtual ~ClassList() = default;
 
 public:
-    const std::vector<std::shared_ptr<BaseClass>> &getClassVector() const
-    {
-        return (const std::vector<std::shared_ptr<BaseClass>> &)m_class_vector;
-    }
-
     /**
      * @brief add class on buffer
      *
@@ -90,23 +85,6 @@ public:
     }
 
     /**
-     * @brief Get the number of classes of type T
-     *
-     * @tparam T class template
-     * @return size_t number of classes of type T
-     */
-    template <class T> size_t getClassCount() const
-    {
-        size_t count = 0;
-        for (auto it : m_class_vector) {
-            if (auto c = std::dynamic_pointer_cast<T>(it)) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    /**
      * @brief Get the list of classes of type T
      *
      * @tparam T class template
@@ -135,7 +113,6 @@ public:
         return m_class_vector.empty() ? nullptr : m_class_vector.back();
     };
 
-    size_t getClassCount() const { return m_class_vector.size(); };
     size_t getMessageLength() const;
     size_t getMessageBuffLength() const { return m_buff_len; };
     uint8_t *getMessageBuff() const { return m_buff; };
