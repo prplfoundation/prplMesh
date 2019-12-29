@@ -10,6 +10,7 @@
 #ifndef _ClassList_H_
 #define _ClassList_H_
 
+#include <list>
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include <vector>
@@ -103,6 +104,23 @@ public:
             }
         }
         return count;
+    }
+
+    /**
+     * @brief Get the list of classes of type T
+     *
+     * @tparam T class template
+     * @return std::list<std::shared_ptr<T>> list of class T pointers
+     */
+    template <class T> std::list<std::shared_ptr<T>> getClassList() const
+    {
+        std::list<std::shared_ptr<T>> list;
+        for (auto it : m_class_vector) {
+            if (auto c = std::dynamic_pointer_cast<T>(it)) {
+                list.push_back(c);
+            }
+        }
+        return list;
     }
 
     /**
