@@ -177,13 +177,25 @@ bool ap_wlan_hal_dummy::update_vap_credentials(
     std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list)
 {
     for (auto bss_info_conf : bss_info_conf_list) {
-        LOG(DEBUG) << "Received credentials for ssid: " << bss_info_conf.ssid << " auth_type: "
-                   << son::wireless_utils::wsc_to_bwl_authentication(
-                          bss_info_conf.authentication_type)
-                   << " encr_type: "
-                   << son::wireless_utils::wsc_to_bwl_encryption(bss_info_conf.encryption_type)
-                   << " network_key: " << bss_info_conf.network_key << " bss_type: "
-                   << son::wireless_utils::wsc_to_bwl_bss_type(bss_info_conf.bss_type);
+        auto auth_type =
+            son::wireless_utils::wsc_to_bwl_authentication(bss_info_conf.authentication_type);
+        if (auth_type == "INVALID") {
+            LOG(ERROR) << "Invalid auth_type " << int(bss_info_conf.authentication_type);
+            return false;
+        }
+        auto enc_type = son::wireless_utils::wsc_to_bwl_encryption(bss_info_conf.encryption_type);
+        if (enc_type == "INVALID") {
+            LOG(ERROR) << "Invalid enc_type " << int(bss_info_conf.encryption_type);
+            return false;
+        }
+        auto bss_type = son::wireless_utils::wsc_to_bwl_bss_type(bss_info_conf.bss_type);
+        if (bss_type == beerocks::BSS_TYPE_INVALID) {
+            LOG(ERROR) << "Invalid bss_type";
+            return false;
+        }
+        LOG(DEBUG) << "Received credentials for ssid: " << bss_info_conf.ssid
+                   << " auth_type: " << auth_type << " encr_type: " << enc_type
+                   << " network_key: " << bss_info_conf.network_key << " bss_type: " << bss_type;
     }
 
     return true;
