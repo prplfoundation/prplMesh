@@ -854,7 +854,6 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 return false;
             }
             auto &config_data = std::get<1>(config_data_tuple);
-            config_data.class_swap();
 
             bss_info_conf.ssid                = config_data.ssid_str();
             bss_info_conf.authentication_type = config_data.authentication_type_attr().data;
