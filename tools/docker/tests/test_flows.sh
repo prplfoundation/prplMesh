@@ -70,9 +70,9 @@ test_initial_ap_config() {
     sleep 3
 
     check docker exec repeater1 sh -c \
-        'grep -i -q "ssid: Multi-AP-24G-1, .* fronthaul" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+        'grep -i -q "Received credentials for ssid: Multi-AP-24G-1 .* bss_type: 2" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
     check docker exec repeater1 sh -c \
-        'grep -i -q "ssid: Multi-AP-24G-2, .* backhaul" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+        'grep -i -q "Received credentials for ssid: Multi-AP-24G-2 .* bss_type: 1" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
     check docker exec repeater1 sh -c \
         'grep -i -q "ssid: .* teardown" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
