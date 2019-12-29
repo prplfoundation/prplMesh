@@ -578,15 +578,7 @@ int test_all()
     CmduMessageRx received_message(recv_buffer, sizeof(recv_buffer));
     received_message.parse();
 
-    eTlvType type;
-    if (received_message.getNextTlvType(type) &&
-        type == eTlvType::TLV_NON_1905_NEIGHBOR_DEVICE_LIST) {
-        MAPF_DBG("SUCCESS");
-    }
-
-    MAPF_DBG("size: " << received_message.getNextTlvLength());
-
-    auto tlv1 = received_message.addClass<tlvNon1905neighborDeviceList>();
+    auto tlv1 = received_message.getClass<tlvNon1905neighborDeviceList>();
     if (tlv1 != nullptr) {
         MAPF_DBG("LENGTH AFTER INIT: " << tlv1->length());
         //tlv1->alloc_mac_non_1905_device(3);
@@ -615,15 +607,9 @@ int test_all()
         errors++;
     }
 
-    if (received_message.getNextTlvType(type) && type == eTlvType::TLV_LINK_METRIC_QUERY) {
-        MAPF_DBG("SUCCESS");
-    } else {
-        errors++;
-    }
-
     MAPF_DBG("size: " << received_message.getNextTlvLength());
 
-    auto tlv2 = received_message.addClass<tlvLinkMetricQuery>();
+    auto tlv2 = received_message.getClass<tlvLinkMetricQuery>();
     if (tlv2 != nullptr) {
         MAPF_DBG("TLV2 LENGTH AFTER INIT: " << tlv2->length());
     } else {
@@ -631,13 +617,7 @@ int test_all()
         errors++;
     }
 
-    if (received_message.getNextTlvType(type) && type == eTlvType::TLV_WSC) {
-        MAPF_DBG("SUCCESS");
-    } else {
-        errors++;
-    }
-
-    auto tlv3 = received_message.addClass<tlvWsc>();
+    auto tlv3 = received_message.getClass<tlvWsc>();
     if (tlv3 != nullptr) {
         MAPF_DBG("TLV3 LENGTH AFTER INIT: " << tlv3->length());
     } else {
@@ -649,19 +629,7 @@ int test_all()
         errors++;
     }
 
-    auto tlvunknown = received_message.addClass<tlvUnknown>();
-    if (tlvunknown != nullptr) {
-        LOG(DEBUG) << "TLVUnknown Type: " << int(tlvunknown->type());
-
-        LOG(DEBUG) << "TLVUnknown data:";
-        for (uint8_t data_idx = 0; data_idx < tlvunknown->data_length(); data_idx++) {
-            LOG(DEBUG) << " " << int(tlvunknown->data()[data_idx]);
-        }
-    } else {
-        MAPF_ERR("TLVUnknown is NULL");
-        errors++;
-    }
-    auto tlv4 = received_message.addClass<tlvTestVarList>();
+    auto tlv4 = received_message.msg.getClass<tlvUnknown>()->class_cast<tlvTestVarList>();
     if (tlv4 == nullptr) {
         MAPF_ERR("TLV4 is NULL");
         errors++;
@@ -777,18 +745,7 @@ int test_all()
 
     CmduMessageRx invmsg(invalidBuffer, invalidBufferSize);
     if (!invmsg.parse()) {
-        MAPF_DBG("HEADER PROTECTION SUCCESS");
-    }
-
-    if (!received_message.getNextTlvType(type)) {
-        MAPF_DBG("TYPE PROTECTION SUCCESS");
-    }
-    auto invptr = invmsg.addClass<tlv1905NeighborDevice>();
-    if (invptr == nullptr) {
-        MAPF_DBG("PROTECTION SUCCESS");
-    } else {
-        MAPF_ERR("PROTECTION FAILED");
-        errors++;
+        MAPF_DBG("Parse PROTECTION SUCCESS");
     }
 
     MAPF_INFO(__FUNCTION__ << " Finished, errors = " << errors << std::endl);
