@@ -36,6 +36,24 @@ public:
     bool is_finalized() { return m_finalized__; };
     void addInnerClassList(std::shared_ptr<ClassList> list) { m_inner__ = list; };
     std::shared_ptr<ClassList> getInnerClassList() { return m_inner__; };
+    /**
+     * @brief cast class
+     *
+     * Cast self to std::shared_ptr<T> which will first swap the whole class back
+     * to the original byte order, then create a shared_ptr<T> on the buffer.
+     * Used only in parsing.
+     *
+     * @tparam T template type to cast to
+     * @return std::shared_ptr<T> pointer to the casted class
+     */
+    template <class T> std::shared_ptr<T> class_cast()
+    {
+        if (m_parse__) {
+            class_swap();
+            return std::make_shared<T>(m_buff__, m_buff_len__, true);
+        }
+        return nullptr;
+    }
 
 protected:
     uint8_t *m_buff__;
