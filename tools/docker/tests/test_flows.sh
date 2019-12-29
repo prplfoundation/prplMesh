@@ -58,6 +58,12 @@ test_initial_ap_config() {
     check docker exec repeater1 sh -c \
         'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
+    return $check_error
+}
+
+test_ap_config_renew() {
+    status "test initial autoconfig"
+
     # Regression test: MAC address should be case insensitive
     MAC_AGENT1=$(echo $mac_agent1 | tr a-z A-Z)
     # Configure the controller and send renew
@@ -77,11 +83,6 @@ test_initial_ap_config() {
         'grep -i -q "ssid: .* teardown" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
 
     return $check_error
-}
-
-test_ap_config_renew() {
-    err "ap_config_renew not implemented yet."
-    return 0
 }
 
 test_ap_config_bss_tear_down() {
