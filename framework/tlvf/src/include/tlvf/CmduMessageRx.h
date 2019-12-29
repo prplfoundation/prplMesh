@@ -10,26 +10,20 @@
 #define _CmduMessageRX_H_
 
 #include <tlvf/CmduMessage.h>
-#include <tlvf/ieee_1905_1/cCmduHeader.h>
-
-#include <list>
-#include <memory>
 
 namespace ieee1905_1 {
-
-class CmduParser;
 
 class CmduMessageRx : public CmduMessage {
 
 public:
     CmduMessageRx() = delete;
-    CmduMessageRx(uint8_t *buff, size_t buff_len);
-    ~CmduMessageRx();
+    CmduMessageRx(uint8_t *buff, size_t buff_len) : CmduMessage(buff, buff_len){};
+    ~CmduMessageRx(){};
     bool parse();
     CmduMessageRx &operator=(const CmduMessageRx &) = delete;
 
 private:
-    std::shared_ptr<CmduParser> parser;
+    std::shared_ptr<BaseClass> parseNextTlv();
 };
 
 }; // namespace ieee1905_1
