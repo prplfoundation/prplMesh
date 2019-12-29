@@ -165,7 +165,7 @@ int test_complex_list()
     CmduMessageRx received_message(recv_buffer, sizeof(recv_buffer));
     received_message.parse();
 
-    auto tlv4 = received_message.addClass<tlvTestVarList>();
+    auto tlv4 = received_message.getClass<tlvUnknown>()->class_cast<tlvTestVarList>();
     if (tlv4 == nullptr) {
         MAPF_ERR("TLV4 is NULL");
         return ++errors;
