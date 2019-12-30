@@ -598,6 +598,9 @@ public:
     bool assign_channel_selection_task_id(int new_task_id);
     int get_channel_selection_task_id();
 
+    bool assign_dynamic_channel_selection_task_id(const std::string &mac, int new_task_id);
+    int get_dynamic_channel_selection_task_id(const std::string &mac);
+
     void lock();
     void unlock();
 
