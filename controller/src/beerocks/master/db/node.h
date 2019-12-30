@@ -17,6 +17,7 @@
 
 #include <list>
 #include <map>
+#include <unordered_set>
 
 namespace son {
 typedef struct {
@@ -183,6 +184,37 @@ public:
         };
         std::shared_ptr<ap_stats_params> stats_info;
         std::unordered_map<int8_t, sVapElement> vaps_info;
+
+        struct channel_scan_config {
+            bool is_enabled = false;
+            std::unordered_set<uint8_t> channel_pool; // default value: empty list
+            int interval_sec    = -1;                 //-1 (invalid)
+            int dwell_time_msec = -1;                 //-1 (invalid)
+        };
+
+        struct channel_scan_status {
+            bool scan_in_progress = false;
+            beerocks::eChannelScanErrCode last_scan_error_code =
+                beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
+        };
+
+        /**
+         * These members are part of the continuous channel scan.
+         * The contiuous scan runs every interval_sec.
+         */
+        channel_scan_config continuous_scan_config; /**< continues scan configuration */
+        channel_scan_status continuous_scan_status; /**< continues scan status        */
+        std::list<beerocks_message::sChannelScanResults>
+            continuous_scan_results; /**< continues scan results list  */
+
+        /**
+         * These members are part of the single channel scan.
+         * The single scan triggered once.
+         */
+        channel_scan_config single_scan_config; /**< single scan configuration */
+        channel_scan_status single_scan_status; /**< single scan status        */
+        std::list<beerocks_message::sChannelScanResults>
+            single_scan_results; /**< single scan results list  */
     };
     std::shared_ptr<radio> hostap;
 
