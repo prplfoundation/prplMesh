@@ -752,6 +752,122 @@ class cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION : public BaseClass
         sSteeringEvSnrXing* m_params = nullptr;
 };
 
+class cACTION_MONITOR_DCS_TRIGGER_SCAN_REQUEST : public BaseClass
+{
+    public:
+        cACTION_MONITOR_DCS_TRIGGER_SCAN_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_DCS_TRIGGER_SCAN_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_MONITOR_DCS_TRIGGER_SCAN_REQUEST();
+
+        static eActionOp_MONITOR get_action_op(){
+            return (eActionOp_MONITOR)(ACTION_MONITOR_DCS_TRIGGER_SCAN_REQUEST);
+        }
+        sDcsScanRequestParams& scan_params();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_MONITOR* m_action_op = nullptr;
+        sDcsScanRequestParams* m_scan_params = nullptr;
+};
+
+class cACTION_MONITOR_DCS_TRIGGER_SCAN_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_MONITOR_DCS_TRIGGER_SCAN_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_DCS_TRIGGER_SCAN_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_MONITOR_DCS_TRIGGER_SCAN_RESPONSE();
+
+        static eActionOp_MONITOR get_action_op(){
+            return (eActionOp_MONITOR)(ACTION_MONITOR_DCS_TRIGGER_SCAN_RESPONSE);
+        }
+        uint8_t& success();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_MONITOR* m_action_op = nullptr;
+        uint8_t* m_success = nullptr;
+};
+
+class cACTION_MONITOR_DCS_SCAN_TRIGGERED_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_MONITOR_DCS_SCAN_TRIGGERED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_DCS_SCAN_TRIGGERED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_MONITOR_DCS_SCAN_TRIGGERED_NOTIFICATION();
+
+        static eActionOp_MONITOR get_action_op(){
+            return (eActionOp_MONITOR)(ACTION_MONITOR_DCS_SCAN_TRIGGERED_NOTIFICATION);
+        }
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_MONITOR* m_action_op = nullptr;
+};
+
+class cACTION_MONITOR_DCS_SCAN_RESULTS_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_MONITOR_DCS_SCAN_RESULTS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_DCS_SCAN_RESULTS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_MONITOR_DCS_SCAN_RESULTS_NOTIFICATION();
+
+        static eActionOp_MONITOR get_action_op(){
+            return (eActionOp_MONITOR)(ACTION_MONITOR_DCS_SCAN_RESULTS_NOTIFICATION);
+        }
+        sDcsChannelScanResults& scan_results();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_MONITOR* m_action_op = nullptr;
+        sDcsChannelScanResults* m_scan_results = nullptr;
+};
+
+class cACTION_MONITOR_DCS_SCAN_ABORT_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_MONITOR_DCS_SCAN_ABORT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_DCS_SCAN_ABORT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_MONITOR_DCS_SCAN_ABORT_NOTIFICATION();
+
+        static eActionOp_MONITOR get_action_op(){
+            return (eActionOp_MONITOR)(ACTION_MONITOR_DCS_SCAN_ABORT_NOTIFICATION);
+        }
+        uint8_t& reason();
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_MONITOR* m_action_op = nullptr;
+        uint8_t* m_reason = nullptr;
+};
+
+class cACTION_MONITOR_DCS_SCAN_FINISHED_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_MONITOR_DCS_SCAN_FINISHED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false, bool swap_needed = false);
+        cACTION_MONITOR_DCS_SCAN_FINISHED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false, bool swap_needed = false);
+        ~cACTION_MONITOR_DCS_SCAN_FINISHED_NOTIFICATION();
+
+        static eActionOp_MONITOR get_action_op(){
+            return (eActionOp_MONITOR)(ACTION_MONITOR_DCS_SCAN_FINISHED_NOTIFICATION);
+        }
+        void class_swap();
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_MONITOR* m_action_op = nullptr;
+};
+
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_MONITOR_H_

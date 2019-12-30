@@ -347,3 +347,32 @@ cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION:
 cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION:
   _type: class 
   params: sSteeringEvAuthFail
+
+################################################
+# MONITOR DCS REQUESTS
+################################################
+cACTION_CONTROL_DCS_TRIGGER_SCAN_REQUEST:
+  _type: class
+  scan_params: sDcsTriggerScanParams
+
+cACTION_CONTROL_DCS_TRIGGER_SCAN_RESPONSE:
+  _type: class
+  success: uint8_t
+
+################################################
+# MONITOR DCS NOTIFICATIONS
+################################################
+
+cACTION_CONTROL_DCS_SCAN_TRIGGERED_NOTIFICATION:
+  _type: class
+
+cACTION_CONTROL_DCS_SCAN_RESULTS_NOTIFICATION:
+  _type: class
+  scan_results: sDcsChannelScanResults
+
+cACTION_CONTROL_DCS_SCAN_ABORT_NOTIFICATION:
+  _type: class
+  reason: uint8_t
+
+cACTION_CONTROL_DCS_SCAN_FINISHED_NOTIFICATION:
+  _type: class

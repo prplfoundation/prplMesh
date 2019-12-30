@@ -3349,4 +3349,228 @@ bool cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::init()
     return true;
 }
 
+cACTION_CONTROL_DCS_TRIGGER_SCAN_REQUEST::cACTION_CONTROL_DCS_TRIGGER_SCAN_REQUEST(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_TRIGGER_SCAN_REQUEST::cACTION_CONTROL_DCS_TRIGGER_SCAN_REQUEST(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_TRIGGER_SCAN_REQUEST::~cACTION_CONTROL_DCS_TRIGGER_SCAN_REQUEST() {
+}
+sDcsTriggerScanParams& cACTION_CONTROL_DCS_TRIGGER_SCAN_REQUEST::scan_params() {
+    return (sDcsTriggerScanParams&)(*m_scan_params);
+}
+
+void cACTION_CONTROL_DCS_TRIGGER_SCAN_REQUEST::class_swap()
+{
+    m_scan_params->struct_swap();
+}
+
+size_t cACTION_CONTROL_DCS_TRIGGER_SCAN_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sDcsTriggerScanParams); // scan_params
+    return class_size;
+}
+
+bool cACTION_CONTROL_DCS_TRIGGER_SCAN_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_scan_params = (sDcsTriggerScanParams*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sDcsTriggerScanParams))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sDcsTriggerScanParams) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_scan_params->struct_init(); }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_DCS_TRIGGER_SCAN_RESPONSE::cACTION_CONTROL_DCS_TRIGGER_SCAN_RESPONSE(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_TRIGGER_SCAN_RESPONSE::cACTION_CONTROL_DCS_TRIGGER_SCAN_RESPONSE(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_TRIGGER_SCAN_RESPONSE::~cACTION_CONTROL_DCS_TRIGGER_SCAN_RESPONSE() {
+}
+uint8_t& cACTION_CONTROL_DCS_TRIGGER_SCAN_RESPONSE::success() {
+    return (uint8_t&)(*m_success);
+}
+
+void cACTION_CONTROL_DCS_TRIGGER_SCAN_RESPONSE::class_swap()
+{
+}
+
+size_t cACTION_CONTROL_DCS_TRIGGER_SCAN_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // success
+    return class_size;
+}
+
+bool cACTION_CONTROL_DCS_TRIGGER_SCAN_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_success = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_DCS_SCAN_TRIGGERED_NOTIFICATION::cACTION_CONTROL_DCS_SCAN_TRIGGERED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_SCAN_TRIGGERED_NOTIFICATION::cACTION_CONTROL_DCS_SCAN_TRIGGERED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_SCAN_TRIGGERED_NOTIFICATION::~cACTION_CONTROL_DCS_SCAN_TRIGGERED_NOTIFICATION() {
+}
+void cACTION_CONTROL_DCS_SCAN_TRIGGERED_NOTIFICATION::class_swap()
+{
+}
+
+size_t cACTION_CONTROL_DCS_SCAN_TRIGGERED_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    return class_size;
+}
+
+bool cACTION_CONTROL_DCS_SCAN_TRIGGERED_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_DCS_SCAN_RESULTS_NOTIFICATION::cACTION_CONTROL_DCS_SCAN_RESULTS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_SCAN_RESULTS_NOTIFICATION::cACTION_CONTROL_DCS_SCAN_RESULTS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_SCAN_RESULTS_NOTIFICATION::~cACTION_CONTROL_DCS_SCAN_RESULTS_NOTIFICATION() {
+}
+sDcsChannelScanResults& cACTION_CONTROL_DCS_SCAN_RESULTS_NOTIFICATION::scan_results() {
+    return (sDcsChannelScanResults&)(*m_scan_results);
+}
+
+void cACTION_CONTROL_DCS_SCAN_RESULTS_NOTIFICATION::class_swap()
+{
+    m_scan_results->struct_swap();
+}
+
+size_t cACTION_CONTROL_DCS_SCAN_RESULTS_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sDcsChannelScanResults); // scan_results
+    return class_size;
+}
+
+bool cACTION_CONTROL_DCS_SCAN_RESULTS_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_scan_results = (sDcsChannelScanResults*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sDcsChannelScanResults))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sDcsChannelScanResults) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_scan_results->struct_init(); }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_DCS_SCAN_ABORT_NOTIFICATION::cACTION_CONTROL_DCS_SCAN_ABORT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_SCAN_ABORT_NOTIFICATION::cACTION_CONTROL_DCS_SCAN_ABORT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_SCAN_ABORT_NOTIFICATION::~cACTION_CONTROL_DCS_SCAN_ABORT_NOTIFICATION() {
+}
+uint8_t& cACTION_CONTROL_DCS_SCAN_ABORT_NOTIFICATION::reason() {
+    return (uint8_t&)(*m_reason);
+}
+
+void cACTION_CONTROL_DCS_SCAN_ABORT_NOTIFICATION::class_swap()
+{
+}
+
+size_t cACTION_CONTROL_DCS_SCAN_ABORT_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // reason
+    return class_size;
+}
+
+bool cACTION_CONTROL_DCS_SCAN_ABORT_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_reason = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_DCS_SCAN_FINISHED_NOTIFICATION::cACTION_CONTROL_DCS_SCAN_FINISHED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse, bool swap_needed) :
+    BaseClass(buff, buff_len, parse, swap_needed) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_SCAN_FINISHED_NOTIFICATION::cACTION_CONTROL_DCS_SCAN_FINISHED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse, bool swap_needed) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse, swap_needed){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_DCS_SCAN_FINISHED_NOTIFICATION::~cACTION_CONTROL_DCS_SCAN_FINISHED_NOTIFICATION() {
+}
+void cACTION_CONTROL_DCS_SCAN_FINISHED_NOTIFICATION::class_swap()
+{
+}
+
+size_t cACTION_CONTROL_DCS_SCAN_FINISHED_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    return class_size;
+}
+
+bool cACTION_CONTROL_DCS_SCAN_FINISHED_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__ && m_swap__) { class_swap(); }
+    return true;
+}
+
 
