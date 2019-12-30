@@ -61,7 +61,7 @@ message_com::parse_intel_vs_message(ieee1905_1::CmduMessageRx &cmdu_rx)
     if (!cmdu_rx.getMessageLength()) {
         LOG(ERROR) << "cmdu is not initialized!";
     }
-    auto tlv = cmdu_rx.addClass<ieee1905_1::tlvVendorSpecific>();
+    auto tlv = cmdu_rx.getClass<ieee1905_1::tlvVendorSpecific>();
     if (!tlv)
         return nullptr;
     if (!intel_oui(tlv))
