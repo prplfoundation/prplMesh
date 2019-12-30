@@ -1189,6 +1189,92 @@ typedef struct sSteeringEvSnr {
     }
 } __attribute__((packed)) sSteeringEvSnr;
 
+typedef struct sDcsTriggerScanParams {
+    sMacAddr radio_mac;
+    //time interval (msec) between channels during scan
+    uint32_t dwell_time_ms;
+    //size of provided channel_pool
+    uint8_t channel_pool_size;
+    //pool of channels to be scaned
+    uint8_t channel_pool[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+    void struct_swap(){
+        radio_mac.struct_swap();
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&dwell_time_ms));
+    }
+    void struct_init(){
+        radio_mac.struct_init();
+        dwell_time_ms = 0x0;
+        channel_pool_size = 0x0;
+    }
+} __attribute__((packed)) sDcsTriggerScanParams;
+
+typedef struct sDcsScanRequestParams {
+    //an invalid (-1) value indicates this value is not requested
+    int32_t dwell_time_ms;
+    //an invalid (-1) value indicates this value is not requested
+    int32_t interval_time_sec;
+    //an invalid (-1) value indicates this value is not requested
+    int8_t channel_pool_size;
+    uint8_t channel_pool[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+    void struct_swap(){
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&dwell_time_ms));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&interval_time_sec));
+    }
+    void struct_init(){
+        dwell_time_ms = -0x1;
+        interval_time_sec = -0x1;
+        channel_pool_size = 0x0;
+    }
+} __attribute__((packed)) sDcsScanRequestParams;
+
+typedef struct sDcsChannelScanResults {
+    //The current service set identifier in use by the neighboring WiFi SSID. The value MAY be empty for hidden SSIDs.
+    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+    //The BSSID used for the neighboring WiFi SSID.
+    sMacAddr bssid;
+    //The mode the neighboring WiFi radio is operating in. Enumeration of AdHoc, Infrastructure
+    char mode[beerocks::message::WIFI_GENERIC_STRING_LENGTH];
+    //The current radio channel used by the neighboring WiFi radio.
+    uint32_t channel;
+    //An indicator of radio signal strength (RSSI) of the neighboring WiFi radio measured in dBm, as an average of the last 100 packets received.
+    int32_t signal_strength_dBm;
+    //The type of encryption the neighboring WiFi SSID advertises. Enumeration of None, WPA-WPA2 etc.
+    char security_mode_enabled[beerocks::message::WIFI_GENERIC_STRING_LENGTH];
+    //Comma-separated list of strings. The type of encryption the neighboring WiFi SSID advertises. Each list item is an enumeration of TKIP, AES
+    char encryption_mode[beerocks::message::WIFI_GENERIC_STRING_LENGTH];
+    //Indicates the frequency band at which the radio this SSID instance is operating. Enumeration of 2.4GHz, 5GHz
+    char operating_frequency_band[beerocks::message::WIFI_OPERATING_STRING_LENGTH];
+    //Comma-separated list of strings. List items indicate which IEEE 802.11 standards thisResultinstance can support simultaneously, in the frequency band specified byOperatingFrequencyBand. Each list item is an enumeration of
+    char supported_standards[beerocks::message::WIFI_GENERIC_STRING_LENGTH];
+    //Comma-separated list of strings. Each list item MUST be a member of the list reported by theSupportedStandardsparameter. List items indicate which IEEE 802.11 standard that is detected for thisResult.
+    char operating_standards[beerocks::message::WIFI_OPERATING_STRING_LENGTH];
+    //Indicates the bandwidth at which the channel is operating. Enumeration of
+    char operating_channel_bandwidth[beerocks::message::WIFI_OPERATING_STRING_LENGTH];
+    //Time interval (inms) between transmitting beacons.
+    uint32_t beacon_period_ms;
+    //Indicator of average noise strength (indBm) received from the neighboring WiFi radio.
+    int32_t noise_dBm;
+    //Comma-separated list (maximum list length 256) of strings. Basic data transmit rates (in Mbps) for the SSID. For example, ifBasicDataTransferRatesis "1,2", this indicates that the SSID is operating with basic rates of 1 Mbps and 2 Mbps.
+    char basic_data_transfer_rates_mbps[beerocks::message::WIFI_DATA_TRANSFER_RATES_LIST_LENGTH];
+    //Comma-separated list (maximum list length 256) of strings. Data transmit rates (in Mbps) for unicast frames at which the SSID will permit a station to connect. For example, ifSupportedDataTransferRatesis "1,2,5.5", this indicates that the SSID will only permit connections at 1 Mbps, 2 Mbps and 5.5 Mbps.
+    char supported_data_transfer_rates_mbps[beerocks::message::WIFI_DATA_TRANSFER_RATES_LIST_LENGTH];
+    //The number of beacon intervals that elapse between transmission of Beacon frames containing a TIM element whose DTIM count field is 0. This value is transmitted in the DTIM Period field of beacon frames. [802.11-2012]
+    uint32_t dtim_period;
+    //Indicates the fraction of the time AP senses that the channel is in use by the neighboring AP for transmissions.
+    uint32_t channel_utilization;
+    void struct_swap(){
+        bssid.struct_swap();
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&channel));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&signal_strength_dBm));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&beacon_period_ms));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&noise_dBm));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&dtim_period));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&channel_utilization));
+    }
+    void struct_init(){
+    }
+} __attribute__((packed)) sDcsChannelScanResults;
+
 
 }; // close namespace: beerocks_message
 
