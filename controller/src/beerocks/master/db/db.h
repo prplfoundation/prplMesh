@@ -21,6 +21,8 @@
 #include <mutex>
 #include <queue>
 
+using namespace beerocks_message;
+
 namespace son {
 
 // Forward decleration for master_thread context saving
@@ -395,6 +397,173 @@ public:
     bool get_hostap_is_acs_enabled(std::string mac);
 
     //
+    // Channel Scan
+    //
+    /**
+     * @brief Set the channel scan is enabled flag
+     * 
+     * @param mac:    MAC address of radio
+     * @param enable: enable flag to be set
+     * @return true on success
+     * @return false on failure 
+     */
+    bool set_channel_scan_is_enabled(const sMacAddr &mac, bool enable);
+
+    /**
+     * @brief Get the channel scan is enabled flag
+     * 
+     * @param [out] mac: MAC address of radio 
+     * @return current channel scan enable flag
+     */
+    bool get_channel_scan_is_enabled(const sMacAddr &mac);
+
+    /**
+     * @brief Set the channel scan interval sec object
+     * 
+     * @param mac 
+     * @param interval_sec 
+     * @return true 
+     * @return false 
+     */
+    bool set_channel_scan_interval_sec(const sMacAddr &mac, int interval_sec);
+
+    /**
+     * @brief Get the channel scan interval sec object
+     * 
+     * @param mac: MAC address of radio 
+     * @return value o interval sec object
+     */
+    int get_channel_scan_interval_sec(const sMacAddr &mac);
+
+    /**
+     * @brief Set the channel scan in progress object
+     * 
+     * @param mac:              MAC address of radio
+     * @param scan_in_progress: Flag of current channel scan
+     * @param single_scan:      Indicated if to use single scan or continuous
+     * @return true on success
+     * @return false on failure 
+     */
+    bool set_channel_scan_in_progress(const sMacAddr &mac, bool scan_in_progress,
+                                      const bool single_scan);
+    /**
+     * @brief Get the channel scan in progress object
+     * 
+     * @param mac          MAC address of radio
+     * @param single_scan: Indicated if to use single scan or continuous
+     * @return Flag of current channel scan
+     */
+    bool get_channel_scan_in_progress(const sMacAddr &mac, bool single_scan);
+
+    /**
+     * @brief Set the channel scan results status object
+     * 
+     * @param mac:         MAC address of radio
+     * @param error_code:  Current status of channel scan results
+     * @param single_scan: Indicated if to use single scan or continuous
+     * @return true on success
+     * @return false on failure 
+     */
+    bool set_channel_scan_results_status(const sMacAddr &mac,
+                                         beerocks::eChannelScanErrCode error_code,
+                                         bool single_scan);
+
+    /**
+     * @brief Get the channel scan results status object
+     * 
+     * @param mac:         MAC address of radio
+     * @param single_scan: Indicated if to use single scan or continuous
+     * @return Current status of channel scan results
+     */
+    beerocks::eChannelScanErrCode get_channel_scan_results_status(const sMacAddr &mac,
+                                                                  bool single_scan);
+
+    /**
+     * @brief Set the channel scan dwell time msec object
+     * 
+     * @param mac:             MAC address of radio
+     * @param dwell_time_msec: Dwell time of channel scan
+     * @param single_scan:     Indicated if to use single scan or continuous
+     * @return true on success
+     * @return false on failure 
+     */
+    bool set_channel_scan_dwell_time_msec(const sMacAddr &mac, int dwell_time_msec,
+                                          bool single_scan);
+
+    /**
+     * @brief Get the channel scan dwell time msec object
+     * 
+     * @param mac          MAC address of radio
+     * @param single_scan: Indicated if to use single scan or continuous
+     * @return Dwell time of channel scan
+     */
+    int get_channel_scan_dwell_time_msec(const sMacAddr &mac, bool single_scan);
+
+    /**
+     * @brief Set the channel scan pool object
+     * 
+     * @param mac:          MAC address of radio
+     * @param channel_pool: Channel pool of channel scan
+     * @param single_scan:  Indicated if to use single scan or continuous
+     * @return true on success
+     * @return false on failure 
+     */
+    bool set_channel_scan_pool(const sMacAddr &mac, const std::unordered_set<uint8_t> &channel_pool,
+                               bool single_scan);
+
+    /**
+     * @brief Get the channel scan pool object
+     * 
+     * @param mac:         MAC address of radio
+     * @param single_scan: Indicated if to use single scan or continuous
+     * @return Channel pool of channel scan
+     */
+    const std::unordered_set<uint8_t> &get_channel_scan_pool(const sMacAddr &mac, bool single_scan);
+
+    /**
+     * @brief Checks whather a given channel is in the currently set channel pool
+     * 
+     * @param mac:         MAC address of radio
+     * @param channel:     Given channel to be checked
+     * @param single_scan: Indicated if to use single scan or continuous
+     * @return true if given channel is in current channel pool
+     * @return false if given channel isn't in current channel pool
+     */
+    bool is_channel_in_pool(const sMacAddr &mac, uint8_t channel, bool single_scan);
+
+    /**
+     * @brief Clears any existing results for the given channel scan
+     * 
+     * @param mac:         MAC address of radio
+     * @param single_scan: Indicated if to use single scan or continuous
+     * @return true on success
+     * @return false on failure 
+     */
+    bool clear_channel_scan_results(const sMacAddr &mac, bool single_scan);
+
+    /**
+     * @brief Adds a new scan result to the current scan results
+     * 
+     * @param mac:         MAC address of radio
+     * @param scan_result: Scan result to be added to current scan results
+     * @param single_scan: Indicated if to use single scan or continuous
+     * @return true on success
+     * @return false on failure 
+     */
+    bool add_channel_scan_results(const sMacAddr &mac, const sChannelScanResults &scan_result,
+                                  bool single_scan);
+
+    /**
+     * @brief Get the channel scan results object
+     * 
+     * @param mac:         MAC address of radio
+     * @param single_scan: Indicated if to use single scan or continuous
+     * @return const std::list<sChannelScanResults>& 
+     */
+    const std::list<sChannelScanResults> &get_channel_scan_results(const sMacAddr &mac,
+                                                                   bool single_scan);
+
+    //
     // CLI
     //
     void add_cli_socket(Socket *sd);
@@ -657,6 +826,7 @@ private:
     std::shared_ptr<node> get_node(std::string key); //key can be <mac> or <al_mac>_<ruid>
     std::shared_ptr<node> get_node(sMacAddr mac);
     std::shared_ptr<node> get_node(sMacAddr al_mac, sMacAddr ruid);
+    std::shared_ptr<node::radio> get_hostap_by_mac(const sMacAddr &mac);
     int get_node_hierarchy(std::shared_ptr<node> n);
     std::set<std::shared_ptr<node>> get_node_subtree(std::shared_ptr<node> n);
     void adjust_subtree_hierarchy(std::shared_ptr<node> n);
