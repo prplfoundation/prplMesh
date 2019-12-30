@@ -3320,6 +3320,29 @@ bool db::assign_rdkb_wlan_task_id(int new_task_id)
 
 int db::get_rdkb_wlan_task_id() { return rdkb_wlan_task_id; }
 
+bool db::assign_dynamic_channel_selection_task_id(const sMacAddr &mac, int new_task_id)
+{
+    auto n = get_node(mac);
+    if (!n) {
+        LOG(WARNING) << __FUNCTION__ << " - node " << network_utils::mac_to_string(mac)
+                     << " does not exist!";
+        return false;
+    }
+    n->dynamic_channel_selection_task_id = new_task_id;
+    return true;
+}
+
+int db::get_dynamic_channel_selection_task_id(const sMacAddr &mac)
+{
+    auto n = get_node(mac);
+    if (!n) {
+        LOG(WARNING) << __FUNCTION__ << " - node " << network_utils::mac_to_string(mac)
+                     << " does not exist!";
+        return -1;
+    }
+    return n->dynamic_channel_selection_task_id;
+}
+
 void db::lock() { db_mutex.lock(); }
 
 void db::unlock() { db_mutex.unlock(); }
