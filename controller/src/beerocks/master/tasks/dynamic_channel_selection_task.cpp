@@ -206,13 +206,130 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
     // This flag (event_handled) indicate if event has arived in the correct fsm state.
     bool event_handled = false;
     switch (eEvent(event_type)) {
-    case eEvent::TRIGGER_SINGLE_SCAN:
-    case eEvent::SCAN_TRIGGERED:
-    case eEvent::SCAN_RESULTS_READY:
-    case eEvent::SCAN_RESULTS_DUMP:
-    case eEvent::SCAN_FINISHED:
-    case eEvent::SCAN_ABORTED:
-    case eEvent::SCAN_ENABLE_CHANGE:
+    case eEvent::TRIGGER_SINGLE_SCAN: {
+        TASK_LOG(DEBUG) << "TRIGGER_SINGLE_SCAN received";
+        auto single_scan_event = reinterpret_cast<sScanEvent *>(obj);
+        event_handled          = true;
+        TASK_LOG(DEBUG) << "TRIGGER_SINGLE_SCAN handled on:" << single_scan_event->radio_mac.oct;
+        m_is_single_scan_pending = true;
+        break;
+    }
+    case eEvent::SCAN_TRIGGERED: {
+        TASK_LOG(DEBUG) << "SCAN_TRIGGERED received";
+        if (fsm_in_state(eState::WAIT_FOR_SCAN_TRIGGERED)) {
+            auto scan_triggered_event = reinterpret_cast<sScanEvent *>(obj);
+            event_handled             = true;
+            TASK_LOG(DEBUG) << "SCAN_TRIGGERED handled on:" << scan_triggered_event->radio_mac.oct;
+
+            set_events_timeout(SCAN_RESULTS_DUMP_WAIT_TIME_MSEC);
+            dcs_wait_for_event(eEvent::SCAN_RESULTS_DUMP);
+
+            fsm_move_state(eState::WAIT_FOR_RESULTS_READY);
+        } else {
+            TASK_LOG(DEBUG) << "ignoring SCAN_TRIGERRED event,"
+                            << " not in state WAIT_FOR_SCAN_TRIGGERED";
+        }
+        break;
+    }
+    case eEvent::SCAN_RESULTS_READY: {
+        TASK_LOG(DEBUG) << "SCAN_RESULTS_READY received";
+        if (fsm_in_state(eState::WAIT_FOR_RESULTS_READY)) {
+            auto scan_results_ready_event = reinterpret_cast<sScanEvent *>(obj);
+            event_handled                 = true;
+            TASK_LOG(DEBUG) << "SCAN_RESULTS_READY handled on:"
+                            << scan_results_ready_event->radio_mac.oct;
+
+            if (!database.clear_channel_scan_results(m_radio_mac, m_is_single_scan)) {
+                TASK_LOG(ERROR) << "failed to clear scan results";
+                m_last_scan_error_code =
+                    beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
+                fsm_move_state(eState::ABORT_SCAN);
+                break;
+            }
+
+            set_events_timeout(SCAN_RESULTS_DUMP_WAIT_TIME_MSEC);
+            dcs_wait_for_event(eEvent::SCAN_RESULTS_DUMP);
+
+            fsm_move_state(eState::WAIT_FOR_RESULTS_DUMP);
+        } else {
+            TASK_LOG(DEBUG) << "ignoring SCAN_RESULTS_READY event,"
+                            << " not in state WAIT_FOR_RESULTS_READY";
+        }
+        break;
+    }
+    case eEvent::SCAN_RESULTS_DUMP: {
+        TASK_LOG(DEBUG) << "SCAN_RESULTS_DUMP received";
+        if (fsm_in_state(eState::WAIT_FOR_RESULTS_DUMP)) {
+            auto scan_results_dump_event = reinterpret_cast<sScanEvent *>(obj);
+            event_handled                = true;
+            TASK_LOG(DEBUG) << "SCAN_RESULTS_DUMP handled on:"
+                            << scan_results_dump_event->radio_mac.oct;
+            auto channel = scan_results_dump_event->udata.scan_results.channel;
+
+            if (!database.is_channel_in_pool(m_radio_mac, channel, m_is_single_scan)) {
+                LOG(DEBUG) << "channel is not in channel pool - ignoring results";
+            } else if (!database.add_channel_scan_results(
+                           m_radio_mac, scan_results_dump_event->udata.scan_results,
+                           m_is_single_scan)) {
+                TASK_LOG(ERROR) << "failed to save scan results";
+                m_last_scan_error_code =
+                    beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
+                fsm_move_state(eState::ABORT_SCAN);
+                break;
+            } else {
+                TASK_LOG(DEBUG) << "results for channel=" << int(channel)
+                                << " saved successfully to DB";
+            }
+
+            set_events_timeout(SCAN_RESULTS_DUMP_WAIT_TIME_MSEC);
+            dcs_wait_for_event(eEvent::SCAN_RESULTS_DUMP);
+        } else {
+            TASK_LOG(DEBUG) << "ignoring SCAN_RESULTS_DUMP event,"
+                            << " not in state WAIT_FOR_RESULTS_DUMP";
+        }
+        break;
+    }
+    case eEvent::SCAN_FINISHED: {
+        TASK_LOG(DEBUG) << "SCAN_FINISHED received";
+        if (fsm_in_state(eState::WAIT_FOR_RESULTS_DUMP)) {
+            auto scan_finished_event = reinterpret_cast<sScanEvent *>(obj);
+            event_handled            = true;
+            TASK_LOG(DEBUG) << "SCAN_FINISHED handled on:" << scan_finished_event->radio_mac.oct;
+
+            //clear any pending events. for example SCAN_RESULTS_DUMP
+            clear_pending_events();
+
+            fsm_move_state(eState::SCAN_DONE);
+        } else {
+            TASK_LOG(DEBUG) << "ignoring SCAN_FINISHED event,"
+                            << " not in state WAIT_FOR_RESULTS_DUMP";
+        }
+        break;
+    }
+    case eEvent::SCAN_ABORTED: {
+        TASK_LOG(DEBUG) << "SCAN_ABORTED received";
+        auto scan_abort_event = reinterpret_cast<sScanEvent *>(obj);
+        event_handled         = true;
+        TASK_LOG(DEBUG) << "SCAN_FINISHED handled on:" << scan_abort_event->radio_mac.oct;
+
+        m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_ABORTED_BY_DRIVER;
+
+        clear_pending_events();
+        fsm_move_state(eState::ABORT_SCAN);
+        break;
+    }
+    case eEvent::SCAN_ENABLE_CHANGE: {
+        TASK_LOG(DEBUG) << "SCAN_ENABLE_CHANGE received";
+        auto scan_enable_change_event = reinterpret_cast<sScanEvent *>(obj);
+        event_handled                 = true;
+        TASK_LOG(DEBUG) << "SCAN_FINISHED handled on:" << scan_enable_change_event->radio_mac.oct;
+
+        if (fsm_in_state(eState::IDLE)) {
+            TASK_LOG(DEBUG) << "current state:IDLE, resetting interval wait";
+            m_next_scan_timestamp_interval = std::chrono::steady_clock::now();
+        }
+        break;
+    }
     default: {
         break;
     }
@@ -235,9 +352,24 @@ void dynamic_channel_selection_task::handle_events_timeout(std::multiset<int> pe
                         << ", going to abort-scan state -> handle_nl_dead_node";
 
         switch (m_fsm_state) {
-        case eState::WAIT_FOR_SCAN_TRIGGERED:
-        case eState::WAIT_FOR_RESULTS_READY:
-        case eState::WAIT_FOR_RESULTS_DUMP:
+        case eState::WAIT_FOR_SCAN_TRIGGERED: {
+            m_last_scan_error_code =
+                beerocks::eChannelScanErrCode::CHANNEL_SCAN_TRIGGERED_EVENT_TIMEOUT;
+            fsm_move_state(eState::ABORT_SCAN);
+            break;
+        }
+        case eState::WAIT_FOR_RESULTS_READY: {
+            m_last_scan_error_code =
+                beerocks::eChannelScanErrCode::CHANNEL_SCAN_RESULTS_READY_EVENT_TIMEOUT;
+            fsm_move_state(eState::ABORT_SCAN);
+            break;
+        }
+        case eState::WAIT_FOR_RESULTS_DUMP: {
+            m_last_scan_error_code =
+                beerocks::eChannelScanErrCode::CHANNEL_SCAN_RESULTS_DUMP_EVENT_TIMEOUT;
+            fsm_move_state(eState::ABORT_SCAN);
+            break;
+        }
         case eState::SCAN_DONE:
         case eState::IDLE:
         case eState::ABORT_SCAN: {
