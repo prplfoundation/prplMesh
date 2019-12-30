@@ -61,6 +61,11 @@ run-tests:
 
 .test-on-target:
   stage: test
+  before_script:
+    # we need a list of all the targets to be able to kill them
+    - ALL_TARGETS="turris-omnia-1 glinet-b1300-1 netgear-rax40-1"
+    # kill prplmesh on each target to make sure they don't interfere with the test
+    - for i in $ALL_TARGETS ; do ssh "$i" 'pgrep -f beerocks | xargs kill -9 2>/dev/null' || true ; done
   script:
     - tools/deploy_ipk.sh $TARGET_DEVICE_NAME tools/docker/builder/openwrt/*.ipk
     - tools/docker/tests/openwrt/test_status.sh $TARGET_DEVICE_NAME
