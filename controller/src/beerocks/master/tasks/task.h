@@ -51,6 +51,7 @@ protected:
     void set_events_timeout(int ms);
     void wait_for_event(int event);
     void wait_for_task_end(int id, int ms);
+    void clear_pending_events();
     void finish();
 
     virtual void work() = 0;
