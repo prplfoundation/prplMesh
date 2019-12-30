@@ -2118,6 +2118,322 @@ bool db::get_hostap_is_acs_enabled(std::string mac)
 }
 
 //
+// DCS
+//
+bool db::set_dcs_is_enabled(const std::string &mac, const bool enable)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+    LOG(DEBUG) << __FUNCTION__ << ", continuous scan is enable = " << int(enable);
+    n->hostap->continuous_scan_config->is_enabled = enable;
+    return true;
+}
+
+bool db::get_dcs_is_enabled(const std::string &mac)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+    return n->hostap->continuous_scan_config->is_enabled;
+}
+
+bool db::set_dcs_interval_sec(const std::string &mac, const int interval_sec)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+    LOG(DEBUG) << __FUNCTION__ << ", continuous scan, interval sec = " << interval_sec;
+    n->hostap->continuous_scan_config->interval_sec = interval_sec;
+    return true;
+}
+
+int db::get_dcs_interval_sec(const std::string &mac)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return -1;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return -1;
+    }
+    return n->hostap->continuous_scan_config->interval_sec;
+}
+
+bool db::set_dcs_scan_in_progress(const std::string &mac, const bool scan_in_progress,
+                                  const bool single_scan)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+    LOG(DEBUG) << __FUNCTION__ << ", " << (single_scan ? "single" : "continuous")
+               << " scan, scan in progress = " << int(scan_in_progress);
+    auto scan_status =
+        (single_scan) ? n->hostap->single_scan_status : n->hostap->continuous_scan_status;
+    scan_status->scan_in_progress = scan_in_progress;
+
+    return true;
+}
+
+bool db::get_dcs_scan_in_progress(const std::string &mac, const bool single_scan)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return -1;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return -1;
+    }
+    auto scan_status =
+        (single_scan) ? n->hostap->single_scan_status : n->hostap->continuous_scan_status;
+    return scan_status->scan_in_progress;
+}
+
+bool db::set_dcs_last_scan_success(const std::string &mac,
+                                   const beerocks::eDcsScanErrCode error_code,
+                                   const bool single_scan)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+    LOG(DEBUG) << __FUNCTION__ << ", " << (single_scan ? "single" : "continuous")
+               << " scan, last scan error code = " << int(error_code);
+
+    auto scan_status =
+        (single_scan) ? n->hostap->single_scan_status : n->hostap->continuous_scan_status;
+    scan_status->last_scan_error_code = error_code;
+
+    return true;
+}
+
+beerocks::eDcsScanErrCode db::get_dcs_last_scan_success(const std::string &mac,
+                                                        const bool single_scan)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return beerocks::DCS_SCAN_INTERNAL_FAILURE;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return beerocks::DCS_SCAN_INTERNAL_FAILURE;
+    }
+
+    auto scan_status =
+        (single_scan) ? n->hostap->single_scan_status : n->hostap->continuous_scan_status;
+    return scan_status->last_scan_error_code;
+}
+
+bool db::set_dcs_dwell_time_msec(const std::string &mac, int dwell_time_msec, bool single_scan)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+    LOG(DEBUG) << __FUNCTION__ << "," << (single_scan ? "single" : "continuous")
+               << ", dwell time msec = " << dwell_time_msec;
+
+    if (dwell_time_msec <= 0) {
+        LOG(ERROR) << __FUNCTION__ << "Only >0 dwell time is supported!";
+        return false;
+    }
+
+    auto scan_config =
+        (single_scan) ? n->hostap->single_scan_config : n->hostap->continuous_scan_config;
+    scan_config->dwell_time_msec = dwell_time_msec;
+
+    return true;
+}
+
+int db::get_dcs_dwell_time_msec(const std::string &mac, const bool single_scan)
+{
+    auto n = get_node(mac);
+
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return -1;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return -1;
+    }
+
+    auto scan_config =
+        (single_scan) ? n->hostap->single_scan_config : n->hostap->continuous_scan_config;
+    return scan_config->dwell_time_msec;
+}
+
+bool db::set_dcs_channel_pool(const std::string &mac, const std::set<uint8_t> &channel_pool,
+                              const bool single_scan)
+{
+    auto n = get_node(mac);
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+
+    //Validate new dcs channel pool with hostap_supported_channels list
+    //This is a workaround
+    static uint8_t supported_channels_array[] = {
+        1,  2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  36,  40,  44,  48,  52,  56,  60,
+        64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161, 165};
+    static size_t supported_channels_array_size =
+        sizeof(supported_channels_array) / sizeof(uint8_t);
+    std::set<uint8_t> supported_channels(supported_channels_array,
+                                          supported_channels_array + supported_channels_array_size);
+    for (auto channel : channel_pool) {
+        if (supported_channels.find(channel) == supported_channels.end()) {
+            //even if one channel is not supported reject all pool
+            LOG(ERROR) << __FUNCTION__ << "channel =" << int(channel)
+                       << " is invalid, setting channel pool failed !";
+            return false;
+        }
+    }
+    auto scan_config =
+        (single_scan) ? n->hostap->single_scan_config : n->hostap->continuous_scan_config;
+    scan_config->channel_pool = std::set<uint8_t>(channel_pool); // creates a copy of the pool
+    LOG(DEBUG) << __FUNCTION__ << ", " << (single_scan ? "single" : "continuous")
+               << " scan, setting channel pool succeeded!";
+
+    return true;
+}
+
+const std::set<uint8_t> &db::get_dcs_channel_pool(const std::string &mac, const bool single_scan)
+{
+    auto n = get_node(mac);
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return *(std::make_shared<std::set<uint8_t>>());
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return *(std::make_shared<std::set<uint8_t>>());
+    }
+
+    auto scan_config =
+        (single_scan) ? n->hostap->single_scan_config : n->hostap->continuous_scan_config;
+
+    return scan_config->channel_pool;
+}
+
+bool db::is_channel_in_pool(const std::string &mac, const uint8_t channel, const bool single_scan)
+{
+    auto n = get_node(mac);
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+
+    auto scan_config =
+        (single_scan) ? n->hostap->single_scan_config : n->hostap->continuous_scan_config;
+    auto &channel_pool = scan_config->channel_pool;
+
+    return channel_pool.find(channel) != channel_pool.end();
+}
+
+bool db::clear_dcs_scan_results(const std::string &mac, const bool single_scan)
+{
+
+    auto n = get_node(mac);
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+
+    auto &scan_results =
+        (single_scan) ? n->hostap->single_scan_results : n->hostap->continuous_scan_results;
+
+    scan_results.clear();
+    return true;
+}
+
+bool db::add_dcs_scan_results(const std::string &mac, const sDcsScanResultsElement &scan_result,
+                              const bool single_scan)
+{
+
+    auto n = get_node(mac);
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return false;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return false;
+    }
+
+    auto &scan_results =
+        (single_scan) ? n->hostap->single_scan_results : n->hostap->continuous_scan_results;
+
+    scan_results.push_back(scan_result);
+
+    return true;
+}
+
+const std::list<sDcsScanResultsElement> &db::get_dcs_scan_results(const std::string &mac,
+                                                                  const bool single_scan)
+{
+    auto n = get_node(mac);
+    static std::list<sDcsScanResultsElement> dummy_return;
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return dummy_return;
+    } else if (n->get_type() != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
+        return dummy_return;
+    }
+
+    auto &scan_results =
+        (single_scan) ? n->hostap->single_scan_results : n->hostap->continuous_scan_results;
+
+    return scan_results;
+}
+
+//
 // CLI
 //
 void db::add_cli_socket(Socket *sd)

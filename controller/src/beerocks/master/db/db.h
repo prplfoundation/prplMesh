@@ -393,7 +393,42 @@ public:
 
     bool set_hostap_is_acs_enabled(std::string mac, bool enable);
     bool get_hostap_is_acs_enabled(std::string mac);
+    
+    //
+    // DCS
+    //
+    bool set_dcs_is_enabled(const std::string &mac, const bool enable);
+    bool get_dcs_is_enabled(const std::string &mac);
 
+    bool set_dcs_interval_sec(const std::string &mac, const int interval_sec);
+    int  get_dcs_interval_sec(const std::string &mac);
+
+    bool set_dcs_scan_in_progress(const std::string &mac, const bool scan_in_progress,
+                                  const bool single_scan);
+    bool get_dcs_scan_in_progress(const std::string &mac, const bool single_scan);
+
+    bool set_dcs_last_scan_success(const std::string &mac,
+                                   const beerocks::eDcsScanErrCode error_code,
+                                   const bool single_scan);
+    beerocks::eDcsScanErrCode get_dcs_last_scan_success(const std::string &mac,
+                                                        const bool single_scan);
+
+    bool set_dcs_dwell_time_msec(const std::string &mac, const int dwell_time_msec,
+                                 const bool single_scan);
+    int get_dcs_dwell_time_msec(const std::string &mac, const bool single_scan);
+
+    bool set_dcs_channel_pool(const std::string &mac, const std::set<uint8_t> &channel_pool,
+                              bool single_scan);
+    const std::set<uint8_t> &get_dcs_channel_pool(const std::string &mac, const bool single_scan);
+
+    bool is_channel_in_pool(const std::string &mac, const uint8_t channel, const bool single_scan);
+
+    bool clear_dcs_scan_results(const std::string &mac, const bool single_scan);
+    bool add_dcs_scan_results(const std::string &mac, const sDcsScanResultsElement &scan_result,
+                              const bool single_scan);
+    const std::list<sDcsScanResultsElement> &get_dcs_scan_results(const std::string &mac,
+                                                                  const bool single_scan);
+                                                                  
     //
     // CLI
     //
