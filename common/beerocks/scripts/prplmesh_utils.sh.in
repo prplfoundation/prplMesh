@@ -142,16 +142,16 @@ start_function() {
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_init
     case "$PRPLMESH_MODE" in
         CA | ca)
-            prplmesh_platform_db_init "Multi-AP-Controller-and-Agent"
+            [ "$PLATFORM_INIT" = "true" ] && prplmesh_platform_db_init "Multi-AP-Controller-and-Agent"
             prplmesh_controller_start
             prplmesh_agent_start
             ;;
         C | c)
-            prplmesh_platform_db_init "Multi-AP-Controller"
+            [ "$PLATFORM_INIT" = "true" ] && prplmesh_platform_db_init "Multi-AP-Controller"
             prplmesh_controller_start
             ;;
         A | a)
-            prplmesh_platform_db_init "Multi-AP-Agent" "WDS-Repeater"
+            [ "$PLATFORM_INIT" = "true" ] && prplmesh_platform_db_init "Multi-AP-Agent" "WDS-Repeater"
             prplmesh_agent_start
             ;;
         * ) err "unsupported mode: $PRPLMESH_MODE"; usage; exit 1 ;;
