@@ -21,8 +21,12 @@ node::node(beerocks::eType type_, const std::string mac_)
     if ((type == beerocks::TYPE_CLIENT) || (type == beerocks::TYPE_IRE_BACKHAUL)) {
         stats_info = std::make_shared<sta_stats_params>();
     } else if (type == beerocks::TYPE_SLAVE) {
-        hostap             = std::make_shared<radio>();
-        hostap->stats_info = std::make_shared<radio::ap_stats_params>();
+        hostap                         = std::make_shared<radio>();
+        hostap->stats_info             = std::make_shared<radio::ap_stats_params>();
+        hostap->continuous_scan_config = std::make_shared<radio::dcs_scan_config>();
+        hostap->continuous_scan_status = std::make_shared<radio::dcs_scan_status>();
+        hostap->single_scan_config     = std::make_shared<radio::dcs_scan_config>();
+        hostap->single_scan_status     = std::make_shared<radio::dcs_scan_status>();
     }
     m_sta_5ghz_capabilities.cap_flag  = false;
     m_sta_24ghz_capabilities.cap_flag = false;

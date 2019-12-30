@@ -33,6 +33,28 @@ typedef struct {
     bool backhaul_vap;
 } sVapElement;
 
+typedef struct {
+    // std::string radio;
+    std::string ssid;
+    std::string mac;
+    std::string mode;
+    uint32_t channel;
+    int32_t signal_strength;
+    std::string security_mode_enabled;
+    std::string encryption_mode;
+    std::string operating_frequency_band;
+    std::string supported_standards;
+    std::string operating_standards;
+    std::string operating_channel_bandwidth;
+    uint32_t beacon_period;
+    int32_t noise;
+    std::string basic_data_transfer_rates;
+    std::string supported_data_transfer_rates;
+    uint32_t dtim_period;
+    uint32_t channel_utilization;
+    std::chrono::steady_clock::time_point timestamp;
+} sDcsScanResultsElement;
+
 class node {
 public:
     node(beerocks::eType type_, const std::string mac_);
@@ -183,6 +205,27 @@ public:
         };
         std::shared_ptr<ap_stats_params> stats_info;
         std::unordered_map<int8_t, sVapElement> vaps_info;
+
+        class dcs_scan_config {
+        public:
+            bool is_enabled = false;
+            std::set<uint8_t> channel_pool; // default value: empty list
+            int interval_sec    = -1;       //-1 (invalid)
+            int dwell_time_msec = -1;       //-1 (invalid)
+        };
+
+        class dcs_scan_status {
+        public:
+            bool scan_in_progress                          = false;
+            beerocks::eDcsScanErrCode last_scan_error_code = beerocks::DCS_SCAN_NO_ERROR;
+        };
+        std::shared_ptr<dcs_scan_config> continuous_scan_config;
+        std::shared_ptr<dcs_scan_status> continuous_scan_status;
+        std::list<sDcsScanResultsElement> continuous_scan_results;
+
+        std::shared_ptr<dcs_scan_config> single_scan_config;
+        std::shared_ptr<dcs_scan_status> single_scan_status;
+        std::list<sDcsScanResultsElement> single_scan_results;
     };
     std::shared_ptr<radio> hostap;
 
