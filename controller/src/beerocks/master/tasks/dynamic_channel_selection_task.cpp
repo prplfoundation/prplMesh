@@ -32,14 +32,150 @@ void dynamic_channel_selection_task::work()
     TASK_LOG(DEBUG) << "FSM current state: " << s_ar_states[int(m_fsm_state)];
 
     switch (m_fsm_state) {
-    case eState::INIT:
-    case eState::IDLE:
-    case eState::TRIGGER_SCAN:
-    case eState::WAIT_FOR_SCAN_TRIGGERED:
-    case eState::WAIT_FOR_RESULTS_READY:
-    case eState::WAIT_FOR_RESULTS_DUMP:
-    case eState::SCAN_DONE:
-    case eState::ABORT_SCAN:
+    case eState::INIT: {
+        database.assign_dynamic_channel_selection_task_id(m_radio_mac, id);
+        // allow first scan
+        m_next_scan_timestamp_interval = std::chrono::steady_clock::now();
+        fsm_move_state(eState::IDLE);
+        break;
+    }
+    case eState::IDLE: {
+        if (m_is_single_scan_pending) {
+            m_is_single_scan         = true;
+            m_is_single_scan_pending = false;
+            fsm_move_state(eState::TRIGGER_SCAN);
+        } else if (database.get_channel_scan_is_enabled(m_radio_mac)) {
+            auto now = std::chrono::steady_clock::now();
+
+            if (now > m_next_scan_timestamp_interval) {
+                m_is_single_scan = false;
+                fsm_move_state(eState::TRIGGER_SCAN);
+                m_last_scan_try_timestamp = now;
+                LOG(DEBUG) << "interval condition is met, trigger scan";
+            }
+        }
+        break;
+    }
+    case eState::TRIGGER_SCAN: {
+        LOG(TRACE) << "TRIGGER_SCAN, mac=" << m_radio_mac << "scan_type is "
+                   << ((m_is_single_scan) ? "single-scan" : "continuous-scan");
+
+        // When a scan is requested send the scan parameters Channel pool & Dwell time
+        // Before sending the request set the scan_in_progress flag to true
+        // So another scan would not trigger on the same radio simultaneously
+
+        database.set_channel_scan_in_progress(m_radio_mac, true, m_is_single_scan);
+
+        auto request = beerocks::message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST>(cmdu_tx);
+        if (request == nullptr) {
+            LOG(ERROR)
+                << "Failed building message cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST !";
+            m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
+            fsm_move_state(eState::ABORT_SCAN);
+            break;
+        }
+
+        int32_t dwell_time_msec =
+            database.get_channel_scan_dwell_time_msec(m_radio_mac, m_is_single_scan);
+        if (dwell_time_msec < 0) {
+            LOG(ERROR) << "invalid dwell_time < 0";
+            m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_INVALID_PARAMS;
+            fsm_move_state(eState::ABORT_SCAN);
+            break;
+        }
+
+        //get current channel pool from DB
+        auto &curr_channel_pool = database.get_channel_scan_pool(m_radio_mac, m_is_single_scan);
+        if (curr_channel_pool.empty()) {
+            LOG(ERROR) << "empty channel pool is not supported. please set channel pool for mac="
+                       << m_radio_mac;
+            m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_INVALID_PARAMS;
+            fsm_move_state(eState::ABORT_SCAN);
+            break;
+        }
+
+        if (curr_channel_pool.size() > beerocks::message::SUPPORTED_CHANNELS_LENGTH) {
+            LOG(ERROR) << "channel_pool is too big";
+            m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_POOL_TOO_BIG;
+            fsm_move_state(eState::ABORT_SCAN);
+            break;
+        }
+
+        request->scan_params().radio_mac         = m_radio_mac;
+        request->scan_params().dwell_time_ms     = dwell_time_msec;
+        request->scan_params().channel_pool_size = curr_channel_pool.size();
+        std::copy(curr_channel_pool.begin(), curr_channel_pool.end(),
+                  request->scan_params().channel_pool);
+
+        // get the parent node to send the CMDU to the agent
+        auto radio_mac_str = beerocks::net::network_utils::mac_to_string(m_radio_mac);
+        auto ire           = database.get_node_parent_ire(radio_mac_str);
+        son_actions::send_cmdu_to_agent(ire, cmdu_tx, database, radio_mac_str);
+
+        set_events_timeout(SCAN_TRIGGERED_WAIT_TIME_MSEC);
+        dcs_wait_for_event(eEvent::SCAN_TRIGGERED);
+
+        fsm_move_state(eState::WAIT_FOR_SCAN_TRIGGERED);
+        break;
+    }
+    case eState::WAIT_FOR_SCAN_TRIGGERED: {
+        TASK_LOG(ERROR) << "This should not happen!";
+
+        m_last_scan_error_code =
+            beerocks::eChannelScanErrCode::CHANNEL_SCAN_TRIGGERED_EVENT_TIMEOUT;
+
+        fsm_move_state(eState::ABORT_SCAN);
+        break;
+    }
+    case eState::WAIT_FOR_RESULTS_READY: {
+        TASK_LOG(ERROR) << "This should not happen!";
+
+        m_last_scan_error_code =
+            beerocks::eChannelScanErrCode::CHANNEL_SCAN_RESULTS_READY_EVENT_TIMEOUT;
+
+        fsm_move_state(eState::ABORT_SCAN);
+        break;
+    }
+    case eState::WAIT_FOR_RESULTS_DUMP: {
+        TASK_LOG(ERROR) << "This should not happen!";
+
+        m_last_scan_error_code =
+            beerocks::eChannelScanErrCode::CHANNEL_SCAN_RESULTS_DUMP_EVENT_TIMEOUT;
+
+        fsm_move_state(eState::ABORT_SCAN);
+        break;
+    }
+    case eState::SCAN_DONE: {
+        LOG(TRACE) << "SCAN_DONE";
+
+        //update next continuous scan time
+        if (!m_is_single_scan) {
+            auto interval =
+                std::chrono::seconds(database.get_channel_scan_interval_sec(m_radio_mac));
+            m_next_scan_timestamp_interval = m_last_scan_try_timestamp + interval;
+        }
+
+        m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
+        database.set_channel_scan_results_status(m_radio_mac, m_last_scan_error_code,
+                                                 m_is_single_scan);
+
+        database.set_channel_scan_in_progress(m_radio_mac, false, m_is_single_scan);
+        m_is_single_scan = false;
+        fsm_move_state(eState::IDLE);
+        break;
+    }
+    case eState::ABORT_SCAN: {
+        LOG(ERROR) << "aborting scan for mac=" << m_radio_mac << ", last_scan_timestamp is not set";
+
+        database.set_channel_scan_results_status(m_radio_mac, m_last_scan_error_code,
+                                                 m_is_single_scan);
+        database.set_channel_scan_in_progress(m_radio_mac, false, m_is_single_scan);
+        m_is_single_scan = false;
+
+        fsm_move_state(eState::IDLE);
+        break;
+    }
     default: {
         break;
     }
