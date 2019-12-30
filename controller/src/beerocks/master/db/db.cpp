@@ -15,6 +15,7 @@
 #include <algorithm>
 
 using namespace beerocks;
+using namespace beerocks_message;
 using namespace son;
 using namespace net;
 
@@ -2116,6 +2117,254 @@ bool db::get_hostap_is_acs_enabled(std::string mac)
 }
 
 //
+// Channel Scan
+//
+bool db::set_channel_scan_is_enabled(const sMacAddr &mac, bool enable)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    hostap->continuous_scan_config.is_enabled = enable;
+    return true;
+}
+
+bool db::get_channel_scan_is_enabled(const sMacAddr &mac)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    return hostap->continuous_scan_config.is_enabled;
+}
+
+bool db::set_channel_scan_interval_sec(const sMacAddr &mac, int interval_sec)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    hostap->continuous_scan_config.interval_sec = interval_sec;
+    return true;
+}
+
+int db::get_channel_scan_interval_sec(const sMacAddr &mac)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    return hostap->continuous_scan_config.interval_sec;
+}
+
+bool db::set_channel_scan_in_progress(const sMacAddr &mac, bool scan_in_progress, bool single_scan)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    LOG(DEBUG) << (single_scan ? "single" : "continuous") << " scan "
+               << (scan_in_progress ? "is" : "isn't") << " in progress.";
+    (single_scan ? hostap->single_scan_status : hostap->continuous_scan_status).scan_in_progress =
+        scan_in_progress;
+
+    return true;
+}
+
+bool db::get_channel_scan_in_progress(const sMacAddr &mac, bool single_scan)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    return (single_scan ? hostap->single_scan_status : hostap->continuous_scan_status)
+        .scan_in_progress;
+}
+
+bool db::set_channel_scan_results_status(const sMacAddr &mac,
+                                         beerocks::eChannelScanErrCode error_code, bool single_scan)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    LOG(DEBUG) << (single_scan ? "single" : "continuous")
+               << " scan, last scan error code = " << int(error_code);
+
+    (single_scan ? hostap->single_scan_status : hostap->continuous_scan_status)
+        .last_scan_error_code = error_code;
+
+    return true;
+}
+
+beerocks::eChannelScanErrCode db::get_channel_scan_results_status(const sMacAddr &mac,
+                                                                  bool single_scan)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
+    }
+
+    return (single_scan ? hostap->single_scan_status : hostap->continuous_scan_status)
+        .last_scan_error_code;
+}
+
+bool db::set_channel_scan_dwell_time_msec(const sMacAddr &mac, int dwell_time_msec,
+                                          bool single_scan)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    LOG(DEBUG) << (single_scan ? "single" : "continuous")
+               << ", dwell time msec = " << dwell_time_msec;
+
+    if (dwell_time_msec <= 0) {
+        LOG(ERROR) << "Only >0 dwell time is supported!";
+        return false;
+    }
+
+    (single_scan ? hostap->single_scan_config : hostap->continuous_scan_config).dwell_time_msec =
+        dwell_time_msec;
+
+    return true;
+}
+
+int db::get_channel_scan_dwell_time_msec(const sMacAddr &mac, bool single_scan)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    return (single_scan ? hostap->single_scan_config : hostap->continuous_scan_config)
+        .dwell_time_msec;
+}
+
+bool db::set_channel_scan_pool(const sMacAddr &mac, const std::unordered_set<uint8_t> &channel_pool,
+                               bool single_scan)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    //Validate new dcs channel pool with hostap_supported_channels list
+    //This is a workaround
+    static uint8_t supported_channels_array[] = {
+        1,  2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  36,  40,  44,  48,  52,  56,  60,
+        64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161, 165};
+    static size_t supported_channels_array_size =
+        sizeof(supported_channels_array) / sizeof(uint8_t);
+    std::set<uint8_t> supported_channels(supported_channels_array,
+                                         supported_channels_array + supported_channels_array_size);
+    for (auto channel : channel_pool) {
+        if (supported_channels.find(channel) == supported_channels.end()) {
+            //even if one channel is not supported reject all pool
+            LOG(ERROR) << "channel #" << int(channel)
+                       << " is invalid, setting channel pool failed !";
+            return false;
+        }
+    }
+
+    (single_scan ? hostap->single_scan_config : hostap->continuous_scan_config).channel_pool =
+        channel_pool;
+
+    LOG(DEBUG) << (single_scan ? "single" : "continuous")
+               << " scan, setting channel pool succeeded!";
+
+    return true;
+}
+
+const std::unordered_set<uint8_t> &db::get_channel_scan_pool(const sMacAddr &mac, bool single_scan)
+{
+    static std::unordered_set<uint8_t> dummy_return;
+
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return dummy_return;
+    }
+
+    return (single_scan ? hostap->single_scan_config : hostap->continuous_scan_config).channel_pool;
+}
+
+bool db::is_channel_in_pool(const sMacAddr &mac, uint8_t channel, bool single_scan)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    auto &pool =
+        (single_scan ? hostap->single_scan_config : hostap->continuous_scan_config).channel_pool;
+    return pool.find(channel) != pool.end();
+}
+
+bool db::clear_channel_scan_results(const sMacAddr &mac, bool single_scan)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    (single_scan ? hostap->single_scan_config : hostap->continuous_scan_config)
+        .channel_pool.clear();
+
+    return true;
+}
+
+bool db::add_channel_scan_results(const sMacAddr &mac, const sChannelScanResults &scan_result,
+                                  bool single_scan)
+{
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return false;
+    }
+
+    (single_scan ? hostap->single_scan_results : hostap->continuous_scan_results)
+        .push_back(scan_result);
+
+    return true;
+}
+
+const std::list<sChannelScanResults> &db::get_channel_scan_results(const sMacAddr &mac,
+                                                                   bool single_scan)
+{
+    static std::list<sChannelScanResults> dummy_return;
+
+    auto hostap = get_hostap_by_mac(mac);
+    if (!hostap) {
+        LOG(ERROR) << "unable to get hostap";
+        return dummy_return;
+    }
+
+    return (single_scan ? hostap->single_scan_results : hostap->continuous_scan_results);
+}
+
+//
 // CLI
 //
 void db::add_cli_socket(Socket *sd)
@@ -3135,6 +3384,22 @@ std::shared_ptr<node> db::get_node(sMacAddr al_mac, sMacAddr ruid)
         key = network_utils::mac_to_string(al_mac) + network_utils::mac_to_string(ruid);
 
     return get_node(key);
+}
+
+std::shared_ptr<node::radio> db::get_hostap_by_mac(const sMacAddr &mac)
+{
+    auto n = get_node(mac);
+    beerocks::eType t;
+    if (!n) {
+        LOG(ERROR) << "node not found.... ";
+        return nullptr;
+    } else if ((t = n->get_type()) != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
+        LOG(ERROR) << "node " << network_utils::mac_to_string(mac) << " type is #" << (int)t;
+        LOG(ERROR) << "node " << network_utils::mac_to_string(mac) << " is not a valid hostap!";
+        return nullptr;
+    }
+
+    return n->hostap;
 }
 
 std::set<std::shared_ptr<node>> db::get_node_subtree(std::shared_ptr<node> n)
