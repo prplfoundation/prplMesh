@@ -107,7 +107,7 @@ std::string message_com::print_cmdu_types(ieee1905_1::CmduMessageRx &cmdu_rx, sC
         cmdu_info->cmdu_type = message_type;
     info = "cmdu_type=" + std::to_string(int(message_type));
     if (message_type == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
-        auto tlv_header = cmdu_rx.addClass<ieee1905_1::tlvVendorSpecific>();
+        auto tlv_header = cmdu_rx.getClass<ieee1905_1::tlvVendorSpecific>();
         if (!intel_oui(tlv_header))
             return std::string();
         if (!tlv_header) {
@@ -120,7 +120,7 @@ std::string message_com::print_cmdu_types(ieee1905_1::CmduMessageRx &cmdu_rx, sC
             LOG(ERROR) << "addClass<cACTION_HEADER> failed!";
             return info;
         }
-
+        tlv_header->addInnerClassList(hdr); // so it will also be swapped back
         if (cmdu_info) {
             cmdu_info->intel_vs_action    = hdr->action();
             cmdu_info->intel_vs_action_op = hdr->action_op();
