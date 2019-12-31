@@ -54,6 +54,7 @@ protected:
 
     // Process dwpal event
     virtual bool process_dwpal_event(char *buffer, int bufLen, const std::string &opcode) = 0;
+    virtual bool process_dwpal_nl_event(struct nl_msg *msg)                               = 0;
 
     bool set(const std::string &param, const std::string &value,
              int vap_id = beerocks::IFACE_RADIO_ID);
@@ -62,6 +63,30 @@ protected:
                         int vap_id = beerocks::IFACE_RADIO_ID); // for external process
     bool dwpal_send_cmd(const std::string &cmd, int vap_id = beerocks::IFACE_RADIO_ID);
     bool attach_ctrl_interface(int vap_id);
+
+    /**
+     * @brief handle get data cmd from netlink
+     * @param ifname radio interface name
+     * @param nl_cmd netlink get command number
+     * @param out_buffer pointer to data buffer for the result
+     * @param max_buffer_size buffer size
+     * @return size of returned data (success if > 0)
+     */
+    size_t dwpal_nl_cmd_get(const std::string &ifname, unsigned int nl_cmd,
+                            unsigned char *out_buffer, const size_t max_buffer_size);
+    /**
+     * @brief handle set vendor data cmd to netlink
+     * @param ifname radio interface name
+     * @param nl_cmd netlink set command number
+     * @param vendor_data pointer to vendor data buffer
+     * @param vendor_data_size size of data
+     * @return true on success
+     * @return false on failure
+     */
+    bool dwpal_nl_cmd_set(const std::string &ifname, unsigned int nl_cmd,
+                          unsigned char *vendor_data, size_t vendor_data_size);
+    bool dwpal_nl_cmd_scan_dump();
+    void *get_dwpal_nl_ctx() const { return (m_dwpal_nl_ctx); }
 
     // Private data-members:
 private:
@@ -76,6 +101,9 @@ private:
     std::chrono::steady_clock::time_point m_state_timeout;
 
     void *m_dwpal_ctx[beerocks::IFACE_TOTAL_VAPS] = {nullptr};
+    void *m_dwpal_nl_ctx                          = nullptr;
+
+    int m_fd_nl_cmd_get = -1;
 
     char m_wpa_ctrl_buffer[HOSTAPD_TO_DWPAL_MSG_LENGTH];
     size_t m_wpa_ctrl_buffer_size = HOSTAPD_TO_DWPAL_MSG_LENGTH;

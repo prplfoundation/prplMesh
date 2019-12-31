@@ -10,6 +10,7 @@
 #define _BWL_MON_WLAN_HAL_DWPAL_H_
 
 #include "base_wlan_hal_dwpal.h"
+#include "mon_wlan_hal_dwpal_types.h"
 #include <bwl/mon_wlan_hal.h>
 
 namespace bwl {
@@ -43,6 +44,7 @@ public:
     // Protected methods:
 protected:
     virtual bool process_dwpal_event(char *buffer, int bufLen, const std::string &opcode) override;
+    virtual bool process_dwpal_nl_event(struct nl_msg *msg) override;
 
     // Overload for Monitor events
     bool event_queue_push(mon_wlan_hal::Event event, std::shared_ptr<void> data = {})
