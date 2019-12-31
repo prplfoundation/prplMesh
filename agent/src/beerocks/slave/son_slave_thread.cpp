@@ -3858,7 +3858,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_WSC_MESSAGE";
 
     std::list<WSC::m2> m2_list;
-    for (auto tlv : cmdu_rx.msg.getClassList<ieee1905_1::tlvWsc>()) {
+    for (auto tlv : cmdu_rx.getClassList<ieee1905_1::tlvWsc>()) {
         auto m2 = std::dynamic_pointer_cast<WSC::m2>(WSC::AttrList::parse(*tlv));
         if (!m2) {
             LOG(INFO) << "Not a valid M2 - Ignoring WSC CMDU";
@@ -4317,7 +4317,7 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
     // parse all tlvs in cmdu
     // parse channel preference report message
 
-    for (auto channel_preference_tlv : cmdu_rx.msg.getClassList<wfa_map::tlvChannelPreference>()) {
+    for (auto channel_preference_tlv : cmdu_rx.getClassList<wfa_map::tlvChannelPreference>()) {
 
         const auto &ruid = channel_preference_tlv->radio_uid();
         if (network_utils::mac_to_string(ruid) != config.radio_identifier) {

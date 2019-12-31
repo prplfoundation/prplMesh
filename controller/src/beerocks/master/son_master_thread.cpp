@@ -1037,7 +1037,7 @@ bool master_thread::handle_cmdu_1905_channel_selection_response(const std::strin
     LOG(INFO) << "Received CHANNEL_SELECTION_RESPONSE_MESSAGE, mid=" << std::dec << int(mid);
 
     for (auto channel_selection_response_tlv :
-         cmdu_rx.msg.getClassList<wfa_map::tlvChannelSelectionResponse>()) {
+         cmdu_rx.getClassList<wfa_map::tlvChannelSelectionResponse>()) {
         auto &ruid         = channel_selection_response_tlv->radio_uid();
         auto response_code = channel_selection_response_tlv->response_code();
 
@@ -1348,7 +1348,7 @@ bool master_thread::handle_cmdu_1905_ap_metric_response(const std::string &src_m
     //getting reference for ap metric data storage from db
     auto &ap_metric_data = database.get_ap_metric_data_map();
 
-    for (auto ap_metric_tlv : cmdu_rx.msg.getClassList<wfa_map::tlvApMetric>()) {
+    for (auto ap_metric_tlv : cmdu_rx.getClassList<wfa_map::tlvApMetric>()) {
         //parse tx_ap_metric_data
         sMacAddr reporting_agent_bssid = ap_metric_tlv->bssid();
 
@@ -1374,7 +1374,7 @@ bool master_thread::handle_cmdu_1905_operating_channel_report(const std::string 
     LOG(INFO) << "Received OPERATING_CHANNEL_REPORT_MESSAGE, mid=" << std::dec << int(mid);
 
     for (auto operating_channel_report_tlv :
-         cmdu_rx.msg.getClassList<wfa_map::tlvOperatingChannelReport>()) {
+         cmdu_rx.getClassList<wfa_map::tlvOperatingChannelReport>()) {
         auto &ruid    = operating_channel_report_tlv->radio_uid();
         auto tx_power = operating_channel_report_tlv->current_transmit_power();
 

@@ -52,7 +52,7 @@ public:
 
     static std::shared_ptr<beerocks_header> get_beerocks_header(ieee1905_1::CmduMessage &cmdu)
     {
-        auto tlv = cmdu.msg.getClass<ieee1905_1::tlvVendorSpecific>();
+        auto tlv = cmdu.getClass<ieee1905_1::tlvVendorSpecific>();
         if (!tlv)
             return nullptr;
         if (!intel_oui(tlv))

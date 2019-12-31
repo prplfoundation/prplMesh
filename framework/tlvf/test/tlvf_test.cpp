@@ -629,7 +629,7 @@ int test_all()
         errors++;
     }
 
-    auto tlv4 = received_message.msg.getClass<tlvUnknown>()->class_cast<tlvTestVarList>();
+    auto tlv4 = received_message.getClass<tlvUnknown>()->class_cast<tlvTestVarList>();
     if (tlv4 == nullptr) {
         MAPF_ERR("TLV4 is NULL");
         errors++;
