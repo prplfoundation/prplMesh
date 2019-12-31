@@ -30,8 +30,6 @@ public:
     CmduMessage(uint8_t *buff, size_t buff_len) : msg(buff, buff_len){};
     ~CmduMessage(){};
 
-    ClassList msg;
-
     std::shared_ptr<cCmduHeader> getCmduHeader() const { return msg.getClass<cCmduHeader>(); };
     static uint16_t getCmduHeaderLength() { return kCmduHeaderLength; }
     eMessageType getMessageType();
@@ -44,9 +42,14 @@ public:
     // Forward wrapper functions
     // TODO check which of them can be removed
     template <class T> std::shared_ptr<T> getClass() const { return msg.getClass<T>(); };
+    template <class T> std::list<std::shared_ptr<T>> getClassList() const
+    {
+        return msg.getClassList<T>();
+    };
     size_t getMessageLength() const { return msg.getMessageLength(); };
     size_t getMessageBuffLength() const { return msg.getMessageBuffLength(); };
     uint8_t *getMessageBuff() const { return msg.getMessageBuff(); };
+    template <class T> std::shared_ptr<T> getClass() { return msg.getClass<T>(); }
     void swap() { msg.swap(); };
     bool is_finalized() const { return msg.is_finalized(); };
     bool is_swapped() const { return msg.is_swapped(); };
@@ -54,6 +57,9 @@ public:
     static const size_t kMaxCmduLength      = 1500;
     static const uint16_t kCmduHeaderLength = 8;
     static const uint16_t kTlvHeaderLength  = 3;
+
+protected:
+    ClassList msg;
 };
 
 }; // namespace ieee1905_1
