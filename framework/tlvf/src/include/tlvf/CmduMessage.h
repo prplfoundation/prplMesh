@@ -43,7 +43,6 @@ public:
 
     // Forward wrapper functions
     // TODO check which of them can be removed
-    template <class T> std::shared_ptr<T> addClass() { return msg.addClass<T>(); }
     template <class T> std::shared_ptr<T> getClass() const { return msg.getClass<T>(); };
     size_t getMessageLength() const { return msg.getMessageLength(); };
     size_t getMessageBuffLength() const { return msg.getMessageBuffLength(); };

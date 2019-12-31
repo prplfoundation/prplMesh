@@ -1666,7 +1666,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         LOG(DEBUG) << "ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION received from iface "
                    << soc->hostap_iface;
         if (m_agent_ucc_listener) {
-            auto msg = cmdu_rx.addClass<
+            auto msg = cmdu_rx.getClass<
                 beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>();
             if (!msg) {
                 LOG(ERROR)
