@@ -507,6 +507,12 @@ bool base_wlan_hal_dwpal::attach_ctrl_interface(int vap_id)
     return true;
 }
 
+bool base_wlan_hal_dwpal::process_nl_events()
+{
+    LOG(ERROR) << __func__ << "isn't implemented by derived and shouldn't be called";
+    return false;
+}
+
 bool base_wlan_hal_dwpal::refresh_radio_info()
 {
     char *reply = nullptr;
