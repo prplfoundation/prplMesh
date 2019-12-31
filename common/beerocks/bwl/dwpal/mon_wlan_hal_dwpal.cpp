@@ -582,6 +582,12 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
     return true;
 }
 
+bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
+{
+    LOG(ERROR) << __func__ << "isn't implemented by this derived and shouldn't be called";
+    return false;
+}
+
 } // namespace dwpal
 
 std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,

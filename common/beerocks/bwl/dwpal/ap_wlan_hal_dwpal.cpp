@@ -2043,6 +2043,12 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
     return true;
 }
 
+bool ap_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
+{
+    LOG(ERROR) << __func__ << "isn't implemented by this derived and shouldn't be called";
+    return false;
+}
+
 } // namespace dwpal
 
 std::shared_ptr<ap_wlan_hal> ap_wlan_hal_create(std::string iface_name, hal_conf_t hal_conf,
