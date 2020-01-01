@@ -287,6 +287,10 @@ bool beerocks_ucc_listener::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx,
             return false;
         }
 
+        //if we got here it means that all TLVs that should be in this CMDU were there
+        LOG(DEBUG) << "certification buffer with CHANNEL_SELECTION_REQUEST_MESSAGE CMDU was loaded "
+                      "successfully!";
+
         break;
     }
     case ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE: {
@@ -312,6 +316,10 @@ bool beerocks_ucc_listener::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx,
             LOG(ERROR) << "getClass<tlvTransmitterLinkMetric> failed";
             return false;
         }
+        //if we got here it means that all TLVs that should be in this CMDU were there
+        //TODO: add a test for combined_infra_metrics and grep this line
+        LOG(DEBUG) << "certification buffer with COMBINED_INFRASTRUCTURE_METRICS_MESSAGE CMDU was "
+                      "loaded successfully!";
 
         break;
     }
