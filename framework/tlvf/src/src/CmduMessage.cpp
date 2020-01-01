@@ -11,7 +11,7 @@
 using namespace ieee1905_1;
 
 int CmduMessage::getNextTlvType() const
-{    
+{
     auto prev_class = msg.prevClass();
     if (!prev_class) {
         return -1;

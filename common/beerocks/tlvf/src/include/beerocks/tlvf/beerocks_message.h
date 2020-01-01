@@ -122,7 +122,9 @@ public:
     }
 
     template <class T>
-    static std::shared_ptr<T> create_vs_message(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
+    static std::shared_ptr<T>
+    create_vs_message(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0,
+                      std::shared_ptr<beerocks_message::cACTION_HEADER> actionhdr = nullptr)
     {
         auto cmduhdr = cmdu_tx.create(id, ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE);
         if (!cmduhdr) {
@@ -130,12 +132,14 @@ public:
                       << std::endl;
             return nullptr;
         }
-
-        return add_vs_tlv<T>(cmdu_tx, id);
+        
+        return add_vs_tlv<T>(cmdu_tx, id, actionhdr);
     }
 
     template <class T>
-    static std::shared_ptr<T> add_vs_tlv(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0)
+    static std::shared_ptr<T>
+    add_vs_tlv(ieee1905_1::CmduMessageTx &cmdu_tx, uint16_t id = 0,
+               std::shared_ptr<beerocks_message::cACTION_HEADER> actionhdr = nullptr)
     {
         auto tlvhdr = cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL);
         if (!tlvhdr) {
@@ -147,6 +151,12 @@ public:
         auto beerocks_header = add_intel_vs_data<T>(tlvhdr, id);
         if (!beerocks_header)
             return nullptr;
+
+        actionhdr = beerocks_header->actionhdr();
+        if (!actionhdr) {
+            LOG(ERROR) << "actionhdr() has failed";
+            return nullptr;
+        }
 
         // According to C++'03 Standard 14.2/4:
         // When the name of a member template specialization appears after . or -> in a postfix-expression,
