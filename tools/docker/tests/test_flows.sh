@@ -136,6 +136,9 @@ test_channel_selection() {
     check docker exec repeater1 sh -c \
         'grep -i -q "CHANNEL_SELECTION_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
     
+    check docker exec gateway sh -c \
+        'grep -i -q "certification buffer with CHANNEL_SELECTION_REQUEST_MESSAGE CMDU was loaded successfully!" /tmp/$USER/beerocks/logs/beerocks_controller.log'
+
     dbg "Confirming 1905.1 Ack Message request was received on agent"
     # TODO: When creating handler for the ACK message on the agent, replace lookup of this string
     check docker exec repeater1 sh -c \
