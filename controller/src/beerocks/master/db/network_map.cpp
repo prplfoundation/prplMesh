@@ -414,25 +414,28 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
                 message_com::send_cmdu(*it, cmdu_tx);
             }
 
+            std::shared_ptr<beerocks_message::cACTION_HEADER> actionhdr;
+
             // prepare for next message
             response =
-                message_com::create_vs_message<beerocks_message::cACTION_BML_STATS_UPDATE>(cmdu_tx);
+                message_com::create_vs_message<beerocks_message::cACTION_BML_STATS_UPDATE>(cmdu_tx,0,actionhdr);
 
             if (!response) {
                 LOG(ERROR) << "create_vs_message() has failed";
                 return -1;
             }
 
-            auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
-            if (!beerocks_header) {
-                LOG(ERROR) << "get_beerocks_header() has failed";
-                return -1;
-            }
-            auto actionhdr = beerocks_header->actionhdr();
-            if (!actionhdr) {
-                LOG(ERROR) << "actionhdr() has failed";
-                return -1;
-            }
+
+            // auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
+            // if (!beerocks_header) {
+            //     LOG(ERROR) << "get_beerocks_header() has failed";
+            //     return -1;
+            // }
+            // auto actionhdr = beerocks_header->actionhdr();
+            // if (!actionhdr) {
+            //     LOG(ERROR) << "actionhdr() has failed";
+            //     return -1;
+            // }
             actionhdr->last()  = 0;
             num_of_stats_bulks = response->num_of_stats_bulks();
             num_of_stats_bulks = 0;
