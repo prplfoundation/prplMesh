@@ -133,7 +133,6 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
                 }
 
                 actionhdr->last() = 0;
-                num_of_nodes      = response->node_num(); // prepare for next message
                 num_of_nodes      = 0;
                 data_start        = nullptr;
                 size              = 0;
@@ -143,13 +142,15 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
                     return;
                 }
 
+                data_start = (uint8_t *)response->buffer(0);
+
                 if (!data_start) {
-                    auto buf = response->buffer(0);
-                    if (!buf) {
-                        LOG(ERROR) << "buffer is nullptr";
+                    // auto buf = response->buffer(0);
+                    // if (!buf) {
+                        LOG(ERROR) << "buffer0) has failed";
                         return;
-                    }
-                    data_start = (uint8_t *)buf;
+                    // }
+                    // data_start = (uint8_t *)buf;
                 }
 
                 fill_bml_node_data(database, n, data_start + size, size_left);
@@ -348,13 +349,13 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
         return;
     }
 
-    auto beerocks_hdr = message_com::get_beerocks_header(cmdu_tx);
-    if (!beerocks_hdr) {
+    auto beerocks_header  = message_com::get_beerocks_header(cmdu_tx);
+    if (!beerocks_header ) {
         LOG(ERROR) << "Failed getting beerocks_header!";
         return;
     }
 
-    auto action_hdr = beerocks_hdr->actionhdr();
+    auto action_hdr = beerocks_header ->actionhdr();
     if (!action_hdr) {
         LOG(ERROR) << "Failed getting action_header!";
         return;
@@ -422,12 +423,12 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
                 return -1;
             }
 
-            auto beerocks_hdr = message_com::get_beerocks_header(cmdu_tx);
-            if (!beerocks_hdr) {
+            auto beerocks_header  = message_com::get_beerocks_header(cmdu_tx);
+            if (!beerocks_header ) {
                 LOG(ERROR) << "get_beerocks_header() has failed";
                 return -1;
             }
-            auto actionhdr = beerocks_hdr->actionhdr();
+            auto actionhdr = beerocks_header ->actionhdr();
             if (!actionhdr) {
                 LOG(ERROR) << "actionhdr() has failed";
                 return -1;
@@ -498,7 +499,7 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
         }
     }
 
-    action_hdr = beerocks_hdr->actionhdr();
+    action_hdr = beerocks_header ->actionhdr();
     if (!action_hdr) {
         LOG(ERROR) << "actionhdr() has failed";
         return;

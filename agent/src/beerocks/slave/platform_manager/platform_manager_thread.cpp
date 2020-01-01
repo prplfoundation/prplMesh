@@ -1312,7 +1312,7 @@ bool main_thread::handle_arp_monitor()
     sd = get_slave_socket_from_hostap_iface_name(strIfaceName);
 
     // Use the Backhaul Manager Slave as the default destination
-    if ((!sd) && ((sd = get_backhaul_socket()))) {
+    if ((!sd) && (!(sd = get_backhaul_socket()))) {
         LOG(WARNING) << "Failed obtaining slave socket";
         return false;
     }
