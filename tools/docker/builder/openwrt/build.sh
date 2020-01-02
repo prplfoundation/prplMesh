@@ -32,8 +32,8 @@ build_image() {
 }
 
 build_prplmesh() {
-    dbg "Container name will be $container_name"
     container_name="prplmesh-builder-$(date +%F_%H-%M-%S)"
+    dbg "Container name will be $container_name"
     docker run -i \
            --name "$container_name" \
            -e TARGET \
@@ -74,14 +74,6 @@ main() {
         esac
     done
 
-    dbg "BUILD_OPTIONS=$BUILD_OPTIONS"
-    dbg "OPENWRT_REPOSITORY=$OPENWRT_REPOSITORY"
-    dbg "OPENWRT_VERSION=$OPENWRT_VERSION"
-    dbg "PRPL_FEED=$PRPL_FEED"
-    dbg "IMAGE_ONLY=$IMAGE_ONLY"
-    dbg "TARGET_DEVICE=$TARGET_DEVICE"
-    dbg "TAG=$TAG"
-
     case "$TARGET_DEVICE" in
         turris-omnia)
             TARGET=mvebu
@@ -98,6 +90,17 @@ main() {
             exit 1
             ;;
     esac
+
+    dbg "BUILD_OPTIONS=$BUILD_OPTIONS"
+    dbg "OPENWRT_REPOSITORY=$OPENWRT_REPOSITORY"
+    dbg "OPENWRT_VERSION=$OPENWRT_VERSION"
+    dbg "PRPL_FEED=$PRPL_FEED"
+    dbg "INTEL_FEED=$INTEL_FEED"
+    dbg "IMAGE_ONLY=$IMAGE_ONLY"
+    dbg "TARGET_DEVICE=$TARGET_DEVICE"
+    dbg "TAG=$TAG"
+    dbg "TARGET=$TARGET"
+    dbg "PRPLMESH_VARIANT=$PRPLMESH_VARIANT"
 
     if [ -n "$TAG" ] ; then
         image_tag="$TAG"
