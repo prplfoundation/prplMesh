@@ -32,7 +32,7 @@ build_image() {
 }
 
 build_prplmesh() {
-    container_name="prplmesh-builder-$(date +%F_%H-%M-%S)"
+    container_name="prplmesh-builder-${TARGET_DEVICE}-$(uuidgen)"
     dbg "Container name will be $container_name"
     trap 'docker rm -f $container_name' EXIT
     docker run -i \
