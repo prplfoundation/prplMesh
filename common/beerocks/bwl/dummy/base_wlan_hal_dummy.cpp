@@ -341,6 +341,10 @@ bool base_wlan_hal_dummy::process_ext_events()
     }
     std::string event;
     std::getline(stream, event);
+    if (event.empty()) {
+        LOG(DEBUG) << "Received empty event, ignoring";
+        return true;
+    }
     LOG(DEBUG) << "Received event " << event;
 
     parsed_obj_map_t event_obj;
