@@ -1,4 +1,4 @@
-project (multiap_framework C CXX)
+project(multiap_framework C CXX)
 
 enable_testing()
 

@@ -1,7 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12)
-
-set(PROJECT_NAME elpp)
-project(${PROJECT_NAME})
+project(elpp VERSION ${prplmesh_VERSION})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if(CMAKE_VERSION VERSION_LESS "3.1")

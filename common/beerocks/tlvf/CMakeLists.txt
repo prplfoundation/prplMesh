@@ -1,7 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12)
-
-set(PROJECT_NAME btlvf)
-project(${PROJECT_NAME})
+project(btlvf VERSION ${prplmesh_VERSION})
 
 find_package(PythonInterp REQUIRED)
 get_property(PythonTlvf TARGET tlvf PROPERTY PythonTlvf)

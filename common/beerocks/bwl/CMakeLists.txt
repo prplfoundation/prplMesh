@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
-
-set(PROJECT_NAME bwl)
-project(${PROJECT_NAME})
+project(bwl VERSION ${prplmesh_VERSION})
 
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
@@ -38,8 +35,6 @@ elseif(TARGET_PLATFORM STREQUAL "openwrt")
 endif()
 
 set(BWL_TYPE ${BWL_TYPE} CACHE STRING "Which BWL backend to use")
-
-message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} (${BoldBlue}${BWL_TYPE}${BoldWhite}) for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 ##########################################################################
 ##########################################################################

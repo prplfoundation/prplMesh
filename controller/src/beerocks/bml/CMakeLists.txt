@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
-
-set(PROJECT_NAME bml)
-project(${PROJECT_NAME})
+project(bml VERSION ${prplmesh_VERSION})
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 # Set the base path for the current module
