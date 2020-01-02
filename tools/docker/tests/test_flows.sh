@@ -584,6 +584,7 @@ usage() {
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
+    echo "      -s|--stop-on-failure - stop on failure"
     echo "      --skip-init - skip init"
     echo ""
     echo "  positional params:"
@@ -605,16 +606,17 @@ usage() {
     echo "      higher_layer_data_payload - Higher layer data payload over 1905 test"
 }
 main() {
-    OPTS=`getopt -o 'hv' --long help,verbose,skip-init -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvs' --long help,verbose,skip-init,stop-on-failure -n 'parse-options' -- "$@"`
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
     eval set -- "$OPTS"
 
     while true; do
         case "$1" in
-            -v | --verbose)     VERBOSE=true; redirect=; shift ;;
-            -h | --help)        usage; exit 0; shift ;;
-            --skip-init)        SKIP_INIT=true; shift ;;
+            -v | --verbose)         VERBOSE=true; redirect=; shift ;;
+            -h | --help)            usage; exit 0; shift ;;
+            -s | --stop-on-failure) STOP_ON_FAILURE=true; shift ;;
+            --skip-init)            SKIP_INIT=true; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
@@ -624,6 +626,7 @@ main() {
     test_init
     for test in "$@"; do
        report "test_${test}" test_${test}
+       [ "$STOP_ON_FAILURE" = "true" -a $error -gt 0 ] && exit 1
        count=$((count+1))
     done
 
@@ -651,5 +654,6 @@ main() {
 
 VERBOSE=false
 SKIP_INIT=false
+STOP_ON_FAILURE=false
 
 main "$@"
