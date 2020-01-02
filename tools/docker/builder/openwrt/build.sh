@@ -34,6 +34,7 @@ build_image() {
 build_prplmesh() {
     container_name="prplmesh-builder-$(date +%F_%H-%M-%S)"
     dbg "Container name will be $container_name"
+    trap 'docker rm -f $container_name' EXIT
     docker run -i \
            --name "$container_name" \
            -e TARGET \
@@ -45,8 +46,6 @@ build_prplmesh() {
            ./build_scripts/build.sh
 
     docker cp "${container_name}:/home/openwrt/openwrt_sdk/prplmesh-${TARGET}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" .
-
-    docker rm "${container_name}"
 }
 
 main() {
