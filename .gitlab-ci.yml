@@ -103,3 +103,9 @@ test-on-glinet-b1300:
   variables:
     TARGET_DEVICE_NAME: glinet-b1300-1
   needs: ["build-for-glinet-b1300"]
+
+test-on-netgear-rax40:
+  extends: .test-on-target
+  variables:
+    TARGET_DEVICE_NAME: netgear-rax40-1
+  needs: ["build-for-netgear-rax40"]
