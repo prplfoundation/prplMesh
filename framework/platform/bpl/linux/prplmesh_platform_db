@@ -1,4 +1,4 @@
 management_mode=Multi-AP-Controller-and-Agent
 operating_mode=Gateway
-stop_on_failure_attempts=0
+stop_on_failure_attempts=1
 certification_mode=1
