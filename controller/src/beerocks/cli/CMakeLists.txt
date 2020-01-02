@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
-
-set(PROJECT_NAME beerocks_cli)
-project (${PROJECT_NAME})
+project(beerocks_cli VERSION ${prplmesh_VERSION})
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 # Dependecies

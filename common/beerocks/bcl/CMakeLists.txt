@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
-
-set(PROJECT_NAME bcl)
-project(${PROJECT_NAME})
+project(bcl VERSION ${prplmesh_VERSION})
 
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
