@@ -544,10 +544,13 @@ test_topology() {
     return $check_error
 }
 test_init() {
-    status "test initialization"    
-    eval ${scriptdir}/test_gw_repeater.sh -f -r "repeater1" -r "repeater2" -d 7 $redirect || {
-        err "start GW+Repeater failed, abort"
-        exit 1
+    status "test initialization"
+
+    [ "$SKIP_INIT" = "false" ] && {
+        eval ${scriptdir}/test_gw_repeater.sh -f -r "repeater1" -r "repeater2" -d 7 $redirect || {
+            err "start GW+Repeater failed, abort"
+            exit 1
+        }
     }
     #save bml_conn_map output into a file.
     connmap=$(mktemp)
@@ -581,6 +584,7 @@ usage() {
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
+    echo "      --skip-init - skip init"
     echo ""
     echo "  positional params:"
     echo "      topology - Topology discovery test"
@@ -601,7 +605,7 @@ usage() {
     echo "      higher_layer_data_payload - Higher layer data payload over 1905 test"
 }
 main() {
-    OPTS=`getopt -o 'hv' --long help,verbose -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hv' --long help,verbose,skip-init -n 'parse-options' -- "$@"`
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
     eval set -- "$OPTS"
@@ -610,6 +614,7 @@ main() {
         case "$1" in
             -v | --verbose)     VERBOSE=true; redirect=; shift ;;
             -h | --help)        usage; exit 0; shift ;;
+            --skip-init)        SKIP_INIT=true; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
@@ -645,5 +650,6 @@ main() {
 }
 
 VERBOSE=false
+SKIP_INIT=false
 
 main "$@"
