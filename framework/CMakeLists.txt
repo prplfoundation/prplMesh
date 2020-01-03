@@ -1,4 +1,3 @@
-set(PROJECT FRAMEWORK)
 project (multiap_framework C CXX)
 
 enable_testing()
@@ -33,8 +32,6 @@ message(STATUS "CMAKE_PREFIX_PATH - ${CMAKE_PREFIX_PATH}")
 message(STATUS "CMAKE_MODULE_PATH - ${CMAKE_MODULE_PATH}")
 message(STATUS "CMAKE_PROGRAM_PATH - ${CMAKE_PROGRAM_PATH}")
 message(STATUS "CMAKE_MULTIAP_OUTPUT_DIRECTORY - ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}")
-
-include(multiap-helpers)
 
 option(BUILD_EXAMPLES "build examples" OFF)
 option(BUILD_TESTS "build multiap unit tests" OFF)

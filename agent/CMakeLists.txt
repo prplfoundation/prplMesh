@@ -1,5 +1,3 @@
-set(PROJECT AGENT)
-
 # Default Compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pthread -std=c++11 -Wno-unused-parameter -Wno-missing-field-initializers -Wno-address-of-packed-member -fpermissive")
 
@@ -38,7 +36,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
 endif()
 
-include(multiap-helpers)
 add_definitions(-DBEEROCKS_VERSION="${${PROJECT}_VERSION_STRING}")
 add_definitions(-DBEEROCKS_BUILD_DATE="${BUILD_DATE}")
 add_definitions(-DBEEROCKS_REVISION="${REVISION}")
