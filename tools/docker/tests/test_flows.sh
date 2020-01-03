@@ -461,10 +461,8 @@ test_client_steering_policy() {
     check docker exec repeater1 sh -c 'grep -i -q "MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log > /tmp/catch'
     sleep 1
     dbg "Confirming client steering policy ack message has been received on the controller"
-    TMP="$(docker exec gateway sh -c 'grep -i "ACK_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_controller.log')"
-    MID2_STR="$(echo "$TMP" | tr ' ' '\n' | grep -Po "(?<=mid=).*[^\s]" | tail -n 1)"
+    check docker exec gateway "grep" "-q" "ACK_MESSAGE, mid=$MID1_STR" "/tmp/$USER/beerocks/logs/beerocks_controller.log"
 
-    check [ "$MID1_STR" = "$MID2_STR" ]
     return $check_error
 }
 
