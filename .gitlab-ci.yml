@@ -41,15 +41,6 @@ build-in-docker:
     - ./bin/tests/${CI_JOB_NAME}
   needs:
     - job: build-in-docker
-  # TODO log to stdout instead of all the following
-  after_script:
-    - mkdir -p logs
-    - ls -l /tmp # Temporary for debug
-    - cp /tmp/${USER}/beerocks/logs/${CI_JOB_NAME}.log logs
-  artifacts:
-    paths:
-      - logs
-    when: always
 
 tlvf_test:
   extends: .run-test-in-docker
