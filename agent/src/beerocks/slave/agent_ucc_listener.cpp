@@ -62,6 +62,21 @@ std::string agent_ucc_listener::fill_version_reply_string()
 void agent_ucc_listener::clear_configuration()
 {
     m_onboarding_state = eOnboardingState::WAIT_FOR_RESET;
+
+    auto timeout =
+        std::chrono::steady_clock::now() + std::chrono::seconds(UCC_REPLY_COMPLETE_TIMEOUT_SEC);
+
+    while (m_onboarding_state != eOnboardingState::WAIT_FOR_CONFIG) {
+
+        if (std::chrono::steady_clock::now() > timeout) {
+            LOG(ERROR) << "Reached timeout!";
+            return;
+        }
+
+        // Unlock the thread mutex and allow the Agent thread to work while this thread sleeps
+        unlock();
+        UTILS_SLEEP_MSEC(1000);
+    }
 }
 
 /**
