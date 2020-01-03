@@ -1,5 +1,3 @@
-set(PROJECT CONTROLLER)
-
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/lib)
@@ -40,7 +38,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
 endif()
 
-include(multiap-helpers)
 add_definitions(-DBEEROCKS_VERSION="${${PROJECT}_VERSION_STRING}")
 add_definitions(-DBEEROCKS_BUILD_DATE="${BUILD_DATE}")
 add_definitions(-DBEEROCKS_REVISION="${REVISION}")

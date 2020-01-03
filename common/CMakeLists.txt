@@ -1,4 +1,3 @@
-set(PROJECT COMMON)
 message("${BoldWhite}Preparing ${BoldGreen}MULTIAP_${PROJECT}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 # Default values
@@ -38,8 +37,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 message(STATUS "Build Type=${CMAKE_BUILD_TYPE}")
-
-include(multiap-helpers)
 
 # Modules
 add_subdirectory(beerocks)
