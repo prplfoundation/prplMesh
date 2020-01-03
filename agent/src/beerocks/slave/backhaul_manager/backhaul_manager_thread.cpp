@@ -597,8 +597,6 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     // Received Backhaul Enable command
     case EState::ENABLED: {
 
-        LOG(TRACE) << "backhaul manager state=ENABLED";
-
         // If reached here without getting DEV_REST_DEFAULT from UCC, 'selected_backhaul' will stay
         // empty, and the state machine will not be affected.
         std::string selected_backhaul;
@@ -612,6 +610,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 selected_backhaul = m_agent_ucc_listener->get_selected_backhaul();
             }
         }
+
+        LOG(TRACE) << "backhaul manager state=ENABLED";
 
         // Connect/Reconnect to the platform manager
         if (!m_scPlatform) {
