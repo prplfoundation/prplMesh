@@ -47,7 +47,7 @@ add_custom_command(
 
 file(GLOB_RECURSE TLVF_SOURCES ${TLVF_DIR}/src/src/*.c*)
 add_library(tlvf SHARED ${TLVF_OUTPUTS} ${TLVF_SOURCES})
-set_target_properties(tlvf PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${${PROJECT}_VERSION_MAJOR})
+set_target_properties(tlvf PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 target_link_libraries(tlvf PRIVATE mapf::elpp)
 target_include_directories(tlvf
     PUBLIC

@@ -25,7 +25,7 @@ endif()
 # Build the library
 add_library(${PROJECT_NAME} SHARED ${bml_common_sources})
 target_link_libraries(${PROJECT_NAME} PRIVATE bcl tlvf elpp btlvf)
-set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs" VERSION ${prplmesh_VERSION} SOVERSION ${${PROJECT}_VERSION_MAJOR})
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs" VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${MODULE_PATH}
     $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
