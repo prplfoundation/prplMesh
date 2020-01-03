@@ -249,9 +249,11 @@ bool backhaul_manager::socket_disconnected(Socket *sd)
             // Remove the socket reference from the backhaul configuration
             m_sConfig.slave_iface_socket.erase(iface);
 
-            LOG(INFO) << "sending platform_notify: slave socket disconnected " << iface;
-            platform_notify_error(bpl::eErrorCode::BH_SLAVE_SOCKET_DISCONNECTED,
-                                  "slave socket disconnected " + iface);
+            if (!m_agent_ucc_listener) {
+                LOG(INFO) << "sending platform_notify: slave socket disconnected " << iface;
+                platform_notify_error(bpl::eErrorCode::BH_SLAVE_SOCKET_DISCONNECTED,
+                                      "slave socket disconnected " + iface);
+            }
 
             it = slaves_sockets.erase(it);
             if ((m_eFSMState > EState::_WIRELESS_START_ && m_eFSMState < EState::_WIRELESS_END_) ||
