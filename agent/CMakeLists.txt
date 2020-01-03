@@ -36,7 +36,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
 endif()
 
-add_definitions(-DBEEROCKS_VERSION="${${PROJECT}_VERSION_STRING}")
+add_definitions(-DBEEROCKS_VERSION="${prplmesh_VERSION}")
 add_definitions(-DBEEROCKS_BUILD_DATE="${BUILD_DATE}")
 add_definitions(-DBEEROCKS_REVISION="${REVISION}")
 

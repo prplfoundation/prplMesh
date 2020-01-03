@@ -47,7 +47,7 @@ endif()
 
 # Create a single common library
 add_library(common SHARED ${sources})
-set_target_properties(common PROPERTIES PREFIX "mapf" VERSION ${${PROJECT}_VERSION_STRING} SOVERSION ${${PROJECT}_VERSION_MAJOR})
+set_target_properties(common PROPERTIES PREFIX "mapf" VERSION ${prplmesh_VERSION} SOVERSION ${${PROJECT}_VERSION_MAJOR})
 target_link_libraries(common 
 	PRIVATE 
 		${MSGLIB_TARGET} 
