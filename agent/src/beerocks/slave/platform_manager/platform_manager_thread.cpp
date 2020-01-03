@@ -989,7 +989,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
     case beerocks_message::ACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION: {
         LOG(DEBUG) << "ACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION";
-        auto notification = cmdu_rx.getClass<
+        auto notification = beerocks_header->addClass<
             beerocks_message::
                 cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION>();
         if (notification == nullptr) {
