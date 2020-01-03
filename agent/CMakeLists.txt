@@ -41,7 +41,7 @@ endif()
 include(multiap-helpers)
 add_definitions(-DBEEROCKS_VERSION="${${PROJECT}_VERSION_STRING}")
 add_definitions(-DBEEROCKS_BUILD_DATE="${BUILD_DATE}")
-add_definitions(-DBEEROCKS_REVISION="${${PROJECT}_REVISION}")
+add_definitions(-DBEEROCKS_REVISION="${REVISION}")
 
 add_definitions(-DBEEROCKS_BIN_PATH="${INSTALL_PATH}/bin/")
 add_definitions(-DBEEROCKS_CONF_PATH="${INSTALL_PATH}/config/")
