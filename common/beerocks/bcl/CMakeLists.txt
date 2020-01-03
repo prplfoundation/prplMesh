@@ -18,7 +18,7 @@ file(GLOB_RECURSE bcl_sources ${MODULE_PATH}/source/*.c*)
 
 # Build the library
 add_library(${PROJECT_NAME} SHARED ${bcl_sources})
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${${PROJECT}_VERSION_MAJOR})
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 
 # Includes
 target_include_directories(${PROJECT_NAME}

@@ -40,7 +40,7 @@ add_custom_command(
 
 file(GLOB TLVF_SOURCES ${TLVF_DIR}/src/src/*.c*)
 add_library(${PROJECT_NAME} SHARED ${TLVF_OUTPUTS} ${TLVF_SOURCES})
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${${PROJECT}_VERSION_MAJOR})
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<TARGET_PROPERTY:tlvf,INTERFACE_INCLUDE_DIRECTORIES>
