@@ -1,7 +1,7 @@
 # Add "strip" flags
 
 # Default Compiler flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pthread -Wno-comment  -Wno-unused-parameter -Wno-shift-negative-value -Wno-missing-field-initializers -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pthread -Wno-comment  -Wno-unused-parameter -Wno-missing-field-initializers -fPIC")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s -O2 -Wformat -Wformat-security -Wl,-S -fPIE")
 
 # Compiler specific flags

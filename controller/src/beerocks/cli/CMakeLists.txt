@@ -12,6 +12,10 @@ file(GLOB cli_sources ${MODULE_PATH}/*.cpp)
 # Module LIBS
 set(cli_libraries bcl btlvf bml)
 
+# In some compiler versions, the static casts to pFunction that are done in the various cli
+# implementations are interpreted as a negative shift. So disable the corresponding warning.
+add_compile_options(-Wno-shift-negative-value)
+
 add_executable(${PROJECT_NAME} ${cli_sources} ${cli_extra_sources})
 target_link_libraries(${PROJECT_NAME} ${cli_libraries} tlvf elpp)
 target_include_directories(${PROJECT_NAME} 
