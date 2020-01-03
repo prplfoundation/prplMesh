@@ -21,6 +21,7 @@ static const auto DEV_SET_ETH = std::string("eth");
 
 enum class eOnboardingState {
     NOT_IN_PROGRESS,
+    WAIT_FOR_RESET,
     RESET_TO_DEFAULT,
     WAIT_FOR_CONFIG,
     IN_PROGRESS,
