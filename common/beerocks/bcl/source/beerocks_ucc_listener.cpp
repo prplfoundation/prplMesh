@@ -882,15 +882,15 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
             }
         }
 
-        if (!handle_dev_set_config(params, err_string)) {
-            LOG(ERROR) << err_string;
-            reply_ucc(eWfaCaStatus::INVALID, err_string);
-            break;
-        }
-
         // Send back first reply
         if (!reply_ucc(eWfaCaStatus::RUNNING)) {
             LOG(ERROR) << "failed to send reply";
+            break;
+        }
+
+        if (!handle_dev_set_config(params, err_string)) {
+            LOG(ERROR) << err_string;
+            reply_ucc(eWfaCaStatus::INVALID, err_string);
             break;
         }
 
