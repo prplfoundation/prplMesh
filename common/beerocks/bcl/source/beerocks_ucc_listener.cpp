@@ -13,9 +13,8 @@
  *     echo -n <command> | nc <bridge_ip_addr> <port>
  */
 
-#include <bcl/beerocks_ucc_listener.h>
-
 #include <bcl/beerocks_string_utils.h>
+#include <bcl/beerocks_ucc_listener.h>
 #include <bcl/network/network_utils.h>
 
 #include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
@@ -249,101 +248,35 @@ bool beerocks_ucc_listener::parse_params(const std::vector<std::string> &command
 }
 
 /**
- * @brief Create CMDU manually by loading CMDU from preperared buffer, or getting the data to fill 
- * TLVs from the database.
- * If the function fails but err_string string is empty, then it means that the CMDU was not handled
- * by this function, and the caller will need to create the CMDU by itself.
- * 
- * @param[in,out] cmdu_tx CmduTx message object created from certification_tx_buffer.
- * @param[in] message_type CMDU message type to create.
- * @param[out] err_string Contains an error description if the function fails.
- * @return true if CMDU was successfully loaded, false with empty err_string if CMDU was not loaded,
- * but didn't fail, false with non-empty err_string on failure.
+ * @brief load external cmdu
+ *
+ * Try to load an external cmdu from a prefilled buffer.
+ * If a buffer exists, load it and return shared_ptr to the newly
+ * created CMDU.
+ *
+ * @return std::shared_ptr<ieee1905_1::CmduMessageTx> 
  */
-bool beerocks_ucc_listener::create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx,
-                                        ieee1905_1::eMessageType message_type,
-                                        std::string &err_string)
+std::shared_ptr<ieee1905_1::CmduMessageTx> beerocks_ucc_listener::load_cmdu()
 {
-    std::shared_ptr<ieee1905_1::cCmduHeader> cmdu_header;
-
-    int tlv_type;
-
-    switch (message_type) {
-    case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE: {
-
-        cmdu_header = cmdu_tx.load();
-        if (!cmdu_header) {
-            LOG(ERROR) << "load cmdu has failed";
-            return false;
-        }
-
-        tlv_type = cmdu_tx.getNextTlvType();
-        while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
-            if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_CHANNEL_PREFERENCE)) {
-                if (!cmdu_tx.addClass<wfa_map::tlvChannelPreference>()) {
-                    LOG(ERROR) << "addClass tlvChannelPreference has failed";
-                    err_string = err_internal;
-                    return false;
-                }
-            } else if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_TRANSMIT_POWER_LIMIT)) {
-                if (!cmdu_tx.addClass<wfa_map::tlvTransmitPowerLimit>()) {
-                    LOG(ERROR) << "addClass tlvTransmitPowerLimit has failed";
-                    err_string = err_internal;
-                    return false;
-                }
-            }
-            tlv_type = cmdu_tx.getNextTlvType();
-        }
-        break;
+    auto buf = get_buffer_filled_with_cmdu();
+    if (!buf)
+        return nullptr;
+    auto cmdu = std::make_shared<ieee1905_1::CmduMessageTx>(
+        buf.get() + sizeof(beerocks::message::sUdsHeader),
+        message::MESSAGE_BUFFER_LENGTH - sizeof(beerocks::message::sUdsHeader));
+    if (!cmdu) {
+        LOG(ERROR) << "Failed to allocate memory";
+        return nullptr;
     }
-    case ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE: {
-
-        cmdu_header = cmdu_tx.load();
-        if (!cmdu_header) {
-            LOG(ERROR) << "load cmdu has failed";
-            return false;
-        }
-        tlv_type = cmdu_tx.getNextTlvType();
-        while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
-            if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_AP_METRIC)) {
-                if (!cmdu_tx.addClass<wfa_map::tlvApMetric>()) {
-                    LOG(ERROR) << "addClass tlvApMetric has failed";
-                    err_string = err_internal;
-                    return false;
-                }
-            } else if (tlv_type == int(ieee1905_1::eTlvType::TLV_RECEIVER_LINK_METRIC)) {
-                if (!cmdu_tx.addClass<ieee1905_1::tlvReceiverLinkMetric>()) {
-                    LOG(ERROR) << "addClass tlvReceiverLinkMetric has failed";
-                    err_string = err_internal;
-                    return false;
-                }
-            } else if (tlv_type == int(ieee1905_1::eTlvType::TLV_TRANSMITTER_LINK_METRIC)) {
-                if (!cmdu_tx.addClass<ieee1905_1::tlvTransmitterLinkMetric>()) {
-                    LOG(ERROR) << "addClass tlvTransmitterLinkMetric has failed";
-                    err_string = err_internal;
-                    return false;
-                }
-            }
-            tlv_type = cmdu_tx.getNextTlvType();
-        }
-        break;
-    }
-    default:
-        // If message type handler is not implemented, then return false with empty error, so the
-        // caller would know that it was not handled.
-        err_string = std::string();
-        return false;
-    }
-
-    if (!cmdu_header) {
-        err_string = err_internal;
-        return false;
+    auto cmduhdr = cmdu->load();
+    if (!cmduhdr) {
+        LOG(ERROR) << "Failed to load cmdu";
+        return nullptr;
     }
 
     // Force mid
-    cmdu_header->message_id() = g_mid;
-
-    return true;
+    cmduhdr->message_id() = g_mid;
+    return cmdu;
 }
 
 /**
@@ -801,30 +734,16 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
             break;
         }
 
-        // Check if CMDU message type has preprepared CMDU which can be loaded
-        auto certification_tx_buffer = get_buffer_filled_with_cmdu();
-        if (!certification_tx_buffer) {
-            LOG(ERROR) << "certification_tx_buffer is not allocated";
-            reply_ucc(eWfaCaStatus::ERROR, err_internal);
-            break;
-        }
-        ieee1905_1::CmduMessageTx external_cmdu_tx(
-            certification_tx_buffer.get() + sizeof(beerocks::message::sUdsHeader),
-            message::MESSAGE_BUFFER_LENGTH - sizeof(beerocks::message::sUdsHeader));
-        if (create_cmdu(external_cmdu_tx, ieee1905_1::eMessageType(message_type), err_string)) {
+        // Check if CMDU message type has preprepared CMDU which can be loaded -
+        // If so, create CMDU manually by loading CMDU from preperared buffer
+        auto external_cmdu = load_cmdu();
+        if (external_cmdu) {
             // Success
-            if (!send_cmdu_to_destination(external_cmdu_tx, dest_alid)) {
+            if (!send_cmdu_to_destination(*external_cmdu, dest_alid)) {
                 LOG(ERROR) << "Failed to send CMDU";
-                reply_ucc(eWfaCaStatus::ERROR, err_internal);
+                reply_ucc(eWfaCaStatus::ERROR, "Failed to send CMDU");
                 break;
             }
-
-        } else if (!err_string.empty()) {
-            // Failure
-            LOG(ERROR) << "cmdu creation of type 0x" << message_type_str << ", has failed";
-            reply_ucc(eWfaCaStatus::ERROR, err_string);
-            break;
-
         } else {
             // CMDU was not loaded from preprepared buffer, and need to be created manually, and
             // use TLV data from the command (if exists)
