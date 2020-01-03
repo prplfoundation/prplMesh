@@ -29,12 +29,12 @@ if (${FORCE_COLORED_OUTPUT})
     endif ()
 endif ()
 
-if (NOT ${PROJECT}_REVISION)
+if (NOT REVISION)
     execute_process(
         COMMAND "git" "rev-parse" "HEAD"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_STRIP_TRAILING_WHITESPACE 
-        OUTPUT_VARIABLE ${PROJECT}_REVISION
+        OUTPUT_VARIABLE REVISION
     )
 endif()
 set(${PROJECT}_VERSION_MAJOR 1)
@@ -48,4 +48,4 @@ endif()
 
 message(STATUS "MultiAP ${PROJECT} Version: ${${PROJECT}_VERSION_STRING}")
 message(STATUS "MultiAP ${PROJECT} Build Date: ${BUILD_DATE}")
-message(STATUS "MultiAP ${PROJECT} Revision: ${${PROJECT}_REVISION}")
+message(STATUS "MultiAP ${PROJECT} Revision: ${REVISION}")
