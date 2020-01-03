@@ -61,7 +61,7 @@ std::string agent_ucc_listener::fill_version_reply_string()
  */
 void agent_ucc_listener::clear_configuration()
 {
-    m_onboarding_state = eOnboardingState::RESET_TO_DEFAULT;
+    m_onboarding_state = eOnboardingState::WAIT_FOR_RESET;
 }
 
 /**
@@ -148,7 +148,8 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
     auto timeout =
         std::chrono::steady_clock::now() + std::chrono::seconds(UCC_REPLY_COMPLETE_TIMEOUT_SEC);
 
-    while (m_onboarding_state == eOnboardingState::WAIT_FOR_CONFIG) {
+    while (m_onboarding_state == eOnboardingState::WAIT_FOR_CONFIG ||
+           m_onboarding_state == eOnboardingState::IN_PROGRESS) {
         if (std::chrono::steady_clock::now() > timeout) {
             err_string         = "onboarding timeout";
             m_onboarding_state = eOnboardingState::NOT_IN_PROGRESS;
@@ -179,7 +180,9 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
  */
 eOnboardingState agent_ucc_listener::get_and_update_onboarding_state()
 {
-    if (m_onboarding_state == eOnboardingState::RESET_TO_DEFAULT) {
+    if (m_onboarding_state == eOnboardingState::WAIT_FOR_RESET) {
+        m_onboarding_state = eOnboardingState::RESET_TO_DEFAULT;
+    } else if (m_onboarding_state == eOnboardingState::RESET_TO_DEFAULT) {
         m_onboarding_state = eOnboardingState::WAIT_FOR_CONFIG;
         return eOnboardingState::RESET_TO_DEFAULT;
     } else if (m_onboarding_state == eOnboardingState::WAIT_FOR_CONFIG) {
