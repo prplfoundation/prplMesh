@@ -2,26 +2,6 @@ project(multiap_framework C CXX)
 
 enable_testing()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic -pthread -Wall -Wextra -Werror -Wno-comment -Wno-unused-parameter -Wno-missing-field-initializers -Wno-address-of-packed-member -fpermissive" CACHE STRING "" FORCE)
-if(CMAKE_VERSION VERSION_LESS "3.1")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-else()
-	set(CMAKE_CXX_STANDARD 11)
-endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
-endif()
-message("-- Build Type=${CMAKE_BUILD_TYPE}")
-
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -Wformat -Wformat-security -Wl,-S -fPIE -fPIC")
-if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector-strong")
-else()
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector")
-endif()
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}")
-
 option(BUILD_EXAMPLES "build examples" OFF)
 option(BUILD_TESTS "build multiap unit tests" OFF)
 
