@@ -754,9 +754,8 @@ int test_all()
 
 int main(int argc, char *argv[])
 {
-    mapf::Logger::Instance().LoggerInit("tlvf_test");
     int errors = 0;
-
+    mapf::Logger::Instance();
     MAPF_INFO(__FUNCTION__ << " Starting tests");
     errors += test_int_len_list();
     errors += test_complex_list();
