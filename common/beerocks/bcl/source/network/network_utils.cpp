@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <dirent.h>
 #include <errno.h>
+#include <limits.h>
 #include <linux/if_bridge.h>
 #include <linux/if_ether.h>  // ETH_P_ARP = 0x0806
 #include <linux/if_packet.h> // struct sockaddr_ll (see man 7 packet)
@@ -76,6 +77,18 @@ const std::string network_utils::WILD_MAC_STRING("ff:ff:ff:ff:ff:ff");
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
+
+// Converts uint64_t mac address to string format
+std::string network_utils::mac_to_string(const uint64_t mac)
+{
+    uint8_t mac_address[MAC_ADDR_LEN];
+    int8_t i;
+    uint8_t *p = mac_address;
+    for (i = 5; i >= 0; i--) {
+        *p++ = mac >> (CHAR_BIT * i);
+    }
+    return mac_to_string(mac_address);
+}
 
 // Converts a mac address in a human-readable format
 std::string network_utils::mac_to_string(const uint8_t *mac_address)
