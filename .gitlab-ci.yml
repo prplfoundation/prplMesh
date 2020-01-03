@@ -1,8 +1,13 @@
-build-in-docker:
-  stage: build
+.in-prplmesh-builder:
   image:
     name: prplfoundationinc/prplmesh-builder:ubuntu-18.04
     entrypoint: [""]
+  tags:
+    - docker
+
+build-in-docker:
+  extends: .in-prplmesh-builder
+  stage: build
   variables:
     CMAKE_BUILD_TYPE: "Release"
   script:
@@ -18,19 +23,13 @@ build-in-docker:
   artifacts:
     paths:
       - build/install
-  tags:
-    - docker
 
 .run-test-in-docker:
   stage: test
-  image:
-    name: prplfoundationinc/prplmesh-builder:ubuntu-18.04
-    entrypoint: [""]
+  extends: .in-prplmesh-builder
   script:
     - cd build/install
     - ./bin/tests/${CI_JOB_NAME}
-  tags:
-    - docker
   needs:
     - job: build-in-docker
   # TODO log to stdout instead of all the following
