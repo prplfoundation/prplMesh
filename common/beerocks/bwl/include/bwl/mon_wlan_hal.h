@@ -11,6 +11,7 @@
 
 #include "base_wlan_hal.h"
 #include "mon_wlan_hal_types.h"
+#include <vector>
 
 namespace bwl {
 
@@ -32,7 +33,13 @@ public:
         RRM_Beacon_Request_Status,
         RRM_Beacon_Response,
         RRM_STA_Statistics_Response,
-        RRM_Link_Measurement_Response
+        RRM_Link_Measurement_Response,
+        //CHANNEL_SCAN events
+        Channel_Scan_Triggered,
+        Channel_Scan_New_Results_Ready,
+        Channel_Scan_Dump_Result,
+        Channel_Scan_Abort,
+        Channel_Scan_Finished
     };
 
     // Public methods:
