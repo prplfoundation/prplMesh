@@ -26,7 +26,13 @@ container_ip() {
 
 container_CAPI_port() {
     # get the CAPI port based on the container name.
-    docker exec -t "$1" grep ucc_listener_port ${installdir}/config/beerocks_controller.conf  | cut -f2 -d= | cut -f1 -d' '
+    # For test_flows, we always consider the gateway to be a controller-only
+    # device (i.e. the agent on the gateway is not addressed by CAPI).
+    if [ "$1" = "gateway" ]; then
+        docker exec -t "$1" grep ucc_listener_port ${installdir}/config/beerocks_controller.conf  | cut -f2 -d= | cut -f1 -d' '
+    else
+        docker exec -t "$1" grep ucc_listener_port ${installdir}/config/beerocks_agent.conf  | cut -f2 -d= | cut -f1 -d' '
+    fi
 }
 
 send_bml_command() {
