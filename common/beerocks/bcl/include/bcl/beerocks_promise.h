@@ -16,7 +16,7 @@ namespace beerocks {
 
 template <class T> class promise {
 public:
-    promise(){};
+    promise() : m_value(T()), m_signal(false){};
     ~promise(){};
 
     // Set value for waiting threads
@@ -78,7 +78,7 @@ private:
     pthread_cond_t m_cond = PTHREAD_COND_INITIALIZER;
     pthread_mutex_t m_mut = PTHREAD_MUTEX_INITIALIZER;
     T m_value;
-    bool m_signal = 0;
+    bool m_signal;
 };
 } //  namespace beerocks
 
