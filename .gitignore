@@ -2,3 +2,7 @@ analyzer-venv
 /*.ipk
 /build/
 /logs/
+_GO_KW
+.kwlp
+.kwps
+kw_reports
