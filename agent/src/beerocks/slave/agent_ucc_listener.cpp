@@ -50,8 +50,6 @@ std::string agent_ucc_listener::fill_version_reply_string()
 {
     return std::string("vendor,") + m_vendor + std::string(",model,") + m_model +
            std::string(",version,") + BEEROCKS_VERSION;
-
-    return std::string();
 }
 
 /**
