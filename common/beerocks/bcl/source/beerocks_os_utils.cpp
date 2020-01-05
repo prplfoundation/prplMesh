@@ -189,6 +189,7 @@ int os_utils::redirect_console_std(std::string log_file_name)
         dup2(fd_log_file_std, STDOUT_FILENO);
         dup2(fd_log_file_std, STDERR_FILENO);
     }
+    close_file(fd_log_file_std);
     return fd_log_file_std;
 }
 
