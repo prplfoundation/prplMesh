@@ -243,35 +243,42 @@ bool sta_wlan_hal_dwpal::connect(const std::string &ssid, const std::string &pas
 bool sta_wlan_hal_dwpal::disconnect(bool remove_all_networks)
 {
     LOG(TRACE) << __func__ << ": iface = " << get_iface_name()
-               << ", m_active_network_id = " << m_active_network_id;
+               << ", m_active_network_id = " << m_active_network_id
+               << "remove_all_networks=" << string_utils::bool_str(remove_all_networks);
 
-    ConnectionStatus connection_status;
-    if (!read_status(connection_status)) {
-        LOG(ERROR) << "disconnect - Failed reading status for " << get_iface_name()
-                   << "! can't disconnect";
-        return false;
+    std::string cmd = "REMOVE_NETWORK ";
+    if (remove_all_networks) {
+        cmd += "all";
+    } else {
+        ConnectionStatus connection_status;
+        if (!read_status(connection_status)) {
+            LOG(ERROR) << "disconnect - Failed reading status for " << get_iface_name()
+                       << "! can't disconnect";
+            return false;
+        }
+
+        // Return gracefully if network state is not connected
+        if (!is_connected(connection_status.wpa_state)) {
+            LOG(DEBUG) << "disconnect - Active network does not exist";
+            return true;
+        }
+
+        // Return gracefully if no network is connected
+        if (m_active_network_id < 0) {
+            LOG(DEBUG) << "disconnect - Active network does not exist";
+            return true;
+        }
+
+        //connection status id must be same as active network id
+        if (m_active_network_id != connection_status.id) {
+            LOG(DEBUG) << "disconnect - m_active_network_id(" << m_active_network_id << ") != "
+                       << "connection_status.id(" << connection_status.id << ")";
+            return false;
+        }
+
+        cmd += std::to_string(m_active_network_id);
     }
 
-    // Return gracefully if network state is not connected
-    if (!is_connected(connection_status.wpa_state)) {
-        LOG(DEBUG) << "disconnect - Active network does not exist";
-        return true;
-    }
-
-    // Return gracefully if no network is connected
-    if (m_active_network_id < 0) {
-        LOG(DEBUG) << "disconnect - Active network does not exist";
-        return true;
-    }
-
-    //connection status id must be same as active network id
-    if (m_active_network_id != connection_status.id) {
-        LOG(DEBUG) << "disconnect - m_active_network_id(" << m_active_network_id << ") != "
-                   << "connection_status.id(" << connection_status.id << ")";
-        return false;
-    }
-
-    const std::string cmd = "REMOVE_NETWORK " + std::to_string(m_active_network_id);
     if (!dwpal_send_cmd(cmd)) {
         LOG(ERROR) << "disconnect - REMOVE_NETWORK failed for network_id = " << m_active_network_id
                    << " on interface: " << get_iface_name();
