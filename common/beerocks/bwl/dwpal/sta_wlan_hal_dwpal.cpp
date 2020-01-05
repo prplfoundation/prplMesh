@@ -103,6 +103,12 @@ bool sta_wlan_hal_dwpal::initiate_scan()
 {
     LOG(DEBUG) << "Initiating scan on interface: " << get_iface_name();
 
+    // Remove all networks to make sure that the wpa_supplicant will not be busy
+    if (!disconnect(true)) {
+        LOG(WARNING) << "Failed disconnecting";
+        return false;
+    }
+
     // Start the scan
     if (!dwpal_send_cmd("SCAN")) {
         LOG(ERROR) << "initiate_scan - wpa_ctrl_send_msg failed for " << get_iface_name();
