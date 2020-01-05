@@ -207,8 +207,8 @@ public:
         ~ap_metrics_data(){};
 
         sMacAddr bssid;
-        uint8_t channel_utilization;
-        uint16_t number_of_stas_currently_associated;
+        uint8_t channel_utilization                  = 0;
+        uint16_t number_of_stas_currently_associated = 0;
         std::vector<uint8_t> estimated_service_info_fields;
         bool include_ac_vo = false;
         bool include_ac_bk = false;

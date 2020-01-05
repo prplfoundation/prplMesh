@@ -80,8 +80,8 @@ private:
     /**
      * If keypair generation failed in the constructor, this will be @a nullptr.
      */
-    uint8_t *m_pubkey = nullptr;
-    unsigned m_pubkey_length;
+    uint8_t *m_pubkey        = nullptr;
+    unsigned m_pubkey_length = 0;
     uint8_t m_nonce[16];
 };
 

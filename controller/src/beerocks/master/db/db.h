@@ -747,7 +747,7 @@ private:
     std::shared_ptr<uint8_t> certification_tx_buffer;
     std::unordered_map<sMacAddr, std::list<wireless_utils::sBssInfoConf>> bss_infos; // key=al_mac
 
-    master_thread *m_master_thread_ctx;
+    master_thread *m_master_thread_ctx = nullptr;
     const std::string m_local_bridge_mac;
 };
 

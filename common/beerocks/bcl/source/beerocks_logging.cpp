@@ -292,8 +292,7 @@ const std::string logging::syslogFormat("<%thread> %fbase[%line] --> %msg");
 
 logging::logging(const std::string config_path, std::string module_name)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
-      m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
-      m_stdout_enabled("true"), m_syslog_enabled("false")
+      m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)
 {
     bool found_settings = false;
 
@@ -313,8 +312,8 @@ logging::logging(const std::string config_path, std::string module_name)
 
 logging::logging(const settings_t &settings, bool cache_settings, std::string module_name)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
-      m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
-      m_stdout_enabled(true), m_syslog_enabled(false)
+      m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)
+
 {
     for (auto &setting : settings) {
         if (0 == setting.first.find("log_")) {
@@ -332,8 +331,7 @@ logging::logging(const settings_t &settings, bool cache_settings, std::string mo
 logging::logging(const beerocks::config_file::SConfigLog &settings, std::string module_name,
                  bool cache_settings)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
-      m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT),
-      m_stdout_enabled(true), m_syslog_enabled(false)
+      m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)
 {
     m_settings_map.insert(
         {"log_files_enabled", settings.files_enabled.empty() ? "true" : settings.files_enabled});

@@ -119,14 +119,14 @@ private:
     std::string m_module_name;
 
     size_t m_logfile_size;
-    bool m_log_files_enabled;
+    bool m_log_files_enabled = true;
     std::string m_log_files_path;
     std::string m_log_filename;
-    bool m_log_files_auto_roll;
+    bool m_log_files_auto_roll = true;
     log_levels m_levels;
     log_levels m_syslog_levels;
-    bool m_stdout_enabled;
-    bool m_syslog_enabled;
+    bool m_stdout_enabled = true;
+    bool m_syslog_enabled = false;
 
     settings_t m_settings_map;
 };
