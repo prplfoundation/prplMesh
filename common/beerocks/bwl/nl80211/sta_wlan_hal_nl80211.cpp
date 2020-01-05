@@ -40,7 +40,7 @@ bool sta_wlan_hal_nl80211::connect(const std::string &ssid, const std::string &p
     return true;
 }
 
-bool sta_wlan_hal_nl80211::disconnect() { return true; }
+bool sta_wlan_hal_nl80211::disconnect(bool remove_all_networks) { return true; }
 
 bool sta_wlan_hal_nl80211::roam(const std::string &bssid, uint8_t channel) { return true; }
 

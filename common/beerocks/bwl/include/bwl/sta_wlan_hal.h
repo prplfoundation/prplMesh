@@ -48,7 +48,7 @@ public:
                          bool mem_only_psk, const std::string &bssid, uint8_t channel,
                          bool hidden_ssid) = 0;
 
-    virtual bool disconnect() = 0;
+    virtual bool disconnect(bool remove_all_networks = false) = 0;
 
     virtual bool roam(const std::string &bssid, uint8_t channel) = 0;
 

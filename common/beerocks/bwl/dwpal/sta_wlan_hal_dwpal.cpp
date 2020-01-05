@@ -240,7 +240,7 @@ bool sta_wlan_hal_dwpal::connect(const std::string &ssid, const std::string &pas
     return true;
 }
 
-bool sta_wlan_hal_dwpal::disconnect()
+bool sta_wlan_hal_dwpal::disconnect(bool remove_all_networks)
 {
     LOG(TRACE) << __func__ << ": iface = " << get_iface_name()
                << ", m_active_network_id = " << m_active_network_id;
