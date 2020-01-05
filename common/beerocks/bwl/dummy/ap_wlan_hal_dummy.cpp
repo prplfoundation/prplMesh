@@ -176,6 +176,8 @@ bool ap_wlan_hal_dummy::sta_bss_steer(const std::string &mac, const std::string 
 bool ap_wlan_hal_dummy::update_vap_credentials(
     std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list)
 {
+    int vap_id = beerocks::IFACE_VAP_ID_MIN;
+
     for (auto bss_info_conf : bss_info_conf_list) {
         auto auth_type =
             son::wireless_utils::wsc_to_bwl_authentication(bss_info_conf.authentication_type);
@@ -196,6 +198,7 @@ bool ap_wlan_hal_dummy::update_vap_credentials(
         LOG(DEBUG) << "Received credentials for ssid: " << bss_info_conf.ssid
                    << " auth_type: " << auth_type << " encr_type: " << enc_type
                    << " network_key: " << bss_info_conf.network_key << " bss_type: " << bss_type;
+        m_radio_info.available_vaps[vap_id++].ssid = bss_info_conf.ssid;
     }
 
     return true;
