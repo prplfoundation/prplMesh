@@ -176,11 +176,11 @@ int cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params)
     return RETURN_OK;
 }
 
-int cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *prefered_radio_band)
+int cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *preferred_radio_band)
 {
-    *max_vaps            = 0;
-    *network_enabled     = 0;
-    *prefered_radio_band = 0;
+    *max_vaps             = 0;
+    *network_enabled      = 0;
+    *preferred_radio_band = 0;
     return RETURN_OK;
 }
 
