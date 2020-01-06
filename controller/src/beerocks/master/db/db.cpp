@@ -3084,15 +3084,10 @@ void db::unlock() { db_mutex.unlock(); }
 void db::setting_certification_mode(bool en)
 {
     if (!en) {
-        remove_certification_tx_buffer();
+        certification_tx_buffer   = nullptr;
         config.certification_mode = false;
         return;
     }
-    if (!allocate_certification_tx_buffer()) {
-        config.certification_mode = false;
-        LOG(DEBUG) << "failed to allocate certification_tx_buffer";
-    }
-
     config.certification_mode = true;
 }
 

@@ -139,13 +139,6 @@ bool master_thread::init()
         LOG(DEBUG) << "Health check is DISABLED!";
     }
 
-    if (database.setting_certification_mode()) {
-        if (!database.allocate_certification_tx_buffer()) {
-            LOG(ERROR) << "failed to allocate certification_tx_buffer";
-            return false;
-        }
-    }
-
     if (database.config.ucc_listener_port != 0) {
         m_controller_ucc_listener = std::make_unique<controller_ucc_listener>(database);
         if (m_controller_ucc_listener && !m_controller_ucc_listener->start("ucc_listener")) {
@@ -948,13 +941,7 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(const std::string
     }
 
     if (database.setting_certification_mode()) {
-        auto certification_tx_buffer = database.get_certification_tx_buffer();
-        if (!certification_tx_buffer) {
-            LOG(ERROR) << "certification_tx_buffer is not allocated!";
-            return false;
-        }
-        database.fill_certification_tx_buffer(cmdu_tx);
-        return true;
+        return database.set_certification_tx_buffer(cmdu_tx);
     }
 
     return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
@@ -1329,13 +1316,7 @@ bool master_thread::construct_combined_infra_metric()
         }
     }
 
-    auto certification_tx_buffer = database.get_certification_tx_buffer();
-    if (!certification_tx_buffer) {
-        LOG(ERROR) << "certification_tx_buffer is not allocated!";
-        return false;
-    }
-    database.fill_certification_tx_buffer(cmdu_tx);
-    return true;
+    return database.set_certification_tx_buffer(cmdu_tx);
 }
 
 bool master_thread::handle_cmdu_1905_ap_metric_response(const std::string &src_mac,

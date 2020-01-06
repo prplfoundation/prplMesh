@@ -85,6 +85,7 @@ std::shared_ptr<uint8_t> controller_ucc_listener::get_buffer_filled_with_cmdu()
 bool controller_ucc_listener::send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmdu_tx,
                                                        const std::string &dest_mac)
 {
+    m_database.free_certification_tx_buffer();
     return son_actions::send_cmdu_to_agent(dest_mac, cmdu_tx, m_database);
 }
 

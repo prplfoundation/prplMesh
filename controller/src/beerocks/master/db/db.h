@@ -510,18 +510,18 @@ public:
     // certification
     //
     std::shared_ptr<uint8_t> get_certification_tx_buffer() { return certification_tx_buffer; };
-    std::shared_ptr<uint8_t> allocate_certification_tx_buffer()
+    void free_certification_tx_buffer() { certification_tx_buffer = nullptr; };
+    bool set_certification_tx_buffer(ieee1905_1::CmduMessageTx &cmdu_tx)
     {
-        return (certification_tx_buffer =
-                    std::shared_ptr<uint8_t>(new uint8_t[beerocks::message::MESSAGE_BUFFER_LENGTH],
-                                             std::default_delete<uint8_t[]>()));
-    };
-    void remove_certification_tx_buffer() { certification_tx_buffer.reset(); };
-    void fill_certification_tx_buffer(ieee1905_1::CmduMessageTx &cmdu_tx)
-    {
+        certification_tx_buffer =
+            std::shared_ptr<uint8_t>(new uint8_t[beerocks::message::MESSAGE_BUFFER_LENGTH],
+                                     std::default_delete<uint8_t[]>());
+        if (!certification_tx_buffer)
+            return false;
         std::copy_n(cmdu_tx.getMessageBuff() - sizeof(beerocks::message::sUdsHeader),
                     cmdu_tx.getMessageBuffLength() + sizeof(beerocks::message::sUdsHeader),
                     certification_tx_buffer.get());
+        return true;
     };
 
     void add_bss_info_configuration(const sMacAddr &al_mac,
