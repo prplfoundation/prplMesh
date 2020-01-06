@@ -109,6 +109,12 @@ void network_map::send_bml_network_map_message(db &database, Socket *sd,
                 response =
                     message_com::create_vs_message<beerocks_message::cACTION_BML_NW_MAP_RESPONSE>(
                         cmdu_tx, id);
+
+                if (response == nullptr) {
+                    LOG(ERROR) << "Failed building message!";
+                    return;
+                }
+
                 beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
                 beerocks_header->actionhdr()->last() = 0;
                 num_of_nodes = response->node_num(); // prepare for next message
@@ -372,6 +378,11 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
             // prepare for next message
             response =
                 message_com::create_vs_message<beerocks_message::cACTION_BML_STATS_UPDATE>(cmdu_tx);
+
+            if (response == nullptr) {
+                LOG(ERROR) << "Failed building message!";
+                return -1;
+            }
 
             beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
             beerocks_header->actionhdr()->last() = 0;

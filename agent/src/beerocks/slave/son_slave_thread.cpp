@@ -3933,6 +3933,12 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     // Notify backhaul manager that onboarding has finished (certification flow)
     auto onboarding_finished_notification = message_com::create_vs_message<
         beerocks_message::cACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION>(cmdu_tx);
+
+    if (onboarding_finished_notification == nullptr) {
+        LOG(ERROR) << "Failed building message!";
+        return false;
+    }
+
     message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
 
     if (slave_state != STATE_WAIT_FOR_JOINED_RESPONSE) {
