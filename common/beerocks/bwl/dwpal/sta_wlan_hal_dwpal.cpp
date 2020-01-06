@@ -192,7 +192,7 @@ bool sta_wlan_hal_dwpal::connect(const std::string &ssid, const std::string &pas
 {
     LOG(DEBUG) << " connect iface " << get_iface_name() << " to SSID = " << ssid
                << ", BSSID = " << bssid << ", Channel = " << int(channel)
-               << ", Sec = " << dwpal_security_val(sec) << "mem_only_psk=" << int(mem_only_psk);
+               << ", Sec = " << dwpal_security_val(sec) << ", mem_only_psk=" << int(mem_only_psk);
 
     if (ssid.empty() || bssid.empty() || sec == WiFiSec::Invalid) {
         LOG(ERROR) << "Invalid params!";
