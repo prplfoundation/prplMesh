@@ -1463,6 +1463,12 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         auto register_response =
             message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_REGISTER_RESPONSE>(
                 cmdu_tx);
+
+        if (register_response == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+
         message_com::send_cmdu(soc->slave, cmdu_tx);
         break;
     }
@@ -1895,6 +1901,11 @@ bool backhaul_manager::send_slaves_enable()
             message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_ENABLE_APS_REQUEST>(
                 cmdu_tx);
 
+        if (notification == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+
         if (soc->sta_iface == m_sConfig.wireless_iface) {
             notification->channel() = iface_hal->get_channel();
         }
@@ -2100,6 +2111,10 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
             auto response = message_com::create_vs_message<
                 beerocks_message::cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE>(cmdu_tx);
 
+            if (response == nullptr) {
+                LOG(ERROR) << "Failed building message!";
+                break;
+            }
             std::copy_n(msg->params.result.mac.oct, sizeof(msg->params.result.mac.oct),
                         response->params().result.mac.oct);
             response->params().result.channel    = msg->params.result.channel;
