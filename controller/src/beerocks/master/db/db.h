@@ -513,6 +513,7 @@ public:
     void free_certification_tx_buffer() { certification_tx_buffer = nullptr; };
     bool set_certification_tx_buffer(ieee1905_1::CmduMessageTx &cmdu_tx)
     {
+        cmdu_tx.finalize();
         certification_tx_buffer =
             std::shared_ptr<uint8_t>(new uint8_t[beerocks::message::MESSAGE_BUFFER_LENGTH],
                                      std::default_delete<uint8_t[]>());

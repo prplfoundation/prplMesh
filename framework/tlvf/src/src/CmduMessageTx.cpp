@@ -30,10 +30,29 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType mes
     return cmduhdr;
 }
 
+/**
+ * @brief load a prefilled cmdu for transmission
+ *
+ * In certification mode, we are sometimes required to wait for UCC
+ * command which triggers a completion of a certain flow by sending a
+ * CMDU which would normally be sent without external intervention.
+ * In these cases, prplMesh prepares the CMDU for tranmission but doesn't
+ * actually send it - it saves the buffer contents in the certification_tx_buffer
+ * instead which contains the entire CMDU in network byte order ready to be sent.
+ * Sending the CMDU on UCC trigger first "loads" the certification_tx_buffer
+ * into a new CmduMessageTx then sends it.
+ * This API does the loading of the buffer into a this CmduMessageTx by first calling
+ * the parse() API which sets all the pointers, then swap the contents back to network
+ * byte order since on parse we swap to host byte order, and returns the cCmduHeader
+ * shared_ptr so the MID can be set by the caller.
+ *
+ * @return std::shared_ptr<cCmduHeader> 
+ */
 std::shared_ptr<cCmduHeader> CmduMessageTx::load()
 {
-    msg.reset(true);
-    return addClass<cCmduHeader>();
+    parse();
+    msg.swap(); // swap back
+    return msg.getClass<cCmduHeader>();
 }
 
 std::shared_ptr<tlvVendorSpecific> CmduMessageTx::add_vs_tlv(tlvVendorSpecific::eVendorOUI voui)
