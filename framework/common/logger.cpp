@@ -73,6 +73,16 @@ static void *watch_log_file(void *args)
 }
 #endif //#ifdef USE_INOTIFY
 
+Logger::Logger()
+{
+    el::Configurations conf;
+    conf.set(el::Level::Global, el::ConfigurationType::Enabled, "true");
+    conf.set(el::Level::Global, el::ConfigurationType::ToStandardOutput, "true");
+    conf.set(el::Level::Global, el::ConfigurationType::Format,
+             "%datetime{%H:%m:%s} %fbase[%line]: %msg");
+    el::Loggers::reconfigureLogger(DEFAULT_LOGGER_NAME, conf);
+}
+
 void Logger::LoggerInit() { LoggerInit(DEFAULT_LOGGER_NAME); }
 
 //for initial configuration and for default configuring all loggers
