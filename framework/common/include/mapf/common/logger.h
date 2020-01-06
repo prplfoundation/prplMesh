@@ -81,7 +81,7 @@ public:
 private:
     std::string logger_name_         = "";
     const char *kSyslogMessageFormat = "[mapf] [%proc] %fbase[%line]: %msg";
-    Logger() {}
+    Logger();
     Logger(const Logger &) = delete;
     void operator=(const Logger &) = delete;
 };
