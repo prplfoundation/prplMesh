@@ -221,12 +221,12 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string vap_iface_name,
         return false;
     }
 
-    size_t numOfValidArgs[9] = {0}, replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
+    size_t numOfValidArgs[10] = {0}, replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
     uint64_t BytesSent = 0, BytesReceived = 0, PacketsSent = 0, PacketsReceived = 0,
-             LastDataDownlinkRate = 0, LastDataUplinkRate = 0;
-    char ShortTermRSSIAverage[24] = {0};
-    char SNR[24]                  = {0};
-    FieldsToParse fieldsToParse[] = {
+             LastDataDownlinkRate = 0, LastDataUplinkRate = 0, Active = 0;
+    char ShortTermRSSIAverage[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH] = {'\0'};
+    char SNR[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH]                  = {'\0'};
+    FieldsToParse fieldsToParse[]                                       = {
         {(void *)&BytesSent, &numOfValidArgs[0], DWPAL_LONG_LONG_INT_PARAM, "BytesSent=", 0},
         {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM,
          "BytesReceived=", 0},
@@ -234,13 +234,14 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string vap_iface_name,
         {(void *)&PacketsReceived, &numOfValidArgs[3], DWPAL_LONG_LONG_INT_PARAM,
          "PacketsReceived=", 0},
         {(void *)&sta_stats.retrans_count, &numOfValidArgs[4], DWPAL_INT_PARAM, "RetransCount=", 0},
-        {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_PARAM,
+        {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_ARRAY_PARAM,
          "ShortTermRSSIAverage=", sizeof(ShortTermRSSIAverage)},
-        {(void *)&LastDataDownlinkRate, &numOfValidArgs[6], DWPAL_LONG_LONG_INT_PARAM,
+        {(void *)SNR, &numOfValidArgs[6], DWPAL_STR_ARRAY_PARAM, "SNR=", sizeof(SNR)},
+        {(void *)&Active, &numOfValidArgs[7], DWPAL_LONG_LONG_INT_PARAM, "Active=", 0},
+        {(void *)&LastDataDownlinkRate, &numOfValidArgs[8], DWPAL_LONG_LONG_INT_PARAM,
          "LastDataDownlinkRate=", 0},
-        {(void *)&LastDataUplinkRate, &numOfValidArgs[7], DWPAL_LONG_LONG_INT_PARAM,
+        {(void *)&LastDataUplinkRate, &numOfValidArgs[9], DWPAL_LONG_LONG_INT_PARAM,
          "LastDataUplinkRate=", 0},
-        {(void *)SNR, &numOfValidArgs[8], DWPAL_STR_PARAM, "SNR=", sizeof(SNR)},
 
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
@@ -259,9 +260,10 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string vap_iface_name,
     // LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3] << " PacketsReceived= " << PacketsReceived;
     // LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " RetransCount= " << sta_stats.retrans_count;
     // LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " ShortTermRSSIAverage= " << ShortTermRSSIAverage;
-    // LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " LastDataDownlinkRate= " << LastDataDownlinkRate;
-    // LOG(DEBUG) << "numOfValidArgs[7]= " << numOfValidArgs[7] << " LastDataUplinkRate= " << LastDataUplinkRate;
-    // LOG(DEBUG) << "numOfValidArgs[8]= " << numOfValidArgs[8] << " SNR= " << SNR;
+    // LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " SNR= " << SNR;
+    // LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[7] << " Active= " << Active;
+    // LOG(DEBUG) << "numOfValidArgs[7]= " << numOfValidArgs[8] << " LastDataDownlinkRate= " << LastDataDownlinkRate;
+    // LOG(DEBUG) << "numOfValidArgs[8]= " << numOfValidArgs[9] << " LastDataUplinkRate= " << LastDataUplinkRate;
     /* End of TEMP: Traces... */
 
     for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
@@ -271,21 +273,19 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string vap_iface_name,
         }
     }
 
-    // Format ShortTermRSSIAverage = %d %d %d %d
-    auto samples = beerocks::string_utils::str_split(ShortTermRSSIAverage, ' ');
-    for (auto &s : samples) {
-        float s_float = float(beerocks::string_utils::stoi(s));
+    //save avarage RSSI in watt
+    for (uint8_t i = 0; i < numOfValidArgs[5]; i++) {
+        float s_float = float(beerocks::string_utils::stoi(std::string(ShortTermRSSIAverage[i])));
         if (s_float > beerocks::RSSI_MIN) {
             sta_stats.rx_rssi_watt += std::pow(10, s_float / float(10));
             sta_stats.rx_rssi_watt_samples_cnt++;
         }
     }
 
-    // Format SNR = %d %d %d %d
-    auto samples_snr = beerocks::string_utils::str_split(SNR, ' ');
-    for (auto &s : samples_snr) {
-        float s_float = float(beerocks::string_utils::stoi(s));
-        if (s_float >= beerocks::SNR_MIN) {
+    //save avarage SNR in watt
+    for (uint8_t i = 0; i < numOfValidArgs[6]; i++) {
+        float s_float = float(beerocks::string_utils::stoi(std::string(SNR[i])));
+        if (s_float > beerocks::SNR_MIN) {
             sta_stats.rx_snr_watt += std::pow(10, s_float / float(10));
             sta_stats.rx_snr_watt_samples_cnt++;
         }
