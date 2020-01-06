@@ -44,7 +44,9 @@ send_CAPI_command() {
     ip="$(container_ip "$1")"
     port="$(container_CAPI_port "$1")"
     dbg "Sending to $ip:$port. Command: $2"
-    "${rootdir}/tools/docker/tests/send_CAPI_command.py" "$ip" "$port" "$2"
+    capi_command_result=$("${rootdir}/tools/docker/tests/send_CAPI_command.py" "$ip" "$port" "$2" | tr  -d '\r')
+    dbg "Result:\n$capi_command_result"
+    capi_command_reply=$(echo -e "$capi_command_result" | awk 'NR==2')
 }
 
 test_initial_ap_config() {
@@ -87,6 +89,9 @@ test_ap_config_renew() {
         'grep -i -q "Received credentials for ssid: Multi-AP-24G-2 .* bss_type: 1" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
     check docker exec repeater1 sh -c \
         'grep -i -q "ssid: .* teardown" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+
+    send_CAPI_command repeater1 "dev_get_parameter,program,map,ruid,0x000000000000,ssid,Multi-AP-24G-1,parameter,macaddr"
+    check [ "$capi_command_reply" = "status,COMPLETE,macaddr,$mac_agent1_wlan0" ];
 
     return $check_error
 }
