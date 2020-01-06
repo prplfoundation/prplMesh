@@ -19,11 +19,8 @@ public:
     CmduMessageRx() = delete;
     CmduMessageRx(uint8_t *buff, size_t buff_len) : CmduMessage(buff, buff_len){};
     ~CmduMessageRx(){};
-    bool parse();
     CmduMessageRx &operator=(const CmduMessageRx &) = delete;
-
-private:
-    std::shared_ptr<BaseClass> parseNextTlv();
+    bool parse() { return CmduMessage::parse(); };
 };
 
 }; // namespace ieee1905_1

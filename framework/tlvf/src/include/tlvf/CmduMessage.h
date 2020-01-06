@@ -60,6 +60,10 @@ public:
 
 protected:
     ClassList msg;
+    bool parse();
+
+private:
+    std::shared_ptr<BaseClass> parseNextTlv();
 };
 
 }; // namespace ieee1905_1
