@@ -178,7 +178,7 @@ bool aes_decrypt(const uint8_t *key, const uint8_t *iv, uint8_t *ciphertext, int
  * @param[out] keywrapkey calculated 128 bit keywrapkey
  * @return true on success, false on error
  */
-bool wps_calculate_keys(const diffie_hellman &dh, const uint8_t *remote_pubkey,
+void wps_calculate_keys(const diffie_hellman &dh, const uint8_t *remote_pubkey,
                         unsigned remote_pubkey_length, const uint8_t *m1_nonce, const uint8_t *mac,
                         const uint8_t *m2_nonce, uint8_t *authkey, uint8_t *keywrapkey);
 

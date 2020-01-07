@@ -46,16 +46,13 @@ int main()
     uint8_t mac[6] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
     uint8_t authkey1[32];
     uint8_t keywrapkey1[16];
-    check(errors,
-          wps_calculate_keys(m1, m2.pubkey(), m2.pubkey_length(), m1.nonce(), mac, m2.nonce(),
-                             authkey1, keywrapkey1),
-          "WPS calculate keys");
+    wps_calculate_keys(m1, m2.pubkey(), m2.pubkey_length(), m1.nonce(), mac, m2.nonce(), authkey1,
+                       keywrapkey1);
     uint8_t authkey2[32];
     uint8_t keywrapkey2[16];
-    check(errors,
-          wps_calculate_keys(m2, m1.pubkey(), m1.pubkey_length(), m1.nonce(), mac, m2.nonce(),
-                             authkey2, keywrapkey2),
-          "WPS calculate keys");
+
+    wps_calculate_keys(m2, m1.pubkey(), m1.pubkey_length(), m1.nonce(), mac, m2.nonce(), authkey2,
+                       keywrapkey2);
     check(errors, std::equal(authkey1, authkey1 + sizeof(authkey1), authkey2),
           "authkeys should be equal");
     check(errors, std::equal(keywrapkey1, keywrapkey1 + sizeof(keywrapkey1), keywrapkey2),
