@@ -73,6 +73,8 @@ run-tests:
   script:
     - cd tools/docker/builder/openwrt
     - ./build.sh -v -d "$TARGET_DEVICE" -t "prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID" 2>&1 | tee build.log | grep '^make\[[12]\]\|^Step\|^ --->' --color=never --line-buffered
+  after_script:
+    - docker rmi "prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID"
   artifacts:
     paths:
       - tools/docker/builder/openwrt/*.ipk
