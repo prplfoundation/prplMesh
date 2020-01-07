@@ -1,19 +1,7 @@
 {
 	"folders": [
 		{
-			"path": "."
-		},
-		{
-			"path": "../common"
-		},
-		{
-			"path": "../framework"
-		},
-		{
-			"path": "../agent"
-		},
-		{
-			"path": "../controller"
+			"path": "../"
 		},
 		{
 			"path": "../../wav-dpal"
@@ -101,7 +89,17 @@
 			"utility": "cpp",
 			"atomic": "cpp",
 			"codecvt": "cpp",
-			"memory": "cpp"
+			"memory": "cpp",
+			"future": "cpp",
+			"optional": "cpp",
+			"string_view": "cpp",
+			"algorithm": "cpp",
+			"iterator": "cpp",
+			"map": "cpp",
+			"memory_resource": "cpp",
+			"set": "cpp",
+			"string": "cpp",
+			"random": "cpp"
 		}
 	}
 }
