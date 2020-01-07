@@ -257,26 +257,23 @@ static bool fill_platform_settings(
 std::string extern_query_db(std::string parameter)
 {
     std::string ret;
-    if (bpl::bpl_init() < 0) {
-        ret = "Failed to initialize BPL!";
+    bpl::bpl_init();
+    if (parameter == "is_master") {
+        ret = (bpl::cfg_is_master() > 0 ? "true" : "false");
+    } else if (parameter == "is_gateway") {
+        auto operating_mode = bpl::cfg_get_operating_mode();
+        ret =
+            (operating_mode == BPL_OPER_MODE_GATEWAY || operating_mode == BPL_OPER_MODE_GATEWAY_WISP
+                 ? "true"
+                 : "false");
+    } else if (parameter == "is_onboarding") {
+        ret = (bpl::cfg_is_onboarding() > 0 ? "true" : "false");
     } else {
-        if (parameter == "is_master") {
-            ret = (bpl::cfg_is_master() > 0 ? "true" : "false");
-        } else if (parameter == "is_gateway") {
-            auto operating_mode = bpl::cfg_get_operating_mode();
-            ret                 = (operating_mode == BPL_OPER_MODE_GATEWAY ||
-                           operating_mode == BPL_OPER_MODE_GATEWAY_WISP
-                       ? "true"
-                       : "false");
-        } else if (parameter == "is_onboarding") {
-            ret = (bpl::cfg_is_onboarding() > 0 ? "true" : "false");
-        } else {
-            ret = "Error, bad parameter.\n"
-                  "Allowed parameters: \n"
-                  " is_master \n"
-                  " is_gateway \n"
-                  " is_onboarding \n";
-        }
+        ret = "Error, bad parameter.\n"
+              "Allowed parameters: \n"
+              " is_master \n"
+              " is_gateway \n"
+              " is_onboarding \n";
     }
     return ret;
 }
@@ -482,10 +479,7 @@ void main_thread::send_dhcp_notification(std::string op, std::string mac, std::s
 bool main_thread::init()
 {
     // Initialize the BPL (Beerocks Platform Library)
-    if (bpl::bpl_init() < 0) {
-        LOG(ERROR) << "Failed to initialize BPL!";
-        return (false);
-    }
+    bpl::bpl_init();
 
     // Bridge & Backhaul interface
     is_onboarding_on_init = bpl::cfg_is_onboarding();
