@@ -123,6 +123,7 @@ static bool dwpal_get_channel_scan_freq(const std::vector<unsigned int> &channel
     }
     return true;
 };
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -782,7 +783,6 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
         LOG(DEBUG) << "DWPAL NL event channel scan results dump";
 
         //TODO: Translate results from NL format to usable format
-
         event_queue_push(event);
         break;
     }
