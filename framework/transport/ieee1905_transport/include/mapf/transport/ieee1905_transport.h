@@ -57,8 +57,10 @@ private:
     //
     // interface index (if_index) is used as Key to the table
     struct NetworkInterface {
-        int fd =
-            -1; // the file descriptor of the socket bound to this interface (or -1 if inactive)
+        int ieee1905_socket =
+            -1; // the file descriptor of the IEEE1905 socket bound to this interface (or -1 if inactive)
+        int lldp_socket =
+            -1; // the file descriptor of the LLDP socket bound to this interface (or -1 if inactive)
         uint8_t addr[ETH_ALEN] = {0};
         unsigned int bridge_if_index =
             0;                  // the bridge's interface index (if this interface is in a bridge)
@@ -228,9 +230,13 @@ private:
     //
     // NETWORK INTERFACE STUFF
     //
+    static const uint16_t ETHERTYPE_IEEE1905 = 0x893A;
+    static const uint16_t ETHERTYPE_LLDP     = 0x88CC;
+
     void
     update_network_interfaces(std::map<unsigned int, NetworkInterface> updated_network_interfaces);
     bool open_interface_socket(unsigned int if_index);
+    int open_packet_socket(unsigned int if_index, uint16_t ether_type);
     bool attach_interface_socket_filter(unsigned int if_index);
     void handle_interface_status_change(unsigned int if_index, bool is_active);
     void handle_interface_pollin_event(int fd);

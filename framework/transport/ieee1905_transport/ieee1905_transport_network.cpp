@@ -21,66 +21,6 @@
 
 namespace mapf {
 
-// helper class to manage socket filter programs (Berkely Socket Filter)
-//
-// Note: I chose to use here the classic BPF implementation. Once all targets move to kernel version >= 3.19
-// this code and the Ieee1905SocketFilter class could be migrated to the extended BPF (eBPF) system - see bpf(2)
-// http://man7.org/linux/man-pages/man2/bpf.2.html
-class Ieee1905SocketFilter {
-public:
-    // create a filter that accepts packets that match the basic transport requirements - see below.
-    // The two addresses are here to specify the AL MAC address and the interface's hardware address
-    Ieee1905SocketFilter(const uint8_t *addr0 = NULL, const uint8_t *addr1 = NULL)
-    {
-        static const uint8_t ieee1905_multicast_address[ETH_ALEN] = {
-            0x01, 0x80, 0xc2, 0x00, 0x00, 0x13}; // 01:80:c2:00:00:13
-
-        // use the IEEE1905 Multicast Address as default value (it is passed by the filter anyway)
-        if (!addr0)
-            addr0 = ieee1905_multicast_address;
-
-        if (!addr1)
-            addr1 = ieee1905_multicast_address;
-
-        filter[4].k = (uint32_t)addr0[2] << 24 | (uint32_t)addr0[3] << 16 |
-                      (uint32_t)addr0[4] << 8 | (uint32_t)addr0[5];
-        filter[6].k = (uint32_t)addr0[0] << 8 | (uint32_t)addr0[1];
-
-        filter[7].k = (uint32_t)addr1[2] << 24 | (uint32_t)addr1[3] << 16 |
-                      (uint32_t)addr1[4] << 8 | (uint32_t)addr1[5];
-        filter[9].k = (uint32_t)addr1[0] << 8 | (uint32_t)addr1[1];
-
-        if (!addr0 && !addr1) {
-            MAPF_WARN("at least one address should be specified for socket filter.");
-        }
-    }
-
-    const struct sock_fprog &sock_fprog() const { return fprog; }
-
-private:
-    struct sock_filter filter[17] = {
-        // This BPF is designed to accepts the following packets:
-        // - IEEE1905 multicast packets (with IEEE1905 Multicast Address set as destination address)
-        // - LLDP multicast packets (with LLDP Multicast Address as destination address)
-        // - IEEE1905 unicast packets (with either this devices' AL MAC address or the interface's HW address set as destination address)
-        //
-        // generated using: tcpdump -dd '(ether proto 0x893a and (ether dst 01:80:c2:00:00:13 or ether dst 11:22:33:44:55:66 or ether dst 77:88:99:aa:bb:cc)) or (ether proto 0x88cc and ether dst 01:80:c2:00:00:0e)'
-        // the two dummy addresses in this filter 11:22... and 77:88... will be replaced in runtime with the AL MAC address and the interface's HW address
-        //
-        {0x28, 0, 0, 0x0000000c}, {0x15, 0, 8, 0x0000893a}, {0x20, 0, 0, 0x00000002},
-        {0x15, 9, 0, 0xc2000013}, {0x15, 0, 2, 0x33445566}, // 4: replace with AL MAC Addr [2..5]
-        {0x28, 0, 0, 0x00000000}, {0x15, 8, 9, 0x00001122}, // 6: replace with AL MAC Addr [0..1]
-        {0x15, 0, 8, 0x99aabbcc},                           // 7: replace with IF MAC Addr [2..5]
-        {0x28, 0, 0, 0x00000000}, {0x15, 5, 6, 0x00007788}, // 9: replace with IF MAC Addr [0..1]
-        {0x15, 0, 5, 0x000088cc}, {0x20, 0, 0, 0x00000002}, {0x15, 0, 3, 0xc200000e},
-        {0x28, 0, 0, 0x00000000}, {0x15, 0, 1, 0x00000180}, {0x6, 0, 0, 0x0000ffff},
-        {0x6, 0, 0, 0x00000000},
-    };
-
-    struct sock_fprog fprog = {.len    = sizeof(filter) / sizeof(struct sock_filter),
-                               .filter = filter};
-};
-
 void Ieee1905Transport::update_network_interfaces(
     std::map<unsigned int, NetworkInterface> updated_network_interfaces)
 {
@@ -91,9 +31,11 @@ void Ieee1905Transport::update_network_interfaces(
 
         if (updated_network_interfaces.count(it->first) == 0) {
             MAPF_DBG("interface " << if_index << " is no longer used.");
-            if (network_interface.fd >= 0) {
-                poller_.Remove(network_interface.fd);
-                close(network_interface.fd);
+            if (network_interface.ieee1905_socket >= 0) {
+                poller_.Remove(network_interface.ieee1905_socket);
+                poller_.Remove(network_interface.lldp_socket);
+                close(network_interface.ieee1905_socket);
+                close(network_interface.lldp_socket);
             }
 
             it = network_interfaces_.erase(it);
@@ -117,15 +59,17 @@ void Ieee1905Transport::update_network_interfaces(
             MAPF_WARN("cannot get address of interface " << if_index << ".");
         }
 
-        if (network_interfaces_[if_index].fd < 0) {
+        if (network_interfaces_[if_index].ieee1905_socket < 0) {
             // if the interface is not already open, try to open it and add it to the poller loop
             if (!open_interface_socket(if_index)) {
                 MAPF_WARN("cannot open interface " << if_index << ".");
             }
 
             // add interface raw socket fd to poller loop (unless it's a bridge interface)
-            if (!network_interfaces_[if_index].is_bridge && network_interfaces_[if_index].fd >= 0) {
-                poller_.Add(network_interfaces_[if_index].fd);
+            else if (!network_interfaces_[if_index].is_bridge &&
+                     network_interfaces_[if_index].ieee1905_socket >= 0) {
+                poller_.Add(network_interfaces_[if_index].ieee1905_socket);
+                poller_.Add(network_interfaces_[if_index].lldp_socket);
             }
         }
 
@@ -137,50 +81,62 @@ void Ieee1905Transport::update_network_interfaces(
     }
 }
 
+int Ieee1905Transport::open_packet_socket(unsigned int if_index, uint16_t ether_type)
+{
+    //TODO: Fixup code for SOCK_RAW -> SOCK_DGRAM transition
+    // open packet raw socket - see man packet(7) https://linux.die.net/man/7/packet
+    int sockfd;
+    if ((sockfd = socket(AF_PACKET, SOCK_DGRAM, htons(ether_type))) < 0) {
+        MAPF_ERR("cannot open raw socket (errno: " << errno << " [" << strerror(errno) << "])");
+        return -1;
+    }
+
+    // the interface should be instantly reusable, e.g. after a crash
+    int optval = 1;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) {
+        MAPF_ERR("cannot set socket option SO_REUSEADDR (errno: " << errno << " ["
+                                                                  << strerror(errno) << "])");
+        close(sockfd);
+        return -1;
+    }
+
+    // bind to specified interface
+    // note that we cannot use SO_BINDTODEVICE sockopt as it does not support AF_PACKET sockets
+    struct sockaddr_ll sockaddr;
+    memset(&sockaddr, 0, sizeof(struct sockaddr_ll));
+    sockaddr.sll_family   = AF_PACKET;
+    sockaddr.sll_protocol = htons(ether_type);
+    sockaddr.sll_ifindex  = if_index;
+    if (bind(sockfd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0) {
+        MAPF_ERR("cannot bind socket to interface (errno: " << errno << " [" << strerror(errno)
+                                                            << "])");
+        close(sockfd);
+        return -1;
+    }
+    return sockfd;
+}
+
 bool Ieee1905Transport::open_interface_socket(unsigned int if_index)
 {
     MAPF_DBG("opening raw socket on interface " << if_index << ".");
 
-    if (network_interfaces_[if_index].fd != -1) {
-        close(network_interfaces_[if_index].fd);
-        network_interfaces_[if_index].fd = -1;
+    if (network_interfaces_[if_index].ieee1905_socket != -1) {
+        close(network_interfaces_[if_index].ieee1905_socket);
+        close(network_interfaces_[if_index].lldp_socket);
+        network_interfaces_[if_index].ieee1905_socket = -1;
+        network_interfaces_[if_index].lldp_socket     = -1;
     }
 
-    // Note to developer: The current implementation uses AF_PACKET socket with SOCK_RAW protocol which means we receive
-    // and send packets with the Ethernet header included in the buffer. Please consider changing
-    // implementation to use SOCK_DGRAM protocol (without L2 header handling)
+    int ieee1905_socket = open_packet_socket(if_index, ETHERTYPE_IEEE1905);
+    int lldp_socket     = open_packet_socket(if_index, ETHERTYPE_LLDP);
 
-    // open packet raw socket - see man packet(7) https://linux.die.net/man/7/packet
-    int sockfd;
-    if ((sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0) {
-        MAPF_ERR("cannot open raw socket \"" << strerror(errno) << "\" (" << errno << ").");
+    if (ieee1905_socket < 0 || lldp_socket < 0) {
+        // if only the second call failed, the first socket still needs to be close()d
+        close(ieee1905_socket);
         return false;
     }
-
-    // the interface can be used by other processes
-    int optval = 1;
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) {
-        MAPF_ERR("cannot set socket option SO_REUSEADDR \"" << strerror(errno) << "\" (" << errno
-                                                            << ").");
-        close(sockfd);
-        return false;
-    }
-
-    // bind to specifed interface - note that we cannot use SO_BINDTODEVICE sockopt as it does not support AF_PACKET sockets
-    struct sockaddr_ll sockaddr;
-    memset(&sockaddr, 0, sizeof(struct sockaddr_ll));
-    sockaddr.sll_family   = AF_PACKET;
-    sockaddr.sll_protocol = htons(ETH_P_ALL);
-    sockaddr.sll_ifindex  = if_index;
-    if (bind(sockfd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0) {
-        MAPF_ERR("cannot bind socket to interface \"" << strerror(errno) << "\" (" << errno
-                                                      << ").");
-        close(sockfd);
-        return false;
-    }
-
-    network_interfaces_[if_index].fd = sockfd;
-
+    network_interfaces_[if_index].ieee1905_socket = ieee1905_socket;
+    network_interfaces_[if_index].lldp_socket     = lldp_socket;
     attach_interface_socket_filter(if_index);
 
     return true;
@@ -200,24 +156,12 @@ bool Ieee1905Transport::attach_interface_socket_filter(unsigned int if_index)
     struct packet_mreq mr = {0};
     mr.mr_ifindex         = if_index;
     mr.mr_type            = PACKET_MR_PROMISC;
-    if (setsockopt(network_interfaces_[if_index].fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr,
-                   sizeof(mr)) == -1) {
+    if (setsockopt(network_interfaces_[if_index].ieee1905_socket, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
+                   &mr, sizeof(mr)) == -1) {
         MAPF_ERR("cannot put interface in promiscuous mode \"" << strerror(errno) << "\" (" << errno
                                                                << ").");
         return false;
     }
-
-    // prepare linux packet filter for this interface
-    struct sock_fprog fprog =
-        Ieee1905SocketFilter(al_mac_addr_, network_interfaces_[if_index].addr).sock_fprog();
-
-    // attach filter
-    if (setsockopt(network_interfaces_[if_index].fd, SOL_SOCKET, SO_ATTACH_FILTER, &fprog,
-                   sizeof(fprog)) == -1) {
-        MAPF_ERR("cannot attach socket filter \"" << strerror(errno) << "\" (" << errno << ").");
-        return false;
-    }
-
     return true;
 }
 
@@ -230,18 +174,23 @@ void Ieee1905Transport::handle_interface_status_change(unsigned int if_index, bo
 
     MAPF_DBG("interface " << if_index << " is now " << (is_active ? "active" : "inactive") << ".");
 
-    if (!is_active && network_interfaces_[if_index].fd >= 0) {
-        poller_.Remove(network_interfaces_[if_index].fd);
-        close(network_interfaces_[if_index].fd);
-        network_interfaces_[if_index].fd = -1;
+    if (!is_active && network_interfaces_[if_index].ieee1905_socket >= 0) {
+        poller_.Remove(network_interfaces_[if_index].ieee1905_socket);
+        poller_.Remove(network_interfaces_[if_index].lldp_socket);
+        close(network_interfaces_[if_index].ieee1905_socket);
+        close(network_interfaces_[if_index].lldp_socket);
+        network_interfaces_[if_index].ieee1905_socket = -1;
+        network_interfaces_[if_index].lldp_socket     = -1;
     }
 
-    if (is_active && network_interfaces_[if_index].fd < 0) {
+    if (is_active && network_interfaces_[if_index].ieee1905_socket < 0) {
         if (!open_interface_socket(if_index)) {
             MAPF_ERR("cannot open network interface " << if_index << ".");
         }
-        if (network_interfaces_[if_index].fd >= 0)
-            poller_.Add(network_interfaces_[if_index].fd);
+        if (network_interfaces_[if_index].ieee1905_socket >= 0) {
+            poller_.Add(network_interfaces_[if_index].ieee1905_socket);
+            poller_.Add(network_interfaces_[if_index].lldp_socket);
+        }
     }
 }
 
@@ -350,7 +299,8 @@ bool Ieee1905Transport::send_packet_to_network_interface(unsigned int if_index, 
 
     packet.header = {.iov_base = &eh, .iov_len = sizeof(eh)};
 
-    int fd             = network_interfaces_[if_index].fd;
+    int fd = packet.ether_type == ETHERTYPE_LLDP ? network_interfaces_[if_index].lldp_socket
+                                                 : network_interfaces_[if_index].ieee1905_socket;
     struct iovec iov[] = {packet.header, packet.payload};
     int n              = writev(fd, iov, sizeof(iov) / sizeof(struct iovec));
 
@@ -376,7 +326,7 @@ void Ieee1905Transport::set_al_mac_addr(const uint8_t *addr)
         unsigned int if_index   = it->first;
         auto &network_interface = it->second;
 
-        if (network_interface.fd >= 0) {
+        if (network_interface.ieee1905_socket >= 0) {
             attach_interface_socket_filter(if_index);
         }
     }

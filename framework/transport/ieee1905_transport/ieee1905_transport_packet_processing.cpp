@@ -494,7 +494,7 @@ bool Ieee1905Transport::forward_packet(Packet &packet)
 
                 if (((forward_to_bridge && network_interface.is_bridge) ||
                      (forward_to_network_interfaces && !network_interface.is_bridge)) &&
-                    (network_interface.fd >= 0) &&
+                    (network_interface.ieee1905_socket >= 0) &&
                     !(packet.src_if_type == CmduRxMessage::IF_TYPE_NET &&
                       packet.src_if_index == if_index)) { /* avoid loop-back */
                     if (!fragment_and_send_packet_to_network_interface(if_index, packet)) {

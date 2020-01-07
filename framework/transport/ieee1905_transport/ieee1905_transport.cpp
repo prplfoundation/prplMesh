@@ -77,18 +77,21 @@ void Ieee1905Transport::run()
             unsigned int if_index   = it->first;
             auto &network_interface = it->second;
 
-            if (network_interface.fd >= 0 && !network_interface.is_bridge) {
+            if (network_interface.ieee1905_socket >= 0 && !network_interface.is_bridge) {
                 MAPF_DBG("check for events on interface " << if_index << ".");
-                auto revents = poller_.CheckEvent(network_interface.fd);
-                if (revents & MAPF_POLLIN) {
-                    MAPF_DBG("got MAPF_POLLIN event on interface " << if_index << ".");
-                    handle_interface_pollin_event(network_interface.fd);
-                }
-                if (revents & MAPF_POLLERR) {
-                    // this could happen whenever an interface comes down
-                    MAPF_DBG("got MAPF_POLLERR event on interface " << if_index
-                                                                    << " (disabling it).");
-                    handle_interface_status_change(if_index, false);
+                int fds[] = {network_interface.ieee1905_socket, network_interface.lldp_socket};
+                for (int fd : fds) {
+                    auto revents = poller_.CheckEvent(fd);
+                    if (revents & MAPF_POLLIN) {
+                        MAPF_DBG("got MAPF_POLLIN event on interface " << if_index << ".");
+                        handle_interface_pollin_event(fd);
+                    }
+                    if (revents & MAPF_POLLERR) {
+                        // this could happen whenever an interface comes down
+                        MAPF_DBG("got MAPF_POLLERR event on interface " << if_index
+                                                                        << " (disabling it).");
+                        handle_interface_status_change(if_index, false);
+                    }
                 }
             }
         }
