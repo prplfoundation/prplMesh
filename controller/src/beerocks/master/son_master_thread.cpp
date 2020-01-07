@@ -506,7 +506,7 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(WSC::config &m2_cfg
  * @return true on success
  * @return false on failure
  */
-bool master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::config &m2,
+void master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::config &m2,
                                                   const mapf::encryption::diffie_hellman &dh,
                                                   uint8_t authkey[32], uint8_t keywrapkey[16])
 {
@@ -516,8 +516,6 @@ bool master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::config &m2,
         dh, m1.public_key(), WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, m1.enrollee_nonce(),
         m1.mac_addr().oct, m2.registrar_nonce, authkey, keywrapkey);
     std::copy(dh.pubkey(), dh.pubkey() + dh.pubkey_length(), m2.pub_key);
-
-    return true;
 }
 
 /**
@@ -623,8 +621,7 @@ bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
     mapf::encryption::diffie_hellman dh;
     uint8_t authkey[32];
     uint8_t keywrapkey[16];
-    if (!autoconfig_wsc_calculate_keys(m1, m2_cfg, dh, authkey, keywrapkey))
-        return false;
+    autoconfig_wsc_calculate_keys(m1, m2_cfg, dh, authkey, keywrapkey);
 
     // Encrypted settings
     // Encrypted settings are the ConfigData + IV. First create the ConfigData,
