@@ -556,3 +556,77 @@ int bml_channel_selection(BML_CTX ctx, const char *al_mac, const char *ruid)
 
     return (pBML->channel_selection(al_mac, ruid));
 }
+
+int bml_set_dcs_continuous_scan_enable(BML_CTX ctx, const char *radio_mac, int enable)
+{
+    // Validate input parameters
+    if (!ctx) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    // TODO: call suitable bml api
+    return BML_RET_OP_FAILED;
+}
+
+int bml_get_dcs_continuous_scan_enable(BML_CTX ctx, const char *radio_mac, int *output_enable)
+{
+    // Validate input parameters
+    if (!ctx) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    // TODO: call suitable bml api
+    return BML_RET_OP_FAILED;
+}
+
+int bml_set_dcs_continuous_scan_params(BML_CTX ctx, const char *radio_mac, int dwell_time,
+                                       int interval_time, unsigned int *channel_pool,
+                                       int channel_pool_size)
+{
+    // Validate input parameters
+    if (!ctx) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    // TODO: call suitable bml api
+    return BML_RET_OP_FAILED;
+}
+
+int bml_get_dcs_continuous_scan_params(BML_CTX ctx, const char *radio_mac, int *output_dwell_time,
+                                       int *output_interval_time, unsigned int *output_channel_pool,
+                                       int *output_channel_pool_size)
+{
+    // Validate input parameters
+    if (!ctx) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    // TODO: call suitable bml api
+    return BML_RET_OP_FAILED;
+}
+
+int bml_get_dcs_scan_results(BML_CTX ctx, const char *radio_mac,
+                             struct BML_DCS_NEIGHBOR_AP **output_results,
+                             unsigned int *output_results_size, unsigned char *output_result_status,
+                             bool is_single_scan)
+{
+    // Validate intput params;
+    if (!ctx) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    // TODO: call suitable bml api
+    return BML_RET_OP_FAILED;
+}
+
+int bml_start_dcs_single_scan(BML_CTX ctx, const char *radio_mac, int dwell_time,
+                              int channel_pool_size, unsigned int *channel_pool)
+{
+    // Validate intput params;
+    if (!ctx) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    // TODO: call suitable bml api
+    return BML_RET_OP_FAILED;
+}

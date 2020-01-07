@@ -117,6 +117,10 @@ extern "C" {
 #define BML_WLAN_ENC_TKIP 1      /* Temporal Key Integrity Protocol */
 #define BML_WLAN_ENC_AES 2       /* Advanced Encryption Standart */
 
+/* DCS Parameters Placeholders */
+#define BML_DCS_INVALID_PARAM -1         /* Invalid parameter placeholder */
+#define BML_DCS_MAX_CHANNEL_POOL_SIZE 32 /* Maximal size of the channel pool */
+
 /****************************************************************************/
 /******************************* General Types ******************************/
 /****************************************************************************/
@@ -547,6 +551,45 @@ struct BML_STATS_ITER {
      * @return Pointer to the node statistics structure.
      */
     struct BML_STATS *(*get_node)();
+};
+
+struct BML_DCS_NEIGHBOR_AP {
+    //char  ap_Radio[64];
+    //The Radio that detected the neighboring WiFi SSID.
+    char ap_SSID[64];
+    //The current service set identifier in use by the neighboring WiFi SSID.
+    char ap_BSSID[64];
+    //[MACAddress] The BSSID used for the neighboring WiFi SSID.
+    char ap_Mode[64];
+    //The mode the neighboring WiFi radio is operating in.
+    unsigned int ap_Channel;
+    //The current radio channel used by the neighboring WiFi radio.
+    int ap_SignalStrength;
+    //An indicator of radio signal strength (RSSI) of the neighboring WiFi radio measured indBm.
+    char ap_SecurityModeEnabled[64];
+    //The type of encryption the neighboring WiFi SSID advertises.
+    char ap_EncryptionMode[64];
+    //The type of encryption the neighboring WiFi SSID advertises.
+    char ap_OperatingFrequencyBand[16];
+    //Indicates the frequency band at which the radio this SSID instance is operating.
+    char ap_SupportedStandards[64];
+    //List items indicate which IEEE 802.11 standards thisResultinstance can support simultaneously.
+    char ap_OperatingStandards[16];
+    //Each list item MUST be a member of the list reported by theSupportedStandardsparameter.
+    char ap_OperatingChannelBandwidth[16];
+    //Indicates the bandwidth at which the channel is operating. Enumeration of:
+    unsigned int ap_BeaconPeriod;
+    //Time interval (inms) between transmitting beacons.
+    int ap_Noise;
+    //Indicator of average noise strength (indBm) received from the neighboring WiFi radio.
+    char ap_BasicDataTransferRates[256];
+    //Basic data transmit rates (in Mbps) for the SSID.
+    char ap_SupportedDataTransferRates[256];
+    //Data transmit rates for unicast frames at which the SSID will permit a station to connect.
+    unsigned int ap_DTIMPeriod;
+    //The number of beacon intervals that elapse between transmission of Beacon frames.
+    unsigned int ap_ChannelUtilization;
+    //Indicates the fraction of the time AP senses that the channel is in use by the neighboring AP.
 };
 
 /****************************************************************************/
