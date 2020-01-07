@@ -103,7 +103,7 @@ private:
                                                   WSC::cConfigData &config_data,
                                                   uint8_t authkey[32], uint8_t keywrapkey[16]);
     bool autoconfig_wsc_authentication(WSC::m1 &m1, WSC::m2 &m2, uint8_t authkey[32]);
-    bool autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::config &m2_cfg,
+    void autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::config &m2_cfg,
                                        const mapf::encryption::diffie_hellman &dh,
                                        uint8_t authkey[32], uint8_t keywrapkey[16]);
 
