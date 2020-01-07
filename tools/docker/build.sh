@@ -21,6 +21,7 @@ main() {
     docker_args="\
     --workdir=$rootdir --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)} \
     -e USER=${SUDO_USER:-${USER}} -v ${rootdir}:${rootdir} \
+    --entrypoint=./tools/maptools.py \
     "
 
     # Add platform base directory mapping into the container
@@ -30,7 +31,7 @@ main() {
         "
     fi
 
-    run docker container run ${docker_args} --rm prplmesh-builder $@
+    run docker container run ${docker_args} --rm prplmesh-builder build $@
 }
 
 main $@
