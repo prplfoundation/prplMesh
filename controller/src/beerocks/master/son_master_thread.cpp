@@ -512,12 +512,9 @@ bool master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::config &m2,
 {
     std::copy_n(m1.enrollee_nonce(), WSC::eWscLengths::WSC_NONCE_LENGTH, m2.enrollee_nonce);
     std::copy_n(dh.nonce(), dh.nonce_length(), m2.registrar_nonce);
-    if (!mapf::encryption::wps_calculate_keys(
-            dh, m1.public_key(), WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, m1.enrollee_nonce(),
-            m1.mac_addr().oct, m2.registrar_nonce, authkey, keywrapkey)) {
-        LOG(ERROR) << "Failed to calculate WPS keys";
-        return false;
-    }
+    mapf::encryption::wps_calculate_keys(
+        dh, m1.public_key(), WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, m1.enrollee_nonce(),
+        m1.mac_addr().oct, m2.registrar_nonce, authkey, keywrapkey);
     std::copy(dh.pubkey(), dh.pubkey() + dh.pubkey_length(), m2.pub_key);
 
     return true;

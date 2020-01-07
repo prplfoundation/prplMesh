@@ -3641,12 +3641,9 @@ bool slave_thread::autoconfig_wsc_calculate_keys(WSC::m2 &m2, uint8_t authkey[32
         return false;
     }
     auto mac = network_utils::mac_from_string(backhaul_params.bridge_mac);
-    if (!mapf::encryption::wps_calculate_keys(*dh, m2.public_key(),
-                                              WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, dh->nonce(),
-                                              mac.oct, m2.registrar_nonce(), authkey, keywrapkey)) {
-        LOG(ERROR) << "Failed to calculate WPS keys";
-        return false;
-    }
+    mapf::encryption::wps_calculate_keys(*dh, m2.public_key(),
+                                         WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, dh->nonce(),
+                                         mac.oct, m2.registrar_nonce(), authkey, keywrapkey);
 
     return true;
 }
