@@ -20,9 +20,12 @@ using namespace beerocks;
 #define DEFAULT_MAX_SOCKET_CONNECTIONS 10
 #define TX_BUFFER_UDS (tx_buffer + sizeof(beerocks::message::sUdsHeader))
 #define TX_BUFFER_UDS_SIZE (sizeof(tx_buffer) - sizeof(beerocks::message::sUdsHeader))
+#define CERT_TX_BUFFER_UDS (cert_tx_buffer + sizeof(beerocks::message::sUdsHeader))
+#define CERT_TX_BUFFER_UDS_SIZE (sizeof(cert_tx_buffer) - sizeof(beerocks::message::sUdsHeader))
 
 socket_thread::socket_thread(const std::string &unix_socket_path_)
     : thread_base(), cmdu_tx(TX_BUFFER_UDS, TX_BUFFER_UDS_SIZE),
+      cert_cmdu_tx(CERT_TX_BUFFER_UDS, CERT_TX_BUFFER_UDS_SIZE),
       unix_socket_path(unix_socket_path_), cmdu_rx(rx_buffer + sizeof(message::sUdsHeader),
                                                    sizeof(rx_buffer) - sizeof(message::sUdsHeader)),
       server_socket(nullptr), server_max_connections(DEFAULT_MAX_SOCKET_CONNECTIONS)
