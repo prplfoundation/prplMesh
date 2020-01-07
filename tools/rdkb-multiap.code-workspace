@@ -35,6 +35,9 @@
 		},
 		{
 			"path": "../../../atom_rdkbos/meta-rdk-soc-intel-puma7/meta-wave-rdkb"
+		},
+		{
+			"path": "../../wave-api"
 		}
 	],
 	"settings": {
