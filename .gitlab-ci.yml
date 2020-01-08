@@ -134,3 +134,21 @@ test-on-netgear-rax40:
   variables:
     TARGET_DEVICE_NAME: netgear-rax40-1
   needs: ["build-for-netgear-rax40"]
+
+run-certification-tests:
+  stage: test
+  variables:
+    TESTS_TO_RUN: "tools/docker/tests/certification/all_controller_tests.txt"
+    GIT_CLONE_PATH: "/builds/prpl-foundation/prplMesh/"
+  script:
+      - /easymesh_cert/run_test_file.sh -o logs $TESTS_TO_RUN
+  artifacts:
+    paths:
+      - logs
+    when: always
+  needs:
+    - job: build-in-docker
+  tags:
+    - certs-tests
+  timeout: 24h
+  when: manual
