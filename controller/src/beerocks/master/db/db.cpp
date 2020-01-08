@@ -3077,25 +3077,6 @@ void db::lock() { db_mutex.lock(); }
 
 void db::unlock() { db_mutex.unlock(); }
 
-//
-// certification
-//
-
-void db::setting_certification_mode(bool en)
-{
-    if (!en) {
-        remove_certification_tx_buffer();
-        config.certification_mode = false;
-        return;
-    }
-    if (!allocate_certification_tx_buffer()) {
-        config.certification_mode = false;
-        LOG(DEBUG) << "failed to allocate certification_tx_buffer";
-    }
-
-    config.certification_mode = true;
-}
-
 void db::add_bss_info_configuration(const sMacAddr &al_mac,
                                     const wireless_utils::sBssInfoConf &bss_info)
 {

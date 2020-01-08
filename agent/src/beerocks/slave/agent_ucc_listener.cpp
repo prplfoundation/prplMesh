@@ -153,17 +153,6 @@ bool agent_ucc_listener::validate_destination_alid(const std::string &dest_alid)
 }
 
 /**
- * @brief Get preprepared buffer with CMDU in it.
- * 
- * @return std::shared_ptr<uint8_t> Buffer pointer.
- */
-std::shared_ptr<uint8_t> agent_ucc_listener::get_buffer_filled_with_cmdu()
-{
-    // Currently, no such buffer on agent side.
-    return std::shared_ptr<uint8_t>(nullptr);
-}
-
-/**
  * @brief Send CMDU to destined Agent.
  * 
  * @param[in] dest_mac Controllers mac address
