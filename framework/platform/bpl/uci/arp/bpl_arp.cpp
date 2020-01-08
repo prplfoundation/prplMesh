@@ -8,6 +8,7 @@
 
 #include "../../common/utils/utils.h"
 #include <bpl/bpl_arp.h>
+#include <bpl/bpl_err.h>
 
 #include "monitor/arp_monitor.h"
 
@@ -41,9 +42,10 @@ int arp_mon_start(BPL_ARP_MON_CTX *ctx, const char *iface)
         return -1;
 
     // Start the monitor
-    if (pArpMon->start(iface) == false) {
+    auto ret = pArpMon->start(iface);
+    if (ret < 0) {
         delete pArpMon;
-        return -1;
+        return ret;
     }
 
     // Store the context
