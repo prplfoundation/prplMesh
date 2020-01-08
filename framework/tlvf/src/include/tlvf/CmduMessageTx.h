@@ -25,7 +25,7 @@ public:
     std::shared_ptr<cCmduHeader> load();
     std::shared_ptr<tlvVendorSpecific> add_vs_tlv(tlvVendorSpecific::eVendorOUI voui);
     template <class T> std::shared_ptr<T> addClass() { return msg.addClass<T>(); }
-
+    void reset() { msg.reset(false); }
     bool finalize();
 };
 
