@@ -20,9 +20,10 @@ using namespace net;
 
 agent_ucc_listener::agent_ucc_listener(backhaul_manager &backhaul_manager_ctx, uint16_t port,
                                        const std::string &vendor, const std::string &model,
-                                       const std::string &bridge_iface)
-    : beerocks_ucc_listener(port), m_backhaul_manager_ctx(backhaul_manager_ctx), m_vendor(vendor),
-      m_model(model), m_bridge_iface(bridge_iface)
+                                       const std::string &bridge_iface,
+                                       ieee1905_1::CmduMessageTx &cmdu)
+    : beerocks_ucc_listener(port, cmdu), m_backhaul_manager_ctx(backhaul_manager_ctx),
+      m_vendor(vendor), m_model(model), m_bridge_iface(bridge_iface)
 {
     m_ucc_listener_run_on = eUccListenerRunOn::AGENT;
 }

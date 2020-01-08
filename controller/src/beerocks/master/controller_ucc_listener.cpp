@@ -12,8 +12,8 @@
 
 using namespace beerocks;
 
-controller_ucc_listener::controller_ucc_listener(db &database)
-    : beerocks_ucc_listener(database.config.ucc_listener_port), m_database(database)
+controller_ucc_listener::controller_ucc_listener(db &database, ieee1905_1::CmduMessageTx &cmdu)
+    : beerocks_ucc_listener(database.config.ucc_listener_port, cmdu), m_database(database)
 {
     m_ucc_listener_run_on = eUccListenerRunOn::CONTROLLER;
 }

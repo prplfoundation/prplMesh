@@ -23,7 +23,7 @@ static constexpr uint8_t UCC_REPLY_COMPLETE_TIMEOUT_SEC = 120;
 
 class beerocks_ucc_listener : public socket_thread {
 public:
-    beerocks_ucc_listener(uint16_t port);
+    beerocks_ucc_listener(uint16_t port, ieee1905_1::CmduMessageTx &cmdu);
     ~beerocks_ucc_listener(){};
 
 protected:

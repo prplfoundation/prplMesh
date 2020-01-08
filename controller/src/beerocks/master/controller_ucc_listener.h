@@ -18,7 +18,7 @@ using namespace son;
 namespace beerocks {
 class controller_ucc_listener : public beerocks_ucc_listener {
 public:
-    controller_ucc_listener(db &database);
+    controller_ucc_listener(db &database, ieee1905_1::CmduMessageTx &cmdu_tx);
     ~controller_ucc_listener(){};
 
 private:

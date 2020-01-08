@@ -139,15 +139,9 @@ bool master_thread::init()
         LOG(DEBUG) << "Health check is DISABLED!";
     }
 
-    if (database.setting_certification_mode()) {
-        if (!database.allocate_certification_tx_buffer()) {
-            LOG(ERROR) << "failed to allocate certification_tx_buffer";
-            return false;
-        }
-    }
-
     if (database.config.ucc_listener_port != 0) {
-        m_controller_ucc_listener = std::make_unique<controller_ucc_listener>(database);
+        m_controller_ucc_listener =
+            std::make_unique<controller_ucc_listener>(database, cert_cmdu_tx);
         if (m_controller_ucc_listener && !m_controller_ucc_listener->start("ucc_listener")) {
             LOG(FATAL) << "failed start controller_ucc_listener";
             return false;

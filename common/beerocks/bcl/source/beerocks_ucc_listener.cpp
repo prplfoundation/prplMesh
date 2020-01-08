@@ -549,10 +549,10 @@ bool beerocks_ucc_listener::custom_message_handler(Socket *sd, uint8_t *rx_buffe
 ////////////////////////////// Class functions ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-beerocks_ucc_listener::beerocks_ucc_listener(uint16_t port) : socket_thread(), m_cmdu_tx(cmdu_tx)
+beerocks_ucc_listener::beerocks_ucc_listener(uint16_t port, ieee1905_1::CmduMessageTx &cmdu)
+    : socket_thread(), m_cmdu_tx(cmdu), m_port(port)
 {
     thread_name = "ucc_listener";
-    m_port      = port;
     set_select_timeout(SELECT_TIMEOUT_MSC);
 }
 
@@ -802,29 +802,15 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         }
 
         // Check if CMDU message type has preprepared CMDU which can be loaded
-        auto certification_tx_buffer = get_buffer_filled_with_cmdu();
-        if (!certification_tx_buffer) {
-            LOG(ERROR) << "certification_tx_buffer is not allocated";
-            reply_ucc(eWfaCaStatus::ERROR, err_internal);
-            break;
-        }
-        ieee1905_1::CmduMessageTx external_cmdu_tx(
-            certification_tx_buffer.get() + sizeof(beerocks::message::sUdsHeader),
-            message::MESSAGE_BUFFER_LENGTH - sizeof(beerocks::message::sUdsHeader));
-        if (create_cmdu(external_cmdu_tx, ieee1905_1::eMessageType(message_type), err_string)) {
-            // Success
-            if (!send_cmdu_to_destination(external_cmdu_tx, dest_alid)) {
+        if (m_cmdu_tx.is_finalized() && m_cmdu_tx.getMessageType() == ieee1905_1::eMessageType(message_type)) {
+            m_cmdu_tx.getClass<ieee1905_1::cCmduHeader>()->message_id() = g_mid; // force mid
+            if (!send_cmdu_to_destination(m_cmdu_tx, dest_alid)) {
                 LOG(ERROR) << "Failed to send CMDU";
                 reply_ucc(eWfaCaStatus::ERROR, err_internal);
+                m_cmdu_tx.reset();
                 break;
             }
-
-        } else if (!err_string.empty()) {
-            // Failure
-            LOG(ERROR) << "cmdu creation of type 0x" << message_type_str << ", has failed";
-            reply_ucc(eWfaCaStatus::ERROR, err_string);
-            break;
-
+            m_cmdu_tx.reset();
         } else {
             // CMDU was not loaded from preprepared buffer, and need to be created manually, and
             // use TLV data from the command (if exists)
