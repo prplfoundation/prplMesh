@@ -43,6 +43,8 @@ private:
     void send_rssi_measurement_response(std::string &sta_mac, monitor_sta_node *sta_node);
     void monitor_idle_station(std::string &sta_mac, monitor_sta_node *sta_node);
 
+    bool arp_enabled() { return arp_socket > 0; }
+
     monitor_db *mon_db = nullptr;
     Socket *slave_socket;
     int arp_socket;

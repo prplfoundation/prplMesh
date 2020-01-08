@@ -38,8 +38,6 @@ void monitor_rssi::stop()
         close(arp_socket);
         arp_socket = -1;
     }
-    mon_db       = nullptr;
-    slave_socket = nullptr;
 }
 
 bool monitor_rssi::start(monitor_db *mon_db_, Socket *slave_socket_)
@@ -61,6 +59,7 @@ bool monitor_rssi::start(monitor_db *mon_db_, Socket *slave_socket_)
     arp_socket_class = new Socket(arp_socket);
     std::string err  = arp_socket_class->getError();
     if (!err.empty()) {
+        arp_socket = -1;
         LOG(ERROR) << "Opening Socket err:" << err;
         return false;
     }
@@ -202,6 +201,13 @@ void monitor_rssi::process()
         auto arp_state  = sta_node->get_arp_state();
         auto &sta_stats = sta_node->get_stats();
 
+        // If the arp is disabled, there is no point being in any other state that is not IDLE,
+        // since all other states are arp related. Thus, override the arp state to IDLE when arp is
+        // disabled.
+        if (!arp_enabled()) {
+            sta_node->set_arp_state(monitor_sta_node::IDLE);
+        }
+
         if (arp_state == monitor_sta_node::IDLE) {
             if (!poll_last)
                 continue;
@@ -241,7 +247,7 @@ void monitor_rssi::process()
                                << " delta_val=" << int(delta_val);
                 }
             }
-            if (!conf_disable_initiative_arp) {
+            if (arp_enabled() && !conf_disable_initiative_arp) {
                 if (std::chrono::steady_clock::now() >=
                     (sta_node->get_last_change_time() +
                      std::chrono::milliseconds(mon_db->MONITOR_LAST_CHANGE_TIMEOUT_MSEC))) {
