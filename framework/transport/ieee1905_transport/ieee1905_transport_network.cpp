@@ -83,10 +83,14 @@ void Ieee1905Transport::update_network_interfaces(
 
 int Ieee1905Transport::open_packet_socket(unsigned int if_index, uint16_t ether_type)
 {
+    // Note to developer: The current implementation uses AF_PACKET socket with SOCK_RAW protocol
+    // which means we receive
+    // and send packets with the Ethernet header included in the buffer. Please consider changing
+    // implementation to use SOCK_DGRAM protocol (without L2 header handling)
     //TODO: Fixup code for SOCK_RAW -> SOCK_DGRAM transition
     // open packet raw socket - see man packet(7) https://linux.die.net/man/7/packet
     int sockfd;
-    if ((sockfd = socket(AF_PACKET, SOCK_DGRAM, htons(ether_type))) < 0) {
+    if ((sockfd = socket(AF_PACKET, SOCK_RAW, htons(ether_type))) < 0) {
         MAPF_ERR("cannot open raw socket (errno: " << errno << " [" << strerror(errno) << "])");
         return -1;
     }
