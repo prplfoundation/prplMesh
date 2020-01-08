@@ -1566,6 +1566,8 @@ bool main_thread::init_arp_monitor()
 
         int ret = bpl::arp_mon_start(&m_ctxArpMon, config.bridge_iface.c_str());
         if (ret < 0) {
+            // If arp_monitor failed to start, continue without it. It might failed due to
+            // insufficient permissions. Detailed error message is printed inside.
             if (ret == -int(bpl::eErrorCode::OPERATION_NOT_SUPPORTED)) {
                 LOG(INFO) << "Skip starting ARP monitor (not supported)";
                 return (true);

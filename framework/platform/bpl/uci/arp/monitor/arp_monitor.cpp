@@ -10,6 +10,8 @@
 
 #include "../../../common/utils/utils_net.h"
 
+#include <bpl/bpl_err.h>
+
 #include <errno.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -206,7 +208,7 @@ arp_monitor::arp_monitor() : m_fdMonSocket(-1), m_fdArpSocket(-1), m_pNlSocket(n
 
 arp_monitor::~arp_monitor() {}
 
-bool arp_monitor::start(std::string strIface)
+int arp_monitor::start(std::string strIface)
 {
     // Stop the monitor (if running)
     stop();
@@ -217,21 +219,21 @@ bool arp_monitor::start(std::string strIface)
     // open netlink sock
     if ((m_fdMonSocket = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE)) < 0) {
         LOG(ERROR) << "Failed opening socket: " << strerror(errno);
-        return false;
+        return -int(eErrorCode::OPERATION_NOT_SUPPORTED);
     }
 
     int sndbuf = SOCKET_SEND_BUF_SIZE;
     if (setsockopt(m_fdMonSocket, SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(sndbuf)) < 0) {
         LOG(ERROR) << "Failed setting SO_SNDBUF option: " << strerror(errno);
         stop();
-        return false;
+        return -1;
     }
 
     int rcvbuf = SOCKET_RECV_BUF_SIZE;
     if (setsockopt(m_fdMonSocket, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf)) < 0) {
         LOG(ERROR) << "Failed setting SO_RCVBUF option: " << strerror(errno);
         stop();
-        return false;
+        return -1;
     }
 
     struct sockaddr_nl local;
@@ -243,21 +245,21 @@ bool arp_monitor::start(std::string strIface)
     if (bind(m_fdMonSocket, (struct sockaddr *)&local, sizeof(local)) < 0) {
         LOG(ERROR) << "Failed binding socket: " << strerror(errno);
         stop();
-        return false;
+        return -1;
     }
 
     // Create a RAW socket for sending ARP messages
     if ((m_fdArpSocket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ARP))) < 0) {
         LOG(ERROR) << "Failed opening RAW socket";
         stop();
-        return false;
+        return -int(eErrorCode::OPERATION_NOT_SUPPORTED);
     }
 
     // Allocate a new netlink socket
     if ((m_pNlSocket = nl_socket_alloc()) == nullptr) {
         LOG(ERROR) << "Failed allocating netlink socket!";
         stop();
-        return false;
+        return -1;
     }
 
     // Connect the netlink socket
@@ -265,10 +267,10 @@ bool arp_monitor::start(std::string strIface)
     if ((err = nl_connect(m_pNlSocket, NETLINK_ROUTE)) != 0) {
         LOG(ERROR) << "Failed connecting the netlink socket: " << nl_geterror(err);
         stop();
-        return false;
+        return -1;
     }
 
-    return true;
+    return 0;
 }
 
 void arp_monitor::stop()

@@ -33,7 +33,7 @@ public:
     ~arp_monitor();
 
     // Start monitoring and return the FD of the monitoring socket
-    bool start(std::string strIface);
+    int start(std::string strIface);
 
     // Stop monitoring
     void stop();
