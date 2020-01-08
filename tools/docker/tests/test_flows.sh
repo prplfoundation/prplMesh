@@ -20,6 +20,28 @@ error=0
 
 bridge_name=br-lan
 
+get_host_bridge_name() {
+    docker network inspect prplMesh-net --format="br-{{ printf \"%.12s\" .Id }}"
+}
+
+start_tcpdump() {
+    test="$1"
+    if [ "$TCPDUMP" = "true" ]; then
+        # -i: interface to capture on; -w: output file
+        tcpdump -i $(get_host_bridge_name) -w test_${test}.pcap &
+        TCPDUMP_PROC=$!
+        status "started tcpdump: pid=${TCPDUMP_PROC}, output file=test_${test}.pcap"
+    fi
+}
+
+kill_tcpdump() {
+    if [ -n "$TCPDUMP_PROC" ]; then
+        status "Terminating tcpdump"
+        kill $TCPDUMP_PROC;
+    fi
+    unset TCPDUMP_PROC
+}
+
 container_ip() {
     docker exec -t "$1" ip -f inet addr show "$bridge_name" | grep -Po 'inet \K[\d.]+'
 }
@@ -555,12 +577,16 @@ test_topology() {
 test_init() {
     status "test initialization"
 
+    start_tcpdump init
+
     [ "$SKIP_INIT" = "false" ] && {
         eval ${scriptdir}/test_gw_repeater.sh -f -r "repeater1" -r "repeater2" -d 7 $redirect || {
             err "start GW+Repeater failed, abort"
             exit 1
         }
     }
+    kill_tcpdump
+
     #save bml_conn_map output into a file.
     connmap=$(mktemp)
     [ -z "$connmap" ] && { err "Failed to create temp file"; exit 1; }
@@ -589,9 +615,10 @@ test_init() {
 
 }
 usage() {
-    echo "usage: $(basename $0) [-hv]"
+    echo "usage: $(basename $0) [-hvds]"
     echo "  options:"
     echo "      -h|--help - show this help menu"
+    echo "      -t|--tcpdump - Capture the results with tcpdump (requires root (sudo) or special permission/capability management of interfaces)"
     echo "      -v|--verbose - verbosity on"
     echo "      -s|--stop-on-failure - stop on failure"
     echo "      --skip-init - skip init"
@@ -615,13 +642,14 @@ usage() {
     echo "      higher_layer_data_payload - Higher layer data payload over 1905 test"
 }
 main() {
-    OPTS=`getopt -o 'hvs' --long help,verbose,skip-init,stop-on-failure -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'htvs' --long help,tcpdump,verbose,skip-init,stop-on-failure -n 'parse-options' -- "$@"`
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
     eval set -- "$OPTS"
 
     while true; do
         case "$1" in
+            -t | --tcpdump)         TCPDUMP=true; shift ;;
             -v | --verbose)         VERBOSE=true; redirect=; shift ;;
             -h | --help)            usage; exit 0; shift ;;
             -s | --stop-on-failure) STOP_ON_FAILURE=true; shift ;;
@@ -632,11 +660,14 @@ main() {
     done
     [ -z "$*" ] && set ${ALL_TESTS}
     info "Tests to run: $*"
+    trap kill_tcpdump EXIT
     test_init
     for test in "$@"; do
-       report "test_${test}" test_${test}
-       [ "$STOP_ON_FAILURE" = "true" -a $error -gt 0 ] && exit 1
-       count=$((count+1))
+        start_tcpdump "${test}"
+        report "test_${test}" test_${test}
+        [ "$STOP_ON_FAILURE" = "true" -a $error -gt 0 ] && exit 1
+        kill_tcpdump
+        count=$((count+1))
     done
 
     if [ $error -gt 0 ]; then
@@ -651,5 +682,6 @@ main() {
 VERBOSE=false
 SKIP_INIT=false
 STOP_ON_FAILURE=false
+TCPDUMP=false
 
 main "$@"
