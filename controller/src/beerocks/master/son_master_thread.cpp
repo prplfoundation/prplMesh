@@ -808,11 +808,16 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(const std::string
     auto mid = cmdu_rx.getMessageId();
     LOG(INFO) << "Received CHANNEL_PREFERENCE_REPORT_MESSAGE, mid=" << std::dec << int(mid);
 
+    // TODO In production mode (not certification), we need to store the channel preference
+    // report in the DB which will in turn be used by the channel selection task.
+    if (!database.setting_certification_mode())
+        return true;
+
     // TODO: in actual channel selection task, it is important to validate that rx mid is identical
     // to the mid sent in channel preference request message
 
     // build channel request message
-    if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE)) {
+    if (!cert_cmdu_tx.create(0, ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE)) {
         LOG(ERROR) << "cmdu creation of type CHANNEL_SELECTION_REQUEST_MESSAGE, has failed";
         return false;
     }
@@ -877,7 +882,7 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(const std::string
             ruid_list.push_back(ruid);
 
             // send one channel preference report for each ruid
-            auto channel_preference_tlv_tx = cmdu_tx.addClass<wfa_map::tlvChannelPreference>();
+            auto channel_preference_tlv_tx = cert_cmdu_tx.addClass<wfa_map::tlvChannelPreference>();
             if (!channel_preference_tlv_tx) {
                 LOG(ERROR) << "addClass ieee1905_1::tlvChannelPreference has failed";
                 return false;
@@ -935,17 +940,7 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(const std::string
         // ignored. Full implemtation will be as part of channel selection task.
     }
 
-    if (database.setting_certification_mode()) {
-        auto certification_tx_buffer = database.get_certification_tx_buffer();
-        if (!certification_tx_buffer) {
-            LOG(ERROR) << "certification_tx_buffer is not allocated!";
-            return false;
-        }
-        database.fill_certification_tx_buffer(cmdu_tx);
-        return true;
-    }
-
-    return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
+    return true; // cert_cmdu_tx will be sent when triggered to by the UCC application
 }
 
 bool master_thread::handle_cmdu_1905_ack_message(const std::string &src_mac,
