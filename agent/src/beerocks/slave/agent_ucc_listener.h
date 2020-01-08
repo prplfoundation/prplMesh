@@ -36,7 +36,7 @@ class agent_ucc_listener : public beerocks_ucc_listener {
 public:
     agent_ucc_listener(backhaul_manager &backhaul_manager_ctx, uint16_t port,
                        const std::string &vendor, const std::string &model,
-                       const std::string &bridge_iface);
+                       const std::string &bridge_iface, ieee1905_1::CmduMessageTx &cmdu);
     ~agent_ucc_listener(){};
 
     bool init() override;

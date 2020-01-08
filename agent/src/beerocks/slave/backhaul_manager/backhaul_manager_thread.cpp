@@ -124,7 +124,7 @@ bool backhaul_manager::init()
     if (m_sConfig.ucc_listener_port != 0) {
         m_agent_ucc_listener = std::make_unique<agent_ucc_listener>(
             *this, m_sConfig.ucc_listener_port, m_sConfig.vendor, m_sConfig.model,
-            m_sConfig.bridge_iface);
+            m_sConfig.bridge_iface, cert_cmdu_tx);
         if (m_agent_ucc_listener && !m_agent_ucc_listener->start("ucc_listener")) {
             LOG(ERROR) << "failed start agent_ucc_listener";
             return false;
