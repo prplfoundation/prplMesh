@@ -506,24 +506,6 @@ public:
     bool get_node_channel_ext_above_secondary(std::string mac);
     uint16_t get_hostap_vht_center_frequency(std::string mac);
 
-    //
-    // certification
-    //
-    std::shared_ptr<uint8_t> get_certification_tx_buffer() { return certification_tx_buffer; };
-    std::shared_ptr<uint8_t> allocate_certification_tx_buffer()
-    {
-        return (certification_tx_buffer =
-                    std::shared_ptr<uint8_t>(new uint8_t[beerocks::message::MESSAGE_BUFFER_LENGTH],
-                                             std::default_delete<uint8_t[]>()));
-    };
-    void remove_certification_tx_buffer() { certification_tx_buffer.reset(); };
-    void fill_certification_tx_buffer(ieee1905_1::CmduMessageTx &cmdu_tx)
-    {
-        std::copy_n(cmdu_tx.getMessageBuff() - sizeof(beerocks::message::sUdsHeader),
-                    cmdu_tx.getMessageBuffLength() + sizeof(beerocks::message::sUdsHeader),
-                    certification_tx_buffer.get());
-    };
-
     void add_bss_info_configuration(const sMacAddr &al_mac,
                                     const wireless_utils::sBssInfoConf &bss_info);
     std::list<wireless_utils::sBssInfoConf> &get_bss_info_configuration(const sMacAddr &al_mac);
@@ -644,7 +626,7 @@ public:
     bool settings_rdkb_extensions() { return settings.rdkb_extensions; }
 
     // Params
-    void setting_certification_mode(bool en);
+    void setting_certification_mode(bool en) { config.certification_mode = en; }
 
     bool setting_certification_mode() { return config.certification_mode; }
 
