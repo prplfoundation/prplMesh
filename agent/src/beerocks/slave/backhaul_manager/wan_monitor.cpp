@@ -33,7 +33,7 @@ static int netlink_open_socket()
     // Open a netlink socket
     int fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
     if (fd < 0) {
-        LOG(ERROR) << "Failed creating netlink socket";
+        LOG(ERROR) << "Failed creating netlink socket: " << strerror(errno);
         return -1;
     }
 
