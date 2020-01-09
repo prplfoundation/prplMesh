@@ -44,6 +44,7 @@ if (TARGET_PLATFORM STREQUAL "openwrt")
         add_definitions(-DHAVE_C99)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
+    # Other OpenWRT based platforms (e.g. Turris-Omnia)
     else()
 
         file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
@@ -72,6 +73,10 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
     find_package(slibc REQUIRED)
 
     list(APPEND BPL_LIBS nl-3 nl-route-3 bridge dl swpal uci ubox ubus slibc)
+
+    # Install the UCI DB files
+    file(GLOB_RECURSE bpl_uci_db_files ${MODULE_PATH}/uci/db/prplmesh_db*)
+    install(FILES ${bpl_uci_db_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 
 elseif (TARGET_PLATFORM STREQUAL "linux")
 
