@@ -1,4 +1,4 @@
-config beerocks 'config'
+config prplmesh 'config'
         option management_mode 'Multi-AP-Controller-and-Agent'
         option operating_mode 'Gateway'
         option enable '1'
@@ -16,5 +16,5 @@ config beerocks 'config'
         option key_passphrase 'test_passphrase'
         option mem_only_psk '0'
         option backhaul_band 'auto'
-
-
+        option certification_mode '0'
+        option stop_on_failure_attempts '1'
