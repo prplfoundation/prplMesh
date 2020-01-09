@@ -4,25 +4,25 @@ You can contribute to prplMesh in various ways: reporting bugs, improving docume
 
 ## Getting involved
 
-The mailing list is very low traffic.
-You can subscribe at [lists.prplfoundation.org](https://lists.prplfoundation.org/postorius/lists/prplmesh.lists.prplfoundation.org/) and [view the archives](https://lists.prplfoundation.org/hyperkitty/list/prplmesh@lists.prplfoundation.org/).
-
 A large part of the conversation takes place directly on github, through issues, pull requests, and comments on commits.
 Thus, it is advisable to subscribe to (i.e. watch) the issues you are interested in, or the project as a whole.
 
 Daily conversations take place on [Slack](https://prplfoundation.slack.com/).
-You can ask for an invite to anyone currently involved, e.g. by sending a message to the mailing list.
+You can ask for an invite to anyone currently involved, e.g. by sending a message to an active contributer on github.
+
+Some issues are labelled as [good first issue](https://github.com/prplfoundation/prplMesh/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
+Picking one of these to work on as your first contribution is recommended.
 
 The [prpl Foundation Code of Conduct](https://prplfoundation.org/about/code-of-conduct/) applies to all communication about prplMesh.
 If you encounter a problem with someone's conduct, contact the prpl Community Manager Mirko Lindner by emailing Mirko.Lindner [at] prplfoundation.org.
 
 ## Reporting bugs
 
-To report bugs, use the [github issues](https:issues/) entry form.
+To report bugs, use the [github issues](https://github.com/prplfoundation/prplMesh/issues/new/choose) entry form.
 
 ## Improving documentation
 
-High-level developer documentation can be found on the [wiki](https:wiki/), which can be edited in-place.
+High-level developer documentation can be found on the [wiki](https://github.com/prplfoundation/prplMesh/wiki), which can be edited in-place.
 
 User documentation is still under development.
 It currently resides as pptx and docx documents in the [documentation](documentation/) directory.
@@ -69,7 +69,7 @@ A commit message consists of a subject, a message body and a set of tags.
     Co-Authored-by: The Other Author <email@address.com>
     Signed-off-by: The Other Author <email@address.com>
 
-The subject must be very short, it appears in the [short log](https:commits/master).
+The subject must be very short, it appears in the [short log](https://github.com/prplfoundation/prplMesh/commits/master).
 
 * Write it in the imperative: "add support for X".
 * Start with a prefix that indicates the component: tlvf, common, documentation, bpl, bwl, bcl, bml, transport, topology, master, slave, monitor.
@@ -257,7 +257,7 @@ The typical workflow for this is:
 * Check out a new branch `hotfix/<description>` based on master.
 * Cherry-pick the fix commit.
 * Push and create a pull request.
-* Check out the development branch and rebase on the hotfix branch. This will automatically remove th fix commit.
+* Check out the development branch and rebase on the hotfix branch. This will automatically remove the fix commit.
 
 Sometimes a pull request looks like it's ready for review or merge (it is not draft, it has an approval) but really it isn't.
 For this purpose, the "don't merge" tag can be added to it.
