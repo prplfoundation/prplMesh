@@ -158,7 +158,6 @@ int cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return 0; }
 int cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PARAMS *wlan_params)
 {
     int retVal    = 0;
-    bool disabled = false;
     int index     = 0;
 
     if (!iface || !wlan_params) {
@@ -170,11 +169,19 @@ int cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PARAMS
         return retVal;
     }
 
-    retVal |= cfg_uci_get_wireless_bool(TYPE_RADIO, index, "disabled", &disabled);
-    if (!retVal) {
-        wlan_params->enabled = !disabled;
+    // The UCI "disabled" setting is optional, defaults to false if not present
+    bool disabled = false;
+    cfg_uci_get_wireless_bool(TYPE_RADIO, index, "disabled", &disabled);
+    wlan_params->enabled = !disabled;
+
+    // The UCI "channel" setting is not documented as optional, but for Intel
+    // wireless (as probably for other drivers) it is. We do not want to
+    // fail when wifi still works fine, so default to "auto" (0) and if
+    // can't get the channel from UCI just move on.
+    wlan_params->channel = 0;
+    if (!cfg_get_channel(index, &wlan_params->channel)) {
+        MAPF_INFO("UCI: radio" << index << ": channel is not configured assuming auto\n");
     }
-    retVal |= cfg_get_channel(index, &wlan_params->channel);
 
     char ssid[MAX_UCI_BUF_LEN] = {0}, security[MAX_UCI_BUF_LEN] = {0},
          passphrase[MAX_UCI_BUF_LEN] = {0};
