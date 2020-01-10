@@ -412,12 +412,14 @@ test_client_steering_dummy() {
 
     dbg "Disconnect dummy STA from wlan0"
     send_bwl_event repeater1 wlan0 "EVENT AP-STA-DISCONNECTED ${sta_mac}"
-    #TODO// check for "disconnected after successful steering, proceeding to unblock" message 
+    # Make sure that controller sees disconnect before connect by waiting a little
+    sleep 1
 
     dbg "Connect dummy STA to wlan2"
     send_bwl_event repeater1 wlan2 "EVENT AP-STA-CONNECTED ${sta_mac}"
     dbg "Confirm steering success by client connected"
     check_log gateway controller "steering successful for sta ${sta_mac}"
+    check_log gateway controller "sta ${sta_mac} disconnected after successful steering"
     return $check_error
 }
 
