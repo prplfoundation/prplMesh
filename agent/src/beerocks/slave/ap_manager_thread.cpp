@@ -1474,19 +1474,7 @@ void ap_manager_thread::handle_hostapd_attached()
         beerocks::utils::convert_bandwidth_to_enum(ap_wlan_hal->get_radio_info().bandwidth));
 
     // Copy the channels supported by the AP
-    if (acs_enabled) {
-        copy_radio_supported_channels(ap_wlan_hal, notification->params().supported_channels);
-    } else {
-        notification->params().supported_channels[0].channel =
-            ap_wlan_hal->get_radio_info().channel;
-        notification->params().supported_channels[0].noise = 0;
-        notification->params().supported_channels[0].tx_pow =
-            ap_wlan_hal->get_radio_info().conducted_power;
-        notification->params().supported_channels[0].bss_overlap    = 0;
-        notification->params().supported_channels[0].is_dfs_channel = 0; // static channel - no dfs
-        notification->params().supported_channels[0].channel_bandwidth = uint8_t(
-            beerocks::utils::convert_bandwidth_to_enum(ap_wlan_hal->get_radio_info().bandwidth));
-    }
+    copy_radio_supported_channels(ap_wlan_hal, notification->params().supported_channels);
 
     LOG(INFO) << "send ACTION_APMANAGER_JOINED_NOTIFICATION";
     LOG(INFO) << " mac = " << ap_wlan_hal->get_radio_mac();
