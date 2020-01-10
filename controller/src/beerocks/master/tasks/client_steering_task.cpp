@@ -50,6 +50,7 @@ void client_steering_task::work()
             finish();
         }
         wait_for_event(STA_DISCONNECTED);
+        wait_for_event(STA_CONNECTED);
         set_events_timeout(steering_wait_time_ms);
         break;
     }
