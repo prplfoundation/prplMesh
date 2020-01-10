@@ -394,6 +394,8 @@ bool ap_wlan_hal_nl80211::read_supported_channels()
 
     // Clear the supported channels vector
     m_radio_info.supported_channels.clear();
+    // Resize the supported channels vector
+    m_radio_info.supported_channels.resize(MAX_SUPPORTED_20M_CHANNELS);
 
     auto ret = send_nl80211_msg(
         NL80211_CMD_GET_WIPHY, 0,
