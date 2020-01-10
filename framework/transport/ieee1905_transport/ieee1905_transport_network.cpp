@@ -110,7 +110,8 @@ int Ieee1905Transport::open_packet_socket(unsigned int if_index, uint16_t ether_
     memset(&sockaddr, 0, sizeof(struct sockaddr_ll));
     sockaddr.sll_family   = AF_PACKET;
     sockaddr.sll_protocol = htons(ether_type);
-    sockaddr.sll_ifindex  = if_index;
+    sockaddr.sll_ifindex  = network_interfaces_[if_index].bridge_if_index;
+
     if (bind(sockfd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0) {
         MAPF_ERR("cannot bind socket to interface (errno: " << errno << " [" << strerror(errno)
                                                             << "])");
