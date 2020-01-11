@@ -12,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "tlvf/WSC/configData.h"
 #include "tlvf/WSC/m1.h"
 #include "tlvf/WSC/m2.h"
 #include "tlvf/ieee_1905_1/tlv1905NeighborDevice.h"
@@ -207,47 +208,47 @@ int test_complex_list()
     return errors;
 }
 
-bool add_encrypted_settings(tlvWsc &tlv, uint8_t *keywrapkey, WSC::m2::config &cfg)
+bool add_encrypted_settings(tlvWsc &tlv, uint8_t *keywrapkey, WSC::m2::config &m2_cfg)
 {
     // Encrypted settings
     // Encrypted settings are the ConfigData + IV. First create the ConfigData,
     // Then copy it to the encrypted data, add an IV and encrypt.
     // Finally, add HMAC
     uint8_t buf[1024];
-    WSC::cConfigData config_data(buf, sizeof(buf), false);
-    config_data.set_ssid("test_ssid");
-    config_data.authentication_type_attr().data = WSC::eWscAuth::WSC_AUTH_WPA2; //DUMMY
-    config_data.encryption_type_attr().data     = WSC::eWscEncr::WSC_ENCR_AES;
-    config_data.set_network_key("test1234");
+    WSC::configData::config cfg;
+    cfg.ssid         = "test_ssid";
+    cfg.auth_type    = WSC::eWscAuth::WSC_AUTH_WPA2;
+    cfg.encr_type    = WSC::eWscEncr::WSC_ENCR_AES;
+    cfg.network_key  = "test1234";
+    auto config_data = WSC::configData::create(cfg, buf, sizeof(buf));
+    if (!config_data) {
+        LOG(ERROR) << "Failed to create configData";
+        return false;
+    }
 
     LOG(DEBUG) << "WSC config_data:" << std::endl
-               << "     ssid: " << config_data.ssid() << std::endl
-               << "     authentication_type: " << int(config_data.authentication_type_attr().data)
-               << std::endl
-               << "     network_key: "
-               << std::string(config_data.network_key(), config_data.network_key_length())
-               << std::endl
-               << "     network_key length: " << int(config_data.network_key_length()) << std::endl
-               << "     encryption_type: " << int(config_data.encryption_type_attr().data)
-               << std::endl;
-    config_data.class_swap();
+               << "     ssid: " << config_data->ssid() << std::endl
+               << "     authentication_type: " << int(config_data->auth_type()) << std::endl
+               << "     network_key: " << config_data->network_key() << std::endl
+               << "     encryption_type: " << int(config_data->encr_type()) << std::endl;
+    config_data->finalize();
 
-    int datalen                  = config_data.getLen();
+    int datalen                  = config_data->getMessageLength();
     int cipherlen                = datalen + 16;
     uint8_t encrypted[cipherlen] = {0};
-    std::copy_n(config_data.getStartBuffPtr(), config_data.getLen(), encrypted);
-    if (!mapf::encryption::aes_encrypt(keywrapkey, cfg.iv, encrypted, datalen, encrypted,
+    std::copy_n(config_data->getMessageBuff(), datalen, encrypted);
+    if (!mapf::encryption::aes_encrypt(keywrapkey, m2_cfg.iv, encrypted, datalen, encrypted,
                                        cipherlen)) {
         LOG(ERROR) << "aes encrypt";
         return false;
     }
-    cfg.encrypted_settings = std::vector<uint8_t>(encrypted, encrypted + cipherlen);
+    m2_cfg.encrypted_settings = std::vector<uint8_t>(encrypted, encrypted + cipherlen);
     // Allocate maximum allowed length for the payload, so it can accommodate variable length
     // data inside the internal TLV list.
     // On finalize(), the buffer is shrunk back to its real size.
     size_t payload_length = tlv.getBuffRemainingBytes();
     tlv.alloc_payload(payload_length);
-    auto m2 = WSC::m2::create(tlv, cfg);
+    auto m2 = WSC::m2::create(tlv, m2_cfg);
     if (!m2) {
         LOG(ERROR) << "create m2";
         return false;
@@ -288,14 +289,19 @@ bool parse_encrypted_settings(std::shared_ptr<tlvWsc> tlv, uint8_t *keywrapkey, 
     mapf::encryption::aes_decrypt(keywrapkey, iv,
                                   (uint8_t *)encrypted_settings.encrypted_settings(),
                                   encrypted_settings.encrypted_settings_length(), buf, dlen);
-    WSC::cConfigData config_data(buf, dlen, true);
+    LOG(DEBUG) << "configData buffer: " << std::hex << ptrdiff_t(buf) << std::endl
+               << utils::dump_buffer(buf, dlen);
+    auto config_data = WSC::configData::parse(buf, dlen);
+    if (!config_data) {
+        LOG(ERROR) << "Failed to parse config data";
+        return false;
+    }
 
     LOG(DEBUG) << "WSC config_data:" << std::endl
-               << "     ssid: " << config_data.ssid() << std::endl
-               << "     authentication_type: " << int(config_data.authentication_type_attr().data)
-               << std::endl
-               << "     encryption_type: " << int(config_data.encryption_type_attr().data)
-               << std::endl;
+               << "     ssid: " << config_data->ssid() << std::endl
+               << "     authentication_type: " << int(config_data->auth_type()) << std::endl
+               << "     encryption_type: " << int(config_data->encr_type()) << std::endl
+               << "     network_key: " << config_data->network_key() << std::endl;
     LOG(DEBUG) << "authenticator buffer: " << std::endl
                << utils::dump_buffer((uint8_t *)m2->authenticator(),
                                      WSC::eWscLengths::WSC_AUTHENTICATOR_LENGTH);
