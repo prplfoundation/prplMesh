@@ -174,6 +174,15 @@ cWscVendorExtWfa:
   vendor_id_2:
     _type: uint8_t
     _value: WSC_VENDOR_ID_WFA_3
+  subelement_id:
+    _type: uint8_t
+    _value: 0x6
+  subelement_length:
+    _type: uint8_t
+    _value: 0x1
+  subelement_value:
+    _type: uint8_t
+    _value: TEARDOWN
   vs_data:
     _type: uint8_t
     _length: []
@@ -532,3 +541,57 @@ cWscAttrVersion2:
   subelement_value:
     _type: uint8_t
     _value: WSC_VERSION2
+
+cWscAttrSsid:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_SSID
+  length:
+    _type: uint16_t
+    _length_var: True
+  ssid:
+    _type: char
+    _length: []
+
+cWscAttrAuthenticationType:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_AUTH_TYPE
+  length:
+    _type: uint16_t
+    _value_const: 2
+    _length_var: True
+  data:
+    _type: eWscAuth
+    _value: eWscAuth::WSC_AUTH_WPA2PSK
+
+cWscAttrEncryptionType:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_ENCR_TYPE
+  length:
+    _type: uint16_t
+    _value_const: 2
+    _length_var: True
+  data:
+    _type: eWscEncr
+    _value: eWscEncr::WSC_ENCR_AES
+
+cWscAttrNetworkKey:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_NETWORK_KEY
+  length:
+    _type: uint16_t
+    _length_var: True
+  key:
+    _type: char
+    _length: []
