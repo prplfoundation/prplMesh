@@ -23,6 +23,29 @@ public:
     bool valid_custom() const override;
 
     // getters
+    eWscMessageType msg_type() const { return getAttr<cWscAttrMessageType>()->msg_type(); };
+    std::string manufacturer() const
+    {
+        return getAttr<cWscAttrManufacturer>()->manufacturer_str();
+    };
+    std::string model_name() const { return getAttr<cWscAttrModelName>()->model_str(); };
+    std::string device_name() const { return getAttr<cWscAttrDeviceName>()->device_name_str(); };
+    std::string serial_number() const
+    {
+        return getAttr<cWscAttrSerialNumber>()->serial_number_str();
+    };
+    uint16_t encr_type_flags() const
+    {
+        return getAttr<cWscAttrEncryptionTypeFlags>()->encr_type_flags();
+    };
+    uint16_t auth_type_flags() const
+    {
+        return getAttr<cWscAttrAuthenticationTypeFlags>()->auth_type_flags();
+    };
+    uint8_t *enrollee_nonce() { return getAttr<cWscAttrEnrolleeNonce>()->nonce(); };
+    uint8_t *public_key() { return getAttr<cWscAttrPublicKey>()->public_key(); };
+    uint16_t rf_bands() const { return getAttr<cWscAttrRfBands>()->bands(); };
+
     sMacAddr mac_addr() const { return getAttr<cWscAttrMac>()->data(); };
 };
 
