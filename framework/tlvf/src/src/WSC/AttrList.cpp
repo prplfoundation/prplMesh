@@ -184,6 +184,30 @@ bool AttrList::init()
                 return false;
             }
             break;
+        case ATTR_SSID:
+            if (!addAttr<cWscAttrSsid>()) {
+                TLVF_LOG(ERROR) << "Failed to add cWscAttrSsid";
+                return false;
+            }
+            break;
+        case ATTR_AUTH_TYPE:
+            if (!addAttr<cWscAttrAuthenticationType>()) {
+                TLVF_LOG(ERROR) << "Failed to add cWscAttrAuthenticationType";
+                return false;
+            }
+            break;
+        case ATTR_ENCR_TYPE:
+            if (!addAttr<cWscAttrEncryptionType>()) {
+                TLVF_LOG(ERROR) << "Failed to add cWscAttrEncryptionType";
+                return false;
+            }
+            break;
+        case ATTR_NETWORK_KEY:
+            if (!addAttr<cWscAttrNetworkKey>()) {
+                TLVF_LOG(ERROR) << "Failed to add cWscAttrNetworkKey";
+                return false;
+            }
+            break;
         // Other attributes are not expected, if so ignore them
         default:
             TLVF_LOG(ERROR) << "Unknown attribute " << getNextAttrType();
