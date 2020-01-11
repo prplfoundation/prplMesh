@@ -68,6 +68,10 @@ class cWscAttrUuidR;
 class cWscAttrAuthenticator;
 class cWscAttrRegistrarNonce;
 class cWscAttrVersion2;
+class cWscAttrSsid;
+class cWscAttrAuthenticationType;
+class cWscAttrEncryptionType;
+class cWscAttrNetworkKey;
 typedef struct sWscAttrVersion2 {
     eWscAttributes attribute_type;
     uint16_t data_length;
@@ -272,6 +276,9 @@ class cWscVendorExtWfa : public BaseClass
         uint8_t& vendor_id_0();
         uint8_t& vendor_id_1();
         uint8_t& vendor_id_2();
+        uint8_t& subelement_id();
+        uint8_t& subelement_length();
+        uint8_t& subelement_value();
         size_t vs_data_length() { return m_vs_data_idx__ * sizeof(uint8_t); }
         uint8_t* vs_data(size_t idx = 0);
         bool alloc_vs_data(size_t count = 1);
@@ -286,6 +293,9 @@ class cWscVendorExtWfa : public BaseClass
         uint8_t* m_vendor_id_0 = nullptr;
         uint8_t* m_vendor_id_1 = nullptr;
         uint8_t* m_vendor_id_2 = nullptr;
+        uint8_t* m_subelement_id = nullptr;
+        uint8_t* m_subelement_length = nullptr;
+        uint8_t* m_subelement_value = nullptr;
         uint8_t* m_vs_data = nullptr;
         size_t m_vs_data_idx__ = 0;
         int m_lock_order_counter__ = 0;
@@ -896,6 +906,104 @@ class cWscAttrVersion2 : public BaseClass
         uint8_t* m_subelement_id = nullptr;
         uint8_t* m_subelement_length = nullptr;
         uint8_t* m_subelement_value = nullptr;
+};
+
+class cWscAttrSsid : public BaseClass
+{
+    public:
+        cWscAttrSsid(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrSsid(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrSsid();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        size_t ssid_length() { return m_ssid_idx__ * sizeof(char); }
+        std::string ssid_str();
+        char* ssid(size_t length = 0);
+        bool set_ssid(const std::string& str);
+        bool set_ssid(const char buffer[], size_t size);
+        bool alloc_ssid(size_t count = 1);
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        char* m_ssid = nullptr;
+        size_t m_ssid_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+};
+
+class cWscAttrAuthenticationType : public BaseClass
+{
+    public:
+        cWscAttrAuthenticationType(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrAuthenticationType(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrAuthenticationType();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        eWscAuth& data();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        eWscAuth* m_data = nullptr;
+};
+
+class cWscAttrEncryptionType : public BaseClass
+{
+    public:
+        cWscAttrEncryptionType(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrEncryptionType(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrEncryptionType();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        eWscEncr& data();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        eWscEncr* m_data = nullptr;
+};
+
+class cWscAttrNetworkKey : public BaseClass
+{
+    public:
+        cWscAttrNetworkKey(uint8_t* buff, size_t buff_len, bool parse = false);
+        cWscAttrNetworkKey(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrNetworkKey();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        size_t key_length() { return m_key_idx__ * sizeof(char); }
+        std::string key_str();
+        char* key(size_t length = 0);
+        bool set_key(const std::string& str);
+        bool set_key(const char buffer[], size_t size);
+        bool alloc_key(size_t count = 1);
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        char* m_key = nullptr;
+        size_t m_key_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 }; // close namespace: WSC

@@ -537,6 +537,18 @@ uint8_t& cWscVendorExtWfa::vendor_id_2() {
     return (uint8_t&)(*m_vendor_id_2);
 }
 
+uint8_t& cWscVendorExtWfa::subelement_id() {
+    return (uint8_t&)(*m_subelement_id);
+}
+
+uint8_t& cWscVendorExtWfa::subelement_length() {
+    return (uint8_t&)(*m_subelement_length);
+}
+
+uint8_t& cWscVendorExtWfa::subelement_value() {
+    return (uint8_t&)(*m_subelement_value);
+}
+
 uint8_t* cWscVendorExtWfa::vs_data(size_t idx) {
     if ( (m_vs_data_idx__ <= 0) || (m_vs_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
@@ -617,6 +629,9 @@ size_t cWscVendorExtWfa::get_initial_size()
     class_size += sizeof(uint8_t); // vendor_id_0
     class_size += sizeof(uint8_t); // vendor_id_1
     class_size += sizeof(uint8_t); // vendor_id_2
+    class_size += sizeof(uint8_t); // subelement_id
+    class_size += sizeof(uint8_t); // subelement_length
+    class_size += sizeof(uint8_t); // subelement_value
     return class_size;
 }
 
@@ -654,6 +669,27 @@ bool cWscVendorExtWfa::init()
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_vendor_id_2 = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_vendor_id_2 = WSC_VENDOR_ID_WFA_3;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
+    m_subelement_id = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_subelement_id = 0x6;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
+    m_subelement_length = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_subelement_length = 0x1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
+    m_subelement_value = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_subelement_value = TEARDOWN;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -3508,6 +3544,490 @@ bool cWscAttrVersion2::init()
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cWscAttrSsid::cWscAttrSsid(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cWscAttrSsid::cWscAttrSsid(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cWscAttrSsid::~cWscAttrSsid() {
+}
+eWscAttributes& cWscAttrSsid::type() {
+    return (eWscAttributes&)(*m_type);
+}
+
+const uint16_t& cWscAttrSsid::length() {
+    return (const uint16_t&)(*m_length);
+}
+
+std::string cWscAttrSsid::ssid_str() {
+    char *ssid_ = ssid();
+    if (!ssid_) { return std::string(); }
+    return std::string(ssid_, m_ssid_idx__);
+}
+
+char* cWscAttrSsid::ssid(size_t length) {
+    if( (m_ssid_idx__ <= 0) || (m_ssid_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "ssid length is smaller than requested length";
+        return nullptr;
+    }
+    return ((char*)m_ssid);
+}
+
+bool cWscAttrSsid::set_ssid(const std::string& str) { return set_ssid(str.c_str(), str.size()); }
+bool cWscAttrSsid::set_ssid(const char str[], size_t size) {
+    if (str == nullptr || size == 0) {
+        TLVF_LOG(WARNING) << "set_ssid received an empty string.";
+        return false;
+    }
+    if (!alloc_ssid(size)) { return false; }
+    std::copy(str, str + size, m_ssid);
+    return true;
+}
+bool cWscAttrSsid::alloc_ssid(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list ssid, abort!";
+        return false;
+    }
+    if (count == 0) {
+        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_ssid;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_ssid_idx__ += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    if(m_length){ (*m_length) += len; }
+    return true;
+}
+
+void cWscAttrSsid::class_swap()
+{
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
+}
+
+bool cWscAttrSsid::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+        *m_length -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cWscAttrSsid::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(eWscAttributes); // type
+    class_size += sizeof(uint16_t); // length
+    return class_size;
+}
+
+bool cWscAttrSsid::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_type = (eWscAttributes*)m_buff_ptr__;
+    if (!m_parse__) *m_type = ATTR_SSID;
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
+        return false;
+    }
+    m_length = (uint16_t*)m_buff_ptr__;
+    if (!m_parse__) *m_length = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
+    m_ssid = (char*)m_buff_ptr__;
+    if (m_length && m_parse__) {
+        size_t len = *m_length;
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&len));
+        len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
+        m_ssid_idx__ = len/sizeof(char);
+        if (!buffPtrIncrementSafe(len)) {
+            LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+            return false;
+        }
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cWscAttrAuthenticationType::cWscAttrAuthenticationType(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cWscAttrAuthenticationType::cWscAttrAuthenticationType(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cWscAttrAuthenticationType::~cWscAttrAuthenticationType() {
+}
+eWscAttributes& cWscAttrAuthenticationType::type() {
+    return (eWscAttributes&)(*m_type);
+}
+
+const uint16_t& cWscAttrAuthenticationType::length() {
+    return (const uint16_t&)(*m_length);
+}
+
+eWscAuth& cWscAttrAuthenticationType::data() {
+    return (eWscAuth&)(*m_data);
+}
+
+void cWscAttrAuthenticationType::class_swap()
+{
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_data));
+}
+
+bool cWscAttrAuthenticationType::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+        *m_length -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cWscAttrAuthenticationType::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(eWscAttributes); // type
+    class_size += sizeof(uint16_t); // length
+    class_size += sizeof(eWscAuth); // data
+    return class_size;
+}
+
+bool cWscAttrAuthenticationType::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_type = (eWscAttributes*)m_buff_ptr__;
+    if (!m_parse__) *m_type = ATTR_AUTH_TYPE;
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
+        return false;
+    }
+    m_length = (uint16_t*)m_buff_ptr__;
+    if (!m_parse__) *m_length = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
+    m_data = (eWscAuth*)m_buff_ptr__;
+    if (!m_parse__) *m_data = eWscAuth::WSC_AUTH_WPA2PSK;
+    if (!buffPtrIncrementSafe(sizeof(eWscAuth))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAuth) << ") Failed!";
+        return false;
+    }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(eWscAuth); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cWscAttrEncryptionType::cWscAttrEncryptionType(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cWscAttrEncryptionType::cWscAttrEncryptionType(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cWscAttrEncryptionType::~cWscAttrEncryptionType() {
+}
+eWscAttributes& cWscAttrEncryptionType::type() {
+    return (eWscAttributes&)(*m_type);
+}
+
+const uint16_t& cWscAttrEncryptionType::length() {
+    return (const uint16_t&)(*m_length);
+}
+
+eWscEncr& cWscAttrEncryptionType::data() {
+    return (eWscEncr&)(*m_data);
+}
+
+void cWscAttrEncryptionType::class_swap()
+{
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_data));
+}
+
+bool cWscAttrEncryptionType::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+        *m_length -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cWscAttrEncryptionType::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(eWscAttributes); // type
+    class_size += sizeof(uint16_t); // length
+    class_size += sizeof(eWscEncr); // data
+    return class_size;
+}
+
+bool cWscAttrEncryptionType::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_type = (eWscAttributes*)m_buff_ptr__;
+    if (!m_parse__) *m_type = ATTR_ENCR_TYPE;
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
+        return false;
+    }
+    m_length = (uint16_t*)m_buff_ptr__;
+    if (!m_parse__) *m_length = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
+    m_data = (eWscEncr*)m_buff_ptr__;
+    if (!m_parse__) *m_data = eWscEncr::WSC_ENCR_AES;
+    if (!buffPtrIncrementSafe(sizeof(eWscEncr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscEncr) << ") Failed!";
+        return false;
+    }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(eWscEncr); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cWscAttrNetworkKey::cWscAttrNetworkKey(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cWscAttrNetworkKey::cWscAttrNetworkKey(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cWscAttrNetworkKey::~cWscAttrNetworkKey() {
+}
+eWscAttributes& cWscAttrNetworkKey::type() {
+    return (eWscAttributes&)(*m_type);
+}
+
+const uint16_t& cWscAttrNetworkKey::length() {
+    return (const uint16_t&)(*m_length);
+}
+
+std::string cWscAttrNetworkKey::key_str() {
+    char *key_ = key();
+    if (!key_) { return std::string(); }
+    return std::string(key_, m_key_idx__);
+}
+
+char* cWscAttrNetworkKey::key(size_t length) {
+    if( (m_key_idx__ <= 0) || (m_key_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "key length is smaller than requested length";
+        return nullptr;
+    }
+    return ((char*)m_key);
+}
+
+bool cWscAttrNetworkKey::set_key(const std::string& str) { return set_key(str.c_str(), str.size()); }
+bool cWscAttrNetworkKey::set_key(const char str[], size_t size) {
+    if (str == nullptr || size == 0) {
+        TLVF_LOG(WARNING) << "set_key received an empty string.";
+        return false;
+    }
+    if (!alloc_key(size)) { return false; }
+    std::copy(str, str + size, m_key);
+    return true;
+}
+bool cWscAttrNetworkKey::alloc_key(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list key, abort!";
+        return false;
+    }
+    if (count == 0) {
+        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_key;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_key_idx__ += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    if(m_length){ (*m_length) += len; }
+    return true;
+}
+
+void cWscAttrNetworkKey::class_swap()
+{
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
+}
+
+bool cWscAttrNetworkKey::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+        *m_length -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cWscAttrNetworkKey::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(eWscAttributes); // type
+    class_size += sizeof(uint16_t); // length
+    return class_size;
+}
+
+bool cWscAttrNetworkKey::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_type = (eWscAttributes*)m_buff_ptr__;
+    if (!m_parse__) *m_type = ATTR_NETWORK_KEY;
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
+        return false;
+    }
+    m_length = (uint16_t*)m_buff_ptr__;
+    if (!m_parse__) *m_length = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
+    m_key = (char*)m_buff_ptr__;
+    if (m_length && m_parse__) {
+        size_t len = *m_length;
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&len));
+        len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
+        m_key_idx__ = len/sizeof(char);
+        if (!buffPtrIncrementSafe(len)) {
+            LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+            return false;
+        }
+    }
     if (m_parse__) { class_swap(); }
     return true;
 }
