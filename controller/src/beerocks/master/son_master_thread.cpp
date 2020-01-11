@@ -443,7 +443,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
  * @return false on failure
  */
 bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(WSC::m2::config &m2_cfg,
-                                                             WSC::cConfigData &config_data,
+                                                             WSC::configData &config_data,
                                                              uint8_t authkey[32],
                                                              uint8_t keywrapkey[16])
 {
@@ -452,18 +452,16 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(WSC::m2::config &m2
     // The config_data buffer has room for 12 bytes for the keywrapauth (2 bytes
     // attribute type, 2 bytes attribute length, 8 bytes data), but check it anyway
     // to be on the safe side. Then, we add keywrapauth at its end.
-    uint8_t *plaintext = config_data.getStartBuffPtr();
-    int plaintextlen   = config_data.getLen() + sizeof(WSC::sWscAttrKeyWrapAuthenticator);
-    if (config_data.getBuffRemainingBytes() < sizeof(WSC::sWscAttrKeyWrapAuthenticator)) {
-        LOG(ERROR) << "No room for keywrap auth in config_data";
-        return false;
-    }
+    uint8_t *plaintext = config_data.getMessageBuff();
+    int plaintextlen =
+        config_data.getMessageBuffLength() + sizeof(WSC::sWscAttrKeyWrapAuthenticator);
     WSC::sWscAttrKeyWrapAuthenticator *keywrapauth =
-        reinterpret_cast<WSC::sWscAttrKeyWrapAuthenticator *>(&plaintext[config_data.getLen()]);
+        reinterpret_cast<WSC::sWscAttrKeyWrapAuthenticator *>(
+            &plaintext[config_data.getMessageLength()]);
     keywrapauth->struct_init();
     uint8_t *kwa = reinterpret_cast<uint8_t *>(keywrapauth->data);
     // Add KWA which is the 1st 64 bits of HMAC of config_data using AuthKey
-    if (!mapf::encryption::kwa_compute(authkey, plaintext, config_data.getLen(), kwa))
+    if (!mapf::encryption::kwa_compute(authkey, plaintext, config_data.getMessageLength(), kwa))
         return false;
     keywrapauth->struct_swap();
 
@@ -624,23 +622,21 @@ bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
 
     // Create ConfigData
     uint8_t buf[1024];
-    WSC::cConfigData config_data(buf, sizeof(buf), false);
+    WSC::configData::config cfg;
     if (bss_info_conf) {
-        config_data.set_ssid(bss_info_conf->ssid);
-        config_data.authentication_type_attr().data = bss_info_conf->authentication_type;
-        config_data.encryption_type_attr().data     = bss_info_conf->encryption_type;
-        config_data.set_network_key(bss_info_conf->network_key);
-        config_data.multiap_attr().subelement_value = bss_info_conf->bss_type;
+        cfg.ssid        = bss_info_conf->ssid;
+        cfg.auth_type   = bss_info_conf->authentication_type;
+        cfg.encr_type   = bss_info_conf->encryption_type;
+        cfg.network_key = bss_info_conf->network_key;
+        cfg.bss_type    = bss_info_conf->bss_type;
 
         LOG(DEBUG) << "WSC config_data:" << std::hex << std::endl
-                   << "     ssid: " << config_data.ssid_str() << std::endl
-                   << "     authentication_type: "
-                   << int(config_data.authentication_type_attr().data) << std::endl
-                   << "     encryption_type: " << int(config_data.encryption_type_attr().data)
-                   << std::dec << std::endl;
+                   << "     ssid: " << cfg.ssid << std::endl
+                   << "     authentication_type: " << int(cfg.auth_type) << std::endl
+                   << "     encryption_type: " << int(cfg.encr_type) << std::dec << std::endl;
     } else {
         // Tear down. No need to set any parameter except the teardown bit and the MAC address.
-        config_data.multiap_attr().subelement_value = WSC::eWscVendorExtSubelementBssType::TEARDOWN;
+        cfg.bss_type = WSC::eWscVendorExtSubelementBssType::TEARDOWN;
         LOG(DEBUG) << "WSC config_data: tear down";
     }
 
@@ -659,11 +655,16 @@ bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
     // the closest to the WSC-specified behaviour.
     //
     // Note that the BBF 1905.1 implementation (meshComms) simply ignores the MAC address in M2.
-    config_data.bssid_attr().data = m1.mac_addr();
+    cfg.bssid = m1.mac_addr();
 
-    config_data.class_swap();
+    auto config_data = WSC::configData::create(cfg, buf, sizeof(buf));
+    if (!config_data) {
+        LOG(ERROR) << "Failed to create configData";
+        return false;
+    }
+    config_data->finalize();
 
-    if (!autoconfig_wsc_add_m2_encrypted_settings(m2_cfg, config_data, authkey, keywrapkey))
+    if (!autoconfig_wsc_add_m2_encrypted_settings(m2_cfg, *config_data, authkey, keywrapkey))
         return false;
 
     auto m2 = WSC::m2::create(*tlv, m2_cfg);

@@ -21,6 +21,7 @@
 #include <bcl/network/network_utils.h>
 
 #include <mapf/common/encryption.h>
+#include <tlvf/WSC/configData.h>
 #include <tlvf/WSC/m1.h>
 #include <tlvf/WSC/m2.h>
 #include <tlvf/ieee_1905_1/tlvWsc.h>
@@ -100,8 +101,8 @@ private:
     // Autoconfig encryption support
     bool autoconfig_wsc_add_m2(WSC::m1 &m1, const wireless_utils::sBssInfoConf *bss_info_conf);
     bool autoconfig_wsc_add_m2_encrypted_settings(WSC::m2::config &m2_cfg,
-                                                  WSC::cConfigData &config_data,
-                                                  uint8_t authkey[32], uint8_t keywrapkey[16]);
+                                                  WSC::configData &config_data, uint8_t authkey[32],
+                                                  uint8_t keywrapkey[16]);
     bool autoconfig_wsc_authentication(WSC::m1 &m1, WSC::m2 &m2, uint8_t authkey[32]);
     void autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::m2::config &m2_cfg,
                                        const mapf::encryption::diffie_hellman &dh,
