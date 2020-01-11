@@ -3726,17 +3726,21 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
     // cConfigData constructor, but then parsing will fail since the length
     // will be calculated wrong. TLVF does not support parsing network byte order
     // without full swap, so keep this workaround for now (another future TLVF V2 feature)
-    WSC::cConfigData config_data(decrypted, datalen, true);
+    auto config_data = WSC::configData::parse(decrypted, datalen);
+    if (!config_data) {
+        LOG(ERROR) << "Failed to parse config data";
+        return false;
+    }
 
     // get length of config_data for KWA authentication
-    size_t len = config_data.getLen();
+    size_t len = config_data->getMessageLength();
     // Protect against M2 buffer overflow attacks
     if (len + sizeof(WSC::sWscAttrKeyWrapAuthenticator) > size_t(datalen)) {
         LOG(ERROR) << "invalid config data length";
         return false;
     }
     // Swap to network byte order for KWA HMAC calculation
-    config_data.class_swap();
+    config_data->swap();
 
     uint8_t kwa[WSC::WSC_AUTHENTICATOR_LENGTH];
     // Compute KWA based on decrypted settings
@@ -3764,14 +3768,9 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
     }
 
     // Swap back to host byte order to read and use config_data
-    config_data.class_swap();
+    config_data->swap();
 
-    // TODO tlvf should check this
-    if (config_data.ssid_length() > WSC::WSC_MAX_SSID_LENGTH) {
-        LOG(INFO) << "SSID too long: " << config_data.ssid_length();
-        return false;
-    }
-    uint8_t bss_type = config_data.multiap_attr().subelement_value;
+    uint8_t bss_type = config_data->bss_type();
     LOG(INFO) << "bss_type: " << std::hex << int(bss_type);
     fronthaul = bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS;
     backhaul  = bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS;
@@ -3782,11 +3781,11 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
     }
     LOG(DEBUG) << "KWA (Key Wrap Auth) success";
 
-    credentials->set_ssid(config_data.ssid_str());
-    credentials->bssid_attr().data = config_data.bssid_attr().data;
-    credentials->set_network_key(config_data.network_key_str());
-    credentials->authentication_type_attr().data = config_data.authentication_type_attr().data;
-    credentials->encryption_type_attr().data     = config_data.encryption_type_attr().data;
+    credentials->set_ssid(config_data->ssid());
+    credentials->bssid_attr().data = config_data->bssid();
+    credentials->set_network_key(config_data->network_key());
+    credentials->authentication_type_attr().data = config_data->auth_type();
+    credentials->encryption_type_attr().data     = config_data->encr_type();
     credentials->multiap_attr().subelement_value = bss_type;
 
     return true;

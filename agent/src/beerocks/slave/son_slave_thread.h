@@ -18,6 +18,7 @@
 #include <beerocks/tlvf/beerocks_header.h>
 
 #include <mapf/common/encryption.h>
+#include <tlvf/WSC/configData.h>
 #include <tlvf/WSC/m1.h>
 #include <tlvf/WSC/m2.h>
 #include <tlvf/ieee_1905_1/tlvWsc.h>
