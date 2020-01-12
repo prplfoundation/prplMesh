@@ -82,6 +82,8 @@ private:
     bool handle_1905_higher_layer_data_message(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                const std::string &src_mac);
 
+    bool handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
+
     //bool sta_handle_event(const std::string &iface,const std::string& event_name, void* event_obj);
     bool hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr, std::string iface);
 

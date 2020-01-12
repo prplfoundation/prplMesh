@@ -30,11 +30,13 @@
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
+#include <tlvf/wfa_map/tlvApCapability.h>
 #include <tlvf/wfa_map/tlvApOperationalBSS.h>
 #include <tlvf/wfa_map/tlvAssociatedClients.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
+#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 
 // BPL Error Codes
 #include <bpl/bpl_err.h>
@@ -1737,6 +1739,9 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return handle_1905_discovery_query(cmdu_rx, src_mac);
         //LOG(INFO) << "I got the Topology Query message!";
     }
+    case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE: {
+        return handle_ap_capability_query(cmdu_rx, src_mac);
+    }
     case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE: {
         return handle_1905_higher_layer_data_message(cmdu_rx, src_mac);
     }
@@ -1746,6 +1751,79 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return false;
     }
     }
+}
+
+bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                  const std::string &src_mac)
+{
+    //TODO - this is a stub handler for the purpose of controller certification testing,
+    //       will be implemented later on agent certification
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received AP_CAPABILITY_QUERY_MESSAGE, mid=" << std::dec << int(mid);
+    // return true;
+    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type AP_CAPABILITY_REPORT_MESSAGE, has failed";
+        return false;
+    }
+
+    auto ap_capability_tlv = cmdu_tx.addClass<wfa_map::tlvApCapability>();
+    if (!ap_capability_tlv) {
+        LOG(ERROR) << "addClass wfa_map::tlvApCapability has failed";
+        return false;
+    }
+
+    for (const auto &vaps_list : m_vaps_map) {
+        // auto radio_list         = tlvApOperationalBSS->create_radio_list();
+        auto ruid = vaps_list.first;
+        // Agent shall include one AP Radio Basic Capabilities TLV for each AP radio
+        std::vector<uint8_t> operating_classes{115,116};
+
+        auto radio_basic_caps = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+        if (!radio_basic_caps) {
+            LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
+            return false;
+        }
+        radio_basic_caps->radio_uid() = ruid;
+        //TODO get maximum supported VAPs from DWPAL
+        radio_basic_caps->maximum_number_of_bsss_supported() = 2;
+
+        // operating_classes =std::vector(115);
+            
+
+        for (auto op_class : operating_classes) {
+            auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
+            if (!operationClassesInfo) {
+                LOG(ERROR) << "Failed creating operating classes info list";
+                return false;
+            }
+
+            operationClassesInfo->operating_class() = op_class;
+            operationClassesInfo->maximum_transmit_power_dbm() =10;
+                
+
+            std::vector<uint8_t> non_oper_channels{110};
+            
+            // Create list of statically non-oper channels
+            if (!non_oper_channels.empty()) {
+                operationClassesInfo->alloc_statically_non_operable_channels_list(
+                    non_oper_channels.size());
+                uint8_t idx = 0;
+                for (auto non_oper : non_oper_channels) {
+                    *operationClassesInfo->statically_non_operable_channels_list(idx) = non_oper;
+                    idx++;
+                }
+            }
+
+            if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
+                LOG(ERROR) << "add_operating_classes_info_list failed";
+                return false;
+            }
+        }
+    }
+
+    // return send_cmdu_to_controller(cmdu_tx);
+    LOG(DEBUG) << "Sending AP_CAPABILITY_REPORT_MESSAGE , mid: " << std::hex << (int)mid;
+    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 /**
