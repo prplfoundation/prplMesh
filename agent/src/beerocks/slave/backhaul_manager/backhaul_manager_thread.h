@@ -228,6 +228,7 @@ private:
     std::string bssid_bridge_mac;
 
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
+    std::unordered_map<std::string, beerocks_message::sVapsList> m_vaps_map;
 
     /*
  * State Machines

@@ -1694,6 +1694,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
             m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(msg->ruid()),
                                                    msg->params());
+
+            m_vaps_map[network_utils::mac_to_string(msg->ruid())] = msg->params();
         }
         break;
     }
@@ -1794,12 +1796,42 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
     //add dummy data
     auto radio_list     = tlvApOperationalBSS->create_radio_list();
     auto radio_bss_list = radio_list->create_radio_bss_list();
-    radio_bss_list->set_ssid("wlan_0");
+
+    auto mac1 = radio_bss_list->radio_bssid();
+
+    
+
+    // auto m = network_utils::mac_to_string(mac1);
+    auto ssid1 = m_vaps_map.at(network_utils::mac_to_string(mac1)).vaps->ssid;
+
+    LOG(DEBUG)<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+
+    LOG(DEBUG)<<" mac1 = "<<network_utils::mac_to_string(mac1)<<", ssid1 =  "<<ssid1;
+
+    LOG(DEBUG)<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+    // radio_bss_list->set_ssid("wlan_0");
+    radio_bss_list->set_ssid(ssid1);
     radio_list->add_radio_bss_list(radio_bss_list);
     radio_bss_list = radio_list->create_radio_bss_list();
-    radio_bss_list->set_ssid("wlan_2");
+
+    auto mac2 = radio_bss_list->radio_bssid();
+    auto ssid2 = m_vaps_map.at(network_utils::mac_to_string(mac2)).vaps->ssid;
+    // radio_bss_list->set_ssid("wlan_2");
+    radio_bss_list->set_ssid(ssid2);
     radio_list->add_radio_bss_list(radio_bss_list);
+
+    LOG(DEBUG)<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+
+    LOG(DEBUG)<<" mac2 = "<<network_utils::mac_to_string(mac2)<<", ssid2 =  "<<ssid2;
+
+    LOG(DEBUG)<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+
+
     tlvApOperationalBSS->add_radio_list(radio_list);
+
+
+
+
 
     auto tlvAssociatedClients = cmdu_tx.addClass<wfa_map::tlvAssociatedClients>();
     if (!tlvAssociatedClients) {

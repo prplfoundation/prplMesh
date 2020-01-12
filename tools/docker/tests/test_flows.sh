@@ -115,6 +115,8 @@ test_ap_config_renew() {
     send_CAPI_command repeater1 "dev_get_parameter,program,map,ruid,0x000000000000,ssid,Multi-AP-24G-1,parameter,macaddr"
     check [ "$capi_command_reply" = "status,COMPLETE,macaddr,$mac_agent1_wlan0" ];
 
+    # check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
+
     return $check_error
 }
 
