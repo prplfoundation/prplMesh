@@ -64,11 +64,7 @@ public:
     void closeSocket();
     bool isOpen();
     SOCKET getSocketFd() { return m_socket; }
-    std::string getError()
-    {
-        return m_error;
-        m_error.clear();
-    }
+    std::string getError() { return m_error; }
     std::string getPeerIP() { return m_peer_ip; }
     int getPeerPort() { return m_peer_port; }
     std::string getUdsPath() { return m_uds_path; }
