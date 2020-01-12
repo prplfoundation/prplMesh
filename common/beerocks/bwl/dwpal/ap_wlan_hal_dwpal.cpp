@@ -131,10 +131,8 @@ static void get_ht_mcs_capabilities(int *HT_MCS, std::string &ht_cap_str,
                                     beerocks::message::sRadioCapabilities &sta_caps)
 {
     bool break_upper_loop = false;
-
-    memset(&sta_caps, 0, sizeof(beerocks::message::sRadioCapabilities));
-
-    sta_caps.ht_bw = 0xFF;
+    sta_caps              = {};
+    sta_caps.ht_bw        = 0xFF;
 
     if (!ht_cap_str.empty() && (HT_MCS != nullptr)) {
         uint16_t ht_cap = uint16_t(std::stoul(ht_cap_str, nullptr, 16));
@@ -1438,10 +1436,9 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             }
         }
 
-        msg->params.vap_id = beerocks::utils::get_ids_from_iface_string(VAP).vap_id;
-        msg->params.mac    = beerocks::net::network_utils::mac_from_string(MACAddress);
-
-        memset(&msg->params.capabilities, 0, sizeof(beerocks::message::sRadioCapabilities));
+        msg->params.vap_id       = beerocks::utils::get_ids_from_iface_string(VAP).vap_id;
+        msg->params.mac          = beerocks::net::network_utils::mac_from_string(MACAddress);
+        msg->params.capabilities = {};
 
         std::string ht_cap_str(ht_cap);
         get_ht_mcs_capabilities(HT_MCS, ht_cap_str, msg->params.capabilities);
