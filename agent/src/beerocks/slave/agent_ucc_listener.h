@@ -48,6 +48,7 @@ public:
     void set_onboarding_status(bool success);
     std::string get_selected_backhaul();
     void update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps);
+    void print_vaps_map();
 
 private:
     std::string fill_version_reply_string() override;

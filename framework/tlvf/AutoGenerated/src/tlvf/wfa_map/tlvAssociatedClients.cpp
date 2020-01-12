@@ -222,7 +222,7 @@ std::tuple<bool, cClientInfo&> cBssInfo::clients_associated_list(size_t idx) {
     bool ret_success = ( (m_clients_associated_list_idx__ > 0) && (m_clients_associated_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
     if (!ret_success) {
-        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        // TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
     }
     return std::forward_as_tuple(ret_success, *(m_clients_associated_list_vector[ret_idx]));
 }

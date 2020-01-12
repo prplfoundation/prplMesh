@@ -1789,6 +1789,8 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
         LOG(ERROR) << "addClass wfa_map::tlvApOperationalBSS failed, mid=" << std::hex << (int)mid;
         return false;
     }
+
+    m_agent_ucc_listener->print_vaps_map();
     //add dummy data
     auto radio_list     = tlvApOperationalBSS->create_radio_list();
     auto radio_bss_list = radio_list->create_radio_bss_list();

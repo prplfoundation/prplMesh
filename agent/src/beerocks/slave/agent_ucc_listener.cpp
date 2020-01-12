@@ -97,6 +97,18 @@ void agent_ucc_listener::update_vaps_list(std::string ruid, beerocks_message::sV
     vaps_map[ruid] = vaps;
 }
 
+void agent_ucc_listener::print_vaps_map()
+{
+    if (!vaps_map.empty()) {
+        for (auto it = vaps_map.begin(); it != vaps_map.end(); ++it) {
+            auto ssid = it->second.vaps->ssid;
+            LOG(DEBUG) << " " << std::string(it->first);
+            LOG(DEBUG) << " " << std::string(ssid);
+            // << ":" << it->second;
+        }
+    }
+}
+
 /**
  * @brief get parameter command
  *
