@@ -208,10 +208,11 @@ bool AttrList::init()
                 return false;
             }
             break;
-        // Other attributes are not expected, if so ignore them
+        // Other attributes are not expected, if so ignore them silently
         default:
-            TLVF_LOG(ERROR) << "Unknown attribute " << getNextAttrType();
-            break;
+            TLVF_LOG(DEBUG) << "Unknown attribute " << getNextAttrType()
+                            << " assuming end of AttrList";
+            return true;
         }
     }
     return true;
