@@ -99,11 +99,11 @@ private:
         std::string radio_mac, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps);
     // Autoconfig encryption support
     bool autoconfig_wsc_add_m2(WSC::m1 &m1, const wireless_utils::sBssInfoConf *bss_info_conf);
-    bool autoconfig_wsc_add_m2_encrypted_settings(WSC::config &m2_cfg,
+    bool autoconfig_wsc_add_m2_encrypted_settings(WSC::m2::config &m2_cfg,
                                                   WSC::cConfigData &config_data,
                                                   uint8_t authkey[32], uint8_t keywrapkey[16]);
     bool autoconfig_wsc_authentication(WSC::m1 &m1, WSC::m2 &m2, uint8_t authkey[32]);
-    void autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::config &m2_cfg,
+    void autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::m2::config &m2_cfg,
                                        const mapf::encryption::diffie_hellman &dh,
                                        uint8_t authkey[32], uint8_t keywrapkey[16]);
 

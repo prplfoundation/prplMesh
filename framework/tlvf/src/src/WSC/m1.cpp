@@ -12,6 +12,46 @@
 
 using namespace WSC;
 
+std::shared_ptr<m1> m1::parse(ieee1905_1::tlvWsc &tlv)
+{
+    if (!tlv.payload_length()) {
+        TLVF_LOG(ERROR) << "No room to add attribute list (payload length = 0)";
+        return nullptr;
+    }
+    auto attributes = std::make_shared<m1>(tlv.payload(), tlv.payload_length(), true);
+    if (!attributes) {
+        TLVF_LOG(ERROR) << "Failed to initialize attributes";
+        return nullptr;
+    }
+    attributes->init();
+    if (attributes->msg_type() != WSC_MSG_TYPE_M1) {
+        TLVF_LOG(INFO) << "Not M1, msg type is " << int(attributes->msg_type());
+        return nullptr;
+    }
+    if (!attributes->valid()) {
+        TLVF_LOG(ERROR) << "Not all attributes present";
+        return nullptr;
+    }
+    return attributes;
+}
+
+std::shared_ptr<m1> m1::create(ieee1905_1::tlvWsc &tlv, const config &cfg)
+{
+    if (cfg.msg_type != eWscMessageType::WSC_MSG_TYPE_M1)
+        return nullptr;
+    auto attributes = std::make_shared<m1>(tlv.payload(), tlv.payload_length(), false);
+    if (!attributes || !attributes->init(cfg)) {
+        TLVF_LOG(ERROR) << "Failed to initialize attributes";
+        return nullptr;
+    }
+    if (!attributes->finalize()) {
+        TLVF_LOG(ERROR) << "Failed to finalize attributes";
+        return nullptr;
+    }
+    tlv.addInnerClassList(attributes);
+    return attributes;
+}
+
 bool m1::init(const config &cfg)
 {
     if (m_parse) {
@@ -183,8 +223,84 @@ bool m1::init(const config &cfg)
     return true;
 }
 
-bool m1::valid_custom() const
+bool m1::valid() const
 {
+    if (!getAttr<cWscAttrVersion>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrVersion> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrMessageType>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrMessageType> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrEnrolleeNonce>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrEnrolleeNonce> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrPublicKey>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrPublicKey> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrAuthenticationTypeFlags>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrAuthenticationTypeFlags> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrEncryptionTypeFlags>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrEncryptionTypeFlags> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrConnectionTypeFlags>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrConnectionTypeFlags> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrConfigurationMethods>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrConfigurationMethods> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrManufacturer>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrManufacturer> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrModelName>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrModelName> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrModelNumber>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrModelNumber> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrSerialNumber>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrSerialNumber> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrPrimaryDeviceType>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrPrimaryDeviceType> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrDeviceName>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrDeviceName> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrRfBands>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrRfBands> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrAssociationState>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrAssociationState> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrConfigurationError>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrConfigurationError> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrDevicePasswordID>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrDevicePasswordID> failed";
+        return false;
+    }
+    if (!getAttr<cWscAttrOsVersion>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrOsVersion> failed";
+        return false;
+    }
     if (!getAttr<cWscAttrUuidE>()) {
         TLVF_LOG(ERROR) << "getAttr<cWscAttrUuidE> failed";
         return false;

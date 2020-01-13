@@ -207,7 +207,7 @@ int test_complex_list()
     return errors;
 }
 
-bool add_encrypted_settings(tlvWsc &tlv, uint8_t *keywrapkey, WSC::config &cfg)
+bool add_encrypted_settings(tlvWsc &tlv, uint8_t *keywrapkey, WSC::m2::config &cfg)
 {
     // Encrypted settings
     // Encrypted settings are the ConfigData + IV. First create the ConfigData,
@@ -247,7 +247,7 @@ bool add_encrypted_settings(tlvWsc &tlv, uint8_t *keywrapkey, WSC::config &cfg)
     // On finalize(), the buffer is shrunk back to its real size.
     size_t payload_length = tlv.getBuffRemainingBytes();
     tlv.alloc_payload(payload_length);
-    auto m2 = std::dynamic_pointer_cast<WSC::m2>(WSC::AttrList::create(tlv, cfg));
+    auto m2 = WSC::m2::create(tlv, cfg);
     if (!m2) {
         LOG(ERROR) << "create m2";
         return false;
@@ -272,7 +272,7 @@ bool add_encrypted_settings(tlvWsc &tlv, uint8_t *keywrapkey, WSC::config &cfg)
 
 bool parse_encrypted_settings(std::shared_ptr<tlvWsc> tlv, uint8_t *keywrapkey, uint8_t *iv)
 {
-    auto m2 = std::dynamic_pointer_cast<WSC::m2>(WSC::AttrList::parse(*tlv));
+    auto m2 = WSC::m2::parse(*tlv);
     if (!m2) {
         LOG(ERROR) << "Not an M2!";
         return false;
@@ -468,7 +468,7 @@ int test_all()
     uint8_t mac[6] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
     uint8_t authkey[32];
     uint8_t keywrapkey[16];
-    WSC::config cfg;
+    WSC::m2::config cfg;
     cfg.msg_type            = WSC::eWscMessageType::WSC_MSG_TYPE_M2;
     cfg.manufacturer        = "Intel";
     cfg.model_name          = "Ubuntu";
