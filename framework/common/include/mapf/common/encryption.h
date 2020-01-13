@@ -83,6 +83,8 @@ private:
     uint8_t *m_pubkey        = nullptr;
     unsigned m_pubkey_length = 0;
     uint8_t m_nonce[16];
+
+    diffie_hellman(const diffie_hellman &) = delete;
 };
 
 /**
