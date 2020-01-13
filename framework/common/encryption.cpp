@@ -90,7 +90,7 @@ diffie_hellman::diffie_hellman() : m_dh(nullptr), m_pubkey(nullptr)
 
 diffie_hellman::~diffie_hellman()
 {
-    delete m_pubkey;
+    delete[] m_pubkey;
     DH_free(m_dh);
 }
 
