@@ -312,21 +312,19 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
     if (parent_hostap_mac == hostap_mac) {
         if (mac_type == beerocks::TYPE_IRE_BACKHAUL || mac_type == beerocks::TYPE_CLIENT) {
             database.set_node_state(mac, beerocks::STATE_DISCONNECTED);
+            // Notify steering task, if any, of disconnect.
+            int steering_task = database.get_steering_task_id(mac);
+            if (tasks.is_task_running(steering_task))
+                tasks.push_event(steering_task, client_steering_task::STA_DISCONNECTED);
+
             if (database.get_node_handoff_flag(mac)) {
                 LOG(DEBUG) << "handoff_flag == true, mac " << mac;
+                // We're in the middle of steering, don't mark as disconnected (yet).
                 return;
             } else {
                 LOG(DEBUG) << "handoff_flag == false, mac " << mac;
 
-                /* 
-                 * notify existing steering task of disconnected STA
-                 * relevant if STA disconnects within the time window when the task is still active
-                 * and the STA is blocked on other APs
-                 */
-                int prev_steering_task = database.get_steering_task_id(mac);
-                tasks.push_event(prev_steering_task, client_steering_task::STA_DISCONNECTED);
-
-                // kill old roaming task
+                // If we're not in the middle of steering, kill roaming task
                 prev_task_id = database.get_roaming_task_id(mac);
                 if (tasks.is_task_running(prev_task_id)) {
                     tasks.kill_task(prev_task_id);
