@@ -442,7 +442,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
  * @return true on success
  * @return false on failure
  */
-bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(WSC::config &m2_cfg,
+bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(WSC::m2::config &m2_cfg,
                                                              WSC::cConfigData &config_data,
                                                              uint8_t authkey[32],
                                                              uint8_t keywrapkey[16])
@@ -500,7 +500,7 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(WSC::config &m2_cfg
  * @return true on success
  * @return false on failure
  */
-void master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::config &m2,
+void master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::m2::config &m2,
                                                   const mapf::encryption::diffie_hellman &dh,
                                                   uint8_t authkey[32], uint8_t keywrapkey[16])
 {
@@ -586,7 +586,7 @@ bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
         tlv->getBuffRemainingBytes() - ieee1905_1::tlvEndOfMessage::get_initial_size();
     tlv->alloc_payload(payload_length);
 
-    WSC::config m2_cfg;
+    WSC::m2::config m2_cfg;
     m2_cfg.msg_type = WSC::eWscMessageType::WSC_MSG_TYPE_M2;
     // enrolee_nonce and registrar_nonce are set in autoconfig_wsc_calculate_keys()
     // public_key is set in autoconfig_wsc_calculate_keys()
@@ -666,7 +666,7 @@ bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
     if (!autoconfig_wsc_add_m2_encrypted_settings(m2_cfg, config_data, authkey, keywrapkey))
         return false;
 
-    auto m2 = std::dynamic_pointer_cast<WSC::m2>(WSC::AttrList::create(*tlv, m2_cfg));
+    auto m2 = WSC::m2::create(*tlv, m2_cfg);
     if (!m2)
         return false;
 
@@ -696,7 +696,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
         LOG(ERROR) << "getClass<ieee1905_1::tlvWsc> failed";
         return false;
     }
-    auto m1 = std::dynamic_pointer_cast<WSC::m1>(WSC::AttrList::parse(*tlvWsc));
+    auto m1 = WSC::m1::parse(*tlvWsc);
     if (!m1) {
         LOG(INFO) << "Not a valid M1 - Ignoring WSC CMDU";
         return false;

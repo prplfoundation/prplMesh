@@ -15,11 +15,34 @@ namespace WSC {
 
 class m2 : public AttrList {
 public:
+    struct config {
+        eWscMessageType msg_type;
+        uint8_t uuid_e[WSC_UUID_LENGTH];
+        uint8_t uuid_r[WSC_UUID_LENGTH];
+        sMacAddr mac;
+        uint8_t enrollee_nonce[WSC_NONCE_LENGTH];
+        uint8_t registrar_nonce[WSC_NONCE_LENGTH];
+        uint8_t pub_key[WSC_PUBLIC_KEY_LENGTH];
+        uint16_t encr_type_flags;
+        uint16_t auth_type_flags;
+        std::string manufacturer;
+        std::string model_name;
+        std::string model_number;
+        std::string serial_number;
+        uint16_t primary_dev_type_id;
+        std::string device_name;
+        eWscRfBands bands;
+        std::vector<uint8_t> encrypted_settings;
+        uint8_t iv[WSC_ENCRYPTED_SETTINGS_IV_LENGTH];
+    };
     m2(uint8_t *buff, size_t buff_len, bool parse) : AttrList(buff, buff_len, parse) {}
     virtual ~m2() = default;
 
-    bool init(const config &cfg) override;
-    bool valid_custom() const override;
+    bool init(const config &cfg);
+    bool init() { return AttrList::init(); };
+    bool valid() const override;
+    static std::shared_ptr<m2> create(ieee1905_1::tlvWsc &tlv, const config &cfg);
+    static std::shared_ptr<m2> parse(ieee1905_1::tlvWsc &tlv);
 
     // getters
     eWscMessageType msg_type() const { return getAttr<cWscAttrMessageType>()->msg_type(); };

@@ -3856,7 +3856,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
 
     std::list<WSC::m2> m2_list;
     for (auto tlv : cmdu_rx.getClassList<ieee1905_1::tlvWsc>()) {
-        auto m2 = std::dynamic_pointer_cast<WSC::m2>(WSC::AttrList::parse(*tlv));
+        auto m2 = WSC::m2::parse(*tlv);
         if (!m2) {
             LOG(INFO) << "Not a valid M2 - Ignoring WSC CMDU";
             continue;
@@ -4523,7 +4523,7 @@ bool slave_thread::autoconfig_wsc_add_m1()
         tlv->getBuffRemainingBytes() - ieee1905_1::tlvEndOfMessage::get_initial_size();
     tlv->alloc_payload(payload_length);
 
-    WSC::config cfg;
+    WSC::m1::config cfg;
     cfg.msg_type = WSC::eWscMessageType::WSC_MSG_TYPE_M1;
     cfg.mac      = network_utils::mac_from_string(backhaul_params.bridge_mac);
     dh           = std::make_unique<mapf::encryption::diffie_hellman>();
@@ -4539,7 +4539,7 @@ bool slave_thread::autoconfig_wsc_add_m1()
     cfg.primary_dev_type_id = WSC::WSC_DEV_NETWORK_INFRA_AP;
     cfg.device_name         = "prplmesh-agent";
     cfg.bands       = hostap_params.iface_is_5ghz ? WSC::WSC_RF_BAND_5GHZ : WSC::WSC_RF_BAND_2GHZ;
-    auto attributes = WSC::AttrList::create(*tlv, cfg);
+    auto attributes = WSC::m1::create(*tlv, cfg);
     if (!attributes)
         return false;
 
