@@ -188,10 +188,6 @@ bool m2::valid_custom() const
         TLVF_LOG(ERROR) << "getAttr<cWscAttrRegistrarNonce> failed";
         return false;
     }
-    if (!getAttr<cWscAttrVersion2>()) {
-        TLVF_LOG(ERROR) << "getAttr<cWscAttrVersion2> failed";
-        return false;
-    }
     if (!getAttr<cWscAttrEncryptedSettings>()) {
         TLVF_LOG(ERROR) << "getAttr<cWscAttrEncryptedSettings> failed";
         return false;
@@ -200,5 +196,5 @@ bool m2::valid_custom() const
         TLVF_LOG(ERROR) << "getAttr<cWscAttrAuthenticator> failed";
         return false;
     }
-    return false;
+    return true;
 }
