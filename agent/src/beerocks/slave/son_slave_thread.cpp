@@ -3217,7 +3217,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             LOG(ERROR) << "Failed adding WSC M1 TLV";
             return false;
         }
-
+#if 0
         auto notification =
             message_com::add_vs_tlv<beerocks_message::cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION>(
                 cmdu_tx);
@@ -3294,7 +3294,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
 
         // Channel Selection Params
         notification->cs_params() = hostap_cs_params;
-
+#endif
         send_cmdu_to_controller(cmdu_tx);
         LOG(DEBUG) << "send SLAVE_JOINED_NOTIFICATION Size=" << int(cmdu_tx.getMessageLength());
 
