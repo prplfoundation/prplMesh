@@ -453,16 +453,15 @@ test_client_steering_dummy() {
 test_client_steering_policy() {
     status "test client steering policy"
     check_error=0
-    rm /tmp/catch
 
     dbg "Send client steering policy to agent 1"
     check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8003,tlv_type,0x89,tlv_length\
-,0x000C,tlv_value,{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}" > /tmp/catch
+,0x000C,tlv_value,{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}" $redirect
     sleep 1
-    MID1_STR=$(grep -Po "(?<=mid,0x).*[^\s]" /tmp/catch)
+    MID1_STR=$(echo "$capi_command_reply" | grep -Po "(?<=mid,0x).*[^\s]")
     dbg "Confirming client steering policy has been received on agent"
     
-    check docker exec repeater1 sh -c 'grep -i -q "MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log > /tmp/catch'
+    check_log repeater1 agent_wlan0 "MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE"
     sleep 1
     dbg "Confirming client steering policy ack message has been received on the controller"
     check_log gateway controller "ACK_MESSAGE, mid=$MID1_STR"
