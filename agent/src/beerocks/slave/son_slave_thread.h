@@ -55,6 +55,7 @@ public:
         beerocks::eIfaceType hostap_iface_type;
         int hostap_ant_gain;
         std::string radio_identifier; //mAP RUID
+        bool no_vendor_specific;
     } sSlaveConfig;
 
     typedef struct {

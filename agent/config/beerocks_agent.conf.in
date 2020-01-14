@@ -19,6 +19,7 @@ bridge_iface=@BEEROCKS_BRIDGE_IFACE@
 enable_system_hang_test=0 # 0 - disabled
 enable_son_slaves_watchdog=0 # 0 - disabled
 debug_disable_arp=@BEEROCKS_ENABLE_ARP_MONITOR@
+no_vendor_specific=0 # 0 - disabled
 
 [backhaul]
 backhaul_preferred_bssid=
