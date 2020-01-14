@@ -1770,7 +1770,12 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
         return false;
     }
 
-    if (!tlvSupportedService->alloc_supported_service_list()) {
+    size_t number_of_supported_services = 1;
+    if (local_master) {
+        number_of_supported_services++;
+    }
+
+    if (!tlvSupportedService->alloc_supported_service_list(number_of_supported_services)) {
         LOG(ERROR) << "alloc_supported_service_list failed";
         return false;
     }
@@ -1782,7 +1787,18 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
     }
 
     std::get<1>(supportedServiceTuple) =
-        wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER;
+        wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_AGENT;
+
+    if (local_master) {
+        auto supportedServiceTuple = tlvSupportedService->supported_service_list(1);
+        if (!std::get<0>(supportedServiceTuple)) {
+            LOG(ERROR) << "Failed accessing supported_service_list";
+            return false;
+        }
+
+        std::get<1>(supportedServiceTuple) =
+            wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER;
+    }
 
     // TODO: the Operational BSS and Associated Clients TLVs are temporary dummies.
     // later to be updated by real platfrom data from bpl
