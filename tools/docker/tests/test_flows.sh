@@ -16,7 +16,7 @@
 ALL_TESTS="optimal_path_dummy topology initial_ap_config ap_config_renew ap_config_bss_tear_down channel_selection
            ap_capability_query client_capability_query combined_infra_metrics
            client_steering_mandate client_steering_dummy client_association_dummy client_steering_policy client_association
-           higher_layer_data_payload_trigger higher_layer_data_payload"
+           higher_layer_data_payload_trigger"
 
 scriptdir="$(cd "${0%/*}"; pwd)"
 rootdir="${scriptdir%/*/*/*}"
@@ -495,10 +495,6 @@ test_higher_layer_data_payload_trigger() {
     return $check_error
 }
 
-test_higher_layer_data_payload() {
-    err "higher_layer_data_payload not implemented yet."
-    return 0
-}
 test_topology() {
     status "test topology query"
     check_error=0
@@ -507,6 +503,7 @@ test_topology() {
     check_log repeater1 agent "TOPOLOGY_QUERY_MESSAGE"
     return $check_error
 }
+
 test_init() {
     status "test initialization"
 
@@ -572,7 +569,6 @@ usage() {
     echo "      client_capability_query - Client Capability info reporting test"
     echo "      combined_infra_metrics - Combined Infrastructure Metrics test"
     echo "      higher_layer_data_payload_trigger - Higher layer data payload over 1905 trigger test"
-    echo "      higher_layer_data_payload - Higher layer data payload over 1905 test"
 }
 main() {
     OPTS=`getopt -o 'htvs' --long help,tcpdump,verbose,skip-init,stop-on-failure -n 'parse-options' -- "$@"`
