@@ -272,10 +272,10 @@ wait_for_message() {
     container=$2
     file=$3
     msg=$4
+    command="grep -q '$msg' '$rootdir/logs/$container/$file'"
     for wait in $(seq 1 $timeout); do
         sleep 1
-        command="docker exec -it $container grep -i -q "$msg" /tmp/$USER/beerocks/logs/$file"
-        if docker exec -it $container grep -i -q "$msg" "/tmp/$USER/beerocks/logs/"$file; then
+        if eval $command; then
             dbg "OK after $wait $command"
             found=1
             break
