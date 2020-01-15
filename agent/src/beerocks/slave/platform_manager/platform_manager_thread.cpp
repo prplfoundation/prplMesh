@@ -282,6 +282,21 @@ std::string extern_query_db(std::string parameter)
     return ret;
 }
 
+static std::string get_sta_iface(const std::string &hostap_iface)
+{
+    char sta_iface_str[BPL_IFNAME_LEN];
+    if (bpl::cfg_get_sta_iface(hostap_iface.c_str(), sta_iface_str) < 0) {
+        LOG(DEBUG) << "failed to read sta_iface for slave ";
+        return std::string();
+    }
+    auto sta_iface = std::string(sta_iface_str);
+    if (!network_utils::linux_iface_exists(sta_iface)) {
+        LOG(DEBUG) << "sta iface " << sta_iface << " does not exist, clearing it from config";
+        return std::string();
+    }
+    return sta_iface;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
