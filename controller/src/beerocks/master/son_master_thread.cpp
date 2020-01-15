@@ -876,7 +876,7 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(const std::string
                 continue;
             }
 
-            LOG(INFO) << "ruid=" << network_utils::mac_to_string(ruid);
+            LOG(INFO) << "ruid=" << ruid;
             LOG(INFO) << "selected_operating_class=" << std::dec << int(operating_class);
             LOG(INFO) << "selected_channel=" << int(*channel_rx);
 
@@ -1026,8 +1026,7 @@ bool master_thread::handle_cmdu_1905_channel_selection_response(const std::strin
         auto response_code = channel_selection_response_tlv->response_code();
 
         LOG(DEBUG)
-            << "channel selection response from ruid=" << network_utils::mac_to_string(ruid)
-            << ", response_code="
+            << "channel selection response from ruid=" << ruid << ", response_code="
             << ([](const wfa_map::tlvChannelSelectionResponse::eResponseCode &response_code) {
                    std::string ret_str;
                    switch (response_code) {
@@ -1063,29 +1062,25 @@ static void print_link_metric_map(
 {
     LOG(DEBUG) << "Printing Link Metrics data map";
     for (auto const &pair_agent : link_metric_data) {
-        LOG(DEBUG) << "  sent from al_mac= " << network_utils::mac_to_string(pair_agent.first)
-                   << std::endl;
+        LOG(DEBUG) << "  sent from al_mac= " << pair_agent.first << std::endl;
 
         for (auto const &pair_neighbor : pair_agent.second) {
-            LOG(DEBUG) << "  reporting neighbor al_mac= "
-                       << network_utils::mac_to_string(pair_neighbor.first) << std::endl;
+            LOG(DEBUG) << "  reporting neighbor al_mac= " << pair_neighbor.first << std::endl;
 
             auto &vrx = pair_neighbor.second.receiverLinkMetrics;
             for (unsigned int i = 0; i < vrx.size(); ++i) {
-                LOG(DEBUG) << "  rx interface metric data # " << i << "  neighbor interface MAC:"
-                           << network_utils::mac_to_string(vrx[i].neighbor_interface_mac)
-                           << "  receiving al_mac:"
-                           << network_utils::mac_to_string(vrx[i].rc_interface_mac)
+                LOG(DEBUG) << "  rx interface metric data # " << i
+                           << "  neighbor interface MAC:" << vrx[i].neighbor_interface_mac
+                           << "  receiving al_mac:" << vrx[i].rc_interface_mac
                            << "  rssi= " << std::hex << int(vrx[i].link_metric_info.rssi_db)
                            << std::endl;
             }
 
             auto &vtx = pair_neighbor.second.transmitterLinkMetrics;
             for (unsigned int i = 0; i < vtx.size(); i++) {
-                LOG(DEBUG) << "  tx interface metric data # " << i << "  neighbor interface MAC:"
-                           << network_utils::mac_to_string(vtx[i].neighbor_interface_mac)
-                           << "  receiving al_mac:"
-                           << network_utils::mac_to_string(vtx[i].rc_interface_mac)
+                LOG(DEBUG) << "  tx interface metric data # " << i
+                           << "  neighbor interface MAC:" << vtx[i].neighbor_interface_mac
+                           << "  receiving al_mac:" << vtx[i].rc_interface_mac
                            << "  phy_rate= " << std::hex << int(vtx[i].link_metric_info.phy_rate)
                            << std::endl;
             }
@@ -1100,8 +1095,7 @@ print_ap_metric_map(std::unordered_map<sMacAddr, son::node::ap_metrics_data> &ap
     for (auto const &pair_agent : ap_metric_data) {
         auto len = pair_agent.second.estimated_service_info_fields.size();
         LOG(DEBUG) << std::endl
-                   << "  Ap Metrics from agent with bssid= "
-                   << network_utils::mac_to_string(pair_agent.first) << std::endl
+                   << "  Ap Metrics from agent with bssid= " << pair_agent.first << std::endl
                    << "  channel_utilization =" << int(pair_agent.second.channel_utilization)
                    << std::endl
                    << "  number_of_stas_currently_associated="
@@ -1159,8 +1153,8 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
             old_link_metrics_removed = true;
         }
 
-        LOG(DEBUG) << "recieved  tlvTransmitterLinkMetric from al_mac ="
-                   << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
+        LOG(DEBUG) << "recieved  tlvTransmitterLinkMetric from al_mac =" << reporting_agent_al_mac
+                   << std::endl
                    << "reported  al_mac ="
                    << network_utils::mac_to_string(TxLinkMetricData->neighbor_al_mac())
                    << std::endl;
@@ -1180,8 +1174,8 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
 
     if (reporting_agent_al_mac != network_utils::ZERO_MAC) {
         if (reporting_agent_al_mac != RxLinkMetricData->reporter_al_mac()) {
-            LOG(ERROR) << "TLV_RECEIVER_LINK_METRIC reporter al_mac ="
-                       << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
+            LOG(ERROR) << "TLV_RECEIVER_LINK_METRIC reporter al_mac =" << reporting_agent_al_mac
+                       << std::endl
                        << " and TLV_TRANSMITTER_LINK_METRIC reporter al_mac ="
                        << network_utils::mac_to_string(RxLinkMetricData->reporter_al_mac())
                        << std::endl
@@ -1190,8 +1184,8 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
         }
     }
 
-    LOG(DEBUG) << "recieved tlvReceiverLinkMetric from al_mac="
-               << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
+    LOG(DEBUG) << "recieved tlvReceiverLinkMetric from al_mac=" << reporting_agent_al_mac
+               << std::endl
                << "reported  al_mac ="
                << network_utils::mac_to_string(RxLinkMetricData->neighbor_al_mac()) << std::endl;
 
@@ -1204,7 +1198,7 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
     link_metric_data[reporting_agent_al_mac][reporting_agent_al_mac] = new_link_metric_data;
 
     LOG(DEBUG) << " Added metric data from "
-               << " al_mac = " << network_utils::mac_to_string(reporting_agent_al_mac) << std::endl
+               << " al_mac = " << reporting_agent_al_mac << std::endl
                << std::endl;
 
     print_link_metric_map(link_metric_data);
@@ -1335,8 +1329,7 @@ bool master_thread::handle_cmdu_1905_ap_metric_response(const std::string &src_m
         //parse tx_ap_metric_data
         sMacAddr reporting_agent_bssid = ap_metric_tlv->bssid();
 
-        LOG(DEBUG) << "recieved tlvApMetric from BSSID ="
-                   << network_utils::mac_to_string(reporting_agent_bssid);
+        LOG(DEBUG) << "recieved tlvApMetric from BSSID =" << reporting_agent_bssid;
 
         //fill tx data from TLV
         if (!ap_metric_data[reporting_agent_bssid].add_ap_metric_data(ap_metric_tlv)) {
@@ -1361,8 +1354,8 @@ bool master_thread::handle_cmdu_1905_operating_channel_report(const std::string 
         auto &ruid    = operating_channel_report_tlv->radio_uid();
         auto tx_power = operating_channel_report_tlv->current_transmit_power();
 
-        LOG(INFO) << "operating channel report, ruid=" << network_utils::mac_to_string(ruid)
-                  << ", tx_power=" << std::dec << int(tx_power);
+        LOG(INFO) << "operating channel report, ruid=" << ruid << ", tx_power=" << std::dec
+                  << int(tx_power);
 
         auto operating_classes_list_length =
             operating_channel_report_tlv->operating_classes_list_length();

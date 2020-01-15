@@ -1279,7 +1279,7 @@ bool main_thread::handle_arp_monitor()
 
         // LOG(DEBUG) << "Ignoring ARP from: "
         //            << network_utils::ipv4_to_string(entry.ip) << " ("
-        //            << network_utils::mac_to_string(entry.mac) << ")"
+        //            << entry.mac << ")"
         //            << ", state: " << int(entry.state)
         //            << ", type: " << int(entry.type);
 

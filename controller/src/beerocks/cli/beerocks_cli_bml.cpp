@@ -130,7 +130,7 @@ static void bml_utils_dump_conn_map(
     for (auto it = range.first; it != range.second; it++) {
         auto node = it->second;
 
-        // ss << "***" << " node mac: " << network_utils::mac_to_string(node->mac) << "***" << std::endl;
+        // ss << "***" << " node mac: " << node->mac << "***" << std::endl;
 
         // CLIENT
         if (node->type == BML_NODE_TYPE_CLIENT) {
@@ -246,13 +246,13 @@ static void steering_set_group_string_to_struct(const std::string &str_cfg_2,
     std::copy_n(cfg2.bssid, sizeof(sMacAddr::oct), bssid2.oct);
     std::copy_n(cfg5.bssid, sizeof(sMacAddr::oct), bssid5.oct);
 
-    std::cout << "cfg2.bssid = " << network_utils::mac_to_string(bssid2) << std::endl
+    std::cout << "cfg2.bssid = " << bssid2 << std::endl
               << "cfg2.utilCheckIntervalSec = " << cfg2.utilCheckIntervalSec << std::endl
               << "cfg2.utilAvgCount = " << cfg2.utilAvgCount << std::endl
               << "cfg2.inactCheckIntervalSec = " << cfg2.inactCheckIntervalSec << std::endl
               << "cfg2.inactCheckThresholdSec = " << cfg2.inactCheckThresholdSec << std::endl
               << "___________________________________________________" << std::endl
-              << "cfg5.bssid = " << network_utils::mac_to_string(bssid5) << std::endl
+              << "cfg5.bssid = " << bssid5 << std::endl
               << "cfg5.utilCheckIntervalSec = " << cfg5.utilCheckIntervalSec << std::endl
               << "cfg5.utilAvgCount = " << cfg5.utilAvgCount << std::endl
               << "cfg5.inactCheckIntervalSec = " << cfg5.inactCheckIntervalSec << std::endl

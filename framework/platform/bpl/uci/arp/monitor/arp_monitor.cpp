@@ -516,7 +516,7 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY &sArpMonData)
     std::copy_n(pArpHeader->sender_ip, sizeof(sArpMonData.ip), sArpMonData.ip);
 
     //LOG(DEBUG) << "ARP Response - IP: " << network_utils::ipv4_to_string(sArpMonData.ipv4)
-    //           << ", MAC: " << network_utils::mac_to_string(sArpMonData.mac) << " task_id:" << iTaskID;
+    //           << ", MAC: " << sArpMonData.mac << " task_id:" << iTaskID;
 
     return iTaskID;
 }
@@ -658,11 +658,11 @@ void arp_monitor::print_arp_table()
         // uint8_t mac[6];
         // get_mac_for_ip(neigh.ip, mac);
         // LOG(DEBUG) << "MAC for IP: " << network_utils::ipv4_to_string(neigh.ip)
-        //            << " --> " << network_utils::mac_to_string(mac);
+        //            << " --> " << mac;
 
         // uint8_t ip[4];
         // get_ip_for_mac(neigh.mac, ip);
-        // LOG(DEBUG) << "IP for MAC: " << network_utils::mac_to_string(neigh.mac)
+        // LOG(DEBUG) << "IP for MAC: " << neigh.mac
         //            << " --> " << network_utils::ipv4_to_string(ip);
     }
 }
