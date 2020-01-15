@@ -456,6 +456,17 @@ int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_noti
  */
 int cfg_get_administrator_credentials(char pass[BPL_USER_PASS_LEN]);
 
+/**
+ * Returns the STA interface for the specified radio id.
+ *
+ * @param [in] iface Interface name for the requested parameters.
+ * @param [out] sta_iface name of STA interface (up to 32 bytes in length).
+ *
+ * @return 0 Success.
+ * @return -1 Error, or no sta_iface is configured.
+ */
+int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAME_LEN]);
+
 } // namespace bpl
 } // namespace beerocks
 
