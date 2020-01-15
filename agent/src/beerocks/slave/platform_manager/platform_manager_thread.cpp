@@ -330,21 +330,6 @@ main_thread::main_thread(config_file::sConfigSlave config_, logging &logger_)
         ap_ifaces.insert(config.hostap_iface[j]);
         i++;
     }
-    for (int j = 0; j < IRE_MAX_SLAVES && i < BPL_NUM_OF_INTERFACES; ++j) {
-        if (config.sta_iface[j].empty())
-            continue;
-
-        auto status = std::make_shared<slave_iface_status>(i, beerocks::eRadioStatus::INVALID, now);
-        if (!status) {
-            LOG(ERROR) << "failed to allocate shared pointer, i=" << i;
-            continue;
-        }
-
-        string_utils::copy_string(bpl_iface_status.ifname[i], config.sta_iface[j].c_str(),
-                                  BPL_IFNAME_LEN);
-        bpl_iface_status_map[config.sta_iface[j]] = status;
-        i++;
-    }
 
     auto status = std::make_shared<slave_iface_status>(i, beerocks::eRadioStatus::INVALID, now);
     if (!status) {
@@ -501,6 +486,27 @@ bool main_thread::init()
     if (bpl::bpl_init() < 0) {
         LOG(ERROR) << "Failed to initialize BPL!";
         return (false);
+    }
+
+    int i    = 0;
+    auto now = std::chrono::steady_clock::now();
+    for (int slave_num = 0; slave_num < IRE_MAX_SLAVES && i < BPL_NUM_OF_INTERFACES; ++slave_num) {
+
+        config.sta_iface[slave_num] = get_sta_iface(config.hostap_iface[slave_num]);
+
+        if (config.sta_iface[slave_num].empty())
+            continue;
+
+        auto status = std::make_shared<slave_iface_status>(i, beerocks::eRadioStatus::INVALID, now);
+        if (!status) {
+            LOG(ERROR) << "failed to allocate shared pointer, i=" << i;
+            continue;
+        }
+
+        string_utils::copy_string(bpl_iface_status.ifname[i], config.sta_iface[slave_num].c_str(),
+                                  BPL_IFNAME_LEN);
+        bpl_iface_status_map[config.sta_iface[slave_num]] = status;
+        i++;
     }
 
     // Bridge & Backhaul interface
