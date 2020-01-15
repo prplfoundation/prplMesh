@@ -30,7 +30,6 @@ radio_identifier=00:00:00:00:00:00
 hostap_iface_type=WIFI_INTEL
 hostap_iface=@BEEROCKS_WLAN1_IFACE@
 hostap_ant_gain=0
-sta_iface=#wlan1  <-- 2.4G station has been disabled due to GEN4 instability 
 enable_repeater_mode=@BEEROCKS_REPEATER_MODE@
 
 [agent1]
@@ -38,14 +37,12 @@ radio_identifier=00:00:00:00:00:02
 hostap_iface_type=WIFI_INTEL
 hostap_iface=@BEEROCKS_WLAN2_IFACE@
 hostap_ant_gain=0
-sta_iface=#wlan3
 enable_repeater_mode=0
 
 #[agent2]
 #hostap_iface_type=WIFI_INTEL
 #hostap_iface=@BEEROCKS_WLAN3_IFACE@
 #hostap_ant_gain=0
-#sta_iface=wlan5
 #enable_repeater_mode=0
 #sta_iface_filter_low=1
 
