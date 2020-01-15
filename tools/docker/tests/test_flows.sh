@@ -128,7 +128,8 @@ test_ap_config_renew() {
     check_log repeater1 agent_wlan0 "Received credentials for ssid: Multi-AP-24G-2 .* bss_type: 1"
     check_log repeater1 agent_wlan2 "ssid: .* teardown"
 
-    send_CAPI_command repeater1 "dev_get_parameter,program,map,ruid,0x000000000000,ssid,Multi-AP-24G-1,parameter,macaddr"
+    mac_agent1_wlan0_hex=0x$(echo $mac_agent1_wlan0 | tr -d :)
+    send_CAPI_command repeater1 "dev_get_parameter,program,map,ruid,${mac_agent1_wlan0_hex},ssid,Multi-AP-24G-1,parameter,macaddr"
     check [ "$capi_command_reply" = "status,COMPLETE,macaddr,$mac_agent1_wlan0" ];
 
     return $check_error
