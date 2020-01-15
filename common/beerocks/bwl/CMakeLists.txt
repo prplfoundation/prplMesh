@@ -45,7 +45,6 @@ if(BWL_TYPE STREQUAL "DWPAL")
     include_directories(
         ${HOSTAPD_DIR}/src/drivers
         ${PLATFORM_BUILD_DIR}/iwlwav-iw-4.14
-        ${PLATFORM_INCLUDE_DIR}/libnl3
     )
 
     file(GLOB bwl_platform_sources
@@ -54,6 +53,8 @@ if(BWL_TYPE STREQUAL "DWPAL")
     )
 
     find_package(dwpal REQUIRED)
+    find_package(nl-3 REQUIRED)
+    find_package(nl-genl-3 REQUIRED)
     list(APPEND BWL_LIBS dwpal nl-3 nl-genl-3)
 
     # safec library can come from either libsafec or slibc
