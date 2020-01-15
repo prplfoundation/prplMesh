@@ -297,14 +297,6 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
     std::string pid_file_path =
         beerocks_slave_conf.temp_path + "pid/" + base_slave_name; // for file touching
 
-    // Threads
-    std::set<std::string> slave_sta_ifaces;
-    for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
-        if (!beerocks_slave_conf.sta_iface[slave_num].empty()) {
-            slave_sta_ifaces.insert(beerocks_slave_conf.sta_iface[slave_num]);
-        }
-    }
-
     std::set<std::string> slave_ap_ifaces;
     for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
         if (!beerocks_slave_conf.hostap_iface[slave_num].empty()) {
@@ -318,6 +310,14 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
     if (platform_mgr.init()) {
         // read the number of failures allowed before stopping agent from platform configuration
         int stop_on_failure_attempts = beerocks::bpl::cfg_get_stop_on_failure_attempts();
+
+        // The platform manager updates the beerocks_slave_conf.sta_iface in the init stage
+        std::set<std::string> slave_sta_ifaces;
+        for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
+            if (!beerocks_slave_conf.sta_iface[slave_num].empty()) {
+                slave_sta_ifaces.insert(beerocks_slave_conf.sta_iface[slave_num]);
+            }
+        }
 
         beerocks::backhaul_manager backhaul_mgr(beerocks_slave_conf, slave_ap_ifaces,
                                                 slave_sta_ifaces, stop_on_failure_attempts);
