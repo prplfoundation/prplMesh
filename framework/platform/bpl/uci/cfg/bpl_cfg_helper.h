@@ -38,6 +38,19 @@ int cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex);
 int cfg_get_prplmesh_param(const std::string &param, char *buf, size_t buf_len);
 
 /**
+ * Returns the value of requested param from DB for the specified radio
+ *
+ * @param [in] radio_id prplmesh radio id
+ * @param [in] param prplmesh param key string
+ * @param [out] buf buffer to get value of requested param
+ * @param [in]  buf_len buffer length.
+ *
+ * @return 0 on success or -1 on error.
+ **/
+int cfg_get_prplmesh_radio_param(int radio_id, const std::string &radio_param, char *buf,
+                                 size_t buf_len);
+
+/**
  * Returns the value of requested integer type param from DB
  *
  * @param [in] param prplmesh param key string
