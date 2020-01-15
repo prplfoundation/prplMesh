@@ -1809,15 +1809,22 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
         LOG(ERROR) << "addClass wfa_map::tlvApOperationalBSS failed, mid=" << std::hex << (int)mid;
         return false;
     }
-    //add dummy data
-    auto radio_list     = tlvApOperationalBSS->create_radio_list();
-    auto radio_bss_list = radio_list->create_radio_bss_list();
-    radio_bss_list->set_ssid("wlan_0");
-    radio_list->add_radio_bss_list(radio_bss_list);
-    radio_bss_list = radio_list->create_radio_bss_list();
-    radio_bss_list->set_ssid("wlan_2");
-    radio_list->add_radio_bss_list(radio_bss_list);
-    tlvApOperationalBSS->add_radio_list(radio_list);
+
+    for (const auto &vaps_list : m_vaps_map) {
+        auto radio_list         = tlvApOperationalBSS->create_radio_list();
+        radio_list->radio_uid() = vaps_list.first;
+        for (const auto &vap : vaps_list.second.vaps) {
+            if (vap.mac == network_utils::ZERO_MAC)
+                continue;
+            auto radio_bss_list           = radio_list->create_radio_bss_list();
+            radio_bss_list->radio_bssid() = vap.mac;
+            auto ssid =
+                std::string(vap.ssid, strnlen(vap.ssid, beerocks::message::WIFI_SSID_MAX_LENGTH));
+            radio_bss_list->set_ssid(ssid);
+            radio_list->add_radio_bss_list(radio_bss_list);
+        }
+        tlvApOperationalBSS->add_radio_list(radio_list);
+    }
 
     auto tlvAssociatedClients = cmdu_tx.addClass<wfa_map::tlvAssociatedClients>();
     if (!tlvAssociatedClients) {
