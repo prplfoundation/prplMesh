@@ -72,23 +72,23 @@ send_CAPI_command() {
 }
 
 test_initial_ap_config() {
-    status "test initial autoconfig"
+#    status "test initial autoconfig"
 
-    check_error=0
-    check docker exec repeater1 sh -c \
-        'grep -i -q "WSC Global authentication success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec repeater1 sh -c \
-        'grep -i -q "WSC Global authentication success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
-    check docker exec repeater1 sh -c \
-        'grep -i -q "KWA (Key Wrap Auth) success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec repeater1 sh -c \
-        'grep -i -q "KWA (Key Wrap Auth) success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
-    check docker exec repeater1 sh -c \
-        'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
-    check docker exec repeater1 sh -c \
-        'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
-
-    return $check_error
+#     check_error=0
+#     check docker exec repeater1 sh -c \
+#         'grep -i -q "WSC Global authentication success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+#     check docker exec repeater1 sh -c \
+#         'grep -i -q "WSC Global authentication success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+#     check docker exec repeater1 sh -c \
+#         'grep -i -q "KWA (Key Wrap Auth) success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+#     check docker exec repeater1 sh -c \
+#         'grep -i -q "KWA (Key Wrap Auth) success" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+#     check docker exec repeater1 sh -c \
+#         'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+#     check docker exec repeater1 sh -c \
+#         'grep -i -q "Controller configuration (WSC M2 Encrypted Settings)" /tmp/$USER/beerocks/logs/beerocks_agent_wlan2.log'
+    python3 ${rootdir}/tools/docker/tests/run_tests.py
+    return $?
 }
 
 test_ap_config_renew() {
