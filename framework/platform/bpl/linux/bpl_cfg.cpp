@@ -220,5 +220,17 @@ int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_noti
 
 int cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return RETURN_ERR; }
 
+int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAME_LEN])
+{
+    if (iface == NULL || sta_iface == NULL) {
+        MAPF_ERR("cfg_get_sta_iface: invalid input: iface or sta_iface are NULL");
+        return RETURN_ERR;
+    }
+
+    // return empty STA interface name
+    sta_iface[0] = '\0';
+    return RETURN_OK;
+}
+
 } // namespace bpl
 } // namespace beerocks
