@@ -1155,9 +1155,7 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
 
         LOG(DEBUG) << "recieved  tlvTransmitterLinkMetric from al_mac =" << reporting_agent_al_mac
                    << std::endl
-                   << "reported  al_mac ="
-                   << network_utils::mac_to_string(TxLinkMetricData->neighbor_al_mac())
-                   << std::endl;
+                   << "reported  al_mac =" << TxLinkMetricData->neighbor_al_mac() << std::endl;
 
         //fill tx data from TLV
         if (!new_link_metric_data.add_transmitter_link_metric(TxLinkMetricData)) {
@@ -1177,8 +1175,7 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
             LOG(ERROR) << "TLV_RECEIVER_LINK_METRIC reporter al_mac =" << reporting_agent_al_mac
                        << std::endl
                        << " and TLV_TRANSMITTER_LINK_METRIC reporter al_mac ="
-                       << network_utils::mac_to_string(RxLinkMetricData->reporter_al_mac())
-                       << std::endl
+                       << RxLinkMetricData->reporter_al_mac() << std::endl
                        << " not the same";
             return false;
         }
@@ -1186,8 +1183,7 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
 
     LOG(DEBUG) << "recieved tlvReceiverLinkMetric from al_mac=" << reporting_agent_al_mac
                << std::endl
-               << "reported  al_mac ="
-               << network_utils::mac_to_string(RxLinkMetricData->neighbor_al_mac()) << std::endl;
+               << "reported  al_mac =" << RxLinkMetricData->neighbor_al_mac() << std::endl;
 
     //fill rx data from TLV
     if (!new_link_metric_data.add_receiver_link_metric(RxLinkMetricData)) {
@@ -3013,8 +3009,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             DEBUG,
             "beacon response , ID: "
                 << beerocks_header->id() << std::endl
-                << "sta_mac: " << network_utils::mac_to_string(response->params().sta_mac)
-                << std::endl
+                << "sta_mac: " << response->params().sta_mac << std::endl
                 << "measurement_rep_mode: " << (int)response->params().rep_mode << std::endl
                 << "op_class: " << (int)response->params().op_class << std::endl
                 << "channel: "
@@ -3028,7 +3023,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
                 << std::endl
                 << "rcpi: " << (int)response->params().rcpi << std::endl
                 << "rsni: " << (int)response->params().rsni << std::endl
-                << "bssid: " << network_utils::mac_to_string(response->params().bssid)
+                << "bssid: " << response->params().bssid
             //<< std::endl << "ant_id: "               << (int)response->params.ant_id
             //<< std::endl << "tsf: "                  << (int)response->params.parent_tsf
             //<< std::endl << "new_ch_width: "                         << (int)response->params.new_ch_width
@@ -3045,24 +3040,23 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE failed";
             return false;
         }
-        LOG_CLI(DEBUG,
-                "sta channel load response:"
-                    << std::endl
-                    << "sta_mac: " << network_utils::mac_to_string(response->params().sta_mac)
-                    << std::endl
-                    << "measurement_rep_mode: " << (int)response->params().rep_mode << std::endl
-                    << "op_class: " << (int)response->params().op_class << std::endl
-                    << "channel: " << (int)response->params().channel << std::endl
-                    << "start_time: " << (int)response->params().start_time << std::endl
-                    << "duration: " << (int)response->params().duration << std::endl
-                    << "channel_load: " << (int)response->params().channel_load
+        LOG_CLI(DEBUG, "sta channel load response:"
+                           << std::endl
+                           << "sta_mac: " << response->params().sta_mac << std::endl
+                           << "measurement_rep_mode: " << (int)response->params().rep_mode
+                           << std::endl
+                           << "op_class: " << (int)response->params().op_class << std::endl
+                           << "channel: " << (int)response->params().channel << std::endl
+                           << "start_time: " << (int)response->params().start_time << std::endl
+                           << "duration: " << (int)response->params().duration << std::endl
+                           << "channel_load: " << (int)response->params().channel_load
 
-                    << std::endl
-                    << "new_ch_width: " << (int)response->params().new_ch_width << std::endl
-                    << "new_ch_center_freq_seg_0: "
-                    << (int)response->params().new_ch_center_freq_seg_0 << std::endl
-                    << "new_ch_center_freq_seg_1: "
-                    << (int)response->params().new_ch_center_freq_seg_1);
+                           << std::endl
+                           << "new_ch_width: " << (int)response->params().new_ch_width << std::endl
+                           << "new_ch_center_freq_seg_0: "
+                           << (int)response->params().new_ch_center_freq_seg_0 << std::endl
+                           << "new_ch_center_freq_seg_1: "
+                           << (int)response->params().new_ch_center_freq_seg_1);
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE: {
@@ -3082,8 +3076,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         LOG_CLI(DEBUG,
                 "statistics response: "
                     << std::endl
-                    << "sta_mac: " << network_utils::mac_to_string(response->params().sta_mac)
-                    << std::endl
+                    << "sta_mac: " << response->params().sta_mac << std::endl
                     << "measurement_rep_mode: " << (int)response->params().rep_mode << std::endl
                     << "duration: " << (int)response->params().duration << std::endl
                     << "group_identity: " << (int)response->params().group_identity << std::endl
@@ -3106,8 +3099,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         LOG_CLI(DEBUG,
                 "link measurements response: "
                     << std::endl
-                    << "sta_mac: " << network_utils::mac_to_string(response->params().sta_mac)
-                    << std::endl
+                    << "sta_mac: " << response->params().sta_mac << std::endl
                     << "transmit_power: " << (int)response->params().transmit_power << std::endl
                     << "link_margin: " << (int)response->params().link_margin << std::endl
                     << "rx_ant_id: " << (int)response->params().rx_ant_id << std::endl

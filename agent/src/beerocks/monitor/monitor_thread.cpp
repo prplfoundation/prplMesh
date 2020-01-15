@@ -1205,7 +1205,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
         auto hal_data = static_cast<bwl::SBeaconResponse11k *>(data);
         int id        = 0;
         LOG(INFO) << "Received beacon measurement response on BSSID: "
-                  << network_utils::mac_to_string((sMacAddr &)hal_data->bssid)
+                  << (sMacAddr &)hal_data->bssid
                   << ", dialog_token: " << int(hal_data->dialog_token);
 
         // TODO: Can be changed to iterator loop?
@@ -1250,8 +1250,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
                 pending_11k_events.erase(it);
                 LOG(INFO) << "Sending beacon measurement reponse on BSSID: "
-                          << network_utils::mac_to_string(response->params().bssid)
-                          << " to task_id: " << id;
+                          << response->params().bssid << " to task_id: " << id;
 
                 message_com::send_cmdu(slave_socket, cmdu_tx);
                 break;

@@ -438,7 +438,7 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
                                                std::shared_ptr<beerocks_header> beerocks_header)
 {
     // LOG(DEBUG) << "handle_cmdu_control_message(), INTEL_VS: action=" + std::to_string(beerocks_header->action()) + ", action_op=" + std::to_string(beerocks_header->action_op());
-    // LOG(DEBUG) << "received radio_mac=" << network_utils::mac_to_string(beerocks_header->radio_mac()) << ", local radio_mac=" << hostap_params.iface_mac;
+    // LOG(DEBUG) << "received radio_mac=" << beerocks_header->radio_mac() << ", local radio_mac=" << hostap_params.iface_mac;
 
     // to me or not to me, this is the question...
     if (beerocks_header->actionhdr()->radio_mac() != hostap_params.iface_mac) {
@@ -668,8 +668,7 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
             message_com::send_cmdu(monitor_socket, cmdu_tx);
         }
 
-        LOG(INFO) << "rx_rssi measurement request for client mac="
-                  << network_utils::mac_to_string(request_in->params().mac)
+        LOG(INFO) << "rx_rssi measurement request for client mac=" << request_in->params().mac
                   << " ip=" << network_utils::ipv4_to_string(request_in->params().ipv4)
                   << " channel=" << int(request_in->params().channel) << " bandwidth="
                   << utils::convert_bandwidth_to_int(
@@ -1050,8 +1049,7 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         LOG(DEBUG) << std::endl
                    << "remove = " << int(update->params().remove) << std::endl
                    << "steeringGroupIndex = " << update->params().steeringGroupIndex << std::endl
-                   << "bssid = " << network_utils::mac_to_string(update->params().cfg.bssid)
-                   << std::endl
+                   << "bssid = " << update->params().cfg.bssid << std::endl
                    << "utilCheckIntervalSec = " << update->params().cfg.utilCheckIntervalSec
                    << std::endl
                    << "utilAvgCount = " << update->params().cfg.utilAvgCount << std::endl
@@ -1105,11 +1103,8 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
                    << "remove = " << notification_ap_out->params().remove << std::endl
                    << "steeringGroupIndex = " << notification_ap_out->params().steeringGroupIndex
                    << std::endl
-                   << "client_mac = "
-                   << network_utils::mac_to_string(notification_ap_out->params().client_mac)
-                   << std::endl
-                   << "bssid = " << network_utils::mac_to_string(update->params().bssid)
-                   << std::endl
+                   << "client_mac = " << notification_ap_out->params().client_mac << std::endl
+                   << "bssid = " << update->params().bssid << std::endl
                    << "config.snrProbeHWM = " << notification_ap_out->params().config.snrProbeHWM
                    << std::endl
                    << "config.snrProbeLWM = " << notification_ap_out->params().config.snrProbeLWM
@@ -1335,7 +1330,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
         }
 
         LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE mac="
-                   << network_utils::mac_to_string(response_in->params().result.mac)
+                   << response_in->params().result.mac
                    << " rx_rssi=" << int(response_in->params().rx_rssi)
                    << " id=" << int(beerocks_header->id());
 
@@ -1579,7 +1574,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 
         } else {
             LOG(DEBUG) << "ACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION op " << notification->op()
-                       << " mac " << network_utils::mac_to_string(notification->mac())
+                       << " mac " << notification->mac()
                        << " ip = " << network_utils::ipv4_to_string(notification->ipv4());
         }
         break;
@@ -1886,7 +1881,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
         LOG(INFO) << "APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE mac="
-                  << network_utils::mac_to_string(response_in->params().result.mac)
+                  << response_in->params().result.mac
                   << " rx_rssi=" << int(response_in->params().rx_rssi)
                   << " id=" << int(beerocks_header->id());
 
@@ -2399,7 +2394,7 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
             break;
         }
         LOG(INFO) << "ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE mac="
-                  << network_utils::mac_to_string(response_in->params().result.mac)
+                  << response_in->params().result.mac
                   << " rx_rssi=" << int(response_in->params().rx_rssi)
                   << " id=" << int(beerocks_header->id());
 
@@ -3092,8 +3087,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                   message::IFACE_NAME_LENGTH);
 
         // Send the message
-        LOG(DEBUG) << "send ACTION_BACKHAUL_ENABLE for mac "
-                   << network_utils::mac_to_string(bh_enable->iface_mac());
+        LOG(DEBUG) << "send ACTION_BACKHAUL_ENABLE for mac " << bh_enable->iface_mac();
         if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
             slave_reset();
         }
@@ -3808,7 +3802,7 @@ bool slave_thread::handle_autoconfiguration_renew(Socket *sd, ieee1905_1::CmduMe
 
     auto tlvAlMac = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddressType>();
     if (tlvAlMac) {
-        LOG(DEBUG) << "tlvAlMac=" << network_utils::mac_to_string(tlvAlMac->mac());
+        LOG(DEBUG) << "tlvAlMac=" << tlvAlMac->mac();
         // TODO register/update mapping of AL-MAC to interface, cfr. #81
     } else {
         LOG(ERROR) << "tlvAlMac missing - ignoring autconfig renew message";
@@ -3875,7 +3869,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     // Check if the message is for this radio agent by comparing the ruid
     if (network_utils::mac_from_string(config.radio_identifier) != ruid->radio_uid()) {
         LOG(DEBUG) << "not to me - ruid " << config.radio_identifier
-                   << " != " << network_utils::mac_to_string(ruid->radio_uid());
+                   << " != " << ruid->radio_uid();
         return true;
     }
 
@@ -3905,7 +3899,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         LOG(DEBUG) << "Controller configuration (WSC M2 Encrypted Settings)";
         LOG(DEBUG) << "     Manufacturer: " << m2.manufacturer()
                    << ", ssid: " << credentials->ssid_str()
-                   << ", bssid: " << network_utils::mac_to_string(credentials->bssid_attr().data)
+                   << ", bssid: " << credentials->bssid_attr().data
                    << ", authentication_type: " << std::hex
                    << int(credentials->authentication_type_attr().data)
                    << ", encryption_type: " << int(credentials->encryption_type_attr().data)
