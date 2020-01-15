@@ -10,28 +10,29 @@ FROM $image
 
 # Update Software repository
 RUN apt-get update && apt-get install -y \
-	curl \
-	gcc \
-	cmake \
-	ninja-build \
-	binutils \
-	git \
-	autoconf \
-	autogen \
-	libtool \
-	pkg-config \
-	libreadline-dev \
-	libncurses-dev \
-	libssl-dev \
-	libjson-c-dev \
-	libnl-genl-3-dev \
-	libssl-dev \
-	libzmq3-dev \
-	python \
-	python-yaml \
-	python3 \
-	python3-yaml \
-	vim \
+    autoconf \
+    autogen \
+    binutils \
+    clang-format \
+    cmake \
+    curl \
+    gcc \
+    git \
+    libjson-c-dev \
+    libncurses-dev \
+    libnl-genl-3-dev \
+    libreadline-dev \
+    libssl-dev \
+    libssl-dev \
+    libtool \
+    libzmq3-dev \
+    ninja-build \
+    pkg-config \
+    python \
+    python-yaml \
+    python3 \
+    python3-yaml \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["./tools/maptools.py", "build"]
