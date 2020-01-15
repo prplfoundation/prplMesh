@@ -1694,6 +1694,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
             m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(msg->ruid()),
                                                    msg->params());
+
+            m_vaps_map[msg->ruid()] = msg->params();
         }
         break;
     }
