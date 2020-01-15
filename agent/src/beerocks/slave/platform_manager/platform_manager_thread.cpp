@@ -838,8 +838,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             // LOG(DEBUG) << "UINT64 --> MAC: " << network_utils::mac_to_string(
             //     (const uint8_t*)pArpEntry->ip);
 
-            LOG(DEBUG) << "Adding MAC " << network_utils::mac_to_string(request->params().mac)
-                       << " to the ARP list...";
+            LOG(DEBUG) << "Adding MAC " << request->params().mac << " to the ARP list...";
 
             m_mapArpEntries[request->params().mac] = pArpEntry;
         }
@@ -1449,8 +1448,8 @@ bool main_thread::handle_arp_raw()
             : "FRONT";
 
     LOG(DEBUG) << "Discovered IP: " << network_utils::ipv4_to_string(arp_resp->params().ipv4)
-               << " (" << network_utils::mac_to_string(arp_resp->params().mac) << ") on '"
-               << strIface << "' (" << strSource << ")";
+               << " (" << arp_resp->params().mac << ") on '" << strIface << "' (" << strSource
+               << ")";
 
     // Update ARP entry parameters
     auto pArpEntry = m_mapArpEntries.find(arp_resp->params().mac);
@@ -1461,7 +1460,7 @@ bool main_thread::handle_arp_raw()
         pArpEntry->second->last_seen   = std::chrono::steady_clock::now();
     } else {
         // This should not happen since the client is added to the list on query request...
-        LOG(WARNING) << "MAC " << network_utils::mac_to_string(arp_resp->params().mac)
+        LOG(WARNING) << "MAC " << arp_resp->params().mac
                      << " was NOT found in the ARP entries list...";
     }
 
@@ -1469,8 +1468,7 @@ bool main_thread::handle_arp_raw()
     Socket *sd = get_backhaul_socket();
 
     if (sd) {
-        LOG(TRACE) << "ACTION_PLATFORM_ARP_QUERY_RESPONSE mac="
-                   << network_utils::mac_to_string(arp_resp->params().mac)
+        LOG(TRACE) << "ACTION_PLATFORM_ARP_QUERY_RESPONSE mac=" << arp_resp->params().mac
                    << " task_id=" << task_id;
         send_cmdu_safe(sd, cmdu_tx);
     }
@@ -1500,8 +1498,7 @@ void main_thread::arp_entries_cleanup()
 
         // If the client wasn't seen --> erase it
         if (last_seen_duration >= ARP_NOTIF_INTERVAL) {
-            LOG(INFO) << "Removing client with MAC "
-                      << network_utils::mac_to_string((const uint8_t *)&it->first)
+            LOG(INFO) << "Removing client with MAC " << (const uint8_t *)&it->first
                       << " due to inactivity of " << last_seen_duration << " milliseconds.";
 
             it = m_mapArpEntries.erase(it);
