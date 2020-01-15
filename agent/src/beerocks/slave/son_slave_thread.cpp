@@ -438,7 +438,7 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
                                                std::shared_ptr<beerocks_header> beerocks_header)
 {
     // LOG(DEBUG) << "handle_cmdu_control_message(), INTEL_VS: action=" + std::to_string(beerocks_header->action()) + ", action_op=" + std::to_string(beerocks_header->action_op());
-    // LOG(DEBUG) << "received radio_mac=" << network_utils::mac_to_string(beerocks_header->radio_mac()) << ", local radio_mac=" << network_utils::mac_to_string(hostap_params.iface_mac);
+    // LOG(DEBUG) << "received radio_mac=" << network_utils::mac_to_string(beerocks_header->radio_mac()) << ", local radio_mac=" << hostap_params.iface_mac;
 
     // to me or not to me, this is the question...
     if (beerocks_header->actionhdr()->radio_mac() != hostap_params.iface_mac) {
@@ -4323,8 +4323,7 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
 
         const auto &ruid = channel_preference_tlv->radio_uid();
         if (network_utils::mac_to_string(ruid) != config.radio_identifier) {
-            LOG(DEBUG) << "ruid_rx=" << network_utils::mac_to_string(ruid)
-                       << ", son_slave_ruid=" << config.radio_identifier;
+            LOG(DEBUG) << "ruid_rx=" << ruid << ", son_slave_ruid=" << config.radio_identifier;
             continue;
         }
 

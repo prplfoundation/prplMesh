@@ -1389,7 +1389,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 //     << std::endl << "repeats: "              << (int)request->params.repeats
 //     << std::endl << "rand_ival: "            << (int)request->params.rand_ival
 //     << std::endl << "duration: "             << (int)request->params.duration
-//     << std::endl << "sta_mac: "              << network_utils::mac_to_string(request->params.sta_mac)
+//     << std::endl << "sta_mac: "              << request->params.sta_mac
 //     << std::endl << "parallel: "             << (int)request->params.parallel
 //     << std::endl << "enable: "               << (int)request->params.enable
 //     << std::endl << "request: "              << (int)request->params.request
@@ -1414,8 +1414,8 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 //     << std::endl << "repeats: "                          << (int)request->params.repeats
 //     << std::endl << "rand_ival: "                        << (int)request->params.rand_ival
 //     << std::endl << "duration: "                         << (int)request->params.duration
-//     << std::endl << "sta_mac: "                          << network_utils::mac_to_string(request->params.sta_mac)
-//     << std::endl << "bssid: "                            << network_utils::mac_to_string(request->params.bssid)
+//     << std::endl << "sta_mac: "                          << request->params.sta_mac
+//     << std::endl << "bssid: "                            << request->params.bssid
 //     << std::endl << "parallel: "                         << (int)request->params.parallel
 //     << std::endl << "enable: "                           << (int)request->params.enable
 //     << std::endl << "request: "                          << (int)request->params.request
@@ -1442,8 +1442,8 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 //     << std::endl << "repeats: "                                      << (int)request->params.repeats
 //     << std::endl << "rand_ival: "                                    << (int)request->params.rand_ival
 //     << std::endl << "duration: "                                     << (int)request->params.duration
-//     << std::endl << "sta_mac: "                                      << network_utils::mac_to_string(request->params.sta_mac)
-//     << std::endl << "peer_mac_addr: "                                << network_utils::mac_to_string(request->params.peer_mac_addr)
+//     << std::endl << "sta_mac: "                                      << request->params.sta_mac
+//     << std::endl << "peer_mac_addr: "                                << request->params.peer_mac_addr
 //     << std::endl << "parallel: "                                     << (int)request->params.parallel
 //     << std::endl << "enable: "                                       << (int)request->params.enable
 //     << std::endl << "request: "                                      << (int)request->params.request
@@ -1490,7 +1490,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 // void monitor_thread::debug_channel_load_11k_response(message::sACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE* event)
 // {
 //     LOG(DEBUG) << "DATA TEST:"
-//     << std::endl << "sta_mac: "              << network_utils::mac_to_string(event->params.sta_mac)
+//     << std::endl << "sta_mac: "              << event->params.sta_mac
 //     << std::endl << "measurement_rep_mode: " << (int)event->params.rep_mode
 //     << std::endl << "op_class: "             << (int)event->params.op_class
 //     << std::endl << "channel: "              << (int)event->params.channel
@@ -1507,7 +1507,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 // void monitor_thread::debug_beacon_11k_response(message::sACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE* event)
 // {
 //     LOG(DEBUG) << "DATA TEST:"
-//     << std::endl << "sta_mac: "              << network_utils::mac_to_string(event->params.sta_mac)
+//     << std::endl << "sta_mac: "              << event->params.sta_mac
 //     << std::endl << "measurement_rep_mode: " << (int)event->params.rep_mode
 //     << std::endl << "op_class: "             << (int)event->params.op_class
 //     << std::endl << "channel: "              << (int)event->params.channel
@@ -1517,7 +1517,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 //     << std::endl << "frame_type: "           << (int)event->params.frame_type
 //     << std::endl << "rcpi: "                 << (int)event->params.rcpi
 //     << std::endl << "rsni: "                 << (int)event->params.rsni
-//     << std::endl << "bssid: "                << network_utils::mac_to_string(event->params.bssid)
+//     << std::endl << "bssid: "                << event->params.bssid
 //     << std::endl << "ant_id: "               << (int)event->params.ant_id
 //     << std::endl << "tsf: "                  << (int)event->params.parent_tsf
 
@@ -1536,7 +1536,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 //     statistics_group_data.pop_back(); // deletes last comma
 
 //     LOG(DEBUG) << "DATA TEST:"
-//     << std::endl << "sta_mac: "              << network_utils::mac_to_string(event->params.sta_mac)
+//     << std::endl << "sta_mac: "              << event->params.sta_mac
 //     << std::endl << "measurement_rep_mode: " << (int)event->params.rep_mode
 //     << std::endl << "duration: "             << (int)event->params.duration
 //     << std::endl << "group_identity: "       << (int)event->params.group_identity
@@ -1551,7 +1551,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 // void monitor_thread::debug_link_measurements_11k_response(message::sACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE* event)
 // {
 //     LOG(DEBUG) << "DATA TEST:"
-//     << std::endl << "sta_mac: "          << network_utils::mac_to_string(event->params.sta_mac)
+//     << std::endl << "sta_mac: "          << event->params.sta_mac
 //     << std::endl << "transmit_power: "   << (int)event->params.transmit_power
 //     << std::endl << "link_margin: "      << (int)event->params.link_margin
 //     << std::endl << "rx_ant_id: "        << (int)event->params.rx_ant_id

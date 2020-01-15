@@ -1172,7 +1172,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
 
         //TODO EasyMesh SteeringBTMReport should contain source BSSID and target BSSID
         auto msg = static_cast<bwl::sACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE *>(data);
-        LOG(INFO) << "BSS_STEER_RESPONSE client " << network_utils::mac_to_string(msg->params.mac)
+        LOG(INFO) << "BSS_STEER_RESPONSE client " << msg->params.mac
                   << " status_code=" << int(msg->params.status_code);
 
         auto response = message_com::create_vs_message<
@@ -1200,8 +1200,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
 
         auto msg = static_cast<bwl::sACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE *>(data);
 
-        LOG(INFO) << "CLIENT_RX_RSSI_MEASUREMENT_RESPONSE for mac "
-                  << network_utils::mac_to_string(msg->params.result.mac)
+        LOG(INFO) << "CLIENT_RX_RSSI_MEASUREMENT_RESPONSE for mac " << msg->params.result.mac
                   << " id=" << sta_unassociated_rssi_measurement_header_id;
 
         if (sta_unassociated_rssi_measurement_header_id > -1) {
@@ -1244,8 +1243,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
         auto msg =
             static_cast<bwl::sACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION *>(data);
 
-        LOG(INFO) << "CLIENT_SOFTBLOCK_NOTIFICATION for client mac "
-                  << network_utils::mac_to_string(msg->params.client_mac);
+        LOG(INFO) << "CLIENT_SOFTBLOCK_NOTIFICATION for client mac " << msg->params.client_mac;
 
         // Build the response message
         auto notification = message_com::create_vs_message<
@@ -1275,8 +1273,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
         auto msg =
             static_cast<bwl::sACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION *>(data);
 
-        LOG(INFO) << "CLIENT_SOFTBLOCK_NOTIFICATION for client mac "
-                  << network_utils::mac_to_string(msg->params.client_mac);
+        LOG(INFO) << "CLIENT_SOFTBLOCK_NOTIFICATION for client mac " << msg->params.client_mac;
 
         // Build the response message
         auto notification = message_com::create_vs_message<

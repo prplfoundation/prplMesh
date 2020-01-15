@@ -2201,8 +2201,7 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
         auto msg = static_cast<bwl::sACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE *>(data);
 
         LOG(DEBUG) << "ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE for mac "
-                   << network_utils::mac_to_string(msg->params.result.mac)
-                   << " id = " << unassociated_rssi_measurement_header_id;
+                   << msg->params.result.mac << " id = " << unassociated_rssi_measurement_header_id;
 
         if (unassociated_rssi_measurement_header_id > -1) {
             auto response = message_com::create_vs_message<
