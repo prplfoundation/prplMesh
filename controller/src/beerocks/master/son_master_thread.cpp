@@ -1816,6 +1816,9 @@ bool master_thread::handle_intel_slave_join(
         database.set_local_slave_mac(radio_mac);
         LOG(DEBUG) << "local_slave_mac = " << radio_mac;
 #ifdef BEEROCKS_RDKB
+        LOG(DEBUG) << "platform rdkb_extensions_enabled="
+                   << int(notification->platform_settings().rdkb_extensions_enabled);
+
         database.settings_rdkb_extensions(
             notification->platform_settings().rdkb_extensions_enabled);
         if (database.settings_rdkb_extensions()) {
@@ -1826,6 +1829,8 @@ bool master_thread::handle_intel_slave_join(
                     std::make_shared<rdkb_wlan_task>(database, cmdu_tx, tasks);
                 tasks.add_task(new_rdkb_wlan_task);
             }
+        } else {
+            LOG(DEBUG) << "rdkb_extensions is not enabled";
         }
 #endif
         database.setting_certification_mode(notification->platform_settings().certification_mode);
