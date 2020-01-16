@@ -130,7 +130,9 @@ prplmesh_agent_stop() {
 
 prplmesh_delete_logs() {
     echo "deleting logs"
-    rm -rf /tmp/beerocks/logs
+    rm -rf @BEEROCKS_LOG_FILES_PATH@
+
+    # Relevant only for Linux environment
     rm -rf /tmp/${SUDO_USER:-${USER}}/beerocks/logs
 }
 
@@ -171,12 +173,12 @@ stop_function() {
 
 main_agent_operational() {
     pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent" > /dev/null 2>&1 || return 1
-    grep -q 'CONNECTED --> OPERATIONAL' "$1/beerocks_agent.log"
+    grep -q 'CONNECTED --> OPERATIONAL' "$1/beerocks_agent@BEEROCKS_LOG_FILES_SUFFIX@"
 }
 
 radio_agent_operational() {
     pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent -i $2" > /dev/null 2>&1 || return 1
-    grep -q 'goto STATE_OPERATIONAL' "$1/beerocks_agent_$2.log"
+    grep -q 'goto STATE_OPERATIONAL' "$1/beerocks_agent_$2@BEEROCKS_LOG_FILES_SUFFIX@"
 }
 
 report() {
@@ -197,7 +199,7 @@ status_function() {
     pgrep -l local_bus
 
     # check for operational status
-    LOGS_PATH=@TMP_PATH@/logs/
+    LOGS_PATH=@BEEROCKS_LOG_FILES_PATH@
 
     error=0
     report "Main agent operational" main_agent_operational $LOGS_PATH
@@ -205,9 +207,9 @@ status_function() {
     report "@BEEROCKS_WLAN2_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN2_IFACE@
 
     [ "$VERBOSE" = "true" -a $error = 1 ] && {
-        cat $LOGS_PATH/beerocks_agent.log
-        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN1_IFACE@.log
-        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN2_IFACE@.log
+        cat $LOGS_PATH/beerocks_agent@BEEROCKS_LOG_FILES_SUFFIX@
+        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN1_IFACE@@BEEROCKS_LOG_FILES_SUFFIX@
+        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN2_IFACE@@BEEROCKS_LOG_FILES_SUFFIX@
     }
 
     return $error
