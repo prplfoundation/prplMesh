@@ -347,3 +347,40 @@ cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION:
 cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION:
   _type: class 
   params: sSteeringEvAuthFail
+
+################################################
+# MONITOR CHANNEL SCAN REQUESTS
+################################################
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST:
+  _type: class
+  scan_params: sTriggerChannelScanParams
+
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE:
+  _type: class
+  success: uint8_t
+
+################################################
+# MONITOR CHANNEL SCAN NOTIFICATIONS
+################################################
+
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION:
+  _type: class
+  radio_mac: sMacAddr
+
+cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION:
+  _type: class
+  scan_results: sChannelScanResults
+  radio_mac: sMacAddr
+  is_dump:
+    _type: uint8_t
+    _value: 0
+    _comment: 1 - notification contains a result dump, 0 - notification that results are ready
+
+cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION:
+  _type: class
+  reason: uint8_t
+  radio_mac: sMacAddr
+
+cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION:
+  _type: class
+  radio_mac: sMacAddr
