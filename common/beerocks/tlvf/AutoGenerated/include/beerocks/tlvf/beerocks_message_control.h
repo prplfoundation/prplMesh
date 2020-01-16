@@ -1498,6 +1498,139 @@ class cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION : public BaseClass
         sSteeringEvAuthFail* m_params = nullptr;
 };
 
+class cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST : public BaseClass
+{
+    public:
+        cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST();
+
+        static eActionOp_CONTROL get_action_op(){
+            return (eActionOp_CONTROL)(ACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST);
+        }
+        sTriggerChannelScanParams& scan_params();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_CONTROL* m_action_op = nullptr;
+        sTriggerChannelScanParams* m_scan_params = nullptr;
+};
+
+class cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE();
+
+        static eActionOp_CONTROL get_action_op(){
+            return (eActionOp_CONTROL)(ACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE);
+        }
+        uint8_t& success();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_CONTROL* m_action_op = nullptr;
+        uint8_t* m_success = nullptr;
+};
+
+class cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION();
+
+        static eActionOp_CONTROL get_action_op(){
+            return (eActionOp_CONTROL)(ACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION);
+        }
+        sMacAddr& radio_mac();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_CONTROL* m_action_op = nullptr;
+        sMacAddr* m_radio_mac = nullptr;
+};
+
+class cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION();
+
+        static eActionOp_CONTROL get_action_op(){
+            return (eActionOp_CONTROL)(ACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION);
+        }
+        sChannelScanResults& scan_results();
+        sMacAddr& radio_mac();
+        //1 - notification contains a result dump, 0 - notification that results are ready
+        uint8_t& is_dump();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_CONTROL* m_action_op = nullptr;
+        sChannelScanResults* m_scan_results = nullptr;
+        sMacAddr* m_radio_mac = nullptr;
+        uint8_t* m_is_dump = nullptr;
+};
+
+class cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION();
+
+        static eActionOp_CONTROL get_action_op(){
+            return (eActionOp_CONTROL)(ACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION);
+        }
+        uint8_t& reason();
+        sMacAddr& radio_mac();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_CONTROL* m_action_op = nullptr;
+        uint8_t* m_reason = nullptr;
+        sMacAddr* m_radio_mac = nullptr;
+};
+
+class cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION();
+
+        static eActionOp_CONTROL get_action_op(){
+            return (eActionOp_CONTROL)(ACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION);
+        }
+        sMacAddr& radio_mac();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_CONTROL* m_action_op = nullptr;
+        sMacAddr* m_radio_mac = nullptr;
+};
+
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_CONTROL_H_

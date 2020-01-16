@@ -1727,6 +1727,320 @@ class cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST : public BaseClass
         sMacAddr* m_ruid = nullptr;
 };
 
+class cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST);
+        }
+        sMacAddr& radio_mac();
+        sChannelScanRequestParams& params();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        sMacAddr* m_radio_mac = nullptr;
+        sChannelScanRequestParams* m_params = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE);
+        }
+        //0 - Success, Otherwise error according to beerocks_defines:eDcsOpErrCode
+        uint8_t& op_error_code();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        uint8_t* m_op_error_code = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST);
+        }
+        sMacAddr& radio_mac();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        sMacAddr* m_radio_mac = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE);
+        }
+        sChannelScanRequestParams& params();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        sChannelScanRequestParams* m_params = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST);
+        }
+        sMacAddr& radio_mac();
+        uint8_t& isEnable();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        sMacAddr* m_radio_mac = nullptr;
+        uint8_t* m_isEnable = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE);
+        }
+        //0 - Success, Otherwise error according to beerocks_defines:eDcsOpErrCode
+        uint8_t& op_error_code();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        uint8_t* m_op_error_code = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST);
+        }
+        sMacAddr& radio_mac();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        sMacAddr* m_radio_mac = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE);
+        }
+        uint8_t& isEnable();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        uint8_t* m_isEnable = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST);
+        }
+        sTriggerChannelScanParams& scan_params();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        sTriggerChannelScanParams* m_scan_params = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE);
+        }
+        //0 - Success, Otherwise error according to beerocks_defines:eDcsOpErrCode
+        uint8_t& op_error_code();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        uint8_t* m_op_error_code = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST);
+        }
+        sMacAddr& radio_mac();
+        //0 - results for the continuous scan, 1 - results for the single scan
+        uint8_t& scan_mode();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        sMacAddr* m_radio_mac = nullptr;
+        uint8_t* m_scan_mode = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE);
+        }
+        //0 - Success, Otherwise error according to beerocks_defines:eDcsScanErrCode
+        uint8_t& result_status();
+        //0 - Success, Otherwise error according to beerocks_defines:eDcsOpErrCode
+        uint8_t& op_error_code();
+        //0 - Not reached end of response, 1 - reached end of respons
+        uint8_t& last();
+        uint32_t& results_size();
+        std::tuple<bool, sChannelScanResults&> results(size_t idx);
+        bool alloc_results(size_t count = 1);
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        uint8_t* m_result_status = nullptr;
+        uint8_t* m_op_error_code = nullptr;
+        uint8_t* m_last = nullptr;
+        uint32_t* m_results_size = nullptr;
+        sChannelScanResults* m_results = nullptr;
+        size_t m_results_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+};
+
+class cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST);
+        }
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+};
+
+class cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE);
+        }
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+};
+
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_BML_H_
