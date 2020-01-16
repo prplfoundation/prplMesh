@@ -47,7 +47,7 @@ bool db::add_virtual_node(sMacAddr mac, sMacAddr real_node_mac)
     }
 
     /*
-     * TODO 
+     * TODO
      * the regular add_node() function should take care of a situation where the real node
      * already exists and is moved to a different hierarchy
      * it should be able to find its virtual nodes and move them to the appropriate hierarchy as well
@@ -1231,7 +1231,7 @@ std::string db::get_hostap_supported_channels_string(const std::string &radio_ma
  * Currently this function is a wrapper which converts the operating
  * class to a set of supported channels and updates the list of currently
  * supported channels.
- * 
+ *
  * @param mac radio mac
  * @param operating class operating class to add
  * @tx_power transmit power
