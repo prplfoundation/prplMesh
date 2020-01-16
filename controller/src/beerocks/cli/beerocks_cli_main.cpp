@@ -13,6 +13,7 @@
 
 #include <bcl/beerocks_config_file.h>
 #include <bcl/beerocks_defines.h>
+#include <bcl/beerocks_logging.h>
 #include <bcl/beerocks_os_utils.h>
 #include <bcl/beerocks_string_utils.h>
 #include <bcl/beerocks_version.h>
@@ -87,24 +88,6 @@ static void init_signals()
     sigemptyset(&sigint_action.sa_mask);
     sigint_action.sa_flags = 0;
     sigaction(SIGINT, &sigint_action, NULL);
-}
-
-static void init_logger(bool to_standard_output, std::string logfile)
-{
-    el::Configurations defaultConf;
-    if (!logfile.empty()) {
-        std::remove(logfile.c_str());
-    }
-    defaultConf.setToDefault();
-    defaultConf.setGlobally(el::ConfigurationType::MaxLogFileSize, "10000000");
-    defaultConf.setGlobally(el::ConfigurationType::Format,
-                            "%level %datetime{%H:%m:%s} %fbase %line --> %msg");
-    defaultConf.setGlobally(el::ConfigurationType::ToFile, logfile.empty() ? "false" : "true");
-    defaultConf.setGlobally(el::ConfigurationType::Filename, logfile.c_str());
-    defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput,
-                            to_standard_output ? "true" : "false");
-    el::Loggers::addFlag(el::LoggingFlag::StrictLogFileSizeCheck);
-    el::Loggers::reconfigureAllLoggers(defaultConf);
 }
 
 #ifdef HAVE_READLINE
@@ -494,15 +477,13 @@ int main(int argc, char *argv[])
 
     int status_return = 0;
 
-    bool log_stdout =
-        ((beerocks_slave_conf.sLog.stdout_enabled == "true") || (cli_role == CLI_PROXY));
+    // Override standard output to "true" since CLI must print everything to the console
+    beerocks_slave_conf.sLog.stdout_enabled = "true";
 
-    std::string log_file;
-    if (beerocks_slave_conf.sLog.files_enabled == "true") {
-        log_file = beerocks_slave_conf.sLog.files_path + std::string(BEEROCKS_CLI) + ".log";
-    }
+    // Init logger
+    beerocks::logging cli_logger(beerocks_slave_conf.sLog, "beerocks_cli");
+    cli_logger.apply_settings();
 
-    init_logger(log_stdout, log_file);
     switch (cli_role) {
     case CLI_PROXY: {
         cli_tcp_proxy(beerocks_slave_conf.temp_path);
