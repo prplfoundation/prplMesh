@@ -534,16 +534,16 @@ test_init() {
     mac_agent2=$(grep "IRE_BRIDGE" "$connmap" | sed -n 2p | awk '{print $5}' | cut -d ',' -f 1)
     dbg "mac_agent2 = ${mac_agent2}"
 
-    mac_agent1_wlan0=$(grep "RADIO: wlan0" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1)
+    mac_agent1_wlan0=$(docker exec repeater1 ip -o l list dev wlan0 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
     dbg "mac_agent1_wlan0 = ${mac_agent1_wlan0}"
 
-    mac_agent2_wlan0=$(grep "RADIO: wlan0" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1)
+    mac_agent2_wlan0=$(docker exec repeater2 ip -o l list dev wlan0 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
     dbg "mac_agent2_wlan0 = ${mac_agent2_wlan0}"
 
-    mac_agent1_wlan2=$(grep "RADIO: wlan2" "$connmap" | head -1 | awk '{print $4}' | cut -d ',' -f 1)
+    mac_agent1_wlan2=$(docker exec repeater1 ip -o l list dev wlan2 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
     dbg "mac_agent1_wlan2 = ${mac_agent1_wlan2}"
 
-    mac_agent2_wlan2=$(grep "RADIO: wlan2" "$connmap" | sed -n 2p | awk '{print $4}' | cut -d ',' -f 1)
+    mac_agent2_wlan2=$(docker exec repeater2 ip -o l list dev wlan2 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
     dbg "mac_agent2_wlan2 = ${mac_agent2_wlan2}"
 
 }
