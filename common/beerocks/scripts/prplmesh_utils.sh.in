@@ -224,13 +224,16 @@ stop_function() {
     [ "$DELETE_LOGS" = "true" ] && prplmesh_delete_logs
 }
 
+# Note: Apparently on some Linux version space is added to the process name.
+# Therefore added "($|[[:blank:]])" to the end of the regex expression which means the end of the 
+# line ($) or blank character ([[:blank:]])
 main_agent_operational() {
-    pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent" > /dev/null 2>&1 || return 1
+    pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent($|[[:blank:]])" > /dev/null 2>&1 || return 1
     grep -q 'CONNECTED --> OPERATIONAL' "$1/beerocks_agent@BEEROCKS_LOG_FILES_SUFFIX@"
 }
 
 radio_agent_operational() {
-    pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent -i $2" > /dev/null 2>&1 || return 1
+    pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent -i $2($|[[:blank:]])" > /dev/null 2>&1 || return 1
     grep -q 'goto STATE_OPERATIONAL' "$1/beerocks_agent_$2@BEEROCKS_LOG_FILES_SUFFIX@"
 }
 
