@@ -1977,9 +1977,7 @@ bool master_thread::handle_intel_slave_join(
 
         for (unsigned int i = 0; i < message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
             if (cs_new_event->backhaul_scan_measurement_list[i].channel > 0) {
-                LOG(DEBUG) << "mac = "
-                           << network_utils::mac_to_string(
-                                  cs_new_event->backhaul_scan_measurement_list[i].mac)
+                LOG(DEBUG) << "mac = " << cs_new_event->backhaul_scan_measurement_list[i].mac
                            << " channel = "
                            << int(cs_new_event->backhaul_scan_measurement_list[i].channel)
                            << " rssi = "

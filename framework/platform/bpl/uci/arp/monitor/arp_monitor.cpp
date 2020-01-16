@@ -188,7 +188,7 @@ static bool send_arp(std::string iface, std::string dst_ip, std::string src_ip, 
 
     // Send ethernet frame to socket.
     for (int i = 0; i < count; i++) {
-        //LOG_MONITOR(DEBUG) << "ARP to ip=" << dest_ip << " mac=" <<network_utils::mac_to_string(dest_mac);
+        //LOG_MONITOR(DEBUG) << "ARP to ip=" << dest_ip << " mac=" << dest_mac;
         if (sendto(arp_socket, packet_buffer, tx_len, 0, (struct sockaddr *)&sock, sizeof(sock)) <=
             0) {
             LOG(ERROR) << "sendto() failed";

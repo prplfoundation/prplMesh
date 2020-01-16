@@ -1237,9 +1237,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 
             for (unsigned int i = 0; i < message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
                 if (backhaul_params.backhaul_scan_measurement_list[i].channel > 0) {
-                    LOG(DEBUG) << "mac = "
-                               << network_utils::mac_to_string(
-                                      backhaul_params.backhaul_scan_measurement_list[i].mac)
+                    LOG(DEBUG) << "mac = " << backhaul_params.backhaul_scan_measurement_list[i].mac
                                << " channel = "
                                << int(backhaul_params.backhaul_scan_measurement_list[i].channel)
                                << " rssi = "
@@ -3275,9 +3273,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             if (notification->backhaul_params().backhaul_scan_measurement_list[i].channel > 0) {
                 LOG(DEBUG)
                     << "mac = "
-                    << network_utils::mac_to_string(notification->backhaul_params()
-                                                        .backhaul_scan_measurement_list[i]
-                                                        .mac.oct)
+                    << notification->backhaul_params().backhaul_scan_measurement_list[i].mac.oct
                     << " channel = "
                     << int(notification->backhaul_params()
                                .backhaul_scan_measurement_list[i]
@@ -3868,8 +3864,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     }
     // Check if the message is for this radio agent by comparing the ruid
     if (network_utils::mac_from_string(config.radio_identifier) != ruid->radio_uid()) {
-        LOG(DEBUG) << "not to me - ruid " << config.radio_identifier
-                   << " != " << ruid->radio_uid();
+        LOG(DEBUG) << "not to me - ruid " << config.radio_identifier << " != " << ruid->radio_uid();
         return true;
     }
 

@@ -835,9 +835,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             pArpEntry->iface_index = -1;
             pArpEntry->last_seen   = std::chrono::steady_clock::now();
 
-            // LOG(DEBUG) << "UINT64 --> MAC: " << network_utils::mac_to_string(
-            //     (const uint8_t*)pArpEntry->ip);
-
             LOG(DEBUG) << "Adding MAC " << request->params().mac << " to the ARP list...";
 
             m_mapArpEntries[request->params().mac] = pArpEntry;
