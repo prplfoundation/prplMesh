@@ -11,13 +11,13 @@ then
 . /opt/multiap/framework/bpl_err.sh
 fi
 
-BEEROCKS_PATH=/opt/beerocks
+BEEROCKS_PATH="@INSTALL_PATH@"
 
-BEEROCKS_LOG_PATH=/rdklogs/logs
+BEEROCKS_LOG_PATH="@BEEROCKS_LOG_FILES_PATH@"
 
-BEEROCKS_TMP_PATH=/tmp/beerocks
+BEEROCKS_TMP_PATH="@TMP_PATH@"
 
-BEEROCKS_ERROR_HANDLER=$BEEROCKS_PATH/beerocks_error_handler.sh
+BEEROCKS_ERROR_HANDLER=$BEEROCKS_PATH/scripts/beerocks_error_handler.sh
 
 killall_program(){
     PROGRAM_NAME=$1
@@ -53,7 +53,7 @@ do
     sleep $WATCHDOG_CYCLE_SECONDS
     #check beerocks
     for FILE in beerocks_controller beerocks_agent; do
-        BEEROCKS_FILE=$BEEROCKS_PATH/$FILE
+        BEEROCKS_FILE=$BEEROCKS_PATH/bin/$FILE
         PID_FILE=$BEEROCKS_TMP_PATH/pid/$FILE
         if [ -f $BEEROCKS_FILE ] && [ -f $PID_FILE ]; then
             PID=`cat $PID_FILE`
@@ -79,9 +79,9 @@ do
         if [ -f /proc/$PID/exe ] && [ $NOW_EPOCH -gt $FILE_EPOCH_TIMEOUT ]; then
             echo "$0: WARNING [`date`]: Process $PID_FILE detected system slow down!"
             echo "$0: WARNING [`date`]: Process $PID_FILE detected system slow down!" >> $BEEROCKS_LOG_PATH/logs/slow_down.log
-            top -b -n1 >> $BEEROCKS_LOG_PATH/logs/slow_down.log
+            top -b -n1 >> $BEEROCKS_LOG_PATH/slow_down.log
             echo " "
-            df >> $BEEROCKS_LOG_PATH/logs/slow_down.log
+            df >> $BEEROCKS_LOG_PATH/slow_down.log
             echo " "
             PID_STUCK=true
         fi
@@ -91,9 +91,9 @@ do
         let PID_STUCK_RETRIES++
         echo "$0: WARNING [`date`]: Beerocks processes stuck retry count=$PID_STUCK_RETRIES"
         echo "$0: WARNING [`date`]: Beerocks processes stuck retry count=$PID_STUCK_RETRIES"  >> $BEEROCKS_LOG_PATH/logs/slow_down.log
-        top -b -n1 >> $BEEROCKS_LOG_PATH/logs/slow_down.log                                                               
+        top -b -n1 >> $BEEROCKS_LOG_PATH/slow_down.log                                                               
         echo " "                                                                                                     
-        df >> $BEEROCKS_LOG_PATH/logs/slow_down.log
+        df >> $BEEROCKS_LOG_PATH/slow_down.log
         echo " "  
     } || PID_STUCK_RETRIES=0
 

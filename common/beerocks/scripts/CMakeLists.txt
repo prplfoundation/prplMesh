@@ -5,11 +5,16 @@ configure_file(
         @ONLY
         )
 
+configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/beerocks_watchdog.sh.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/beerocks_watchdog.sh"
+        @ONLY
+        )
+
 set(scripts ${CMAKE_CURRENT_BINARY_DIR}/prplmesh_utils.sh)
+
 if (NOT TARGET_PLATFORM STREQUAL "linux")
-list(APPEND scripts beerocks_utils.sh
-    beerocks_endurance_test.sh beerocks_watchdog.sh
-    udhcpc.script.alt)
+list(APPEND scripts ${CMAKE_CURRENT_BINARY_DIR}/beerocks_watchdog.sh)
 endif()
 
 install(PROGRAMS ${scripts} DESTINATION scripts)
