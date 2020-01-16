@@ -362,3 +362,82 @@ cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST:
   _type: class
   al_mac: sMacAddr
   ruid: sMacAddr
+
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST:
+  _type: class
+  radio_mac: sMacAddr
+  params: sChannelScanRequestParams
+
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE:
+  _type: class
+  op_error_code:
+    _type: uint8_t
+    _comment: 0 - Success, Otherwise error according to beerocks_defines:eDcsOpErrCode 
+
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST:
+  _type: class
+  radio_mac: sMacAddr
+
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE:
+  _type: class
+  params: sChannelScanRequestParams
+
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST:
+  _type: class
+  radio_mac: sMacAddr
+  isEnable: uint8_t
+
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE:
+  _type: class
+  op_error_code:
+    _type: uint8_t
+    _comment: 0 - Success, Otherwise error according to beerocks_defines:eDcsOpErrCode
+
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST:
+  _type: class
+  radio_mac: sMacAddr
+
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE:
+  _type: class
+  isEnable: uint8_t
+
+cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST:
+  _type: class
+  scan_params: sTriggerChannelScanParams
+
+cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE:
+  _type: class
+  op_error_code:
+    _type: uint8_t
+    _comment: 0 - Success, Otherwise error according to beerocks_defines:eDcsOpErrCode
+
+cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST:
+  _type: class
+  radio_mac: sMacAddr
+  scan_mode:
+    _type: uint8_t
+    _comment: 0 - results for the continuous scan, 1 - results for the single scan
+
+cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE:
+  _type: class
+  result_status:
+    _type: uint8_t
+    _comment: 0 - Success, Otherwise error according to beerocks_defines:eDcsScanErrCode
+  op_error_code:
+    _type: uint8_t
+    _comment: 0 - Success, Otherwise error according to beerocks_defines:eDcsOpErrCode
+  last:
+    _type: uint8_t
+    _comment: 0 - Not reached end of response, 1 - reached end of respons
+  results_size:
+    _type: uint32_t
+    _length_var: True
+  results:
+    _type: sChannelScanResults
+    _length: [ results_size ]
+
+cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST:
+  _type: class
+
+cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE:
+  _type: class
