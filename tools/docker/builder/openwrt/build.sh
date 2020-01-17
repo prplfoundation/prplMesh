@@ -56,6 +56,12 @@ build_prplmesh() {
 }
 
 main() {
+
+    if ! command -v uuidgen > /dev/null ; then
+        err "You need uuidgen to use this script. Please install it and try again."
+        exit 1
+    fi
+
     OPTS=`getopt -o 'hb:d:io:r:t:v' --long help,build-options:,device:,image,openwrt-version:,openwrt-repository:,tag:,verbose -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
