@@ -5,6 +5,18 @@
   tags:
     - docker
 
+cppcheck:
+  stage: build
+  image: prplfoundationinc/prplmesh-builder:alpine-3.11.3
+  script:
+    # cppcheck runs in the alpine image because every new release brings useful improvements
+    # (the versions from Ubuntu get old too quickly)
+    - tools/docker/static-analysis/cppcheck.sh common
+  artifacts:
+    paths:
+      - cppcheck_results.txt
+    when: always
+
 clang-format:
   extends: .in-prplmesh-builder
   stage: build
