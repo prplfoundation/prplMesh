@@ -268,7 +268,7 @@ status_function() {
         cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN2_IFACE@@BEEROCKS_LOG_FILES_SUFFIX@
     }
 
-    return $error
+    exit $error
 }
 
 usage() {
