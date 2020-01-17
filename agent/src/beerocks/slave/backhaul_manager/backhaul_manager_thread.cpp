@@ -1739,7 +1739,7 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return false;
     }
     case ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE: {
-        return handle_1905_discovery_query(cmdu_rx, src_mac);
+        return handle_1905_topology_query(cmdu_rx, src_mac);
         //LOG(INFO) << "I got the Topology Query message!";
     }
     case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE: {
@@ -1758,20 +1758,20 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
 }
 
 /**
- * @brief Handles 1905 Discovery Query message, currently only prints to the log
- * @param cmdu_rx
+ * @brief Handles 1905 Topology Query message
+ * @param cmdu_rx Received CMDU (containing Topology Query)
+ * @param src_mac MAC address of the message sender
  * @return true on success
  * @return false on failure
  */
-bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                                   const std::string &src_mac)
+bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                  const std::string &src_mac)
 {
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received TOPOLOGY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
     auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE);
     if (!cmdu_tx_header) {
-        LOG(ERROR) << "Failed creating topology discovery response header! mid=" << std::hex
-                   << (int)mid;
+        LOG(ERROR) << "Failed creating topology response header! mid=" << std::hex << (int)mid;
         return false;
     }
 
@@ -1805,7 +1805,7 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
 
     auto supportedServiceTuple = tlvSupportedService->supported_service_list(0);
     if (!std::get<0>(supportedServiceTuple)) {
-        LOG(ERROR) << "Failed accessing supported_service_list";
+        LOG(ERROR) << "Failed accessing supported_service_list(0)";
         return false;
     }
 
@@ -1815,7 +1815,7 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
     if (local_master) {
         auto supportedServiceTuple = tlvSupportedService->supported_service_list(1);
         if (!std::get<0>(supportedServiceTuple)) {
-            LOG(ERROR) << "Failed accessing supported_service_list";
+            LOG(ERROR) << "Failed accessing supported_service_list(1)";
             return false;
         }
 

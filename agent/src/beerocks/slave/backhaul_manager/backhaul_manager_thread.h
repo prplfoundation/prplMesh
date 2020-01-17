@@ -77,8 +77,7 @@ private:
     // 1905 messages handlers
     bool handle_1905_autoconfiguration_response(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                 const std::string &src_mac);
-    bool handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                     const std::string &src_mac);
+    bool handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
     bool handle_1905_higher_layer_data_message(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                const std::string &src_mac);
     bool handle_1905_combined_infrastructure_metrics(ieee1905_1::CmduMessageRx &cmdu_rx,
