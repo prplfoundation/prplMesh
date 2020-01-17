@@ -10,16 +10,20 @@ tlvDeviceInformation:
     _value_const: TLV_DEVICE_INFORMATION
   length: uint16_t
   mac: sMacAddr
-  info_length:
+  local_interface_list_length:
     _type: uint8_t
     _length_var: True
-  info:
-    _type: sInfo
-    _length: [ info_length ]
+  local_interface_list:
+    _type: cLocalInterfaceInfo
+    _length: [ local_interface_list_length ]
 
-sInfo:
-  _type: struct
+cLocalInterfaceInfo:
+  _type: class
   mac: sMacAddr
   media_type: eMediaType
-  media_info_length: uint8_t
-  media_info: eMediaType
+  media_info_length:
+    _type: uint8_t
+    _length_var: True
+  media_info:
+    _type: uint8_t
+    _length: [ media_info_length ]
