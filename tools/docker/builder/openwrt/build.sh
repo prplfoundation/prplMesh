@@ -39,6 +39,7 @@ build_image() {
 }
 
 build_prplmesh() {
+    build_dir="$1"
     container_name="prplmesh-builder-${TARGET_DEVICE}-$(uuidgen)"
     dbg "Container name will be $container_name"
     trap 'docker rm -f $container_name' EXIT
@@ -51,8 +52,8 @@ build_prplmesh() {
            -v "${rootdir}:/home/openwrt/prplMesh_source:ro" \
            "$image_tag" \
            ./build_scripts/build.sh
-
-    docker cp "${container_name}:/home/openwrt/openwrt_sdk/prplmesh-${TARGET}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" .
+    mkdir -p "$build_dir"
+    docker cp "${container_name}:/home/openwrt/openwrt_sdk/prplmesh-${TARGET}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" "$build_dir"
 }
 
 main() {
@@ -145,7 +146,7 @@ main() {
     fi
 
     build_image
-    build_prplmesh
+    build_prplmesh "$rootdir/build/$TARGET_DEVICE"
 
 }
 
