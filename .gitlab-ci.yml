@@ -83,8 +83,8 @@ run-tests:
 .build-for-openwrt:
   stage: build
   script:
-    - cd tools/docker/builder/openwrt
-    - ./build.sh -v -d "$TARGET_DEVICE" -t "prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID" 2>&1 | tee build.log | grep '^make\[[12]\]\|^Step\|^ --->' --color=never --line-buffered
+    - mkdir -p "build/$TARGET_DEVICE"
+    - tools/docker/builder/openwrt/build.sh -v -d "$TARGET_DEVICE" -t "prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID" 2>&1 | tee "build/$TARGET_DEVICE/openwrt-build.log" | grep '^make\[[12]\]\|^Step\|^ --->' --color=never --line-buffered
   after_script:
     # if we're on master, tag the docker image with a persistant tag:
     - |
@@ -96,8 +96,8 @@ run-tests:
     - docker rmi "prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID"
   artifacts:
     paths:
-      - tools/docker/builder/openwrt/*.ipk
-      - tools/docker/builder/openwrt/build.log
+      - "build/$TARGET_DEVICE/*.ipk"
+      - "build/$TARGET_DEVICE/openwrt-build.log"
     when: always
   tags:
     - shell
@@ -111,7 +111,7 @@ run-tests:
     # kill prplmesh on each target to make sure they don't interfere with the test
     - for i in $ALL_TARGETS ; do ssh "$i" 'pgrep -f beerocks | xargs kill -9 2>/dev/null' || true ; done
   script:
-    - tools/deploy_ipk.sh $TARGET_DEVICE_NAME tools/docker/builder/openwrt/*.ipk
+    - tools/deploy_ipk.sh $TARGET_DEVICE_NAME "build/$TARGET_DEVICE/"*.ipk
     - tests/openwrt/test_status.sh $TARGET_DEVICE_NAME
   artifacts:
     paths:
@@ -139,18 +139,21 @@ build-for-netgear-rax40:
 test-on-turris-omnia:
   extends: .test-on-target
   variables:
+    TARGET_DEVICE: turris-omnia
     TARGET_DEVICE_NAME: turris-omnia-1
   needs: ["build-for-turris-omnia"]
 
 test-on-glinet-b1300:
   extends: .test-on-target
   variables:
+    TARGET_DEVICE: glinet-b1300
     TARGET_DEVICE_NAME: glinet-b1300-1
   needs: ["build-for-glinet-b1300"]
 
 test-on-netgear-rax40:
   extends: .test-on-target
   variables:
+    TARGET_DEVICE: netgear-rax40
     TARGET_DEVICE_NAME: netgear-rax40-1
   needs: ["build-for-netgear-rax40"]
 
