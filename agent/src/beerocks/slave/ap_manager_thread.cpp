@@ -855,12 +855,24 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             }
             auto &config_data = std::get<1>(config_data_tuple);
 
+            // If a Multi-AP Agent receives an AP-Autoconfiguration WSC message containing an M2
+            // with a Multi-AP Extension subelement with bit 4 (Tear Down bit) of the subelement
+            // value set to one (see Table 4), it shall tear down all currently operating BSS(s)
+            // on the radio indicated by the Radio Unique Identifier, and shall ignore the other
+            // attributes in the M2.
+            auto bss_type = static_cast<WSC::eWscVendorExtSubelementBssType>(
+                config_data.multiap_attr().subelement_value);
+            if ((bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN) != 0) {
+                LOG(DEBUG) << "received teardown";
+                bss_info_conf_list.clear();
+                break;
+            }
+
             bss_info_conf.ssid                = config_data.ssid_str();
             bss_info_conf.authentication_type = config_data.authentication_type_attr().data;
             bss_info_conf.encryption_type     = config_data.encryption_type_attr().data;
             bss_info_conf.network_key         = config_data.network_key_str();
-            bss_info_conf.bss_type            = static_cast<WSC::eWscVendorExtSubelementBssType>(
-                config_data.multiap_attr().subelement_value);
+            bss_info_conf.bss_type            = bss_type;
 
             bss_info_conf_list.push_back(bss_info_conf);
         }

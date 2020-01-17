@@ -70,6 +70,13 @@ public:
     ///
     static std::string get_process_dir();
 
+    ///
+    /// @brief Function that checks if file exists
+    ///
+    /// @return boolean that is true if the file exists and false otherwise.
+    ///
+    static bool file_exists(const std::string &fname);
+
     static std::string system_call(std::string cmd, int log_lvl = 0, bool detached = false);
 
     static void kill_pid(std::string path, std::string file_name);
