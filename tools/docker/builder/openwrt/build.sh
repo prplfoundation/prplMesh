@@ -68,7 +68,7 @@ main() {
 
     eval set -- "$OPTS"
 
-    SUPPORTED_TARGETS="turris-omnia glinet-b1300"
+    SUPPORTED_TARGETS="turris-omnia glinet-b1300 netgear-rax40"
 
     while true; do
         case "$1" in
