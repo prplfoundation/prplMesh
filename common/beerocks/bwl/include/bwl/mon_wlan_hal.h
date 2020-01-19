@@ -55,6 +55,8 @@ public:
     virtual bool sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token) = 0;
     virtual bool sta_statistics_11k_request(const SStatisticsRequest11k &req)            = 0;
     virtual bool sta_link_measurements_11k_request(const std::string &sta_mac)           = 0;
+    virtual bool channel_scan_trigger(int dwell_time_msec,
+                                      const std::vector<unsigned int> &channel_pool)     = 0;
 };
 
 // mon HAL factory types
