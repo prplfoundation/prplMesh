@@ -1803,26 +1803,366 @@ void son_management::handle_bml_message(Socket *sd,
     }
     case beerocks_message::ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST: {
         LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST";
-       break;
+
+        auto request = beerocks_header->addClass<
+            beerocks_message::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+        if (!response) {
+            LOG(ERROR) << "Failed building cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE";
+        }
+
+        auto radio_mac         = request->radio_mac();
+        auto dwell_time_ms     = request->params().dwell_time_ms;
+        auto interval_time_sec = request->params().interval_time_sec;
+        auto channel_pool      = request->params().channel_pool;
+        auto channel_pool_size = request->params().channel_pool_size;
+
+        LOG(DEBUG) << "request radio_mac:" << radio_mac;
+        auto op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
+
+        if (dwell_time_ms != CHANNEL_SCAN_INVALID_PARAM &&
+            op_error_code == eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
+            op_error_code =
+                database.set_channel_scan_dwell_time_msec(radio_mac, dwell_time_ms, false)
+                    ? op_error_code
+                    : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_DWELLTIME;
+        }
+        if (interval_time_sec != CHANNEL_SCAN_INVALID_PARAM &&
+            op_error_code == eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
+            op_error_code = database.set_channel_scan_interval_sec(radio_mac, interval_time_sec)
+                                ? op_error_code
+                                : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_SCANTIME;
+        }
+        if (channel_pool != nullptr && channel_pool_size != CHANNEL_SCAN_INVALID_PARAM &&
+            op_error_code == eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
+            auto channel_pool_set =
+                std::unordered_set<uint8_t>(channel_pool, channel_pool + channel_pool_size);
+            op_error_code = database.set_channel_scan_pool(radio_mac, channel_pool_set, false)
+                                ? op_error_code
+                                : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_CHANNELPOOL;
+        }
+        response->op_error_code() = uint8_t(op_error_code);
+        //send response to bml
+        message_com::send_cmdu(sd, cmdu_tx);
+        break;
     }
     case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST: {
         LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST";
+
+        auto request = beerocks_header->addClass<
+            beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+        if (!response) {
+            LOG(ERROR) << "Failed building message "
+                          "cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE !";
+        }
+
+        auto radio_mac = request->radio_mac();
+        response->params().dwell_time_ms =
+            database.get_channel_scan_dwell_time_msec(radio_mac, false);
+        response->params().interval_time_sec = database.get_channel_scan_interval_sec(radio_mac);
+        auto &channel_pool                   = database.get_channel_scan_pool(radio_mac, false);
+        std::copy(channel_pool.begin(), channel_pool.end(), response->params().channel_pool);
+        response->params().channel_pool_size = channel_pool.size();
+        LOG(DEBUG) << "request radio_mac:" << radio_mac;
+        message_com::send_cmdu(sd, cmdu_tx);
         break;
     }
     case beerocks_message::ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST: {
         LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST";
+
+        auto request = beerocks_header->addClass<
+            beerocks_message::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+        if (!response) {
+            LOG(ERROR) << "Failed building message "
+                          "cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE !";
+            return;
+        }
+
+        auto radio_mac = request->radio_mac();
+        auto enable    = (request->isEnable() == 1);
+        LOG(DEBUG) << "request radio_mac:" << radio_mac;
+        bool success = database.set_channel_scan_is_enabled(radio_mac, enable);
+        response->op_error_code() =
+            uint8_t((success) ? eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS
+                              : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_ENABLE);
+
+        // on DCS enable - "reset" the interval wait of the task
+        // (will perform scan right after change to enable)
+        if (enable && success) {
+            dynamic_channel_selection_task::sScanEvent new_event;
+            new_event.radio_mac = request->radio_mac();
+
+            tasks.push_event(database.get_dynamic_channel_selection_task_id(radio_mac),
+                             (int)dynamic_channel_selection_task::eEvent::SCAN_ENABLE_CHANGE,
+                             (void *)&new_event);
+        }
+        //send response to bml
+        message_com::send_cmdu(sd, cmdu_tx);
         break;
     }
     case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST: {
         LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST";
+
+        auto request = beerocks_header->addClass<
+            beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+        if (!response) {
+            LOG(ERROR) << "Failed building message "
+                          "cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE !";
+            return;
+        }
+
+        auto radio_mac = request->radio_mac();
+        LOG(DEBUG) << "request radio_mac:" << radio_mac;
+        response->isEnable() = (database.get_channel_scan_is_enabled(radio_mac)) ? 1 : 0;
+
+        //send response to bml
+        message_com::send_cmdu(sd, cmdu_tx);
         break;
     }
     case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST: {
         LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST";
+
+        auto request =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST failed";
+            break;
+        }
+
+        // Get information from request
+        auto radio_mac      = request->radio_mac();
+        auto is_single_scan = request->scan_mode() == 1;
+        LOG(DEBUG) << "request radio_mac:" << radio_mac << ", "
+                   << ((is_single_scan) ? "single-scan" : "continuous-scan");
+
+        // Clear flags
+        auto result_status = eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
+        auto op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
+        uint8_t last       = 0;
+
+        // Get scan statuses
+        auto scan_in_progress = database.get_channel_scan_in_progress(radio_mac, is_single_scan);
+        if (scan_in_progress) {
+            LOG(ERROR) << "Scan is still running!";
+            op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SCAN_IN_PROGRESS;
+        }
+
+        auto last_scan_success =
+            database.get_channel_scan_results_status(radio_mac, is_single_scan);
+        if (last_scan_success != eChannelScanErrCode::CHANNEL_SCAN_SUCCESS) {
+            LOG(ERROR) << "Last scan did not finish successfully!";
+            result_status = last_scan_success;
+        }
+
+        // Get results
+        auto scan_results      = database.get_channel_scan_results(radio_mac, is_single_scan);
+        auto scan_results_size = scan_results.size();
+
+        LOG(DEBUG) << "scan_results received for hostap_mac= " << radio_mac << std::endl
+                   << "scan_results_size= " << scan_results_size;
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE>(cmdu_tx,
+                                                                             beerocks_header->id());
+
+        // If there was an error before, send the results with a failed status
+        if (op_error_code != eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS ||
+            result_status != eChannelScanErrCode::CHANNEL_SCAN_SUCCESS) {
+            LOG(ERROR) << "Something went wrong, sending CMDU with error code: ["
+                       << (int)op_error_code << "] & result status [" << (int)result_status << "].";
+            response->result_status() = uint8_t(result_status);
+            response->op_error_code() = uint8_t(op_error_code);
+            response->last()          = 1;
+            message_com::send_cmdu(sd, cmdu_tx);
+
+            break;
+        }
+
+        //Results avaliablity check
+        if (scan_results_size == 0) {
+            LOG(DEBUG) << "no scan results are available";
+            response->result_status() = uint8_t(eChannelScanErrCode::CHANNEL_SCAN_RESULTS_EMPTY);
+            response->op_error_code() = uint8_t(op_error_code);
+            response->last()          = 1;
+            message_com::send_cmdu(sd, cmdu_tx);
+        }
+
+        // Set const sized for message building
+        const size_t tlvEndSize    = ieee1905_1::tlvEndOfMessage::get_initial_size();
+        const size_t result_size   = sizeof(beerocks_message::sChannelScanResults);
+        const size_t ext_data_size = sizeof(result_status) + sizeof(op_error_code) + sizeof(last);
+        int remaining_results      = scan_results_size;
+        int response_result_index  = 0;
+        beerocks_message::sChannelScanResults *results = nullptr;
+
+        for (auto dump : scan_results) {
+
+            if (results == nullptr) {
+                LOG(DEBUG) << "Creating new ACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE !";
+                response = message_com::create_vs_message<
+                    beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE>(
+                    cmdu_tx, beerocks_header->id());
+                if (!response) {
+                    LOG(ERROR) << "Failed building message "
+                                  "cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE !";
+                    return;
+                }
+
+                //reset message flags
+                result_status = eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
+                op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
+                last          = 0;
+
+                // Need to find how much results we can allocate before running out of room
+                int size_left = cmdu_tx.getMessageBuffLength() - cmdu_tx.getMessageLength() -
+                                tlvEndSize - ext_data_size;
+                int cmdu_max_avaliable_result_count = size_left / result_size;
+                int cmdu_max_result_count = cmdu_max_avaliable_result_count > remaining_results
+                                                ? remaining_results
+                                                : cmdu_max_avaliable_result_count;
+
+                LOG(DEBUG) << "Allocating space for " << cmdu_max_result_count << " results";
+                if (response->alloc_results(cmdu_max_result_count) == false) {
+                    LOG(ERROR) << "Failed buffer allocation to size = "
+                               << int(cmdu_max_result_count);
+                    op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
+                    break;
+                }
+
+                // Getting response results' pointer
+                auto results_tuple = response->results(0);
+                if (std::get<0>(results_tuple) == false) {
+                    LOG(ERROR) << "response->results access fail!";
+                    op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
+                    break;
+                }
+                results               = &std::get<1>(results_tuple);
+                response_result_index = 0;
+            }
+            LOG(DEBUG) << "Adding result to CMDU";
+
+            results[response_result_index++] = dump;
+            remaining_results--;
+
+            if (remaining_results <= 0) {
+                LOG(DEBUG) << "reached end of results";
+                last = 1;
+            }
+            if (response_result_index >= (int)response->results_size() || remaining_results <= 0) {
+                LOG(DEBUG) << "reached CMDU capacity";
+
+                response->result_status() = uint8_t(result_status);
+                response->op_error_code() = uint8_t(op_error_code);
+                response->last()          = last;
+                message_com::send_cmdu(sd, cmdu_tx);
+
+                //clears result, this will cause another response to be created
+                if (remaining_results > 0) {
+                    results = nullptr;
+                }
+            }
+        }
+
+        if (op_error_code != eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
+            LOG(ERROR) << "Something went wrong, this shouldn't be reached";
+            response->result_status() = uint8_t(result_status);
+            response->op_error_code() = uint8_t(op_error_code);
+            response->last()          = 1;
+            message_com::send_cmdu(sd, cmdu_tx);
+        }
         break;
     }
     case beerocks_message::ACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST: {
         LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST";
+
+        auto request =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE>(cmdu_tx,
+                                                                            beerocks_header->id());
+        if (!response) {
+            LOG(ERROR) << "Failed building message cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE !";
+            return;
+        }
+        auto radio_mac         = request->scan_params().radio_mac;
+        auto dwell_time_ms     = request->scan_params().dwell_time_ms;
+        auto channel_pool_size = request->scan_params().channel_pool_size;
+        auto channel_pool      = request->scan_params().channel_pool;
+        auto channel_pool_set =
+            std::unordered_set<uint8_t>(channel_pool, channel_pool + channel_pool_size);
+
+        LOG(DEBUG) << "set_channel_scan_dwell_time_msec " << dwell_time_ms;
+        if (!database.set_channel_scan_dwell_time_msec(radio_mac, dwell_time_ms, true)) {
+            LOG(ERROR) << "set_channel_scan_dwell_time_msec failed";
+            response->op_error_code() =
+                uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_DWELLTIME);
+            message_com::send_cmdu(sd, cmdu_tx);
+            break;
+        }
+
+        LOG(DEBUG) << "set_channel_scan_pool " << channel_pool_size;
+        if (!database.set_channel_scan_pool(radio_mac, channel_pool_set, true)) {
+            LOG(ERROR) << "set_channel_scan_pool failed";
+            response->op_error_code() =
+                uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_CHANNELPOOL);
+            message_com::send_cmdu(sd, cmdu_tx);
+            break;
+        }
+
+        LOG(DEBUG) << "Clearing DB results for a single scan";
+        if (!database.clear_channel_scan_results(radio_mac, true)) {
+            LOG(ERROR) << "failed to clear scan results";
+            response->op_error_code() = uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR);
+            message_com::send_cmdu(sd, cmdu_tx);
+            break;
+        }
+
+        LOG(DEBUG) << "Triggering Scan in task";
+        dynamic_channel_selection_task::sScanEvent new_event;
+        new_event.radio_mac = radio_mac;
+        tasks.push_event(database.get_dynamic_channel_selection_task_id(radio_mac),
+                         (int)dynamic_channel_selection_task::eEvent::TRIGGER_SINGLE_SCAN,
+                         (void *)&new_event);
+        response->op_error_code() = uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS);
+        message_com::send_cmdu(sd, cmdu_tx);
         break;
     }
     case beerocks_message::ACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST: {
