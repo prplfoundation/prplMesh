@@ -1124,6 +1124,30 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
 
         break;
     }
+    case beerocks_message::ACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST: {
+        LOG(TRACE) << "ACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST";
+        auto request_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST>();
+        if (!request_in) {
+            LOG(ERROR) << "addClass cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST failed";
+            return false;
+        }
+
+        auto request_out = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST>(cmdu_tx);
+        if (!request_out) {
+            LOG(ERROR)
+                << "Failed building cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST message!";
+            return false;
+        }
+
+        request_out->scan_params() = request_in->scan_params();
+
+        LOG(DEBUG) << "send cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST";
+        message_com::send_cmdu(monitor_socket, cmdu_tx);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unknown CONTROL message, action_op: " << int(beerocks_header->action_op());
         return false;
@@ -2785,6 +2809,105 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
             return false;
         }
         notification_out->params() = notification_in->params();
+        send_cmdu_to_controller(cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE: {
+        auto response_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE>();
+        if (!response_in) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE failed";
+            return false;
+        }
+
+        auto response_out = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE>(cmdu_tx);
+        if (!response_out) {
+            LOG(ERROR) << "Failed building cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE";
+            return false;
+        }
+
+        response_out->success() = response_in->success();
+        send_cmdu_to_controller(cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_TRIGGERED_NOTIFICATION: {
+        auto notification_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_TRIGGERED_NOTIFICATION>();
+        if (!notification_in) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CHANNEL_SCAN_TRIGGERED_NOTIFICATION failed";
+            return false;
+        }
+
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION>(cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR) << "Failed building cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION !";
+            return false;
+        }
+
+        send_cmdu_to_controller(cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION: {
+        auto notification_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION>();
+        if (!notification_in) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION failed";
+            return false;
+        }
+
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION>(cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION !";
+            return false;
+        }
+
+        notification_out->scan_results() = notification_in->scan_results();
+        notification_out->is_dump()      = notification_in->is_dump();
+
+        send_cmdu_to_controller(cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION: {
+        auto notification_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION>();
+        if (!notification_in) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION failed";
+            return false;
+        }
+
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION>(cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR) << "Failed building cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION !";
+            return false;
+        }
+
+        send_cmdu_to_controller(cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION: {
+        auto notification_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION>();
+        if (!notification_in) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION failed";
+            return false;
+        }
+
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION>(cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR) << "Failed building cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION !";
+            return false;
+        }
+
         send_cmdu_to_controller(cmdu_tx);
         break;
     }
