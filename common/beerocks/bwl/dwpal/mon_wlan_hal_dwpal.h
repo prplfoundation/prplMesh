@@ -41,7 +41,7 @@ public:
     virtual bool sta_statistics_11k_request(const SStatisticsRequest11k &req) override;
     virtual bool sta_link_measurements_11k_request(const std::string &sta_mac) override;
     virtual bool channel_scan_trigger(int dwell_time_msec,
-                                      const std::vector<unsigned int> &channel_pool);
+                                      const std::vector<unsigned int> &channel_pool) override;
     virtual bool channel_scan_dump_results();
     // Protected methods:
 protected:
