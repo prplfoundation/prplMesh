@@ -14,6 +14,7 @@
 #endif
 #include "db/network_map.h"
 #include "tasks/channel_selection_task.h"
+#include "tasks/dynamic_channel_selection_task.h"
 #include "tasks/ire_network_optimization_task.h"
 #include "tasks/load_balancer_task.h"
 
@@ -1798,6 +1799,34 @@ void son_management::handle_bml_message(Socket *sd,
         }
 
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database);
+        break;
+    }
+    case beerocks_message::ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST";
+       break;
+    }
+    case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST";
+        break;
+    }
+    case beerocks_message::ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST";
+        break;
+    }
+    case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST";
+        break;
+    }
+    case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST";
+        break;
+    }
+    case beerocks_message::ACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST";
+        break;
+    }
+    case beerocks_message::ACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST";
         break;
     }
     default: {
