@@ -228,6 +228,8 @@ private:
     std::string bssid_bridge_mac;
 
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
+    // vaps map of ruid (key) to VapsList (value)
+    std::unordered_map<sMacAddr, beerocks_message::sVapsList> m_vaps_map;
 
     /*
  * State Machines

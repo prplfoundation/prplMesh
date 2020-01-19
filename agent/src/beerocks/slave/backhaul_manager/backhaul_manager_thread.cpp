@@ -1694,6 +1694,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
             m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(msg->ruid()),
                                                    msg->params());
+
+            m_vaps_map[msg->ruid()] = msg->params();
         }
         break;
     }
@@ -1807,15 +1809,22 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
         LOG(ERROR) << "addClass wfa_map::tlvApOperationalBSS failed, mid=" << std::hex << (int)mid;
         return false;
     }
-    //add dummy data
-    auto radio_list     = tlvApOperationalBSS->create_radio_list();
-    auto radio_bss_list = radio_list->create_radio_bss_list();
-    radio_bss_list->set_ssid("wlan_0");
-    radio_list->add_radio_bss_list(radio_bss_list);
-    radio_bss_list = radio_list->create_radio_bss_list();
-    radio_bss_list->set_ssid("wlan_2");
-    radio_list->add_radio_bss_list(radio_bss_list);
-    tlvApOperationalBSS->add_radio_list(radio_list);
+
+    for (const auto &vaps_list : m_vaps_map) {
+        auto radio_list         = tlvApOperationalBSS->create_radio_list();
+        radio_list->radio_uid() = vaps_list.first;
+        for (const auto &vap : vaps_list.second.vaps) {
+            if (vap.mac == network_utils::ZERO_MAC)
+                continue;
+            auto radio_bss_list           = radio_list->create_radio_bss_list();
+            radio_bss_list->radio_bssid() = vap.mac;
+            auto ssid =
+                std::string(vap.ssid, strnlen(vap.ssid, beerocks::message::WIFI_SSID_MAX_LENGTH));
+            radio_bss_list->set_ssid(ssid);
+            radio_list->add_radio_bss_list(radio_bss_list);
+        }
+        tlvApOperationalBSS->add_radio_list(radio_list);
+    }
 
     auto tlvAssociatedClients = cmdu_tx.addClass<wfa_map::tlvAssociatedClients>();
     if (!tlvAssociatedClients) {
@@ -2192,8 +2201,7 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
         auto msg = static_cast<bwl::sACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE *>(data);
 
         LOG(DEBUG) << "ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE for mac "
-                   << network_utils::mac_to_string(msg->params.result.mac)
-                   << " id = " << unassociated_rssi_measurement_header_id;
+                   << msg->params.result.mac << " id = " << unassociated_rssi_measurement_header_id;
 
         if (unassociated_rssi_measurement_header_id > -1) {
             auto response = message_com::create_vs_message<

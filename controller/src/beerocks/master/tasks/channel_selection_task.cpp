@@ -353,16 +353,13 @@ void channel_selection_task::work()
         }
         TASK_LOG(DEBUG) << "vht_center_frequency = " << uint16_t(vht_center_frequency);
 
-        TASK_LOG(DEBUG) << "hostap_mac = "
-                        << network_utils::mac_to_string(slave_joined_event->hostap_mac)
+        TASK_LOG(DEBUG) << "hostap_mac = " << slave_joined_event->hostap_mac
                         << " channel_ext_above_primary = "
                         << int(slave_joined_event->cs_params.channel_ext_above_primary);
         for (int i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
             if (slave_joined_event->backhaul_scan_measurement_list[i].channel > 0) {
                 TASK_LOG(DEBUG)
-                    << "mac = "
-                    << network_utils::mac_to_string(
-                           slave_joined_event->backhaul_scan_measurement_list[i].mac)
+                    << "mac = " << slave_joined_event->backhaul_scan_measurement_list[i].mac
                     << " channel = "
                     << int(slave_joined_event->backhaul_scan_measurement_list[i].channel)
                     << " rssi = "

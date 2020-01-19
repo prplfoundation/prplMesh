@@ -299,7 +299,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
         if (obj) {
             auto event_obj = (steering_rssi_measurement_request_event *)obj;
             TASK_LOG(INFO) << "STEERING_RSSI_MEASUREMENT_REQUEST event was received for client_mac "
-                           << net::network_utils::mac_to_string(event_obj->params.mac);
+                           << event_obj->params.mac;
 
             auto update = message_com::create_vs_message<
                 beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST>(cmdu_tx, id);

@@ -42,12 +42,12 @@ bool db::add_virtual_node(sMacAddr mac, sMacAddr real_node_mac)
     auto real_node = get_node(real_node_mac);
 
     if (!real_node) {
-        LOG(ERROR) << "node " << network_utils::mac_to_string(real_node_mac) << " does not exist";
+        LOG(ERROR) << "node " << real_node_mac << " does not exist";
         return false;
     }
 
     /*
-     * TODO 
+     * TODO
      * the regular add_node() function should take care of a situation where the real node
      * already exists and is moved to a different hierarchy
      * it should be able to find its virtual nodes and move them to the appropriate hierarchy as well
@@ -70,14 +70,13 @@ bool db::add_node(const sMacAddr &mac, const sMacAddr &parent_mac, beerocks::eTy
     // if parent node does not exist, new_hierarchy will be equal to 0
     int new_hierarchy = get_node_hierarchy(parent_node) + 1;
     if (new_hierarchy >= HIERARCHY_MAX) {
-        LOG(ERROR) << "hierarchy too high for node " << network_utils::mac_to_string(mac);
+        LOG(ERROR) << "hierarchy too high for node " << mac;
         return false;
     }
 
     auto n = get_node(mac);
     if (n) { // n is not nullptr
-        LOG(DEBUG) << "node with mac " << network_utils::mac_to_string(mac)
-                   << " already exists, updating";
+        LOG(DEBUG) << "node with mac " << mac << " already exists, updating";
         n->set_type(type);
         if (n->parent_mac != network_utils::mac_to_string(parent_mac)) {
             n->previous_parent_mac = n->parent_mac;
@@ -87,15 +86,14 @@ bool db::add_node(const sMacAddr &mac, const sMacAddr &parent_mac, beerocks::eTy
         if (old_hierarchy >= 0 && old_hierarchy < HIERARCHY_MAX) {
             nodes[old_hierarchy].erase(network_utils::mac_to_string(mac));
         } else {
-            LOG(ERROR) << "old hierarchy " << old_hierarchy << " for node "
-                       << network_utils::mac_to_string(mac) << " is invalid!!!";
+            LOG(ERROR) << "old hierarchy " << old_hierarchy << " for node " << mac
+                       << " is invalid!!!";
         }
         auto subtree = get_node_subtree(n);
         int offset   = new_hierarchy - old_hierarchy;
         adjust_subtree_hierarchy(subtree, offset);
     } else {
-        LOG(DEBUG) << "node with mac " << network_utils::mac_to_string(mac)
-                   << " being created, the type is " << type;
+        LOG(DEBUG) << "node with mac " << mac << " being created, the type is " << type;
         n             = std::make_shared<node>(type, network_utils::mac_to_string(mac));
         n->parent_mac = network_utils::mac_to_string(parent_mac);
     }
@@ -1233,7 +1231,7 @@ std::string db::get_hostap_supported_channels_string(const std::string &radio_ma
  * Currently this function is a wrapper which converts the operating
  * class to a set of supported channels and updates the list of currently
  * supported channels.
- * 
+ *
  * @param mac radio mac
  * @param operating class operating class to add
  * @tx_power transmit power

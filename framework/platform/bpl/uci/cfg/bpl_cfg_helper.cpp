@@ -49,6 +49,23 @@ int cfg_get_prplmesh_param(const std::string &param, char *buf, size_t buf_len)
     return cfg_uci_get(path, buf, buf_len);
 }
 
+int cfg_get_prplmesh_radio_param(int radio_id, const std::string &radio_param, char *buf,
+                                 size_t buf_len)
+{
+    char path[MAX_UCI_BUF_LEN] = {0};
+
+    if (buf_len > MAX_UCI_BUF_LEN) {
+        buf_len = MAX_UCI_BUF_LEN;
+    }
+
+    if (snprintf_s(path, MAX_UCI_BUF_LEN, "prplmesh.radio%d.%s", radio_id, radio_param.c_str()) <=
+        0) {
+        return RETURN_ERR;
+    }
+
+    return cfg_uci_get(path, buf, buf_len);
+}
+
 int cfg_get_prplmesh_param_int(const std::string &param, int *buf)
 {
     int status;

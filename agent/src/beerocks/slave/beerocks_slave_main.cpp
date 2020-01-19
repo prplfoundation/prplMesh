@@ -125,6 +125,25 @@ static bool parse_arguments(int argc, char *argv[])
     return true;
 }
 
+static std::string get_sta_iface_from_hostap_iface(const std::string &hostap_iface)
+{
+    // read the sta_iface from bpl and verify it is available
+    char sta_iface_str[BPL_IFNAME_LEN];
+    std::string sta_iface;
+
+    if (beerocks::bpl::cfg_get_sta_iface(hostap_iface.c_str(), sta_iface_str) < 0) {
+        LOG(ERROR) << "failed to read sta_iface for slave ";
+        return std::string();
+    } else {
+        sta_iface = std::string(sta_iface_str);
+        if (!beerocks::net::network_utils::linux_iface_exists(sta_iface)) {
+            LOG(DEBUG) << "sta iface " << sta_iface << " does not exist, clearing it from config";
+            sta_iface.clear();
+        }
+    }
+    return sta_iface;
+}
+
 static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_slave_conf,
                                   son::slave_thread::sSlaveConfig &son_slave_conf, int slave_num)
 {
@@ -149,8 +168,9 @@ static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_
     son_slave_conf.hostap_iface = beerocks_slave_conf.hostap_iface[slave_num];
     son_slave_conf.hostap_ant_gain =
         beerocks::string_utils::stoi(beerocks_slave_conf.hostap_ant_gain[slave_num]);
-    son_slave_conf.radio_identifier        = beerocks_slave_conf.radio_identifier[slave_num];
-    son_slave_conf.backhaul_wireless_iface = beerocks_slave_conf.sta_iface[slave_num];
+    son_slave_conf.radio_identifier = beerocks_slave_conf.radio_identifier[slave_num];
+    son_slave_conf.backhaul_wireless_iface =
+        get_sta_iface_from_hostap_iface(son_slave_conf.hostap_iface);
     son_slave_conf.backhaul_wireless_iface_filter_low =
         beerocks::string_utils::stoi(beerocks_slave_conf.sta_iface_filter_low[slave_num]);
     son_slave_conf.backhaul_wireless_iface_type = son_slave_conf.hostap_iface_type;
@@ -277,14 +297,6 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
     std::string pid_file_path =
         beerocks_slave_conf.temp_path + "pid/" + base_slave_name; // for file touching
 
-    // Threads
-    std::set<std::string> slave_sta_ifaces;
-    for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
-        if (!beerocks_slave_conf.sta_iface[slave_num].empty()) {
-            slave_sta_ifaces.insert(beerocks_slave_conf.sta_iface[slave_num]);
-        }
-    }
-
     std::set<std::string> slave_ap_ifaces;
     for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
         if (!beerocks_slave_conf.hostap_iface[slave_num].empty()) {
@@ -298,6 +310,14 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
     if (platform_mgr.init()) {
         // read the number of failures allowed before stopping agent from platform configuration
         int stop_on_failure_attempts = beerocks::bpl::cfg_get_stop_on_failure_attempts();
+
+        // The platform manager updates the beerocks_slave_conf.sta_iface in the init stage
+        std::set<std::string> slave_sta_ifaces;
+        for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
+            if (!beerocks_slave_conf.sta_iface[slave_num].empty()) {
+                slave_sta_ifaces.insert(beerocks_slave_conf.sta_iface[slave_num]);
+            }
+        }
 
         beerocks::backhaul_manager backhaul_mgr(beerocks_slave_conf, slave_ap_ifaces,
                                                 slave_sta_ifaces, stop_on_failure_attempts);
@@ -482,14 +502,6 @@ int main(int argc, char *argv[])
                 LOG(DEBUG) << "hostap iface " << beerocks_slave_conf.hostap_iface[slave_num]
                            << " does not exist, clearing it from config";
                 beerocks_slave_conf.hostap_iface[slave_num].clear();
-            }
-        }
-        if (!beerocks_slave_conf.sta_iface[slave_num].empty()) {
-            if (!beerocks::net::network_utils::linux_iface_exists(
-                    beerocks_slave_conf.sta_iface[slave_num])) {
-                LOG(DEBUG) << "sta iface " << beerocks_slave_conf.sta_iface[slave_num]
-                           << " does not exist, clearing it from config";
-                beerocks_slave_conf.sta_iface[slave_num].clear();
             }
         }
     }

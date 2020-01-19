@@ -250,6 +250,7 @@ static bool fill_platform_settings(
     LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)msg->platform_settings().dfs_reentry_enabled;
     LOG(DEBUG) << "backhaul_preferred_radio_band: "
                << (unsigned)msg->platform_settings().backhaul_preferred_radio_band;
+    LOG(DEBUG) << "rdkb_extensions: " << (unsigned)msg->platform_settings().rdkb_extensions_enabled;
 
     return true;
 }
@@ -279,6 +280,21 @@ std::string extern_query_db(std::string parameter)
         }
     }
     return ret;
+}
+
+static std::string get_sta_iface(const std::string &hostap_iface)
+{
+    char sta_iface_str[BPL_IFNAME_LEN];
+    if (bpl::cfg_get_sta_iface(hostap_iface.c_str(), sta_iface_str) < 0) {
+        LOG(DEBUG) << "failed to read sta_iface for slave ";
+        return std::string();
+    }
+    auto sta_iface = std::string(sta_iface_str);
+    if (!network_utils::linux_iface_exists(sta_iface)) {
+        LOG(DEBUG) << "sta iface " << sta_iface << " does not exist, clearing it from config";
+        return std::string();
+    }
+    return sta_iface;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -312,21 +328,6 @@ main_thread::main_thread(config_file::sConfigSlave config_, logging &logger_)
                                   BPL_IFNAME_LEN);
         bpl_iface_status_map[config.hostap_iface[j]] = status;
         ap_ifaces.insert(config.hostap_iface[j]);
-        i++;
-    }
-    for (int j = 0; j < IRE_MAX_SLAVES && i < BPL_NUM_OF_INTERFACES; ++j) {
-        if (config.sta_iface[j].empty())
-            continue;
-
-        auto status = std::make_shared<slave_iface_status>(i, beerocks::eRadioStatus::INVALID, now);
-        if (!status) {
-            LOG(ERROR) << "failed to allocate shared pointer, i=" << i;
-            continue;
-        }
-
-        string_utils::copy_string(bpl_iface_status.ifname[i], config.sta_iface[j].c_str(),
-                                  BPL_IFNAME_LEN);
-        bpl_iface_status_map[config.sta_iface[j]] = status;
         i++;
     }
 
@@ -485,6 +486,27 @@ bool main_thread::init()
     if (bpl::bpl_init() < 0) {
         LOG(ERROR) << "Failed to initialize BPL!";
         return (false);
+    }
+
+    int i    = 0;
+    auto now = std::chrono::steady_clock::now();
+    for (int slave_num = 0; slave_num < IRE_MAX_SLAVES && i < BPL_NUM_OF_INTERFACES; ++slave_num) {
+
+        config.sta_iface[slave_num] = get_sta_iface(config.hostap_iface[slave_num]);
+
+        if (config.sta_iface[slave_num].empty())
+            continue;
+
+        auto status = std::make_shared<slave_iface_status>(i, beerocks::eRadioStatus::INVALID, now);
+        if (!status) {
+            LOG(ERROR) << "failed to allocate shared pointer, i=" << i;
+            continue;
+        }
+
+        string_utils::copy_string(bpl_iface_status.ifname[i], config.sta_iface[slave_num].c_str(),
+                                  BPL_IFNAME_LEN);
+        bpl_iface_status_map[config.sta_iface[slave_num]] = status;
+        i++;
     }
 
     // Bridge & Backhaul interface
@@ -835,11 +857,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             pArpEntry->iface_index = -1;
             pArpEntry->last_seen   = std::chrono::steady_clock::now();
 
-            // LOG(DEBUG) << "UINT64 --> MAC: " << network_utils::mac_to_string(
-            //     (const uint8_t*)pArpEntry->ip);
-
-            LOG(DEBUG) << "Adding MAC " << network_utils::mac_to_string(request->params().mac)
-                       << " to the ARP list...";
+            LOG(DEBUG) << "Adding MAC " << request->params().mac << " to the ARP list...";
 
             m_mapArpEntries[request->params().mac] = pArpEntry;
         }
@@ -1279,7 +1297,7 @@ bool main_thread::handle_arp_monitor()
 
         // LOG(DEBUG) << "Ignoring ARP from: "
         //            << network_utils::ipv4_to_string(entry.ip) << " ("
-        //            << network_utils::mac_to_string(entry.mac) << ")"
+        //            << entry.mac << ")"
         //            << ", state: " << int(entry.state)
         //            << ", type: " << int(entry.type);
 
@@ -1449,8 +1467,8 @@ bool main_thread::handle_arp_raw()
             : "FRONT";
 
     LOG(DEBUG) << "Discovered IP: " << network_utils::ipv4_to_string(arp_resp->params().ipv4)
-               << " (" << network_utils::mac_to_string(arp_resp->params().mac) << ") on '"
-               << strIface << "' (" << strSource << ")";
+               << " (" << arp_resp->params().mac << ") on '" << strIface << "' (" << strSource
+               << ")";
 
     // Update ARP entry parameters
     auto pArpEntry = m_mapArpEntries.find(arp_resp->params().mac);
@@ -1461,7 +1479,7 @@ bool main_thread::handle_arp_raw()
         pArpEntry->second->last_seen   = std::chrono::steady_clock::now();
     } else {
         // This should not happen since the client is added to the list on query request...
-        LOG(WARNING) << "MAC " << network_utils::mac_to_string(arp_resp->params().mac)
+        LOG(WARNING) << "MAC " << arp_resp->params().mac
                      << " was NOT found in the ARP entries list...";
     }
 
@@ -1469,8 +1487,7 @@ bool main_thread::handle_arp_raw()
     Socket *sd = get_backhaul_socket();
 
     if (sd) {
-        LOG(TRACE) << "ACTION_PLATFORM_ARP_QUERY_RESPONSE mac="
-                   << network_utils::mac_to_string(arp_resp->params().mac)
+        LOG(TRACE) << "ACTION_PLATFORM_ARP_QUERY_RESPONSE mac=" << arp_resp->params().mac
                    << " task_id=" << task_id;
         send_cmdu_safe(sd, cmdu_tx);
     }
@@ -1500,8 +1517,7 @@ void main_thread::arp_entries_cleanup()
 
         // If the client wasn't seen --> erase it
         if (last_seen_duration >= ARP_NOTIF_INTERVAL) {
-            LOG(INFO) << "Removing client with MAC "
-                      << network_utils::mac_to_string((const uint8_t *)&it->first)
+            LOG(INFO) << "Removing client with MAC " << (const uint8_t *)&it->first
                       << " due to inactivity of " << last_seen_duration << " milliseconds.";
 
             it = m_mapArpEntries.erase(it);

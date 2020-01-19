@@ -91,8 +91,7 @@ typedef struct {
 } sVapElement;
 void agent_ucc_listener::update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps)
 {
-    LOG(INFO) << "Update VAP map for ruid " << ruid << " bssid "
-              << network_utils::mac_to_string(vaps.vaps->mac) << " ssid "
+    LOG(INFO) << "Update VAP map for ruid " << ruid << " bssid " << vaps.vaps->mac << " ssid "
               << std::string(vaps.vaps->ssid, 36);
     vaps_map[ruid] = vaps;
 }

@@ -507,8 +507,7 @@ bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
                    << "  phy_type = " << int(resp->phy_type) << std::endl
                    << "  rcpi = " << int(resp->rcpi) << std::endl
                    << "  rsni = " << int(resp->rsni) << std::endl
-                   << "  bssid = " << beerocks::net::network_utils::mac_to_string(resp->bssid.oct)
-                   << std::endl
+                   << "  bssid = " << resp->bssid.oct << std::endl
                    << "  ant_id = " << int(resp->ant_id) << std::endl
                    << "  parent_tfs = " << int(resp->parent_tsf);
 

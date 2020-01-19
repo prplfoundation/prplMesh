@@ -259,8 +259,7 @@ void association_handling_task::handle_response(std::string mac,
         }
 
         LOG(DEBUG) << "beacon response , ID: " << id << std::endl
-                   << "sta_mac: " << network_utils::mac_to_string(response->params().sta_mac)
-                   << std::endl
+                   << "sta_mac: " << response->params().sta_mac << std::endl
                    << "measurement_rep_mode: " << (int)response->params().rep_mode << std::endl
                    << "op_class: " << (int)response->params().op_class << std::endl
                    << "channel: "
@@ -274,7 +273,7 @@ void association_handling_task::handle_response(std::string mac,
                    << std::endl
                    << "rcpi: " << (int)response->params().rcpi << std::endl
                    << "rsni: " << (int)response->params().rsni << std::endl
-                   << "bssid: " << network_utils::mac_to_string(response->params().bssid)
+                   << "bssid: " << response->params().bssid
             //<< std::endl << "ant_id: "               << (int)response->params.ant_id
             //<< std::endl << "tsf: "                  << (int)response->params.parent_tsf
 
