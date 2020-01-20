@@ -198,7 +198,7 @@ test_ap_capability_query() {
     check send_CAPI_command gateway "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8001" $redirect
     sleep 1
     dbg "Confirming ap capability query has been received on agent"
-    check docker exec repeater1 sh -c 'grep -i -q "AP_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent_wlan0.log'
+    check docker exec repeater1 sh -c 'grep -i -q "AP_CAPABILITY_QUERY_MESSAGE" /tmp/$USER/beerocks/logs/beerocks_agent.log'
     return $check_error
 }
 test_combined_infra_metrics() {
