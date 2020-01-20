@@ -15,6 +15,7 @@
 #include <beerocks/tlvf/beerocks_message.h>
 
 #include <cmath>
+#include <vector>
 
 using namespace beerocks;
 using namespace net;
@@ -147,7 +148,7 @@ bool monitor_thread::socket_disconnected(Socket *sd)
         thread_last_error_code = MONITOR_THREAD_ERROR_HAL_DISCONNECTED;
         stop_monitor_thread();
         return false;
-    }
+     }
 
     return true;
 }
@@ -1151,6 +1152,52 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                    << "mac=" << mac_str;
 
         mon_wlan_hal->sta_link_measurements_11k_request(mac_str);
+        break;
+    }
+    case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST: {
+        auto request =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST failed";
+            return false;
+        }
+
+        auto radio_mac         = request->scan_params().radio_mac;
+        auto dwell_time_ms     = request->scan_params().dwell_time_ms;
+        auto channel_pool      = request->scan_params().channel_pool;
+        auto channel_pool_size = request->scan_params().channel_pool_size;
+        auto channel_pool_vector =
+            std::vector<unsigned int>(channel_pool, channel_pool + channel_pool_size);
+        std::string channels;
+        for (int8_t index = 0; index < channel_pool_size; index++) {
+            if (index != 0) {
+                channels += ",";
+            }
+            channels += std::to_string(int(channel_pool[index]));
+        }
+
+        //debug print incoming information:
+        LOG(DEBUG) << std::endl
+                   << "scan_params:" << std::endl
+                   << "radio_mac=" << network_utils::mac_to_string(radio_mac) << std::endl
+                   << "dwell_time_ms=" << dwell_time_ms << std::endl
+                   << "channel_pool_size=" << int(channel_pool_size) << std::endl
+                   << "channel_pool=" << channels;
+
+        auto response_out = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE>(cmdu_tx,
+                                                                         beerocks_header->id());
+        if (!response_out) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE message!";
+            return false;
+        }
+
+        bool result = mon_wlan_hal->channel_scan_trigger(int(dwell_time_ms), channel_pool_vector);
+        LOG_IF(!result, ERROR) << "channel_scan_trigger Failed";
+
+        response_out->success() = (result) ? 1 : 0;
+        message_com::send_cmdu(slave_socket, cmdu_tx);
         break;
     }
     default: {
