@@ -28,6 +28,7 @@ using namespace son;
 #define BEACON_MEASURE_REQ_TIME_SPAN 3000
 #define BEACON_MEASURE_MAX_ATTEMPTS 3
 #define REQUEST_RSSI_MEASUREMENT_DELAY 5000
+#define GET_CLIENT_IP_TIMEOUT_SEC 3
 
 association_handling_task::association_handling_task(db &database_,
                                                      ieee1905_1::CmduMessageTx &cmdu_tx_,
@@ -70,10 +71,15 @@ void association_handling_task::work()
     case START_RSSI_MONITORING: {
         TASK_LOG(DEBUG) << "START_RSSI_MONITORING";
         /*
-            * request constant RSSI monitoring for the new client
-            */
+         * request constant RSSI monitoring for the new client
+         */
+
+        bool send_start_monitoring_request = true;
+        std::string new_hostap_mac;
+        std::string ipv4;
+
         if (database.is_node_wireless(sta_mac)) {
-            std::string new_hostap_mac = database.get_node_parent(sta_mac);
+            new_hostap_mac = database.get_node_parent(sta_mac);
             if (new_hostap_mac != original_parent_mac ||
                 database.get_node_state(sta_mac) != beerocks::STATE_CONNECTED) {
                 TASK_LOG(DEBUG) << "sta " << sta_mac << " is no longer connected to "
@@ -81,7 +87,24 @@ void association_handling_task::work()
                 finish();
                 return;
             }
-            std::string ipv4 = database.get_node_ipv4(sta_mac);
+
+            ipv4 = database.get_node_ipv4(sta_mac);
+
+            // Wait until ipv4 will be received on DHCP event or platform arp monitor notification
+            if (ipv4.empty()) {
+                if (std::chrono::steady_clock::now() >
+                    (task_started_timestamp + std::chrono::seconds(GET_CLIENT_IP_TIMEOUT_SEC))) {
+                    TASK_LOG(ERROR) << "ipv4 hasn't been received on client " << sta_mac
+                                    << ", skip start monitoring";
+                    send_start_monitoring_request = false;
+                } else {
+                    // Break the FSM and remain in the same state until the ipv4 is set.
+                    break;
+                }
+            }
+        }
+
+        if (send_start_monitoring_request) {
             LOG(DEBUG) << "START_MONITORING_REQUEST hostap_mac=" << new_hostap_mac << " sta_mac "
                        << sta_mac;
 
