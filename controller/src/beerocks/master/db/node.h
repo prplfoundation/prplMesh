@@ -101,6 +101,7 @@ public:
     int load_balancer_task_id                    = -1;
     int client_locating_task_id_new_connection   = -1;
     int client_locating_task_id_exist_connection = -1;
+    int dynamic_channel_selection_task_id        = -1;
 
     std::chrono::steady_clock::time_point measurement_sent_timestamp;
     int measurement_recv_delta  = 0;

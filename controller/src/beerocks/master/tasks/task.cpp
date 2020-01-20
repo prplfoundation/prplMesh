@@ -89,6 +89,7 @@ void task::wait_for_task_end(int task_id, int ms)
     waiting                  = true;
     pending_task_id          = task_id;
 }
+void task::clear_pending_events() { pending_events.clear(); }
 
 void task::finish()
 {
