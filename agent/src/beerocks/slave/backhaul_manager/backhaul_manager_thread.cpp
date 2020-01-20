@@ -1703,7 +1703,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(msg->ruid()),
                                                    msg->params());
 
-            m_vaps_map[msg->ruid()] = msg->params();
+            m_radio_info_map[msg->ruid()].vaps_list = msg->params();
         }
         break;
     }
@@ -1862,10 +1862,13 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         return false;
     }
 
-    for (const auto &vaps_list : m_vaps_map) {
+    for (const auto &radio_info : m_radio_info_map) {
+        auto ruid      = radio_info.first;
+        auto vaps_list = radio_info.second.vaps_list;
+
         auto radio_list         = tlvApOperationalBSS->create_radio_list();
-        radio_list->radio_uid() = vaps_list.first;
-        for (const auto &vap : vaps_list.second.vaps) {
+        radio_list->radio_uid() = ruid;
+        for (const auto &vap : vaps_list.vaps) {
             if (vap.mac == network_utils::ZERO_MAC)
                 continue;
             auto radio_bss_list           = radio_list->create_radio_bss_list();
