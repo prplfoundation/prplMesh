@@ -629,6 +629,6 @@ int bml_start_dcs_single_scan(BML_CTX ctx, const char *radio_mac, int dwell_time
         return (-BML_RET_INVALID_ARGS);
     }
 
-    // TODO: call suitable bml api
-    return BML_RET_OP_FAILED;
+    bml_internal *pBML = (bml_internal *)ctx;
+    return pBML->start_dcs_single_scan(radio_mac, dwell_time, channel_pool_size, channel_pool);
 }

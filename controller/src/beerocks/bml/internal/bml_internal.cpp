@@ -1401,6 +1401,44 @@ int bml_internal::get_dcs_continuous_scan_params(const std::string &mac, int *ou
     return (iRet);
 }
 
+int bml_internal::start_dcs_single_scan(const std::string &mac, int dwell_time_ms,
+                                        int channel_pool_size, unsigned int *channel_pool)
+{
+    LOG(DEBUG) << "start_single_channel_scan";
+    //CMDU message
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST>(cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->scan_params().radio_mac         = network_utils::mac_from_string(mac);
+    request->scan_params().dwell_time_ms     = dwell_time_ms;
+    request->scan_params().channel_pool_size = channel_pool_size;
+    if (channel_pool_size > 0 && channel_pool_size <= BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE &&
+        channel_pool != nullptr) {
+        std::copy_n(channel_pool, channel_pool_size, request->scan_params().channel_pool);
+    }
+
+    LOG(DEBUG) << "mac:" << mac << ", dwell_time:" << request->scan_params().dwell_time_ms
+               << ", channel_pool_size:" << (int)request->scan_params().channel_pool_size << ".";
+
+    int result = 0;
+    if (send_bml_cmdu(result, request->get_action_op()) != BML_RET_OK) {
+        LOG(ERROR) << "Send cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST failed";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    if (result != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+        LOG(ERROR) << "cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST returned error code:" << result;
+        return result;
+    }
+
+    return BML_RET_OK;
+}
+
 int bml_internal::ping()
 {
     // Command supported only on local master

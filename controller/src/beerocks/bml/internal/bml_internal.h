@@ -162,6 +162,10 @@ public:
     int get_dcs_continuous_scan_params(const std::string &mac, int *output_dwell_time,
                                        int *output_interval_time, unsigned int *output_channel_pool,
                                        int *output_channel_pool_size);
+
+    //trigger single channel scan
+    int start_dcs_single_scan(const std::string &mac, int dwell_time_ms, int channel_pool_size,
+                              unsigned int *channel_pool);
     /*
  * Public static methods:
  */
