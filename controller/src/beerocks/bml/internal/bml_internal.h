@@ -152,6 +152,38 @@ public:
     int bml_set_vap_list_credentials(const BML_VAP_INFO *vaps, const uint8_t vaps_num);
     int bml_get_vap_list_credentials(BML_VAP_INFO *vaps, uint8_t &vaps_num);
 
+    /**
+    * @brief Enables or disables beerocks DCS continuous scans.
+    *
+    * @param [in] radio_mac Radio MAC of selected radio
+    * @param [in] enable    Value of 1 to enable or 0 to disable.
+    *
+    * @return BML_RET_OK on success.
+    */
+    int set_dcs_continuous_scan_enable(const sMacAddr &mac, int enable);
+    /**
+    * @brief Get DCS continuous scans param.
+    *
+    * @param [in] mac     Radio MAC of selected radio
+    * @param [out] enable A reference for the result to be stored in.
+    *
+    * @return BML_RET_OK on success.
+    */
+    int get_dcs_continuous_scan_enable(const sMacAddr &mac, int &enable);
+    int set_dcs_continuous_scan_params(const sMacAddr &mac, int dwell_time, int interval_time,
+                                       unsigned int *channel_pool, int channel_pool_size);
+    int get_dcs_continuous_scan_params(const sMacAddr &mac, int *output_dwell_time,
+                                       int *output_interval_time, unsigned int *output_channel_pool,
+                                       int *output_channel_pool_size);
+
+    //get channel scan results
+    int get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP **output_results,
+                             unsigned int *output_results_size, const unsigned int max_results_size,
+                             uint8_t *output_result_status, bool is_single_scan);
+
+    //trigger single channel scan
+    int start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms, int channel_pool_size,
+                              unsigned int *channel_pool);
     /*
  * Public static methods:
  */
