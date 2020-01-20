@@ -493,11 +493,23 @@ uint8_t& cACTION_BACKHAUL_ENABLE::backhaul_preferred_radio_band() {
     return (uint8_t&)(*m_backhaul_preferred_radio_band);
 }
 
+std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_BACKHAUL_ENABLE::supported_channels_list(size_t idx) {
+    bool ret_success = ( (m_supported_channels_list_idx__ > 0) && (m_supported_channels_list_idx__ > idx) );
+    size_t ret_idx = ret_success ? idx : 0;
+    if (!ret_success) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+    }
+    return std::forward_as_tuple(ret_success, m_supported_channels_list[ret_idx]);
+}
+
 void cACTION_BACKHAUL_ENABLE::class_swap()
 {
     m_iface_mac->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_security_type));
     m_preferred_bssid->struct_swap();
+    for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
+        m_supported_channels_list[i].struct_swap();
+    }
 }
 
 bool cACTION_BACKHAUL_ENABLE::finalize()
@@ -543,6 +555,7 @@ size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
     class_size += sizeof(uint8_t); // wireless_iface_type
     class_size += sizeof(uint8_t); // mem_only_psk
     class_size += sizeof(uint8_t); // backhaul_preferred_radio_band
+    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
     return class_size;
 }
 
@@ -623,6 +636,15 @@ bool cACTION_BACKHAUL_ENABLE::init()
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
+    }
+    m_supported_channels_list = (beerocks::message::sWifiChannel*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
+        return false;
+    }
+    m_supported_channels_list_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
+    if (!m_parse__) {
+        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
     }
     if (m_parse__) { class_swap(); }
     return true;
