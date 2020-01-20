@@ -120,7 +120,7 @@ extern "C" {
 /* Channel Scan Parameters Placeholders */
 #define BML_CHANNEL_SCAN_INVALID_PARAM -1         /* Invalid parameter placeholder */
 #define BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE 32 /* Maximal size of the channel pool */
-#define BML_CHANNEL_SCAN_ENUM_LIST_SIZE 16
+#define BML_CHANNEL_SCAN_ENUM_LIST_SIZE 8
 
 /****************************************************************************/
 /******************************* General Types ******************************/

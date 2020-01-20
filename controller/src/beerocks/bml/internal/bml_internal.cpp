@@ -67,6 +67,33 @@ static void config_logger(const std::string log_file = std::string())
 
 #endif // BEEROCKS_DEBUG
 
+static void translate_channel_scan_results(const beerocks_message::sChannelScanResults &res_in,
+                                           BML_NEIGHBOR_AP &res_out)
+{
+    string_utils::copy_string(res_out.ap_SSID, res_in.ssid,
+                              beerocks::message::WIFI_SSID_MAX_LENGTH);
+    std::copy_n(res_in.bssid.oct, BML_MAC_ADDR_LEN, res_out.ap_BSSID);
+    std::copy_n(res_in.security_mode_enabled, BML_CHANNEL_SCAN_ENUM_LIST_SIZE,
+                res_out.ap_SecurityModeEnabled);
+    std::copy_n(res_in.encryption_mode, BML_CHANNEL_SCAN_ENUM_LIST_SIZE, res_out.ap_EncryptionMode);
+    std::copy_n(res_in.supported_standards, BML_CHANNEL_SCAN_ENUM_LIST_SIZE,
+                res_out.ap_SupportedStandards);
+    std::copy_n(res_in.basic_data_transfer_rates_kbps, BML_CHANNEL_SCAN_ENUM_LIST_SIZE,
+                res_out.ap_BasicDataTransferRates);
+    std::copy_n(res_in.supported_data_transfer_rates_kbps, BML_CHANNEL_SCAN_ENUM_LIST_SIZE,
+                res_out.ap_SupportedDataTransferRates);
+
+    res_out.ap_Channel                   = res_in.channel;
+    res_out.ap_SignalStrength            = res_in.signal_strength_dBm;
+    res_out.ap_OperatingFrequencyBand    = res_in.operating_frequency_band;
+    res_out.ap_OperatingStandards        = res_in.operating_standards;
+    res_out.ap_OperatingChannelBandwidth = res_in.operating_channel_bandwidth;
+    res_out.ap_BeaconPeriod              = res_in.beacon_period_ms;
+    res_out.ap_Noise                     = res_in.noise_dBm;
+    res_out.ap_DTIMPeriod                = res_in.dtim_period;
+    res_out.ap_ChannelUtilization        = res_in.channel_utilization;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -920,7 +947,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                              << " response, but no one is waiting...";
             }
         } break;
-                case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE: {
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE: {
             auto response = beerocks_header->addClass<
                 beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE>();
             if (!response) {
@@ -958,6 +985,60 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             }
         } break;
         case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE: {
+            LOG(DEBUG) << "ACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE received";
+            auto response =
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE>();
+            if (!response) {
+                LOG(ERROR) << "addClass cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE failed";
+                return BML_RET_OP_FAILED;
+            }
+
+            //Signal any waiting threads
+            if (m_prmChannelScanResultsGet) {
+
+                if (m_scan_results && m_scan_results_maxsize && m_scan_results_status) {
+
+                    LOG(DEBUG) << "Receiving Response";
+
+                    uint8_t op_error_code  = response->op_error_code();
+                    *m_scan_results_status = response->result_status();
+                    auto scan_results_size = response->results_size();
+                    uint8_t last           = response->last();
+
+                    LOG(DEBUG) << "Opt code: " << int(op_error_code)
+                               << ", status: " << int(*m_scan_results_status)
+                               << ", size: " << int(scan_results_size);
+
+                    if (scan_results_size > 0) {
+                        LOG(DEBUG) << "currently with " << m_scan_results->size() << " results";
+
+                        // Get results from CMDU
+                        auto results = &std::get<1>(response->results(0));
+
+                        // Cap results if no more room is avaliable
+                        scan_results_size =
+                            (m_scan_results->size() + scan_results_size > *m_scan_results_maxsize)
+                                ? *m_scan_results_maxsize - m_scan_results->size()
+                                : scan_results_size;
+
+                        // Insert results
+                        m_scan_results->insert(m_scan_results->end(), results,
+                                               results + scan_results_size);
+                        LOG(DEBUG) << scan_results_size << " results added";
+                    }
+                    LOG(DEBUG) << "last: " << (int)last;
+                    if (last == 1) {
+                        LOG(DEBUG) << "Results done";
+                        m_prmChannelScanResultsGet->set_value(op_error_code);
+                    } else {
+                        LOG(DEBUG) << "Results cont";
+                    }
+                }
+            } else {
+                LOG(WARNING) << "Received ACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE response, "
+                             << "but no one is waiting...";
+            }
         } break;
         case beerocks_message::ACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE: {
             LOG(DEBUG) << "ACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE received";
@@ -1484,6 +1565,93 @@ int bml_internal::get_dcs_continuous_scan_params(const sMacAddr &mac, int *dwell
     }
 
     return (iRet);
+}
+
+int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP **results,
+                                       unsigned int &results_size,
+                                       const unsigned int max_results_size, uint8_t &result_status,
+                                       bool is_single_scan)
+{
+    if (!results || !results_size || !result_status) {
+        LOG(ERROR) << "Function is called, but no data is being requested!";
+        return (-BML_RET_INVALID_DATA);
+    }
+
+    // If the socket is not valid, attempt to re-establish the connection
+    if (!m_sockMaster) {
+        int iRet = connect_to_master();
+        if (iRet != BML_RET_OK) {
+            return iRet;
+        }
+    }
+
+    // Initialize the promise for receiving the response
+    beerocks::promise<int> prmChannelScanResultsGet;
+    m_prmChannelScanResultsGet    = &prmChannelScanResultsGet;
+    int iOpTimeout                = DELAYED_RESPONSE_TIMEOUT; // Default timeout
+    auto scan_results             = std::list<beerocks_message::sChannelScanResults>();
+    uint32_t scan_results_maxsize = uint32_t(max_results_size);
+
+    m_scan_results         = &scan_results;
+    m_scan_results_maxsize = &scan_results_maxsize;
+    m_scan_results_status  = &result_status;
+
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST>(cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->radio_mac() = mac;
+    request->scan_mode() = (is_single_scan) ? 1 : 0;
+    // Build and send the message
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending param get message!";
+        m_prmChannelScanResultsGet = nullptr;
+        m_scan_results             = nullptr;
+        m_scan_results_maxsize     = nullptr;
+        m_scan_results_status      = nullptr;
+        return (-BML_RET_OP_FAILED);
+    }
+    LOG(DEBUG) << "ACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST sent";
+
+    int iRet = BML_RET_OK;
+
+    if (!m_prmChannelScanResultsGet->wait_for(iOpTimeout)) {
+        LOG(WARNING) << "Timeout while waiting for results get response...";
+        iRet = -BML_RET_TIMEOUT;
+    }
+
+    // Clear the scan results members
+    m_scan_results         = nullptr;
+    m_scan_results_maxsize = nullptr;
+    m_scan_results_status  = nullptr;
+
+    // Clear the promise holder
+    m_prmChannelScanResultsGet = nullptr;
+
+    if (iRet != BML_RET_OK) {
+        LOG(ERROR) << "Results get failed!";
+        return (iRet);
+    }
+
+    iRet = prmChannelScanResultsGet.get_value();
+    if (iRet != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+        LOG(ERROR) << "Results returned with error code:" << iRet << ". Aborting!";
+        return iRet;
+    }
+
+    //output_results_size will be set to the number of actual returning results
+    results_size = 0;
+    for (auto &res : scan_results) {
+        auto &out = ((*results)[results_size]);
+        translate_channel_scan_results(res, out);
+        results_size += 1;
+    }
+
+    return BML_RET_OK;
 }
 
 int bml_internal::start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms,
