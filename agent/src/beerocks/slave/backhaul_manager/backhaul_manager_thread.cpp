@@ -1491,7 +1491,18 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             return false;
         }
 
-        std::string mac            = network_utils::mac_to_string(request->iface_mac());
+        std::string mac = network_utils::mac_to_string(request->iface_mac());
+
+        auto tuple_supported_channels = request->supported_channels_list(0);
+        auto channels                 = &std::get<1>(tuple_supported_channels);
+
+        std::vector<beerocks::message::sWifiChannel> supported_channels_vec;
+        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+            supported_channels_vec.push_back(channels[i]);
+        }
+
+        m_radio_capabilities_map.insert({request->iface_mac(), supported_channels_vec});
+
         soc->radio_mac             = mac;
         soc->freq_type             = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
                                                    : beerocks::eFreqType::FREQ_24G);
