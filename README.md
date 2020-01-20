@@ -20,7 +20,7 @@ To build prplMesh, you need (on Ubuntu) the following packages:
 ```bash
 sudo apt install curl gcc cmake binutils git autoconf autogen libtool pkg-config \
      libreadline-dev libncurses-dev libssl-dev libjson-c-dev libnl-genl-3-dev libzmq3-dev \
-     python python-yaml python-paramiko repo bridge-utils clang-format ninja
+     python python-yaml python-paramiko repo bridge-utils clang-format ninja-build
 ```
 
 If you haven't done so already, set up your git configuration:
