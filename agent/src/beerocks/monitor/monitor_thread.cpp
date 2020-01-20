@@ -1409,13 +1409,50 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
     } break;
     case Event::Channel_Scan_Triggered: {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_TRIGGERED_NOTIFICATION>(cmdu_tx);
+        if (!notification) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_TRIGGERED_NOTIFICATION msg";
+            return false;
+        }
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;
     case Event::Channel_Scan_New_Results_Ready:
     case Event::Channel_Scan_Dump_Result: {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION>(cmdu_tx);
+        if (!notification) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION msg";
+            return false;
+        }
+
+        // If event == Channel_Scan_New_Results_Ready do nothing since is_dump's default is 0
+        if (event == Event::Channel_Scan_Dump_Result) {
+            notification->is_dump() = 1;
+        }
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;
     case Event::Channel_Scan_Finished: {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION>(cmdu_tx);
+        if (!notification) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION msg";
+            return false;
+        }
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;
     case Event::Channel_Scan_Abort: {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION>(cmdu_tx);
+        if (!notification) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION msg";
+            return false;
+        }
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;
 
     // Unhandled events
