@@ -564,8 +564,8 @@ int bml_set_dcs_continuous_scan_enable(BML_CTX ctx, const char *radio_mac, int e
         return (-BML_RET_INVALID_ARGS);
     }
 
-    // TODO: call suitable bml api
-    return BML_RET_OP_FAILED;
+    bml_internal *pBML = (bml_internal *)ctx;
+    return pBML->set_dcs_continuous_scan_enable(radio_mac, enable);
 }
 
 int bml_get_dcs_continuous_scan_enable(BML_CTX ctx, const char *radio_mac, int *output_enable)
@@ -575,8 +575,8 @@ int bml_get_dcs_continuous_scan_enable(BML_CTX ctx, const char *radio_mac, int *
         return (-BML_RET_INVALID_ARGS);
     }
 
-    // TODO: call suitable bml api
-    return BML_RET_OP_FAILED;
+    bml_internal *pBML = (bml_internal *)ctx;
+    return pBML->get_dcs_continuous_scan_enable(radio_mac, output_enable);
 }
 
 int bml_set_dcs_continuous_scan_params(BML_CTX ctx, const char *radio_mac, int dwell_time,

@@ -152,6 +152,9 @@ public:
     int bml_set_vap_list_credentials(const BML_VAP_INFO *vaps, const uint8_t vaps_num);
     int bml_get_vap_list_credentials(BML_VAP_INFO *vaps, uint8_t &vaps_num);
 
+    //set and get channel scan enable flag
+    int set_dcs_continuous_scan_enable(const std::string &mac, int enable);
+    int get_dcs_continuous_scan_enable(const std::string &mac, int *output_enable);
     /*
  * Public static methods:
  */

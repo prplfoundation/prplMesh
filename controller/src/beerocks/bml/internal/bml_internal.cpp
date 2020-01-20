@@ -1219,6 +1219,53 @@ int bml_internal::bml_get_vap_list_credentials(BML_VAP_INFO *vaps, uint8_t &vaps
     return (iRet);
 }
 
+int bml_internal::set_dcs_continuous_scan_enable(const std::string &mac, int enable)
+{
+    //CMDU message
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST>(cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR)
+            << "Failed building cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->radio_mac() = network_utils::mac_from_string(mac);
+    request->isEnable()  = enable;
+
+    int result = 0;
+    if (send_bml_cmdu(result, request->get_action_op()) != BML_RET_OK) {
+        LOG(ERROR) << "Send ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST failed";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    if (result > 0) {
+        LOG(ERROR) << "ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST returned error code:"
+                   << result;
+        return result;
+    }
+
+    return BML_RET_OK;
+}
+
+int bml_internal::get_dcs_continuous_scan_enable(const std::string &mac, int *output_enable)
+{
+    //CMDU message
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST>(cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR)
+            << "Failed building ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->radio_mac() = network_utils::mac_from_string(mac);
+
+    return send_bml_cmdu(*output_enable, request->get_action_op());
+}
+
 int bml_internal::ping()
 {
     // Command supported only on local master
