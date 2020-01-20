@@ -406,8 +406,6 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_autoconfiguration_wsc(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE:
         return handle_autoconfiguration_renew(sd, cmdu_rx);
-    case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE:
-        return handle_ap_capability_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE:
         return handle_client_association_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE:
@@ -4117,14 +4115,6 @@ bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMe
     return true;
 }
 
-bool slave_thread::handle_ap_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
-{
-    //TODO - this is a stub handler for the purpose of controller certification testing,
-    //       will be implemented later on agent certification
-    const auto mid = cmdu_rx.getMessageId();
-    LOG(DEBUG) << "Received AP_CAPABILITY_QUERY_MESSAGE, mid=" << std::dec << int(mid);
-    return true;
-}
 
 bool slave_thread::handle_multi_ap_policy_config_request(Socket *sd,
                                                          ieee1905_1::CmduMessageRx &cmdu_rx)
