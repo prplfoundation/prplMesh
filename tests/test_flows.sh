@@ -222,8 +222,13 @@ test_ap_capability_query() {
     check_error=0
     check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8001
     sleep 1
+    
     dbg "Confirming ap capability query has been received on agent"
-    check_log ${REPEATER1} agent_wlan0 "AP_CAPABILITY_QUERY_MESSAGE"
+    check_log ${REPEATER1} agent "AP_CAPABILITY_QUERY_MESSAGE"
+    
+    dbg "Confirming ap capability report has been received on controller"
+    check_log ${GATEWAY} controller "AP_CAPABILITY_REPORT_MESSAGE"
+    
     return $check_error
 }
 
