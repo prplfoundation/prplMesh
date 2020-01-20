@@ -116,6 +116,17 @@ public:
     static bool linux_iface_is_up(const std::string &iface);
     static bool linux_iface_is_up_and_running(const std::string &iface);
 
+    /**
+     * @brief Gets the speed of a network interface.
+     *
+     * @param[in] iface Name of the network interface.
+     * @param[out] speed On success, speed in Mbps of the network interface as defined in SPEED_*
+     * macros included in ethtool.h
+     *
+     * @return True if speed could be successfully obtained and false otherwise.
+     */
+    static bool linux_iface_get_speed(const std::string &iface, uint32_t &speed);
+
     static bool arp_send(const std::string &iface, const std::string &dst_ip,
                          const std::string &src_ip, sMacAddr dst_mac, sMacAddr src_mac, int count,
                          int arp_socket = -1);
