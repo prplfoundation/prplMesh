@@ -199,6 +199,18 @@ public:
     int get_dcs_continuous_scan_params(const sMacAddr &mac, int *dwell_time, int *interval_time,
                                        unsigned int *channel_pool, int *channel_pool_size);
 
+    /**
+    * Start a single DCS scan with parameters.
+    *
+    * @param [in] mac                  Radio MAC of selected radio
+    * @param [in] dwell_time_ms        Set the dwell time in milliseconds.
+    * @param [in] channel_pool         Set the channel pool for the DCS.
+    * @param [in] channel_pool_size    Set the DCS channel pool size.
+    *
+    * @return BML_RET_OK on success.
+    */
+    int start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms, unsigned int *channel_pool,
+                              int channel_pool_size);
     /*
  * Public static methods:
  */

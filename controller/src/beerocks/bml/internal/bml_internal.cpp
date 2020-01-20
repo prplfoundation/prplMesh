@@ -960,6 +960,21 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
         case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE: {
         } break;
         case beerocks_message::ACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE: {
+            LOG(DEBUG) << "ACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE received";
+            auto response =
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE>();
+            if (!response) {
+                LOG(ERROR) << "addClass cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE failed";
+                return BML_RET_OP_FAILED;
+            }
+
+            //Signal any waiting threads
+            if (!wake_up(beerocks_message::ACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST,
+                         response->op_error_code())) {
+                LOG(WARNING) << "Received ACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST"
+                             << " response, but no one is waiting...";
+            }
         } break;
         default: {
             LOG(WARNING) << "unhandled header BML action type 0x" << std::hex
@@ -1469,6 +1484,44 @@ int bml_internal::get_dcs_continuous_scan_params(const sMacAddr &mac, int *dwell
     }
 
     return (iRet);
+}
+
+int bml_internal::start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms,
+                                        unsigned int *channel_pool, int channel_pool_size)
+{
+    LOG(DEBUG) << "start_single_channel_scan";
+
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST>(cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->scan_params().radio_mac         = mac;
+    request->scan_params().dwell_time_ms     = dwell_time_ms;
+    request->scan_params().channel_pool_size = channel_pool_size;
+    if (channel_pool && channel_pool_size > 0 &&
+        channel_pool_size <= BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE) {
+        std::copy_n(channel_pool, channel_pool_size, request->scan_params().channel_pool);
+    }
+
+    LOG(DEBUG) << "mac:" << mac << ", dwell_time:" << request->scan_params().dwell_time_ms
+               << ", channel_pool_size:" << (int)request->scan_params().channel_pool_size << ".";
+
+    int result = 0;
+    if (send_bml_cmdu(result, request->get_action_op()) != BML_RET_OK) {
+        LOG(ERROR) << "Send cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST failed";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    if (result != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+        LOG(ERROR) << "cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST returned error code:" << result;
+        return result;
+    }
+
+    return BML_RET_OK;
 }
 
 int bml_internal::ping()
