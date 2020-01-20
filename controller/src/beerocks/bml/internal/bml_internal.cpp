@@ -27,8 +27,9 @@ INITIALIZE_EASYLOGGINGPP
 ////////////////////////// Local Module Definitions //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-#define SELECT_TIMEOUT (500)    // 500 milliseconds
-#define RESPONSE_TIMEOUT (5000) // 5 seconds
+#define SELECT_TIMEOUT (500)             // 500 milliseconds
+#define RESPONSE_TIMEOUT (5000)          // 5 seconds
+#define DELAYED_RESPONSE_TIMEOUT (30000) // 30 seconds
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////// Static Members Initialization ///////////////////////
@@ -1029,6 +1030,18 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                 LOG(WARNING)
                     << "Received MASTER_SLAVE_VERSIONS_RESPONSE response, but no one is waiting...";
             }
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE: {
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE: {
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE: {
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE: {
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE: {
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE: {
         } break;
         default: {
             LOG(WARNING) << "unhandled header platform action type 0x" << std::hex
