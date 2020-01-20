@@ -312,6 +312,10 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
     if (parent_hostap_mac == hostap_mac) {
         if (mac_type == beerocks::TYPE_IRE_BACKHAUL || mac_type == beerocks::TYPE_CLIENT) {
             database.set_node_state(mac, beerocks::STATE_DISCONNECTED);
+
+            // Clear node ipv4
+            database.set_node_ipv4(mac);
+
             // Notify steering task, if any, of disconnect.
             int steering_task = database.get_steering_task_id(mac);
             if (tasks.is_task_running(steering_task))
