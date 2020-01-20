@@ -203,8 +203,13 @@ test_ap_capability_query() {
     check_error=0
     check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8001" $redirect
     sleep 1
+    
     dbg "Confirming ap capability query has been received on agent"
-    check_log ${REPEATER1} agent_wlan0 "AP_CAPABILITY_QUERY_MESSAGE"
+    check_log ${REPEATER1} agent "AP_CAPABILITY_QUERY_MESSAGE"
+    
+    dbg "Confirming ap capability report has been received on controller"
+    check_log ${GATEWAY} controller "AP_CAPABILITY_REPORT_MESSAGE"
+    
     return $check_error
 }
 test_combined_infra_metrics() {
