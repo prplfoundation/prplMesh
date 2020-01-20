@@ -27,8 +27,12 @@ INITIALIZE_EASYLOGGINGPP
 ////////////////////////// Local Module Definitions //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-#define SELECT_TIMEOUT (500)    // 500 milliseconds
-#define RESPONSE_TIMEOUT (5000) // 5 seconds
+//These timeout definitions used throughout the code.
+//Usually used for setting wait periods for promises,
+//and sleeping until a partial or complete response arrives.
+#define SELECT_TIMEOUT (500)             // equivelent of 0.5 seconds
+#define RESPONSE_TIMEOUT (5000)          // equivelent of 5 seconds
+#define DELAYED_RESPONSE_TIMEOUT (30000) // equivelent of 30 seconds
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////// Static Members Initialization ///////////////////////
@@ -883,6 +887,18 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             }
             *m_pvaps_list_size = i;
 
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE: {
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE: {
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE: {
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE: {
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE: {
+        } break;
+        case beerocks_message::ACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE: {
         } break;
         default: {
             LOG(WARNING) << "unhandled header BML action type 0x" << std::hex
