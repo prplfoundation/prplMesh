@@ -79,7 +79,7 @@ void monitor_thread::stop_monitor_thread()
     } else {
 
         LOG(ERROR) << "disconnecting monitor_thread sockets";
-        if (mon_hal_ext_events || slave_socket)
+        if (mon_hal_ext_events || mon_hal_nl_events || slave_socket)
             LOG(DEBUG) << "stop_monitor_thread()";
 
         if (mon_hal_ext_events) {
@@ -99,6 +99,13 @@ void monitor_thread::stop_monitor_thread()
             remove_socket(mon_hal_int_events);
             delete mon_hal_int_events;
             mon_hal_int_events = nullptr;
+        }
+
+        if (mon_hal_nl_events) {
+            remove_socket(mon_hal_nl_events);
+            delete mon_hal_nl_events;
+            mon_hal_nl_events = nullptr;
+            LOG(ERROR) << "nl socket remove";
         }
 
         if (slave_socket) {
@@ -132,6 +139,11 @@ bool monitor_thread::socket_disconnected(Socket *sd)
         return false;
     } else if (mon_hal_int_events && (sd == mon_hal_int_events)) {
         LOG(ERROR) << "mon_hal_int_events socket disconnected!";
+        thread_last_error_code = MONITOR_THREAD_ERROR_HAL_DISCONNECTED;
+        stop_monitor_thread();
+        return false;
+    } else if (mon_hal_nl_events && (sd == mon_hal_nl_events)) {
+        LOG(ERROR) << "mon_hal_nl_events socket disconnected!";
         thread_last_error_code = MONITOR_THREAD_ERROR_HAL_DISCONNECTED;
         stop_monitor_thread();
         return false;
@@ -262,6 +274,21 @@ void monitor_thread::after_select(bool timeout)
                 return;
             }
 
+            int nl_events_fd = mon_wlan_hal->get_nl_events_fd();
+            if (nl_events_fd > 0) {
+                mon_hal_nl_events = new Socket(nl_events_fd);
+                add_socket(mon_hal_nl_events);
+                LOG(DEBUG) << "nl socket created ";
+            } else if (nl_events_fd == 0) {
+                mon_hal_nl_events = nullptr;
+                LOG(DEBUG) << "Couldn't get NL fd ";
+            } else {
+                LOG(ERROR) << "Couldn't get NL socket ";
+                thread_last_error_code = MONITOR_THREAD_ERROR_NL_ATTACH_FAIL;
+                stop_monitor_thread();
+                return;
+            }
+
             // start local monitors //
             LOG(TRACE) << "mon_stats.start()";
             if (!mon_stats.start(&mon_db, slave_socket)) {
@@ -344,6 +371,26 @@ void monitor_thread::after_select(bool timeout)
                 stop_monitor_thread();
                 return;
             }
+        }
+
+        // Process nl events
+        if (mon_hal_nl_events) {
+            if (read_ready(mon_hal_nl_events)) {
+                if (!mon_wlan_hal->process_nl_events()) {
+                    LOG(ERROR) << "process_nl_events() failed!";
+                    thread_last_error_code = MONITOR_THREAD_ERROR_NL_REPORT_PROCESS_FAIL;
+                    stop_monitor_thread();
+                    return;
+                }
+                LOG(DEBUG) << "proccess nl events finished ";
+                clear_ready(mon_hal_nl_events);
+            }
+        } else {
+            // There is no socket for external events
+            LOG(ERROR) << "no socket exists for mon_hal_nl_events";
+            thread_last_error_code = MONITOR_THREAD_ERROR_NL_ATTACH_FAIL;
+            stop_monitor_thread();
+            return;
         }
 
         if (pending_11k_events.size() > 0) {
@@ -1368,6 +1415,15 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
         update_vaps_in_db();
 
+    } break;
+    case Event::Channel_Scan_Triggered: {
+    } break;
+    case Event::Channel_Scan_New_Results_Ready:
+    case Event::Channel_Scan_Dump_Result: {
+    } break;
+    case Event::Channel_Scan_Finished: {
+    } break;
+    case Event::Channel_Scan_Abort: {
     } break;
 
     // Unhandled events

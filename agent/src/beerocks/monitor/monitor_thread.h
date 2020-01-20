@@ -35,12 +35,14 @@ public:
     virtual bool init() override;
 
     enum eThreadErrors : uint32_t {
-        MONITOR_THREAD_ERROR_NO_ERROR            = 0,
-        MONITOR_THREAD_ERROR_HOSTAP_DISABLED     = 1,
-        MONITOR_THREAD_ERROR_ATTACH_FAIL         = 2,
-        MONITOR_THREAD_ERROR_SUDDEN_DETACH       = 3,
-        MONITOR_THREAD_ERROR_HAL_DISCONNECTED    = 4,
-        MONITOR_THREAD_ERROR_REPORT_PROCESS_FAIL = 5,
+        MONITOR_THREAD_ERROR_NO_ERROR               = 0,
+        MONITOR_THREAD_ERROR_HOSTAP_DISABLED        = 1,
+        MONITOR_THREAD_ERROR_ATTACH_FAIL            = 2,
+        MONITOR_THREAD_ERROR_SUDDEN_DETACH          = 3,
+        MONITOR_THREAD_ERROR_HAL_DISCONNECTED       = 4,
+        MONITOR_THREAD_ERROR_REPORT_PROCESS_FAIL    = 5,
+        MONITOR_THREAD_ERROR_NL_ATTACH_FAIL         = 6,
+        MONITOR_THREAD_ERROR_NL_REPORT_PROCESS_FAIL = 7,
     };
 
 protected:
@@ -80,6 +82,7 @@ private:
     Socket *slave_socket       = nullptr;
     Socket *mon_hal_ext_events = nullptr;
     Socket *mon_hal_int_events = nullptr;
+    Socket *mon_hal_nl_events  = nullptr;
     beerocks::logging &logger;
 
     typedef struct {
