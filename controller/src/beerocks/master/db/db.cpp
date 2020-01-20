@@ -184,7 +184,7 @@ bool db::set_local_slave_mac(std::string mac)
 
 std::string db::get_local_slave_mac() { return local_slave_mac; }
 
-bool db::set_node_ipv4(std::string mac, std::string ipv4)
+bool db::set_node_ipv4(const std::string &mac, const std::string &ipv4)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -194,7 +194,7 @@ bool db::set_node_ipv4(std::string mac, std::string ipv4)
     return true;
 }
 
-std::string db::get_node_ipv4(std::string mac)
+std::string db::get_node_ipv4(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
