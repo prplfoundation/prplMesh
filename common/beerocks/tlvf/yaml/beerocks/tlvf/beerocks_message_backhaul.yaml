@@ -59,6 +59,9 @@ cACTION_BACKHAUL_ENABLE:
   wireless_iface_type: uint8_t  
   mem_only_psk: uint8_t
   backhaul_preferred_radio_band: uint8_t
+  supported_channels_list:
+    _type: beerocks::message::sWifiChannel 
+    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
 
 cACTION_BACKHAUL_CONNECTED_NOTIFICATION:
   _type: class
