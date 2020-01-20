@@ -230,6 +230,8 @@ private:
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
     // vaps map of ruid (key) to VapsList (value)
     std::unordered_map<sMacAddr, beerocks_message::sVapsList> m_vaps_map;
+    std::unordered_map<sMacAddr, std::vector<beerocks::message::sWifiChannel>>
+        m_radio_capabilities_map;
 
     /*
  * State Machines
