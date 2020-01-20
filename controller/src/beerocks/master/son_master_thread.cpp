@@ -104,6 +104,7 @@ bool master_thread::init()
         LOG(ERROR) << "Failed subscribing to the Bus";
     }
 
+#ifndef BEEROCKS_LINUX
     auto new_statistics_polling_task =
         std::make_shared<statistics_polling_task>(database, cmdu_tx, tasks);
     if (!new_statistics_polling_task) {
@@ -111,6 +112,7 @@ bool master_thread::init()
         return false;
     }
     tasks.add_task(new_statistics_polling_task);
+#endif
 
     auto new_bml_task = std::make_shared<bml_task>(database, cmdu_tx, tasks);
     if (!new_bml_task) {
