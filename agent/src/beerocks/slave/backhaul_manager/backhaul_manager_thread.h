@@ -228,8 +228,23 @@ private:
     std::string bssid_bridge_mac;
 
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
-    // vaps map of ruid (key) to VapsList (value)
-    std::unordered_map<sMacAddr, beerocks_message::sVapsList> m_vaps_map;
+
+    /**
+     * @brief Information gathered about a radio.
+     *
+     * Radio information is obtained from messages sent by slave threads and is used to build
+     * the TLVs to include in notification messages or responses to CDMU query messages.
+     */
+    struct sRadioInfo {
+        beerocks_message::sVapsList vaps_list; /**< List of VAPs in radio. */
+        std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
+            supported_channels; /**< Array of supported channels in radio. */
+    };
+
+    /**
+     * @brief Map of radio information structures indexed by radio uid.
+     */
+    std::unordered_map<sMacAddr, sRadioInfo> m_radio_info_map;
 
     /*
  * State Machines
