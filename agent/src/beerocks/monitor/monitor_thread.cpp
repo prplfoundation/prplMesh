@@ -286,7 +286,6 @@ void monitor_thread::after_select(bool timeout)
             } else {
                 LOG(ERROR) << "Couldn't get NL socket ";
                 thread_last_error_code = MONITOR_THREAD_ERROR_NL_ATTACH_FAIL;
-                stop_monitor_thread();
                 return;
             }
 
@@ -390,7 +389,6 @@ void monitor_thread::after_select(bool timeout)
             // There is no socket for external events
             LOG(ERROR) << "no socket exists for mon_hal_nl_events";
             thread_last_error_code = MONITOR_THREAD_ERROR_NL_ATTACH_FAIL;
-            stop_monitor_thread();
             return;
         }
 
