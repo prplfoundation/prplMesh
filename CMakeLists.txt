@@ -136,6 +136,7 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
     # Disable file and enable syslog logging
     set(BEEROCKS_LOG_FILES_ENABLED "false")
     set(BEEROCKS_LOG_SYSLOG_ENABLED "true")
+    set(BEEROCKS_LOG_FILES_AUTO_ROLL "false")
     set(BEEROCKS_LOG_FILES_PATH "/rdklogs/logs")
     set(BEEROCKS_LOG_FILES_SUFFIX ".txt.0")
     set(CMAKE_SKIP_RPATH TRUE)
