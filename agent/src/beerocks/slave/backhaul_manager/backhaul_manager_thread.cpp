@@ -8,6 +8,8 @@
 
 #include "backhaul_manager_thread.h"
 
+#include "../tlvf_utils.h"
+
 #include <bcl/beerocks_utils.h>
 #include <bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
@@ -33,7 +35,9 @@
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
+#include <tlvf/wfa_map/tlvApCapability.h>
 #include <tlvf/wfa_map/tlvApOperationalBSS.h>
+#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvAssociatedClients.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
@@ -1757,6 +1761,9 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return handle_1905_topology_query(cmdu_rx, src_mac);
         //LOG(INFO) << "I got the Topology Query message!";
     }
+    case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE: {
+        return handle_ap_capability_query(cmdu_rx, src_mac);
+    }
     case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE: {
         return handle_1905_higher_layer_data_message(cmdu_rx, src_mac);
     }
@@ -1770,6 +1777,39 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return false;
     }
     }
+}
+
+bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                  const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received AP_CAPABILITY_QUERY_MESSAGE, mid=" << std::dec << int(mid);
+
+    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type AP_CAPABILITY_REPORT_MESSAGE, has failed";
+        return false;
+    }
+
+    auto ap_capability_tlv = cmdu_tx.addClass<wfa_map::tlvApCapability>();
+    if (!ap_capability_tlv) {
+        LOG(ERROR) << "addClass wfa_map::tlvApCapability has failed";
+        return false;
+    }
+
+    // Capability bitmask is set to 0 because neither unassociated STA link metrics
+    // reporting or agent-initiated RCPI-based steering are supported
+
+    for (const auto &radio_info : m_radio_info_map) {
+        auto radio_mac          = radio_info.first;
+        auto supported_channels = radio_info.second.supported_channels;
+
+        if (!tlvf_utils::add_ap_radio_basic_capabilities(cmdu_tx, radio_mac, supported_channels)) {
+            return false;
+        }
+    }
+
+    LOG(DEBUG) << "Sending AP_CAPABILITY_REPORT_MESSAGE , mid: " << std::hex << (int)mid;
+    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 /**
