@@ -175,8 +175,8 @@ public:
     bool set_local_slave_mac(std::string mac);
     std::string get_local_slave_mac();
 
-    bool set_node_ipv4(std::string mac, std::string ipv4);
-    std::string get_node_ipv4(std::string mac);
+    bool set_node_ipv4(const std::string &mac, const std::string &ipv4 = std::string());
+    std::string get_node_ipv4(const std::string &mac);
 
     bool set_node_manufacturer(std::string mac, std::string manufacturer);
     std::string get_node_manufacturer(std::string mac);
