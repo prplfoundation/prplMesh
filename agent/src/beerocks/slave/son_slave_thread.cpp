@@ -3259,6 +3259,15 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                   config.backhaul_wireless_iface.c_str(),
                                   message::IFACE_NAME_LENGTH);
 
+        auto tuple_supported_channels = bh_enable->supported_channels_list(0);
+        if (!std::get<0>(tuple_supported_channels)) {
+            LOG(ERROR) << "getting supported channels has failed!";
+            break;
+        }
+
+        std::copy_n(hostap_params.supported_channels, message::SUPPORTED_CHANNELS_LENGTH,
+                    &std::get<1>(tuple_supported_channels));
+
         // Send the message
         LOG(DEBUG) << "send ACTION_BACKHAUL_ENABLE for mac " << bh_enable->iface_mac();
         if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
