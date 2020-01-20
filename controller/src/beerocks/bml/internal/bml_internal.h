@@ -170,20 +170,35 @@ public:
     * @return BML_RET_OK on success.
     */
     int get_dcs_continuous_scan_enable(const sMacAddr &mac, int &enable);
+
+    /**
+    * @brief Set DCS continuous scan params.
+    *
+    * @param [in] mac               Radio MAC of selected radio
+    * @param [in] dwell_time        Set the dwell time in milliseconds.
+    * @param [in] interval_time     Set the interval time in seconds.
+    * @param [in] channel_pool      Set the channel pool for the DCS.
+    * @param [in] channel_pool_size Set the DCS channel pool size.
+    *
+    * @return BML_RET_OK on success.
+    */
     int set_dcs_continuous_scan_params(const sMacAddr &mac, int dwell_time, int interval_time,
                                        unsigned int *channel_pool, int channel_pool_size);
-    int get_dcs_continuous_scan_params(const sMacAddr &mac, int *output_dwell_time,
-                                       int *output_interval_time, unsigned int *output_channel_pool,
-                                       int *output_channel_pool_size);
 
-    //get channel scan results
-    int get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP **output_results,
-                             unsigned int *output_results_size, const unsigned int max_results_size,
-                             uint8_t *output_result_status, bool is_single_scan);
+    /**
+    * @brief Get DCS continuous scan params.
+    *
+    * @param [in] mac                Radio MAC of selected radio
+    * @param [out] dwell_time        Get the dwell time in milliseconds.
+    * @param [out] interval_time     Get the interval time in seconds.
+    * @param [out] channel_pool      Get the channel pool for the DCS.
+    * @param [out] channel_pool_size Get the DCS channel pool size.
+    *
+    * @return BML_RET_OK on success.
+    */
+    int get_dcs_continuous_scan_params(const sMacAddr &mac, int *dwell_time, int *interval_time,
+                                       unsigned int *channel_pool, int *channel_pool_size);
 
-    //trigger single channel scan
-    int start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms, int channel_pool_size,
-                              unsigned int *channel_pool);
     /*
  * Public static methods:
  */
@@ -248,6 +263,8 @@ private:
     beerocks::promise<bool> *m_prmLocalMasterGet        = nullptr;
     beerocks::promise<bool> *m_prmRestrictedChannelsGet = nullptr;
     beerocks::promise<int> *m_prmRdkbWlan               = nullptr;
+    //Promise used to indicate the GetParams response was received
+    beerocks::promise<bool> *m_prmChannelScanParamsGet = nullptr;
 
     std::map<uint8_t, beerocks::promise<int> *> m_prmCliResponses;
 
@@ -262,9 +279,11 @@ private:
     beerocks_message::sAdminCredentials *m_admin_credentials     = nullptr;
     beerocks_message::sVersions *m_master_slave_versions         = nullptr;
     beerocks_message::sRestrictedChannels *m_Restricted_channels = nullptr;
-    BML_VAP_INFO *m_vaps                                         = nullptr;
-    uint8_t *m_pvaps_list_size                                   = nullptr;
-    uint16_t id                                                  = 0;
+    //m_scan_params is used when receiving the channel scan parameters
+    beerocks_message::sChannelScanRequestParams *m_scan_params = nullptr;
+    BML_VAP_INFO *m_vaps                                       = nullptr;
+    uint8_t *m_pvaps_list_size                                 = nullptr;
+    uint16_t id                                                = 0;
     static bool s_fExtLogContext;
 };
 
