@@ -155,6 +155,13 @@ public:
     //set and get channel scan enable flag
     int set_dcs_continuous_scan_enable(const std::string &mac, int enable);
     int get_dcs_continuous_scan_enable(const std::string &mac, int *output_enable);
+
+    //set and get channel scan params
+    int set_dcs_continuous_scan_params(const std::string &mac, int dwell_time, int interval_time,
+                                       unsigned int *channel_pool, int channel_pool_size);
+    int get_dcs_continuous_scan_params(const std::string &mac, int *output_dwell_time,
+                                       int *output_interval_time, unsigned int *output_channel_pool,
+                                       int *output_channel_pool_size);
     /*
  * Public static methods:
  */
@@ -219,6 +226,7 @@ private:
     beerocks::promise<bool> *m_prmLocalMasterGet        = nullptr;
     beerocks::promise<bool> *m_prmRestrictedChannelsGet = nullptr;
     beerocks::promise<int> *m_prmRdkbWlan               = nullptr;
+    beerocks::promise<bool> *m_prmChannelScanParamsGet  = nullptr;
 
     std::map<uint8_t, beerocks::promise<int> *> m_prmCliResponses;
 
@@ -233,6 +241,7 @@ private:
     beerocks_message::sAdminCredentials *m_admin_credentials     = nullptr;
     beerocks_message::sVersions *m_master_slave_versions         = nullptr;
     beerocks_message::sRestrictedChannels *m_Restricted_channels = nullptr;
+    beerocks_message::sChannelScanRequestParams *m_scan_params   = nullptr;
     BML_VAP_INFO *m_vaps                                         = nullptr;
     uint8_t *m_pvaps_list_size                                   = nullptr;
     uint16_t id                                                  = 0;

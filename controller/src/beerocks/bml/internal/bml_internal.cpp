@@ -1266,6 +1266,141 @@ int bml_internal::get_dcs_continuous_scan_enable(const std::string &mac, int *ou
     return send_bml_cmdu(*output_enable, request->get_action_op());
 }
 
+int bml_internal::set_dcs_continuous_scan_params(const std::string &mac, int dwell_time,
+                                                 int interval_time, unsigned int *channel_pool,
+                                                 int channel_pool_size)
+{
+    if (dwell_time == BML_CHANNEL_SCAN_INVALID_PARAM &&
+        interval_time == BML_CHANNEL_SCAN_INVALID_PARAM &&
+        channel_pool_size == BML_CHANNEL_SCAN_INVALID_PARAM) {
+        LOG(ERROR) << "Function is called, but no data is being set!";
+        return (-BML_RET_INVALID_DATA);
+    }
+
+    // If the socket is not valid, attempt to re-establish the connection
+    if (m_sockMaster == nullptr) {
+        int iRet = connect_to_master();
+        if (iRet != BML_RET_OK) {
+            return iRet;
+        }
+    }
+
+    //CMDU message
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST>(cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR)
+            << "Failed building cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->radio_mac()                = network_utils::mac_from_string(mac);
+    request->params().dwell_time_ms     = dwell_time;
+    request->params().interval_time_sec = interval_time;
+    request->params().channel_pool_size = channel_pool_size;
+    if (channel_pool_size > 0 && channel_pool_size <= BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE &&
+        channel_pool != nullptr) {
+        std::copy_n(channel_pool, channel_pool_size, request->params().channel_pool);
+    }
+
+    int result = 0;
+    if (send_bml_cmdu(result, request->get_action_op()) != BML_RET_OK) {
+        LOG(ERROR) << "Send ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST failed";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    if (result > 0) {
+        LOG(ERROR) << "ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST returned error code:"
+                   << result;
+        return result;
+    }
+
+    return BML_RET_OK;
+}
+
+int bml_internal::get_dcs_continuous_scan_params(const std::string &mac, int *output_dwell_time,
+                                                 int *output_interval_time,
+                                                 unsigned int *output_channel_pool,
+                                                 int *output_channel_pool_size)
+{
+    if (output_dwell_time == nullptr && output_interval_time == nullptr &&
+        output_channel_pool_size == nullptr) {
+        LOG(ERROR) << "Function is called, but no data is being requested!";
+        return (-BML_RET_INVALID_DATA);
+    }
+
+    if (m_sockPlatform == nullptr && !connect_to_platform()) {
+        return (-BML_RET_CONNECT_FAIL);
+    }
+
+    // Initialize the promise for receiving the response
+    beerocks::promise<bool> prmChannelScanParamsGet;
+    m_prmChannelScanParamsGet = &prmChannelScanParamsGet;
+    int iOpTimeout            = RESPONSE_TIMEOUT; // Default timeout
+
+    beerocks_message::sChannelScanRequestParams ScanParams;
+    m_scan_params = &ScanParams;
+
+    //CMDU message
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST>(cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR)
+            << "Failed building ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->radio_mac() = network_utils::mac_from_string(mac);
+    // Build and send the message
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending param get message!";
+        m_prmChannelScanParamsGet = nullptr;
+        m_scan_params             = nullptr;
+        return (-BML_RET_OP_FAILED);
+    }
+    LOG(DEBUG) << "ACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST sent";
+
+    int iRet = BML_RET_OK;
+
+    if (!m_prmChannelScanParamsGet->wait_for(iOpTimeout)) {
+        LOG(WARNING) << "Timeout while waiting for param get response...";
+        iRet = -BML_RET_TIMEOUT;
+    }
+
+    // Clear the scan params member
+    m_scan_params = nullptr;
+
+    // Clear the promise holder
+    m_prmChannelScanParamsGet = nullptr;
+
+    if (output_dwell_time != nullptr) {
+        *output_dwell_time = ScanParams.dwell_time_ms;
+    }
+    if (output_interval_time != nullptr) {
+        *output_interval_time = ScanParams.interval_time_sec;
+    }
+    if (output_channel_pool_size != nullptr && output_channel_pool != nullptr) {
+        *output_channel_pool_size = ScanParams.channel_pool_size;
+        if (*output_channel_pool_size > BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE) {
+            LOG(WARNING) << "Channel pool size is too big for the allocated channel pool...";
+            *output_channel_pool_size = BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE;
+            /* Currently this simply cuts the given channel pool to the maximal size
+               If this is considered an error uncomment the following line */
+            // iRet = -BML_RET_OP_FAILED;
+        }
+        std::copy_n(ScanParams.channel_pool, *output_channel_pool_size, output_channel_pool);
+    }
+
+    if (iRet != BML_RET_OK) {
+        LOG(ERROR) << "Params get failed!";
+        return (iRet);
+    }
+
+    return (iRet);
+}
+
 int bml_internal::ping()
 {
     // Command supported only on local master
