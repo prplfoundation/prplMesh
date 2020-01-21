@@ -453,8 +453,7 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(WSC::m2::config &m2
     // attribute type, 2 bytes attribute length, 8 bytes data), but check it anyway
     // to be on the safe side. Then, we add keywrapauth at its end.
     uint8_t *plaintext = config_data.getMessageBuff();
-    int plaintextlen =
-        config_data.getMessageBuffLength() + sizeof(WSC::sWscAttrKeyWrapAuthenticator);
+    int plaintextlen   = config_data.getMessageLength() + sizeof(WSC::sWscAttrKeyWrapAuthenticator);
     WSC::sWscAttrKeyWrapAuthenticator *keywrapauth =
         reinterpret_cast<WSC::sWscAttrKeyWrapAuthenticator *>(
             &plaintext[config_data.getMessageLength()]);
