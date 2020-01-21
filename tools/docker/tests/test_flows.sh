@@ -517,7 +517,7 @@ test_init() {
     start_tcpdump init
 
     [ "$SKIP_INIT" = "false" ] && {
-        eval ${scriptdir}/test_gw_repeater.sh -f -r "repeater1" -r "repeater2" -d 7 $redirect || {
+        eval ${scriptdir}/test_gw_repeater.sh -f -r "repeater1" -r "repeater2" -r "repeater3" -d 7 $redirect || {
             err "start GW+Repeater failed, abort"
             exit 1
         }
@@ -533,10 +533,12 @@ test_init() {
     mac_gateway=$(grep "GW_BRIDGE" "$connmap" | head -1 | awk '{print $5}' | cut -d ',' -f 1)
     dbg "mac_gateway = ${mac_gateway}"
 
-    mac_agent1=$(grep "IRE_BRIDGE" "$connmap" | head -1 | awk '{print $5}' | cut -d ',' -f 1)
+    mac_agent1=$(docker exec repeater1 ip -o l list dev br-lan | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
     dbg "mac_agent1 = ${mac_agent1}"
-    mac_agent2=$(grep "IRE_BRIDGE" "$connmap" | sed -n 2p | awk '{print $5}' | cut -d ',' -f 1)
+    mac_agent2=$(docker exec repeater2 ip -o l list dev br-lan | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
     dbg "mac_agent2 = ${mac_agent2}"
+    mac_agent1=$(docker exec repeater1 ip -o l list dev br-lan | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
+    dbg "mac_agent3 = ${mac_agent3}"
 
     mac_gateway_wlan0=$(docker exec gateway ip -o l list dev wlan0 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
     dbg "mac_gateway_wlan0 = ${mac_gateway_wlan0}"
@@ -547,14 +549,20 @@ test_init() {
     mac_agent2_wlan0=$(docker exec repeater2 ip -o l list dev wlan0 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
     dbg "mac_agent2_wlan0 = ${mac_agent2_wlan0}"
 
+    mac_agent3_wlan0=$(docker exec repeater3 ip -o l list dev wlan0 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
+    dbg "mac_agent3_wlan0 = ${mac_agent3_wlan0}"
+
     mac_gateway_wlan2=$(docker exec gateway ip -o l list dev wlan2 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
-    dbg "mac_gateway_wlan0 = ${mac_gateway_wlan2}"
+    dbg "mac_gateway_wlan2 = ${mac_gateway_wlan2}"
 
     mac_agent1_wlan2=$(docker exec repeater1 ip -o l list dev wlan2 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
     dbg "mac_agent1_wlan2 = ${mac_agent1_wlan2}"
 
     mac_agent2_wlan2=$(docker exec repeater2 ip -o l list dev wlan2 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
     dbg "mac_agent2_wlan2 = ${mac_agent2_wlan2}"
+
+    mac_agent3_wlan2=$(docker exec repeater3 ip -o l list dev wlan2 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
+    dbg "mac_agent3_wlan2 = ${mac_agent3_wlan2}"
 
 }
 usage() {
