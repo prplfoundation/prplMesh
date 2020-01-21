@@ -15,7 +15,7 @@ tlvApVhtCapabilities:
   flags1: sFlags1
   flags2: sFlags2
 
-sFalgs1:
+sFlags1:
   _type: struct
   _bit_field: uint8_t
   max_num_of_supported_tx_spatial_streams:
@@ -27,7 +27,7 @@ sFalgs1:
   short_gi_support_160mhz_and_80_80mhz:
     _bit_range: [0,0]
 
-sFalgs2:
+sFlags2:
   _type: struct
   _bit_field: uint8_t
   vht_support_80_80mhz:

@@ -19,7 +19,7 @@ tlvApHeCapabilities:
   flags1: sFlags1
   flags2: sFlags2
 
-sFalgs1:
+sFlags1:
   _type: struct
   _bit_field: uint8_t
   max_num_of_supported_tx_spatial_streams:
@@ -31,7 +31,7 @@ sFalgs1:
   he_support_160mhz:
     _bit_range: [0,0]
 
-sFalgs2:
+sFlags2:
   _type: struct
   _bit_field: uint8_t
   su_beamformer_capable:
