@@ -282,7 +282,7 @@ public:
     const beerocks::message::sRadioCapabilities *
     get_station_capabilities(const std::string &client_mac, bool is_bandtype_5ghz);
     bool set_station_capabilities(const std::string &client_mac,
-                                  beerocks::message::sRadioCapabilities &sta_cap);
+                                  const beerocks::message::sRadioCapabilities &sta_cap);
 
     bool set_hostap_ant_num(std::string mac, beerocks::eWiFiAntNum ant_num);
     beerocks::eWiFiAntNum get_hostap_ant_num(std::string mac);

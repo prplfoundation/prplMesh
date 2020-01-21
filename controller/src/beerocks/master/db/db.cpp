@@ -1018,7 +1018,7 @@ const beerocks::message::sRadioCapabilities *db::get_station_current_capabilitie
 }
 
 bool db::set_station_capabilities(const std::string &client_mac,
-                                  beerocks::message::sRadioCapabilities &sta_cap)
+                                  const beerocks::message::sRadioCapabilities &sta_cap)
 {
     auto n = get_node(client_mac);
 
