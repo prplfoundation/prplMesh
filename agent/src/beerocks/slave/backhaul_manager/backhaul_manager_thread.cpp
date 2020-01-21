@@ -43,6 +43,9 @@
 #include <bpl/bpl_cfg.h>
 #include <bpl/bpl_err.h>
 
+// SPEED values
+#include <linux/ethtool.h>
+
 using namespace beerocks::net;
 
 namespace beerocks {
@@ -1781,11 +1784,39 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
                    << (int)mid;
         return false;
     }
+
+    /**
+     * 1905.1 AL MAC address of the device.
+     */
     tlvDeviceInformation->mac() = network_utils::mac_from_string(bridge_info.mac);
 
-    // https://github.com/prplfoundation/prplMesh/issues/300
-    //TODO: set number of local interfaces.
-    //TODO: fill info of each of the local interfaces, according to IEEE_1905 section 6.4.5
+    /**
+     * Set the number of local interfaces and fill info of each of the local interfaces, according
+     * to IEEE_1905 section 6.4.5
+     */
+    uint32_t speed;
+    if (network_utils::linux_iface_get_speed(bridge_info.iface, speed)) {
+        std::shared_ptr<ieee1905_1::cLocalInterfaceInfo> localInterfaceInfo =
+            tlvDeviceInformation->create_local_interface_list();
+
+        ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+        if (SPEED_100 == speed) {
+            media_type = ieee1905_1::eMediaType::IEEE_802_3U_FAST_ETHERNET;
+        } else if (SPEED_1000 == speed) {
+            media_type = ieee1905_1::eMediaType::IEEE_802_3AB_GIGABIT_ETHERNET;
+        }
+
+        localInterfaceInfo->mac()               = network_utils::mac_from_string(bridge_info.mac);
+        localInterfaceInfo->media_type()        = media_type;
+        localInterfaceInfo->media_info_length() = 0;
+
+        tlvDeviceInformation->add_local_interface_list(localInterfaceInfo);
+    }
+
+    // TODO: Add a LocalInterfaceInfo field for each wireless interface.
+    // This is something that cannot be done at this moment because the MediaType field
+    // must be computed with information obtained through NL80211_CMD_GET_WIPHY command of DWPAL,
+    // which is currently not supported. See "Send standard NL80211 commands using DWPAL #782"
 
     auto tlvSupportedService = cmdu_tx.addClass<wfa_map::tlvSupportedService>();
     if (!tlvSupportedService) {
