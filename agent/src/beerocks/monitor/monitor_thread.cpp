@@ -1475,6 +1475,63 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
         // If event == Channel_Scan_New_Results_Ready do nothing since is_dump's default is 0
         if (event == Event::Channel_Scan_Dump_Result) {
+            auto &msg = *(static_cast<bwl::sCHANNEL_SCAN_RESULTS_NOTIFICATION *>(data));
+
+            auto &in_result  = msg.channel_scan_results;
+            auto &out_result = notification->scan_results();
+
+            // Arrays
+            string_utils::copy_string(out_result.ssid, in_result.ssid,
+                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
+            std::copy_n(in_result.bssid.oct, sizeof(out_result.bssid.oct), out_result.bssid.oct);
+            std::copy(in_result.basic_data_transfer_rates_kbps.begin(),
+                      in_result.basic_data_transfer_rates_kbps.end(),
+                      out_result.basic_data_transfer_rates_kbps);
+            std::copy(in_result.supported_data_transfer_rates_kbps.begin(),
+                      in_result.supported_data_transfer_rates_kbps.end(),
+                      out_result.supported_data_transfer_rates_kbps);
+
+            // Primery values
+            out_result.channel             = in_result.channel;
+            out_result.signal_strength_dBm = in_result.signal_strength_dBm;
+            out_result.beacon_period_ms    = in_result.beacon_period_ms;
+            out_result.noise_dBm           = in_result.noise_dBm;
+            out_result.dtim_period         = in_result.dtim_period;
+            out_result.channel_utilization = in_result.channel_utilization;
+
+            // Enums
+            out_result.mode = beerocks_message::eChannelScanResultMode(uint8_t(in_result.mode));
+            out_result.operating_frequency_band =
+                beerocks_message::eChannelScanResultOperatingFrequencyBand(
+                    uint8_t(in_result.operating_frequency_band));
+            out_result.operating_standards = beerocks_message::eChannelScanResultStandards(
+                uint8_t(in_result.operating_standards));
+            out_result.operating_channel_bandwidth =
+                beerocks_message::eChannelScanResultChannelBandwidth(
+                    uint8_t(in_result.operating_channel_bandwidth));
+
+            // Enum list
+            int i = 0;
+            std::for_each(in_result.security_mode_enabled.begin(),
+                          in_result.security_mode_enabled.end(),
+                          [&i, &out_result](bwl::eChannelScanResultSecurityMode e) {
+                              out_result.security_mode_enabled[i++] =
+                                  beerocks_message::eChannelScanResultSecurityMode(uint8_t(e));
+                          });
+            i = 0;
+            std::for_each(in_result.encryption_mode.begin(), in_result.encryption_mode.end(),
+                          [&i, &out_result](bwl::eChannelScanResultEncryptionMode e) {
+                              out_result.encryption_mode[i++] =
+                                  beerocks_message::eChannelScanResultEncryptionMode(uint8_t(e));
+                          });
+            i = 0;
+            std::for_each(in_result.supported_standards.begin(),
+                          in_result.supported_standards.end(),
+                          [&i, &out_result](bwl::eChannelScanResultStandards e) {
+                              out_result.supported_standards[i++] =
+                                  beerocks_message::eChannelScanResultStandards(uint8_t(e));
+                          });
+
             notification->is_dump() = 1;
         }
 
