@@ -295,7 +295,8 @@ wait_for_message() {
         fi
     done
     if [ $found = 0 ]; then
-        err "FAIL after $wait $command" 
+        err "FAIL after $wait $command"
+        check_error=$((check_error+1))
         return 1
     fi
 }
@@ -304,10 +305,10 @@ test_optimal_path_dummy() {
     status "test optimal path dummy"
     check_error=0
 
-    dbg "Connect dummy STA to wlan0"
-    send_bwl_event repeater1 wlan0 "EVENT AP-STA-CONNECTED 11:22:33:44:55:66"
     dbg "Pre-prepare RRM Beacon Response for association handling task"
     send_bwl_event repeater1 wlan0 "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-40 rsni=40 bssid=aa:bb:cc:00:00:10"
+    dbg "Connect dummy STA to wlan0"
+    send_bwl_event repeater1 wlan0 "EVENT AP-STA-CONNECTED 11:22:33:44:55:66"
     dbg "Confirming 11k request is done by association handling task"
     wait_for_message 2 repeater1 "beerocks_monitor_wlan0.log" "Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:00:00:10 channel 1"
 
@@ -376,6 +377,7 @@ test_optimal_path_dummy() {
 
     dbg "Confirming optimal path falls back to RSSI measurements"
     wait_for_message 20 gateway "beerocks_controller.log" "requesting rssi measurements for 11:22:33:44:55:77"
+    return $check_error
 }
 
 test_client_steering_dummy() {
