@@ -2329,8 +2329,7 @@ bool db::clear_channel_scan_results(const sMacAddr &mac, bool single_scan)
         return false;
     }
 
-    (single_scan ? hostap->single_scan_config : hostap->continuous_scan_config)
-        .channel_pool.clear();
+    (single_scan ? hostap->single_scan_results : hostap->continuous_scan_results).clear();
 
     return true;
 }
