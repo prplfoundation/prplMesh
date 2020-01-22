@@ -173,17 +173,11 @@ test-on-netgear-rax40:
 run-certification-tests:
   stage: test
   variables:
-    # TESTS_TO_RUN needs to be set by the user (or the pipeline schedule)
+    TESTS_TO_RUN: "MAP-4.2.1"
     GIT_CLONE_PATH: "/builds/prpl-foundation/prplMesh/"
     # device to test with: prplmesh for dummy bwl, netgear-rax40 for dwpal on rax40
-    DEVICE_UNDER_TEST: prplmesh
   script:
-      - |
-        if [ "$DEVICE_UNDER_TEST" != prplmesh ] ; then
-            echo "Deploying to $DEVICE_UNDER_TEST"
-            tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/prplmesh.ipk
-        fi
-      - /easymesh_cert/run_test_file.sh -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
+      - /easymesh_cert/run_test_file.sh -d mediatek -o logs $TESTS_TO_RUN
   artifacts:
     paths:
       - logs
