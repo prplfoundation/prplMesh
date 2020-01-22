@@ -29,8 +29,6 @@ dynamic_channel_selection_task::dynamic_channel_selection_task(db &database_,
 
 void dynamic_channel_selection_task::work()
 {
-    TASK_LOG(DEBUG) << "FSM current state: " << s_ar_states[int(m_fsm_state)];
-
     switch (m_fsm_state) {
     case eState::INIT: {
         database.assign_dynamic_channel_selection_task_id(m_radio_mac, id);
@@ -57,7 +55,7 @@ void dynamic_channel_selection_task::work()
         break;
     }
     case eState::TRIGGER_SCAN: {
-        LOG(TRACE) << "TRIGGER_SCAN, mac=" << m_radio_mac << "scan_type is "
+        LOG(TRACE) << "TRIGGER_SCAN, mac=" << m_radio_mac << ", scan_type is "
                    << ((m_is_single_scan) ? "single-scan" : "continuous-scan");
 
         // When a scan is requested send the scan parameters Channel pool & Dwell time
@@ -180,7 +178,6 @@ void dynamic_channel_selection_task::work()
         break;
     }
     }
-    TASK_LOG(DEBUG) << "FSM next state: " << s_ar_states[int(m_fsm_state)];
 }
 
 void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
@@ -389,3 +386,11 @@ void dynamic_channel_selection_task::dcs_wait_for_event(eEvent dcs_event)
     m_dcs_waiting_for_event = dcs_event;
     wait_for_event((int)dcs_event);
 }
+
+void dynamic_channel_selection_task::fsm_move_state(eState new_state)
+{
+    TASK_LOG(TRACE) << "FSM: " << s_ar_states[int(m_fsm_state)] << " --> "
+                    << s_ar_states[int(new_state)];
+    m_fsm_state = new_state;
+}
+bool dynamic_channel_selection_task::fsm_in_state(eState state) { return m_fsm_state == state; }
