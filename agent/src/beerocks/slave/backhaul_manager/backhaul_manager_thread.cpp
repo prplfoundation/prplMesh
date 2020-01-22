@@ -25,6 +25,7 @@
 #include <tlvf/ieee_1905_1/eMessageType.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
+#include <tlvf/ieee_1905_1/tlvDeviceInformation.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
 #include <tlvf/ieee_1905_1/tlvMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
@@ -1765,6 +1766,18 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
                    << (int)mid;
         return false;
     }
+
+    auto tlvDeviceInformation = cmdu_tx.addClass<ieee1905_1::tlvDeviceInformation>();
+    if (!tlvDeviceInformation) {
+        LOG(ERROR) << "addClass ieee1905_1::tlvDeviceInformation failed, mid=" << std::hex
+                   << (int)mid;
+        return false;
+    }
+    tlvDeviceInformation->mac() = network_utils::mac_from_string(bridge_info.mac);
+
+    // https://github.com/prplfoundation/prplMesh/issues/300
+    //TODO: set number of local interfaces.
+    //TODO: fill info of each of the local interfaces, according to IEEE_1905 section 6.4.5
 
     auto tlvSupportedService = cmdu_tx.addClass<wfa_map::tlvSupportedService>();
     if (!tlvSupportedService) {
