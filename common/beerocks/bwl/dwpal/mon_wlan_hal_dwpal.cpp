@@ -33,6 +33,21 @@ namespace dwpal {
 ////////////////////////// Local Module Definitions //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+enum ie_type : uint8_t {
+    TYPE_SSID                     = 0,
+    TYPE_SUPPORTED_RATES          = 1,
+    TYPE_TIM                      = 5,
+    TYPE_BSS_LOAD                 = 11,
+    TYPE_RSN                      = 48,
+    TYPE_EXTENDED_SUPPORTED_RATES = 50,
+    TYPE_HT_OPERATION             = 61,
+    TYPE_VHT_OPERATION            = 192,
+    TYPE_VENDOR                   = 221
+};
+
+#define WLAN_CAPABILITY_ESS (1 << 0)
+#define WLAN_CAPABILITY_IBSS (1 << 1)
+#define WLAN_CAPABILITY_PRIVACY (1 << 4)
 #define GET_OP_CLASS(channel) ((channel < 14) ? 4 : 5)
 
 // Allocate a char array wrapped in a shared_ptr
