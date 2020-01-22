@@ -62,10 +62,9 @@ run-tests:
   stage: test
   image: $CI_REGISTRY_IMAGE/tests-runner:18.09.7-dind
   script:
-    - cd tools/docker
-    # Try to pull from dockerhub, build the container images if that fails
-    - ./image-pull.sh || ./image-build.sh
-    - ./tests/test_flows.sh -v -u $RANDOM
+    # Try to pull from dockerhub, if it fails, the run should fail
+    - tools/docker/image-pull.sh
+    - tests/test_flows.sh -v -u $RANDOM
 
   artifacts:
     paths:
@@ -106,7 +105,7 @@ run-tests:
     - for i in $ALL_TARGETS ; do ssh "$i" 'pgrep -f beerocks | xargs kill -9 2>/dev/null' || true ; done
   script:
     - tools/deploy_ipk.sh $TARGET_DEVICE_NAME tools/docker/builder/openwrt/*.ipk
-    - tools/docker/tests/openwrt/test_status.sh $TARGET_DEVICE_NAME
+    - tests/openwrt/test_status.sh $TARGET_DEVICE_NAME
   artifacts:
     paths:
       - ${TARGET_DEVICE_NAME}_logs.tar.gz
