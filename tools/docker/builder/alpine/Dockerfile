@@ -27,6 +27,6 @@ RUN apk add --update --no-cache \
     readline-dev \
     && apk add --update --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
     clang-extra-tools
-# cland-extra-tools needs to be fetched from the edge repository for now
+# clang-extra-tools needs to be fetched from the edge repository for now
 
 RUN pip install pyyaml
