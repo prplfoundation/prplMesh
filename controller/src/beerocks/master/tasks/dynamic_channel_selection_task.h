@@ -69,6 +69,8 @@ protected:
 
 private:
     void dcs_wait_for_event(eEvent cs_event);
+    void fsm_move_state(eState new_state);
+    bool fsm_in_state(eState state);
 
     eState m_fsm_state;
 
@@ -85,9 +87,6 @@ private:
 
     bool m_is_single_scan_pending = false;
     bool m_is_single_scan         = false;
-
-    void fsm_move_state(eState new_state) { (m_fsm_state = new_state); }
-    bool fsm_in_state(eState state) { return (m_fsm_state == state); }
 };
 } //namespace son
 #endif
