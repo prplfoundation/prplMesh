@@ -139,6 +139,311 @@ static bool dwpal_get_channel_scan_freq(const std::vector<unsigned int> &channel
     return true;
 };
 
+static bool read_nl_data_from_msg(struct nlattr **bss, struct nl_msg *msg)
+{
+    struct genlmsghdr *gnlh = (genlmsghdr *)nlmsg_data(nlmsg_hdr(msg));
+    struct nlattr *tb[NL80211_ATTR_MAX + 1];
+    static struct nla_policy bss_policy[NL80211_BSS_MAX + 1];
+
+    if (!bss || !msg) {
+        LOG(ERROR) << "invalid input bss=" << bss << ", msg=" << msg;
+        return false;
+    }
+
+    bss_policy[NL80211_BSS_BSSID]                = {};
+    bss_policy[NL80211_BSS_FREQUENCY].type       = NLA_U32;
+    bss_policy[NL80211_BSS_TSF].type             = NLA_U64;
+    bss_policy[NL80211_BSS_BEACON_INTERVAL].type = NLA_U16;
+    bss_policy[NL80211_BSS_CAPABILITY].type      = NLA_U16;
+    bss_policy[NL80211_BSS_INFORMATION_ELEMENTS] = {};
+    bss_policy[NL80211_BSS_SIGNAL_MBM].type      = NLA_U32;
+    bss_policy[NL80211_BSS_SIGNAL_UNSPEC].type   = NLA_U8;
+    bss_policy[NL80211_BSS_STATUS].type          = NLA_U32;
+    bss_policy[NL80211_BSS_SEEN_MS_AGO].type     = NLA_U32;
+    bss_policy[NL80211_BSS_BEACON_IES]           = {};
+
+    nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0), NULL);
+
+    if (!tb[NL80211_ATTR_BSS]) {
+        LOG(ERROR) << "netlink message is missing the BSS attribute";
+        return false;
+    }
+    if (nla_parse_nested(bss, NL80211_BSS_MAX, tb[NL80211_ATTR_BSS], bss_policy)) {
+        LOG(ERROR) << "Failed parsing nested netlink BSS attribute";
+        return false;
+    }
+    if (!bss[NL80211_BSS_BSSID]) {
+        LOG(ERROR) << "netlink message is missing the BSSID attribute";
+        return false;
+    }
+
+    return true;
+}
+
+static void get_ht_oper(const uint8_t *data, sChannelScanResults &results)
+{
+    if (!data) {
+        LOG(ERROR) << "data buffer is NULL";
+        return;
+    }
+
+    if (!(data[1] & 0x3)) {
+        results.operating_channel_bandwidth = eChannel_Bandwidth_20MHz;
+    } else if ((data[1] & 0x3) != 2) {
+        results.operating_channel_bandwidth = eChannel_Bandwidth_40MHz;
+    }
+
+    results.supported_standards.push_back(eStandard_802_11n);
+    results.operating_standards = eStandard_802_11n;
+}
+
+static void get_vht_oper(const uint8_t *data, sChannelScanResults &results)
+{
+    if (!data) {
+        LOG(ERROR) << "data buffer is NULL";
+        return;
+    }
+
+    if (data[0] == 0x01) {
+        if (data[2]) {
+            results.operating_channel_bandwidth = eChannel_Bandwidth_160MHz;
+        } else {
+            results.operating_channel_bandwidth = eChannel_Bandwidth_80MHz;
+        }
+    }
+
+    if (data[0] == 0x02) {
+        results.operating_channel_bandwidth = eChannel_Bandwidth_80MHz;
+    }
+
+    if (data[0] == 0x03) {
+        results.operating_channel_bandwidth = eChannel_Bandwidth_80_80;
+    }
+
+    if (data[0] > 0x03) {
+        LOG(ERROR) << "illegal TYPE_VHT_OPERATION value=" << data[0];
+    }
+
+    if (results.operating_frequency_band == eOperating_Freq_Band_5GHz) {
+        results.supported_standards.push_back(eStandard_802_11ac);
+        results.operating_standards = eStandard_802_11ac;
+    }
+}
+
+static void get_supprates(const uint8_t *data, uint8_t len, sChannelScanResults &results)
+{
+    uint8_t rate_mbs_fp_8_1;
+    uint32_t rate_kbs;
+
+    if (!data) {
+        LOG(ERROR) << "data buffer is NULL";
+        return;
+    }
+
+    for (int i = 0; i < len; i++) {
+        rate_mbs_fp_8_1 = data[i] & 0x7f;
+
+        if (rate_mbs_fp_8_1 / 2 == 11) {
+            if (results.operating_frequency_band == eOperating_Freq_Band_2_4GHz) {
+                results.supported_standards.push_back(eStandard_802_11b);
+                results.operating_standards = eStandard_802_11b;
+            }
+        } else if (rate_mbs_fp_8_1 / 2 == 54) {
+            if (results.operating_frequency_band == eOperating_Freq_Band_5GHz) {
+                results.supported_standards.push_back(eStandard_802_11a);
+                results.operating_standards = eStandard_802_11a;
+            }
+        }
+
+        /**
+         * rate_mbs_fp_8_1 is tx data rate in mbps 
+         * represented with fixed point u<8,1>.
+         * converting to kbps (no fixpoint) for simplicity u<8,0> 
+         */
+        rate_kbs = (rate_mbs_fp_8_1 / 2) * 1000 + (5 * (rate_mbs_fp_8_1 & 1)) * 100;
+
+        if (data[i] & 0x80) {
+            results.basic_data_transfer_rates_kbps.push_back(rate_kbs);
+        } else {
+            results.supported_data_transfer_rates_kbps.push_back(rate_kbs);
+        }
+    }
+}
+
+static void parse_info_elements(unsigned char *ie, int ielen, sChannelScanResults &results)
+{
+    if (!ie) {
+        LOG(ERROR) << "info elements buffer is NULL";
+        return;
+    }
+
+    while (ielen >= 2 && ielen >= ie[1]) {
+        auto key      = ie[0];
+        auto length   = ie[1];
+        uint8_t *data = ie + 2;
+
+        switch (key) {
+        case ie_type::TYPE_SSID: {
+            if (length > 32) {
+                LOG(ERROR) << "TYPE_SSID doesn't match min and max length criteria";
+                break;
+            }
+            std::copy_n(data, length, results.ssid);
+        } break;
+
+        case ie_type::TYPE_SUPPORTED_RATES: {
+            get_supprates(data, length, results);
+        } break;
+
+        case ie_type::TYPE_TIM: {
+            if (length < 4) {
+                LOG(ERROR) << "TYPE_TIM doesn't match min and max length criteria";
+                break;
+            }
+            results.dtim_period = (uint32_t)data[1];
+        } break;
+
+        case ie_type::TYPE_BSS_LOAD: {
+            if (length != 5) {
+                LOG(ERROR) << "TYPE_BSS_LOAD doesn't match min and max length criteria";
+                break;
+            }
+            results.channel_utilization = (uint32_t)(data[2] / 255);
+        } break;
+
+        case ie_type::TYPE_RSN: {
+            if (length < 2) {
+                LOG(ERROR) << "TYPE_RSN doesn't match min and max length criteria";
+                break;
+            }
+            results.encryption_mode.push_back(eEncryption_Mode_AES);
+            results.security_mode_enabled.push_back(eSecurity_Mode_WPA2);
+        } break;
+
+        case ie_type::TYPE_EXTENDED_SUPPORTED_RATES: {
+
+            if (results.operating_frequency_band == eOperating_Freq_Band_2_4GHz) {
+                results.supported_standards.push_back(eStandard_802_11g);
+                results.operating_standards = eStandard_802_11g;
+            }
+
+            get_supprates(data, length, results);
+
+        } break;
+
+        case ie_type::TYPE_HT_OPERATION: {
+            if (length != 22) {
+                LOG(ERROR) << "TYPE_HT_OPERATION doesn't match min and max length criteria";
+                break;
+            }
+            get_ht_oper(data, results);
+        } break;
+
+        case ie_type::TYPE_VHT_OPERATION: {
+            if (length < 5) {
+                LOG(ERROR) << "TYPE_VHT_OPERATION doesn't match min and max length criteria";
+                break;
+            }
+            get_vht_oper(data, results);
+        } break;
+
+        default: {
+            LOG(ERROR) << "Unhandled element received: " << int(key);
+        } break;
+        }
+
+        ielen -= length + 2;
+        ie += length + 2;
+    }
+}
+
+static bool translate_nl_data_to_bwl_results(sChannelScanResults &results,
+                                             const struct nlattr **bss)
+{
+    //get bssid
+    std::copy_n(results.bssid.oct, sizeof(results.bssid.oct),
+                (unsigned char *)nla_data(bss[NL80211_BSS_BSSID]));
+
+    //get channel and operating frequency band
+    if (bss[NL80211_BSS_FREQUENCY]) {
+        int freq = nla_get_u32(bss[NL80211_BSS_FREQUENCY]);
+        if (freq >= 5180) {
+            results.operating_frequency_band = eOperating_Freq_Band_5GHz;
+        } else {
+            results.operating_frequency_band = eOperating_Freq_Band_2_4GHz;
+        }
+        results.channel = beerocks::utils::wifi_freq_to_channel(freq);
+    }
+
+    // get beacon period
+    if (bss[NL80211_BSS_BEACON_INTERVAL]) {
+        results.beacon_period_ms = (unsigned int)nla_get_u16(bss[NL80211_BSS_BEACON_INTERVAL]);
+    }
+
+    // get signal strength
+    if (bss[NL80211_BSS_SIGNAL_UNSPEC]) {
+        results.signal_strength_dBm = (nla_get_u8(bss[NL80211_BSS_SIGNAL_UNSPEC])) / 100;
+    } else if (bss[NL80211_BSS_SIGNAL_MBM]) {
+        results.signal_strength_dBm = (nla_get_u32(bss[NL80211_BSS_SIGNAL_MBM])) / 100;
+    }
+
+    //get information elements from information-elements-buffer or from beacon
+    if (bss[NL80211_BSS_BEACON_IES]) {
+        enum nl80211_bss ies_index = (bss[NL80211_BSS_INFORMATION_ELEMENTS])
+                                         ? NL80211_BSS_INFORMATION_ELEMENTS
+                                         : NL80211_BSS_BEACON_IES;
+        parse_info_elements((unsigned char *)nla_data(bss[ies_index]), nla_len(bss[ies_index]),
+                            results);
+    }
+
+    //get capabilities: mode, security_mode_enabled
+    if (bss[NL80211_BSS_CAPABILITY]) {
+        uint16_t capa = nla_get_u16(bss[NL80211_BSS_CAPABILITY]);
+
+        if (capa & WLAN_CAPABILITY_IBSS) {
+            results.mode = eMode_AdHoc;
+        } else if (capa & WLAN_CAPABILITY_ESS) {
+            results.mode = eMode_Infrastructure;
+        }
+
+        if (results.security_mode_enabled.size() == 0) {
+            if (capa & WLAN_CAPABILITY_PRIVACY) {
+                results.security_mode_enabled.push_back(eSecurity_Mode_WEP);
+            } else {
+                results.security_mode_enabled.push_back(eSecurity_Mode_None);
+            }
+        }
+    }
+
+    return true;
+}
+
+static bool get_scan_results_from_nl_msg(sChannelScanResults &results, struct nl_msg *msg)
+{
+    struct nlattr *bss[NL80211_BSS_MAX + 1];
+
+    if (!msg) {
+        LOG(ERROR) << "invalid input: msg==NULL" << msg;
+        return false;
+    }
+
+    //prepare results
+    results = {'\0'};
+
+    //read msg buffer into nl attributes struct
+    if (!read_nl_data_from_msg(bss, msg)) {
+        LOG(ERROR) << "failed to parse netlink message";
+        return false;
+    }
+
+    if (!translate_nl_data_to_bwl_results(results, (const nlattr **)bss)) {
+        LOG(ERROR) << "failed to translate nl data to BWL results";
+        return false;
+    }
+
+    return true;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -768,10 +1073,8 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
         }
         LOG(DEBUG) << "DWPAL NL event channel scan triggered";
 
-        // Setting to distingwish from 1st and rest of NL80211_CMD_NEW_SCAN_RESULTS events.
-        // 1st event "empty dump result" need to send back scan dump request.
-        // rest of events are the actual scan dumps.
-        m_wait_for_channel_scan_results_ready = true;
+        //start new sequence of dump results
+        m_nl_seq = 0;
         event_queue_push(event);
         break;
     }
@@ -782,23 +1085,43 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
             return true;
         }
 
-        if (m_wait_for_channel_scan_results_ready) {
-            if (m_nl_seq == 0 && nlh->nlmsg_seq != 0) {
-                LOG(DEBUG) << "Results dump are ready with sequence number: "
-                           << (int)nlh->nlmsg_seq;
-                m_nl_seq                              = nlh->nlmsg_seq;
-                m_wait_for_channel_scan_results_ready = false;
-            }
-
-            event_queue_push(Event::Channel_Scan_New_Results_Ready);
-            channel_scan_dump_results();
-            break;
+        if (nlh->nlmsg_seq == 0) {
+            LOG(ERROR) << "Invalid! nl message seq cannot be 0";
+            return false;
         }
 
-        LOG(DEBUG) << "DWPAL NL event channel scan results dump";
+        // We need to distinguish 1st dump event that cannot be parsed
+        // and the rest of dump events (NL80211_CMD_NEW_SCAN_RESULTS)
+        // 1st event "empty dump result" need to send back scan dump request.
+        // rest of events are the actual scan dumps that need to be parsed.
+        if (m_nl_seq == 0) {
+            LOG(DEBUG) << "Results dump are ready with sequence number: " << (int)nlh->nlmsg_seq;
+            m_nl_seq = nlh->nlmsg_seq;
+            event_queue_push(Event::Channel_Scan_New_Results_Ready);
+            channel_scan_dump_results();
+        } else if (m_nl_seq == nlh->nlmsg_seq) {
+            LOG(DEBUG) << "DWPAL NL event channel scan results dump";
 
-        //TODO: Translate results from NL format to usable format
-        event_queue_push(event);
+            auto results_buff = ALLOC_SMART_BUFFER(sizeof(sCHANNEL_SCAN_RESULTS_NOTIFICATION));
+            auto results =
+                reinterpret_cast<sCHANNEL_SCAN_RESULTS_NOTIFICATION *>(results_buff.get());
+            if (!results) {
+                LOG(FATAL) << "Memory allocation failed!";
+                return false;
+            }
+            // Initialize the message
+            results_buff = {};
+
+            if (!get_scan_results_from_nl_msg(results->channel_scan_results, msg)) {
+                LOG(ERROR) << "read NL msg to monitor msg failed!";
+                return false;
+            }
+            LOG(DEBUG) << "Processing results for BSSID:" << results->channel_scan_results.bssid;
+            event_queue_push(event, results_buff);
+        } else {
+            LOG(ERROR) << "channel scan results dump recieved with unexpected seq number";
+            return false;
+        }
         break;
     }
     case Event::Channel_Scan_Abort: {
@@ -810,8 +1133,8 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
         }
         LOG(DEBUG) << "DWPAL NL event channel scan aborted";
 
-        m_nl_seq                              = 0;
-        m_wait_for_channel_scan_results_ready = false;
+        //zero sequence number for next scan
+        m_nl_seq = 0;
 
         event_queue_push(event);
         break;
@@ -827,8 +1150,8 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
         LOG(DEBUG) << "DWPAL NL event channel scan results finished for sequence: "
                    << (int)nlh->nlmsg_seq;
 
-        m_nl_seq                              = 0;
-        m_wait_for_channel_scan_results_ready = false;
+        //zero sequence number for next scan
+        m_nl_seq = 0;
 
         event_queue_push(event);
         break;

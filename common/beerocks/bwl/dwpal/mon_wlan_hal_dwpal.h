@@ -109,7 +109,6 @@ private:
     }
 
     std::shared_ptr<char> m_temp_dwpal_value;
-    bool m_wait_for_channel_scan_results_ready       = false;
     uint32_t m_nl_seq                                = 0;
     unsigned char m_nl_buffer[NL_MAX_REPLY_BUFFSIZE] = {'\0'};
 };
