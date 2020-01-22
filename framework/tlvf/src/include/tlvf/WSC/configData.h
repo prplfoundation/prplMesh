@@ -17,12 +17,12 @@ class configData : public AttrList {
 
 public:
     struct config {
-        std::string ssid = "NA";
-        eWscAuth auth_type;
-        eWscEncr encr_type;
-        std::string network_key = "NA";
-        sMacAddr bssid          = {};
-        eWscVendorExtSubelementBssType bss_type;
+        std::string ssid                        = "prplMesh";
+        eWscAuth auth_type                      = eWscAuth::WSC_AUTH_WPA2PSK;
+        eWscEncr encr_type                      = eWscEncr::WSC_ENCR_AES;
+        std::string network_key                 = "12345678";
+        sMacAddr bssid                          = {};
+        eWscVendorExtSubelementBssType bss_type = eWscVendorExtSubelementBssType::TEARDOWN;
     };
 
     configData(uint8_t *buff, size_t buff_len, bool parse) : AttrList(buff, buff_len, parse) {}
