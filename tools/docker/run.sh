@@ -24,6 +24,7 @@ usage() {
     echo "      -p|--port - port to expose on the container"
     echo "      -I|--image - docker network to which to attach the container"
     echo "      -N|--network - docker network to which to attach the container"
+    echo "      -u|--unique-id - unique id to add as suffix to container and network names"
     echo "      --entrypoint - use a different entrypoint for the container"
 }
 
@@ -42,11 +43,11 @@ generate_container_random_ip() {
 }
 
 gateway_netid_length() {
-    docker network inspect prplMesh-net --format "{{(index .IPAM.Config 0).Subnet}}" | sed -rn 's/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{2})$/\1/p'
+    docker network inspect prplMesh-net-${UNIQUE_ID} --format "{{(index .IPAM.Config 0).Subnet}}" | sed -rn 's/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{2})$/\1/p'
 }
 
 main() {
-    OPTS=`getopt -o 'hvdfi:m:n:N:o:t:p:' --long verbose,help,detach,force,ipaddr:,mac:,name:,network:,entrypoint:,tag:,port:,options: -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvdfi:m:n:N:o:t:p:u:' --long verbose,help,detach,force,ipaddr:,mac:,name:,network:,entrypoint:,tag:,port:,options:,unique-id: -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -61,6 +62,7 @@ main() {
             -i | --ipaddr)      IPADDR="$2"; shift; shift ;;
             -m | --mac)         BASE_MAC="$2"; shift; shift ;;
             -n | --name)        NAME="$2"; shift; shift ;;
+            -u | --unique-id)   UNIQUE_ID="$2"; shift; shift ;;
             -t | --tag)         TAG=":$2"; shift; shift ;;
             -p | --port)        PORT=":$2"; shift; shift ;;
             -N | --network)     NETWORK="$2"; shift; shift ;;
@@ -76,6 +78,7 @@ main() {
         run ${scriptdir}/image-build.sh
     }
 
+    NETWORK=prplMesh-net-${UNIQUE_ID}
     docker network inspect ${NETWORK} >/dev/null 2>&1 || {
         dbg "Network $NETWORK does not exist, creating..."
         run docker network create ${NETWORK} >/dev/null 2>&1
@@ -97,6 +100,7 @@ main() {
     dbg "PORT=${PORT}"
     dbg "NAME=${NAME}"
     dbg "FORCE=${FORCE}"
+    dbg "UNIQUE_ID=${UNIQUE_ID}"
 
     DOCKEROPTS="-e USER=${SUDO_USER:-${USER}}
                 -e INSTALL_DIR=${installdir}
@@ -131,7 +135,7 @@ main() {
 VERBOSE=false
 DETACH=false
 FORCE=false
-NETWORK=prplMesh-net
+UNIQUE_ID=${SUDO_USER:-${USER}}
 IPADDR=
 NAME=prplMesh
 ENTRYPOINT=
