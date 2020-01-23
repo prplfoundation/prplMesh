@@ -2856,9 +2856,9 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
         }
 
         auto notification_out = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION>(cmdu_tx);
+            beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION>(cmdu_tx);
         if (!notification_out) {
-            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION !";
+            LOG(ERROR) << "Failed building cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION !";
             return false;
         }
 
