@@ -146,7 +146,8 @@ bool base_wlan_hal_dwpal::fsm_setup()
                         m_dwpal_nl_ctx = nullptr;
                     } else {
                         LOG(DEBUG)
-                            << "dwpal_driver_nl_attach() success for: " << m_radio_info.iface_name;
+                            << "dwpal_driver_nl_attach() success for: " << m_radio_info.iface_name
+                            << ", nl_context = " << m_dwpal_nl_ctx;
                     }
                 }
 
@@ -308,7 +309,7 @@ bool base_wlan_hal_dwpal::fsm_setup()
                     << "Open and attach an event interface to wpa_supplicant/hostapd - SUCCESS!";
 
                 // Get the nl event interface file descriptor
-                if (!m_dwpal_nl_ctx) {
+                if (m_dwpal_nl_ctx) {
                     if (dwpal_driver_nl_fd_get(m_dwpal_nl_ctx, &m_fd_nl_events, &m_fd_nl_cmd_get)) {
                         LOG(ERROR) << "getting nl fd failed for: " << m_radio_info.iface_name
                                    << "disbling netlink for this platform";
