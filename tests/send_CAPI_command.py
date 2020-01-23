@@ -39,7 +39,6 @@ class UCCSocket:
         self.host = host
         self.port = port
         self.timeout = timeout
-        self.conn: socket.socket
 
     def __enter__(self):
         self.conn = socket.create_connection((self.host, self.port), self.timeout)
