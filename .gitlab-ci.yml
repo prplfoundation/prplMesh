@@ -14,8 +14,16 @@ clang-format:
     # `diff-index` doesn't update the index so doesn't actually see changes. Need to manually update index.
     - git update-index -q --refresh
     # Use `diff-index` instead of `status` or `diff` because it gives more predictable output and exit code.
-    # `-p` shows the differences as patch on stdout. This is handy to copy&paste from CI to fix mistakes.
-    - git diff-index -p --exit-code HEAD
+    - |
+      git diff-index --exit-code HEAD || {
+        ret=$?
+        echo "Inconsistent formatting, please apply patch from artifacts"
+        git diff > correct-formatting.patch
+        exit $?
+      }
+  artifacts:
+    paths:
+      - correct-formatting.patch
 
 build-in-docker:
   extends: .in-prplmesh-builder
