@@ -73,15 +73,16 @@ static void translate_channel_scan_results(const beerocks_message::sChannelScanR
     string_utils::copy_string(res_out.ap_SSID, res_in.ssid,
                               beerocks::message::WIFI_SSID_MAX_LENGTH);
     std::copy_n(res_in.bssid.oct, BML_MAC_ADDR_LEN, res_out.ap_BSSID);
-    std::copy_n(res_in.security_mode_enabled, BML_CHANNEL_SCAN_ENUM_LIST_SIZE,
+    std::copy_n(res_in.security_mode_enabled, beerocks::message::CHANNEL_SCAN_LIST_LENGTH,
                 res_out.ap_SecurityModeEnabled);
-    std::copy_n(res_in.encryption_mode, BML_CHANNEL_SCAN_ENUM_LIST_SIZE, res_out.ap_EncryptionMode);
-    std::copy_n(res_in.supported_standards, BML_CHANNEL_SCAN_ENUM_LIST_SIZE,
+    std::copy_n(res_in.encryption_mode, beerocks::message::CHANNEL_SCAN_LIST_LENGTH,
+                res_out.ap_EncryptionMode);
+    std::copy_n(res_in.supported_standards, beerocks::message::CHANNEL_SCAN_LIST_LENGTH,
                 res_out.ap_SupportedStandards);
-    std::copy_n(res_in.basic_data_transfer_rates_kbps, BML_CHANNEL_SCAN_ENUM_LIST_SIZE,
+    std::copy_n(res_in.basic_data_transfer_rates_kbps, beerocks::message::CHANNEL_SCAN_LIST_LENGTH,
                 res_out.ap_BasicDataTransferRates);
-    std::copy_n(res_in.supported_data_transfer_rates_kbps, BML_CHANNEL_SCAN_ENUM_LIST_SIZE,
-                res_out.ap_SupportedDataTransferRates);
+    std::copy_n(res_in.supported_data_transfer_rates_kbps,
+                beerocks::message::CHANNEL_SCAN_LIST_LENGTH, res_out.ap_SupportedDataTransferRates);
 
     res_out.ap_Channel                   = res_in.channel;
     res_out.ap_SignalStrength            = res_in.signal_strength_dBm;
