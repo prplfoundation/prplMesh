@@ -1056,10 +1056,8 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
     struct nlattr *tb[NL80211_ATTR_MAX + 1];
     nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0), NULL);
 
-    if ((tb[NL80211_ATTR_IFINDEX] == NULL) ||
-        (if_indextoname(nla_get_u32(tb[NL80211_ATTR_IFINDEX]), ifname) == NULL)) {
-        LOG(ERROR) << __func__ << " failed to get ifname";
-        return false;
+    if (tb[NL80211_ATTR_IFINDEX]) {
+        if_indextoname(nla_get_u32(tb[NL80211_ATTR_IFINDEX]), ifname);
     }
 
     auto event = dwpal_nl_to_bwl_event(gnlh->cmd);
