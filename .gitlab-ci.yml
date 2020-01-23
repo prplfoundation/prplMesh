@@ -151,7 +151,7 @@ test-on-netgear-rax40:
 .run-certification-tests:
   stage: test
   variables:
-    TESTS_TO_RUN: "tools/docker/tests/certification/all_controller_tests.txt"
+    # TESTS_TO_RUN needs to be set by the user (or the pipeline schedule)
     GIT_CLONE_PATH: "/builds/prpl-foundation/prplMesh/"
   script:
       - /easymesh_cert/run_test_file.sh -o logs $TESTS_TO_RUN
