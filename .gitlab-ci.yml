@@ -35,6 +35,8 @@ build-in-docker:
 build-in-docker-alpine:
   extends: build-in-docker
   image: prplfoundationinc/prplmesh-builder:alpine-3.11.3
+  only:
+    - schedules
 
 .run-test-in-docker:
   stage: test
