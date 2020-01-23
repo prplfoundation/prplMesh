@@ -1,0 +1,15 @@
+name: Automation on pull requests
+
+on: [pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Assign PR to Author
+      uses: samspills/assign-pr-to-author@v1.0
+      if: github.event_name == 'pull_request' && github.event.action == 'opened'
+      with:
+        repo-token: '${{ secrets.GITHUB_TOKEN }}' 
