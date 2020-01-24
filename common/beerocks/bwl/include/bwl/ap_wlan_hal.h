@@ -53,6 +53,7 @@ public:
         ACS_Failed,
 
         CSA_Finished,
+        CTRL_Channel_Switch,
 
         BSS_TM_Response,
 
