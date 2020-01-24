@@ -57,7 +57,7 @@ run-tests:
     - cd tools/docker
     # Try to pull from dockerhub, build the container images if that fails
     - ./image-pull.sh || ./image-build.sh
-    - ./tests/test_flows.sh -v
+    - ./tests/test_flows.sh -v -u $RANDOM
 
   artifacts:
     paths:
