@@ -52,7 +52,7 @@ public:
             return nullptr;
         }
 
-        m_class_vector.push_back(std::shared_ptr<BaseClass>(ptr));
+        m_class_vector.push_back(ptr);
         return ptr;
     }
 
