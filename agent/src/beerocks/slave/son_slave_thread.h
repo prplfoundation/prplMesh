@@ -210,7 +210,6 @@ private:
 
     std::unordered_map<sMacAddr, std::set<sMacAddr>> m_vaps_clients_map;
 
-
     SocketClient *platform_manager_socket = nullptr;
     SocketClient *backhaul_manager_socket = nullptr;
     SocketClient *master_socket           = nullptr;

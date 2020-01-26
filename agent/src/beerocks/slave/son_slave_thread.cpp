@@ -35,8 +35,9 @@
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
-#include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
+#include <tlvf/wfa_map/tlvClientInfo.h>
+#include <tlvf/wfa_map/tlvErrorCode.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvSteeringBTMReport.h>
 #include <tlvf/wfa_map/tlvSteeringRequest.h>
@@ -1811,7 +1812,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         // std::copy_n(notification_out->params(),beerocks::IFACE_TOTAL_VAPS,
         //             m_vaps_list);
 
-
         auto notification_out2 = message_com::create_vs_message<
             beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>(cmdu_tx);
         if (notification_out2 == nullptr) {
@@ -1939,9 +1939,9 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         std::string client_mac = network_utils::mac_to_string(notification_in->params().mac);
         LOG(INFO) << "client disconnected sta_mac=" << client_mac;
 
-        //update the map to remove this client from its vap 
+        //update the map to remove this client from its vap
         auto it = m_vaps_clients_map.find(notification_in->params().bssid);
-        if(it != m_vaps_clients_map.end()){
+        if (it != m_vaps_clients_map.end()) {
             it->second.erase(notification_in->params().mac);
         }
 
@@ -2128,11 +2128,11 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         LOG(INFO) << "client associated sta_mac=" << client_mac;
 
         auto it = m_vaps_clients_map.find(notification_in->params().bssid);
-        if( it == m_vaps_clients_map.end()){
-            std::set<sMacAddr> clients;  
+        if (it == m_vaps_clients_map.end()) {
+            std::set<sMacAddr> clients;
             clients.insert(notification_in->params().mac);
-            m_vaps_clients_map.insert({notification_in->params().bssid,clients});
-        }else{
+            m_vaps_clients_map.insert({notification_in->params().bssid, clients});
+        } else {
             //The insertion only takes place if this client is not already in set
             it->second.insert(notification_in->params().mac);
         }
@@ -4256,25 +4256,25 @@ bool slave_thread::parse_non_intel_join_response(Socket *sd)
 bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "************************************************************";
     LOG(DEBUG) << "Received CLIENT_CAPABILITY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
+    LOG(DEBUG) << "************************************************************";
     
-
     auto client_info_tlv_r = cmdu_rx.getClass<wfa_map::tlvClientInfo>();
     if (!client_info_tlv_r) {
-        LOG(ERROR) << "addClass wfa_map::tlvClientInfo failed";
+        LOG(ERROR) << "getClass wfa_map::tlvClientInfo failed";
         return false;
     }
     //TODO: Check if it is an error scenario - if the STA specified in the Client Capability Query message is not associated
     //with any of the BSS operated by the Multi-AP Agent (an error scenario)
     bool error_scenario = 1;
-    auto it = m_vaps_clients_map.find(client_info_tlv_r->bssid());
-    if(it != m_vaps_clients_map.end()){
-        if(it->second.count(client_info_tlv_r->client_mac())){
+    auto it             = m_vaps_clients_map.find(client_info_tlv_r->bssid());
+    if (it != m_vaps_clients_map.end()) {
+        if (it->second.count(client_info_tlv_r->client_mac())) {
             //only if the client exist in one of the BSS operated by the Multi-AP Agent this is not an error scenario
             error_scenario = 0;
         }
     }
-
 
     // send CLIENT_CAPABILITY_REPORT_MESSAGE back to the controller
     if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE)) {
@@ -4287,7 +4287,7 @@ bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMe
         LOG(ERROR) << "addClass wfa_map::tlvClientInfo has failed";
         return false;
     }
-    client_info_tlv_t->bssid() = client_info_tlv_r->bssid();
+    client_info_tlv_t->bssid()      = client_info_tlv_r->bssid();
     client_info_tlv_t->client_mac() = client_info_tlv_r->client_mac();
 
     auto client_capability_report_tlv = cmdu_tx.addClass<wfa_map::tlvClientCapabilityReport>();
@@ -4297,17 +4297,24 @@ bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMe
     }
 
     //TODO: if it is an error scenario, set Success status to 0x01 = Failure and do nothing after it to this tlv
-    if(!error_scenario){
-       client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::SUCCESS;
-       //TODO: Add frame body of the most recently received (Re)Association Request frame from this client
-    }else{
+    if (!error_scenario) {
+        client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::SUCCESS;
+        //TODO: Add frame body of the most recently received (Re)Association Request frame from this client
+    } else {
         client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::FAILURE;
-        //TODO: Add an Error Code TLV 
+        
+        //TODO: Add an Error Code TLV
+        auto error_code_tlv = cmdu_tx.addClass<wfa_map::tlvErrorCode>();
+        if (!error_code_tlv) {
+            LOG(ERROR) << "addClass wfa_map::tlvErrorCode has failed";
+            return false;
+        }
+        error_code_tlv->reason_code() = wfa_map::tlvErrorCode::STA_NOT_ASSOCIATED_WITH_ANY_BSS_OPERATED_BY_THE_AGENT;
+        error_code_tlv->sta_mac() = client_info_tlv_r->client_mac();
     }
 
-    return true;
-
-
+    // return true;
+    return send_cmdu_to_controller(cmdu_tx);
 }
 
 bool slave_thread::handle_ap_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
@@ -4398,6 +4405,9 @@ bool slave_thread::handle_ack_message(Socket *sd, ieee1905_1::CmduMessageRx &cmd
 bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "************************************************************";
+    LOG(DEBUG) << "Received CLIENT_STEERING_REQUEST_MESSAGE , mid=" << std::hex << int(mid);
+    LOG(DEBUG) << "************************************************************";
 
     auto steering_request_tlv = cmdu_rx.getClass<wfa_map::tlvSteeringRequest>();
     if (!steering_request_tlv) {
@@ -4405,7 +4415,7 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
         return false;
     }
 
-    LOG(DEBUG) << "Received CLIENT_STEERING_REQUEST_MESSAGE , mid=" << std::hex << int(mid);
+    // LOG(DEBUG) << "Received CLIENT_STEERING_REQUEST_MESSAGE , mid=" << std::hex << int(mid);
 
     auto request_mode = steering_request_tlv->request_flags().request_mode;
     LOG(DEBUG) << "request_mode: " << std::hex << int(request_mode);

@@ -136,11 +136,11 @@ inline el::base::MessageBuilder &operator<<(el::base::MessageBuilder &log, const
     return log << beerocks::net::network_utils::mac_to_string(addr);
 }
 
-inline bool operator<(const sMacAddr& lhs, const sMacAddr& rhs)
+inline bool operator<(const sMacAddr &lhs, const sMacAddr &rhs)
 {
     auto s1 = beerocks::net::network_utils::mac_to_string(lhs);
     auto s2 = beerocks::net::network_utils::mac_to_string(rhs);
-  return (s1.compare(s2));
+    return (s1.compare(s2));
 }
 
 #endif //_NETWORK_UTILS_H_
