@@ -48,6 +48,8 @@
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
+#include <tlvf/wfa_map/tlvClientCapabilityReport.h>
+#include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvRadioOperationRestriction.h>
@@ -278,6 +280,8 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
         return handle_cmdu_1905_ack_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE:
         return handle_cmdu_1905_client_steering_btm_report_message(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE:
+        return handle_cmdu_1905_client_capability_report_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE:
         return handle_cmdu_1905_operating_channel_report(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE:
@@ -958,6 +962,35 @@ bool master_thread::handle_cmdu_1905_steering_completed_message(const std::strin
     }
     LOG(DEBUG) << "sending ACK message back to agent, mid=" << std::hex << int(mid);
     return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
+}
+
+bool master_thread::handle_cmdu_1905_client_capability_report_message(
+    const std::string &src_mac, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid                          = cmdu_rx.getMessageId();
+    auto client_capability_report_tlv = cmdu_rx.getClass<wfa_map::tlvClientCapabilityReport>();
+    if (!client_capability_report_tlv) {
+        LOG(ERROR) << "getClass wfa_map::tlvClientCapabilityReport has failed";
+        return false;
+    }
+
+    std::string result_code =
+        (client_capability_report_tlv->result_code() == wfa_map::tlvClientCapabilityReport::SUCCESS)
+            ? "SUCCESS"
+            : "FAILURE";
+
+    auto client_info_tlv = cmdu_rx.getClass<wfa_map::tlvClientInfo>();
+    if (!client_info_tlv) {
+        LOG(ERROR) << "getClass wfa_map::tlvClientInfo failed";
+        return false;
+    }
+
+    //TODO: log the details so it can be checked in the test_flows
+    LOG(INFO) << "Received CLIENT_CAPABILITY_REPORT_MESSAGE, mid=" << std::hex << int(mid)
+              << ", Result Code= " << result_code
+              << ", client MAC= " << network_utils::mac_to_string(client_info_tlv->client_mac())
+              << ", BSSID= " << network_utils::mac_to_string(client_info_tlv->bssid());
+    return true;
 }
 
 bool master_thread::handle_cmdu_1905_client_steering_btm_report_message(
@@ -3432,7 +3465,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
 
         //get the mac from hostap_mac
         auto radio_mac = network_utils::mac_from_string(hostap_mac);
-        
+
         dynamic_channel_selection_task::sScanEvent new_event;
         new_event.radio_mac = radio_mac;
 
