@@ -40,7 +40,7 @@ uint8_t& tlvTestVarList::simple_list_length() {
 }
 
 uint16_t* tlvTestVarList::simple_list(size_t idx) {
-    if ( (m_simple_list_idx__ <= 0) || (m_simple_list_idx__ <= idx) ) {
+    if ( (m_simple_list_idx__ == 0) || (m_simple_list_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -93,7 +93,7 @@ std::string tlvTestVarList::test_string_str() {
 }
 
 char* tlvTestVarList::test_string(size_t length) {
-    if( (m_test_string_idx__ <= 0) || (m_test_string_idx__ < length) ) {
+    if( (m_test_string_idx__ == 0) || (m_test_string_idx__ < length) ) {
         TLVF_LOG(ERROR) << "test_string length is smaller than requested length";
         return nullptr;
     }
@@ -655,7 +655,7 @@ uint8_t& cInner::list_length() {
 }
 
 uint8_t* cInner::list(size_t idx) {
-    if ( (m_list_idx__ <= 0) || (m_list_idx__ <= idx) ) {
+    if ( (m_list_idx__ == 0) || (m_list_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -702,7 +702,7 @@ std::string cInner::unknown_length_list_inner_str() {
 }
 
 char* cInner::unknown_length_list_inner(size_t length) {
-    if( (m_unknown_length_list_inner_idx__ <= 0) || (m_unknown_length_list_inner_idx__ < length) ) {
+    if( (m_unknown_length_list_inner_idx__ == 0) || (m_unknown_length_list_inner_idx__ < length) ) {
         TLVF_LOG(ERROR) << "unknown_length_list_inner length is smaller than requested length";
         return nullptr;
     }

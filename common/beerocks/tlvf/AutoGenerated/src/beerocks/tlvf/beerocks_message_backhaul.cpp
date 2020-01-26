@@ -32,7 +32,7 @@ std::string cACTION_BACKHAUL_REGISTER_REQUEST::sta_iface_str() {
 }
 
 char* cACTION_BACKHAUL_REGISTER_REQUEST::sta_iface(size_t length) {
-    if( (m_sta_iface_idx__ <= 0) || (m_sta_iface_idx__ < length) ) {
+    if( (m_sta_iface_idx__ == 0) || (m_sta_iface_idx__ < length) ) {
         TLVF_LOG(ERROR) << "sta_iface length is smaller than requested length";
         return nullptr;
     }
@@ -59,7 +59,7 @@ std::string cACTION_BACKHAUL_REGISTER_REQUEST::hostap_iface_str() {
 }
 
 char* cACTION_BACKHAUL_REGISTER_REQUEST::hostap_iface(size_t length) {
-    if( (m_hostap_iface_idx__ <= 0) || (m_hostap_iface_idx__ < length) ) {
+    if( (m_hostap_iface_idx__ == 0) || (m_hostap_iface_idx__ < length) ) {
         TLVF_LOG(ERROR) << "hostap_iface length is smaller than requested length";
         return nullptr;
     }
@@ -351,7 +351,7 @@ std::string cACTION_BACKHAUL_ENABLE::wire_iface_str() {
 }
 
 char* cACTION_BACKHAUL_ENABLE::wire_iface(size_t length) {
-    if( (m_wire_iface_idx__ <= 0) || (m_wire_iface_idx__ < length) ) {
+    if( (m_wire_iface_idx__ == 0) || (m_wire_iface_idx__ < length) ) {
         TLVF_LOG(ERROR) << "wire_iface length is smaller than requested length";
         return nullptr;
     }
@@ -378,7 +378,7 @@ std::string cACTION_BACKHAUL_ENABLE::sta_iface_str() {
 }
 
 char* cACTION_BACKHAUL_ENABLE::sta_iface(size_t length) {
-    if( (m_sta_iface_idx__ <= 0) || (m_sta_iface_idx__ < length) ) {
+    if( (m_sta_iface_idx__ == 0) || (m_sta_iface_idx__ < length) ) {
         TLVF_LOG(ERROR) << "sta_iface length is smaller than requested length";
         return nullptr;
     }
@@ -405,7 +405,7 @@ std::string cACTION_BACKHAUL_ENABLE::ap_iface_str() {
 }
 
 char* cACTION_BACKHAUL_ENABLE::ap_iface(size_t length) {
-    if( (m_ap_iface_idx__ <= 0) || (m_ap_iface_idx__ < length) ) {
+    if( (m_ap_iface_idx__ == 0) || (m_ap_iface_idx__ < length) ) {
         TLVF_LOG(ERROR) << "ap_iface length is smaller than requested length";
         return nullptr;
     }
@@ -432,7 +432,7 @@ std::string cACTION_BACKHAUL_ENABLE::ssid_str() {
 }
 
 char* cACTION_BACKHAUL_ENABLE::ssid(size_t length) {
-    if( (m_ssid_idx__ <= 0) || (m_ssid_idx__ < length) ) {
+    if( (m_ssid_idx__ == 0) || (m_ssid_idx__ < length) ) {
         TLVF_LOG(ERROR) << "ssid length is smaller than requested length";
         return nullptr;
     }
@@ -459,7 +459,7 @@ std::string cACTION_BACKHAUL_ENABLE::pass_str() {
 }
 
 char* cACTION_BACKHAUL_ENABLE::pass(size_t length) {
-    if( (m_pass_idx__ <= 0) || (m_pass_idx__ < length) ) {
+    if( (m_pass_idx__ == 0) || (m_pass_idx__ < length) ) {
         TLVF_LOG(ERROR) << "pass length is smaller than requested length";
         return nullptr;
     }

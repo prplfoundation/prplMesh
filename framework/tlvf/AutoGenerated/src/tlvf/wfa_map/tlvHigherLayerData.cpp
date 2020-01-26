@@ -38,7 +38,7 @@ tlvHigherLayerData::eProtocol& tlvHigherLayerData::protocol() {
 }
 
 uint8_t* tlvHigherLayerData::payload(size_t idx) {
-    if ( (m_payload_idx__ <= 0) || (m_payload_idx__ <= idx) ) {
+    if ( (m_payload_idx__ == 0) || (m_payload_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }

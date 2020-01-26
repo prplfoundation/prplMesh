@@ -50,7 +50,7 @@ tlvApMetric::sEstimatedService& tlvApMetric::estimated_service_parameters() {
 }
 
 uint8_t* tlvApMetric::estimated_service_info_field(size_t idx) {
-    if ( (m_estimated_service_info_field_idx__ <= 0) || (m_estimated_service_info_field_idx__ <= idx) ) {
+    if ( (m_estimated_service_info_field_idx__ == 0) || (m_estimated_service_info_field_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }

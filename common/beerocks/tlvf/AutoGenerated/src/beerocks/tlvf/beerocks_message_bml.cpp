@@ -211,7 +211,7 @@ std::string cACTION_BML_NW_MAP_RESPONSE::buffer_str() {
 }
 
 char* cACTION_BML_NW_MAP_RESPONSE::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
@@ -349,7 +349,7 @@ std::string cACTION_BML_NW_MAP_UPDATE::buffer_str() {
 }
 
 char* cACTION_BML_NW_MAP_UPDATE::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
@@ -487,7 +487,7 @@ std::string cACTION_BML_STATS_UPDATE::buffer_str() {
 }
 
 char* cACTION_BML_STATS_UPDATE::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
@@ -621,7 +621,7 @@ std::string cACTION_BML_EVENTS_UPDATE::buffer_str() {
 }
 
 char* cACTION_BML_EVENTS_UPDATE::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
@@ -5420,7 +5420,7 @@ std::string cACTION_BML_STEERING_EVENTS_UPDATE::buffer_str() {
 }
 
 char* cACTION_BML_STEERING_EVENTS_UPDATE::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
