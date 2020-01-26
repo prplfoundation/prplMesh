@@ -100,6 +100,7 @@ bool master_thread::init()
             ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE,
+            ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE,
             ieee1905_1::eMessageType::ACK_MESSAGE,
 
         })) {
