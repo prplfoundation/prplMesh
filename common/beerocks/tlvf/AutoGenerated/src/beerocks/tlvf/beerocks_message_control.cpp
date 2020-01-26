@@ -32,7 +32,7 @@ std::string cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::slave_version_str() {
 }
 
 char* cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::slave_version(size_t length) {
-    if( (m_slave_version_idx__ <= 0) || (m_slave_version_idx__ < length) ) {
+    if( (m_slave_version_idx__ == 0) || (m_slave_version_idx__ < length) ) {
         TLVF_LOG(ERROR) << "slave_version length is smaller than requested length";
         return nullptr;
     }
@@ -225,7 +225,7 @@ std::string cACTION_CONTROL_SLAVE_JOINED_RESPONSE::master_version_str() {
 }
 
 char* cACTION_CONTROL_SLAVE_JOINED_RESPONSE::master_version(size_t length) {
-    if( (m_master_version_idx__ <= 0) || (m_master_version_idx__ < length) ) {
+    if( (m_master_version_idx__ == 0) || (m_master_version_idx__ < length) ) {
         TLVF_LOG(ERROR) << "master_version length is smaller than requested length";
         return nullptr;
     }
@@ -530,7 +530,7 @@ uint16_t& cACTION_CONTROL_CONTROLLER_PING_REQUEST::size() {
 }
 
 uint8_t* cACTION_CONTROL_CONTROLLER_PING_REQUEST::data(size_t idx) {
-    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
+    if ( (m_data_idx__ == 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -654,7 +654,7 @@ uint16_t& cACTION_CONTROL_CONTROLLER_PING_RESPONSE::size() {
 }
 
 uint8_t* cACTION_CONTROL_CONTROLLER_PING_RESPONSE::data(size_t idx) {
-    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
+    if ( (m_data_idx__ == 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -778,7 +778,7 @@ uint16_t& cACTION_CONTROL_AGENT_PING_REQUEST::size() {
 }
 
 uint8_t* cACTION_CONTROL_AGENT_PING_REQUEST::data(size_t idx) {
-    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
+    if ( (m_data_idx__ == 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -902,7 +902,7 @@ uint16_t& cACTION_CONTROL_AGENT_PING_RESPONSE::size() {
 }
 
 uint8_t* cACTION_CONTROL_AGENT_PING_RESPONSE::data(size_t idx) {
-    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
+    if ( (m_data_idx__ == 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -3821,7 +3821,7 @@ std::string cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::name_str() {
 }
 
 char* cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::name(size_t length) {
-    if( (m_name_idx__ <= 0) || (m_name_idx__ < length) ) {
+    if( (m_name_idx__ == 0) || (m_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "name length is smaller than requested length";
         return nullptr;
     }

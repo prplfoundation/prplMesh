@@ -99,7 +99,7 @@ std::string cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::iface_name_str() {
 }
 
 char* cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::iface_name(size_t length) {
-    if( (m_iface_name_idx__ <= 0) || (m_iface_name_idx__ < length) ) {
+    if( (m_iface_name_idx__ == 0) || (m_iface_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
         return nullptr;
     }
@@ -436,7 +436,7 @@ std::string cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::hostname_str() {
 }
 
 char* cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::hostname(size_t length) {
-    if( (m_hostname_idx__ <= 0) || (m_hostname_idx__ < length) ) {
+    if( (m_hostname_idx__ == 0) || (m_hostname_idx__ < length) ) {
         TLVF_LOG(ERROR) << "hostname length is smaller than requested length";
         return nullptr;
     }
@@ -958,7 +958,7 @@ std::string cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::iface_name_str() {
 }
 
 char* cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::iface_name(size_t length) {
-    if( (m_iface_name_idx__ <= 0) || (m_iface_name_idx__ < length) ) {
+    if( (m_iface_name_idx__ == 0) || (m_iface_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
         return nullptr;
     }
@@ -1885,7 +1885,7 @@ std::string cACTION_PLATFORM_ERROR_NOTIFICATION::data_str() {
 }
 
 char* cACTION_PLATFORM_ERROR_NOTIFICATION::data(size_t length) {
-    if( (m_data_idx__ <= 0) || (m_data_idx__ < length) ) {
+    if( (m_data_idx__ == 0) || (m_data_idx__ < length) ) {
         TLVF_LOG(ERROR) << "data length is smaller than requested length";
         return nullptr;
     }
@@ -1983,7 +1983,7 @@ std::string cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_ap_s
 }
 
 char* cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_ap(size_t length) {
-    if( (m_iface_name_ap_idx__ <= 0) || (m_iface_name_ap_idx__ < length) ) {
+    if( (m_iface_name_ap_idx__ == 0) || (m_iface_name_ap_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name_ap length is smaller than requested length";
         return nullptr;
     }
@@ -2010,7 +2010,7 @@ std::string cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_bh_s
 }
 
 char* cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_bh(size_t length) {
-    if( (m_iface_name_bh_idx__ <= 0) || (m_iface_name_bh_idx__ < length) ) {
+    if( (m_iface_name_bh_idx__ == 0) || (m_iface_name_bh_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iface_name_bh length is smaller than requested length";
         return nullptr;
     }

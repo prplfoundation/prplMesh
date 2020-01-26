@@ -390,7 +390,7 @@ std::string cRadioBssInfo::ssid_str() {
 }
 
 char* cRadioBssInfo::ssid(size_t length) {
-    if( (m_ssid_idx__ <= 0) || (m_ssid_idx__ < length) ) {
+    if( (m_ssid_idx__ == 0) || (m_ssid_idx__ < length) ) {
         TLVF_LOG(ERROR) << "ssid length is smaller than requested length";
         return nullptr;
     }

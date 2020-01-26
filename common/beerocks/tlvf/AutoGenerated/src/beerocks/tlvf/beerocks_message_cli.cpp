@@ -382,7 +382,7 @@ std::string cACTION_CLI_RESPONSE_STR::buffer_str() {
 }
 
 char* cACTION_CLI_RESPONSE_STR::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
@@ -1701,7 +1701,7 @@ sMacAddr& cACTION_CLI_CLIENT_BEACON_11K_REQUEST::bssid() {
 }
 
 uint8_t* cACTION_CLI_CLIENT_BEACON_11K_REQUEST::ssid(size_t idx) {
-    if ( (m_ssid_idx__ <= 0) || (m_ssid_idx__ <= idx) ) {
+    if ( (m_ssid_idx__ == 0) || (m_ssid_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
