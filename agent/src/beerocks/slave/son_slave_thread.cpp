@@ -1939,6 +1939,12 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         std::string client_mac = network_utils::mac_to_string(notification_in->params().mac);
         LOG(INFO) << "client disconnected sta_mac=" << client_mac;
 
+        //update the map to remove this client from its vap 
+        auto it = m_vaps_clients_map.find(notification_in->params().bssid);
+        if(it != m_vaps_clients_map.end()){
+            it->second.erase(notification_in->params().mac);
+        }
+
         //notify monitor
         {
             auto notification_out = message_com::create_vs_message<
@@ -2123,11 +2129,12 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
 
         auto it = m_vaps_clients_map.find(notification_in->params().bssid);
         if( it == m_vaps_clients_map.end()){
-            std::vector<sMacAddr> clients;  
-            clients.push_back(notification_in->params().mac);
+            std::set<sMacAddr> clients;  
+            clients.insert(notification_in->params().mac);
             m_vaps_clients_map.insert({notification_in->params().bssid,clients});
         }else{
-            
+            //The insertion only takes place if this client is not already in set
+            it->second.insert(notification_in->params().mac);
         }
 
         if (!master_socket) {
@@ -4259,6 +4266,15 @@ bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMe
     }
     //TODO: Check if it is an error scenario - if the STA specified in the Client Capability Query message is not associated
     //with any of the BSS operated by the Multi-AP Agent (an error scenario)
+    bool error_scenario = 1;
+    auto it = m_vaps_clients_map.find(client_info_tlv_r->bssid());
+    if(it != m_vaps_clients_map.end()){
+        if(it->second.count(client_info_tlv_r->client_mac())){
+            //only if the client exist in one of the BSS operated by the Multi-AP Agent this is not an error scenario
+            error_scenario = 0;
+        }
+    }
+
 
     // send CLIENT_CAPABILITY_REPORT_MESSAGE back to the controller
     if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE)) {
@@ -4281,7 +4297,13 @@ bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMe
     }
 
     //TODO: if it is an error scenario, set Success status to 0x01 = Failure and do nothing after it to this tlv
-
+    if(!error_scenario){
+       client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::SUCCESS;
+       //TODO: Add frame body of the most recently received (Re)Association Request frame from this client
+    }else{
+        client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::FAILURE;
+        //TODO: Add an Error Code TLV 
+    }
 
     return true;
 
