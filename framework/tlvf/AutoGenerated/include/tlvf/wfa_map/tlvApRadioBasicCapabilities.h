@@ -33,7 +33,7 @@ class tlvApRadioBasicCapabilities : public BaseClass
 {
     public:
         tlvApRadioBasicCapabilities(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvApRadioBasicCapabilities(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvApRadioBasicCapabilities(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvApRadioBasicCapabilities();
 
         const eTlvTypeMap& type();
@@ -66,7 +66,7 @@ class cOperatingClassesInfo : public BaseClass
 {
     public:
         cOperatingClassesInfo(uint8_t* buff, size_t buff_len, bool parse = false);
-        cOperatingClassesInfo(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cOperatingClassesInfo(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cOperatingClassesInfo();
 
         uint8_t& operating_class();

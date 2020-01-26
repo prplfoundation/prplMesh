@@ -31,7 +31,7 @@ class tlvClientAssociationControlRequest : public BaseClass
 {
     public:
         tlvClientAssociationControlRequest(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvClientAssociationControlRequest(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvClientAssociationControlRequest(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvClientAssociationControlRequest();
 
         enum eAssociationControl: uint8_t {

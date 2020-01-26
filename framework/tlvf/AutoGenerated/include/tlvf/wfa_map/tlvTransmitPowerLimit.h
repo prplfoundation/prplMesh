@@ -30,7 +30,7 @@ class tlvTransmitPowerLimit : public BaseClass
 {
     public:
         tlvTransmitPowerLimit(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvTransmitPowerLimit(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvTransmitPowerLimit(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvTransmitPowerLimit();
 
         const eTlvTypeMap& type();

@@ -30,7 +30,7 @@ class cACTION_HEADER : public BaseClass
 {
     public:
         cACTION_HEADER(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_HEADER(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_HEADER(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_HEADER();
 
         const uint32_t& magic();

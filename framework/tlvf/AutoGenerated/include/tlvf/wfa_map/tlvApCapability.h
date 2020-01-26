@@ -30,7 +30,7 @@ class tlvApCapability : public BaseClass
 {
     public:
         tlvApCapability(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvApCapability(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvApCapability(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvApCapability();
 
         typedef struct sValue {

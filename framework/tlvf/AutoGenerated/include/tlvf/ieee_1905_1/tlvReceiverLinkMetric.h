@@ -32,7 +32,7 @@ class tlvReceiverLinkMetric : public BaseClass
 {
     public:
         tlvReceiverLinkMetric(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvReceiverLinkMetric(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvReceiverLinkMetric(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvReceiverLinkMetric();
 
         typedef struct sLinkMetricInfo {

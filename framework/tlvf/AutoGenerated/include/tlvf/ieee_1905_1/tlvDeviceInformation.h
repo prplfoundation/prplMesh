@@ -32,7 +32,7 @@ class tlvDeviceInformation : public BaseClass
 {
     public:
         tlvDeviceInformation(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvDeviceInformation(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvDeviceInformation(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvDeviceInformation();
 
         typedef struct sInfo {

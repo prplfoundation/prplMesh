@@ -29,7 +29,7 @@ class tlvAutoconfigFreqBand : public BaseClass
 {
     public:
         tlvAutoconfigFreqBand(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvAutoconfigFreqBand(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvAutoconfigFreqBand(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvAutoconfigFreqBand();
 
         enum eValue: uint8_t {

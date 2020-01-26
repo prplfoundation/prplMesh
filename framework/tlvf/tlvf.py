@@ -1593,7 +1593,7 @@ class TlvF:
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "}")
 
             # constractor 2
-            self.insertLineH(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "%s(std::shared_ptr<BaseClass> base, bool parse = false);" % (obj_meta.name))
+            self.insertLineH(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "explicit %s(std::shared_ptr<BaseClass> base, bool parse = false);" % (obj_meta.name))
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, ("%s::%s(std::shared_ptr<BaseClass> base, bool parse) :" % (obj_meta.name, obj_meta.name)))
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){" )
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "%sm_init_succeeded = init();" % self.getIndentation(1))
