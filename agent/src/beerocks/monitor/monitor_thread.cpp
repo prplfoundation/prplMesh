@@ -1510,9 +1510,9 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
         // If event == Channel_Scan_New_Results_Ready do nothing since is_dump's default is 0
         if (event == Event::Channel_Scan_Dump_Result) {
-            auto &msg = *(static_cast<bwl::sCHANNEL_SCAN_RESULTS_NOTIFICATION *>(data));
+            auto msg = static_cast<bwl::sCHANNEL_SCAN_RESULTS_NOTIFICATION *>(data);
 
-            auto &in_result  = msg.channel_scan_results;
+            auto &in_result  = msg->channel_scan_results;
             auto &out_result = notification->scan_results();
 
             // Arrays
