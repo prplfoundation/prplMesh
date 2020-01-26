@@ -206,6 +206,9 @@ private:
     beerocks_message::sNodeHostap hostap_params;
     beerocks_message::sApChannelSwitch hostap_cs_params;
 
+    std::unordered_map<sMacAddr, std::vector<sMacAddr>> m_vaps_clients_map;
+
+
     SocketClient *platform_manager_socket = nullptr;
     SocketClient *backhaul_manager_socket = nullptr;
     SocketClient *master_socket           = nullptr;
