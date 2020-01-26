@@ -231,7 +231,7 @@ base_wlan_hal_nl80211::base_wlan_hal_nl80211(HALType type, std::string iface_nam
     fsm_setup();
 }
 
-base_wlan_hal_nl80211::~base_wlan_hal_nl80211() { detach(); }
+base_wlan_hal_nl80211::~base_wlan_hal_nl80211() { base_wlan_hal_nl80211::detach(); }
 
 bool base_wlan_hal_nl80211::fsm_setup()
 {

@@ -21,7 +21,7 @@ sta_wlan_hal_nl80211::sta_wlan_hal_nl80211(std::string iface_name, hal_event_cb_
 {
 }
 
-sta_wlan_hal_nl80211::~sta_wlan_hal_nl80211() { detach(); }
+sta_wlan_hal_nl80211::~sta_wlan_hal_nl80211() { sta_wlan_hal_nl80211::detach(); }
 
 bool sta_wlan_hal_nl80211::detach() { return true; }
 

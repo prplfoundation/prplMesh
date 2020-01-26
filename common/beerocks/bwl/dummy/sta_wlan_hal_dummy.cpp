@@ -21,7 +21,7 @@ sta_wlan_hal_dummy::sta_wlan_hal_dummy(std::string iface_name, hal_event_cb_t ca
 {
 }
 
-sta_wlan_hal_dummy::~sta_wlan_hal_dummy() { detach(); }
+sta_wlan_hal_dummy::~sta_wlan_hal_dummy() { sta_wlan_hal_dummy::detach(); }
 
 bool sta_wlan_hal_dummy::detach() { return true; }
 
