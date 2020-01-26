@@ -32,7 +32,7 @@ class tlvPushButtonEventNotification : public BaseClass
 {
     public:
         tlvPushButtonEventNotification(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvPushButtonEventNotification(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvPushButtonEventNotification(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvPushButtonEventNotification();
 
         typedef struct sMediaType {

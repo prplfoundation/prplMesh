@@ -32,7 +32,7 @@ class tlvSteeringRequest : public BaseClass
 {
     public:
         tlvSteeringRequest(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvSteeringRequest(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvSteeringRequest(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvSteeringRequest();
 
         typedef struct sRequestFlags {

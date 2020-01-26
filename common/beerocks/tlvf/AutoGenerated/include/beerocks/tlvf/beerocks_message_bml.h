@@ -31,7 +31,7 @@ class cACTION_BML_PING_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_PING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_PING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_PING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_PING_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -50,7 +50,7 @@ class cACTION_BML_PING_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_PING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_PING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_PING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_PING_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -69,7 +69,7 @@ class cACTION_BML_NW_MAP_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_NW_MAP_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_NW_MAP_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_NW_MAP_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_NW_MAP_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -88,7 +88,7 @@ class cACTION_BML_NW_MAP_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_NW_MAP_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_NW_MAP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_NW_MAP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_NW_MAP_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -119,7 +119,7 @@ class cACTION_BML_NW_MAP_UPDATE : public BaseClass
 {
     public:
         cACTION_BML_NW_MAP_UPDATE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_NW_MAP_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_NW_MAP_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_NW_MAP_UPDATE();
 
         static eActionOp_BML get_action_op(){
@@ -150,7 +150,7 @@ class cACTION_BML_STATS_UPDATE : public BaseClass
 {
     public:
         cACTION_BML_STATS_UPDATE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STATS_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STATS_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STATS_UPDATE();
 
         static eActionOp_BML get_action_op(){
@@ -181,7 +181,7 @@ class cACTION_BML_EVENTS_UPDATE : public BaseClass
 {
     public:
         cACTION_BML_EVENTS_UPDATE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_EVENTS_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_EVENTS_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_EVENTS_UPDATE();
 
         static eActionOp_BML get_action_op(){
@@ -210,7 +210,7 @@ class cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -229,7 +229,7 @@ class cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -248,7 +248,7 @@ class cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -267,7 +267,7 @@ class cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -286,7 +286,7 @@ class cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -305,7 +305,7 @@ class cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -324,7 +324,7 @@ class cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -343,7 +343,7 @@ class cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -362,7 +362,7 @@ class cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -381,7 +381,7 @@ class cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -400,7 +400,7 @@ class cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -419,7 +419,7 @@ class cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -438,7 +438,7 @@ class cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -457,7 +457,7 @@ class cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -476,7 +476,7 @@ class cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -497,7 +497,7 @@ class cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -518,7 +518,7 @@ class cACTION_BML_SET_CLIENT_ROAMING_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_SET_CLIENT_ROAMING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_CLIENT_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_CLIENT_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_CLIENT_ROAMING_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -539,7 +539,7 @@ class cACTION_BML_SET_CLIENT_ROAMING_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_SET_CLIENT_ROAMING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_CLIENT_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_CLIENT_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_CLIENT_ROAMING_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -558,7 +558,7 @@ class cACTION_BML_GET_CLIENT_ROAMING_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_GET_CLIENT_ROAMING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_CLIENT_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_CLIENT_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_CLIENT_ROAMING_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -577,7 +577,7 @@ class cACTION_BML_GET_CLIENT_ROAMING_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_GET_CLIENT_ROAMING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_CLIENT_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_CLIENT_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_CLIENT_ROAMING_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -598,7 +598,7 @@ class cACTION_BML_SET_DFS_REENTRY_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_SET_DFS_REENTRY_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_DFS_REENTRY_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_DFS_REENTRY_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_DFS_REENTRY_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -619,7 +619,7 @@ class cACTION_BML_SET_DFS_REENTRY_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_SET_DFS_REENTRY_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_DFS_REENTRY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_DFS_REENTRY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_DFS_REENTRY_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -638,7 +638,7 @@ class cACTION_BML_GET_DFS_REENTRY_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_GET_DFS_REENTRY_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_DFS_REENTRY_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_DFS_REENTRY_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_DFS_REENTRY_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -657,7 +657,7 @@ class cACTION_BML_GET_DFS_REENTRY_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_GET_DFS_REENTRY_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_DFS_REENTRY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_DFS_REENTRY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_DFS_REENTRY_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -678,7 +678,7 @@ class cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST : public Bas
 {
     public:
         cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -699,7 +699,7 @@ class cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE : public Ba
 {
     public:
         cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -718,7 +718,7 @@ class cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST : public Bas
 {
     public:
         cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -737,7 +737,7 @@ class cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE : public Ba
 {
     public:
         cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -758,7 +758,7 @@ class cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -779,7 +779,7 @@ class cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -798,7 +798,7 @@ class cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -817,7 +817,7 @@ class cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -838,7 +838,7 @@ class cACTION_BML_SET_IRE_ROAMING_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_SET_IRE_ROAMING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_IRE_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_IRE_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_IRE_ROAMING_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -859,7 +859,7 @@ class cACTION_BML_SET_IRE_ROAMING_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_SET_IRE_ROAMING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_IRE_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_IRE_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_IRE_ROAMING_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -878,7 +878,7 @@ class cACTION_BML_GET_IRE_ROAMING_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_GET_IRE_ROAMING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_IRE_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_IRE_ROAMING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_IRE_ROAMING_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -897,7 +897,7 @@ class cACTION_BML_GET_IRE_ROAMING_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_GET_IRE_ROAMING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_IRE_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_IRE_ROAMING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_IRE_ROAMING_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -918,7 +918,7 @@ class cACTION_BML_SET_LOAD_BALANCER_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_SET_LOAD_BALANCER_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_LOAD_BALANCER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_LOAD_BALANCER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_LOAD_BALANCER_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -939,7 +939,7 @@ class cACTION_BML_SET_LOAD_BALANCER_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_SET_LOAD_BALANCER_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_LOAD_BALANCER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_LOAD_BALANCER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_LOAD_BALANCER_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -958,7 +958,7 @@ class cACTION_BML_GET_LOAD_BALANCER_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_GET_LOAD_BALANCER_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_LOAD_BALANCER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_LOAD_BALANCER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_LOAD_BALANCER_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -977,7 +977,7 @@ class cACTION_BML_GET_LOAD_BALANCER_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_GET_LOAD_BALANCER_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_LOAD_BALANCER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_LOAD_BALANCER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_LOAD_BALANCER_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -998,7 +998,7 @@ class cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1019,7 +1019,7 @@ class cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1038,7 +1038,7 @@ class cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1057,7 +1057,7 @@ class cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1078,7 +1078,7 @@ class cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1099,7 +1099,7 @@ class cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1118,7 +1118,7 @@ class cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1139,7 +1139,7 @@ class cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1160,7 +1160,7 @@ class cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1181,7 +1181,7 @@ class cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1202,7 +1202,7 @@ class cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1223,7 +1223,7 @@ class cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1244,7 +1244,7 @@ class cACTION_BML_SET_CERTIFICATION_MODE_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_SET_CERTIFICATION_MODE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_CERTIFICATION_MODE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_CERTIFICATION_MODE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_CERTIFICATION_MODE_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1265,7 +1265,7 @@ class cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1284,7 +1284,7 @@ class cACTION_BML_GET_CERTIFICATION_MODE_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_GET_CERTIFICATION_MODE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_CERTIFICATION_MODE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_CERTIFICATION_MODE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_CERTIFICATION_MODE_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1303,7 +1303,7 @@ class cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1324,7 +1324,7 @@ class cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1352,7 +1352,7 @@ class cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1373,7 +1373,7 @@ class cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1401,7 +1401,7 @@ class cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1422,7 +1422,7 @@ class cACTION_BML_STEERING_SET_GROUP_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_STEERING_SET_GROUP_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STEERING_SET_GROUP_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STEERING_SET_GROUP_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STEERING_SET_GROUP_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1449,7 +1449,7 @@ class cACTION_BML_STEERING_SET_GROUP_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_STEERING_SET_GROUP_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STEERING_SET_GROUP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STEERING_SET_GROUP_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STEERING_SET_GROUP_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1470,7 +1470,7 @@ class cACTION_BML_STEERING_CLIENT_SET_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_STEERING_CLIENT_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STEERING_CLIENT_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STEERING_CLIENT_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STEERING_CLIENT_SET_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1499,7 +1499,7 @@ class cACTION_BML_STEERING_CLIENT_SET_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_STEERING_CLIENT_SET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STEERING_CLIENT_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STEERING_CLIENT_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STEERING_CLIENT_SET_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1520,7 +1520,7 @@ class cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1541,7 +1541,7 @@ class cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1562,7 +1562,7 @@ class cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1591,7 +1591,7 @@ class cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1612,7 +1612,7 @@ class cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1637,7 +1637,7 @@ class cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1658,7 +1658,7 @@ class cACTION_BML_STEERING_EVENTS_UPDATE : public BaseClass
 {
     public:
         cACTION_BML_STEERING_EVENTS_UPDATE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_STEERING_EVENTS_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_STEERING_EVENTS_UPDATE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_STEERING_EVENTS_UPDATE();
 
         static eActionOp_BML get_action_op(){
@@ -1687,7 +1687,7 @@ class cACTION_BML_TRIGGER_TOPOLOGY_QUERY : public BaseClass
 {
     public:
         cACTION_BML_TRIGGER_TOPOLOGY_QUERY(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_TRIGGER_TOPOLOGY_QUERY(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_TRIGGER_TOPOLOGY_QUERY(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_TRIGGER_TOPOLOGY_QUERY();
 
         static eActionOp_BML get_action_op(){
@@ -1708,7 +1708,7 @@ class cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1731,7 +1731,7 @@ class cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1754,7 +1754,7 @@ class cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1776,7 +1776,7 @@ class cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1797,7 +1797,7 @@ class cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1818,7 +1818,7 @@ class cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1841,7 +1841,7 @@ class cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1863,7 +1863,7 @@ class cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1884,7 +1884,7 @@ class cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1905,7 +1905,7 @@ class cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1926,7 +1926,7 @@ class cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -1948,7 +1948,7 @@ class cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -1972,7 +1972,7 @@ class cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE();
 
         static eActionOp_BML get_action_op(){
@@ -2007,7 +2007,7 @@ class cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST();
 
         static eActionOp_BML get_action_op(){
@@ -2026,7 +2026,7 @@ class cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE : public BaseClass
 {
     public:
         cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE();
 
         static eActionOp_BML get_action_op(){

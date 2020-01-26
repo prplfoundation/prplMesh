@@ -30,7 +30,7 @@ class tlvPushButtonJoinNotification : public BaseClass
 {
     public:
         tlvPushButtonJoinNotification(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvPushButtonJoinNotification(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvPushButtonJoinNotification(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvPushButtonJoinNotification();
 
         const eTlvType& type();

@@ -31,7 +31,7 @@ class tlvOperatingChannelReport : public BaseClass
 {
     public:
         tlvOperatingChannelReport(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvOperatingChannelReport(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvOperatingChannelReport(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvOperatingChannelReport();
 
         typedef struct sOperatingClasses {

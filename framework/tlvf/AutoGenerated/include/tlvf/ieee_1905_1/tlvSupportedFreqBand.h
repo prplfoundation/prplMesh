@@ -29,7 +29,7 @@ class tlvSupportedFreqBand : public BaseClass
 {
     public:
         tlvSupportedFreqBand(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvSupportedFreqBand(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvSupportedFreqBand(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvSupportedFreqBand();
 
         enum eValue: uint8_t {

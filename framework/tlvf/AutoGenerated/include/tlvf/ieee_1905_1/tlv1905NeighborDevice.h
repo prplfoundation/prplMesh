@@ -31,7 +31,7 @@ class tlv1905NeighborDevice : public BaseClass
 {
     public:
         tlv1905NeighborDevice(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlv1905NeighborDevice(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlv1905NeighborDevice(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlv1905NeighborDevice();
 
         enum eBridgesExist: uint8_t {

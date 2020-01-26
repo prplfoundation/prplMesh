@@ -30,7 +30,7 @@ class tlvClientAssociationEvent : public BaseClass
 {
     public:
         tlvClientAssociationEvent(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvClientAssociationEvent(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvClientAssociationEvent(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvClientAssociationEvent();
 
         enum eAssociationEvent: uint8_t {

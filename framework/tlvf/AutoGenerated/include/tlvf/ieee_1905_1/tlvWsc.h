@@ -30,7 +30,7 @@ class tlvWsc : public BaseClass
 {
     public:
         tlvWsc(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvWsc(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvWsc(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvWsc();
 
         const eTlvType& type();

@@ -35,7 +35,7 @@ class tlvApOperationalBSS : public BaseClass
 {
     public:
         tlvApOperationalBSS(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvApOperationalBSS(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvApOperationalBSS(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvApOperationalBSS();
 
         const eTlvTypeMap& type();
@@ -64,7 +64,7 @@ class cRadioInfo : public BaseClass
 {
     public:
         cRadioInfo(uint8_t* buff, size_t buff_len, bool parse = false);
-        cRadioInfo(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cRadioInfo(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cRadioInfo();
 
         sMacAddr& radio_uid();
@@ -91,7 +91,7 @@ class cRadioBssInfo : public BaseClass
 {
     public:
         cRadioBssInfo(uint8_t* buff, size_t buff_len, bool parse = false);
-        cRadioBssInfo(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cRadioBssInfo(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cRadioBssInfo();
 
         sMacAddr& radio_bssid();

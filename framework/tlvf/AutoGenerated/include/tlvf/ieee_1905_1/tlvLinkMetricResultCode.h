@@ -29,7 +29,7 @@ class tlvLinkMetricResultCode : public BaseClass
 {
     public:
         tlvLinkMetricResultCode(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvLinkMetricResultCode(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvLinkMetricResultCode(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvLinkMetricResultCode();
 
         enum eValue: uint8_t {

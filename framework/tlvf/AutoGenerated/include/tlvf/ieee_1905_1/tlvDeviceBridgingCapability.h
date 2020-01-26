@@ -33,7 +33,7 @@ class tlvDeviceBridgingCapability : public BaseClass
 {
     public:
         tlvDeviceBridgingCapability(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvDeviceBridgingCapability(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvDeviceBridgingCapability(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvDeviceBridgingCapability();
 
         const eTlvType& type();
@@ -62,7 +62,7 @@ class cMacList : public BaseClass
 {
     public:
         cMacList(uint8_t* buff, size_t buff_len, bool parse = false);
-        cMacList(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cMacList(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cMacList();
 
         uint8_t& mac_list_length();

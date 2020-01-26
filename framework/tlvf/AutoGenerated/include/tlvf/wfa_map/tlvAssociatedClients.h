@@ -34,7 +34,7 @@ class tlvAssociatedClients : public BaseClass
 {
     public:
         tlvAssociatedClients(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvAssociatedClients(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvAssociatedClients(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvAssociatedClients();
 
         const eTlvTypeMap& type();
@@ -63,7 +63,7 @@ class cBssInfo : public BaseClass
 {
     public:
         cBssInfo(uint8_t* buff, size_t buff_len, bool parse = false);
-        cBssInfo(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cBssInfo(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cBssInfo();
 
         sMacAddr& bssid();
@@ -90,7 +90,7 @@ class cClientInfo : public BaseClass
 {
     public:
         cClientInfo(uint8_t* buff, size_t buff_len, bool parse = false);
-        cClientInfo(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cClientInfo(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cClientInfo();
 
         sMacAddr& mac();
