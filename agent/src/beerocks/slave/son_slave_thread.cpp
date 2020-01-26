@@ -4260,11 +4260,20 @@ bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMe
     LOG(DEBUG) << "Received CLIENT_CAPABILITY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
     LOG(DEBUG) << "************************************************************";
     
-    auto client_info_tlv_r = cmdu_rx.getClass<wfa_map::tlvClientInfo>();
+    // auto client_info_tlv_r = cmdu_rx.getClass<wfa_map::tlvClientInfo>();
+    // if (!client_info_tlv_r) {
+    //     LOG(ERROR) << "getClass wfa_map::tlvClientInfo failed";
+    //     return false;
+    // }
+
+    auto client_info_tlv_r =
+        cmdu_rx.getClass<wfa_map::tlvClientInfo>();
     if (!client_info_tlv_r) {
         LOG(ERROR) << "getClass wfa_map::tlvClientInfo failed";
         return false;
     }
+
+
     //TODO: Check if it is an error scenario - if the STA specified in the Client Capability Query message is not associated
     //with any of the BSS operated by the Multi-AP Agent (an error scenario)
     bool error_scenario = 1;

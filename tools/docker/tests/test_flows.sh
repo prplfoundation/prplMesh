@@ -188,10 +188,14 @@ test_channel_selection() {
 }
 test_client_capability_query() { 
     status "test client capability"
+    sta_mac=11:11:33:44:55:66
+
+    dbg "Connect dummy STA to wlan0"
+    send_bwl_event ${REPEATER1} wlan0 "EVENT AP-STA-CONNECTED ${sta_mac}"
 
     check_error=0
-    send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
-0x000C,tlv_value,{$mac_agent1_wlan0 0x000000110022}" $redirect
+    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
+0x000C,tlv_value,{$mac_agent1_wlan0 0x111133445566}" $redirect
     sleep 1
     dbg "Confirming client capability query has been received on agent"
     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
