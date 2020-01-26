@@ -261,7 +261,7 @@ base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, std::string iface_name,
     fsm_setup();
 }
 
-base_wlan_hal_dummy::~base_wlan_hal_dummy() { detach(); }
+base_wlan_hal_dummy::~base_wlan_hal_dummy() { base_wlan_hal_dummy::detach(); }
 
 bool base_wlan_hal_dummy::fsm_setup() { return true; }
 

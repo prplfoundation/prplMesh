@@ -82,7 +82,7 @@ base_wlan_hal_dwpal::base_wlan_hal_dwpal(HALType type, std::string iface_name,
     fsm_setup();
 }
 
-base_wlan_hal_dwpal::~base_wlan_hal_dwpal() { detach(); }
+base_wlan_hal_dwpal::~base_wlan_hal_dwpal() { base_wlan_hal_dwpal::detach(); }
 
 bool base_wlan_hal_dwpal::fsm_setup()
 {
