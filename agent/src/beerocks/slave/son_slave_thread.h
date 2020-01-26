@@ -11,6 +11,8 @@
 
 #include "ap_manager_thread.h"
 
+#include <bcl/network/network_utils.h>
+
 #include <bcl/beerocks_backport.h>
 #include <bcl/beerocks_logging.h>
 #include <bcl/beerocks_socket_thread.h>
