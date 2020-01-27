@@ -87,6 +87,13 @@ run-tests:
     - cd tools/docker/builder/openwrt
     - ./build.sh -v -d "$TARGET_DEVICE" -t "prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID" 2>&1 | tee build.log | grep '^make\[[12]\]\|^Step\|^ --->' --color=never --line-buffered
   after_script:
+    # if we're on master, tag the docker image with a persistant tag:
+    - |
+      if [ $CI_COMMIT_REF_NAME == "master" ] ; then
+          echo "Keeping tag prplmesh-builder-$TARGET_DEVICE"
+          docker tag prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID prplmesh-builder-$TARGET_DEVICE
+      fi
+    # always delete the unique tag:
     - docker rmi "prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID"
   artifacts:
     paths:
