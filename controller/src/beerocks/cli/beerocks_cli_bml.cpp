@@ -1661,3 +1661,102 @@ int cli_bml::steering_client_measure(uint32_t steeringGroupIndex, const std::str
     return 0;
 }
 #endif //BEEROCKS_RDKB
+
+/**
+ * Enables or disables beerocks DCS continuous scans.
+ *
+ * @param [in] radio_mac Radio MAC of selected radio
+ * @param [in] enable Value of 1 to enable or 0 to disable.
+ *
+ * @return 0 on success.
+ */
+int cli_bml::set_dcs_continuous_scan_enable(const std::string &radio_mac, int8_t enable)
+{
+    std::cout << "set_dcs_continuous_scan_enable" << std::endl;
+
+    return 0;
+}
+
+/**
+ * get DCS continuous scans param. Value is printed to the console.
+ *
+ * @param [in] radio_mac Radio MAC of selected radio
+ *
+ * @return 0 on success.
+ */
+int cli_bml::get_dcs_continuous_scan_enable(const std::string &radio_mac)
+{
+    std::cout << __func__ << ", mac=" << radio_mac << std::endl;
+
+    return 0;
+}
+
+/**
+ * set DCS continuous scan params.
+ *
+ * @param [in] radio_mac Radio MAC of selected radio
+ * @param [in] dwell_time Set the dwell time in milliseconds.
+ * @param [in] interval_time Set the interval time in seconds.
+ * @param [in] channel_pool Set the channel pool for the DCS.
+ *
+ * @return 0 on success.
+ */
+int cli_bml::set_dcs_continuous_scan_params(const std::string &radio_mac, int32_t dwell_time,
+                                            int32_t interval_time, const std::string &channel_pool)
+{
+    std::cout << __func__ << ", mac=" << radio_mac << ", dwell_time=" << dwell_time
+              << ", interval_time=" << interval_time << ", channel_pool=" << channel_pool
+              << std::endl;
+
+    return 0;
+}
+
+/**
+ * get DCS continuous scan params. Values are printed to the console.
+ *
+ * @param [in] radio_mac Radio MAC of selected radio
+ *
+ * @return 0 on success.
+ */
+int cli_bml::get_dcs_continuous_scan_params(const std::string &radio_mac)
+{
+    std::cout << __func__ << ", mac=" << radio_mac << std::endl;
+
+    return 0;
+}
+
+/**
+ * Start a single DCS scan with parameters.
+ *
+ * @param [in] radio_mac radio MAC of selected radio
+ * @param [in] dwell_time Set the dwell time in milliseconds.
+ * @param [in] channel_pool Set the channel pool for the DCS.
+ *
+ * @return 0 on success.
+ */
+int cli_bml::start_dcs_single_scan(const std::string &radio_mac, int32_t dwell_time,
+                                   const std::string &channel_pool)
+{
+    std::cout << "start_dcs_single_scan, mac=" << radio_mac << ", dwell_time=" << dwell_time
+              << ", channel_pool=" << channel_pool << std::endl;
+
+    return 0;
+}
+
+/**
+ * get DCS continuous scan params.
+ *
+ * @param [in] radio_mac radio MAC of selected radio
+ * @param [in] max_results_size Max number of the returned results
+ * @param [in] is_single_scan Flag indicating if the results belong to a single scan or not
+ * 
+ * @return 0 on success.
+ */
+int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_results_size,
+                                  bool is_single_scan)
+{
+    std::cout << __func__ << ", mac=" << radio_mac << ", max_results_size=" << max_results_size
+              << ", is_single_scan=" << string_utils::bool_str(is_single_scan) << std::endl;
+
+    return 0;
+}
