@@ -1,5 +1,5 @@
 # prplMesh
-[![Build Status](https://travis-ci.com/prplfoundation/prplMesh.svg?branch=master)](https://travis-ci.org/prplfoundation/prplMesh)
+[![Build Status](https://gitlab.com/prpl-foundation/prplMesh/badges/master/pipeline.svg)](https://gitlab.com/prpl-foundation/prplMesh/pipelines)
 
 prplMesh is an open-source, carrier-grade and certifiable implementation of the WiFi Alliance’s Multi-AP specification.
 
