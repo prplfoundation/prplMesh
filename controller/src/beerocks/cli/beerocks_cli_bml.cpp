@@ -1123,6 +1123,119 @@ int cli_bml::bml_rdkb_steering_client_measure_caller(int numOfArgs)
 }
 #endif //BEEROCKS_RDKB
 
+/**
+ * caller function for set_dcs_continuous_scan_enable
+ *
+ * @param [in] numOfArgs Num of received arguments
+ *
+ * @return 0 on success.
+ */
+int cli_bml::set_dcs_continuous_scan_enable_caller(int numOfArgs)
+{
+    if (numOfArgs == 2) {
+        return set_dcs_continuous_scan_enable(args.stringArgs[0], args.intArgs[1]);
+    }
+    return -1;
+}
+
+/**
+ * caller function for get_dcs_continuous_scan_enable
+ *
+ * @param [in] numOfArgs Num of received arguments
+ *
+ * @return 0 on success.
+ */
+int cli_bml::get_dcs_continuous_scan_enable_caller(int numOfArgs)
+{
+    if (numOfArgs == 1) {
+        return get_dcs_continuous_scan_enable(args.stringArgs[0]);
+    }
+    return -1;
+}
+
+/**
+ * caller function for set_dcs_continuous_scan_params
+ *
+ * @param [in] numOfArgs Num of received arguments
+ *
+ * @return 0 on success.
+ */
+int cli_bml::set_dcs_continuous_scan_params_caller(int numOfArgs)
+{
+    std::string radio_mac(network_utils::WILD_MAC_STRING);
+    int32_t dwell_time    = BML_CHANNEL_SCAN_INVALID_PARAM;
+    int32_t interval_time = BML_CHANNEL_SCAN_INVALID_PARAM;
+    std::string channel_pool;
+
+    std::string::size_type pos;
+    //[radio_mac=<radio_mac> dwell_time=<dwell_time> interval_time='<interval_time>']"
+    for (int i = 1; i < numOfArgs; i++) { //first optional arg
+        if ((pos = args.stringArgs[i].find("radio_mac=")) != std::string::npos) {
+            radio_mac = args.stringArgs[i].substr(pos + sizeof("radio_mac"));
+        } else if ((pos = args.stringArgs[i].find("dwell_time=")) != std::string::npos) {
+            dwell_time = string_utils::stoi(args.stringArgs[i].substr(pos + sizeof("dwell_time")));
+        } else if ((pos = args.stringArgs[i].find("interval_time=")) != std::string::npos) {
+            interval_time =
+                string_utils::stoi(args.stringArgs[i].substr(pos + sizeof("interval_time")));
+        } else if ((pos = args.stringArgs[i].find("channel_pool=")) != std::string::npos) {
+            channel_pool = args.stringArgs[i].substr(pos + sizeof("channel_pool"));
+        }
+    }
+
+    if (numOfArgs > 1) {
+        return set_dcs_continuous_scan_params(radio_mac, dwell_time, interval_time, channel_pool);
+    }
+    return -1;
+}
+
+/**
+ * caller function for get_dcs_continuous_scan_params
+ *
+ * @param [in] numOfArgs Num of received arguments
+ *
+ * @return 0 on success.
+ */
+int cli_bml::get_dcs_continuous_scan_params_caller(int numOfArgs)
+{
+    if (numOfArgs == 1) {
+        return get_dcs_continuous_scan_params(args.stringArgs[0]);
+    }
+    return -1;
+}
+
+/**
+ * caller function for start_dcs_single_scan
+ *
+ * @param [in] numOfArgs Num of received arguments
+ *
+ * @return 0 on success.
+ */
+int cli_bml::start_dcs_single_scan_caller(int numOfArgs)
+{
+    if (numOfArgs == 4) {
+        return start_dcs_single_scan(args.stringArgs[0], args.intArgs[1], args.stringArgs[2]);
+    }
+    return -1;
+}
+
+/**
+ * caller function for get_dcs_scan_results
+ *
+ * @param [in] numOfArgs Num of received arguments
+ *
+ * @return 0 on success.
+ */
+int cli_bml::get_dcs_scan_results_caller(int numOfArgs)
+{
+    if (numOfArgs == 2) {
+        return get_dcs_scan_results(args.stringArgs[0], args.intArgs[1]);
+    } else if (numOfArgs == 3) {
+        bool single_scan = (args.intArgs[2] == 1);
+        return get_dcs_scan_results(args.stringArgs[0], args.intArgs[1], single_scan);
+    }
+    return -1;
+}
+
 //
 // Functions
 //
