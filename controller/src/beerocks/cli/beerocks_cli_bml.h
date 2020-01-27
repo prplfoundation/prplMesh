@@ -190,6 +190,15 @@ private:
     int steering_client_measure(uint32_t steeringGroupIndex, const std::string &str_bssid,
                                 const std::string &str_client_mac);
 #endif
+    int set_dcs_continuous_scan_enable(const std::string &radio_mac, int8_t enable);
+    int get_dcs_continuous_scan_enable(const std::string &radio_mac);
+    int set_dcs_continuous_scan_params(const std::string &radio_mac, int32_t dwell_time,
+                                       int32_t interval_time, const std::string &channel_pool);
+    int get_dcs_continuous_scan_params(const std::string &radio_mac);
+    int start_dcs_single_scan(const std::string &radio_mac, int32_t dwell_time,
+                              const std::string &channel_pool);
+    int get_dcs_scan_results(const std::string &radio_mac, uint32_t max_results_size,
+                             bool is_single_scan = false);
     // Variable
     std::string beerocks_conf_path;
     BML_CTX ctx = nullptr;
