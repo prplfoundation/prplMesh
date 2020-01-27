@@ -24,6 +24,17 @@ using namespace net;
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+static const std::string string_from_int_array(void *arr, size_t arr_max_size)
+{
+    std::stringstream ss;
+    if (arr) {
+        for (size_t i = 0; i < arr_max_size; i++) {
+            ss << ((i != 0) ? ", " : "") << int(static_cast<int *>(arr)[i]);
+        }
+    }
+    return ss.str();
+}
+
 static void fill_conn_map_node(
     std::unordered_multimap<std::string, std::shared_ptr<cli_bml::conn_map_node_t>> &conn_map_nodes,
     struct BML_NODE *node)
@@ -1217,7 +1228,6 @@ int cli_bml::set_dcs_continuous_scan_params_caller(int numOfArgs)
             channel_pool = args.stringArgs[i].substr(pos + sizeof("channel_pool"));
         }
     }
-
     if (numOfArgs > 1) {
         return set_dcs_continuous_scan_params(radio_mac, dwell_time, interval_time, channel_pool);
     }
@@ -1821,7 +1831,11 @@ int cli_bml::steering_client_measure(uint32_t steeringGroupIndex, const std::str
  */
 int cli_bml::set_dcs_continuous_scan_enable(const std::string &radio_mac, int8_t enable)
 {
-    std::cout << "set_dcs_continuous_scan_enable" << std::endl;
+    std::cout << __func__ << ", mac=" << radio_mac << ", enable=" << enable << std::endl;
+
+    int ret = bml_set_dcs_continuous_scan_enable(ctx, radio_mac.c_str(), enable);
+
+    printBmlReturnVals("bml_set_dcs_continuous_scan_enable", ret);
 
     return 0;
 }
@@ -1836,6 +1850,15 @@ int cli_bml::set_dcs_continuous_scan_enable(const std::string &radio_mac, int8_t
 int cli_bml::get_dcs_continuous_scan_enable(const std::string &radio_mac)
 {
     std::cout << __func__ << ", mac=" << radio_mac << std::endl;
+
+    int enable = -1;
+    int ret    = bml_get_dcs_continuous_scan_enable(ctx, radio_mac.c_str(), &enable);
+
+    if (ret == BML_RET_OK) {
+        std::cout << "dcs-continuous-scan-enable=" << string_utils::bool_str(enable) << std::endl;
+    }
+
+    printBmlReturnVals("bml_get_dcs_continuous_scan_enable", ret);
 
     return 0;
 }
@@ -1857,6 +1880,30 @@ int cli_bml::set_dcs_continuous_scan_params(const std::string &radio_mac, int32_
               << ", interval_time=" << interval_time << ", channel_pool=" << channel_pool
               << std::endl;
 
+    int ret = -1;
+    if (channel_pool.length() == 0) {
+        ret = bml_set_dcs_continuous_scan_params(ctx, radio_mac.c_str(), dwell_time, interval_time,
+                                                 nullptr, BML_CHANNEL_SCAN_INVALID_PARAM);
+    } else {
+        auto channels      = string_utils::str_split(channel_pool, ',');
+        auto channels_size = channels.size();
+
+        if (channels_size > BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE) {
+            std::cout << "size of channel_pool is too big. size=" << channels_size << std::endl;
+            return -1;
+        }
+
+        unsigned int channel_pool_arr[BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE] = {0};
+
+        for (size_t i = 0; i < channels_size; i++) {
+            channel_pool_arr[i] = beerocks::string_utils::stoi(channels[i]);
+        }
+
+        ret = bml_set_dcs_continuous_scan_params(ctx, radio_mac.c_str(), dwell_time, interval_time,
+                                                 channel_pool_arr, uint32_t(channels_size));
+    }
+    printBmlReturnVals("bml_set_dcs_continuous_scan_params", ret);
+
     return 0;
 }
 
@@ -1870,6 +1917,34 @@ int cli_bml::set_dcs_continuous_scan_params(const std::string &radio_mac, int32_
 int cli_bml::get_dcs_continuous_scan_params(const std::string &radio_mac)
 {
     std::cout << __func__ << ", mac=" << radio_mac << std::endl;
+
+    int dwell_time = BML_CHANNEL_SCAN_INVALID_PARAM, interval_time = BML_CHANNEL_SCAN_INVALID_PARAM,
+        channel_pool_size = BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE;
+    unsigned int channel_pool[BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE] = {0};
+
+    int ret = bml_get_dcs_continuous_scan_params(ctx, radio_mac.c_str(), &dwell_time,
+                                                 &interval_time, channel_pool, &channel_pool_size);
+
+    if (ret == BML_RET_OK) {
+        std::cout << "dcs-continuous-scan-params for mac=" << radio_mac << std::endl
+                  << "dwell_time=" << dwell_time << std::endl
+                  << "interval_time=" << interval_time << std::endl;
+
+        std::cout << "channel_pool=";
+        for (int i = 0; (i < channel_pool_size) && (i < BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE);
+             i++) {
+            if (channel_pool[i] > 0) {
+                if (i > 0) {
+                    std::cout << ",";
+                }
+                std::cout << channel_pool[i];
+            }
+        }
+        std::cout << std::endl;
+        std::cout << "channel_pool_size=" << channel_pool_size << std::endl;
+    }
+
+    printBmlReturnVals("bml_get_dcs_continuous_scan_params", ret);
 
     return 0;
 }
@@ -1889,6 +1964,38 @@ int cli_bml::start_dcs_single_scan(const std::string &radio_mac, int32_t dwell_t
     std::cout << "start_dcs_single_scan, mac=" << radio_mac << ", dwell_time=" << dwell_time
               << ", channel_pool=" << channel_pool << std::endl;
 
+    if (dwell_time <= 0) {
+        std::cout << __func__ << ", invalid input: dwell_time(" << dwell_time << ") <= 0"
+                  << std::endl;
+        return -1;
+    }
+
+    if (channel_pool.length() == 0) {
+        std::cout << __func__
+                  << "invalid channel_pool input: channel_pool.length()==" << channel_pool.length()
+                  << std::endl;
+        return -1;
+    }
+
+    auto channels      = string_utils::str_split(channel_pool, ',');
+    auto channels_size = channels.size();
+
+    if (channels_size > BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE) {
+        std::cout << "size of channel_pool is too big. size=" << channels_size << std::endl;
+        return -1;
+    }
+
+    unsigned int channel_pool_arr[BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE] = {0};
+
+    for (size_t i = 0; i < channels_size; i++) {
+        channel_pool_arr[i] = beerocks::string_utils::stoi(channels[i]);
+    }
+
+    int ret = bml_start_dcs_single_scan(ctx, radio_mac.c_str(), dwell_time, uint32_t(channels_size),
+                                        channel_pool_arr);
+
+    printBmlReturnVals("bml_start_dcs_single_scan", ret);
+
     return 0;
 }
 
@@ -1906,6 +2013,67 @@ int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_res
 {
     std::cout << __func__ << ", mac=" << radio_mac << ", max_results_size=" << max_results_size
               << ", is_single_scan=" << string_utils::bool_str(is_single_scan) << std::endl;
+
+    if (max_results_size == 0) {
+        std::cout << __func__ << "invalid input, max_results_size==0" << std::endl;
+        return -1;
+    }
+
+    BML_NEIGHBOR_AP results[max_results_size] = {0};
+
+    uint8_t status             = 0;
+    unsigned int results_count = max_results_size;
+    int ret                    = bml_get_dcs_scan_results(ctx, radio_mac.c_str(),
+                                       reinterpret_cast<BML_NEIGHBOR_AP **>(&results),
+                                       &results_count, &status, is_single_scan);
+
+    if (ret == BML_RET_OK) {
+        if (results_count > max_results_size) {
+            std::cout << __func__ << "ERROR: results_count(" << results_count << ")"
+                      << " > max_results_size(" << max_results_size << ")" << std::endl;
+        } else if ((status == 0) && (results_count > 0)) {
+            for (size_t i = 0; i < results_count; i++) {
+                auto res = results[i];
+                std::cout << "result[" << i << "]:" << std::endl
+                          << "  ssid=" << res.ap_SSID << std::endl
+                          << "  bssid=" << res.ap_BSSID << std::endl
+                          << "  mode=" << int(res.ap_Mode) << std::endl
+                          << "  channel=" << int(res.ap_Channel) << std::endl
+                          << "  signal_strength=" << int(res.ap_SignalStrength) << std::endl
+                          << "  security_mode_enabled="
+                          << string_from_int_array(res.ap_SecurityModeEnabled,
+                                                   BML_CHANNEL_SCAN_ENUM_LIST_SIZE)
+                          << std::endl
+                          << "  encryption_mode="
+                          << string_from_int_array(res.ap_EncryptionMode,
+                                                   BML_CHANNEL_SCAN_ENUM_LIST_SIZE)
+                          << std::endl
+                          << "  operating_frequency_band=" << res.ap_OperatingFrequencyBand
+                          << std::endl
+                          << "  supported_standards="
+                          << string_from_int_array(res.ap_SupportedStandards,
+                                                   BML_CHANNEL_SCAN_ENUM_LIST_SIZE)
+                          << std::endl
+                          << "  operating_standards=" << res.ap_OperatingStandards << std::endl
+                          << "  operating_channel_bandwidth=" << res.ap_OperatingChannelBandwidth
+                          << std::endl
+                          << "  beacon_period=" << (int)res.ap_BeaconPeriod << std::endl
+                          << "  noise=" << (int)res.ap_Noise << std::endl
+                          << "  basic_data_transfer_rates="
+                          << string_from_int_array(res.ap_BasicDataTransferRates,
+                                                   BML_CHANNEL_SCAN_ENUM_LIST_SIZE)
+                          << std::endl
+                          << "  supported_data_transfer_rates="
+                          << string_from_int_array(res.ap_SupportedDataTransferRates,
+                                                   BML_CHANNEL_SCAN_ENUM_LIST_SIZE)
+                          << std::endl
+                          << "  dtim_period=" << (int)res.ap_DTIMPeriod << std::endl
+                          << "  channel_utilization=" << (int)res.ap_ChannelUtilization
+                          << std::endl;
+            }
+        }
+    }
+    printBmlReturnVals("bml_get_dcs_scan_results", ret);
 
     return 0;
 }
