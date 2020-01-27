@@ -1009,8 +1009,8 @@ class TlvF:
 
                 lines_h.append( "bool set_%s(const char buffer[], size_t size);" % (param_name) )
                 lines_cpp.append( "bool %s::set_%s(const char str[], size_t size) {" % (obj_meta.name, param_name) )
-                lines_cpp.append( "%sif (str == nullptr || size == 0) {" % self.getIndentation(1))
-                lines_cpp.append( '%sTLVF_LOG(WARNING) << "set_%s received an empty string.";' %  (self.getIndentation(2), param_name) )
+                lines_cpp.append( "%sif (str == nullptr) {" % self.getIndentation(1))
+                lines_cpp.append( '%sTLVF_LOG(WARNING) << "set_%s received a null pointer.";' %  (self.getIndentation(2), param_name) )
                 lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                 lines_cpp.append( "%s}" % self.getIndentation(1) )
                 if is_const_len or is_int_len:
@@ -1151,10 +1151,6 @@ class TlvF:
             lines_cpp.append( "%sTLVF_LOG(ERROR) << \"Out of order allocation for variable length list %s, abort!\";" %(self.getIndentation(2), param_name) )
             lines_cpp.append( "%sreturn false;" %self.getIndentation(2))
             lines_cpp.append( "%s}" %self.getIndentation(1))
-            lines_cpp.append( "%sif (count == 0) {" % (self.getIndentation(1)) )
-            lines_cpp.append( '%sTLVF_LOG(WARNING) << "can\'t allocate 0 bytes";' %  self.getIndentation(2) )
-            lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
-            lines_cpp.append( "%s}" % self.getIndentation(1) )
             lines_cpp.append( "%ssize_t len = sizeof(%s) * count;" % (self.getIndentation(1), param_type) )
             lines_cpp.append( "%sif(getBuffRemainingBytes() < len )  {" % (self.getIndentation(1)) )
             lines_cpp.append( '%sTLVF_LOG(ERROR) << "Not enough available space on buffer - can\'t allocate";' %  self.getIndentation(2) )

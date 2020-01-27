@@ -1416,10 +1416,6 @@ bool cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list sta_stats, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(sStaStatsParams) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";

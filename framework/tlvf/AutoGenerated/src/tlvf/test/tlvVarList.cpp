@@ -52,10 +52,6 @@ bool tlvTestVarList::alloc_simple_list(size_t count) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list simple_list, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(uint16_t) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
@@ -110,8 +106,8 @@ char* tlvTestVarList::test_string(size_t length) {
 
 bool tlvTestVarList::set_test_string(const std::string& str) { return set_test_string(str.c_str(), str.size()); }
 bool tlvTestVarList::set_test_string(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_test_string received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_test_string received a null pointer.";
         return false;
     }
     if (!alloc_test_string(size)) { return false; }
@@ -121,10 +117,6 @@ bool tlvTestVarList::set_test_string(const char str[], size_t size) {
 bool tlvTestVarList::alloc_test_string(size_t count) {
     if (m_lock_order_counter__ > 1) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list test_string, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -675,10 +667,6 @@ bool cInner::alloc_list(size_t count) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list list, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(uint8_t) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
@@ -723,8 +711,8 @@ char* cInner::unknown_length_list_inner(size_t length) {
 
 bool cInner::set_unknown_length_list_inner(const std::string& str) { return set_unknown_length_list_inner(str.c_str(), str.size()); }
 bool cInner::set_unknown_length_list_inner(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_unknown_length_list_inner received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_unknown_length_list_inner received a null pointer.";
         return false;
     }
     if (!alloc_unknown_length_list_inner(size)) { return false; }
@@ -734,10 +722,6 @@ bool cInner::set_unknown_length_list_inner(const char str[], size_t size) {
 bool cInner::alloc_unknown_length_list_inner(size_t count) {
     if (m_lock_order_counter__ > 1) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list unknown_length_list_inner, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;

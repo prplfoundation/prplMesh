@@ -391,8 +391,8 @@ char* cACTION_CLI_RESPONSE_STR::buffer(size_t length) {
 
 bool cACTION_CLI_RESPONSE_STR::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_CLI_RESPONSE_STR::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -402,10 +402,6 @@ bool cACTION_CLI_RESPONSE_STR::set_buffer(const char str[], size_t size) {
 bool cACTION_CLI_RESPONSE_STR::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;

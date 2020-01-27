@@ -62,10 +62,6 @@ bool tlvApMetric::alloc_estimated_service_info_field(size_t count) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list estimated_service_info_field, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(uint8_t) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";

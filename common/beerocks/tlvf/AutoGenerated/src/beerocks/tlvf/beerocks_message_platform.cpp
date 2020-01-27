@@ -108,8 +108,8 @@ char* cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::iface_name(size_t length) {
 
 bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::set_iface_name(const std::string& str) { return set_iface_name(str.c_str(), str.size()); }
 bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::set_iface_name(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_iface_name received a null pointer.";
         return false;
     }
     if (size > beerocks::message::IFACE_NAME_LENGTH) {
@@ -445,8 +445,8 @@ char* cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::hostname(size_t length) {
 
 bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::set_hostname(const std::string& str) { return set_hostname(str.c_str(), str.size()); }
 bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::set_hostname(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_hostname received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_hostname received a null pointer.";
         return false;
     }
     if (size > beerocks::message::NODE_NAME_LENGTH) {
@@ -967,8 +967,8 @@ char* cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::iface_name(size_t length) {
 
 bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::set_iface_name(const std::string& str) { return set_iface_name(str.c_str(), str.size()); }
 bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::set_iface_name(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_iface_name received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_iface_name received a null pointer.";
         return false;
     }
     if (size > beerocks::message::IFACE_NAME_LENGTH) {
@@ -1894,8 +1894,8 @@ char* cACTION_PLATFORM_ERROR_NOTIFICATION::data(size_t length) {
 
 bool cACTION_PLATFORM_ERROR_NOTIFICATION::set_data(const std::string& str) { return set_data(str.c_str(), str.size()); }
 bool cACTION_PLATFORM_ERROR_NOTIFICATION::set_data(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_data received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_data received a null pointer.";
         return false;
     }
     if (size > 256) {
@@ -1992,8 +1992,8 @@ char* cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_ap(size_t 
 
 bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_ap(const std::string& str) { return set_iface_name_ap(str.c_str(), str.size()); }
 bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_ap(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_iface_name_ap received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_iface_name_ap received a null pointer.";
         return false;
     }
     if (size > beerocks::message::IFACE_NAME_LENGTH) {
@@ -2019,8 +2019,8 @@ char* cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::iface_name_bh(size_t 
 
 bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_bh(const std::string& str) { return set_iface_name_bh(str.c_str(), str.size()); }
 bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::set_iface_name_bh(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_iface_name_bh received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_iface_name_bh received a null pointer.";
         return false;
     }
     if (size > beerocks::message::IFACE_NAME_LENGTH) {

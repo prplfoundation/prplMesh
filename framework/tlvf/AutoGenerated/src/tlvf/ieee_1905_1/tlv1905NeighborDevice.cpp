@@ -51,10 +51,6 @@ bool tlv1905NeighborDevice::alloc_mac_al_1905_device(size_t count) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list mac_al_1905_device, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(sMacAl1905Device) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";

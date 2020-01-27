@@ -220,8 +220,8 @@ char* cACTION_BML_NW_MAP_RESPONSE::buffer(size_t length) {
 
 bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -231,10 +231,6 @@ bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const char str[], size_t size) {
 bool cACTION_BML_NW_MAP_RESPONSE::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -362,8 +358,8 @@ char* cACTION_BML_NW_MAP_UPDATE::buffer(size_t length) {
 
 bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -373,10 +369,6 @@ bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const char str[], size_t size) {
 bool cACTION_BML_NW_MAP_UPDATE::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -504,8 +496,8 @@ char* cACTION_BML_STATS_UPDATE::buffer(size_t length) {
 
 bool cACTION_BML_STATS_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_STATS_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -515,10 +507,6 @@ bool cACTION_BML_STATS_UPDATE::set_buffer(const char str[], size_t size) {
 bool cACTION_BML_STATS_UPDATE::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -642,8 +630,8 @@ char* cACTION_BML_EVENTS_UPDATE::buffer(size_t length) {
 
 bool cACTION_BML_EVENTS_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_EVENTS_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -653,10 +641,6 @@ bool cACTION_BML_EVENTS_UPDATE::set_buffer(const char str[], size_t size) {
 bool cACTION_BML_EVENTS_UPDATE::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -4229,10 +4213,6 @@ bool cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::alloc_vap_list(size_t count) 
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list vap_list, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(sConfigVapInfo) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
@@ -4426,10 +4406,6 @@ std::tuple<bool, sConfigVapInfo&> cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE:
 bool cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::alloc_vap_list(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list vap_list, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(sConfigVapInfo) * count;
@@ -5453,8 +5429,8 @@ char* cACTION_BML_STEERING_EVENTS_UPDATE::buffer(size_t length) {
 
 bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -5464,10 +5440,6 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const char str[], size_t siz
 bool cACTION_BML_STEERING_EVENTS_UPDATE::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -6525,10 +6497,6 @@ std::tuple<bool, sChannelScanResults&> cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESP
 bool cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::alloc_results(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list results, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(sChannelScanResults) * count;

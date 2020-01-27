@@ -41,8 +41,8 @@ char* cACTION_BACKHAUL_REGISTER_REQUEST::sta_iface(size_t length) {
 
 bool cACTION_BACKHAUL_REGISTER_REQUEST::set_sta_iface(const std::string& str) { return set_sta_iface(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_REGISTER_REQUEST::set_sta_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_sta_iface received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_sta_iface received a null pointer.";
         return false;
     }
     if (size > beerocks::message::IFACE_NAME_LENGTH) {
@@ -68,8 +68,8 @@ char* cACTION_BACKHAUL_REGISTER_REQUEST::hostap_iface(size_t length) {
 
 bool cACTION_BACKHAUL_REGISTER_REQUEST::set_hostap_iface(const std::string& str) { return set_hostap_iface(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_REGISTER_REQUEST::set_hostap_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_hostap_iface received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_hostap_iface received a null pointer.";
         return false;
     }
     if (size > beerocks::message::IFACE_NAME_LENGTH) {
@@ -360,8 +360,8 @@ char* cACTION_BACKHAUL_ENABLE::wire_iface(size_t length) {
 
 bool cACTION_BACKHAUL_ENABLE::set_wire_iface(const std::string& str) { return set_wire_iface(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_ENABLE::set_wire_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_wire_iface received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_wire_iface received a null pointer.";
         return false;
     }
     if (size > beerocks::message::IFACE_NAME_LENGTH) {
@@ -387,8 +387,8 @@ char* cACTION_BACKHAUL_ENABLE::sta_iface(size_t length) {
 
 bool cACTION_BACKHAUL_ENABLE::set_sta_iface(const std::string& str) { return set_sta_iface(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_ENABLE::set_sta_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_sta_iface received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_sta_iface received a null pointer.";
         return false;
     }
     if (size > beerocks::message::IFACE_NAME_LENGTH) {
@@ -414,8 +414,8 @@ char* cACTION_BACKHAUL_ENABLE::ap_iface(size_t length) {
 
 bool cACTION_BACKHAUL_ENABLE::set_ap_iface(const std::string& str) { return set_ap_iface(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_ENABLE::set_ap_iface(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_ap_iface received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_ap_iface received a null pointer.";
         return false;
     }
     if (size > beerocks::message::IFACE_NAME_LENGTH) {
@@ -441,8 +441,8 @@ char* cACTION_BACKHAUL_ENABLE::ssid(size_t length) {
 
 bool cACTION_BACKHAUL_ENABLE::set_ssid(const std::string& str) { return set_ssid(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_ENABLE::set_ssid(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_ssid received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_ssid received a null pointer.";
         return false;
     }
     if (size > beerocks::message::WIFI_SSID_MAX_LENGTH) {
@@ -468,8 +468,8 @@ char* cACTION_BACKHAUL_ENABLE::pass(size_t length) {
 
 bool cACTION_BACKHAUL_ENABLE::set_pass(const std::string& str) { return set_pass(str.c_str(), str.size()); }
 bool cACTION_BACKHAUL_ENABLE::set_pass(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_pass received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_pass received a null pointer.";
         return false;
     }
     if (size > beerocks::message::WIFI_PASS_MAX_LENGTH) {

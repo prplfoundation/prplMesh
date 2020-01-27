@@ -41,8 +41,8 @@ char* cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::slave_version(size_t length) {
 
 bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const std::string& str) { return set_slave_version(str.c_str(), str.size()); }
 bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_slave_version received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_slave_version received a null pointer.";
         return false;
     }
     if (size > beerocks::message::VERSION_LENGTH) {
@@ -234,8 +234,8 @@ char* cACTION_CONTROL_SLAVE_JOINED_RESPONSE::master_version(size_t length) {
 
 bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const std::string& str) { return set_master_version(str.c_str(), str.size()); }
 bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_master_version received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_master_version received a null pointer.";
         return false;
     }
     if (size > beerocks::message::VERSION_LENGTH) {
@@ -542,10 +542,6 @@ bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::alloc_data(size_t count) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(uint8_t) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
@@ -668,10 +664,6 @@ uint8_t* cACTION_CONTROL_CONTROLLER_PING_RESPONSE::data(size_t idx) {
 bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::alloc_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(uint8_t) * count;
@@ -798,10 +790,6 @@ bool cACTION_CONTROL_AGENT_PING_REQUEST::alloc_data(size_t count) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(uint8_t) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
@@ -924,10 +912,6 @@ uint8_t* cACTION_CONTROL_AGENT_PING_RESPONSE::data(size_t idx) {
 bool cACTION_CONTROL_AGENT_PING_RESPONSE::alloc_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(uint8_t) * count;
@@ -2434,10 +2418,6 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list sta_stats, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(sStaStatsParams) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
@@ -3850,8 +3830,8 @@ char* cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::name(size_t length) {
 
 bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const std::string& str) { return set_name(str.c_str(), str.size()); }
 bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_name received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_name received a null pointer.";
         return false;
     }
     if (size > beerocks::message::NODE_NAME_LENGTH) {
