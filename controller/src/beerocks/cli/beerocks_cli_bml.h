@@ -140,6 +140,12 @@ private:
     int bml_rdkb_steering_event_register_caller(int numOfArgs);
     int bml_rdkb_steering_client_measure_caller(int numOfArgs);
 #endif
+    int set_dcs_continuous_scan_enable_caller(int numOfArgs);
+    int get_dcs_continuous_scan_enable_caller(int numOfArgs);
+    int set_dcs_continuous_scan_params_caller(int numOfArgs);
+    int get_dcs_continuous_scan_params_caller(int numOfArgs);
+    int start_dcs_single_scan_caller(int numOfArgs);
+    int get_dcs_scan_results_caller(int numOfArgs);
     // Functions
     int onboard_status();
     int ping();
