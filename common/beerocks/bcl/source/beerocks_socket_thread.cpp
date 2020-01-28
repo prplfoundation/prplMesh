@@ -31,7 +31,7 @@ socket_thread::socket_thread(const std::string &unix_socket_path_)
       server_socket(nullptr), server_max_connections(DEFAULT_MAX_SOCKET_CONNECTIONS)
 {
     memset(TX_BUFFER_UDS, 0, TX_BUFFER_UDS_SIZE);
-    set_select_timeout(500);
+    socket_thread::set_select_timeout(500);
 }
 
 socket_thread::~socket_thread() {}

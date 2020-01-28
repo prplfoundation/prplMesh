@@ -10,7 +10,11 @@
 
 using namespace beerocks;
 
-thread_base::~thread_base() { stop(); }
+thread_base::~thread_base() {
+    should_stop = true;
+    thread_base::before_stop();
+    join();
+}
 
 bool thread_base::start(std::string name)
 {
@@ -38,7 +42,7 @@ void thread_base::join()
 void thread_base::stop(bool block)
 {
     should_stop = true;
-    before_stop();
+    thread_base::before_stop();
     if (block) {
         join();
     }
