@@ -141,15 +141,14 @@ public:
     static std::string wsc_to_bwl_encryption(WSC::eWscEncr enctype);
     static beerocks::eBssType wsc_to_bwl_bss_type(WSC::eWscVendorExtSubelementBssType bss_type);
     static std::vector<uint8_t>
-    get_supported_operating_classes(beerocks::message::sWifiChannel supported_channels[]);
+    get_supported_operating_classes(const beerocks::message::sWifiChannel supported_channels[]);
     static uint8_t
-    get_operating_class_max_tx_power(beerocks::message::sWifiChannel supported_channels[],
+    get_operating_class_max_tx_power(const beerocks::message::sWifiChannel supported_channels[],
                                      uint8_t operating_class);
-    static std::vector<uint8_t>
-    get_operating_class_non_oper_channels(beerocks::message::sWifiChannel supported_channels[],
-                                          uint8_t operating_class);
+    static std::vector<uint8_t> get_operating_class_non_oper_channels(
+        const beerocks::message::sWifiChannel supported_channels[], uint8_t operating_class);
     static std::list<sChannelPreference>
-    get_channel_preferences(beerocks::message::sWifiChannel supported_channels[]);
+    get_channel_preferences(const beerocks::message::sWifiChannel supported_channels[]);
 
 private:
     enum eAntennaFactor {
