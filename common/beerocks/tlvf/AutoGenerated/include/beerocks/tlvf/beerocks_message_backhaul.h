@@ -149,6 +149,7 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         uint8_t& wireless_iface_type();
         uint8_t& mem_only_psk();
         uint8_t& backhaul_preferred_radio_band();
+        std::tuple<bool, beerocks::message::sWifiChannel&> supported_channels_list(size_t idx);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -175,6 +176,8 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         uint8_t* m_wireless_iface_type = nullptr;
         uint8_t* m_mem_only_psk = nullptr;
         uint8_t* m_backhaul_preferred_radio_band = nullptr;
+        beerocks::message::sWifiChannel* m_supported_channels_list = nullptr;
+        size_t m_supported_channels_list_idx__ = 0;
 };
 
 class cACTION_BACKHAUL_CONNECTED_NOTIFICATION : public BaseClass
