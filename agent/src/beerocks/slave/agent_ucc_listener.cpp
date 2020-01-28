@@ -109,7 +109,7 @@ void agent_ucc_listener::update_vaps_list(std::string ruid, beerocks_message::sV
 bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, std::string> &params,
                                               std::string &value)
 {
-    if (params["parameter"] == "macaddr") {
+    if (params["parameter"] == "macaddr" || params["parameter"] == "bssid") {
         if (params.find("ruid") == params.end()) {
             value = "missing ruid";
             return false;
@@ -132,7 +132,7 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
                 return true;
             }
         }
-        value = "macaddr not found for ruid " + ruid + " ssid " + ssid;
+        value = "macaddr/bssid not found for ruid " + ruid + " ssid " + ssid;
         return false;
     }
     value = "parameter " + params["parameter"] + " not supported";
