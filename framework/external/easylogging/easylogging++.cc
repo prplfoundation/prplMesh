@@ -603,7 +603,7 @@ void LogBuilder::convertToColoredOutput(base::type::string_t* logLine, Level lev
 
 // Logger
 
-Logger::Logger(const std::string& id, base::LogStreamsReferenceMap* logStreamsReference) :
+Logger::Logger(const std::string& id, base::LogStreamsReferenceMapPtr logStreamsReference) :
   m_id(id),
   m_typedConfigurations(nullptr),
   m_parentApplicationName(std::string()),
@@ -613,7 +613,7 @@ Logger::Logger(const std::string& id, base::LogStreamsReferenceMap* logStreamsRe
 }
 
 Logger::Logger(const std::string& id, const Configurations& configurations,
-               base::LogStreamsReferenceMap* logStreamsReference) :
+               base::LogStreamsReferenceMapPtr logStreamsReference) :
   m_id(id),
   m_typedConfigurations(nullptr),
   m_parentApplicationName(std::string()),
@@ -1620,7 +1620,7 @@ void LogFormat::updateFormatSpec(void) {
 // TypedConfigurations
 
 TypedConfigurations::TypedConfigurations(Configurations* configurations,
-    base::LogStreamsReferenceMap* logStreamsReference) {
+    LogStreamsReferenceMapPtr logStreamsReference) {
   m_configurations = configurations;
   m_logStreamsReference = logStreamsReference;
   build(m_configurations);
@@ -1901,6 +1901,7 @@ bool RegisteredHitCounters::validateNTimes(const char* filename, base::type::Lin
 RegisteredLoggers::RegisteredLoggers(const LogBuilderPtr& defaultLogBuilder) :
   m_defaultLogBuilder(defaultLogBuilder) {
   m_defaultConfigurations.setToDefault();
+  m_logStreamsReference = std::make_shared<base::LogStreamsReferenceMap>();
 }
 
 Logger* RegisteredLoggers::get(const std::string& id, bool forceCreation) {
@@ -1912,7 +1913,7 @@ Logger* RegisteredLoggers::get(const std::string& id, bool forceCreation) {
       ELPP_ASSERT(validId, "Invalid logger ID [" << id << "]. Not registering this logger.");
       return nullptr;
     }
-    logger_ = new Logger(id, m_defaultConfigurations, &m_logStreamsReference);
+    logger_ = new Logger(id, m_defaultConfigurations, m_logStreamsReference);
     logger_->m_logBuilder = m_defaultLogBuilder;
     registerNew(id, logger_);
     LoggerRegistrationCallback* callback = nullptr;
@@ -1942,8 +1943,8 @@ bool RegisteredLoggers::remove(const std::string& id) {
 
 void RegisteredLoggers::unsafeFlushAll(void) {
   ELPP_INTERNAL_INFO(1, "Flushing all log files");
-  for (base::LogStreamsReferenceMap::iterator it = m_logStreamsReference.begin();
-       it != m_logStreamsReference.end(); ++it) {
+  for (base::LogStreamsReferenceMap::iterator it = m_logStreamsReference->begin();
+       it != m_logStreamsReference->end(); ++it) {
     if (it->second.get() == nullptr) continue;
     it->second->flush();
   }
@@ -3038,7 +3039,7 @@ const Configurations* Loggers::defaultConfigurations(void) {
   return ELPP->registeredLoggers()->defaultConfigurations();
 }
 
-const base::LogStreamsReferenceMap* Loggers::logStreamsReference(void) {
+const base::LogStreamsReferenceMapPtr Loggers::logStreamsReference(void) {
   return ELPP->registeredLoggers()->logStreamsReference();
 }
 
