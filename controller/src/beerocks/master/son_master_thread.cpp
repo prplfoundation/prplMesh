@@ -1311,7 +1311,7 @@ bool master_thread::handle_cmdu_1905_ap_metric_response(const std::string &src_m
 {
 
     auto mid = cmdu_rx.getMessageId();
-    LOG(INFO) << "Received AP_METRIC_RESPONSE_MESSAGE, mid=" << std::dec << int(mid);
+    LOG(INFO) << "Received AP_METRICS_RESPONSE_MESSAGE, mid=" << std::dec << int(mid);
 
     //getting reference for ap metric data storage from db
     auto &ap_metric_data = database.get_ap_metric_data_map();
