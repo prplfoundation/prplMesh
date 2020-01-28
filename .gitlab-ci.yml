@@ -266,7 +266,7 @@ test-on-netgear-rax40:
     TARGET_DEVICE_NAME: netgear-rax40-1
   needs: ["build-for-netgear-rax40"]
 
-run-certification-tests:
+.run-certification-tests:
   stage: test
   variables:
     # TESTS_TO_RUN needs to be set by the user (or the pipeline schedule)
@@ -274,12 +274,7 @@ run-certification-tests:
     # device to test with: prplmesh for dummy bwl, netgear-rax40 for dwpal on rax40
     DEVICE_UNDER_TEST: prplmesh
   script:
-    - |
-      if [ "$DEVICE_UNDER_TEST" != prplmesh ] ; then
-          echo "Deploying to $DEVICE_UNDER_TEST"
-          tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/prplmesh.ipk
-      fi
-    - sudo /easymesh_cert/run_test_file.py -v -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
+      - /easymesh_cert/run_test_file.py -v -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
   artifacts:
     paths:
       - logs
@@ -293,7 +288,26 @@ run-certification-tests:
   rules:
     - if: "$TESTS_TO_RUN"
 
-include:
-  - local: "/ci/certification/generic.yml"
-  - local: "/ci/certification/dummy.yml"
-  - local: "/ci/certification/netgear-rax40.yml"
+agent-certs-tests-qualcomm:
+  extends: .run-certification-tests
+  variables:
+    DEVICE_UNDER_TEST: qualcomm
+    TESTS_TO_RUN: tests/certification/$DEVICE_UNDER_TEST.txt
+
+agent-certs-tests-broadcom:
+  extends: .run-certification-tests
+  variables:
+    DEVICE_UNDER_TEST: broadcom
+    TESTS_TO_RUN: tests/certification/$DEVICE_UNDER_TEST.txt
+
+agent-certs-tests-mediatek:
+  extends: .run-certification-tests
+  variables:
+    DEVICE_UNDER_TEST: mediatek
+    TESTS_TO_RUN: tests/certification/$DEVICE_UNDER_TEST.txt
+
+agent-certs-tests-marvell:
+  extends: .run-certification-tests
+  variables:
+    DEVICE_UNDER_TEST: marvell
+    TESTS_TO_RUN: tests/certification/$DEVICE_UNDER_TEST.txt
