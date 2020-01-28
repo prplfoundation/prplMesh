@@ -575,7 +575,7 @@ std::vector<uint8_t> wireless_utils::calc_5g_20MHz_subband_channels(
  *         list of channels> as value
  */
 std::list<wireless_utils::sChannelPreference>
-wireless_utils::get_channel_preferences(beerocks::message::sWifiChannel supported_channels[])
+wireless_utils::get_channel_preferences(const beerocks::message::sWifiChannel supported_channels[])
 {
     std::list<sChannelPreference> preferences;
 
@@ -607,7 +607,7 @@ wireless_utils::get_channel_preferences(beerocks::message::sWifiChannel supporte
  * @return std::vector<uint8_t> vector of supported operating classes
  */
 std::vector<uint8_t> wireless_utils::get_supported_operating_classes(
-    beerocks::message::sWifiChannel supported_channels[])
+    const beerocks::message::sWifiChannel supported_channels[])
 {
     std::vector<uint8_t> operating_classes;
     //TODO handle regulatory domain operating classes
@@ -631,7 +631,7 @@ std::vector<uint8_t> wireless_utils::get_supported_operating_classes(
  * @return max tx power for requested operating class
  */
 uint8_t wireless_utils::get_operating_class_max_tx_power(
-    beerocks::message::sWifiChannel supported_channels[], uint8_t operating_class)
+    const beerocks::message::sWifiChannel supported_channels[], uint8_t operating_class)
 {
     uint8_t max_tx_power = 0;
     auto oper_class      = operating_classes_list.at(operating_class);
@@ -652,7 +652,7 @@ uint8_t wireless_utils::get_operating_class_max_tx_power(
  * @return std::vector<uint8_t> vector of non operable channels
  */
 std::vector<uint8_t> wireless_utils::get_operating_class_non_oper_channels(
-    beerocks::message::sWifiChannel supported_channels[], uint8_t operating_class)
+    const beerocks::message::sWifiChannel supported_channels[], uint8_t operating_class)
 {
     std::vector<uint8_t> non_oper_channels;
     auto oper_class = operating_classes_list.at(operating_class);
