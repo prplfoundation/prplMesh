@@ -393,19 +393,19 @@ enum eChannelScanResultChannelBandwidth : uint8_t {
 
 typedef struct sChannelScanResults {
     //The current service set identifier in use by the neighboring WiFi SSID. The value MAY be empty for hidden SSIDs.
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH] = {'\0'};
 
     //The BSSID used for the neighboring WiFi SSID.
-    sMacAddr bssid;
+    sMacAddr bssid = {.oct = {0}};
 
     //The mode the neighboring WiFi radio is operating in. Enumerate
-    eChannelScanResultMode mode;
+    eChannelScanResultMode mode = eMode_NA;
 
     //The current radio channel used by the neighboring WiFi radio.
-    uint32_t channel;
+    uint32_t channel = 0;
 
     //An indicator of radio signal strength (RSSI) of the neighboring WiFi radio measured in dBm, as an average of the last 100 packets received.
-    int32_t signal_strength_dBm;
+    int32_t signal_strength_dBm = 0;
 
     //The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
     std::vector<eChannelScanResultSecurityMode> security_mode_enabled;
@@ -414,22 +414,22 @@ typedef struct sChannelScanResults {
     std::vector<eChannelScanResultEncryptionMode> encryption_mode;
 
     //Indicates the frequency band at which the radio this SSID instance is operating. Enumerate
-    eChannelScanResultOperatingFrequencyBand operating_frequency_band;
+    eChannelScanResultOperatingFrequencyBand operating_frequency_band = eOperating_Freq_Band_NA;
 
     //List items indicate which IEEE 802.11 standards thisResultinstance can support simultaneously, in the frequency band specified byOperatingFrequencyBand. Enumerate List
     std::vector<eChannelScanResultStandards> supported_standards;
 
     //Indicates which IEEE 802.11 standard that is detected for this Result. Enumerate
-    eChannelScanResultStandards operating_standards;
+    eChannelScanResultStandards operating_standards = eStandard_NA;
 
     //Indicates the bandwidth at which the channel is operating. Enumerate
-    eChannelScanResultChannelBandwidth operating_channel_bandwidth;
+    eChannelScanResultChannelBandwidth operating_channel_bandwidth = eChannel_Bandwidth_NA;
 
     //Time interval (inms) between transmitting beacons.
-    uint32_t beacon_period_ms;
+    uint32_t beacon_period_ms = 0;
 
     //Indicator of average noise strength (indBm) received from the neighboring WiFi radio.
-    int32_t noise_dBm;
+    int32_t noise_dBm = 0;
 
     //Basic data transmit rates (in Kbps) for the SSID.
     std::vector<uint32_t> basic_data_transfer_rates_kbps;
@@ -438,10 +438,10 @@ typedef struct sChannelScanResults {
     std::vector<uint32_t> supported_data_transfer_rates_kbps;
 
     //The number of beacon intervals that elapse between transmission of Beacon frames containing a TIM element whose DTIM count field is 0. This value is transmitted in the DTIM Period field of beacon frames. [802.11-2012]
-    uint32_t dtim_period;
+    uint32_t dtim_period = 0;
 
     //Indicates the fraction of the time AP senses that the channel is in use by the neighboring AP for transmissions.
-    uint32_t channel_utilization;
+    uint32_t channel_utilization = 0;
 } sChannelScanResults;
 
 typedef struct {
