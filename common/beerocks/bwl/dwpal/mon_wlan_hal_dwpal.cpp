@@ -427,9 +427,6 @@ static bool get_scan_results_from_nl_msg(sChannelScanResults &results, struct nl
         return false;
     }
 
-    //prepare results
-    results = {'\0'};
-
     //read msg buffer into nl attributes struct
     if (!read_nl_data_from_msg(bss, msg)) {
         LOG(ERROR) << "failed to parse netlink message";
@@ -1103,22 +1100,14 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
         if (m_nl_seq == nlh->nlmsg_seq) {
             LOG(DEBUG) << "DWPAL NL event channel scan results dump, seq = " << int(nlh->nlmsg_seq);
 
-            auto results_buff = ALLOC_SMART_BUFFER(sizeof(sCHANNEL_SCAN_RESULTS_NOTIFICATION));
-            auto results =
-                reinterpret_cast<sCHANNEL_SCAN_RESULTS_NOTIFICATION *>(results_buff.get());
-            if (!results) {
-                LOG(FATAL) << "Memory allocation failed!";
-                return false;
-            }
-            // Initialize the message
-            results_buff = {};
+            auto results = std::make_shared<sCHANNEL_SCAN_RESULTS_NOTIFICATION>();
 
             if (!get_scan_results_from_nl_msg(results->channel_scan_results, msg)) {
                 LOG(ERROR) << "read NL msg to monitor msg failed!";
                 return false;
             }
             LOG(DEBUG) << "Processing results for BSSID:" << results->channel_scan_results.bssid;
-            event_queue_push(event, results_buff);
+            event_queue_push(event, results);
         } else {
             LOG(ERROR) << "channel scan results dump received with unexpected seq number";
             return false;
