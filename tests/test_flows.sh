@@ -71,11 +71,17 @@ send_bml_command() {
 send_CAPI_command() {
     # send a CAPI command to a container.
     ip="$(container_ip "$1")"
+    [ -z "$ip" ] && return 1
     port="$(container_CAPI_port "$1")"
+    [ -z "$port" ] && return 1
     dbg "Sending to $ip:$port. Command: $2"
-    capi_command_result=$("${rootdir}/tests/send_CAPI_command.py" "$ip" "$port" "$2" | tr  -d '\r')
-    dbg "Result:\n$capi_command_result"
-    capi_command_reply=$(echo -e "$capi_command_result" | awk 'NR==2')
+    capi_command_result=$(mktemp)
+    [ -z "$capi_command_result" ] && { err "Failed to create temp file"; return 1; }
+    trap "rm -f $capi_command_result" EXIT
+    "${rootdir}/tests/send_CAPI_command.py" "$ip" "$port" "$2" > "$capi_command_result" || return $?
+    dbg "Result:"
+    [ "$VERBOSE" = true ] && cat "$capi_command_result"
+    capi_command_reply=$(tr  -d '\r' < "$capi_command_result" | awk 'NR==2')
 }
 
 check_log() {
