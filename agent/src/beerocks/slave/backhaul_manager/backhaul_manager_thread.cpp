@@ -124,16 +124,6 @@ bool backhaul_manager::init()
         return false;
     }
 
-    if (m_sConfig.ucc_listener_port != 0) {
-        m_agent_ucc_listener = std::make_unique<agent_ucc_listener>(
-            *this, m_sConfig.ucc_listener_port, m_sConfig.vendor, m_sConfig.model,
-            m_sConfig.bridge_iface, cert_cmdu_tx);
-        if (m_agent_ucc_listener && !m_agent_ucc_listener->start("ucc_listener")) {
-            LOG(ERROR) << "failed start agent_ucc_listener";
-            return false;
-        }
-    }
-
     return true;
 }
 
@@ -1466,6 +1456,16 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
         // Add the slave socket to the backhaul configuration
         m_sConfig.slave_iface_socket[soc->sta_iface] = soc;
+
+        if (!m_agent_ucc_listener && request->certification_mode() && m_sConfig.ucc_listener_port != 0) {
+            m_agent_ucc_listener = std::make_unique<agent_ucc_listener>(
+                *this, m_sConfig.ucc_listener_port, m_sConfig.vendor, m_sConfig.model,
+                m_sConfig.bridge_iface, cert_cmdu_tx);
+            if (m_agent_ucc_listener && !m_agent_ucc_listener->start("ucc_listener")) {
+                LOG(ERROR) << "failed start agent_ucc_listener";
+                return false;
+            }
+        }
 
         LOG(DEBUG) << "ACTION_BACKHAUL_REGISTER_REQUEST sta_iface=" << soc->sta_iface
                    << " local_master=" << int(local_master) << " local_gw=" << int(local_gw)
