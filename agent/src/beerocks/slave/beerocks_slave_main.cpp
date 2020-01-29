@@ -374,8 +374,11 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
             }
         }
 
+        LOG(DEBUG) << "backhaul_mgr.stop()";
+        backhaul_mgr.stop();
+
         LOG(DEBUG) << "platform_mgr.stop()";
-        platform_mgr.stop(false);
+        platform_mgr.stop();
     }
 
     LOG(DEBUG) << "Bye Bye!";
