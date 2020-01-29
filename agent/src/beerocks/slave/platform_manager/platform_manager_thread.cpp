@@ -803,7 +803,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                                       std::chrono::seconds(PLATFORM_READ_CONF_RETRY_SEC);
                     }
                 }
-            } while (!register_response->valid());
+            } while (!register_response->valid() && !should_stop);
 
             LOG(DEBUG) << "sending ACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE to " << strIfaceName
                        << " sd=" << intptr_t(sd);
