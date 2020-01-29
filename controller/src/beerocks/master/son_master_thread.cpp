@@ -142,15 +142,6 @@ bool master_thread::init()
         LOG(DEBUG) << "Health check is DISABLED!";
     }
 
-    if (database.config.ucc_listener_port != 0) {
-        m_controller_ucc_listener =
-            std::make_unique<controller_ucc_listener>(database, cert_cmdu_tx);
-        if (m_controller_ucc_listener && !m_controller_ucc_listener->start("ucc_listener")) {
-            LOG(FATAL) << "failed start controller_ucc_listener";
-            return false;
-        }
-    }
-
     return true;
 }
 
@@ -1849,6 +1840,16 @@ bool master_thread::handle_intel_slave_join(
         database.settings_service_fairness(
             notification->platform_settings().service_fairness_enabled);
         database.settings_dfs_reentry(notification->platform_settings().dfs_reentry_enabled);
+    }
+
+    if (!m_controller_ucc_listener && database.setting_certification_mode() &&
+        database.config.ucc_listener_port != 0) {
+        m_controller_ucc_listener =
+            std::make_unique<controller_ucc_listener>(database, cert_cmdu_tx);
+        if (m_controller_ucc_listener && !m_controller_ucc_listener->start("ucc_listener")) {
+            LOG(FATAL) << "failed start controller_ucc_listener";
+            return false;
+        }
     }
 
     /*
