@@ -658,12 +658,21 @@ size_t base_wlan_hal_dwpal::dwpal_nl_cmd_get(const std::string &ifname, unsigned
         return nl_handler_cb_wrapper(ifname, event, subevent, len, data);
     };
 
-    //parsing will be done in callback func
-    if (dwpal_driver_nl_msg_get(m_dwpal_nl_ctx, DWPAL_NL_SOLICITED_EVENT, nl_handler_cb, NULL) ==
-        DWPAL_FAILURE) {
-        LOG(ERROR) << " dwpal_driver_nl_msg_get failed,"
-                   << " ctx=" << m_dwpal_nl_ctx;
-        return data_size;
+    // Since we're expecting a Solicited (asynchronous) event from the driver,
+    // and it's impossible to know the type of the received message without
+    // processing it (using a callback function), we continue processing events
+    // until data_size != 0.
+    // 1 sec TO is added so we dont get stuck here forever.
+    // In practice, the response usually arrives much faster.
+    auto timeout = std::chrono::steady_clock::now() + std::chrono::seconds(1);
+    while ((data_size == 0) && std::chrono::steady_clock::now() < timeout) {
+        //parsing will be done in callback func
+        if (dwpal_driver_nl_msg_get(m_dwpal_nl_ctx, DWPAL_NL_SOLICITED_EVENT, nl_handler_cb,
+                                    NULL) == DWPAL_FAILURE) {
+            LOG(ERROR) << " dwpal_driver_nl_msg_get failed,"
+                       << " ctx=" << m_dwpal_nl_ctx;
+            return data_size;
+        }
     }
 
     return data_size;
