@@ -50,6 +50,7 @@ class cACTION_BACKHAUL_REGISTER_REQUEST : public BaseClass
         uint8_t& sta_iface_filter_low();
         uint8_t& onboarding();
         sMacAddr& ruid();
+        uint8_t& certification_mode();
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -67,6 +68,7 @@ class cACTION_BACKHAUL_REGISTER_REQUEST : public BaseClass
         uint8_t* m_sta_iface_filter_low = nullptr;
         uint8_t* m_onboarding = nullptr;
         sMacAddr* m_ruid = nullptr;
+        uint8_t* m_certification_mode = nullptr;
 };
 
 class cACTION_BACKHAUL_REGISTER_RESPONSE : public BaseClass

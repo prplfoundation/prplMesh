@@ -25,6 +25,7 @@ cACTION_BACKHAUL_REGISTER_REQUEST:
   sta_iface_filter_low: uint8_t
   onboarding: uint8_t
   ruid: sMacAddr
+  certification_mode: uint8_t
 
 cACTION_BACKHAUL_REGISTER_RESPONSE:
   _type: class
