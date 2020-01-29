@@ -1457,7 +1457,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         // Add the slave socket to the backhaul configuration
         m_sConfig.slave_iface_socket[soc->sta_iface] = soc;
 
-        if (!m_agent_ucc_listener && request->certification_mode() && m_sConfig.ucc_listener_port != 0) {
+        if (!m_agent_ucc_listener && request->certification_mode() &&
+            m_sConfig.ucc_listener_port != 0) {
             m_agent_ucc_listener = std::make_unique<agent_ucc_listener>(
                 *this, m_sConfig.ucc_listener_port, m_sConfig.vendor, m_sConfig.model,
                 m_sConfig.bridge_iface, cert_cmdu_tx);
