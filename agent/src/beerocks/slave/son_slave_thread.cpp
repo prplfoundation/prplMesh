@@ -3048,6 +3048,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         request->sta_iface_filter_low() = config.backhaul_wireless_iface_filter_low;
         request->onboarding()           = platform_settings.onboarding;
         request->ruid()                 = hostap_params.iface_mac;
+        request->certification_mode()   = platform_settings.certification_mode;  
 
         LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST local_master="
                   << int(platform_settings.local_master)
