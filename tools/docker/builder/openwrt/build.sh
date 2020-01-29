@@ -34,6 +34,7 @@ build_image() {
            --build-arg PRPL_FEED \
            --build-arg PRPLMESH_VARIANT \
            --build-arg INTEL_FEED \
+           --build-arg SDK_CONFIG \
            $BUILD_OPTIONS \
            "$scriptdir/"
 }
@@ -96,8 +97,9 @@ main() {
         netgear-rax40)
             TARGET=intel_mips
             PRPLMESH_VARIANT="-dwpal"
-            PRPL_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^e9ee6b109764dbb91b6cb399ccc0f78e5b04e260"
+            PRPL_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^edf5c63e0616c026f53133ddd699472b60219f83"
             INTEL_FEED="https://git.prpl.dev/prplmesh/feed-intel.git^e3eca4e93286eb4346f0196b2816a3be97287482"
+            SDK_CONFIG=gcc8
             ;;
         *)
             err "Unknown target device: $TARGET_DEVICE"
@@ -112,6 +114,7 @@ main() {
     dbg "BUILD_OPTIONS=$BUILD_OPTIONS"
     dbg "OPENWRT_REPOSITORY=$OPENWRT_REPOSITORY"
     dbg "OPENWRT_VERSION=$OPENWRT_VERSION"
+    dbg "SDK_CONFIG=$SDK_CONFIG"
     dbg "PRPL_FEED=$PRPL_FEED"
     dbg "INTEL_FEED=$INTEL_FEED"
     dbg "IMAGE_ONLY=$IMAGE_ONLY"
@@ -139,6 +142,7 @@ main() {
     export PRPL_FEED
     export PRPLMESH_VARIANT
     export INTEL_FEED
+    export SDK_CONFIG
 
     if [ $IMAGE_ONLY = true ] ; then
         build_image
@@ -157,5 +161,6 @@ OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='9d2efd'
 PRPL_FEED='https://git.prpl.dev/prplmesh/iwlwav.git^06a0126d5fb53b1d65bad90757a5f9f5f77419ca'
 INTEL_FEED=""
+SDK_CONFIG=default
 
 main "$@"
