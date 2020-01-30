@@ -17,17 +17,17 @@ namespace bpl {
 int cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex)
 {
     char ifname[BPL_IFNAME_LEN] = {0};
-    int rpcIndex                = -1;
+    int uci_idx                = -1;
 
     if (!nIndex) {
         return RETURN_ERR;
     }
     utils::copy_string(ifname, inputIfName.c_str(), BPL_IFNAME_LEN);
 
-    const int ifType = (inputIfName.find('.') != std::string::npos) ? TYPE_VAP : TYPE_RADIO;
+    const auto ifType = (inputIfName.find('.') != std::string::npos) ? TYPE_VAP : TYPE_RADIO;
 
-    if (cfg_uci_get_wireless_idx(ifname, &rpcIndex) == RETURN_OK) {
-        *nIndex = UCI_RETURN_INDEX(ifType, rpcIndex);
+    if (cfg_uci_get_wireless_idx(ifname, &uci_idx) == RETURN_OK) {
+        *nIndex = uci_to_rpc_index(ifType, uci_idx);
     } else {
         return RETURN_ERR;
     }

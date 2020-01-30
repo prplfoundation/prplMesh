@@ -34,33 +34,16 @@
 #define DEBUG(fmt, args...) LOGF_LOG_DEBUG(fmt, ##args)
 
 #define MAX_UCI_BUF_LEN 64
-#define DUMMY_VAP_OFFSET 100
 #define MAX_NUM_OF_RADIOS 3
 
 #define RETURN_ERR_NOT_FOUND -2
 #define RETURN_ERR -1
 #define RETURN_OK 0
 
-/* use only even phy numbers since odd phy's are used for station interfaces */
-#define RADIO_INDEX_SKIP 2
-#define VAP_RPC_IDX_OFFSET 10
-#define MAX_VAPS_PER_RADIO 16
+enum paramType { TYPE_RADIO = 0, TYPE_RADIO_VAP, TYPE_VAP };
 
-#define UCI_INDEX(iftype, index)                                                                   \
-    iftype == TYPE_RADIO                                                                           \
-        ? (RADIO_INDEX_SKIP * index)                                                               \
-        : (VAP_RPC_IDX_OFFSET + (MAX_VAPS_PER_RADIO * RADIO_INDEX_SKIP * (index % 2)) +            \
-           ((index - (index % 2)) / 2))
-
-#define UCI_RETURN_INDEX(iftype, rpcIndex)                                                         \
-    iftype == TYPE_RADIO                                                                           \
-        ? (rpcIndex / RADIO_INDEX_SKIP)                                                            \
-        : (2 * (rpcIndex -                                                                         \
-                (VAP_RPC_IDX_OFFSET +                                                              \
-                 MAX_VAPS_PER_RADIO * ((rpcIndex - VAP_RPC_IDX_OFFSET) / MAX_VAPS_PER_RADIO))) +   \
-           (((rpcIndex - VAP_RPC_IDX_OFFSET) / MAX_VAPS_PER_RADIO) / RADIO_INDEX_SKIP))
-
-enum paramType { TYPE_RADIO = 0, TYPE_VAP };
+int rpc_to_uci_index(enum paramType iftype, int index);
+int uci_to_rpc_index(enum paramType iftype, int index);
 
 namespace beerocks {
 namespace bpl {
