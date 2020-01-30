@@ -168,7 +168,7 @@ test-on-netgear-rax40:
       - |
         if [ "$DEVICE_UNDER_TEST" != prplmesh ] ; then
             echo "Deploying to $DEVICE_UNDER_TEST"
-            tools/deploy_ipk.sh $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/*.ipk
+            tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/*.ipk
         fi
       - /easymesh_cert/run_test_file.sh -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
   artifacts:
