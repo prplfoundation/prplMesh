@@ -782,26 +782,24 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                 return;
             }
 
-            std::chrono::steady_clock::time_point retry_timer = std::chrono::steady_clock::now();
-            uint8_t retry_cnt                                 = 0;
-
+            uint8_t retry_cnt          = 0;
             register_response->valid() = 0;
             do {
-                if (std::chrono::steady_clock::now() > retry_timer) {
-                    LOG(TRACE) << "Trying to read settings of iface:" << strIfaceName
-                               << ", attempt=" << int(retry_cnt);
-                    if (fill_platform_settings(strIfaceName, register_response,
-                                               platform_common_conf, bpl_iface_wlan_params_map,
-                                               sd)) {
-                        register_response->valid() = 1;
-                    } else {
-                        LOG(INFO) << "Reading settings of iface:" << strIfaceName
-                                  << ", attempt=" << int(retry_cnt) << " has failed!";
-                        if (++retry_cnt == PLATFORM_READ_CONF_MAX_ATTEMPTS)
-                            break;
-                        retry_timer = std::chrono::steady_clock::now() +
-                                      std::chrono::seconds(PLATFORM_READ_CONF_RETRY_SEC);
-                    }
+                LOG(TRACE) << "Trying to read settings of iface:" << strIfaceName
+                           << ", attempt=" << int(retry_cnt);
+                if (fill_platform_settings(strIfaceName, register_response, platform_common_conf,
+                                           bpl_iface_wlan_params_map, sd)) {
+                    register_response->valid() = 1;
+                } else {
+                    LOG(INFO) << "Reading settings of iface:" << strIfaceName
+                              << ", attempt=" << int(retry_cnt) << " has failed!";
+
+                    // reached max number of retries
+                    if (++retry_cnt == PLATFORM_READ_CONF_MAX_ATTEMPTS)
+                        break;
+
+                    // sleep and retry
+                    std::this_thread::sleep_for(std::chrono::seconds(PLATFORM_READ_CONF_RETRY_SEC));
                 }
             } while (!register_response->valid() && !should_stop);
 

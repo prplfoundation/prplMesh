@@ -89,7 +89,7 @@ private:
     bool wlan_params_changed_check();
 
 private:
-    const int PLATFORM_READ_CONF_RETRY_SEC    = 10;
+    const int PLATFORM_READ_CONF_RETRY_SEC    = 5;
     const int PLATFORM_READ_CONF_MAX_ATTEMPTS = 10;
 
     config_file::sConfigSlave config;
