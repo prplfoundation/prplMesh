@@ -257,13 +257,11 @@ public:
     virtual const std::string topic_prefix() const { return kTopicPrefix; }
 };
 
-class InterfaceConfigurationRequestMessage : public Message {
+class InterfaceConfigurationMessage: public Message {
     static const uint8_t kVersion   = 0;
     static const int kMaxInterfaces = 32;
 
 public:
-    static const std::string kTopicPrefix;
-
     enum Flags {
         ENABLE_IEEE1905_TRANSPORT = 0x00000001, // enable IEEE1905 transport on this interface
         IS_BRIDGE                 = 0x00000002,
@@ -282,14 +280,14 @@ public:
         Interface interfaces[kMaxInterfaces];
     };
 
-    InterfaceConfigurationRequestMessage() : InterfaceConfigurationRequestMessage("", {}) {}
+    InterfaceConfigurationMessage() : InterfaceConfigurationMessage("", {}) {}
 
-    InterfaceConfigurationRequestMessage(const std::string &topic)
-        : InterfaceConfigurationRequestMessage(topic, {})
+    InterfaceConfigurationMessage(const std::string &topic)
+        : InterfaceConfigurationMessage(topic, {})
     {
     }
 
-    InterfaceConfigurationRequestMessage(const std::string &topic,
+    InterfaceConfigurationMessage(const std::string &topic,
                                          std::initializer_list<Frame> frames)
         : Message(topic, frames)
     {
@@ -303,10 +301,6 @@ public:
             this->frames().back().set_size(sizeof(Metadata));
         }
     }
-
-    virtual const std::string topic_prefix() const { return kTopicPrefix; }
-
-    virtual const std::string topic() const { return topic_prefix(); }
 
     Metadata *metadata() const { return (Metadata *)frames().back().data(); };
 
@@ -330,12 +324,24 @@ public:
 
         return os << ss.str();
     }
+
+    virtual const std::string topic_prefix() const = 0;
+    virtual const std::string topic() const { return topic_prefix(); }
 };
 
+class InterfaceConfigurationRequestMessage : public InterfaceConfigurationMessage {
+    using InterfaceConfigurationMessage::
+        InterfaceConfigurationMessage; // inherit base class constructors
+
+public:
+    static const std::string kTopicPrefix;
+
+    virtual const std::string topic_prefix() const { return kTopicPrefix; }
+};
 // same as InterfaceConfigurationRequestMessage - only with different topic
-class InterfaceConfigurationIndicationMessage : public InterfaceConfigurationRequestMessage {
-    using InterfaceConfigurationRequestMessage::
-        InterfaceConfigurationRequestMessage; // inherit base class constructors
+class InterfaceConfigurationIndicationMessage : public InterfaceConfigurationMessage {
+    using InterfaceConfigurationMessage::
+        InterfaceConfigurationMessage; // inherit base class constructors
 
 public:
     static const std::string kTopicPrefix;
