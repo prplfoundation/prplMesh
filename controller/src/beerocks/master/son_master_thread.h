@@ -77,6 +77,8 @@ private:
                                                ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_ap_metric_response(const std::string &src_mac,
                                              ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_1905_ap_capability_report(const std::string &src_mac,
+                                               ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_channel_preference_report(const std::string &src_mac,
                                                     ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_channel_selection_response(const std::string &src_mac,

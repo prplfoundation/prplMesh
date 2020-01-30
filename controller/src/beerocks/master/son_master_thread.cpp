@@ -99,6 +99,7 @@ bool master_thread::init()
             ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE,
             ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE,
+            ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE,
             ieee1905_1::eMessageType::ACK_MESSAGE,
 
         })) {
@@ -288,6 +289,8 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
         return handle_cmdu_1905_link_metric_response(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE:
         return handle_cmdu_1905_ap_metric_response(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE:
+        return handle_cmdu_1905_ap_capability_report(src_mac, cmdu_rx);
     default:
         break;
     }
@@ -1328,6 +1331,15 @@ bool master_thread::handle_cmdu_1905_ap_metric_response(const std::string &src_m
     }
 
     print_ap_metric_map(ap_metric_data);
+
+    return true;
+}
+
+bool master_thread::handle_cmdu_1905_ap_capability_report(const std::string &src_mac,
+                                                          ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(INFO) << "Received AP_CAPABILITY_REPORT_MESSAGE, mid=" << std::dec << int(mid);
 
     return true;
 }
