@@ -35,10 +35,19 @@ if (TARGET_PLATFORM STREQUAL "openwrt")
 
         # UGW specific libraries
         find_package(ubus REQUIRED)
-        find_package(safec REQUIRED)
+
+        find_package(safec QUIET)
+        if (safec_FOUND)
+            list(APPEND BPL_LIBS safec)
+            add_definitions(-DUSE_LIBSAFEC)
+    
+            # Signal libsafec that we support the C99 standard
+            add_definitions(-DHAVE_C99)
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+        endif()
 
         link_directories(${PLATFORM_STAGING_DIR}/usr/lib)
-        list(APPEND BPL_LIBS ubus nl-3 nl-route-3 bridge dl uci ubox safec)
+        list(APPEND BPL_LIBS ubus nl-3 nl-route-3 bridge dl uci ubox)
 
         # Signal libsafec that we support the C99 standard
         add_definitions(-DHAVE_C99)
@@ -70,9 +79,12 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
 
     # RDKB specific libraries
     find_package(ubus REQUIRED)
-    find_package(slibc REQUIRED)
 
-    list(APPEND BPL_LIBS nl-3 nl-route-3 bridge dl swpal uci ubox ubus slibc)
+    find_package(slibc REQUIRED)
+    list(APPEND BPL_LIBS slibc)
+    add_definitions(-DUSE_SLIBC)
+
+    list(APPEND BPL_LIBS nl-3 nl-route-3 bridge dl uci ubox ubus)
 
     # Install the UCI DB files
     file(GLOB_RECURSE bpl_uci_db_files ${MODULE_PATH}/uci/db/prplmesh_db*)

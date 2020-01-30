@@ -9,20 +9,18 @@
 #ifndef BPL_CFG_UCI_H_
 #define BPL_CFG_UCI_H_
 
-#ifdef BEEROCKS_UGW
+#include <cstring>
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
+#ifdef USE_LIBSAFEC
 #define restrict __restrict
 #include <libsafec/safe_str_lib.h>
 #undef snprintf_s
 #define snprintf_s snprintf
-
-#ifndef u_int_32
-#define u_int_32 unsigned int
+#elif USE_SLIBC
+#include <slibc/stdio.h>
+#include <slibc/string.h>
+#else
+#error "No safe C library defined, define either USE_LIBSAFEC or USE_SLIBC"
 #endif
 
 #ifndef _cplusplus
@@ -63,13 +61,6 @@
            (((rpcIndex - VAP_RPC_IDX_OFFSET) / MAX_VAPS_PER_RADIO) / RADIO_INDEX_SKIP))
 
 enum paramType { TYPE_RADIO = 0, TYPE_VAP };
-
-#elif BEEROCKS_RDKB
-
-#include <slibc/stdio.h>
-#include <slibc/string.h>
-#include <uci_wrapper.h>
-#endif
 
 namespace beerocks {
 namespace bpl {
