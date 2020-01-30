@@ -162,7 +162,7 @@ test-on-netgear-rax40:
   variables:
     # TESTS_TO_RUN needs to be set by the user (or the pipeline schedule)
     GIT_CLONE_PATH: "/builds/prpl-foundation/prplMesh/"
-    # device to test with: prplmesh for dummy bwl, prplmesh-rax40 for dwpal on rax40
+    # device to test with: prplmesh for dummy bwl, netgear-rax40 for dwpal on rax40
     DEVICE_UNDER_TEST: prplmesh
   script:
       - |
