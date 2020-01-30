@@ -10,7 +10,7 @@ temp_path=@TMP_PATH@
 
 vendor=Intel
 model=prplMesh
-ucc_listener_port=8001 # 0 - disabled
+ucc_listener_port=8002 # 0 - disabled
 
 # Features:
 #   DFS reentry feature:

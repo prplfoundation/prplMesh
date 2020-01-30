@@ -39,6 +39,7 @@
 
 // BPL Error Codes
 #include <bpl/bpl_err.h>
+#include <bpl/bpl_cfg.h>
 
 using namespace beerocks::net;
 
@@ -1458,7 +1459,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         m_sConfig.slave_iface_socket[soc->sta_iface] = soc;
 
         if (!m_agent_ucc_listener && request->certification_mode() &&
-            m_sConfig.ucc_listener_port != 0) {
+            m_sConfig.ucc_listener_port != 0 && !bpl::cfg_is_master()) {
             m_agent_ucc_listener = std::make_unique<agent_ucc_listener>(
                 *this, m_sConfig.ucc_listener_port, m_sConfig.vendor, m_sConfig.model,
                 m_sConfig.bridge_iface, cert_cmdu_tx);
