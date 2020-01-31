@@ -1723,6 +1723,44 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         }
         break;
     }
+    case beerocks_message::ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION: {
+        LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION received from iface "
+                   << soc->hostap_iface;
+        auto msg =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION>();
+        if (!msg) {
+            LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION message!";
+            return false;
+        }
+
+        // Set client association information for associated client
+        auto &&associated_clients =
+            m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
+        associated_clients[msg->client_mac()] = std::chrono::steady_clock::now();
+        break;
+    }
+    case beerocks_message::ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION: {
+        LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION received from iface "
+                   << soc->hostap_iface;
+        auto msg =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION>();
+        if (!msg) {
+            LOG(ERROR)
+                << "Failed building ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION message!";
+            return false;
+        }
+
+        // If exists, remove client association information for disconnected client
+        auto &&associated_clients =
+            m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
+        auto it = associated_clients.find(msg->client_mac());
+        if (it != associated_clients.end()) {
+            associated_clients.erase(it);
+        }
+        break;
+    }
     default: {
         LOG(ERROR) << "Unhandled message received from master: "
                    << int(beerocks_header->action_op());
