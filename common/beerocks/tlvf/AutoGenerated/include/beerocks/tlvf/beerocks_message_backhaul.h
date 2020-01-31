@@ -476,6 +476,56 @@ class cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION : public BaseClass
         sVapsList* m_params = nullptr;
 };
 
+class cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION();
+
+        static eActionOp_BACKHAUL get_action_op(){
+            return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION);
+        }
+        sMacAddr& iface_mac();
+        sMacAddr& client_mac();
+        sMacAddr& bssid();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BACKHAUL* m_action_op = nullptr;
+        sMacAddr* m_iface_mac = nullptr;
+        sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
+};
+
+class cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION();
+
+        static eActionOp_BACKHAUL get_action_op(){
+            return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION);
+        }
+        sMacAddr& iface_mac();
+        sMacAddr& client_mac();
+        sMacAddr& bssid();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BACKHAUL* m_action_op = nullptr;
+        sMacAddr* m_iface_mac = nullptr;
+        sMacAddr* m_client_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
+};
+
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_BACKHAUL_H_
