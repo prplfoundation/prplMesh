@@ -1977,6 +1977,26 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return true;
         }
 
+        // Build VS CMDU message to send to backhaul manager
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION>(cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR)
+                << "Failed building ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION message!";
+            break;
+        }
+
+        notification_out->iface_mac()  = hostap_params.iface_mac;
+        notification_out->client_mac() = notification_in->params().mac;
+        notification_out->bssid()      = notification_in->params().bssid;
+
+        // Send the message
+        LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION for client "
+                   << notification_out->client_mac();
+        if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
+            slave_reset();
+        }
+
         // build 1905.1 message CMDU to send to the controller
         if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
@@ -2142,6 +2162,26 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             LOG(DEBUG) << "Controller is not connected";
             return true;
         }
+
+        // Build VS CMDU message to send to backhaul manager
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION message!";
+            break;
+        }
+
+        notification_out->iface_mac()  = hostap_params.iface_mac;
+        notification_out->client_mac() = notification_in->params().mac;
+        notification_out->bssid()      = notification_in->params().bssid;
+
+        // Send the message
+        LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION for client "
+                   << notification_out->client_mac();
+        if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
+            slave_reset();
+        }
+
         // build 1905.1 message CMDU to send to the controller
         if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
