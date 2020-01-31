@@ -119,3 +119,15 @@ cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION:
   _type: class
   ruid: sMacAddr
   params: sVapsList
+
+cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION:
+  _type: class
+  iface_mac: sMacAddr
+  client_mac: sMacAddr
+  bssid: sMacAddr
+
+cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION:
+  _type: class
+  iface_mac: sMacAddr
+  client_mac: sMacAddr
+  bssid: sMacAddr
