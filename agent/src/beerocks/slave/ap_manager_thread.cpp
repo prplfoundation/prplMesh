@@ -586,7 +586,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(DEBUG) << "Start ACS";
 
         // Set AP channel
-        if (!ap_wlan_hal->switch_channel(request->cs_params().channel,
+        if (ap_wlan_hal->get_radio_info().channel != request->cs_params().channel &&
+            !ap_wlan_hal->switch_channel(request->cs_params().channel,
                                          request->cs_params().bandwidth,
                                          request->cs_params().vht_center_frequency)) { //error
             std::string error("Failed to set AP channel!");
@@ -614,7 +615,12 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 ap_wlan_hal->get_radio_info().vht_center_freq;
             notification->cs_params().switch_reason = beerocks::CH_SWITCH_REASON_UNKNOWN;
             message_com::send_cmdu(slave_socket, cmdu_tx);
+            return false;
         }
+        //TODO: in case only tx power received need to send notification to slave as there
+        // is no event for this
+        if (request->tx_limit_valid())
+            ap_wlan_hal->set_tx_power_limit(request->tx_limit());
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST: {
