@@ -86,14 +86,30 @@ run-tests:
     - mkdir -p "build/$TARGET_DEVICE"
     - tools/docker/builder/openwrt/build.sh -v -d "$TARGET_DEVICE" -t "prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID" 2>&1 | tee "build/$TARGET_DEVICE/openwrt-build.log" | grep -E '^[[:blank:]]?make\[[12]\]|^Step|^ --->' --color=never --line-buffered
   after_script:
-    # if we're on master, tag the docker image with a persistant tag:
     - |
-      if [ $CI_COMMIT_REF_NAME == "master" ] ; then
-          echo "Keeping tag prplmesh-builder-$TARGET_DEVICE"
-          docker tag prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID prplmesh-builder-$TARGET_DEVICE
+      max_days=30
+      repository="prplmesh-builder-$TARGET_DEVICE"
+      # get all the image ids with the corresponding repository (no matter what the tag is):
+      image_ids="$(docker images --filter=reference="$repository:*" -q | sort | uniq)"
+      if [ ! "$?" ] ; then
+        echo No image found, nothing to do.
+        exit 0
       fi
-    # always delete the unique tag:
-    - docker rmi "prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID"
+      for i in $image_ids ; do
+        # last time image was used:
+        image_time="$(docker inspect "$i" --format='{{ .Metadata.LastTagTime.Unix }}')"
+        # time elapsed since last tags (in seconds):
+        time_since_last_tag="$(( $(date +%s) - image_time ))"
+        if [ "$time_since_last_tag" -gt $((3600*24*max_days)) ] ; then
+          echo "Image with id $i is older than $max_days days and will be deleted."
+          # get all the tags associated to the image id:
+          tags_to_delete="$(docker image inspect "$i" --format='{{join .RepoTags " "}}')"
+          echo "The image has the following tags:"
+          echo -e "$(echo $tags_to_delete | tr ' ' '\n')"
+          # tags_to_delete is guaranteed to be non-empty since we found it using a tag
+          docker rmi $tags_to_delete
+        fi
+      done
   artifacts:
     paths:
       - "build/$TARGET_DEVICE/*.ipk"
