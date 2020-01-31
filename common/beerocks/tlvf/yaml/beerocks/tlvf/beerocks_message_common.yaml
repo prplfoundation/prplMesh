@@ -123,6 +123,7 @@ sApChannelSwitch:
   switch_reason: uint8_t 
   is_dfs_channel: uint8_t 
   vht_center_frequency: uint16_t
+  tx_power: int8_t
 
 sDfsCacCompleted:
   _type: struct      

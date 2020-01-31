@@ -139,6 +139,7 @@ typedef struct sApChannelSwitch {
     uint8_t switch_reason;
     uint8_t is_dfs_channel;
     uint16_t vht_center_frequency;
+    int8_t tx_power;
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&vht_center_frequency));
     }
