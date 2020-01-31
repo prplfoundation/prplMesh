@@ -4387,10 +4387,12 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received CHANNEL_SELECTION_REQUEST_MESSAGE, mid=" << std::dec << int(mid);
 
-    uint8_t selected_channel         = 0;
-    uint8_t selected_operating_class = 0;
-    // parse all tlvs in cmdu
-    // parse channel preference report message
+    bool power_limit_received = false;
+    int switch_required       = 0;
+    int power_limit           = 0;
+    beerocks::message::sWifiChannel channel_to_switch;
+
+    channel_preferences.clear();
 
     for (auto channel_preference_tlv : cmdu_rx.getClassList<wfa_map::tlvChannelPreference>()) {
 
@@ -4421,6 +4423,7 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
             ss << ", preference=" << int(preference) << ", reason=" << int(reason_code);
             ss << ", channel_list={";
 
+            std::vector<beerocks::message::sWifiChannel> channels_list;
             auto channel_list_length = op_class_channels.channel_list_length();
             for (int ch_idx = 0; ch_idx < channel_list_length; ch_idx++) {
                 auto channel = op_class_channels.channel_list(ch_idx);
@@ -4434,35 +4437,76 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
                 // add comma if not last channel in the list, else close list by add curl brackets
                 ss << (((ch_idx + 1) != channel_list_length) ? "," : "}");
 
-                // mark first supported non-dfs channel as selected channel
-                // TODO: need to check that selected channel does not violate radio restriction
-                if (preference == 0 || wireless_utils::is_dfs_channel(*channel)) {
-                    continue;
-                }
-
-                LOG(INFO) << "selected_operating_class=" << int(operating_class);
-                LOG(INFO) << "selected_channel=" << int(*channel);
-                selected_channel         = *channel;
-                selected_operating_class = operating_class;
-
-                // TODO: check that the data is parsed properly after fixing the following bug:
-                // Since sFlags is defined after dynamic list cPreferenceOperatingClasses it cause data override
-                // on the first channel on the list and sFlags itself.
-                // See: https://github.com/prplfoundation/prplMesh/issues/8
+                beerocks::message::sWifiChannel wifi_channel;
+                wifi_channel.channel = *channel;
+                channels_list.push_back(wifi_channel);
             }
             LOG(DEBUG) << ss.str();
+            auto pref =
+                beerocks::message::sPreference({operating_class, preference, uint8_t(reason_code)});
+            channel_preferences.push_back({pref, channels_list});
         }
     }
 
-    // parse radio operation restriction tlv
-    auto tlvTransmitPowerLimit = cmdu_rx.getClass<wfa_map::tlvTransmitPowerLimit>();
-    if (tlvTransmitPowerLimit) {
-        LOG(DEBUG) << "received tlvTransmitPowerLimit";
-        // TODO: continute to parse this tlv
-        // This TLV contains power Tx power limit that must be considered in channel selection
-        // request message. Since this is a dummy message, this TLV is ignored.
-        // Full implemtation will be as part of channel selection agent certification task.
-        // See: https://github.com/prplfoundation/prplMesh/issues/62
+    for (auto tx_power_limit_tlv : cmdu_rx.getClassList<wfa_map::tlvTransmitPowerLimit>()) {
+
+        const auto &ruid = tx_power_limit_tlv->radio_uid();
+        if (ruid != hostap_params.iface_mac) {
+            LOG(DEBUG) << "ruid_rx=" << ruid << ", son_slave_ruid=" << hostap_params.iface_mac;
+            continue;
+        }
+
+        power_limit          = tx_power_limit_tlv->transmit_power_limit_dbm();
+        power_limit_received = true;
+        LOG(DEBUG) << std::dec << "received tlvTransmitPowerLimit " << (int)power_limit;
+        // Only one limit per ruid
+        break;
+    }
+
+    // No preferences or power limit for current ruid
+    if (channel_preferences.empty() && !power_limit_received)
+        return true;
+
+    for (auto preference : channel_preferences) {
+        auto is_restricted =
+            std::find_if(preference.channels.begin(), preference.channels.end(),
+                         [&](const beerocks::message::sWifiChannel &wifi_channel) {
+                             return hostap_cs_params.channel == wifi_channel.channel;
+                         });
+
+        if (is_restricted != preference.channels.end()) {
+            switch_required = 1;
+            break;
+        }
+    }
+
+    // According to design only Resticted channels should be included in channel selection request
+    if (switch_required) {
+        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+            if (hostap_params.supported_channels[i].channel == 0)
+                continue;
+            for (auto preference : channel_preferences) {
+                auto is_restricted = std::find_if(
+                    preference.channels.begin(), preference.channels.end(),
+                    [&](const beerocks::message::sWifiChannel &wifi_channel) {
+                        return (
+                            preference.preference.oper_class ==
+                                wireless_utils::get_operating_class_by_channel(
+                                    hostap_params.supported_channels[i].channel,
+                                    (beerocks::eWiFiBandwidth)hostap_params.supported_channels[i]
+                                        .channel_bandwidth) &&
+                            hostap_params.supported_channels[i].channel == wifi_channel.channel);
+                    });
+
+                if (is_restricted == preference.channels.end() &&
+                    !hostap_params.supported_channels[i].is_dfs_channel) {
+                    channel_to_switch = hostap_params.supported_channels[i];
+                    break;
+                }
+            }
+            if (channel_to_switch.channel != 0)
+                break;
+        }
     }
 
     // build and send channel response message
@@ -4477,11 +4521,63 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
         return false;
     }
 
+    if (switch_required && channel_to_switch.channel == 0) {
+        channel_selection_response_tlv->radio_uid()     = hostap_params.iface_mac;
+        channel_selection_response_tlv->response_code() = wfa_map::tlvChannelSelectionResponse::
+            eResponseCode::DECLINE_VIOLATES_MOST_RECENTLY_REPORTED_PREFERENCES;
+        LOG(INFO) << "Decline channel selection request " << hostap_params.iface_mac;
+        if (!send_cmdu_to_controller(cmdu_tx)) {
+            LOG(ERROR) << "failed to send CHANNEL_SELECTION_RESPONSE_MESSAGE";
+            return false;
+        }
+        return true;
+    }
+
     channel_selection_response_tlv->radio_uid() = hostap_params.iface_mac;
     channel_selection_response_tlv->response_code() =
         wfa_map::tlvChannelSelectionResponse::eResponseCode::ACCEPT;
 
-    return send_cmdu_to_controller(cmdu_tx);
+    if (!send_cmdu_to_controller(cmdu_tx)) {
+        LOG(ERROR) << "failed to send CHANNEL_SELECTION_RESPONSE_MESSAGE";
+        return false;
+    }
+
+    if (!switch_required && !power_limit_received) {
+        send_operating_channel_report();
+        return true;
+    }
+
+    auto request_out = message_com::create_vs_message<
+        beerocks_message::cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START>(cmdu_tx, mid);
+    if (!request_out) {
+        LOG(ERROR) << "Failed building message!";
+        return false;
+    }
+
+    LOG(DEBUG) << "send ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START";
+
+    // If only tx power limit change is required, set channel to current
+    request_out->cs_params().channel =
+        switch_required ? channel_to_switch.channel : hostap_cs_params.channel;
+    request_out->cs_params().bandwidth = channel_to_switch.channel_bandwidth;
+    request_out->tx_limit()            = power_limit;
+    request_out->tx_limit_valid()      = power_limit_received;
+
+    ///////////////////////////////////////////////////////////////////
+    // TODO https://github.com/prplfoundation/prplMesh/issues/797
+    //
+    // Short term solution
+    // In non-EasyMesh mode, never modify hostapd configuration
+    // and in this case don't switch channel
+    //
+    ////////////////////////////////////////////////////////////////////
+    if (platform_settings.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+    } else {
+        LOG(WARNING) << "non-EasyMesh mode - skip channel switch";
+    }
+
+    return true;
 }
 
 bool slave_thread::send_operating_channel_report()
