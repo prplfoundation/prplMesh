@@ -235,6 +235,7 @@ private:
     bool handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_autoconfiguration_renew(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool autoconfig_wsc_add_m1();
+    bool send_operating_channel_report();
     bool handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_link_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_channel_preference_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
