@@ -234,7 +234,16 @@ bool ap_wlan_hal_dummy::sta_softblock_remove(const std::string &vap_name,
 
 bool ap_wlan_hal_dummy::switch_channel(int chan, int bw, int vht_center_frequency)
 {
-    LOG(DEBUG) << "Got channel switch, simulate ACS-STARTED;ACS-COMPLETED";
+    LOG(TRACE) << __func__ << " channel: " << chan << ", bw: " << bw
+               << ", vht_center_frequency: " << vht_center_frequency;
+
+    m_radio_info.channel = chan;
+    m_radio_info.bandwidth =
+        beerocks::utils::convert_bandwidth_to_int((beerocks::eWiFiBandwidth)bw);
+    m_radio_info.vht_center_freq    = vht_center_frequency;
+    m_radio_info.is_dfs_channel     = son::wireless_utils::is_dfs_channel(chan);
+    m_radio_info.last_csa_sw_reason = ChanSwReason::Unknown;
+
     event_queue_push(Event::ACS_Started);
     event_queue_push(Event::ACS_Completed);
     event_queue_push(Event::CSA_Finished);
