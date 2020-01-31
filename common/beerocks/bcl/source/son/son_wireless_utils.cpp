@@ -645,6 +645,25 @@ uint8_t wireless_utils::get_operating_class_max_tx_power(
 }
 
 /**
+ * @brief get operating class number by channel and channel bandwidth 
+ *
+ * @param channel current channel
+ * @param channel_bandwidth current channel bandwidth
+ * @return operating class number
+ */
+uint8_t wireless_utils::get_operating_class_by_channel(uint8_t channel,
+                                                       beerocks::eWiFiBandwidth channel_bandwidth)
+{
+    for (auto oper_class : operating_classes_list) {
+        if (oper_class.second.band == channel_bandwidth &&
+            oper_class.second.channels.find(channel) != oper_class.second.channels.end()) {
+            return oper_class.first;
+        }
+    }
+    return 0;
+}
+
+/**
  * @brief get list of permanent non operable channels for operating class
  *
  * @param supported_channels list of supported channels
