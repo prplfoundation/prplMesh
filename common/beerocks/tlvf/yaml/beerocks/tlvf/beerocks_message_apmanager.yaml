@@ -71,6 +71,8 @@ cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION:
 cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START:
   _type: class
   cs_params: sApChannelSwitch
+  tx_limit: int8_t
+  tx_limit_valid: uint8_t #bool
 
 cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION:
   _type: class
