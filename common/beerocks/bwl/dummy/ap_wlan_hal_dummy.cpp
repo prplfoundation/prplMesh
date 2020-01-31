@@ -322,6 +322,12 @@ bool ap_wlan_hal_dummy::read_acs_report()
 
 bool ap_wlan_hal_dummy::read_supported_channels() { return true; }
 
+bool ap_wlan_hal_dummy::set_tx_power_limit(int tx_pow_limit)
+{
+    LOG(TRACE) << __func__ << " power limit: " << tx_pow_limit;
+    return true;
+}
+
 bool ap_wlan_hal_dummy::set_vap_enable(const std::string &iface_name, const bool enable)
 {
     return true;

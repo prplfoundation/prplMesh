@@ -1586,6 +1586,12 @@ bool ap_wlan_hal_dwpal::read_supported_channels()
     return true;
 }
 
+bool ap_wlan_hal_dwpal::set_tx_power_limit(int tx_pow_limit)
+{
+    LOG(DEBUG) << "set_tx_power_limit(): missing function implementation";
+    return true;
+}
+
 bool ap_wlan_hal_dwpal::set_vap_enable(const std::string &iface_name, const bool enable)
 {
     LOG(DEBUG) << "set_vap_enable(): missing function implementation";
