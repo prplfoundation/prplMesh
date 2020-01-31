@@ -319,6 +319,15 @@ public:
     virtual bool read_supported_channels() = 0;
 
     /*!
+     * Set Transmit Power Limit 
+     *
+     * @param [in] tx_pow_limit Transmit Power Limit in dBm.
+     *
+     * @return true on success or false on error.
+     */
+    virtual bool set_tx_power_limit(int tx_pow_limit) = 0;
+
+    /*!
      * Returns a string representation of the WLAN driver version.
      */
     virtual std::string get_radio_driver_version() = 0;
