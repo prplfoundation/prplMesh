@@ -231,6 +231,22 @@ private:
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
 
     /**
+     * @brief Type definition for associated clients information.
+     *
+     * Associated client information consists of:
+     * - The MAC address of the 802.11 client that associates to a BSS.
+     * - Timestamp of the 802.11 client's last association to this Multi-AP device.
+     *
+     * Associated client information is gathered from
+     * ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION events received from slave threads.
+     *
+     * Associated client information is later used to fill in the Associated Clients TLV
+     * in the Topology Response message.
+     */
+    typedef std::unordered_map<sMacAddr, std::chrono::steady_clock::time_point>
+        associated_clients_t;
+
+    /**
      * @brief Information gathered about a radio.
      *
      * Radio information is obtained from messages sent by slave threads and is used to build
@@ -240,6 +256,8 @@ private:
         beerocks_message::sVapsList vaps_list; /**< List of VAPs in radio. */
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
             supported_channels; /**< Array of supported channels in radio. */
+        std::unordered_map<sMacAddr, associated_clients_t>
+            associated_clients_map; /**< Associated clients grouped by BSSID. */
     };
 
     /**
