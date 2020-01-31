@@ -1772,6 +1772,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         std::copy_n(&std::get<1>(tuple_in_supported_channels), message::SUPPORTED_CHANNELS_LENGTH,
                     &std::get<1>(tuple_out_supported_channels));
         send_cmdu_to_controller(cmdu_tx);
+        send_operating_channel_report();
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION: {
@@ -1796,6 +1797,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
 
         notification_out->cs_params() = notification_in->cs_params();
         send_cmdu_to_controller(cmdu_tx);
+        send_operating_channel_report();
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION: {
@@ -1818,6 +1820,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
         notification_out->cs_params() = notification_in->cs_params();
         send_cmdu_to_controller(cmdu_tx);
+        send_operating_channel_report();
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
@@ -4478,11 +4481,11 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
     channel_selection_response_tlv->response_code() =
         wfa_map::tlvChannelSelectionResponse::eResponseCode::ACCEPT;
 
-    if (!send_cmdu_to_controller(cmdu_tx)) {
-        LOG(ERROR) << "failed to send CHANNEL_SELECTION_RESPONSE_MESSAGE";
-        return false;
-    }
+    return send_cmdu_to_controller(cmdu_tx);
+}
 
+bool slave_thread::send_operating_channel_report()
+{
     // build and send operating channel report message
     if (!cmdu_tx.create(0, ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE)) {
         LOG(ERROR) << "cmdu creation of type OPERATING_CHANNEL_REPORT_MESSAGE, has failed";
@@ -4509,16 +4512,12 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
         return false;
     }
 
-    auto &operating_class_entry = std::get<1>(operating_class_entry_tuple);
-    if (selected_channel) {
-        operating_class_entry.operating_class = selected_operating_class;
-        operating_class_entry.channel_number  = selected_channel;
-    } else {
-        operating_class_entry.operating_class = 80;
-        operating_class_entry.channel_number  = 36;
-    }
+    auto &operating_class_entry           = std::get<1>(operating_class_entry_tuple);
+    operating_class_entry.operating_class = wireless_utils::get_operating_class_by_channel(
+        hostap_cs_params.channel, (beerocks::eWiFiBandwidth)hostap_cs_params.bandwidth);
+    operating_class_entry.channel_number = hostap_cs_params.channel;
 
-    operating_channel_report_tlv->current_transmit_power() = -50;
+    operating_channel_report_tlv->current_transmit_power() = hostap_cs_params.tx_power;
 
     return send_cmdu_to_controller(cmdu_tx);
 }
