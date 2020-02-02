@@ -11,6 +11,14 @@
 #include "bpl_cfg_helper.h"
 #include "bpl_cfg_uci.h"
 
+#define LOGF_LOG_CRIT(args...) PRINTF("CRIT", ##args)
+#define LOGF_LOG_ERROR(args...) PRINTF("ERROR", ##args)
+#define LOGF_LOG_WARN(args...) PRINTF("WARN", ##args)
+#define LOGF_LOG_INFO(args...) PRINTF("INFO", ##args)
+#define LOGF_LOG_DEBUG(args...) PRINTF("DEBUG", ##args)
+
+#define PRINTF(LEVEL, fmt, args...) printf(LEVEL ":{%s, %d}:" fmt, __func__, __LINE__, ##args)
+
 namespace beerocks {
 namespace bpl {
 
@@ -29,7 +37,14 @@ int cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex)
     if (cfg_uci_get_wireless_idx(ifname, &uci_idx) == RETURN_OK) {
         *nIndex = uci_to_rpc_index(ifType, uci_idx);
     } else {
+        ERROR("cfg_get_index_from_interface() failed: ifname=%s, uci_idx=%d\n", ifname, uci_idx);
         return RETURN_ERR;
+    }
+
+    if (*nIndex < 0) {
+        ERROR("uci_to_rpc_index() failed: ifname=%s, uci_idx=%d, ifType=%d\n", ifname, uci_idx, 
+                    int(ifType));
+        return RETURN_ERR; 
     }
 
     return RETURN_OK;

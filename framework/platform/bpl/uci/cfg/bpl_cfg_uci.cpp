@@ -344,7 +344,9 @@ int cfg_uci_get_wireless(enum paramType type, int index, const char param[], cha
     if (status == RETURN_OK) {
         // DEBUG("%s index=%d %s=%s\n", __func__, index, param, value);
     } else {
-        ERROR("%s option N/A. index=%d param=%s\n", __func__, index, param);
+        ERROR("%s radio_str=%s, rcp_idx=%d, param=%s\n", __func__, radio_str, 
+                rpc_to_uci_index(type, index), param);
+        ERROR("%s option N/A. path=%s\n", __func__, path);
     }
 
     return status;
