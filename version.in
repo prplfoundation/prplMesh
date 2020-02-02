@@ -1,0 +1,4 @@
+prplmesh_version=@prplmesh_VERSION@
+prplmesh_revision=@REVISION@
+prplmesh_build_date=@BUILD_DATE@
+
