@@ -366,6 +366,7 @@ bool beerocks_ucc_listener::init()
         should_stop = true;
         return false;
     }
+    LOG(DEBUG) << "Starting UCC listener on port " << int(m_port);
 
     return socket_thread::init();
 }
