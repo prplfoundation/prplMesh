@@ -11,6 +11,11 @@ file(GLOB_RECURSE bpl_common_sources ${MODULE_PATH}/common/*.c*)
 # Common libraries
 find_package(elpp REQUIRED)
 
+if (CERTIFICATION)
+    message(STATUS "Certification support")
+    add_definitions(-DCERTIFICAITON)
+endif()
+
 # OpenWRT
 if (TARGET_PLATFORM STREQUAL "openwrt")
 

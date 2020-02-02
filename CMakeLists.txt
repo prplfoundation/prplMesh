@@ -12,6 +12,7 @@ endif()
 
 option (BUILD_AGENT "Build EasyMesh agent" ON)
 option (BUILD_CONTROLLER "Build EasyMesh controller" ON)
+option (CERTIFICATION "EasyMesh certification support" ON)
 
 ## Generic checks and defaults
 
