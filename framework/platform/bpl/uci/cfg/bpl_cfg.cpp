@@ -84,11 +84,13 @@ int cfg_get_operating_mode()
 
 int cfg_get_certification_mode()
 {
-    int retVal = -1;
+    int retVal = BPL_CERTIFICATION_MODE_OFF;
+#ifndef CERTIFICATION
     if (cfg_get_prplmesh_param_int("certification_mode", &retVal) == RETURN_ERR) {
         MAPF_ERR("cfg_get_certification_mode: Failed to read certification_mode parameter\n");
         return RETURN_ERR;
     }
+#endif
     return retVal;
 }
 
