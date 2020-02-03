@@ -934,6 +934,7 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(const std::string
         // ignored. Full implemtation will be as part of channel selection task.
     }
 
+    cert_cmdu_tx.finalize();
     return true; // cert_cmdu_tx will be sent when triggered to by the UCC application
 }
 
@@ -1301,6 +1302,7 @@ bool master_thread::construct_combined_infra_metric()
         }
     }
 
+    cert_cmdu_tx.finalize();
     return true;
 }
 
