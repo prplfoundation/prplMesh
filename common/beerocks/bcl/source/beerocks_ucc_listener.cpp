@@ -706,7 +706,7 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         // Check if CMDU message type has preprepared CMDU which can be loaded
         if (m_cmdu_tx.is_finalized() &&
             m_cmdu_tx.getMessageType() == ieee1905_1::eMessageType(message_type)) {
-            m_cmdu_tx.getClass<ieee1905_1::cCmduHeader>()->message_id() = g_mid; // force mid
+            m_cmdu_tx.setMessageId(g_mid); // force mid
             if (!send_cmdu_to_destination(m_cmdu_tx, dest_alid)) {
                 LOG(ERROR) << "Failed to send CMDU";
                 reply_ucc(eWfaCaStatus::ERROR, err_internal);
