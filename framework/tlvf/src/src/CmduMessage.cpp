@@ -23,7 +23,7 @@ bool CmduMessage::getNextTlvType(eTlvType &tlvType) const
     int tlvValue = getNextTlvType();
     if (tlvValue < 0)
         return false;
-    tlvType = (eTlvType)tlvValue;
+    tlvType = static_cast<eTlvType>(tlvValue);
     return eTlvTypeValidate::check(tlvValue);
 }
 
@@ -50,7 +50,7 @@ eMessageType CmduMessage::getMessageType()
     auto cmduhdr      = getCmduHeader();
     msgValue          = (uint16_t)cmduhdr->message_type();
     if (cmduhdr->is_finalized())
-        swap_16((uint16_t &)msgValue);
+        swap_16(msgValue);
 
     return (eMessageType)msgValue;
 }
@@ -61,7 +61,16 @@ uint16_t CmduMessage::getMessageId()
     uint16_t mid = cmduhdr->message_id();
 
     if (cmduhdr->is_finalized())
-        swap_16((uint16_t &)mid);
+        swap_16(mid);
 
     return mid;
+}
+
+void CmduMessage::setMessageId(uint16_t mid)
+{
+    auto cmduhdr = getCmduHeader();
+
+    if (cmduhdr->is_finalized())
+        swap_16(mid);
+    cmduhdr->message_id() = mid;
 }

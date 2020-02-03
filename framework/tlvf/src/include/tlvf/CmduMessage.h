@@ -34,6 +34,7 @@ public:
     static uint16_t getCmduHeaderLength() { return kCmduHeaderLength; }
     eMessageType getMessageType();
     uint16_t getMessageId();
+    void setMessageId(uint16_t mid);
     bool getNextTlvType(eTlvType &tlvType) const;
     int getNextTlvType() const;
     uint16_t getNextTlvLength() const;
