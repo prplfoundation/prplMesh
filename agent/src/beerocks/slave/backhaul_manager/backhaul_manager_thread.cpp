@@ -1735,7 +1735,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         }
 
         // Set client association information for associated client
-        auto &&associated_clients =
+        auto &associated_clients =
             m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
         associated_clients[msg->client_mac()] = std::chrono::steady_clock::now();
         break;
@@ -1753,7 +1753,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         }
 
         // If exists, remove client association information for disconnected client
-        auto &&associated_clients =
+        auto &associated_clients =
             m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
         auto it = associated_clients.find(msg->client_mac());
         if (it != associated_clients.end()) {
@@ -1944,8 +1944,6 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER;
     }
 
-    // TODO: the Operational BSS and Associated Clients TLVs are temporary dummies.
-    // later to be updated by real platfrom data from bpl
     auto tlvApOperationalBSS = cmdu_tx.addClass<wfa_map::tlvApOperationalBSS>();
     if (!tlvApOperationalBSS) {
         LOG(ERROR) << "addClass wfa_map::tlvApOperationalBSS failed, mid=" << std::hex << (int)mid;
@@ -1971,23 +1969,75 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         tlvApOperationalBSS->add_radio_list(radio_list);
     }
 
-    auto tlvAssociatedClients = cmdu_tx.addClass<wfa_map::tlvAssociatedClients>();
-    if (!tlvAssociatedClients) {
-        LOG(ERROR) << "addClass wfa_map::tlvAssociatedClients failed, mid=" << std::hex << (int)mid;
-        return false;
+    // The Multi-AP Agent shall include an Associated Clients TLV in the message if there is at
+    // least one 802.11 client directly associated with any of the BSS(s) that is operated by the
+    // Multi-AP Agent
+    bool shall_include_associated_clients_tlv = false;
+    for (const auto &radio_info_entry : m_radio_info_map) {
+        auto associated_clients_map = radio_info_entry.second.associated_clients_map;
+        for (const auto &associated_clients_entry : associated_clients_map) {
+            auto associated_clients = associated_clients_entry.second;
+            if (associated_clients.size() > 0) {
+                shall_include_associated_clients_tlv = true;
+                break;
+            }
+        }
+        if (shall_include_associated_clients_tlv) {
+            break;
+        }
     }
-    auto bss_list   = tlvAssociatedClients->create_bss_list();
-    auto client_1   = bss_list->create_clients_associated_list();
-    client_1->mac() = network_utils::mac_from_string("aa:bb:cc:dd:ee:ff");
-    client_1->time_since_last_association_sec() = 5;
-    bss_list->add_clients_associated_list(client_1);
-    auto client_2   = bss_list->create_clients_associated_list();
-    client_2->mac() = network_utils::mac_from_string("00:11:22:33:44:55");
-    client_2->time_since_last_association_sec() = 1;
-    bss_list->add_clients_associated_list(client_2);
-    tlvAssociatedClients->add_bss_list(bss_list);
 
-    bss_list->bssid() = network_utils::mac_from_string("ab:cd:ef:01:23:45");
+    if (shall_include_associated_clients_tlv) {
+        auto tlvAssociatedClients = cmdu_tx.addClass<wfa_map::tlvAssociatedClients>();
+        if (!tlvAssociatedClients) {
+            LOG(ERROR) << "addClass wfa_map::tlvAssociatedClients failed, mid=" << std::hex
+                       << (int)mid;
+            return false;
+        }
+
+        // Get current time to compute elapsed time since last client association
+        auto now = std::chrono::steady_clock::now();
+
+        // Fill in Associated Clients TLV
+        for (const auto &radio_info_entry : m_radio_info_map) {
+            auto associated_clients_map = radio_info_entry.second.associated_clients_map;
+
+            // Associated clients map contains sets of associated clients grouped by BSSID
+            for (const auto &associated_clients_entry : associated_clients_map) {
+                auto bssid              = associated_clients_entry.first;
+                auto associated_clients = associated_clients_entry.second;
+
+                if (associated_clients.size() > 0) {
+                    auto bss_list = tlvAssociatedClients->create_bss_list();
+
+                    bss_list->bssid() = bssid;
+
+                    // Information for each associated client includes its MAC address and
+                    // the timestamp of its last association.
+                    for (const auto &associated_client : associated_clients) {
+                        auto client_mac       = associated_client.first;
+                        auto association_time = associated_client.second;
+
+                        auto elapsed =
+                            std::chrono::duration_cast<std::chrono::seconds>(now - association_time)
+                                .count();
+                        if ((elapsed < 0) || (elapsed > UINT16_MAX)) {
+                            elapsed = UINT16_MAX;
+                        }
+
+                        auto client = bss_list->create_clients_associated_list();
+
+                        client->mac()                             = client_mac;
+                        client->time_since_last_association_sec() = elapsed;
+
+                        bss_list->add_clients_associated_list(client);
+                    }
+
+                    tlvAssociatedClients->add_bss_list(bss_list);
+                }
+            }
+        }
+    }
 
     LOG(DEBUG) << "Sending topology response message, mid: " << std::hex << (int)mid;
     return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
