@@ -587,17 +587,18 @@ bool base_wlan_hal_dwpal::process_nl_events()
 }
 
 bool base_wlan_hal_dwpal::dwpal_nl_cmd_set(const std::string &ifname, unsigned int nl_cmd,
-                                           unsigned char *vendor_data, size_t vendor_data_size)
+                                           const void *vendor_data, size_t vendor_data_size)
 {
     if (vendor_data == nullptr) {
         LOG(ERROR) << __func__ << "vendor_data is NULL ==> Abort!";
         return false;
     }
 
-    if (dwpal_driver_nl_cmd_send(m_dwpal_nl_ctx, DWPAL_NL_UNSOLICITED_EVENT, (char *)ifname.c_str(),
-                                 NL80211_CMD_VENDOR, DWPAL_NETDEV_ID,
-                                 (enum ltq_nl80211_vendor_subcmds)nl_cmd, vendor_data,
-                                 vendor_data_size) != DWPAL_SUCCESS) {
+    if (dwpal_driver_nl_cmd_send(
+            m_dwpal_nl_ctx, DWPAL_NL_UNSOLICITED_EVENT, (char *)ifname.c_str(), NL80211_CMD_VENDOR,
+            DWPAL_NETDEV_ID, ltq_nl80211_vendor_subcmds(nl_cmd),
+            const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(vendor_data)),
+            vendor_data_size) != DWPAL_SUCCESS) {
         LOG(ERROR) << __func__ << "ERROR for cmd = " << nl_cmd;
         return false;
     }
