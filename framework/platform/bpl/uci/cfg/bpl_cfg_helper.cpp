@@ -24,7 +24,7 @@ int cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex)
     }
     utils::copy_string(ifname, inputIfName.c_str(), BPL_IFNAME_LEN);
 
-    const int ifType = (inputIfName.find('.') != std::string::npos) ? TYPE_VAP : TYPE_RADIO;
+    const paramType ifType = (inputIfName.find('.') != std::string::npos) ? TYPE_VAP : TYPE_RADIO;
 
     if (cfg_uci_get_wireless_idx(ifname, &rpcIndex) == RETURN_OK) {
         *nIndex = UCI_RETURN_INDEX(ifType, rpcIndex);

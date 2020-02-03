@@ -68,7 +68,14 @@ enum paramType { TYPE_RADIO = 0, TYPE_VAP };
 
 #include <slibc/stdio.h>
 #include <slibc/string.h>
+
+extern "C" {
 #include <uci_wrapper.h>
+
+#define UCI_INDEX(iftype, rpc_index) rpc_to_uci_index(iftype, rpc_index)
+#define UCI_RETURN_INDEX(iftype, uci_idx) uci_to_rpc_index(ifType, uci_idx)
+}
+
 #endif
 
 namespace beerocks {

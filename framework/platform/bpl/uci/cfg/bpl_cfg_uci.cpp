@@ -20,6 +20,29 @@ extern "C" {
 
 #define PRINTF(LEVEL, fmt, args...) printf(LEVEL ":{%s, %d}:" fmt, __func__, __LINE__, ##args)
 
+#ifdef BEEROCKS_RDKB
+// NOTE:
+// This function is defined as static function on swpal, so it is not possible to access it.
+// Therefore the implementation has been copied from swpal.
+// This is a temporary solution and will be removed.
+/**
+ * @brief convert dummy vap uci index to radio uci index using uci-db
+ *
+ * @param[in] index The uci index of the dummy vap
+ * @return the index if success, negative if error
+ */
+static int dummy_to_radio_index(int index)
+{
+    char radio[MAX_UCI_BUF_LEN] = "";
+    if (uci_converter_get_str(TYPE_RADIO_VAP, uci_to_rpc_index(TYPE_RADIO_VAP, index), "device",
+                              radio) == RETURN_ERR)
+        return RETURN_ERR;
+
+    return (radio[sizeof("radio") - 1] - '0');
+}
+
+#endif
+
 namespace beerocks {
 namespace bpl {
 
@@ -256,6 +279,22 @@ int cfg_uci_get_wireless_idx(char *interfaceName, int *rpc_index)
 
             scanf_res = sscanf_s(s->e.name, "default_radio%d", rpc_index);
 
+#ifdef BEEROCKS_RDKB
+            if (scanf_res < 1 || *rpc_index < 0) {
+                *rpc_index = -1;
+                uci_free_context(ctx);
+                return RETURN_ERR;
+            }
+
+            /* if it is dummy we want the radio index, not the dummy one */
+            if (uci_converter_is_dummy(*rpc_index)) {
+                *rpc_index = dummy_to_radio_index(*rpc_index);
+                if (*rpc_index == RETURN_ERR) {
+                    uci_free_context(ctx);
+                    return RETURN_ERR;
+                }
+            }
+#else
             if (scanf_res < 1 || *rpc_index < 0 ||
                 *rpc_index > DUMMY_VAP_OFFSET + MAX_NUM_OF_RADIOS) {
                 *rpc_index = -1;
@@ -265,6 +304,7 @@ int cfg_uci_get_wireless_idx(char *interfaceName, int *rpc_index)
 
             *rpc_index =
                 (*rpc_index >= DUMMY_VAP_OFFSET) ? (*rpc_index - DUMMY_VAP_OFFSET) : *rpc_index;
+#endif
             uci_free_context(ctx);
             return RETURN_OK;
         }
