@@ -92,8 +92,8 @@ private:
 
     bool dwpal_set_scan_params_fg(const sScanCfgParams &params)
     {
-        if (dwpal_nl_cmd_set(m_radio_info.iface_name, LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS,
-                             (unsigned char *)&params, sizeof(params))) {
+        if (!dwpal_nl_cmd_set(m_radio_info.iface_name, LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS,
+                              &params, sizeof(params))) {
             LOG(ERROR) << __func__ << " LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS failed!";
             return false;
         }
@@ -102,8 +102,8 @@ private:
 
     bool dwpal_set_scan_params_bg(const sScanCfgParamsBG &params)
     {
-        if (dwpal_nl_cmd_set(m_radio_info.iface_name, LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS_BG,
-                             (unsigned char *)&params, sizeof(params))) {
+        if (!dwpal_nl_cmd_set(m_radio_info.iface_name, LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS_BG,
+                              &params, sizeof(params))) {
             LOG(ERROR) << __func__ << " LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS_BG failed!";
             return false;
         }

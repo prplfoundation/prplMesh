@@ -83,8 +83,8 @@ protected:
      * @return true on success
      * @return false on failure
      */
-    bool dwpal_nl_cmd_set(const std::string &ifname, unsigned int nl_cmd,
-                          unsigned char *vendor_data, size_t vendor_data_size);
+    bool dwpal_nl_cmd_set(const std::string &ifname, unsigned int nl_cmd, const void *vendor_data,
+                          size_t vendor_data_size);
     bool dwpal_nl_cmd_scan_dump();
     void *get_dwpal_nl_ctx() const { return (m_dwpal_nl_ctx); }
 
