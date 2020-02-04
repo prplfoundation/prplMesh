@@ -1203,19 +1203,8 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
 
 bool master_thread::construct_combined_infra_metric()
 {
-    // auto agents = database.get_all_connected_ires();
-    auto agents            = database.get_nodes(beerocks::TYPE_IRE);
     auto &link_metric_data = database.get_link_metric_data_map();
 
-    for (auto &al_mac : agents) {
-        if (link_metric_data.find(net::network_utils::mac_from_string(al_mac)) ==
-            link_metric_data.end()) {
-            //If agent mac still not in database and not create Combined Metrics CMDU
-            return true;
-        }
-    }
-    //If all agents already in database, create Combined Metrics CMDU
-    // build Combined Metrics message
     if (!cert_cmdu_tx.create(0,
                              ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE)) {
         LOG(ERROR) << "cmdu creation of type COMBINED_INFRASTRUCTURE_METRICS_MESSAGE, has failed";
