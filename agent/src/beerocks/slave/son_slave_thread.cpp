@@ -8,6 +8,7 @@
 #include "son_slave_thread.h"
 
 #include "../monitor/monitor_thread.h"
+#include "tlvf_utils.h"
 
 #include <bcl/beerocks_utils.h>
 #include <bcl/beerocks_version.h>
@@ -3392,8 +3393,14 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        if (!add_radio_basic_capabilities()) {
-            LOG(ERROR) << "Failed adding WSC M1 TLV";
+        std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
+            supported_channels;
+        std::copy_n(std::begin(hostap_params.supported_channels), supported_channels.size(),
+                    supported_channels.begin());
+
+        if (!tlvf_utils::add_ap_radio_basic_capabilities(cmdu_tx, hostap_params.iface_mac,
+                                                         supported_channels)) {
+            LOG(ERROR) << "Failed adding AP Radio Basic Capabilities TLV";
             return false;
         }
 
@@ -4636,57 +4643,6 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
     operating_channel_report_tlv->current_transmit_power() = -50;
 
     return send_cmdu_to_controller(cmdu_tx);
-}
-
-bool slave_thread::add_radio_basic_capabilities()
-{
-    std::vector<uint8_t> operating_classes;
-
-    auto radio_basic_caps = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
-    if (!radio_basic_caps) {
-        LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
-        return false;
-    }
-    radio_basic_caps->radio_uid() = hostap_params.iface_mac;
-    //TODO get maximum supported VAPs from DWPAL
-    radio_basic_caps->maximum_number_of_bsss_supported() = 2;
-
-    operating_classes =
-        wireless_utils::get_supported_operating_classes(hostap_params.supported_channels);
-
-    for (auto op_class : operating_classes) {
-        auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
-        if (!operationClassesInfo) {
-            LOG(ERROR) << "Failed creating operating classes info list";
-            return false;
-        }
-
-        operationClassesInfo->operating_class() = op_class;
-        operationClassesInfo->maximum_transmit_power_dbm() =
-            wireless_utils::get_operating_class_max_tx_power(hostap_params.supported_channels,
-                                                             op_class);
-
-        std::vector<uint8_t> non_oper_channels;
-        non_oper_channels = wireless_utils::get_operating_class_non_oper_channels(
-            hostap_params.supported_channels, op_class);
-        // Create list of statically non-oper channels
-        if (!non_oper_channels.empty()) {
-            operationClassesInfo->alloc_statically_non_operable_channels_list(
-                non_oper_channels.size());
-            uint8_t idx = 0;
-            for (auto non_oper : non_oper_channels) {
-                *operationClassesInfo->statically_non_operable_channels_list(idx) = non_oper;
-                idx++;
-            }
-        }
-
-        if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
-            LOG(ERROR) << "add_operating_classes_info_list failed";
-            return false;
-        }
-    }
-
-    return true;
 }
 
 bool slave_thread::autoconfig_wsc_add_m1()
