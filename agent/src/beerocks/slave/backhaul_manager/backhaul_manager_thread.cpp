@@ -28,9 +28,11 @@
 #include <tlvf/ieee_1905_1/tlvDeviceInformation.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
 #include <tlvf/ieee_1905_1/tlvMacAddress.h>
+#include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
+#include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
 #include <tlvf/wfa_map/tlvApOperationalBSS.h>
 #include <tlvf/wfa_map/tlvAssociatedClients.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
@@ -38,8 +40,8 @@
 #include <tlvf/wfa_map/tlvSupportedService.h>
 
 // BPL Error Codes
-#include <bpl/bpl_err.h>
 #include <bpl/bpl_cfg.h>
+#include <bpl/bpl_err.h>
 
 using namespace beerocks::net;
 
@@ -1743,6 +1745,10 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE: {
         return handle_1905_higher_layer_data_message(cmdu_rx, src_mac);
     }
+    case ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE: {
+        return handle_1905_combined_infrastructure_metrics(cmdu_rx, src_mac);
+    }
+
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
@@ -1879,6 +1885,27 @@ bool backhaul_manager::handle_1905_higher_layer_data_message(ieee1905_1::CmduMes
     const auto payload_length = tlvHigherLayerData->payload_length();
     LOG(DEBUG) << "protocol: " << std::hex << int(protocol);
     LOG(DEBUG) << "payload_length: " << std::hex << int(payload_length);
+
+    // build ACK message CMDU
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+    LOG(DEBUG) << "sending ACK message to the originator, mid=" << std::hex << int(mid);
+    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+}
+
+bool backhaul_manager::handle_1905_combined_infrastructure_metrics(
+    ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received COMBINED_INFRASTRUCTURE_METRICS message, mid=" << std::hex << int(mid);
+
+    if (cmdu_rx.getClass<ieee1905_1::tlvReceiverLinkMetric>())
+        LOG(DEBUG) << "Received TLV_RECEIVER_LINK_METRIC";
+    if (cmdu_rx.getClass<ieee1905_1::tlvTransmitterLinkMetric>())
+        LOG(DEBUG) << "Received TLV_TRANSMITTER_LINK_METRIC";
 
     // build ACK message CMDU
     auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
