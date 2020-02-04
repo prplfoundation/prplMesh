@@ -208,8 +208,25 @@ test_ap_capability_query() {
     return $check_error
 }
 test_combined_infra_metrics() {
-    err "combined_infra_metrics not implemented yet."
-    return 0
+    status "test combined infrastructure metrics"
+    check_error=0
+    dbg "Send AP Metrics query message to agent 1"
+    mac_agent1_wlan0_hex=0x$(echo $mac_agent1_wlan0 | tr -d :)
+    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x800B,\
+tlv_type,0x93,tlv_length,0x0007,tlv_value,{0x01 $mac_agent1_wlan0_hex}" $redirect
+    sleep 1
+    check_log ${REPEATER1} agent_wlan0 "AP_METRICS_QUERY_MESSAGE"
+    check_log ${GATEWAY} controller "AP_METRIC_RESPONSE_MESSAGE"
+    dbg "Send 1905 Link metric query to agent 1 (neighbor agent 2)"
+    check send_CAPI_command ${GATEWAY} "dev_send_1905,DestALid,$mac_agent1,MessageTypeValue,0x0005,\
+tlv_type,0x08,tlv_length,0x0008,tlv_value,{0x01 $mac_agent2 0x02}"
+    sleep 1
+    check_log ${REPEATER1} agent_wlan0 "LINK_METRIC_QUERY_MESSAGE"
+    check_log ${GATEWAY} controller "LINK_METRIC_RESPONSE_MESSAGE"
+    dbg "Send Combined infrastructure metrics message to agent 1"
+    check send_CAPI_command ${GATEWAY} "dev_send_1905,DestALid,$mac_agent1,MessageTypeValue,0x8013"
+    return 0 # TODO fix in https://github.com/prplfoundation/prplMesh/pull/784
+
 }
 test_client_steering_mandate() {
     status "test client steering"
