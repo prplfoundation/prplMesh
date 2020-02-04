@@ -4384,38 +4384,16 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
 bool slave_thread::handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     const auto mid = cmdu_rx.getMessageId();
-    auto tlv_type  = cmdu_rx.getNextTlvType();
-    while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
-        if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_AP_METRIC_QUERY)) {
-            auto ap_metrics_query_tlv = cmdu_tx.addClass<wfa_map::tlvApMetricQuery>();
-            if (!ap_metrics_query_tlv) {
-                LOG(ERROR) << "addClass tlvApMetricQuery has failed";
-                return false;
-            }
-            LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
-                       << ", with TLV type=" << std::hex << int(ap_metrics_query_tlv->type());
-        }
-        tlv_type = cmdu_tx.getNextTlvType();
-    }
+    LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid);
+    // TODO add handling for AP metrics response}
     return true;
 }
 
 bool slave_thread::handle_link_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     const auto mid = cmdu_rx.getMessageId();
-    auto tlv_type  = cmdu_rx.getNextTlvType();
-    while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
-        if (tlv_type == int(ieee1905_1::eTlvType::TLV_LINK_METRIC_QUERY)) {
-            auto link_metrics_query_tlv = cmdu_tx.addClass<ieee1905_1::tlvLinkMetricQuery>();
-            if (!link_metrics_query_tlv) {
-                LOG(ERROR) << "addClass tlvLinkMetricQuery has failed";
-                return false;
-            }
-            LOG(DEBUG) << "Received LINK_METRIC_QUERY_MESSAGE , mid=" << std::hex << int(mid)
-                       << ", with TLV type=" << std::hex << int(link_metrics_query_tlv->type());
-        }
-        tlv_type = cmdu_tx.getNextTlvType();
-    }
+    LOG(DEBUG) << "Received LINK_METRIC_QUERY_MESSAGE, mid=" << std::hex << int(mid);
+    // TODO add handling for Link metric query response}
     return true;
 }
 
