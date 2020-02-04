@@ -1320,6 +1320,11 @@ bool master_thread::handle_cmdu_1905_ap_metric_response(const std::string &src_m
 
     print_ap_metric_map(ap_metric_data);
 
+    // TODO store the ap metric response data in the DB and trigger the relevant task.
+    // For now, this is only used for certification so update the certification cmdu.
+    if (database.setting_certification_mode())
+        construct_combined_infra_metric();
+
     return true;
 }
 
