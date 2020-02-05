@@ -70,7 +70,8 @@ static void config_logger(const std::string log_file = std::string())
 static void translate_channel_scan_results(const beerocks_message::sChannelScanResults &res_in,
                                            BML_NEIGHBOR_AP &res_out)
 {
-    string_utils::copy_string(res_out.ap_SSID, res_in.ssid,
+    string_utils::copy_string(reinterpret_cast<char *>(res_out.ap_SSID),
+                              reinterpret_cast<const char *>(res_in.ssid),
                               beerocks::message::WIFI_SSID_MAX_LENGTH);
     std::copy_n(res_in.bssid.oct, BML_MAC_ADDR_LEN, res_out.ap_BSSID);
     std::copy_n(res_in.security_mode_enabled, beerocks::message::CHANNEL_SCAN_LIST_LENGTH,
@@ -83,7 +84,6 @@ static void translate_channel_scan_results(const beerocks_message::sChannelScanR
                 res_out.ap_BasicDataTransferRates);
     std::copy_n(res_in.supported_data_transfer_rates_kbps,
                 beerocks::message::CHANNEL_SCAN_LIST_LENGTH, res_out.ap_SupportedDataTransferRates);
-
     res_out.ap_Channel                   = res_in.channel;
     res_out.ap_SignalStrength            = res_in.signal_strength_dBm;
     res_out.ap_OperatingFrequencyBand    = res_in.operating_frequency_band;
@@ -999,20 +999,20 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             if (m_prmChannelScanResultsGet) {
 
                 if (m_scan_results && m_scan_results_maxsize && m_scan_results_status) {
-
-                    LOG(DEBUG) << "Receiving Response";
-
                     uint8_t op_error_code  = response->op_error_code();
                     *m_scan_results_status = response->result_status();
                     auto scan_results_size = response->results_size();
                     uint8_t last           = response->last();
 
-                    LOG(DEBUG) << "Opt code: " << int(op_error_code)
+                    LOG(DEBUG) << "Received response ["
+                               << "opt code: " << int(op_error_code)
                                << ", status: " << int(*m_scan_results_status)
-                               << ", size: " << int(scan_results_size);
+                               << ", size: " << int(scan_results_size)
+                               << "].";
 
                     if (scan_results_size > 0) {
-                        LOG(DEBUG) << "currently with " << m_scan_results->size() << " results";
+                        LOG(TRACE) << "currently " << m_scan_results->size() << " cached results, "
+                                   << "adding " << int(scan_results_size) << ".";
 
                         // Get results from CMDU
                         auto results = &std::get<1>(response->results(0));
@@ -1026,14 +1026,14 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                         // Insert results
                         m_scan_results->insert(m_scan_results->end(), results,
                                                results + scan_results_size);
-                        LOG(DEBUG) << scan_results_size << " results added";
+                        LOG(TRACE) << "added " << int(scan_results_size) << " results, "
+                                   << "to a total of " << m_scan_results->size() << ".";
                     }
-                    LOG(DEBUG) << "last: " << (int)last;
-                    if (last == 1) {
-                        LOG(DEBUG) << "Results done";
-                        m_prmChannelScanResultsGet->set_value(op_error_code);
+                    if (!last) {
+                        LOG(TRACE) << "Waiting for more results.";
                     } else {
-                        LOG(DEBUG) << "Results cont";
+                        LOG(TRACE) << "Done receiving results, resolving promise.";
+                        m_prmChannelScanResultsGet->set_value(op_error_code);
                     }
                 }
             } else {
@@ -1568,7 +1568,7 @@ int bml_internal::get_dcs_continuous_scan_params(const sMacAddr &mac, int *dwell
     return (iRet);
 }
 
-int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP **results,
+int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP *results,
                                        unsigned int &results_size,
                                        const unsigned int max_results_size, uint8_t &result_status,
                                        bool is_single_scan)
@@ -1639,7 +1639,11 @@ int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP **re
     }
 
     iRet = prmChannelScanResultsGet.get_value();
-    if (iRet != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+    LOG(DEBUG) << "Promise resolved, recived results info: ["
+               << "total count: " << scan_results.size() << ", "
+               << "results status: " << int(result_status) << ", "
+               << "results opt code: " << int(iRet) << "].";
+    if (iRet != uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
         LOG(ERROR) << "Results returned with error code:" << iRet << ". Aborting!";
         return iRet;
     }
@@ -1647,7 +1651,7 @@ int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP **re
     //output_results_size will be set to the number of actual returning results
     results_size = 0;
     for (auto &res : scan_results) {
-        auto &out = ((*results)[results_size]);
+        auto &out = results[results_size];
         translate_channel_scan_results(res, out);
         results_size += 1;
     }

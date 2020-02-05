@@ -211,7 +211,7 @@ public:
     * 
     * @return BML_RET_OK on success.
     */
-    int get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP **results,
+    int get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP *results,
                              unsigned int &results_size, const unsigned int max_results_size,
                              uint8_t &result_status, bool is_single_scan);
 

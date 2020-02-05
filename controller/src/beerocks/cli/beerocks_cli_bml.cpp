@@ -1831,7 +1831,7 @@ int cli_bml::steering_client_measure(uint32_t steeringGroupIndex, const std::str
  */
 int cli_bml::set_dcs_continuous_scan_enable(const std::string &radio_mac, int8_t enable)
 {
-    std::cout << __func__ << ", mac=" << radio_mac << ", enable=" << enable << std::endl;
+    std::cout << __func__ << ", mac=" << radio_mac << ", enable=" << ((enable==1)?"true":"false") << std::endl;
 
     int ret = bml_set_dcs_continuous_scan_enable(ctx, radio_mac.c_str(), enable);
 
@@ -2019,12 +2019,13 @@ int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_res
         return -1;
     }
 
-    BML_NEIGHBOR_AP results[max_results_size] = {0};
+    BML_NEIGHBOR_AP results[max_results_size];
+    //BML_NEIGHBOR_AP* results = reinterpret_cast<BML_NEIGHBOR_AP *>(calloc(max_results_size, sizeof(struct BML_NEIGHBOR_AP)));
 
     uint8_t status             = 0;
     unsigned int results_count = max_results_size;
     int ret                    = bml_get_dcs_scan_results(ctx, radio_mac.c_str(),
-                                       reinterpret_cast<BML_NEIGHBOR_AP **>(&results),
+                                       reinterpret_cast<BML_NEIGHBOR_AP *>(results),
                                        &results_count, &status, is_single_scan);
 
     if (ret == BML_RET_OK) {
