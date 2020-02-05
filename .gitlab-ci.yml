@@ -157,7 +157,7 @@ test-on-netgear-rax40:
     TARGET_DEVICE_NAME: netgear-rax40-1
   needs: ["build-for-netgear-rax40"]
 
-.run-certification-tests:
+run-certification-tests:
   stage: test
   variables:
     # TESTS_TO_RUN needs to be set by the user (or the pipeline schedule)
@@ -181,12 +181,5 @@ test-on-netgear-rax40:
   tags:
     - certs-tests
   timeout: 24h
-
-scheduled-certification-tests:
-  extends: .run-certification-tests
-  only:
-    - schedules
-
-manual-certification-tests:
-  extends: .run-certification-tests
-  when: manual
+  rules:
+    - if: '$TESTS_TO_RUN'
