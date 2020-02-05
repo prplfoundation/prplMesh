@@ -430,7 +430,7 @@ cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE:
     _type: uint8_t
     _comment: 0 - Not reached end of response, 1 - reached end of respons
   results_size:
-    _type: uint32_t
+    _type: uint8_t
     _length_var: True
   results:
     _type: sChannelScanResults

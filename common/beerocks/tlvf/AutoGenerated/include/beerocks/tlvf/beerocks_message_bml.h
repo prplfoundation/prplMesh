@@ -1984,7 +1984,7 @@ class cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE : public BaseClass
         uint8_t& op_error_code();
         //0 - Not reached end of response, 1 - reached end of respons
         uint8_t& last();
-        uint32_t& results_size();
+        uint8_t& results_size();
         std::tuple<bool, sChannelScanResults&> results(size_t idx);
         bool alloc_results(size_t count = 1);
         void class_swap() override;
@@ -1997,7 +1997,7 @@ class cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE : public BaseClass
         uint8_t* m_result_status = nullptr;
         uint8_t* m_op_error_code = nullptr;
         uint8_t* m_last = nullptr;
-        uint32_t* m_results_size = nullptr;
+        uint8_t* m_results_size = nullptr;
         sChannelScanResults* m_results = nullptr;
         size_t m_results_idx__ = 0;
         int m_lock_order_counter__ = 0;
