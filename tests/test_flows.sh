@@ -231,19 +231,46 @@ test_combined_infra_metrics() {
     status "test combined infrastructure metrics"
     check_error=0
     dbg "Send AP Metrics query message to agent 1"
-    mac_agent1_wlan0_hex=0x$(echo $mac_agent1_wlan0 | tr -d :)
-    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x800B "tlv_type,0x93,tlv_length,0x0007,tlv_value,{0x01 $mac_agent1_wlan0_hex}"
-    sleep 1
-    check_log ${REPEATER1} agent_wlan0 "AP_METRICS_QUERY_MESSAGE"
-    check_log ${GATEWAY} controller "AP_METRIC_RESPONSE_MESSAGE"
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x800B "tlv_type,0x93,tlv_length,0x0007,tlv_value,0x01 {$mac_agent1_wlan0}"
+    check_log ${REPEATER1} agent_wlan0 "Received AP_METRICS_QUERY_MESSAGE"
+    # TODO agent should send response autonomously, with same MID.
+    # tlv1 == AP metrics TLV
+    # tlv2 == STA metrics TLV with no metrics
+    # tlv3 == STA metrics TLV for STA connected to this BSS
+    # tlv4 == STA traffic stats TLV for same STA
+    check send_CAPI_1905 ${REPEATER1} $mac_gateway 0x800C "tlv_type1,0x94,tlv_length1,0x000d,tlv_value1,{$mac_agent1_wlan0} 0x01 0x0002 0x01 0x1f2f3f,\
+tlv_type2,0x96,tlv_length2,0x0007,tlv_value2,{55:44:33:22:11:00} 0x00,tlv_type3,0x96,tlv_length3,0x001a,\
+tlv_value3,{66:44:33:22:11:00} 0x01 {$mac_agent1_wlan0} 0x11223344 0x1a2a3a4a 0x1b2b3b4b 0x55,\
+tlv_type4,0xa2,tlv_length4,0x0022,tlv_value4,{55:44:33:22:11:00} 0x10203040 0x11213141 0x12223242 0x13233343 0x14243444 0x15253545 0x16263646"
+    check_log ${GATEWAY} controller "Received AP_METRICS_RESPONSE_MESSAGE"
+
+    dbg "Send AP Metrics query message to agent 2"
+    check send_CAPI_1905 ${GATEWAY} $mac_agent2 0x800B "tlv_type,0x93,tlv_length,0x0007,tlv_value,0x01 {$mac_agent2_wlan2}"
+    check_log ${REPEATER2} agent_wlan2 "Received AP_METRICS_QUERY_MESSAGE"
+    # TODO agent should send response autonomously
+    # Same as above but with different STA MAC addresses, different values and skipping the empty one
+    check send_CAPI_1905 ${REPEATER2} $mac_gateway 0x800C "tlv_type1,0x94,tlv_length1,0x0010,tlv_value1,{$mac_agent2_wlan2} 0x11 0x1002 0x90 0x1c2c3c 0x1d2d3d,\
+tlv_type2,0x96,tlv_length2,0x001a,tlv_value2,{77:44:33:22:11:00} 0x01 {$mac_agent2_wlan2} 0x19293949 0x10203040 0x11213141 0x99,\
+tlv_type3,0xa2,tlv_length3,0x0022,tlv_value3,{77:44:33:22:11:00} 0xa0203040 0xa1213141 0xa2223242 0xa3233343 0xa4243444 0xa5253545 0xa6263646"
+    check_log ${GATEWAY} controller "Received AP_METRICS_RESPONSE_MESSAGE"
+
     dbg "Send 1905 Link metric query to agent 1 (neighbor agent 2)"
-    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x0005 "tlv_type,0x08,tlv_length,0x0008,tlv_value,{0x01 $mac_agent2 0x02}"
-    sleep 1
-    check_log ${REPEATER1} agent_wlan0 "LINK_METRIC_QUERY_MESSAGE"
-    check_log ${GATEWAY} controller "LINK_METRIC_RESPONSE_MESSAGE"
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x0005 "tlv_type,0x08,tlv_length,0x0008,tlv_value,0x01 {$mac_agent2} 0x02"
+    check_log ${REPEATER1} agent_wlan0 "Received LINK_METRIC_QUERY_MESSAGE"
+    # TODO agent should send response autonomously
+    check send_CAPI_1905 ${REPEATER1} $mac_gateway 0x6 "tlv_type1,0x09,tlv_length1,0x0029,\
+tlv_value1,{$mac_agent1} {$mac_agent2} {$mac_agent1_wlan0} {$mac_agent2_wlan2} 0x0100 0x01 0x00000000 0x0000e300 0x4230 0x0064 0x0300,\
+tlv_type2,0x0a,tlv_length2,0x0023,tlv_value2,{$mac_agent1} {$mac_agent2} {$mac_agent1} {$mac_agent2} 0x0100 0x00000007 0x00020000 0x31"
+    check_log ${GATEWAY} controller "Received LINK_METRIC_RESPONSE_MESSAGE"
+
+    # Trigger combined infra metrics
     dbg "Send Combined infrastructure metrics message to agent 1"
     check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8013
-    return 0 # TODO fix in https://github.com/prplfoundation/prplMesh/pull/784
+    check_log ${REPEATER1} agent "Received COMBINED_INFRASTRUCTURE_METRICS"
+    check_log ${REPEATER1} agent "Received TLV_TRANSMITTER_LINK_METRIC"
+    check_log ${REPEATER1} agent "Received TLV_RECEIVER_LINK_METRIC"
+
+    return $check_error
 }
 
 test_client_steering_mandate() {
