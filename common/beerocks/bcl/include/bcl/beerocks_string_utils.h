@@ -73,7 +73,7 @@ public:
 
     static std::vector<std::string> str_split(const std::string &s, char delim);
 
-#ifndef __GCC__
+#ifndef __GNUC__
 #define __builtin_FILE() __FILE__
 #define __builtin_LINE() __LINE__
 #endif
