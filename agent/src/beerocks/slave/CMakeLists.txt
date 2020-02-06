@@ -6,6 +6,9 @@ set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 file(GLOB beerocks_agent_sources 
     ${MODULE_PATH}/backhaul_manager/*.c*
+    # This code should be moved to BPL 
+    # [TASK] Move link metric related classes to BPL #910
+    ${MODULE_PATH}/link_metrics/*.c*
     ${MODULE_PATH}/platform_manager/*.c*
     ${MODULE_PATH}/*.c*
 )
