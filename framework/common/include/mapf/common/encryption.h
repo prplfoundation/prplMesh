@@ -176,7 +176,6 @@ bool aes_decrypt(const uint8_t *key, const uint8_t *iv, uint8_t *ciphertext, int
  */
 void copy_pubkey(const diffie_hellman &dh, uint8_t *dest);
 
-
 /**
  * @brief Calculate WPS secret authkey and KeyWrapKey based on remote and local public keys
  *        generated with diffie-hellman key exchange, WSC M1 and M2 nonces, and M1 MAC address.

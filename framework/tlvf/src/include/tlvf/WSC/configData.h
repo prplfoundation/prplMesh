@@ -35,11 +35,31 @@ public:
     static std::shared_ptr<configData> parse(uint8_t *buff, size_t buff_len);
 
     // getters
-    std::string ssid() const { return getAttr<cWscAttrSsid>()->ssid_str(); };
-    eWscAuth auth_type() const { return getAttr<cWscAttrAuthenticationType>()->data(); };
-    eWscEncr encr_type() const { return getAttr<cWscAttrEncryptionType>()->data(); };
-    std::string network_key() const { return getAttr<cWscAttrNetworkKey>()->key_str(); };
-    sMacAddr bssid() const { return getAttr<cWscAttrMac>()->data(); };
+    std::string ssid() const
+    {
+        auto attr = getAttr<cWscAttrSsid>();
+        return attr ? attr->ssid_str() : std::string();
+    };
+    eWscAuth auth_type() const
+    {
+        auto attr = getAttr<cWscAttrAuthenticationType>();
+        return attr ? attr->data() : eWscAuth::WSC_AUTH_INVALID;
+    };
+    eWscEncr encr_type() const
+    {
+        auto attr = getAttr<cWscAttrEncryptionType>();
+        return attr ? attr->data() : eWscEncr::WSC_ENCR_INVALID;
+    };
+    std::string network_key() const
+    {
+        auto attr = getAttr<cWscAttrNetworkKey>();
+        return attr ? attr->key_str() : std::string();
+    };
+    sMacAddr bssid() const
+    {
+        auto attr = getAttr<cWscAttrMac>();
+        return attr ? attr->data() : sMacAddr();
+    };
     uint8_t bss_type() const { return getAttr<cWscVendorExtWfa>()->subelement_value(); };
 };
 
