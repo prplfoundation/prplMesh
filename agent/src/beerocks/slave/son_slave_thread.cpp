@@ -3923,9 +3923,9 @@ bool slave_thread::autoconfig_wsc_authenticate(WSC::m2 &m2, uint8_t authkey[32])
     return true;
 }
 
-bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
-    WSC::m2 &m2, uint8_t authkey[32], uint8_t keywrapkey[16], bool &backhaul, bool &fronthaul,
-    bool &teardown, std::shared_ptr<WSC::cConfigData> &credentials)
+bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(WSC::m2 &m2, uint8_t authkey[32],
+                                                              uint8_t keywrapkey[16],
+                                                              WSC::configData::config &config)
 {
     auto encrypted_settings = m2.encrypted_settings();
     uint8_t *iv             = reinterpret_cast<uint8_t *>(encrypted_settings.iv());
@@ -3943,19 +3943,15 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
 
     LOG(DEBUG) << "M2 Parse: parse config_data, len = " << datalen;
 
-    // Need to convert to host byte order to get config data length,
-    // which is needed for computing the KWA (1st 64 bits of HMAC)
-    // However, the KWA is computed on the finalized version of the config
-    // data, hence the class_swap.
-    // Finally, once authentication succeeds, swap back to host byte order.
-    // Theoretically, this can be avoided by not passing swap_needed=True to
-    // cConfigData constructor, but then parsing will fail since the length
-    // will be calculated wrong. TLVF does not support parsing network byte order
-    // without full swap, so keep this workaround for now (another future TLVF V2 feature)
+    // Parsing failure means that the config data is invalid,
+    // in which case it is unclear what we should do.
+    // In practice, some controllers simply send an empty config data
+    // when the radio should be tore down, so let the caller handle this
+    // by returning true with a warning for now.
     auto config_data = WSC::configData::parse(decrypted, datalen);
     if (!config_data) {
-        LOG(ERROR) << "Failed to parse config data";
-        return false;
+        LOG(WARNING) << "Invalid config data, skip it";
+        return true;
     }
 
     // get length of config_data for KWA authentication
@@ -3965,9 +3961,16 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
         LOG(ERROR) << "invalid config data length";
         return false;
     }
+    // Update VAP configuration
+    config.auth_type   = config_data->auth_type();
+    config.encr_type   = config_data->encr_type();
+    config.bssid       = config_data->bssid();
+    config.network_key = config_data->network_key();
+    config.ssid        = config_data->ssid();
+    config.bss_type    = static_cast<WSC::eWscVendorExtSubelementBssType>(config_data->bss_type());
     // Swap to network byte order for KWA HMAC calculation
+    // from this point config data is not readable!
     config_data->swap();
-
     uint8_t kwa[WSC::WSC_AUTHENTICATOR_LENGTH];
     // Compute KWA based on decrypted settings
     if (!mapf::encryption::kwa_compute(authkey, decrypted, len, kwa)) {
@@ -3992,27 +3995,7 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
                    << "length: " << std::hex << int(keywrapauth->data_length);
         return false;
     }
-
-    // Swap back to host byte order to read and use config_data
-    config_data->swap();
-
-    uint8_t bss_type = config_data->bss_type();
-    LOG(INFO) << "bss_type: " << std::hex << int(bss_type);
-    fronthaul = bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS;
-    backhaul  = bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS;
-    teardown  = bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN;
-    // BACKHAUL_STA bit is not expected to be set
-    if (bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_STA) {
-        LOG(WARNING) << "Unexpected backhaul STA bit";
-    }
     LOG(DEBUG) << "KWA (Key Wrap Auth) success";
-
-    credentials->set_ssid(config_data->ssid());
-    credentials->bssid_attr().data = config_data->bssid();
-    credentials->set_network_key(config_data->network_key());
-    credentials->authentication_type_attr().data = config_data->auth_type();
-    credentials->encryption_type_attr().data     = config_data->encr_type();
-    credentials->multiap_attr().subelement_value = bss_type;
 
     return true;
 }
@@ -4104,14 +4087,10 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         return true;
     }
 
-    auto request = message_com::create_vs_message<
-        beerocks_message::cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST>(cmdu_tx);
-    if (!request) {
-        LOG(ERROR) << "Failed building message!";
-        return false;
-    }
-
+    std::vector<WSC::configData::config> configs;
     for (auto m2 : m2_list) {
+        LOG(DEBUG) << "M2 Parse " << m2.manufacturer()
+                   << " Controller configuration (WSC M2 Encrypted Settings)";
         uint8_t authkey[32];
         uint8_t keywrapkey[16];
         LOG(DEBUG) << "M2 Parse: calculate keys";
@@ -4121,32 +4100,56 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         if (!autoconfig_wsc_authenticate(m2, authkey))
             return false;
 
-        bool fronthaul, backhaul, teardown;
-        auto credentials = request->create_wifi_credentials();
-        if (!autoconfig_wsc_parse_m2_encrypted_settings(m2, authkey, keywrapkey, backhaul,
-                                                        fronthaul, teardown, credentials))
-            return false;
-
-        LOG(DEBUG) << "Controller configuration (WSC M2 Encrypted Settings)";
-        LOG(DEBUG) << "     Manufacturer: " << m2.manufacturer()
-                   << ", ssid: " << credentials->ssid_str()
-                   << ", bssid: " << credentials->bssid_attr().data
-                   << ", authentication_type: " << std::hex
-                   << int(credentials->authentication_type_attr().data)
-                   << ", encryption_type: " << int(credentials->encryption_type_attr().data)
-                   << (fronthaul ? " fronthaul" : "") << (backhaul ? " backhaul" : "")
-                   << (teardown ? " teardown" : "");
-
-        if (!request->add_wifi_credentials(credentials)) {
-            LOG(ERROR) << "add_wifi_credentials() has failed!";
-            return false;
+        WSC::configData::config config;
+        if (!autoconfig_wsc_parse_m2_encrypted_settings(m2, authkey, keywrapkey, config)) {
+            LOG(ERROR) << "Invalid config data, skip it";
+            continue;
+        }
+        // TODO - revisit this in the future
+        // In practice, some controllers simply send an empty config data when asked for tear down,
+        // so tear down the radio if the SSID is empty.
+        if (config.ssid.empty()) {
+            LOG(INFO) << "Empty config data, tear down radio";
+            configs.clear();
+            break;
         }
 
-        if (teardown && m2_list.size() > 1) {
-            // Teardown is not compatible with any other bit in the M2.
-            LOG(ERROR) << "Teardwon combined with other M2, ignoring all";
+        LOG(INFO) << "bss_type: " << std::hex << int(config.bss_type);
+        if (config.bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN) {
+            LOG(INFO) << "Teardown bit set, tear down radio";
+            configs.clear();
+            break;
+        }
+        // BACKHAUL_STA bit is not expected to be set
+        if (config.bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_STA) {
+            LOG(WARNING) << "Unexpected backhaul STA bit";
+        }
+        LOG(DEBUG) << m2.manufacturer() << " config data:" << std::endl
+                   << " ssid: " << config.ssid << ", bssid: " << config.bssid
+                   << ", authentication_type: " << std::hex << int(config.auth_type)
+                   << ", encryption_type: " << int(config.encr_type);
+        configs.push_back(config);
+    }
+
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST>(cmdu_tx);
+    if (!request) {
+        LOG(ERROR) << "Failed building message!";
+        return false;
+    }
+    for (auto config : configs) {
+        auto c = request->create_wifi_credentials();
+        if (!c) {
+            LOG(ERROR) << "Failed building message!";
             return false;
         }
+        c->set_ssid(config.ssid);
+        c->set_network_key(config.network_key);
+        c->bssid_attr().data               = config.bssid;
+        c->authentication_type_attr().data = config.auth_type;
+        c->encryption_type_attr().data     = config.encr_type;
+        c->multiap_attr().subelement_value = config.bss_type;
+        request->add_wifi_credentials(c);
     }
 
     ///////////////////////////////////////////////////////////////////
