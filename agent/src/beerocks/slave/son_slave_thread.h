@@ -235,9 +235,8 @@ private:
     // Encryption support - move to common library
     bool autoconfig_wsc_calculate_keys(WSC::m2 &m2, uint8_t authkey[32], uint8_t keywrapkey[16]);
     bool autoconfig_wsc_parse_m2_encrypted_settings(WSC::m2 &m2, uint8_t authkey[32],
-                                                    uint8_t keywrapkey[16], bool &backhaul,
-                                                    bool &fronthaul, bool &teardown,
-                                                    std::shared_ptr<WSC::cConfigData> &credentials);
+                                                    uint8_t keywrapkey[16],
+                                                    WSC::configData::config &config);
     bool autoconfig_wsc_authenticate(WSC::m2 &m2, uint8_t authkey[32]);
 
     std::unique_ptr<mapf::encryption::diffie_hellman> dh = nullptr;

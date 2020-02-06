@@ -123,8 +123,6 @@ test_initial_ap_config() {
     check_log ${REPEATER1} agent_wlan2 "WSC Global authentication success"
     check_log ${REPEATER1} agent_wlan0 "KWA (Key Wrap Auth) success"
     check_log ${REPEATER1} agent_wlan2 "KWA (Key Wrap Auth) success"
-    check_log ${REPEATER1} agent_wlan0 "Controller configuration (WSC M2 Encrypted Settings)"
-    check_log ${REPEATER1} agent_wlan2 "Controller configuration (WSC M2 Encrypted Settings)"
 
     return $check_error
 }
@@ -145,7 +143,7 @@ test_ap_config_renew() {
 
     check_log ${REPEATER1} agent_wlan0 "Received credentials for ssid: Multi-AP-24G-1 .* bss_type: 2"
     check_log ${REPEATER1} agent_wlan0 "Received credentials for ssid: Multi-AP-24G-2 .* bss_type: 1"
-    check_log ${REPEATER1} agent_wlan2 "ssid: .* teardown"
+    check_log ${REPEATER1} agent_wlan2 ".* tear down radio"
 
     mac_agent1_wlan0_hex=0x$(echo $mac_agent1_wlan0 | tr -d :)
     send_CAPI_command ${REPEATER1} "dev_get_parameter,program,map,ruid,${mac_agent1_wlan0_hex},ssid,Multi-AP-24G-1,parameter,macaddr"
@@ -166,8 +164,8 @@ test_ap_config_bss_tear_down() {
     send_CAPI_1905 ${GATEWAY} $mac_agent1 0x000A "tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}"
 
     sleep 3
-    check_log ${REPEATER1} agent_wlan0 "ssid: Multi-AP-24G-1, .* fronthaul"
-    check_log ${REPEATER1} agent_wlan2 "ssid: .* teardown"
+    check_log ${REPEATER1} agent_wlan0 "ssid: Multi-AP-24G-1"
+    check_log ${REPEATER1} agent_wlan2 ".* tear down radio"
 
     # SSIDs have been removed for the CTT Agent1's front radio
     send_CAPI_command ${GATEWAY} "DEV_SET_CONFIG,bss_info1,$MAC_AGENT1 8x" $redirect
@@ -175,7 +173,7 @@ test_ap_config_bss_tear_down() {
     send_CAPI_1905 ${GATEWAY} $mac_agent1 0x000A "tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}"
 
     sleep 3
-    check_log ${REPEATER1} agent_wlan0 "ssid: .* teardown"
+    check_log ${REPEATER1} agent_wlan0 ".* tear down radio"
     
     return $check_error
 }
