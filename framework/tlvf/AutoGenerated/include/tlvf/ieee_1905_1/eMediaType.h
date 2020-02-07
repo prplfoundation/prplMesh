@@ -36,6 +36,14 @@ enum eMediaType: uint16_t {
     UNKNONWN_MEDIA = 0xffff,
 };
 
+enum eMediaTypeGroup: uint8_t {
+    IEEE_802_3 = 0x0,
+    IEEE_802_11 = 0x1,
+    IEEE_1901 = 0x2,
+    MoCA = 0x3,
+    UNKNOWN = 0xff,
+};
+
 
 }; // close namespace: ieee1905_1
 
