@@ -38,19 +38,19 @@ class tlvReceiverLinkMetric : public BaseClass
         typedef struct sLinkMetricInfo {
             //The underlying network technology
             eMediaType intfType;
-            uint32_t packet_errors_received;
+            uint32_t packet_errors;
             //Number of packets received at the
             //interface during the same measurement
             //period used to count packetErrors.
-            uint32_t packets_receiveds;
+            uint32_t packets_received;
             //If the media type of the link is IEEE 802.11 (8 MSB value of media
             //type as defined in Table 6-12, then this value is the estimated RSSI in dB at the
             //receive side of the Link expressed in dB; otherwise, it is set to 0xFF.    
             uint8_t rssi_db;
             void struct_swap(){
                 tlvf_swap(16, reinterpret_cast<uint8_t*>(&intfType));
-                tlvf_swap(32, reinterpret_cast<uint8_t*>(&packet_errors_received));
-                tlvf_swap(32, reinterpret_cast<uint8_t*>(&packets_receiveds));
+                tlvf_swap(32, reinterpret_cast<uint8_t*>(&packet_errors));
+                tlvf_swap(32, reinterpret_cast<uint8_t*>(&packets_received));
             }
             void struct_init(){
                 rssi_db = 0xff;
