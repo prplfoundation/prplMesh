@@ -29,6 +29,8 @@ using namespace son;
 #define BEACON_MEASURE_MAX_ATTEMPTS 3
 #define REQUEST_RSSI_MEASUREMENT_MAX_ATTEMPTS 5
 #define REQUEST_RSSI_MEASUREMENT_DELAY 5000
+#define START_MONITORING_RESPONSE_TIMEOUT_MSEC 3000
+#define START_MONITORING_MAX_ATTEMPTS (60 * START_MONITORING_RESPONSE_TIMEOUT_MSEC) // 3 minutes
 
 association_handling_task::association_handling_task(db &database_,
                                                      ieee1905_1::CmduMessageTx &cmdu_tx_,
@@ -42,6 +44,12 @@ void association_handling_task::work()
 {
     switch (state) {
     case START: {
+
+        if (!database.is_node_wireless(sta_mac)) {
+            TASK_LOG(DEBUG) << "client " << sta_mac << " is not wireless, finish the task";
+            finish();
+            return;
+        }
         // If this task already has been created by another event, let it finish and finish the new
         // instance of it.
         int prev_task_id = database.get_association_handling_task_id(sta_mac);
@@ -63,7 +71,8 @@ void association_handling_task::work()
         }
 
         TASK_LOG(DEBUG) << "started association_handling_task, rssi measurement on " << sta_mac;
-        state = START_RSSI_MONITORING;
+        state        = START_RSSI_MONITORING;
+        max_attempts = START_MONITORING_MAX_ATTEMPTS;
         break;
     }
 
@@ -76,69 +85,58 @@ void association_handling_task::work()
         std::string new_hostap_mac;
         std::string ipv4;
 
-        if (database.is_node_wireless(sta_mac)) {
-            new_hostap_mac = database.get_node_parent(sta_mac);
-            if (new_hostap_mac != original_parent_mac ||
-                database.get_node_state(sta_mac) != beerocks::STATE_CONNECTED) {
-                TASK_LOG(DEBUG) << "sta " << sta_mac << " is no longer connected to "
-                                << original_parent_mac << " finishing task";
-                finish();
-                return;
-            }
-
-            LOG(DEBUG) << "START_MONITORING_REQUEST hostap_mac=" << new_hostap_mac << " sta_mac "
-                       << sta_mac;
-
-            auto request = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST>(cmdu_tx, id);
-
-            if (request == nullptr) {
-                LOG(ERROR)
-                    << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST message!";
-                return;
-            }
-
-            request->params().mac     = network_utils::mac_from_string(sta_mac);
-            request->params().ipv4    = network_utils::ipv4_from_string(ipv4);
-            request->params().channel = database.get_node_channel(sta_mac);
-            request->params().vap_id  = database.get_node_vap_id(sta_mac);
-            request->params().is_ire  = false;
-
-            //add bridge mac for ires
-            if (database.get_node_type(sta_mac) == beerocks::TYPE_IRE_BACKHAUL) {
-                request->params().is_ire = true;
-                auto bridge_container    = database.get_node_children(sta_mac, beerocks::TYPE_IRE);
-                if (!bridge_container.empty()) {
-                    std::string bridge_4addr_mac = *bridge_container.begin();
-                    request->params().bridge_4addr_mac =
-                        network_utils::mac_from_string(bridge_4addr_mac);
-                    LOG(DEBUG) << "IRE " << sta_mac << " is on a bridge with mac "
-                               << bridge_4addr_mac;
-                }
-            }
-
-            auto radio_mac = database.get_node_parent_radio(new_hostap_mac);
-            auto agent_mac = database.get_node_parent_ire(radio_mac);
-            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
+        new_hostap_mac = database.get_node_parent(sta_mac);
+        if (new_hostap_mac != original_parent_mac ||
+            database.get_node_state(sta_mac) != beerocks::STATE_CONNECTED) {
+            TASK_LOG(DEBUG) << "sta " << sta_mac << " is no longer connected to "
+                            << original_parent_mac << " finishing task";
+            finish();
+            return;
         }
 
-        if (database.settings_client_11k_roaming() &&
-            (database.get_node_beacon_measurement_support_level(sta_mac) ==
-             beerocks::BEACON_MEAS_UNSUPPORTED) &&
-            (database.get_node_type(sta_mac) == beerocks::TYPE_CLIENT)) {
-            TASK_LOG(DEBUG) << "started association_handling_task, looking for beacon measurement "
-                               "capabilities on "
-                            << sta_mac;
-            state        = CHECK_11K_BEACON_MEASURE_CAP;
-            max_attempts = BEACON_MEASURE_MAX_ATTEMPTS;
-        } else {
-            TASK_LOG(DEBUG) << "started association_handling_task, rssi measurement on " << sta_mac;
-            state = REQUEST_RSSI_MEASUREMENT_WAIT;
+        LOG(DEBUG) << "START_MONITORING_REQUEST hostap_mac=" << new_hostap_mac << " sta_mac "
+                   << sta_mac;
+
+        auto request = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST>(cmdu_tx, id);
+
+        if (request == nullptr) {
+            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST message!";
+            return;
         }
+
+        request->params().mac     = network_utils::mac_from_string(sta_mac);
+        request->params().ipv4    = network_utils::ipv4_from_string(ipv4);
+        request->params().channel = database.get_node_channel(sta_mac);
+        request->params().vap_id  = database.get_node_vap_id(sta_mac);
+        request->params().is_ire  = false;
+
+        //add bridge mac for ires
+        if (database.get_node_type(sta_mac) == beerocks::TYPE_IRE_BACKHAUL) {
+            request->params().is_ire = true;
+            auto bridge_container    = database.get_node_children(sta_mac, beerocks::TYPE_IRE);
+            if (!bridge_container.empty()) {
+                std::string bridge_4addr_mac = *bridge_container.begin();
+                request->params().bridge_4addr_mac =
+                    network_utils::mac_from_string(bridge_4addr_mac);
+                LOG(DEBUG) << "IRE " << sta_mac << " is on a bridge with mac " << bridge_4addr_mac;
+            }
+        }
+
+        auto radio_mac = database.get_node_parent_radio(new_hostap_mac);
+        auto agent_mac = database.get_node_parent_ire(radio_mac);
+        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
+
+        add_pending_mac(database.get_node_parent_radio(new_hostap_mac),
+                        beerocks_message::ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE);
+        set_responses_timeout(START_MONITORING_RESPONSE_TIMEOUT_MSEC);
         break;
     }
 
     case CHECK_11K_BEACON_MEASURE_CAP: {
+        TASK_LOG(DEBUG) << "started association_handling_task, looking for beacon measurement "
+                           "capabilities on "
+                        << sta_mac;
         std::string parent_mac = database.get_node_parent(sta_mac);
         std::string radio_mac  = database.get_node_parent_radio(parent_mac);
         auto agent_mac         = database.get_node_parent_ire(parent_mac);
@@ -197,8 +195,9 @@ void association_handling_task::work()
     case REQUEST_RSSI_MEASUREMENT: {
 
         /*
-             * send measurement request to get a valid RSSI reading
-             */
+         * send measurement request to get a valid RSSI reading
+         */
+        TASK_LOG(DEBUG) << "starting rssi measurement on " << sta_mac;
         std::string hostap_mac = database.get_node_parent(sta_mac);
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
 
@@ -256,6 +255,48 @@ void association_handling_task::handle_response(std::string mac,
                                                 std::shared_ptr<beerocks_header> beerocks_header)
 {
     switch (beerocks_header->action_op()) {
+    case beerocks_message::ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE: {
+
+        auto response =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE>();
+        if (!response) {
+            TASK_LOG(ERROR)
+                << "addClass failed for cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE";
+            return;
+        }
+
+        TASK_LOG(DEBUG) << "received ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE, success="
+                        << string_utils::bool_str(response->success());
+
+        if (!response->success()) {
+            if (++attempts >= max_attempts) {
+                TASK_LOG(ERROR) << "state START_RSSI_MONITORING reached maximum attempts = "
+                                << attempts << " aborting task!";
+
+                TASK_LOG(WARNING) << "client " << sta_mac
+                                  << " is not monitored, and could not be steered!!!";
+                finish();
+            } else {
+                wait_for(START_MONITORING_RESPONSE_TIMEOUT_MSEC); // Wait before next request
+            }
+
+            break;
+        }
+
+        if (database.settings_client_11k_roaming() &&
+            (database.get_node_beacon_measurement_support_level(sta_mac) ==
+             beerocks::BEACON_MEAS_UNSUPPORTED) &&
+            (database.get_node_type(sta_mac) == beerocks::TYPE_CLIENT)) {
+
+            state        = CHECK_11K_BEACON_MEASURE_CAP;
+            max_attempts = BEACON_MEASURE_MAX_ATTEMPTS;
+            attempts     = 0;
+        } else {
+            state = REQUEST_RSSI_MEASUREMENT_WAIT;
+        }
+        break;
+    }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
         break;
     }
@@ -364,6 +405,18 @@ void association_handling_task::handle_responses_timeout(
     ++attempts;
 
     switch (state) {
+    case START_RSSI_MONITORING: {
+        TASK_LOG(DEBUG) << "response for start monitoring from " << original_parent_mac
+                        << " for sta " << sta_mac << " timed out! attempts=" << attempts;
+        if (attempts >= max_attempts) {
+            TASK_LOG(ERROR) << "state START_RSSI_MONITORING reached maximum attempts = " << attempts
+                            << " aborting task!";
+            TASK_LOG(WARNING) << "client " << sta_mac
+                              << " is not monitored, and could not be steered!!!";
+            finish();
+        }
+        break;
+    }
     case REQUEST_RSSI_MEASUREMENT: {
         TASK_LOG(DEBUG) << "response for rx rssi measurement from " << original_parent_mac
                         << " for sta " << sta_mac << " timed out! attempts=" << attempts;
@@ -376,8 +429,6 @@ void association_handling_task::handle_responses_timeout(
             TASK_LOG(ERROR) << "state REQUEST_RSSI_MEASUREMENT reached maximum attempts="
                             << attempts << " aborting task!";
             finalize_new_connection();
-        } else {
-            state = REQUEST_RSSI_MEASUREMENT;
         }
         break;
     }
