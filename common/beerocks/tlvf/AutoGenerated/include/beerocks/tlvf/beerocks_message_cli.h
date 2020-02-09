@@ -420,7 +420,7 @@ class cACTION_CLI_CLIENT_DISCONNECT_REQUEST : public BaseClass
             return (eActionOp_CLI)(ACTION_CLI_CLIENT_DISCONNECT_REQUEST);
         }
         sMacAddr& client_mac();
-        uint32_t& type();
+        eDisconnectType& type();
         uint32_t& reason();
         void class_swap() override;
         bool finalize() override;
@@ -430,7 +430,7 @@ class cACTION_CLI_CLIENT_DISCONNECT_REQUEST : public BaseClass
         bool init();
         eActionOp_CLI* m_action_op = nullptr;
         sMacAddr* m_client_mac = nullptr;
-        uint32_t* m_type = nullptr;
+        eDisconnectType* m_type = nullptr;
         uint32_t* m_reason = nullptr;
 };
 

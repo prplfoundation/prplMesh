@@ -708,7 +708,7 @@ int cli_socket::client_disconnect(std::string client_mac, uint32_t type, uint32_
         return -1;
     }
     request->client_mac() = network_utils::mac_from_string(client_mac);
-    request->type()       = type;
+    request->type()       = beerocks_message::eDisconnectType(type);
     request->reason()     = reason;
     wait_response         = true;
     message_com::send_cmdu(master_socket, cmdu_tx);

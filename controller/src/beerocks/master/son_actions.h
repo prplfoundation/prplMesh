@@ -36,8 +36,7 @@ public:
                          int disassoc_timer_ms = beerocks::BSS_STEER_DISASSOC_TIMER_MS,
                          bool steer_restricted = false);
     static void disconnect_client(db &database, ieee1905_1::CmduMessageTx &cmdu_tx,
-                                  std::string &client_mac, std::string &bssid, uint32_t type,
-                                  uint32_t reason);
+                                  eDisconnectType type, uint32_t reason);
     static void activate_hostap(db &database, task_pool &tasks, std::string hostap_mac);
     static bool set_hostap_active(db &database, task_pool &tasks, std::string hostap_mac,
                                   bool active);
