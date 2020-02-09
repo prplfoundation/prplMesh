@@ -485,6 +485,17 @@ int cfg_get_administrator_credentials(char pass[BPL_USER_PASS_LEN]);
  */
 int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAME_LEN]);
 
+/**
+ * Returns the HOSTAP interface for the specified radio id.
+ *
+ * @param [in] radio_num radio number in prplmesh UCI for the requested parameters.
+ * @param [out] hostap_iface name of HOSTAP interface (up to 32 bytes in length).
+ *
+ * @return 0 Success.
+ * @return -1 Error, or no hostap_iface is configured.
+ */
+int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN]);
+
 } // namespace bpl
 } // namespace beerocks
 

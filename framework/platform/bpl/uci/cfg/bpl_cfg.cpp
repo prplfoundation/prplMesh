@@ -301,18 +301,33 @@ int cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return 0; }
 
 int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAME_LEN])
 {
-    if (iface == NULL || sta_iface == NULL) {
+    if (!iface || !sta_iface) {
         MAPF_ERR("cfg_get_sta_iface: invalid input: iface or sta_iface are NULL");
         return RETURN_ERR;
     }
 
     int index = -1;
     if (cfg_get_index_from_interface(iface, &index) == RETURN_ERR) {
-        MAPF_ERR("cfg_get_sta_iface: Failed to get radio index from iface\n");
+        MAPF_ERR("cfg_get_sta_iface: Failed to get radio index from iface");
         return RETURN_ERR;
     }
 
     return cfg_get_prplmesh_radio_param(index, "sta_iface", sta_iface, BPL_IFNAME_LEN);
+}
+
+int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN])
+{
+    if (!hostap_iface) {
+        MAPF_ERR("cfg_get_hostap_iface: invalid input: hostap_iface is NULL");
+        return RETURN_ERR;
+    }
+
+    if (radio_num < 0) {
+        MAPF_ERR("cfg_get_hostap_iface: invalid input: radio_num < 0");
+        return RETURN_ERR;
+    }
+
+    return cfg_get_prplmesh_radio_param(radio_num, "hostap_iface", hostap_iface, BPL_IFNAME_LEN);
 }
 
 } // namespace bpl

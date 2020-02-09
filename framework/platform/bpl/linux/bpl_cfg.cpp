@@ -243,13 +243,34 @@ int cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return RETURN_E
 
 int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAME_LEN])
 {
-    if (iface == NULL || sta_iface == NULL) {
+    if (!iface || !sta_iface) {
         MAPF_ERR("cfg_get_sta_iface: invalid input: iface or sta_iface are NULL");
         return RETURN_ERR;
     }
 
     // return empty STA interface name
     sta_iface[0] = '\0';
+    return RETURN_OK;
+}
+
+int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN])
+{
+    if (!hostap_iface) {
+        MAPF_ERR("cfg_get_hostap_iface: invalid input: hostap_iface is NULL");
+        return RETURN_ERR;
+    }
+
+    if (radio_num < 0) {
+        MAPF_ERR("cfg_get_hostap_iface: invalid input: radio_num < 0");
+        return RETURN_ERR;
+    }
+
+    // the linux implementation expects to receive "wlanX" for interface names where the X is:
+    // 0,2 for Linux-PC
+    // 0,1 for Turris-Omnia and GLInet
+    // we return 0,1,2 and the upper layer filters the non-supported interface
+    std::string iface_str("wlan" + std::to_string(radio_num));
+    utils::copy_string(hostap_iface, iface_str.c_str(), BPL_IFNAME_LEN);
     return RETURN_OK;
 }
 
