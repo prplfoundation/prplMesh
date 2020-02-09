@@ -2437,6 +2437,27 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
 
         break;
     }
+    case beerocks_message::ACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE: {
+        auto response_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE>();
+        if (!response_in) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE failed";
+            break;
+        }
+
+        auto response_out = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+        if (!response_out) {
+            LOG(ERROR)
+                << "Failed building cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE message!";
+            break;
+        }
+        response_out->success() = response_in->success();
+        send_cmdu_to_controller(cmdu_tx);
+        break;
+    }
     case beerocks_message::ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
         auto response_in =
             beerocks_header
