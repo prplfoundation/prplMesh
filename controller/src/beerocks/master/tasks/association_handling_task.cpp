@@ -27,6 +27,7 @@ using namespace son;
 
 #define BEACON_MEASURE_REQ_TIME_SPAN 3000
 #define BEACON_MEASURE_MAX_ATTEMPTS 3
+#define REQUEST_RSSI_MEASUREMENT_MAX_ATTEMPTS 5
 #define REQUEST_RSSI_MEASUREMENT_DELAY 5000
 
 association_handling_task::association_handling_task(db &database_,
@@ -62,8 +63,7 @@ void association_handling_task::work()
         }
 
         TASK_LOG(DEBUG) << "started association_handling_task, rssi measurement on " << sta_mac;
-        state        = START_RSSI_MONITORING;
-        max_attempts = 15;
+        state = START_RSSI_MONITORING;
         break;
     }
 
@@ -188,6 +188,8 @@ void association_handling_task::work()
                                   .count();
         int new_delay = REQUEST_RSSI_MEASUREMENT_DELAY - time_elapsed_ms;
         TASK_LOG(DEBUG) << "new_delay=" << new_delay << "ms";
+        max_attempts = REQUEST_RSSI_MEASUREMENT_MAX_ATTEMPTS;
+        attempts     = 0;
         wait_for(new_delay);
         break;
     }
