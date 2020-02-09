@@ -755,6 +755,26 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 #endif
         break;
     }
+    case beerocks_message::ACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION: {
+        LOG(TRACE) << "received ACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION";
+        auto notification =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>();
+        if (!notification) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION failed";
+            return false;
+        }
+        std::string sta_mac  = network_utils::mac_to_string(notification->mac());
+        std::string sta_ipv4 = network_utils::ipv4_to_string(notification->ipv4());
+
+        auto sta_node = mon_db.sta_find(sta_mac);
+        if (!sta_node) {
+            LOG(ERROR) << "sta " << sta_mac << " hasn't been found on mon_db";
+            return false;
+        }
+        sta_node->set_ipv4(sta_ipv4);
+        break;
+    }
 #ifdef BEEROCKS_RDKB
     case beerocks_message::ACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST: {
 

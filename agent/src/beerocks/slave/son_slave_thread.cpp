@@ -701,6 +701,30 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
         break;
     }
+    case beerocks_message::ACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION: {
+        LOG(DEBUG) << "received ACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION";
+        auto notification_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>();
+        if (!notification_in) {
+            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION failed";
+            return false;
+        }
+
+        // Notify monitor
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>(cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR)
+                << "Failed building cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION message!";
+            return false;
+        }
+
+        notification_out->mac()  = notification_in->mac();
+        notification_out->ipv4() = notification_in->ipv4();
+        message_com::send_cmdu(monitor_socket, cmdu_tx);
+        break;
+    }
     case beerocks_message::ACTION_CONTROL_CONTROLLER_PING_REQUEST: {
         LOG(DEBUG) << "received ACTION_CONTROL_CONTROLLER_PING_REQUEST";
         auto request =
