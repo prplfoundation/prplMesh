@@ -573,7 +573,7 @@ class cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST : public BaseClass
         }
         sMacAddr& mac();
         int8_t& vap_id();
-        uint32_t& type();
+        eDisconnectType& type();
         uint32_t& reason();
         void class_swap() override;
         bool finalize() override;
@@ -584,7 +584,7 @@ class cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST : public BaseClass
         eActionOp_APMANAGER* m_action_op = nullptr;
         sMacAddr* m_mac = nullptr;
         int8_t* m_vap_id = nullptr;
-        uint32_t* m_type = nullptr;
+        eDisconnectType* m_type = nullptr;
         uint32_t* m_reason = nullptr;
 };
 

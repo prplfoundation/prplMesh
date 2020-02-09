@@ -1341,8 +1341,8 @@ sMacAddr& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::client_mac() {
     return (sMacAddr&)(*m_client_mac);
 }
 
-uint32_t& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::type() {
-    return (uint32_t&)(*m_type);
+eDisconnectType& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::type() {
+    return (eDisconnectType&)(*m_type);
 }
 
 uint32_t& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::reason() {
@@ -1352,7 +1352,6 @@ uint32_t& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::reason() {
 void cACTION_CLI_CLIENT_DISCONNECT_REQUEST::class_swap()
 {
     m_client_mac->struct_swap();
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_reason));
 }
 
@@ -1387,7 +1386,7 @@ size_t cACTION_CLI_CLIENT_DISCONNECT_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // client_mac
-    class_size += sizeof(uint32_t); // type
+    class_size += sizeof(eDisconnectType); // type
     class_size += sizeof(uint32_t); // reason
     return class_size;
 }
@@ -1404,9 +1403,9 @@ bool cACTION_CLI_CLIENT_DISCONNECT_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_client_mac->struct_init(); }
-    m_type = (uint32_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+    m_type = (eDisconnectType*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(eDisconnectType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eDisconnectType) << ") Failed!";
         return false;
     }
     m_reason = (uint32_t*)m_buff_ptr__;

@@ -216,8 +216,7 @@ bool son_actions::set_hostap_active(db &database, task_pool &tasks, std::string 
 }
 
 void son_actions::disconnect_client(db &database, ieee1905_1::CmduMessageTx &cmdu_tx,
-                                    std::string &client_mac, std::string &bssid, uint32_t type,
-                                    uint32_t reason)
+                                    eDisconnectType type, uint32_t reason)
 {
 
     auto agent_mac = database.get_node_parent_ire(bssid);
