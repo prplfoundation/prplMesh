@@ -898,7 +898,16 @@ bool network_utils::arp_send(const std::string &iface, const std::string &dst_ip
     struct sockaddr_ll sock;
     uint8_t packet_buffer[128];
 
-    uint32_t dst_ip_uint = network_utils::uint_ipv4_from_string(dst_ip);
+    // If the destination IP is empty, there is no point sending the arp, therefore replace the
+    // with broadcast IP, so all clients will receive it and answer, but since the request is
+    // being sent to a specific mac address, then only the requested client will answer.
+    uint32_t dst_ip_uint;
+    if (dst_ip.empty()) {
+        dst_ip_uint = 0xFFFFFFFF; // "255.255.255.255" equivalent
+    } else {
+        dst_ip_uint = network_utils::uint_ipv4_from_string(dst_ip);
+    }
+
     uint32_t src_ip_uint = network_utils::uint_ipv4_from_string(src_ip);
 
     // Fill out sockaddr_ll.
