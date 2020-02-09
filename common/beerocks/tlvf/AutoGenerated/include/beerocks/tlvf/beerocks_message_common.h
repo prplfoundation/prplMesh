@@ -1082,7 +1082,7 @@ enum eDisconnectSource: uint8_t {
 enum eDisconnectType: uint8_t {
     eDisconnect_Type_Unknown = 0x0,
     eDisconnect_Type_Disassoc = 0x1,
-    eIsconnect_Type_Deauth = 0x2,
+    eDisconnect_Type_Deauth = 0x2,
 };
 
 enum eSteeringSnrChange: uint8_t {
