@@ -145,6 +145,11 @@ cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE:
   _type: class
   params: sLinkMeasurementsResponse11k 
 
+cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION:
+  _type: class
+  mac: sMacAddr
+  ipv4: beerocks::net::sIpv4Addr 
+
 #################################################
 # CLIENT MONITOR RDKB HAL
 #################################################

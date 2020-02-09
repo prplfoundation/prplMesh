@@ -252,6 +252,10 @@ cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION:
   _type: class
   mac: sMacAddr 
 
+cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION:
+  _type: class
+  mac: sMacAddr
+  ipv4: beerocks::net::sIpv4Addr 
 
 cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST:
   _type: class
