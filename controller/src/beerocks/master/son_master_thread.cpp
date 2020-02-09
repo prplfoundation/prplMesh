@@ -3448,6 +3448,10 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
                          static_cast<void *>(&new_event));
         break;
     }
+    case beerocks_message::ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE: {
+        // handled in association handling task
+        break;
+    }
     default: {
         LOG_CLI(ERROR, "Unsupported CONTROL action_op: " << int(beerocks_header->action_op()));
         return false;
