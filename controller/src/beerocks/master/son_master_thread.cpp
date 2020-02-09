@@ -2788,16 +2788,16 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION: {
-        auto notification =
+        auto notification_in =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification_in) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION failed";
             return false;
         }
 
-        std::string client_mac = network_utils::mac_to_string(notification->mac());
-        std::string ipv4       = network_utils::ipv4_to_string(notification->ipv4());
+        std::string client_mac = network_utils::mac_to_string(notification_in->mac());
+        std::string ipv4       = network_utils::ipv4_to_string(notification_in->ipv4());
         LOG(DEBUG) << "dhcp complete for client " << client_mac << " new ip=" << ipv4
                    << " previous ip=" << database.get_node_ipv4(client_mac);
 
@@ -2814,16 +2814,30 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             }
 
             if (!database.set_node_name(
-                    client_mac, std::string(notification->name(message::NODE_NAME_LENGTH)))) {
+                    client_mac, std::string(notification_in->name(message::NODE_NAME_LENGTH)))) {
                 LOG(ERROR) << "set node name failed";
             }
 
-            if (database.get_node_ipv4(client_mac) != ipv4) {
-                LOG(DEBUG) << "handle_completed_connection client_mac = " << client_mac;
-                son_actions::handle_completed_connection(database, cmdu_tx, tasks, client_mac);
-            }
+            if (database.is_node_wireless(client_mac)) {
+                auto notification_out = message_com::create_vs_message<
+                    beerocks_message::cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>(cmdu_tx);
 
-            if (!database.is_node_wireless(client_mac)) {
+                if (!notification_out) {
+                    LOG(ERROR) << "Failed building message!";
+                    return false;
+                }
+                notification_out->mac()  = notification_in->mac();
+                notification_out->ipv4() = notification_in->ipv4();
+
+                auto clients_bssid_radio_mac = database.get_node_parent(client_mac);
+                if (clients_bssid_radio_mac.empty()) {
+                    LOG(WARNING) << "Client does not have a valid parent hostap on the database";
+                    return true;
+                }
+                son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database,
+                                                clients_bssid_radio_mac);
+
+            } else {
                 LOG(DEBUG) << "run_client_locating_task client_mac = " << client_mac;
                 int prev_task_id = database.get_client_locating_task_id(client_mac, true);
                 if (tasks.is_task_running(prev_task_id)) {
