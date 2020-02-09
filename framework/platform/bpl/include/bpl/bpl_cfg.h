@@ -231,6 +231,14 @@ struct BPL_WLAN_PARAMS {
     char security[BPL_SEC_LEN];
 };
 
+/**
+ * a structure to couple together radio-number (also correlates to slave-number) and interface name
+ */
+struct BPL_WLAN_IFACE {
+    int radio_num;
+    char ifname[BPL_IFNAME_LEN];
+};
+
 /****************************************************************************/
 /******************************** Functions *********************************/
 /****************************************************************************/
@@ -495,6 +503,17 @@ int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAM
  * @return -1 Error, or no hostap_iface is configured.
  */
 int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN]);
+
+/**
+ * Returns all the HOSTAP interfaces available in prplmesh config file
+ *
+ * @param [out] interfaces list of HOSTAP interfaces of type BPL_WLAN_IFACE.
+ * @param [int/out] num_of_interfaces in:max num of interfaces, out:actual num of interfaces.
+ *
+ * @return 0 Success.
+ * @return -1 Error, or no hostap_iface is configured.
+ */
+int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of_interfaces);
 
 } // namespace bpl
 } // namespace beerocks

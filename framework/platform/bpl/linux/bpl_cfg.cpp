@@ -274,5 +274,35 @@ int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN])
     return RETURN_OK;
 }
 
+int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of_interfaces)
+{
+    if (!interfaces) {
+        MAPF_ERR("cfg_get_all_prplmesh_wifi_interfaces: invalid input: interfaces is NULL");
+        return RETURN_ERR;
+    }
+    if (!num_of_interfaces) {
+        MAPF_ERR("cfg_get_all_prplmesh_wifi_interfaces: invalid input: num_of_interfaces is NULL");
+        return RETURN_ERR;
+    }
+    if (*num_of_interfaces < 1) {
+        MAPF_ERR(
+            "cfg_get_all_prplmesh_wifi_interfaces: invalid input: max num_of_interfaces value < 1");
+        return RETURN_ERR;
+    }
+
+    int interfaces_count = 0;
+    for (int index = 0; index < *num_of_interfaces; index++) {
+        if (cfg_get_hostap_iface(index, interfaces[interfaces_count].ifname) == RETURN_ERR) {
+            MAPF_ERR("cfg_get_all_prplmesh_wifi_interfaces: failed to get wifi interface for agent"
+                     << index);
+        }
+        interfaces[interfaces_count++].radio_num = index;
+    }
+
+    *num_of_interfaces = interfaces_count;
+
+    return RETURN_OK;
+}
+
 } // namespace bpl
 } // namespace beerocks
