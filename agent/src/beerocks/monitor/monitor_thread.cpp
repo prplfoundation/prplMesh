@@ -729,6 +729,16 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         LOG(INFO) << "ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST=" << sta_mac
                   << " ip=" << sta_ipv4 << " vap_id=" << vap_id;
 
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+
+        if (!response) {
+            LOG(ERROR)
+                << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE message!";
+            return false;
+        }
+
         auto sta_node = mon_db.sta_find(sta_mac);
         if (sta_node) {
             mon_db.sta_erase(sta_mac);
@@ -737,12 +747,17 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto vap_node = mon_db.vap_get_by_id(vap_id);
         if (vap_node == nullptr) {
             LOG(ERROR) << "vap_id " << vap_id << " doesn't not exists";
+            response->success() = false;
+            message_com::send_cmdu(slave_socket, cmdu_tx);
             return false;
         }
 
         sta_node = mon_db.sta_add(sta_mac, vap_id);
         sta_node->set_ipv4(sta_ipv4);
         sta_node->set_bridge_4addr_mac(set_bridge_4addr_mac);
+
+        response->success() = true;
+        message_com::send_cmdu(slave_socket, cmdu_tx);
 #ifdef BEEROCKS_RDKB
         //clean rdkb monitor data if already in database.
         auto client = mon_rdkb_hal.conf_get_client(sta_mac);
