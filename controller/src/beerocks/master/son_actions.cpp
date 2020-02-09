@@ -216,6 +216,7 @@ bool son_actions::set_hostap_active(db &database, task_pool &tasks, std::string 
 }
 
 void son_actions::disconnect_client(db &database, ieee1905_1::CmduMessageTx &cmdu_tx,
+                                    const std::string &client_mac, const std::string &bssid,
                                     eDisconnectType type, uint32_t reason)
 {
 
