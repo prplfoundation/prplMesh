@@ -322,8 +322,11 @@ main_thread::main_thread(config_file::sConfigSlave config_,
     auto now = std::chrono::steady_clock::now();
     int i    = 0;
     for (int j = 0; j < IRE_MAX_SLAVES && i < BPL_NUM_OF_INTERFACES; ++j) {
-        if (config.hostap_iface[j].empty())
+        auto hostap_iface_elm = interfaces_map.find(j);
+        if (hostap_iface_elm == interfaces_map.end() || hostap_iface_elm->second.empty())
             continue;
+
+        auto hostap_iface = hostap_iface_elm->second;
 
         auto status = std::make_shared<slave_iface_status>(i, beerocks::eRadioStatus::INVALID, now);
         if (!status) {
@@ -331,10 +334,9 @@ main_thread::main_thread(config_file::sConfigSlave config_,
             continue;
         }
 
-        string_utils::copy_string(bpl_iface_status.ifname[i], config.hostap_iface[j].c_str(),
-                                  BPL_IFNAME_LEN);
-        bpl_iface_status_map[config.hostap_iface[j]] = status;
-        ap_ifaces.insert(config.hostap_iface[j]);
+        string_utils::copy_string(bpl_iface_status.ifname[i], hostap_iface.c_str(), BPL_IFNAME_LEN);
+        bpl_iface_status_map[hostap_iface] = status;
+        ap_ifaces.insert(hostap_iface);
         i++;
     }
 
@@ -499,7 +501,11 @@ bool main_thread::init()
     auto now = std::chrono::steady_clock::now();
     for (int slave_num = 0; slave_num < IRE_MAX_SLAVES && i < BPL_NUM_OF_INTERFACES; ++slave_num) {
 
-        config.sta_iface[slave_num] = get_sta_iface(config.hostap_iface[slave_num]);
+        auto hostap_iface_elm = interfaces_map.find(slave_num);
+        if (hostap_iface_elm == interfaces_map.end() || hostap_iface_elm->second.empty())
+            continue;
+
+        config.sta_iface[slave_num] = get_sta_iface(hostap_iface_elm->second);
 
         if (config.sta_iface[slave_num].empty())
             continue;
