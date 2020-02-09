@@ -1063,6 +1063,29 @@ class cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION : public BaseClass
         sMacAddr* m_mac = nullptr;
 };
 
+class cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION();
+
+        static eActionOp_CONTROL get_action_op(){
+            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION);
+        }
+        sMacAddr& mac();
+        beerocks::net::sIpv4Addr& ipv4();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_CONTROL* m_action_op = nullptr;
+        sMacAddr* m_mac = nullptr;
+        beerocks::net::sIpv4Addr* m_ipv4 = nullptr;
+};
+
 class cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST : public BaseClass
 {
     public:

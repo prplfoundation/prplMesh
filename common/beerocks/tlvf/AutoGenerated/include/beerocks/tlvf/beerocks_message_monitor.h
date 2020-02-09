@@ -663,6 +663,29 @@ class cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE : public BaseClass
         sLinkMeasurementsResponse11k* m_params = nullptr;
 };
 
+class cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION();
+
+        static eActionOp_MONITOR get_action_op(){
+            return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION);
+        }
+        sMacAddr& mac();
+        beerocks::net::sIpv4Addr& ipv4();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_MONITOR* m_action_op = nullptr;
+        sMacAddr* m_mac = nullptr;
+        beerocks::net::sIpv4Addr* m_ipv4 = nullptr;
+};
+
 class cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST : public BaseClass
 {
     public:
