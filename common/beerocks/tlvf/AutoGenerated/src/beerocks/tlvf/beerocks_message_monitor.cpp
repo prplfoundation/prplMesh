@@ -2133,6 +2133,87 @@ bool cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::init()
     return true;
 }
 
+cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::~cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION() {
+}
+sMacAddr& cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::mac() {
+    return (sMacAddr&)(*m_mac);
+}
+
+beerocks::net::sIpv4Addr& cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::ipv4() {
+    return (beerocks::net::sIpv4Addr&)(*m_ipv4);
+}
+
+void cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::class_swap()
+{
+    m_mac->struct_swap();
+    m_ipv4->struct_swap();
+}
+
+bool cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // mac
+    class_size += sizeof(beerocks::net::sIpv4Addr); // ipv4
+    return class_size;
+}
+
+bool cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_mac->struct_init(); }
+    m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::net::sIpv4Addr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_ipv4->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
 cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST::cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
