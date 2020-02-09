@@ -30,7 +30,8 @@ extern std::string extern_query_db(std::string parameter);
 class main_thread : public socket_thread {
 
 public:
-    main_thread(config_file::sConfigSlave config_, logging &logger_);
+    main_thread(config_file::sConfigSlave config_,
+                const std::unordered_map<int, std::string> &interfaces_map, logging &logger_);
     ~main_thread();
 
     struct platform_common_conf_t {
@@ -94,6 +95,7 @@ private:
     const int PLATFORM_READ_CONF_MAX_ATTEMPTS = 10;
 
     config_file::sConfigSlave config;
+    const std::unordered_map<int, std::string> interfaces_map;
 
     struct SIfaceParams {
         beerocks::eArpSource eType;

@@ -306,9 +306,11 @@ static std::string get_sta_iface(const std::string &hostap_iface)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-main_thread::main_thread(config_file::sConfigSlave config_, logging &logger_)
+main_thread::main_thread(config_file::sConfigSlave config_,
+                         const std::unordered_map<int, std::string> &interfaces_map_,
+                         logging &logger_)
     : socket_thread(config_.temp_path + std::string(BEEROCKS_PLAT_MGR_UDS)), config(config_),
-      logger(logger_)
+      interfaces_map(interfaces_map_), logger(logger_)
 {
     set_select_timeout(SELECT_TIMEOUT_MSC);
     thread_name        = "platform_manager";

@@ -145,7 +145,8 @@ static std::string get_sta_iface_from_hostap_iface(const std::string &hostap_ifa
 }
 
 static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_slave_conf,
-                                  son::slave_thread::sSlaveConfig &son_slave_conf, int slave_num)
+                                  son::slave_thread::sSlaveConfig &son_slave_conf,
+                                  const std::string &hostap_iface, int slave_num)
 {
     son_slave_conf.temp_path = beerocks_slave_conf.temp_path;
     son_slave_conf.vendor    = beerocks_slave_conf.vendor;
@@ -181,7 +182,8 @@ static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_
     son_slave_conf.stop_on_failure_attempts = 0;
 }
 
-static void son_slave_watchdog(beerocks::config_file::sConfigSlave &beerocks_slave_conf)
+static void son_slave_watchdog(beerocks::config_file::sConfigSlave &beerocks_slave_conf,
+                               const std::unordered_map<int, std::string> &interfaces_map)
 {
     for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
         if (!beerocks_slave_conf.hostap_iface[slave_num].empty()) {
@@ -266,7 +268,8 @@ static int system_hang_test(beerocks::config_file::sConfigSlave &beerocks_slave_
     return 0;
 }
 
-static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slave_conf, int argc,
+static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slave_conf,
+                              const std::unordered_map<int, std::string> &interfaces_map, int argc,
                               char *argv[])
 {
     std::string base_slave_name = std::string(BEEROCKS_AGENT);
@@ -305,7 +308,8 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
         }
     }
 
-    beerocks::platform_manager::main_thread platform_mgr(beerocks_slave_conf, slave_logger);
+    beerocks::platform_manager::main_thread platform_mgr(beerocks_slave_conf, interfaces_map,
+                                                         slave_logger);
 
     //start platform_manager
     if (platform_mgr.init()) {
@@ -357,7 +361,7 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
                             .count();
                     if (son_slave_watchdog_time_elapsed_ms >=
                         beerocks::SON_SLAVE_WATCHDOG_INTERVAL_MSC) {
-                        son_slave_watchdog(beerocks_slave_conf);
+                        son_slave_watchdog(beerocks_slave_conf, interfaces_map);
                         son_slave_watchdog_time = std::chrono::steady_clock::now();
                     }
                 }
@@ -388,7 +392,7 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
 }
 
 static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
-                         int argc, char *argv[])
+                         const std::string &hostap_iface, int argc, char *argv[])
 {
     std::string base_slave_name =
         std::string(BEEROCKS_AGENT) + "_" + beerocks_slave_conf.hostap_iface[slave_num];
@@ -417,7 +421,7 @@ static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &bee
 
     // fill configuration
     son::slave_thread::sSlaveConfig son_slave_conf;
-    fill_son_slave_config(beerocks_slave_conf, son_slave_conf, slave_num);
+    fill_son_slave_config(beerocks_slave_conf, son_slave_conf, hostap_iface, slave_num);
 
     // disable stopping on failure initially. Later on, it will be read from BPL as part of
     // cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE
@@ -509,7 +513,7 @@ int main(int argc, char *argv[])
     std::unordered_map<int, std::string> interfaces_map;
     for (int i = 0; i < num_of_interfaces; i++) {
         if (beerocks::net::network_utils::linux_iface_exists(interfaces[i].ifname)) {
-            LOG(DEBUG) << "radio" << i << ".hostap_iface=" << std::string(interfaces[i].ifname);
+            LOG(DEBUG) << "radio" << i << ".hostap_iface=" << interfaces[i].ifname;
             interfaces_map[interfaces[i].radio_num] = std::string(interfaces[i].ifname);
         } else {
             // mask slave iface that do not exist
@@ -535,7 +539,8 @@ int main(int argc, char *argv[])
         //start given slave
         for (slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
             if (g_son_slave_iface == beerocks_slave_conf.hostap_iface[slave_num]) {
-                return run_son_slave(slave_num, beerocks_slave_conf, argc, argv);
+                return run_son_slave(slave_num, beerocks_slave_conf,
+                                     beerocks_slave_conf.hostap_iface[slave_num], argc, argv);
             }
         }
         LOG(ERROR) << "did not find g_son_slave_iface in hostap_iface array" << std::endl;
@@ -568,5 +573,5 @@ int main(int argc, char *argv[])
     }
 
     // backhaul/platform manager slave
-    return run_beerocks_slave(beerocks_slave_conf, argc, argv);
+    return run_beerocks_slave(beerocks_slave_conf, interfaces_map, argc, argv);
 }
