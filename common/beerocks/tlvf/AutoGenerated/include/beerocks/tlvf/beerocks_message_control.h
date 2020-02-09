@@ -895,6 +895,27 @@ class cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST : public BaseClass
         sClientMonitoringParams* m_params = nullptr;
 };
 
+class cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE();
+
+        static eActionOp_CONTROL get_action_op(){
+            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE);
+        }
+        uint8_t& success();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_CONTROL* m_action_op = nullptr;
+        uint8_t* m_success = nullptr;
+};
+
 class cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST : public BaseClass
 {
     public:
@@ -1067,7 +1088,7 @@ class cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION : public BaseClass
 {
     public:
         cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
