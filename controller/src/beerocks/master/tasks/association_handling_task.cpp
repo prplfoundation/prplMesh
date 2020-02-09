@@ -90,7 +90,7 @@ void association_handling_task::work()
                        << sta_mac;
 
             auto request = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST>(cmdu_tx);
+                beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST>(cmdu_tx, id);
 
             if (request == nullptr) {
                 LOG(ERROR)
