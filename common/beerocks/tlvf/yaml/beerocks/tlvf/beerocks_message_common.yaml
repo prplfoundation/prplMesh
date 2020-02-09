@@ -767,7 +767,7 @@ eDisconnectType:
   _enum_storage: uint8_t
   eDisconnect_Type_Unknown : 0
   eDisconnect_Type_Disassoc : 1 
-  eIsconnect_Type_Deauth : 2
+  eDisconnect_Type_Deauth : 2
 
 
 eSteeringSnrChange:

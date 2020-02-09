@@ -660,11 +660,11 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         auto reason         = request->reason();
 
         LOG(DEBUG) << "CLIENT_DISCONNECT, type "
-                   << ((type == beerocks_message::eIsconnect_Type_Deauth) ? "DEAUTH" : "DISASSOC")
+                   << ((type == beerocks_message::eDisconnect_Type_Deauth) ? "DEAUTH" : "DISASSOC")
                    << " vap_id = " << int(vap_id) << " mac = " << sta_mac
                    << " reason = " << std::to_string(reason);
         bool res;
-        if (type == beerocks_message::eIsconnect_Type_Deauth) {
+        if (type == beerocks_message::eDisconnect_Type_Deauth) {
             res = ap_wlan_hal->sta_deauth(vap_id, sta_mac, reason);
         } else {
             res = ap_wlan_hal->sta_disassoc(vap_id, sta_mac, reason);
