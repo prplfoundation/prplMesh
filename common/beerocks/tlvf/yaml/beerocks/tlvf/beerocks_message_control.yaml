@@ -261,7 +261,7 @@ cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST:
   _type: class
   mac: sMacAddr 
   vap_id: int8_t
-  type: uint32_t
+  type: eDisconnectType
   reason: uint32_t
 
 cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE:
