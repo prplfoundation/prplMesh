@@ -20,7 +20,7 @@ namespace beerocks {
 
 class async_work_queue : public thread_base {
 public:
-    async_work_queue()  = default;
+    async_work_queue() = default;
     ~async_work_queue();
 
     template <typename R, typename... Args, typename F> std::future<R> enqueue(F func, Args... args)

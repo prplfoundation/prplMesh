@@ -14,9 +14,7 @@
 
 namespace beerocks {
 
-async_work_queue::~async_work_queue() {
-    async_work_queue::before_stop();
-}
+async_work_queue::~async_work_queue() { async_work_queue::before_stop(); }
 
 bool async_work_queue::init() { return true; }
 

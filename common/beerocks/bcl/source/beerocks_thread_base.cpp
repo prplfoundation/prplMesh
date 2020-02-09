@@ -10,7 +10,8 @@
 
 using namespace beerocks;
 
-thread_base::~thread_base() {
+thread_base::~thread_base()
+{
     should_stop = true;
     thread_base::before_stop();
     join();

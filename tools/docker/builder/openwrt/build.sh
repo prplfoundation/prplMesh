@@ -97,7 +97,7 @@ main() {
         netgear-rax40)
             TARGET=intel_mips
             PRPLMESH_VARIANT="-dwpal"
-            PRPL_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^edf5c63e0616c026f53133ddd699472b60219f83"
+            PRPL_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^d340b644a2f210ef8949fe0e6bf15a969bc79ae7"
             INTEL_FEED="https://git.prpl.dev/prplmesh/feed-intel.git^e3eca4e93286eb4346f0196b2816a3be97287482"
             SDK_CONFIG=gcc8
             ;;
@@ -159,7 +159,7 @@ VERBOSE=false
 BUILD_OPTIONS=""
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='9d2efd'
-PRPL_FEED='https://git.prpl.dev/prplmesh/iwlwav.git^06a0126d5fb53b1d65bad90757a5f9f5f77419ca'
+PRPL_FEED='https://git.prpl.dev/prplmesh/iwlwav.git^6749d406d243465e06b4f518767b2d1b9372e3f5'
 INTEL_FEED=""
 SDK_CONFIG=default
 

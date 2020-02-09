@@ -1082,8 +1082,7 @@ bool ap_wlan_hal_dwpal::update_vap_credentials(
     for (const auto &it : hostapd_config_vaps) {
         // Skip STAs
         std::string entry_mode;
-        if (hostapd_config_get_value(it.second, "mode", entry_mode) &&
-            entry_mode != "ap") {
+        if (hostapd_config_get_value(it.second, "mode", entry_mode) && entry_mode != "ap") {
             continue;
         }
         // Count the the total of available for reconfiguration VAPs
