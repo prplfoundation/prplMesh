@@ -360,7 +360,9 @@ void association_handling_task::handle_responses_timeout(
     std::unordered_multimap<std::string, beerocks_message::eActionOp_CONTROL> timed_out_macs)
 {
     ++attempts;
-    if (state == REQUEST_RSSI_MEASUREMENT) {
+
+    switch (state) {
+    case REQUEST_RSSI_MEASUREMENT: {
         TASK_LOG(DEBUG) << "response for rx rssi measurement from " << original_parent_mac
                         << " for sta " << sta_mac << " timed out! attempts=" << attempts;
         if (attempts >= max_attempts) {
@@ -375,7 +377,9 @@ void association_handling_task::handle_responses_timeout(
         } else {
             state = REQUEST_RSSI_MEASUREMENT;
         }
-    } else if (state == CHECK_11K_BEACON_MEASURE_CAP) {
+        break;
+    }
+    case CHECK_11K_BEACON_MEASURE_CAP: {
         TASK_LOG(DEBUG) << "response for beacon measurement request from " << sta_mac
                         << " timed out! attempts=" << attempts;
         if (attempts >= max_attempts) {
@@ -386,5 +390,11 @@ void association_handling_task::handle_responses_timeout(
                                                                beerocks::BEACON_MEAS_UNSUPPORTED);
             state = REQUEST_RSSI_MEASUREMENT_WAIT;
         }
+        break;
+    }
+    default: {
+        TASK_LOG(ERROR) << "Unknown state: " << int(state);
+        break;
+    }
     }
 }
