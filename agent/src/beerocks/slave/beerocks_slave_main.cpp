@@ -498,6 +498,26 @@ int main(int argc, char *argv[])
         }
     }
 
+    beerocks::bpl::BPL_WLAN_IFACE interfaces[beerocks::IRE_MAX_SLAVES] = {0};
+    int num_of_interfaces                                              = beerocks::IRE_MAX_SLAVES;
+    if (beerocks::bpl::cfg_get_all_prplmesh_wifi_interfaces(interfaces, &num_of_interfaces)) {
+        std::cout << "failed to read interfaces map" << std::endl;
+        return 1;
+    }
+
+    //create unordered_map of interfaces
+    std::unordered_map<int, std::string> interfaces_map;
+    for (int i = 0; i < num_of_interfaces; i++) {
+        if (beerocks::net::network_utils::linux_iface_exists(interfaces[i].ifname)) {
+            LOG(DEBUG) << "radio" << i << ".hostap_iface=" << std::string(interfaces[i].ifname);
+            interfaces_map[interfaces[i].radio_num] = std::string(interfaces[i].ifname);
+        } else {
+            // mask slave iface that do not exist
+            LOG(DEBUG) << "hostap iface " << interfaces[i].ifname
+                       << " does not exist, not adding it to config";
+        }
+    }
+
     // mask slave iface that do not exist
     for (slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
         if (!beerocks_slave_conf.hostap_iface[slave_num].empty()) {
