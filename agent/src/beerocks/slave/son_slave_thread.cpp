@@ -4050,7 +4050,22 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         }
     }
 
-    message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+    ///////////////////////////////////////////////////////////////////
+    // TODO https://github.com/prplfoundation/prplMesh/issues/797
+    //
+    // Short term solution
+    // In non-EasyMesh mode, never modify hostapd configuration
+    // and in this case VAPs credentials
+    //
+    // Long term solution
+    // All EasyMesh VAPs will be stored in the platform DB.
+    // All other VAPs are manual, AKA should not be modified by prplMesh
+    ////////////////////////////////////////////////////////////////////
+    if (platform_settings.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+    } else {
+        LOG(WARNING) << "non-EasyMesh mode - skip updating VAP credentials";
+    }
 
     // Notify backhaul manager that onboarding has finished (certification flow)
     auto onboarding_finished_notification = message_com::create_vs_message<
