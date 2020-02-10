@@ -1566,7 +1566,7 @@ int bml_internal::get_dcs_continuous_scan_params(const sMacAddr &mac, int *dwell
     return (iRet);
 }
 
-int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP **results,
+int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP *results,
                                        unsigned int &results_size,
                                        const unsigned int max_results_size, uint8_t &result_status,
                                        bool is_single_scan)
@@ -1645,7 +1645,7 @@ int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP **re
     //output_results_size will be set to the number of actual returning results
     results_size = 0;
     for (auto &res : scan_results) {
-        auto &out = ((*results)[results_size]);
+        auto &out = results[results_size];
         translate_channel_scan_results(res, out);
         results_size += 1;
     }

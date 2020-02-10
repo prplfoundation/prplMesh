@@ -2019,13 +2019,12 @@ int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_res
         return -1;
     }
 
-    BML_NEIGHBOR_AP results[max_results_size] = {0};
+    BML_NEIGHBOR_AP results[max_results_size];
 
     uint8_t status             = 0;
     unsigned int results_count = max_results_size;
-    int ret                    = bml_get_dcs_scan_results(ctx, radio_mac.c_str(),
-                                       reinterpret_cast<BML_NEIGHBOR_AP **>(&results),
-                                       &results_count, &status, is_single_scan);
+    int ret                    = bml_get_dcs_scan_results(ctx, radio_mac.c_str(), results,
+                                                          &results_count, &status, is_single_scan);
 
     if (ret == BML_RET_OK) {
         if (results_count > max_results_size) {

@@ -612,7 +612,7 @@ int bml_get_dcs_continuous_scan_params(BML_CTX ctx, const char *radio_mac, int *
 }
 
 int bml_get_dcs_scan_results(BML_CTX ctx, const char *radio_mac,
-                             struct BML_NEIGHBOR_AP **output_results,
+                             struct BML_NEIGHBOR_AP *output_results,
                              unsigned int *output_results_size, unsigned char *output_result_status,
                              bool is_single_scan)
 {
