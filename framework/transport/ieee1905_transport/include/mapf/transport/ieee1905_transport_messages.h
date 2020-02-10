@@ -257,7 +257,7 @@ public:
     virtual const std::string topic_prefix() const { return kTopicPrefix; }
 };
 
-class InterfaceConfigurationMessage: public Message {
+class InterfaceConfigurationMessage : public Message {
     static const uint8_t kVersion   = 0;
     static const int kMaxInterfaces = 32;
 
@@ -287,8 +287,7 @@ public:
     {
     }
 
-    InterfaceConfigurationMessage(const std::string &topic,
-                                         std::initializer_list<Frame> frames)
+    InterfaceConfigurationMessage(const std::string &topic, std::initializer_list<Frame> frames)
         : Message(topic, frames)
     {
         // maximum one frame is allowed (if none are given we will allocate one below)
