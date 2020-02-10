@@ -271,6 +271,9 @@ Example use cases:
 
 If a PR is marked "don't merge" and it becomes ready (i.e. you did the necessary fixups and rebased on master), please remember to remove the tag again.
 
+When your PR is ready to be merged (you have the required number of reviews and you addressed all the review comments), you don't need to wait for the CI to finish.
+You can add the "MergeWhenReady" tag, and Github will automatically merge the pull request once the CI has finished and is passing.
+
 ### Definition of done
 
 Before a pull request can be merged, it must be considered "Done".
