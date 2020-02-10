@@ -55,6 +55,31 @@ int cfg_is_master()
     return retVal;
 }
 
+int cfg_get_management_mode()
+{
+    int retVal                                = 0;
+    char mgmt_mode[BPL_GW_DB_MANAGE_MODE_LEN] = {0};
+    if (cfg_get_prplmesh_param("management_mode", mgmt_mode, BPL_GW_DB_MANAGE_MODE_LEN) < 0) {
+        MAPF_ERR("cfg_get_management_mode: Failed to read management_mode");
+        retVal = -1;
+    } else {
+        std::string mode_str(mgmt_mode);
+        if (mode_str == "Multi-AP-Controller-and-Agent") {
+            retVal = BPL_MGMT_MODE_MULTIAP_CONTROLLER_AGENT;
+        } else if (mode_str == "Multi-AP-Controller") {
+            retVal = BPL_MGMT_MODE_MULTIAP_CONTROLLER;
+        } else if (mode_str == "Multi-AP-Agent") {
+            retVal = BPL_MGMT_MODE_MULTIAP_AGENT;
+        } else if (mode_str == "Not-Multi-AP") {
+            retVal = BPL_MGMT_MODE_NOT_MULTIAP;
+        } else {
+            MAPF_ERR("cfg_get_management_mode: Unexpected management_mode");
+            retVal = -1;
+        }
+    }
+    return retVal;
+}
+
 int cfg_get_operating_mode()
 {
     int retVal                            = 0;

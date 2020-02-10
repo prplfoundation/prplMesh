@@ -51,6 +51,12 @@ namespace bpl {
 #define BPL_OPER_MODE_WDS_REPEATER 3
 #define BPL_OPER_MODE_L2NAT_CLIENT 4
 
+/* Platform Management Mode */
+#define BPL_MGMT_MODE_MULTIAP_CONTROLLER_AGENT 0 /* EasyMesh controller and agent */
+#define BPL_MGMT_MODE_MULTIAP_CONTROLLER 1       /* EasyMesh controller */
+#define BPL_MGMT_MODE_MULTIAP_AGENT 2            /* EasyMesh agent */
+#define BPL_MGMT_MODE_NOT_MULTIAP 3              /* Non EasyMesh */
+
 /* Platform Certification Mode */
 #define BPL_CERTIFICATION_MODE_OFF 0
 #define BPL_CERTIFICATION_MODE_ON 1
@@ -259,6 +265,18 @@ int cfg_is_master();
  * @return -1 Error.
  */
 int cfg_get_operating_mode();
+
+/**
+ * Returns the current management mode configuration.
+ *
+ * @return valid possibilities:
+ *   BPL_MGMT_MODE_MULTIAP_CONTROLLER_AGENT,
+ *   BPL_MGMT_MODE_MULTIAP_CONTROLLER,
+ *   BPL_MGMT_MODE_MULTIAP_AGENT,
+ *   BPL_MGMT_MODE_NOT_MULTIAP
+ * @return -1 Error.
+ */
+int cfg_get_management_mode();
 
 /**
  * Returns certification mode value.
