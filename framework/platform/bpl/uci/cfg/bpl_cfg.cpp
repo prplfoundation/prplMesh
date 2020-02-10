@@ -34,25 +34,18 @@ int cfg_is_enabled()
 
 int cfg_is_master()
 {
-    int retVal                               = 0;
-    char man_mode[BPL_GW_DB_MANAGE_MODE_LEN] = {0};
-    if (cfg_get_prplmesh_param("management_mode", man_mode, BPL_GW_DB_MANAGE_MODE_LEN) < 0) {
-        MAPF_ERR("cfg_is_master: Failed to read ManagementMode\n");
-        retVal = -1;
-    } else {
-        std::string mode_str(man_mode);
-        if (mode_str == "Multi-AP-Controller-and-Agent") {
-            retVal = 1;
-        } else if (mode_str == "Proprietary-Mesh") {
-            retVal = 1;
-        } else if (mode_str == "Multi-AP-Agent") {
-            retVal = 0;
-        } else {
-            MAPF_ERR("cfg_is_master: Unexpected ManagementMode\n");
-            retVal = -1;
-        }
+    switch (cfg_get_management_mode()) {
+    case BPL_MGMT_MODE_MULTIAP_CONTROLLER_AGENT:
+        return 1;
+    case BPL_MGMT_MODE_MULTIAP_CONTROLLER:
+        return 1;
+    case BPL_MGMT_MODE_MULTIAP_AGENT:
+        return 0;
+    case BPL_MGMT_MODE_NOT_MULTIAP:
+        return (cfg_get_operating_mode() == BPL_OPER_MODE_GATEWAY) ? 1 : 0;
+    default:
+        return -1;
     }
-    return retVal;
 }
 
 int cfg_get_management_mode()
