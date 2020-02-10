@@ -159,6 +159,10 @@ static bool fill_platform_settings(
             LOG(ERROR) << "Failed reading 'local_master'";
             return false;
         }
+        if ((platform_common_conf.management_mode = bpl::cfg_get_management_mode()) < 0) {
+            LOG(ERROR) << "Failed reading 'management_mode'";
+            return false;
+        }
         if ((platform_common_conf.operating_mode = bpl::cfg_get_operating_mode()) < 0) {
             LOG(ERROR) << "Failed reading 'operating_mode'";
             return false;
@@ -222,6 +226,7 @@ static bool fill_platform_settings(
         uint8_t(platform_common_conf.client_roaming || platform_common_conf.band_steering);
     msg->platform_settings().local_gw           = uint8_t(platform_common_conf.local_gw);
     msg->platform_settings().operating_mode     = uint8_t(platform_common_conf.operating_mode);
+    msg->platform_settings().management_mode    = uint8_t(platform_common_conf.management_mode);
     msg->platform_settings().certification_mode = uint8_t(platform_common_conf.certification_mode);
     msg->platform_settings().stop_on_failure_attempts =
         uint8_t(platform_common_conf.stop_on_failure_attempts);

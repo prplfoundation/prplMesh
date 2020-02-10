@@ -83,6 +83,7 @@ typedef struct sPlatformSettings {
     uint8_t local_master;
     uint8_t local_gw;
     uint8_t operating_mode;
+    uint8_t management_mode;
     uint8_t mem_only_psk;
     uint8_t certification_mode;
     uint8_t stop_on_failure_attempts;
