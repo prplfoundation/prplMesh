@@ -40,12 +40,12 @@ hostap_iface=@BEEROCKS_WLAN2_IFACE@
 hostap_ant_gain=0
 enable_repeater_mode=0
 
-#[agent2]
-#hostap_iface_type=WIFI_INTEL
-#hostap_iface=@BEEROCKS_WLAN3_IFACE@
-#hostap_ant_gain=0
-#enable_repeater_mode=0
-#sta_iface_filter_low=1
+[agent2]
+radio_identifier=00:00:00:00:00:02
+hostap_iface=@BEEROCKS_WLAN2_IFACE@
+hostap_iface_type=WIFI_INTEL
+hostap_ant_gain=0
+enable_repeater_mode=0
 
 [log]
 log_global_levels=error,info,warning,fatal,trace,debug
