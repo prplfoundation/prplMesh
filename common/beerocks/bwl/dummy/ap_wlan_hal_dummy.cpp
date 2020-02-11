@@ -201,6 +201,11 @@ bool ap_wlan_hal_dummy::update_vap_credentials(
         m_radio_info.available_vaps[vap_id++].ssid = bss_info_conf.ssid;
     }
 
+    /* Tear down all other VAPs */
+    while (vap_id < predefined_vaps_num) {
+        m_radio_info.available_vaps[vap_id++].ssid.clear();
+    }
+
     return true;
 }
 
