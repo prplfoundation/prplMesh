@@ -294,6 +294,12 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
+
+        // If there is running association handleing task already, terminate it.
+        int prev_task_id = database.get_association_handling_task_id(mac);
+        if (tasks.is_task_running(prev_task_id)) {
+            tasks.kill_task(prev_task_id);
+        }
     }
     if (parent_hostap_mac == hostap_mac) {
         if (mac_type == beerocks::TYPE_IRE_BACKHAUL || mac_type == beerocks::TYPE_CLIENT) {
