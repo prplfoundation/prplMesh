@@ -220,15 +220,6 @@ struct BPL_WLAN_PARAMS {
 
     /* Wi-Fi Channel (0 for ACS) */
     int channel;
-
-    /* Wi-Fi SSID */
-    char ssid[BPL_SSID_LEN];
-
-    /* Wi-Fi KeyPassphrase */
-    char passphrase[BPL_PASS_LEN];
-
-    /* Wi-Fi Securirt Mode */
-    char security[BPL_SEC_LEN];
 };
 
 /**
