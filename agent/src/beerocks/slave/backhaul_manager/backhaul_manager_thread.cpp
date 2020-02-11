@@ -1707,19 +1707,17 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
     case beerocks_message::ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION: {
         LOG(DEBUG) << "ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION received from iface "
                    << soc->hostap_iface;
-        if (m_agent_ucc_listener) {
-            auto msg = beerocks_header->addClass<
-                beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>();
-            if (!msg) {
-                LOG(ERROR)
-                    << "Failed building ACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION message!";
-                return false;
-            }
+        auto msg = beerocks_header->addClass<
+            beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>();
+        if (!msg) {
+            LOG(ERROR)
+                << "Failed parsing BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION message!";
+            return false;
+        }
 
+        if (m_agent_ucc_listener) {
             m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(msg->ruid()),
                                                    msg->params());
-
-            m_radio_info_map[msg->ruid()].vaps_list = msg->params();
         }
         break;
     }
