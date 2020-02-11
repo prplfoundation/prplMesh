@@ -91,6 +91,9 @@ int cfg_uci_get_radio_param(int index, const char param[], char *value, size_t b
 int cfg_uci_get_wireless_radio_idx(const char *interfaceName, int *radio_index);
 int cfg_uci_get_radio_param_ulong(int index, const char param[], unsigned long *value);
 
+int cfg_uci_get_wireless_from_ifname(enum paramType type, const char *interface_name,
+                                     const char param[], char *value);
+
 } // namespace bpl
 } // namespace beerocks
 
