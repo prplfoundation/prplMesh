@@ -75,6 +75,8 @@ protected:
     bool dummy_send_cmd(const std::string &cmd, char **reply); // for external process
     bool dummy_send_cmd(const std::string &cmd);
 
+    static const int predefined_vaps_num = 4;
+
     // Private data-members:
 private:
     const uint32_t AP_ENABELED_TIMEOUT_SEC           = 15;
