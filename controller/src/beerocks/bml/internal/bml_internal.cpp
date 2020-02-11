@@ -1571,7 +1571,7 @@ int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP *res
                                        const unsigned int max_results_size, uint8_t &result_status,
                                        bool is_single_scan)
 {
-    if (!results || !results_size || !result_status) {
+    if (!results || max_results_size == 0) {
         LOG(ERROR) << "Function is called, but no data is being requested!";
         return (-BML_RET_INVALID_DATA);
     }
