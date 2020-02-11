@@ -99,16 +99,9 @@ static bool fill_platform_settings(
     /* update message */
     msg->wlan_settings().band_enabled = params.enabled;
     msg->wlan_settings().channel      = params.channel;
-    string_utils::copy_string(msg->wlan_settings().ssid, params.ssid,
-                              beerocks::message::WIFI_SSID_MAX_LENGTH);
-    string_utils::copy_string(msg->wlan_settings().pass, params.passphrase,
-                              beerocks::message::WIFI_PASS_MAX_LENGTH);
-    string_utils::copy_string(msg->wlan_settings().security_type, params.security,
-                              beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
 
     LOG(DEBUG) << "wlan settings:"
-               << " ssid=" << msg->wlan_settings().ssid
-               << " sec=" << msg->wlan_settings().security_type << " pass=***"
+               << " band_enabled=" << string_utils::bool_str(msg->wlan_settings().band_enabled)
                << " channel=" << int(msg->wlan_settings().channel);
 
     // initialize wlan params cache
@@ -122,12 +115,6 @@ static bool fill_platform_settings(
 
     params_ptr->band_enabled = params.enabled;
     params_ptr->channel      = params.channel;
-    string_utils::copy_string(params_ptr->ssid, params.ssid,
-                              beerocks::message::WIFI_SSID_MAX_LENGTH);
-    string_utils::copy_string(params_ptr->pass, params.passphrase,
-                              beerocks::message::WIFI_PASS_MAX_LENGTH);
-    string_utils::copy_string(params_ptr->security_type, params.security,
-                              beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
 
     iface_wlan_params_map[iface_name] = params_ptr;
 
@@ -615,28 +602,6 @@ bool main_thread::wlan_params_changed_check()
             LOG(DEBUG) << "channel changed";
             wlan_params_changed = true;
         }
-        if (std::string(elm.second->ssid).compare(std::string(params.ssid))) {
-            LOG(DEBUG) << "ssid changed, cached=" << std::string(elm.second->ssid) << ", new="
-                       << std::string(params.ssid, beerocks::message::WIFI_SSID_MAX_LENGTH);
-            string_utils::copy_string(elm.second->ssid, params.ssid,
-                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
-            wlan_params_changed = true;
-        }
-        if (std::string(elm.second->pass).compare(std::string(params.passphrase))) {
-            LOG(DEBUG) << "pass changed";
-            string_utils::copy_string(elm.second->pass, params.passphrase,
-                                      beerocks::message::WIFI_PASS_MAX_LENGTH);
-            wlan_params_changed = true;
-        }
-        if (std::string(elm.second->security_type).compare(std::string(params.security))) {
-            LOG(DEBUG) << "security_type changed, cached=" << std::string(elm.second->security_type)
-                       << ", new="
-                       << std::string(params.security,
-                                      beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
-            string_utils::copy_string(elm.second->security_type, params.security,
-                                      beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
-            wlan_params_changed = true;
-        }
 
         if (wlan_params_changed) {
             any_slave_changed = true;
@@ -649,13 +614,6 @@ bool main_thread::wlan_params_changed_check()
 
             notification->wlan_settings().band_enabled = elm.second->band_enabled;
             notification->wlan_settings().channel      = elm.second->channel;
-            string_utils::copy_string(notification->wlan_settings().ssid, elm.second->ssid,
-                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
-            string_utils::copy_string(notification->wlan_settings().pass, elm.second->pass,
-                                      beerocks::message::WIFI_PASS_MAX_LENGTH);
-            string_utils::copy_string(notification->wlan_settings().security_type,
-                                      elm.second->security_type,
-                                      beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
 
             Socket *sd = get_slave_socket_from_hostap_iface_name(elm.first);
             if (!sd) {

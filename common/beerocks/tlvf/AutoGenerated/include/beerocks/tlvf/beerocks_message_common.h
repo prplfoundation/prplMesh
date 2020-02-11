@@ -114,9 +114,6 @@ typedef struct sPlatformSettings {
 typedef struct sWlanSettings {
     uint8_t band_enabled;
     uint8_t channel;
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
-    char pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
-    char security_type[beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH];
     void struct_swap(){
     }
     void struct_init(){
