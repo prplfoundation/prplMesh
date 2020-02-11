@@ -1132,6 +1132,28 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         message_com::send_cmdu(monitor_socket, cmdu_tx);
         break;
     }
+    case beerocks_message::ACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_REQUEST: {
+        LOG(TRACE) << "ACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_REQUEST";
+        auto request_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_REQUEST>();
+        if (!request_in) {
+            LOG(ERROR) << "addClass cACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_REQUEST failed";
+            return false;
+        }
+
+        auto request_out = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_REQUEST>(cmdu_tx);
+        if (!request_out) {
+            LOG(ERROR)
+                << "Failed building cACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_REQUEST message!";
+            return false;
+        }
+
+        LOG(DEBUG) << "send cACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_REQUEST";
+        message_com::send_cmdu(monitor_socket, cmdu_tx);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unknown CONTROL message, action_op: " << int(beerocks_header->action_op());
         return false;
@@ -2829,6 +2851,26 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
             beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE>(cmdu_tx);
         if (!response_out) {
             LOG(ERROR) << "Failed building cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE";
+            return false;
+        }
+
+        response_out->success() = response_in->success();
+        send_cmdu_to_controller(cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE: {
+        auto response_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE>();
+        if (!response_in) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE failed";
+            return false;
+        }
+
+        auto response_out = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE>(cmdu_tx);
+        if (!response_out) {
+            LOG(ERROR) << "Failed building cACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE";
             return false;
         }
 
