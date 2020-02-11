@@ -6573,8 +6573,8 @@ uint8_t& cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::last() {
     return (uint8_t&)(*m_last);
 }
 
-uint32_t& cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::results_size() {
-    return (uint32_t&)(*m_results_size);
+uint8_t& cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::results_size() {
+    return (uint8_t&)(*m_results_size);
 }
 
 std::tuple<bool, sChannelScanResults&> cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::results(size_t idx) {
@@ -6618,7 +6618,6 @@ bool cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::alloc_results(size_t count) 
 void cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_results_size));
     for (size_t i = 0; i < (size_t)*m_results_size; i++){
         m_results[i].struct_swap();
     }
@@ -6657,7 +6656,7 @@ size_t cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::get_initial_size()
     class_size += sizeof(uint8_t); // result_status
     class_size += sizeof(uint8_t); // op_error_code
     class_size += sizeof(uint8_t); // last
-    class_size += sizeof(uint32_t); // results_size
+    class_size += sizeof(uint8_t); // results_size
     return class_size;
 }
 
@@ -6682,15 +6681,14 @@ bool cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_results_size = (uint32_t*)m_buff_ptr__;
+    m_results_size = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_results_size = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     m_results = (sChannelScanResults*)m_buff_ptr__;
-    uint32_t results_size = *m_results_size;
-    if (m_parse__) {  tlvf_swap(32, reinterpret_cast<uint8_t*>(&results_size)); }
+    uint8_t results_size = *m_results_size;
     m_results_idx__ = results_size;
     if (!buffPtrIncrementSafe(sizeof(sChannelScanResults) * (results_size))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sChannelScanResults) * (results_size) << ") Failed!";
