@@ -80,6 +80,8 @@ private:
     bool handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
     bool handle_1905_higher_layer_data_message(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                const std::string &src_mac);
+    bool handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                       const std::string &src_mac);
     bool handle_1905_combined_infrastructure_metrics(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                      const std::string &src_mac);
     bool handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
@@ -267,6 +269,23 @@ private:
      * @brief Map of radio information structures indexed by radio uid.
      */
     std::unordered_map<sMacAddr, sRadioInfo> m_radio_info_map;
+
+    /**
+     * @brief Gets the list of neighbor links from topology database.
+     *
+     * Neighbor links are pairs (interface, neighbor) where 'interface' is the name of the interface
+     * that connects to the neighbor device and 'neighbor' is the MAC address of the neighbor device.
+     *
+     * @param[in] neighbor_mac_filter Optional MAC address to filter the neighbor links to be
+     * returned. A value of network_utils::ZERO_MAC means no filter has to be applied. A specific
+     * MAC address means that only links to that device must be included.
+     * @param[in, out] neighbor_links_map Map containing lists of neighbors grouped by the interface
+     * that connects to them.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool get_neighbor_links(const sMacAddr &neighbor_mac_filter,
+                            std::map<std::string, std::vector<sMacAddr>> &neighbor_links_map);
 
     /*
  * State Machines
