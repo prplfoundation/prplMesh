@@ -175,21 +175,15 @@ int cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return 0; }
 
 int cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PARAMS *wlan_params)
 {
-    int retVal = 0;
-    int index  = 0;
-
     if (!iface || !wlan_params) {
+        MAPF_ERR("cfg_get_wifi_params: invalid input: iface = "
+                 << intptr_t(iface) << " wlan_params = " << intptr_t(wlan_params));
         return RETURN_ERR;
-    }
-
-    retVal = cfg_get_index_from_interface(iface, &index);
-    if (retVal) {
-        return retVal;
     }
 
     // The UCI "disabled" setting is optional, defaults to false if not present
     bool disabled = false;
-    cfg_uci_get_wireless_bool(TYPE_RADIO, index, "disabled", &disabled);
+    cfg_uci_get_wireless_bool(TYPE_RADIO, iface, "disabled", &disabled);
     wlan_params->enabled = !disabled;
 
     // The UCI "channel" setting is not documented as optional, but for Intel
@@ -197,11 +191,11 @@ int cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PARAMS
     // fail when wifi still works fine, so default to "auto" (0) and if
     // can't get the channel from UCI just move on.
     wlan_params->channel = 0;
-    if (!cfg_get_channel(index, &wlan_params->channel)) {
-        MAPF_INFO("UCI: radio" << index << ": channel is not configured assuming auto\n");
+    if (!cfg_get_channel(iface, &wlan_params->channel)) {
+        MAPF_INFO("UCI: interface " << iface << ": channel is not configured assuming auto\n");
     }
 
-    return retVal;
+    return RETURN_OK;
 }
 
 int cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *preferred_radio_band)
@@ -291,6 +285,7 @@ int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAM
         return RETURN_ERR;
     }
 
+    //TODO: remove dependency in wireless section naming in UCI #801
     int index = -1;
     if (cfg_get_index_from_interface(iface, &index) == RETURN_ERR) {
         MAPF_ERR("cfg_get_sta_iface: Failed to get radio index from iface");

@@ -69,12 +69,13 @@ int cfg_uci_get(char *path, char *value, size_t length)
     return RETURN_OK;
 }
 
-int cfg_uci_get_wireless_int(enum paramType type, int index, const char param[], int *value)
+int cfg_uci_get_wireless_int(enum paramType type, const char *interface_name, const char param[],
+                             int *value)
 {
     int status;
     char val[MAX_UCI_BUF_LEN] = "";
 
-    status = cfg_uci_get_wireless(type, index, param, val);
+    status = cfg_uci_get_wireless_from_ifname(type, interface_name, param, val);
     if (status == RETURN_ERR)
         return RETURN_ERR;
 
@@ -439,12 +440,12 @@ int cfg_uci_get_wireless_idx(char *interfaceName, int *rpc_index)
     return RETURN_ERR;
 }
 
-int cfg_uci_get_wireless_bool(enum paramType type, int index, const char param[], bool *value)
+int cfg_uci_get_wireless_bool(enum paramType type, const char *interface_name, const char param[],
+                              bool *value)
 {
-    int status;
     int res;
 
-    status = cfg_uci_get_wireless_int(type, index, param, &res);
+    int status = cfg_uci_get_wireless_int(type, interface_name, param, &res);
     if (status == RETURN_ERR)
         return RETURN_ERR;
 
