@@ -157,6 +157,12 @@ bool mon_wlan_hal_dummy::channel_scan_trigger(int dwell_time_msec,
     return false;
 }
 
+bool mon_wlan_hal_dummy::channel_scan_dump_results()
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED";
+    return false;
+}
+
 bool mon_wlan_hal_dummy::process_dummy_data(parsed_obj_map_t &parsed_obj)
 {
     char *tmp_str;
