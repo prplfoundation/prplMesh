@@ -3074,6 +3074,73 @@ bool cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::init()
     return true;
 }
 
+cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::~cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE() {
+}
+uint8_t& cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::success() {
+    return (uint8_t&)(*m_success);
+}
+
+void cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::class_swap()
+{
+}
+
+bool cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // success
+    return class_size;
+}
+
+bool cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_success = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
 cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
@@ -3626,6 +3693,87 @@ bool cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::init()
     return true;
 }
 
+cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::~cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION() {
+}
+sMacAddr& cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::mac() {
+    return (sMacAddr&)(*m_mac);
+}
+
+beerocks::net::sIpv4Addr& cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::ipv4() {
+    return (beerocks::net::sIpv4Addr&)(*m_ipv4);
+}
+
+void cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::class_swap()
+{
+    m_mac->struct_swap();
+    m_ipv4->struct_swap();
+}
+
+bool cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // mac
+    class_size += sizeof(beerocks::net::sIpv4Addr); // ipv4
+    return class_size;
+}
+
+bool cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_mac->struct_init(); }
+    m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::net::sIpv4Addr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_ipv4->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
 cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
@@ -3644,8 +3792,8 @@ int8_t& cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::vap_id() {
     return (int8_t&)(*m_vap_id);
 }
 
-uint32_t& cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::type() {
-    return (uint32_t&)(*m_type);
+eDisconnectType& cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::type() {
+    return (eDisconnectType&)(*m_type);
 }
 
 uint32_t& cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::reason() {
@@ -3655,7 +3803,6 @@ uint32_t& cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::reason() {
 void cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::class_swap()
 {
     m_mac->struct_swap();
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_reason));
 }
 
@@ -3691,7 +3838,7 @@ size_t cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // mac
     class_size += sizeof(int8_t); // vap_id
-    class_size += sizeof(uint32_t); // type
+    class_size += sizeof(eDisconnectType); // type
     class_size += sizeof(uint32_t); // reason
     return class_size;
 }
@@ -3713,9 +3860,9 @@ bool cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    m_type = (uint32_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+    m_type = (eDisconnectType*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(eDisconnectType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eDisconnectType) << ") Failed!";
         return false;
     }
     m_reason = (uint32_t*)m_buff_ptr__;

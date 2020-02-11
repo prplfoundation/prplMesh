@@ -701,6 +701,30 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
         break;
     }
+    case beerocks_message::ACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION: {
+        LOG(DEBUG) << "received ACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION";
+        auto notification_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>();
+        if (!notification_in) {
+            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION failed";
+            return false;
+        }
+
+        // Notify monitor
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>(cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR)
+                << "Failed building cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION message!";
+            return false;
+        }
+
+        notification_out->mac()  = notification_in->mac();
+        notification_out->ipv4() = notification_in->ipv4();
+        message_com::send_cmdu(monitor_socket, cmdu_tx);
+        break;
+    }
     case beerocks_message::ACTION_CONTROL_CONTROLLER_PING_REQUEST: {
         LOG(DEBUG) << "received ACTION_CONTROL_CONTROLLER_PING_REQUEST";
         auto request =
@@ -2413,6 +2437,27 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
 
         break;
     }
+    case beerocks_message::ACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE: {
+        auto response_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE>();
+        if (!response_in) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE failed";
+            break;
+        }
+
+        auto response_out = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+        if (!response_out) {
+            LOG(ERROR)
+                << "Failed building cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE message!";
+            break;
+        }
+        response_out->success() = response_in->success();
+        send_cmdu_to_controller(cmdu_tx);
+        break;
+    }
     case beerocks_message::ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
         auto response_in =
             beerocks_header
@@ -4050,7 +4095,22 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         }
     }
 
-    message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+    ///////////////////////////////////////////////////////////////////
+    // TODO https://github.com/prplfoundation/prplMesh/issues/797
+    //
+    // Short term solution
+    // In non-EasyMesh mode, never modify hostapd configuration
+    // and in this case VAPs credentials
+    //
+    // Long term solution
+    // All EasyMesh VAPs will be stored in the platform DB.
+    // All other VAPs are manual, AKA should not be modified by prplMesh
+    ////////////////////////////////////////////////////////////////////
+    if (platform_settings.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+    } else {
+        LOG(WARNING) << "non-EasyMesh mode - skip updating VAP credentials";
+    }
 
     // Notify backhaul manager that onboarding has finished (certification flow)
     auto onboarding_finished_notification = message_com::create_vs_message<

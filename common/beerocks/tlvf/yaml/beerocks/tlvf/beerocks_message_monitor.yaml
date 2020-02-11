@@ -44,6 +44,10 @@ cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST:
   _type: class
   params: sClientMonitoringParams 
 
+cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE:
+  _type: class
+  success: uint8_t
+
 cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST:
   _type: class
   mac: sMacAddr
@@ -144,6 +148,11 @@ cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST:
 cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE:
   _type: class
   params: sLinkMeasurementsResponse11k 
+
+cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION:
+  _type: class
+  mac: sMacAddr
+  ipv4: beerocks::net::sIpv4Addr 
 
 #################################################
 # CLIENT MONITOR RDKB HAL

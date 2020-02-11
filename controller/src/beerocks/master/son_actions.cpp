@@ -80,22 +80,8 @@ void son_actions::handle_completed_connection(db &database, ieee1905_1::CmduMess
          * send disassociate request to previous hostap to clear STA mac from its list
          */
         if (!previous_hostap_mac.empty() && previous_hostap_mac != new_hostap_mac) {
-            auto previous_agent_mac = database.get_node_parent_ire(previous_hostap_mac);
-            auto disassoc_request   = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST>(cmdu_tx);
-
-            if (disassoc_request == nullptr) {
-                LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_DISCONNECT_REQUEST message!";
-                return;
-            }
-            disassoc_request->mac()    = network_utils::mac_from_string(client_mac);
-            disassoc_request->vap_id() = database.get_hostap_vap_id(previous_hostap_mac);
-            disassoc_request->type()   = beerocks_message::eDisconnect_Type_Disassoc;
-
-            const auto parent_radio = database.get_node_parent_radio(previous_hostap_mac);
-            son_actions::send_cmdu_to_agent(previous_agent_mac, cmdu_tx, database, parent_radio);
-            LOG(DEBUG) << "sending DISASSOCIATE request, client " << client_mac << " hostap "
-                       << previous_hostap_mac;
+            disconnect_client(database, cmdu_tx, client_mac, previous_hostap_mac,
+                              eDisconnect_Type_Disassoc, 0);
         }
 
         /*
@@ -216,8 +202,8 @@ bool son_actions::set_hostap_active(db &database, task_pool &tasks, std::string 
 }
 
 void son_actions::disconnect_client(db &database, ieee1905_1::CmduMessageTx &cmdu_tx,
-                                    std::string &client_mac, std::string &bssid, uint32_t type,
-                                    uint32_t reason)
+                                    const std::string &client_mac, const std::string &bssid,
+                                    eDisconnectType type, uint32_t reason)
 {
 
     auto agent_mac = database.get_node_parent_ire(bssid);

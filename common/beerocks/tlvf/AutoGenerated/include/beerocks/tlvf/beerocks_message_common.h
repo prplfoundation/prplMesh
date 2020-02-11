@@ -83,6 +83,7 @@ typedef struct sPlatformSettings {
     uint8_t local_master;
     uint8_t local_gw;
     uint8_t operating_mode;
+    uint8_t management_mode;
     uint8_t mem_only_psk;
     uint8_t certification_mode;
     uint8_t stop_on_failure_attempts;
@@ -1081,7 +1082,7 @@ enum eDisconnectSource: uint8_t {
 enum eDisconnectType: uint8_t {
     eDisconnect_Type_Unknown = 0x0,
     eDisconnect_Type_Disassoc = 0x1,
-    eIsconnect_Type_Deauth = 0x2,
+    eDisconnect_Type_Deauth = 0x2,
 };
 
 enum eSteeringSnrChange: uint8_t {

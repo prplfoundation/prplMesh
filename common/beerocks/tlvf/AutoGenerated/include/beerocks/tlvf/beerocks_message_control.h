@@ -895,6 +895,27 @@ class cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST : public BaseClass
         sClientMonitoringParams* m_params = nullptr;
 };
 
+class cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE();
+
+        static eActionOp_CONTROL get_action_op(){
+            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE);
+        }
+        uint8_t& success();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_CONTROL* m_action_op = nullptr;
+        uint8_t* m_success = nullptr;
+};
+
 class cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST : public BaseClass
 {
     public:
@@ -1063,6 +1084,29 @@ class cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION : public BaseClass
         sMacAddr* m_mac = nullptr;
 };
 
+class cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION();
+
+        static eActionOp_CONTROL get_action_op(){
+            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION);
+        }
+        sMacAddr& mac();
+        beerocks::net::sIpv4Addr& ipv4();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_CONTROL* m_action_op = nullptr;
+        sMacAddr* m_mac = nullptr;
+        beerocks::net::sIpv4Addr* m_ipv4 = nullptr;
+};
+
 class cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST : public BaseClass
 {
     public:
@@ -1075,7 +1119,7 @@ class cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST : public BaseClass
         }
         sMacAddr& mac();
         int8_t& vap_id();
-        uint32_t& type();
+        eDisconnectType& type();
         uint32_t& reason();
         void class_swap() override;
         bool finalize() override;
@@ -1086,7 +1130,7 @@ class cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST : public BaseClass
         eActionOp_CONTROL* m_action_op = nullptr;
         sMacAddr* m_mac = nullptr;
         int8_t* m_vap_id = nullptr;
-        uint32_t* m_type = nullptr;
+        eDisconnectType* m_type = nullptr;
         uint32_t* m_reason = nullptr;
 };
 

@@ -74,7 +74,8 @@ sPlatformSettings:
   onboarding: uint8_t 
   local_master: uint8_t 
   local_gw: uint8_t 
-  operating_mode: uint8_t 
+  operating_mode: uint8_t
+  management_mode: uint8_t
   mem_only_psk: uint8_t
 
   certification_mode: uint8_t 
@@ -766,7 +767,7 @@ eDisconnectType:
   _enum_storage: uint8_t
   eDisconnect_Type_Unknown : 0
   eDisconnect_Type_Disassoc : 1 
-  eIsconnect_Type_Deauth : 2
+  eDisconnect_Type_Deauth : 2
 
 
 eSteeringSnrChange:

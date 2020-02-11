@@ -416,21 +416,8 @@ void son_management::handle_cli_message(Socket *sd,
         LOG(DEBUG) << "CLI client disassociate request, client " << client_mac << " hostap "
                    << hostap_mac;
 
-        auto agent_mac = database.get_node_parent_ire(hostap_mac);
-        auto request   = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST>(cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_DISCONNECT_REQUEST message!";
-            isOK = false;
-            break;
-        }
-        request->mac()    = network_utils::mac_from_string(client_mac);
-        request->vap_id() = database.get_hostap_vap_id(hostap_mac);
-        request->reason() = cli_request->reason();
-        request->type()   = cli_request->type();
-
-        const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
+        son_actions::disconnect_client(database, cmdu_tx, client_mac, hostap_mac,
+                                       cli_request->type(), cli_request->reason());
         break;
     }
     case beerocks_message::ACTION_CLI_CLIENT_BEACON_11K_REQUEST: {
