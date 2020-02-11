@@ -1797,7 +1797,6 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
     case ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE: {
         return handle_1905_topology_query(cmdu_rx, src_mac);
-        //LOG(INFO) << "I got the Topology Query message!";
     }
     case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE: {
         return handle_ap_capability_query(cmdu_rx, src_mac);
