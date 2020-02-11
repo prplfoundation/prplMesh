@@ -1230,6 +1230,42 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         message_com::send_cmdu(slave_socket, cmdu_tx);
         break;
     }
+    case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_REQUEST: {
+        auto request =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_REQUEST failed";
+            return false;
+        }
+
+        auto response_out = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+        if (!response_out) {
+            LOG(ERROR)
+                << "Failed building cACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE message!";
+            return false;
+        }
+
+        bool result = mon_wlan_hal->channel_scan_dump_results();
+        LOG_IF(!result, ERROR) << "channel_scan_dump_results Failed";
+
+        response_out->success() = (result) ? 1 : 0;
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION>(cmdu_tx);
+        if (!notification) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION msg";
+            return false;
+        }
+
+        //Sending the cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION without
+        //modifications will cause the DUMP_READY event to trigger in the DCS task
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unsupported MONITOR action_op: " << int(beerocks_header->action_op());
         break;
