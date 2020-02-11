@@ -424,6 +424,19 @@ class test_flows:
         self.debug("Confirming ap capability report has been received on controller")
         self.check_log(self.gateway, "controller", "AP_CAPABILITY_REPORT_MESSAGE")
 
+    def test_link_metric_query(self):
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x0005,
+                                       tlv(0x08,0x0002,"0x00 0x02"))
+        time.sleep(1)
+
+        self.debug("Confirming link metric query has been received on agent")
+        self.check_log(self.repeater1, "agent", "Received LINK_METRIC_QUERY_MESSAGE")
+
+        self.debug("Confirming link metric response has been received on controller")
+        self.check_log(self.gateway, "controller", "Received LINK_METRIC_RESPONSE_MESSAGE")
+        self.check_log(self.gateway, "controller", "Received TLV_TRANSMITTER_LINK_METRIC")
+        self.check_log(self.gateway, "controller", "Received TLV_RECEIVER_LINK_METRIC")
+
     def test_combined_infra_metrics(self):
         self.debug("Send AP Metrics query message to agent 1")
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x800B,
