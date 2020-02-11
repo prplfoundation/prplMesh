@@ -1957,8 +1957,7 @@ void son_management::handle_bml_message(Socket *sd,
         // Clear flags
         auto result_status = eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
         auto op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
-        uint8_t last       = 0;
-
+        
         // Get scan statuses
         auto scan_in_progress = database.get_channel_scan_in_progress(radio_mac, is_single_scan);
         if (scan_in_progress) {
@@ -1979,20 +1978,32 @@ void son_management::handle_bml_message(Socket *sd,
 
         LOG(DEBUG) << "scan_results received for hostap_mac= " << radio_mac << std::endl
                    << "scan_results_size= " << scan_results_size;
-
-        auto response = message_com::create_vs_message<
-            beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE>(cmdu_tx,
-                                                                             beerocks_header->id());
+        auto gen_new_results_response = [&cmdu_tx, &beerocks_header]()
+            -> std::shared_ptr<beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE> {
+            auto res_msg = message_com::create_vs_message<
+                beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE>(
+                cmdu_tx, beerocks_header->id());
+            return res_msg;
+        };
+        auto send_results_response =
+            [&sd, &cmdu_tx](
+                std::shared_ptr<beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE>
+                    &res_msg,
+                const eChannelScanErrCode result_status, const eChannelScanOpErrCode op_error_code,
+                bool is_last = true) {
+                res_msg->result_status() = uint8_t(result_status);
+                res_msg->op_error_code() = uint8_t(op_error_code);
+                res_msg->last()          = (is_last) ? 1 : 0;
+                message_com::send_cmdu(sd, cmdu_tx);
+            };
 
         // If there was an error before, send the results with a failed status
         if (op_error_code != eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS ||
             result_status != eChannelScanErrCode::CHANNEL_SCAN_SUCCESS) {
             LOG(ERROR) << "Something went wrong, sending CMDU with error code: ["
                        << (int)op_error_code << "] & result status [" << (int)result_status << "].";
-            response->result_status() = uint8_t(result_status);
-            response->op_error_code() = uint8_t(op_error_code);
-            response->last()          = 1;
-            message_com::send_cmdu(sd, cmdu_tx);
+            auto response = gen_new_results_response();
+            send_results_response(response,result_status,op_error_code);
 
             break;
         }
@@ -2000,95 +2011,45 @@ void son_management::handle_bml_message(Socket *sd,
         //Results avaliablity check
         if (scan_results_size == 0) {
             LOG(DEBUG) << "no scan results are available";
-            response->result_status() = uint8_t(eChannelScanErrCode::CHANNEL_SCAN_RESULTS_EMPTY);
-            response->op_error_code() = uint8_t(op_error_code);
-            response->last()          = 1;
-            message_com::send_cmdu(sd, cmdu_tx);
+            auto response = gen_new_results_response();
+            send_results_response(response,eChannelScanErrCode::CHANNEL_SCAN_RESULTS_EMPTY,op_error_code);
+            break;
         }
 
-        // Set const sized for message building
-        const size_t tlvEndSize    = ieee1905_1::tlvEndOfMessage::get_initial_size();
-        const size_t result_size   = sizeof(beerocks_message::sChannelScanResults);
-        const size_t ext_data_size = sizeof(result_status) + sizeof(op_error_code) + sizeof(last);
-        int remaining_results      = scan_results_size;
-        int response_result_index  = 0;
-        beerocks_message::sChannelScanResults *results = nullptr;
+        size_t reserved_size = (message_com::get_vs_cmdu_size_on_buffer<
+                                beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE>());
+        auto response        = gen_new_results_response();
+        size_t max_size      = cmdu_tx.getMessageBuffLength() - reserved_size;
+        for (auto &dump : scan_results) {
 
-        for (auto dump : scan_results) {
+            if (max_size < sizeof(dump)) {
 
-            if (results == nullptr) {
-                LOG(DEBUG) << "Creating new ACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE !";
-                response = message_com::create_vs_message<
-                    beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE>(
-                    cmdu_tx, beerocks_header->id());
-                if (!response) {
-                    LOG(ERROR) << "Failed building message "
-                                  "cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE !";
-                    return;
-                }
-
-                //reset message flags
-                result_status = eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
-                op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
-                last          = 0;
-
-                // Need to find how much results we can allocate before running out of room
-                int size_left = cmdu_tx.getMessageBuffLength() - cmdu_tx.getMessageLength() -
-                                tlvEndSize - ext_data_size;
-                int cmdu_max_avaliable_result_count = size_left / result_size;
-                int cmdu_max_result_count = cmdu_max_avaliable_result_count > remaining_results
-                                                ? remaining_results
-                                                : cmdu_max_avaliable_result_count;
-
-                LOG(DEBUG) << "Allocating space for " << cmdu_max_result_count << " results";
-                if (response->alloc_results(cmdu_max_result_count) == false) {
-                    LOG(ERROR) << "Failed buffer allocation to size = "
-                               << int(cmdu_max_result_count);
-                    op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
-                    break;
-                }
-
-                // Getting response results' pointer
-                auto results_tuple = response->results(0);
-                if (std::get<0>(results_tuple) == false) {
-                    LOG(ERROR) << "response->results access fail!";
-                    op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
-                    break;
-                }
-                results               = &std::get<1>(results_tuple);
-                response_result_index = 0;
+                LOG(DEBUG) << "Reached limit on CMDU, Sending..";
+                send_results_response(response,result_status,op_error_code, false);
+                LOG(DEBUG) << "Creating new CMDU";
+                response = gen_new_results_response();
+                max_size = cmdu_tx.getMessageBuffLength() - reserved_size;
+            } 
+            //LOG(DEBUG) << "Allocating space";
+            if(!response->alloc_results()) {
+                LOG(ERROR) << "Failed buffer allocation";
+                op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
+                break;
             }
-            LOG(DEBUG) << "Adding result to CMDU";
+            max_size -= sizeof(dump);
 
-            results[response_result_index++] = dump;
-            remaining_results--;
-
-            if (remaining_results <= 0) {
-                LOG(DEBUG) << "reached end of results";
-                last = 1;
+            auto num_of_res = response->results_size();
+            if(!std::get<0>(response->results(num_of_res - 1))) {
+                LOG(ERROR) << "Failed accessing results buffer";
+                op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
+                break;
             }
-            if (response_result_index >= (int)response->results_size() || remaining_results <= 0) {
-                LOG(DEBUG) << "reached CMDU capacity";
+            auto &dump_msg = std::get<1>(response->results(num_of_res - 1));
 
-                response->result_status() = uint8_t(result_status);
-                response->op_error_code() = uint8_t(op_error_code);
-                response->last()          = last;
-                message_com::send_cmdu(sd, cmdu_tx);
-
-                //clears result, this will cause another response to be created
-                if (remaining_results > 0) {
-                    results = nullptr;
-                }
-            }
+            dump_msg = dump;         
         }
-
-        if (op_error_code != eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
-            LOG(ERROR) << "Something went wrong, this shouldn't be reached";
-            response->result_status() = uint8_t(result_status);
-            response->op_error_code() = uint8_t(op_error_code);
-            response->last()          = 1;
-            message_com::send_cmdu(sd, cmdu_tx);
-        }
+        LOG(DEBUG) << "Finished all results, Sending final CMDU";
+        send_results_response(response,result_status,op_error_code, true);
         break;
     }
     case beerocks_message::ACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST: {
