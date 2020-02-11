@@ -1956,6 +1956,8 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         for (const auto &vap : vaps_list.vaps) {
             if (vap.mac == network_utils::ZERO_MAC)
                 continue;
+            if (vap.ssid[0] == '\0')
+                continue;
             auto radio_bss_list           = radio_list->create_radio_bss_list();
             radio_bss_list->radio_bssid() = vap.mac;
             auto ssid =
