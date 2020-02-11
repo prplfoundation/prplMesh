@@ -201,21 +201,6 @@ int cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PARAMS
         MAPF_INFO("UCI: radio" << index << ": channel is not configured assuming auto\n");
     }
 
-    char ssid[MAX_UCI_BUF_LEN] = {0}, security[MAX_UCI_BUF_LEN] = {0},
-         passphrase[MAX_UCI_BUF_LEN] = {0};
-    retVal |= cfg_uci_get_wireless(TYPE_VAP, index, "ssid", ssid);
-    retVal |= cfg_uci_get_wireless(TYPE_VAP, index, "wav_security_mode", security);
-    std::string mode = std::string(security);
-    if (mode == BPL_WLAN_SEC_WEP64_STR || mode == BPL_WLAN_SEC_WEP128_STR) {
-        retVal |= cfg_get_wep_key(index, -1, passphrase);
-    } else if (mode != BPL_WLAN_SEC_NONE_STR) {
-        retVal |= cfg_uci_get_wireless(TYPE_VAP, index, "key", passphrase);
-    }
-
-    utils::copy_string(wlan_params->ssid, ssid, BPL_SSID_LEN);
-    utils::copy_string(wlan_params->security, security, BPL_SEC_LEN);
-    utils::copy_string(wlan_params->passphrase, passphrase, BPL_PASS_LEN);
-
     return retVal;
 }
 
