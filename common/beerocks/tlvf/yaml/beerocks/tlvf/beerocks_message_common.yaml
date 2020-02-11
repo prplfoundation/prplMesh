@@ -105,15 +105,6 @@ sWlanSettings:
   band_enabled:
     _type: uint8_t
   channel: uint8_t 
-  ssid:
-    _type: char    
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
-  pass:
-    _type: char    
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
-  security_type:
-    _type: char    
-    _length: [ "beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH" ]
 
 sApSetRestrictedFailsafe:
   _type: struct
