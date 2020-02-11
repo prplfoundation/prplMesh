@@ -168,6 +168,8 @@ test_ap_config_bss_tear_down() {
     sleep 3
     check_log ${REPEATER1} agent_wlan0 "ssid: Multi-AP-24G-1, .* fronthaul"
     check_log ${REPEATER1} agent_wlan2 "ssid: .* teardown"
+    agent1_wlan0_ssid="$(send_bml_command bml_conn_map | sed -n "/fVAP.*$mac_agent1_wlan0/s/.*ssid: //p")"
+    check [ "$agent1_wlan0_ssid" = "Multi-AP-24G-1" ]
 
     # SSIDs have been removed for the CTT Agent1's front radio
     send_CAPI_command ${GATEWAY} "DEV_SET_CONFIG,bss_info1,$MAC_AGENT1 8x" $redirect
@@ -176,7 +178,9 @@ test_ap_config_bss_tear_down() {
 
     sleep 3
     check_log ${REPEATER1} agent_wlan0 "ssid: .* teardown"
-    
+    agent1_wlan0_ssid="$(send_bml_command bml_conn_map | sed -n "/fVAP.*$mac_agent1_wlan0/s/.*ssid: //p")"
+    check [ "$agent1_wlan0_ssid" = "N/A" ]
+
     return $check_error
 }
 
