@@ -72,6 +72,9 @@ private:
     void fsm_move_state(eState new_state);
     bool fsm_in_state(eState state);
 
+    beerocks::eChannelScanErrCode dcs_request_scan_trigger();
+    beerocks::eChannelScanErrCode dcs_request_scan_dump();
+
     eState m_fsm_state;
 
     db &database;
