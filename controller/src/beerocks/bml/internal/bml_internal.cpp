@@ -997,20 +997,20 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             if (m_prmChannelScanResultsGet) {
 
                 if (m_scan_results && m_scan_results_maxsize && m_scan_results_status) {
-
-                    LOG(DEBUG) << "Receiving Response";
-
                     uint8_t op_error_code  = response->op_error_code();
                     *m_scan_results_status = response->result_status();
                     auto scan_results_size = response->results_size();
                     uint8_t last           = response->last();
 
-                    LOG(DEBUG) << "Opt code: " << int(op_error_code)
+                    LOG(DEBUG) << "Received response ["
+                               << "opt code: " << int(op_error_code)
                                << ", status: " << int(*m_scan_results_status)
-                               << ", size: " << int(scan_results_size);
+                               << ", size: " << int(scan_results_size)
+                               << "].";
 
                     if (scan_results_size > 0) {
-                        LOG(DEBUG) << "currently with " << m_scan_results->size() << " results";
+                        LOG(TRACE) << "currently " << m_scan_results->size() << " cached results, "
+                                   << "adding " << int(scan_results_size) << ".";
 
                         // Get results from CMDU
                         auto results = &std::get<1>(response->results(0));
@@ -1024,14 +1024,14 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                         // Insert results
                         m_scan_results->insert(m_scan_results->end(), results,
                                                results + scan_results_size);
-                        LOG(DEBUG) << scan_results_size << " results added";
+                        LOG(TRACE) << "added " << int(scan_results_size) << " results, "
+                                   << "to a total of " << m_scan_results->size() << ".";
                     }
-                    LOG(DEBUG) << "last: " << (int)last;
-                    if (last == 1) {
-                        LOG(DEBUG) << "Results done";
-                        m_prmChannelScanResultsGet->set_value(op_error_code);
+                    if (!last) {
+                        LOG(TRACE) << "Waiting for more results.";
                     } else {
-                        LOG(DEBUG) << "Results cont";
+                        LOG(TRACE) << "Done receiving results, resolving promise.";
+                        m_prmChannelScanResultsGet->set_value(op_error_code);
                     }
                 }
             } else {
@@ -1052,7 +1052,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             //Signal any waiting threads
             if (!wake_up(beerocks_message::ACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST,
                          response->op_error_code())) {
-                LOG(WARNING) << "Received ACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST"
+                LOG(WARNING) << "Received ACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE"
                              << " response, but no one is waiting...";
             }
         } break;
@@ -1637,6 +1637,10 @@ int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP *res
     }
 
     iRet = prmChannelScanResultsGet.get_value();
+    LOG(DEBUG) << "Promise resolved, recived results info: ["
+               << "total count: " << scan_results.size() << ", "
+               << "results status: " << int(result_status) << ", "
+               << "results opt code: " << int(iRet) << "].";
     if (iRet != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
         LOG(ERROR) << "Results returned with error code:" << iRet << ". Aborting!";
         return iRet;
