@@ -1209,7 +1209,7 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
 
     auto TxLinkMetricData = cmdu_rx.getClass<ieee1905_1::tlvTransmitterLinkMetric>();
     if (!TxLinkMetricData) {
-        LOG(ERROR) << "addClass ieee1905_1::tx_Link_metric_data has failed";
+        LOG(ERROR) << "getClass ieee1905_1::tlvTransmitterLinkMetric has failed";
         return false;
     }
 
@@ -1222,7 +1222,7 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
             old_link_metrics_removed = true;
         }
 
-        LOG(DEBUG) << "recieved  tlvTransmitterLinkMetric from al_mac =" << reporting_agent_al_mac
+        LOG(DEBUG) << "Received TLV_TRANSMITTER_LINK_METRIC from al_mac =" << reporting_agent_al_mac
                    << std::endl
                    << "reported  al_mac =" << TxLinkMetricData->neighbor_al_mac() << std::endl;
 
@@ -1235,7 +1235,7 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
 
     auto RxLinkMetricData = cmdu_rx.getClass<ieee1905_1::tlvReceiverLinkMetric>();
     if (!RxLinkMetricData) {
-        LOG(ERROR) << "addClass ieee1905_1::tlvReceiverLinkMetric has failed";
+        LOG(ERROR) << "getClass ieee1905_1::tlvReceiverLinkMetric has failed";
         return false;
     }
 
@@ -1250,7 +1250,7 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
         }
     }
 
-    LOG(DEBUG) << "recieved tlvReceiverLinkMetric from al_mac=" << reporting_agent_al_mac
+    LOG(DEBUG) << "Received TLV_RECEIVER_LINK_METRIC from al_mac=" << reporting_agent_al_mac
                << std::endl
                << "reported  al_mac =" << RxLinkMetricData->neighbor_al_mac() << std::endl;
 
