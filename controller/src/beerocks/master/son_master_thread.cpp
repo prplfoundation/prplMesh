@@ -611,17 +611,6 @@ bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
     uint8_t keywrapkey[16];
     autoconfig_wsc_calculate_keys(m1, m2_cfg, dh, authkey, keywrapkey);
 
-    // TODO This is temporary for debugging #560
-    LOG(DEBUG) << "authkey:" << std::endl
-               << utils::dump_buffer(authkey, sizeof(authkey)) << "kwrpkey:" << std::endl
-               << utils::dump_buffer(keywrapkey, sizeof(keywrapkey)) << "nonce_e:" << std::endl
-               << utils::dump_buffer(m1.enrollee_nonce(), WSC::eWscLengths::WSC_NONCE_LENGTH)
-               << "nonce_r:" << std::endl
-               << utils::dump_buffer(dh.nonce(), dh.nonce_length()) << "pubkeye:" << std::endl
-               << utils::dump_buffer(m1.public_key(), WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH)
-               << "pubkeyr:" << std::endl
-               << utils::dump_buffer(dh.pubkey(), dh.pubkey_length());
-
     // Encrypted settings
     // Encrypted settings are the ConfigData + IV. First create the ConfigData,
     // Then copy it to the encrypted data, add an IV and encrypt.
