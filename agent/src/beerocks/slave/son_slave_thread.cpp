@@ -4705,7 +4705,7 @@ bool slave_thread::autoconfig_wsc_add_m1()
     cfg.mac      = network_utils::mac_from_string(backhaul_params.bridge_mac);
     dh           = std::make_unique<mapf::encryption::diffie_hellman>();
     std::copy(dh->nonce(), dh->nonce() + dh->nonce_length(), cfg.enrollee_nonce);
-    std::copy(dh->pubkey(), dh->pubkey() + dh->pubkey_length(), cfg.pub_key);
+    copy_pubkey(*dh, cfg.pub_key);
     cfg.auth_type_flags =
         uint16_t(WSC::eWscAuth::WSC_AUTH_OPEN) | uint16_t(WSC::eWscAuth::WSC_AUTH_WPA2PSK);
     cfg.encr_type_flags     = uint16_t(WSC::eWscEncr::WSC_ENCR_AES);

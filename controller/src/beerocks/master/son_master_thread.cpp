@@ -503,7 +503,7 @@ void master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::m2::config &
     mapf::encryption::wps_calculate_keys(
         dh, m1.public_key(), WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, m1.enrollee_nonce(),
         m1.mac_addr().oct, m2.registrar_nonce, authkey, keywrapkey);
-    std::copy(dh.pubkey(), dh.pubkey() + dh.pubkey_length(), m2.pub_key);
+    copy_pubkey(dh, m2.pub_key);
 }
 
 /**
