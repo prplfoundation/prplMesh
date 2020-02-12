@@ -48,12 +48,11 @@ platform_init() {
     control_ip=192.168.250.140
     
     ip link add @BEEROCKS_BRIDGE_IFACE@ address "${base_mac}:00:00" type bridge
-    ip link add @BEEROCKS_BH_WIRE_IFACE@ type dummy
     ip link add wlan0 address "${base_mac}:00:10" type dummy
     ip link add wlan2 address "${base_mac}:00:20" type dummy
     ip link set dev wlan0 up
     ip link set dev wlan2 up
-    for iface in wlan0 wlan2 @BEEROCKS_BH_WIRE_IFACE@ $DATA_IFACE
+    for iface in wlan0 wlan2 $DATA_IFACE
     do
         echo "add $iface to @BEEROCKS_BRIDGE_IFACE@"
         nmcli d set "$iface" managed no
@@ -69,7 +68,7 @@ platform_deinit() {
     echo "platform deinit"
     [ -z "$DATA_IFACE" ] && err "DATA_IFACE not set, abort" && exit 1
     [ -z "$CONTROL_IFACE" ] && err "CONTROL_IFACE not set, abort" && exit 1
-    for iface in wlan0 wlan2 @BEEROCKS_BH_WIRE_IFACE@ $DATA_IFACE
+    for iface in wlan0 wlan2 $DATA_IFACE
     do
         echo "remove $iface from @BEEROCKS_BRIDGE_IFACE@"
         ip link set dev "$iface" nomaster
@@ -77,7 +76,6 @@ platform_deinit() {
     done
     ip link del wlan0
     ip link del wlan2
-    ip link del @BEEROCKS_BH_WIRE_IFACE@
     ip link del @BEEROCKS_BRIDGE_IFACE@
 }
 
