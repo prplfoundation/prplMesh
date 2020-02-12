@@ -606,7 +606,7 @@ bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
     ///////////////////////////////
     // @brief encryption support //
     ///////////////////////////////
-    mapf::encryption::diffie_hellman dh;
+    mapf::encryption::diffie_hellman dh(true);
     uint8_t authkey[32];
     uint8_t keywrapkey[16];
     autoconfig_wsc_calculate_keys(m1, m2_cfg, dh, authkey, keywrapkey);
