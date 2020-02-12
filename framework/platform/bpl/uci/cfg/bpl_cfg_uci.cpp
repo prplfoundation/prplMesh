@@ -251,7 +251,7 @@ int cfg_uci_get_wireless_from_ifname(enum paramType type, const char *interface_
         }
         uci_free_context(ctx);
 
-        if (device_option_exist) {
+        if (!device_option_exist) {
             // radio not found
             ERROR("%s device option not found\n", __func__);
             return RETURN_ERR;
