@@ -141,6 +141,27 @@ prplmesh_delete_logs() {
     rm -rf /tmp/${SUDO_USER:-${USER}}/beerocks/logs
 }
 
+prplmesh_watchdog() {
+    # Store PIDs of the Controller and Agents
+    local CURR_PIDS="$(pgrep 'beerocks_(agent|controller)' | wc -l)"
+    local PREV_PIDS="$CURR_PIDS"
+
+    # Make sure there's at least one PID to monitor
+    if [ -z "$CURR_PIDS" ]; then
+        echo "No controller or agent processes found."
+        return
+    fi
+
+    # Monitor the number of running processes
+    while [ $CURR_PIDS -ge $PREV_PIDS ]; do
+        sleep 1
+        CURR_PIDS="$(pgrep 'beerocks_(agent|controller)' | wc -l)"
+        if [ $CURR_PIDS -gt $PREV_PIDS ]; then
+            PREV_PIDS=$CURR_PIDS
+        fi
+    done
+}
+
 roll_logs_function()
 {
     ROLL_PROGRESS_DIR="roll_in_progress.lock"
@@ -315,7 +336,8 @@ main() {
             ;;
         "start_wait")
             start_function
-            wait -n
+            prplmesh_watchdog
+            stop_function
             ;;
         "stop")
             stop_function
