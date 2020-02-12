@@ -54,7 +54,7 @@ EOF
 
 main() {
     if ! OPTS=$(getopt -o 'h' --long help,certification-mode,proxy: -n 'parse-options' -- "$@"); then
-        err "Failed parsing options." >&2
+        echo "Failed parsing options." >&2
         usage
         exit 1
     fi
