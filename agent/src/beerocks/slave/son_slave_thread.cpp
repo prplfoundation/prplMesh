@@ -4118,8 +4118,19 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         if (!autoconfig_wsc_calculate_keys(m2, authkey, keywrapkey))
             return false;
 
-        if (!autoconfig_wsc_authenticate(m2, authkey))
+        if (!autoconfig_wsc_authenticate(m2, authkey)) {
+            // TODO This is temporary for debugging #560
+            LOG(DEBUG)
+                << "authkey:" << std::endl
+                << utils::dump_buffer(authkey, sizeof(authkey)) << "kwrpkey:" << std::endl
+                << utils::dump_buffer(keywrapkey, sizeof(keywrapkey)) << "nonce_e:" << std::endl
+                << utils::dump_buffer(dh->nonce(), dh->nonce_length()) << "nonce_r:" << std::endl
+                << utils::dump_buffer(m2.registrar_nonce(), WSC::eWscLengths::WSC_NONCE_LENGTH)
+                << "pubkeye:" << std::endl
+                << utils::dump_buffer(dh->pubkey(), dh->pubkey_length()) << "pubkeyr:" << std::endl
+                << utils::dump_buffer(m2.public_key(), WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH);
             return false;
+        }
 
         bool fronthaul, backhaul, teardown;
         auto credentials = request->create_wifi_credentials();
