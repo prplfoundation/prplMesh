@@ -1882,7 +1882,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
      * to IEEE_1905 section 6.4.5
      */
     uint32_t speed;
-    if (network_utils::linux_iface_get_speed(bridge_info.iface, speed)) {
+    if (network_utils::linux_iface_get_speed(m_sConfig.wire_iface, speed)) {
         std::shared_ptr<ieee1905_1::cLocalInterfaceInfo> localInterfaceInfo =
             tlvDeviceInformation->create_local_interface_list();
 
@@ -1893,7 +1893,10 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             media_type = ieee1905_1::eMediaType::IEEE_802_3AB_GIGABIT_ETHERNET;
         }
 
-        localInterfaceInfo->mac()               = network_utils::mac_from_string(bridge_info.mac);
+        // default to zero mac if get_mac fails.
+        std::string wire_iface_mac = network_utils::ZERO_MAC_STRING;
+        network_utils::linux_iface_get_mac(m_sConfig.wire_iface, wire_iface_mac);
+        localInterfaceInfo->mac()               = network_utils::mac_from_string(wire_iface_mac);
         localInterfaceInfo->media_type()        = media_type;
         localInterfaceInfo->media_info_length() = 0;
 
