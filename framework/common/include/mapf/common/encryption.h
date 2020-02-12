@@ -32,7 +32,7 @@ public:
     /**
      * @brief Generate a keypair suitable for Diffie-Hellman key exchange
      */
-    diffie_hellman(bool force_small_key = false);
+    diffie_hellman();
 
     ~diffie_hellman();
 
