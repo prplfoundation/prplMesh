@@ -477,7 +477,6 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(WSC::m2::config &m2
         LOG(ERROR) << "aes encrypt failure";
         return false;
     }
-    LOG(DEBUG) << "ciphertext: " << std::endl << utils::dump_buffer(ciphertext, cipherlen);
     m2_cfg.encrypted_settings = std::vector<uint8_t>(ciphertext, ciphertext + cipherlen);
 
     return true;
@@ -540,12 +539,6 @@ bool master_thread::autoconfig_wsc_authentication(WSC::m1 &m1, WSC::m2 &m2, uint
         LOG(ERROR) << "kwa_compute failure";
         return false;
     }
-    LOG(DEBUG) << "authenticator: " << utils::dump_buffer(kwa, WSC::WSC_AUTHENTICATOR_LENGTH);
-    LOG(DEBUG) << "authenticator key: " << utils::dump_buffer(authkey, 32);
-    LOG(DEBUG) << "m2 buf:" << std::endl
-               << utils::dump_buffer(m2.getMessageBuff(), m2.getMessageLength());
-    LOG(DEBUG) << "authenticator buf:" << std::endl << utils::dump_buffer(buf, sizeof(buf));
-
     return true;
 }
 
