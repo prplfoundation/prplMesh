@@ -40,6 +40,7 @@ tlvSearchedRole::eValue& tlvSearchedRole::value() {
 void tlvSearchedRole::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
+    tlvf_swap(8*sizeof(eValue), reinterpret_cast<uint8_t*>(m_value));
 }
 
 bool tlvSearchedRole::finalize()

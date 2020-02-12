@@ -74,6 +74,7 @@ bool tlvHigherLayerData::alloc_payload(size_t count) {
 void tlvHigherLayerData::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
+    tlvf_swap(8*sizeof(eProtocol), reinterpret_cast<uint8_t*>(m_protocol));
 }
 
 bool tlvHigherLayerData::finalize()

@@ -856,6 +856,7 @@ typedef struct sWifiCredentials {
     uint8_t force;
     uint8_t radio_dir;
     void struct_swap(){
+        tlvf_swap(8*sizeof(eWiFiSec), reinterpret_cast<uint8_t*>(&wifi_sec));
     }
     void struct_init(){
     }
@@ -1133,6 +1134,8 @@ typedef struct sSteeringEvDisconnect {
         client_mac.struct_swap();
         bssid.struct_swap();
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&reason));
+        tlvf_swap(8*sizeof(eDisconnectSource), reinterpret_cast<uint8_t*>(&source));
+        tlvf_swap(8*sizeof(eDisconnectType), reinterpret_cast<uint8_t*>(&type));
     }
     void struct_init(){
         client_mac.struct_init();
@@ -1165,6 +1168,9 @@ typedef struct sSteeringEvSnrXing {
         client_mac.struct_swap();
         bssid.struct_swap();
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&snr));
+        tlvf_swap(8*sizeof(eSteeringSnrChange), reinterpret_cast<uint8_t*>(&inactveXing));
+        tlvf_swap(8*sizeof(eSteeringSnrChange), reinterpret_cast<uint8_t*>(&highXing));
+        tlvf_swap(8*sizeof(eSteeringSnrChange), reinterpret_cast<uint8_t*>(&lowXing));
     }
     void struct_init(){
         client_mac.struct_init();

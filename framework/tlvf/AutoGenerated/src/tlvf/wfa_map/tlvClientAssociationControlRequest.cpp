@@ -92,6 +92,7 @@ void tlvClientAssociationControlRequest::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_bssid_to_block_client->struct_swap();
+    tlvf_swap(8*sizeof(eAssociationControl), reinterpret_cast<uint8_t*>(m_association_control));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_validity_period_sec));
     for (size_t i = 0; i < (size_t)*m_sta_list_length; i++){
         m_sta_list[i].struct_swap();

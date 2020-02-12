@@ -31,6 +31,7 @@ int8_t& cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION::vap_id() {
 
 void cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION::finalize()
@@ -94,6 +95,7 @@ cACTION_MONITOR_JOINED_NOTIFICATION::~cACTION_MONITOR_JOINED_NOTIFICATION() {
 }
 void cACTION_MONITOR_JOINED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_MONITOR_JOINED_NOTIFICATION::finalize()
@@ -155,6 +157,7 @@ sSonConfig& cACTION_MONITOR_SON_CONFIG_UPDATE::config() {
 
 void cACTION_MONITOR_SON_CONFIG_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_config->struct_swap();
 }
 
@@ -224,6 +227,7 @@ sLoggingLevelChange& cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL::params() {
 
 void cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -293,6 +297,7 @@ uint32_t& cACTION_MONITOR_ERROR_NOTIFICATION::error_code() {
 
 void cACTION_MONITOR_ERROR_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -357,6 +362,7 @@ cACTION_MONITOR_ERROR_NOTIFICATION_ACK::~cACTION_MONITOR_ERROR_NOTIFICATION_ACK(
 }
 void cACTION_MONITOR_ERROR_NOTIFICATION_ACK::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_MONITOR_ERROR_NOTIFICATION_ACK::finalize()
@@ -414,6 +420,7 @@ cACTION_MONITOR_HEARTBEAT_NOTIFICATION::~cACTION_MONITOR_HEARTBEAT_NOTIFICATION(
 }
 void cACTION_MONITOR_HEARTBEAT_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_MONITOR_HEARTBEAT_NOTIFICATION::finalize()
@@ -475,6 +482,7 @@ sClientMonitoringParams& cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST::params
 
 void cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -544,6 +552,7 @@ uint8_t& cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE::success() {
 
 void cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE::finalize()
@@ -611,6 +620,7 @@ sMacAddr& cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::mac() {
 
 void cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -680,6 +690,7 @@ sNodeRssiMeasurementRequest& cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST:
 
 void cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -757,6 +768,7 @@ uint8_t& cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::channel() {
 
 void cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
     m_ipv4->struct_swap();
 }
@@ -840,6 +852,7 @@ sNodeRssiMeasurement& cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::p
 
 void cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -909,6 +922,7 @@ sNodeRssiMeasurement& cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::param
 
 void cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -978,6 +992,7 @@ sMacAddr& cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::mac() {
 
 void cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -1047,6 +1062,7 @@ sMacAddr& cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::mac() {
 
 void cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -1116,6 +1132,7 @@ sMacAddr& cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::mac() {
 
 void cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -1185,6 +1202,7 @@ sMacAddr& cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::mac() {
 
 void cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -1254,6 +1272,7 @@ sApActivityNotificationParams& cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION::par
 
 void cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1323,6 +1342,7 @@ uint8_t& cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST::sync() {
 
 void cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST::finalize()
@@ -1394,6 +1414,7 @@ int8_t& cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION::new_hostap_enabled_s
 
 void cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION::finalize()
@@ -1509,6 +1530,7 @@ bool cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
 
 void cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_ap_stats->struct_swap();
     for (size_t i = 0; i < (size_t)*m_sta_stats_size; i++){
         m_sta_stats[i].struct_swap();
@@ -1595,6 +1617,7 @@ sApLoadNotificationParams& cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION:
 
 void cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1664,6 +1687,7 @@ sBeaconRequest11k& cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST::params() {
 
 void cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1733,6 +1757,7 @@ sBeaconResponse11k& cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE::params() {
 
 void cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1802,6 +1827,7 @@ sStaChannelLoadRequest11k& cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST::para
 
 void cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1871,6 +1897,7 @@ sStaChannelLoadResponse11k& cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE::pa
 
 void cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1940,6 +1967,7 @@ sStatisticsRequest11k& cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST::params() {
 
 void cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2009,6 +2037,7 @@ sStatisticsResponse11k& cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE::params()
 
 void cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2078,6 +2107,7 @@ sMacAddr& cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::mac() {
 
 void cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -2147,6 +2177,7 @@ sLinkMeasurementsResponse11k& cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPO
 
 void cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2220,6 +2251,7 @@ beerocks::net::sIpv4Addr& cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::ip
 
 void cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
     m_ipv4->struct_swap();
 }
@@ -2297,6 +2329,7 @@ sSteeringSetGroupRequest& cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST::par
 
 void cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2366,6 +2399,7 @@ sSteeringSetGroupResponse& cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE::p
 
 void cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2435,6 +2469,7 @@ sSteeringClientSetRequest& cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST::params()
 
 void cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2504,6 +2539,7 @@ sSteeringClientSetResponse& cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE::params
 
 void cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2573,6 +2609,7 @@ sSteeringEvActivity& cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION
 
 void cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2642,6 +2679,7 @@ sSteeringEvSnrXing& cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION::params
 
 void cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2711,6 +2749,7 @@ sTriggerChannelScanParams& cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST::sc
 
 void cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_scan_params->struct_swap();
 }
 
@@ -2780,6 +2819,7 @@ uint8_t& cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::success() {
 
 void cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::finalize()
@@ -2843,6 +2883,7 @@ cACTION_MONITOR_CHANNEL_SCAN_TRIGGERED_NOTIFICATION::~cACTION_MONITOR_CHANNEL_SC
 }
 void cACTION_MONITOR_CHANNEL_SCAN_TRIGGERED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_MONITOR_CHANNEL_SCAN_TRIGGERED_NOTIFICATION::finalize()
@@ -2908,6 +2949,7 @@ uint8_t& cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION::is_dump() {
 
 void cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     m_scan_results->struct_swap();
 }
 
@@ -2984,6 +3026,7 @@ uint8_t& cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION::reason() {
 
 void cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION::finalize()
@@ -3047,6 +3090,7 @@ cACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION::~cACTION_MONITOR_CHANNEL_SCA
 }
 void cACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION::finalize()

@@ -272,6 +272,7 @@ bool cLocalInterfaceInfo::alloc_media_info(size_t count) {
 void cLocalInterfaceInfo::class_swap()
 {
     m_mac->struct_swap();
+    tlvf_swap(8*sizeof(eMediaType), reinterpret_cast<uint8_t*>(m_media_type));
 }
 
 bool cLocalInterfaceInfo::finalize()

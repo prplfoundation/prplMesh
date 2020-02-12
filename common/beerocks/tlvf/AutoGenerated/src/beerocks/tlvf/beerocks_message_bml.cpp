@@ -27,6 +27,7 @@ cACTION_BML_PING_REQUEST::~cACTION_BML_PING_REQUEST() {
 }
 void cACTION_BML_PING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_PING_REQUEST::finalize()
@@ -84,6 +85,7 @@ cACTION_BML_PING_RESPONSE::~cACTION_BML_PING_RESPONSE() {
 }
 void cACTION_BML_PING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_PING_RESPONSE::finalize()
@@ -141,6 +143,7 @@ cACTION_BML_NW_MAP_REQUEST::~cACTION_BML_NW_MAP_REQUEST() {
 }
 void cACTION_BML_NW_MAP_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_NW_MAP_REQUEST::finalize()
@@ -256,6 +259,7 @@ bool cACTION_BML_NW_MAP_RESPONSE::alloc_buffer(size_t count) {
 
 void cACTION_BML_NW_MAP_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_node_num));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
@@ -394,6 +398,7 @@ bool cACTION_BML_NW_MAP_UPDATE::alloc_buffer(size_t count) {
 
 void cACTION_BML_NW_MAP_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_node_num));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
@@ -532,6 +537,7 @@ bool cACTION_BML_STATS_UPDATE::alloc_buffer(size_t count) {
 
 void cACTION_BML_STATS_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_num_of_stats_bulks));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
@@ -666,6 +672,7 @@ bool cACTION_BML_EVENTS_UPDATE::alloc_buffer(size_t count) {
 
 void cACTION_BML_EVENTS_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
 
@@ -739,6 +746,7 @@ cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST::~cACTION_BML_REGISTER_TO_NW_MAP_
 }
 void cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST::finalize()
@@ -796,6 +804,7 @@ cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE::~cACTION_BML_REGISTER_TO_NW_MAP
 }
 void cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE::finalize()
@@ -853,6 +862,7 @@ cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST::~cACTION_BML_UNREGISTER_FROM
 }
 void cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST::finalize()
@@ -910,6 +920,7 @@ cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE::~cACTION_BML_UNREGISTER_FRO
 }
 void cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE::finalize()
@@ -967,6 +978,7 @@ cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE::~cACTION_BML_SET_LEGACY_CLIENT_R
 }
 void cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE::finalize()
@@ -1024,6 +1036,7 @@ cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST::~cACTION_BML_GET_LEGACY_CLIENT_RO
 }
 void cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST::finalize()
@@ -1081,6 +1094,7 @@ cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST::~cACTION_BML_REGISTER_TO_EVENTS_
 }
 void cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST::finalize()
@@ -1138,6 +1152,7 @@ cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE::~cACTION_BML_REGISTER_TO_EVENTS
 }
 void cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE::finalize()
@@ -1195,6 +1210,7 @@ cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST::~cACTION_BML_UNREGISTER_FROM
 }
 void cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST::finalize()
@@ -1252,6 +1268,7 @@ cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE::~cACTION_BML_UNREGISTER_FRO
 }
 void cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE::finalize()
@@ -1309,6 +1326,7 @@ cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST::~cACTION_BML_REGISTER_TO_STATS_UP
 }
 void cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST::finalize()
@@ -1366,6 +1384,7 @@ cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE::~cACTION_BML_REGISTER_TO_STATS_U
 }
 void cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE::finalize()
@@ -1423,6 +1442,7 @@ cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST::~cACTION_BML_UNREGISTER_FROM_
 }
 void cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST::finalize()
@@ -1480,6 +1500,7 @@ cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE::~cACTION_BML_UNREGISTER_FROM
 }
 void cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE::finalize()
@@ -1541,6 +1562,7 @@ uint8_t& cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST::isEnable() {
 
 void cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST::finalize()
@@ -1608,6 +1630,7 @@ uint8_t& cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE::finalize()
@@ -1675,6 +1698,7 @@ uint8_t& cACTION_BML_SET_CLIENT_ROAMING_REQUEST::isEnable() {
 
 void cACTION_BML_SET_CLIENT_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_ROAMING_REQUEST::finalize()
@@ -1738,6 +1762,7 @@ cACTION_BML_SET_CLIENT_ROAMING_RESPONSE::~cACTION_BML_SET_CLIENT_ROAMING_RESPONS
 }
 void cACTION_BML_SET_CLIENT_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_ROAMING_RESPONSE::finalize()
@@ -1795,6 +1820,7 @@ cACTION_BML_GET_CLIENT_ROAMING_REQUEST::~cACTION_BML_GET_CLIENT_ROAMING_REQUEST(
 }
 void cACTION_BML_GET_CLIENT_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_ROAMING_REQUEST::finalize()
@@ -1856,6 +1882,7 @@ uint8_t& cACTION_BML_GET_CLIENT_ROAMING_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_CLIENT_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_ROAMING_RESPONSE::finalize()
@@ -1923,6 +1950,7 @@ uint8_t& cACTION_BML_SET_DFS_REENTRY_REQUEST::isEnable() {
 
 void cACTION_BML_SET_DFS_REENTRY_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_DFS_REENTRY_REQUEST::finalize()
@@ -1986,6 +2014,7 @@ cACTION_BML_SET_DFS_REENTRY_RESPONSE::~cACTION_BML_SET_DFS_REENTRY_RESPONSE() {
 }
 void cACTION_BML_SET_DFS_REENTRY_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_DFS_REENTRY_RESPONSE::finalize()
@@ -2043,6 +2072,7 @@ cACTION_BML_GET_DFS_REENTRY_REQUEST::~cACTION_BML_GET_DFS_REENTRY_REQUEST() {
 }
 void cACTION_BML_GET_DFS_REENTRY_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_DFS_REENTRY_REQUEST::finalize()
@@ -2104,6 +2134,7 @@ uint8_t& cACTION_BML_GET_DFS_REENTRY_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_DFS_REENTRY_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_DFS_REENTRY_RESPONSE::finalize()
@@ -2171,6 +2202,7 @@ uint8_t& cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::isEnable
 
 void cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::finalize()
@@ -2234,6 +2266,7 @@ cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::~cACTION_BML_SET
 }
 void cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::finalize()
@@ -2291,6 +2324,7 @@ cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::~cACTION_BML_GET_
 }
 void cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::finalize()
@@ -2352,6 +2386,7 @@ uint8_t& cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::isEnabl
 
 void cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::finalize()
@@ -2419,6 +2454,7 @@ uint8_t& cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST::isEnable() {
 
 void cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST::finalize()
@@ -2482,6 +2518,7 @@ cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE::~cACTION_BML_SET_CLIENT_BAND_STEE
 }
 void cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE::finalize()
@@ -2539,6 +2576,7 @@ cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST::~cACTION_BML_GET_CLIENT_BAND_STEER
 }
 void cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST::finalize()
@@ -2600,6 +2638,7 @@ uint8_t& cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE::finalize()
@@ -2667,6 +2706,7 @@ uint8_t& cACTION_BML_SET_IRE_ROAMING_REQUEST::isEnable() {
 
 void cACTION_BML_SET_IRE_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_IRE_ROAMING_REQUEST::finalize()
@@ -2730,6 +2770,7 @@ cACTION_BML_SET_IRE_ROAMING_RESPONSE::~cACTION_BML_SET_IRE_ROAMING_RESPONSE() {
 }
 void cACTION_BML_SET_IRE_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_IRE_ROAMING_RESPONSE::finalize()
@@ -2787,6 +2828,7 @@ cACTION_BML_GET_IRE_ROAMING_REQUEST::~cACTION_BML_GET_IRE_ROAMING_REQUEST() {
 }
 void cACTION_BML_GET_IRE_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_IRE_ROAMING_REQUEST::finalize()
@@ -2848,6 +2890,7 @@ uint8_t& cACTION_BML_GET_IRE_ROAMING_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_IRE_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_IRE_ROAMING_RESPONSE::finalize()
@@ -2915,6 +2958,7 @@ uint8_t& cACTION_BML_SET_LOAD_BALANCER_REQUEST::isEnable() {
 
 void cACTION_BML_SET_LOAD_BALANCER_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_LOAD_BALANCER_REQUEST::finalize()
@@ -2978,6 +3022,7 @@ cACTION_BML_SET_LOAD_BALANCER_RESPONSE::~cACTION_BML_SET_LOAD_BALANCER_RESPONSE(
 }
 void cACTION_BML_SET_LOAD_BALANCER_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_LOAD_BALANCER_RESPONSE::finalize()
@@ -3035,6 +3080,7 @@ cACTION_BML_GET_LOAD_BALANCER_REQUEST::~cACTION_BML_GET_LOAD_BALANCER_REQUEST() 
 }
 void cACTION_BML_GET_LOAD_BALANCER_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_LOAD_BALANCER_REQUEST::finalize()
@@ -3096,6 +3142,7 @@ uint8_t& cACTION_BML_GET_LOAD_BALANCER_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_LOAD_BALANCER_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_LOAD_BALANCER_RESPONSE::finalize()
@@ -3163,6 +3210,7 @@ uint8_t& cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST::isEnable() {
 
 void cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST::finalize()
@@ -3226,6 +3274,7 @@ cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE::~cACTION_BML_SET_SERVICE_FAIRNESS_RES
 }
 void cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE::finalize()
@@ -3283,6 +3332,7 @@ cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST::~cACTION_BML_GET_SERVICE_FAIRNESS_REQU
 }
 void cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST::finalize()
@@ -3344,6 +3394,7 @@ uint8_t& cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE::finalize()
@@ -3411,6 +3462,7 @@ sLoggingLevelChange& cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST::params() {
 
 void cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3476,6 +3528,7 @@ cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE::~cACTION_BML_CHANGE_MODULE_LOG
 }
 void cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE::finalize()
@@ -3537,6 +3590,7 @@ sWifiCredentials& cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST::params() {
 
 void cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3606,6 +3660,7 @@ uint32_t& cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE::error_code() {
 
 void cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -3674,6 +3729,7 @@ sRestrictedChannels& cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST::params() {
 
 void cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3743,6 +3799,7 @@ uint32_t& cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE::error_code() {
 
 void cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -3811,6 +3868,7 @@ sRestrictedChannels& cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST::params() {
 
 void cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3880,6 +3938,7 @@ sRestrictedChannels& cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE::params() {
 
 void cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3949,6 +4008,7 @@ uint8_t& cACTION_BML_SET_CERTIFICATION_MODE_REQUEST::isEnable() {
 
 void cACTION_BML_SET_CERTIFICATION_MODE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CERTIFICATION_MODE_REQUEST::finalize()
@@ -4012,6 +4072,7 @@ cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE::~cACTION_BML_SET_CERTIFICATION_MODE
 }
 void cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE::finalize()
@@ -4069,6 +4130,7 @@ cACTION_BML_GET_CERTIFICATION_MODE_REQUEST::~cACTION_BML_GET_CERTIFICATION_MODE_
 }
 void cACTION_BML_GET_CERTIFICATION_MODE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CERTIFICATION_MODE_REQUEST::finalize()
@@ -4130,6 +4192,7 @@ uint8_t& cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE::finalize()
@@ -4239,6 +4302,7 @@ bool cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::alloc_vap_list(size_t count) 
 
 void cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
     for (size_t i = 0; i < (size_t)*m_vap_list_size; i++){
         m_vap_list[i].struct_swap();
@@ -4324,6 +4388,7 @@ uint32_t& cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE::result() {
 
 void cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
 }
 
@@ -4434,6 +4499,7 @@ bool cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::alloc_vap_list(size_t count)
 
 void cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
     for (size_t i = 0; i < (size_t)*m_vap_list_size; i++){
         m_vap_list[i].struct_swap();
@@ -4519,6 +4585,7 @@ uint32_t& cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST::result() {
 
 void cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
 }
 
@@ -4599,6 +4666,7 @@ uint8_t& cACTION_BML_STEERING_SET_GROUP_REQUEST::remove() {
 
 void cACTION_BML_STEERING_SET_GROUP_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_steeringGroupIndex));
     m_cfg_2->struct_swap();
     m_cfg_5->struct_swap();
@@ -4689,6 +4757,7 @@ int32_t& cACTION_BML_STEERING_SET_GROUP_RESPONSE::error_code() {
 
 void cACTION_BML_STEERING_SET_GROUP_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -4773,6 +4842,7 @@ uint8_t& cACTION_BML_STEERING_CLIENT_SET_REQUEST::remove() {
 
 void cACTION_BML_STEERING_CLIENT_SET_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_steeringGroupIndex));
     m_bssid->struct_swap();
     m_client_mac->struct_swap();
@@ -4871,6 +4941,7 @@ int32_t& cACTION_BML_STEERING_CLIENT_SET_RESPONSE::error_code() {
 
 void cACTION_BML_STEERING_CLIENT_SET_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -4939,6 +5010,7 @@ uint8_t& cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST::unregister() {
 
 void cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST::finalize()
@@ -5006,6 +5078,7 @@ int32_t& cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE::error_code() {
 
 void cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -5090,9 +5163,11 @@ uint32_t& cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::reason() {
 
 void cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_steeringGroupIndex));
     m_bssid->struct_swap();
     m_client_mac->struct_swap();
+    tlvf_swap(8*sizeof(eDisconnectType), reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_reason));
 }
 
@@ -5187,6 +5262,7 @@ int32_t& cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE::error_code() {
 
 void cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -5263,6 +5339,7 @@ sMacAddr& cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::client_mac() {
 
 void cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_steeringGroupIndex));
     m_bssid->struct_swap();
     m_client_mac->struct_swap();
@@ -5347,6 +5424,7 @@ int32_t& cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE::error_code() {
 
 void cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -5465,6 +5543,7 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::alloc_buffer(size_t count) {
 
 void cACTION_BML_STEERING_EVENTS_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
 
@@ -5542,6 +5621,7 @@ sMacAddr& cACTION_BML_TRIGGER_TOPOLOGY_QUERY::al_mac() {
 
 void cACTION_BML_TRIGGER_TOPOLOGY_QUERY::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_al_mac->struct_swap();
 }
 
@@ -5615,6 +5695,7 @@ sMacAddr& cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::ruid() {
 
 void cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_al_mac->struct_swap();
     m_ruid->struct_swap();
 }
@@ -5696,6 +5777,7 @@ sChannelScanRequestParams& cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUES
 
 void cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_radio_mac->struct_swap();
     m_params->struct_swap();
 }
@@ -5773,6 +5855,7 @@ uint8_t& cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE::op_error_code(
 
 void cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE::finalize()
@@ -5840,6 +5923,7 @@ sMacAddr& cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST::radio_mac() {
 
 void cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_radio_mac->struct_swap();
 }
 
@@ -5909,6 +5993,7 @@ sChannelScanRequestParams& cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPON
 
 void cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -5982,6 +6067,7 @@ uint8_t& cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST::isEnable() {
 
 void cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_radio_mac->struct_swap();
 }
 
@@ -6057,6 +6143,7 @@ uint8_t& cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE::op_error_code(
 
 void cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE::finalize()
@@ -6124,6 +6211,7 @@ sMacAddr& cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST::radio_mac() {
 
 void cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_radio_mac->struct_swap();
 }
 
@@ -6193,6 +6281,7 @@ uint8_t& cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE::isEnable() {
 
 void cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE::finalize()
@@ -6260,6 +6349,7 @@ sTriggerChannelScanParams& cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST::scan_par
 
 void cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_scan_params->struct_swap();
 }
 
@@ -6329,6 +6419,7 @@ uint8_t& cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE::op_error_code() {
 
 void cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE::finalize()
@@ -6400,6 +6491,7 @@ uint8_t& cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST::scan_mode() {
 
 void cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_radio_mac->struct_swap();
 }
 
@@ -6525,6 +6617,7 @@ bool cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::alloc_results(size_t count) 
 
 void cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_results_size));
     for (size_t i = 0; i < (size_t)*m_results_size; i++){
         m_results[i].struct_swap();
@@ -6619,6 +6712,7 @@ cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST::~cACTION_BML_CHANNEL_SCAN_DUMP_RE
 }
 void cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST::finalize()
@@ -6676,6 +6770,7 @@ cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE::~cACTION_BML_CHANNEL_SCAN_DUMP_R
 }
 void cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE::finalize()
