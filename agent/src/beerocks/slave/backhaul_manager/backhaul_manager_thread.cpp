@@ -1889,7 +1889,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
         if (SPEED_100 == speed) {
             media_type = ieee1905_1::eMediaType::IEEE_802_3U_FAST_ETHERNET;
-        } else if (SPEED_1000 == speed) {
+        } else if (SPEED_1000 <= speed) {
             media_type = ieee1905_1::eMediaType::IEEE_802_3AB_GIGABIT_ETHERNET;
         }
 
