@@ -131,6 +131,7 @@ prplmesh_agent_start() {
 prplmesh_agent_stop() {
     echo "prplmesh_agent_stop - stopping beerocks_agent process..."
     killall_program beerocks_agent
+    killall_program beerocks_monitor
 }
 
 prplmesh_delete_logs() {
