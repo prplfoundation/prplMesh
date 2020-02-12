@@ -48,7 +48,9 @@ tlvLinkMetricQuery::eLinkMetricsType& tlvLinkMetricQuery::link_metrics() {
 void tlvLinkMetricQuery::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
+    tlvf_swap(8*sizeof(eNeighborType), reinterpret_cast<uint8_t*>(m_neighbor_type));
     m_mac_al_1905_device->struct_swap();
+    tlvf_swap(8*sizeof(eLinkMetricsType), reinterpret_cast<uint8_t*>(m_link_metrics));
 }
 
 bool tlvLinkMetricQuery::finalize()

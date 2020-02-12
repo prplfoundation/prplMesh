@@ -39,6 +39,7 @@ typedef struct s802_11SpecificInformation {
     uint8_t ap_channel_center_frequency_index2;
     void struct_swap(){
         network_membership.struct_swap();
+        tlvf_swap(8*sizeof(eRole), reinterpret_cast<uint8_t*>(&role));
     }
     void struct_init(){
         network_membership.struct_init();

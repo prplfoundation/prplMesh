@@ -31,6 +31,7 @@ uint8_t& cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION::i
 
 void cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION::finalize()
@@ -121,6 +122,7 @@ bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::set_iface_name(const char str[
 }
 void cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::finalize()
@@ -197,6 +199,7 @@ uint32_t& cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::valid() {
 
 void cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_platform_settings->struct_swap();
     m_wlan_settings->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_valid));
@@ -281,6 +284,7 @@ sArpMonitorData& cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION::params() {
 
 void cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -350,6 +354,7 @@ sWlanSettings& cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION::wlan_settings(
 
 void cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_wlan_settings->struct_swap();
 }
 
@@ -458,6 +463,8 @@ bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::set_hostname(const char str[], 
 }
 void cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
+    tlvf_swap(8*sizeof(eDHCPOp), reinterpret_cast<uint8_t*>(m_dhcp_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_op));
     m_mac->struct_swap();
     m_ipv4->struct_swap();
@@ -555,6 +562,7 @@ sLoggingLevelChange& cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL::params() {
 
 void cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -624,6 +632,7 @@ sArpQuery& cACTION_PLATFORM_ARP_QUERY_REQUEST::params() {
 
 void cACTION_PLATFORM_ARP_QUERY_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -693,6 +702,7 @@ sArpMonitorData& cACTION_PLATFORM_ARP_QUERY_RESPONSE::params() {
 
 void cACTION_PLATFORM_ARP_QUERY_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -758,6 +768,7 @@ cACTION_PLATFORM_ONBOARD_QUERY_REQUEST::~cACTION_PLATFORM_ONBOARD_QUERY_REQUEST(
 }
 void cACTION_PLATFORM_ONBOARD_QUERY_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_ONBOARD_QUERY_REQUEST::finalize()
@@ -819,6 +830,7 @@ sOnboarding& cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE::params() {
 
 void cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -888,6 +900,7 @@ sOnboarding& cACTION_PLATFORM_ONBOARD_SET_REQUEST::params() {
 
 void cACTION_PLATFORM_ONBOARD_SET_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -980,6 +993,7 @@ bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::set_iface_name(const char str[], s
 }
 void cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::finalize()
@@ -1048,6 +1062,7 @@ uint8_t& cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST::vap_id() {
 
 void cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST::finalize()
@@ -1123,6 +1138,7 @@ uint32_t& cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE::result() {
 
 void cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_front_params->struct_swap();
     m_back_params->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
@@ -1203,6 +1219,7 @@ cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST::~cACTION_PLATFORM_ADMIN_CREDENTI
 }
 void cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST::finalize()
@@ -1268,6 +1285,7 @@ uint32_t& cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE::result() {
 
 void cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
 }
@@ -1340,6 +1358,7 @@ cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST::~cACTION_PLATFORM_DEVICE_INFO_GET_REQU
 }
 void cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST::finalize()
@@ -1405,6 +1424,7 @@ uint32_t& cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE::result() {
 
 void cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
 }
@@ -1477,6 +1497,7 @@ cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST::~cACTION_PLATFORM_LOCAL_MASTER_GET_RE
 }
 void cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST::finalize()
@@ -1538,6 +1559,7 @@ uint8_t& cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE::local_master() {
 
 void cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE::finalize()
@@ -1605,6 +1627,7 @@ sVersions& cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION::versions() {
 
 void cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_versions->struct_swap();
 }
 
@@ -1674,6 +1697,7 @@ sVersions& cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION::versions() {
 
 void cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_versions->struct_swap();
 }
 
@@ -1739,6 +1763,7 @@ cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST::~cACTION_PLATFORM_GET_MASTER
 }
 void cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST::finalize()
@@ -1804,6 +1829,7 @@ uint32_t& cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE::result() {
 
 void cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     m_versions->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
 }
@@ -1907,6 +1933,7 @@ bool cACTION_PLATFORM_ERROR_NOTIFICATION::set_data(const char str[], size_t size
 }
 void cACTION_PLATFORM_ERROR_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_code));
 }
 
@@ -2052,6 +2079,7 @@ uint8_t& cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::status_operational
 
 void cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION::finalize()
@@ -2157,6 +2185,7 @@ uint8_t& cACTION_PLATFORM_OPERATIONAL_NOTIFICATION::operational() {
 
 void cACTION_PLATFORM_OPERATIONAL_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_PLATFORM_OPERATIONAL_NOTIFICATION::finalize()

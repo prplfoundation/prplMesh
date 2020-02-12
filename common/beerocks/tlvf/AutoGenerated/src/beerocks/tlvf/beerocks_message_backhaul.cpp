@@ -105,6 +105,7 @@ uint8_t& cACTION_BACKHAUL_REGISTER_REQUEST::certification_mode() {
 
 void cACTION_BACKHAUL_REGISTER_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_ruid->struct_swap();
 }
 
@@ -218,6 +219,7 @@ uint8_t& cACTION_BACKHAUL_REGISTER_RESPONSE::is_backhaul_manager() {
 
 void cACTION_BACKHAUL_REGISTER_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BACKHAUL_REGISTER_RESPONSE::finalize()
@@ -281,6 +283,7 @@ cACTION_BACKHAUL_BUSY_NOTIFICATION::~cACTION_BACKHAUL_BUSY_NOTIFICATION() {
 }
 void cACTION_BACKHAUL_BUSY_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BACKHAUL_BUSY_NOTIFICATION::finalize()
@@ -514,6 +517,7 @@ std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_BACKHAUL_ENABLE::supp
 
 void cACTION_BACKHAUL_ENABLE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_iface_mac->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_security_type));
     m_preferred_bssid->struct_swap();
@@ -676,6 +680,7 @@ sBackhaulParams& cACTION_BACKHAUL_CONNECTED_NOTIFICATION::params() {
 
 void cACTION_BACKHAUL_CONNECTED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -745,6 +750,7 @@ uint8_t& cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION::stopped() {
 
 void cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION::finalize()
@@ -820,6 +826,7 @@ uint8_t& cACTION_BACKHAUL_ENABLE_APS_REQUEST::center_channel() {
 
 void cACTION_BACKHAUL_ENABLE_APS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_bandwidth));
 }
 
@@ -900,6 +907,7 @@ sBackhaulRoam& cACTION_BACKHAUL_ROAM_REQUEST::params() {
 
 void cACTION_BACKHAUL_ROAM_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -969,6 +977,7 @@ uint8_t& cACTION_BACKHAUL_ROAM_RESPONSE::connected() {
 
 void cACTION_BACKHAUL_ROAM_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BACKHAUL_ROAM_RESPONSE::finalize()
@@ -1032,6 +1041,7 @@ cACTION_BACKHAUL_RESET::~cACTION_BACKHAUL_RESET() {
 }
 void cACTION_BACKHAUL_RESET::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BACKHAUL_RESET::finalize()
@@ -1093,6 +1103,7 @@ sMacAddr& cACTION_BACKHAUL_4ADDR_CONNECTED::mac() {
 
 void cACTION_BACKHAUL_4ADDR_CONNECTED::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -1162,6 +1173,7 @@ sBackhaulRssi& cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::params() {
 
 void cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1231,6 +1243,7 @@ uint32_t& cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::attempts() {
 
 void cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_attempts));
 }
 
@@ -1295,6 +1308,7 @@ cACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION::~cACTION_BACKHAUL_ONBOARDING_
 }
 void cACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION::finalize()
@@ -1356,6 +1370,7 @@ sNodeRssiMeasurementRequest& cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST
 
 void cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1425,6 +1440,7 @@ sNodeRssiMeasurement& cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::para
 
 void cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1494,6 +1510,7 @@ sMacAddr& cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::mac() {
 
 void cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -1567,6 +1584,7 @@ sVapsList& cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::params() {
 
 void cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_ruid->struct_swap();
     m_params->struct_swap();
 }
@@ -1652,6 +1670,7 @@ sMacAddr& cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::bssid() {
 
 void cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_iface_mac->struct_swap();
     m_client_mac->struct_swap();
     m_bssid->struct_swap();
@@ -1745,6 +1764,7 @@ sMacAddr& cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::bssid() {
 
 void cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_iface_mac->struct_swap();
     m_client_mac->struct_swap();
     m_bssid->struct_swap();

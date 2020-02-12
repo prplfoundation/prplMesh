@@ -44,6 +44,7 @@ class tlv1905NeighborDevice : public BaseClass
             eBridgesExist bridges_exist;
             void struct_swap(){
                 mac.struct_swap();
+                tlvf_swap(8*sizeof(eBridgesExist), reinterpret_cast<uint8_t*>(&bridges_exist));
             }
             void struct_init(){
                 mac.struct_init();

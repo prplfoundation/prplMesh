@@ -40,6 +40,7 @@ class tlvPushButtonEventNotification : public BaseClass
             uint8_t k_octets_of_media_specific_information;
             s802_11SpecificInformation media_specific_information;
             void struct_swap(){
+                tlvf_swap(8*sizeof(eMediaType), reinterpret_cast<uint8_t*>(&media_type));
                 media_specific_information.struct_swap();
             }
             void struct_init(){
