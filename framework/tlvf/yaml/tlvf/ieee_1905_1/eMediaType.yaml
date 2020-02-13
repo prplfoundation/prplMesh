@@ -20,3 +20,12 @@ eMediaType:
   MOCA_V1_1: 0x0300
   UNKNONWN_MEDIA: 0xFFFF
 
+eMediaTypeGroup:
+  _type: enum
+  _enum_storage: uint8_t
+  IEEE_802_3: 0x00
+  IEEE_802_11: 0x01
+  IEEE_1901: 0x02
+  MoCA: 0x03
+  UNKNOWN: 0xFF
+
