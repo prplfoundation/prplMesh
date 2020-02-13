@@ -24,17 +24,6 @@ using namespace net;
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-static const std::string string_from_int_array(void *arr, size_t arr_max_size)
-{
-    std::stringstream ss;
-    if (arr) {
-        for (size_t i = 0; i < arr_max_size; i++) {
-            ss << ((i != 0) ? ", " : "") << int(static_cast<int *>(arr)[i]);
-        }
-    }
-    return ss.str();
-}
-
 static void fill_conn_map_node(
     std::unordered_multimap<std::string, std::shared_ptr<cli_bml::conn_map_node_t>> &conn_map_nodes,
     struct BML_NODE *node)
@@ -2075,4 +2064,16 @@ int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_res
     printBmlReturnVals("bml_get_dcs_scan_results", ret);
 
     return 0;
+}
+
+template <typename T>
+const std::string cli_bml::string_from_int_array(T *arr, size_t arr_max_size)
+{
+    std::stringstream ss;
+    if (arr) {
+        for (size_t i = 0; i < arr_max_size; i++) {
+            ss << ((i != 0) ? ", " : "") << (unsigned int)(arr[i]);
+        }
+    }
+    return ss.str();
 }

@@ -205,6 +205,8 @@ private:
                               const std::string &channel_pool);
     int get_dcs_scan_results(const std::string &radio_mac, uint32_t max_results_size,
                              bool is_single_scan = false);
+    template <typename T>
+    const std::string string_from_int_array(T *arr, size_t arr_max_size);
     // Variable
     std::string beerocks_conf_path;
     BML_CTX ctx = nullptr;
