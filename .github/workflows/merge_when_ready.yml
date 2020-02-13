@@ -1,6 +1,8 @@
 name: Merge Bot
 
 on:
+  check_suite:
+    types: [completed]
   pull_request:
     types:
       - labeled # MergeWhenReady added
@@ -27,3 +29,4 @@ jobs:
         checks_enabled: true
         reviewers: true
         method: rebase
+        test: true # make the bot comment instead of taking action
