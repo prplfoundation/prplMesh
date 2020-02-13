@@ -46,7 +46,7 @@ EOF
 
     if [ "$CERTIFICATION_MODE" = true ] ; then
         echo "Certification mode will be enabled on the target"
-        eval ssh "$SSH_OPTIONS" "$TARGET" "uci set prplmesh.config.certification_mode=1 && uci commit"
+        eval ssh "$SSH_OPTIONS" "$TARGET" \""uci set prplmesh.config.certification_mode=1 && uci commit"\"
         echo "Certification mode enabled on the target."
     fi
     echo "Done"
