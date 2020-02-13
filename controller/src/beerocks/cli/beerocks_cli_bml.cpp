@@ -2024,10 +2024,10 @@ int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_res
                 auto res = results[i];
                 std::cout << "result[" << i << "]:" << std::endl
                           << "  ssid=" << res.ap_SSID << std::endl
-                          << "  bssid=" << res.ap_BSSID << std::endl
+                          << "  bssid=" << network_utils::mac_to_string(res.ap_BSSID) << std::endl
                           << "  mode=" << int(res.ap_Mode) << std::endl
                           << "  channel=" << int(res.ap_Channel) << std::endl
-                          << "  signal_strength=" << int(res.ap_SignalStrength) << std::endl
+                          << "  signal_strength_dbm=" << res.ap_SignalStrength << std::endl
                           << "  security_mode_enabled="
                           << string_from_int_array(res.ap_SecurityModeEnabled,
                                                    BML_CHANNEL_SCAN_ENUM_LIST_SIZE)
@@ -2036,27 +2036,27 @@ int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_res
                           << string_from_int_array(res.ap_EncryptionMode,
                                                    BML_CHANNEL_SCAN_ENUM_LIST_SIZE)
                           << std::endl
-                          << "  operating_frequency_band=" << res.ap_OperatingFrequencyBand
+                          << "  operating_frequency_band=" << int(res.ap_OperatingFrequencyBand)
                           << std::endl
                           << "  supported_standards="
                           << string_from_int_array(res.ap_SupportedStandards,
                                                    BML_CHANNEL_SCAN_ENUM_LIST_SIZE)
                           << std::endl
-                          << "  operating_standards=" << res.ap_OperatingStandards << std::endl
-                          << "  operating_channel_bandwidth=" << res.ap_OperatingChannelBandwidth
-                          << std::endl
-                          << "  beacon_period=" << (int)res.ap_BeaconPeriod << std::endl
-                          << "  noise=" << (int)res.ap_Noise << std::endl
-                          << "  basic_data_transfer_rates="
+                          << "  operating_standards=" << int(res.ap_OperatingStandards) << std::endl
+                          << "  operating_channel_bandwidth="
+                          << int(res.ap_OperatingChannelBandwidth) << std::endl
+                          << "  beacon_period_ms=" << int(res.ap_BeaconPeriod) << std::endl
+                          << "  noise_dbm=" << int(res.ap_Noise) << std::endl
+                          << "  basic_data_transfer_rates_kbps="
                           << string_from_int_array(res.ap_BasicDataTransferRates,
                                                    BML_CHANNEL_SCAN_ENUM_LIST_SIZE)
                           << std::endl
-                          << "  supported_data_transfer_rates="
+                          << "  supported_data_transfer_rates_kbps="
                           << string_from_int_array(res.ap_SupportedDataTransferRates,
                                                    BML_CHANNEL_SCAN_ENUM_LIST_SIZE)
                           << std::endl
-                          << "  dtim_period=" << (int)res.ap_DTIMPeriod << std::endl
-                          << "  channel_utilization=" << (int)res.ap_ChannelUtilization
+                          << "  dtim_period=" << int(res.ap_DTIMPeriod) << std::endl
+                          << "  channel_utilization=" << int(res.ap_ChannelUtilization)
                           << std::endl;
             }
         }
