@@ -555,40 +555,40 @@ struct BML_STATS_ITER {
 };
 
 struct BML_NEIGHBOR_AP {
-    char ap_SSID[BML_SSID_MAX_LENGTH];
     //The current service set identifier in use by the neighboring WiFi SSID. The value MAY be empty for hidden SSIDs.
-    unsigned char ap_BSSID[BML_MAC_ADDR_LEN];
+    char ap_SSID[BML_SSID_MAX_LENGTH];
     //The BSSID used for the neighboring WiFi SSID.
-    uint8_t ap_Mode;
+    uint8_t ap_BSSID[BML_MAC_ADDR_LEN];
     //The mode the neighboring WiFi radio is operating in. Enumerate
-    uint32_t ap_Channel;
+    uint8_t ap_Mode;
     //The current radio channel used by the neighboring WiFi radio.
-    int32_t ap_SignalStrength;
+    uint32_t ap_Channel;
     //An indicator of radio signal strength (RSSI) of the neighboring WiFi radio measured in dBm, as an average of the last 100 packets received.
+    int32_t ap_SignalStrength;
+    //The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
     uint8_t ap_SecurityModeEnabled[BML_CHANNEL_SCAN_ENUM_LIST_SIZE];
     //The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
     uint8_t ap_EncryptionMode[BML_CHANNEL_SCAN_ENUM_LIST_SIZE];
-    //The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
-    uint8_t ap_OperatingFrequencyBand;
     //Indicates the frequency band at which the radio this SSID instance is operating. Enumerate
-    uint8_t ap_SupportedStandards[BML_CHANNEL_SCAN_ENUM_LIST_SIZE];
+    uint8_t ap_OperatingFrequencyBand;
     //List items indicate which IEEE 802.11 standards thisResultinstance can support simultaneously, in the frequency band specified byOperatingFrequencyBand. Enumerate List
-    uint8_t ap_OperatingStandards;
+    uint8_t ap_SupportedStandards[BML_CHANNEL_SCAN_ENUM_LIST_SIZE];
     //Indicates which IEEE 802.11 standard that is detected for this Result. Enumerate
-    uint8_t ap_OperatingChannelBandwidth;
+    uint8_t ap_OperatingStandards;
     //Indicates the bandwidth at which the channel is operating. Enumerate
-    uint32_t ap_BeaconPeriod;
+    uint8_t ap_OperatingChannelBandwidth;
     //Time interval (inms) between transmitting beacons.
-    int32_t ap_Noise;
+    uint32_t ap_BeaconPeriod;
     //Indicator of average noise strength (indBm) received from the neighboring WiFi radio.
-    uint32_t ap_BasicDataTransferRates[BML_CHANNEL_SCAN_ENUM_LIST_SIZE];
+    int32_t ap_Noise;
     //Basic data transmit rates (in Kbps) for the SSID.
-    uint32_t ap_SupportedDataTransferRates[BML_CHANNEL_SCAN_ENUM_LIST_SIZE];
+    uint32_t ap_BasicDataTransferRates[BML_CHANNEL_SCAN_ENUM_LIST_SIZE];
     //Data transmit rates (in Kbps) for unicast frames at which the SSID will permit a station to connect.
-    uint32_t ap_DTIMPeriod;
+    uint32_t ap_SupportedDataTransferRates[BML_CHANNEL_SCAN_ENUM_LIST_SIZE];
     //The number of beacon intervals that elapse between transmission of Beacon frames containing a TIM element whose DTIM count field is 0. This value is transmitted in the DTIM Period field of beacon frames. [802.11-2012]
-    uint32_t ap_ChannelUtilization;
+    uint32_t ap_DTIMPeriod;
     //Indicates the fraction of the time AP senses that the channel is in use by the neighboring AP for transmissions.
+    uint32_t ap_ChannelUtilization;
 };
 
 /****************************************************************************/
