@@ -1,0 +1,29 @@
+name: Merge Bot
+
+on:
+  pull_request:
+    types:
+      - labeled # MergeWhenReady added
+      - review_request_removed # Blocking review removed
+      - review_requested
+      - unlabeled # don't merge label removed
+  pull_request_review:
+    types:
+      - dismissed # Blocking review removed
+      - submitted # Approving review added
+  status: # CI
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    name: Merge when ready
+    steps:
+    - name: Integration check
+      uses: squalrus/merge-bot@v0.4.0
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        labels: "MergeWhenReady"
+        blocking-labels: "don't merge"
+        checks_enabled: true
+        reviewers: true
+        method: rebase
