@@ -1,0 +1,11 @@
+#
+---
+_namespace: ieee1905_1
+
+eLinkMetricsType:
+  _type: enum
+  _enum_storage: uint8_t
+  TX_LINK_METRICS_ONLY: 0x00
+  RX_LINK_METRICS_ONLY: 0x01
+  BOTH_TX_AND_RX_LINK_METRICS: 0x02
+

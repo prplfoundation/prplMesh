@@ -1,0 +1,10 @@
+#
+---
+_namespace: ieee1905_1
+
+eLinkMetricNeighborType:
+  _type: enum
+  _enum_storage: uint8_t
+  ALL_NEIGHBORS: 0x00
+  SPECIFIC_NEIGHBOR: 0x01
+
