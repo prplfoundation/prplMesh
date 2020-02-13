@@ -23,8 +23,8 @@ sLinkMetricInfo:
   intfType:
     _type: eMediaType
     _comment: The underlying network technology
-  packet_errors_received: uint32_t
-  packets_receiveds:
+  packet_errors: uint32_t
+  packets_received:
     _type: uint32_t
     _comment: |
       Number of packets received at the
