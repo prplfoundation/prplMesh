@@ -376,8 +376,6 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_client_association_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE:
         return handle_ap_metrics_query(sd, cmdu_rx);
-    case ieee1905_1::eMessageType::LINK_METRIC_QUERY_MESSAGE:
-        return handle_link_metrics_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
         return handle_channel_preference_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
@@ -4405,14 +4403,6 @@ bool slave_thread::handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx
         LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
                    << "  bssid " << std::get<1>(bssid);
     }
-    return true;
-}
-
-bool slave_thread::handle_link_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
-{
-    const auto mid = cmdu_rx.getMessageId();
-    LOG(DEBUG) << "Received LINK_METRIC_QUERY_MESSAGE, mid=" << std::hex << int(mid);
-    // TODO add handling for Link metric query response}
     return true;
 }
 
