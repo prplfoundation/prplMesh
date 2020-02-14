@@ -447,8 +447,8 @@ int test_all()
     }
 
     MAPF_DBG("TLV LENGTH START: " << firstTlv->length());
-    auto secondTlv            = msg.addClass<tlvLinkMetricQuery>(); // another tlv for the example
-    secondTlv->link_metrics() = tlvLinkMetricQuery::eLinkMetricsType::RX_LINK_METRICS_ONLY;
+    auto secondTlv = msg.addClass<tlvLinkMetricQuery>(); // another tlv for the example
+    secondTlv->link_metrics_type() = eLinkMetricsType::RX_LINK_METRICS_ONLY;
 
     LOG(DEBUG) << "Start WSC M2";
     auto thirdTlv = msg.addClass<tlvWsc>();
