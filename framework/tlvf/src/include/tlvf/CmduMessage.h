@@ -35,10 +35,6 @@ public:
     eMessageType getMessageType();
     uint16_t getMessageId();
     void setMessageId(uint16_t mid);
-    bool getNextTlvType(eTlvType &tlvType) const;
-    int getNextTlvType() const;
-    uint16_t getNextTlvLength() const;
-    uint8_t *getNextTlvData() const;
 
     // Forward wrapper functions
     // TODO check which of them can be removed
