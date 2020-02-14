@@ -611,8 +611,6 @@ int test_all()
         errors++;
     }
 
-    MAPF_DBG("size: " << received_message.getNextTlvLength());
-
     auto tlv2 = received_message.getClass<tlvLinkMetricQuery>();
     if (tlv2 != nullptr) {
         MAPF_DBG("TLV2 LENGTH AFTER INIT: " << tlv2->length());

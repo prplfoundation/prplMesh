@@ -23,6 +23,8 @@ public:
     CmduMessageRx &operator=(const CmduMessageRx &) = delete;
 
 private:
+    int getNextTlvType() const;
+    uint16_t getNextTlvLength() const;
     std::shared_ptr<BaseClass> parseNextTlv();
 };
 
