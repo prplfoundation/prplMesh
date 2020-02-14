@@ -97,7 +97,27 @@ std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
         return msg.addClass<tlv1905NeighborDevice>();
     }
     case (8): {
-        return msg.addClass<tlvLinkMetricQuery>();
+        /**
+         * The IEEE 1905.1 standard says about the Link Metric Query TLV and the neighbor type
+         * octet that "If the value is 0, then the EUI48 field is not present; if the value is 1,
+         * then the EUI-48 field shall be present."
+         *
+         * However, optional fields are not currently supported by TLVF.
+         *
+         * As a workaround, instead of defining a tlvLinkMetricQuery TLV with an optional field,
+         * we have defined two different TLVs, one with the optional field and the other one
+         * without it. Application must then check the length of received TLV to know if optional
+         * field (MAC address of neighbor device) is present or not and then create an instance of
+         * either tlvLinkMetricQuery or tlvLinkMetricQueryAllNeighbors respectively.
+         */
+        const uint16_t all_neighbors_tlv_length = 2;
+        uint16_t tlv_length                     = getNextTlvLength();
+
+        if (all_neighbors_tlv_length == tlv_length) {
+            return msg.addClass<tlvLinkMetricQueryAllNeighbors>();
+        } else {
+            return msg.addClass<tlvLinkMetricQuery>();
+        }
     }
     case (9): {
         return msg.addClass<tlvTransmitterLinkMetric>();
