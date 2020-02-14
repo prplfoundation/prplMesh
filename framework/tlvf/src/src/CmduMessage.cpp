@@ -10,40 +10,6 @@
 
 using namespace ieee1905_1;
 
-int CmduMessage::getNextTlvType() const
-{
-    if (!getCmduHeader())
-        return -1;
-    sTlvHeader *tlv = reinterpret_cast<sTlvHeader *>(msg.prevClass()->getBuffPtr());
-    return tlv->type;
-}
-
-bool CmduMessage::getNextTlvType(eTlvType &tlvType) const
-{
-    int tlvValue = getNextTlvType();
-    if (tlvValue < 0)
-        return false;
-    tlvType = static_cast<eTlvType>(tlvValue);
-    return eTlvTypeValidate::check(tlvValue);
-}
-
-uint16_t CmduMessage::getNextTlvLength() const
-{
-    if (!getCmduHeader())
-        return -1;
-    sTlvHeader *tlv = reinterpret_cast<sTlvHeader *>(msg.prevClass()->getBuffPtr());
-    return tlv->length;
-}
-
-uint8_t *CmduMessage::getNextTlvData() const
-{
-    if (!getCmduHeader())
-        return nullptr;
-
-    sTlvHeader *tlv = reinterpret_cast<sTlvHeader *>(msg.prevClass()->getBuffPtr());
-    return reinterpret_cast<uint8_t *>(tlv) + sizeof(*tlv);
-}
-
 eMessageType CmduMessage::getMessageType()
 {
     uint16_t msgValue = 0;
