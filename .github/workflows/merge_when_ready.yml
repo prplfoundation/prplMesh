@@ -3,16 +3,6 @@ name: Merge Bot
 on:
   check_suite:
     types: [completed]
-  pull_request:
-    types:
-      - labeled # MergeWhenReady added
-      - review_request_removed # Blocking review removed
-      - review_requested
-      - unlabeled # don't merge label removed
-  pull_request_review:
-    types:
-      - dismissed # Blocking review removed
-      - submitted # Approving review added
   status: # CI
 
 jobs:
