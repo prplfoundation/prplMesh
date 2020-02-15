@@ -205,51 +205,8 @@ bool base_wlan_hal_dwpal::fsm_setup()
                            << ", fixed_dfs_channel=" << int(fixed_dfs_channel)
                            << ", fixed_channel=" << int(fixed_channel);
 
-                // AP is Enabled
                 LOG(DEBUG) << "wifi_ctrl_enabled  = " << int(m_radio_info.wifi_ctrl_enabled);
-
-                bool error = false;
-                if (fixed_dfs_channel) {
-                    if (m_radio_info.tx_enabled) {
-                        LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
-                        return true;
-                    } else {
-                        LOG(ERROR) << "ap_enabled with tx OFF!";
-                        error = true;
-                    }
-                } else if (fixed_channel) {
-                    if (m_radio_info.wifi_ctrl_enabled == 1) {
-                        if (m_radio_info.tx_enabled) {
-                            LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
-                            return true;
-                        } else {
-                            LOG(ERROR) << "ap_enabled with tx OFF!";
-                            error = true;
-                        }
-                    }
-                } else { // Auto Channel
-                    if (m_radio_info.wifi_ctrl_enabled == 1) {
-                        if (m_radio_info.tx_enabled) {
-                            LOG(DEBUG) << "ap_enabled tx = " << int(m_radio_info.tx_enabled);
-                            return true;
-                        } else {
-                            LOG(ERROR) << "ap_enabled with tx OFF!";
-                            error = true;
-                        }
-                    } else if (m_radio_info.wifi_ctrl_enabled != 0) {
-                        LOG(ERROR)
-                            << "Auto channel, invalid wifi_ctrl_enabled value. wifi_ctrl_enabled="
-                            << m_radio_info.wifi_ctrl_enabled;
-                        error = true;
-                    }
-                }
-
-                if (error || (std::chrono::steady_clock::now() >= m_state_timeout)) {
-                    return (transition.change_destination(dwpal_fsm_state::Detach));
-                }
-
-                // Remain in the current state
-                return false;
+                return true;
             })
 
         //////////////////////////////////////////////////////////////////////////
