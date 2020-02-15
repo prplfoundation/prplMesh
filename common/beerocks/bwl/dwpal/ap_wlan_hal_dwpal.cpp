@@ -2325,7 +2325,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         FieldsToParse fieldsToParse[] = {
             {NULL /*opCode*/, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0},
             {NULL, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL, 0},
-            {(void *)&msg->params.success, &numOfValidArgs[2], DWPAL_CHAR_PARAM, "success=", 0},
+            {(void *)&msg->params.success, &numOfValidArgs[2], DWPAL_CHAR_PARAM, "cac_status=", 0},
             {(void *)&msg->params.frequency, &numOfValidArgs[3], DWPAL_INT_PARAM, "freq=", 0},
             {(void *)&msg->params.timeout, &numOfValidArgs[4], DWPAL_INT_PARAM, "timeout=", 0},
             {(void *)&chan_width, &numOfValidArgs[5], DWPAL_CHAR_PARAM, "chan_width=", 0},
