@@ -109,7 +109,13 @@ void agent_ucc_listener::update_vaps_list(std::string ruid, beerocks_message::sV
 bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, std::string> &params,
                                               std::string &value)
 {
-    if (params["parameter"] == "macaddr" || params["parameter"] == "bssid") {
+    if (params["parameter"] == "alid") {
+        if (!net::network_utils::linux_iface_get_mac("br-lan", value)) {
+            value = "failed to get br-lan mac address";
+            return false;
+        }
+        return true;
+    } else if (params["parameter"] == "macaddr" || params["parameter"] == "bssid") {
         if (params.find("ruid") == params.end()) {
             value = "missing ruid";
             return false;
