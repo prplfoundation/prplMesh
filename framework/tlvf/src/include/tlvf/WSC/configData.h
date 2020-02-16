@@ -17,10 +17,10 @@ class configData : public AttrList {
 
 public:
     struct config {
-        std::string ssid = "NA";
+        std::string ssid = "";
         eWscAuth auth_type;
         eWscEncr encr_type;
-        std::string network_key = "NA";
+        std::string network_key = "";
         sMacAddr bssid          = {};
         eWscVendorExtSubelementBssType bss_type;
     };
