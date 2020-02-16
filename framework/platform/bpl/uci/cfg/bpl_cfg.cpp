@@ -191,9 +191,7 @@ int cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PARAMS
     // fail when wifi still works fine, so default to "auto" (0) and if
     // can't get the channel from UCI just move on.
     wlan_params->channel = 0;
-    if (!cfg_get_channel(iface, &wlan_params->channel)) {
-        MAPF_INFO("UCI: interface " << iface << ": channel is not configured assuming auto\n");
-    }
+    cfg_get_channel(iface, &wlan_params->channel);
 
     return RETURN_OK;
 }
