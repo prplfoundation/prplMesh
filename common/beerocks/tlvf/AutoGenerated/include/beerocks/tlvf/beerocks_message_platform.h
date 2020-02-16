@@ -607,69 +607,6 @@ class cACTION_PLATFORM_ERROR_NOTIFICATION : public BaseClass
         int m_lock_order_counter__ = 0;
 };
 
-class cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION : public BaseClass
-{
-    public:
-        cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION();
-
-        static eActionOp_PLATFORM get_action_op(){
-            return (eActionOp_PLATFORM)(ACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION);
-        }
-        std::string iface_name_ap_str();
-        char* iface_name_ap(size_t length = 0);
-        bool set_iface_name_ap(const std::string& str);
-        bool set_iface_name_ap(const char buffer[], size_t size);
-        std::string iface_name_bh_str();
-        char* iface_name_bh(size_t length = 0);
-        bool set_iface_name_bh(const std::string& str);
-        bool set_iface_name_bh(const char buffer[], size_t size);
-        uint8_t& status_ap();
-        uint8_t& status_bh();
-        uint8_t& status_bh_wired();
-        uint8_t& is_bh_manager();
-        uint8_t& status_operational();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_PLATFORM* m_action_op = nullptr;
-        char* m_iface_name_ap = nullptr;
-        size_t m_iface_name_ap_idx__ = 0;
-        int m_lock_order_counter__ = 0;
-        char* m_iface_name_bh = nullptr;
-        size_t m_iface_name_bh_idx__ = 0;
-        uint8_t* m_status_ap = nullptr;
-        uint8_t* m_status_bh = nullptr;
-        uint8_t* m_status_bh_wired = nullptr;
-        uint8_t* m_is_bh_manager = nullptr;
-        uint8_t* m_status_operational = nullptr;
-};
-
-class cACTION_PLATFORM_OPERATIONAL_NOTIFICATION : public BaseClass
-{
-    public:
-        cACTION_PLATFORM_OPERATIONAL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_PLATFORM_OPERATIONAL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_PLATFORM_OPERATIONAL_NOTIFICATION();
-
-        static eActionOp_PLATFORM get_action_op(){
-            return (eActionOp_PLATFORM)(ACTION_PLATFORM_OPERATIONAL_NOTIFICATION);
-        }
-        uint8_t& operational();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_PLATFORM* m_action_op = nullptr;
-        uint8_t* m_operational = nullptr;
-};
-
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_PLATFORM_H_
