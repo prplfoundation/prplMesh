@@ -142,32 +142,6 @@ struct BPL_WIFI_CREDENTIALS {
     char sec[BPL_SEC_LEN];
 };
 
-/* Interface state for the platform*/
-typedef struct {
-
-    /* interface's name */
-    char ifname[BPL_NUM_OF_INTERFACES][BPL_IFNAME_LEN];
-
-    /* status from the BPL_WIFI_INTERFACE_STATUS enum*/
-    int status[BPL_NUM_OF_INTERFACES];
-
-    /* is platform on operational mode (true/false) */
-    int operational_status;
-
-} BPL_INTERFACE_STATUS_NOTIFICATION;
-
-enum BPL_INTERFACE_STATUS {
-    INVALID = 0,
-    OFF,
-    AP_OK,
-    AP_DFS_CAC,
-    BH_SIGNAL_OK,
-    BH_SIGNAL_TOO_LOW,
-    BH_SIGNAL_TOO_HIGH,
-    BH_WIRED,
-    BH_SCAN
-};
-
 /* WPS Trigger params */
 struct BPL_WPS_PARAMS {
 
@@ -452,16 +426,6 @@ int cfg_notify_fw_version_mismatch();
  * @return -1 Error. 
  */
 int cfg_notify_error(int code, const char str[BPL_ERROR_STRING_LEN]);
-
-/**
- * Notify the platform about the interface status.
- *
- * @param [in] BPL_INTERFACE_STATUS_NOTIFICATION (status for intrfaces)
- *
- * @return 0 Success.
- * @return -1 Error.
- */
-int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif);
 
 /**
  * Returns the platform administrator password.

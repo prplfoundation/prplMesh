@@ -231,11 +231,6 @@ int cfg_notify_fw_version_mismatch() { return RETURN_ERR; }
 
 int cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return RETURN_ERR; }
 
-int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif)
-{
-    return RETURN_ERR;
-}
-
 int cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return RETURN_ERR; }
 
 int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAME_LEN])
