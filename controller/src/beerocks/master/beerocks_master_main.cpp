@@ -10,6 +10,7 @@
 #include <bcl/beerocks_logging.h>
 #include <bcl/beerocks_version.h>
 #include <bcl/network/network_utils.h>
+#include <bpl/bpl_cfg.h>
 #include <easylogging++.h>
 
 #include "db/db.h"
