@@ -67,7 +67,8 @@ using namespace net;
 using namespace son;
 
 master_thread::master_thread(const std::string &master_uds_, db &database_)
-    : transport_socket_thread(master_uds_), database(database_)
+    : transport_socket_thread(master_uds_), database(database_),
+      m_controller_ucc_listener(database_, cert_cmdu_tx)
 {
     thread_name = "master";
 
@@ -146,6 +147,12 @@ bool master_thread::init()
         LOG(DEBUG) << "Health check is DISABLED!";
     }
 
+    if (database.setting_certification_mode() && database.config.ucc_listener_port != 0) {
+        if (!m_controller_ucc_listener.start("ucc_listener")) {
+            LOG(FATAL) << "failed start controller_ucc_listener";
+            return false;
+        }
+    }
     return true;
 }
 
@@ -1861,7 +1868,6 @@ bool master_thread::handle_intel_slave_join(
             LOG(DEBUG) << "rdkb_extensions is not enabled";
         }
 #endif
-        database.setting_certification_mode(notification->platform_settings().certification_mode);
         database.settings_client_band_steering(
             notification->platform_settings().client_band_steering_enabled);
         database.settings_client_optimal_path_roaming(
@@ -1875,16 +1881,6 @@ bool master_thread::handle_intel_slave_join(
         database.settings_service_fairness(
             notification->platform_settings().service_fairness_enabled);
         database.settings_dfs_reentry(notification->platform_settings().dfs_reentry_enabled);
-    }
-
-    if (!m_controller_ucc_listener && database.setting_certification_mode() &&
-        database.config.ucc_listener_port != 0) {
-        m_controller_ucc_listener =
-            std::make_unique<controller_ucc_listener>(database, cert_cmdu_tx);
-        if (m_controller_ucc_listener && !m_controller_ucc_listener->start("ucc_listener")) {
-            LOG(FATAL) << "failed start controller_ucc_listener";
-            return false;
-        }
     }
 
     /*

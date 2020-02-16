@@ -114,7 +114,7 @@ private:
 
     db &database;
     task_pool tasks;
-    std::unique_ptr<beerocks::controller_ucc_listener> m_controller_ucc_listener;
+    beerocks::controller_ucc_listener m_controller_ucc_listener;
 };
 
 } // namespace son
