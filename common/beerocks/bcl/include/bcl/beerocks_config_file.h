@@ -97,7 +97,6 @@ public:
         std::string enable_arp_monitor;
         std::string enable_keep_alive;
         std::string debug_disable_arp;
-        std::string enable_bpl_iface_status_notifications;
         std::string bridge_iface;
         std::string backhaul_preferred_bssid;
         std::string backhaul_wire_iface;

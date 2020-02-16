@@ -153,10 +153,8 @@ static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_
     son_slave_conf.model     = beerocks_slave_conf.model;
     son_slave_conf.ucc_listener_port =
         beerocks::string_utils::stoi(beerocks_slave_conf.ucc_listener_port);
-    son_slave_conf.enable_keep_alive = beerocks_slave_conf.enable_keep_alive == "1";
-    son_slave_conf.debug_disable_arp = beerocks_slave_conf.debug_disable_arp == "1";
-    son_slave_conf.enable_bpl_iface_status_notifications =
-        beerocks_slave_conf.enable_bpl_iface_status_notifications == "1";
+    son_slave_conf.enable_keep_alive        = beerocks_slave_conf.enable_keep_alive == "1";
+    son_slave_conf.debug_disable_arp        = beerocks_slave_conf.debug_disable_arp == "1";
     son_slave_conf.bridge_iface             = beerocks_slave_conf.bridge_iface;
     son_slave_conf.backhaul_preferred_bssid = beerocks_slave_conf.backhaul_preferred_bssid;
     son_slave_conf.backhaul_wire_iface      = beerocks_slave_conf.backhaul_wire_iface;
