@@ -35,7 +35,6 @@ public:
     ~main_thread();
 
     struct platform_common_conf_t {
-        bool conf_initialized = false;
         int rdkb_extensions;
         int band_steering;
         int client_roaming;

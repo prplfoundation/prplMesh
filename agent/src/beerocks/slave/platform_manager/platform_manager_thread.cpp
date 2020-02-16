@@ -120,83 +120,77 @@ static bool fill_platform_settings(
 
     LOG(DEBUG) << "iface=" << iface_name << " added to wlan params change check";
 
-    if (!platform_common_conf.conf_initialized) {
+    const int back_vaps_buff_len =
+        BPL_BACK_VAPS_GROUPS * BPL_BACK_VAPS_IN_GROUP * BPL_MAC_ADDR_OCTETS_LEN;
+    char back_vaps[back_vaps_buff_len];
 
-        const int back_vaps_buff_len =
-            BPL_BACK_VAPS_GROUPS * BPL_BACK_VAPS_IN_GROUP * BPL_MAC_ADDR_OCTETS_LEN;
-        char back_vaps[back_vaps_buff_len];
+    if ((platform_common_conf.onboarding = bpl::cfg_is_onboarding()) < 0) {
+        LOG(ERROR) << "Failed reading 'onboarding'";
+        return false;
+    }
+    if ((platform_common_conf.rdkb_extensions = bpl::cfg_get_rdkb_extensions()) < 0) {
+        LOG(ERROR) << "Failed reading 'rdkb_extensions'";
+        return false;
+    }
+    if ((platform_common_conf.band_steering = bpl::cfg_get_band_steering()) < 0) {
+        LOG(ERROR) << "Failed reading 'band_steering'";
+        return false;
+    }
+    if ((platform_common_conf.client_roaming = bpl::cfg_get_client_roaming()) < 0) {
+        LOG(ERROR) << "Failed reading 'client_roaming";
+        return false;
+    }
+    if ((platform_common_conf.local_master = bpl::cfg_is_master()) < 0) {
+        LOG(ERROR) << "Failed reading 'local_master'";
+        return false;
+    }
+    if ((platform_common_conf.management_mode = bpl::cfg_get_management_mode()) < 0) {
+        LOG(ERROR) << "Failed reading 'management_mode'";
+        return false;
+    }
+    if ((platform_common_conf.operating_mode = bpl::cfg_get_operating_mode()) < 0) {
+        LOG(ERROR) << "Failed reading 'operating_mode'";
+        return false;
+    }
+    if ((platform_common_conf.certification_mode = bpl::cfg_get_certification_mode()) < 0) {
+        LOG(ERROR) << "Failed reading 'certification_mode'";
+        return false;
+    }
+    if ((platform_common_conf.stop_on_failure_attempts = bpl::cfg_get_stop_on_failure_attempts()) <
+        0) {
+        LOG(ERROR) << "Failed reading 'stop_on_failure_attempts'";
+        return false;
+    }
+    if ((platform_common_conf.dfs_reentry = bpl::cfg_get_dfs_reentry()) < 0) {
+        LOG(ERROR) << "Failed reading 'dfs_reentry'";
+        return false;
+    }
 
-        if ((platform_common_conf.onboarding = bpl::cfg_is_onboarding()) < 0) {
-            LOG(ERROR) << "Failed reading 'onboarding'";
-            return false;
-        }
-        if ((platform_common_conf.rdkb_extensions = bpl::cfg_get_rdkb_extensions()) < 0) {
-            LOG(ERROR) << "Failed reading 'rdkb_extensions'";
-            return false;
-        }
-        if ((platform_common_conf.band_steering = bpl::cfg_get_band_steering()) < 0) {
-            LOG(ERROR) << "Failed reading 'band_steering'";
-            return false;
-        }
-        if ((platform_common_conf.client_roaming = bpl::cfg_get_client_roaming()) < 0) {
-            LOG(ERROR) << "Failed reading 'client_roaming";
-            return false;
-        }
-        if ((platform_common_conf.local_master = bpl::cfg_is_master()) < 0) {
-            LOG(ERROR) << "Failed reading 'local_master'";
-            return false;
-        }
-        if ((platform_common_conf.management_mode = bpl::cfg_get_management_mode()) < 0) {
-            LOG(ERROR) << "Failed reading 'management_mode'";
-            return false;
-        }
-        if ((platform_common_conf.operating_mode = bpl::cfg_get_operating_mode()) < 0) {
-            LOG(ERROR) << "Failed reading 'operating_mode'";
-            return false;
-        }
-        if ((platform_common_conf.certification_mode = bpl::cfg_get_certification_mode()) < 0) {
-            LOG(ERROR) << "Failed reading 'certification_mode'";
-            return false;
-        }
-        if ((platform_common_conf.stop_on_failure_attempts =
-                 bpl::cfg_get_stop_on_failure_attempts()) < 0) {
-            LOG(ERROR) << "Failed reading 'stop_on_failure_attempts'";
-            return false;
-        }
-        if ((platform_common_conf.dfs_reentry = bpl::cfg_get_dfs_reentry()) < 0) {
-            LOG(ERROR) << "Failed reading 'dfs_reentry'";
-            return false;
-        }
+    if (bpl::cfg_get_backhaul_params(&platform_common_conf.backhaul_max_vaps,
+                                     &platform_common_conf.backhaul_network_enabled,
+                                     &platform_common_conf.backhaul_preferred_radio_band) < 0) {
+        LOG(ERROR) << "Failed reading 'backhaul_max_vaps, backhaul_network_enabled, "
+                      "backhaul_preferred_radio_band'!";
+    }
 
-        if (bpl::cfg_get_backhaul_params(&platform_common_conf.backhaul_max_vaps,
-                                         &platform_common_conf.backhaul_network_enabled,
-                                         &platform_common_conf.backhaul_preferred_radio_band) < 0) {
-            LOG(ERROR) << "Failed reading 'backhaul_max_vaps, backhaul_network_enabled, "
-                          "backhaul_preferred_radio_band'!";
-        }
+    if (bpl::cfg_get_backhaul_vaps(back_vaps, back_vaps_buff_len) < 0) {
+        LOG(ERROR) << "Failed reading beerocks backhaul_vaps parameters!";
+        return false;
+    }
 
-        if (bpl::cfg_get_backhaul_vaps(back_vaps, back_vaps_buff_len) < 0) {
-            LOG(ERROR) << "Failed reading beerocks backhaul_vaps parameters!";
-            return false;
-        }
+    // set local_gw flag
+    platform_common_conf.local_gw =
+        (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
+         platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
 
-        // set local_gw flag
-        platform_common_conf.local_gw =
-            (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
-             platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
-
-        // fill backhaul vaps
-        auto *p             = back_vaps;
-        int num_of_elements = sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid) /
-                              sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid[0]);
-        for (int i = 0; i < num_of_elements; i++) {
-            std::copy_n(p, BPL_MAC_ADDR_OCTETS_LEN,
-                        msg->platform_settings().backhaul_vaps_bssid[i].oct);
-            p += BPL_MAC_ADDR_OCTETS_LEN;
-        }
-
-        // mark initialization flag
-        platform_common_conf.conf_initialized = true;
+    // fill backhaul vaps
+    auto *p             = back_vaps;
+    int num_of_elements = sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid) /
+                          sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid[0]);
+    for (int i = 0; i < num_of_elements; i++) {
+        std::copy_n(p, BPL_MAC_ADDR_OCTETS_LEN,
+                    msg->platform_settings().backhaul_vaps_bssid[i].oct);
+        p += BPL_MAC_ADDR_OCTETS_LEN;
     }
 
     msg->platform_settings().onboarding          = uint8_t(platform_common_conf.onboarding);
@@ -695,10 +689,6 @@ bool main_thread::socket_disconnected(Socket *sd)
 
     del_slave_socket(sd);
 
-    if (platform_operational) {
-        platform_common_conf.conf_initialized = false;
-    }
-
     return (true);
 }
 
@@ -953,9 +943,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             if (check_operational) {
                 LOG(INFO) << "***platform operational state chenged to: "
                           << (platform_operational ? "true" : "false");
-                if (!platform_operational) {
-                    platform_common_conf.conf_initialized = false;
-                }
 
                 // Response message
                 auto notification = message_com::create_vs_message<
