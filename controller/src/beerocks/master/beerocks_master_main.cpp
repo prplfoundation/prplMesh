@@ -214,6 +214,9 @@ static void fill_master_config(son::db::sDbMasterConfig &master_conf,
     if (!s.empty()) {
         master_conf.global_restricted_channels.push_back(beerocks::string_utils::stoi(s));
     }
+
+    // platform settings
+    master_conf.certification_mode = beerocks::bpl::cfg_get_certification_mode();
 }
 
 int main(int argc, char *argv[])
