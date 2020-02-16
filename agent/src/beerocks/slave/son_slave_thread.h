@@ -43,7 +43,6 @@ public:
         int stop_on_failure_attempts;
         bool enable_keep_alive;
         bool debug_disable_arp;
-        bool enable_bpl_iface_status_notifications;
         bool enable_repeater_mode;
         std::string backhaul_wire_iface;
         beerocks::eIfaceType backhaul_wire_iface_type;
