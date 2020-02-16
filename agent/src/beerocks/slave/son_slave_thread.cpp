@@ -138,9 +138,8 @@ void slave_thread::slave_reset()
     hostap_services_off();
     ap_manager_stop();
     monitor_stop();
-    is_backhaul_manager            = false;
-    iface_status_operational_state = false;
-    detach_on_conf_change          = false;
+    is_backhaul_manager   = false;
+    detach_on_conf_change = false;
 
     if (configuration_stop_on_failure_attempts && !stop_on_failure_attempts) {
         LOG(ERROR) << "Reached to max stop on failure attempts!";
@@ -251,11 +250,6 @@ bool slave_thread::work()
         return false;
     }
 
-    if (config.enable_bpl_iface_status_notifications && platform_manager_socket &&
-        !platform_settings.onboarding) {
-        send_iface_status();
-    }
-
     if (call_slave_select) {
         if (!socket_thread::work()) {
             return false;
@@ -307,35 +301,6 @@ void slave_thread::process_keep_alive()
             keep_alive_retries++;
             master_last_seen = now;
         }
-    }
-}
-
-void slave_thread::update_iface_status(bool is_ap, int8_t iface_status)
-{
-    if (iface_status == 1) {
-        if (is_ap) {
-            iface_status_ap = beerocks::eRadioStatus::AP_OK;
-        } else { //BH
-            iface_status_bh = beerocks::eRadioStatus::BH_SCAN;
-        }
-    } else if (iface_status == 0) {
-        iface_status_bh = beerocks::eRadioStatus::OFF;
-        iface_status_ap = beerocks::eRadioStatus::OFF;
-    }
-}
-
-void slave_thread::send_iface_status()
-{
-    // LOG(DEBUG) << std::endl
-    //            << "iface_status_ap_prev=" << int(iface_status_ap_prev) << ", iface_status_ap=" << int(iface_status_ap) << std::endl
-    //            << "iface_status_bh_prev=" << int(iface_status_bh_prev) << ", iface_status_bh=" << int(iface_status_bh) << std::endl
-    //            << "iface_status_bh_wired_prev=" << int(iface_status_bh_wired_prev) << ", iface_status_bh_wired_prev=" << int(iface_status_bh_wired_prev);
-
-    if (iface_status_ap_prev != iface_status_ap || iface_status_bh_prev != iface_status_bh ||
-        iface_status_bh_wired_prev != iface_status_bh_wired ||
-        iface_status_operational_state_prev != iface_status_operational_state) {
-
-        send_platform_iface_status_notif(iface_status_ap, iface_status_operational_state);
     }
 }
 
@@ -1044,7 +1009,6 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
     }
     case beerocks_message::ACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER: {
         LOG(DEBUG) << "ACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER, marking slave as operational!";
-        iface_status_operational_state = true;
         break;
     }
     case beerocks_message::ACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST: {
@@ -1296,20 +1260,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
             } else {
                 backhaul_params.backhaul_iface = config.backhaul_wire_iface;
             }
-            //Radio status
-            if (is_backhaul_manager) {
-                if (notification->params().backhaul_is_wireless) {
-                    iface_status_bh =
-                        eRadioStatus::BH_SIGNAL_OK; //TODO - send according to the RSSI
-                    iface_status_bh_wired = eRadioStatus::OFF;
-                } else {
-                    iface_status_bh       = eRadioStatus::OFF;
-                    iface_status_bh_wired = eRadioStatus::BH_WIRED;
-                }
-            } else {
-                iface_status_bh       = eRadioStatus::OFF;
-                iface_status_bh_wired = eRadioStatus::OFF;
-            }
+
             LOG(DEBUG) << "goto STATE_BACKHAUL_MANAGER_CONNECTED";
             slave_state = STATE_BACKHAUL_MANAGER_CONNECTED;
 
@@ -1349,10 +1300,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 
         stopped |= bool(notification->stopped());
 
-        is_backhaul_disconnected       = true;
-        iface_status_operational_state = false;
-        update_iface_status(false, false);
-
+        is_backhaul_disconnected = true;
         slave_state_timer =
             std::chrono::steady_clock::now() +
             std::chrono::milliseconds(beerocks::IRE_MAX_WIRELESS_RECONNECTION_TIME_MSC);
@@ -1439,21 +1387,6 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 
         notification_out->params() = notification_in->params();
         send_cmdu_to_controller(cmdu_tx);
-
-        int rssi = notification_in->params().rssi;
-
-        if (abs(last_reported_backhaul_rssi - rssi) >= BH_SIGNAL_RSSI_THRESHOLD_HYSTERESIS) {
-            last_reported_backhaul_rssi = rssi;
-
-            if (rssi < BH_SIGNAL_RSSI_THRESHOLD_LOW) {
-                iface_status_bh = eRadioStatus::BH_SIGNAL_TOO_LOW;
-            } else if (rssi >= BH_SIGNAL_RSSI_THRESHOLD_LOW &&
-                       rssi < BH_SIGNAL_RSSI_THRESHOLD_HIGH) {
-                iface_status_bh = eRadioStatus::BH_SIGNAL_OK;
-            } else {
-                iface_status_bh = eRadioStatus::BH_SIGNAL_TOO_HIGH;
-            }
-        }
 
         break;
     }
@@ -1552,32 +1485,6 @@ bool slave_thread::handle_cmdu_platform_manager_message(
         if (wlan_settings.band_enabled != notification->wlan_settings().band_enabled) {
             LOG(DEBUG) << "band_enabled changed - performing slave_reset()";
             slave_reset();
-        }
-        break;
-    }
-    case beerocks_message::ACTION_PLATFORM_OPERATIONAL_NOTIFICATION: {
-        auto notification_in =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_PLATFORM_OPERATIONAL_NOTIFICATION>();
-        if (notification_in == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_OPERATIONAL_NOTIFICATION failed";
-            return false;
-        }
-
-        LOG(DEBUG) << "sending master operational notification, new_oper_state="
-                   << int(notification_in->operational())
-                   << " bridge_mac=" << backhaul_params.bridge_mac;
-
-        auto notification_out = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION>(cmdu_tx);
-        if (notification_out == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-        notification_out->operational() = notification_in->operational();
-        notification_out->bridge_mac() = network_utils::mac_from_string(backhaul_params.bridge_mac);
-        if (master_socket) {
-            send_cmdu_to_controller(cmdu_tx);
         }
         break;
     }
@@ -1887,14 +1794,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
 
         notification_out->cs_params() = notification_in->cs_params();
         send_cmdu_to_controller(cmdu_tx);
-
-        if (wireless_utils::is_dfs_channel(hostap_cs_params.channel)) {
-            LOG(INFO) << "AP is in DFS channel: " << (int)hostap_cs_params.channel;
-            iface_status_ap = beerocks::eRadioStatus::AP_DFS_CAC;
-        } else {
-            iface_status_ap = beerocks::eRadioStatus::AP_OK;
-        }
-
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION: {
@@ -2123,7 +2022,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
         notification_out->params() = notification_in->params();
         send_cmdu_to_controller(cmdu_tx);
-        iface_status_ap = beerocks::eRadioStatus::AP_OK;
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION: {
@@ -2464,15 +2362,22 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
         }
         LOG(INFO) << "ACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION" << print_str.str();
 
+        bool agent_operational = false;
         if (slave_state == STATE_OPERATIONAL && notification_in->new_tx_state() == 1 &&
             notification_in->new_hostap_enabled_state() == 1) {
-
-            // marking slave as operational if it is on operational state with tx on and hostap is enabled
-            iface_status_operational_state = true;
-            slave_resets_counter           = 0;
-        } else {
-            iface_status_operational_state = false;
+            slave_resets_counter = 0;
+            agent_operational    = true;
         }
+
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION>(cmdu_tx);
+        if (notification_out == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        notification_out->operational() = agent_operational;
+        notification_out->bridge_mac() = network_utils::mac_from_string(backhaul_params.bridge_mac);
+        send_cmdu_to_controller(cmdu_tx);
 
         break;
     }
@@ -3174,12 +3079,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         }
 
         if (!platform_settings.local_gw) {
-            is_backhaul_manager   = false;
-            iface_status_bh_wired = eRadioStatus::OFF;
+            is_backhaul_manager = false;
         }
-
-        // mark slave as in non operational state
-        iface_status_operational_state = false;
 
         LOG(TRACE) << "goto STATE_START_AP_MANAGER";
         is_slave_reset = false;
@@ -3335,9 +3236,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         master_socket->setPeerMac(backhaul_params.controller_bridge_mac);
 
         if (!wlan_settings.band_enabled) {
-
-            iface_status_operational_state = true;
-            iface_status_ap                = eRadioStatus::OFF;
             LOG(TRACE) << "goto STATE_OPERATIONAL";
             slave_state = STATE_OPERATIONAL;
             break;
@@ -3539,10 +3437,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         slave_state_timer = std::chrono::steady_clock::now() +
                             std::chrono::seconds(WAIT_FOR_JOINED_RESPONSE_TIMEOUT_SEC);
 
-        if (wlan_settings.channel != 0 /* NOT ACS */) {
-            send_platform_iface_status_notif(eRadioStatus::AP_OK, true);
-        }
-
         slave_state = STATE_WAIT_FOR_JOINED_RESPONSE;
         break;
     }
@@ -3638,8 +3532,6 @@ void slave_thread::ap_manager_stop()
     }
     if (did_stop)
         LOG(DEBUG) << "ap_manager_stop() - done";
-
-    iface_status_ap = eRadioStatus::OFF;
 }
 
 void slave_thread::backhaul_manager_stop()
@@ -3651,9 +3543,6 @@ void slave_thread::backhaul_manager_stop()
     }
     backhaul_manager_socket = nullptr;
     master_socket           = nullptr;
-
-    iface_status_bh       = eRadioStatus::OFF;
-    iface_status_bh_wired = eRadioStatus::OFF;
 }
 
 void slave_thread::platform_manager_stop()
@@ -3736,46 +3625,6 @@ void slave_thread::log_son_config()
                << "monitor_disable_initiative_arp="
                << int(son_config.monitor_disable_initiative_arp) << std::endl
                << "slave_keep_alive_retries=" << int(son_config.slave_keep_alive_retries);
-}
-
-void slave_thread::send_platform_iface_status_notif(eRadioStatus radio_status,
-                                                    bool status_operational)
-{
-    // CMDU Message
-    auto platform_notification = message_com::create_vs_message<
-        beerocks_message::cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION>(cmdu_tx);
-
-    if (platform_notification == nullptr) {
-        LOG(ERROR) << "Failed building message!";
-        return;
-    }
-    string_utils::copy_string(platform_notification->iface_name_ap(message::IFACE_NAME_LENGTH),
-                              config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
-    string_utils::copy_string(platform_notification->iface_name_bh(message::IFACE_NAME_LENGTH),
-                              config.backhaul_wireless_iface.c_str(), message::IFACE_NAME_LENGTH);
-
-    platform_notification->status_ap()          = (uint8_t)radio_status;
-    platform_notification->status_bh()          = (uint8_t)iface_status_bh;
-    platform_notification->status_bh_wired()    = (uint8_t)iface_status_bh_wired;
-    platform_notification->is_bh_manager()      = (uint8_t)is_backhaul_manager;
-    platform_notification->status_operational() = (uint8_t)status_operational;
-
-    iface_status_ap_prev                = iface_status_ap;
-    iface_status_bh_prev                = iface_status_bh;
-    iface_status_bh_wired_prev          = iface_status_bh_wired;
-    iface_status_operational_state_prev = iface_status_operational_state;
-    LOG(INFO) << "***** send_iface_status:"
-              << " iface_name_ap: "
-              << platform_notification->iface_name_ap(message::IFACE_NAME_LENGTH)
-              << " iface_name_bh: "
-              << platform_notification->iface_name_bh(message::IFACE_NAME_LENGTH)
-              << " status_ap: " << (int)platform_notification->status_ap()
-              << " status_bh: " << (int)platform_notification->status_bh()
-              << " status_bh_wired: " << (int)platform_notification->status_bh_wired()
-              << " is_bh_manager: " << (int)platform_notification->is_bh_manager()
-              << " operational: " << (int)platform_notification->status_operational();
-
-    message_com::send_cmdu(platform_manager_socket, cmdu_tx);
 }
 
 bool slave_thread::monitor_heartbeat_check()
