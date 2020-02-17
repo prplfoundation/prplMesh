@@ -385,8 +385,6 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_client_steering_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::ACK_MESSAGE:
         return handle_ack_message(sd, cmdu_rx);
-    case ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE:
-        return handle_client_capability_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE:
         return handle_multi_ap_policy_config_request(sd, cmdu_rx);
     default:
@@ -4195,13 +4193,6 @@ bool slave_thread::parse_non_intel_join_response(Socket *sd)
 
     slave_state = STATE_UPDATE_MONITOR_SON_CONFIG;
 
-    return true;
-}
-
-bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
-{
-    const auto mid = cmdu_rx.getMessageId();
-    LOG(DEBUG) << "Received CLIENT_CAPABILITY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
     return true;
 }
 
