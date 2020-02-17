@@ -43,7 +43,6 @@ public:
         int stop_on_failure_attempts;
         bool enable_keep_alive;
         bool debug_disable_arp;
-        bool enable_bpl_iface_status_notifications;
         bool enable_repeater_mode;
         std::string backhaul_wire_iface;
         beerocks::eIfaceType backhaul_wire_iface_type;
@@ -150,10 +149,6 @@ private:
     void monitor_stop();
     void log_son_config();
     void platform_notify_error(beerocks::bpl::eErrorCode code, const std::string &error_data);
-    void update_iface_status(bool is_ap, int8_t iface_status);
-    void send_iface_status();
-    void send_platform_iface_status_notif(beerocks::eRadioStatus radio_status,
-                                          bool status_operational);
     bool monitor_heartbeat_check();
     bool ap_manager_heartbeat_check();
     bool send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx);
@@ -222,15 +217,6 @@ private:
     int last_reported_backhaul_rssi = beerocks::RSSI_INVALID;
 
     ap_manager_thread *ap_manager = nullptr;
-
-    beerocks::eRadioStatus iface_status_ap            = beerocks::eRadioStatus::INVALID;
-    beerocks::eRadioStatus iface_status_ap_prev       = beerocks::eRadioStatus::INVALID;
-    beerocks::eRadioStatus iface_status_bh            = beerocks::eRadioStatus::INVALID;
-    beerocks::eRadioStatus iface_status_bh_prev       = beerocks::eRadioStatus::INVALID;
-    beerocks::eRadioStatus iface_status_bh_wired      = beerocks::eRadioStatus::INVALID;
-    beerocks::eRadioStatus iface_status_bh_wired_prev = beerocks::eRadioStatus::INVALID;
-    bool iface_status_operational_state               = false;
-    bool iface_status_operational_state_prev          = false;
 
     // Encryption support - move to common library
     bool autoconfig_wsc_calculate_keys(WSC::m2 &m2, uint8_t authkey[32], uint8_t keywrapkey[16]);

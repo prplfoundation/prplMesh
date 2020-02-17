@@ -154,8 +154,6 @@ bool config_file::read_slave_config_file(std::string config_file_path, sConfigSl
             std::make_tuple("enable_arp_monitor=", &conf.enable_arp_monitor, mandatory_slave),
             std::make_tuple("enable_keep_alive=", &conf.enable_keep_alive, mandatory_slave),
             std::make_tuple("debug_disable_arp=", &conf.debug_disable_arp, 0),
-            std::make_tuple("enable_bpl_iface_status_notifications=",
-                            &conf.enable_bpl_iface_status_notifications, mandatory_slave),
             std::make_tuple("bridge_iface=", &conf.bridge_iface, 0),
             std::make_tuple("enable_system_hang_test=", &conf.enable_system_hang_test, 0),
             std::make_tuple("enable_son_slaves_watchdog=", &conf.enable_son_slaves_watchdog, 0),

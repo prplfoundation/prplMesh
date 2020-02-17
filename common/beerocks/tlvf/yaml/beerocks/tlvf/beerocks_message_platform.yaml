@@ -142,20 +142,3 @@ cACTION_PLATFORM_ERROR_NOTIFICATION:
     _length: [ 256 ]
     _comment: # Must match BPL_ERROR_STRING_LEN
 
-cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION:
-  _type: class
-  iface_name_ap: 
-    _type: char     
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
-  iface_name_bh: 
-    _type: char     
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
-  status_ap: uint8_t 
-  status_bh: uint8_t 
-  status_bh_wired: uint8_t 
-  is_bh_manager: uint8_t 
-  status_operational: uint8_t
-
-cACTION_PLATFORM_OPERATIONAL_NOTIFICATION:
-  _type: class
-  operational: uint8_t  

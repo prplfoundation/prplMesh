@@ -677,6 +677,10 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         mon_rssi.conf_rx_rssi_notification_threshold_dbm =
             update->config().monitor_rx_rssi_notification_threshold_dbm;
         mon_rssi.conf_disable_initiative_arp = update->config().monitor_disable_initiative_arp;
+
+        // Mark the enable flag as "false" to force update in hostapd status.
+        // The status is polled every "MONITOR_DB_AP_POLLING_RATE_SEC" and update the value.
+        mon_db.set_hostapd_enabled(false);
         break;
     }
     case beerocks_message::ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST: {
