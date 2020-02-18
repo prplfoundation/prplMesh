@@ -1,6 +1,11 @@
 set(ELPP_LIB_NAME "mapf::elpp")
 set(ELPP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/framework/external/easylogging)
-set(ELPP_LIBRARY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libelpp.so.1.4.0)
+message("-- ** -- ** Findelpp: BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
+if(BUILD_SHARED_LIBS)
+	set(ELPP_LIBRARY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libelpp.so.1.4.0)
+else()
+	set(ELPP_LIBRARY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libelpp.a)
+endif()
 
 add_library(${ELPP_LIB_NAME} UNKNOWN IMPORTED)
 

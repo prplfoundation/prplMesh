@@ -13,9 +13,9 @@
 #include <sys/inotify.h>
 #include <unistd.h>
 
-SHARE_EASYLOGGINGPP(
-    el::Helpers::
-        storage()) //use easylogging resources of the main process (assuming this process use INITIALIZE_EASYLOGGINGPP)
+//SHARE_EASYLOGGINGPP(
+//    el::Helpers::
+//        storage()) //use easylogging resources of the main process (assuming this process use INITIALIZE_EASYLOGGINGPP)
 
 #define DEFAULT_LOGGER_NAME "default"
 

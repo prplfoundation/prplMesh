@@ -11,6 +11,8 @@
 #include <net/if.h>
 #include <unistd.h>
 
+//MAPF_INITIALIZE_LOGGER
+///SHARE_EASYLOGGINGPP(el::Helpers::storage())
 MAPF_INITIALIZE_LOGGER
 
 using namespace mapf;

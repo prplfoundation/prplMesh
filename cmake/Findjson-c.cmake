@@ -2,7 +2,11 @@ find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(JSONC json-c REQUIRED)
 
-find_library(JSONC_LIBRARY "${JSONC_LIBRARIES}")
+if(BUILD_SHARED_LIBS)
+	find_library(JSONC_LIBRARY "${JSONC_LIBRARIES}")
+else()
+	find_library(JSONC_LIBRARY libjson-c.a "${JSONC_LIBRARIES}")
+endif()
 if(NOT JSONC_LIBRARY)
 	message(FATAL_ERROR "libjson-c not found!")
 endif()

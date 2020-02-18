@@ -21,7 +21,11 @@
 using namespace beerocks;
 using namespace net;
 
+//INITIALIZE_EASYLOGGINGPP
+//INITIALIZE_EASYLOGGINGPP
+#ifdef BUILD_SHARED_LIBS
 INITIALIZE_EASYLOGGINGPP
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////// Local Module Definitions //////////////////////////

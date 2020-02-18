@@ -13,6 +13,8 @@ endif()
 option (BUILD_AGENT "Build EasyMesh agent" ON)
 option (BUILD_CONTROLLER "Build EasyMesh controller" ON)
 
+option(BUILD_SHARED_LIBS "Build shared libraries (.so) instead of static ones (.a)" ON)
+
 ## Generic checks and defaults
 
 include(FindPkgConfig)
@@ -28,6 +30,7 @@ endif()
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/bin)
 
 message(STATUS "CMAKE_FIND_ROOT_PATH - ${CMAKE_FIND_ROOT_PATH}")
@@ -64,6 +67,18 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector-strong")
 else()
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector")
+endif()
+
+#CHECK!
+if(NOT BUILD_SHARED_LIBS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static " CACHE STRING "" FORCE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -static " CACHE STRING "" FORCE)
+    #strip
+    #set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
+    #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+	set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -static-libgcc -static-libstdc++ -ldl ")
+else()
+    add_definitions(-DBUILD_SHARED_LIBS)
 endif()
 
 # Release flags

@@ -11,7 +11,10 @@
 #include <mapf/common/logger.h>
 
 // Use easylogging++ instance of the main application
+//SHARE_EASYLOGGINGPP(el::Helpers::storage())
+#ifdef BUILD_SHARED_LIBS
 SHARE_EASYLOGGINGPP(el::Helpers::storage())
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////

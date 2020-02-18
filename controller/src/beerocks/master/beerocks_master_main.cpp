@@ -20,6 +20,7 @@
 /// Do not use this macro anywhere else in gateway process
 /// It should only be there in one place and easylogging++ recommends to be in the file where
 /// main function is defined.
+//INITIALIZE_EASYLOGGINGPP
 INITIALIZE_EASYLOGGINGPP
 
 // Do not use this macro anywhere else in ire process
@@ -303,6 +304,7 @@ int main(int argc, char *argv[])
     std::string master_uds = beerocks_master_conf.temp_path + std::string(BEEROCKS_MASTER_UDS);
     beerocks::net::network_utils::iface_info bridge_info;
     auto &bridge_iface = beerocks_slave_conf.bridge_iface;
+    LOG(INFO) << "Bridge name: " << beerocks_slave_conf.bridge_iface << std::endl;
     if (beerocks::net::network_utils::get_iface_info(bridge_info, bridge_iface) != 0) {
         LOG(ERROR) << "Failed reading addresses from the bridge!";
         return 0;

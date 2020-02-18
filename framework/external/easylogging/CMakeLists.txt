@@ -8,7 +8,7 @@ add_definitions(-DELPP_SYSLOG)
 set(ELPP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 
-add_library(${PROJECT_NAME} SHARED ${CMAKE_CURRENT_SOURCE_DIR}/easylogging++.cc)
+add_library(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/easylogging++.cc)
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 target_include_directories(${PROJECT_NAME}
     PUBLIC

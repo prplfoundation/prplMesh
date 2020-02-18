@@ -26,6 +26,7 @@
 #include <readline/readline.h>
 #endif
 
+//INITIALIZE_EASYLOGGINGPP
 INITIALIZE_EASYLOGGINGPP
 
 // Do not use this macro anywhere else in ire process

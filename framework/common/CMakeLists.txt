@@ -37,6 +37,10 @@ install(TARGETS local_bus DESTINATION bin)
 
 endif()
 
+if (NOT BUILD_SHARED_LIBS)
+	set(OPENSSL_USE_STATIC_LIBS TRUE)
+endif()
+
 # We use OpenSSL 1.1.x for Encryption
 find_package(OpenSSL 1.1 QUIET)
 if(NOT OpenSSL_FOUND)
@@ -46,7 +50,7 @@ if(NOT OpenSSL_FOUND)
 endif()
 
 # Create a single common library
-add_library(common SHARED ${sources})
+add_library(common ${sources})
 set_target_properties(common PROPERTIES PREFIX "mapf" VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 target_link_libraries(common 
 	PRIVATE 
