@@ -23,8 +23,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-MAPF_INITIALIZE_LOGGER
-
 //  Suggestions for unit testing (none of this is currently happening in this simple test program):
 //  ----------------------------------------------------------------------------------------------
 //  connect external Tester PC (with many interfaces) to DUT network interfaces:

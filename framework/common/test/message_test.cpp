@@ -15,7 +15,7 @@
 #include <mapf/local_bus.h>
 #include <thread>
 #include <unistd.h>
-MAPF_INITIALIZE_LOGGER
+
 namespace mapf {
 
 class MessageTest1 : public Message {

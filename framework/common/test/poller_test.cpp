@@ -17,7 +17,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-MAPF_INITIALIZE_LOGGER
+
 class PollerTest {
 public:
     PollerTest(mapf::Context &ctx, const char *name = "")

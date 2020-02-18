@@ -11,7 +11,7 @@
 #include <mapf/local_bus.h>
 #include <mapf/topology_discovery_agent/topology_discovery_agent.h>
 #include <signal.h>
-MAPF_INITIALIZE_LOGGER
+
 static void signal_handler(int signum)
 {
     MAPF_INFO("PID #" << getpid() << ": Interrupt Signal (" << signum << ") received.");
