@@ -18,33 +18,36 @@ using namespace beerocks;
 constexpr char version::INVALID_VERSION_STRING[];
 constexpr char version::INVALID_TIMESTAMP_STRING[];
 
-// Static variable declaration
-beerocks::version::beerocks_version_map_t beerocks::version::s_beerocks_version_map;
+const beerocks::version *beerocks::version::s_version = nullptr;
 
 beerocks::version::version(std::string ver, std::string build_date, std::string build_rev)
+    : m_ver(ver), m_build_date(build_date), m_build_rev(build_rev)
 {
-    set_module_version("__main__", ver, build_date, build_rev);
+    s_version = this;
 }
 
-void beerocks::version::set_module_version(std::string so_name, std::string ver,
-                                           std::string build_date, std::string build_rev)
+std::string beerocks::version::get_module_version()
 {
-    s_beerocks_version_map[so_name] = std::make_tuple(ver, build_date, build_rev);
+    if (s_version)
+        return s_version->m_ver;
+    else
+        return INVALID_VERSION_STRING;
 }
 
-std::string beerocks::version::get_module_version(const std::string &module_name)
+std::string beerocks::version::get_module_timestamp()
 {
-    return std::get<0>(s_beerocks_version_map[module_name]);
+    if (s_version)
+        return s_version->m_build_date;
+    else
+        return INVALID_TIMESTAMP_STRING;
 }
 
-std::string beerocks::version::get_module_timestamp(const std::string &module_name)
+std::string beerocks::version::get_module_revision()
 {
-    return std::get<1>(s_beerocks_version_map[module_name]);
-}
-
-std::string beerocks::version::get_module_revision(const std::string &module_name)
-{
-    return std::get<2>(s_beerocks_version_map[module_name]);
+    if (s_version)
+        return s_version->m_build_rev;
+    else
+        return "";
 }
 
 std::string beerocks::version::version_to_string(const sBinaryVersion &version)
@@ -103,19 +106,6 @@ void beerocks::version::print_version(bool verbose, const std::string &name,
     }
     std::cout << "Copyright (c) 2018 Intel Corporation, All Rights Reserved." << std::endl
               << std::endl;
-    if (verbose) {
-        if (s_beerocks_version_map.size() > 1) {
-            std::cout << "Additional Modules:" << std::endl;
-            for (auto &module_node : s_beerocks_version_map) {
-                if (module_node.first != "__main__") {
-                    std::cout << std::string("  ") << module_node.first << std::string(": ")
-                              << std::get<0>(module_node.second) << " ("
-                              << std::get<1>(module_node.second) << ") ["
-                              << std::get<2>(module_node.second) << "]" << std::endl;
-                }
-            }
-        }
-    }
 }
 
 void beerocks::version::log_version(int, char **argv)
@@ -124,18 +114,6 @@ void beerocks::version::log_version(int, char **argv)
 
     LOG(INFO) << name << " " << version::get_module_version() << " ("
               << version::get_module_timestamp() << ") [" << version::get_module_revision() << "]";
-
-    if (s_beerocks_version_map.size() > 1) {
-        LOG(INFO) << "Additional Modules:";
-        for (auto &module_node : s_beerocks_version_map) {
-            if (module_node.first != "__main__") {
-                LOG(INFO) << std::string("  ") << module_node.first << std::string(": ")
-                          << std::get<0>(module_node.second) << " ("
-                          << std::get<1>(module_node.second) << ") ["
-                          << std::get<2>(module_node.second) << "]";
-            }
-        }
-    }
 }
 
 bool beerocks::version::handle_version_query(int argc, char **argv, const std::string &description)

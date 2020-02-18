@@ -37,16 +37,6 @@ namespace beerocks {
                                                 std::string(BEEROCKS_BUILD_DATE),                  \
                                                 std::string(BEEROCKS_REVISION));
 
-#define BEEROCKS_INIT_SO_VERSION(so_name)                                                          \
-    __attribute__((constructor)) static void beerocks_version_register_module()                    \
-    {                                                                                              \
-        beerocks::g_beerocks_version_map[so_name] = std::make_tuple(            \
-        beerocks::version::set_module_version(std::version(so_name),            \
-            std::string(BEEROCKS_VERSION),                                      \
-            std::string(BEEROCKS_BUILD_DATE),                                   \
-            std::string(BEEROCKS_REVISION));                                                       \
-    }
-
 typedef struct sBinaryVersion {
     uint8_t major;
     uint8_t minor;
@@ -68,21 +58,18 @@ public:
                                      const std::string &description = std::string());
     static void log_version(int argc, char **argv);
 
-    static void set_module_version(std::string so_name, std::string ver, std::string build_date,
-                                   std::string build_rev);
-    static std::string get_module_version(const std::string &module_name = std::string("__main__"));
-    static std::string
-    get_module_timestamp(const std::string &module_name = std::string("__main__"));
-    static std::string
-    get_module_revision(const std::string &module_name = std::string("__main__"));
+    static std::string get_module_version();
+    static std::string get_module_timestamp();
+    static std::string get_module_revision();
     static std::string version_to_string(const sBinaryVersion &version);
     static sBinaryVersion version_from_string(const std::string &version);
 
 private:
-    // Version, Build Date, GIT Revision
-    typedef std::map<std::string, std::tuple<std::string, std::string, std::string>>
-        beerocks_version_map_t;
-    static beerocks_version_map_t s_beerocks_version_map;
+    std::string m_ver;
+    std::string m_build_date;
+    std::string m_build_rev;
+
+    static const version *s_version;
 };
 } // namespace beerocks
 
