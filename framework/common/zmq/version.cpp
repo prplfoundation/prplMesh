@@ -10,8 +10,6 @@
 #include <mapf/common/logger.h>
 #include <zmq.h>
 
-MAPF_INITIALIZE_LOGGER
-
 int main(void)
 {
     int major, minor, patch;

@@ -11,8 +11,6 @@
 #include <net/if.h>
 #include <unistd.h>
 
-MAPF_INITIALIZE_LOGGER
-
 using namespace mapf;
 
 int main(int argc, char *argv[])

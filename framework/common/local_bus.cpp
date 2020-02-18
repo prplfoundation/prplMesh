@@ -11,7 +11,7 @@
 #include <mapf/common/logger.h>
 #include <sstream>
 #include <unistd.h>
-MAPF_INITIALIZE_LOGGER
+
 void usage()
 {
     std::cout << "usage: broker -[cfbdsh]" << std::endl;

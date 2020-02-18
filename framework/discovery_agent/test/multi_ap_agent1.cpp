@@ -20,7 +20,6 @@
 #define CL_MAC "\x22\x33\x44\x55\x66\x77"
 #define DST_MAC "\x02\x9A\x96\xF3\x58\x30"
 
-MAPF_INITIALIZE_LOGGER
 int main(int argc, char *argv[])
 {
     int i, j;
