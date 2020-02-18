@@ -2231,8 +2231,10 @@ void DefaultLogDispatchCallback::handle(const LogDispatchData* data) {
   {
 	  LogDispatchData syslogData;
 	  syslogData.setDispatchAction(base::DispatchAction::SysLog);
-	  syslogData.setLogMessage(new LogMessage(data->logMessage()->level(), data->logMessage()->file(), data->logMessage()->line(),
-		data->logMessage()->func(), data->logMessage()->verboseLevel(), Loggers::getLogger(base::consts::kSysLogLoggerId), data->logMessage()->message()));
+	  LogMessage log_message(data->logMessage()->level(), data->logMessage()->file(),
+			   data->logMessage()->line(), data->logMessage()->func(), data->logMessage()->verboseLevel(),
+			   Loggers::getLogger(base::consts::kSysLogLoggerId), data->logMessage()->message());
+	  syslogData.setLogMessage(&log_message);
 
 	  dispatch(m_data->logMessage()->logger()->logBuilder()->build(m_data->logMessage(),
 			   m_data->dispatchAction() == base::DispatchAction::NormalLog), syslogData .logMessage()->logger()->logBuilder()->build(syslogData.logMessage(),
