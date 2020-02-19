@@ -13,7 +13,7 @@ configure_file(
 
 set(scripts ${CMAKE_CURRENT_BINARY_DIR}/prplmesh_utils.sh)
 
-if (NOT TARGET_PLATFORM STREQUAL "linux")
+if ((NOT TARGET_PLATFORM STREQUAL "linux") AND (NOT TARGET_PLATFORM STREQUAL "econet" ))
 list(APPEND scripts ${CMAKE_CURRENT_BINARY_DIR}/beerocks_watchdog.sh)
 endif()
 

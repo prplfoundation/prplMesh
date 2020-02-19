@@ -292,7 +292,8 @@ bool base_wlan_hal_dummy::process_nl_events()
 
 bool base_wlan_hal_dummy::refresh_radio_info()
 {
-    if (get_iface_name() == "wlan2") {
+    //if (get_iface_name() == "wlan2") {
+    if (get_iface_name() == "rai0") {
         m_radio_info.is_5ghz = true;
     }
     std::string radio_mac;

@@ -89,6 +89,17 @@ elseif (TARGET_PLATFORM STREQUAL "linux")
     add_definitions(-DPLATFORM_DB_PATH_TEMP="${TMP_PATH}/prplmesh_platform_db")
     install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 
+elseif (TARGET_PLATFORM STREQUAL "econet")
+
+    # Platform definitions
+    #add_definitions(-DBEEROCKS_LINUX)
+
+    file(GLOB_RECURSE bpl_platform_sources ${MODULE_PATH}/linux/*.c*)
+
+    add_definitions(-DPLATFORM_DB_PATH="${INSTALL_PATH}/share/prplmesh_platform_db")
+    add_definitions(-DPLATFORM_DB_PATH_TEMP="${TMP_PATH}/prplmesh_platform_db")
+    install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
+
 else()
 
     message(WARNING "${BoldWhite}Skipping ${BoldGreen}${PROJECT_NAME}${BoldWhite} build for unsupported platform...${ColourReset}")

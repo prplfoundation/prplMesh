@@ -26,6 +26,16 @@ set_target_properties(ubus PROPERTIES
 )
 endif()
 
+if (TARGET_PLATFORM STREQUAL "econet")
+# Include directories
+set_target_properties(ubus PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${UBUS_INCLUDE_DIRS}"
+)
+endif()
+
+
+
+
 # Library
 set_target_properties(ubus PROPERTIES
     IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"

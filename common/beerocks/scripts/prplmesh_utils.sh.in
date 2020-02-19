@@ -170,7 +170,10 @@ roll_logs_function()
         logFilesCountPostRoll=$(find ./*.*.log | wc -l)
 
         # All modules rolled
-        if [ "$logFilesCountPostRoll" -ge $((logFilesCountPreRoll * 2)) ]; then
+        LOGFILESCOUNTPREROLL=`echo ${logFilesCountPreRoll} 2 | awk '{print $1 * $2}'`
+#        if [ "$logFilesCountPostRoll" -ge $((logFilesCountPreRoll * 2)) ]; then
+        if [ "$logFilesCountPostRoll" -ge $LOGFILESCOUNTPREROLL ]; then
+
             break
         fi
 
@@ -179,7 +182,9 @@ roll_logs_function()
             break
         fi
         
-        rollTimeout=$((rollTimeout + 1))
+#        rollTimeout=$((rollTimeout + 1))
+        ROLLTIMEOUT_VAL=`echo ${rollTimeout} 1 | awk '{print $1 * $2}'`
+        rollTimeout=$ROLLTIMEOUT_VAL
         sleep 1
     done
 
@@ -337,6 +342,9 @@ main() {
 
     # Give write permissions (linux only)
     if [ "@TARGET_PLATFORM@" = "linux" ]; then
+        chmod -R +o+w /tmp/${SUDO_USER:-${USER}}
+    fi
+    if [ "@TARGET_PLATFORM@" = "econet" ]; then
         chmod -R +o+w /tmp/${SUDO_USER:-${USER}}
     fi
 }

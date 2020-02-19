@@ -18,6 +18,11 @@ set_target_properties(zmq::zmq PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${ZMQ_INCLUDE_DIRS}"
 )
 
+# Include directory
+#set_target_properties(zmq::zmq PROPERTIES
+#    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_PREFIX_PATH}/include"
+#)
+
 # Library
 set_target_properties(zmq::zmq PROPERTIES
     IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"

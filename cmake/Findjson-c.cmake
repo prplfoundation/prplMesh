@@ -22,6 +22,17 @@ set_target_properties(json-c PROPERTIES
 )
 endif()
 
+
+# Workaround in case pkg-config finds json-c in the build server instead of the cross compiled toolchain -
+# For cross compile, we include all the staging_dir/usr/include so we don't need to explicitely include json-c dirs.
+if (TARGET_PLATFORM STREQUAL "econet")
+# Include directory
+set_target_properties(json-c PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${JSONC_INCLUDE_DIRS}"
+)
+endif()
+
+
 # Library
 set_target_properties(json-c PROPERTIES
     IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"

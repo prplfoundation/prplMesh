@@ -567,9 +567,10 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         std::transform(parameter.begin(), parameter.end(), parameter.begin(), ::tolower);
         std::string value;
         if (parameter == "alid") {
-            if (!net::network_utils::linux_iface_get_mac("br-lan", value)) {
-                LOG(ERROR) << "failed to get br-lan mac address";
-                reply_ucc(eWfaCaStatus::ERROR, "failed to get br-lan mac address");
+            //if (!net::network_utils::linux_iface_get_mac("br-lan", value)) {
+        	if (!net::network_utils::linux_iface_get_mac("br0", value)) {
+                LOG(ERROR) << "failed to get br0 mac address";
+                reply_ucc(eWfaCaStatus::ERROR, "failed to get br0 mac address");
                 break;
             }
         } else if (!handle_dev_get_param(params, value)) {
