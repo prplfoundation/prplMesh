@@ -12,8 +12,6 @@ add_definitions(-DUDS_BUS)
 set(btl_sources btl.cpp btl_uds.cpp)
 endif()
 
-find_package(elpp REQUIRED)
-
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 

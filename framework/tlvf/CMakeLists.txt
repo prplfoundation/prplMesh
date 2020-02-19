@@ -1,6 +1,5 @@
 project(tlvf VERSION ${prplmesh_VERSION})
 
-find_package(elpp REQUIRED)
 find_package(PythonInterp REQUIRED)
 
 set(TLVF_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -39,7 +38,7 @@ add_custom_command(
 file(GLOB_RECURSE TLVF_SOURCES ${TLVF_DIR}/src/src/*.c*)
 add_library(tlvf SHARED ${TLVF_OUTPUTS} ${TLVF_SOURCES})
 set_target_properties(tlvf PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
-target_link_libraries(tlvf PRIVATE mapf::elpp)
+target_link_libraries(tlvf PRIVATE elpp)
 target_include_directories(tlvf
     PUBLIC
         $<BUILD_INTERFACE:${TLVF_OUT}/include>

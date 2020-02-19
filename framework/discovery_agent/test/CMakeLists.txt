@@ -2,9 +2,9 @@ if(BUILD_TESTS)
 		add_executable(discovery_agent_test discovery_agent_test.cpp)
 		add_executable(discovery_agent_test1 multi_ap_agent1.cpp)
 		add_executable(discovery_agent_test2 multi_ap_agent2.cpp)
-		target_link_libraries(discovery_agent_test common ieee1905_transport_messages mapf::elpp)
-		target_link_libraries(discovery_agent_test1 common ieee1905_transport_messages mapf::elpp)
-		target_link_libraries(discovery_agent_test2 common ieee1905_transport_messages mapf::elpp)
+		target_link_libraries(discovery_agent_test common ieee1905_transport_messages elpp)
+		target_link_libraries(discovery_agent_test1 common ieee1905_transport_messages elpp)
+		target_link_libraries(discovery_agent_test2 common ieee1905_transport_messages elpp)
 		target_include_directories(discovery_agent_test1 PUBLIC
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
 			$<INSTALL_INTERFACE:include>
