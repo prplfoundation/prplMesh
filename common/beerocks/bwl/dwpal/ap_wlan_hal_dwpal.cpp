@@ -1902,6 +1902,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         msg->params.vap_id       = beerocks::utils::get_ids_from_iface_string(VAP).vap_id;
         msg->params.mac          = beerocks::net::network_utils::mac_from_string(MACAddress);
         msg->params.capabilities = {};
+        std::copy_n(assoc_req, strnlen(assoc_req, ASSOCIATION_FRAME_SIZE) + 1,
+                    msg->params.association_frame);
 
         std::string ht_cap_str(ht_cap);
         get_ht_mcs_capabilities(HT_MCS, ht_cap_str, msg->params.capabilities);
