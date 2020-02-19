@@ -1725,6 +1725,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION: {
+        LOG(DEBUG) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
         LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION received from iface "
                    << soc->hostap_iface;
         auto msg =
@@ -1745,13 +1746,25 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             }
         }
         // Set client association information for associated client
+        // char assoc_req[1024] = {0};
+        // std::copy_n(assoc_req, strnlen(msg->association_frame(), ASSOCIATION_FRAME_SIZE) + 1,
+        //             msg->association_frame());
+        std::string assoc_req(msg->association_frame());
         auto &associated_clients =
             m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
+
+        associated_clients[msg->client_mac()] =
+            make_tuple(std::chrono::steady_clock::now(), assoc_req);
         auto associatedClientsTuple         = associated_clients[msg->client_mac()];
-        std::get<0>(associatedClientsTuple) = std::chrono::steady_clock::now();
-        std::copy_n(std::get<1>(associatedClientsTuple),
-                    strnlen(std::get<1>(associatedClientsTuple), ASSOCIATION_FRAME_SIZE) + 1,
-                    msg->association_frame());
+        LOG(DEBUG) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+
+        LOG(DEBUG)<< "assoc_req= " << std::get<1>(associatedClientsTuple);
+
+        LOG(DEBUG) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+
+        // std::copy_n(std::get<1>(associatedClientsTuple),
+        //             strnlen(std::get<1>(associatedClientsTuple), ASSOCIATION_FRAME_SIZE) + 1,
+        //             msg->association_frame());
 
         break;
     }
@@ -1835,6 +1848,7 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
 bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                       const std::string &src_mac)
 {
+    LOG(DEBUG) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received CLIENT_CAPABILITY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
 
@@ -1890,8 +1904,8 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         auto associated_clients = m_radio_info_map[client_ruid].associated_clients_map[client_vap];
         auto associatedClientsTuple = associated_clients[client_info_tlv_r->client_mac()];
         client_capability_report_tlv->set_association_frame(
-            std::get<1>(associatedClientsTuple),
-            strnlen(std::get<1>(associatedClientsTuple), ASSOCIATION_FRAME_SIZE));
+            std::get<1>(associatedClientsTuple));
+            
 
     } else {
         client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::FAILURE;

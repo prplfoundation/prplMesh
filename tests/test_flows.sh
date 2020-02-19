@@ -216,16 +216,16 @@ test_client_capability_query() {
     sta_mac2=00:00:00:11:00:33
 
     check_error=0
-    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8009 "tlv_type,0x90,tlv_length,\
-0x000C,tlv_value,{$mac_agent1_wlan0 ${sta_mac1}}"
-    sleep 1
-    dbg "Confirming client capability query has been received on agent"
-    # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
-    check_log ${REPEATER1} agent "CLIENT_CAPABILITY_QUERY_MESSAGE"
+#     check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8009 "tlv_type,0x90,tlv_length,\
+# 0x000C,tlv_value,{$mac_agent1_wlan0 ${sta_mac1}}"
+#     sleep 1
+#     dbg "Confirming client capability query has been received on agent"
+#     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
+#     check_log ${REPEATER1} agent "CLIENT_CAPABILITY_QUERY_MESSAGE"
     
-    dbg "Confirming client capability report message has been received on controller"
-    check_log ${GATEWAY} controller "Received CLIENT_CAPABILITY_REPORT_MESSAGE"
-    check_log ${GATEWAY} controller "Result Code= FAILURE, client MAC= ${sta_mac1}, BSSID= ${mac_agent1_wlan0}"
+#     dbg "Confirming client capability report message has been received on controller"
+#     check_log ${GATEWAY} controller "Received CLIENT_CAPABILITY_REPORT_MESSAGE"
+#     check_log ${GATEWAY} controller "Result Code= FAILURE, client MAC= ${sta_mac1}, BSSID= ${mac_agent1_wlan0}"
 
     dbg "Connect dummy STA to wlan0"
     send_bwl_event ${REPEATER1} wlan0 "EVENT AP-STA-CONNECTED ${sta_mac2}"
@@ -234,9 +234,9 @@ test_client_capability_query() {
 0x000C,tlv_value,{$mac_agent1_wlan0 ${sta_mac2}}" 
     sleep 1
 
-    dbg "Confirming client capability report message has been received on controller"
-    check_log ${GATEWAY} controller "Received CLIENT_CAPABILITY_REPORT_MESSAGE"
-    check_log ${GATEWAY} controller "Result Code= SUCCESS, client MAC= ${sta_mac2}, BSSID= ${mac_agent1_wlan0}"
+#     dbg "Confirming client capability report message has been received on controller"
+#     check_log ${GATEWAY} controller "Received CLIENT_CAPABILITY_REPORT_MESSAGE"
+#     check_log ${GATEWAY} controller "Result Code= SUCCESS, client MAC= ${sta_mac2}, BSSID= ${mac_agent1_wlan0}"
     return $check_error
 }
 test_ap_capability_query() {

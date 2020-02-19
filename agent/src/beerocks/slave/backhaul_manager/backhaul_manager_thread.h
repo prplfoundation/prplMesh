@@ -246,7 +246,7 @@ private:
      * in the Topology Response message.
      */
     typedef std::unordered_map<
-        sMacAddr, std::tuple<std::chrono::steady_clock::time_point, char[ASSOCIATION_FRAME_SIZE]>>
+        sMacAddr, std::tuple<std::chrono::steady_clock::time_point, std::string>>
         associated_clients_t;
 
     /**

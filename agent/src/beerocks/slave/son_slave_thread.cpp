@@ -2079,6 +2079,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         notification_out->iface_mac()  = hostap_params.iface_mac;
         notification_out->client_mac() = notification_in->params().mac;
         notification_out->bssid()      = notification_in->params().bssid;
+        LOG(DEBUG) << "*************************************************************";
         notification_out->set_association_frame(
             notification_in->params().association_frame,
             strnlen(notification_in->params().association_frame, ASSOCIATION_FRAME_SIZE) + 1);
