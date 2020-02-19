@@ -73,10 +73,16 @@ endif()
 if(NOT BUILD_SHARED_LIBS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static " CACHE STRING "" FORCE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -static " CACHE STRING "" FORCE)
+
     #strip
     #set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
     #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
-	set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -static-libgcc -static-libstdc++ -ldl ")
+
+    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -static-libgcc -static-libstdc++ -ldl ")
+
+    #Force to use all static libraries. Can this be done in a different way?
+    set(CMAKE_LINK_SEARCH_START_STATIC 1)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 else()
     add_definitions(-DBUILD_SHARED_LIBS)
 endif()
