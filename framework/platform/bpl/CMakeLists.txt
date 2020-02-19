@@ -8,9 +8,6 @@ set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 # Common Sources
 file(GLOB_RECURSE bpl_common_sources ${MODULE_PATH}/common/*.c*)
 
-# Common libraries
-find_package(elpp REQUIRED)
-
 # OpenWRT
 if (TARGET_PLATFORM STREQUAL "openwrt")
 
@@ -100,7 +97,7 @@ endif()
 add_library(${PROJECT_NAME} SHARED ${bpl_common_sources} ${bpl_platform_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
-target_link_libraries(${PROJECT_NAME} PRIVATE mapf::elpp common ${BPL_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE elpp common ${BPL_LIBS})
 
 # Install
 target_include_directories(${PROJECT_NAME}
