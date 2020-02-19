@@ -190,6 +190,7 @@ typedef struct {
     uint8_t reserved1;
     uint8_t reserved2;
     uint8_t reserved3;
+    char *association_frame;
 } sClientAssociationParams;
 
 typedef struct {
