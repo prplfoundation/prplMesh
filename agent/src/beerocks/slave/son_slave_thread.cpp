@@ -2079,9 +2079,21 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         notification_out->iface_mac()  = hostap_params.iface_mac;
         notification_out->client_mac() = notification_in->params().mac;
         notification_out->bssid()      = notification_in->params().bssid;
-        notification_out->set_association_frame(
+        LOG(DEBUG) << "*************************************************************";
+        if (!notification_in->params().association_frame) {
+        //    char a[1]                                = {0};
+            notification_out->set_association_frame("0");
+            LOG(DEBUG) << "---------------------------- EMPTY ASSOCIATION FRAME -----------------"; 
+        }else{
+            LOG(DEBUG) << "---------------------------- NOT EMPTY ASSOCIATION FRAME -----------------"; 
+            notification_out->set_association_frame(
             notification_in->params().association_frame,
             strnlen(notification_in->params().association_frame, ASSOCIATION_FRAME_SIZE) + 1);
+
+        }
+
+        LOG(DEBUG) << "---------------------------- AFTER ASSOCIATION FRAME -----------------";
+        
 
         // Send the message
         LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION for client "
