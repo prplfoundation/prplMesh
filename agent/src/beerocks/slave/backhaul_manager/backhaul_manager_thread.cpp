@@ -1749,16 +1749,26 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         // char assoc_req[1024] = {0};
         // std::copy_n(assoc_req, strnlen(msg->association_frame(), ASSOCIATION_FRAME_SIZE) + 1,
         //             msg->association_frame());
-        std::string assoc_req(msg->association_frame());
+        std::string assoc_req;
+
+        if (!msg->association_frame()) {
+            assoc_req = "";
+            LOG(DEBUG) << "---------------------------- EMPTY ASSOCIATION FRAME -----------------";
+        }else{
+            LOG(DEBUG) << "---------------------------- NOT EMPTY ASSOCIATION FRAME -----------------";
+            std::string s(msg->association_frame());
+            assoc_req = s;
+        }
+        // std::string assoc_req(msg->association_frame());
         auto &associated_clients =
             m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
 
         associated_clients[msg->client_mac()] =
             make_tuple(std::chrono::steady_clock::now(), assoc_req);
-        auto associatedClientsTuple         = associated_clients[msg->client_mac()];
+        auto associatedClientsTuple = associated_clients[msg->client_mac()];
         LOG(DEBUG) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
 
-        LOG(DEBUG)<< "assoc_req= " << std::get<1>(associatedClientsTuple);
+        LOG(DEBUG) << "assoc_req= " << std::get<1>(associatedClientsTuple);
 
         LOG(DEBUG) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
 
@@ -1903,9 +1913,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         //Add frame body of the most recently received (Re)Association Request frame from this client
         auto associated_clients = m_radio_info_map[client_ruid].associated_clients_map[client_vap];
         auto associatedClientsTuple = associated_clients[client_info_tlv_r->client_mac()];
-        client_capability_report_tlv->set_association_frame(
-            std::get<1>(associatedClientsTuple));
-            
+        client_capability_report_tlv->set_association_frame(std::get<1>(associatedClientsTuple));
 
     } else {
         client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::FAILURE;
