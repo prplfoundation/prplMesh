@@ -8,6 +8,8 @@
 
 #include "msglib.h"
 #include <algorithm>
+#include <chrono>
+#include <thread>
 #include <mapf/common/err.h>
 #include <mapf/common/logger.h>
 #include <mapf/common/message_factory.h>
