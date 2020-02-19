@@ -1061,6 +1061,8 @@ bool ap_wlan_hal_dwpal::update_vap_credentials(
             entry_mode != "ap") {
             continue;
         }
+        // SSID
+        hostapd_config_set_value(vap_hostapd_config, "ssid", std::string());
         // Disable the VAP
         hostapd_config_set_value(vap_hostapd_config, "start_disabled", "1");
     }
