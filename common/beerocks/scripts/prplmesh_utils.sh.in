@@ -34,8 +34,10 @@ killall_program() {
         KILL_SIG=$SIG_KILL
     fi
     for PID in $(pgrep -f "$PROGRAM_NAME"); do
-        echo "kill $KILL_SIG $PID $PROGRAM_NAME";
-        kill $KILL_SIG $PID > /dev/null 2>&1;
+        if [ "$(basename "$(readlink /proc/"$PID"/exe)")" = "$PROGRAM_NAME" ]; then
+            echo "kill $KILL_SIG $PID $PROGRAM_NAME";
+            kill $KILL_SIG "$PID" > /dev/null 2>&1;
+        fi
     done
 }
 
