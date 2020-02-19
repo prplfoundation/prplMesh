@@ -1083,6 +1083,8 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
     // STA Connected
     case Event::STA_Connected: {
 
+        LOG(DEBUG) << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
+
         if (!data) {
             LOG(ERROR) << "STA_Connected without data!";
             return false;

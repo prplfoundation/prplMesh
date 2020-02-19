@@ -359,6 +359,7 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
     switch (event) {
     // STA Connected
     case Event::STA_Connected: {
+        LOG(DEBUG) << "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
         auto msg_buff =
             ALLOC_SMART_BUFFER(sizeof(sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION));
         auto msg =
