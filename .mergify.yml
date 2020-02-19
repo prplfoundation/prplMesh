@@ -1,0 +1,22 @@
+pull_request_rules:
+  - name: Automatic rebase and merge on approval
+    conditions:
+      - "#approved-reviews-by>=2" # Require at least two approving reviewers
+      - "#changes-requested-reviews-by=0" # Changes requested blocks the merge
+      - "label!=don't merge" # Don't merge label blocks the merge
+      # All status checks must pass. Since mergify itself is a status check, this is a bit
+      # recursive... So, explicitly say that there should be no unfinished (= neutral) status
+      # check, no failures obviously, and that at least two status checks are successful.
+      - "#status-neutral=0"
+      - "#status-failure=0"
+      - "#status-success>=2"
+    actions:
+      merge:
+        method: rebase # Merge with rebase
+        rebase_fallback: null # Manual intervention needed if that doesn't work
+        # If not up-to-date with master, bring it up-to-date first.
+        # Use rebase for bringing up-to-date
+        # Use "smart" to do the rebase one-by-one, in case multiple PRs need to be
+        # rebased.
+        strict: smart
+        strict_method: rebase
