@@ -252,6 +252,7 @@ typedef struct {
 } sHOSTAP_ENABLED_NOTIFICATION;
 
 #define SSID_MAX_SIZE beerocks::message::WIFI_SSID_MAX_LENGTH
+#define ASSOCIATION_FRAME_SIZE 1024
 #define MAC_ADDR_SIZE 18
 #define MAX_SUPPORTED_20M_CHANNELS beerocks::message::SUPPORTED_CHANNELS_LENGTH
 #define MAX_SUPPORTED_CHANNELS                                                                     \
