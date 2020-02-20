@@ -93,29 +93,30 @@ bool configData::init(const config &cfg)
 
 bool configData::valid() const
 {
+    bool valid = true;
     if (!getAttr<cWscVendorExtWfa>()) {
         TLVF_LOG(ERROR) << "getAttr<cWscVendorExtWfa> failed";
-        return false;
+        valid = false;
     }
     if (!getAttr<cWscAttrSsid>()) {
         TLVF_LOG(ERROR) << "getAttr<cWscAttrSsid> failed";
-        return false;
+        valid = false;
     }
     if (!getAttr<cWscAttrAuthenticationType>()) {
         TLVF_LOG(ERROR) << "getAttr<cWscAttrAuthenticationType> failed";
-        return false;
+        valid = false;
     }
     if (!getAttr<cWscAttrEncryptionType>()) {
         TLVF_LOG(ERROR) << "getAttr<cWscAttrEncryptionType> failed";
-        return false;
+        valid = false;
     }
     if (!getAttr<cWscAttrNetworkKey>()) {
         TLVF_LOG(ERROR) << "getAttr<cWscAttrNetworkKey> failed";
-        return false;
+        valid = false;
     }
     if (!getAttr<cWscAttrMac>()) {
         TLVF_LOG(ERROR) << "getAttr<cWscAttrMac> failed";
-        return false;
+        valid = false;
     }
-    return true;
+    return valid;
 }

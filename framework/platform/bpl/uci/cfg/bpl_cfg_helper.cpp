@@ -24,7 +24,7 @@ int cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex)
     }
     utils::copy_string(ifname, inputIfName.c_str(), BPL_IFNAME_LEN);
 
-    const int ifType = (inputIfName.find('.') != std::string::npos) ? TYPE_VAP : TYPE_RADIO;
+    const paramType ifType = (inputIfName.find('.') != std::string::npos) ? TYPE_VAP : TYPE_RADIO;
 
     if (cfg_uci_get_wireless_idx(ifname, &rpcIndex) == RETURN_OK) {
         *nIndex = UCI_RETURN_INDEX(ifType, rpcIndex);
@@ -82,16 +82,19 @@ int cfg_get_prplmesh_param_int(const std::string &param, int *buf)
     return RETURN_OK;
 }
 
-int cfg_get_channel(int index, int *channel)
+int cfg_get_channel(const std::string &interface_name, int *channel)
 {
     if (!channel) {
         return RETURN_ERR;
     }
 
     char channel_num[MAX_UCI_BUF_LEN] = {0};
-    int status = cfg_uci_get_wireless(TYPE_RADIO, index, "channel", channel_num);
-    if (status == RETURN_ERR)
+    char ifname[BPL_IFNAME_LEN]       = {0};
+
+    utils::copy_string(ifname, interface_name.c_str(), BPL_IFNAME_LEN);
+    if (cfg_uci_get_wireless_from_ifname(TYPE_RADIO, ifname, "channel", channel_num) != RETURN_OK) {
         return RETURN_ERR;
+    }
 
     std::string channel_str(channel_num);
     if (!channel_str.compare("auto")) {
@@ -103,7 +106,7 @@ int cfg_get_channel(int index, int *channel)
     return RETURN_OK;
 }
 
-int cfg_get_wep_key(int index, int keyIndex, char *key)
+int cfg_get_wep_key(const std::string &interface_name, int keyIndex, char *key)
 {
     /*TODO: implement using d/s-pal apis*/
     return RETURN_OK;

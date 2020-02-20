@@ -17,12 +17,6 @@
 #include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
-/// Do not use this macro anywhere else in gateway process
-/// It should only be there in one place and easylogging++ recommends to be in the file where
-/// main function is defined.
-//INITIALIZE_EASYLOGGINGPP
-INITIALIZE_EASYLOGGINGPP
-
 // Do not use this macro anywhere else in ire process
 // It should only be there in one place in each executable module
 BEEROCKS_INIT_BEEROCKS_VERSION
@@ -146,17 +140,16 @@ static std::string get_sta_iface_from_hostap_iface(const std::string &hostap_ifa
 }
 
 static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_slave_conf,
-                                  son::slave_thread::sSlaveConfig &son_slave_conf, int slave_num)
+                                  son::slave_thread::sSlaveConfig &son_slave_conf,
+                                  const std::string &hostap_iface, int slave_num)
 {
     son_slave_conf.temp_path = beerocks_slave_conf.temp_path;
     son_slave_conf.vendor    = beerocks_slave_conf.vendor;
     son_slave_conf.model     = beerocks_slave_conf.model;
     son_slave_conf.ucc_listener_port =
         beerocks::string_utils::stoi(beerocks_slave_conf.ucc_listener_port);
-    son_slave_conf.enable_keep_alive = beerocks_slave_conf.enable_keep_alive == "1";
-    son_slave_conf.debug_disable_arp = beerocks_slave_conf.debug_disable_arp == "1";
-    son_slave_conf.enable_bpl_iface_status_notifications =
-        beerocks_slave_conf.enable_bpl_iface_status_notifications == "1";
+    son_slave_conf.enable_keep_alive        = beerocks_slave_conf.enable_keep_alive == "1";
+    son_slave_conf.debug_disable_arp        = beerocks_slave_conf.debug_disable_arp == "1";
     son_slave_conf.bridge_iface             = beerocks_slave_conf.bridge_iface;
     son_slave_conf.backhaul_preferred_bssid = beerocks_slave_conf.backhaul_preferred_bssid;
     son_slave_conf.backhaul_wire_iface      = beerocks_slave_conf.backhaul_wire_iface;
@@ -166,7 +159,7 @@ static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_
         beerocks_slave_conf.enable_repeater_mode[slave_num] == "1";
     son_slave_conf.hostap_iface_type = beerocks::utils::get_iface_type_from_string(
         beerocks_slave_conf.hostap_iface_type[slave_num]);
-    son_slave_conf.hostap_iface = beerocks_slave_conf.hostap_iface[slave_num];
+    son_slave_conf.hostap_iface = hostap_iface;
     son_slave_conf.hostap_ant_gain =
         beerocks::string_utils::stoi(beerocks_slave_conf.hostap_ant_gain[slave_num]);
     son_slave_conf.radio_identifier = beerocks_slave_conf.radio_identifier[slave_num];
@@ -182,25 +175,34 @@ static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_
     son_slave_conf.stop_on_failure_attempts = 0;
 }
 
-static void son_slave_watchdog(beerocks::config_file::sConfigSlave &beerocks_slave_conf)
+static void son_slave_watchdog(const std::string &beerocks_slave_temp_path,
+                               const std::unordered_map<int, std::string> &interfaces_map)
 {
     for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
-        if (!beerocks_slave_conf.hostap_iface[slave_num].empty()) {
-            // check if slave is still running
-            std::string base_name =
-                std::string(BEEROCKS_AGENT) + "_" + beerocks_slave_conf.hostap_iface[slave_num];
-            if (!beerocks::os_utils::is_pid_running(beerocks_slave_conf.temp_path, base_name)) {
-                //start new slave process
-                std::string file_name = "./" + std::string(BEEROCKS_AGENT);
-                if (access(file_name.c_str(), F_OK) == -1) //file does not exist in current location
-                {
-                    file_name = BEEROCKS_BIN_PATH + std::string(BEEROCKS_AGENT);
-                }
-                std::string cmd = file_name + " -i " + beerocks_slave_conf.hostap_iface[slave_num];
-                LOG(DEBUG) << "son_slave_watchdog(): sending SYSTEM_CALL with cmd = " << cmd
-                           << std::endl;
-                beerocks::SYSTEM_CALL(cmd, 2, true);
+        auto hostap_iface_elm = interfaces_map.find(slave_num);
+        // if slave_num not mapped
+        if (hostap_iface_elm == interfaces_map.end()) {
+            continue;
+        }
+
+        std::string hostap_iface = hostap_iface_elm->second;
+        // if slave has no interface configured
+        if (hostap_iface.empty()) {
+            continue;
+        }
+        // check if slave is still running
+        std::string base_name = std::string(BEEROCKS_AGENT) + "_" + hostap_iface;
+        std::string temp_path(beerocks_slave_temp_path);
+        if (!beerocks::os_utils::is_pid_running(temp_path, base_name)) {
+            //start new slave process
+            std::string file_name = "./" + std::string(BEEROCKS_AGENT);
+            if (access(file_name.c_str(), F_OK) == -1) { //file does not exist in current location
+                file_name = BEEROCKS_BIN_PATH + std::string(BEEROCKS_AGENT);
             }
+            std::string cmd = file_name + " -i " + hostap_iface;
+            LOG(DEBUG) << "son_slave_watchdog(): sending SYSTEM_CALL with cmd = " << cmd
+                       << std::endl;
+            beerocks::SYSTEM_CALL(cmd, 2, true);
         }
     }
 }
@@ -267,7 +269,8 @@ static int system_hang_test(beerocks::config_file::sConfigSlave &beerocks_slave_
     return 0;
 }
 
-static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slave_conf, int argc,
+static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slave_conf,
+                              const std::unordered_map<int, std::string> &interfaces_map, int argc,
                               char *argv[])
 {
     std::string base_slave_name = std::string(BEEROCKS_AGENT);
@@ -300,13 +303,14 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
         beerocks_slave_conf.temp_path + "pid/" + base_slave_name; // for file touching
 
     std::set<std::string> slave_ap_ifaces;
-    for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
-        if (!beerocks_slave_conf.hostap_iface[slave_num].empty()) {
-            slave_ap_ifaces.insert(beerocks_slave_conf.hostap_iface[slave_num]);
+    for (auto &elm : interfaces_map) {
+        if (!elm.second.empty()) {
+            slave_ap_ifaces.insert(elm.second);
         }
     }
 
-    beerocks::platform_manager::main_thread platform_mgr(beerocks_slave_conf, slave_logger);
+    beerocks::platform_manager::main_thread platform_mgr(beerocks_slave_conf, interfaces_map,
+                                                         slave_logger);
 
     //start platform_manager
     if (platform_mgr.init()) {
@@ -358,7 +362,7 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
                             .count();
                     if (son_slave_watchdog_time_elapsed_ms >=
                         beerocks::SON_SLAVE_WATCHDOG_INTERVAL_MSC) {
-                        son_slave_watchdog(beerocks_slave_conf);
+                        son_slave_watchdog(beerocks_slave_conf.temp_path, interfaces_map);
                         son_slave_watchdog_time = std::chrono::steady_clock::now();
                     }
                 }
@@ -375,8 +379,11 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
             }
         }
 
+        LOG(DEBUG) << "backhaul_mgr.stop()";
+        backhaul_mgr.stop();
+
         LOG(DEBUG) << "platform_mgr.stop()";
-        platform_mgr.stop(false);
+        platform_mgr.stop();
     }
 
     LOG(DEBUG) << "Bye Bye!";
@@ -386,10 +393,9 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
 }
 
 static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
-                         int argc, char *argv[])
+                         const std::string &hostap_iface, int argc, char *argv[])
 {
-    std::string base_slave_name =
-        std::string(BEEROCKS_AGENT) + "_" + beerocks_slave_conf.hostap_iface[slave_num];
+    std::string base_slave_name = std::string(BEEROCKS_AGENT) + "_" + hostap_iface;
 
     //init logger
     beerocks::logging slave_logger(beerocks_slave_conf.sLog, base_slave_name);
@@ -415,7 +421,7 @@ static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &bee
 
     // fill configuration
     son::slave_thread::sSlaveConfig son_slave_conf;
-    fill_son_slave_config(beerocks_slave_conf, son_slave_conf, slave_num);
+    fill_son_slave_config(beerocks_slave_conf, son_slave_conf, hostap_iface, slave_num);
 
     // disable stopping on failure initially. Later on, it will be read from BPL as part of
     // cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE
@@ -496,24 +502,40 @@ int main(int argc, char *argv[])
         }
     }
 
-    // mask slave iface that do not exist
-    for (slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
-        if (!beerocks_slave_conf.hostap_iface[slave_num].empty()) {
-            if (!beerocks::net::network_utils::linux_iface_exists(
-                    beerocks_slave_conf.hostap_iface[slave_num])) {
-                LOG(DEBUG) << "hostap iface " << beerocks_slave_conf.hostap_iface[slave_num]
-                           << " does not exist, clearing it from config";
-                beerocks_slave_conf.hostap_iface[slave_num].clear();
-            }
+    beerocks::bpl::BPL_WLAN_IFACE interfaces[beerocks::IRE_MAX_SLAVES] = {0};
+    int num_of_interfaces                                              = beerocks::IRE_MAX_SLAVES;
+    if (beerocks::bpl::cfg_get_all_prplmesh_wifi_interfaces(interfaces, &num_of_interfaces)) {
+        std::cout << "failed to read interfaces map" << std::endl;
+        return 1;
+    }
+
+    //create unordered_map of interfaces
+    std::unordered_map<int, std::string> interfaces_map;
+    for (int i = 0; i < num_of_interfaces; i++) {
+        if (beerocks::net::network_utils::linux_iface_exists(interfaces[i].ifname)) {
+            LOG(DEBUG) << "radio" << i << ".hostap_iface=" << interfaces[i].ifname;
+            interfaces_map[interfaces[i].radio_num] = std::string(interfaces[i].ifname);
+        } else {
+            // mask slave iface that do not exist
+            LOG(DEBUG) << "hostap iface " << interfaces[i].ifname
+                       << " does not exist, not adding it to config";
         }
+    }
+
+    if (interfaces_map.empty()) {
+        LOG(INFO) << "no hostap interface is available";
+        return 0;
     }
 
     //Handle -i option (start given son slave)
     if (!g_son_slave_iface.empty()) {
         //start given slave
         for (slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
-            if (g_son_slave_iface == beerocks_slave_conf.hostap_iface[slave_num]) {
-                return run_son_slave(slave_num, beerocks_slave_conf, argc, argv);
+            auto hostap_iface_elm = interfaces_map.find(slave_num);
+            if ((hostap_iface_elm != interfaces_map.end()) &&
+                (g_son_slave_iface == hostap_iface_elm->second)) {
+                return run_son_slave(slave_num, beerocks_slave_conf, hostap_iface_elm->second, argc,
+                                     argv);
             }
         }
         LOG(ERROR) << "did not find g_son_slave_iface in hostap_iface array" << std::endl;
@@ -525,26 +547,32 @@ int main(int argc, char *argv[])
 
     // start all slave's
     for (slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
-        if (!beerocks_slave_conf.hostap_iface[slave_num].empty()) {
-            // killall running son slave's
-            std::string base_name =
-                std::string(BEEROCKS_AGENT) + "_" + beerocks_slave_conf.hostap_iface[slave_num];
-            beerocks::os_utils::kill_pid(beerocks_slave_conf.temp_path, base_name);
-
-            //start new slave process
-            LOG(INFO) << "Starting slave for iface '" << beerocks_slave_conf.hostap_iface[slave_num]
-                      << "'";
-
-            std::string file_name = "./" + std::string(BEEROCKS_AGENT);
-            if (access(file_name.c_str(), F_OK) == -1) //file does not exist in current location
-            {
-                file_name = BEEROCKS_BIN_PATH + std::string(BEEROCKS_AGENT);
-            }
-            std::string cmd = file_name + " -i " + beerocks_slave_conf.hostap_iface[slave_num];
-            beerocks::SYSTEM_CALL(cmd, 0, true);
+        auto hostap_iface_elm = interfaces_map.find(slave_num);
+        // if slave_num not mapped
+        if (hostap_iface_elm == interfaces_map.end()) {
+            continue;
         }
+
+        std::string hostap_iface = hostap_iface_elm->second;
+        // if slave has no interface configured
+        if (hostap_iface.empty()) {
+            continue;
+        }
+        // killall running son slave's
+        std::string base_name = std::string(BEEROCKS_AGENT) + "_" + hostap_iface;
+        beerocks::os_utils::kill_pid(beerocks_slave_conf.temp_path, base_name);
+
+        //start new slave process
+        LOG(INFO) << "Starting slave for iface '" << hostap_iface << "'";
+
+        std::string file_name = "./" + std::string(BEEROCKS_AGENT);
+        if (access(file_name.c_str(), F_OK) == -1) { //file does not exist in current location
+            file_name = BEEROCKS_BIN_PATH + std::string(BEEROCKS_AGENT);
+        }
+        std::string cmd = file_name + " -i " + hostap_iface;
+        beerocks::SYSTEM_CALL(cmd, 0, true);
     }
 
     // backhaul/platform manager slave
-    return run_beerocks_slave(beerocks_slave_conf, argc, argv);
+    return run_beerocks_slave(beerocks_slave_conf, interfaces_map, argc, argv);
 }

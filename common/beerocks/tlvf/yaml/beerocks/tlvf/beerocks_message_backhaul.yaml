@@ -25,6 +25,7 @@ cACTION_BACKHAUL_REGISTER_REQUEST:
   sta_iface_filter_low: uint8_t
   onboarding: uint8_t
   ruid: sMacAddr
+  certification_mode: uint8_t
 
 cACTION_BACKHAUL_REGISTER_RESPONSE:
   _type: class
@@ -58,6 +59,9 @@ cACTION_BACKHAUL_ENABLE:
   wireless_iface_type: uint8_t  
   mem_only_psk: uint8_t
   backhaul_preferred_radio_band: uint8_t
+  supported_channels_list:
+    _type: beerocks::message::sWifiChannel 
+    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
 
 cACTION_BACKHAUL_CONNECTED_NOTIFICATION:
   _type: class
@@ -115,3 +119,15 @@ cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION:
   _type: class
   ruid: sMacAddr
   params: sVapsList
+
+cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION:
+  _type: class
+  iface_mac: sMacAddr
+  client_mac: sMacAddr
+  bssid: sMacAddr
+
+cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION:
+  _type: class
+  iface_mac: sMacAddr
+  client_mac: sMacAddr
+  bssid: sMacAddr

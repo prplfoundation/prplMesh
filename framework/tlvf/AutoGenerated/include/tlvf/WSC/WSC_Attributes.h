@@ -188,7 +188,7 @@ class cConfigData : public BaseClass
 {
     public:
         cConfigData(uint8_t* buff, size_t buff_len, bool parse = false);
-        cConfigData(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cConfigData(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cConfigData();
 
         eWscAttributes& ssid_type();
@@ -234,7 +234,7 @@ class cWscAttrEncryptedSettings : public BaseClass
 {
     public:
         cWscAttrEncryptedSettings(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrEncryptedSettings(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrEncryptedSettings(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrEncryptedSettings();
 
         const eWscAttributes& type();
@@ -268,7 +268,7 @@ class cWscVendorExtWfa : public BaseClass
 {
     public:
         cWscVendorExtWfa(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscVendorExtWfa(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscVendorExtWfa(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscVendorExtWfa();
 
         eWscAttributes& type();
@@ -305,7 +305,7 @@ class cWscAttrVersion : public BaseClass
 {
     public:
         cWscAttrVersion(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrVersion(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrVersion(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrVersion();
 
         eWscAttributes& type();
@@ -326,7 +326,7 @@ class cWscAttrMessageType : public BaseClass
 {
     public:
         cWscAttrMessageType(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrMessageType(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrMessageType(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrMessageType();
 
         eWscAttributes& type();
@@ -347,7 +347,7 @@ class cWscAttrEnrolleeNonce : public BaseClass
 {
     public:
         cWscAttrEnrolleeNonce(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrEnrolleeNonce(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrEnrolleeNonce(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrEnrolleeNonce();
 
         eWscAttributes& type();
@@ -370,7 +370,7 @@ class cWscAttrPublicKey : public BaseClass
 {
     public:
         cWscAttrPublicKey(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrPublicKey(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrPublicKey(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrPublicKey();
 
         eWscAttributes& type();
@@ -393,7 +393,7 @@ class cWscAttrAuthenticationTypeFlags : public BaseClass
 {
     public:
         cWscAttrAuthenticationTypeFlags(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrAuthenticationTypeFlags(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrAuthenticationTypeFlags(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrAuthenticationTypeFlags();
 
         eWscAttributes& type();
@@ -414,7 +414,7 @@ class cWscAttrEncryptionTypeFlags : public BaseClass
 {
     public:
         cWscAttrEncryptionTypeFlags(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrEncryptionTypeFlags(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrEncryptionTypeFlags(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrEncryptionTypeFlags();
 
         eWscAttributes& type();
@@ -435,7 +435,7 @@ class cWscAttrConnectionTypeFlags : public BaseClass
 {
     public:
         cWscAttrConnectionTypeFlags(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrConnectionTypeFlags(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrConnectionTypeFlags(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrConnectionTypeFlags();
 
         eWscAttributes& type();
@@ -456,7 +456,7 @@ class cWscAttrConfigurationMethods : public BaseClass
 {
     public:
         cWscAttrConfigurationMethods(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrConfigurationMethods(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrConfigurationMethods(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrConfigurationMethods();
 
         eWscAttributes& type();
@@ -477,7 +477,7 @@ class cWscAttrManufacturer : public BaseClass
 {
     public:
         cWscAttrManufacturer(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrManufacturer(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrManufacturer(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrManufacturer();
 
         eWscAttributes& type();
@@ -505,7 +505,7 @@ class cWscAttrModelName : public BaseClass
 {
     public:
         cWscAttrModelName(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrModelName(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrModelName(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrModelName();
 
         eWscAttributes& type();
@@ -533,7 +533,7 @@ class cWscAttrModelNumber : public BaseClass
 {
     public:
         cWscAttrModelNumber(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrModelNumber(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrModelNumber(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrModelNumber();
 
         eWscAttributes& type();
@@ -561,7 +561,7 @@ class cWscAttrSerialNumber : public BaseClass
 {
     public:
         cWscAttrSerialNumber(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrSerialNumber(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrSerialNumber(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrSerialNumber();
 
         eWscAttributes& type();
@@ -589,7 +589,7 @@ class cWscAttrPrimaryDeviceType : public BaseClass
 {
     public:
         cWscAttrPrimaryDeviceType(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrPrimaryDeviceType(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrPrimaryDeviceType(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrPrimaryDeviceType();
 
         eWscAttributes& type();
@@ -614,7 +614,7 @@ class cWscAttrDeviceName : public BaseClass
 {
     public:
         cWscAttrDeviceName(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrDeviceName(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrDeviceName(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrDeviceName();
 
         eWscAttributes& type();
@@ -642,7 +642,7 @@ class cWscAttrRfBands : public BaseClass
 {
     public:
         cWscAttrRfBands(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrRfBands(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrRfBands(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrRfBands();
 
         eWscAttributes& type();
@@ -663,7 +663,7 @@ class cWscAttrAssociationState : public BaseClass
 {
     public:
         cWscAttrAssociationState(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrAssociationState(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrAssociationState(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrAssociationState();
 
         eWscAttributes& type();
@@ -684,7 +684,7 @@ class cWscAttrDevicePasswordID : public BaseClass
 {
     public:
         cWscAttrDevicePasswordID(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrDevicePasswordID(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrDevicePasswordID(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrDevicePasswordID();
 
         eWscAttributes& type();
@@ -705,7 +705,7 @@ class cWscAttrConfigurationError : public BaseClass
 {
     public:
         cWscAttrConfigurationError(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrConfigurationError(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrConfigurationError(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrConfigurationError();
 
         eWscAttributes& type();
@@ -726,7 +726,7 @@ class cWscAttrOsVersion : public BaseClass
 {
     public:
         cWscAttrOsVersion(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrOsVersion(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrOsVersion(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrOsVersion();
 
         eWscAttributes& type();
@@ -747,7 +747,7 @@ class cWscAttrMac : public BaseClass
 {
     public:
         cWscAttrMac(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrMac(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrMac(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrMac();
 
         eWscAttributes& type();
@@ -768,7 +768,7 @@ class cWscAttrUuidE : public BaseClass
 {
     public:
         cWscAttrUuidE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrUuidE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrUuidE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrUuidE();
 
         eWscAttributes& type();
@@ -791,7 +791,7 @@ class cWscAttrWscState : public BaseClass
 {
     public:
         cWscAttrWscState(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrWscState(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrWscState(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrWscState();
 
         eWscAttributes& type();
@@ -812,7 +812,7 @@ class cWscAttrUuidR : public BaseClass
 {
     public:
         cWscAttrUuidR(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrUuidR(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrUuidR(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrUuidR();
 
         eWscAttributes& type();
@@ -835,7 +835,7 @@ class cWscAttrAuthenticator : public BaseClass
 {
     public:
         cWscAttrAuthenticator(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrAuthenticator(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrAuthenticator(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrAuthenticator();
 
         eWscAttributes& type();
@@ -858,7 +858,7 @@ class cWscAttrRegistrarNonce : public BaseClass
 {
     public:
         cWscAttrRegistrarNonce(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrRegistrarNonce(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrRegistrarNonce(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrRegistrarNonce();
 
         eWscAttributes& type();
@@ -881,7 +881,7 @@ class cWscAttrVersion2 : public BaseClass
 {
     public:
         cWscAttrVersion2(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrVersion2(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrVersion2(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrVersion2();
 
         eWscAttributes& type();
@@ -912,7 +912,7 @@ class cWscAttrSsid : public BaseClass
 {
     public:
         cWscAttrSsid(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrSsid(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrSsid(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrSsid();
 
         eWscAttributes& type();
@@ -940,7 +940,7 @@ class cWscAttrAuthenticationType : public BaseClass
 {
     public:
         cWscAttrAuthenticationType(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrAuthenticationType(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrAuthenticationType(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrAuthenticationType();
 
         eWscAttributes& type();
@@ -961,7 +961,7 @@ class cWscAttrEncryptionType : public BaseClass
 {
     public:
         cWscAttrEncryptionType(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrEncryptionType(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrEncryptionType(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrEncryptionType();
 
         eWscAttributes& type();
@@ -982,7 +982,7 @@ class cWscAttrNetworkKey : public BaseClass
 {
     public:
         cWscAttrNetworkKey(uint8_t* buff, size_t buff_len, bool parse = false);
-        cWscAttrNetworkKey(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cWscAttrNetworkKey(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cWscAttrNetworkKey();
 
         eWscAttributes& type();

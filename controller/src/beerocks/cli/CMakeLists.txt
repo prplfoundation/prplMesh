@@ -28,6 +28,9 @@ target_include_directories(${PROJECT_NAME}
 
 if (readline_FOUND)
     target_link_libraries(${PROJECT_NAME} readline)
+    if (BUILD_FULL_STATIC)
+        target_link_libraries(${PROJECT_NAME} tinfo)
+    endif()
     target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_READLINE)
 endif()
 

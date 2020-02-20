@@ -10,18 +10,13 @@
 #include <bcl/beerocks_logging.h>
 #include <bcl/beerocks_version.h>
 #include <bcl/network/network_utils.h>
+#include <bpl/bpl_cfg.h>
 #include <easylogging++.h>
 
 #include "db/db.h"
 #include "son_master_thread.h"
 
 // #include <string>
-
-/// Do not use this macro anywhere else in gateway process
-/// It should only be there in one place and easylogging++ recommends to be in the file where
-/// main function is defined.
-//INITIALIZE_EASYLOGGINGPP
-INITIALIZE_EASYLOGGINGPP
 
 // Do not use this macro anywhere else in ire process
 // It should only be there in one place in each executable module
@@ -214,6 +209,9 @@ static void fill_master_config(son::db::sDbMasterConfig &master_conf,
     if (!s.empty()) {
         master_conf.global_restricted_channels.push_back(beerocks::string_utils::stoi(s));
     }
+
+    // platform settings
+    master_conf.certification_mode = beerocks::bpl::cfg_get_certification_mode();
 }
 
 int main(int argc, char *argv[])

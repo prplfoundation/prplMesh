@@ -77,6 +77,8 @@ private:
                                                ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_ap_metric_response(const std::string &src_mac,
                                              ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_1905_ap_capability_report(const std::string &src_mac,
+                                               ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_channel_preference_report(const std::string &src_mac,
                                                     ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_channel_selection_response(const std::string &src_mac,
@@ -93,6 +95,8 @@ private:
                                                      ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_client_steering_btm_report_message(const std::string &src_mac,
                                                              ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_1905_client_capability_report_message(const std::string &src_mac,
+                                                           ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_topology_notification(const std::string &src_mac,
                                                 ieee1905_1::CmduMessageRx &cmdu_rx);
 
@@ -110,7 +114,7 @@ private:
 
     db &database;
     task_pool tasks;
-    std::unique_ptr<beerocks::controller_ucc_listener> m_controller_ucc_listener;
+    beerocks::controller_ucc_listener m_controller_ucc_listener;
 };
 
 } // namespace son

@@ -360,9 +360,13 @@ static void parse_info_elements(unsigned char *ie, int ielen, sChannelScanResult
 static bool translate_nl_data_to_bwl_results(sChannelScanResults &results,
                                              const struct nlattr **bss)
 {
-    //get bssid
-    std::copy_n(results.bssid.oct, sizeof(results.bssid.oct),
-                (unsigned char *)nla_data(bss[NL80211_BSS_BSSID]));
+    if (!bss[NL80211_BSS_BSSID]) {
+        LOG(ERROR) << "Invalid BSSID in the netlink message";
+        return false;
+    }
+
+    std::copy_n(reinterpret_cast<unsigned char *>(nla_data(bss[NL80211_BSS_BSSID])),
+                sizeof(results.bssid), results.bssid.oct);
 
     //get channel and operating frequency band
     if (bss[NL80211_BSS_FREQUENCY]) {
@@ -426,9 +430,6 @@ static bool get_scan_results_from_nl_msg(sChannelScanResults &results, struct nl
         LOG(ERROR) << "invalid input: msg==NULL" << msg;
         return false;
     }
-
-    //prepare results
-    results = {'\0'};
 
     //read msg buffer into nl attributes struct
     if (!read_nl_data_from_msg(bss, msg)) {
@@ -1056,10 +1057,8 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
     struct nlattr *tb[NL80211_ATTR_MAX + 1];
     nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0), NULL);
 
-    if ((tb[NL80211_ATTR_IFINDEX] == NULL) ||
-        (if_indextoname(nla_get_u32(tb[NL80211_ATTR_IFINDEX]), ifname) == NULL)) {
-        LOG(ERROR) << __func__ << " failed to get ifname";
-        return false;
+    if (tb[NL80211_ATTR_IFINDEX]) {
+        if_indextoname(nla_get_u32(tb[NL80211_ATTR_IFINDEX]), ifname);
     }
 
     auto event = dwpal_nl_to_bwl_event(gnlh->cmd);
@@ -1081,45 +1080,40 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
     case Event::Channel_Scan_Dump_Result: {
         if (m_radio_info.iface_name.compare(ifname) != 0) {
             // ifname doesn't match current interface
-            // meaning the event was recevied for a diffrent channel
+            // meaning the event was received for a diffrent channel
             return true;
         }
 
-        if (nlh->nlmsg_seq == 0) {
-            LOG(ERROR) << "Invalid! nl message seq cannot be 0";
-            return false;
+        // We need to distinguish 1st and rest of dump events (NL80211_CMD_NEW_SCAN_RESULTS)
+        // 1st event is an empty dump result that we should reply with scan dump request.
+        // nlh->nlmsg_seq = 0 only with the 1st dump result.
+        // rest of events are the actual scan dump results that need to be parsed.
+        // unique sequence number is chosen by the nl (nlh->nlmsg_seq != 0) for the rest of events.
+        if (m_nl_seq == 0) {
+            if (nlh->nlmsg_seq == 0) {
+                LOG(DEBUG) << "Results dump are ready";
+                event_queue_push(Event::Channel_Scan_New_Results_Ready);
+                channel_scan_dump_results();
+                return true;
+            } else {
+                LOG(DEBUG) << "Results dump new sequence:" << int(nlh->nlmsg_seq);
+                m_nl_seq = nlh->nlmsg_seq;
+            }
         }
 
-        // We need to distinguish 1st dump event that cannot be parsed
-        // and the rest of dump events (NL80211_CMD_NEW_SCAN_RESULTS)
-        // 1st event "empty dump result" need to send back scan dump request.
-        // rest of events are the actual scan dumps that need to be parsed.
-        if (m_nl_seq == 0) {
-            LOG(DEBUG) << "Results dump are ready with sequence number: " << (int)nlh->nlmsg_seq;
-            m_nl_seq = nlh->nlmsg_seq;
-            event_queue_push(Event::Channel_Scan_New_Results_Ready);
-            channel_scan_dump_results();
-        } else if (m_nl_seq == nlh->nlmsg_seq) {
-            LOG(DEBUG) << "DWPAL NL event channel scan results dump";
+        if (m_nl_seq == nlh->nlmsg_seq) {
+            LOG(DEBUG) << "DWPAL NL event channel scan results dump, seq = " << int(nlh->nlmsg_seq);
 
-            auto results_buff = ALLOC_SMART_BUFFER(sizeof(sCHANNEL_SCAN_RESULTS_NOTIFICATION));
-            auto results =
-                reinterpret_cast<sCHANNEL_SCAN_RESULTS_NOTIFICATION *>(results_buff.get());
-            if (!results) {
-                LOG(FATAL) << "Memory allocation failed!";
-                return false;
-            }
-            // Initialize the message
-            results_buff = {};
+            auto results = std::make_shared<sCHANNEL_SCAN_RESULTS_NOTIFICATION>();
 
             if (!get_scan_results_from_nl_msg(results->channel_scan_results, msg)) {
                 LOG(ERROR) << "read NL msg to monitor msg failed!";
                 return false;
             }
             LOG(DEBUG) << "Processing results for BSSID:" << results->channel_scan_results.bssid;
-            event_queue_push(event, results_buff);
+            event_queue_push(event, results);
         } else {
-            LOG(ERROR) << "channel scan results dump recieved with unexpected seq number";
+            LOG(ERROR) << "channel scan results dump received with unexpected seq number";
             return false;
         }
         break;

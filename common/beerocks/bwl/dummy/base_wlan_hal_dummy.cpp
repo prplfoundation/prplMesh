@@ -261,7 +261,7 @@ base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, std::string iface_name,
     fsm_setup();
 }
 
-base_wlan_hal_dummy::~base_wlan_hal_dummy() { detach(); }
+base_wlan_hal_dummy::~base_wlan_hal_dummy() { base_wlan_hal_dummy::detach(); }
 
 bool base_wlan_hal_dummy::fsm_setup() { return true; }
 
@@ -298,7 +298,7 @@ bool base_wlan_hal_dummy::refresh_radio_info()
     }
     std::string radio_mac;
     beerocks::net::network_utils::linux_iface_get_mac(m_radio_info.iface_name, radio_mac);
-    for (int vap_id = 0; vap_id < 4; vap_id++) {
+    for (int vap_id = 0; vap_id < predefined_vaps_num; vap_id++) {
         auto mac = beerocks::net::network_utils::mac_from_string(radio_mac);
         mac.oct[5] += vap_id;
         m_radio_info.available_vaps[vap_id].mac = beerocks::net::network_utils::mac_to_string(mac);

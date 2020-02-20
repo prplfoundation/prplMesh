@@ -34,21 +34,39 @@ int cfg_is_enabled()
 
 int cfg_is_master()
 {
-    int retVal                               = 0;
-    char man_mode[BPL_GW_DB_MANAGE_MODE_LEN] = {0};
-    if (cfg_get_prplmesh_param("management_mode", man_mode, BPL_GW_DB_MANAGE_MODE_LEN) < 0) {
-        MAPF_ERR("cfg_is_master: Failed to read ManagementMode\n");
+    switch (cfg_get_management_mode()) {
+    case BPL_MGMT_MODE_MULTIAP_CONTROLLER_AGENT:
+        return 1;
+    case BPL_MGMT_MODE_MULTIAP_CONTROLLER:
+        return 1;
+    case BPL_MGMT_MODE_MULTIAP_AGENT:
+        return 0;
+    case BPL_MGMT_MODE_NOT_MULTIAP:
+        return (cfg_get_operating_mode() == BPL_OPER_MODE_GATEWAY) ? 1 : 0;
+    default:
+        return -1;
+    }
+}
+
+int cfg_get_management_mode()
+{
+    int retVal                                = 0;
+    char mgmt_mode[BPL_GW_DB_MANAGE_MODE_LEN] = {0};
+    if (cfg_get_prplmesh_param("management_mode", mgmt_mode, BPL_GW_DB_MANAGE_MODE_LEN) < 0) {
+        MAPF_ERR("cfg_get_management_mode: Failed to read management_mode");
         retVal = -1;
     } else {
-        std::string mode_str(man_mode);
+        std::string mode_str(mgmt_mode);
         if (mode_str == "Multi-AP-Controller-and-Agent") {
-            retVal = 1;
-        } else if (mode_str == "Proprietary-Mesh") {
-            retVal = 1;
+            retVal = BPL_MGMT_MODE_MULTIAP_CONTROLLER_AGENT;
+        } else if (mode_str == "Multi-AP-Controller") {
+            retVal = BPL_MGMT_MODE_MULTIAP_CONTROLLER;
         } else if (mode_str == "Multi-AP-Agent") {
-            retVal = 0;
+            retVal = BPL_MGMT_MODE_MULTIAP_AGENT;
+        } else if (mode_str == "Not-Multi-AP") {
+            retVal = BPL_MGMT_MODE_NOT_MULTIAP;
         } else {
-            MAPF_ERR("cfg_is_master: Unexpected ManagementMode\n");
+            MAPF_ERR("cfg_get_management_mode: Unexpected management_mode");
             retVal = -1;
         }
     }
@@ -157,41 +175,25 @@ int cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return 0; }
 
 int cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PARAMS *wlan_params)
 {
-    int retVal    = 0;
-    bool disabled = false;
-    int index     = 0;
-
     if (!iface || !wlan_params) {
+        MAPF_ERR("cfg_get_wifi_params: invalid input: iface = "
+                 << intptr_t(iface) << " wlan_params = " << intptr_t(wlan_params));
         return RETURN_ERR;
     }
 
-    retVal = cfg_get_index_from_interface(iface, &index);
-    if (retVal) {
-        return retVal;
-    }
+    // The UCI "disabled" setting is optional, defaults to false if not present
+    bool disabled = false;
+    cfg_uci_get_wireless_bool(TYPE_RADIO, iface, "disabled", &disabled);
+    wlan_params->enabled = !disabled;
 
-    retVal |= cfg_uci_get_wireless_bool(TYPE_RADIO, index, "disabled", &disabled);
-    if (!retVal) {
-        wlan_params->enabled = !disabled;
-    }
-    retVal |= cfg_get_channel(index, &wlan_params->channel);
+    // The UCI "channel" setting is not documented as optional, but for Intel
+    // wireless (as probably for other drivers) it is. We do not want to
+    // fail when wifi still works fine, so default to "auto" (0) and if
+    // can't get the channel from UCI just move on.
+    wlan_params->channel = 0;
+    cfg_get_channel(iface, &wlan_params->channel);
 
-    char ssid[MAX_UCI_BUF_LEN] = {0}, security[MAX_UCI_BUF_LEN] = {0},
-         passphrase[MAX_UCI_BUF_LEN] = {0};
-    retVal |= cfg_uci_get_wireless(TYPE_VAP, index, "ssid", ssid);
-    retVal |= cfg_uci_get_wireless(TYPE_VAP, index, "wav_security_mode", security);
-    std::string mode = std::string(security);
-    if (mode == BPL_WLAN_SEC_WEP64_STR || mode == BPL_WLAN_SEC_WEP128_STR) {
-        retVal |= cfg_get_wep_key(index, -1, passphrase);
-    } else if (mode != BPL_WLAN_SEC_NONE_STR) {
-        retVal |= cfg_uci_get_wireless(TYPE_VAP, index, "key", passphrase);
-    }
-
-    utils::copy_string(wlan_params->ssid, ssid, BPL_SSID_LEN);
-    utils::copy_string(wlan_params->security, security, BPL_SEC_LEN);
-    utils::copy_string(wlan_params->passphrase, passphrase, BPL_PASS_LEN);
-
-    return retVal;
+    return RETURN_OK;
 }
 
 int cfg_get_backhaul_params(int *max_vaps, int *network_enabled, int *preferred_radio_band)
@@ -270,24 +272,69 @@ int cfg_notify_fw_version_mismatch() { return 0; }
 
 int cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return 0; }
 
-int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif) { return 0; }
-
 int cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return 0; }
 
 int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAME_LEN])
 {
-    if (iface == NULL || sta_iface == NULL) {
+    if (!iface || !sta_iface) {
         MAPF_ERR("cfg_get_sta_iface: invalid input: iface or sta_iface are NULL");
         return RETURN_ERR;
     }
 
+    //TODO: remove dependency in wireless section naming in UCI #801
     int index = -1;
     if (cfg_get_index_from_interface(iface, &index) == RETURN_ERR) {
-        MAPF_ERR("cfg_get_sta_iface: Failed to get radio index from iface\n");
+        MAPF_ERR("cfg_get_sta_iface: Failed to get radio index from iface");
         return RETURN_ERR;
     }
 
     return cfg_get_prplmesh_radio_param(index, "sta_iface", sta_iface, BPL_IFNAME_LEN);
+}
+
+int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN])
+{
+    if (!hostap_iface) {
+        MAPF_ERR("cfg_get_hostap_iface: invalid input: hostap_iface is NULL");
+        return RETURN_ERR;
+    }
+
+    if (radio_num < 0) {
+        MAPF_ERR("cfg_get_hostap_iface: invalid input: radio_num < 0");
+        return RETURN_ERR;
+    }
+
+    return cfg_get_prplmesh_radio_param(radio_num, "hostap_iface", hostap_iface, BPL_IFNAME_LEN);
+}
+
+int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of_interfaces)
+{
+    if (!interfaces) {
+        MAPF_ERR("cfg_get_all_prplmesh_wifi_interfaces: invalid input: interfaces is NULL");
+        return RETURN_ERR;
+    }
+    if (!num_of_interfaces) {
+        MAPF_ERR("cfg_get_all_prplmesh_wifi_interfaces: invalid input: num_of_interfaces is NULL");
+        return RETURN_ERR;
+    }
+    if (*num_of_interfaces < 1) {
+        MAPF_ERR(
+            "cfg_get_all_prplmesh_wifi_interfaces: invalid input: max num_of_interfaces value < 1");
+        return RETURN_ERR;
+    }
+
+    int interfaces_count = 0;
+    for (int index = 0; index < *num_of_interfaces; index++) {
+        if (cfg_get_hostap_iface(index, interfaces[interfaces_count].ifname) == RETURN_ERR) {
+            MAPF_DBG("cfg_get_all_prplmesh_wifi_interfaces: failed to get wifi interface for radio"
+                     << index << " or radio" << interfaces_count << ".hostap_iface doesn't exist");
+        } else {
+            interfaces[interfaces_count++].radio_num = index;
+        }
+    }
+
+    *num_of_interfaces = interfaces_count;
+
+    return RETURN_OK;
 }
 
 } // namespace bpl

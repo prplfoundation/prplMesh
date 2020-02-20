@@ -1,5 +1,4 @@
 # Logging
-find_package(elpp REQUIRED)
 configure_file(
 	"${CMAKE_CURRENT_SOURCE_DIR}/logging.conf.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/logging.conf"
@@ -21,10 +20,10 @@ set(MSGLIB_TARGET ${MSGLIB}::${MSGLIB})
 set(sources logger.cpp encryption.cpp utils.cpp message_factory.cpp broker_config.cpp broker_interface.cpp ${MSGLIB}/broker.cpp ${MSGLIB}/socket.cpp ${MSGLIB}/context.cpp ${MSGLIB}/poller.cpp )
 
 add_executable(version ${MSGLIB}/version.cpp)
-target_link_libraries(version common mapf::elpp ${MSGLIB_TARGET})
+target_link_libraries(version common elpp ${MSGLIB_TARGET})
 
 add_executable(local_bus local_bus.cpp)
-target_link_libraries(local_bus PRIVATE common mapf::elpp json-c)
+target_link_libraries(local_bus PRIVATE common elpp json-c)
 
 configure_file(
 	"${CMAKE_CURRENT_SOURCE_DIR}/local_bus.conf.in"
@@ -55,7 +54,7 @@ set_target_properties(common PROPERTIES PREFIX "mapf" VERSION ${prplmesh_VERSION
 target_link_libraries(common 
 	PRIVATE 
 		${MSGLIB_TARGET} 
-		mapf::elpp 
+		elpp
 		json-c 
 	PUBLIC
 		${OPENSSL_LIBRARIES}

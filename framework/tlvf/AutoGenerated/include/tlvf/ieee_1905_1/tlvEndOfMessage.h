@@ -29,7 +29,7 @@ class tlvEndOfMessage : public BaseClass
 {
     public:
         tlvEndOfMessage(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvEndOfMessage(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvEndOfMessage(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvEndOfMessage();
 
         const eTlvType& type();

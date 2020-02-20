@@ -24,6 +24,7 @@ enum class eWscEncr : uint16_t {
     WSC_ENCR_WEP = 0x2,
     WSC_ENCR_TKIP = 0x4,
     WSC_ENCR_AES = 0x8,
+    WSC_ENCR_INVALID = 0xffff,
 };
 class eWscEncrValidate {
 public:
@@ -34,6 +35,7 @@ public:
         case 0x2:
         case 0x4:
         case 0x8:
+        case 0xffff:
                 ret = true;
                 break;
             default:

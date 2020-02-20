@@ -82,7 +82,7 @@ base_wlan_hal_dwpal::base_wlan_hal_dwpal(HALType type, std::string iface_name,
     fsm_setup();
 }
 
-base_wlan_hal_dwpal::~base_wlan_hal_dwpal() { detach(); }
+base_wlan_hal_dwpal::~base_wlan_hal_dwpal() { base_wlan_hal_dwpal::detach(); }
 
 bool base_wlan_hal_dwpal::fsm_setup()
 {
@@ -146,7 +146,8 @@ bool base_wlan_hal_dwpal::fsm_setup()
                         m_dwpal_nl_ctx = nullptr;
                     } else {
                         LOG(DEBUG)
-                            << "dwpal_driver_nl_attach() success for: " << m_radio_info.iface_name;
+                            << "dwpal_driver_nl_attach() success for: " << m_radio_info.iface_name
+                            << ", nl_context = " << m_dwpal_nl_ctx;
                     }
                 }
 
@@ -308,7 +309,7 @@ bool base_wlan_hal_dwpal::fsm_setup()
                     << "Open and attach an event interface to wpa_supplicant/hostapd - SUCCESS!";
 
                 // Get the nl event interface file descriptor
-                if (!m_dwpal_nl_ctx) {
+                if (m_dwpal_nl_ctx) {
                     if (dwpal_driver_nl_fd_get(m_dwpal_nl_ctx, &m_fd_nl_events, &m_fd_nl_cmd_get)) {
                         LOG(ERROR) << "getting nl fd failed for: " << m_radio_info.iface_name
                                    << "disbling netlink for this platform";
@@ -586,17 +587,18 @@ bool base_wlan_hal_dwpal::process_nl_events()
 }
 
 bool base_wlan_hal_dwpal::dwpal_nl_cmd_set(const std::string &ifname, unsigned int nl_cmd,
-                                           unsigned char *vendor_data, size_t vendor_data_size)
+                                           const void *vendor_data, size_t vendor_data_size)
 {
     if (vendor_data == nullptr) {
         LOG(ERROR) << __func__ << "vendor_data is NULL ==> Abort!";
         return false;
     }
 
-    if (dwpal_driver_nl_cmd_send(m_dwpal_nl_ctx, DWPAL_NL_UNSOLICITED_EVENT, (char *)ifname.c_str(),
-                                 NL80211_CMD_VENDOR, DWPAL_NETDEV_ID,
-                                 (enum ltq_nl80211_vendor_subcmds)nl_cmd, vendor_data,
-                                 vendor_data_size) != DWPAL_SUCCESS) {
+    if (dwpal_driver_nl_cmd_send(
+            m_dwpal_nl_ctx, DWPAL_NL_UNSOLICITED_EVENT, (char *)ifname.c_str(), NL80211_CMD_VENDOR,
+            DWPAL_NETDEV_ID, ltq_nl80211_vendor_subcmds(nl_cmd),
+            const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(vendor_data)),
+            vendor_data_size) != DWPAL_SUCCESS) {
         LOG(ERROR) << __func__ << "ERROR for cmd = " << nl_cmd;
         return false;
     }
@@ -657,12 +659,21 @@ size_t base_wlan_hal_dwpal::dwpal_nl_cmd_get(const std::string &ifname, unsigned
         return nl_handler_cb_wrapper(ifname, event, subevent, len, data);
     };
 
-    //parsing will be done in callback func
-    if (dwpal_driver_nl_msg_get(m_dwpal_nl_ctx, DWPAL_NL_SOLICITED_EVENT, nl_handler_cb, NULL) ==
-        DWPAL_FAILURE) {
-        LOG(ERROR) << " dwpal_driver_nl_msg_get failed,"
-                   << " ctx=" << m_dwpal_nl_ctx;
-        return data_size;
+    // Since we're expecting a Solicited (asynchronous) event from the driver,
+    // and it's impossible to know the type of the received message without
+    // processing it (using a callback function), we continue processing events
+    // until data_size != 0.
+    // 1 sec TO is added so we dont get stuck here forever.
+    // In practice, the response usually arrives much faster.
+    auto timeout = std::chrono::steady_clock::now() + std::chrono::seconds(1);
+    while ((data_size == 0) && std::chrono::steady_clock::now() < timeout) {
+        //parsing will be done in callback func
+        if (dwpal_driver_nl_msg_get(m_dwpal_nl_ctx, DWPAL_NL_SOLICITED_EVENT, nl_handler_cb,
+                                    NULL) == DWPAL_FAILURE) {
+            LOG(ERROR) << " dwpal_driver_nl_msg_get failed,"
+                       << " ctx=" << m_dwpal_nl_ctx;
+            return data_size;
+        }
     }
 
     return data_size;

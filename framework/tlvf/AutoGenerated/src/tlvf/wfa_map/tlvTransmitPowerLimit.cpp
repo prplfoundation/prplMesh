@@ -37,8 +37,8 @@ sMacAddr& tlvTransmitPowerLimit::radio_uid() {
     return (sMacAddr&)(*m_radio_uid);
 }
 
-uint8_t& tlvTransmitPowerLimit::transmit_power_limit_dbm() {
-    return (uint8_t&)(*m_transmit_power_limit_dbm);
+int8_t& tlvTransmitPowerLimit::transmit_power_limit_dbm() {
+    return (int8_t&)(*m_transmit_power_limit_dbm);
 }
 
 void tlvTransmitPowerLimit::class_swap()
@@ -81,7 +81,7 @@ size_t tlvTransmitPowerLimit::get_initial_size()
     class_size += sizeof(eTlvTypeMap); // type
     class_size += sizeof(uint16_t); // length
     class_size += sizeof(sMacAddr); // radio_uid
-    class_size += sizeof(uint8_t); // transmit_power_limit_dbm
+    class_size += sizeof(int8_t); // transmit_power_limit_dbm
     return class_size;
 }
 
@@ -110,12 +110,12 @@ bool tlvTransmitPowerLimit::init()
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_radio_uid->struct_init(); }
-    m_transmit_power_limit_dbm = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+    m_transmit_power_limit_dbm = (int8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(int8_t); }
     if (m_parse__) { class_swap(); }
     if (m_parse__) {
         if (*m_type != eTlvTypeMap::TLV_TRANSMIT_POWER_LIMIT) {

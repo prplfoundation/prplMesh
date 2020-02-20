@@ -8,6 +8,7 @@
 #include "son_slave_thread.h"
 
 #include "../monitor/monitor_thread.h"
+#include "tlvf_utils.h"
 
 #include <bcl/beerocks_utils.h>
 #include <bcl/beerocks_version.h>
@@ -137,9 +138,8 @@ void slave_thread::slave_reset()
     hostap_services_off();
     ap_manager_stop();
     monitor_stop();
-    is_backhaul_manager            = false;
-    iface_status_operational_state = false;
-    detach_on_conf_change          = false;
+    is_backhaul_manager   = false;
+    detach_on_conf_change = false;
 
     if (configuration_stop_on_failure_attempts && !stop_on_failure_attempts) {
         LOG(ERROR) << "Reached to max stop on failure attempts!";
@@ -250,11 +250,6 @@ bool slave_thread::work()
         return false;
     }
 
-    if (config.enable_bpl_iface_status_notifications && platform_manager_socket &&
-        !platform_settings.onboarding) {
-        send_iface_status();
-    }
-
     if (call_slave_select) {
         if (!socket_thread::work()) {
             return false;
@@ -306,35 +301,6 @@ void slave_thread::process_keep_alive()
             keep_alive_retries++;
             master_last_seen = now;
         }
-    }
-}
-
-void slave_thread::update_iface_status(bool is_ap, int8_t iface_status)
-{
-    if (iface_status == 1) {
-        if (is_ap) {
-            iface_status_ap = beerocks::eRadioStatus::AP_OK;
-        } else { //BH
-            iface_status_bh = beerocks::eRadioStatus::BH_SCAN;
-        }
-    } else if (iface_status == 0) {
-        iface_status_bh = beerocks::eRadioStatus::OFF;
-        iface_status_ap = beerocks::eRadioStatus::OFF;
-    }
-}
-
-void slave_thread::send_iface_status()
-{
-    // LOG(DEBUG) << std::endl
-    //            << "iface_status_ap_prev=" << int(iface_status_ap_prev) << ", iface_status_ap=" << int(iface_status_ap) << std::endl
-    //            << "iface_status_bh_prev=" << int(iface_status_bh_prev) << ", iface_status_bh=" << int(iface_status_bh) << std::endl
-    //            << "iface_status_bh_wired_prev=" << int(iface_status_bh_wired_prev) << ", iface_status_bh_wired_prev=" << int(iface_status_bh_wired_prev);
-
-    if (iface_status_ap_prev != iface_status_ap || iface_status_bh_prev != iface_status_bh ||
-        iface_status_bh_wired_prev != iface_status_bh_wired ||
-        iface_status_operational_state_prev != iface_status_operational_state) {
-
-        send_platform_iface_status_notif(iface_status_ap, iface_status_operational_state);
     }
 }
 
@@ -405,8 +371,6 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_autoconfiguration_wsc(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE:
         return handle_autoconfiguration_renew(sd, cmdu_rx);
-    case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE:
-        return handle_ap_capability_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE:
         return handle_client_association_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE:
@@ -421,8 +385,6 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_client_steering_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::ACK_MESSAGE:
         return handle_ack_message(sd, cmdu_rx);
-    case ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE:
-        return handle_client_capability_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE:
         return handle_multi_ap_policy_config_request(sd, cmdu_rx);
     default:
@@ -699,6 +661,30 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         request_out->reason() = request_in->reason();
 
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION: {
+        LOG(DEBUG) << "received ACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION";
+        auto notification_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>();
+        if (!notification_in) {
+            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION failed";
+            return false;
+        }
+
+        // Notify monitor
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>(cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR)
+                << "Failed building cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION message!";
+            return false;
+        }
+
+        notification_out->mac()  = notification_in->mac();
+        notification_out->ipv4() = notification_in->ipv4();
+        message_com::send_cmdu(monitor_socket, cmdu_tx);
         break;
     }
     case beerocks_message::ACTION_CONTROL_CONTROLLER_PING_REQUEST: {
@@ -1021,7 +1007,6 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
     }
     case beerocks_message::ACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER: {
         LOG(DEBUG) << "ACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER, marking slave as operational!";
-        iface_status_operational_state = true;
         break;
     }
     case beerocks_message::ACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST: {
@@ -1273,20 +1258,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
             } else {
                 backhaul_params.backhaul_iface = config.backhaul_wire_iface;
             }
-            //Radio status
-            if (is_backhaul_manager) {
-                if (notification->params().backhaul_is_wireless) {
-                    iface_status_bh =
-                        eRadioStatus::BH_SIGNAL_OK; //TODO - send according to the RSSI
-                    iface_status_bh_wired = eRadioStatus::OFF;
-                } else {
-                    iface_status_bh       = eRadioStatus::OFF;
-                    iface_status_bh_wired = eRadioStatus::BH_WIRED;
-                }
-            } else {
-                iface_status_bh       = eRadioStatus::OFF;
-                iface_status_bh_wired = eRadioStatus::OFF;
-            }
+
             LOG(DEBUG) << "goto STATE_BACKHAUL_MANAGER_CONNECTED";
             slave_state = STATE_BACKHAUL_MANAGER_CONNECTED;
 
@@ -1326,10 +1298,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 
         stopped |= bool(notification->stopped());
 
-        is_backhaul_disconnected       = true;
-        iface_status_operational_state = false;
-        update_iface_status(false, false);
-
+        is_backhaul_disconnected = true;
         slave_state_timer =
             std::chrono::steady_clock::now() +
             std::chrono::milliseconds(beerocks::IRE_MAX_WIRELESS_RECONNECTION_TIME_MSC);
@@ -1416,21 +1385,6 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 
         notification_out->params() = notification_in->params();
         send_cmdu_to_controller(cmdu_tx);
-
-        int rssi = notification_in->params().rssi;
-
-        if (abs(last_reported_backhaul_rssi - rssi) >= BH_SIGNAL_RSSI_THRESHOLD_HYSTERESIS) {
-            last_reported_backhaul_rssi = rssi;
-
-            if (rssi < BH_SIGNAL_RSSI_THRESHOLD_LOW) {
-                iface_status_bh = eRadioStatus::BH_SIGNAL_TOO_LOW;
-            } else if (rssi >= BH_SIGNAL_RSSI_THRESHOLD_LOW &&
-                       rssi < BH_SIGNAL_RSSI_THRESHOLD_HIGH) {
-                iface_status_bh = eRadioStatus::BH_SIGNAL_OK;
-            } else {
-                iface_status_bh = eRadioStatus::BH_SIGNAL_TOO_HIGH;
-            }
-        }
 
         break;
     }
@@ -1529,32 +1483,6 @@ bool slave_thread::handle_cmdu_platform_manager_message(
         if (wlan_settings.band_enabled != notification->wlan_settings().band_enabled) {
             LOG(DEBUG) << "band_enabled changed - performing slave_reset()";
             slave_reset();
-        }
-        break;
-    }
-    case beerocks_message::ACTION_PLATFORM_OPERATIONAL_NOTIFICATION: {
-        auto notification_in =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_PLATFORM_OPERATIONAL_NOTIFICATION>();
-        if (notification_in == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_OPERATIONAL_NOTIFICATION failed";
-            return false;
-        }
-
-        LOG(DEBUG) << "sending master operational notification, new_oper_state="
-                   << int(notification_in->operational())
-                   << " bridge_mac=" << backhaul_params.bridge_mac;
-
-        auto notification_out = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION>(cmdu_tx);
-        if (notification_out == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-        notification_out->operational() = notification_in->operational();
-        notification_out->bridge_mac() = network_utils::mac_from_string(backhaul_params.bridge_mac);
-        if (master_socket) {
-            send_cmdu_to_controller(cmdu_tx);
         }
         break;
     }
@@ -1829,6 +1757,8 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             LOG(ERROR) << "addClass ACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION failed";
             return false;
         }
+        hostap_cs_params = notification_in->cs_params();
+
         auto notification_out = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION>(cmdu_tx,
                                                                        beerocks_header->id());
@@ -1842,6 +1772,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         std::copy_n(&std::get<1>(tuple_in_supported_channels), message::SUPPORTED_CHANNELS_LENGTH,
                     &std::get<1>(tuple_out_supported_channels));
         send_cmdu_to_controller(cmdu_tx);
+        send_operating_channel_report();
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION: {
@@ -1854,6 +1785,8 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION failed";
             return false;
         }
+        hostap_cs_params = notification_in->cs_params();
+
         auto notification_out = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION>(cmdu_tx,
                                                                        beerocks_header->id());
@@ -1864,14 +1797,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
 
         notification_out->cs_params() = notification_in->cs_params();
         send_cmdu_to_controller(cmdu_tx);
-
-        if (wireless_utils::is_dfs_channel(hostap_cs_params.channel)) {
-            LOG(INFO) << "AP is in DFS channel: " << (int)hostap_cs_params.channel;
-            iface_status_ap = beerocks::eRadioStatus::AP_DFS_CAC;
-        } else {
-            iface_status_ap = beerocks::eRadioStatus::AP_OK;
-        }
-
+        send_operating_channel_report();
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION: {
@@ -1883,6 +1809,8 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION failed";
             return false;
         }
+        hostap_cs_params = notification_in->cs_params();
+
         auto notification_out = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION>(cmdu_tx,
                                                                              beerocks_header->id());
@@ -1892,6 +1820,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
         notification_out->cs_params() = notification_in->cs_params();
         send_cmdu_to_controller(cmdu_tx);
+        send_operating_channel_report();
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
@@ -1952,6 +1881,26 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         if (!master_socket) {
             LOG(DEBUG) << "Controller is not connected";
             return true;
+        }
+
+        // Build VS CMDU message to send to backhaul manager
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION>(cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR)
+                << "Failed building ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION message!";
+            break;
+        }
+
+        notification_out->iface_mac()  = hostap_params.iface_mac;
+        notification_out->client_mac() = notification_in->params().mac;
+        notification_out->bssid()      = notification_in->params().bssid;
+
+        // Send the message
+        LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION for client "
+                   << notification_out->client_mac();
+        if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
+            slave_reset();
         }
 
         // build 1905.1 message CMDU to send to the controller
@@ -2080,7 +2029,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
         notification_out->params() = notification_in->params();
         send_cmdu_to_controller(cmdu_tx);
-        iface_status_ap = beerocks::eRadioStatus::AP_OK;
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION: {
@@ -2119,6 +2067,26 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             LOG(DEBUG) << "Controller is not connected";
             return true;
         }
+
+        // Build VS CMDU message to send to backhaul manager
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
+        if (!notification_out) {
+            LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION message!";
+            break;
+        }
+
+        notification_out->iface_mac()  = hostap_params.iface_mac;
+        notification_out->client_mac() = notification_in->params().mac;
+        notification_out->bssid()      = notification_in->params().bssid;
+
+        // Send the message
+        LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION for client "
+                   << notification_out->client_mac();
+        if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
+            slave_reset();
+        }
+
         // build 1905.1 message CMDU to send to the controller
         if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
@@ -2401,16 +2369,44 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
         }
         LOG(INFO) << "ACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION" << print_str.str();
 
+        bool agent_operational = false;
         if (slave_state == STATE_OPERATIONAL && notification_in->new_tx_state() == 1 &&
             notification_in->new_hostap_enabled_state() == 1) {
-
-            // marking slave as operational if it is on operational state with tx on and hostap is enabled
-            iface_status_operational_state = true;
-            slave_resets_counter           = 0;
-        } else {
-            iface_status_operational_state = false;
+            slave_resets_counter = 0;
+            agent_operational    = true;
         }
 
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION>(cmdu_tx);
+        if (notification_out == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        notification_out->operational() = agent_operational;
+        notification_out->bridge_mac() = network_utils::mac_from_string(backhaul_params.bridge_mac);
+        send_cmdu_to_controller(cmdu_tx);
+
+        break;
+    }
+    case beerocks_message::ACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE: {
+        auto response_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE>();
+        if (!response_in) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE failed";
+            break;
+        }
+
+        auto response_out = message_com::create_vs_message<
+            beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+        if (!response_out) {
+            LOG(ERROR)
+                << "Failed building cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE message!";
+            break;
+        }
+        response_out->success() = response_in->success();
+        send_cmdu_to_controller(cmdu_tx);
         break;
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
@@ -2867,9 +2863,9 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
         }
 
         auto notification_out = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION>(cmdu_tx);
+            beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION>(cmdu_tx);
         if (!notification_out) {
-            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION !";
+            LOG(ERROR) << "Failed building cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION !";
             return false;
         }
 
@@ -3048,6 +3044,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         request->sta_iface_filter_low() = config.backhaul_wireless_iface_filter_low;
         request->onboarding()           = platform_settings.onboarding;
         request->ruid()                 = hostap_params.iface_mac;
+        request->certification_mode()   = platform_settings.certification_mode;
 
         LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST local_master="
                   << int(platform_settings.local_master)
@@ -3089,12 +3086,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         }
 
         if (!platform_settings.local_gw) {
-            is_backhaul_manager   = false;
-            iface_status_bh_wired = eRadioStatus::OFF;
+            is_backhaul_manager = false;
         }
-
-        // mark slave as in non operational state
-        iface_status_operational_state = false;
 
         LOG(TRACE) << "goto STATE_START_AP_MANAGER";
         is_slave_reset = false;
@@ -3213,6 +3206,15 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                   config.backhaul_wireless_iface.c_str(),
                                   message::IFACE_NAME_LENGTH);
 
+        auto tuple_supported_channels = bh_enable->supported_channels_list(0);
+        if (!std::get<0>(tuple_supported_channels)) {
+            LOG(ERROR) << "getting supported channels has failed!";
+            break;
+        }
+
+        std::copy_n(hostap_params.supported_channels, message::SUPPORTED_CHANNELS_LENGTH,
+                    &std::get<1>(tuple_supported_channels));
+
         // Send the message
         LOG(DEBUG) << "send ACTION_BACKHAUL_ENABLE for mac " << bh_enable->iface_mac();
         if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
@@ -3241,9 +3243,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         master_socket->setPeerMac(backhaul_params.controller_bridge_mac);
 
         if (!wlan_settings.band_enabled) {
-
-            iface_status_operational_state = true;
-            iface_status_ap                = eRadioStatus::OFF;
             LOG(TRACE) << "goto STATE_OPERATIONAL";
             slave_state = STATE_OPERATIONAL;
             break;
@@ -3337,8 +3336,14 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        if (!add_radio_basic_capabilities()) {
-            LOG(ERROR) << "Failed adding WSC M1 TLV";
+        std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
+            supported_channels;
+        std::copy_n(std::begin(hostap_params.supported_channels), supported_channels.size(),
+                    supported_channels.begin());
+
+        if (!tlvf_utils::add_ap_radio_basic_capabilities(cmdu_tx, hostap_params.iface_mac,
+                                                         supported_channels)) {
+            LOG(ERROR) << "Failed adding AP Radio Basic Capabilities TLV";
             return false;
         }
 
@@ -3439,10 +3444,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         slave_state_timer = std::chrono::steady_clock::now() +
                             std::chrono::seconds(WAIT_FOR_JOINED_RESPONSE_TIMEOUT_SEC);
 
-        if (wlan_settings.channel != 0 /* NOT ACS */) {
-            send_platform_iface_status_notif(eRadioStatus::AP_OK, true);
-        }
-
         slave_state = STATE_WAIT_FOR_JOINED_RESPONSE;
         break;
     }
@@ -3538,8 +3539,6 @@ void slave_thread::ap_manager_stop()
     }
     if (did_stop)
         LOG(DEBUG) << "ap_manager_stop() - done";
-
-    iface_status_ap = eRadioStatus::OFF;
 }
 
 void slave_thread::backhaul_manager_stop()
@@ -3551,9 +3550,6 @@ void slave_thread::backhaul_manager_stop()
     }
     backhaul_manager_socket = nullptr;
     master_socket           = nullptr;
-
-    iface_status_bh       = eRadioStatus::OFF;
-    iface_status_bh_wired = eRadioStatus::OFF;
 }
 
 void slave_thread::platform_manager_stop()
@@ -3636,46 +3632,6 @@ void slave_thread::log_son_config()
                << "monitor_disable_initiative_arp="
                << int(son_config.monitor_disable_initiative_arp) << std::endl
                << "slave_keep_alive_retries=" << int(son_config.slave_keep_alive_retries);
-}
-
-void slave_thread::send_platform_iface_status_notif(eRadioStatus radio_status,
-                                                    bool status_operational)
-{
-    // CMDU Message
-    auto platform_notification = message_com::create_vs_message<
-        beerocks_message::cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION>(cmdu_tx);
-
-    if (platform_notification == nullptr) {
-        LOG(ERROR) << "Failed building message!";
-        return;
-    }
-    string_utils::copy_string(platform_notification->iface_name_ap(message::IFACE_NAME_LENGTH),
-                              config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
-    string_utils::copy_string(platform_notification->iface_name_bh(message::IFACE_NAME_LENGTH),
-                              config.backhaul_wireless_iface.c_str(), message::IFACE_NAME_LENGTH);
-
-    platform_notification->status_ap()          = (uint8_t)radio_status;
-    platform_notification->status_bh()          = (uint8_t)iface_status_bh;
-    platform_notification->status_bh_wired()    = (uint8_t)iface_status_bh_wired;
-    platform_notification->is_bh_manager()      = (uint8_t)is_backhaul_manager;
-    platform_notification->status_operational() = (uint8_t)status_operational;
-
-    iface_status_ap_prev                = iface_status_ap;
-    iface_status_bh_prev                = iface_status_bh;
-    iface_status_bh_wired_prev          = iface_status_bh_wired;
-    iface_status_operational_state_prev = iface_status_operational_state;
-    LOG(INFO) << "***** send_iface_status:"
-              << " iface_name_ap: "
-              << platform_notification->iface_name_ap(message::IFACE_NAME_LENGTH)
-              << " iface_name_bh: "
-              << platform_notification->iface_name_bh(message::IFACE_NAME_LENGTH)
-              << " status_ap: " << (int)platform_notification->status_ap()
-              << " status_bh: " << (int)platform_notification->status_bh()
-              << " status_bh_wired: " << (int)platform_notification->status_bh_wired()
-              << " is_bh_manager: " << (int)platform_notification->is_bh_manager()
-              << " operational: " << (int)platform_notification->status_operational();
-
-    message_com::send_cmdu(platform_manager_socket, cmdu_tx);
 }
 
 bool slave_thread::monitor_heartbeat_check()
@@ -3823,9 +3779,9 @@ bool slave_thread::autoconfig_wsc_authenticate(WSC::m2 &m2, uint8_t authkey[32])
     return true;
 }
 
-bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
-    WSC::m2 &m2, uint8_t authkey[32], uint8_t keywrapkey[16], bool &backhaul, bool &fronthaul,
-    bool &teardown, std::shared_ptr<WSC::cConfigData> &credentials)
+bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(WSC::m2 &m2, uint8_t authkey[32],
+                                                              uint8_t keywrapkey[16],
+                                                              WSC::configData::config &config)
 {
     auto encrypted_settings = m2.encrypted_settings();
     uint8_t *iv             = reinterpret_cast<uint8_t *>(encrypted_settings.iv());
@@ -3843,19 +3799,15 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
 
     LOG(DEBUG) << "M2 Parse: parse config_data, len = " << datalen;
 
-    // Need to convert to host byte order to get config data length,
-    // which is needed for computing the KWA (1st 64 bits of HMAC)
-    // However, the KWA is computed on the finalized version of the config
-    // data, hence the class_swap.
-    // Finally, once authentication succeeds, swap back to host byte order.
-    // Theoretically, this can be avoided by not passing swap_needed=True to
-    // cConfigData constructor, but then parsing will fail since the length
-    // will be calculated wrong. TLVF does not support parsing network byte order
-    // without full swap, so keep this workaround for now (another future TLVF V2 feature)
+    // Parsing failure means that the config data is invalid,
+    // in which case it is unclear what we should do.
+    // In practice, some controllers simply send an empty config data
+    // when the radio should be tore down, so let the caller handle this
+    // by returning true with a warning for now.
     auto config_data = WSC::configData::parse(decrypted, datalen);
     if (!config_data) {
-        LOG(ERROR) << "Failed to parse config data";
-        return false;
+        LOG(WARNING) << "Invalid config data, skip it";
+        return true;
     }
 
     // get length of config_data for KWA authentication
@@ -3865,9 +3817,16 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
         LOG(ERROR) << "invalid config data length";
         return false;
     }
+    // Update VAP configuration
+    config.auth_type   = config_data->auth_type();
+    config.encr_type   = config_data->encr_type();
+    config.bssid       = config_data->bssid();
+    config.network_key = config_data->network_key();
+    config.ssid        = config_data->ssid();
+    config.bss_type    = static_cast<WSC::eWscVendorExtSubelementBssType>(config_data->bss_type());
     // Swap to network byte order for KWA HMAC calculation
+    // from this point config data is not readable!
     config_data->swap();
-
     uint8_t kwa[WSC::WSC_AUTHENTICATOR_LENGTH];
     // Compute KWA based on decrypted settings
     if (!mapf::encryption::kwa_compute(authkey, decrypted, len, kwa)) {
@@ -3892,27 +3851,7 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(
                    << "length: " << std::hex << int(keywrapauth->data_length);
         return false;
     }
-
-    // Swap back to host byte order to read and use config_data
-    config_data->swap();
-
-    uint8_t bss_type = config_data->bss_type();
-    LOG(INFO) << "bss_type: " << std::hex << int(bss_type);
-    fronthaul = bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS;
-    backhaul  = bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS;
-    teardown  = bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN;
-    // BACKHAUL_STA bit is not expected to be set
-    if (bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_STA) {
-        LOG(WARNING) << "Unexpected backhaul STA bit";
-    }
     LOG(DEBUG) << "KWA (Key Wrap Auth) success";
-
-    credentials->set_ssid(config_data->ssid());
-    credentials->bssid_attr().data = config_data->bssid();
-    credentials->set_network_key(config_data->network_key());
-    credentials->authentication_type_attr().data = config_data->auth_type();
-    credentials->encryption_type_attr().data     = config_data->encr_type();
-    credentials->multiap_attr().subelement_value = bss_type;
 
     return true;
 }
@@ -4004,14 +3943,10 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         return true;
     }
 
-    auto request = message_com::create_vs_message<
-        beerocks_message::cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST>(cmdu_tx);
-    if (!request) {
-        LOG(ERROR) << "Failed building message!";
-        return false;
-    }
-
+    std::vector<WSC::configData::config> configs;
     for (auto m2 : m2_list) {
+        LOG(DEBUG) << "M2 Parse " << m2.manufacturer()
+                   << " Controller configuration (WSC M2 Encrypted Settings)";
         uint8_t authkey[32];
         uint8_t keywrapkey[16];
         LOG(DEBUG) << "M2 Parse: calculate keys";
@@ -4021,35 +3956,74 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         if (!autoconfig_wsc_authenticate(m2, authkey))
             return false;
 
-        bool fronthaul, backhaul, teardown;
-        auto credentials = request->create_wifi_credentials();
-        if (!autoconfig_wsc_parse_m2_encrypted_settings(m2, authkey, keywrapkey, backhaul,
-                                                        fronthaul, teardown, credentials))
-            return false;
-
-        LOG(DEBUG) << "Controller configuration (WSC M2 Encrypted Settings)";
-        LOG(DEBUG) << "     Manufacturer: " << m2.manufacturer()
-                   << ", ssid: " << credentials->ssid_str()
-                   << ", bssid: " << credentials->bssid_attr().data
-                   << ", authentication_type: " << std::hex
-                   << int(credentials->authentication_type_attr().data)
-                   << ", encryption_type: " << int(credentials->encryption_type_attr().data)
-                   << (fronthaul ? " fronthaul" : "") << (backhaul ? " backhaul" : "")
-                   << (teardown ? " teardown" : "");
-
-        if (!request->add_wifi_credentials(credentials)) {
-            LOG(ERROR) << "add_wifi_credentials() has failed!";
-            return false;
+        WSC::configData::config config;
+        if (!autoconfig_wsc_parse_m2_encrypted_settings(m2, authkey, keywrapkey, config)) {
+            LOG(ERROR) << "Invalid config data, skip it";
+            continue;
+        }
+        // TODO - revisit this in the future
+        // In practice, some controllers simply send an empty config data when asked for tear down,
+        // so tear down the radio if the SSID is empty.
+        if (config.ssid.empty()) {
+            LOG(INFO) << "Empty config data, tear down radio";
+            configs.clear();
+            break;
         }
 
-        if (teardown && m2_list.size() > 1) {
-            // Teardown is not compatible with any other bit in the M2.
-            LOG(ERROR) << "Teardwon combined with other M2, ignoring all";
-            return false;
+        LOG(INFO) << "bss_type: " << std::hex << int(config.bss_type);
+        if (config.bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN) {
+            LOG(INFO) << "Teardown bit set, tear down radio";
+            configs.clear();
+            break;
         }
+        // BACKHAUL_STA bit is not expected to be set
+        if (config.bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_STA) {
+            LOG(WARNING) << "Unexpected backhaul STA bit";
+        }
+        LOG(DEBUG) << m2.manufacturer() << " config data:" << std::endl
+                   << " ssid: " << config.ssid << ", bssid: " << config.bssid
+                   << ", authentication_type: " << std::hex << int(config.auth_type)
+                   << ", encryption_type: " << int(config.encr_type);
+        configs.push_back(config);
     }
 
-    message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST>(cmdu_tx);
+    if (!request) {
+        LOG(ERROR) << "Failed building message!";
+        return false;
+    }
+    for (auto config : configs) {
+        auto c = request->create_wifi_credentials();
+        if (!c) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        c->set_ssid(config.ssid);
+        c->set_network_key(config.network_key);
+        c->bssid_attr().data               = config.bssid;
+        c->authentication_type_attr().data = config.auth_type;
+        c->encryption_type_attr().data     = config.encr_type;
+        c->multiap_attr().subelement_value = config.bss_type;
+        request->add_wifi_credentials(c);
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // TODO https://github.com/prplfoundation/prplMesh/issues/797
+    //
+    // Short term solution
+    // In non-EasyMesh mode, never modify hostapd configuration
+    // and in this case VAPs credentials
+    //
+    // Long term solution
+    // All EasyMesh VAPs will be stored in the platform DB.
+    // All other VAPs are manual, AKA should not be modified by prplMesh
+    ////////////////////////////////////////////////////////////////////
+    if (platform_settings.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+    } else {
+        LOG(WARNING) << "non-EasyMesh mode - skip updating VAP credentials";
+    }
 
     // Notify backhaul manager that onboarding has finished (certification flow)
     auto onboarding_finished_notification = message_com::create_vs_message<
@@ -4231,22 +4205,6 @@ bool slave_thread::parse_non_intel_join_response(Socket *sd)
     return true;
 }
 
-bool slave_thread::handle_client_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
-{
-    const auto mid = cmdu_rx.getMessageId();
-    LOG(DEBUG) << "Received CLIENT_CAPABILITY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
-    return true;
-}
-
-bool slave_thread::handle_ap_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
-{
-    //TODO - this is a stub handler for the purpose of controller certification testing,
-    //       will be implemented later on agent certification
-    const auto mid = cmdu_rx.getMessageId();
-    LOG(DEBUG) << "Received AP_CAPABILITY_QUERY_MESSAGE, mid=" << std::dec << int(mid);
-    return true;
-}
-
 bool slave_thread::handle_multi_ap_policy_config_request(Socket *sd,
                                                          ieee1905_1::CmduMessageRx &cmdu_rx)
 {
@@ -4382,19 +4340,20 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
 
 bool slave_thread::handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    const auto mid = cmdu_rx.getMessageId();
-    auto tlv_type  = cmdu_rx.getNextTlvType();
-    while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
-        if (tlv_type == int(wfa_map::eTlvTypeMap::TLV_AP_METRIC_QUERY)) {
-            auto ap_metrics_query_tlv = cmdu_tx.addClass<wfa_map::tlvApMetricQuery>();
-            if (!ap_metrics_query_tlv) {
-                LOG(ERROR) << "addClass tlvApMetricQuery has failed";
-                return false;
-            }
-            LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
-                       << ", with TLV type=" << std::hex << int(ap_metrics_query_tlv->type());
+    const auto mid            = cmdu_rx.getMessageId();
+    auto ap_metrics_query_tlv = cmdu_rx.getClass<wfa_map::tlvApMetricQuery>();
+    if (!ap_metrics_query_tlv) {
+        LOG(ERROR) << "AP Metrics Query CMDU mid=" << mid << " does not have AP Metric Query TLV";
+        return false;
+    }
+    for (int bssid_idx = 0; bssid_idx < ap_metrics_query_tlv->bssid_list_length(); bssid_idx++) {
+        auto bssid = ap_metrics_query_tlv->bssid_list(bssid_idx);
+        if (!std::get<0>(bssid)) {
+            LOG(ERROR) << "Failed to get bssid " << bssid_idx << " from AP_METRICS_QUERY";
+            return false;
         }
-        tlv_type = cmdu_tx.getNextTlvType();
+        LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
+                   << "  bssid " << std::get<1>(bssid);
     }
     return true;
 }
@@ -4402,19 +4361,8 @@ bool slave_thread::handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx
 bool slave_thread::handle_link_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     const auto mid = cmdu_rx.getMessageId();
-    auto tlv_type  = cmdu_rx.getNextTlvType();
-    while (tlv_type != int(ieee1905_1::eTlvType::TLV_END_OF_MESSAGE)) {
-        if (tlv_type == int(ieee1905_1::eTlvType::TLV_LINK_METRIC_QUERY)) {
-            auto link_metrics_query_tlv = cmdu_tx.addClass<ieee1905_1::tlvLinkMetricQuery>();
-            if (!link_metrics_query_tlv) {
-                LOG(ERROR) << "addClass tlvLinkMetricQuery has failed";
-                return false;
-            }
-            LOG(DEBUG) << "Received LINK_METRIC_QUERY_MESSAGE , mid=" << std::hex << int(mid)
-                       << ", with TLV type=" << std::hex << int(link_metrics_query_tlv->type());
-        }
-        tlv_type = cmdu_tx.getNextTlvType();
-    }
+    LOG(DEBUG) << "Received LINK_METRIC_QUERY_MESSAGE, mid=" << std::hex << int(mid);
+    // TODO add handling for Link metric query response}
     return true;
 }
 
@@ -4439,10 +4387,12 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received CHANNEL_SELECTION_REQUEST_MESSAGE, mid=" << std::dec << int(mid);
 
-    uint8_t selected_channel         = 0;
-    uint8_t selected_operating_class = 0;
-    // parse all tlvs in cmdu
-    // parse channel preference report message
+    bool power_limit_received = false;
+    int switch_required       = 0;
+    int power_limit           = 0;
+    beerocks::message::sWifiChannel channel_to_switch;
+
+    channel_preferences.clear();
 
     for (auto channel_preference_tlv : cmdu_rx.getClassList<wfa_map::tlvChannelPreference>()) {
 
@@ -4473,6 +4423,7 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
             ss << ", preference=" << int(preference) << ", reason=" << int(reason_code);
             ss << ", channel_list={";
 
+            std::vector<beerocks::message::sWifiChannel> channels_list;
             auto channel_list_length = op_class_channels.channel_list_length();
             for (int ch_idx = 0; ch_idx < channel_list_length; ch_idx++) {
                 auto channel = op_class_channels.channel_list(ch_idx);
@@ -4486,35 +4437,76 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
                 // add comma if not last channel in the list, else close list by add curl brackets
                 ss << (((ch_idx + 1) != channel_list_length) ? "," : "}");
 
-                // mark first supported non-dfs channel as selected channel
-                // TODO: need to check that selected channel does not violate radio restriction
-                if (preference == 0 || wireless_utils::is_dfs_channel(*channel)) {
-                    continue;
-                }
-
-                LOG(INFO) << "selected_operating_class=" << int(operating_class);
-                LOG(INFO) << "selected_channel=" << int(*channel);
-                selected_channel         = *channel;
-                selected_operating_class = operating_class;
-
-                // TODO: check that the data is parsed properly after fixing the following bug:
-                // Since sFlags is defined after dynamic list cPreferenceOperatingClasses it cause data override
-                // on the first channel on the list and sFlags itself.
-                // See: https://github.com/prplfoundation/prplMesh/issues/8
+                beerocks::message::sWifiChannel wifi_channel;
+                wifi_channel.channel = *channel;
+                channels_list.push_back(wifi_channel);
             }
             LOG(DEBUG) << ss.str();
+            auto pref =
+                beerocks::message::sPreference({operating_class, preference, uint8_t(reason_code)});
+            channel_preferences.push_back({pref, channels_list});
         }
     }
 
-    // parse radio operation restriction tlv
-    auto tlvTransmitPowerLimit = cmdu_rx.getClass<wfa_map::tlvTransmitPowerLimit>();
-    if (tlvTransmitPowerLimit) {
-        LOG(DEBUG) << "received tlvTransmitPowerLimit";
-        // TODO: continute to parse this tlv
-        // This TLV contains power Tx power limit that must be considered in channel selection
-        // request message. Since this is a dummy message, this TLV is ignored.
-        // Full implemtation will be as part of channel selection agent certification task.
-        // See: https://github.com/prplfoundation/prplMesh/issues/62
+    for (auto tx_power_limit_tlv : cmdu_rx.getClassList<wfa_map::tlvTransmitPowerLimit>()) {
+
+        const auto &ruid = tx_power_limit_tlv->radio_uid();
+        if (ruid != hostap_params.iface_mac) {
+            LOG(DEBUG) << "ruid_rx=" << ruid << ", son_slave_ruid=" << hostap_params.iface_mac;
+            continue;
+        }
+
+        power_limit          = tx_power_limit_tlv->transmit_power_limit_dbm();
+        power_limit_received = true;
+        LOG(DEBUG) << std::dec << "received tlvTransmitPowerLimit " << (int)power_limit;
+        // Only one limit per ruid
+        break;
+    }
+
+    // No preferences or power limit for current ruid
+    if (channel_preferences.empty() && !power_limit_received)
+        return true;
+
+    for (auto preference : channel_preferences) {
+        auto is_restricted =
+            std::find_if(preference.channels.begin(), preference.channels.end(),
+                         [&](const beerocks::message::sWifiChannel &wifi_channel) {
+                             return hostap_cs_params.channel == wifi_channel.channel;
+                         });
+
+        if (is_restricted != preference.channels.end()) {
+            switch_required = 1;
+            break;
+        }
+    }
+
+    // According to design only Resticted channels should be included in channel selection request
+    if (switch_required) {
+        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+            if (hostap_params.supported_channels[i].channel == 0)
+                continue;
+            for (auto preference : channel_preferences) {
+                auto is_restricted = std::find_if(
+                    preference.channels.begin(), preference.channels.end(),
+                    [&](const beerocks::message::sWifiChannel &wifi_channel) {
+                        return (
+                            preference.preference.oper_class ==
+                                wireless_utils::get_operating_class_by_channel(
+                                    hostap_params.supported_channels[i].channel,
+                                    (beerocks::eWiFiBandwidth)hostap_params.supported_channels[i]
+                                        .channel_bandwidth) &&
+                            hostap_params.supported_channels[i].channel == wifi_channel.channel);
+                    });
+
+                if (is_restricted == preference.channels.end() &&
+                    !hostap_params.supported_channels[i].is_dfs_channel) {
+                    channel_to_switch = hostap_params.supported_channels[i];
+                    break;
+                }
+            }
+            if (channel_to_switch.channel != 0)
+                break;
+        }
     }
 
     // build and send channel response message
@@ -4529,6 +4521,18 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
         return false;
     }
 
+    if (switch_required && channel_to_switch.channel == 0) {
+        channel_selection_response_tlv->radio_uid()     = hostap_params.iface_mac;
+        channel_selection_response_tlv->response_code() = wfa_map::tlvChannelSelectionResponse::
+            eResponseCode::DECLINE_VIOLATES_MOST_RECENTLY_REPORTED_PREFERENCES;
+        LOG(INFO) << "Decline channel selection request " << hostap_params.iface_mac;
+        if (!send_cmdu_to_controller(cmdu_tx)) {
+            LOG(ERROR) << "failed to send CHANNEL_SELECTION_RESPONSE_MESSAGE";
+            return false;
+        }
+        return true;
+    }
+
     channel_selection_response_tlv->radio_uid() = hostap_params.iface_mac;
     channel_selection_response_tlv->response_code() =
         wfa_map::tlvChannelSelectionResponse::eResponseCode::ACCEPT;
@@ -4538,6 +4542,46 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
         return false;
     }
 
+    if (!switch_required && !power_limit_received) {
+        send_operating_channel_report();
+        return true;
+    }
+
+    auto request_out = message_com::create_vs_message<
+        beerocks_message::cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START>(cmdu_tx, mid);
+    if (!request_out) {
+        LOG(ERROR) << "Failed building message!";
+        return false;
+    }
+
+    LOG(DEBUG) << "send ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START";
+
+    // If only tx power limit change is required, set channel to current
+    request_out->cs_params().channel =
+        switch_required ? channel_to_switch.channel : hostap_cs_params.channel;
+    request_out->cs_params().bandwidth = channel_to_switch.channel_bandwidth;
+    request_out->tx_limit()            = power_limit;
+    request_out->tx_limit_valid()      = power_limit_received;
+
+    ///////////////////////////////////////////////////////////////////
+    // TODO https://github.com/prplfoundation/prplMesh/issues/797
+    //
+    // Short term solution
+    // In non-EasyMesh mode, never modify hostapd configuration
+    // and in this case don't switch channel
+    //
+    ////////////////////////////////////////////////////////////////////
+    if (platform_settings.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+    } else {
+        LOG(WARNING) << "non-EasyMesh mode - skip channel switch";
+    }
+
+    return true;
+}
+
+bool slave_thread::send_operating_channel_report()
+{
     // build and send operating channel report message
     if (!cmdu_tx.create(0, ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE)) {
         LOG(ERROR) << "cmdu creation of type OPERATING_CHANNEL_REPORT_MESSAGE, has failed";
@@ -4564,69 +4608,14 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
         return false;
     }
 
-    auto &operating_class_entry = std::get<1>(operating_class_entry_tuple);
-    if (selected_channel) {
-        operating_class_entry.operating_class = selected_operating_class;
-        operating_class_entry.channel_number  = selected_channel;
-    } else {
-        operating_class_entry.operating_class = 80;
-        operating_class_entry.channel_number  = 36;
-    }
+    auto &operating_class_entry           = std::get<1>(operating_class_entry_tuple);
+    operating_class_entry.operating_class = wireless_utils::get_operating_class_by_channel(
+        hostap_cs_params.channel, (beerocks::eWiFiBandwidth)hostap_cs_params.bandwidth);
+    operating_class_entry.channel_number = hostap_cs_params.channel;
 
-    operating_channel_report_tlv->current_transmit_power() = -50;
+    operating_channel_report_tlv->current_transmit_power() = hostap_cs_params.tx_power;
 
     return send_cmdu_to_controller(cmdu_tx);
-}
-
-bool slave_thread::add_radio_basic_capabilities()
-{
-    std::vector<uint8_t> operating_classes;
-
-    auto radio_basic_caps = cmdu_tx.addClass<wfa_map::tlvApRadioBasicCapabilities>();
-    if (!radio_basic_caps) {
-        LOG(ERROR) << "Error creating TLV_AP_RADIO_BASIC_CAPABILITIES";
-        return false;
-    }
-    radio_basic_caps->radio_uid() = hostap_params.iface_mac;
-    //TODO get maximum supported VAPs from DWPAL
-    radio_basic_caps->maximum_number_of_bsss_supported() = 2;
-
-    operating_classes =
-        wireless_utils::get_supported_operating_classes(hostap_params.supported_channels);
-
-    for (auto op_class : operating_classes) {
-        auto operationClassesInfo = radio_basic_caps->create_operating_classes_info_list();
-        if (!operationClassesInfo) {
-            LOG(ERROR) << "Failed creating operating classes info list";
-            return false;
-        }
-
-        operationClassesInfo->operating_class() = op_class;
-        operationClassesInfo->maximum_transmit_power_dbm() =
-            wireless_utils::get_operating_class_max_tx_power(hostap_params.supported_channels,
-                                                             op_class);
-
-        std::vector<uint8_t> non_oper_channels;
-        non_oper_channels = wireless_utils::get_operating_class_non_oper_channels(
-            hostap_params.supported_channels, op_class);
-        // Create list of statically non-oper channels
-        if (!non_oper_channels.empty()) {
-            operationClassesInfo->alloc_statically_non_operable_channels_list(
-                non_oper_channels.size());
-            uint8_t idx = 0;
-            for (auto non_oper : non_oper_channels) {
-                *operationClassesInfo->statically_non_operable_channels_list(idx) = non_oper;
-                idx++;
-            }
-        }
-
-        if (!radio_basic_caps->add_operating_classes_info_list(operationClassesInfo)) {
-            LOG(ERROR) << "add_operating_classes_info_list failed";
-            return false;
-        }
-    }
-
-    return true;
 }
 
 bool slave_thread::autoconfig_wsc_add_m1()
@@ -4649,7 +4638,7 @@ bool slave_thread::autoconfig_wsc_add_m1()
     cfg.mac      = network_utils::mac_from_string(backhaul_params.bridge_mac);
     dh           = std::make_unique<mapf::encryption::diffie_hellman>();
     std::copy(dh->nonce(), dh->nonce() + dh->nonce_length(), cfg.enrollee_nonce);
-    std::copy(dh->pubkey(), dh->pubkey() + dh->pubkey_length(), cfg.pub_key);
+    copy_pubkey(*dh, cfg.pub_key);
     cfg.auth_type_flags =
         uint16_t(WSC::eWscAuth::WSC_AUTH_OPEN) | uint16_t(WSC::eWscAuth::WSC_AUTH_WPA2PSK);
     cfg.encr_type_flags     = uint16_t(WSC::eWscEncr::WSC_ENCR_AES);

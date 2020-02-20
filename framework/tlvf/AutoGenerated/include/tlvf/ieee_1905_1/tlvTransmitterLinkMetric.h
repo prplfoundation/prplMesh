@@ -32,7 +32,7 @@ class tlvTransmitterLinkMetric : public BaseClass
 {
     public:
         tlvTransmitterLinkMetric(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvTransmitterLinkMetric(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvTransmitterLinkMetric(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvTransmitterLinkMetric();
 
         enum eIEEE802_1BridgeFlag: uint8_t {

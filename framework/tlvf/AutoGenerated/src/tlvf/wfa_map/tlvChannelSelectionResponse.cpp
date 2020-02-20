@@ -45,6 +45,7 @@ void tlvChannelSelectionResponse::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_radio_uid->struct_swap();
+    tlvf_swap(8*sizeof(eResponseCode), reinterpret_cast<uint8_t*>(m_response_code));
 }
 
 bool tlvChannelSelectionResponse::finalize()

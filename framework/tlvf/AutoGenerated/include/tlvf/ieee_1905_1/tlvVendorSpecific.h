@@ -31,7 +31,7 @@ class tlvVendorSpecific : public BaseClass
 {
     public:
         tlvVendorSpecific(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvVendorSpecific(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvVendorSpecific(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvVendorSpecific();
 
         enum eVendorOUI: uint32_t {

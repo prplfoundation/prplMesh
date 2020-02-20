@@ -30,7 +30,7 @@ class tlvAlMacAddressType : public BaseClass
 {
     public:
         tlvAlMacAddressType(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvAlMacAddressType(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvAlMacAddressType(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvAlMacAddressType();
 
         const eTlvType& type();

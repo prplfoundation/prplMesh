@@ -1217,7 +1217,7 @@ int cli_bml::set_dcs_continuous_scan_params_caller(int numOfArgs)
 
     std::string::size_type pos;
     //[radio_mac=<radio_mac> dwell_time=<dwell_time> interval_time='<interval_time>']"
-    for (int i = 1; i < numOfArgs; i++) { //first optional arg
+    for (int i = 0; i < numOfArgs; i++) { //first optional arg
         if ((pos = args.stringArgs[i].find("radio_mac=")) != std::string::npos) {
             radio_mac = args.stringArgs[i].substr(pos + sizeof("radio_mac"));
         } else if ((pos = args.stringArgs[i].find("dwell_time=")) != std::string::npos) {

@@ -390,7 +390,7 @@ std::string cRadioBssInfo::ssid_str() {
 }
 
 char* cRadioBssInfo::ssid(size_t length) {
-    if( (m_ssid_idx__ <= 0) || (m_ssid_idx__ < length) ) {
+    if( (m_ssid_idx__ == 0) || (m_ssid_idx__ < length) ) {
         TLVF_LOG(ERROR) << "ssid length is smaller than requested length";
         return nullptr;
     }
@@ -399,8 +399,8 @@ char* cRadioBssInfo::ssid(size_t length) {
 
 bool cRadioBssInfo::set_ssid(const std::string& str) { return set_ssid(str.c_str(), str.size()); }
 bool cRadioBssInfo::set_ssid(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_ssid received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_ssid received a null pointer.";
         return false;
     }
     if (!alloc_ssid(size)) { return false; }
@@ -410,10 +410,6 @@ bool cRadioBssInfo::set_ssid(const char str[], size_t size) {
 bool cRadioBssInfo::alloc_ssid(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list ssid, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;

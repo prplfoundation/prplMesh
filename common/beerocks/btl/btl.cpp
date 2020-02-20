@@ -18,7 +18,7 @@ const std::string transport_socket_thread::MULTICAST_MAC_ADDR = "01:80:c2:00:00:
 transport_socket_thread::transport_socket_thread(const std::string &unix_socket_path_)
     : socket_thread(unix_socket_path_)
 {
-    set_select_timeout(DEFAULT_SELECT_TIMEOUT_MS);
+    transport_socket_thread::set_select_timeout(DEFAULT_SELECT_TIMEOUT_MS);
 }
 
 transport_socket_thread::~transport_socket_thread() {}

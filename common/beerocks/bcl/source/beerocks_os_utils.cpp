@@ -37,6 +37,12 @@ std::string os_utils::get_process_dir()
     return exe_path.substr(0, dir_end);
 }
 
+bool os_utils::file_exists(const std::string &fname)
+{
+    struct stat st;
+    return (stat(fname.c_str(), &st) == 0);
+}
+
 std::string os_utils::system_call(std::string cmd, int log_lvl, bool detached)
 {
     std::string ret_str;

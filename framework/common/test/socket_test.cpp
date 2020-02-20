@@ -19,9 +19,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-//MAPF_INITIALIZE_LOGGER
-////SHARE_EASYLOGGINGPP(el::Helpers::storage())
-MAPF_INITIALIZE_LOGGER
+
 class SocketTest {
 public:
     struct SocketTestConfig {

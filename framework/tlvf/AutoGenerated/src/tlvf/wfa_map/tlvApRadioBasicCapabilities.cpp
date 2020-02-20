@@ -247,7 +247,7 @@ uint8_t& cOperatingClassesInfo::statically_non_operable_channels_list_length() {
 }
 
 uint8_t* cOperatingClassesInfo::statically_non_operable_channels_list(size_t idx) {
-    if ( (m_statically_non_operable_channels_list_idx__ <= 0) || (m_statically_non_operable_channels_list_idx__ <= idx) ) {
+    if ( (m_statically_non_operable_channels_list_idx__ == 0) || (m_statically_non_operable_channels_list_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -257,10 +257,6 @@ uint8_t* cOperatingClassesInfo::statically_non_operable_channels_list(size_t idx
 bool cOperatingClassesInfo::alloc_statically_non_operable_channels_list(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list statically_non_operable_channels_list, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(uint8_t) * count;

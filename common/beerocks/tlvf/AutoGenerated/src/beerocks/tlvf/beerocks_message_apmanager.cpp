@@ -35,6 +35,7 @@ sMacAddr& cACTION_APMANAGER_4ADDR_STA_JOINED::dst_mac() {
 
 void cACTION_APMANAGER_4ADDR_STA_JOINED::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_src_mac->struct_swap();
     m_dst_mac->struct_swap();
 }
@@ -116,6 +117,7 @@ sApChannelSwitch& cACTION_APMANAGER_JOINED_NOTIFICATION::cs_params() {
 
 void cACTION_APMANAGER_JOINED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
     m_cs_params->struct_swap();
 }
@@ -201,6 +203,7 @@ uint8_t& cACTION_APMANAGER_ENABLE_APS_REQUEST::center_channel() {
 
 void cACTION_APMANAGER_ENABLE_APS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_bandwidth));
 }
 
@@ -281,6 +284,7 @@ uint8_t& cACTION_APMANAGER_ENABLE_APS_RESPONSE::success() {
 
 void cACTION_APMANAGER_ENABLE_APS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_APMANAGER_ENABLE_APS_RESPONSE::finalize()
@@ -344,6 +348,7 @@ cACTION_APMANAGER_INIT_DONE_NOTIFICATION::~cACTION_APMANAGER_INIT_DONE_NOTIFICAT
 }
 void cACTION_APMANAGER_INIT_DONE_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_APMANAGER_INIT_DONE_NOTIFICATION::finalize()
@@ -405,6 +410,7 @@ sApSetRestrictedFailsafe& cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANN
 
 void cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -474,6 +480,7 @@ uint8_t& cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::succ
 
 void cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::finalize()
@@ -541,6 +548,7 @@ int8_t& cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::vap_id() {
 
 void cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_APMANAGER_HOSTAP_AP_DISABLED_NOTIFICATION::finalize()
@@ -612,6 +620,7 @@ sVapInfo& cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::vap_info() {
 
 void cACTION_APMANAGER_HOSTAP_AP_ENABLED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_vap_info->struct_swap();
 }
 
@@ -683,6 +692,7 @@ cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::~cACTION_APMANAGER_HOSTAP_VAP
 }
 void cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_REQUEST::finalize()
@@ -740,6 +750,7 @@ cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST::~cAC
 }
 void cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_APMANAGER_HOSTAP_GENERATE_CLIENT_ASSOCIATION_NOTIFICATIONS_REQUEST::finalize()
@@ -801,6 +812,7 @@ sVapsList& cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::params() {
 
 void cACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -868,8 +880,17 @@ sApChannelSwitch& cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::cs_params()
     return (sApChannelSwitch&)(*m_cs_params);
 }
 
+int8_t& cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::tx_limit() {
+    return (int8_t&)(*m_tx_limit);
+}
+
+uint8_t& cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::tx_limit_valid() {
+    return (uint8_t&)(*m_tx_limit_valid);
+}
+
 void cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
 }
 
@@ -904,6 +925,8 @@ size_t cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sApChannelSwitch); // cs_params
+    class_size += sizeof(int8_t); // tx_limit
+    class_size += sizeof(uint8_t); // tx_limit_valid
     return class_size;
 }
 
@@ -919,6 +942,16 @@ bool cACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START::init()
         return false;
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
+    m_tx_limit = (int8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
+        return false;
+    }
+    m_tx_limit_valid = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__) { class_swap(); }
     return true;
 }
@@ -939,6 +972,7 @@ sApChannelSwitch& cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::cs_params() {
 
 void cACTION_APMANAGER_HOSTAP_CSA_ERROR_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
 }
 
@@ -1008,6 +1042,7 @@ sApChannelSwitch& cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::cs_params() {
 
 void cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
 }
 
@@ -1077,6 +1112,7 @@ sApChannelSwitch& cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::cs_params() {
 
 void cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
 }
 
@@ -1155,6 +1191,7 @@ std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_APMANAGER_HOSTAP_ACS_
 
 void cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
     for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels_list[i].struct_swap();
@@ -1237,6 +1274,7 @@ sDfsCacCompleted& cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::param
 
 void cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1306,6 +1344,7 @@ sDfsChannelAvailable& cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATIO
 
 void cACTION_APMANAGER_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1375,6 +1414,7 @@ sMacAddr& cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::mac() {
 
 void cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -1444,6 +1484,7 @@ sMacAddr& cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::mac() {
 
 void cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -1513,6 +1554,7 @@ sNeighborSetParams11k& cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::params
 
 void cACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1582,6 +1624,7 @@ sNeighborRemoveParams11k& cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::
 
 void cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1651,6 +1694,7 @@ sClientAssociationParams& cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::para
 
 void cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1720,6 +1764,7 @@ sClientDisconnectionParams& cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::
 
 void cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1791,8 +1836,8 @@ int8_t& cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::vap_id() {
     return (int8_t&)(*m_vap_id);
 }
 
-uint32_t& cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::type() {
-    return (uint32_t&)(*m_type);
+eDisconnectType& cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::type() {
+    return (eDisconnectType&)(*m_type);
 }
 
 uint32_t& cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::reason() {
@@ -1801,8 +1846,9 @@ uint32_t& cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::reason() {
 
 void cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_type));
+    tlvf_swap(8*sizeof(eDisconnectType), reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_reason));
 }
 
@@ -1838,7 +1884,7 @@ size_t cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // mac
     class_size += sizeof(int8_t); // vap_id
-    class_size += sizeof(uint32_t); // type
+    class_size += sizeof(eDisconnectType); // type
     class_size += sizeof(uint32_t); // reason
     return class_size;
 }
@@ -1860,9 +1906,9 @@ bool cACTION_APMANAGER_CLIENT_DISCONNECT_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    m_type = (uint32_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+    m_type = (eDisconnectType*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(eDisconnectType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eDisconnectType) << ") Failed!";
         return false;
     }
     m_reason = (uint32_t*)m_buff_ptr__;
@@ -1890,6 +1936,7 @@ sClientDisconnectResponse& cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::params(
 
 void cACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1963,6 +2010,7 @@ sMacAddr& cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::bssid() {
 
 void cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
     m_bssid->struct_swap();
 }
@@ -2044,6 +2092,7 @@ sMacAddr& cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::bssid() {
 
 void cACTION_APMANAGER_CLIENT_ALLOW_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
     m_bssid->struct_swap();
 }
@@ -2121,6 +2170,7 @@ sNodeRssiMeasurementRequest& cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUES
 
 void cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2190,6 +2240,7 @@ sNodeRssiMeasurement& cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::par
 
 void cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2259,6 +2310,7 @@ sMacAddr& cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::mac() {
 
 void cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -2332,6 +2384,7 @@ sMacAddr& cACTION_APMANAGER_ACK::sta_mac() {
 
 void cACTION_APMANAGER_ACK::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_sta_mac->struct_swap();
 }
 
@@ -2407,6 +2460,7 @@ sNodeBssSteerRequest& cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::params() {
 
 void cACTION_APMANAGER_CLIENT_BSS_STEER_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2476,6 +2530,7 @@ sNodeBssSteerResponse& cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::params() {
 
 void cACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2545,6 +2600,7 @@ sMacAddr& cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::mac() {
 
 void cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -2614,6 +2670,7 @@ sSteeringClientSetRequest& cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::params
 
 void cACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2683,6 +2740,7 @@ sSteeringClientSetResponse& cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::para
 
 void cACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2752,6 +2810,7 @@ sSteeringEvProbeReq& cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::pa
 
 void cACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2821,6 +2880,7 @@ sSteeringEvAuthFail& cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::pa
 
 void cACTION_APMANAGER_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2956,6 +3016,7 @@ bool cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST::add_wifi_credentials(std
 
 void cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     for (size_t i = 0; i < (size_t)*m_wifi_credentials_size; i++){
         std::get<1>(wifi_credentials(i)).class_swap();
     }
@@ -3039,6 +3100,7 @@ cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::~cACTION_APMANAGER_HEARTBEAT_NOTIFICAT
 }
 void cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_APMANAGER_HEARTBEAT_NOTIFICATION::finalize()
@@ -3096,6 +3158,7 @@ cACTION_APMANAGER_READ_ACS_REPORT_REQUEST::~cACTION_APMANAGER_READ_ACS_REPORT_RE
 }
 void cACTION_APMANAGER_READ_ACS_REPORT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_APMANAGER_READ_ACS_REPORT_REQUEST::finalize()
@@ -3162,6 +3225,7 @@ std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_APMANAGER_READ_ACS_RE
 
 void cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels_list[i].struct_swap();
     }

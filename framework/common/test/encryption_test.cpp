@@ -13,10 +13,6 @@
 
 #include <arpa/inet.h>
 
-//MAPF_INITIALIZE_LOGGER
-////SHARE_EASYLOGGINGPP(el::Helpers::storage())
-MAPF_INITIALIZE_LOGGER
-
 static bool check(int &errors, bool check, std::string message)
 {
     if (check) {

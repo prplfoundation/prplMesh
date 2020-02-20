@@ -67,10 +67,6 @@ bool tlvSteeringRequest::alloc_sta_list(size_t count) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list sta_list, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(sMacAddr) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
@@ -114,10 +110,6 @@ std::tuple<bool, tlvSteeringRequest::sTargetBssidInfo&> tlvSteeringRequest::targ
 bool tlvSteeringRequest::alloc_target_bssid_list(size_t count) {
     if (m_lock_order_counter__ > 1) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list target_bssid_list, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(sTargetBssidInfo) * count;

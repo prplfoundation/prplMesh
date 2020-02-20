@@ -71,6 +71,11 @@ public:
      */
     unsigned nonce_length() const { return sizeof(m_nonce); }
 
+    /**
+     * @brief Maximum length of pubkey().
+     */
+    static const unsigned max_pubkey_length = 192;
+
 private:
     /**
      * OpenSSL Diffie-Hellman state structure.
@@ -162,6 +167,14 @@ bool aes_encrypt(const uint8_t *key, const uint8_t *iv, uint8_t *plaintext, int 
  */
 bool aes_decrypt(const uint8_t *key, const uint8_t *iv, uint8_t *ciphertext, int clen,
                  uint8_t *plaintext, int &plen);
+
+/**
+ * @brief Copy the public key of @a dh to @a dest
+ *
+ * Copy the public key of @a dh to @a dest, padding with zeroes on the left. Size of @a dest must be
+ * pubkey_max_length.
+ */
+void copy_pubkey(const diffie_hellman &dh, uint8_t *dest);
 
 /**
  * @brief Calculate WPS secret authkey and KeyWrapKey based on remote and local public keys

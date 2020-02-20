@@ -127,6 +127,9 @@ class TypeInfo:
             elif len(self.type_str) > 2 and (str(self.type_str[1]).isupper() or str(self.type_str[1]).isdigit()):
                 if self.type_str[0] == "e":
                     self.type = TypeInfo.ENUM
+                    self.swap_prefix = "tlvf_swap(8*sizeof(" + self.type_str + "), reinterpret_cast<uint8_t*>("
+                    self.swap_suffix = "))"
+                    self.swap_needed = True
                 elif self.type_str[0] == "s":
                     self.type = TypeInfo.STRUCT
                     self.swap_suffix = TypeInfo.STRUCT_SWAP_FUNCTION_NAME
@@ -991,7 +994,7 @@ class TlvF:
                 #add function to get char*
                 lines_h.append( "%s* %s(size_t length = 0);" % (param_type, param_name) )
                 lines_cpp.append( "%s* %s::%s(size_t length) {" % (param_type_full, obj_meta.name, param_name) )
-                lines_cpp.append( "%sif( (m_%s_idx__ <= 0) || (m_%s_idx__ < length) ) {" % (self.getIndentation(1), param_name, param_name) )
+                lines_cpp.append( "%sif( (m_%s_idx__ == 0) || (m_%s_idx__ < length) ) {" % (self.getIndentation(1), param_name, param_name) )
                 lines_cpp.append( '%sTLVF_LOG(ERROR) << "%s length is smaller than requested length";' %  (self.getIndentation(2), param_name) )
                 lines_cpp.append( "%sreturn nullptr;" % self.getIndentation(2))
                 lines_cpp.append( "%s}" % self.getIndentation(1) )
@@ -1009,8 +1012,8 @@ class TlvF:
 
                 lines_h.append( "bool set_%s(const char buffer[], size_t size);" % (param_name) )
                 lines_cpp.append( "bool %s::set_%s(const char str[], size_t size) {" % (obj_meta.name, param_name) )
-                lines_cpp.append( "%sif (str == nullptr || size == 0) {" % self.getIndentation(1))
-                lines_cpp.append( '%sTLVF_LOG(WARNING) << "set_%s received an empty string.";' %  (self.getIndentation(2), param_name) )
+                lines_cpp.append( "%sif (str == nullptr) {" % self.getIndentation(1))
+                lines_cpp.append( '%sTLVF_LOG(WARNING) << "set_%s received a null pointer.";' %  (self.getIndentation(2), param_name) )
                 lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
                 lines_cpp.append( "%s}" % self.getIndentation(1) )
                 if is_const_len or is_int_len:
@@ -1027,7 +1030,7 @@ class TlvF:
             elif param_type_info.type == TypeInfo.STD:
                 lines_h.append( "%s* %s(size_t idx = 0);" % (param_type, param_name) )
                 lines_cpp.append( "%s* %s::%s(size_t idx) {" % (param_type_full, obj_meta.name, param_name) )
-                lines_cpp.append( "%sif ( (m_%s_idx__ <= 0) || (m_%s_idx__ <= idx) ) {" % (self.getIndentation(1), param_name, param_name) )
+                lines_cpp.append( "%sif ( (m_%s_idx__ == 0) || (m_%s_idx__ <= idx) ) {" % (self.getIndentation(1), param_name, param_name) )
                 lines_cpp.append( '%sTLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";' %  self.getIndentation(2) )
                 lines_cpp.append( '%sreturn nullptr;' %  self.getIndentation(2) )
                 lines_cpp.append( "%s}" % self.getIndentation(1) )
@@ -1151,10 +1154,6 @@ class TlvF:
             lines_cpp.append( "%sTLVF_LOG(ERROR) << \"Out of order allocation for variable length list %s, abort!\";" %(self.getIndentation(2), param_name) )
             lines_cpp.append( "%sreturn false;" %self.getIndentation(2))
             lines_cpp.append( "%s}" %self.getIndentation(1))
-            lines_cpp.append( "%sif (count == 0) {" % (self.getIndentation(1)) )
-            lines_cpp.append( '%sTLVF_LOG(WARNING) << "can\'t allocate 0 bytes";' %  self.getIndentation(2) )
-            lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
-            lines_cpp.append( "%s}" % self.getIndentation(1) )
             lines_cpp.append( "%ssize_t len = sizeof(%s) * count;" % (self.getIndentation(1), param_type) )
             lines_cpp.append( "%sif(getBuffRemainingBytes() < len )  {" % (self.getIndentation(1)) )
             lines_cpp.append( '%sTLVF_LOG(ERROR) << "Not enough available space on buffer - can\'t allocate";' %  self.getIndentation(2) )
@@ -1597,7 +1596,7 @@ class TlvF:
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "}")
 
             # constractor 2
-            self.insertLineH(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "%s(std::shared_ptr<BaseClass> base, bool parse = false);" % (obj_meta.name))
+            self.insertLineH(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "explicit %s(std::shared_ptr<BaseClass> base, bool parse = false);" % (obj_meta.name))
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, ("%s::%s(std::shared_ptr<BaseClass> base, bool parse) :" % (obj_meta.name, obj_meta.name)))
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){" )
             self.insertLineCpp(obj_meta.name, self.CODE_CLASS_CONSTRACTOR, "%sm_init_succeeded = init();" % self.getIndentation(1))
@@ -1655,7 +1654,7 @@ class TlvF:
         code.append('')
         
         code += [
-            'add_library(${PROJET_NAME} ${tlvf_sources})',
+            'add_library(${PROJET_NAME} ${tlvf_sources})', 
             'target_link_libraries(${PROJET_NAME} dl)',
             '', 
             '# set_target_properties(${PROJET_NAME} PROPERTIES VERSION "%s" SOVERSION "%s")' % (self.CMAKE_PROPERTIES_VERSION, self.CMAKE_SO_VERSION) ,

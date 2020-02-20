@@ -83,6 +83,7 @@ typedef struct sPlatformSettings {
     uint8_t local_master;
     uint8_t local_gw;
     uint8_t operating_mode;
+    uint8_t management_mode;
     uint8_t mem_only_psk;
     uint8_t certification_mode;
     uint8_t stop_on_failure_attempts;
@@ -113,9 +114,6 @@ typedef struct sPlatformSettings {
 typedef struct sWlanSettings {
     uint8_t band_enabled;
     uint8_t channel;
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
-    char pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
-    char security_type[beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH];
     void struct_swap(){
     }
     void struct_init(){
@@ -141,6 +139,7 @@ typedef struct sApChannelSwitch {
     uint8_t switch_reason;
     uint8_t is_dfs_channel;
     uint16_t vht_center_frequency;
+    int8_t tx_power;
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&vht_center_frequency));
     }
@@ -858,6 +857,7 @@ typedef struct sWifiCredentials {
     uint8_t force;
     uint8_t radio_dir;
     void struct_swap(){
+        tlvf_swap(8*sizeof(eWiFiSec), reinterpret_cast<uint8_t*>(&wifi_sec));
     }
     void struct_init(){
     }
@@ -1081,7 +1081,7 @@ enum eDisconnectSource: uint8_t {
 enum eDisconnectType: uint8_t {
     eDisconnect_Type_Unknown = 0x0,
     eDisconnect_Type_Disassoc = 0x1,
-    eIsconnect_Type_Deauth = 0x2,
+    eDisconnect_Type_Deauth = 0x2,
 };
 
 enum eSteeringSnrChange: uint8_t {
@@ -1135,6 +1135,8 @@ typedef struct sSteeringEvDisconnect {
         client_mac.struct_swap();
         bssid.struct_swap();
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&reason));
+        tlvf_swap(8*sizeof(eDisconnectSource), reinterpret_cast<uint8_t*>(&source));
+        tlvf_swap(8*sizeof(eDisconnectType), reinterpret_cast<uint8_t*>(&type));
     }
     void struct_init(){
         client_mac.struct_init();
@@ -1167,6 +1169,9 @@ typedef struct sSteeringEvSnrXing {
         client_mac.struct_swap();
         bssid.struct_swap();
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&snr));
+        tlvf_swap(8*sizeof(eSteeringSnrChange), reinterpret_cast<uint8_t*>(&inactveXing));
+        tlvf_swap(8*sizeof(eSteeringSnrChange), reinterpret_cast<uint8_t*>(&highXing));
+        tlvf_swap(8*sizeof(eSteeringSnrChange), reinterpret_cast<uint8_t*>(&lowXing));
     }
     void struct_init(){
         client_mac.struct_init();

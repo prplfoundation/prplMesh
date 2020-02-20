@@ -677,6 +677,10 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         mon_rssi.conf_rx_rssi_notification_threshold_dbm =
             update->config().monitor_rx_rssi_notification_threshold_dbm;
         mon_rssi.conf_disable_initiative_arp = update->config().monitor_disable_initiative_arp;
+
+        // Mark the enable flag as "false" to force update in hostapd status.
+        // The status is polled every "MONITOR_DB_AP_POLLING_RATE_SEC" and update the value.
+        mon_db.set_hostapd_enabled(false);
         break;
     }
     case beerocks_message::ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST: {
@@ -729,6 +733,16 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         LOG(INFO) << "ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST=" << sta_mac
                   << " ip=" << sta_ipv4 << " vap_id=" << vap_id;
 
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+
+        if (!response) {
+            LOG(ERROR)
+                << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE message!";
+            return false;
+        }
+
         auto sta_node = mon_db.sta_find(sta_mac);
         if (sta_node) {
             mon_db.sta_erase(sta_mac);
@@ -737,12 +751,17 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto vap_node = mon_db.vap_get_by_id(vap_id);
         if (vap_node == nullptr) {
             LOG(ERROR) << "vap_id " << vap_id << " doesn't not exists";
+            response->success() = false;
+            message_com::send_cmdu(slave_socket, cmdu_tx);
             return false;
         }
 
         sta_node = mon_db.sta_add(sta_mac, vap_id);
         sta_node->set_ipv4(sta_ipv4);
         sta_node->set_bridge_4addr_mac(set_bridge_4addr_mac);
+
+        response->success() = true;
+        message_com::send_cmdu(slave_socket, cmdu_tx);
 #ifdef BEEROCKS_RDKB
         //clean rdkb monitor data if already in database.
         auto client = mon_rdkb_hal.conf_get_client(sta_mac);
@@ -753,6 +772,26 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             client->clearData();
         }
 #endif
+        break;
+    }
+    case beerocks_message::ACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION: {
+        LOG(TRACE) << "received ACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION";
+        auto notification =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>();
+        if (!notification) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION failed";
+            return false;
+        }
+        std::string sta_mac  = network_utils::mac_to_string(notification->mac());
+        std::string sta_ipv4 = network_utils::ipv4_to_string(notification->ipv4());
+
+        auto sta_node = mon_db.sta_find(sta_mac);
+        if (!sta_node) {
+            LOG(ERROR) << "sta " << sta_mac << " hasn't been found on mon_db";
+            return false;
+        }
+        sta_node->set_ipv4(sta_ipv4);
         break;
     }
 #ifdef BEEROCKS_RDKB
@@ -1475,9 +1514,9 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
         // If event == Channel_Scan_New_Results_Ready do nothing since is_dump's default is 0
         if (event == Event::Channel_Scan_Dump_Result) {
-            auto &msg = *(static_cast<bwl::sCHANNEL_SCAN_RESULTS_NOTIFICATION *>(data));
+            auto msg = static_cast<bwl::sCHANNEL_SCAN_RESULTS_NOTIFICATION *>(data);
 
-            auto &in_result  = msg.channel_scan_results;
+            auto &in_result  = msg->channel_scan_results;
             auto &out_result = notification->scan_results();
 
             // Arrays

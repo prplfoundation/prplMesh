@@ -14,6 +14,14 @@ option (BUILD_AGENT "Build EasyMesh agent" ON)
 option (BUILD_CONTROLLER "Build EasyMesh controller" ON)
 
 option(BUILD_SHARED_LIBS "Build shared libraries (.so) instead of static ones (.a)" ON)
+option(BUILD_FULL_STATIC "Build full static executable (links library dependencies as static)" OFF)
+
+if (BUILD_FULL_STATIC)
+     if (BUILD_SHARED_LIBS)
+        message("Turning off BUILD_SHARED_LIBS!")
+        set (BUILD_SHARED_LIBS "OFF")
+     endif()
+endif()
 
 ## Generic checks and defaults
 
@@ -69,20 +77,17 @@ else()
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector")
 endif()
 
-#CHECK!
 if(NOT BUILD_SHARED_LIBS)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static " CACHE STRING "" FORCE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -static " CACHE STRING "" FORCE)
-
-    #strip
-    #set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
-    #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
-
-    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -static-libgcc -static-libstdc++ -ldl ")
-
-    #Force to use all static libraries. Can this be done in a different way?
-    set(CMAKE_LINK_SEARCH_START_STATIC 1)
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+    #strip for Release
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+    #libdl needed by libcrypto
+    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -ldl")
+    if (BUILD_FULL_STATIC)
+        #Force to use all static libraries. Can this be done in a different way?
+        set(CMAKE_LINK_SEARCH_START_STATIC 1)
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+    endif()
 else()
     add_definitions(-DBUILD_SHARED_LIBS)
 endif()
@@ -97,6 +102,10 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}
 # - Setting "rpath" linker to add the cmake installed library folder to the linker search path
 #   (Removes the need to set LD_LIBRARY_PATH manually when installing to a none standard location)
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
+# Workaround for linking error with pthreads when building statically
+if(BUILD_FULL_STATIC)
+	SET(CMAKE_EXE_LINKER_FLAGS " -Wl,-u,pthread_mutex_lock -Wl,-u,pthread_mutex_unlock  -static  ${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
@@ -138,7 +147,6 @@ set(BEEROCKS_BRIDGE_IFACE "br-lan")
 if (NOT DEFINED BEEROCKS_BH_WIRE_IFACE)
     set(BEEROCKS_BH_WIRE_IFACE "eth1")
 endif()
-set(BEEROCKS_NOTIFY 0)
 set(BEEROCKS_REPEATER_MODE 0)
 set(BEEROCKS_ENABLE_ARP_MONITOR 1)
 
@@ -154,7 +162,6 @@ set(BEEROCKS_LOG_SYSLOG_ENABLED     "false")
 if (TARGET_PLATFORM STREQUAL "openwrt")
     if (TARGET_PLATFORM_TYPE STREQUAL "ugw")
         add_definitions(-DBEEROCKS_UGW)
-        set(BEEROCKS_NOTIFY 1)
         set(BEEROCKS_REPEATER_MODE 1)
     else()
         set(BEEROCKS_WLAN2_IFACE "wlan1")
@@ -180,7 +187,7 @@ elseif (TARGET_PLATFORM STREQUAL "econet")
     set(BEEROCKS_BH_WIRE_IFACE "eth0")
 elseif (TARGET_PLATFORM STREQUAL "linux")
     add_definitions(-DBEEROCKS_LINUX)
-    set(BEEROCKS_BH_WIRE_IFACE "sim-eth0")
+    set(BEEROCKS_BH_WIRE_IFACE "eth0")
 endif()
 
 ## Components
@@ -193,3 +200,11 @@ endif()
 if (BUILD_CONTROLLER)
 add_subdirectory(controller)
 endif()
+
+## Version
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/version.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/version"
+)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/version DESTINATION config)
+file(COPY ${CMAKE_CURRENT_BINARY_DIR}/version DESTINATION "${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/config")

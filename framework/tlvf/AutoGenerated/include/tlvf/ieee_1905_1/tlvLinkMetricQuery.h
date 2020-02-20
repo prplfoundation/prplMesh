@@ -30,7 +30,7 @@ class tlvLinkMetricQuery : public BaseClass
 {
     public:
         tlvLinkMetricQuery(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvLinkMetricQuery(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvLinkMetricQuery(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvLinkMetricQuery();
 
         enum eNeighborType: uint8_t {

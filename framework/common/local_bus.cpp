@@ -11,10 +11,7 @@
 #include <mapf/common/logger.h>
 #include <sstream>
 #include <unistd.h>
-//Duplicates logger??
-//MAPF_INITIALIZE_LOGGER
-////SHARE_EASYLOGGINGPP(el::Helpers::storage())
-MAPF_INITIALIZE_LOGGER
+
 void usage()
 {
     std::cout << "usage: broker -[cfbdsh]" << std::endl;

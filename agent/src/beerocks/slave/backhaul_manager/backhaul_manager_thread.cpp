@@ -8,6 +8,8 @@
 
 #include "backhaul_manager_thread.h"
 
+#include "../tlvf_utils.h"
+
 #include <bcl/beerocks_utils.h>
 #include <bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
@@ -28,17 +30,28 @@
 #include <tlvf/ieee_1905_1/tlvDeviceInformation.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
 #include <tlvf/ieee_1905_1/tlvMacAddress.h>
+#include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
+#include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
+#include <tlvf/wfa_map/tlvApCapability.h>
 #include <tlvf/wfa_map/tlvApOperationalBSS.h>
+#include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvAssociatedClients.h>
+#include <tlvf/wfa_map/tlvClientCapabilityReport.h>
+#include <tlvf/wfa_map/tlvClientInfo.h>
+#include <tlvf/wfa_map/tlvErrorCode.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
 
 // BPL Error Codes
+#include <bpl/bpl_cfg.h>
 #include <bpl/bpl_err.h>
+
+// SPEED values
+#include <linux/ethtool.h>
 
 using namespace beerocks::net;
 
@@ -122,16 +135,6 @@ bool backhaul_manager::init()
         })) {
         LOG(ERROR) << "Failed to init mapf_bus";
         return false;
-    }
-
-    if (m_sConfig.ucc_listener_port != 0) {
-        m_agent_ucc_listener = std::make_unique<agent_ucc_listener>(
-            *this, m_sConfig.ucc_listener_port, m_sConfig.vendor, m_sConfig.model,
-            m_sConfig.bridge_iface, cert_cmdu_tx);
-        if (m_agent_ucc_listener && !m_agent_ucc_listener->start("ucc_listener")) {
-            LOG(ERROR) << "failed start agent_ucc_listener";
-            return false;
-        }
     }
 
     return true;
@@ -1467,6 +1470,17 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         // Add the slave socket to the backhaul configuration
         m_sConfig.slave_iface_socket[soc->sta_iface] = soc;
 
+        if (!m_agent_ucc_listener && request->certification_mode() &&
+            m_sConfig.ucc_listener_port != 0 && !bpl::cfg_is_master()) {
+            m_agent_ucc_listener = std::make_unique<agent_ucc_listener>(
+                *this, m_sConfig.ucc_listener_port, m_sConfig.vendor, m_sConfig.model,
+                m_sConfig.bridge_iface, cert_cmdu_tx);
+            if (m_agent_ucc_listener && !m_agent_ucc_listener->start("ucc_listener")) {
+                LOG(ERROR) << "failed start agent_ucc_listener";
+                return false;
+            }
+        }
+
         LOG(DEBUG) << "ACTION_BACKHAUL_REGISTER_REQUEST sta_iface=" << soc->sta_iface
                    << " local_master=" << int(local_master) << " local_gw=" << int(local_gw)
                    << " hostap_iface=" << soc->hostap_iface;
@@ -1492,7 +1506,19 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             return false;
         }
 
-        std::string mac            = network_utils::mac_to_string(request->iface_mac());
+        std::string mac = network_utils::mac_to_string(request->iface_mac());
+
+        auto tuple_supported_channels = request->supported_channels_list(0);
+        if (!std::get<0>(tuple_supported_channels)) {
+            LOG(ERROR) << "access to supported channels list failed!";
+            return false;
+        }
+
+        auto channels = &std::get<1>(tuple_supported_channels);
+
+        std::copy_n(channels, beerocks::message::SUPPORTED_CHANNELS_LENGTH,
+                    m_radio_info_map[request->iface_mac()].supported_channels.begin());
+
         soc->radio_mac             = mac;
         soc->freq_type             = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
                                                    : beerocks::eFreqType::FREQ_24G);
@@ -1684,19 +1710,55 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
     case beerocks_message::ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION: {
         LOG(DEBUG) << "ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION received from iface "
                    << soc->hostap_iface;
-        if (m_agent_ucc_listener) {
-            auto msg = beerocks_header->addClass<
-                beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>();
-            if (!msg) {
-                LOG(ERROR)
-                    << "Failed building ACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION message!";
-                return false;
-            }
+        auto msg = beerocks_header->addClass<
+            beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>();
+        if (!msg) {
+            LOG(ERROR) << "Failed parsing BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION message!";
+            return false;
+        }
 
+        m_radio_info_map[msg->ruid()].vaps_list = msg->params();
+        if (m_agent_ucc_listener) {
             m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(msg->ruid()),
                                                    msg->params());
+        }
+        break;
+    }
+    case beerocks_message::ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION: {
+        LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION received from iface "
+                   << soc->hostap_iface;
+        auto msg =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION>();
+        if (!msg) {
+            LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION message!";
+            return false;
+        }
 
-            m_vaps_map[msg->ruid()] = msg->params();
+        // Set client association information for associated client
+        auto &associated_clients =
+            m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
+        associated_clients[msg->client_mac()] = std::chrono::steady_clock::now();
+        break;
+    }
+    case beerocks_message::ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION: {
+        LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION received from iface "
+                   << soc->hostap_iface;
+        auto msg =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION>();
+        if (!msg) {
+            LOG(ERROR)
+                << "Failed building ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION message!";
+            return false;
+        }
+
+        // If exists, remove client association information for disconnected client
+        auto &associated_clients =
+            m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
+        auto it = associated_clients.find(msg->client_mac());
+        if (it != associated_clients.end()) {
+            associated_clients.erase(it);
         }
         break;
     }
@@ -1735,12 +1797,19 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return false;
     }
     case ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE: {
-        return handle_1905_discovery_query(cmdu_rx, src_mac);
-        //LOG(INFO) << "I got the Topology Query message!";
+        return handle_1905_topology_query(cmdu_rx, src_mac);
+    }
+    case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE: {
+        return handle_ap_capability_query(cmdu_rx, src_mac);
     }
     case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE: {
         return handle_1905_higher_layer_data_message(cmdu_rx, src_mac);
     }
+    case ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE: {
+        return handle_1905_combined_infrastructure_metrics(cmdu_rx, src_mac);
+    }
+    case ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE:
+        return handle_client_capability_query(cmdu_rx, src_mac);
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
@@ -1749,21 +1818,125 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
 }
 
+bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                      const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received CLIENT_CAPABILITY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
+
+    auto client_info_tlv_r = cmdu_rx.getClass<wfa_map::tlvClientInfo>();
+    if (!client_info_tlv_r) {
+        LOG(ERROR) << "getClass wfa_map::tlvClientInfo failed";
+        return false;
+    }
+
+    //Check if it is an error scenario - if the STA specified in the Client Capability Query message is not associated
+    //with any of the BSS operated by the Multi-AP Agent [ though the TLV does contain a BSSID, the specification
+    // says that we should answer if the client is associated with any BSS on this agent.]
+    bool associated_client_found = false;
+    for (const auto &slave : m_radio_info_map) {
+        auto associated_clients_map = slave.second.associated_clients_map;
+        for (const auto &vap : associated_clients_map) {
+            if (vap.second.find(client_info_tlv_r->client_mac()) != vap.second.end()) {
+                associated_client_found = true;
+                break;
+            }
+        }
+    }
+
+    // send CLIENT_CAPABILITY_REPORT_MESSAGE back to the controller
+    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type CLIENT_CAPABILITY_REPORT_MESSAGE, has failed";
+        return false;
+    }
+
+    auto client_info_tlv_t = cmdu_tx.addClass<wfa_map::tlvClientInfo>();
+    if (!client_info_tlv_t) {
+        LOG(ERROR) << "addClass wfa_map::tlvClientInfo has failed";
+        return false;
+    }
+    client_info_tlv_t->bssid()      = client_info_tlv_r->bssid();
+    client_info_tlv_t->client_mac() = client_info_tlv_r->client_mac();
+
+    auto client_capability_report_tlv = cmdu_tx.addClass<wfa_map::tlvClientCapabilityReport>();
+    if (!client_capability_report_tlv) {
+        LOG(ERROR) << "addClass wfa_map::tlvClientCapabilityReport has failed";
+        return false;
+    }
+
+    //if it is an error scenario, set Success status to 0x01 = Failure and do nothing after it.
+    if (associated_client_found) {
+        client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::SUCCESS;
+        LOG(DEBUG) << "Result Code: SUCCESS";
+        //TODO: Add frame body of the most recently received (Re)Association Request frame from this client
+    } else {
+        client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::FAILURE;
+
+        LOG(DEBUG) << "Result Code: FAILURE";
+        LOG(DEBUG) << "STA specified in the Client Capability Query message is not associated with "
+                      "any of the BSS operated by the Multi-AP Agent ";
+        //Add an Error Code TLV
+        auto error_code_tlv = cmdu_tx.addClass<wfa_map::tlvErrorCode>();
+        if (!error_code_tlv) {
+            LOG(ERROR) << "addClass wfa_map::tlvErrorCode has failed";
+            return false;
+        }
+        error_code_tlv->reason_code() =
+            wfa_map::tlvErrorCode::STA_NOT_ASSOCIATED_WITH_ANY_BSS_OPERATED_BY_THE_AGENT;
+        error_code_tlv->sta_mac() = client_info_tlv_r->client_mac();
+    }
+    LOG(DEBUG) << "Send a CLIENT_CAPABILITY_REPORT_MESSAGE back to controller";
+    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+}
+
+bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                  const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received AP_CAPABILITY_QUERY_MESSAGE, mid=" << std::dec << int(mid);
+
+    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type AP_CAPABILITY_REPORT_MESSAGE, has failed";
+        return false;
+    }
+
+    auto ap_capability_tlv = cmdu_tx.addClass<wfa_map::tlvApCapability>();
+    if (!ap_capability_tlv) {
+        LOG(ERROR) << "addClass wfa_map::tlvApCapability has failed";
+        return false;
+    }
+
+    // Capability bitmask is set to 0 because neither unassociated STA link metrics
+    // reporting or agent-initiated RCPI-based steering are supported
+
+    for (const auto &radio_info : m_radio_info_map) {
+        auto radio_mac          = radio_info.first;
+        auto supported_channels = radio_info.second.supported_channels;
+
+        if (!tlvf_utils::add_ap_radio_basic_capabilities(cmdu_tx, radio_mac, supported_channels)) {
+            return false;
+        }
+    }
+
+    LOG(DEBUG) << "Sending AP_CAPABILITY_REPORT_MESSAGE , mid: " << std::hex << (int)mid;
+    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+}
+
 /**
- * @brief Handles 1905 Discovery Query message, currently only prints to the log
- * @param cmdu_rx
+ * @brief Handles 1905 Topology Query message
+ * @param cmdu_rx Received CMDU (containing Topology Query)
+ * @param src_mac MAC address of the message sender
  * @return true on success
  * @return false on failure
  */
-bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                                   const std::string &src_mac)
+bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                  const std::string &src_mac)
 {
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received TOPOLOGY_QUERY_MESSAGE , mid=" << std::dec << int(mid);
     auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE);
     if (!cmdu_tx_header) {
-        LOG(ERROR) << "Failed creating topology discovery response header! mid=" << std::hex
-                   << (int)mid;
+        LOG(ERROR) << "Failed creating topology response header! mid=" << std::hex << (int)mid;
         return false;
     }
 
@@ -1773,11 +1946,42 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
                    << (int)mid;
         return false;
     }
+
+    /**
+     * 1905.1 AL MAC address of the device.
+     */
     tlvDeviceInformation->mac() = network_utils::mac_from_string(bridge_info.mac);
 
-    // https://github.com/prplfoundation/prplMesh/issues/300
-    //TODO: set number of local interfaces.
-    //TODO: fill info of each of the local interfaces, according to IEEE_1905 section 6.4.5
+    /**
+     * Set the number of local interfaces and fill info of each of the local interfaces, according
+     * to IEEE_1905 section 6.4.5
+     */
+    uint32_t speed;
+    if (network_utils::linux_iface_get_speed(m_sConfig.wire_iface, speed)) {
+        std::shared_ptr<ieee1905_1::cLocalInterfaceInfo> localInterfaceInfo =
+            tlvDeviceInformation->create_local_interface_list();
+
+        ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+        if (SPEED_100 == speed) {
+            media_type = ieee1905_1::eMediaType::IEEE_802_3U_FAST_ETHERNET;
+        } else if (SPEED_1000 <= speed) {
+            media_type = ieee1905_1::eMediaType::IEEE_802_3AB_GIGABIT_ETHERNET;
+        }
+
+        // default to zero mac if get_mac fails.
+        std::string wire_iface_mac = network_utils::ZERO_MAC_STRING;
+        network_utils::linux_iface_get_mac(m_sConfig.wire_iface, wire_iface_mac);
+        localInterfaceInfo->mac()               = network_utils::mac_from_string(wire_iface_mac);
+        localInterfaceInfo->media_type()        = media_type;
+        localInterfaceInfo->media_info_length() = 0;
+
+        tlvDeviceInformation->add_local_interface_list(localInterfaceInfo);
+    }
+
+    // TODO: Add a LocalInterfaceInfo field for each wireless interface.
+    // This is something that cannot be done at this moment because the MediaType field
+    // must be computed with information obtained through NL80211_CMD_GET_WIPHY command of DWPAL,
+    // which is currently not supported. See "Send standard NL80211 commands using DWPAL #782"
 
     auto tlvSupportedService = cmdu_tx.addClass<wfa_map::tlvSupportedService>();
     if (!tlvSupportedService) {
@@ -1797,7 +2001,7 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
 
     auto supportedServiceTuple = tlvSupportedService->supported_service_list(0);
     if (!std::get<0>(supportedServiceTuple)) {
-        LOG(ERROR) << "Failed accessing supported_service_list";
+        LOG(ERROR) << "Failed accessing supported_service_list(0)";
         return false;
     }
 
@@ -1807,7 +2011,7 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
     if (local_master) {
         auto supportedServiceTuple = tlvSupportedService->supported_service_list(1);
         if (!std::get<0>(supportedServiceTuple)) {
-            LOG(ERROR) << "Failed accessing supported_service_list";
+            LOG(ERROR) << "Failed accessing supported_service_list(1)";
             return false;
         }
 
@@ -1815,19 +2019,22 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
             wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER;
     }
 
-    // TODO: the Operational BSS and Associated Clients TLVs are temporary dummies.
-    // later to be updated by real platfrom data from bpl
     auto tlvApOperationalBSS = cmdu_tx.addClass<wfa_map::tlvApOperationalBSS>();
     if (!tlvApOperationalBSS) {
         LOG(ERROR) << "addClass wfa_map::tlvApOperationalBSS failed, mid=" << std::hex << (int)mid;
         return false;
     }
 
-    for (const auto &vaps_list : m_vaps_map) {
+    for (const auto &radio_info : m_radio_info_map) {
+        auto ruid      = radio_info.first;
+        auto vaps_list = radio_info.second.vaps_list;
+
         auto radio_list         = tlvApOperationalBSS->create_radio_list();
-        radio_list->radio_uid() = vaps_list.first;
-        for (const auto &vap : vaps_list.second.vaps) {
+        radio_list->radio_uid() = ruid;
+        for (const auto &vap : vaps_list.vaps) {
             if (vap.mac == network_utils::ZERO_MAC)
+                continue;
+            if (vap.ssid[0] == '\0')
                 continue;
             auto radio_bss_list           = radio_list->create_radio_bss_list();
             radio_bss_list->radio_bssid() = vap.mac;
@@ -1839,23 +2046,75 @@ bool backhaul_manager::handle_1905_discovery_query(ieee1905_1::CmduMessageRx &cm
         tlvApOperationalBSS->add_radio_list(radio_list);
     }
 
-    auto tlvAssociatedClients = cmdu_tx.addClass<wfa_map::tlvAssociatedClients>();
-    if (!tlvAssociatedClients) {
-        LOG(ERROR) << "addClass wfa_map::tlvAssociatedClients failed, mid=" << std::hex << (int)mid;
-        return false;
+    // The Multi-AP Agent shall include an Associated Clients TLV in the message if there is at
+    // least one 802.11 client directly associated with any of the BSS(s) that is operated by the
+    // Multi-AP Agent
+    bool shall_include_associated_clients_tlv = false;
+    for (const auto &radio_info_entry : m_radio_info_map) {
+        auto associated_clients_map = radio_info_entry.second.associated_clients_map;
+        for (const auto &associated_clients_entry : associated_clients_map) {
+            auto associated_clients = associated_clients_entry.second;
+            if (associated_clients.size() > 0) {
+                shall_include_associated_clients_tlv = true;
+                break;
+            }
+        }
+        if (shall_include_associated_clients_tlv) {
+            break;
+        }
     }
-    auto bss_list   = tlvAssociatedClients->create_bss_list();
-    auto client_1   = bss_list->create_clients_associated_list();
-    client_1->mac() = network_utils::mac_from_string("aa:bb:cc:dd:ee:ff");
-    client_1->time_since_last_association_sec() = 5;
-    bss_list->add_clients_associated_list(client_1);
-    auto client_2   = bss_list->create_clients_associated_list();
-    client_2->mac() = network_utils::mac_from_string("00:11:22:33:44:55");
-    client_2->time_since_last_association_sec() = 1;
-    bss_list->add_clients_associated_list(client_2);
-    tlvAssociatedClients->add_bss_list(bss_list);
 
-    bss_list->bssid() = network_utils::mac_from_string("ab:cd:ef:01:23:45");
+    if (shall_include_associated_clients_tlv) {
+        auto tlvAssociatedClients = cmdu_tx.addClass<wfa_map::tlvAssociatedClients>();
+        if (!tlvAssociatedClients) {
+            LOG(ERROR) << "addClass wfa_map::tlvAssociatedClients failed, mid=" << std::hex
+                       << (int)mid;
+            return false;
+        }
+
+        // Get current time to compute elapsed time since last client association
+        auto now = std::chrono::steady_clock::now();
+
+        // Fill in Associated Clients TLV
+        for (const auto &radio_info_entry : m_radio_info_map) {
+            auto associated_clients_map = radio_info_entry.second.associated_clients_map;
+
+            // Associated clients map contains sets of associated clients grouped by BSSID
+            for (const auto &associated_clients_entry : associated_clients_map) {
+                auto bssid              = associated_clients_entry.first;
+                auto associated_clients = associated_clients_entry.second;
+
+                if (associated_clients.size() > 0) {
+                    auto bss_list = tlvAssociatedClients->create_bss_list();
+
+                    bss_list->bssid() = bssid;
+
+                    // Information for each associated client includes its MAC address and
+                    // the timestamp of its last association.
+                    for (const auto &associated_client : associated_clients) {
+                        auto client_mac       = associated_client.first;
+                        auto association_time = associated_client.second;
+
+                        auto elapsed =
+                            std::chrono::duration_cast<std::chrono::seconds>(now - association_time)
+                                .count();
+                        if ((elapsed < 0) || (elapsed > UINT16_MAX)) {
+                            elapsed = UINT16_MAX;
+                        }
+
+                        auto client = bss_list->create_clients_associated_list();
+
+                        client->mac()                             = client_mac;
+                        client->time_since_last_association_sec() = elapsed;
+
+                        bss_list->add_clients_associated_list(client);
+                    }
+
+                    tlvAssociatedClients->add_bss_list(bss_list);
+                }
+            }
+        }
+    }
 
     LOG(DEBUG) << "Sending topology response message, mid: " << std::hex << (int)mid;
     return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
@@ -1877,6 +2136,27 @@ bool backhaul_manager::handle_1905_higher_layer_data_message(ieee1905_1::CmduMes
     const auto payload_length = tlvHigherLayerData->payload_length();
     LOG(DEBUG) << "protocol: " << std::hex << int(protocol);
     LOG(DEBUG) << "payload_length: " << std::hex << int(payload_length);
+
+    // build ACK message CMDU
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+    LOG(DEBUG) << "sending ACK message to the originator, mid=" << std::hex << int(mid);
+    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+}
+
+bool backhaul_manager::handle_1905_combined_infrastructure_metrics(
+    ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received COMBINED_INFRASTRUCTURE_METRICS message, mid=" << std::hex << int(mid);
+
+    if (cmdu_rx.getClass<ieee1905_1::tlvReceiverLinkMetric>())
+        LOG(DEBUG) << "Received TLV_RECEIVER_LINK_METRIC";
+    if (cmdu_rx.getClass<ieee1905_1::tlvTransmitterLinkMetric>())
+        LOG(DEBUG) << "Received TLV_TRANSMITTER_LINK_METRIC";
 
     // build ACK message CMDU
     auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);

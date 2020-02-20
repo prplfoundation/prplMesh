@@ -83,20 +83,41 @@ int cfg_is_enabled() { return 1; }
 
 int cfg_is_master()
 {
-    std::string mode_str;
-    if (cfg_get_param("management_mode=", mode_str) < 0) {
-        MAPF_ERR("cfg_is_master: Failed to read ManagementMode");
+    switch (cfg_get_management_mode()) {
+    case BPL_MGMT_MODE_MULTIAP_CONTROLLER_AGENT:
+        return 1;
+    case BPL_MGMT_MODE_MULTIAP_CONTROLLER:
+        return 1;
+    case BPL_MGMT_MODE_MULTIAP_AGENT:
+        return 0;
+    case BPL_MGMT_MODE_NOT_MULTIAP:
+        return (cfg_get_operating_mode() == BPL_OPER_MODE_GATEWAY) ? 1 : 0;
+    default:
         return RETURN_ERR;
     }
+}
 
-    if (mode_str == "Multi-AP-Controller-and-Agent" || mode_str == "Multi-AP-Controller")
-        return 1;
-    else if (mode_str == "Multi-AP-Agent")
-        return 0;
+int cfg_get_management_mode()
+{
+    int retVal = RETURN_ERR;
+    std::string mgmt_mode;
+    if (cfg_get_param("management_mode=", mgmt_mode) < 0) {
+        MAPF_ERR("cfg_get_management_mode: Failed to read management_mode");
+        return -1;
+    }
 
-    MAPF_ERR("cfg_is_master: Unexpected management_mode " << mode_str);
+    if (mgmt_mode == "Multi-AP-Controller-and-Agent") {
+        return BPL_MGMT_MODE_MULTIAP_CONTROLLER_AGENT;
+    } else if (mgmt_mode == "Multi-AP-Controller") {
+        return BPL_MGMT_MODE_MULTIAP_CONTROLLER;
+    } else if (mgmt_mode == "Multi-AP-Agent") {
+        return BPL_MGMT_MODE_MULTIAP_AGENT;
+    } else if (mgmt_mode == "Not-Multi-AP") {
+        return BPL_MGMT_MODE_NOT_MULTIAP;
+    }
 
-    return RETURN_ERR;
+    MAPF_ERR("cfg_get_management_mode: Unexpected management_mode");
+    return retVal;
 }
 
 int cfg_get_operating_mode()
@@ -169,9 +190,6 @@ int cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params)
     }
     wlan_params->enabled = 1;
     wlan_params->channel = 0;
-    utils::copy_string(wlan_params->ssid, "test_ssid", BPL_SSID_LEN);
-    utils::copy_string(wlan_params->passphrase, "test_pass", BPL_PASS_LEN);
-    utils::copy_string(wlan_params->security, "None", BPL_SEC_LEN);
 
     return RETURN_OK;
 }
@@ -213,22 +231,68 @@ int cfg_notify_fw_version_mismatch() { return RETURN_ERR; }
 
 int cfg_notify_error(int code, const char data[BPL_ERROR_STRING_LEN]) { return RETURN_ERR; }
 
-int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif)
-{
-    return RETURN_ERR;
-}
-
 int cfg_get_administrator_credentials(char pass[BPL_PASS_LEN]) { return RETURN_ERR; }
 
 int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAME_LEN])
 {
-    if (iface == NULL || sta_iface == NULL) {
+    if (!iface || !sta_iface) {
         MAPF_ERR("cfg_get_sta_iface: invalid input: iface or sta_iface are NULL");
         return RETURN_ERR;
     }
 
     // return empty STA interface name
     sta_iface[0] = '\0';
+    return RETURN_OK;
+}
+
+int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN])
+{
+    if (!hostap_iface) {
+        MAPF_ERR("cfg_get_hostap_iface: invalid input: hostap_iface is NULL");
+        return RETURN_ERR;
+    }
+
+    if (radio_num < 0) {
+        MAPF_ERR("cfg_get_hostap_iface: invalid input: radio_num < 0");
+        return RETURN_ERR;
+    }
+
+    // the linux implementation expects to receive "wlanX" for interface names where the X is:
+    // 0,2 for Linux-PC
+    // 0,1 for Turris-Omnia and GLInet
+    // we return 0,1,2 and the upper layer filters the non-supported interface
+    std::string iface_str("wlan" + std::to_string(radio_num));
+    utils::copy_string(hostap_iface, iface_str.c_str(), BPL_IFNAME_LEN);
+    return RETURN_OK;
+}
+
+int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of_interfaces)
+{
+    if (!interfaces) {
+        MAPF_ERR("cfg_get_all_prplmesh_wifi_interfaces: invalid input: interfaces is NULL");
+        return RETURN_ERR;
+    }
+    if (!num_of_interfaces) {
+        MAPF_ERR("cfg_get_all_prplmesh_wifi_interfaces: invalid input: num_of_interfaces is NULL");
+        return RETURN_ERR;
+    }
+    if (*num_of_interfaces < 1) {
+        MAPF_ERR(
+            "cfg_get_all_prplmesh_wifi_interfaces: invalid input: max num_of_interfaces value < 1");
+        return RETURN_ERR;
+    }
+
+    int interfaces_count = 0;
+    for (int index = 0; index < *num_of_interfaces; index++) {
+        if (cfg_get_hostap_iface(index, interfaces[interfaces_count].ifname) == RETURN_ERR) {
+            MAPF_ERR("cfg_get_all_prplmesh_wifi_interfaces: failed to get wifi interface for agent"
+                     << index);
+        }
+        interfaces[interfaces_count++].radio_num = index;
+    }
+
+    *num_of_interfaces = interfaces_count;
+
     return RETURN_OK;
 }
 

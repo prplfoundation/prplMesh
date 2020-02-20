@@ -99,16 +99,9 @@ static bool fill_platform_settings(
     /* update message */
     msg->wlan_settings().band_enabled = params.enabled;
     msg->wlan_settings().channel      = params.channel;
-    string_utils::copy_string(msg->wlan_settings().ssid, params.ssid,
-                              beerocks::message::WIFI_SSID_MAX_LENGTH);
-    string_utils::copy_string(msg->wlan_settings().pass, params.passphrase,
-                              beerocks::message::WIFI_PASS_MAX_LENGTH);
-    string_utils::copy_string(msg->wlan_settings().security_type, params.security,
-                              beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
 
     LOG(DEBUG) << "wlan settings:"
-               << " ssid=" << msg->wlan_settings().ssid
-               << " sec=" << msg->wlan_settings().security_type << " pass=***"
+               << " band_enabled=" << string_utils::bool_str(msg->wlan_settings().band_enabled)
                << " channel=" << int(msg->wlan_settings().channel);
 
     // initialize wlan params cache
@@ -122,90 +115,82 @@ static bool fill_platform_settings(
 
     params_ptr->band_enabled = params.enabled;
     params_ptr->channel      = params.channel;
-    string_utils::copy_string(params_ptr->ssid, params.ssid,
-                              beerocks::message::WIFI_SSID_MAX_LENGTH);
-    string_utils::copy_string(params_ptr->pass, params.passphrase,
-                              beerocks::message::WIFI_PASS_MAX_LENGTH);
-    string_utils::copy_string(params_ptr->security_type, params.security,
-                              beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
 
     iface_wlan_params_map[iface_name] = params_ptr;
 
     LOG(DEBUG) << "iface=" << iface_name << " added to wlan params change check";
 
-    if (!platform_common_conf.conf_initialized) {
+    const int back_vaps_buff_len =
+        BPL_BACK_VAPS_GROUPS * BPL_BACK_VAPS_IN_GROUP * BPL_MAC_ADDR_OCTETS_LEN;
+    char back_vaps[back_vaps_buff_len];
 
-        const int back_vaps_buff_len =
-            BPL_BACK_VAPS_GROUPS * BPL_BACK_VAPS_IN_GROUP * BPL_MAC_ADDR_OCTETS_LEN;
-        char back_vaps[back_vaps_buff_len];
+    if ((platform_common_conf.onboarding = bpl::cfg_is_onboarding()) < 0) {
+        LOG(ERROR) << "Failed reading 'onboarding'";
+        return false;
+    }
+    if ((platform_common_conf.rdkb_extensions = bpl::cfg_get_rdkb_extensions()) < 0) {
+        LOG(ERROR) << "Failed reading 'rdkb_extensions'";
+        return false;
+    }
+    if ((platform_common_conf.band_steering = bpl::cfg_get_band_steering()) < 0) {
+        LOG(ERROR) << "Failed reading 'band_steering'";
+        return false;
+    }
+    if ((platform_common_conf.client_roaming = bpl::cfg_get_client_roaming()) < 0) {
+        LOG(ERROR) << "Failed reading 'client_roaming";
+        return false;
+    }
+    if ((platform_common_conf.local_master = bpl::cfg_is_master()) < 0) {
+        LOG(ERROR) << "Failed reading 'local_master'";
+        return false;
+    }
+    if ((platform_common_conf.management_mode = bpl::cfg_get_management_mode()) < 0) {
+        LOG(ERROR) << "Failed reading 'management_mode'";
+        return false;
+    }
+    if ((platform_common_conf.operating_mode = bpl::cfg_get_operating_mode()) < 0) {
+        LOG(ERROR) << "Failed reading 'operating_mode'";
+        return false;
+    }
+    if ((platform_common_conf.certification_mode = bpl::cfg_get_certification_mode()) < 0) {
+        LOG(ERROR) << "Failed reading 'certification_mode'";
+        return false;
+    }
+    if ((platform_common_conf.stop_on_failure_attempts = bpl::cfg_get_stop_on_failure_attempts()) <
+        0) {
+        LOG(ERROR) << "Failed reading 'stop_on_failure_attempts'";
+        return false;
+    }
+    if ((platform_common_conf.dfs_reentry = bpl::cfg_get_dfs_reentry()) < 0) {
+        LOG(ERROR) << "Failed reading 'dfs_reentry'";
+        return false;
+    }
 
-        if ((platform_common_conf.onboarding = bpl::cfg_is_onboarding()) < 0) {
-            LOG(ERROR) << "Failed reading 'onboarding'";
-            return false;
-        }
-        if ((platform_common_conf.rdkb_extensions = bpl::cfg_get_rdkb_extensions()) < 0) {
-            LOG(ERROR) << "Failed reading 'rdkb_extensions'";
-            return false;
-        }
-        if ((platform_common_conf.band_steering = bpl::cfg_get_band_steering()) < 0) {
-            LOG(ERROR) << "Failed reading 'band_steering'";
-            return false;
-        }
-        if ((platform_common_conf.client_roaming = bpl::cfg_get_client_roaming()) < 0) {
-            LOG(ERROR) << "Failed reading 'client_roaming";
-            return false;
-        }
-        if ((platform_common_conf.local_master = bpl::cfg_is_master()) < 0) {
-            LOG(ERROR) << "Failed reading 'local_master'";
-            return false;
-        }
-        if ((platform_common_conf.operating_mode = bpl::cfg_get_operating_mode()) < 0) {
-            LOG(ERROR) << "Failed reading 'operating_mode'";
-            return false;
-        }
-        if ((platform_common_conf.certification_mode = bpl::cfg_get_certification_mode()) < 0) {
-            LOG(ERROR) << "Failed reading 'certification_mode'";
-            return false;
-        }
-        if ((platform_common_conf.stop_on_failure_attempts =
-                 bpl::cfg_get_stop_on_failure_attempts()) < 0) {
-            LOG(ERROR) << "Failed reading 'stop_on_failure_attempts'";
-            return false;
-        }
-        if ((platform_common_conf.dfs_reentry = bpl::cfg_get_dfs_reentry()) < 0) {
-            LOG(ERROR) << "Failed reading 'dfs_reentry'";
-            return false;
-        }
+    if (bpl::cfg_get_backhaul_params(&platform_common_conf.backhaul_max_vaps,
+                                     &platform_common_conf.backhaul_network_enabled,
+                                     &platform_common_conf.backhaul_preferred_radio_band) < 0) {
+        LOG(ERROR) << "Failed reading 'backhaul_max_vaps, backhaul_network_enabled, "
+                      "backhaul_preferred_radio_band'!";
+    }
 
-        if (bpl::cfg_get_backhaul_params(&platform_common_conf.backhaul_max_vaps,
-                                         &platform_common_conf.backhaul_network_enabled,
-                                         &platform_common_conf.backhaul_preferred_radio_band) < 0) {
-            LOG(ERROR) << "Failed reading 'backhaul_max_vaps, backhaul_network_enabled, "
-                          "backhaul_preferred_radio_band'!";
-        }
+    if (bpl::cfg_get_backhaul_vaps(back_vaps, back_vaps_buff_len) < 0) {
+        LOG(ERROR) << "Failed reading beerocks backhaul_vaps parameters!";
+        return false;
+    }
 
-        if (bpl::cfg_get_backhaul_vaps(back_vaps, back_vaps_buff_len) < 0) {
-            LOG(ERROR) << "Failed reading beerocks backhaul_vaps parameters!";
-            return false;
-        }
+    // set local_gw flag
+    platform_common_conf.local_gw =
+        (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
+         platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
 
-        // set local_gw flag
-        platform_common_conf.local_gw =
-            (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
-             platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
-
-        // fill backhaul vaps
-        auto *p             = back_vaps;
-        int num_of_elements = sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid) /
-                              sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid[0]);
-        for (int i = 0; i < num_of_elements; i++) {
-            std::copy_n(p, BPL_MAC_ADDR_OCTETS_LEN,
-                        msg->platform_settings().backhaul_vaps_bssid[i].oct);
-            p += BPL_MAC_ADDR_OCTETS_LEN;
-        }
-
-        // mark initialization flag
-        platform_common_conf.conf_initialized = true;
+    // fill backhaul vaps
+    auto *p             = back_vaps;
+    int num_of_elements = sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid) /
+                          sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid[0]);
+    for (int i = 0; i < num_of_elements; i++) {
+        std::copy_n(p, BPL_MAC_ADDR_OCTETS_LEN,
+                    msg->platform_settings().backhaul_vaps_bssid[i].oct);
+        p += BPL_MAC_ADDR_OCTETS_LEN;
     }
 
     msg->platform_settings().onboarding          = uint8_t(platform_common_conf.onboarding);
@@ -222,6 +207,7 @@ static bool fill_platform_settings(
         uint8_t(platform_common_conf.client_roaming || platform_common_conf.band_steering);
     msg->platform_settings().local_gw           = uint8_t(platform_common_conf.local_gw);
     msg->platform_settings().operating_mode     = uint8_t(platform_common_conf.operating_mode);
+    msg->platform_settings().management_mode    = uint8_t(platform_common_conf.management_mode);
     msg->platform_settings().certification_mode = uint8_t(platform_common_conf.certification_mode);
     msg->platform_settings().stop_on_failure_attempts =
         uint8_t(platform_common_conf.stop_on_failure_attempts);
@@ -301,44 +287,26 @@ static std::string get_sta_iface(const std::string &hostap_iface)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-main_thread::main_thread(config_file::sConfigSlave config_, logging &logger_)
+main_thread::main_thread(config_file::sConfigSlave config_,
+                         const std::unordered_map<int, std::string> &interfaces_map_,
+                         logging &logger_)
     : socket_thread(config_.temp_path + std::string(BEEROCKS_PLAT_MGR_UDS)), config(config_),
-      logger(logger_)
+      interfaces_map(interfaces_map_), logger(logger_)
 {
     set_select_timeout(SELECT_TIMEOUT_MSC);
     thread_name        = "platform_manager";
     enable_arp_monitor = (config.enable_arp_monitor == "1");
 
-    std::memset(&bpl_iface_status, 0, sizeof(bpl::BPL_INTERFACE_STATUS_NOTIFICATION));
-
-    //copy the AP interface names and station interface names for the BPL to send the interface status
-    auto now = std::chrono::steady_clock::now();
-    int i    = 0;
+    int i = 0;
     for (int j = 0; j < IRE_MAX_SLAVES && i < BPL_NUM_OF_INTERFACES; ++j) {
-        if (config.hostap_iface[j].empty())
+        auto hostap_iface_elm = interfaces_map.find(j);
+        if (hostap_iface_elm == interfaces_map.end() || hostap_iface_elm->second.empty())
             continue;
 
-        auto status = std::make_shared<slave_iface_status>(i, beerocks::eRadioStatus::INVALID, now);
-        if (!status) {
-            LOG(ERROR) << "failed to allocate shared pointer, i=" << i;
-            continue;
-        }
-
-        string_utils::copy_string(bpl_iface_status.ifname[i], config.hostap_iface[j].c_str(),
-                                  BPL_IFNAME_LEN);
-        bpl_iface_status_map[config.hostap_iface[j]] = status;
-        ap_ifaces.insert(config.hostap_iface[j]);
+        auto hostap_iface = hostap_iface_elm->second;
+        ap_ifaces.insert(hostap_iface);
         i++;
     }
-
-    auto status = std::make_shared<slave_iface_status>(i, beerocks::eRadioStatus::INVALID, now);
-    if (!status) {
-        LOG(ERROR) << "failed to allocate shared pointer, i=" << i;
-        return;
-    }
-    bpl_iface_status_map[config.backhaul_wire_iface] = status;
-    string_utils::copy_string(bpl_iface_status.ifname[i], config.backhaul_wire_iface.c_str(),
-                              BPL_IFNAME_LEN);
 }
 
 main_thread::~main_thread() { on_thread_stop(); }
@@ -488,24 +456,18 @@ bool main_thread::init()
         return (false);
     }
 
-    int i    = 0;
-    auto now = std::chrono::steady_clock::now();
+    int i = 0;
     for (int slave_num = 0; slave_num < IRE_MAX_SLAVES && i < BPL_NUM_OF_INTERFACES; ++slave_num) {
 
-        config.sta_iface[slave_num] = get_sta_iface(config.hostap_iface[slave_num]);
+        auto hostap_iface_elm = interfaces_map.find(slave_num);
+        if (hostap_iface_elm == interfaces_map.end() || hostap_iface_elm->second.empty())
+            continue;
+
+        config.sta_iface[slave_num] = get_sta_iface(hostap_iface_elm->second);
 
         if (config.sta_iface[slave_num].empty())
             continue;
 
-        auto status = std::make_shared<slave_iface_status>(i, beerocks::eRadioStatus::INVALID, now);
-        if (!status) {
-            LOG(ERROR) << "failed to allocate shared pointer, i=" << i;
-            continue;
-        }
-
-        string_utils::copy_string(bpl_iface_status.ifname[i], config.sta_iface[slave_num].c_str(),
-                                  BPL_IFNAME_LEN);
-        bpl_iface_status_map[config.sta_iface[slave_num]] = status;
         i++;
     }
 
@@ -541,42 +503,6 @@ bool main_thread::work()
     return bret;
 }
 
-bool main_thread::slave_iface_status_check(const std::string &iface_name, uint8_t status,
-                                           bool operational)
-{
-    bool bret = false;
-    auto now  = std::chrono::steady_clock::now();
-    auto it   = bpl_iface_status_map.find(iface_name);
-    if (it != bpl_iface_status_map.end() && it->second != nullptr) {
-
-        if (it->second->status != status) {
-            bret = true;
-        }
-
-        //update the latest values in the map
-        it->second->last_seen   = now;
-        it->second->status      = status;
-        it->second->operational = operational;
-        return bret;
-    }
-    return false;
-}
-
-bool main_thread::platform_operational_state_check()
-{
-    bool new_operational_state = true;
-
-    for (auto iface_status : bpl_iface_status_map) {
-        if (ap_ifaces.find(iface_status.first) == ap_ifaces.end())
-            continue; // iface is not an ap
-        new_operational_state = (iface_status.second->operational) ? new_operational_state : false;
-    }
-
-    bool ret             = platform_operational != new_operational_state;
-    platform_operational = new_operational_state;
-    return ret;
-}
-
 bool main_thread::wlan_params_changed_check()
 {
     bool any_slave_changed = false;
@@ -602,28 +528,6 @@ bool main_thread::wlan_params_changed_check()
             LOG(DEBUG) << "channel changed";
             wlan_params_changed = true;
         }
-        if (std::string(elm.second->ssid).compare(std::string(params.ssid))) {
-            LOG(DEBUG) << "ssid changed, cached=" << std::string(elm.second->ssid) << ", new="
-                       << std::string(params.ssid, beerocks::message::WIFI_SSID_MAX_LENGTH);
-            string_utils::copy_string(elm.second->ssid, params.ssid,
-                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
-            wlan_params_changed = true;
-        }
-        if (std::string(elm.second->pass).compare(std::string(params.passphrase))) {
-            LOG(DEBUG) << "pass changed";
-            string_utils::copy_string(elm.second->pass, params.passphrase,
-                                      beerocks::message::WIFI_PASS_MAX_LENGTH);
-            wlan_params_changed = true;
-        }
-        if (std::string(elm.second->security_type).compare(std::string(params.security))) {
-            LOG(DEBUG) << "security_type changed, cached=" << std::string(elm.second->security_type)
-                       << ", new="
-                       << std::string(params.security,
-                                      beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
-            string_utils::copy_string(elm.second->security_type, params.security,
-                                      beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
-            wlan_params_changed = true;
-        }
 
         if (wlan_params_changed) {
             any_slave_changed = true;
@@ -636,13 +540,6 @@ bool main_thread::wlan_params_changed_check()
 
             notification->wlan_settings().band_enabled = elm.second->band_enabled;
             notification->wlan_settings().channel      = elm.second->channel;
-            string_utils::copy_string(notification->wlan_settings().ssid, elm.second->ssid,
-                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
-            string_utils::copy_string(notification->wlan_settings().pass, elm.second->pass,
-                                      beerocks::message::WIFI_PASS_MAX_LENGTH);
-            string_utils::copy_string(notification->wlan_settings().security_type,
-                                      elm.second->security_type,
-                                      beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH);
 
             Socket *sd = get_slave_socket_from_hostap_iface_name(elm.first);
             if (!sd) {
@@ -656,27 +553,6 @@ bool main_thread::wlan_params_changed_check()
         }
     }
     return any_slave_changed;
-}
-
-void main_thread::send_slave_iface_status_to_bpl(bool bforce)
-{
-    if (config.enable_bpl_iface_status_notifications != "1") {
-        return;
-    }
-    for (auto &elm : bpl_iface_status_map) {
-        auto saved_status = elm.second;
-        if (saved_status != nullptr) {
-            bpl_iface_status.status[saved_status->index] = saved_status->status;
-            bpl_iface_status.operational_status          = platform_operational;
-        }
-    }
-
-    // Notify the SL asynchronously
-    work_queue.enqueue<void>(
-        [](bpl::BPL_INTERFACE_STATUS_NOTIFICATION bpl_iface_status) {
-            bpl::cfg_notify_iface_status(&bpl_iface_status);
-        },
-        bpl_iface_status);
 }
 
 void main_thread::on_thread_stop()
@@ -704,8 +580,6 @@ void main_thread::on_thread_stop()
     bpl::bpl_close();
     LOG(DEBUG) << "Closed BPL.";
 
-    bpl_iface_status_map.clear();
-
     bpl_iface_wlan_params_map.clear();
 }
 
@@ -716,17 +590,12 @@ bool main_thread::socket_disconnected(Socket *sd)
         LOG(INFO) << "non slave socket disconnected! (probably backhaul manager)";
         return true;
     }
-    LOG(DEBUG) << "slave socket_disconnected, iface=" << m_mapSlaves[sd] << ", sd=" << sd
-               << ", is_platform_operational = " << platform_operational;
+    LOG(DEBUG) << "slave socket_disconnected, iface=" << m_mapSlaves[sd] << ", sd=" << sd;
 
     // we should have only one per sd
     bpl_iface_wlan_params_map.erase(m_mapSlaves[sd]);
 
     del_slave_socket(sd);
-
-    if (platform_operational) {
-        platform_common_conf.conf_initialized = false;
-    }
 
     return (true);
 }
@@ -782,28 +651,26 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                 return;
             }
 
-            std::chrono::steady_clock::time_point retry_timer = std::chrono::steady_clock::now();
-            uint8_t retry_cnt                                 = 0;
-
+            uint8_t retry_cnt          = 0;
             register_response->valid() = 0;
             do {
-                if (std::chrono::steady_clock::now() > retry_timer) {
-                    LOG(TRACE) << "Trying to read settings of iface:" << strIfaceName
-                               << ", attempt=" << int(retry_cnt);
-                    if (fill_platform_settings(strIfaceName, register_response,
-                                               platform_common_conf, bpl_iface_wlan_params_map,
-                                               sd)) {
-                        register_response->valid() = 1;
-                    } else {
-                        LOG(INFO) << "Reading settings of iface:" << strIfaceName
-                                  << ", attempt=" << int(retry_cnt) << " has failed!";
-                        if (++retry_cnt == PLATFORM_READ_CONF_MAX_ATTEMPTS)
-                            break;
-                        retry_timer = std::chrono::steady_clock::now() +
-                                      std::chrono::seconds(PLATFORM_READ_CONF_RETRY_SEC);
-                    }
+                LOG(TRACE) << "Trying to read settings of iface:" << strIfaceName
+                           << ", attempt=" << int(retry_cnt);
+                if (fill_platform_settings(strIfaceName, register_response, platform_common_conf,
+                                           bpl_iface_wlan_params_map, sd)) {
+                    register_response->valid() = 1;
+                } else {
+                    LOG(INFO) << "Reading settings of iface:" << strIfaceName
+                              << ", attempt=" << int(retry_cnt) << " has failed!";
+
+                    // reached max number of retries
+                    if (++retry_cnt == PLATFORM_READ_CONF_MAX_ATTEMPTS)
+                        break;
+
+                    // sleep and retry
+                    std::this_thread::sleep_for(std::chrono::seconds(PLATFORM_READ_CONF_RETRY_SEC));
                 }
-            } while (!register_response->valid());
+            } while (!register_response->valid() && !should_stop);
 
             LOG(DEBUG) << "sending ACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE to " << strIfaceName
                        << " sd=" << intptr_t(sd);
@@ -947,62 +814,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
         master_version.assign(notification->versions().master_version);
         slave_version.assign(notification->versions().slave_version);
-    } break;
-    case beerocks_message::ACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION: {
-
-        auto notification =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION>();
-        if (notification == nullptr) {
-            LOG(ERROR) << "addClass cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION failed";
-            return false;
-        }
-        bool check_wifi_ap =
-            slave_iface_status_check(notification->iface_name_ap(message::IFACE_NAME_LENGTH),
-                                     notification->status_ap(), notification->status_operational());
-        bool check_wifi_bh     = false;
-        bool check_wired_bh    = false;
-        bool check_operational = platform_operational_state_check();
-        if (!platform_common_conf.local_gw && notification->is_bh_manager()) {
-            check_wifi_bh = slave_iface_status_check(
-                notification->iface_name_bh(message::IFACE_NAME_LENGTH), notification->status_bh());
-            check_wired_bh = slave_iface_status_check(config.backhaul_wire_iface,
-                                                      notification->status_bh_wired());
-        }
-        //if the status has changed from prev status or the timer has expired, send the status to BPL
-        if (check_wifi_ap || check_wifi_bh || check_wired_bh || check_operational) {
-            LOG(INFO)
-                << "ACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION - change in iface status "
-                << " iface_name_ap: " << notification->iface_name_ap(message::IFACE_NAME_LENGTH)
-                << " iface_name_bh: " << notification->iface_name_bh(message::IFACE_NAME_LENGTH)
-                << " is_bh_manager: " << (int)notification->is_bh_manager()
-                << " BH_wire_iface: " << config.backhaul_wire_iface
-                << " status_bh_wired: " << (int)notification->status_bh_wired() << " check_wifi_ap "
-                << check_wifi_ap << " check_wifi_bh " << check_wifi_bh << " check_wired_bh "
-                << check_wired_bh << " check_operational " << check_operational;
-
-            if (check_operational) {
-                LOG(INFO) << "***platform operational state chenged to: "
-                          << (platform_operational ? "true" : "false");
-                if (!platform_operational) {
-                    platform_common_conf.conf_initialized = false;
-                }
-
-                // Response message
-                auto notification = message_com::create_vs_message<
-                    beerocks_message::cACTION_PLATFORM_OPERATIONAL_NOTIFICATION>(cmdu_tx);
-                if (notification == nullptr) {
-                    LOG(ERROR) << "Failed building message!";
-                    return false;
-                }
-
-                notification->operational() = platform_operational;
-
-                send_cmdu_safe(sd, cmdu_tx);
-            }
-
-            send_slave_iface_status_to_bpl(true);
-        }
     } break;
 
     case beerocks_message::ACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION: {

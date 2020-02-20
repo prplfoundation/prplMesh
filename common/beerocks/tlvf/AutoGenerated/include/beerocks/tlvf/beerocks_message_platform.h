@@ -31,7 +31,7 @@ class cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION : pub
 {
     public:
         cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -52,7 +52,7 @@ class cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST : public BaseClass
 {
     public:
         cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -78,7 +78,7 @@ class cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE : public BaseClass
 {
     public:
         cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -103,7 +103,7 @@ class cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION : public BaseClass
 {
     public:
         cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -124,7 +124,7 @@ class cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION : public BaseClass
 {
     public:
         cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -145,7 +145,7 @@ class cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION : public BaseClass
 {
     public:
         cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -179,7 +179,7 @@ class cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL : public BaseClass
 {
     public:
         cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -200,7 +200,7 @@ class cACTION_PLATFORM_ARP_QUERY_REQUEST : public BaseClass
 {
     public:
         cACTION_PLATFORM_ARP_QUERY_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_ARP_QUERY_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_ARP_QUERY_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_ARP_QUERY_REQUEST();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -221,7 +221,7 @@ class cACTION_PLATFORM_ARP_QUERY_RESPONSE : public BaseClass
 {
     public:
         cACTION_PLATFORM_ARP_QUERY_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_ARP_QUERY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_ARP_QUERY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_ARP_QUERY_RESPONSE();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -242,7 +242,7 @@ class cACTION_PLATFORM_ONBOARD_QUERY_REQUEST : public BaseClass
 {
     public:
         cACTION_PLATFORM_ONBOARD_QUERY_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_ONBOARD_QUERY_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_ONBOARD_QUERY_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_ONBOARD_QUERY_REQUEST();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -261,7 +261,7 @@ class cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE : public BaseClass
 {
     public:
         cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -282,7 +282,7 @@ class cACTION_PLATFORM_ONBOARD_SET_REQUEST : public BaseClass
 {
     public:
         cACTION_PLATFORM_ONBOARD_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_ONBOARD_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_ONBOARD_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_ONBOARD_SET_REQUEST();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -303,7 +303,7 @@ class cACTION_PLATFORM_WPS_ONBOARDING_REQUEST : public BaseClass
 {
     public:
         cACTION_PLATFORM_WPS_ONBOARDING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_WPS_ONBOARDING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_WPS_ONBOARDING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_WPS_ONBOARDING_REQUEST();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -329,7 +329,7 @@ class cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST : public BaseClass
 {
     public:
         cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -350,7 +350,7 @@ class cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE : public BaseClass
 {
     public:
         cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -375,7 +375,7 @@ class cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST : public BaseClass
 {
     public:
         cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_REQUEST();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -394,7 +394,7 @@ class cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE : public BaseClass
 {
     public:
         cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -417,7 +417,7 @@ class cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST : public BaseClass
 {
     public:
         cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -436,7 +436,7 @@ class cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE : public BaseClass
 {
     public:
         cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -459,7 +459,7 @@ class cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST : public BaseClass
 {
     public:
         cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -478,7 +478,7 @@ class cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE : public BaseClass
 {
     public:
         cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -499,7 +499,7 @@ class cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION : public BaseClass
 {
     public:
         cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -520,7 +520,7 @@ class cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION : public BaseClass
 {
     public:
         cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -541,7 +541,7 @@ class cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST : public BaseClass
 {
     public:
         cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_REQUEST();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -560,7 +560,7 @@ class cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE : public BaseClass
 {
     public:
         cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -583,7 +583,7 @@ class cACTION_PLATFORM_ERROR_NOTIFICATION : public BaseClass
 {
     public:
         cACTION_PLATFORM_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cACTION_PLATFORM_ERROR_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cACTION_PLATFORM_ERROR_NOTIFICATION();
 
         static eActionOp_PLATFORM get_action_op(){
@@ -605,69 +605,6 @@ class cACTION_PLATFORM_ERROR_NOTIFICATION : public BaseClass
         char* m_data = nullptr;
         size_t m_data_idx__ = 0;
         int m_lock_order_counter__ = 0;
-};
-
-class cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION : public BaseClass
-{
-    public:
-        cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION();
-
-        static eActionOp_PLATFORM get_action_op(){
-            return (eActionOp_PLATFORM)(ACTION_PLATFORM_WIFI_INTERFACE_STATUS_NOTIFICATION);
-        }
-        std::string iface_name_ap_str();
-        char* iface_name_ap(size_t length = 0);
-        bool set_iface_name_ap(const std::string& str);
-        bool set_iface_name_ap(const char buffer[], size_t size);
-        std::string iface_name_bh_str();
-        char* iface_name_bh(size_t length = 0);
-        bool set_iface_name_bh(const std::string& str);
-        bool set_iface_name_bh(const char buffer[], size_t size);
-        uint8_t& status_ap();
-        uint8_t& status_bh();
-        uint8_t& status_bh_wired();
-        uint8_t& is_bh_manager();
-        uint8_t& status_operational();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_PLATFORM* m_action_op = nullptr;
-        char* m_iface_name_ap = nullptr;
-        size_t m_iface_name_ap_idx__ = 0;
-        int m_lock_order_counter__ = 0;
-        char* m_iface_name_bh = nullptr;
-        size_t m_iface_name_bh_idx__ = 0;
-        uint8_t* m_status_ap = nullptr;
-        uint8_t* m_status_bh = nullptr;
-        uint8_t* m_status_bh_wired = nullptr;
-        uint8_t* m_is_bh_manager = nullptr;
-        uint8_t* m_status_operational = nullptr;
-};
-
-class cACTION_PLATFORM_OPERATIONAL_NOTIFICATION : public BaseClass
-{
-    public:
-        cACTION_PLATFORM_OPERATIONAL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        cACTION_PLATFORM_OPERATIONAL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_PLATFORM_OPERATIONAL_NOTIFICATION();
-
-        static eActionOp_PLATFORM get_action_op(){
-            return (eActionOp_PLATFORM)(ACTION_PLATFORM_OPERATIONAL_NOTIFICATION);
-        }
-        uint8_t& operational();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_PLATFORM* m_action_op = nullptr;
-        uint8_t* m_operational = nullptr;
 };
 
 }; // close namespace: beerocks_message

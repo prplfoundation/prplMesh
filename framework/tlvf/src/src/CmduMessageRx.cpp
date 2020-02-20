@@ -36,6 +36,8 @@
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
+#include <tlvf/wfa_map/tlvClientCapabilityReport.h>
+#include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvRadioOperationRestriction.h>
@@ -135,6 +137,12 @@ std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
     }
     case (143): {
         return msg.addClass<wfa_map::tlvOperatingChannelReport>();
+    }
+    case (144): {
+        return msg.addClass<wfa_map::tlvClientInfo>();
+    }
+    case (145): {
+        return msg.addClass<wfa_map::tlvClientCapabilityReport>();
     }
     case (146): {
         return msg.addClass<wfa_map::tlvClientAssociationEvent>();

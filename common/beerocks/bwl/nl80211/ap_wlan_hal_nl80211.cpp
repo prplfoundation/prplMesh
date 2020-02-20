@@ -81,6 +81,8 @@ static ap_wlan_hal::Event nl80211_to_bwl_event(const std::string &opcode)
         return ap_wlan_hal::Event::ACS_Failed;
     } else if (opcode == "AP-CSA-FINISHED") {
         return ap_wlan_hal::Event::CSA_Finished;
+    } else if (opcode == "CTRL-EVENT-CHANNEL-SWITCH") {
+        return ap_wlan_hal::Event::CTRL_Channel_Switch;
     } else if (opcode == "BSS-TM-RESP") {
         return ap_wlan_hal::Event::BSS_TM_Response;
     } else if (opcode == "DFS-CAC-COMPLETED") {
@@ -90,6 +92,18 @@ static ap_wlan_hal::Event nl80211_to_bwl_event(const std::string &opcode)
     }
 
     return ap_wlan_hal::Event::Invalid;
+}
+
+static uint8_t wpa_bw_to_beerocks_bw(const std::string &chan_width)
+{
+    // 20 MHz (no HT)
+    // 20 MHz
+    // 40 MHz
+    // 80 MHz
+    // 80+80 MHz
+    // 160 MHz
+
+    return (chan_width == "80+80") ? 160 : beerocks::string_utils::stoi(chan_width);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -281,12 +295,53 @@ bool ap_wlan_hal_nl80211::switch_channel(int chan, int bw, int vht_center_freque
     LOG(TRACE) << __func__ << " channel: " << chan << ", bw: " << bw
                << ", vht_center_frequency: " << vht_center_frequency;
 
-    // TODO: IMPLEMENT!
+    // CHAN_SWITCH cs_count freq [center_freq1] [center_freq2] [bandwidth] [sec_channel_offset]
+    //             [ht] [vht] [blocktx]
+    // cs_count - CSA_BCN_COUNT, beacon count before switch. 5 is default value in
+    //            hostapd_dfs_start_channel_switch()
+    std::string cmd = "CHAN_SWITCH 5 ";
 
-    LOG(DEBUG) << "Got channel switch, simulate ACS-STARTED;ACS-COMPLETED";
-    event_queue_push(Event::ACS_Started);
-    event_queue_push(Event::ACS_Completed);
-    event_queue_push(Event::CSA_Finished);
+    if (chan == 0) {
+        LOG(ERROR) << "ACS is not supported";
+        return false;
+    }
+
+    int freq                              = beerocks::utils::wifi_channel_to_freq(chan);
+    std::string freq_str                  = std::to_string(freq);
+    std::string wave_vht_center_frequency = std::to_string(vht_center_frequency);
+
+    // Center Freq
+    cmd += freq_str; // CenterFrequency
+
+    // Extension Channel
+    if (bw != beerocks::BANDWIDTH_20) {
+        if (freq < vht_center_frequency) {
+            cmd += " sec_channel_offset=1";
+        } else {
+            cmd += " sec_channel_offset=-1";
+        }
+    }
+
+    // Channel bandwidth
+    if (bw == beerocks::BANDWIDTH_80) {
+        cmd += " center_freq1=" + wave_vht_center_frequency;
+    }
+
+    cmd += " bandwidth=" +
+           std::to_string(beerocks::utils::convert_bandwidth_to_int((beerocks::eWiFiBandwidth)bw));
+
+    // Supported Standard n/ac
+    if (bw == beerocks::BANDWIDTH_20 || bw == beerocks::BANDWIDTH_40) {
+        cmd += " ht"; //n
+    } else if (bw == beerocks::BANDWIDTH_80 || bw == beerocks::BANDWIDTH_160) {
+        cmd += " vht"; // ac
+    }
+
+    // Send command
+    if (!wpa_ctrl_send_msg(cmd)) {
+        LOG(ERROR) << "wpa_ctrl_send_msg() failed!";
+        return false;
+    }
 
     return true;
 }
@@ -515,6 +570,12 @@ bool ap_wlan_hal_nl80211::read_supported_channels()
     return ret;
 }
 
+bool ap_wlan_hal_nl80211::set_tx_power_limit(int tx_pow_limit)
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
+    return true;
+}
+
 bool ap_wlan_hal_nl80211::set_vap_enable(const std::string &iface_name, const bool enable)
 {
     LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
@@ -613,9 +674,28 @@ bool ap_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
 
     } break;
 
+    case Event::CTRL_Channel_Switch: {
+        std::string bandwidth = parsed_obj["ch_width"];
+        if (bandwidth.empty()) {
+            LOG(ERROR) << "Invalid bandwidth";
+            return false;
+        }
+        m_radio_info.channel =
+            beerocks::utils::wifi_freq_to_channel(beerocks::string_utils::stoi(parsed_obj["freq"]));
+        m_radio_info.bandwidth          = wpa_bw_to_beerocks_bw(bandwidth);
+        m_radio_info.channel_ext_above  = beerocks::string_utils::stoi(parsed_obj["ch_offset"]);
+        m_radio_info.vht_center_freq    = beerocks::string_utils::stoi(parsed_obj["cf1"]);
+        m_radio_info.is_dfs_channel     = beerocks::string_utils::stoi(parsed_obj["dfs"]);
+        m_radio_info.last_csa_sw_reason = ChanSwReason::Unknown;
+        if (son::wireless_utils::which_freq(m_radio_info.channel) == beerocks::eFreqType::FREQ_5G) {
+            m_radio_info.is_5ghz = true;
+        }
+    } break;
     // ACS/CSA Completed
     case Event::ACS_Completed:
     case Event::CSA_Finished:
+        event_queue_push(event);
+        break;
     case Event::Interface_Disabled:
     case Event::ACS_Failed: {
         // Forward to the AP manager

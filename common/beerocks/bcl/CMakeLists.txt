@@ -4,7 +4,6 @@ project(bcl VERSION ${prplmesh_VERSION})
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 find_package(PythonInterp REQUIRED)
-find_package(elpp REQUIRED)
 
 message(STATUS ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -25,16 +24,6 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC tlvf elpp)
-
-# ELPP Definitions - Added as public since all modules that use
-# the easylogging++ library should define these
-target_compile_definitions(${PROJECT_NAME} 
-    PUBLIC 
-        ELPP_FORCE_USE_STD_THREAD
-        ELPP_NO_DEFAULT_LOG_FILE
-        ELPP_THREAD_SAFE
-        ELPP_SYSLOG
-)
 
 install(TARGETS ${PROJECT_NAME} EXPORT bclConfig
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

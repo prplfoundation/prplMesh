@@ -55,6 +55,7 @@ uint8_t& tlvVsClientAssociationEvent::disconnect_type() {
 
 void tlvVsClientAssociationEvent::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_1905_VS), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
     m_bssid->struct_swap();
     m_capabilities->struct_swap();

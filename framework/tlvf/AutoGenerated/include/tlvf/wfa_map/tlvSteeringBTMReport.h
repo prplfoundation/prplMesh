@@ -30,7 +30,7 @@ class tlvSteeringBTMReport : public BaseClass
 {
     public:
         tlvSteeringBTMReport(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvSteeringBTMReport(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvSteeringBTMReport(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvSteeringBTMReport();
 
         const eTlvTypeMap& type();

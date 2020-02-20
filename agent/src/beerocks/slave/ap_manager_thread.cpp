@@ -52,6 +52,20 @@ static void copy_radio_supported_channels(std::shared_ptr<bwl::ap_wlan_hal> &ap_
     }
 }
 
+static int8_t get_tx_power(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal)
+{
+    auto radio_channels = ap_wlan_hal->get_radio_info().supported_channels;
+    uint8_t channel     = ap_wlan_hal->get_radio_info().channel;
+
+    for (uint8_t i = 0;
+         i < beerocks::message::SUPPORTED_CHANNELS_LENGTH && i < radio_channels.size(); i++) {
+        if (radio_channels[i].channel == channel)
+            return radio_channels[i].tx_pow;
+    }
+
+    return 0;
+}
+
 static std::string
 get_radio_supported_channels_string(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal)
 {
@@ -572,7 +586,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(DEBUG) << "Start ACS";
 
         // Set AP channel
-        if (!ap_wlan_hal->switch_channel(request->cs_params().channel,
+        if (ap_wlan_hal->get_radio_info().channel != request->cs_params().channel &&
+            !ap_wlan_hal->switch_channel(request->cs_params().channel,
                                          request->cs_params().bandwidth,
                                          request->cs_params().vht_center_frequency)) { //error
             std::string error("Failed to set AP channel!");
@@ -589,7 +604,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 return false;
             }
 
-            notification->cs_params().channel = ap_wlan_hal->get_radio_info().channel;
+            notification->cs_params().channel  = ap_wlan_hal->get_radio_info().channel;
+            notification->cs_params().tx_power = get_tx_power(ap_wlan_hal);
             notification->cs_params().bandwidth =
                 uint8_t(beerocks::utils::convert_bandwidth_to_enum(
                     ap_wlan_hal->get_radio_info().bandwidth));
@@ -599,7 +615,12 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 ap_wlan_hal->get_radio_info().vht_center_freq;
             notification->cs_params().switch_reason = beerocks::CH_SWITCH_REASON_UNKNOWN;
             message_com::send_cmdu(slave_socket, cmdu_tx);
+            return false;
         }
+        //TODO: in case only tx power received need to send notification to slave as there
+        // is no event for this
+        if (request->tx_limit_valid())
+            ap_wlan_hal->set_tx_power_limit(request->tx_limit());
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST: {
@@ -660,11 +681,11 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         auto reason         = request->reason();
 
         LOG(DEBUG) << "CLIENT_DISCONNECT, type "
-                   << ((type == beerocks_message::eIsconnect_Type_Deauth) ? "DEAUTH" : "DISASSOC")
+                   << ((type == beerocks_message::eDisconnect_Type_Deauth) ? "DEAUTH" : "DISASSOC")
                    << " vap_id = " << int(vap_id) << " mac = " << sta_mac
                    << " reason = " << std::to_string(reason);
         bool res;
-        if (type == beerocks_message::eIsconnect_Type_Deauth) {
+        if (type == beerocks_message::eDisconnect_Type_Deauth) {
             res = ap_wlan_hal->sta_deauth(vap_id, sta_mac, reason);
         } else {
             res = ap_wlan_hal->sta_disassoc(vap_id, sta_mac, reason);
@@ -855,12 +876,24 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             }
             auto &config_data = std::get<1>(config_data_tuple);
 
+            // If a Multi-AP Agent receives an AP-Autoconfiguration WSC message containing an M2
+            // with a Multi-AP Extension subelement with bit 4 (Tear Down bit) of the subelement
+            // value set to one (see Table 4), it shall tear down all currently operating BSS(s)
+            // on the radio indicated by the Radio Unique Identifier, and shall ignore the other
+            // attributes in the M2.
+            auto bss_type = static_cast<WSC::eWscVendorExtSubelementBssType>(
+                config_data.multiap_attr().subelement_value);
+            if ((bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN) != 0) {
+                LOG(DEBUG) << "received teardown";
+                bss_info_conf_list.clear();
+                break;
+            }
+
             bss_info_conf.ssid                = config_data.ssid_str();
             bss_info_conf.authentication_type = config_data.authentication_type_attr().data;
             bss_info_conf.encryption_type     = config_data.encryption_type_attr().data;
             bss_info_conf.network_key         = config_data.network_key_str();
-            bss_info_conf.bss_type            = static_cast<WSC::eWscVendorExtSubelementBssType>(
-                config_data.multiap_attr().subelement_value);
+            bss_info_conf.bss_type            = bss_type;
 
             bss_info_conf_list.push_back(bss_info_conf);
         }
@@ -1034,6 +1067,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
             msg_params = &notification->cs_params();
         }
 
+        msg_params->tx_power  = get_tx_power(ap_wlan_hal);
         msg_params->channel   = ap_wlan_hal->get_radio_info().channel;
         msg_params->bandwidth = uint8_t(
             beerocks::utils::convert_bandwidth_to_enum(ap_wlan_hal->get_radio_info().bandwidth));

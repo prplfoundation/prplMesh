@@ -29,7 +29,7 @@ class tlvUnknown : public BaseClass
 {
     public:
         tlvUnknown(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvUnknown(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvUnknown(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvUnknown();
 
         uint8_t& type();

@@ -51,6 +51,12 @@ namespace bpl {
 #define BPL_OPER_MODE_WDS_REPEATER 3
 #define BPL_OPER_MODE_L2NAT_CLIENT 4
 
+/* Platform Management Mode */
+#define BPL_MGMT_MODE_MULTIAP_CONTROLLER_AGENT 0 /* EasyMesh controller and agent */
+#define BPL_MGMT_MODE_MULTIAP_CONTROLLER 1       /* EasyMesh controller */
+#define BPL_MGMT_MODE_MULTIAP_AGENT 2            /* EasyMesh agent */
+#define BPL_MGMT_MODE_NOT_MULTIAP 3              /* Non EasyMesh */
+
 /* Platform Certification Mode */
 #define BPL_CERTIFICATION_MODE_OFF 0
 #define BPL_CERTIFICATION_MODE_ON 1
@@ -136,32 +142,6 @@ struct BPL_WIFI_CREDENTIALS {
     char sec[BPL_SEC_LEN];
 };
 
-/* Interface state for the platform*/
-typedef struct {
-
-    /* interface's name */
-    char ifname[BPL_NUM_OF_INTERFACES][BPL_IFNAME_LEN];
-
-    /* status from the BPL_WIFI_INTERFACE_STATUS enum*/
-    int status[BPL_NUM_OF_INTERFACES];
-
-    /* is platform on operational mode (true/false) */
-    int operational_status;
-
-} BPL_INTERFACE_STATUS_NOTIFICATION;
-
-enum BPL_INTERFACE_STATUS {
-    INVALID = 0,
-    OFF,
-    AP_OK,
-    AP_DFS_CAC,
-    BH_SIGNAL_OK,
-    BH_SIGNAL_TOO_LOW,
-    BH_SIGNAL_TOO_HIGH,
-    BH_WIRED,
-    BH_SCAN
-};
-
 /* WPS Trigger params */
 struct BPL_WPS_PARAMS {
 
@@ -214,15 +194,14 @@ struct BPL_WLAN_PARAMS {
 
     /* Wi-Fi Channel (0 for ACS) */
     int channel;
+};
 
-    /* Wi-Fi SSID */
-    char ssid[BPL_SSID_LEN];
-
-    /* Wi-Fi KeyPassphrase */
-    char passphrase[BPL_PASS_LEN];
-
-    /* Wi-Fi Securirt Mode */
-    char security[BPL_SEC_LEN];
+/**
+ * a structure to couple together radio-number (also correlates to slave-number) and interface name
+ */
+struct BPL_WLAN_IFACE {
+    int radio_num;
+    char ifname[BPL_IFNAME_LEN];
 };
 
 /****************************************************************************/
@@ -259,6 +238,18 @@ int cfg_is_master();
  * @return -1 Error.
  */
 int cfg_get_operating_mode();
+
+/**
+ * Returns the current management mode configuration.
+ *
+ * @return valid possibilities:
+ *   BPL_MGMT_MODE_MULTIAP_CONTROLLER_AGENT,
+ *   BPL_MGMT_MODE_MULTIAP_CONTROLLER,
+ *   BPL_MGMT_MODE_MULTIAP_AGENT,
+ *   BPL_MGMT_MODE_NOT_MULTIAP
+ * @return -1 Error.
+ */
+int cfg_get_management_mode();
 
 /**
  * Returns certification mode value.
@@ -437,16 +428,6 @@ int cfg_notify_fw_version_mismatch();
 int cfg_notify_error(int code, const char str[BPL_ERROR_STRING_LEN]);
 
 /**
- * Notify the platform about the interface status.
- *
- * @param [in] BPL_INTERFACE_STATUS_NOTIFICATION (status for intrfaces)
- *
- * @return 0 Success.
- * @return -1 Error.
- */
-int cfg_notify_iface_status(const BPL_INTERFACE_STATUS_NOTIFICATION *status_notif);
-
-/**
  * Returns the platform administrator password.
  *
  * @param [out] pass Password (up to 64 bytes in length).
@@ -466,6 +447,28 @@ int cfg_get_administrator_credentials(char pass[BPL_USER_PASS_LEN]);
  * @return -1 Error, or no sta_iface is configured.
  */
 int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAME_LEN]);
+
+/**
+ * Returns the HOSTAP interface for the specified radio id.
+ *
+ * @param [in] radio_num radio number in prplmesh UCI for the requested parameters.
+ * @param [out] hostap_iface name of HOSTAP interface (up to 32 bytes in length).
+ *
+ * @return 0 Success.
+ * @return -1 Error, or no hostap_iface is configured.
+ */
+int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN]);
+
+/**
+ * Returns all the HOSTAP interfaces available in prplmesh config file
+ *
+ * @param [out] interfaces list of HOSTAP interfaces of type BPL_WLAN_IFACE.
+ * @param [int/out] num_of_interfaces in:max num of interfaces, out:actual num of interfaces.
+ *
+ * @return 0 Success.
+ * @return -1 Error, or no hostap_iface is configured.
+ */
+int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of_interfaces);
 
 } // namespace bpl
 } // namespace beerocks

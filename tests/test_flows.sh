@@ -71,11 +71,30 @@ send_bml_command() {
 send_CAPI_command() {
     # send a CAPI command to a container.
     ip="$(container_ip "$1")"
+    [ -z "$ip" ] && return 1
     port="$(container_CAPI_port "$1")"
+    [ -z "$port" ] && return 1
     dbg "Sending to $ip:$port. Command: $2"
-    capi_command_result=$("${rootdir}/tests/send_CAPI_command.py" "$ip" "$port" "$2" | tr  -d '\r')
-    dbg "Result:\n$capi_command_result"
-    capi_command_reply=$(echo -e "$capi_command_result" | awk 'NR==2')
+    capi_command_result=$(mktemp)
+    [ -z "$capi_command_result" ] && { err "Failed to create temp file"; return 1; }
+    trap "rm -f $capi_command_result" EXIT
+    "${rootdir}/tests/send_CAPI_command.py" "$ip" "$port" "$2" > "$capi_command_result" || return $?
+    dbg "Result:"
+    [ "$VERBOSE" = true ] && cat "$capi_command_result"
+    capi_command_reply=$(tr  -d '\r' < "$capi_command_result" | awk 'NR==2')
+}
+
+send_CAPI_1905() {
+    container="$1"; shift
+    dest="$1"; shift
+    messagetype="$1"; shift
+    command="DEV_SEND_1905,DestALid,${dest},MessageTypeValue,${messagetype}"
+    for arg; do
+        command="$command,$arg"
+    done
+    capi_command_mid=""
+    send_CAPI_command "$container" "$command" || return $?
+    capi_command_mid=$(echo "$capi_command_reply" | grep -Po "(?<=mid,0x).*[^\s]")
 }
 
 check_log() {
@@ -104,8 +123,8 @@ test_initial_ap_config() {
     check_log ${REPEATER1} agent_wlan2 "WSC Global authentication success"
     check_log ${REPEATER1} agent_wlan0 "KWA (Key Wrap Auth) success"
     check_log ${REPEATER1} agent_wlan2 "KWA (Key Wrap Auth) success"
-    check_log ${REPEATER1} agent_wlan0 "Controller configuration (WSC M2 Encrypted Settings)"
-    check_log ${REPEATER1} agent_wlan2 "Controller configuration (WSC M2 Encrypted Settings)"
+    check_log ${REPEATER1} agent_wlan0 ".* Controller configuration (WSC M2 Encrypted Settings)"
+    check_log ${REPEATER1} agent_wlan2 ".* Controller configuration (WSC M2 Encrypted Settings)"
 
     return $check_error
 }
@@ -119,14 +138,14 @@ test_ap_config_renew() {
     send_CAPI_command ${GATEWAY} "DEV_RESET_DEFAULT" $redirect
     send_CAPI_command ${GATEWAY} "DEV_SET_CONFIG,bss_info1,$MAC_AGENT1 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1,bss_info2,$mac_agent1 8x Multi-AP-24G-2 0x0020 0x0008 maprocks2 1 0" $redirect
     gw_mac_without_colons="$(printf $mac_gateway | tr -d :)"
-    send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x000A,tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}" $redirect
+    send_CAPI_1905 ${GATEWAY} $mac_agent1 0x000A "tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}"
 
     # Wait a bit for the renew to complete
     sleep 3
 
     check_log ${REPEATER1} agent_wlan0 "Received credentials for ssid: Multi-AP-24G-1 .* bss_type: 2"
     check_log ${REPEATER1} agent_wlan0 "Received credentials for ssid: Multi-AP-24G-2 .* bss_type: 1"
-    check_log ${REPEATER1} agent_wlan2 "ssid: .* teardown"
+    check_log ${REPEATER1} agent_wlan2 ".* tear down radio"
 
     mac_agent1_wlan0_hex=0x$(echo $mac_agent1_wlan0 | tr -d :)
     send_CAPI_command ${REPEATER1} "dev_get_parameter,program,map,ruid,${mac_agent1_wlan0_hex},ssid,Multi-AP-24G-1,parameter,macaddr"
@@ -144,20 +163,24 @@ test_ap_config_bss_tear_down() {
     send_CAPI_command ${GATEWAY} "DEV_SET_CONFIG,bss_info1,$mac_agent1 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1" $redirect
 
     gw_mac_without_colons="$(printf $mac_gateway | tr -d :)"
-    send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x000A,tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}" $redirect
+    send_CAPI_1905 ${GATEWAY} $mac_agent1 0x000A "tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}"
 
     sleep 3
-    check_log ${REPEATER1} agent_wlan0 "ssid: Multi-AP-24G-1, .* fronthaul"
-    check_log ${REPEATER1} agent_wlan2 "ssid: .* teardown"
+    check_log ${REPEATER1} agent_wlan0 "ssid: Multi-AP-24G-1"
+    check_log ${REPEATER1} agent_wlan2 ".* tear down radio"
+    agent1_wlan0_ssid="$(send_bml_command bml_conn_map | sed -n "/fVAP.*$mac_agent1_wlan0/s/.*ssid: //p")"
+    check [ "$agent1_wlan0_ssid" = "Multi-AP-24G-1" ]
 
     # SSIDs have been removed for the CTT Agent1's front radio
     send_CAPI_command ${GATEWAY} "DEV_SET_CONFIG,bss_info1,$MAC_AGENT1 8x" $redirect
     # Send renew message
-    send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x000A,tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}" $redirect
+    send_CAPI_1905 ${GATEWAY} $mac_agent1 0x000A "tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}"
 
     sleep 3
-    check_log ${REPEATER1} agent_wlan0 "ssid: .* teardown"
-    
+    check_log ${REPEATER1} agent_wlan0 ".* tear down radio"
+    agent1_wlan0_ssid="$(send_bml_command bml_conn_map | sed -n "/fVAP.*$mac_agent1_wlan0/s/.*ssid: //p")"
+    check [ "$agent1_wlan0_ssid" = "N/A" ]
+
     return $check_error
 }
 
@@ -166,14 +189,14 @@ test_channel_selection() {
     
     check_error=0
     dbg "Send channel preference query"
-    send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8004" $redirect
+    send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8004
     sleep 1
     dbg "Confirming channel preference query has been received on agent"
     check_log ${REPEATER1} agent_wlan0 "CHANNEL_PREFERENCE_QUERY_MESSAGE"
     check_log ${REPEATER1} agent_wlan2 "CHANNEL_PREFERENCE_QUERY_MESSAGE"
     
     dbg "Send channel selection request"
-    send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8006" $redirect
+    send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8006
     sleep 1
     dbg "Confirming channel selection request has been received on agent"
     check_log ${REPEATER1} agent_wlan0 "CHANNEL_SELECTION_REQUEST_MESSAGE"
@@ -181,55 +204,121 @@ test_channel_selection() {
     
     dbg "Confirming 1905.1 Ack Message request was received on agent"
     # TODO: When creating handler for the ACK message on the agent, replace lookup of this string
-    check_log ${REPEATER1} agent_wlan0 "ACK_MESSAGE"
-    check_log ${REPEATER1} agent_wlan2 "ACK_MESSAGE"
+    # TODO: currently controller sends empty channel selection request, so no switch is performed
+    # check_log ${REPEATER1} agent_wlan0 "ACK_MESSAGE"
+    # check_log ${REPEATER1} agent_wlan2 "ACK_MESSAGE"
 
     return $check_error
 }
 test_client_capability_query() { 
     status "test client capability"
+    sta_mac1=00:00:00:11:00:22
+    sta_mac2=00:00:00:11:00:33
 
     check_error=0
-    send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8009,tlv_type,0x90,tlv_length,\
-0x000C,tlv_value,{$mac_agent1_wlan0 0x000000110022}" $redirect
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8009 "tlv_type,0x90,tlv_length,\
+0x000C,tlv_value,{$mac_agent1_wlan0 ${sta_mac1}}"
     sleep 1
     dbg "Confirming client capability query has been received on agent"
     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
-    check_log ${REPEATER1} agent_wlan0 "CLIENT_CAPABILITY_QUERY_MESSAGE"
-    check_log ${REPEATER1} agent_wlan2 "CLIENT_CAPABILITY_QUERY_MESSAGE"
+    check_log ${REPEATER1} agent "CLIENT_CAPABILITY_QUERY_MESSAGE"
+    
+    dbg "Confirming client capability report message has been received on controller"
+    check_log ${GATEWAY} controller "Received CLIENT_CAPABILITY_REPORT_MESSAGE"
+    check_log ${GATEWAY} controller "Result Code= FAILURE, client MAC= ${sta_mac1}, BSSID= ${mac_agent1_wlan0}"
+
+    dbg "Connect dummy STA to wlan0"
+    send_bwl_event ${REPEATER1} wlan0 "EVENT AP-STA-CONNECTED ${sta_mac2}"
+
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8009 "tlv_type,0x90,tlv_length,\
+0x000C,tlv_value,{$mac_agent1_wlan0 ${sta_mac2}}" 
+    sleep 1
+
+    dbg "Confirming client capability report message has been received on controller"
+    check_log ${GATEWAY} controller "Received CLIENT_CAPABILITY_REPORT_MESSAGE"
+    check_log ${GATEWAY} controller "Result Code= SUCCESS, client MAC= ${sta_mac2}, BSSID= ${mac_agent1_wlan0}"
+    return $check_error
 }
 test_ap_capability_query() {
     status "test ap capability query"
     check_error=0
-    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8001" $redirect
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8001
     sleep 1
+    
     dbg "Confirming ap capability query has been received on agent"
-    check_log ${REPEATER1} agent_wlan0 "AP_CAPABILITY_QUERY_MESSAGE"
+    check_log ${REPEATER1} agent "AP_CAPABILITY_QUERY_MESSAGE"
+    
+    dbg "Confirming ap capability report has been received on controller"
+    check_log ${GATEWAY} controller "AP_CAPABILITY_REPORT_MESSAGE"
+    
     return $check_error
 }
+
 test_combined_infra_metrics() {
-    err "combined_infra_metrics not implemented yet."
-    return 0
+    status "test combined infrastructure metrics"
+    check_error=0
+    dbg "Send AP Metrics query message to agent 1"
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x800B "tlv_type,0x93,tlv_length,0x0007,tlv_value,0x01 {$mac_agent1_wlan0}"
+    check_log ${REPEATER1} agent_wlan0 "Received AP_METRICS_QUERY_MESSAGE"
+    # TODO agent should send response autonomously, with same MID.
+    # tlv1 == AP metrics TLV
+    # tlv2 == STA metrics TLV with no metrics
+    # tlv3 == STA metrics TLV for STA connected to this BSS
+    # tlv4 == STA traffic stats TLV for same STA
+    check send_CAPI_1905 ${REPEATER1} $mac_gateway 0x800C "tlv_type1,0x94,tlv_length1,0x000d,tlv_value1,{$mac_agent1_wlan0} 0x01 0x0002 0x01 0x1f2f3f,\
+tlv_type2,0x96,tlv_length2,0x0007,tlv_value2,{55:44:33:22:11:00} 0x00,tlv_type3,0x96,tlv_length3,0x001a,\
+tlv_value3,{66:44:33:22:11:00} 0x01 {$mac_agent1_wlan0} 0x11223344 0x1a2a3a4a 0x1b2b3b4b 0x55,\
+tlv_type4,0xa2,tlv_length4,0x0022,tlv_value4,{55:44:33:22:11:00} 0x10203040 0x11213141 0x12223242 0x13233343 0x14243444 0x15253545 0x16263646"
+    check_log ${GATEWAY} controller "Received AP_METRICS_RESPONSE_MESSAGE"
+
+    dbg "Send AP Metrics query message to agent 2"
+    check send_CAPI_1905 ${GATEWAY} $mac_agent2 0x800B "tlv_type,0x93,tlv_length,0x0007,tlv_value,0x01 {$mac_agent2_wlan2}"
+    check_log ${REPEATER2} agent_wlan2 "Received AP_METRICS_QUERY_MESSAGE"
+    # TODO agent should send response autonomously
+    # Same as above but with different STA MAC addresses, different values and skipping the empty one
+    check send_CAPI_1905 ${REPEATER2} $mac_gateway 0x800C "tlv_type1,0x94,tlv_length1,0x0010,tlv_value1,{$mac_agent2_wlan2} 0x11 0x1002 0x90 0x1c2c3c 0x1d2d3d,\
+tlv_type2,0x96,tlv_length2,0x001a,tlv_value2,{77:44:33:22:11:00} 0x01 {$mac_agent2_wlan2} 0x19293949 0x10203040 0x11213141 0x99,\
+tlv_type3,0xa2,tlv_length3,0x0022,tlv_value3,{77:44:33:22:11:00} 0xa0203040 0xa1213141 0xa2223242 0xa3233343 0xa4243444 0xa5253545 0xa6263646"
+    check_log ${GATEWAY} controller "Received AP_METRICS_RESPONSE_MESSAGE"
+
+    dbg "Send 1905 Link metric query to agent 1 (neighbor agent 2)"
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x0005 "tlv_type,0x08,tlv_length,0x0008,tlv_value,0x01 {$mac_agent2} 0x02"
+    check_log ${REPEATER1} agent_wlan0 "Received LINK_METRIC_QUERY_MESSAGE"
+    # TODO agent should send response autonomously
+    check send_CAPI_1905 ${REPEATER1} $mac_gateway 0x6 "tlv_type1,0x09,tlv_length1,0x0029,\
+tlv_value1,{$mac_agent1} {$mac_agent2} {$mac_agent1_wlan0} {$mac_agent2_wlan2} 0x0100 0x01 0x00000000 0x0000e300 0x4230 0x0064 0x0300,\
+tlv_type2,0x0a,tlv_length2,0x0023,tlv_value2,{$mac_agent1} {$mac_agent2} {$mac_agent1} {$mac_agent2} 0x0100 0x00000007 0x00020000 0x31"
+    check_log ${GATEWAY} controller "Received LINK_METRIC_RESPONSE_MESSAGE"
+
+    # Trigger combined infra metrics
+    dbg "Send Combined infrastructure metrics message to agent 1"
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8013
+    check_log ${REPEATER1} agent "Received COMBINED_INFRASTRUCTURE_METRICS"
+    check_log ${REPEATER1} agent "Received TLV_TRANSMITTER_LINK_METRIC"
+    check_log ${REPEATER1} agent "Received TLV_RECEIVER_LINK_METRIC"
+
+    return $check_error
 }
+
 test_client_steering_mandate() {
     status "test client steering"
     check_error=0
 
     dbg "Send topology request to agent 1"
-    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x0002
     sleep 1
     dbg "Confirming topology query was received"
     check_log ${REPEATER1} agent "TOPOLOGY_QUERY_MESSAGE"
 
     dbg "Send topology request to agent 2"
-    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent2,MessageTypeValue,0x0002" $redirect
+    check send_CAPI_1905 ${GATEWAY} $mac_agent2 0x0002
     sleep 1
     dbg "Confirming topology query was received"
     check_log ${REPEATER2} agent "TOPOLOGY_QUERY_MESSAGE"
 
     dbg "Send Client Steering Request message for Steering Mandate to CTT Agent1"
-    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
-0x001b,tlv_value,{$mac_agent1_wlan0 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {$mac_agent2_wlan0 0x73 0x24}}" $redirect
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8014 "tlv_type,0x9B,tlv_length,\
+0x001b,tlv_value,{$mac_agent1_wlan0 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {$mac_agent2_wlan0 0x73 0x24}}"
     sleep 1
     dbg "Confirming Client Steering Request message was received - mandate"
     check_log ${REPEATER1} agent_wlan0 "Got steer request"
@@ -240,8 +329,8 @@ test_client_steering_mandate() {
     dbg "Confirming ACK message was received"
     check_log ${REPEATER1} agent_wlan0 "ACK_MESSAGE"
 
-    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8014,tlv_type,0x9B,tlv_length,\
-0x000C,tlv_value,{$mac_agent1_wlan0 0x00 0x000A 0x0000 0x00}" $redirect
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8014 "tlv_type,0x9B,tlv_length,\
+0x000C,tlv_value,{$mac_agent1_wlan0 0x00 0x000A 0x0000 0x00}"
     sleep 1
     dbg "Confirming Client Steering Request message was received - Opportunity"
     check_log ${REPEATER1} agent_wlan0 "CLIENT_STEERING_REQUEST_MESSAGE"
@@ -429,10 +518,10 @@ test_client_steering_policy() {
     check_error=0
 
     dbg "Send client steering policy to agent 1"
-    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8003,tlv_type,0x89,tlv_length\
-,0x000C,tlv_value,{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}" $redirect
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8003 \
+        "tlv_type,0x89,tlv_length,0x000C,tlv_value,{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}"
+    MID1_STR=$capi_command_mid
     sleep 1
-    MID1_STR=$(echo "$capi_command_reply" | grep -Po "(?<=mid,0x).*[^\s]")
     dbg "Confirming client steering policy has been received on agent"
     
     check_log ${REPEATER1} agent_wlan0 "MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE"
@@ -447,13 +536,13 @@ test_client_association() {
     status "test client association"
     check_error=0
     dbg "Send topology request to agent 1"
-    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x0002
     dbg "Confirming topology query was received"
     check_log ${REPEATER1} agent "TOPOLOGY_QUERY_MESSAGE"
 
     dbg "Send client association control message"
-    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8016,tlv_type,0x9D,tlv_length,\
-0x000f,tlv_value,{$mac_agent1_wlan0 0x00 0x1E 0x01 {0x000000110022}}" $redirect
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8016 "tlv_type,0x9D,tlv_length,\
+0x000f,tlv_value,{$mac_agent1_wlan0 0x00 0x1E 0x01 {0x000000110022}}"
 
     dbg "Confirming client association control message has been received on agent"
     # check that both radio agents received it,in the future we'll add a check to verify which radio the query was intended for.
@@ -481,8 +570,8 @@ test_higher_layer_data_payload_trigger() {
     # MCUT sends Higher Layer Data message to CTT Agent1 by providing:
     # Higher layer protocol = "0x00"
     # Higher layer payload = 200 concatenated copies of the ALID of the MCUT (1200 octets)
-    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x8018,tlv_type,0xA0,tlv_length,\
-0x04b1,tlv_value,{0x00 $payload}" $redirect
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8018 "tlv_type,0xA0,tlv_length,\
+0x04b1,tlv_value,{0x00 $payload}"
 
     dbg "Confirming higher layer data message was received in the agent" 
     
@@ -501,7 +590,7 @@ test_higher_layer_data_payload_trigger() {
 test_topology() {
     status "test topology query"
     check_error=0
-    check send_CAPI_command ${GATEWAY} "DEV_SEND_1905,DestALid,$mac_agent1,MessageTypeValue,0x0002" $redirect
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x0002
     dbg "Confirming topology query was received"
     check_log ${REPEATER1} agent "TOPOLOGY_QUERY_MESSAGE"
     return $check_error

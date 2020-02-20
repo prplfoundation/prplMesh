@@ -38,12 +38,6 @@
 using namespace ieee1905_1;
 using namespace wfa_map;
 
-//MAPF_INITIALIZE_LOGGER
-//SHARE_EASYLOGGINGPP(el::Helpers::storage())
-//MAPF_INITIALIZE_LOGGER
-SHARE_EASYLOGGINGPP(el::Helpers::storage())
-
-
 using namespace mapf;
 
 int test_int_len_list()

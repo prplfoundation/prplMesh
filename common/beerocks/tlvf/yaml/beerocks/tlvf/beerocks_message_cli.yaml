@@ -105,7 +105,7 @@ cACTION_CLI_CLIENT_DISALLOW_REQUEST:
 cACTION_CLI_CLIENT_DISCONNECT_REQUEST:
   _type: class
   client_mac: sMacAddr
-  type: uint32_t
+  type: eDisconnectType
   reason: uint32_t
 
 cACTION_CLI_CLIENT_BSS_STEER_REQUEST:

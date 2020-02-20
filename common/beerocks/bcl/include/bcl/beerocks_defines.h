@@ -424,19 +424,6 @@ enum eSlaveJoinResponseErrCode {
     JOIN_RESP_REJECT,
 };
 
-// if this enum is changed here, it must be change also on "bpl_cfg.h"
-enum eRadioStatus : uint8_t {
-    INVALID            = 0,
-    OFF                = 1,
-    AP_OK              = 2,
-    AP_DFS_CAC         = 3,
-    BH_SIGNAL_OK       = 4,
-    BH_SIGNAL_TOO_LOW  = 5,
-    BH_SIGNAL_TOO_HIGH = 6,
-    BH_WIRED           = 7,
-    BH_SCAN            = 8,
-};
-
 enum eApActiveMode : uint8_t { AP_IDLE_MODE = 0, AP_ACTIVE_MODE, AP_INVALID_MODE };
 
 enum eBssType {

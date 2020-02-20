@@ -14,7 +14,6 @@
 
 using namespace std;
 using namespace mapf;
-MAPF_INITIALIZE_LOGGER
 
 void getString(char *s, int size)
 {
@@ -45,8 +44,8 @@ int main()
             if (beerocks::bpl::cfg_get_wifi_params(inputInterface, &wlan_params) != 0) {
                 MAPF_ERR("Failed to retrieve WiFi params for " << inputInterface << "\n");
             } else {
-                MAPF_INFO("SSID " << wlan_params.ssid << " Security mode " << wlan_params.security
-                                  << " Passphrase " << wlan_params.passphrase << "\n");
+                MAPF_INFO("enabled " << wlan_params.enabled << " channel " << wlan_params.channel
+                                     << "\n");
             }
             break;
         case 11:

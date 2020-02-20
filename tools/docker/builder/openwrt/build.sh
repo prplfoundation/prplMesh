@@ -34,11 +34,13 @@ build_image() {
            --build-arg PRPL_FEED \
            --build-arg PRPLMESH_VARIANT \
            --build-arg INTEL_FEED \
+           --build-arg SDK_CONFIG \
            $BUILD_OPTIONS \
            "$scriptdir/"
 }
 
 build_prplmesh() {
+    build_dir="$1"
     container_name="prplmesh-builder-${TARGET_DEVICE}-$(uuidgen)"
     dbg "Container name will be $container_name"
     trap 'docker rm -f $container_name' EXIT
@@ -51,18 +53,24 @@ build_prplmesh() {
            -v "${rootdir}:/home/openwrt/prplMesh_source:ro" \
            "$image_tag" \
            ./build_scripts/build.sh
-
-    docker cp "${container_name}:/home/openwrt/openwrt_sdk/prplmesh-${TARGET}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" .
+    mkdir -p "$build_dir"
+    docker cp "${container_name}:/home/openwrt/openwrt_sdk/prplmesh-${TARGET}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" "$build_dir"
 }
 
 main() {
+
+    if ! command -v uuidgen > /dev/null ; then
+        err "You need uuidgen to use this script. Please install it and try again."
+        exit 1
+    fi
+
     OPTS=`getopt -o 'hb:d:io:r:t:v' --long help,build-options:,device:,image,openwrt-version:,openwrt-repository:,tag:,verbose -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
     eval set -- "$OPTS"
 
-    SUPPORTED_TARGETS="turris-omnia glinet-b1300"
+    SUPPORTED_TARGETS="turris-omnia glinet-b1300 netgear-rax40"
 
     while true; do
         case "$1" in
@@ -89,8 +97,9 @@ main() {
         netgear-rax40)
             TARGET=intel_mips
             PRPLMESH_VARIANT="-dwpal"
-            PRPL_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^e9ee6b109764dbb91b6cb399ccc0f78e5b04e260"
+            PRPL_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^d340b644a2f210ef8949fe0e6bf15a969bc79ae7"
             INTEL_FEED="https://git.prpl.dev/prplmesh/feed-intel.git^e3eca4e93286eb4346f0196b2816a3be97287482"
+            SDK_CONFIG=gcc8
             ;;
         *)
             err "Unknown target device: $TARGET_DEVICE"
@@ -105,6 +114,7 @@ main() {
     dbg "BUILD_OPTIONS=$BUILD_OPTIONS"
     dbg "OPENWRT_REPOSITORY=$OPENWRT_REPOSITORY"
     dbg "OPENWRT_VERSION=$OPENWRT_VERSION"
+    dbg "SDK_CONFIG=$SDK_CONFIG"
     dbg "PRPL_FEED=$PRPL_FEED"
     dbg "INTEL_FEED=$INTEL_FEED"
     dbg "IMAGE_ONLY=$IMAGE_ONLY"
@@ -132,6 +142,7 @@ main() {
     export PRPL_FEED
     export PRPLMESH_VARIANT
     export INTEL_FEED
+    export SDK_CONFIG
 
     if [ $IMAGE_ONLY = true ] ; then
         build_image
@@ -139,7 +150,7 @@ main() {
     fi
 
     build_image
-    build_prplmesh
+    build_prplmesh "$rootdir/build/$TARGET_DEVICE"
 
 }
 
@@ -148,7 +159,8 @@ VERBOSE=false
 BUILD_OPTIONS=""
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='9d2efd'
-PRPL_FEED='https://git.prpl.dev/prplmesh/iwlwav.git^06a0126d5fb53b1d65bad90757a5f9f5f77419ca'
+PRPL_FEED='https://git.prpl.dev/prplmesh/iwlwav.git^6749d406d243465e06b4f518767b2d1b9372e3f5'
 INTEL_FEED=""
+SDK_CONFIG=default
 
 main "$@"

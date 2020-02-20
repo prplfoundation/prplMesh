@@ -563,23 +563,14 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
             LOG(ERROR) << "failed to send reply";
             break;
         }
-        auto parameter = params["parameter"];
-        std::transform(parameter.begin(), parameter.end(), parameter.begin(), ::tolower);
         std::string value;
-        if (parameter == "alid") {
-            //if (!net::network_utils::linux_iface_get_mac("br-lan", value)) {
-        	if (!net::network_utils::linux_iface_get_mac("br0", value)) {
-                LOG(ERROR) << "failed to get br0 mac address";
-                reply_ucc(eWfaCaStatus::ERROR, "failed to get br0 mac address");
-                break;
-            }
-        } else if (!handle_dev_get_param(params, value)) {
-            LOG(ERROR) << "failed to get parameter " << parameter << "error: " << value;
+        if (!handle_dev_get_param(params, value)) {
+            LOG(ERROR) << "failed to get parameter " << params["parameter"] << "error: " << value;
             reply_ucc(eWfaCaStatus::ERROR, value);
             break;
         }
         // Success
-        reply_ucc(eWfaCaStatus::COMPLETE, parameter + "," + value);
+        reply_ucc(eWfaCaStatus::COMPLETE, params["parameter"] + "," + value);
         break;
     }
     case eWfaCaCommand::DEV_RESET_DEFAULT: {
@@ -707,7 +698,8 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         // Check if CMDU message type has preprepared CMDU which can be loaded
         if (m_cmdu_tx.is_finalized() &&
             m_cmdu_tx.getMessageType() == ieee1905_1::eMessageType(message_type)) {
-            m_cmdu_tx.getClass<ieee1905_1::cCmduHeader>()->message_id() = g_mid; // force mid
+            m_cmdu_tx.setMessageId(g_mid); // force mid
+            LOG(DEBUG) << "Send preset cmdu with mid " << std::hex << g_mid;
             if (!send_cmdu_to_destination(m_cmdu_tx, dest_alid)) {
                 LOG(ERROR) << "Failed to send CMDU";
                 reply_ucc(eWfaCaStatus::ERROR, err_internal);
