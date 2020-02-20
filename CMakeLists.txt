@@ -104,7 +104,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
 # Workaround for linking error with pthreads when building statically
 if(BUILD_FULL_STATIC)
-	SET(CMAKE_EXE_LINKER_FLAGS " -Wl,-u,pthread_mutex_lock -Wl,-u,pthread_mutex_unlock  -static  ${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
+    set(CMAKE_EXE_LINKER_FLAGS " -Wl,-u,pthread_mutex_lock -Wl,-u,pthread_mutex_unlock  -static  ${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
+    set(CMAKE_SKIP_RPATH  TRUE)
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
