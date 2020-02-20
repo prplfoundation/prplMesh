@@ -16,6 +16,8 @@ cppcheck:
     paths:
       - cppcheck_results.txt
     when: always
+  tags:
+    - docker
 
 clang-format:
   extends: .in-prplmesh-builder
