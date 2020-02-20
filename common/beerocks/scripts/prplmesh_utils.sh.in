@@ -6,8 +6,7 @@
 # See LICENSE file for more details.
 ###############################################################
 
-SIG_TERM=-15
-SIG_KILL=-9
+PRPLMESH_BIN_DIR="@INSTALL_PATH@/@CMAKE_INSTALL_BINDIR@"
 
 dbg() {
     [ "$VERBOSE" = "true" ] && echo "$@"
@@ -28,17 +27,9 @@ run() {
 
 killall_program() {
     PROGRAM_NAME=$1
-    if [ "$#" -eq 2 ]; then
-        KILL_SIG=$2
-    else
-        KILL_SIG=$SIG_KILL
-    fi
-    for PID in $(pgrep -f "$PROGRAM_NAME"); do
-        if [ "$(basename "$(readlink /proc/"$PID"/exe)")" = "$PROGRAM_NAME" ]; then
-            echo "kill $KILL_SIG $PID $PROGRAM_NAME";
-            kill $KILL_SIG "$PID" > /dev/null 2>&1;
-        fi
-    done
+    KILL_SIG=${2:-KILL}
+    echo "killing $PROGRAM_NAME ($KILL_SIG)"
+    start-stop-daemon -K -s "$KILL_SIG" -x "$PRPLMESH_BIN_DIR"/"$PROGRAM_NAME" > /dev/null 2>&1
 }
 
 platform_init() {
@@ -182,9 +173,9 @@ roll_logs_function()
     logFilesCountPreRoll=$(find ./*.*.log | wc -l)
         
     # Send USR1 signals to the beerocks processes to trigger log rolling
-    killall_program beerocks_controller  -USR1
-    killall_program beerocks_agent   -USR1
-    killall_program beerocks_monitor -USR1
+    killall_program beerocks_controller USR1
+    killall_program beerocks_agent USR1
+    killall_program beerocks_monitor USR1
 
     # Wait for all the modules to create a new file
     rollTimeout=0
