@@ -14,6 +14,14 @@ option (BUILD_AGENT "Build EasyMesh agent" ON)
 option (BUILD_CONTROLLER "Build EasyMesh controller" ON)
 
 option(BUILD_SHARED_LIBS "Build shared libraries (.so) instead of static ones (.a)" ON)
+option(BUILD_FULL_STATIC "Build full static executable (links library dependencies as static)" OFF)
+
+if (BUILD_FULL_STATIC)
+     if (BUILD_SHARED_LIBS)
+        message("Turning off BUILD_SHARED_LIBS!")
+        set (BUILD_SHARED_LIBS "OFF")
+     endif()
+endif()
 
 ## Generic checks and defaults
 
@@ -30,6 +38,7 @@ endif()
 # Update output directories for easy deployment
 set(CMAKE_MULTIAP_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/bin)
 
 message(STATUS "CMAKE_FIND_ROOT_PATH - ${CMAKE_FIND_ROOT_PATH}")
@@ -68,6 +77,21 @@ else()
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fstack-protector")
 endif()
 
+if(NOT BUILD_SHARED_LIBS)
+    #strip for Release
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+    #libdl needed by libcrypto
+    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -ldl")
+    if (BUILD_FULL_STATIC)
+        #Force to use all static libraries. Can this be done in a different way?
+        set(CMAKE_LINK_SEARCH_START_STATIC 1)
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+    endif()
+else()
+    add_definitions(-DBUILD_SHARED_LIBS)
+endif()
+
 # Release flags
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}")
@@ -78,6 +102,10 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CMAKE_C_FLAGS_RELEASE}
 # - Setting "rpath" linker to add the cmake installed library folder to the linker search path
 #   (Removes the need to set LD_LIBRARY_PATH manually when installing to a none standard location)
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
+# Workaround for linking error with pthreads when building statically
+if(BUILD_FULL_STATIC)
+	SET(CMAKE_EXE_LINKER_FLAGS " -Wl,-u,pthread_mutex_lock -Wl,-u,pthread_mutex_unlock  -static  ${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
