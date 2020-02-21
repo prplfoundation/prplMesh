@@ -86,29 +86,46 @@ utils::sIfaceVapIds utils::get_ids_from_iface_string(const std::string &iface)
         return ids;
     }
 
-    std::string::size_type pos = iface.find("wlan");
-    if (pos == std::string::npos) {
-        LOG(ERROR) << "iface does not contain the string 'wlan', function input string: " << iface;
-        return ids;
-    }
+//    std::string::size_type pos = iface.find("wlan");
+//    if (pos == std::string::npos) {
+//        LOG(ERROR) << "iface does not contain the string 'wlan', function input string: " << iface;
+//        return ids;
+//    }
+//
+//    auto iface_num_str = iface.substr(pos + sizeof("wlan") - 1); // "x" or x.x"
+//    auto iface_num_vec = string_utils::str_split(iface_num_str, '.');
+//    if (iface_num_vec.size() == 0) {
+//        LOG(ERROR) << "Invalid interface name " << iface;
+//        return ids;
+//    }
+//
+//    ids.iface_id = string_utils::stoi(iface_num_vec[0]);
+//    ids.vap_id   = beerocks::IFACE_RADIO_ID;
+//    if (iface_num_vec.size() == 2) {
+//        int8_t vap_id = string_utils::stoi(iface_num_vec[1]);
+//        if ((vap_id < beerocks::IFACE_VAP_ID_MIN) || (vap_id > beerocks::IFACE_VAP_ID_MAX)) {
+//            LOG(DEBUG) << "Invalid VAP id " << vap_id << " for interface " << iface;
+//            return ids;
+//        }
+//        ids.vap_id = vap_id;
+//    }
 
-    auto iface_num_str = iface.substr(pos + sizeof("wlan") - 1); // "x" or x.x"
-    auto iface_num_vec = string_utils::str_split(iface_num_str, '.');
-    if (iface_num_vec.size() == 0) {
-        LOG(ERROR) << "Invalid interface name " << iface;
-        return ids;
-    }
-
-    ids.iface_id = string_utils::stoi(iface_num_vec[0]);
-    ids.vap_id   = beerocks::IFACE_RADIO_ID;
-    if (iface_num_vec.size() == 2) {
-        int8_t vap_id = string_utils::stoi(iface_num_vec[1]);
-        if ((vap_id < beerocks::IFACE_VAP_ID_MIN) || (vap_id > beerocks::IFACE_VAP_ID_MAX)) {
-            LOG(DEBUG) << "Invalid VAP id " << vap_id << " for interface " << iface;
+        std::string::size_type pos = iface.find("ra");
+        if (pos == std::string::npos) {
+            LOG(ERROR) << "iface does not contain the string 'ra', function input string: " << iface;
             return ids;
         }
-        ids.vap_id = vap_id;
-    }
+
+        if (!iface.compare("ra0")){
+            ids.iface_id = 0;
+            ids.vap_id   = beerocks::IFACE_RADIO_ID;
+            return ids;
+        }
+        else if (!iface.compare("rai0")){
+            ids.iface_id = 1;
+            ids.vap_id   = beerocks::IFACE_RADIO_ID;
+            return ids;
+        }
 
     return ids;
 }

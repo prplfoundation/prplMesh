@@ -257,11 +257,19 @@ int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN])
         return RETURN_ERR;
     }
 
-    // the linux implementation expects to receive "wlanX" for interface names where the X is:
-    // 0,2 for Linux-PC
-    // 0,1 for Turris-Omnia and GLInet
-    // we return 0,1,2 and the upper layer filters the non-supported interface
-    std::string iface_str("wlan" + std::to_string(radio_num));
+//    // the linux implementation expects to receive "wlanX" for interface names where the X is:
+//    // 0,2 for Linux-PC
+//    // 0,1 for Turris-Omnia and GLInet
+//    // we return 0,1,2 and the upper layer filters the non-supported interface
+//    std::string iface_str("wlan" + std::to_string(radio_num));
+//    utils::copy_string(hostap_iface, iface_str.c_str(), BPL_IFNAME_LEN);
+    std::string iface_str = "ra";
+    if (radio_num == 0)
+        iface_str = iface_str + "0";
+    else if (radio_num == 1)
+        iface_str = iface_str + "i0";
+    else
+        iface_str = iface_str + "i" + std::to_string(radio_num - 1);
     utils::copy_string(hostap_iface, iface_str.c_str(), BPL_IFNAME_LEN);
     return RETURN_OK;
 }

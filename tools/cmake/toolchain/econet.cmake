@@ -16,7 +16,6 @@ set(CMAKE_CROSS_COMPILING ON)
 set(TARGET_PLATFORM "econet" CACHE STRING "EcoNet")
 
 # 
-# #TARGET_PLATFORM=mips
 # TARGET_PLATFORM=econet
 # #TARGET_PLATFORM=linux
 # 
@@ -24,15 +23,8 @@ set(TARGET_PLATFORM "econet" CACHE STRING "EcoNet")
 # 
 # 
 # ##a) ECONET TOOLCHAIN
-# ##PLATFORM_TOOLCHAIN_PREFIX=/opt/ugw/toolchain/64bit/toolchain-mips_mips32_gcc-4.8-linaro_uClibc-0.9.33.2_linux_3_10/bin/mips-openwrt-linux-uclibc-
-# ##PLATFORM_TOOLCHAIN_PREFIX=/home/juan/Development/customers/EcoNet/sw/mips-x86_64.linux-xgcc/mips/bin/mips-
-# ##PLATFORM_BASE_DIR=/home/vbukhovsky/work/GRX/UGW-7.2-Repo/beerocks_1_2_wcci_master_1.2_latest/ugw_sw/ugw/openwrt/core
-# ##PLATFORM_BASE_DIR=/home/juan/Development/customers/EcoNet/prpl_build3/prplmesh_root_econet/econet
-# ##PLATFORM_BASE_DIR=/home/juan/Development/customers/EcoNet/src/sdk/
 # #PLATFORM_BASE_DIR=/home/juan/Development/customers/EcoNet/releasebsp_testprof
 # #PLATFORM_TOOLCHAIN_PREFIX=/opt/trendchip/mipsel-linux-uclibc-4.6.3-kernel3.18/usr/bin/mipsel-buildroot-linux-uclibc-
-# 
-# 
 # 
 # ## b) UBUNTU MIPSEL TOOLCHAIN
 # PLATFORM_TOOLCHAIN_PREFIX=/usr/bin/mipsel-linux-gnu-
@@ -96,199 +88,123 @@ if(NOT WIN32)
   set(BoldWhite   "${Esc}[1;37m")
 endif()
 
-# # Check if "external_toolchain.cfg" file exists
-# if (EXISTS "${CMAKE_SOURCE_DIR}/external_toolchain.cfg" AND IS_SYMLINK "${CMAKE_SOURCE_DIR}/external_toolchain.cfg")
-# 
-#     file(STRINGS "external_toolchain.cfg" ConfigContents)
-#     foreach(NameAndValue ${ConfigContents})
-#         # Strip leading spaces
-#         string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
-# 
-#         # Find variable name
-#         string(REGEX MATCH "^[^=]+" Name ${NameAndValue})
-# 
-#         # Find the value
-#         string(REPLACE "${Name}=" "" Value ${NameAndValue})
-# 
-#         # Set the variable
-#         set(${Name} "${Value}")
-#     endforeach()
-# 
-#     if (NOT TARGET_PLATFORM)
-#         message(FATAL_ERROR "${BoldRed}TARGET_PLATFORM NOT DEFINED!${ColourReset}")
-#     endif()
+message("${BoldWhite}Setting TOOLCHAIN for ${BoldGreen}'${TARGET_PLATFORM}'${BoldWhite} platform...${ColourReset}")
 
-    message("${BoldWhite}Setting TOOLCHAIN for ${BoldGreen}'${TARGET_PLATFORM}'${BoldWhite} platform...${ColourReset}")
+# Workaround for https://www.cmake.org/Bug/view.php?id=14075
+set(CMAKE_CROSS_COMPILING ON)
 
-#     # UGW
-#     if (TARGET_PLATFORM STREQUAL "ugw")
-#         set(CMAKE_C_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}gcc)
-#         set(CMAKE_CXX_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}g++)
-# 
-#         # Target Environment
-#         set(PLATFORM_BUILD_DIR      ${PLATFORM_BASE_DIR}/build_dir/${PLATFORM_BUILD_NAME})
-#         set(PLATFORM_STAGING_DIR    ${PLATFORM_BASE_DIR}/staging_dir/${PLATFORM_BUILD_NAME})
-#         set(PLATFORM_INCLUDE_DIR    ${PLATFORM_STAGING_DIR}/usr/include)
-#         set(CMAKE_FIND_ROOT_PATH    ${PLATFORM_STAGING_DIR})
-#         set(ENV{PKG_CONFIG_PATH}  "${PLATFORM_STAGING_DIR}/usr/lib/pkgconfig")
-#         set(ENV{DEPENDENCIES_PATH}  "${PLATFORM_STAGING_DIR}/usr/lib/pkgconfig")
-# 
-#         # Platform link directories
-#         link_directories(${PLATFORM_STAGING_DIR}/usr/lib)
-#     
-#     elseif (TARGET_PLATFORM STREQUAL "rdkb")
-#         set(CMAKE_C_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}gcc)
-#         set(CMAKE_CXX_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}g++)
-# 
-#         # Target Environment
-#         set(PLATFORM_BUILD_DIR      ${PLATFORM_BASE_DIR})
-#         set(PLATFORM_STAGING_DIR    ${PLATFORM_BUILD_DIR}/${PLATFORM_BUILD_NAME})
-#         set(PLATFORM_INCLUDE_DIR    ${PLATFORM_STAGING_DIR}/usr/include)
-#         set(CMAKE_FIND_ROOT_PATH    ${PLATFORM_STAGING_DIR})
-#         set(ENV{PKG_CONFIG_PATH}  "${PLATFORM_STAGING_DIR}/usr/lib/pkgconfig")
-#         # Do not use files from system paths
-#         set(NO_CMAKE_SYSTEM_PATH)
-# 
-#         # Default Compiler flags
-#         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=${PLATFORM_STAGING_DIR}" CACHE STRING "" FORCE)
-#         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --sysroot=${PLATFORM_STAGING_DIR}" CACHE STRING "" FORCE)
-# 
-#         # RDKB Build
-#         add_definitions(-DBEEROCKS_RDKB -DYOCTO)
-# 
-#     elseif (TARGET_PLATFORM STREQUAL "econet")
-    
-    
-        # Workaround for https://www.cmake.org/Bug/view.php?id=14075
-        set(CMAKE_CROSS_COMPILING ON)
-
-        ## IS THIS NECESSARY HERE??
-        ## IS THIS NECESSARY HERE??
-        ## IS THIS NECESSARY HERE??
-        # projects (mis)use `-isystem` to silence warnings from 3rd-party
-        # source (among other things). gcc6 introduces changes to search
-        # order which breaks this usage.
-        #   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70129
-        #   https://gitlab.kitware.com/cmake/cmake/issues/16291
-        #   https://gitlab.kitware.com/cmake/cmake/issues/16919
-        set(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES ${PLATFORM_TOOLCHAIN_DIR} CACHE STRING "")
-        set(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES ${PLATFORM_TOOLCHAIN_DIR} CACHE STRING "")
-        
-    
-        message(" ***  econet in external_toolchain.cmake ***")
-        message(" # PKG_CONFIG_PATH default value: ${PKG_CONFIG_PATH} ")
-        message(" # CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH} ")
-        message(" # CMAKE_FIND_ROOT_PATH: ${CMAKE_FIND_ROOT_PATH} ")
-        
-	#a) ECONET TOOLCHAIN
-        #set(CMAKE_C_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}gcc)
-        #set(CMAKE_CXX_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}g++)
-	#b) NEW TOOLCHAIN
-        #set(CMAKE_AR ${PLATFORM_TOOLCHAIN_PREFIX}ar)
-        set(CMAKE_C_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}gcc-5)
-        #set(CMAKE_C_ARCHIVE_CREATE ${PLATFORM_TOOLCHAIN_PREFIX}ar)
-        set(CMAKE_CXX_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}g++-5)
-        #set(CMAKE_CXX_ARCHIVE_CREATE ${PLATFORM_TOOLCHAIN_PREFIX}ar)
-        #set(CMAKE_AR ${PLATFORM_TOOLCHAIN_PREFIX}ar)
-        set(CMAKE_C_COMPILER_AR ${PLATFORM_TOOLCHAIN_PREFIX}ar)
-        message("###CMAKE_AR: ${CMAKE_AR}####")
-
-        set(CMAKE_C_COMPILER_AR ${PLATFORM_TOOLCHAIN_PREFIX}ar)
-        set(CMAKE_CXX_COMPILER_AR ${PLATFORM_TOOLCHAIN_PREFIX}ar)
-        set(CMAKE_C_COMPILER_RANLIB ${PLATFORM_TOOLCHAIN_PREFIX}ranlib)
-        set(CMAKE_CXX_COMPILER_RANLIB ${PLATFORM_TOOLCHAIN_PREFIX}ranlib)
-
-        set( CMAKE_AR "${PLATFORM_TOOLCHAIN_PREFIX}ar" CACHE FILEPATH "Archiver" )
-        set( CMAKE_RANLIB "${PLATFORM_TOOLCHAIN_PREFIX}ranlib" CACHE FILEPATH "Ranlib" )
+## IS THIS NECESSARY HERE??
+## IS THIS NECESSARY HERE??
+## IS THIS NECESSARY HERE??
+# projects (mis)use `-isystem` to silence warnings from 3rd-party
+# source (among other things). gcc6 introduces changes to search
+# order which breaks this usage.
+#   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70129
+#   https://gitlab.kitware.com/cmake/cmake/issues/16291
+#   https://gitlab.kitware.com/cmake/cmake/issues/16919
+set(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES ${PLATFORM_TOOLCHAIN_DIR} CACHE STRING "")
+set(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES ${PLATFORM_TOOLCHAIN_DIR} CACHE STRING "")
 
 
+message(" ***  econet in econet.cmake ***")
+message(" # PKG_CONFIG_PATH default value: ${PKG_CONFIG_PATH} ")
+message(" # CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH} ")
+message(" # CMAKE_FIND_ROOT_PATH: ${CMAKE_FIND_ROOT_PATH} ")
 
-        # Target Environment
-        set(PLATFORM_BUILD_DIR      ${PLATFORM_BASE_DIR}/build_dir/${PLATFORM_BUILD_NAME})
-        #set(PLATFORM_STAGING_DIR    ${PLATFORM_BASE_DIR}/staging_dir/${PLATFORM_BUILD_NAME})
-        set(PLATFORM_STAGING_DIR    ${PLATFORM_BASE_DIR})
-        ##set(PLATFORM_INCLUDE_DIR    ${PLATFORM_STAGING_DIR}/usr/include)
-        #set(PLATFORM_INCLUDE_DIR    ${PLATFORM_STAGING_DIR}/lib_install)
-        
-        #set(CMAKE_FIND_ROOT_PATH    ${PLATFORM_STAGING_DIR})
-        #set(ENV{PKG_CONFIG_PATH}  "${PLATFORM_STAGING_DIR}/usr/lib/pkgconfig")
-        #set(OPENSSL_ROOT_DIR 
+#a) ECONET TOOLCHAIN
+#set(CMAKE_C_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}gcc)
+#set(CMAKE_CXX_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}g++)
+#b) NEW TOOLCHAIN
+#set(CMAKE_AR ${PLATFORM_TOOLCHAIN_PREFIX}ar)
+set(CMAKE_C_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}gcc-5)
+#set(CMAKE_C_ARCHIVE_CREATE ${PLATFORM_TOOLCHAIN_PREFIX}ar)
+set(CMAKE_CXX_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}g++-5)
+#set(CMAKE_CXX_ARCHIVE_CREATE ${PLATFORM_TOOLCHAIN_PREFIX}ar)
+#set(CMAKE_AR ${PLATFORM_TOOLCHAIN_PREFIX}ar)
+set(CMAKE_C_COMPILER_AR ${PLATFORM_TOOLCHAIN_PREFIX}ar)
+#message("###CMAKE_AR: ${CMAKE_AR}####")
 
-        
-        add_definitions(-DBEEROCKS_ECONET)
-        # Default Compiler flags
-    if(ECONET_TOOLCHAIN)
+set(CMAKE_C_COMPILER_AR ${PLATFORM_TOOLCHAIN_PREFIX}ar)
+set(CMAKE_CXX_COMPILER_AR ${PLATFORM_TOOLCHAIN_PREFIX}ar)
+set(CMAKE_C_COMPILER_RANLIB ${PLATFORM_TOOLCHAIN_PREFIX}ranlib)
+set(CMAKE_CXX_COMPILER_RANLIB ${PLATFORM_TOOLCHAIN_PREFIX}ranlib)
+
+set( CMAKE_AR "${PLATFORM_TOOLCHAIN_PREFIX}ar" CACHE FILEPATH "Archiver" )
+set( CMAKE_RANLIB "${PLATFORM_TOOLCHAIN_PREFIX}ranlib" CACHE FILEPATH "Ranlib" )
+
+
+# Target Environment
+set(PLATFORM_BUILD_DIR      ${PLATFORM_BASE_DIR}/build_dir/${PLATFORM_BUILD_NAME})
+#set(PLATFORM_STAGING_DIR    ${PLATFORM_BASE_DIR}/staging_dir/${PLATFORM_BUILD_NAME})
+set(PLATFORM_STAGING_DIR    ${PLATFORM_BASE_DIR})
+##set(PLATFORM_INCLUDE_DIR    ${PLATFORM_STAGING_DIR}/usr/include)
+#set(PLATFORM_INCLUDE_DIR    ${PLATFORM_STAGING_DIR}/lib_install)
+
+#set(CMAKE_FIND_ROOT_PATH    ${PLATFORM_STAGING_DIR})
+#set(ENV{PKG_CONFIG_PATH}  "${PLATFORM_STAGING_DIR}/usr/lib/pkgconfig")
+#set(OPENSSL_ROOT_DIR 
+
+
+add_definitions(-DBEEROCKS_ECONET)
+# Default Compiler flags
+if(ECONET_TOOLCHAIN)
 	# a) ECONET TOOLCHAIN: no sysroot?
-        #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=${PLATFORM_STAGING_DIR}" CACHE STRING "" FORCE)
-        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --sysroot=${PLATFORM_STAGING_DIR}" CACHE STRING "" FORCE)
-        
-        # a) Add experimental features C++ (ECONET TOOLCHAIN)
-        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x " CACHE STRING "" FORCE)
+	#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=${PLATFORM_STAGING_DIR}" CACHE STRING "" FORCE)
+	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --sysroot=${PLATFORM_STAGING_DIR}" CACHE STRING "" FORCE)
 
-	# b) NEW TOOLCHAIN: sysroot
-    else()
-        #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=/usr/mipsel-linux-gnu/" CACHE STRING "" FORCE)
-        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --sysroot=/usr/mipsel-linux-gnu/" CACHE STRING "" FORCE)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=/  " CACHE STRING "" FORCE)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --sysroot=/ " CACHE STRING "" FORCE)
+	# a) Add experimental features C++ (ECONET TOOLCHAIN)
+	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x " CACHE STRING "" FORCE)
 
-    endif()
+# b) NEW TOOLCHAIN: sysroot
+else()
+	#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=/usr/mipsel-linux-gnu/" CACHE STRING "" FORCE)
+	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --sysroot=/usr/mipsel-linux-gnu/" CACHE STRING "" FORCE)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=/  " CACHE STRING "" FORCE)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --sysroot=/ " CACHE STRING "" FORCE)
+endif()
 
 
-    #Linker options (static libc)
-	#NEW TOOLCHAIN
-    if(NOT ECONET_TOOLCHAIN)
-        ##set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive")
+#Linker options (static libc)
+#NEW TOOLCHAIN
+if(NOT ECONET_TOOLCHAIN)
+	##set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive")
 	if(NOT BUILD_SHARED_LIBS)
-        	set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -static-libgcc -static-libstdc++ -ldl ")
-        	#set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -ldl ")
+		set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -static-libgcc -static-libstdc++ -ldl ")
+		#set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -ldl ")
 	endif()
-    endif()
+endif()
 
-	## COPIED FROM DEFAULT CMAKELISTS.TXT FOR LINUX TARGET ##
-	## COPIED FROM DEFAULT CMAKELISTS.TXT FOR LINUX TARGET ##
-	## COPIED FROM DEFAULT CMAKELISTS.TXT FOR LINUX TARGET ##
-	# Linker Options
-	# - Setting the "rpath-link" linker variable to help the linker resolve secondery dependecies
-	#   (Libraries that are not directly referenced by the executable, but a linked library)
-	# - Setting "rpath" linker to add the cmake installed library folder to the linker search path
-	#   (Removes the need to set LD_LIBRARY_PATH manually when installing to a none standard location)
-	#SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
-	SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=/tmp/prpl/lib/,-rpath-link=/tmp/prpl/lib")
-	#if (CMAKE_BUILD_TYPE STREQUAL "Release")
-	#    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
-	#endif()
+## COPIED FROM DEFAULT CMAKELISTS.TXT FOR LINUX TARGET ##
+# Linker Options
+# - Setting the "rpath-link" linker variable to help the linker resolve secondery dependecies
+#   (Libraries that are not directly referenced by the executable, but a linked library)
+# - Setting "rpath" linker to add the cmake installed library folder to the linker search path
+#   (Removes the need to set LD_LIBRARY_PATH manually when installing to a none standard location)
+#SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=/tmp/prpl/lib/,-rpath-link=/tmp/prpl/lib")
+#if (CMAKE_BUILD_TYPE STREQUAL "Release")
+#    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z now -pie")
+#endif()
 
-        # RDKB Build
-        #add_definitions(-DBEEROCKS_RDKB -DYOCTO)
-
-	set(BEEROCKS_BRIDGE_IFACE "br0")
-	set(BEEROCKS_BH_WIRE_IFACE "eth0")
-	set(BEEROCKS_WLAN1_IFACE "ra0")
-	set(BEEROCKS_WLAN2_IFACE "rai0")
+#Should this be here?
+set(BEEROCKS_BRIDGE_IFACE "br0")
+set(BEEROCKS_BH_WIRE_IFACE "eth0")
+set(BEEROCKS_WLAN1_IFACE "ra0")
+set(BEEROCKS_WLAN2_IFACE "rai0")
 	
-        
-        # Platform link directories
-        #link_directories(${PLATFORM_STAGING_DIR}/usr/lib)
-        #link_directories(${PKG_CONFIG_PATH})
-        #link_directories(${PLATFORM_STAGING_DIR}/lib_install)
-        
-        
-        #set(TARGET_PLATFORM  "linux")
 
-#     else()
-# 
-#         message(FATAL_ERROR "${BoldRed}Unsupported platform type '${TARGET_PLATFORM}'!${ColourReset}")  
-# 
-#     endif()
+# Platform link directories
+#link_directories(${PLATFORM_STAGING_DIR}/usr/lib)
+#link_directories(${PKG_CONFIG_PATH})
+#link_directories(${PLATFORM_STAGING_DIR}/lib_install)
+        
+#set(TARGET_PLATFORM  "linux")
 
-    # Set the TARGET_PLATFORM build definition
-    add_definitions(-DTARGET_PLATFORM=${TARGET_PLATFORM})
-    add_definitions(-DBEEROCKS_BRIDGE_IFACE=${BEEROCKS_BRIDGE_IFACE})
-    add_definitions(-DBEEROCKS_BH_WIRE_IFACE=${BEEROCKS_BH_WIRE_IFACE})
-    add_definitions(-DBEEROCKS_WLAN1_IFACE=${BEEROCKS_WLAN1_IFACE})
-    add_definitions(-DBEEROCKS_WLAN2_IFACE=${BEEROCKS_WLAN2_IFACE})
+# Set the TARGET_PLATFORM build definition
+add_definitions(-DTARGET_PLATFORM=${TARGET_PLATFORM})
+add_definitions(-DBEEROCKS_BRIDGE_IFACE=${BEEROCKS_BRIDGE_IFACE})
+add_definitions(-DBEEROCKS_BH_WIRE_IFACE=${BEEROCKS_BH_WIRE_IFACE})
+add_definitions(-DBEEROCKS_WLAN1_IFACE=${BEEROCKS_WLAN1_IFACE})
+add_definitions(-DBEEROCKS_WLAN2_IFACE=${BEEROCKS_WLAN2_IFACE})
 
-# else()
-#     message("${BoldWhite}Using default TOOLCHAIN...${ColourReset}")
-# endif()
+
