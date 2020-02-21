@@ -237,8 +237,8 @@ stop_function() {
 
     [ "@BWL_TYPE@" = "DUMMY" -a "$PLATFORM_INIT" = "true" ] && platform_deinit
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_deinit
-    [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "C" ] && prplmesh_controller_stop
-    [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "A" ] && prplmesh_agent_stop
+    prplmesh_controller_stop
+    prplmesh_agent_stop
     [ "$DELETE_LOGS" = "true" ] && prplmesh_delete_logs
 }
 
