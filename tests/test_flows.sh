@@ -130,7 +130,7 @@ test_initial_ap_config() {
 }
 
 test_ap_config_renew() {
-    status "test initial autoconfig"
+    status "test autoconfig renew"
 
     # Regression test: MAC address should be case insensitive
     MAC_AGENT1=$(echo $mac_agent1 | tr a-z A-Z)
