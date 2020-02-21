@@ -596,6 +596,10 @@ test_topology() {
     return $check_error
 }
 
+get_alid(){
+    send_CAPI_command $1 "dev_get_parameter,program,map,parameter,ALid"> /dev/null 2>&1
+    echo ${capi_command_reply#*'ALid,'}
+}
 test_init() {
     status "test initialization"
 
