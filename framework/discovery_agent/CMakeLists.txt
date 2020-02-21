@@ -1,6 +1,0 @@
-add_executable(topology_discovery_agent topology_discovery_agent_main.cpp topology_discovery_agent_database.cpp topology_discovery_agent_messages.cpp)
-target_link_libraries(topology_discovery_agent PUBLIC common ieee1905_transport_messages ieee1905_transport_lib PRIVATE elpp)
-target_include_directories(topology_discovery_agent PUBLIC include/)
-install(TARGETS topology_discovery_agent DESTINATION bin)
-
-add_subdirectory(test)
