@@ -618,13 +618,11 @@ test_init() {
     [ -z "$connmap" ] && { err "Failed to create temp file"; exit 1; }
     trap "rm -f $connmap" EXIT
     docker exec ${GATEWAY} ${installdir}/bin/beerocks_cli -c bml_conn_map > "$connmap"
-
-    mac_gateway=$(grep "GW_BRIDGE" "$connmap" | head -1 | awk '{print $5}' | cut -d ',' -f 1)
+    mac_gateway=$(get_alid ${GATEWAY})
+    mac_agent1=$(get_alid ${REPEATER1})
+    mac_agent2=$(get_alid ${REPEATER2})
     dbg "mac_gateway = ${mac_gateway}"
-
-    mac_agent1=$(grep "IRE_BRIDGE" "$connmap" | head -1 | awk '{print $5}' | cut -d ',' -f 1)
     dbg "mac_agent1 = ${mac_agent1}"
-    mac_agent2=$(grep "IRE_BRIDGE" "$connmap" | sed -n 2p | awk '{print $5}' | cut -d ',' -f 1)
     dbg "mac_agent2 = ${mac_agent2}"
 
     mac_agent1_wlan0=$(docker exec ${REPEATER1} ip -o l list dev wlan0 | sed 's%.*link/ether \([0-9a-f:]*\).*%\1%')
