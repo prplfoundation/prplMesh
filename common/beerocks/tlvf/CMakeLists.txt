@@ -41,14 +41,13 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOV
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<TARGET_PROPERTY:tlvf,INTERFACE_INCLUDE_DIRECTORIES>
-        $<TARGET_PROPERTY:bcl,INTERFACE_INCLUDE_DIRECTORIES>
         $<BUILD_INTERFACE:${TLVF_OUT}/include>
         $<BUILD_INTERFACE:${TLVF_DIR}/src/include>
         $<INSTALL_INTERFACE:include>
     )
 
 # set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
-target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf)
+target_link_libraries(${PROJECT_NAME} PUBLIC tlvf elpp)
 
 install(TARGETS ${PROJECT_NAME} EXPORT btlvfConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
