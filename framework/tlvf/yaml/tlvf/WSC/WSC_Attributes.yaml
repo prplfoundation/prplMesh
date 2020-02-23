@@ -1,11 +1,20 @@
 #
 ---
 _include: {
+  tlvf/WSC/eWscAttributes.h,
   tlvf/WSC/eWscLengths.h,
   tlvf/WSC/eWscAuth.h,
+  tlvf/WSC/eWscEncr.h,
   tlvf/WSC/eWscVendorId.h,
   tlvf/WSC/eWscVendorExt.h,
   tlvf/WSC/eWscDev.h,
+  tlvf/WSC/eWscValues8.h,
+  tlvf/WSC/eWscMessageType.h,
+  tlvf/WSC/eWscConn.h,
+  tlvf/WSC/eWscRfBands.h,
+  tlvf/WSC/eWscAssoc.h,
+  tlvf/WSC/eWscValues16.h,
+  tlvf/WSC/eWscState.h,
   tlvf/common/sMacAddr.h,
 }
 _namespace: WSC
