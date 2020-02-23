@@ -475,9 +475,6 @@ class TlvF:
                                 break
                     param_type_info = TypeInfo(value[MetaData.KEY_ENUM_STORAGE])
                     param_type_info.type = param_meta.type_info.type
-                    if param_meta.type == param_type_real.type_str:
-                        self.include_list.append('"' + self.yaml_path + "/" + param_type + ".h" + '"')
-
             else:
                 param_type = param_dict
                 param_meta = None
