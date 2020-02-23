@@ -466,8 +466,13 @@ class TlvF:
                 if param_type_real.type == TypeInfo.ENUM:
                     try:
                         value = self.db_enum_storage_type[(self.yaml_fname, param_type_real.type_str)]
+                    except 1:
+                        value = self.db_enum_storage_type[(other_yaml_file, type_str)]
                     except:
-                        value = self.db_enum_storage_type[(param_type_real.type_str, param_type_real.type_str)]
+                        for other_yaml_file, type_str in self.db_enum_storage_type:
+                            if type_str == param_type_real.type_str:
+                                value = self.db_enum_storage_type[(other_yaml_file, type_str)]
+                                break
                     param_type_info = TypeInfo(value[MetaData.KEY_ENUM_STORAGE])
                     param_type_info.type = param_meta.type_info.type
                     if param_meta.type == param_type_real.type_str:
