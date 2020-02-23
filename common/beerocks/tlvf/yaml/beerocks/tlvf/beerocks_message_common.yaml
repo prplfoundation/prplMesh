@@ -2,27 +2,11 @@
 ---
 _include: {
   beerocks/tlvf/beerocks_message_action.h,
+  beerocks/tlvf/beerocks_message_enums.h,
   bcl/beerocks_message_structs.h,
 }
 
 _namespace: beerocks_message
-
-eWiFiSec:
-  _type: enum
-  _enum_storage: uint8_t
-  eWiFiSec_None: 0
-  eWiFiSec_WEP64: 1
-  eWiFiSec_WEP128: 2
-  eWiFiSec_WPA_PSK: 3
-  eWiFiSec_WPA2_PSK: 4
-  eWiFiSec_WPA_WPA2_PSK: 5
-
-eDHCPOp:
-  _type: enum
-  _enum_storage: uint8_t
-  eDHCPOp_Add: 0
-  eDHCPOp_Del: 1
-  eDHCPOp_Old: 2
 
 sVapInfo:
   _type: struct
@@ -746,40 +730,6 @@ sSteeringRrmCaps:
   lciMeas: uint8_t
   ftmRangeRpt: uint8_t
 
-eDisconnectSource:
-  _type: enum
-  _enum_storage: uint8_t
-  eDisconnect_Source_Unknown : 0
-  eDisconnect_Source_Local : 1
-  eDisconnect_Source_Remote : 2
-
-
-eDisconnectType:
-  _type: enum
-  _enum_storage: uint8_t
-  eDisconnect_Type_Unknown : 0
-  eDisconnect_Type_Disassoc : 1 
-  eDisconnect_Type_Deauth : 2
-
-
-eSteeringSnrChange:
-  _type: enum
-  _enum_storage: uint8_t
-  eWifi_Steering_Snr_Unchanged : 0           
-  eWifi_Steering_Snr_Higher : 1                      
-  eWifi_Steering_Snr_Lower : 2
-
-eSteeringEventType:
-  _type: enum
-  _enum_storage: uint8_t
-  eWifi_Steering_Event_Probe_Req : 1
-  eWifi_Steering_Event_Client_Connect : 2
-  eWifi_Steering_Event_Client_Disconnect : 3
-  eWifi_Steering_Event_Client_Activity : 4
-  eWifi_Steering_Event_Snr_Xing : 5
-  eWifi_Steering_Event_Snr : 6
-  eWifi_Steering_Event_Auth_Fail : 7
-
 sSteeringEvConnect:
   _type: struct
   client_mac: sMacAddr
@@ -853,55 +803,6 @@ sChannelScanRequestParams:
  channel_pool:
     _type: uint8_t 
     _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
-
-eChannelScanResultMode:
-  _type: enum
-  _enum_storage: uint8_t
-  eMode_NA: 0
-  eMode_AdHoc: 1
-  eMode_Infrastructure: 2
-
-eChannelScanResultEncryptionMode:
-  _type: enum
-  _enum_storage: uint8_t
-  eEncryption_Mode_NA: 0
-  eEncryption_Mode_AES: 1
-  eEncryption_Mode_TKIP: 2
-
-eChannelScanResultSecurityMode:
-  _type: enum
-  _enum_storage: uint8_t
-  eSecurity_Mode_None: 0
-  eSecurity_Mode_WEP: 1
-  eSecurity_Mode_WPA: 2
-  eSecurity_Mode_WPA2: 3
-
-eChannelScanResultOperatingFrequencyBand:
-  _type: enum
-  _enum_storage: uint8_t
-  eOperating_Freq_Band_NA: 0
-  eOperating_Freq_Band_2_4GHz: 1
-  eOperating_Freq_Band_5GHz: 2
-
-eChannelScanResultStandards:
-  _type: enum
-  _enum_storage: uint8_t
-  eStandard_NA: 0
-  eStandard_802_11a: 1
-  eStandard_802_11b: 2
-  eStandard_802_11g: 3
-  eStandard_802_11n: 4
-  eStandard_802_11ac: 5
-
-eChannelScanResultChannelBandwidth:
-  _type: enum
-  _enum_storage: uint8_t
-  eChannel_Bandwidth_NA: 0
-  eChannel_Bandwidth_20MHz: 1
-  eChannel_Bandwidth_40MHz: 2
-  eChannel_Bandwidth_80MHz: 3
-  eChannel_Bandwidth_160MHz: 4
-  eChannel_Bandwidth_80_80: 5
 
 sChannelScanResults:
   _type: struct
