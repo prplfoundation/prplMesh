@@ -10,12 +10,9 @@ tlvClientCapabilityReport:
     _value_const: TLV_CLIENT_CAPABILITY_REPORT
   length: uint16_t
   result_code: eResultCode
-  association_frame_length:
-    _type: uint8_t
-    _length_var: True
   association_frame:
     _type: uint8_t
-    _length: [ association_frame_length ] 
+    _length: [] 
 
 eResultCode:
   _type: enum
