@@ -35,29 +35,6 @@ namespace beerocks {
 
 namespace message {
 
-enum eStructsConsts {
-    VERSION_LENGTH                = 16,
-    NODE_NAME_LENGTH              = 32,
-    IFACE_NAME_LENGTH             = 32 + 4, //need extra 1 byte for null termination + alignment
-    SUPPORTED_CHANNELS_LENGTH     = 64,     //support upto # channels, every channel item is 32-bit
-    HOSTAP_ERR_MSG_LENGTH         = 64,
-    WIFI_DRIVER_VER_LENGTH        = 32 + 4,
-    WIFI_SSID_MAX_LENGTH          = 32 + 1 + 3, //need extra 1 byte for null termination + alignment
-    WIFI_PASS_MAX_LENGTH          = 64 + 1 + 3, //need extra 1 byte for null termination + alignment
-    USER_PASS_LEN                 = 64 + 1 + 3, //need extra 1 byte for null termination + alignment
-    DEV_INFO_STR_MAX_LEN          = 32,
-    WPA_SCAN_FREQ_SEGMENTS        = 3,
-    WPA_SCAN_MAX_RESULTS          = 8,
-    RESTRICTED_CHANNEL_LENGTH     = 40,
-    WIFI_SECURITY_TYPE_MAX_LENGTH = 32,
-    BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH = 16,
-    PLATFORM_ERROR_DATA_SIZE             = 256,
-    WIFI_GENERIC_STRING_LENGTH           = 64,
-    WIFI_OPERATING_STRING_LENGTH         = 16,
-    WIFI_DATA_TRANSFER_RATES_LIST_LENGTH = 256,
-    CHANNEL_SCAN_LIST_LENGTH             = 8,
-};
-
 enum eMessageConsts {
     MESSAGE_VERSION       = 6,
     MESSAGE_MAGIC         = 0x55CDABEF,

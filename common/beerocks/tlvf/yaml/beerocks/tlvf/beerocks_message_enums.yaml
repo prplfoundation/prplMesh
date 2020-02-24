@@ -2,6 +2,23 @@
 ---
 _namespace: beerocks_message
 
+eStructsConsts:
+  _type: enum
+  VERSION_LENGTH: 16
+  NODE_NAME_LENGTH: 32
+  IFACE_NAME_LENGTH: 33 # (32 + 1) need extra 1 byte for null termination
+  SUPPORTED_CHANNELS_LENGTH: 64
+  WIFI_DRIVER_VER_LENGTH: 33 # (32 + 1) need extra 1 byte for null termination
+  WIFI_SSID_MAX_LENGTH: 33 # (32 + 1) need extra 1 byte for null termination
+  WIFI_PASS_MAX_LENGTH: 65 # (64 + 1) need extra 1 byte for null termination
+  USER_PASS_LEN: 65 # (64 + 1) need extra 1 byte for null termination
+  DEV_INFO_STR_MAX_LEN: 32
+  RESTRICTED_CHANNEL_LENGTH: 40
+  WIFI_SECURITY_TYPE_MAX_LENGTH: 32
+  BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH: 16
+  PLATFORM_ERROR_DATA_SIZE: 256
+  CHANNEL_SCAN_LIST_LENGTH: 8
+
 eWiFiSec:
   _type: enum
   _enum_storage: uint8_t
