@@ -463,12 +463,18 @@ typedef struct sNodeBssSteerRequest {
 
 typedef struct sNodeBssSteerResponse {
     sMacAddr mac;
+    sMacAddr source_bssid;
+    sMacAddr target_bssid;
     uint8_t status_code;
     void struct_swap(){
         mac.struct_swap();
+        source_bssid.struct_swap();
+        target_bssid.struct_swap();
     }
     void struct_init(){
         mac.struct_init();
+        source_bssid.struct_init();
+        target_bssid.struct_init();
     }
 } __attribute__((packed)) sNodeBssSteerResponse;
 
