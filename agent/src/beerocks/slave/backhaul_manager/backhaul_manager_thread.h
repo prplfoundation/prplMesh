@@ -246,7 +246,8 @@ private:
      * Associated client information is later used to fill in the Associated Clients TLV
      * in the Topology Response message.
      */
-    typedef std::unordered_map<sMacAddr, std::chrono::steady_clock::time_point>
+    typedef std::unordered_map<sMacAddr,
+                               std::tuple<std::chrono::steady_clock::time_point, std::string>>
         associated_clients_t;
 
     /**
