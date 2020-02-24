@@ -33,15 +33,6 @@ namespace beerocks {
 // clang-format on
 #endif
 
-namespace message {
-
-enum eMessageConsts {
-    MESSAGE_VERSION       = 6,
-    MESSAGE_MAGIC         = 0x55CDABEF,
-    MESSAGE_BUFFER_LENGTH = 4096,
-};
-} //namespace message
-
 enum eGlobals {
     HIERARCHY_MAX                           = 14,
     IRE_MAX_SLAVES                          = 3,

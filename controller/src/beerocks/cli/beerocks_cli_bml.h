@@ -17,6 +17,7 @@
 #endif
 
 #include <bcl/network/network_utils.h>
+#include <beerocks/tlvf/beerocks_message_common.h>
 
 #include <list>
 #include <unordered_map>
@@ -218,7 +219,7 @@ private:
     std::unordered_multimap<std::string, std::shared_ptr<conn_map_node_t>>
         conn_map_nodes; // key=parent_mac, val=conn_map_node_t
 
-    uint8_t rx_buffer[message::MESSAGE_BUFFER_LENGTH];
+    uint8_t rx_buffer[beerocks_message::MESSAGE_BUFFER_LENGTH];
 };
 } // namespace beerocks
 

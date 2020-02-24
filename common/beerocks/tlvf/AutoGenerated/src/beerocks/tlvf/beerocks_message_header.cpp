@@ -119,13 +119,13 @@ bool cACTION_HEADER::init()
         return false;
     }
     m_magic = (uint32_t*)m_buff_ptr__;
-    if (!m_parse__) *m_magic = beerocks::message::MESSAGE_MAGIC;
+    if (!m_parse__) *m_magic = MESSAGE_MAGIC;
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
     m_version = (uint8_t*)m_buff_ptr__;
-    if (!m_parse__) *m_version = beerocks::message::MESSAGE_VERSION;
+    if (!m_parse__) *m_version = MESSAGE_VERSION;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;

@@ -36,6 +36,12 @@ enum eStructsConsts {
     CHANNEL_SCAN_LIST_LENGTH = 0x8,
 };
 
+enum eMessageConsts {
+    MESSAGE_VERSION = 0x6,
+    MESSAGE_MAGIC = 0x55cdabef,
+    MESSAGE_BUFFER_LENGTH = 0x1000,
+};
+
 enum eWiFiSec: uint8_t {
     eWiFiSec_None = 0x0,
     eWiFiSec_WEP64 = 0x1,

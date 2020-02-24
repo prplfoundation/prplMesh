@@ -16,6 +16,8 @@
 #include <tlvf/CmduMessageRx.h>
 #include <tlvf/CmduMessageTx.h>
 
+#include <beerocks/tlvf/beerocks_message_common.h>
+
 #define DEFAULT_SELECT_TIMEOUT_MS 500
 
 namespace beerocks {
@@ -68,9 +70,9 @@ private:
     bool handle_cmdu_message_uds(Socket *sd);
     bool verify_cmdu(message::sUdsHeader *uds_header);
 
-    uint8_t rx_buffer[message::MESSAGE_BUFFER_LENGTH];
-    uint8_t tx_buffer[message::MESSAGE_BUFFER_LENGTH];
-    uint8_t cert_tx_buffer[message::MESSAGE_BUFFER_LENGTH];
+    uint8_t rx_buffer[beerocks_message::MESSAGE_BUFFER_LENGTH];
+    uint8_t tx_buffer[beerocks_message::MESSAGE_BUFFER_LENGTH];
+    uint8_t cert_tx_buffer[beerocks_message::MESSAGE_BUFFER_LENGTH];
     ieee1905_1::CmduMessageRx cmdu_rx;
 
     std::unique_ptr<SocketServer> server_socket;
