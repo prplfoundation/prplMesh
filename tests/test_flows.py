@@ -9,6 +9,7 @@
 import argparse
 import os
 import re
+import subprocess
 import sys
 
 
@@ -28,7 +29,7 @@ class test_flows:
                             help="append UNIQUE_ID to all container names, e.g. gateway-<UNIQUE_ID>; "
                                  "defaults to {}".format(user))
         parser.add_argument("--skip-init", action='store_true', default=False,
-                            help="don't start up the containers - UNINMPLEMENTED")
+                            help="don't start up the containers")
         parser.add_argument("tests", nargs='*',
                             help="tests to run; if not specified, run all tests: " + ", ".join(self.tests))
         self.opts = parser.parse_args()
@@ -87,6 +88,11 @@ class test_flows:
         self.gateway = 'gateway-' + self.opts.unique_id
         self.repeater1 = 'repeater1-' + self.opts.unique_id
         self.repeater2 = 'repeater2-' + self.opts.unique_id
+        if not self.opts.skip_init:
+            subprocess.check_call((os.path.join(self.rootdir, "tests", "test_gw_repeater.sh"),
+                                   "-f", "-u", self.opts.unique_id, "-g", self.gateway,
+                                   "-r", self.repeater1, "-r", self.repeater2, "-d", "7"))
+
 
     def check_log(self, device: str, program: str, regex: str) -> bool:
         '''Verify that on "device" the logfile for "program" matches "regex", fail if not.'''
