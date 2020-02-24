@@ -306,6 +306,38 @@ int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN])
     return cfg_get_prplmesh_radio_param(radio_num, "hostap_iface", hostap_iface, BPL_IFNAME_LEN);
 }
 
+int cfg_test() {
+    return 0;
+}
+
+int cfg_get_no_vendor_specific(const char iface[BPL_IFNAME_LEN])
+{
+	char iface[123];
+    int retVal = -1;
+
+    if (!iface || !sta_iface) {
+        MAPF_ERR("cfg_get_sta_iface: invalid input: iface or sta_iface are NULL");
+        return RETURN_ERR;
+    }
+
+    //TODO: remove dependency in wireless section naming in UCI #801
+    int index = -1;
+    if (cfg_get_index_from_interface(iface, &index) == RETURN_ERR) {
+        MAPF_ERR("cfg_get_sta_iface: Failed to get radio index from iface");
+        return RETURN_ERR;
+    }
+
+	char no_vendor_specific;
+
+	retVal = cfg_get_prplmesh_radio_param(index, "no_vendor_specific", &no_vendor_specific, 1);
+
+    if (retVal != RETURN_ERR) {
+        return no_vendor_specific == '1' ? 1 : 0;
+    }
+
+    return retVal;
+}
+
 int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of_interfaces)
 {
     if (!interfaces) {

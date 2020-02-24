@@ -266,6 +266,29 @@ int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN])
     return RETURN_OK;
 }
 
+int cfg_test() {
+    return 0;
+}
+
+int cfg_get_no_vendor_specific(const char iface[BPL_IFNAME_LEN])
+{
+    if (!iface) {
+        MAPF_ERR("cfg_get_no_vendor_specific: invalid input: iface is NULL");
+        return RETURN_ERR;
+    }
+    std::string param = std::string(iface) + "/no_vendor_specific=";
+    std::string value;
+
+    int retVal = cfg_get_param(param, value);
+
+    if (retVal == -1) {
+        MAPF_ERR("cfg_get_no_vendor_specific: Failed to read no_vendor_specific");
+		return RETURN_ERR;
+    }
+
+    return value == "1" ? 1 : 0;
+}   
+
 int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of_interfaces)
 {
     if (!interfaces) {
