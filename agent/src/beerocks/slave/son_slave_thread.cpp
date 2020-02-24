@@ -755,14 +755,14 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
             return false;
         }
         bool all = false;
-        if (request_in->params().module_name == beerocks::BEEROCKS_PROCESS_ALL) {
+        if (request_in->params().module_name == beerocks_message::BEEROCKS_PROCESS_ALL) {
             all = true;
         }
-        if (all || request_in->params().module_name == beerocks::BEEROCKS_PROCESS_SLAVE) {
+        if (all || request_in->params().module_name == beerocks_message::BEEROCKS_PROCESS_SLAVE) {
             logger.set_log_level_state((eLogLevel)request_in->params().log_level,
                                        request_in->params().enable);
         }
-        if (all || request_in->params().module_name == beerocks::BEEROCKS_PROCESS_MONITOR) {
+        if (all || request_in->params().module_name == beerocks_message::BEEROCKS_PROCESS_MONITOR) {
             auto request_out = message_com::create_vs_message<
                 beerocks_message::cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL>(cmdu_tx);
             if (request_out == nullptr) {
@@ -772,7 +772,8 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
             request_out->params() = request_in->params();
             message_com::send_cmdu(monitor_socket, cmdu_tx);
         }
-        if (all || request_in->params().module_name == beerocks::BEEROCKS_PROCESS_PLATFORM) {
+        if (all ||
+            request_in->params().module_name == beerocks_message::BEEROCKS_PROCESS_PLATFORM) {
             auto request_out = message_com::create_vs_message<
                 beerocks_message::cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL>(cmdu_tx);
             if (request_out == nullptr) {

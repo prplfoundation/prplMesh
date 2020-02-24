@@ -2763,15 +2763,15 @@ int bml_internal::set_log_level(const std::string module_name, const std::string
     }
 
     if (module_name == "master")
-        request->params().module_name = BEEROCKS_PROCESS_MASTER;
+        request->params().module_name = beerocks_message::BEEROCKS_PROCESS_MASTER;
     else if (module_name == "slave")
-        request->params().module_name = BEEROCKS_PROCESS_SLAVE;
+        request->params().module_name = beerocks_message::BEEROCKS_PROCESS_SLAVE;
     else if (module_name == "monitor")
-        request->params().module_name = BEEROCKS_PROCESS_MONITOR;
+        request->params().module_name = beerocks_message::BEEROCKS_PROCESS_MONITOR;
     else if (module_name == "platform")
-        request->params().module_name = BEEROCKS_PROCESS_MONITOR;
+        request->params().module_name = beerocks_message::BEEROCKS_PROCESS_MONITOR;
     else if (module_name == "all")
-        request->params().module_name = BEEROCKS_PROCESS_ALL;
+        request->params().module_name = beerocks_message::BEEROCKS_PROCESS_ALL;
     else {
         LOG(ERROR) << "module_name not valid";
         return -BML_RET_INVALID_ARGS;

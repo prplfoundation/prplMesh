@@ -1461,11 +1461,11 @@ void son_management::handle_bml_message(Socket *sd,
             LOG(ERROR) << "addClass ACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST failed";
             break;
         }
-        if (bml_request->params().module_name == beerocks::BEEROCKS_PROCESS_MASTER) {
+        if (bml_request->params().module_name == beerocks_message::BEEROCKS_PROCESS_MASTER) {
             database.set_log_level_state((beerocks::eLogLevel)bml_request->params().log_level,
                                          bml_request->params().enable);
         } else {
-            if (bml_request->params().module_name == beerocks::BEEROCKS_PROCESS_ALL) {
+            if (bml_request->params().module_name == beerocks_message::BEEROCKS_PROCESS_ALL) {
                 database.set_log_level_state((eLogLevel)bml_request->params().log_level,
                                              bml_request->params().enable);
             }

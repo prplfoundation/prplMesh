@@ -42,6 +42,15 @@ enum eMessageConsts {
     MESSAGE_BUFFER_LENGTH = 0x1000,
 };
 
+enum eBeeRocksProcesses: uint8_t {
+    BEEROCKS_PROCESS_NONE = 0x0,
+    BEEROCKS_PROCESS_ALL = 0x1,
+    BEEROCKS_PROCESS_MASTER = 0x2,
+    BEEROCKS_PROCESS_SLAVE = 0x3,
+    BEEROCKS_PROCESS_MONITOR = 0x4,
+    BEEROCKS_PROCESS_PLATFORM = 0x5,
+};
+
 enum eWiFiSec: uint8_t {
     eWiFiSec_None = 0x0,
     eWiFiSec_WEP64 = 0x1,

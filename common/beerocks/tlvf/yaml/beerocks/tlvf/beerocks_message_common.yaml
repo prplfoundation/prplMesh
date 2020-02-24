@@ -578,7 +578,7 @@ sBackhaulRssi:
 sLoggingLevelChange:
   _type: struct
   mac: sMacAddr
-  module_name: uint8_t  # beerocks::eBeeRocksModules
+  module_name: eBeeRocksProcesses
   log_level: uint8_t    # beerocks::eLogLevel
   enable: uint8_t 
 

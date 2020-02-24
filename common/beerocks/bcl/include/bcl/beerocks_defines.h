@@ -58,15 +58,6 @@ enum eGlobals {
     TOUCH_PID_TIMEOUT_SECONDS               = 4, // beerocks_watchdog cycle (10 secs) / 2 - 1
 };
 
-enum eBeeRocksProcesses : uint8_t {
-    BEEROCKS_PROCESS_NONE = 0,
-    BEEROCKS_PROCESS_ALL,
-    BEEROCKS_PROCESS_MASTER,
-    BEEROCKS_PROCESS_SLAVE,
-    BEEROCKS_PROCESS_MONITOR,
-    BEEROCKS_PROCESS_PLATFORM,
-};
-
 enum eBeeRocksEntities : uint8_t {
     BEEROCKS_ENTITY_NONE             = 0,
     BEEROCKS_ENTITY_MASTER           = 1,

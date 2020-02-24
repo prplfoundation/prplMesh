@@ -25,6 +25,16 @@ eMessageConsts:
   MESSAGE_MAGIC: 0x55CDABEF
   MESSAGE_BUFFER_LENGTH: 4096
 
+eBeeRocksProcesses:
+  _type: enum
+  _enum_storage: uint8_t
+  BEEROCKS_PROCESS_NONE: 0
+  BEEROCKS_PROCESS_ALL: 1
+  BEEROCKS_PROCESS_MASTER: 2
+  BEEROCKS_PROCESS_SLAVE: 3
+  BEEROCKS_PROCESS_MONITOR: 4
+  BEEROCKS_PROCESS_PLATFORM: 5
+
 eWiFiSec:
   _type: enum
   _enum_storage: uint8_t

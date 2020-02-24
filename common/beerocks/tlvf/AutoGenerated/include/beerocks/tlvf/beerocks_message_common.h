@@ -814,11 +814,12 @@ typedef struct sBackhaulRssi {
 
 typedef struct sLoggingLevelChange {
     sMacAddr mac;
-    uint8_t module_name;
+    eBeeRocksProcesses module_name;
     uint8_t log_level;
     uint8_t enable;
     void struct_swap(){
         mac.struct_swap();
+        tlvf_swap(8*sizeof(eBeeRocksProcesses), reinterpret_cast<uint8_t*>(&module_name));
     }
     void struct_init(){
         mac.struct_init();
