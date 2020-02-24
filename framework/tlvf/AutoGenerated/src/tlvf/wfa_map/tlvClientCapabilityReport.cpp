@@ -37,37 +37,48 @@ tlvClientCapabilityReport::eResultCode& tlvClientCapabilityReport::result_code()
     return (eResultCode&)(*m_result_code);
 }
 
-uint8_t& tlvClientCapabilityReport::association_frame_length() {
-    return (uint8_t&)(*m_association_frame_length);
+std::string tlvClientCapabilityReport::association_frame_str() {
+    char *association_frame_ = association_frame();
+    if (!association_frame_) { return std::string(); }
+    return std::string(association_frame_, m_association_frame_idx__);
 }
 
-uint8_t* tlvClientCapabilityReport::association_frame(size_t idx) {
-    if ( (m_association_frame_idx__ == 0) || (m_association_frame_idx__ <= idx) ) {
-        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+char* tlvClientCapabilityReport::association_frame(size_t length) {
+    if( (m_association_frame_idx__ == 0) || (m_association_frame_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "association_frame length is smaller than requested length";
         return nullptr;
     }
-    return &(m_association_frame[idx]);
+    return ((char*)m_association_frame);
 }
 
+bool tlvClientCapabilityReport::set_association_frame(const std::string& str) { return set_association_frame(str.c_str(), str.size()); }
+bool tlvClientCapabilityReport::set_association_frame(const char str[], size_t size) {
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_association_frame received a null pointer.";
+        return false;
+    }
+    if (!alloc_association_frame(size)) { return false; }
+    std::copy(str, str + size, m_association_frame);
+    return true;
+}
 bool tlvClientCapabilityReport::alloc_association_frame(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list association_frame, abort!";
         return false;
     }
-    size_t len = sizeof(uint8_t) * count;
+    size_t len = sizeof(char) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
     m_lock_order_counter__ = 0;
-    uint8_t *src = (uint8_t *)&m_association_frame[*m_association_frame_length];
+    uint8_t *src = (uint8_t *)m_association_frame;
     uint8_t *dst = src + len;
     if (!m_parse__) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
     m_association_frame_idx__ += count;
-    *m_association_frame_length += count;
     if (!buffPtrIncrementSafe(len)) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
         return false;
@@ -116,7 +127,6 @@ size_t tlvClientCapabilityReport::get_initial_size()
     class_size += sizeof(eTlvTypeMap); // type
     class_size += sizeof(uint16_t); // length
     class_size += sizeof(eResultCode); // result_code
-    class_size += sizeof(uint8_t); // association_frame_length
     return class_size;
 }
 
@@ -144,19 +154,16 @@ bool tlvClientCapabilityReport::init()
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eResultCode); }
-    m_association_frame_length = (uint8_t*)m_buff_ptr__;
-    if (!m_parse__) *m_association_frame_length = 0;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
-        return false;
-    }
-    if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_association_frame = (uint8_t*)m_buff_ptr__;
-    uint8_t association_frame_length = *m_association_frame_length;
-    m_association_frame_idx__ = association_frame_length;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t) * (association_frame_length))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (association_frame_length) << ") Failed!";
-        return false;
+    m_association_frame = (char*)m_buff_ptr__;
+    if (m_length && m_parse__) {
+        size_t len = *m_length;
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&len));
+        len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
+        m_association_frame_idx__ = len/sizeof(char);
+        if (!buffPtrIncrementSafe(len)) {
+            LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+            return false;
+        }
     }
     if (m_parse__) { class_swap(); }
     if (m_parse__) {
