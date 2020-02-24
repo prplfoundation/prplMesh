@@ -2088,7 +2088,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
                     // the timestamp of its last association.
                     for (const auto &associated_client : associated_clients) {
                         auto client_mac       = associated_client.first;
-                        auto association_time = associated_client.second;
+                        auto association_time = std::get<0>(associated_client.second);
 
                         auto elapsed =
                             std::chrono::duration_cast<std::chrono::seconds>(now - association_time)
