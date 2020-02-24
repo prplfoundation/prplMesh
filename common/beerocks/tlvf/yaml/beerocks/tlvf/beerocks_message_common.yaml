@@ -309,7 +309,9 @@ sNodeBssSteerRequest:
 sNodeBssSteerResponse:
   _type: struct
   mac: sMacAddr
-  status_code: uint8_t 
+  source_bssid: sMacAddr
+  target_bssid: sMacAddr
+  status_code: uint8_t
 
 sNeighborSetParams11k:
   _type: struct
