@@ -30,14 +30,14 @@ eDisconnectType:
   _type: enum
   _enum_storage: uint8_t
   eDisconnect_Type_Unknown : 0
-  eDisconnect_Type_Disassoc : 1 
+  eDisconnect_Type_Disassoc : 1
   eDisconnect_Type_Deauth : 2
 
 eSteeringSnrChange:
   _type: enum
   _enum_storage: uint8_t
-  eWifi_Steering_Snr_Unchanged : 0           
-  eWifi_Steering_Snr_Higher : 1                      
+  eWifi_Steering_Snr_Unchanged : 0
+  eWifi_Steering_Snr_Higher : 1
   eWifi_Steering_Snr_Lower : 2
 
 eSteeringEventType:

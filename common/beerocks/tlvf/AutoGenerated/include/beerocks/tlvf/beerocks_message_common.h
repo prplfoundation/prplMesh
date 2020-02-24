@@ -18,7 +18,7 @@
 #include <tlvf/swap.h>
 #include "beerocks/tlvf/beerocks_message_action.h"
 #include "beerocks/tlvf/beerocks_message_enums.h"
-#include "bcl/beerocks_message_structs.h"
+#include "tlvf/common/sMacAddr.h"
 
 namespace beerocks_message {
 

@@ -3,7 +3,7 @@
 _include: {
   beerocks/tlvf/beerocks_message_action.h,
   beerocks/tlvf/beerocks_message_enums.h,
-  bcl/beerocks_message_structs.h,
+  tlvf/common/sMacAddr.h,
 }
 
 _namespace: beerocks_message
