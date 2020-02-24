@@ -644,7 +644,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             auto ifaces = network_utils::linux_get_iface_list_from_bridge(m_sConfig.bridge_iface);
 
             // If a wired (WAN) interface was provided, try it first, check if the interface is UP
-            wan_monitor::ELinkState wired_link_state;
+            wan_monitor::ELinkState wired_link_state = wan_monitor::ELinkState::eInvalid;
             if (!m_sConfig.wire_iface.empty()) {
                 wired_link_state = wan_mon.initialize(m_sConfig.wire_iface);
                 // Failure might be due to insufficient permissions, datailed error message is being
