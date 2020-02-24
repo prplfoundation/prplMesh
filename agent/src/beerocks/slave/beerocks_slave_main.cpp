@@ -141,7 +141,8 @@ static std::string get_sta_iface_from_hostap_iface(const std::string &hostap_ifa
 
 static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_slave_conf,
                                   son::slave_thread::sSlaveConfig &son_slave_conf,
-                                  const std::string &hostap_iface, int slave_num)
+                                  const std::string &hostap_iface, bool no_vendor_specific,
+                                  int slave_num)
 {
     son_slave_conf.temp_path = beerocks_slave_conf.temp_path;
     son_slave_conf.vendor    = beerocks_slave_conf.vendor;
@@ -168,7 +169,7 @@ static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_
     son_slave_conf.backhaul_wireless_iface_filter_low =
         beerocks::string_utils::stoi(beerocks_slave_conf.sta_iface_filter_low[slave_num]);
     son_slave_conf.backhaul_wireless_iface_type = son_slave_conf.hostap_iface_type;
-    son_slave_conf.no_vendor_specific           = beerocks_slave_conf.no_vendor_specific == "1";
+    // son_slave_conf.no_vendor_specific = 
 
     // disable stopping on failure initially. Later on, it will be read from BPL as part of
     // cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE
@@ -393,7 +394,8 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
 }
 
 static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
-                         const std::string &hostap_iface, int argc, char *argv[])
+                         const std::string &hostap_iface, bool no_vendor_specific, 
+                         int argc, char *argv[])
 {
     std::string base_slave_name = std::string(BEEROCKS_AGENT) + "_" + hostap_iface;
 
@@ -421,7 +423,8 @@ static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &bee
 
     // fill configuration
     son::slave_thread::sSlaveConfig son_slave_conf;
-    fill_son_slave_config(beerocks_slave_conf, son_slave_conf, hostap_iface, slave_num);
+    fill_son_slave_config(beerocks_slave_conf, son_slave_conf, hostap_iface, no_vendor_specific,
+                          slave_num);
 
     // disable stopping on failure initially. Later on, it will be read from BPL as part of
     // cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE
@@ -534,8 +537,14 @@ int main(int argc, char *argv[])
             auto hostap_iface_elm = interfaces_map.find(slave_num);
             if ((hostap_iface_elm != interfaces_map.end()) &&
                 (g_son_slave_iface == hostap_iface_elm->second)) {
-                return run_son_slave(slave_num, beerocks_slave_conf, hostap_iface_elm->second, argc,
-                                     argv);
+                int no_vendor_specific = beerocks::bpl::cfg_get_no_vendor_specific();
+                if (no_vendor_specific == -1) {
+                    LOG(ERROR) << "no_vendor_specific value not set. Assuming 0" << std::endl;
+                    no_vendor_specific = 0;
+                }
+				LOG(DEBUG) << "no_vendor_specific = " << no_vendor_specific << " ZZZZZZZZZZZ" << std::endl;
+                return run_son_slave(slave_num, beerocks_slave_conf, hostap_iface_elm->second,
+                                     no_vendor_specific, argc, argv);
             }
         }
         LOG(ERROR) << "did not find g_son_slave_iface in hostap_iface array" << std::endl;

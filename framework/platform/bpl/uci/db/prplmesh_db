@@ -20,6 +20,7 @@ config prplmesh 'config'
     option backhaul_band 'auto'
     option certification_mode '1'
     option stop_on_failure_attempts '1'
+    option no_vendor_specific '0'
 
 config wifi-device 'radio0'
     option hostap_iface 'wlan0'

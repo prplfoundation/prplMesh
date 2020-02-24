@@ -269,6 +269,14 @@ int cfg_get_certification_mode();
 int cfg_get_stop_on_failure_attempts();
 
 /**
+ * Returns whether the vendor specific messages are turned off in M1
+ * @return 1 Messages are enabled
+ * @return 0 Messages are disabled
+ * @return -1 Error
+ */
+int cfg_get_no_vendor_specific();
+
+/**
  * Returns whether the platform is in onboarding state.
  *
  * @return 1 Platform is in onboarding state.
