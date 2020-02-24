@@ -146,6 +146,9 @@ sClientAssociationParams:
   bssid: sMacAddr
   capabilities: beerocks::message::sRadioCapabilities
   vap_id: int8_t
+  association_frame:
+    _type: char
+    _length: [ "beerocks::message::ASSOCIATION_MAX_LENGTH" ] 
 
 sClientDisconnectionParams:
   _type: struct
