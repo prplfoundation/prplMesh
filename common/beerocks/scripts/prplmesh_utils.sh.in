@@ -91,12 +91,13 @@ prplmesh_platform_db_init() {
         # In certification, agent must retry onboarding indefinitely
         echo "certification_mode=1"
         echo "stop_on_failure_attempts=0" 
+        if [ "$NO_VENDOR_SPECIFIC" = true ]; then
+            echo "no_vendor_specific=1"
+        else
+            echo "no_vendor_specific=0"
+        fi
     } > @TMP_PATH@/prplmesh_platform_db
 
-    if [ "$NO_VENDOR_SPECIFIC" = true ]; then
-        sed '/^no_vendor_specific=0/s//no_vendor_specific=1/' \
-            @CMAKE_INSTALL_PREFIX@/config/beerocks_agent.conf > /tmp/beerocks_agent.conf
-    fi
 }
 
 prplmesh_framework_init() {
