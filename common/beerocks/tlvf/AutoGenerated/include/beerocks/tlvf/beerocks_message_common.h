@@ -179,6 +179,7 @@ typedef struct sClientAssociationParams {
     sMacAddr bssid;
     beerocks::message::sRadioCapabilities capabilities;
     int8_t vap_id;
+    char* association_frame; //TLVF_TODO: not supported yet
     void struct_swap(){
         mac.struct_swap();
         bssid.struct_swap();
