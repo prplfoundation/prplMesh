@@ -125,6 +125,9 @@ cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION:
   iface_mac: sMacAddr
   client_mac: sMacAddr
   bssid: sMacAddr
+  association_frame:
+    _type: char 
+    _length: [] 
 
 cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION:
   _type: class
