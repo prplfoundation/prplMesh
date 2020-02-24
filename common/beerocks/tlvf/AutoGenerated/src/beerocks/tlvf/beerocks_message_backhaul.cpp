@@ -1690,6 +1690,55 @@ sMacAddr& cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::bssid() {
     return (sMacAddr&)(*m_bssid);
 }
 
+std::string cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::association_frame_str() {
+    char *association_frame_ = association_frame();
+    if (!association_frame_) { return std::string(); }
+    return std::string(association_frame_, m_association_frame_idx__);
+}
+
+char* cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::association_frame(size_t length) {
+    if( (m_association_frame_idx__ == 0) || (m_association_frame_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "association_frame length is smaller than requested length";
+        return nullptr;
+    }
+    return ((char*)m_association_frame);
+}
+
+bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::set_association_frame(const std::string& str) { return set_association_frame(str.c_str(), str.size()); }
+bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::set_association_frame(const char str[], size_t size) {
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_association_frame received a null pointer.";
+        return false;
+    }
+    if (!alloc_association_frame(size)) { return false; }
+    std::copy(str, str + size, m_association_frame);
+    return true;
+}
+bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::alloc_association_frame(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list association_frame, abort!";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_association_frame;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_association_frame_idx__ += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    return true;
+}
+
 void cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
@@ -1758,6 +1807,8 @@ bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_bssid->struct_init(); }
+    m_association_frame = (char*)m_buff_ptr__;
+    m_association_frame_idx__ = getBuffRemainingBytes();
     if (m_parse__) { class_swap(); }
     return true;
 }
