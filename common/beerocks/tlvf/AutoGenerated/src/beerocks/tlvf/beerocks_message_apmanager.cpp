@@ -1193,7 +1193,7 @@ void cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
-    for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
+    for (size_t i = 0; i < SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels_list[i].struct_swap();
     }
 }
@@ -1229,7 +1229,7 @@ size_t cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sApChannelSwitch); // cs_params
-    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
+    class_size += SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
     return class_size;
 }
 
@@ -1246,13 +1246,13 @@ bool cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::init()
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
     m_supported_channels_list = (beerocks::message::sWifiChannel*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (SUPPORTED_CHANNELS_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
         return false;
     }
-    m_supported_channels_list_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
+    m_supported_channels_list_idx__  = SUPPORTED_CHANNELS_LENGTH;
     if (!m_parse__) {
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
+        for (size_t i = 0; i < SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
     }
     if (m_parse__) { class_swap(); }
     return true;
@@ -3226,7 +3226,7 @@ std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_APMANAGER_READ_ACS_RE
 void cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
-    for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
+    for (size_t i = 0; i < SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels_list[i].struct_swap();
     }
 }
@@ -3261,7 +3261,7 @@ bool cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::finalize()
 size_t cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
+    class_size += SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
     return class_size;
 }
 
@@ -3272,13 +3272,13 @@ bool cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::init()
         return false;
     }
     m_supported_channels_list = (beerocks::message::sWifiChannel*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (SUPPORTED_CHANNELS_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
         return false;
     }
-    m_supported_channels_list_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
+    m_supported_channels_list_idx__  = SUPPORTED_CHANNELS_LENGTH;
     if (!m_parse__) {
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
+        for (size_t i = 0; i < SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
     }
     if (m_parse__) { class_swap(); }
     return true;

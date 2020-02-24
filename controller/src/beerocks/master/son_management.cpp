@@ -484,7 +484,7 @@ void son_management::handle_cli_message(Socket *sd,
         if (cli_request->use_optional_ssid()) {
             request->params().use_optional_ssid = 1; // bool
             string_utils::copy_string((char *)request->params().ssid, (char *)cli_request->ssid(),
-                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
+                                      beerocks_message::WIFI_SSID_MAX_LENGTH);
         } else {
             request->params().use_optional_ssid = 0;
         }

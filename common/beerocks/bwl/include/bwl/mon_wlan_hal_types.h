@@ -393,7 +393,7 @@ enum eChannelScanResultChannelBandwidth : uint8_t {
 
 typedef struct sChannelScanResults {
     //The current service set identifier in use by the neighboring WiFi SSID. The value MAY be empty for hidden SSIDs.
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH] = {'\0'};
+    char ssid[WIFI_SSID_MAX_LENGTH] = {'\0'};
 
     //The BSSID used for the neighboring WiFi SSID.
     sMacAddr bssid = {.oct = {0}};

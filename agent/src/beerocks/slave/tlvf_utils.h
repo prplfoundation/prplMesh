@@ -29,7 +29,7 @@ public:
     static bool add_ap_radio_basic_capabilities(
         ieee1905_1::CmduMessageTx &cmdu_tx, const sMacAddr &ruid,
         const std::array<beerocks::message::sWifiChannel,
-                         beerocks::message::SUPPORTED_CHANNELS_LENGTH> &supported_channels);
+                         beerocks_message::SUPPORTED_CHANNELS_LENGTH> &supported_channels);
 };
 
 } // namespace beerocks

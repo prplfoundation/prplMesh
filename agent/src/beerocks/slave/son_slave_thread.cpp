@@ -183,7 +183,7 @@ void slave_thread::platform_notify_error(beerocks::bpl::eErrorCode code,
 
     error->code() = uint32_t(code);
     string_utils::copy_string(error->data(0), error_data.c_str(),
-                              message::PLATFORM_ERROR_DATA_SIZE);
+                              beerocks_message::PLATFORM_ERROR_DATA_SIZE);
 
     // Send the message
     message_com::send_cmdu(platform_manager_socket, cmdu_tx);
@@ -899,7 +899,8 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
             std::string((char *)request_in->params().ssid).empty()) {
             //LOG(DEBUG) << "ssid field is empty! using slave ssid -> " << config.ssid;
             string_utils::copy_string((char *)request_in->params().ssid,
-                                      platform_settings.front_ssid, message::WIFI_SSID_MAX_LENGTH);
+                                      platform_settings.front_ssid,
+                                      beerocks_message::WIFI_SSID_MAX_LENGTH);
         }
 
         auto request_out = message_com::create_vs_message<
@@ -1240,10 +1241,11 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
             backhaul_params.backhaul_iface_type  = notification->params().backhaul_iface_type;
 
             std::copy_n(notification->params().backhaul_scan_measurement_list,
-                        beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH,
+                        beerocks_message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH,
                         backhaul_params.backhaul_scan_measurement_list);
 
-            for (unsigned int i = 0; i < message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
+            for (unsigned int i = 0; i < beerocks_message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH;
+                 i++) {
                 if (backhaul_params.backhaul_scan_measurement_list[i].channel > 0) {
                     LOG(DEBUG) << "mac = " << backhaul_params.backhaul_scan_measurement_list[i].mac
                                << " channel = "
@@ -1502,7 +1504,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 
             LOG(DEBUG) << "ACTION_DHCP_LEASE_ADDED_NOTIFICATION mac " << client_mac
                        << " ip = " << client_ip << " name="
-                       << std::string(notification->hostname(message::NODE_NAME_LENGTH));
+                       << std::string(notification->hostname(beerocks_message::NODE_NAME_LENGTH));
 
             // notify master
             if (master_socket) {
@@ -1515,9 +1517,10 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 
                 master_notification->mac()  = notification->mac();
                 master_notification->ipv4() = notification->ipv4();
-                string_utils::copy_string(master_notification->name(message::NODE_NAME_LENGTH),
-                                          notification->hostname(message::NODE_NAME_LENGTH),
-                                          message::NODE_NAME_LENGTH);
+                string_utils::copy_string(
+                    master_notification->name(beerocks_message::NODE_NAME_LENGTH),
+                    notification->hostname(beerocks_message::NODE_NAME_LENGTH),
+                    beerocks_message::NODE_NAME_LENGTH);
                 send_cmdu_to_controller(cmdu_tx);
             }
 
@@ -1769,7 +1772,8 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         notification_out->cs_params()     = notification_in->cs_params();
         auto tuple_in_supported_channels  = notification_in->supported_channels_list(0);
         auto tuple_out_supported_channels = notification_out->supported_channels(0);
-        std::copy_n(&std::get<1>(tuple_in_supported_channels), message::SUPPORTED_CHANNELS_LENGTH,
+        std::copy_n(&std::get<1>(tuple_in_supported_channels),
+                    beerocks_message::SUPPORTED_CHANNELS_LENGTH,
                     &std::get<1>(tuple_out_supported_channels));
         send_cmdu_to_controller(cmdu_tx);
         send_operating_channel_report();
@@ -2219,8 +2223,8 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
 
         auto tuple_supported_channels = response->supported_channels_list(0);
-        std::copy_n(&std::get<1>(tuple_supported_channels), message::SUPPORTED_CHANNELS_LENGTH,
-                    hostap_params.supported_channels);
+        std::copy_n(&std::get<1>(tuple_supported_channels),
+                    beerocks_message::SUPPORTED_CHANNELS_LENGTH, hostap_params.supported_channels);
 
         // build channel preference report
         auto cmdu_tx_header = cmdu_tx.create(
@@ -2973,8 +2977,9 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 return false;
             }
 
-            string_utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH),
-                                      config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
+            string_utils::copy_string(request->iface_name(beerocks_message::IFACE_NAME_LENGTH),
+                                      config.hostap_iface.c_str(),
+                                      beerocks_message::IFACE_NAME_LENGTH);
             message_com::send_cmdu(platform_manager_socket, cmdu_tx);
 
             LOG(TRACE) << "send ACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST";
@@ -3030,14 +3035,15 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         }
 
         if (platform_settings.local_gw || config.backhaul_wireless_iface.empty()) {
-            memset(request->sta_iface(message::IFACE_NAME_LENGTH), 0, message::IFACE_NAME_LENGTH);
+            memset(request->sta_iface(beerocks_message::IFACE_NAME_LENGTH), 0,
+                   beerocks_message::IFACE_NAME_LENGTH);
         } else {
-            string_utils::copy_string(request->sta_iface(message::IFACE_NAME_LENGTH),
+            string_utils::copy_string(request->sta_iface(beerocks_message::IFACE_NAME_LENGTH),
                                       config.backhaul_wireless_iface.c_str(),
-                                      message::IFACE_NAME_LENGTH);
+                                      beerocks_message::IFACE_NAME_LENGTH);
         }
-        string_utils::copy_string(request->hostap_iface(message::IFACE_NAME_LENGTH),
-                                  config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
+        string_utils::copy_string(request->hostap_iface(beerocks_message::IFACE_NAME_LENGTH),
+                                  config.hostap_iface.c_str(), beerocks_message::IFACE_NAME_LENGTH);
 
         request->local_master()         = platform_settings.local_master;
         request->local_gw()             = platform_settings.local_gw;
@@ -3049,8 +3055,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST local_master="
                   << int(platform_settings.local_master)
                   << " local_gw=" << int(platform_settings.local_gw)
-                  << " hostap_iface=" << request->hostap_iface(message::IFACE_NAME_LENGTH)
-                  << " sta_iface=" << request->sta_iface(message::IFACE_NAME_LENGTH)
+                  << " hostap_iface=" << request->hostap_iface(beerocks_message::IFACE_NAME_LENGTH)
+                  << " sta_iface=" << request->sta_iface(beerocks_message::IFACE_NAME_LENGTH)
                   << " onboarding=" << int(request->onboarding());
 
         message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
@@ -3176,19 +3182,21 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             // TODO: On passive mode, mem_only_psk is always be set, so supplying the credentials
             // to the backhaul manager will no longer be necessary, and therefore should be be
             // removed completely from beerocks including the BPL.
-            string_utils::copy_string(bh_enable->ssid(message::WIFI_SSID_MAX_LENGTH),
-                                      platform_settings.back_ssid, message::WIFI_SSID_MAX_LENGTH);
-            string_utils::copy_string(bh_enable->pass(message::WIFI_PASS_MAX_LENGTH),
-                                      platform_settings.back_pass, message::WIFI_PASS_MAX_LENGTH);
+            string_utils::copy_string(bh_enable->ssid(beerocks_message::WIFI_SSID_MAX_LENGTH),
+                                      platform_settings.back_ssid,
+                                      beerocks_message::WIFI_SSID_MAX_LENGTH);
+            string_utils::copy_string(bh_enable->pass(beerocks_message::WIFI_PASS_MAX_LENGTH),
+                                      platform_settings.back_pass,
+                                      beerocks_message::WIFI_PASS_MAX_LENGTH);
             bh_enable->security_type() = static_cast<uint32_t>(
                 platform_to_bwl_security(platform_settings.back_security_type));
             bh_enable->mem_only_psk() = platform_settings.mem_only_psk;
             bh_enable->backhaul_preferred_radio_band() =
                 platform_settings.backhaul_preferred_radio_band;
 
-            string_utils::copy_string(bh_enable->wire_iface(message::IFACE_NAME_LENGTH),
+            string_utils::copy_string(bh_enable->wire_iface(beerocks_message::IFACE_NAME_LENGTH),
                                       config.backhaul_wire_iface.c_str(),
-                                      message::IFACE_NAME_LENGTH);
+                                      beerocks_message::IFACE_NAME_LENGTH);
 
             bh_enable->wire_iface_type()     = config.backhaul_wire_iface_type;
             bh_enable->wireless_iface_type() = config.backhaul_wireless_iface_type;
@@ -3200,11 +3208,11 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             network_utils::mac_from_string(config.backhaul_preferred_bssid);
 
         // necessary to erase all pending enable slaves on backhaul manager
-        string_utils::copy_string(bh_enable->ap_iface(message::IFACE_NAME_LENGTH),
-                                  config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
-        string_utils::copy_string(bh_enable->sta_iface(message::IFACE_NAME_LENGTH),
+        string_utils::copy_string(bh_enable->ap_iface(beerocks_message::IFACE_NAME_LENGTH),
+                                  config.hostap_iface.c_str(), beerocks_message::IFACE_NAME_LENGTH);
+        string_utils::copy_string(bh_enable->sta_iface(beerocks_message::IFACE_NAME_LENGTH),
                                   config.backhaul_wireless_iface.c_str(),
-                                  message::IFACE_NAME_LENGTH);
+                                  beerocks_message::IFACE_NAME_LENGTH);
 
         auto tuple_supported_channels = bh_enable->supported_channels_list(0);
         if (!std::get<0>(tuple_supported_channels)) {
@@ -3212,7 +3220,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             break;
         }
 
-        std::copy_n(hostap_params.supported_channels, message::SUPPORTED_CHANNELS_LENGTH,
+        std::copy_n(hostap_params.supported_channels, beerocks_message::SUPPORTED_CHANNELS_LENGTH,
                     &std::get<1>(tuple_supported_channels));
 
         // Send the message
@@ -3336,7 +3344,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
+        std::array<beerocks::message::sWifiChannel, beerocks_message::SUPPORTED_CHANNELS_LENGTH>
             supported_channels;
         std::copy_n(std::begin(hostap_params.supported_channels), supported_channels.size(),
                     supported_channels.begin());
@@ -3367,8 +3375,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             is_backhual_reconf              = false;
 
             // Version
-            string_utils::copy_string(notification->slave_version(message::VERSION_LENGTH),
-                                      BEEROCKS_VERSION, message::VERSION_LENGTH);
+            string_utils::copy_string(notification->slave_version(beerocks_message::VERSION_LENGTH),
+                                      BEEROCKS_VERSION, beerocks_message::VERSION_LENGTH);
 
             // Platform Configuration
             notification->low_pass_filter_on()   = config.backhaul_wireless_iface_filter_low;
@@ -3405,10 +3413,11 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             }
 
             std::copy_n(backhaul_params.backhaul_scan_measurement_list,
-                        beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH,
+                        beerocks_message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH,
                         notification->backhaul_params().backhaul_scan_measurement_list);
 
-            for (unsigned int i = 0; i < message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
+            for (unsigned int i = 0; i < beerocks_message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH;
+                 i++) {
                 if (notification->backhaul_params().backhaul_scan_measurement_list[i].channel > 0) {
                     LOG(DEBUG)
                         << "mac = "
@@ -4107,7 +4116,7 @@ bool slave_thread::parse_intel_join_response(Socket *sd, beerocks::beerocks_head
     }
     message_com::send_cmdu(ap_manager_socket, cmdu_tx);
 
-    master_version.assign(joined_response->master_version(message::VERSION_LENGTH));
+    master_version.assign(joined_response->master_version(beerocks_message::VERSION_LENGTH));
 
     LOG(DEBUG) << "Version (Master/Slave): " << master_version << "/" << BEEROCKS_VERSION;
     auto slave_version_s  = version::version_from_string(BEEROCKS_VERSION);
@@ -4482,7 +4491,7 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
 
     // According to design only Resticted channels should be included in channel selection request
     if (switch_required) {
-        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+        for (uint8_t i = 0; i < beerocks_message::SUPPORTED_CHANNELS_LENGTH; i++) {
             if (hostap_params.supported_channels[i].channel == 0)
                 continue;
             for (auto preference : channel_preferences) {

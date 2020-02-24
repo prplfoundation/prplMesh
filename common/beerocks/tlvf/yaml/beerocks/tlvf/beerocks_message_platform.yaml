@@ -20,7 +20,7 @@ cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST:
   _type: class
   iface_name:
     _type: char    
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+    _length: [ IFACE_NAME_LENGTH ]
 
 cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE:
   _type: class
@@ -46,7 +46,7 @@ cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION:
   ipv4: beerocks::net::sIpv4Addr 
   hostname: 
     _type: char 
-    _length: [ "beerocks::message::NODE_NAME_LENGTH" ]
+    _length: [ NODE_NAME_LENGTH ]
 
 cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL:
   _type: class
@@ -75,7 +75,7 @@ cACTION_PLATFORM_WPS_ONBOARDING_REQUEST:
   _type: class
   iface_name: 
     _type: char 
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+    _length: [ IFACE_NAME_LENGTH ]
 
 cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST:
   _type: class
@@ -139,6 +139,6 @@ cACTION_PLATFORM_ERROR_NOTIFICATION:
   code: uint32_t 
   data: 
     _type: char 
-    _length: [ 256 ]
+    _length: [ PLATFORM_ERROR_DATA_SIZE ]
     _comment: # Must match BPL_ERROR_STRING_LEN
 

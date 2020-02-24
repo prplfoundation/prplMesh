@@ -1603,9 +1603,10 @@ bool master_thread::handle_intel_slave_join(
         return false;
     }
 
-    std::string slave_version = std::string(notification->slave_version(message::VERSION_LENGTH));
-    std::string radio_mac     = network_utils::mac_to_string(notification->hostap().iface_mac);
-    std::string gw_ipv4 = network_utils::ipv4_to_string(notification->backhaul_params().gw_ipv4);
+    std::string slave_version =
+        std::string(notification->slave_version(beerocks_message::VERSION_LENGTH));
+    std::string radio_mac = network_utils::mac_to_string(notification->hostap().iface_mac);
+    std::string gw_ipv4   = network_utils::ipv4_to_string(notification->backhaul_params().gw_ipv4);
     std::string gw_bridge_mac =
         network_utils::mac_to_string(notification->backhaul_params().gw_bridge_mac);
     std::string parent_bssid_mac =
@@ -1817,7 +1818,7 @@ bool master_thread::handle_intel_slave_join(
     auto master_version_s = version::version_from_string(BEEROCKS_VERSION);
 
     string_utils::copy_string(join_response->master_version(), BEEROCKS_VERSION,
-                              message::VERSION_LENGTH);
+                              beerocks_message::VERSION_LENGTH);
 
     // check if fatal mismatch
     if (slave_version_s.major != master_version_s.major ||
@@ -1828,8 +1829,8 @@ bool master_thread::handle_intel_slave_join(
         LOG(INFO) << " bridge_mac=" << bridge_mac << " bridge_ipv4=" << bridge_ipv4;
 
         join_response->err_code() = beerocks::JOIN_RESP_VERSION_MISMATCH;
-        string_utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
-                                  BEEROCKS_VERSION, message::VERSION_LENGTH);
+        string_utils::copy_string(join_response->master_version(beerocks_message::VERSION_LENGTH),
+                                  BEEROCKS_VERSION, beerocks_message::VERSION_LENGTH);
         return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
     }
 
@@ -1932,7 +1933,7 @@ bool master_thread::handle_intel_slave_join(
     database.set_node_manufacturer(radio_mac, "Intel");
 
     database.set_hostap_supported_channels(radio_mac, notification->hostap().supported_channels,
-                                           message::SUPPORTED_CHANNELS_LENGTH);
+                                           beerocks_message::SUPPORTED_CHANNELS_LENGTH);
 
     if (database.get_node_5ghz_support(radio_mac)) {
         if (notification->low_pass_filter_on()) {
@@ -1957,8 +1958,8 @@ bool master_thread::handle_intel_slave_join(
     // send JOINED_RESPONSE with son config
     {
 
-        string_utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
-                                  BEEROCKS_VERSION, message::VERSION_LENGTH);
+        string_utils::copy_string(join_response->master_version(beerocks_message::VERSION_LENGTH),
+                                  BEEROCKS_VERSION, beerocks_message::VERSION_LENGTH);
         join_response->config().monitor_total_ch_load_notification_hi_th_percent =
             database.config.monitor_total_ch_load_notification_hi_th_percent;
         join_response->config().monitor_total_ch_load_notification_lo_th_percent =
@@ -2020,10 +2021,10 @@ bool master_thread::handle_intel_slave_join(
         }
 
         std::copy_n(notification->backhaul_params().backhaul_scan_measurement_list,
-                    beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH,
+                    beerocks_message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH,
                     cs_new_event->backhaul_scan_measurement_list);
 
-        for (unsigned int i = 0; i < message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
+        for (unsigned int i = 0; i < beerocks_message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
             if (cs_new_event->backhaul_scan_measurement_list[i].channel > 0) {
                 LOG(DEBUG) << "mac = " << cs_new_event->backhaul_scan_measurement_list[i].mac
                            << " channel = "
@@ -2069,9 +2070,9 @@ bool master_thread::autoconfig_wsc_parse_radio_caps(
 {
     // read all operating class list
     auto operating_classes_list_length = radio_caps->operating_classes_info_list_length();
-    if (operating_classes_list_length > beerocks::message::SUPPORTED_CHANNELS_LENGTH) {
+    if (operating_classes_list_length > beerocks_message::SUPPORTED_CHANNELS_LENGTH) {
         LOG(WARNING) << "operating class info list larger then maximum supported channels";
-        operating_classes_list_length = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
+        operating_classes_list_length = beerocks_message::SUPPORTED_CHANNELS_LENGTH;
     }
     for (int oc_idx = 0; oc_idx < operating_classes_list_length; oc_idx++) {
         std::stringstream ss;
@@ -2390,8 +2391,8 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         new_event->hostap_mac         = network_utils::mac_from_string(hostap_mac);
         new_event->cs_params          = notification->cs_params();
         auto tuple_supported_channels = notification->supported_channels(0);
-        std::copy_n(&std::get<1>(tuple_supported_channels), message::SUPPORTED_CHANNELS_LENGTH,
-                    new_event->supported_channels);
+        std::copy_n(&std::get<1>(tuple_supported_channels),
+                    beerocks_message::SUPPORTED_CHANNELS_LENGTH, new_event->supported_channels);
         tasks.push_event(database.get_channel_selection_task_id(),
                          (int)channel_selection_task::eEvent::ACS_RESPONSE_EVENT,
                          (void *)new_event);
@@ -2848,8 +2849,8 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
                 LOG(ERROR) << "set node ipv4 failed";
             }
 
-            if (!database.set_node_name(
-                    client_mac, std::string(notification_in->name(message::NODE_NAME_LENGTH)))) {
+            if (!database.set_node_name(client_mac, std::string(notification_in->name(
+                                                        beerocks_message::NODE_NAME_LENGTH)))) {
                 LOG(ERROR) << "set node name failed";
             }
 

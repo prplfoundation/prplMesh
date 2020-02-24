@@ -438,7 +438,8 @@ void main_thread::send_dhcp_notification(std::string op, std::string mac, std::s
 
     dhcp_notif->mac()  = network_utils::mac_from_string(mac);
     dhcp_notif->ipv4() = network_utils::ipv4_from_string(ip);
-    string_utils::copy_string(dhcp_notif->hostname(0), hostname.c_str(), message::NODE_NAME_LENGTH);
+    string_utils::copy_string(dhcp_notif->hostname(0), hostname.c_str(),
+                              beerocks_message::NODE_NAME_LENGTH);
 
     // Get a slave socket
     Socket *sd = get_backhaul_socket();
@@ -629,7 +630,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             return false;
         }
         // Interface params
-        std::string strIfaceName = std::string(request->iface_name(message::IFACE_NAME_LENGTH));
+        std::string strIfaceName =
+            std::string(request->iface_name(beerocks_message::IFACE_NAME_LENGTH));
         LOG(DEBUG) << "Registering slave with interface = " << strIfaceName;
 
         add_slave_socket(sd, strIfaceName);
@@ -742,7 +744,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             LOG(ERROR) << "Failed building message!";
             return false;
         }
-        memset(response->params().user_password, 0, message::USER_PASS_LEN);
+        memset(response->params().user_password, 0, beerocks_message::USER_PASS_LEN);
 
         char pass[BPL_USER_PASS_LEN];
 
@@ -753,7 +755,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             response->result() = 1;
         }
 
-        string_utils::copy_string(response->params().user_password, pass, message::USER_PASS_LEN);
+        string_utils::copy_string(response->params().user_password, pass,
+                                  beerocks_message::USER_PASS_LEN);
 
         // Sent with unsafe because BML is reachable only on platform thread
         message_com::send_cmdu(sd, cmdu_tx);
@@ -773,9 +776,9 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
         if (!master_version.empty() && !slave_version.empty()) {
             string_utils::copy_string(response->versions().master_version, master_version.c_str(),
-                                      message::VERSION_LENGTH);
+                                      beerocks_message::VERSION_LENGTH);
             string_utils::copy_string(response->versions().slave_version, slave_version.c_str(),
-                                      message::VERSION_LENGTH);
+                                      beerocks_message::VERSION_LENGTH);
             response->result() = 1;
         } else {
             response->result() = 0;
@@ -905,8 +908,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         auto fill_credentials_msg = [](const int radio_dir, char *msg_ssid, char *msg_pass,
                                        uint8_t &msg_sec) -> bool {
-            memset(msg_ssid, 0, message::WIFI_SSID_MAX_LENGTH);
-            memset(msg_pass, 0, message::WIFI_PASS_MAX_LENGTH);
+            memset(msg_ssid, 0, beerocks_message::WIFI_SSID_MAX_LENGTH);
+            memset(msg_pass, 0, beerocks_message::WIFI_PASS_MAX_LENGTH);
 
             char ssid[BPL_SSID_LEN];
             char pass[BPL_PASS_LEN];
@@ -936,8 +939,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                 }
             }
 
-            string_utils::copy_string(msg_ssid, ssid, message::WIFI_SSID_MAX_LENGTH);
-            string_utils::copy_string(msg_pass, pass, message::WIFI_PASS_MAX_LENGTH);
+            string_utils::copy_string(msg_ssid, ssid, beerocks_message::WIFI_SSID_MAX_LENGTH);
+            string_utils::copy_string(msg_pass, pass, beerocks_message::WIFI_PASS_MAX_LENGTH);
 
             //clear the pwd in the memory
             memset(&pass, 0, sizeof(pass));
@@ -994,7 +997,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             break;
         }
 
-        std::string iface = request->iface_name(message::IFACE_NAME_LENGTH);
+        std::string iface = request->iface_name(beerocks_message::IFACE_NAME_LENGTH);
 
         work_queue.enqueue<void>(
             [this](std::string iface) {
@@ -1029,21 +1032,21 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
 
         string_utils::copy_string(params.manufacturer, bpl_device_info.manufacturer,
-                                  message::DEV_INFO_STR_MAX_LEN);
+                                  beerocks_message::DEV_INFO_STR_MAX_LEN);
         string_utils::copy_string(params.model_name, bpl_device_info.model_name,
-                                  message::DEV_INFO_STR_MAX_LEN);
+                                  beerocks_message::DEV_INFO_STR_MAX_LEN);
         string_utils::copy_string(params.serial_number, bpl_device_info.serial_number,
-                                  message::DEV_INFO_STR_MAX_LEN);
+                                  beerocks_message::DEV_INFO_STR_MAX_LEN);
 
         // LAN
         string_utils::copy_string(params.lan_iface_name, bpl_device_info.lan_iface_name,
-                                  message::IFACE_NAME_LENGTH);
+                                  beerocks_message::IFACE_NAME_LENGTH);
         params.lan_ip_address   = bpl_device_info.lan_ip_address;
         params.lan_network_mask = bpl_device_info.lan_network_mask;
 
         // WAN
         string_utils::copy_string(params.wan_iface_name, bpl_device_info.wan_iface_name,
-                                  message::IFACE_NAME_LENGTH);
+                                  beerocks_message::IFACE_NAME_LENGTH);
         params.wan_ip_address   = bpl_device_info.wan_ip_address;
         params.wan_network_mask = bpl_device_info.wan_network_mask;
 

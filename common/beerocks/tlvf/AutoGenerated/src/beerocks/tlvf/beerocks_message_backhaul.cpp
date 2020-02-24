@@ -45,7 +45,7 @@ bool cACTION_BACKHAUL_REGISTER_REQUEST::set_sta_iface(const char str[], size_t s
         TLVF_LOG(WARNING) << "set_sta_iface received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::IFACE_NAME_LENGTH) {
+    if (size > IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -72,7 +72,7 @@ bool cACTION_BACKHAUL_REGISTER_REQUEST::set_hostap_iface(const char str[], size_
         TLVF_LOG(WARNING) << "set_hostap_iface received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::IFACE_NAME_LENGTH) {
+    if (size > IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -139,8 +139,8 @@ bool cACTION_BACKHAUL_REGISTER_REQUEST::finalize()
 size_t cACTION_BACKHAUL_REGISTER_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // sta_iface
-    class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // hostap_iface
+    class_size += IFACE_NAME_LENGTH * sizeof(char); // sta_iface
+    class_size += IFACE_NAME_LENGTH * sizeof(char); // hostap_iface
     class_size += sizeof(uint8_t); // local_master
     class_size += sizeof(uint8_t); // local_gw
     class_size += sizeof(uint8_t); // sta_iface_filter_low
@@ -157,17 +157,17 @@ bool cACTION_BACKHAUL_REGISTER_REQUEST::init()
         return false;
     }
     m_sta_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (IFACE_NAME_LENGTH) << ") Failed!";
         return false;
     }
-    m_sta_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
+    m_sta_iface_idx__  = IFACE_NAME_LENGTH;
     m_hostap_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (IFACE_NAME_LENGTH) << ") Failed!";
         return false;
     }
-    m_hostap_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
+    m_hostap_iface_idx__  = IFACE_NAME_LENGTH;
     m_local_master = (uint8_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -367,7 +367,7 @@ bool cACTION_BACKHAUL_ENABLE::set_wire_iface(const char str[], size_t size) {
         TLVF_LOG(WARNING) << "set_wire_iface received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::IFACE_NAME_LENGTH) {
+    if (size > IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -394,7 +394,7 @@ bool cACTION_BACKHAUL_ENABLE::set_sta_iface(const char str[], size_t size) {
         TLVF_LOG(WARNING) << "set_sta_iface received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::IFACE_NAME_LENGTH) {
+    if (size > IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -421,7 +421,7 @@ bool cACTION_BACKHAUL_ENABLE::set_ap_iface(const char str[], size_t size) {
         TLVF_LOG(WARNING) << "set_ap_iface received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::IFACE_NAME_LENGTH) {
+    if (size > IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -448,7 +448,7 @@ bool cACTION_BACKHAUL_ENABLE::set_ssid(const char str[], size_t size) {
         TLVF_LOG(WARNING) << "set_ssid received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::WIFI_SSID_MAX_LENGTH) {
+    if (size > WIFI_SSID_MAX_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -475,7 +475,7 @@ bool cACTION_BACKHAUL_ENABLE::set_pass(const char str[], size_t size) {
         TLVF_LOG(WARNING) << "set_pass received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::WIFI_PASS_MAX_LENGTH) {
+    if (size > WIFI_PASS_MAX_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -521,7 +521,7 @@ void cACTION_BACKHAUL_ENABLE::class_swap()
     m_iface_mac->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_security_type));
     m_preferred_bssid->struct_swap();
-    for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
+    for (size_t i = 0; i < SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels_list[i].struct_swap();
     }
 }
@@ -558,18 +558,18 @@ size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // iface_mac
     class_size += sizeof(uint8_t); // iface_is_5ghz
-    class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // wire_iface
-    class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // sta_iface
-    class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // ap_iface
-    class_size += beerocks::message::WIFI_SSID_MAX_LENGTH * sizeof(char); // ssid
-    class_size += beerocks::message::WIFI_PASS_MAX_LENGTH * sizeof(char); // pass
+    class_size += IFACE_NAME_LENGTH * sizeof(char); // wire_iface
+    class_size += IFACE_NAME_LENGTH * sizeof(char); // sta_iface
+    class_size += IFACE_NAME_LENGTH * sizeof(char); // ap_iface
+    class_size += WIFI_SSID_MAX_LENGTH * sizeof(char); // ssid
+    class_size += WIFI_PASS_MAX_LENGTH * sizeof(char); // pass
     class_size += sizeof(uint32_t); // security_type
     class_size += sizeof(sMacAddr); // preferred_bssid
     class_size += sizeof(uint8_t); // wire_iface_type
     class_size += sizeof(uint8_t); // wireless_iface_type
     class_size += sizeof(uint8_t); // mem_only_psk
     class_size += sizeof(uint8_t); // backhaul_preferred_radio_band
-    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
+    class_size += SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
     return class_size;
 }
 
@@ -591,35 +591,35 @@ bool cACTION_BACKHAUL_ENABLE::init()
         return false;
     }
     m_wire_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (IFACE_NAME_LENGTH) << ") Failed!";
         return false;
     }
-    m_wire_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
+    m_wire_iface_idx__  = IFACE_NAME_LENGTH;
     m_sta_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (IFACE_NAME_LENGTH) << ") Failed!";
         return false;
     }
-    m_sta_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
+    m_sta_iface_idx__  = IFACE_NAME_LENGTH;
     m_ap_iface = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (IFACE_NAME_LENGTH) << ") Failed!";
         return false;
     }
-    m_ap_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
+    m_ap_iface_idx__  = IFACE_NAME_LENGTH;
     m_ssid = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::WIFI_SSID_MAX_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::WIFI_SSID_MAX_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (WIFI_SSID_MAX_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (WIFI_SSID_MAX_LENGTH) << ") Failed!";
         return false;
     }
-    m_ssid_idx__  = beerocks::message::WIFI_SSID_MAX_LENGTH;
+    m_ssid_idx__  = WIFI_SSID_MAX_LENGTH;
     m_pass = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::WIFI_PASS_MAX_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::WIFI_PASS_MAX_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (WIFI_PASS_MAX_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (WIFI_PASS_MAX_LENGTH) << ") Failed!";
         return false;
     }
-    m_pass_idx__  = beerocks::message::WIFI_PASS_MAX_LENGTH;
+    m_pass_idx__  = WIFI_PASS_MAX_LENGTH;
     m_security_type = (uint32_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
@@ -652,13 +652,13 @@ bool cACTION_BACKHAUL_ENABLE::init()
         return false;
     }
     m_supported_channels_list = (beerocks::message::sWifiChannel*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (SUPPORTED_CHANNELS_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
         return false;
     }
-    m_supported_channels_list_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
+    m_supported_channels_list_idx__  = SUPPORTED_CHANNELS_LENGTH;
     if (!m_parse__) {
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
+        for (size_t i = 0; i < SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
     }
     if (m_parse__) { class_swap(); }
     return true;

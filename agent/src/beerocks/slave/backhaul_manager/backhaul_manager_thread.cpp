@@ -308,7 +308,7 @@ void backhaul_manager::platform_notify_error(bpl::eErrorCode code, const std::st
     error->code() = uint32_t(code);
 
     string_utils::copy_string(error->data(0), error_data.c_str(),
-                              message::PLATFORM_ERROR_DATA_SIZE);
+                              beerocks_message::PLATFORM_ERROR_DATA_SIZE);
 
     LOG(ERROR) << "platform_notify_error: " << error_data;
 
@@ -1457,8 +1457,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             return false;
         }
 
-        soc->sta_iface.assign(request->sta_iface(message::IFACE_NAME_LENGTH));
-        soc->hostap_iface.assign(request->hostap_iface(message::IFACE_NAME_LENGTH));
+        soc->sta_iface.assign(request->sta_iface(beerocks_message::IFACE_NAME_LENGTH));
+        soc->hostap_iface.assign(request->hostap_iface(beerocks_message::IFACE_NAME_LENGTH));
         soc->ruid = request->ruid();
         soc->operational_on_registration =
             FSM_IS_IN_STATE(OPERATIONAL) || FSM_IS_IN_STATE(CONNECTED);
@@ -1516,7 +1516,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
         auto channels = &std::get<1>(tuple_supported_channels);
 
-        std::copy_n(channels, beerocks::message::SUPPORTED_CHANNELS_LENGTH,
+        std::copy_n(channels, beerocks_message::SUPPORTED_CHANNELS_LENGTH,
                     m_radio_info_map[request->iface_mac()].supported_channels.begin());
 
         soc->radio_mac             = mac;
@@ -1540,7 +1540,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             }
             message_com::send_cmdu(soc->slave, cmdu_tx);
         } else {
-            pending_slave_ifaces.erase(request->ap_iface(message::IFACE_NAME_LENGTH));
+            pending_slave_ifaces.erase(request->ap_iface(beerocks_message::IFACE_NAME_LENGTH));
 
             if (pending_slave_ifaces.empty()) {
 
@@ -1558,8 +1558,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
                     m_sConfig.preferred_bssid =
                         network_utils::mac_to_string(request->preferred_bssid());
-                    m_sConfig.ssid.assign(request->ssid(message::WIFI_SSID_MAX_LENGTH));
-                    m_sConfig.pass.assign(request->pass(message::WIFI_PASS_MAX_LENGTH));
+                    m_sConfig.ssid.assign(request->ssid(beerocks_message::WIFI_SSID_MAX_LENGTH));
+                    m_sConfig.pass.assign(request->pass(beerocks_message::WIFI_PASS_MAX_LENGTH));
                     m_sConfig.security_type = static_cast<bwl::WiFiSec>(request->security_type());
                     m_sConfig.mem_only_psk  = request->mem_only_psk();
                     if (request->backhaul_preferred_radio_band() ==
@@ -1575,7 +1575,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
                     if (m_sConfig.security_type == bwl::WiFiSec::WPA_WPA2_PSK) {
                         m_sConfig.security_type = bwl::WiFiSec::WPA2_PSK;
                     }
-                    m_sConfig.wire_iface.assign(request->wire_iface(message::IFACE_NAME_LENGTH));
+                    m_sConfig.wire_iface.assign(
+                        request->wire_iface(beerocks_message::IFACE_NAME_LENGTH));
                     m_sConfig.wire_iface_type = (beerocks::eIfaceType)request->wire_iface_type();
 
                     LOG(DEBUG) << "All slaves ready, proceeding" << std::endl
@@ -2039,7 +2040,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             auto radio_bss_list           = radio_list->create_radio_bss_list();
             radio_bss_list->radio_bssid() = vap.mac;
             auto ssid =
-                std::string(vap.ssid, strnlen(vap.ssid, beerocks::message::WIFI_SSID_MAX_LENGTH));
+                std::string(vap.ssid, strnlen(vap.ssid, beerocks_message::WIFI_SSID_MAX_LENGTH));
             radio_bss_list->set_ssid(ssid);
             radio_list->add_radio_bss_list(radio_bss_list);
         }

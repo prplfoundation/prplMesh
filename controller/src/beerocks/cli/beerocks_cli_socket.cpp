@@ -808,7 +808,7 @@ int cli_socket::client_beacon_11k_req(std::string client_mac, std::string bssid,
     if (!ssid.empty()) {
         request->use_optional_ssid() = true;
         string_utils::copy_string((char *)request->ssid(), ssid.c_str(),
-                                  message::WIFI_SSID_MAX_LENGTH);
+                                  beerocks_message::WIFI_SSID_MAX_LENGTH);
     }
     wait_response = true;
     message_com::send_cmdu(master_socket, cmdu_tx);

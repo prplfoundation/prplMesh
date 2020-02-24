@@ -21,6 +21,14 @@
 
 namespace bwl {
 
+#define SSID_MAX_SIZE 33              // beerocks_message::WIFI_SSID_MAX_LENGTH
+#define RESTRICTED_CHANNEL_LENGTH 40  // beerocks_message::RESTRICTED_CHANNEL_LENGTH
+#define MAX_SUPPORTED_20M_CHANNELS 64 // beerocks_message::SUPPORTED_CHANNELS_LENGTH
+#define IFACE_NAME_LENGTH 33
+#define MAC_ADDR_SIZE 18
+#define MAX_SUPPORTED_CHANNELS                                                                     \
+    (MAX_SUPPORTED_20M_CHANNELS * 4) //max 64 channels, each with BW 20/40/80/160
+
 enum class HALType {
     Invalid = 0,
 
@@ -101,7 +109,7 @@ struct hal_conf_t {
 //sta_wlan_hal
 typedef struct {
     beerocks::net::sScanResult result;
-    char iface_name[beerocks::message::IFACE_NAME_LENGTH];
+    char iface_name[IFACE_NAME_LENGTH];
     uint16_t rx_phy_rate_100kb;
     uint16_t tx_phy_rate_100kb;
     int8_t rx_rssi;
@@ -252,11 +260,6 @@ typedef struct {
     int8_t vap_id;
 } sHOSTAP_ENABLED_NOTIFICATION;
 
-#define SSID_MAX_SIZE beerocks::message::WIFI_SSID_MAX_LENGTH
-#define MAC_ADDR_SIZE 18
-#define MAX_SUPPORTED_20M_CHANNELS beerocks::message::SUPPORTED_CHANNELS_LENGTH
-#define MAX_SUPPORTED_CHANNELS                                                                     \
-    (MAX_SUPPORTED_20M_CHANNELS * 4) //max 64 channels, each with BW 20/40/80/160
 } // namespace bwl
 
 #endif // _BWL_BASE_WLAN_HAL_TYPES_H_

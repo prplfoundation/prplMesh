@@ -308,7 +308,8 @@ bool db::set_global_restricted_channels(uint8_t *restricted_channels)
         return false;
     }
     global_restricted_channels.clear();
-    std::copy(restricted_channels, restricted_channels + message::RESTRICTED_CHANNEL_LENGTH,
+    std::copy(restricted_channels,
+              restricted_channels + beerocks_message::RESTRICTED_CHANNEL_LENGTH,
               std::back_inserter(global_restricted_channels));
     return true;
 }
@@ -329,7 +330,8 @@ bool db::set_hostap_conf_restricted_channels(std::string hostap_mac, uint8_t *re
         return false;
     }
     n->hostap->conf_restricted_channels.clear();
-    std::copy(restricted_channels, restricted_channels + message::RESTRICTED_CHANNEL_LENGTH,
+    std::copy(restricted_channels,
+              restricted_channels + beerocks_message::RESTRICTED_CHANNEL_LENGTH,
               std::back_inserter(n->hostap->conf_restricted_channels));
     for (auto elm : n->hostap->conf_restricted_channels) {
         LOG(WARNING) << __FUNCTION__ << " elm = " << int(elm);
