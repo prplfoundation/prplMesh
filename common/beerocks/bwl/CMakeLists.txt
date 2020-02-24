@@ -103,15 +103,19 @@ elseif(BWL_TYPE STREQUAL "NL80211")
 
     list(APPEND BWL_LIBS nl-tiny)
 
-elseif(BWL_TYPE STREQUAL "DUMMY")
+else()
 
-    set(bwl_platform_sources
-        ${bwl_platform_sources}
-        ${MODULE_PATH}/dummy/mon_wlan_hal_dummy.cpp
-        ${MODULE_PATH}/dummy/ap_wlan_hal_dummy.cpp
-        ${MODULE_PATH}/dummy/base_wlan_hal_dummy.cpp
-        ${MODULE_PATH}/dummy/sta_wlan_hal_dummy.cpp
-    )
+    string(TOLOWER ${BWL_TYPE} BWL_PATH)
+
+    if(EXISTS ${MODULE_PATH}/${BWL_PATH})
+        set(bwl_platform_sources
+            ${bwl_platform_sources}
+	    ${MODULE_PATH}/${BWL_PATH}/mon_wlan_hal_${BWL_PATH}.cpp
+	    ${MODULE_PATH}/${BWL_PATH}/ap_wlan_hal_${BWL_PATH}.cpp
+	    ${MODULE_PATH}/${BWL_PATH}/base_wlan_hal_${BWL_PATH}.cpp
+	    ${MODULE_PATH}/${BWL_PATH}/sta_wlan_hal_${BWL_PATH}.cpp
+        )
+     endif()
 
 endif()
 
