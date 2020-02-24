@@ -43,13 +43,18 @@ main() {
         esac
     done
 
-    while read -r container; do
-        docker "$stop_cmd" "${container}" >/dev/null 2>&1
-        if [ "$remove" = true ] ; then
-            docker rm "${container}" >/dev/null 2>&1
-        fi
-    done <"$containers_file"
+    grep -v '^network ' "$containers_file" |\
+        while read -r container; do
+            docker "$stop_cmd" "${container}" >/dev/null 2>&1
+            if [ "$remove" = true ] ; then
+                docker rm "${container}" >/dev/null 2>&1
+            fi
+        done
 
+    sed -n '/^network \(.*\)$/s//\1/p' "$containers_file" |\
+        while read -r network; do
+            docker network rm "${network}" >/dev/null 2>&1
+        done
 }
 
 main "$@"
