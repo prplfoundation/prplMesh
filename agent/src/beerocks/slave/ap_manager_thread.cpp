@@ -1171,6 +1171,12 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
         notification->vap_id()       = msg->params.vap_id;
         notification->bssid()        = network_utils::mac_from_string(vap_node->second.mac);
         notification->capabilities() = msg->params.capabilities;
+        if (!msg->params.association_frame) {
+            LOG(DEBUG) << "no association frame";
+        } else {
+            notification->set_association_frame(msg->params.association_frame,
+                                                msg->params.association_frame_length);
+        }
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
 
