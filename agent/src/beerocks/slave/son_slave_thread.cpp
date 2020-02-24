@@ -1338,7 +1338,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
         }
 
         response_out->params()            = response_in->params();
-        response_out->params().src_module = beerocks::BEEROCKS_ENTITY_BACKHAUL_MANAGER;
+        response_out->params().src_module = beerocks_message::BEEROCKS_ENTITY_BACKHAUL_MANAGER;
         send_cmdu_to_controller(cmdu_tx);
         break;
     }
@@ -1851,7 +1851,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
 
         response_out->params()            = response_in->params();
-        response_out->params().src_module = beerocks::BEEROCKS_ENTITY_AP_MANAGER;
+        response_out->params().src_module = beerocks_message::BEEROCKS_ENTITY_AP_MANAGER;
         send_cmdu_to_controller(cmdu_tx);
         break;
     }
@@ -2437,7 +2437,7 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
         }
 
         response_out->params()            = response_in->params();
-        response_out->params().src_module = beerocks::BEEROCKS_ENTITY_MONITOR;
+        response_out->params().src_module = beerocks_message::BEEROCKS_ENTITY_MONITOR;
         send_cmdu_to_controller(cmdu_tx);
         break;
     }

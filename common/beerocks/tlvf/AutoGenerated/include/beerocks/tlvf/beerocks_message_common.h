@@ -335,12 +335,13 @@ typedef struct sNodeRssiMeasurement {
     int8_t rx_rssi;
     uint8_t rx_snr;
     int8_t rx_packets;
-    uint8_t src_module;
+    eBeeRocksEntities src_module;
     int8_t vap_id;
     void struct_swap(){
         result.struct_swap();
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&rx_phy_rate_100kb));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&tx_phy_rate_100kb));
+        tlvf_swap(8*sizeof(eBeeRocksEntities), reinterpret_cast<uint8_t*>(&src_module));
     }
     void struct_init(){
         result.struct_init();

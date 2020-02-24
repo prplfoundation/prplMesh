@@ -235,7 +235,7 @@ sNodeRssiMeasurement:
   rx_rssi: int8_t
   rx_snr: uint8_t
   rx_packets: int8_t
-  src_module: uint8_t 
+  src_module: eBeeRocksEntities 
   vap_id: int8_t
 
 sNodeHostap:

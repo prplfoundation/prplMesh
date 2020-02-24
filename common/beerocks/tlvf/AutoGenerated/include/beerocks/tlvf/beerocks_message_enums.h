@@ -51,6 +51,16 @@ enum eBeeRocksProcesses: uint8_t {
     BEEROCKS_PROCESS_PLATFORM = 0x5,
 };
 
+enum eBeeRocksEntities: uint8_t {
+    BEEROCKS_ENTITY_NONE = 0x0,
+    BEEROCKS_ENTITY_MASTER = 0x1,
+    BEEROCKS_ENTITY_SLAVE = 0x2,
+    BEEROCKS_ENTITY_AP_MANAGER = 0x3,
+    BEEROCKS_ENTITY_MONITOR = 0x4,
+    BEEROCKS_ENTITY_BACKHAUL_MANAGER = 0x5,
+    BEEROCKS_ENTITY_PLATFORM_MANAGER = 0x6,
+};
+
 enum eWiFiSec: uint8_t {
     eWiFiSec_None = 0x0,
     eWiFiSec_WEP64 = 0x1,
