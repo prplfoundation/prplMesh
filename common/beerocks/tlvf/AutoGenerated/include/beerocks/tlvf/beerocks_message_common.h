@@ -179,6 +179,7 @@ typedef struct sClientAssociationParams {
     sMacAddr bssid;
     beerocks::message::sRadioCapabilities capabilities;
     int8_t vap_id;
+    char association_frame[beerocks::message::ASSOCIATION_MAX_LENGTH];
     void struct_swap(){
         mac.struct_swap();
         bssid.struct_swap();
