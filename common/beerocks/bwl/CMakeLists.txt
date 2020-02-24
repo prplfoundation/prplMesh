@@ -115,7 +115,9 @@ else()
 	    ${MODULE_PATH}/${BWL_PATH}/base_wlan_hal_${BWL_PATH}.cpp
 	    ${MODULE_PATH}/${BWL_PATH}/sta_wlan_hal_${BWL_PATH}.cpp
         )
-     endif()
+    else()
+        message( FATAL_ERROR "BWL_TYPE not found" )
+    endif()
 
 endif()
 
