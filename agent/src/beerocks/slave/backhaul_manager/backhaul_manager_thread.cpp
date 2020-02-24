@@ -1735,10 +1735,32 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             return false;
         }
 
+        //remove this client from other radios
+        for (const auto &slave : m_radio_info_map) {
+            auto associated_clients_map = slave.second.associated_clients_map;
+            for (const auto &vap : associated_clients_map) {
+                if (vap.second.find(msg->client_mac()) != vap.second.end()) {
+                    m_radio_info_map.erase(msg->client_mac());
+                }
+            }
+        }
         // Set client association information for associated client
+        std::string assoc_req;
+        if (!msg->association_frame()) {
+            LOG(DEBUG) << "no association frame";
+            assoc_req = "dummy";
+        } else {
+            std::string assoc_frame(msg->association_frame());
+            assoc_req = assoc_frame;
+        }
         auto &associated_clients =
             m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
-        associated_clients[msg->client_mac()] = std::chrono::steady_clock::now();
+
+        associated_clients[msg->client_mac()] =
+            make_tuple(std::chrono::steady_clock::now(), assoc_req);
+        auto associatedClientsTuple = associated_clients[msg->client_mac()];
+
+        LOG(DEBUG) << "association frame= " << std::get<1>(associatedClientsTuple);
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION: {
