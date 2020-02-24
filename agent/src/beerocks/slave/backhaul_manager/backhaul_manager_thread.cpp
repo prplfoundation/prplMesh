@@ -1856,11 +1856,15 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
     //with any of the BSS operated by the Multi-AP Agent [ though the TLV does contain a BSSID, the specification
     // says that we should answer if the client is associated with any BSS on this agent.]
     bool associated_client_found = false;
+    sMacAddr client_ruid;
+    sMacAddr client_vap;
     for (const auto &slave : m_radio_info_map) {
         auto associated_clients_map = slave.second.associated_clients_map;
         for (const auto &vap : associated_clients_map) {
             if (vap.second.find(client_info_tlv_r->client_mac()) != vap.second.end()) {
                 associated_client_found = true;
+                client_ruid             = slave.first;
+                client_vap              = vap.first;
                 break;
             }
         }
@@ -1886,18 +1890,22 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         return false;
     }
 
-    //if it is an error scenario, set Success status to 0x01 = Failure and do nothing after it.
+    // if it is an error scenario, set Success status to 0x01 = Failure and do nothing after it.
     if (associated_client_found) {
         client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::SUCCESS;
         LOG(DEBUG) << "Result Code: SUCCESS";
-        //TODO: Add frame body of the most recently received (Re)Association Request frame from this client
+        // Add frame body of the most recently received (Re)Association Request frame from this client
+        auto associated_clients = m_radio_info_map[client_ruid].associated_clients_map[client_vap];
+        auto associatedClientsTuple = associated_clients[client_info_tlv_r->client_mac()];
+        client_capability_report_tlv->set_association_frame(std::get<1>(associatedClientsTuple));
+
     } else {
         client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::FAILURE;
 
         LOG(DEBUG) << "Result Code: FAILURE";
         LOG(DEBUG) << "STA specified in the Client Capability Query message is not associated with "
                       "any of the BSS operated by the Multi-AP Agent ";
-        //Add an Error Code TLV
+        // Add an Error Code TLV
         auto error_code_tlv = cmdu_tx.addClass<wfa_map::tlvErrorCode>();
         if (!error_code_tlv) {
             LOG(ERROR) << "addClass wfa_map::tlvErrorCode has failed";
