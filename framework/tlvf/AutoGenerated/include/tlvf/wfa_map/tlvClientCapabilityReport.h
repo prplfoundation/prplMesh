@@ -41,7 +41,7 @@ class tlvClientCapabilityReport : public BaseClass
         const eTlvTypeMap& type();
         const uint16_t& length();
         eResultCode& result_code();
-        uint8_t& association_frame_length();
+        size_t association_frame_length() { return m_association_frame_idx__ * sizeof(uint8_t); }
         uint8_t* association_frame(size_t idx = 0);
         bool alloc_association_frame(size_t count = 1);
         void class_swap() override;
@@ -53,7 +53,6 @@ class tlvClientCapabilityReport : public BaseClass
         eTlvTypeMap* m_type = nullptr;
         uint16_t* m_length = nullptr;
         eResultCode* m_result_code = nullptr;
-        uint8_t* m_association_frame_length = nullptr;
         uint8_t* m_association_frame = nullptr;
         size_t m_association_frame_idx__ = 0;
         int m_lock_order_counter__ = 0;
