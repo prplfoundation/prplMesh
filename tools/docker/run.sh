@@ -82,6 +82,7 @@ main() {
     docker network inspect ${NETWORK} >/dev/null 2>&1 || {
         dbg "Network $NETWORK does not exist, creating..."
         run docker network create ${NETWORK} >/dev/null 2>&1
+        echo "network $NETWORK" >> "${scriptdir}/.test_containers"
     }
 
     [ -z "$IPADDR" -a -n "$NETWORK" ] && {
