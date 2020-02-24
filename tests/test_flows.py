@@ -11,6 +11,7 @@ import os
 import re
 import subprocess
 import sys
+import json
 
 
 class test_flows:
@@ -19,7 +20,7 @@ class test_flows:
 
         parser = argparse.ArgumentParser()
         parser.add_argument("--tcpdump", "-t", action='store_true', default=False,
-                            help="capture the packets during each test - UNINMPLEMENTED")
+                            help="capture the packets during each test")
         parser.add_argument("--verbose", "-v", action='store_true', default=False,
                             help="report each action")
         parser.add_argument("--stop-on-failure", "-s", action='store_true', default=False,
@@ -43,6 +44,7 @@ class test_flows:
 
         self.rootdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
         self.running = ''
+        self.tcpdump_proc = None
 
     def message(self, message: str, color: int = 0):
         '''Print a message, optionally in a color, preceded by the currently running test.'''
@@ -82,6 +84,34 @@ class test_flows:
         self.running = test
         self.status("starting")
 
+    def tcpdump_start(self):
+        '''Start tcpdump if enabled by config.'''
+        if self.opts.tcpdump:
+            outputfile = os.path.join(self.rootdir, 'logs', 'test_{}.pcap'.format(self.running))
+            self.debug("Starting tcpdump, output file {}".format(outputfile))
+            inspect = json.loads(subprocess.check_output(('docker', 'network', 'inspect',
+                                                          'prplMesh-net-{}'.format(self.opts.unique_id))))
+            bridge = inspect[0]['plugins'][0]['bridge']
+            self.tcpdump_proc = subprocess.Popen(["tcpdump", "-i", bridge, "-w", outputfile], stderr=subprocess.PIPE)
+            # tcpdump takes a while to start up. Wait for the appropriate output before continuing.
+            # poll() so we exit the loop if tcpdump terminates for any reason.
+            while not self.tcpdump_proc.poll():
+                line = self.tcpdump_proc.stderr.readline()
+                self.debug(line.decode()[:-1]) # strip off newline
+                if line.startswith(b"tcpdump: listening on " + bridge.encode()):
+                    self.tcpdump_proc.stderr.close() # Make sure it doesn't block due to stderr buffering
+                    break
+            else:
+                self.err("tcpdump terminated")
+                self.tcpdump_proc = None
+
+    def tcpdump_kill(self):
+        '''Stop tcpdump if it is running.'''
+        if self.tcpdump_proc:
+            self.status("Terminating tcpdump")
+            self.tcpdump_proc.terminate()
+            self.tcpdump_proc = None
+
     def init(self):
         '''Initialize the tests.'''
         self.start_test('init')
@@ -89,10 +119,13 @@ class test_flows:
         self.repeater1 = 'repeater1-' + self.opts.unique_id
         self.repeater2 = 'repeater2-' + self.opts.unique_id
         if not self.opts.skip_init:
-            subprocess.check_call((os.path.join(self.rootdir, "tests", "test_gw_repeater.sh"),
-                                   "-f", "-u", self.opts.unique_id, "-g", self.gateway,
-                                   "-r", self.repeater1, "-r", self.repeater2, "-d", "7"))
-
+            self.tcpdump_start()
+            try:
+                subprocess.check_call((os.path.join(self.rootdir, "tests", "test_gw_repeater.sh"),
+                                       "-f", "-u", self.opts.unique_id, "-g", self.gateway,
+                                       "-r", self.repeater1, "-r", self.repeater2, "-d", "7"))
+            finally:
+                self.tcpdump_kill()
 
     def check_log(self, device: str, program: str, regex: str) -> bool:
         '''Verify that on "device" the logfile for "program" matches "regex", fail if not.'''
@@ -112,8 +145,12 @@ class test_flows:
         total_errors = 0
         for test in self.opts.tests:
             self.start_test(test)
+            self.tcpdump_start()
             self.check_error = 0
-            getattr(self, 'test_' + test)()
+            try:
+                getattr(self, 'test_' + test)()
+            finally:
+                self.tcpdump_kill()
             if self.check_error != 0:
                 self.err("failed")
             else:
