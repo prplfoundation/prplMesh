@@ -1982,11 +1982,13 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             LOG(ERROR) << "addClass wfa_map::tlvSteeringBTMReport failed";
             return false;
         }
-        //TODO Add target/source BSSID
+        //TODO Add target BSSID
         steering_btm_report_tlv->sta_mac()         = response_in->params().mac;
         steering_btm_report_tlv->btm_status_code() = response_in->params().status_code;
+        steering_btm_report_tlv->bssid() = response_in->params().source_bssid;
 
         LOG(DEBUG) << "sending CLIENT_STEERING_BTM_REPORT_MESSAGE back to controller";
+        LOG(DEBUG) << "BTM report source bssid: " << steering_btm_report_tlv->bssid();
         send_cmdu_to_controller(cmdu_tx);
         break;
     }
