@@ -2543,6 +2543,15 @@ void MessageBuilder::initialize(Logger* logger) {
   m_logger = logger;
   m_containerLogSeperator = ELPP->hasFlag(LoggingFlag::NewLineForContainer) ?
                             ELPP_LITERAL("\n    ") : ELPP_LITERAL(", ");
+  if (ELPP->hasFlag(LoggingFlag::ForceDecBase)) {
+    m_logger->stream().setf(std::ios::dec);
+  }
+  if (ELPP->hasFlag(LoggingFlag::ShowBase)) {
+    m_logger->stream().setf(std::ios::showbase);
+  }
+  if (ELPP->hasFlag(LoggingFlag::BoolAlpha)) {
+    m_logger->stream().setf(std::ios::boolalpha);
+  }
 }
 
 MessageBuilder& MessageBuilder::operator<<(const wchar_t* msg) {
