@@ -60,12 +60,17 @@ class UCCSocket:
             command += "\n"
         self.conn.send(command.encode("utf-8"))
 
-    def get_reply(self) -> str:
+    def get_reply(self, verbose: bool = False) -> str:
         """Wait until the server replies with a `CAPIReply` message other than `CAPIReply.RUNNING`.
 
         The replies from the server will be printed as they are received.
         Note that this method only returns once a `CAPIReply.COMPLETE`, `CAPIReply.INVALID`,
         or `CAPIReply.ERROR` message has been received from the server.
+
+        Parameters
+        ----------
+        verbose : bool
+            If True, print out the valid replies (RUNNING and COMPLETE) as they arrive.
 
         Returns
         -------
@@ -84,9 +89,11 @@ class UCCSocket:
                 if not r:
                     pass  # server replied with an empty line
                 elif CAPIReply.RUNNING.value in r:
-                    print(r)
+                    if verbose:
+                        print(r)
                 elif CAPIReply.COMPLETE.value in r:
-                    print(r)
+                    if verbose:
+                        print(r)
                     return r
                 elif CAPIReply.INVALID.value in r or CAPIReply.ERROR.value in r:
                     raise ValueError("Server replied with {}".format(r))
@@ -104,4 +111,4 @@ if __name__ == "__main__":
 
     with UCCSocket(args.host, args.port) as sock:
         sock.send_cmd(args.command)
-        sock.get_reply()
+        sock.get_reply(True)
