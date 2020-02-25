@@ -725,8 +725,14 @@ enum class LoggingFlag : base::type::EnumType {
   AutoSpacing = 8192,
   /// @brief Preserves time format and does not convert it to sec, hour etc (performance tracking only)
   FixedTimeFormat = 16384,
-  // @brief Ignore SIGINT or crash
+  /// @brief Ignore SIGINT or crash
   IgnoreSigInt = 32768,
+  /// @brief Set the log to print integer on decimal format with every log-entry
+  ForceDecBase = 65536,
+  /// @brief Set the log to print the base of integer value according to iostream base flag
+  ShowBase = 131072,
+  /// @brief Set the log to print the booleans as "true" or "false" instead of "1" or "0"
+  BoolAlpha = 262144,
 };
 namespace base {
 /// @brief Namespace containing constants used internally.
