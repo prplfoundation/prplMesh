@@ -166,6 +166,9 @@ bool ap_wlan_hal_dummy::sta_bss_steer(const std::string &mac, const std::string 
 
     msg->params.mac         = beerocks::net::network_utils::mac_from_string(mac);
     msg->params.status_code = 0;
+    // source_bssid should be the vap bssid and not radio_mac, but
+    // dummy mode doesn't use vaps yet
+    msg->params.source_bssid = beerocks::net::network_utils::mac_from_string(get_radio_mac());
 
     // Add the message to the queue
     event_queue_push(Event::BSS_TM_Response, msg_buff);
