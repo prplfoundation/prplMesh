@@ -45,15 +45,15 @@ main() {
 
     grep -v '^network ' "$containers_file" |\
         while read -r container; do
-            docker "$stop_cmd" "${container}" >/dev/null 2>&1
+            docker "$stop_cmd" "${container}" >/dev/null 2>&1 || true
             if [ "$remove" = true ] ; then
-                docker rm "${container}" >/dev/null 2>&1
+                docker rm "${container}" >/dev/null 2>&1 || true
             fi
         done
 
     sed -n '/^network \(.*\)$/s//\1/p' "$containers_file" |\
         while read -r network; do
-            docker network rm "${network}" >/dev/null 2>&1
+            docker network rm "${network}" >/dev/null 2>&1 || true
         done
 }
 
