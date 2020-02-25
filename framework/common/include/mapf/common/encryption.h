@@ -36,6 +36,8 @@ public:
 
     ~diffie_hellman();
 
+    diffie_hellman &operator=(const diffie_hellman &) = delete;
+
     /**
      * @brief Compute the shared secret key
      *
