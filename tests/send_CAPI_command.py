@@ -110,6 +110,11 @@ class UCCSocket:
             self.send_cmd(command)
             return self.get_reply(verbose)
 
+    def dev_get_parameter(self, parameter: str) -> str:
+        """Call dev_get_parameter and return the parameter, or raise KeyError if it is missing."""
+        reply = self.cmd_reply("dev_get_parameter,program,map,parameter,{}".format(parameter))
+        return reply[parameter]
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Simulated UCC")
     parser.add_argument("host", help="The device hostname or IP.", type=str)
