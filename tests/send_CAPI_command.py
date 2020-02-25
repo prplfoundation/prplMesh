@@ -3,7 +3,7 @@ import argparse
 import logging
 import socket
 from enum import Enum
-from typing import Union
+from typing import Union, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class UCCSocket:
             command += "\n"
         self.conn.send(command.encode("utf-8"))
 
-    def get_reply(self, verbose: bool = False) -> str:
+    def get_reply(self, verbose: bool = False) -> Dict[str, str]:
         """Wait until the server replies with a `CAPIReply` message other than `CAPIReply.RUNNING`.
 
         The replies from the server will be printed as they are received.
@@ -74,8 +74,10 @@ class UCCSocket:
 
         Returns
         -------
-        str
-            The reply from the device.
+        Dict[str, str]
+            A mapping of parameter -> value. The CAPI COMPLETE message is followed by
+            parameter,value pairs. These are converted to a dict and returned. If the COMPLETE
+            message has no parameters, an empty dict is returned.
         """
         data = bytearray()
         while True:
@@ -94,13 +96,15 @@ class UCCSocket:
                 elif CAPIReply.COMPLETE.value in r:
                     if verbose:
                         print(r)
-                    return r
+                    reply_value_str = r[len(CAPIReply.COMPLETE.value) + 1:].strip()
+                    reply_values = reply_value_str.split(',')
+                    return {k: v for k, v in zip(reply_values[::2], reply_values[1::2])}
                 elif CAPIReply.INVALID.value in r or CAPIReply.ERROR.value in r:
                     raise ValueError("Server replied with {}".format(r))
                 else:
                     raise ValueError("Received an unknown reply from the server:\n {}".format(r))
 
-    def cmd_reply(self, command: str, verbose: bool = False) -> str:
+    def cmd_reply(self, command: str, verbose: bool = False) -> Dict[str, str]:
         """Open the connection, send a command and wait for the reply."""
         with self:
             self.send_cmd(command)
