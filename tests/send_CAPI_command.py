@@ -100,6 +100,11 @@ class UCCSocket:
                 else:
                     raise ValueError("Received an unknown reply from the server:\n {}".format(r))
 
+    def cmd_reply(self, command: str, verbose: bool = False) -> str:
+        """Open the connection, send a command and wait for the reply."""
+        with self:
+            self.send_cmd(command)
+            return self.get_reply(verbose)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Simulated UCC")
@@ -109,6 +114,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     socket.gethostbyname(args.host)
 
-    with UCCSocket(args.host, args.port) as sock:
-        sock.send_cmd(args.command)
-        sock.get_reply(True)
+    UCCSocket(args.host, args.port).cmd_reply(args.command, True)
