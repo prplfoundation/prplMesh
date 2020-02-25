@@ -2276,22 +2276,25 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
 
         char MACAddress[MAC_ADDR_SIZE] = {0};
         int status_code                = 0;
+        char vap_name[beerocks::message::IFACE_NAME_LENGTH] = {0};
         size_t numOfValidArgs[4]       = {0};
         FieldsToParse fieldsToParse[]  = {
             {NULL /*opCode*/, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0},
-            {NULL, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL, 0},
+            {(void*) vap_name, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL,
+             beerocks::message::IFACE_NAME_LENGTH},
             {(void *)MACAddress, &numOfValidArgs[2], DWPAL_STR_PARAM, NULL, sizeof(MACAddress)},
             {(void *)&status_code, &numOfValidArgs[3], DWPAL_INT_PARAM, "status_code=", 0},
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(MACAddress)) ==
-            DWPAL_FAILURE) {
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse,
+                                         sizeof(vap_name) + sizeof(MACAddress) + sizeof(status_code)) == DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }
 
         /* TEMP: Traces... */
+        LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " VAP name= " << vap_name;
         LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2] << " MACAddress= " << MACAddress;
         LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3]
                    << " status_code= " << int(status_code);
@@ -2305,6 +2308,10 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
 
         msg->params.mac         = beerocks::net::network_utils::mac_from_string(MACAddress);
         msg->params.status_code = status_code;
+        std::string bssid;
+        beerocks::net::network_utils::linux_iface_get_mac(vap_name, bssid);
+        LOG(DEBUG) << "BTM response source BSSID: " << bssid;
+        msg->params.source_bssid = beerocks::net::network_utils::mac_from_string(bssid);
 
         // Add the message to the queue
         event_queue_push(Event::BSS_TM_Response, msg_buff);
