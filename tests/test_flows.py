@@ -13,6 +13,7 @@ import subprocess
 import sys
 import json
 
+import send_CAPI_command
 
 class test_flows:
     def __init__(self):
@@ -43,8 +44,11 @@ class test_flows:
             parser.error("Unknown tests: {}".format(', '.join(unknown_tests)))
 
         self.rootdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
+        self.installdir = os.path.join(self.rootdir, 'build', 'install')
         self.running = ''
         self.tcpdump_proc = None
+        self.bridge_name = 'br-lan'
+
 
     def message(self, message: str, color: int = 0):
         '''Print a message, optionally in a color, preceded by the currently running test.'''
@@ -112,6 +116,24 @@ class test_flows:
             self.tcpdump_proc.terminate()
             self.tcpdump_proc = None
 
+    def docker_command(self, device: str, *command: str) -> bytes:
+        '''Execute `command` in docker container `device` and return its output.'''
+        return subprocess.check_output(("docker", "exec", device) + command)
+
+    def open_CAPI_socket(self, device: str, controller: bool = False) -> send_CAPI_command.UCCSocket:
+        '''Open a CAPI socket to the agent (or controller, if set) on "device".'''
+        # First, get the UCC port from the config file
+        if controller:
+            config_file_name = 'beerocks_controller.conf'
+        else:
+            config_file_name = 'beerocks_agent.conf'
+        with open(os.path.join(self.installdir, 'config', config_file_name)) as config_file:
+            ucc_port = re.search(r'ucc_listener_port=(?P<port>[0-9]+)', config_file.read()).group('port')
+
+        device_ip_output = self.docker_command(device, 'ip', '-f', 'inet', 'addr', 'show', self.bridge_name)
+        device_ip = re.search(r'inet (?P<ip>[0-9.]+)', device_ip_output.decode('utf-8')).group('ip')
+        return send_CAPI_command.UCCSocket(device_ip, ucc_port)
+
     def init(self):
         '''Initialize the tests.'''
         self.start_test('init')
@@ -126,6 +148,17 @@ class test_flows:
                                        "-r", self.repeater1, "-r", self.repeater2, "-d", "7"))
             finally:
                 self.tcpdump_kill()
+
+        self.gateway_ucc = self.open_CAPI_socket(self.gateway, True)
+        self.repeater1_ucc = self.open_CAPI_socket(self.repeater1)
+        self.repeater2_ucc = self.open_CAPI_socket(self.repeater2)
+
+        self.mac_gateway = self.gateway_ucc.dev_get_parameter('ALid')
+        self.debug('mac_gateway: {}'.format(self.mac_gateway))
+        self.mac_repeater1 = self.repeater1_ucc.dev_get_parameter('ALid')
+        self.debug('mac_repeater1: {}'.format(self.mac_repeater1))
+        self.mac_repeater2 = self.repeater2_ucc.dev_get_parameter('ALid')
+        self.debug('mac_repeater2: {}'.format(self.mac_repeater2))
 
     def check_log(self, device: str, program: str, regex: str) -> bool:
         '''Verify that on "device" the logfile for "program" matches "regex", fail if not.'''
