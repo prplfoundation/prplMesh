@@ -1919,7 +1919,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         client_association_event_tlv->association_event() =
             wfa_map::tlvClientAssociationEvent::CLIENT_HAS_LEFT_THE_BSS;
 
-        if (config.no_vendor_specific) {
+        if (platform_settings.no_vendor_specific) {
             LOG(DEBUG) << "non-Intel, not adding ClientAssociationEvent VS TLV";
         } else {
             // Add vendor specific tlv
@@ -2105,7 +2105,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         client_association_event_tlv->association_event() =
             wfa_map::tlvClientAssociationEvent::CLIENT_HAS_JOINED_THE_BSS;
 
-        if (config.no_vendor_specific) {
+        if (platform_settings.no_vendor_specific) {
             LOG(DEBUG) << "non-Intel, not adding ClientAssociationEvent VS TLV";
         } else {
             // Add vendor specific tlv
@@ -3354,7 +3354,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        if (config.no_vendor_specific) {
+        if (platform_settings.no_vendor_specific) {
             LOG(INFO) << "Configured as non-Intel, not sending SLAVE_JOINED_NOTIFICATION";
         } else {
             auto notification = message_com::add_vs_tlv<

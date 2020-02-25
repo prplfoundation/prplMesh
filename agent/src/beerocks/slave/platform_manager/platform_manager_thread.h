@@ -42,6 +42,7 @@ public:
         int management_mode;
         int operating_mode;
         int certification_mode;
+        int no_vendor_specific;
         int stop_on_failure_attempts;
         int local_gw;
         int local_master;

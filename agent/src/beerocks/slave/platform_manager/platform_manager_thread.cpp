@@ -161,6 +161,10 @@ static bool fill_platform_settings(
         LOG(ERROR) << "Failed reading 'stop_on_failure_attempts'";
         return false;
     }
+    if ((platform_common_conf.no_vendor_specific = bpl::cfg_get_no_vendor_specific()) < 0) {
+        LOG(ERROR) << "Failed reading 'no_vendor_specific'";
+        return false;
+    }
     if ((platform_common_conf.dfs_reentry = bpl::cfg_get_dfs_reentry()) < 0) {
         LOG(ERROR) << "Failed reading 'dfs_reentry'";
         return false;
@@ -209,6 +213,7 @@ static bool fill_platform_settings(
     msg->platform_settings().operating_mode     = uint8_t(platform_common_conf.operating_mode);
     msg->platform_settings().management_mode    = uint8_t(platform_common_conf.management_mode);
     msg->platform_settings().certification_mode = uint8_t(platform_common_conf.certification_mode);
+    msg->platform_settings().no_vendor_specific = uint8_t(platform_common_conf.no_vendor_specific);
     msg->platform_settings().stop_on_failure_attempts =
         uint8_t(platform_common_conf.stop_on_failure_attempts);
     msg->platform_settings().local_master      = uint8_t(platform_common_conf.local_master);

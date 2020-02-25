@@ -90,6 +90,7 @@ namespace bpl {
 #define DEFAULT_BAND_STEERING 1
 #define DEFAULT_DFS_REENTRY 1
 #define DEFAULT_CLIENT_ROAMING 1
+#define DEFAULT_NO_VENDOR_SPECIFIC 0
 
 /****************************************************************************/
 /******************************* Structures *********************************/
@@ -274,6 +275,14 @@ int cfg_get_certification_mode();
  * @return -1 Error.
  */
 int cfg_get_stop_on_failure_attempts();
+
+/**
+ * Returns whether the vendor specific messages are turned off
+ * @return 1 Messages are enabled
+ * @return 0 Messages are disabled
+ * @return -1 Error
+ */
+int cfg_get_no_vendor_specific();
 
 /**
  * Returns whether the platform is in onboarding state.

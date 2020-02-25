@@ -313,6 +313,17 @@ int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN])
     return cfg_get_prplmesh_radio_param(radio_num, "hostap_iface", hostap_iface, BPL_IFNAME_LEN);
 }
 
+int cfg_get_no_vendor_specific()
+{
+    int retVal = -1;
+    if (cfg_get_prplmesh_param_int_default("no_vendor_specific", &retVal,
+                                           DEFAULT_NO_VENDOR_SPECIFIC) == RETURN_ERR) {
+        MAPF_INFO("cfg_get_no_vendor_specific: Failed to read no_vendor_specific parameter\n");
+        return RETURN_ERR;
+    }
+    return retVal;
+}
+
 int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of_interfaces)
 {
     if (!interfaces) {
