@@ -513,6 +513,9 @@ void logging::apply_settings()
     el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);
     el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
     el::Loggers::addFlag(el::LoggingFlag::StrictLogFileSizeCheck);
+    el::Loggers::addFlag(el::LoggingFlag::ForceDecBase);
+    el::Loggers::addFlag(el::LoggingFlag::ShowBase);
+    el::Loggers::addFlag(el::LoggingFlag::BoolAlpha);
 
     auto logger = el::Loggers::getLogger("default");
     if (!logger) {
