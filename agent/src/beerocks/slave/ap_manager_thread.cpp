@@ -1219,6 +1219,8 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
 
         response->params().mac         = msg->params.mac;
         response->params().status_code = msg->params.status_code;
+        response->params().source_bssid = msg->params.source_bssid;
+        // TODO: add the optional target BSSID
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
 
