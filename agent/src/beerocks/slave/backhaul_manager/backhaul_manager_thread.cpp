@@ -2197,54 +2197,44 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
     auto tlvSupportedFreqBand = cmdu_rx.getClass<ieee1905_1::tlvSupportedFreqBand>();
     if (tlvSupportedFreqBand) {
         LOG(DEBUG) << "tlvSupportedFreqBand->value()=" << int(tlvSupportedFreqBand->value());
-
-        if (tlvSupportedFreqBand->value() == ieee1905_1::tlvSupportedFreqBand::BAND_2_4G) {
-            LOG(DEBUG) << "received auto-config reply for 2.4GHz band";
-            for (auto soc : slaves_sockets) {
-                if (soc->freq_type == beerocks::eFreqType::FREQ_24G) {
-                    LOG(DEBUG) << "2.4GHz band socket found, iface=" << soc->hostap_iface;
-                    if (!soc->controller_discovered) {
-                        LOG(DEBUG) << "set controller_discovered to true for 2.4GHz band, iface="
-                                   << soc->hostap_iface;
-                        LOG(DEBUG) << FSM_CURR_STATE_STR;
-                        soc->controller_discovered = true;
-                        controller_bridge_mac      = src_mac;
-                        // the backhaul was operational on slave registration.
-                        // This means that it was restarted and sending backhaul connected event
-                        // is required so that the slave will re-join the controller.
-                        if (soc->operational_on_registration) {
-                            finalize_slaves_connect_state(true, soc);
-                        }
-                    }
-                }
-            }
-        } else if (tlvSupportedFreqBand->value() == ieee1905_1::tlvSupportedFreqBand::BAND_5G) {
-            LOG(DEBUG) << "received auto-config reply for 5GHz band";
-            for (auto soc : slaves_sockets) {
-                if (soc->freq_type == beerocks::eFreqType::FREQ_5G) {
-                    LOG(DEBUG) << "5GHz band socket found, iface=" << soc->hostap_iface;
-                    if (!soc->controller_discovered) {
-                        LOG(DEBUG) << "set controller_discovered to true for 5GHz band, iface="
-                                   << soc->hostap_iface;
-                        LOG(DEBUG) << FSM_CURR_STATE_STR;
-                        soc->controller_discovered = true;
-                        controller_bridge_mac      = src_mac;
-                        // the backhaul was operational on slave registration.
-                        // This means that it was restarted and sending backhaul connected event
-                        // is required so that the slave will re-join the controller.
-                        if (soc->operational_on_registration) {
-                            finalize_slaves_connect_state(true, soc);
-                        }
-                    }
-                }
-            }
-        } else if (tlvSupportedFreqBand->value() == ieee1905_1::tlvSupportedFreqBand::BAND_60G) {
+        std::string band_name;
+        beerocks::eFreqType freq_type = beerocks::eFreqType::FREQ_UNKNOWN;
+        switch (tlvSupportedFreqBand->value()) {
+        case ieee1905_1::tlvSupportedFreqBand::BAND_2_4G:
+            band_name = "2.4GHz";
+            freq_type = beerocks::eFreqType::FREQ_24G;
+            break;
+        case ieee1905_1::tlvSupportedFreqBand::BAND_5G:
+            band_name = "5GHz";
+            freq_type = beerocks::eFreqType::FREQ_5G;
+            break;
+        case ieee1905_1::tlvSupportedFreqBand::BAND_60G:
             LOG(DEBUG) << "received auto-config reply for 60GHz band, unsupported";
             return true;
-        } else {
+        default:
             LOG(ERROR) << "invalid tlvSupportedFreqBand value";
             return true;
         }
+        LOG(DEBUG) << "received auto-config reply for " << band_name << " band";
+        for (auto soc : slaves_sockets) {
+            if (soc->freq_type == freq_type) {
+                LOG(DEBUG) << band_name << " band socket found, iface=" << soc->hostap_iface;
+                if (!soc->controller_discovered) {
+                    LOG(DEBUG) << "set controller_discovered to true for " << band_name
+                               << " band, iface=" << soc->hostap_iface;
+                    LOG(DEBUG) << FSM_CURR_STATE_STR;
+                    soc->controller_discovered = true;
+                    controller_bridge_mac      = src_mac;
+                    // the backhaul was operational on slave registration.
+                    // This means that it was restarted and sending backhaul connected event
+                    // is required so that the slave will re-join the controller.
+                    if (soc->operational_on_registration) {
+                        finalize_slaves_connect_state(true, soc);
+                    }
+                }
+            }
+        }
+
     } else {
         LOG(ERROR) << "tlvSupportedFreqBand missing - ignoring autconfig search message";
         return true;
