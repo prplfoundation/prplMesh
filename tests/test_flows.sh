@@ -13,9 +13,9 @@
 # since it uses all radios. A better solution would of course be to properly configure all APs,
 # but just doing the optimal_path_dummy test first is simpler for the time being.
 # FIXME optimal_path_dummy temporarily disabled since it's broken
-ALL_TESTS="topology initial_ap_config ap_config_renew ap_config_bss_tear_down channel_selection
-           ap_capability_query client_capability_query combined_infra_metrics
-           client_steering_mandate client_steering_dummy client_association_dummy client_steering_policy client_association
+ALL_TESTS="topology ap_config_renew ap_config_bss_tear_down
+           client_capability_query
+           client_steering_dummy client_association_dummy client_steering_policy client_association
            higher_layer_data_payload_trigger"
 
 scriptdir="$(cd "${0%/*}"; pwd)"
@@ -170,33 +170,7 @@ test_ap_config_bss_tear_down() {
     return $check_error
 }
 
-test_channel_selection() {
-    status "test channel selection"
-    
-    check_error=0
-    dbg "Send channel preference query"
-    send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8004
-    sleep 1
-    dbg "Confirming channel preference query has been received on agent"
-    check_log ${REPEATER1} agent_wlan0 "CHANNEL_PREFERENCE_QUERY_MESSAGE"
-    check_log ${REPEATER1} agent_wlan2 "CHANNEL_PREFERENCE_QUERY_MESSAGE"
-    
-    dbg "Send channel selection request"
-    send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8006
-    sleep 1
-    dbg "Confirming channel selection request has been received on agent"
-    check_log ${REPEATER1} agent_wlan0 "CHANNEL_SELECTION_REQUEST_MESSAGE"
-    check_log ${REPEATER1} agent_wlan2 "CHANNEL_SELECTION_REQUEST_MESSAGE"
-    
-    dbg "Confirming 1905.1 Ack Message request was received on agent"
-    # TODO: When creating handler for the ACK message on the agent, replace lookup of this string
-    # TODO: currently controller sends empty channel selection request, so no switch is performed
-    # check_log ${REPEATER1} agent_wlan0 "ACK_MESSAGE"
-    # check_log ${REPEATER1} agent_wlan2 "ACK_MESSAGE"
-
-    return $check_error
-}
-test_client_capability_query() { 
+test_client_capability_query() {
     status "test client capability"
     sta_mac1=00:00:00:11:00:22
     sta_mac2=00:00:00:11:00:33
@@ -223,112 +197,6 @@ test_client_capability_query() {
     dbg "Confirming client capability report message has been received on controller"
     check_log ${GATEWAY} controller "Received CLIENT_CAPABILITY_REPORT_MESSAGE"
     check_log ${GATEWAY} controller "Result Code= SUCCESS, client MAC= ${sta_mac2}, BSSID= ${mac_agent1_wlan0}"
-    return $check_error
-}
-test_ap_capability_query() {
-    status "test ap capability query"
-    check_error=0
-    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8001
-    sleep 1
-    
-    dbg "Confirming ap capability query has been received on agent"
-    check_log ${REPEATER1} agent "AP_CAPABILITY_QUERY_MESSAGE"
-    
-    dbg "Confirming ap capability report has been received on controller"
-    check_log ${GATEWAY} controller "AP_CAPABILITY_REPORT_MESSAGE"
-    
-    return $check_error
-}
-
-test_combined_infra_metrics() {
-    status "test combined infrastructure metrics"
-    check_error=0
-    dbg "Send AP Metrics query message to agent 1"
-    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x800B "tlv_type,0x93,tlv_length,0x0007,tlv_value,0x01 {$mac_agent1_wlan0}"
-    check_log ${REPEATER1} agent_wlan0 "Received AP_METRICS_QUERY_MESSAGE"
-    # TODO agent should send response autonomously, with same MID.
-    # tlv1 == AP metrics TLV
-    # tlv2 == STA metrics TLV with no metrics
-    # tlv3 == STA metrics TLV for STA connected to this BSS
-    # tlv4 == STA traffic stats TLV for same STA
-    check send_CAPI_1905 ${REPEATER1} $mac_gateway 0x800C "tlv_type1,0x94,tlv_length1,0x000d,tlv_value1,{$mac_agent1_wlan0} 0x01 0x0002 0x01 0x1f2f3f,\
-tlv_type2,0x96,tlv_length2,0x0007,tlv_value2,{55:44:33:22:11:00} 0x00,tlv_type3,0x96,tlv_length3,0x001a,\
-tlv_value3,{66:44:33:22:11:00} 0x01 {$mac_agent1_wlan0} 0x11223344 0x1a2a3a4a 0x1b2b3b4b 0x55,\
-tlv_type4,0xa2,tlv_length4,0x0022,tlv_value4,{55:44:33:22:11:00} 0x10203040 0x11213141 0x12223242 0x13233343 0x14243444 0x15253545 0x16263646"
-    check_log ${GATEWAY} controller "Received AP_METRICS_RESPONSE_MESSAGE"
-
-    dbg "Send AP Metrics query message to agent 2"
-    check send_CAPI_1905 ${GATEWAY} $mac_agent2 0x800B "tlv_type,0x93,tlv_length,0x0007,tlv_value,0x01 {$mac_agent2_wlan2}"
-    check_log ${REPEATER2} agent_wlan2 "Received AP_METRICS_QUERY_MESSAGE"
-    # TODO agent should send response autonomously
-    # Same as above but with different STA MAC addresses, different values and skipping the empty one
-    check send_CAPI_1905 ${REPEATER2} $mac_gateway 0x800C "tlv_type1,0x94,tlv_length1,0x0010,tlv_value1,{$mac_agent2_wlan2} 0x11 0x1002 0x90 0x1c2c3c 0x1d2d3d,\
-tlv_type2,0x96,tlv_length2,0x001a,tlv_value2,{77:44:33:22:11:00} 0x01 {$mac_agent2_wlan2} 0x19293949 0x10203040 0x11213141 0x99,\
-tlv_type3,0xa2,tlv_length3,0x0022,tlv_value3,{77:44:33:22:11:00} 0xa0203040 0xa1213141 0xa2223242 0xa3233343 0xa4243444 0xa5253545 0xa6263646"
-    check_log ${GATEWAY} controller "Received AP_METRICS_RESPONSE_MESSAGE"
-
-    dbg "Send 1905 Link metric query to agent 1 (neighbor agent 2)"
-    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x0005 "tlv_type,0x08,tlv_length,0x0008,tlv_value,0x01 {$mac_agent2} 0x02"
-    check_log ${REPEATER1} agent_wlan0 "Received LINK_METRIC_QUERY_MESSAGE"
-    # TODO agent should send response autonomously
-    check send_CAPI_1905 ${REPEATER1} $mac_gateway 0x6 "tlv_type1,0x09,tlv_length1,0x0029,\
-tlv_value1,{$mac_agent1} {$mac_agent2} {$mac_agent1_wlan0} {$mac_agent2_wlan2} 0x0100 0x01 0x00000000 0x0000e300 0x4230 0x0064 0x0300,\
-tlv_type2,0x0a,tlv_length2,0x0023,tlv_value2,{$mac_agent1} {$mac_agent2} {$mac_agent1} {$mac_agent2} 0x0100 0x00000007 0x00020000 0x31"
-    check_log ${GATEWAY} controller "Received LINK_METRIC_RESPONSE_MESSAGE"
-
-    # Trigger combined infra metrics
-    dbg "Send Combined infrastructure metrics message to agent 1"
-    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8013
-    check_log ${REPEATER1} agent "Received COMBINED_INFRASTRUCTURE_METRICS"
-    check_log ${REPEATER1} agent "Received TLV_TRANSMITTER_LINK_METRIC"
-    check_log ${REPEATER1} agent "Received TLV_RECEIVER_LINK_METRIC"
-
-    return $check_error
-}
-
-test_client_steering_mandate() {
-    status "test client steering"
-    check_error=0
-
-    dbg "Send topology request to agent 1"
-    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x0002
-    sleep 1
-    dbg "Confirming topology query was received"
-    check_log ${REPEATER1} agent "TOPOLOGY_QUERY_MESSAGE"
-
-    dbg "Send topology request to agent 2"
-    check send_CAPI_1905 ${GATEWAY} $mac_agent2 0x0002
-    sleep 1
-    dbg "Confirming topology query was received"
-    check_log ${REPEATER2} agent "TOPOLOGY_QUERY_MESSAGE"
-
-    dbg "Send Client Steering Request message for Steering Mandate to CTT Agent1"
-    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8014 "tlv_type,0x9B,tlv_length,\
-0x001b,tlv_value,{$mac_agent1_wlan0 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {$mac_agent2_wlan0 0x73 0x24}}"
-    sleep 1
-    dbg "Confirming Client Steering Request message was received - mandate"
-    check_log ${REPEATER1} agent_wlan0 "Got steer request"
-    
-    dbg "Confirming BTM Report message was received"
-    check_log ${GATEWAY} controller "CLIENT_STEERING_BTM_REPORT_MESSAGE"
-
-    dbg "Confirming ACK message was received"
-    check_log ${REPEATER1} agent_wlan0 "ACK_MESSAGE"
-
-    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8014 "tlv_type,0x9B,tlv_length,\
-0x000C,tlv_value,{$mac_agent1_wlan0 0x00 0x000A 0x0000 0x00}"
-    sleep 1
-    dbg "Confirming Client Steering Request message was received - Opportunity"
-    check_log ${REPEATER1} agent_wlan0 "CLIENT_STEERING_REQUEST_MESSAGE"
-
-    dbg "Confirming ACK message was received"
-    check_log ${GATEWAY} controller "ACK_MESSAGE"
-
-    dbg "Confirming steering completed message was received"
-    check_log ${GATEWAY} controller "STEERING_COMPLETED_MESSAGE"
-
-    dbg "Confirming ACK message was received"
-    check_log ${REPEATER1} agent_wlan0 "ACK_MESSAGE"
     return $check_error
 }
 
@@ -636,19 +504,13 @@ usage() {
     echo ""
     echo "  positional params:"
     echo "      topology - Topology discovery test"
-    echo "      initial_ap_config - Initial AP configuration test"
     echo "      ap_config_renew - AP configuration renew test"
     echo "      ap_config_bss_tear_down - AP configuration BSS Tear Down test"
-    echo "      channel_selection - Channel Selection test"
-    echo "      client_steering_mandate - Client Steering for Steering Mandate and Steering Opportunity test"
     echo "      client_steering_dummy - Client Steering using dummy bwl"
     echo "      optimal_path_dummy - Optimal Path using dummy bwl"
     echo "      client_association_dummy - Client Association Control Message using dummy bwl"
     echo "      client_steering_policy - Setting Client Steering Policy test"
     echo "      client_association - Client Association Control Message test"
-    echo "      ap_capability_query - AP Capability query test"
-    echo "      client_capability_query - Client Capability info reporting test"
-    echo "      combined_infra_metrics - Combined Infrastructure Metrics test"
     echo "      higher_layer_data_payload_trigger - Higher layer data payload over 1905 trigger test"
 }
 main() {
