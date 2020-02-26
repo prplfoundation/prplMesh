@@ -34,6 +34,8 @@ EOF
 # The first start currently never succeeds, we need to restart it first.
 echo "Attempting to start/restart prplMesh ..."
 ssh "$TARGET" <<"EOF"
+# Some devices still use the old path (outside of "scripts")
+ln -s /opt/prplmesh/scripts/prplmesh_utils.sh /opt/prplmesh/prplmesh_utils.sh || true
 /opt/prplmesh/prplmesh_utils.sh restart -d
 TIMEOUT=30
 for _ in $(seq 1 "$TIMEOUT") ; do

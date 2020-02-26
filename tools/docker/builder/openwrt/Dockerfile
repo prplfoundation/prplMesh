@@ -17,7 +17,7 @@ RUN apt-get update \
 RUN useradd -ms /bin/bash openwrt
 
 ####
-## Pre-built OpenWrt (and extracted sdk)
+## Pre-built OpenWrt
 ####
 FROM openwrt-prerequisites as openwrt-prebuilt
 
@@ -33,10 +33,22 @@ ARG INTEL_FEED
 ARG OPENWRT_REPOSITORY
 # Which OpenWrt version (commit hash) to use:
 ARG OPENWRT_VERSION
-# Target to build for (can be any existing value after CONFIG_TARGET_):
-ARG TARGET
-# SDK .config to use as baseline
-ARG SDK_CONFIG=default
+
+# Target to build for (CONFIG_TARGET_ will be prepended).
+# Example: TARGET_SYSTEM=mvebu
+ARG TARGET_SYSTEM
+
+# Subtarget (CONFIG_TARGET_${TARGET_SYSTEM}_ will be prepended).
+# Example: SUBTARGET=cortexa9
+ARG SUBTARGET
+
+# Target profile (CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}_ will be prepended).
+# Example: TARGET_PROFILE=DEVICE_cznic_turris-omnia
+ARG TARGET_PROFILE
+
+# .config file to use as base. Can include be used to specify a custom
+# toolchain for example. It has to be in the "configs" directory.
+ARG BASE_CONFIG=default
 
 WORKDIR /home/openwrt
 
@@ -46,38 +58,31 @@ RUN git clone "$OPENWRT_REPOSITORY" openwrt \
 
 WORKDIR /home/openwrt/openwrt
 
-COPY --chown=openwrt:openwrt configs/sdk_${SDK_CONFIG}_config /home/openwrt/sdk_config
+COPY --chown=openwrt:openwrt configs/base_${BASE_CONFIG}_config /home/openwrt/base_config
 
 RUN if [ -n "$INTEL_FEED" ] ; then \
         echo "src-git intel $INTEL_FEED" >> feeds.conf.default \
         && scripts/feeds update intel \
         && scripts/feeds install intel_mips ; \
     fi ;\
-    cp /home/openwrt/sdk_config .config \
-    && echo "CONFIG_SDK=y" >> .config \
-    && echo "CONFIG_TARGET_${TARGET}=y" >> .config \
+    cp /home/openwrt/base_config .config \
+    && echo "CONFIG_TARGET_${TARGET_SYSTEM}=y" >> .config \
+    && echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}=y" >> .config \
+    && echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}_${TARGET_PROFILE}=y" >> .config \
     && make defconfig \
     && cat .config \
-    && make -j$(nproc)
-
-RUN TAR="$(find bin/targets -name 'openwrt-sdk*' -print)" \
-    && mkdir -p "/home/openwrt/openwrt_sdk" \
-    && tar -C "/home/openwrt/openwrt_sdk" -xf "${TAR}" --strip-components=1
-
-####
-## Prebuilt sdk only
-####
-FROM openwrt-prerequisites as openwrt-sdk
-COPY --from=openwrt-prebuilt --chown=openwrt:openwrt /home/openwrt/openwrt_sdk /home/openwrt/openwrt_sdk
-WORKDIR /home/openwrt/openwrt_sdk
+    && make -j$(nproc) V=sc
+    # note that the result from diffconfig.sh with a minimal
+    # configuration has the 3 CONFIG_TARGET items we set here, but NOT
+    # the individual CONFIG_TARGET_${SUBTARGET} and
+    # CONFIG_TARGET_${TARGET_PROFILE}, which means we don't need to
+    # set them.
 
 ####
-## Prebuilt sdk and prplmesh dependencies
+## Prebuilt openwrt and prplmesh dependencies
 ####
 
-FROM openwrt-sdk as prplmesh-builder
-
-COPY --chown=openwrt:openwrt configs/prplmesh_config /home/openwrt/prplmesh_config
+FROM openwrt-prebuilt as prplmesh-builder
 
 # The following args are mandatory, do not expect the build to
 # succeed without specifying them on the command line.
@@ -99,7 +104,6 @@ RUN echo "src-git prpl ${PRPL_FEED}" >> feeds.conf.default \
     && scripts/feeds update -a \
     && scripts/feeds install -a -p intel \
     && scripts/feeds install -a \
-    && cp "/home/openwrt/prplmesh_config" .config \
     && echo "CONFIG_PACKAGE_prplmesh${PRPLMESH_VARIANT}=y" >> .config \
     && make defconfig \
     && cat .config \

@@ -30,11 +30,13 @@ build_image() {
     docker build --tag "$image_tag" \
            --build-arg OPENWRT_REPOSITORY \
            --build-arg OPENWRT_VERSION \
-           --build-arg TARGET \
+           --build-arg TARGET_SYSTEM \
+           --build-arg SUBTARGET \
+           --build-arg TARGET_PROFILE \
            --build-arg PRPL_FEED \
            --build-arg PRPLMESH_VARIANT \
            --build-arg INTEL_FEED \
-           --build-arg SDK_CONFIG \
+           --build-arg BASE_CONFIG \
            $BUILD_OPTIONS \
            "$scriptdir/"
 }
@@ -46,15 +48,15 @@ build_prplmesh() {
     trap 'docker rm -f $container_name' EXIT
     docker run -i \
            --name "$container_name" \
-           -e TARGET \
+           -e TARGET_PROFILE \
            -e OPENWRT_VERSION \
            -e PRPLMESH_VERSION \
-           -v "$scriptdir/scripts:/home/openwrt/openwrt_sdk/build_scripts/:ro" \
+           -v "$scriptdir/scripts:/home/openwrt/openwrt/build_scripts/:ro" \
            -v "${rootdir}:/home/openwrt/prplMesh_source:ro" \
            "$image_tag" \
            ./build_scripts/build.sh
     mkdir -p "$build_dir"
-    docker cp "${container_name}:/home/openwrt/openwrt_sdk/prplmesh-${TARGET}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" "$build_dir"
+    docker cp "${container_name}:/home/openwrt/openwrt/prplmesh-${TARGET_PROFILE}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" "$build_dir"
 }
 
 main() {
@@ -89,17 +91,23 @@ main() {
 
     case "$TARGET_DEVICE" in
         turris-omnia)
-            TARGET=mvebu
+            TARGET_SYSTEM=mvebu
+            SUBTARGET=cortexa9
+            TARGET_PROFILE=DEVICE_cznic_turris-omnia
             ;;
         glinet-b1300)
-            TARGET=ipq40xx
+            TARGET_SYSTEM=ipq40xx
+            SUBTARGET=generic
+            TARGET_PROFILE=DEVICE_glinet_gl-b1300
             ;;
         netgear-rax40)
-            TARGET=intel_mips
+            TARGET_SYSTEM=intel_mips
+            SUBTARGET=xrx500
+            TARGET_PROFILE=DEVICE_NETGEAR_RAX40
             PRPLMESH_VARIANT="-dwpal"
-            PRPL_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^d340b644a2f210ef8949fe0e6bf15a969bc79ae7"
+            PRPL_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^acc744ea7c3f678a9f5f7f6b6904c167afceb5b7"
             INTEL_FEED="https://git.prpl.dev/prplmesh/feed-intel.git^e3eca4e93286eb4346f0196b2816a3be97287482"
-            SDK_CONFIG=gcc8
+            BASE_CONFIG=gcc8
             ;;
         *)
             err "Unknown target device: $TARGET_DEVICE"
@@ -114,13 +122,15 @@ main() {
     dbg "BUILD_OPTIONS=$BUILD_OPTIONS"
     dbg "OPENWRT_REPOSITORY=$OPENWRT_REPOSITORY"
     dbg "OPENWRT_VERSION=$OPENWRT_VERSION"
-    dbg "SDK_CONFIG=$SDK_CONFIG"
+    dbg "BASE_CONFIG=$BASE_CONFIG"
     dbg "PRPL_FEED=$PRPL_FEED"
     dbg "INTEL_FEED=$INTEL_FEED"
     dbg "IMAGE_ONLY=$IMAGE_ONLY"
     dbg "TARGET_DEVICE=$TARGET_DEVICE"
     dbg "TAG=$TAG"
-    dbg "TARGET=$TARGET"
+    dbg "TARGET_SYSTEM=$TARGET_SYSTEM"
+    dbg "SUBTARGET=$SUBTARGET"
+    dbg "TARGET_PROFILE=$TARGET_PROFILE"
     dbg "PRPLMESH_VARIANT=$PRPLMESH_VARIANT"
 
     if [ -n "$TAG" ] ; then
@@ -132,7 +142,9 @@ main() {
 
     export OPENWRT_REPOSITORY
     export OPENWRT_VERSION
-    export TARGET
+    export TARGET_SYSTEM
+    export SUBTARGET
+    export TARGET_PROFILE
     # We want to exclude tags from the git-describe output because we
     # have no relevant tags to use at the moment.
     # The '--exclude' option of git-describe is not available on older
@@ -142,7 +154,7 @@ main() {
     export PRPL_FEED
     export PRPLMESH_VARIANT
     export INTEL_FEED
-    export SDK_CONFIG
+    export BASE_CONFIG
 
     if [ $IMAGE_ONLY = true ] ; then
         build_image
@@ -161,6 +173,6 @@ OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='9d2efd'
 PRPL_FEED='https://git.prpl.dev/prplmesh/iwlwav.git^6749d406d243465e06b4f518767b2d1b9372e3f5'
 INTEL_FEED=""
-SDK_CONFIG=default
+BASE_CONFIG=default
 
 main "$@"
