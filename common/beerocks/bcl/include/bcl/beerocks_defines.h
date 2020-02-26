@@ -78,7 +78,7 @@ enum eGlobals {
     PHY_RATE_100KB_MAX                      = 8666,
     PHY_RATE_100KB_MIN                      = 72,
     PHY_RATE_100KB_INVALID                  = 0,
-    BSS_STEER_DISASSOC_TIMER_MS             = 15000, // ~15sec
+    BSS_STEER_DISASSOC_TIMER_MS             = 200, // ~200ms
     BSS_STEER_IMMINENT_VALID_INT            = 100,
     BSS_STEER_VALID_INT                     = 50,
     SON_SLAVE_WATCHDOG_INTERVAL_MSC         = 5000,
