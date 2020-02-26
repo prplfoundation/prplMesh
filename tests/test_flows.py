@@ -182,6 +182,11 @@ class test_flows:
         '''Verify that on "device" the logfile for "program" matches "regex", fail if not.'''
         logfilename = os.path.join(self.rootdir, 'logs', device, 'beerocks_{}.log'.format(program))
         try:
+            # HACK check_log is often used immediately after triggering a message on the other side.
+            # That message needs some time to arrive on the receiver. Since our python script is pretty fast,
+            # we tend to check it too quickly. As a simple workaround, add a small sleep here.
+            # The good solution is to retry with a small timeout.
+            time.sleep(.1)
             with open(logfilename) as logfile:
                 for line in logfile.readlines():
                     if re.search(regex, line):
