@@ -15,6 +15,9 @@ import json
 
 import send_CAPI_command
 
+'''Regular expression to match a MAC address in a bytes string.'''
+RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
+
 class test_flows:
     def __init__(self):
         self.tests = [attr[len('test_'):] for attr in dir(self) if attr.startswith('test_')]
@@ -159,6 +162,20 @@ class test_flows:
         self.debug('mac_repeater1: {}'.format(self.mac_repeater1))
         self.mac_repeater2 = self.repeater2_ucc.dev_get_parameter('ALid')
         self.debug('mac_repeater2: {}'.format(self.mac_repeater2))
+
+        mac_repeater1_wlan0_output = self.docker_command(self.repeater1, "ip", "-o",  "link", "list", "dev", "wlan0")
+        self.mac_repeater1_wlan0 = re.search(rb"link/ether " + RE_MAC, mac_repeater1_wlan0_output).group('mac').decode()
+        self.debug("Repeater1 wl0: {}".format(self.mac_repeater1_wlan0))
+        mac_repeater1_wlan2_output = self.docker_command(self.repeater1, "ip", "-o",  "link", "list", "dev", "wlan2")
+        self.mac_repeater1_wlan2 = re.search(rb"link/ether " + RE_MAC, mac_repeater1_wlan2_output).group('mac').decode()
+        self.debug("Repeater1 wl2: {}".format(self.mac_repeater1_wlan2))
+
+        mac_repeater2_wlan0_output = self.docker_command(self.repeater2, "ip", "-o",  "link", "list", "dev", "wlan0")
+        self.mac_repeater2_wlan0 = re.search(rb"link/ether " + RE_MAC, mac_repeater2_wlan0_output).group('mac').decode()
+        self.debug("Repeater2 wl0: {}".format(self.mac_repeater2_wlan0))
+        mac_repeater2_wlan2_output = self.docker_command(self.repeater2, "ip", "-o",  "link", "list", "dev", "wlan2")
+        self.mac_repeater2_wlan2 = re.search(rb"link/ether " + RE_MAC, mac_repeater2_wlan2_output).group('mac').decode()
+        self.debug("Repeater2 wl2: {}".format(self.mac_repeater2_wlan2))
 
     def check_log(self, device: str, program: str, regex: str) -> bool:
         '''Verify that on "device" the logfile for "program" matches "regex", fail if not.'''
