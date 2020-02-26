@@ -250,8 +250,15 @@ void client_steering_task::steer_sta()
 void client_steering_task::handle_event(int event_type, void *obj)
 {
     if (event_type == STA_CONNECTED) {
-        TASK_LOG(DEBUG) << "steering successful for sta " << sta_mac;
-        steering_success = true;
+        auto connected_bssid = database.get_node_parent(sta_mac);
+        if (target_bssid == connected_bssid) {
+            TASK_LOG(DEBUG) << "steering successful for sta " << sta_mac << " to bssid "
+                            << connected_bssid;
+            steering_success = true;
+        } else {
+            TASK_LOG(ERROR) << "sta " << sta_mac << " steered to bssid " << connected_bssid
+                            << " ,target bssid was " << target_bssid;
+        }
     } else if (event_type == STA_DISCONNECTED) {
         TASK_LOG(DEBUG) << "sta " << sta_mac
                         << " disconnected after successful steering, proceeding to unblock";
