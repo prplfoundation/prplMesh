@@ -3,7 +3,7 @@ import argparse
 import logging
 import socket
 from enum import Enum
-from typing import Union, Dict
+from typing import Union, Dict, Sequence, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +114,43 @@ class UCCSocket:
         """Call dev_get_parameter and return the parameter, or raise KeyError if it is missing."""
         reply = self.cmd_reply("dev_get_parameter,program,map,parameter,{}".format(parameter))
         return reply[parameter]
+
+    def dev_send_1905(self, dest: str, message_type: int, *tlvs: Tuple[int, int, str]) -> int:
+        """Call dev_send_1905 to `dest` with CMDU type `message_type` and additional `tlvs`.
+
+        Parameters
+        ----------
+        dest : str
+            The AL-MAC address of the recipient, as a string.
+
+        message_type : int
+            The message type of the 1905.1 message to be sent, as an integer.
+
+        tlvs : Tuple[int, int, str]
+            A list of TLV descriptions. Each TLV is a 3-tuple (type, length, value). The type and
+            length are given as integers. The value is given as a string, formatted according to the
+            UCC rules, i.e. with curly braces and hexadecimal numbers.
+
+        Returns
+        -------
+        The MID of the message, as an integer.
+        """
+        def format_tlv(tlv_num, tlv_type, tlv_length, tlv_value):
+            if tlv_num:
+                tlv_num = str(tlv_num)
+            else:
+                tlv_num = ''
+            return "tlv_type{tlv_num},0x{tlv_type:02x}," \
+                   "tlv_length{tlv_num},0x{tlv_length:04x}," \
+                   "tlv_value{tlv_num},{tlv_value}".format(**locals())
+
+        cmd = "DEV_SEND_1905,DestALid,{dest:s},MessageTypeValue,0x{message_type:04x}".format(**locals())
+        if len(tlvs) > 1:
+            cmd += ',' + ','.join([format_tlv(tlv_num + 1, *tlv) for (tlv_num, tlv) in enumerate(tlvs)])
+        elif tlvs:
+            cmd += ',' + format_tlv('', *tlvs[0])
+        return int(self.cmd_reply(cmd)["mid"], base=0)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Simulated UCC")
