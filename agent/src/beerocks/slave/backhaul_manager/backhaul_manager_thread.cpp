@@ -773,13 +773,9 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     case EState::CONNECTED: {
 
         stop_on_failure_attempts = configuration_stop_on_failure_attempts;
-        LOG(DEBUG) << "Sending notifications...";
 
         LOG(DEBUG) << "clearing blacklist";
         ap_blacklist.clear();
-
-        finalize_slaves_connect_state(true);
-        LOG(DEBUG) << "Sent notifications, goto OPERATIONAL state";
 
         eth_link_poll_timer = std::chrono::steady_clock::now();
         m_eth_link_up       = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
@@ -803,7 +799,6 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             }
         } else if (pending_enable && m_sConfig.eType != SBackhaulConfig::EType::Invalid) {
             pending_enable = false;
-            finalize_slaves_connect_state(true);
         }
 
         break;
@@ -2225,12 +2220,7 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
                     LOG(DEBUG) << FSM_CURR_STATE_STR;
                     soc->controller_discovered = true;
                     controller_bridge_mac      = src_mac;
-                    // the backhaul was operational on slave registration.
-                    // This means that it was restarted and sending backhaul connected event
-                    // is required so that the slave will re-join the controller.
-                    if (soc->operational_on_registration) {
-                        finalize_slaves_connect_state(true, soc);
-                    }
+                    finalize_slaves_connect_state(true, soc);
                 }
             }
         }
