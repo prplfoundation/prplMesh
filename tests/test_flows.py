@@ -11,6 +11,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 import json
 
 import send_CAPI_command
@@ -219,6 +220,129 @@ class test_flows:
         self.check_log(self.repeater1, "agent_wlan0", r".* Controller configuration \(WSC M2 Encrypted Settings\)")
         self.check_log(self.repeater1, "agent_wlan2", r".* Controller configuration \(WSC M2 Encrypted Settings\)")
 
+    def test_channel_selection(self):
+        self.debug("Send channel preference query")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8004)
+        time.sleep(1)
+        self.debug("Confirming channel preference query has been received on agent")
+        self.check_log(self.repeater1, "agent_wlan0", "CHANNEL_PREFERENCE_QUERY_MESSAGE")
+        self.check_log(self.repeater1, "agent_wlan2", "CHANNEL_PREFERENCE_QUERY_MESSAGE")
+
+        self.debug("Send channel selection request")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8006)
+        time.sleep(1)
+        self.debug("Confirming channel selection request has been received on agent")
+        self.check_log(self.repeater1, "agent_wlan0", "CHANNEL_SELECTION_REQUEST_MESSAGE")
+        self.check_log(self.repeater1, "agent_wlan2", "CHANNEL_SELECTION_REQUEST_MESSAGE")
+
+        #self.debug("Confirming 1905.1 Ack Message request was received on agent")
+        # TODO: When creating handler for the ACK message on the agent, replace lookup of this string
+        # TODO: currently controller sends empty channel selection request, so no switch is performed
+        # self.check_log(self.repeater1, "agent_wlan0", "ACK_MESSAGE")
+        # self.check_log(self.repeater1, "agent_wlan2", "ACK_MESSAGE")
+
+    def test_ap_capability_query(self):
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8001)
+        time.sleep(1)
+
+        self.debug("Confirming ap capability query has been received on agent")
+        self.check_log(self.repeater1, "agent", "AP_CAPABILITY_QUERY_MESSAGE")
+
+        self.debug("Confirming ap capability report has been received on controller")
+        self.check_log(self.gateway, "controller", "AP_CAPABILITY_REPORT_MESSAGE")
+
+    def test_combined_infra_metrics(self):
+        self.debug("Send AP Metrics query message to agent 1")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x800B,
+                                       (0x93,0x0007,"0x01 {%s}" % (self.mac_repeater1_wlan0)))
+        self.check_log(self.repeater1, "agent_wlan0", "Received AP_METRICS_QUERY_MESSAGE")
+        # TODO agent should send response autonomously, with same MID.
+        # tlv1 == AP metrics TLV
+        # tlv2 == STA metrics TLV with no metrics
+        # tlv3 == STA metrics TLV for STA connected to this BSS
+        # tlv4 == STA traffic stats TLV for same STA
+        self.repeater1_ucc.dev_send_1905(self.mac_gateway, 0x800C,
+            (0x94,0x000d,"{%s} 0x01 0x0002 0x01 0x1f2f3f" % (self.mac_repeater1_wlan0)),
+            (0x96,0x0007,"{55:44:33:22:11:00} 0x00"),
+            (0x96,0x001a,"{66:44:33:22:11:00} 0x01 {%s} 0x11223344 0x1a2a3a4a 0x1b2b3b4b 0x55" %
+                self.mac_repeater1_wlan0),
+            (0xa2,0x0022,"{55:44:33:22:11:00} 0x10203040 0x11213141 0x12223242 0x13233343 "
+                "0x14243444 0x15253545 0x16263646"))
+        self.check_log(self.gateway, "controller", "Received AP_METRICS_RESPONSE_MESSAGE")
+
+        self.debug("Send AP Metrics query message to agent 2")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater2, 0x800B,
+                                       (0x93,0x0007,"0x01 {%s}" % self.mac_repeater2_wlan2))
+        self.check_log(self.repeater2, "agent_wlan2", "Received AP_METRICS_QUERY_MESSAGE")
+        # TODO agent should send response autonomously
+        # Same as above but with different STA MAC addresses, different values and skipping the empty one
+        self.repeater2_ucc.dev_send_1905(self.mac_gateway, 0x800C,
+            (0x94,0x0010,"{%s} 0x11 0x1002 0x90 0x1c2c3c 0x1d2d3d" % self.mac_repeater2_wlan2),
+            (0x96,0x001a,"{77:44:33:22:11:00} 0x01 {%s} 0x19293949 0x10203040 0x11213141 0x99" % self.mac_repeater2_wlan2),
+            (0xa2,0x0022,"{77:44:33:22:11:00} 0xa0203040 0xa1213141 0xa2223242 0xa3233343 "
+                         "0xa4243444 0xa5253545 0xa6263646"))
+        self.check_log(self.gateway, "controller", "Received AP_METRICS_RESPONSE_MESSAGE")
+
+        self.debug("Send 1905 Link metric query to agent 1 (neighbor agent 2)")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x0005,
+                                       (0x08,0x0008,"0x01 {%s} 0x02" % self.mac_repeater2))
+        self.check_log(self.repeater1, "agent_wlan0", "Received LINK_METRIC_QUERY_MESSAGE")
+        # TODO agent should send response autonomously
+        self.repeater1_ucc.dev_send_1905(self.mac_gateway, 0x6,
+            (0x09,0x0029,"{%s} {%s} {%s} {%s} 0x0100 0x01 0x00000000 0x0000e300 0x4230 0x0064 0x0300" %
+                (self.mac_repeater1, self.mac_repeater2, self.mac_repeater1_wlan0, self.mac_repeater2_wlan2)),
+            (0x0a,0x0023,"{%s} {%s} {%s} {%s} 0x0100 0x00000007 0x00020000 0x31" %
+                (self.mac_repeater1, self.mac_repeater2, self.mac_repeater1, self.mac_repeater2)))
+        self.check_log(self.gateway, "controller", "Received LINK_METRIC_RESPONSE_MESSAGE")
+
+        # Trigger combined infra metrics
+        self.debug("Send Combined infrastructure metrics message to agent 1")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8013)
+        self.check_log(self.repeater1, "agent", "Received COMBINED_INFRASTRUCTURE_METRICS")
+        self.check_log(self.repeater1, "agent", "Received TLV_TRANSMITTER_LINK_METRIC")
+        self.check_log(self.repeater1, "agent", "Received TLV_RECEIVER_LINK_METRIC")
+
+    def test_client_steering_mandate(self):
+        self.debug("Send topology request to agent 1")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x0002)
+        time.sleep(1)
+        self.debug("Confirming topology query was received")
+        self.check_log(self.repeater1, "agent", "TOPOLOGY_QUERY_MESSAGE")
+
+        self.debug("Send topology request to agent 2")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater2, 0x0002)
+        time.sleep(1)
+        self.debug("Confirming topology query was received")
+        self.check_log(self.repeater2, "agent", "TOPOLOGY_QUERY_MESSAGE")
+
+        self.debug("Send Client Steering Request message for Steering Mandate to CTT Agent1")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8014,
+            (0x9B, 0x001b, "{%s 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {%s 0x73 0x24}}" %
+                (self.mac_repeater1_wlan0, self.mac_repeater2_wlan0)))
+        time.sleep(1)
+        self.debug("Confirming Client Steering Request message was received - mandate")
+        self.check_log(self.repeater1, "agent_wlan0", "Got steer request")
+
+        self.debug("Confirming BTM Report message was received")
+        self.check_log(self.gateway, "controller", "CLIENT_STEERING_BTM_REPORT_MESSAGE")
+
+        self.debug("Confirming ACK message was received")
+        self.check_log(self.repeater1, "agent_wlan0", "ACK_MESSAGE")
+
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8014,
+            (0x9B, 0x000C, "{%s 0x00 0x000A 0x0000 0x00}" % self.mac_repeater1_wlan0))
+        time.sleep(1)
+        self.debug("Confirming Client Steering Request message was received - Opportunity")
+        self.check_log(self.repeater1, "agent_wlan0", "CLIENT_STEERING_REQUEST_MESSAGE")
+
+        self.debug("Confirming ACK message was received")
+        self.check_log(self.gateway, "controller", "ACK_MESSAGE")
+
+        self.debug("Confirming steering completed message was received")
+        self.check_log(self.gateway, "controller", "STEERING_COMPLETED_MESSAGE")
+
+        self.debug("Confirming ACK message was received")
+        self.check_log(self.repeater1, "agent_wlan0", "ACK_MESSAGE")
 
 if __name__ == '__main__':
     t = test_flows()
