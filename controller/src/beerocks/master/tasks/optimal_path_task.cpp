@@ -1191,10 +1191,8 @@ void optimal_path_task::work()
                             << sta_mac << " steer from AP " << current_hostap_vap << " to AP "
                             << chosen_hostap;
             bool disassoc_imminent = true;
-            int disassoc_timer_ms  = 100;
-            steering_task_id =
-                son_actions::steer_sta(database, cmdu_tx, tasks, sta_mac, chosen_hostap,
-                                       disassoc_imminent, disassoc_timer_ms);
+            steering_task_id       = son_actions::steer_sta(database, cmdu_tx, tasks, sta_mac,
+                                                      chosen_hostap, disassoc_imminent);
         }
 
         wait_for_task_end(steering_task_id, 30000);
