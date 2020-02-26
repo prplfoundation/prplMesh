@@ -115,20 +115,6 @@ send_bwl_event() {
     check docker exec $1 sh -c 'echo '"$3"' > /tmp/$USER/beerocks/'$2'/EVENT'
 }
 
-test_initial_ap_config() {
-    status "test initial autoconfig"
-
-    check_error=0
-    check_log ${REPEATER1} agent_wlan0 "WSC Global authentication success"
-    check_log ${REPEATER1} agent_wlan2 "WSC Global authentication success"
-    check_log ${REPEATER1} agent_wlan0 "KWA (Key Wrap Auth) success"
-    check_log ${REPEATER1} agent_wlan2 "KWA (Key Wrap Auth) success"
-    check_log ${REPEATER1} agent_wlan0 ".* Controller configuration (WSC M2 Encrypted Settings)"
-    check_log ${REPEATER1} agent_wlan2 ".* Controller configuration (WSC M2 Encrypted Settings)"
-
-    return $check_error
-}
-
 test_ap_config_renew() {
     status "test autoconfig renew"
 
