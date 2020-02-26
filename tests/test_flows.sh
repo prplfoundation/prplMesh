@@ -527,7 +527,7 @@ test_client_steering_policy() {
     check_log ${REPEATER1} agent_wlan0 "MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE"
     sleep 1
     dbg "Confirming client steering policy ack message has been received on the controller"
-    check_log ${GATEWAY} controller "ACK_MESSAGE, mid=$MID1_STR"
+    check_log ${GATEWAY} controller "ACK_MESSAGE, mid=0x$MID1_STR"
 
     return $check_error
 }
@@ -580,7 +580,7 @@ test_higher_layer_data_payload_trigger() {
     dbg "Confirming matching protocol and payload length"
 
     check_log ${REPEATER1} agent "protocol: 0"
-    check_log ${REPEATER1} agent "payload_length: 4b0"
+    check_log ${REPEATER1} agent "payload_length: 0x4b0"
 
     dbg "Confirming ACK message was received in the controller"
     check_log ${GATEWAY} controller "ACK_MESSAGE"
