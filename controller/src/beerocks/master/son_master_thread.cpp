@@ -2661,17 +2661,17 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION failed";
             return false;
         }
-        std::string client_mac    = network_utils::mac_to_string(notification->params().result.mac);
-        std::string client_parent = database.get_node_parent(client_mac);
-        std::string ap_mac = database.get_hostap_vap_mac(hostap_mac, notification->params().vap_id);
-        bool is_parent =
-            (client_parent == database.get_hostap_vap_mac(ap_mac, notification->params().vap_id));
+        std::string client_mac = network_utils::mac_to_string(notification->params().result.mac);
+        std::string client_parent_mac = database.get_node_parent(client_mac);
+        std::string bssid = database.get_hostap_vap_mac(hostap_mac, notification->params().vap_id);
+        bool is_parent    = (client_parent_mac ==
+                          database.get_hostap_vap_mac(bssid, notification->params().vap_id));
 
         int rx_rssi = int(notification->params().rx_rssi);
 
         LOG_CLI(DEBUG,
                 "measurement change notification: "
-                    << client_mac << " (sta) <-> (ap) " << ap_mac << " rx_rssi=" << rx_rssi
+                    << client_mac << " (sta) <-> (ap) " << bssid << " rx_rssi=" << rx_rssi
                     << " phy_rate_100kb (RX|TX)=" << int(notification->params().rx_phy_rate_100kb)
                     << " | " << int(notification->params().tx_phy_rate_100kb));
 
@@ -2679,7 +2679,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             (database.get_node_state(client_mac) == beerocks::STATE_CONNECTED) &&
             (!database.get_node_handoff_flag(client_mac)) && is_parent) {
 
-            database.set_node_cross_rx_rssi(client_mac, ap_mac, notification->params().rx_rssi,
+            database.set_node_cross_rx_rssi(client_mac, bssid, notification->params().rx_rssi,
                                             notification->params().rx_packets);
             database.set_node_cross_tx_phy_rate_100kb(client_mac,
                                                       notification->params().tx_phy_rate_100kb);
