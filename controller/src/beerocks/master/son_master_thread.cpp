@@ -2670,7 +2670,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
 
         LOG_CLI(DEBUG,
                 "measurement change notification: "
-                    << client_mac << " (sta) <-> (ap) " << bssid << " rx_rssi=" << rx_rssi
+                    << client_mac << " (sta) <-> (ap) " << hostap_mac << " rx_rssi=" << rx_rssi
                     << " phy_rate_100kb (RX|TX)=" << int(notification->params().rx_phy_rate_100kb)
                     << " | " << int(notification->params().tx_phy_rate_100kb));
 
