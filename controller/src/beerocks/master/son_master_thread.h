@@ -112,6 +112,8 @@ private:
                                        const mapf::encryption::diffie_hellman &dh,
                                        uint8_t authkey[32], uint8_t keywrapkey[16]);
 
+    bool is_prplmesh(const std::string &mac);
+
     db &database;
     task_pool tasks;
     beerocks::controller_ucc_listener m_controller_ucc_listener;

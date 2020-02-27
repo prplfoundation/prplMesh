@@ -265,6 +265,8 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const node &node);
     friend std::ostream &operator<<(std::ostream &os, const node *node);
 
+    bool is_prplmesh = 0;
+
 private:
     class rssi_measurement {
     public:

@@ -824,6 +824,9 @@ public:
     //
     sDbMasterConfig &config;
 
+    bool is_prplMesh(const std::string &mac);
+    void set_prplMesh(const std::string &mac);
+
 private:
     std::string local_slave_mac;
     std::shared_ptr<node> get_node(std::string key); //key can be <mac> or <al_mac>_<ruid>
@@ -904,6 +907,7 @@ private:
 
     master_thread *m_master_thread_ctx = nullptr;
     const std::string m_local_bridge_mac;
+
 };
 
 } // namespace son

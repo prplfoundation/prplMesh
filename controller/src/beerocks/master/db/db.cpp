@@ -3589,6 +3589,14 @@ int db::get_node_bw_int(std::shared_ptr<node> &n)
     return bw;
 }
 
+bool db::is_prplMesh(const std::string &mac) {
+    return get_node(mac).get()->is_prplmesh;
+}
+
+void db::set_prplMesh(const std::string &mac) {
+    get_node(mac).get()->is_prplmesh = true;
+}
+
 void db::set_vap_list(std::shared_ptr<db::vaps_list_t> vaps_list) { m_vap_list = vaps_list; }
 
 void db::clear_vap_list()

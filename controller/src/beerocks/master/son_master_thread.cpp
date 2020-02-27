@@ -342,6 +342,12 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
         return false;
     }
 
+    // Agent sent a VS TLVs. Mark it as prplMesh
+    auto tlvVendorSpecific = cmdu_rx.getClass<ieee1905_1::tlvVendorSpecific>();
+    if (tlvVendorSpecific != nullptr) {
+        database.set_prplMesh(src_mac);
+    }
+
     auto al_mac =
         network_utils::mac_to_string((const unsigned char *)tlvAlMacAddressType->mac().oct);
     LOG(DEBUG) << "mac=" << al_mac;
