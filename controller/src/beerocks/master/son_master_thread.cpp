@@ -2678,7 +2678,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             (database.get_node_state(client_mac) == beerocks::STATE_CONNECTED) &&
             (!database.get_node_handoff_flag(client_mac)) && is_parent) {
 
-            database.set_node_cross_rx_rssi(client_mac, bssid, notification->params().rx_rssi,
+            database.set_node_cross_rx_rssi(client_mac, hostap_mac, notification->params().rx_rssi,
                                             notification->params().rx_packets);
             database.set_node_cross_tx_phy_rate_100kb(client_mac,
                                                       notification->params().tx_phy_rate_100kb);
