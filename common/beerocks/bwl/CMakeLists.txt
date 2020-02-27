@@ -49,6 +49,7 @@ if(BWL_TYPE STREQUAL "DWPAL")
 
     file(GLOB bwl_platform_sources
         ${bwl_platform_sources}
+        ${MODULE_PATH}/shared/*.c*
         ${MODULE_PATH}/dwpal/*.c*
     )
 
@@ -75,6 +76,7 @@ if(BWL_TYPE STREQUAL "DWPAL")
 elseif(BWL_TYPE STREQUAL "NL80211")
 
     file(GLOB bwl_platform_sources
+        ${MODULE_PATH}/shared/*.c*
         ${MODULE_PATH}/nl80211/*.c*
 
         # WPA Control Interface
@@ -103,6 +105,18 @@ elseif(BWL_TYPE STREQUAL "NL80211")
 
     list(APPEND BWL_LIBS nl-tiny)
 
+elseif(BWL_TYPE STREQUAL "DUMMY")
+
+    set(bwl_platform_sources
+        ${bwl_platform_sources}
+        ${MODULE_PATH}/dummy/nl80211_client_dummy.cpp
+        ${MODULE_PATH}/dummy/nl80211_client_factory_dummy.cpp
+        ${MODULE_PATH}/dummy/mon_wlan_hal_dummy.cpp
+        ${MODULE_PATH}/dummy/ap_wlan_hal_dummy.cpp
+        ${MODULE_PATH}/dummy/base_wlan_hal_dummy.cpp
+        ${MODULE_PATH}/dummy/sta_wlan_hal_dummy.cpp
+    )
+    
 else()
 
     string(TOLOWER ${BWL_TYPE} BWL_PATH)
