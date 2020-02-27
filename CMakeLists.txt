@@ -67,7 +67,22 @@ endif()
 
 # Default Compiler flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pthread -Wno-comment -Wno-unused-parameter -Wno-missing-field-initializers")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s -O2 -Wformat -Wformat-security -Wl,-S -fPIC -fPIE")
+if(TARGET_PLATFORM STREQUAL "econet")
+    if (BUILD_FULL_STATIC)
+        #set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}  -g -O0 -Wformat -Wformat-security -Wl,-S -fPIC -fPIE")
+        #set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -g -O2 -Wformat -Wformat-security -Wl,-S ")
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s -O2 -Wformat -Wformat-security -Wl,-S ")
+    else()
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}  -g -O2 -Wformat -Wformat-security -Wl,-S -fPIC -fPIE")
+    endif()
+    #override default O3 setting to O0
+    ##string(REGEX REPLACE "([\\/\\-]O)3" "\\10" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+    ##string(REGEX REPLACE "([\\/\\-]O)3" "\\10" CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+    #set(CMAKE_CXX_FLAGS_RELEASE "-g -O2 -Wformat -Wformat-security  ${CMAKE_C_FLAGS_RELEASE}  ")
+else()
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s -O2 -Wformat -Wformat-security -Wl,-S -fPIC -fPIE")
+endif()
+
 
 # Compiler specific flags
 if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
@@ -79,8 +94,8 @@ endif()
 
 if(NOT BUILD_SHARED_LIBS)
     #strip for Release
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+    #set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
+    #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
     #libdl needed by libcrypto
     set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -ldl")
     if (BUILD_FULL_STATIC)
