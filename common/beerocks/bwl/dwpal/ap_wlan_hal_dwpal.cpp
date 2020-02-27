@@ -1183,8 +1183,6 @@ bool ap_wlan_hal_dwpal::switch_channel(int chan, int bw, int vht_center_frequenc
     } else {
         m_drop_csa = false;
 
-        // int bandwidth_int = utils::convert_bandwidth_to_int(bandwidth);
-        std::string bandwidth_str             = std::to_string(bw);
         int freq                              = beerocks::utils::wifi_channel_to_freq(chan);
         std::string freq_str                  = std::to_string(freq);
         std::string wave_vht_center_frequency = std::to_string(vht_center_frequency);
@@ -1193,7 +1191,7 @@ bool ap_wlan_hal_dwpal::switch_channel(int chan, int bw, int vht_center_frequenc
         cmd += freq_str; // CenterFrequency
 
         // Extension Channel
-        if (bw != 20) {
+        if (bw != beerocks::BANDWIDTH_20) {
             if (freq < vht_center_frequency) {
                 cmd += " sec_channel_offset=1";
             } else {
@@ -1206,7 +1204,8 @@ bool ap_wlan_hal_dwpal::switch_channel(int chan, int bw, int vht_center_frequenc
             cmd += " center_freq1=" + wave_vht_center_frequency;
         }
 
-        cmd += " bandwidth=" + bandwidth_str;
+        cmd += " bandwidth=" + std::to_string(beerocks::utils::convert_bandwidth_to_int(
+                                   static_cast<beerocks::eWiFiBandwidth>(bw)));
 
         // Supported Standard n/ac
         if (bw == beerocks::BANDWIDTH_20 || bw == beerocks::BANDWIDTH_40) {
@@ -1217,6 +1216,7 @@ bool ap_wlan_hal_dwpal::switch_channel(int chan, int bw, int vht_center_frequenc
     }
 
     // Send command
+    LOG(DEBUG) << "switch channel command: " << cmd;
     if (!dwpal_send_cmd(cmd)) {
         LOG(ERROR) << "switch_channel() failed!";
         return false;
