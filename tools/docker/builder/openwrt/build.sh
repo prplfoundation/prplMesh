@@ -48,6 +48,8 @@ build_prplmesh() {
     trap 'docker rm -f $container_name' EXIT
     docker run -i \
            --name "$container_name" \
+           -e TARGET_SYSTEM \
+           -e SUBTARGET \
            -e TARGET_PROFILE \
            -e OPENWRT_VERSION \
            -e PRPLMESH_VERSION \
@@ -56,7 +58,10 @@ build_prplmesh() {
            "$image_tag" \
            ./build_scripts/build.sh
     mkdir -p "$build_dir"
-    docker cp "${container_name}:/home/openwrt/openwrt/prplmesh-${TARGET_PROFILE}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" "$build_dir"
+    # Note: docker cp does not support globbing, so we need to copy the folder
+    docker cp "${container_name}:/home/openwrt/openwrt/artifacts/" "$build_dir"
+    mv "$build_dir/artifacts/"* "$build_dir"
+    rm -r "$build_dir/artifacts/"
 }
 
 main() {
