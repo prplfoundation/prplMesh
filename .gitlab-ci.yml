@@ -140,8 +140,8 @@ run-tests-py:
     - docker rmi "prplmesh-builder-$TARGET_DEVICE:$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID"
   artifacts:
     paths:
-      - "build/$TARGET_DEVICE/*.ipk"
-      - "build/$TARGET_DEVICE/openwrt-build.log"
+      - "build/$TARGET_DEVICE/"
+    expire_in: 4 weeks
     when: always
   tags:
     - shell
