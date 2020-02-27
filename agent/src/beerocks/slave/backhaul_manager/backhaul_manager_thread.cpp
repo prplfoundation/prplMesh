@@ -2036,6 +2036,18 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
                 continue;
             if (vap.ssid[0] == '\0')
                 continue;
+            //check if ssid contains only whitespace
+            bool all_whitespace = true;
+            for (size_t i = 0; i < sizeof(vap.ssid) / sizeof(vap.ssid[0]); i++) {
+                if (!isspace(vap.ssid[i])) {
+                    all_whitespace = false;
+                    break;
+                }
+            }
+            if (all_whitespace) {
+                continue;
+            }
+
             auto radio_bss_list           = radio_list->create_radio_bss_list();
             radio_bss_list->radio_bssid() = vap.mac;
             auto ssid =
