@@ -1125,6 +1125,8 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
         if (!msg->params.association_frame) {
             LOG(DEBUG) << "no association frame";
         } else {
+            notification->params().association_frame =
+                new char[strnlen(msg->params.association_frame, ASSOCIATION_FRAME_SIZE) + 1];
             std::copy_n(msg->params.association_frame,
                         strnlen(msg->params.association_frame, ASSOCIATION_FRAME_SIZE) + 1,
                         notification->params().association_frame);

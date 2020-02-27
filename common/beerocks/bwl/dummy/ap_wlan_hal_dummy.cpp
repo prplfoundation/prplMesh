@@ -376,8 +376,15 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
             LOG(ERROR) << "Failed reading mac parameter!";
             return false;
         }
+        msg->params.association_frame = new char[30];
 
-        msg->params.mac = beerocks::net::network_utils::mac_from_string(tmp_str);
+        msg->params.mac  = beerocks::net::network_utils::mac_from_string(tmp_str);
+        char assoc_req[] = "dummy association frame";
+        LOG(DEBUG) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+
+        std::copy_n(assoc_req, strnlen(assoc_req, ASSOCIATION_FRAME_SIZE) + 1,
+                    msg->params.association_frame);
+        LOG(DEBUG) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
 
         bool caps_valid = true;
         SRadioCapabilitiesStrings caps_strings;
