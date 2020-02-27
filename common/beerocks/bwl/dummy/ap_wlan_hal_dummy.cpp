@@ -380,9 +380,20 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
             LOG(ERROR) << "Failed reading mac parameter!";
             return false;
         }
-
         msg->params.mac = beerocks::net::network_utils::mac_from_string(tmp_str);
+        const char assoc_req[] =
+            "00003A01029A96FB591100504322565F029A96FB591110E431141400000E4D756C74692D41502D3234472D"
+            "31010802040B0C121618242102001430140100000FAC040100000FAC040100000FAC02000032043048606C"
+            "3B10515153547374757677787C7D7E7F80823B160C01020304050C161718191A1B1C1D1E1F202180818246"
+            "057000000000460571505000047F0A04000A82214000408000DD070050F2020001002D1A2D1103FFFF0000"
+            "000000000000000000000000000018E6E10900BF0CB079D133FAFF0C03FAFF0C03C70110DD07506F9A1603"
+            "0103";
 
+        auto assoc_req_len                   = strnlen(assoc_req, ASSOCIATION_FRAME_SIZE);
+        auto sub_str                         = std::string(&assoc_req[56], assoc_req_len - 56 - 18);
+        msg->params.association_frame_length = sub_str.length();
+
+        std::copy_n(&sub_str[0], sub_str.length(), msg->params.association_frame);
         bool caps_valid = true;
         SRadioCapabilitiesStrings caps_strings;
         if (!dummy_obj_read_str("SupportedRates", parsed_obj, &tmp_str)) {
