@@ -883,18 +883,33 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             // attributes in the M2.
             auto bss_type = static_cast<WSC::eWscVendorExtSubelementBssType>(
                 config_data.multiap_attr().subelement_value);
-            if ((bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN) != 0) {
+            bool is_teardown = false;
+            if ((bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN) != 0 ||
+                config_data.ssid_str().empty()) {
+                is_teardown = true;
+            }
+            bool all_whitespace = true;
+            for (size_t i = 0; i < config_data.ssid_length(); i++) {
+                if (!isspace(config_data.ssid_str()[i])) {
+                    all_whitespace = false;
+                    break;
+                }
+            }
+            if (all_whitespace) {
+                is_teardown = true;
+            }
+            if (is_teardown) {
                 LOG(DEBUG) << "received teardown";
                 bss_info_conf_list.clear();
                 break;
             }
 
+            // bss_info_conf.bssid               = config_data.bssid_attr();
             bss_info_conf.ssid                = config_data.ssid_str();
             bss_info_conf.authentication_type = config_data.authentication_type_attr().data;
             bss_info_conf.encryption_type     = config_data.encryption_type_attr().data;
             bss_info_conf.network_key         = config_data.network_key_str();
             bss_info_conf.bss_type            = bss_type;
-
             bss_info_conf_list.push_back(bss_info_conf);
         }
 
