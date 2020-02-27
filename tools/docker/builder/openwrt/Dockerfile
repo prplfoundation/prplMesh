@@ -35,6 +35,8 @@ ARG OPENWRT_REPOSITORY
 ARG OPENWRT_VERSION
 # Target to build for (can be any existing value after CONFIG_TARGET_):
 ARG TARGET
+# SDK .config to use as baseline
+ARG SDK_CONFIG=default
 
 WORKDIR /home/openwrt
 
@@ -44,14 +46,18 @@ RUN git clone "$OPENWRT_REPOSITORY" openwrt \
 
 WORKDIR /home/openwrt/openwrt
 
+COPY --chown=openwrt:openwrt configs/sdk_${SDK_CONFIG}_config /home/openwrt/sdk_config
+
 RUN if [ -n "$INTEL_FEED" ] ; then \
-	echo "src-git intel $INTEL_FEED" >> feeds.conf.default \
-	&& scripts/feeds update intel \
-	&& scripts/feeds install intel_mips ; \
-    fi ; \
-    echo "CONFIG_SDK=y" > .config \
+        echo "src-git intel $INTEL_FEED" >> feeds.conf.default \
+        && scripts/feeds update intel \
+        && scripts/feeds install intel_mips ; \
+    fi ;\
+    cp /home/openwrt/sdk_config .config \
+    && echo "CONFIG_SDK=y" >> .config \
     && echo "CONFIG_TARGET_${TARGET}=y" >> .config \
     && make defconfig \
+    && cat .config \
     && make -j$(nproc)
 
 RUN TAR="$(find bin/targets -name 'openwrt-sdk*' -print)" \

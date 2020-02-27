@@ -32,7 +32,7 @@ std::string cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::slave_version_str() {
 }
 
 char* cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::slave_version(size_t length) {
-    if( (m_slave_version_idx__ <= 0) || (m_slave_version_idx__ < length) ) {
+    if( (m_slave_version_idx__ == 0) || (m_slave_version_idx__ < length) ) {
         TLVF_LOG(ERROR) << "slave_version length is smaller than requested length";
         return nullptr;
     }
@@ -41,8 +41,8 @@ char* cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::slave_version(size_t length) {
 
 bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const std::string& str) { return set_slave_version(str.c_str(), str.size()); }
 bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_slave_version received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_slave_version received a null pointer.";
         return false;
     }
     if (size > beerocks::message::VERSION_LENGTH) {
@@ -90,6 +90,7 @@ uint8_t& cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::is_slave_reconf() {
 
 void cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_platform_settings->struct_swap();
     m_wlan_settings->struct_swap();
     m_backhaul_params->struct_swap();
@@ -225,7 +226,7 @@ std::string cACTION_CONTROL_SLAVE_JOINED_RESPONSE::master_version_str() {
 }
 
 char* cACTION_CONTROL_SLAVE_JOINED_RESPONSE::master_version(size_t length) {
-    if( (m_master_version_idx__ <= 0) || (m_master_version_idx__ < length) ) {
+    if( (m_master_version_idx__ == 0) || (m_master_version_idx__ < length) ) {
         TLVF_LOG(ERROR) << "master_version length is smaller than requested length";
         return nullptr;
     }
@@ -234,8 +235,8 @@ char* cACTION_CONTROL_SLAVE_JOINED_RESPONSE::master_version(size_t length) {
 
 bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const std::string& str) { return set_master_version(str.c_str(), str.size()); }
 bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_master_version received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_master_version received a null pointer.";
         return false;
     }
     if (size > beerocks::message::VERSION_LENGTH) {
@@ -255,6 +256,7 @@ sSonConfig& cACTION_CONTROL_SLAVE_JOINED_RESPONSE::config() {
 
 void cACTION_CONTROL_SLAVE_JOINED_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_config->struct_swap();
 }
 
@@ -353,6 +355,7 @@ sNodeHostap& cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::hostap() {
 
 void cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_backhaul_iface_mac->struct_swap();
     m_backhaul_ipv4->struct_swap();
     m_bridge_iface_mac->struct_swap();
@@ -454,6 +457,7 @@ sSonConfig& cACTION_CONTROL_SON_CONFIG_UPDATE::config() {
 
 void cACTION_CONTROL_SON_CONFIG_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_config->struct_swap();
 }
 
@@ -530,7 +534,7 @@ uint16_t& cACTION_CONTROL_CONTROLLER_PING_REQUEST::size() {
 }
 
 uint8_t* cACTION_CONTROL_CONTROLLER_PING_REQUEST::data(size_t idx) {
-    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
+    if ( (m_data_idx__ == 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -540,10 +544,6 @@ uint8_t* cACTION_CONTROL_CONTROLLER_PING_REQUEST::data(size_t idx) {
 bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::alloc_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(uint8_t) * count;
@@ -568,6 +568,7 @@ bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::alloc_data(size_t count) {
 
 void cACTION_CONTROL_CONTROLLER_PING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_total));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_seq));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_size));
@@ -658,7 +659,7 @@ uint16_t& cACTION_CONTROL_CONTROLLER_PING_RESPONSE::size() {
 }
 
 uint8_t* cACTION_CONTROL_CONTROLLER_PING_RESPONSE::data(size_t idx) {
-    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
+    if ( (m_data_idx__ == 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -668,10 +669,6 @@ uint8_t* cACTION_CONTROL_CONTROLLER_PING_RESPONSE::data(size_t idx) {
 bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::alloc_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(uint8_t) * count;
@@ -696,6 +693,7 @@ bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::alloc_data(size_t count) {
 
 void cACTION_CONTROL_CONTROLLER_PING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_total));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_seq));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_size));
@@ -786,7 +784,7 @@ uint16_t& cACTION_CONTROL_AGENT_PING_REQUEST::size() {
 }
 
 uint8_t* cACTION_CONTROL_AGENT_PING_REQUEST::data(size_t idx) {
-    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
+    if ( (m_data_idx__ == 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -796,10 +794,6 @@ uint8_t* cACTION_CONTROL_AGENT_PING_REQUEST::data(size_t idx) {
 bool cACTION_CONTROL_AGENT_PING_REQUEST::alloc_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(uint8_t) * count;
@@ -824,6 +818,7 @@ bool cACTION_CONTROL_AGENT_PING_REQUEST::alloc_data(size_t count) {
 
 void cACTION_CONTROL_AGENT_PING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_total));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_seq));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_size));
@@ -914,7 +909,7 @@ uint16_t& cACTION_CONTROL_AGENT_PING_RESPONSE::size() {
 }
 
 uint8_t* cACTION_CONTROL_AGENT_PING_RESPONSE::data(size_t idx) {
-    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
+    if ( (m_data_idx__ == 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -924,10 +919,6 @@ uint8_t* cACTION_CONTROL_AGENT_PING_RESPONSE::data(size_t idx) {
 bool cACTION_CONTROL_AGENT_PING_RESPONSE::alloc_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(uint8_t) * count;
@@ -952,6 +943,7 @@ bool cACTION_CONTROL_AGENT_PING_RESPONSE::alloc_data(size_t count) {
 
 void cACTION_CONTROL_AGENT_PING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_total));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_seq));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_size));
@@ -1035,6 +1027,7 @@ sArpQuery& cACTION_CONTROL_ARP_QUERY_REQUEST::params() {
 
 void cACTION_CONTROL_ARP_QUERY_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1104,6 +1097,7 @@ sArpMonitorData& cACTION_CONTROL_ARP_QUERY_RESPONSE::params() {
 
 void cACTION_CONTROL_ARP_QUERY_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1177,6 +1171,7 @@ uint8_t& cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION::operational() {
 
 void cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_bridge_mac->struct_swap();
 }
 
@@ -1252,6 +1247,7 @@ sBackhaulRssi& cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::params() {
 
 void cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1317,6 +1313,7 @@ cACTION_CONTROL_BACKHAUL_RESET::~cACTION_CONTROL_BACKHAUL_RESET() {
 }
 void cACTION_CONTROL_BACKHAUL_RESET::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_CONTROL_BACKHAUL_RESET::finalize()
@@ -1378,6 +1375,7 @@ sBackhaulRoam& cACTION_CONTROL_BACKHAUL_ROAM_REQUEST::params() {
 
 void cACTION_CONTROL_BACKHAUL_ROAM_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1447,6 +1445,7 @@ sLoggingLevelChange& cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL::params() {
 
 void cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1516,6 +1515,7 @@ sApChannelSwitch& cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION::cs_params() {
 
 void cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
 }
 
@@ -1585,6 +1585,7 @@ sApChannelSwitch& cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION::cs_params() {
 
 void cACTION_CONTROL_HOSTAP_CSA_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
 }
 
@@ -1654,6 +1655,7 @@ sApChannelSwitch& cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION::cs_params() {
 
 void cACTION_CONTROL_HOSTAP_ACS_ERROR_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
 }
 
@@ -1732,6 +1734,7 @@ std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_CONTROL_HOSTAP_ACS_NO
 
 void cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
     for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels[i].struct_swap();
@@ -1814,6 +1817,7 @@ sDfsCacCompleted& cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::params(
 
 void cACTION_CONTROL_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1883,6 +1887,7 @@ sDfsChannelAvailable& cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION:
 
 void cACTION_CONTROL_HOSTAP_DFS_CHANNEL_AVAILABLE_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -1952,6 +1957,7 @@ sApSetRestrictedFailsafe& cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL
 
 void cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2021,6 +2027,7 @@ uint8_t& cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::succes
 
 void cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_CONTROL_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE::finalize()
@@ -2088,6 +2095,7 @@ sApChannelSwitch& cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START::cs_params() {
 
 void cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_ACS_START::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
 }
 
@@ -2157,6 +2165,7 @@ uint32_t& cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::attemp
 
 void cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_attempts));
 }
 
@@ -2221,6 +2230,7 @@ cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER::~cACTION_CONTROL_HOSTAP_DISABLED_BY_M
 }
 void cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_CONTROL_HOSTAP_DISABLED_BY_MASTER::finalize()
@@ -2282,6 +2292,7 @@ sApChannelSwitch& cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST::cs_params() {
 
 void cACTION_CONTROL_HOSTAP_CHANNEL_SWITCH_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
 }
 
@@ -2351,6 +2362,7 @@ uint8_t& cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST::sync() {
 
 void cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST::finalize()
@@ -2434,10 +2446,6 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list sta_stats, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(sStaStatsParams) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
@@ -2464,6 +2472,7 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
 
 void cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_ap_stats->struct_swap();
     for (size_t i = 0; i < (size_t)*m_sta_stats_size; i++){
         m_sta_stats[i].struct_swap();
@@ -2550,6 +2559,7 @@ sApLoadNotificationParams& cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION:
 
 void cACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2619,6 +2629,7 @@ sNeighborSetParams11k& cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST::params()
 
 void cACTION_CONTROL_HOSTAP_SET_NEIGHBOR_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2688,6 +2699,7 @@ sNeighborRemoveParams11k& cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::pa
 
 void cACTION_CONTROL_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2757,6 +2769,7 @@ sApActivityNotificationParams& cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION::par
 
 void cACTION_CONTROL_HOSTAP_ACTIVITY_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2826,6 +2839,7 @@ sVapsList& cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::params() {
 
 void cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -2895,6 +2909,7 @@ int8_t& cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION::vap_id() {
 
 void cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_CONTROL_HOSTAP_AP_DISABLED_NOTIFICATION::finalize()
@@ -2966,6 +2981,7 @@ sVapInfo& cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION::vap_info() {
 
 void cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_vap_info->struct_swap();
 }
 
@@ -3041,6 +3057,7 @@ sClientMonitoringParams& cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::params
 
 void cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3094,6 +3111,74 @@ bool cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::init()
     return true;
 }
 
+cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::~cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE() {
+}
+uint8_t& cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::success() {
+    return (uint8_t&)(*m_success);
+}
+
+void cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // success
+    return class_size;
+}
+
+bool cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_success = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
 cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
@@ -3110,6 +3195,7 @@ sMacAddr& cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::mac() {
 
 void cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -3179,6 +3265,7 @@ sNodeRssiMeasurementRequest& cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST:
 
 void cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3248,6 +3335,7 @@ sNodeRssiMeasurement& cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::param
 
 void cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3317,6 +3405,7 @@ sMacAddr& cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::mac() {
 
 void cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -3386,6 +3475,7 @@ sMacAddr& cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::mac() {
 
 void cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -3455,6 +3545,7 @@ sNodeRssiMeasurement& cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::p
 
 void cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3524,6 +3615,7 @@ sMacAddr& cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION::mac() {
 
 void cACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -3593,6 +3685,7 @@ sMacAddr& cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::mac() {
 
 void cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -3646,6 +3739,88 @@ bool cACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION::init()
     return true;
 }
 
+cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::~cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION() {
+}
+sMacAddr& cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::mac() {
+    return (sMacAddr&)(*m_mac);
+}
+
+beerocks::net::sIpv4Addr& cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::ipv4() {
+    return (beerocks::net::sIpv4Addr&)(*m_ipv4);
+}
+
+void cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
+    m_mac->struct_swap();
+    m_ipv4->struct_swap();
+}
+
+bool cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // mac
+    class_size += sizeof(beerocks::net::sIpv4Addr); // ipv4
+    return class_size;
+}
+
+bool cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_mac->struct_init(); }
+    m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::net::sIpv4Addr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_ipv4->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
 cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
@@ -3664,8 +3839,8 @@ int8_t& cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::vap_id() {
     return (int8_t&)(*m_vap_id);
 }
 
-uint32_t& cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::type() {
-    return (uint32_t&)(*m_type);
+eDisconnectType& cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::type() {
+    return (eDisconnectType&)(*m_type);
 }
 
 uint32_t& cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::reason() {
@@ -3674,8 +3849,9 @@ uint32_t& cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::reason() {
 
 void cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_type));
+    tlvf_swap(8*sizeof(eDisconnectType), reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_reason));
 }
 
@@ -3711,7 +3887,7 @@ size_t cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // mac
     class_size += sizeof(int8_t); // vap_id
-    class_size += sizeof(uint32_t); // type
+    class_size += sizeof(eDisconnectType); // type
     class_size += sizeof(uint32_t); // reason
     return class_size;
 }
@@ -3733,9 +3909,9 @@ bool cACTION_CONTROL_CLIENT_DISCONNECT_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    m_type = (uint32_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+    m_type = (eDisconnectType*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(eDisconnectType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eDisconnectType) << ") Failed!";
         return false;
     }
     m_reason = (uint32_t*)m_buff_ptr__;
@@ -3763,6 +3939,7 @@ sClientDisconnectResponse& cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE::params() 
 
 void cACTION_CONTROL_CLIENT_DISCONNECT_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3841,7 +4018,7 @@ std::string cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::name_str() {
 }
 
 char* cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::name(size_t length) {
-    if( (m_name_idx__ <= 0) || (m_name_idx__ < length) ) {
+    if( (m_name_idx__ == 0) || (m_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "name length is smaller than requested length";
         return nullptr;
     }
@@ -3850,8 +4027,8 @@ char* cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::name(size_t length) {
 
 bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const std::string& str) { return set_name(str.c_str(), str.size()); }
 bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_name received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_name received a null pointer.";
         return false;
     }
     if (size > beerocks::message::NODE_NAME_LENGTH) {
@@ -3863,6 +4040,7 @@ bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const char str[
 }
 void cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
     m_ipv4->struct_swap();
 }
@@ -3947,6 +4125,7 @@ sArpMonitorData& cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION::params() {
 
 void cACTION_CONTROL_CLIENT_ARP_MONITOR_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4016,6 +4195,7 @@ sBeaconRequest11k& cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST::params() {
 
 void cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4085,6 +4265,7 @@ sBeaconResponse11k& cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE::params() {
 
 void cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4154,6 +4335,7 @@ sStaChannelLoadRequest11k& cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST::para
 
 void cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4223,6 +4405,7 @@ sStaChannelLoadResponse11k& cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE::pa
 
 void cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4292,6 +4475,7 @@ sStatisticsRequest11k& cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST::params() {
 
 void cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4361,6 +4545,7 @@ sStatisticsResponse11k& cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE::params()
 
 void cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4430,6 +4615,7 @@ sMacAddr& cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST::mac() {
 
 void cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -4499,6 +4685,7 @@ sLinkMeasurementsResponse11k& cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPO
 
 void cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4568,6 +4755,7 @@ sSteeringSetGroupRequest& cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST::par
 
 void cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4637,6 +4825,7 @@ sSteeringSetGroupResponse& cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE::p
 
 void cACTION_CONTROL_STEERING_CLIENT_SET_GROUP_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4706,6 +4895,7 @@ sSteeringClientSetRequest& cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST::params()
 
 void cACTION_CONTROL_STEERING_CLIENT_SET_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4775,6 +4965,7 @@ sSteeringClientSetResponse& cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE::params
 
 void cACTION_CONTROL_STEERING_CLIENT_SET_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4844,6 +5035,7 @@ sSteeringEvActivity& cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION
 
 void cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4913,6 +5105,7 @@ sSteeringEvSnrXing& cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION::params
 
 void cACTION_CONTROL_STEERING_EVENT_SNR_XING_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -4982,6 +5175,7 @@ sSteeringEvProbeReq& cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION::para
 
 void cACTION_CONTROL_STEERING_EVENT_PROBE_REQ_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -5051,6 +5245,7 @@ sSteeringEvAuthFail& cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::para
 
 void cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -5100,6 +5295,457 @@ bool cACTION_CONTROL_STEERING_EVENT_AUTH_FAIL_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST::~cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST() {
+}
+sTriggerChannelScanParams& cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST::scan_params() {
+    return (sTriggerChannelScanParams&)(*m_scan_params);
+}
+
+void cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
+    m_scan_params->struct_swap();
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sTriggerChannelScanParams); // scan_params
+    return class_size;
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_scan_params = (sTriggerChannelScanParams*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sTriggerChannelScanParams))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sTriggerChannelScanParams) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_scan_params->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::~cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE() {
+}
+uint8_t& cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::success() {
+    return (uint8_t&)(*m_success);
+}
+
+void cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // success
+    return class_size;
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_success = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION::cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION::cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION::~cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION() {
+}
+sMacAddr& cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION::radio_mac() {
+    return (sMacAddr&)(*m_radio_mac);
+}
+
+void cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
+    m_radio_mac->struct_swap();
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // radio_mac
+    return class_size;
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_radio_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_radio_mac->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION::cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION::cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION::~cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION() {
+}
+sChannelScanResults& cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION::scan_results() {
+    return (sChannelScanResults&)(*m_scan_results);
+}
+
+sMacAddr& cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION::radio_mac() {
+    return (sMacAddr&)(*m_radio_mac);
+}
+
+uint8_t& cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION::is_dump() {
+    return (uint8_t&)(*m_is_dump);
+}
+
+void cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
+    m_scan_results->struct_swap();
+    m_radio_mac->struct_swap();
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sChannelScanResults); // scan_results
+    class_size += sizeof(sMacAddr); // radio_mac
+    class_size += sizeof(uint8_t); // is_dump
+    return class_size;
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_scan_results = (sChannelScanResults*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sChannelScanResults))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sChannelScanResults) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_scan_results->struct_init(); }
+    m_radio_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_radio_mac->struct_init(); }
+    m_is_dump = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_is_dump = 0x0;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION::cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION::cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION::~cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION() {
+}
+uint8_t& cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION::reason() {
+    return (uint8_t&)(*m_reason);
+}
+
+sMacAddr& cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION::radio_mac() {
+    return (sMacAddr&)(*m_radio_mac);
+}
+
+void cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
+    m_radio_mac->struct_swap();
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // reason
+    class_size += sizeof(sMacAddr); // radio_mac
+    return class_size;
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_reason = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_radio_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_radio_mac->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION::cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION::cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION::~cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION() {
+}
+sMacAddr& cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION::radio_mac() {
+    return (sMacAddr&)(*m_radio_mac);
+}
+
+void cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
+    m_radio_mac->struct_swap();
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // radio_mac
+    return class_size;
+}
+
+bool cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_radio_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_radio_mac->struct_init(); }
     if (m_parse__) { class_swap(); }
     return true;
 }

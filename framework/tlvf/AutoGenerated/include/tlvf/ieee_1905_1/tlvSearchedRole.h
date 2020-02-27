@@ -29,7 +29,7 @@ class tlvSearchedRole : public BaseClass
 {
     public:
         tlvSearchedRole(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvSearchedRole(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvSearchedRole(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvSearchedRole();
 
         enum eValue: uint8_t {

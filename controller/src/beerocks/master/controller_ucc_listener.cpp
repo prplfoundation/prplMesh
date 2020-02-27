@@ -49,7 +49,37 @@ void controller_ucc_listener::clear_configuration() { m_database.clear_bss_info_
 bool controller_ucc_listener::handle_dev_get_param(
     std::unordered_map<std::string, std::string> &params, std::string &value)
 {
-    value = "parameter " + params["parameter"] + " not supported";
+    auto parameter = params["parameter"];
+    std::transform(parameter.begin(), parameter.end(), parameter.begin(), ::tolower);
+    if (parameter == "alid") {
+        value = m_database.get_local_bridge_mac();
+        return true;
+    } else if (parameter == "macaddr" || parameter == "bssid") {
+        if (params.find("ruid") == params.end()) {
+            value = "missing ruid";
+            return false;
+        }
+        if (params.find("ssid") == params.end()) {
+            value = "missing ssid";
+            return false;
+        }
+        auto ruid = net::network_utils::mac_to_string(std::stoull(params["ruid"], nullptr, 16));
+        auto ssid = params["ssid"];
+        auto vaps = m_database.get_hostap_vap_list(ruid);
+        if (vaps.empty()) {
+            value = "ruid " + ruid + " not found";
+            return false;
+        }
+        for (const auto &vap : vaps) {
+            if (std::string(vap.second.ssid) == ssid) {
+                value = vap.second.mac;
+                return true;
+            }
+        }
+        value = "macaddr/bssid not found for ruid " + ruid + " ssid " + ssid;
+        return false;
+    }
+    value = "parameter " + parameter + " not supported";
     return false;
 }
 

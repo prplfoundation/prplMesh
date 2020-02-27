@@ -29,7 +29,7 @@ class tlvSupportedRole : public BaseClass
 {
     public:
         tlvSupportedRole(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvSupportedRole(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvSupportedRole(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvSupportedRole();
 
         enum eValue: uint8_t {

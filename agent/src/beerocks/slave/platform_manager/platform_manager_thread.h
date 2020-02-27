@@ -30,15 +30,16 @@ extern std::string extern_query_db(std::string parameter);
 class main_thread : public socket_thread {
 
 public:
-    main_thread(config_file::sConfigSlave config_, logging &logger_);
+    main_thread(config_file::sConfigSlave config_,
+                const std::unordered_map<int, std::string> &interfaces_map, logging &logger_);
     ~main_thread();
 
     struct platform_common_conf_t {
-        bool conf_initialized = false;
         int rdkb_extensions;
         int band_steering;
         int client_roaming;
         int onboarding;
+        int management_mode;
         int operating_mode;
         int certification_mode;
         int stop_on_failure_attempts;
@@ -81,18 +82,14 @@ private:
     bool init_arp_monitor();
     void stop_arp_monitor();
     bool restart_arp_monitor();
-
-    void send_slave_iface_status_to_bpl(bool bforce = false);
-    bool slave_iface_status_check(const std::string &iface_name, uint8_t status,
-                                  bool operational = false);
-    bool platform_operational_state_check();
     bool wlan_params_changed_check();
 
 private:
-    const int PLATFORM_READ_CONF_RETRY_SEC    = 10;
+    const int PLATFORM_READ_CONF_RETRY_SEC    = 5;
     const int PLATFORM_READ_CONF_MAX_ATTEMPTS = 10;
 
     config_file::sConfigSlave config;
+    const std::unordered_map<int, std::string> interfaces_map;
 
     struct SIfaceParams {
         beerocks::eArpSource eType;
@@ -135,25 +132,9 @@ private:
 
     beerocks::async_work_queue work_queue;
 
-    struct slave_iface_status {
-        int index;
-        int status;
-        bool operational = false;
-        std::chrono::steady_clock::time_point last_seen;
-
-        slave_iface_status(int index_, int status_,
-                           std::chrono::steady_clock::time_point last_seen_)
-            : index(index_), status(status_), last_seen(last_seen_)
-        {
-        }
-    };
-
-    bool platform_operational = false;
-    std::unordered_map<std::string, std::shared_ptr<slave_iface_status>> bpl_iface_status_map;
     std::unordered_map<std::string, std::shared_ptr<beerocks_message::sWlanSettings>>
         bpl_iface_wlan_params_map;
     std::unordered_set<std::string> ap_ifaces;
-    bpl::BPL_INTERFACE_STATUS_NOTIFICATION bpl_iface_status;
 
     platform_common_conf_t platform_common_conf;
 };

@@ -26,6 +26,7 @@ enum class eWscAuth : uint16_t {
     WSC_AUTH_WPA = 0x8,
     WSC_AUTH_WPA2 = 0x10,
     WSC_AUTH_WPA2PSK = 0x20,
+    WSC_AUTH_INVALID = 0xffff,
 };
 class eWscAuthValidate {
 public:
@@ -38,6 +39,7 @@ public:
         case 0x8:
         case 0x10:
         case 0x20:
+        case 0xffff:
                 ret = true;
                 break;
             default:

@@ -74,7 +74,8 @@ sPlatformSettings:
   onboarding: uint8_t 
   local_master: uint8_t 
   local_gw: uint8_t 
-  operating_mode: uint8_t 
+  operating_mode: uint8_t
+  management_mode: uint8_t
   mem_only_psk: uint8_t
 
   certification_mode: uint8_t 
@@ -104,15 +105,6 @@ sWlanSettings:
   band_enabled:
     _type: uint8_t
   channel: uint8_t 
-  ssid:
-    _type: char    
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
-  pass:
-    _type: char    
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
-  security_type:
-    _type: char    
-    _length: [ "beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH" ]
 
 sApSetRestrictedFailsafe:
   _type: struct
@@ -131,6 +123,7 @@ sApChannelSwitch:
   switch_reason: uint8_t 
   is_dfs_channel: uint8_t 
   vht_center_frequency: uint16_t
+  tx_power: int8_t
 
 sDfsCacCompleted:
   _type: struct      
@@ -766,7 +759,7 @@ eDisconnectType:
   _enum_storage: uint8_t
   eDisconnect_Type_Unknown : 0
   eDisconnect_Type_Disassoc : 1 
-  eIsconnect_Type_Deauth : 2
+  eDisconnect_Type_Deauth : 2
 
 
 eSteeringSnrChange:
@@ -826,4 +819,146 @@ sSteeringEvSnr:
  client_mac: sMacAddr
  bssid: sMacAddr
  snr: uint32_t
-                
+
+sTriggerChannelScanParams:
+ _type: struct
+ radio_mac: sMacAddr
+ dwell_time_ms:
+    _type: uint32_t
+    _value: 0
+    _comment: time interval (msec) between channels during scan 
+ channel_pool_size:
+    _type: uint8_t
+    _value: 0
+    _comment: size of provided channel_pool
+ channel_pool:
+    _type: uint8_t
+    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+    _comment: pool of channels to be scaned
+
+sChannelScanRequestParams:
+ _type: struct
+ dwell_time_ms:
+    _type: int32_t
+    _value: -1
+    _comment: an invalid (-1) value indicates this value is not requested
+ interval_time_sec:
+    _type: int32_t
+    _value: -1
+    _comment: an invalid (-1) value indicates this value is not requested
+ channel_pool_size:
+    _type: int8_t
+    _value: 0
+    _comment: an invalid (-1) value indicates this value is not requested
+ channel_pool:
+    _type: uint8_t 
+    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+
+eChannelScanResultMode:
+  _type: enum
+  _enum_storage: uint8_t
+  eMode_NA: 0
+  eMode_AdHoc: 1
+  eMode_Infrastructure: 2
+
+eChannelScanResultEncryptionMode:
+  _type: enum
+  _enum_storage: uint8_t
+  eEncryption_Mode_NA: 0
+  eEncryption_Mode_AES: 1
+  eEncryption_Mode_TKIP: 2
+
+eChannelScanResultSecurityMode:
+  _type: enum
+  _enum_storage: uint8_t
+  eSecurity_Mode_None: 0
+  eSecurity_Mode_WEP: 1
+  eSecurity_Mode_WPA: 2
+  eSecurity_Mode_WPA2: 3
+
+eChannelScanResultOperatingFrequencyBand:
+  _type: enum
+  _enum_storage: uint8_t
+  eOperating_Freq_Band_NA: 0
+  eOperating_Freq_Band_2_4GHz: 1
+  eOperating_Freq_Band_5GHz: 2
+
+eChannelScanResultStandards:
+  _type: enum
+  _enum_storage: uint8_t
+  eStandard_NA: 0
+  eStandard_802_11a: 1
+  eStandard_802_11b: 2
+  eStandard_802_11g: 3
+  eStandard_802_11n: 4
+  eStandard_802_11ac: 5
+
+eChannelScanResultChannelBandwidth:
+  _type: enum
+  _enum_storage: uint8_t
+  eChannel_Bandwidth_NA: 0
+  eChannel_Bandwidth_20MHz: 1
+  eChannel_Bandwidth_40MHz: 2
+  eChannel_Bandwidth_80MHz: 3
+  eChannel_Bandwidth_160MHz: 4
+  eChannel_Bandwidth_80_80: 5
+
+sChannelScanResults:
+  _type: struct
+  ssid:
+    _comment: The current service set identifier in use by the neighboring WiFi SSID. The value MAY be empty for hidden SSIDs.
+    _type: char
+    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  bssid:
+    _comment: The BSSID used for the neighboring WiFi SSID.
+    _type: sMacAddr
+  mode:
+    _comment: The mode the neighboring WiFi radio is operating in. Enumerate
+    _type: eChannelScanResultMode
+  channel:
+    _comment: The current radio channel used by the neighboring WiFi radio.
+    _type: uint32_t
+  signal_strength_dBm:
+    _type: int32_t
+    _comment: An indicator of radio signal strength (RSSI) of the neighboring WiFi radio measured in dBm, as an average of the last 100 packets received.
+  security_mode_enabled:
+    _comment: The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
+    _type: eChannelScanResultSecurityMode
+    _length: ["beerocks::message::CHANNEL_SCAN_LIST_LENGTH"]
+  encryption_mode:
+    _comment: The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
+    _type: eChannelScanResultEncryptionMode
+    _length: ["beerocks::message::CHANNEL_SCAN_LIST_LENGTH"]
+  operating_frequency_band:
+    _comment: Indicates the frequency band at which the radio this SSID instance is operating. Enumerate
+    _type: eChannelScanResultOperatingFrequencyBand
+  supported_standards:
+    _comment: List items indicate which IEEE 802.11 standards thisResultinstance can support simultaneously, in the frequency band specified byOperatingFrequencyBand. Enumerate List
+    _type: eChannelScanResultStandards
+    _length: ["beerocks::message::CHANNEL_SCAN_LIST_LENGTH"]
+  operating_standards:
+    _comment: Indicates which IEEE 802.11 standard that is detected for this Result. Enumerate
+    _type: eChannelScanResultStandards
+  operating_channel_bandwidth:
+    _comment: Indicates the bandwidth at which the channel is operating. Enumerate
+    _type: eChannelScanResultChannelBandwidth
+  beacon_period_ms:
+    _comment: Time interval (inms) between transmitting beacons.
+    _type: uint32_t
+  noise_dBm:
+    _comment: Indicator of average noise strength (indBm) received from the neighboring WiFi radio.
+    _type: int32_t
+  basic_data_transfer_rates_kbps:
+    _comment: Basic data transmit rates (in Kbps) for the SSID.
+    _type: uint32_t
+    _length: ["beerocks::message::CHANNEL_SCAN_LIST_LENGTH"]
+  supported_data_transfer_rates_kbps:
+    _comment: Data transmit rates (in Kbps) for unicast frames at which the SSID will permit a station to connect.
+    _type: uint32_t
+    _length: ["beerocks::message::CHANNEL_SCAN_LIST_LENGTH"]
+  dtim_period:
+    _comment: The number of beacon intervals that elapse between transmission of Beacon frames containing a TIM element whose DTIM count field is 0. This value is transmitted in the DTIM Period field of beacon frames. [802.11-2012]
+    _type: uint32_t
+  channel_utilization:
+    _comment: Indicates the fraction of the time AP senses that the channel is in use by the neighboring AP for transmissions.
+    _type: uint32_t

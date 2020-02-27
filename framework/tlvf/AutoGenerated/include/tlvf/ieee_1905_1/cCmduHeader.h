@@ -30,7 +30,7 @@ class cCmduHeader : public BaseClass
 {
     public:
         cCmduHeader(uint8_t* buff, size_t buff_len, bool parse = false);
-        cCmduHeader(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit cCmduHeader(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cCmduHeader();
 
         typedef struct sFlags {

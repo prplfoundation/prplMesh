@@ -40,7 +40,7 @@ std::string cConfigData::ssid_str() {
 }
 
 char* cConfigData::ssid(size_t length) {
-    if( (m_ssid_idx__ <= 0) || (m_ssid_idx__ < length) ) {
+    if( (m_ssid_idx__ == 0) || (m_ssid_idx__ < length) ) {
         TLVF_LOG(ERROR) << "ssid length is smaller than requested length";
         return nullptr;
     }
@@ -53,8 +53,8 @@ char* cConfigData::ssid(size_t length) {
 
 bool cConfigData::set_ssid(const std::string& str) { return set_ssid(str.c_str(), str.size()); }
 bool cConfigData::set_ssid(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_ssid received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_ssid received a null pointer.";
         return false;
     }
     if (!alloc_ssid(size)) { return false; }
@@ -64,10 +64,6 @@ bool cConfigData::set_ssid(const char str[], size_t size) {
 bool cConfigData::alloc_ssid(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list ssid, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -125,7 +121,7 @@ std::string cConfigData::network_key_str() {
 }
 
 char* cConfigData::network_key(size_t length) {
-    if( (m_network_key_idx__ <= 0) || (m_network_key_idx__ < length) ) {
+    if( (m_network_key_idx__ == 0) || (m_network_key_idx__ < length) ) {
         TLVF_LOG(ERROR) << "network_key length is smaller than requested length";
         return nullptr;
     }
@@ -138,8 +134,8 @@ char* cConfigData::network_key(size_t length) {
 
 bool cConfigData::set_network_key(const std::string& str) { return set_network_key(str.c_str(), str.size()); }
 bool cConfigData::set_network_key(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_network_key received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_network_key received a null pointer.";
         return false;
     }
     if (!alloc_network_key(size)) { return false; }
@@ -149,10 +145,6 @@ bool cConfigData::set_network_key(const char str[], size_t size) {
 bool cConfigData::alloc_network_key(size_t count) {
     if (m_lock_order_counter__ > 1) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list network_key, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -342,7 +334,7 @@ std::string cWscAttrEncryptedSettings::iv_str() {
 }
 
 char* cWscAttrEncryptedSettings::iv(size_t length) {
-    if( (m_iv_idx__ <= 0) || (m_iv_idx__ < length) ) {
+    if( (m_iv_idx__ == 0) || (m_iv_idx__ < length) ) {
         TLVF_LOG(ERROR) << "iv length is smaller than requested length";
         return nullptr;
     }
@@ -351,8 +343,8 @@ char* cWscAttrEncryptedSettings::iv(size_t length) {
 
 bool cWscAttrEncryptedSettings::set_iv(const std::string& str) { return set_iv(str.c_str(), str.size()); }
 bool cWscAttrEncryptedSettings::set_iv(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_iv received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_iv received a null pointer.";
         return false;
     }
     if (size > WSC_ENCRYPTED_SETTINGS_IV_LENGTH) {
@@ -369,7 +361,7 @@ std::string cWscAttrEncryptedSettings::encrypted_settings_str() {
 }
 
 char* cWscAttrEncryptedSettings::encrypted_settings(size_t length) {
-    if( (m_encrypted_settings_idx__ <= 0) || (m_encrypted_settings_idx__ < length) ) {
+    if( (m_encrypted_settings_idx__ == 0) || (m_encrypted_settings_idx__ < length) ) {
         TLVF_LOG(ERROR) << "encrypted_settings length is smaller than requested length";
         return nullptr;
     }
@@ -378,8 +370,8 @@ char* cWscAttrEncryptedSettings::encrypted_settings(size_t length) {
 
 bool cWscAttrEncryptedSettings::set_encrypted_settings(const std::string& str) { return set_encrypted_settings(str.c_str(), str.size()); }
 bool cWscAttrEncryptedSettings::set_encrypted_settings(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_encrypted_settings received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_encrypted_settings received a null pointer.";
         return false;
     }
     if (!alloc_encrypted_settings(size)) { return false; }
@@ -389,10 +381,6 @@ bool cWscAttrEncryptedSettings::set_encrypted_settings(const char str[], size_t 
 bool cWscAttrEncryptedSettings::alloc_encrypted_settings(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list encrypted_settings, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -550,7 +538,7 @@ uint8_t& cWscVendorExtWfa::subelement_value() {
 }
 
 uint8_t* cWscVendorExtWfa::vs_data(size_t idx) {
-    if ( (m_vs_data_idx__ <= 0) || (m_vs_data_idx__ <= idx) ) {
+    if ( (m_vs_data_idx__ == 0) || (m_vs_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -560,10 +548,6 @@ uint8_t* cWscVendorExtWfa::vs_data(size_t idx) {
 bool cWscVendorExtWfa::alloc_vs_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list vs_data, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(uint8_t) * count;
@@ -917,7 +901,7 @@ const uint16_t& cWscAttrEnrolleeNonce::length() {
 }
 
 uint8_t* cWscAttrEnrolleeNonce::nonce(size_t idx) {
-    if ( (m_nonce_idx__ <= 0) || (m_nonce_idx__ <= idx) ) {
+    if ( (m_nonce_idx__ == 0) || (m_nonce_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -1017,7 +1001,7 @@ const uint16_t& cWscAttrPublicKey::length() {
 }
 
 uint8_t* cWscAttrPublicKey::public_key(size_t idx) {
-    if ( (m_public_key_idx__ <= 0) || (m_public_key_idx__ <= idx) ) {
+    if ( (m_public_key_idx__ == 0) || (m_public_key_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -1502,7 +1486,7 @@ std::string cWscAttrManufacturer::manufacturer_str() {
 }
 
 char* cWscAttrManufacturer::manufacturer(size_t length) {
-    if( (m_manufacturer_idx__ <= 0) || (m_manufacturer_idx__ < length) ) {
+    if( (m_manufacturer_idx__ == 0) || (m_manufacturer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "manufacturer length is smaller than requested length";
         return nullptr;
     }
@@ -1511,8 +1495,8 @@ char* cWscAttrManufacturer::manufacturer(size_t length) {
 
 bool cWscAttrManufacturer::set_manufacturer(const std::string& str) { return set_manufacturer(str.c_str(), str.size()); }
 bool cWscAttrManufacturer::set_manufacturer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_manufacturer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_manufacturer received a null pointer.";
         return false;
     }
     if (!alloc_manufacturer(size)) { return false; }
@@ -1522,10 +1506,6 @@ bool cWscAttrManufacturer::set_manufacturer(const char str[], size_t size) {
 bool cWscAttrManufacturer::alloc_manufacturer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list manufacturer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -1649,7 +1629,7 @@ std::string cWscAttrModelName::model_str() {
 }
 
 char* cWscAttrModelName::model(size_t length) {
-    if( (m_model_idx__ <= 0) || (m_model_idx__ < length) ) {
+    if( (m_model_idx__ == 0) || (m_model_idx__ < length) ) {
         TLVF_LOG(ERROR) << "model length is smaller than requested length";
         return nullptr;
     }
@@ -1658,8 +1638,8 @@ char* cWscAttrModelName::model(size_t length) {
 
 bool cWscAttrModelName::set_model(const std::string& str) { return set_model(str.c_str(), str.size()); }
 bool cWscAttrModelName::set_model(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_model received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_model received a null pointer.";
         return false;
     }
     if (!alloc_model(size)) { return false; }
@@ -1669,10 +1649,6 @@ bool cWscAttrModelName::set_model(const char str[], size_t size) {
 bool cWscAttrModelName::alloc_model(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list model, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -1796,7 +1772,7 @@ std::string cWscAttrModelNumber::model_number_str() {
 }
 
 char* cWscAttrModelNumber::model_number(size_t length) {
-    if( (m_model_number_idx__ <= 0) || (m_model_number_idx__ < length) ) {
+    if( (m_model_number_idx__ == 0) || (m_model_number_idx__ < length) ) {
         TLVF_LOG(ERROR) << "model_number length is smaller than requested length";
         return nullptr;
     }
@@ -1805,8 +1781,8 @@ char* cWscAttrModelNumber::model_number(size_t length) {
 
 bool cWscAttrModelNumber::set_model_number(const std::string& str) { return set_model_number(str.c_str(), str.size()); }
 bool cWscAttrModelNumber::set_model_number(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_model_number received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_model_number received a null pointer.";
         return false;
     }
     if (!alloc_model_number(size)) { return false; }
@@ -1816,10 +1792,6 @@ bool cWscAttrModelNumber::set_model_number(const char str[], size_t size) {
 bool cWscAttrModelNumber::alloc_model_number(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list model_number, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -1943,7 +1915,7 @@ std::string cWscAttrSerialNumber::serial_number_str() {
 }
 
 char* cWscAttrSerialNumber::serial_number(size_t length) {
-    if( (m_serial_number_idx__ <= 0) || (m_serial_number_idx__ < length) ) {
+    if( (m_serial_number_idx__ == 0) || (m_serial_number_idx__ < length) ) {
         TLVF_LOG(ERROR) << "serial_number length is smaller than requested length";
         return nullptr;
     }
@@ -1952,8 +1924,8 @@ char* cWscAttrSerialNumber::serial_number(size_t length) {
 
 bool cWscAttrSerialNumber::set_serial_number(const std::string& str) { return set_serial_number(str.c_str(), str.size()); }
 bool cWscAttrSerialNumber::set_serial_number(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_serial_number received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_serial_number received a null pointer.";
         return false;
     }
     if (!alloc_serial_number(size)) { return false; }
@@ -1963,10 +1935,6 @@ bool cWscAttrSerialNumber::set_serial_number(const char str[], size_t size) {
 bool cWscAttrSerialNumber::alloc_serial_number(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list serial_number, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -2210,7 +2178,7 @@ std::string cWscAttrDeviceName::device_name_str() {
 }
 
 char* cWscAttrDeviceName::device_name(size_t length) {
-    if( (m_device_name_idx__ <= 0) || (m_device_name_idx__ < length) ) {
+    if( (m_device_name_idx__ == 0) || (m_device_name_idx__ < length) ) {
         TLVF_LOG(ERROR) << "device_name length is smaller than requested length";
         return nullptr;
     }
@@ -2219,8 +2187,8 @@ char* cWscAttrDeviceName::device_name(size_t length) {
 
 bool cWscAttrDeviceName::set_device_name(const std::string& str) { return set_device_name(str.c_str(), str.size()); }
 bool cWscAttrDeviceName::set_device_name(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_device_name received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_device_name received a null pointer.";
         return false;
     }
     if (!alloc_device_name(size)) { return false; }
@@ -2230,10 +2198,6 @@ bool cWscAttrDeviceName::set_device_name(const char str[], size_t size) {
 bool cWscAttrDeviceName::alloc_device_name(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list device_name, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -2919,7 +2883,7 @@ const uint16_t& cWscAttrUuidE::length() {
 }
 
 uint8_t* cWscAttrUuidE::data(size_t idx) {
-    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
+    if ( (m_data_idx__ == 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -3113,7 +3077,7 @@ const uint16_t& cWscAttrUuidR::length() {
 }
 
 uint8_t* cWscAttrUuidR::data(size_t idx) {
-    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
+    if ( (m_data_idx__ == 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -3213,7 +3177,7 @@ const uint16_t& cWscAttrAuthenticator::length() {
 }
 
 uint8_t* cWscAttrAuthenticator::data(size_t idx) {
-    if ( (m_data_idx__ <= 0) || (m_data_idx__ <= idx) ) {
+    if ( (m_data_idx__ == 0) || (m_data_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -3313,7 +3277,7 @@ const uint16_t& cWscAttrRegistrarNonce::length() {
 }
 
 uint8_t* cWscAttrRegistrarNonce::nonce(size_t idx) {
-    if ( (m_nonce_idx__ <= 0) || (m_nonce_idx__ <= idx) ) {
+    if ( (m_nonce_idx__ == 0) || (m_nonce_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -3573,7 +3537,7 @@ std::string cWscAttrSsid::ssid_str() {
 }
 
 char* cWscAttrSsid::ssid(size_t length) {
-    if( (m_ssid_idx__ <= 0) || (m_ssid_idx__ < length) ) {
+    if( (m_ssid_idx__ == 0) || (m_ssid_idx__ < length) ) {
         TLVF_LOG(ERROR) << "ssid length is smaller than requested length";
         return nullptr;
     }
@@ -3582,8 +3546,8 @@ char* cWscAttrSsid::ssid(size_t length) {
 
 bool cWscAttrSsid::set_ssid(const std::string& str) { return set_ssid(str.c_str(), str.size()); }
 bool cWscAttrSsid::set_ssid(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_ssid received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_ssid received a null pointer.";
         return false;
     }
     if (!alloc_ssid(size)) { return false; }
@@ -3593,10 +3557,6 @@ bool cWscAttrSsid::set_ssid(const char str[], size_t size) {
 bool cWscAttrSsid::alloc_ssid(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list ssid, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -3910,7 +3870,7 @@ std::string cWscAttrNetworkKey::key_str() {
 }
 
 char* cWscAttrNetworkKey::key(size_t length) {
-    if( (m_key_idx__ <= 0) || (m_key_idx__ < length) ) {
+    if( (m_key_idx__ == 0) || (m_key_idx__ < length) ) {
         TLVF_LOG(ERROR) << "key length is smaller than requested length";
         return nullptr;
     }
@@ -3919,8 +3879,8 @@ char* cWscAttrNetworkKey::key(size_t length) {
 
 bool cWscAttrNetworkKey::set_key(const std::string& str) { return set_key(str.c_str(), str.size()); }
 bool cWscAttrNetworkKey::set_key(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_key received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_key received a null pointer.";
         return false;
     }
     if (!alloc_key(size)) { return false; }
@@ -3930,10 +3890,6 @@ bool cWscAttrNetworkKey::set_key(const char str[], size_t size) {
 bool cWscAttrNetworkKey::alloc_key(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list key, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;

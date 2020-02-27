@@ -4,7 +4,7 @@ about: Create a report to help us improve
 title: "[BUG] <component>: <headline>"
 labels: bug
 assignees: ''
-
+projects: prplfoundation/prplMesh/1
 ---
 
 **Describe the bug** -

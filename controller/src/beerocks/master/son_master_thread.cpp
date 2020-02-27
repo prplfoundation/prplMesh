@@ -21,6 +21,7 @@
 #include "db/db_algo.h"
 #include "db/network_map.h"
 #include "tasks/client_locating_task.h"
+#include "tasks/dynamic_channel_selection_task.h"
 #include "tasks/ire_network_optimization_task.h"
 #include "tasks/network_health_check_task.h"
 
@@ -47,6 +48,8 @@
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
+#include <tlvf/wfa_map/tlvClientCapabilityReport.h>
+#include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvRadioOperationRestriction.h>
@@ -64,7 +67,8 @@ using namespace net;
 using namespace son;
 
 master_thread::master_thread(const std::string &master_uds_, db &database_)
-    : transport_socket_thread(master_uds_), database(database_)
+    : transport_socket_thread(master_uds_), database(database_),
+      m_controller_ucc_listener(database_, cert_cmdu_tx)
 {
     thread_name = "master";
 
@@ -98,12 +102,15 @@ bool master_thread::init()
             ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE,
             ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE,
+            ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE,
+            ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE,
             ieee1905_1::eMessageType::ACK_MESSAGE,
 
         })) {
         LOG(ERROR) << "Failed subscribing to the Bus";
     }
 
+#ifndef BEEROCKS_LINUX
     auto new_statistics_polling_task =
         std::make_shared<statistics_polling_task>(database, cmdu_tx, tasks);
     if (!new_statistics_polling_task) {
@@ -111,6 +118,7 @@ bool master_thread::init()
         return false;
     }
     tasks.add_task(new_statistics_polling_task);
+#endif
 
     auto new_bml_task = std::make_shared<bml_task>(database, cmdu_tx, tasks);
     if (!new_bml_task) {
@@ -139,15 +147,12 @@ bool master_thread::init()
         LOG(DEBUG) << "Health check is DISABLED!";
     }
 
-    if (database.config.ucc_listener_port != 0) {
-        m_controller_ucc_listener =
-            std::make_unique<controller_ucc_listener>(database, cert_cmdu_tx);
-        if (m_controller_ucc_listener && !m_controller_ucc_listener->start("ucc_listener")) {
+    if (database.setting_certification_mode() && database.config.ucc_listener_port != 0) {
+        if (!m_controller_ucc_listener.start("ucc_listener")) {
             LOG(FATAL) << "failed start controller_ucc_listener";
             return false;
         }
     }
-
     return true;
 }
 
@@ -282,6 +287,8 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
         return handle_cmdu_1905_ack_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE:
         return handle_cmdu_1905_client_steering_btm_report_message(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE:
+        return handle_cmdu_1905_client_capability_report_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE:
         return handle_cmdu_1905_operating_channel_report(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE:
@@ -294,6 +301,8 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
         return handle_cmdu_1905_link_metric_response(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE:
         return handle_cmdu_1905_ap_metric_response(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE:
+        return handle_cmdu_1905_ap_capability_report(src_mac, cmdu_rx);
     default:
         break;
     }
@@ -453,8 +462,7 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(WSC::m2::config &m2
     // attribute type, 2 bytes attribute length, 8 bytes data), but check it anyway
     // to be on the safe side. Then, we add keywrapauth at its end.
     uint8_t *plaintext = config_data.getMessageBuff();
-    int plaintextlen =
-        config_data.getMessageBuffLength() + sizeof(WSC::sWscAttrKeyWrapAuthenticator);
+    int plaintextlen   = config_data.getMessageLength() + sizeof(WSC::sWscAttrKeyWrapAuthenticator);
     WSC::sWscAttrKeyWrapAuthenticator *keywrapauth =
         reinterpret_cast<WSC::sWscAttrKeyWrapAuthenticator *>(
             &plaintext[config_data.getMessageLength()]);
@@ -481,7 +489,6 @@ bool master_thread::autoconfig_wsc_add_m2_encrypted_settings(WSC::m2::config &m2
         LOG(ERROR) << "aes encrypt failure";
         return false;
     }
-    LOG(DEBUG) << "ciphertext: " << std::endl << utils::dump_buffer(ciphertext, cipherlen);
     m2_cfg.encrypted_settings = std::vector<uint8_t>(ciphertext, ciphertext + cipherlen);
 
     return true;
@@ -507,7 +514,7 @@ void master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::m2::config &
     mapf::encryption::wps_calculate_keys(
         dh, m1.public_key(), WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, m1.enrollee_nonce(),
         m1.mac_addr().oct, m2.registrar_nonce, authkey, keywrapkey);
-    std::copy(dh.pubkey(), dh.pubkey() + dh.pubkey_length(), m2.pub_key);
+    copy_pubkey(dh, m2.pub_key);
 }
 
 /**
@@ -544,12 +551,6 @@ bool master_thread::autoconfig_wsc_authentication(WSC::m1 &m1, WSC::m2 &m2, uint
         LOG(ERROR) << "kwa_compute failure";
         return false;
     }
-    LOG(DEBUG) << "authenticator: " << utils::dump_buffer(kwa, WSC::WSC_AUTHENTICATOR_LENGTH);
-    LOG(DEBUG) << "authenticator key: " << utils::dump_buffer(authkey, 32);
-    LOG(DEBUG) << "m2 buf:" << std::endl
-               << utils::dump_buffer(m2.getMessageBuff(), m2.getMessageLength());
-    LOG(DEBUG) << "authenticator buf:" << std::endl << utils::dump_buffer(buf, sizeof(buf));
-
     return true;
 }
 
@@ -941,6 +942,7 @@ bool master_thread::handle_cmdu_1905_channel_preference_report(const std::string
         // ignored. Full implemtation will be as part of channel selection task.
     }
 
+    cert_cmdu_tx.finalize();
     return true; // cert_cmdu_tx will be sent when triggered to by the UCC application
 }
 
@@ -967,6 +969,35 @@ bool master_thread::handle_cmdu_1905_steering_completed_message(const std::strin
     }
     LOG(DEBUG) << "sending ACK message back to agent, mid=" << std::hex << int(mid);
     return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
+}
+
+bool master_thread::handle_cmdu_1905_client_capability_report_message(
+    const std::string &src_mac, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid                          = cmdu_rx.getMessageId();
+    auto client_capability_report_tlv = cmdu_rx.getClass<wfa_map::tlvClientCapabilityReport>();
+    if (!client_capability_report_tlv) {
+        LOG(ERROR) << "getClass wfa_map::tlvClientCapabilityReport has failed";
+        return false;
+    }
+
+    std::string result_code =
+        (client_capability_report_tlv->result_code() == wfa_map::tlvClientCapabilityReport::SUCCESS)
+            ? "SUCCESS"
+            : "FAILURE";
+
+    auto client_info_tlv = cmdu_rx.getClass<wfa_map::tlvClientInfo>();
+    if (!client_info_tlv) {
+        LOG(ERROR) << "getClass wfa_map::tlvClientInfo failed";
+        return false;
+    }
+
+    //TODO: log the details so it can be checked in the test_flows
+    LOG(INFO) << "Received CLIENT_CAPABILITY_REPORT_MESSAGE, mid=" << std::hex << int(mid)
+              << ", Result Code= " << result_code
+              << ", client MAC= " << network_utils::mac_to_string(client_info_tlv->client_mac())
+              << ", BSSID= " << network_utils::mac_to_string(client_info_tlv->bssid());
+    return true;
 }
 
 bool master_thread::handle_cmdu_1905_client_steering_btm_report_message(
@@ -1209,19 +1240,8 @@ bool master_thread::handle_cmdu_1905_link_metric_response(const std::string &src
 
 bool master_thread::construct_combined_infra_metric()
 {
-    // auto agents = database.get_all_connected_ires();
-    auto agents            = database.get_nodes(beerocks::TYPE_IRE);
     auto &link_metric_data = database.get_link_metric_data_map();
 
-    for (auto &al_mac : agents) {
-        if (link_metric_data.find(net::network_utils::mac_from_string(al_mac)) ==
-            link_metric_data.end()) {
-            //If agent mac still not in database and not create Combined Metrics CMDU
-            return true;
-        }
-    }
-    //If all agents already in database, create Combined Metrics CMDU
-    // build Combined Metrics message
     if (!cert_cmdu_tx.create(0,
                              ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE)) {
         LOG(ERROR) << "cmdu creation of type COMBINED_INFRASTRUCTURE_METRICS_MESSAGE, has failed";
@@ -1308,6 +1328,7 @@ bool master_thread::construct_combined_infra_metric()
         }
     }
 
+    cert_cmdu_tx.finalize();
     return true;
 }
 
@@ -1316,7 +1337,7 @@ bool master_thread::handle_cmdu_1905_ap_metric_response(const std::string &src_m
 {
 
     auto mid = cmdu_rx.getMessageId();
-    LOG(INFO) << "Received AP_METRIC_RESPONSE_MESSAGE, mid=" << std::dec << int(mid);
+    LOG(INFO) << "Received AP_METRICS_RESPONSE_MESSAGE, mid=" << std::dec << int(mid);
 
     //getting reference for ap metric data storage from db
     auto &ap_metric_data = database.get_ap_metric_data_map();
@@ -1335,6 +1356,20 @@ bool master_thread::handle_cmdu_1905_ap_metric_response(const std::string &src_m
     }
 
     print_ap_metric_map(ap_metric_data);
+
+    // TODO store the ap metric response data in the DB and trigger the relevant task.
+    // For now, this is only used for certification so update the certification cmdu.
+    if (database.setting_certification_mode())
+        construct_combined_infra_metric();
+
+    return true;
+}
+
+bool master_thread::handle_cmdu_1905_ap_capability_report(const std::string &src_mac,
+                                                          ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(INFO) << "Received AP_CAPABILITY_REPORT_MESSAGE, mid=" << std::dec << int(mid);
 
     return true;
 }
@@ -1833,7 +1868,6 @@ bool master_thread::handle_intel_slave_join(
             LOG(DEBUG) << "rdkb_extensions is not enabled";
         }
 #endif
-        database.setting_certification_mode(notification->platform_settings().certification_mode);
         database.settings_client_band_steering(
             notification->platform_settings().client_band_steering_enabled);
         database.settings_client_optimal_path_roaming(
@@ -1910,6 +1944,15 @@ bool master_thread::handle_intel_slave_join(
         database.set_hostap_band_capability(radio_mac, beerocks::SUBBAND_CAPABILITY_UNKNOWN);
     }
     autoconfig_wsc_parse_radio_caps(radio_mac, radio_caps);
+
+    auto mac = network_utils::mac_from_string(radio_mac);
+    if (tasks.is_task_running(database.get_dynamic_channel_selection_task_id(mac))) {
+        LOG(DEBUG) << "dynamic channel selection task already running for " << mac;
+    } else {
+        auto new_task =
+            std::make_shared<dynamic_channel_selection_task>(database, cmdu_tx, tasks, mac);
+        tasks.add_task(new_task);
+    }
 
     // send JOINED_RESPONSE with son config
     {
@@ -2780,16 +2823,16 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION: {
-        auto notification =
+        auto notification_in =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION>();
-        if (notification == nullptr) {
+        if (!notification_in) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION failed";
             return false;
         }
 
-        std::string client_mac = network_utils::mac_to_string(notification->mac());
-        std::string ipv4       = network_utils::ipv4_to_string(notification->ipv4());
+        std::string client_mac = network_utils::mac_to_string(notification_in->mac());
+        std::string ipv4       = network_utils::ipv4_to_string(notification_in->ipv4());
         LOG(DEBUG) << "dhcp complete for client " << client_mac << " new ip=" << ipv4
                    << " previous ip=" << database.get_node_ipv4(client_mac);
 
@@ -2806,16 +2849,30 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             }
 
             if (!database.set_node_name(
-                    client_mac, std::string(notification->name(message::NODE_NAME_LENGTH)))) {
+                    client_mac, std::string(notification_in->name(message::NODE_NAME_LENGTH)))) {
                 LOG(ERROR) << "set node name failed";
             }
 
-            if (database.get_node_ipv4(client_mac) != ipv4) {
-                LOG(DEBUG) << "handle_completed_connection client_mac = " << client_mac;
-                son_actions::handle_completed_connection(database, cmdu_tx, tasks, client_mac);
-            }
+            if (database.is_node_wireless(client_mac)) {
+                auto notification_out = message_com::create_vs_message<
+                    beerocks_message::cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>(cmdu_tx);
 
-            if (!database.is_node_wireless(client_mac)) {
+                if (!notification_out) {
+                    LOG(ERROR) << "Failed building message!";
+                    return false;
+                }
+                notification_out->mac()  = notification_in->mac();
+                notification_out->ipv4() = notification_in->ipv4();
+
+                auto clients_bssid_radio_mac = database.get_node_parent(client_mac);
+                if (clients_bssid_radio_mac.empty()) {
+                    LOG(WARNING) << "Client does not have a valid parent hostap on the database";
+                    return true;
+                }
+                son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database,
+                                                clients_bssid_radio_mac);
+
+            } else {
                 LOG(DEBUG) << "run_client_locating_task client_mac = " << client_mac;
                 int prev_task_id = database.get_client_locating_task_id(client_mac, true);
                 if (tasks.is_task_running(prev_task_id)) {
@@ -3321,6 +3378,121 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
                              &new_event);
         }
 #endif
+        break;
+    }
+    case beerocks_message::ACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE: {
+        LOG(TRACE) << "ACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE for mac " << hostap_mac;
+        break;
+    }
+    case beerocks_message::ACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION: {
+        LOG(TRACE) << "DCS_task, sending SCAN_TRIGGERED for mac " << hostap_mac;
+        auto notification =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION>();
+        if (!notification) {
+            LOG(ERROR) << "addClass cACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION failed";
+            return false;
+        }
+
+        //get the mac from hostap_mac
+        auto radio_mac = network_utils::mac_from_string(hostap_mac);
+
+        dynamic_channel_selection_task::sScanEvent new_event;
+        new_event.radio_mac = radio_mac;
+        auto taskID         = database.get_dynamic_channel_selection_task_id(radio_mac);
+        if (taskID == -1) {
+            LOG(ERROR) << "no task for the requesed mac (" << radio_mac << ") could be found!";
+        } else {
+            tasks.push_event(taskID, (int)dynamic_channel_selection_task::eEvent::SCAN_TRIGGERED,
+                             (void *)&new_event);
+        }
+        break;
+    }
+    case beerocks_message::ACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION: {
+        LOG(TRACE) << "ACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION for mac " << hostap_mac;
+        auto notification =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION>();
+        if (!notification) {
+            LOG(ERROR) << "addClass cACTION_CONTROL_CHANNEL_SCAN_RESULTS_NOTIFICATION failed";
+            return false;
+        }
+
+        //get the mac from hostap_mac
+        auto radio_mac = network_utils::mac_from_string(hostap_mac);
+
+        //send results to dcs task if no scan is in progress for both the
+        //single scan (mac, single_scan = true) and the continuous scan (mac, single_scan = false)
+        //for the given radio mac
+        if (database.get_channel_scan_in_progress(radio_mac, false) ||
+            database.get_channel_scan_in_progress(radio_mac, true)) {
+
+            dynamic_channel_selection_task::sScanEvent new_event;
+            dynamic_channel_selection_task::eEvent new_event_type;
+            new_event.radio_mac = radio_mac;
+
+            if (notification->is_dump() == 1) {
+                new_event_type = dynamic_channel_selection_task::eEvent::SCAN_RESULTS_DUMP;
+                new_event.udata.scan_results = notification->scan_results();
+            } else {
+                new_event_type = dynamic_channel_selection_task::eEvent::SCAN_RESULTS_READY;
+            }
+
+            //push event to dcs task
+            tasks.push_event(database.get_dynamic_channel_selection_task_id(radio_mac),
+                             int(new_event_type), static_cast<void *>(&new_event));
+
+        } else {
+            LOG(DEBUG) << "received scan results while the scan is in progress, ignoring."
+                       << " hostap_mac=" << hostap_mac;
+        }
+
+        break;
+    }
+    case beerocks_message::ACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION: {
+        LOG(DEBUG) << "DCS_task, sending SCAN_FINISHED for mac " << hostap_mac;
+        auto notification =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION>();
+        if (!notification) {
+            LOG(ERROR) << "addClass cACTION_CONTROL_CHANNEL_SCAN_FINISHED_NOTIFICATION failed";
+            return false;
+        }
+
+        //get the mac from hostap_mac
+        auto radio_mac = network_utils::mac_from_string(hostap_mac);
+
+        dynamic_channel_selection_task::sScanEvent new_event;
+        new_event.radio_mac = radio_mac;
+
+        tasks.push_event(database.get_dynamic_channel_selection_task_id(radio_mac),
+                         int(dynamic_channel_selection_task::eEvent::SCAN_FINISHED),
+                         static_cast<void *>(&new_event));
+        break;
+    }
+    case beerocks_message::ACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION: {
+        LOG(DEBUG) << "DCS_task, sending SCAN_ABORTED for mac " << hostap_mac;
+        auto notification =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION>();
+        if (!notification) {
+            LOG(ERROR) << "addClass cACTION_CONTROL_CHANNEL_SCAN_ABORT_NOTIFICATION failed";
+            return false;
+        }
+
+        //get the mac from hostap_mac
+        auto radio_mac = network_utils::mac_from_string(hostap_mac);
+
+        dynamic_channel_selection_task::sScanEvent new_event;
+        new_event.radio_mac = radio_mac;
+
+        tasks.push_event(database.get_dynamic_channel_selection_task_id(radio_mac),
+                         int(dynamic_channel_selection_task::eEvent::SCAN_ABORTED),
+                         static_cast<void *>(&new_event));
+        break;
+    }
+    case beerocks_message::ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE: {
+        // handled in association handling task
         break;
     }
     default: {

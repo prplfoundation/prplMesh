@@ -9,6 +9,7 @@
  */
 
 #include <mapf/common/encryption.h>
+#include <mapf/common/err.h>
 #include <mapf/common/logger.h>
 
 #include <arpa/inet.h>
@@ -328,6 +329,14 @@ bool aes_decrypt(const uint8_t *key, const uint8_t *iv, uint8_t *ciphertext, int
 
     EVP_CIPHER_CTX_free(ctx);
     return true;
+}
+
+void copy_pubkey(const diffie_hellman &dh, uint8_t *dest)
+{
+    int padding = dh.max_pubkey_length - dh.pubkey_length();
+    mapf_assert(padding >= 0);
+    std::fill_n(dest, padding, 0);
+    std::copy_n(dh.pubkey(), dh.pubkey_length(), dest + padding);
 }
 
 void wps_calculate_keys(const diffie_hellman &dh, const uint8_t *remote_pubkey,

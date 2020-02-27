@@ -41,7 +41,7 @@ public:
     virtual bool sta_statistics_11k_request(const SStatisticsRequest11k &req) override;
     virtual bool sta_link_measurements_11k_request(const std::string &sta_mac) override;
     virtual bool channel_scan_trigger(int dwell_time_msec,
-                                      const std::vector<unsigned int> &channel_pool);
+                                      const std::vector<unsigned int> &channel_pool) override;
     virtual bool channel_scan_dump_results();
     // Protected methods:
 protected:
@@ -59,12 +59,13 @@ private:
     bool dwpal_get_scan_params_fg(sScanCfgParams &params)
     {
         const size_t expected_result_size = sizeof(params) + NL_ATTR_HDR;
+        size_t received_result_size =
+            dwpal_nl_cmd_get(m_radio_info.iface_name, LTQ_NL80211_VENDOR_SUBCMD_GET_SCAN_PARAMS,
+                             m_nl_buffer, NL_MAX_REPLY_BUFFSIZE);
 
-        if (expected_result_size != dwpal_nl_cmd_get(m_radio_info.iface_name,
-                                                     LTQ_NL80211_VENDOR_SUBCMD_GET_SCAN_PARAMS,
-                                                     m_nl_buffer, NL_MAX_REPLY_BUFFSIZE)) {
-            LOG(ERROR) << "LTQ_NL80211_VENDOR_SUBCMD_GET_SCAN_PARAMS failed! returned size does "
-                          "not match sScanCfgParams!";
+        if (expected_result_size != received_result_size) {
+            LOG(ERROR) << "LTQ_NL80211_VENDOR_SUBCMD_GET_SCAN_PARAMS failed! expected size = "
+                       << expected_result_size << ", received size = " << received_result_size;
             return false;
         }
         std::copy_n(&m_nl_buffer[NL_ATTR_HDR], sizeof(params),
@@ -75,12 +76,13 @@ private:
     bool dwpal_get_scan_params_bg(sScanCfgParamsBG &params)
     {
         const size_t expected_result_size = sizeof(params) + NL_ATTR_HDR;
+        size_t received_result_size =
+            dwpal_nl_cmd_get(m_radio_info.iface_name, LTQ_NL80211_VENDOR_SUBCMD_GET_SCAN_PARAMS_BG,
+                             m_nl_buffer, NL_MAX_REPLY_BUFFSIZE);
 
-        if (expected_result_size != dwpal_nl_cmd_get(m_radio_info.iface_name,
-                                                     LTQ_NL80211_VENDOR_SUBCMD_GET_SCAN_PARAMS_BG,
-                                                     m_nl_buffer, NL_MAX_REPLY_BUFFSIZE)) {
-            LOG(ERROR) << "LTQ_NL80211_VENDOR_SUBCMD_GET_SCAN_PARAMS_BG failed! returned size does "
-                          "not match sScanCfgParamsBG!";
+        if (expected_result_size != received_result_size) {
+            LOG(ERROR) << "LTQ_NL80211_VENDOR_SUBCMD_GET_SCAN_PARAMS_BG failed! expected size = "
+                       << expected_result_size << ", received size = " << received_result_size;
             return false;
         }
         std::copy_n(&m_nl_buffer[NL_ATTR_HDR], sizeof(params),
@@ -90,8 +92,8 @@ private:
 
     bool dwpal_set_scan_params_fg(const sScanCfgParams &params)
     {
-        if (dwpal_nl_cmd_set(m_radio_info.iface_name, LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS,
-                             (unsigned char *)&params, sizeof(params))) {
+        if (!dwpal_nl_cmd_set(m_radio_info.iface_name, LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS,
+                              &params, sizeof(params))) {
             LOG(ERROR) << __func__ << " LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS failed!";
             return false;
         }
@@ -100,8 +102,8 @@ private:
 
     bool dwpal_set_scan_params_bg(const sScanCfgParamsBG &params)
     {
-        if (dwpal_nl_cmd_set(m_radio_info.iface_name, LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS_BG,
-                             (unsigned char *)&params, sizeof(params))) {
+        if (!dwpal_nl_cmd_set(m_radio_info.iface_name, LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS_BG,
+                              &params, sizeof(params))) {
             LOG(ERROR) << __func__ << " LTQ_NL80211_VENDOR_SUBCMD_SET_SCAN_PARAMS_BG failed!";
             return false;
         }
@@ -109,7 +111,6 @@ private:
     }
 
     std::shared_ptr<char> m_temp_dwpal_value;
-    bool m_wait_for_channel_scan_results_ready       = false;
     uint32_t m_nl_seq                                = 0;
     unsigned char m_nl_buffer[NL_MAX_REPLY_BUFFSIZE] = {'\0'};
 };

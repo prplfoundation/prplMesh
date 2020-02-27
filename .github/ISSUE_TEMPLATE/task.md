@@ -4,6 +4,7 @@ about: Feature currently being developed / reviewed
 title: "[TASK]"
 labels: enhancement
 assignees: ''
+projects: prplfoundation/prplMesh/1
 
 ---
 

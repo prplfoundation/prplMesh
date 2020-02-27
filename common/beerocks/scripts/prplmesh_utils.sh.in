@@ -6,8 +6,7 @@
 # See LICENSE file for more details.
 ###############################################################
 
-SIG_TERM=-15
-SIG_KILL=-9
+PRPLMESH_BIN_DIR="@INSTALL_PATH@/@CMAKE_INSTALL_BINDIR@"
 
 dbg() {
     [ "$VERBOSE" = "true" ] && echo "$@"
@@ -28,15 +27,9 @@ run() {
 
 killall_program() {
     PROGRAM_NAME=$1
-    if [ "$#" -eq 2 ]; then
-        KILL_SIG=$2
-    else
-        KILL_SIG=$SIG_KILL
-    fi
-    for PID in $(pgrep -f $PROGRAM_NAME); do
-        echo "kill $KILL_SIG $PID $PROGRAM_NAME";
-        kill $KILL_SIG $PID > /dev/null 2>&1;
-    done
+    KILL_SIG=${2:-KILL}
+    echo "killing $PROGRAM_NAME ($KILL_SIG)"
+    start-stop-daemon -K -s "$KILL_SIG" -x "$PRPLMESH_BIN_DIR"/"$PROGRAM_NAME" > /dev/null 2>&1
 }
 
 platform_init() {
@@ -48,12 +41,11 @@ platform_init() {
     control_ip=192.168.250.140
     
     ip link add @BEEROCKS_BRIDGE_IFACE@ address "${base_mac}:00:00" type bridge
-    ip link add @BEEROCKS_BH_WIRE_IFACE@ type dummy
     ip link add wlan0 address "${base_mac}:00:10" type dummy
     ip link add wlan2 address "${base_mac}:00:20" type dummy
     ip link set dev wlan0 up
     ip link set dev wlan2 up
-    for iface in wlan0 wlan2 @BEEROCKS_BH_WIRE_IFACE@ $DATA_IFACE
+    for iface in wlan0 wlan2 $DATA_IFACE
     do
         echo "add $iface to @BEEROCKS_BRIDGE_IFACE@"
         nmcli d set "$iface" managed no
@@ -69,7 +61,7 @@ platform_deinit() {
     echo "platform deinit"
     [ -z "$DATA_IFACE" ] && err "DATA_IFACE not set, abort" && exit 1
     [ -z "$CONTROL_IFACE" ] && err "CONTROL_IFACE not set, abort" && exit 1
-    for iface in wlan0 wlan2 @BEEROCKS_BH_WIRE_IFACE@ $DATA_IFACE
+    for iface in wlan0 wlan2 $DATA_IFACE
     do
         echo "remove $iface from @BEEROCKS_BRIDGE_IFACE@"
         ip link set dev "$iface" nomaster
@@ -77,7 +69,6 @@ platform_deinit() {
     done
     ip link del wlan0
     ip link del wlan2
-    ip link del @BEEROCKS_BH_WIRE_IFACE@
     ip link del @BEEROCKS_BRIDGE_IFACE@
 }
 
@@ -94,6 +85,11 @@ prplmesh_platform_db_init() {
         echo "certification_mode=1"
         echo "stop_on_failure_attempts=0" 
     } > @TMP_PATH@/prplmesh_platform_db
+
+    if [ "$NO_VENDOR_SPECIFIC" = true ]; then
+        sed '/^no_vendor_specific=0/s//no_vendor_specific=1/' \
+            @CMAKE_INSTALL_PREFIX@/config/beerocks_agent.conf > /tmp/beerocks_agent.conf
+    fi
 }
 
 prplmesh_framework_init() {
@@ -126,6 +122,7 @@ prplmesh_agent_start() {
 prplmesh_agent_stop() {
     echo "prplmesh_agent_stop - stopping beerocks_agent process..."
     killall_program beerocks_agent
+    killall_program beerocks_monitor
 }
 
 prplmesh_delete_logs() {
@@ -134,6 +131,27 @@ prplmesh_delete_logs() {
 
     # Relevant only for Linux environment
     rm -rf /tmp/${SUDO_USER:-${USER}}/beerocks/logs
+}
+
+prplmesh_watchdog() {
+    # Store PIDs of the Controller and Agents
+    local CURR_PIDS="$(pgrep 'beerocks_(agent|controller)' | wc -l)"
+    local PREV_PIDS="$CURR_PIDS"
+
+    # Make sure there's at least one PID to monitor
+    if [ -z "$CURR_PIDS" ]; then
+        echo "No controller or agent processes found."
+        return
+    fi
+
+    # Monitor the number of running processes
+    while [ $CURR_PIDS -ge $PREV_PIDS ]; do
+        sleep 1
+        CURR_PIDS="$(pgrep 'beerocks_(agent|controller)' | wc -l)"
+        if [ $CURR_PIDS -gt $PREV_PIDS ]; then
+            PREV_PIDS=$CURR_PIDS
+        fi
+    done
 }
 
 roll_logs_function()
@@ -155,9 +173,9 @@ roll_logs_function()
     logFilesCountPreRoll=$(find ./*.*.log | wc -l)
         
     # Send USR1 signals to the beerocks processes to trigger log rolling
-    killall_program beerocks_controller  -USR1
-    killall_program beerocks_agent   -USR1
-    killall_program beerocks_monitor -USR1
+    killall_program beerocks_controller USR1
+    killall_program beerocks_agent USR1
+    killall_program beerocks_monitor USR1
 
     # Wait for all the modules to create a new file
     rollTimeout=0
@@ -219,8 +237,8 @@ stop_function() {
 
     [ "@BWL_TYPE@" = "DUMMY" -a "$PLATFORM_INIT" = "true" ] && platform_deinit
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_deinit
-    [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "C" ] && prplmesh_controller_stop
-    [ "$PRPLMESH_MODE" = "CA" -o "$PRPLMESH_MODE" = "A" ] && prplmesh_agent_stop
+    prplmesh_controller_stop
+    prplmesh_agent_stop
     [ "$DELETE_LOGS" = "true" ] && prplmesh_delete_logs
 }
 
@@ -276,7 +294,9 @@ usage() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvm:pdC:D:' --long verbose,help,mode:platform-init,delete-logs,iface-ctrl,iface-data -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvm:npdC:D:'  -n 'parse-options' \
+        --long 'verbose,help,mode:,no-vendor-specific,platform-init,delete-logs,iface-ctrl,iface-data' \
+        -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -287,6 +307,7 @@ main() {
             -v | --verbose)       VERBOSE=true; shift ;;
             -h | --help)          usage; exit 0; shift ;;
             -m | --mode)          PRPLMESH_MODE="$2"; shift; shift ;;
+            -n | --no-vendor-specific) NO_VENDOR_SPECIFIC=true; shift ;;
             -p | --platform-init) PLATFORM_INIT=true; shift ;;
             -d | --delete-logs)   DELETE_LOGS=true; shift ;;
             -C | --iface-ctrl)    CONTROL_IFACE="$2"; shift; shift ;;
@@ -299,6 +320,7 @@ main() {
     dbg VERBOSE=$VERBOSE
     dbg PLATFORM_INIT=$PLATFORM_INIT
     dbg DELETE_LOGS=$DELETE_LOGS
+    dbg NO_VENDOR_SPECIFIC="$NO_VENDOR_SPECIFIC"
 
     case $1 in
         "start")
@@ -306,7 +328,8 @@ main() {
             ;;
         "start_wait")
             start_function
-            wait -n
+            prplmesh_watchdog
+            stop_function
             ;;
         "stop")
             stop_function
@@ -335,6 +358,7 @@ main() {
 VERBOSE=false
 PLATFORM_INIT=@BEEROCKS_PLATFORM_INIT@
 DELETE_LOGS=false
+NO_VENDOR_SPECIFIC=false
 CONTROL_IFACE=
 DATA_IFACE=
 PRPLMESH_MODE="CA" # CA = Controller & Agent, A = Agent only, C = Controller only

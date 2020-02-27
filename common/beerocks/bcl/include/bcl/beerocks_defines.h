@@ -52,6 +52,10 @@ enum eStructsConsts {
     WIFI_SECURITY_TYPE_MAX_LENGTH = 32,
     BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH = 16,
     PLATFORM_ERROR_DATA_SIZE             = 256,
+    WIFI_GENERIC_STRING_LENGTH           = 64,
+    WIFI_OPERATING_STRING_LENGTH         = 16,
+    WIFI_DATA_TRANSFER_RATES_LIST_LENGTH = 256,
+    CHANNEL_SCAN_LIST_LENGTH             = 8,
 };
 
 enum eMessageConsts {
@@ -420,19 +424,6 @@ enum eSlaveJoinResponseErrCode {
     JOIN_RESP_REJECT,
 };
 
-// if this enum is changed here, it must be change also on "bpl_cfg.h"
-enum eRadioStatus : uint8_t {
-    INVALID            = 0,
-    OFF                = 1,
-    AP_OK              = 2,
-    AP_DFS_CAC         = 3,
-    BH_SIGNAL_OK       = 4,
-    BH_SIGNAL_TOO_LOW  = 5,
-    BH_SIGNAL_TOO_HIGH = 6,
-    BH_WIRED           = 7,
-    BH_SCAN            = 8,
-};
-
 enum eApActiveMode : uint8_t { AP_IDLE_MODE = 0, AP_ACTIVE_MODE, AP_INVALID_MODE };
 
 enum eBssType {
@@ -442,6 +433,30 @@ enum eBssType {
     BSS_TYPE_BACK_FRONTHAUL,
     BSS_TYPE_INVALID
 };
+
+enum class eChannelScanErrCode : uint8_t {
+    CHANNEL_SCAN_SUCCESS = 0,
+    CHANNEL_SCAN_INTERNAL_FAILURE,
+    CHANNEL_SCAN_POOL_TOO_BIG,
+    CHANNEL_SCAN_TRIGGERED_EVENT_TIMEOUT,
+    CHANNEL_SCAN_RESULTS_READY_EVENT_TIMEOUT,
+    CHANNEL_SCAN_RESULTS_DUMP_EVENT_TIMEOUT,
+    CHANNEL_SCAN_ABORTED_BY_DRIVER,
+    CHANNEL_SCAN_RESULTS_EMPTY,
+    CHANNEL_SCAN_INVALID_PARAMS
+};
+
+enum class eChannelScanOpErrCode : uint8_t {
+    CHANNEL_SCAN_OP_SUCCESS = 0,
+    CHANNEL_SCAN_OP_ERROR,
+    CHANNEL_SCAN_OP_SCAN_IN_PROGRESS,
+    CHANNEL_SCAN_OP_INVALID_PARAMS_ENABLE,
+    CHANNEL_SCAN_OP_INVALID_PARAMS_DWELLTIME,
+    CHANNEL_SCAN_OP_INVALID_PARAMS_SCANTIME,
+    CHANNEL_SCAN_OP_INVALID_PARAMS_CHANNELPOOL
+};
+
+#define CHANNEL_SCAN_INVALID_PARAM -1
 
 } // namespace beerocks
 

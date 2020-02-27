@@ -7,7 +7,7 @@
 ###############################################################
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-rootdir="${scriptdir%/*/*/*}"
+rootdir="${scriptdir%/*}"
 
 . ${rootdir}/tools/docker/functions.sh
 
@@ -19,6 +19,7 @@ usage() {
     echo "      -d|--delay - delay between starting the containers
     and testing their status (default %DELAY seconds"
     echo "      -f|--force - kill any running containers before starting"
+    echo "      -u|--unique-id - unique id to add as suffix to container and network names"
     echo "      -g|--gateway - gateway container name"
     echo "      -r|--repeater - repeater container name"
     echo "      --rm - remove containers after test completes"
@@ -27,7 +28,7 @@ usage() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvd:fg:r:' --long help,verbose,rm,gateway-only,repeater-only,delay:,force,gateway:,repeater: -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvd:fg:r:u:' --long help,verbose,rm,gateway-only,repeater-only,delay:,force,gateway:,repeater:,unique-id: -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -39,6 +40,7 @@ main() {
             -h | --help)          usage; exit 0; shift ;;
             -d | --delay)         DELAY="$2"; shift; shift ;;
             -f | --force)         FORCE_OPT="-f"; shift ;;
+            -u | --unique-id)     UNIQUE_ID="$2"; shift; shift ;;
             -g | --gateway)       GW_NAME="$2"; shift; shift ;;
             -r | --repeater)      REPEATER_NAMES="$REPEATER_NAMES $2"; shift; shift ;;
             --rm)                 REMOVE=true; shift ;;
@@ -52,8 +54,8 @@ main() {
     status "Starting GW+Repeater test"
 
     # default values for gateway and repeater[s] names
-    REPEATER_NAMES=${REPEATER_NAMES-repeater}
-    GW_NAME=${GW_NAME-gateway}
+    REPEATER_NAMES=${REPEATER_NAMES-repeater-${UNIQUE_ID}}
+    GW_NAME=${GW_NAME-gateway-${UNIQUE_ID}}
 
     dbg REMOVE=$REMOVE
     dbg GW_NAME=$GW_NAME
@@ -61,10 +63,11 @@ main() {
     dbg START_GATEWAY=$START_GATEWAY
     dbg START_REPEATER=$START_REPEATER
     dbg DELAY=$DELAY
+    dbg UNIQUE_ID=$UNIQUE_ID
 
     [ "$START_GATEWAY" = "true" ] && {
         status "Start GW (Controller + local Agent)"
-        ${scriptdir}/../run.sh ${VERBOSE_OPT} ${FORCE_OPT} start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33 "$@"
+        ${rootdir}/tools/docker/run.sh -u ${UNIQUE_ID} ${VERBOSE_OPT} ${FORCE_OPT} start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33 -- "$@"
     }
 
     [ "$START_GATEWAY" = "true" -a "$START_REPEATER" = "true" ] && {
@@ -74,10 +77,12 @@ main() {
 
     [ "$START_REPEATER" = "true" ] && {
         index=0
+        no_vendor="-n"
         for repeater in $REPEATER_NAMES; do
             status "Start Repeater (Remote Agent): $repeater"
-            ${scriptdir}/../run.sh ${VERBOSE_OPT} ${FORCE_OPT} start-agent -d -n ${repeater} -m aa:bb:cc:$index$index "$@"
+            ${rootdir}/tools/docker/run.sh -u ${UNIQUE_ID} ${VERBOSE_OPT} ${FORCE_OPT} start-agent -d -n ${repeater} -m aa:bb:cc:$index$index -- $no_vendor "$@"
             index=$((index+1))
+            no_vendor=
         done
     }
 
@@ -86,14 +91,14 @@ main() {
 
     error=0
     [ "$START_GATEWAY" = "true" ] && report "GW operational" \
-        ${scriptdir}/../test.sh ${VERBOSE_OPT} -n ${GW_NAME}
+        ${rootdir}/tools/docker/test.sh ${VERBOSE_OPT} -n ${GW_NAME}
 
 
     [ "$START_REPEATER" = "true" ] && {
         for repeater in $REPEATER_NAMES
         do
             report "Repeater $repeater operational" \
-            ${scriptdir}/../test.sh ${VERBOSE_OPT} -n ${repeater}
+            ${rootdir}/tools/docker/test.sh ${VERBOSE_OPT} -n ${repeater}
         done
     }
 
@@ -109,6 +114,7 @@ VERBOSE=false
 REMOVE=false
 START_GATEWAY=true
 START_REPEATER=true
+UNIQUE_ID=${SUDO_USER:-${USER}}
 DELAY=5
 
 main $@

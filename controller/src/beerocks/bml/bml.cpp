@@ -564,19 +564,21 @@ int bml_set_dcs_continuous_scan_enable(BML_CTX ctx, const char *radio_mac, int e
         return (-BML_RET_INVALID_ARGS);
     }
 
-    // TODO: call suitable bml api
-    return BML_RET_OP_FAILED;
+    auto pBML = static_cast<bml_internal *>(ctx);
+    return pBML->set_dcs_continuous_scan_enable(
+        network_utils::mac_from_string(std::string(radio_mac)), enable);
 }
 
-int bml_get_dcs_continuous_scan_enable(BML_CTX ctx, const char *radio_mac, int *output_enable)
+int bml_get_dcs_continuous_scan_enable(BML_CTX ctx, const char *radio_mac, int *enable)
 {
     // Validate input parameters
     if (!ctx) {
         return (-BML_RET_INVALID_ARGS);
     }
 
-    // TODO: call suitable bml api
-    return BML_RET_OP_FAILED;
+    auto pBML = static_cast<bml_internal *>(ctx);
+    return pBML->get_dcs_continuous_scan_enable(
+        network_utils::mac_from_string(std::string(radio_mac)), *enable);
 }
 
 int bml_set_dcs_continuous_scan_params(BML_CTX ctx, const char *radio_mac, int dwell_time,
@@ -588,8 +590,10 @@ int bml_set_dcs_continuous_scan_params(BML_CTX ctx, const char *radio_mac, int d
         return (-BML_RET_INVALID_ARGS);
     }
 
-    // TODO: call suitable bml api
-    return BML_RET_OP_FAILED;
+    auto pBML = static_cast<bml_internal *>(ctx);
+    return pBML->set_dcs_continuous_scan_params(
+        network_utils::mac_from_string(std::string(radio_mac)), dwell_time, interval_time,
+        channel_pool, channel_pool_size);
 }
 
 int bml_get_dcs_continuous_scan_params(BML_CTX ctx, const char *radio_mac, int *output_dwell_time,
@@ -601,12 +605,14 @@ int bml_get_dcs_continuous_scan_params(BML_CTX ctx, const char *radio_mac, int *
         return (-BML_RET_INVALID_ARGS);
     }
 
-    // TODO: call suitable bml api
-    return BML_RET_OP_FAILED;
+    auto pBML = static_cast<bml_internal *>(ctx);
+    return pBML->get_dcs_continuous_scan_params(
+        network_utils::mac_from_string(std::string(radio_mac)), output_dwell_time,
+        output_interval_time, output_channel_pool, output_channel_pool_size);
 }
 
 int bml_get_dcs_scan_results(BML_CTX ctx, const char *radio_mac,
-                             struct BML_DCS_NEIGHBOR_AP **output_results,
+                             struct BML_NEIGHBOR_AP **output_results,
                              unsigned int *output_results_size, unsigned char *output_result_status,
                              bool is_single_scan)
 {
@@ -615,8 +621,10 @@ int bml_get_dcs_scan_results(BML_CTX ctx, const char *radio_mac,
         return (-BML_RET_INVALID_ARGS);
     }
 
-    // TODO: call suitable bml api
-    return BML_RET_OP_FAILED;
+    auto pBML = static_cast<bml_internal *>(ctx);
+    return pBML->get_dcs_scan_results(network_utils::mac_from_string(std::string(radio_mac)),
+                                      output_results, *output_results_size, *output_results_size,
+                                      *output_result_status, is_single_scan);
 }
 
 int bml_start_dcs_single_scan(BML_CTX ctx, const char *radio_mac, int dwell_time,
@@ -627,6 +635,7 @@ int bml_start_dcs_single_scan(BML_CTX ctx, const char *radio_mac, int dwell_time
         return (-BML_RET_INVALID_ARGS);
     }
 
-    // TODO: call suitable bml api
-    return BML_RET_OP_FAILED;
+    auto pBML = static_cast<bml_internal *>(ctx);
+    return pBML->start_dcs_single_scan(network_utils::mac_from_string(std::string(radio_mac)),
+                                       dwell_time, channel_pool, channel_pool_size);
 }

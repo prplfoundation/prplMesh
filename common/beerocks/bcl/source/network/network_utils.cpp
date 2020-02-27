@@ -14,12 +14,15 @@
 #include <dirent.h>
 #include <errno.h>
 #include <limits.h>
+#include <linux/ethtool.h>
 #include <linux/if_bridge.h>
 #include <linux/if_ether.h>  // ETH_P_ARP = 0x0806
 #include <linux/if_packet.h> // struct sockaddr_ll (see man 7 packet)
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
+#include <linux/sockios.h>
 #include <net/if.h>
+#include <netinet/in.h>
 #include <netinet/ip_icmp.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -767,6 +770,87 @@ bool network_utils::linux_iface_is_up_and_running(const std::string &iface)
     return (false);
 }
 
+#define ETHTOOL_LINK_MODE_MASK_MAX_KERNEL_NU32 (SCHAR_MAX)
+
+bool network_utils::linux_iface_get_speed(const std::string &iface, uint32_t &speed)
+{
+    int sock;
+    bool result = false;
+
+    speed = SPEED_UNKNOWN;
+
+    sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
+    if (sock < 0) {
+        LOG(ERROR) << "Can't create SOCK_DGRAM socket: " << strerror(errno);
+    } else {
+        struct ifreq ifr;
+        struct {
+            struct ethtool_link_settings req;
+            __u32 link_mode_data[3 * ETHTOOL_LINK_MODE_MASK_MAX_KERNEL_NU32];
+        } ecmd;
+        int rc;
+
+        beerocks::string_utils::copy_string(ifr.ifr_name, iface.c_str(), sizeof(ifr.ifr_name));
+        ifr.ifr_data = reinterpret_cast<char *>(&ecmd);
+
+        /* Handshake with kernel to determine number of words for link
+         * mode bitmaps. When requested number of bitmap words is not
+         * the one expected by kernel, the latter returns the integer
+         * opposite of what it is expecting. We request length 0 below
+         * (aka. invalid bitmap length) to get this info.
+         */
+        memset(&ecmd, 0, sizeof(ecmd));
+        ecmd.req.cmd = ETHTOOL_GLINKSETTINGS;
+        rc           = ioctl(sock, SIOCETHTOOL, &ifr);
+        if (0 == rc) {
+            /**
+             * See above: we expect a strictly negative value from kernel.
+             */
+            if ((ecmd.req.link_mode_masks_nwords >= 0) || (ETHTOOL_GLINKSETTINGS != ecmd.req.cmd)) {
+                LOG(ERROR) << "ETHTOOL_GLINKSETTINGS handshake failed";
+            } else {
+                /**
+               * Got the real ecmd.req.link_mode_masks_nwords, now send the real request
+              */
+                ecmd.req.cmd                    = ETHTOOL_GLINKSETTINGS;
+                ecmd.req.link_mode_masks_nwords = -ecmd.req.link_mode_masks_nwords;
+                rc                              = ioctl(sock, SIOCETHTOOL, &ifr);
+                if (0 == rc) {
+                    speed  = ecmd.req.speed;
+                    result = true;
+                }
+            }
+        }
+
+        /**
+         * ETHTOOL_GSET is deprecated and must be used only if ETHTOOL_GLINKSETTINGS
+         * didn't work
+         */
+        if (!result) {
+            struct ethtool_cmd ecmd;
+
+            ifr.ifr_data = reinterpret_cast<char *>(&ecmd);
+
+            memset(&ecmd, 0, sizeof(ecmd));
+            ecmd.cmd = ETHTOOL_GSET;
+
+            rc = ioctl(sock, SIOCETHTOOL, &ifr);
+            if (0 == rc) {
+                speed  = ethtool_cmd_speed(&ecmd);
+                result = true;
+            }
+        }
+
+        if (rc < 0) {
+            LOG(ERROR) << "ioctl failed: " << strerror(errno);
+        }
+
+        close(sock);
+    }
+
+    return result;
+}
+
 std::vector<network_utils::ip_info> network_utils::get_ip_list()
 {
     std::vector<network_utils::ip_info> ip_list;
@@ -898,7 +982,16 @@ bool network_utils::arp_send(const std::string &iface, const std::string &dst_ip
     struct sockaddr_ll sock;
     uint8_t packet_buffer[128];
 
-    uint32_t dst_ip_uint = network_utils::uint_ipv4_from_string(dst_ip);
+    // If the destination IP is empty, there is no point sending the arp, therefore replace the
+    // with broadcast IP, so all clients will receive it and answer, but since the request is
+    // being sent to a specific mac address, then only the requested client will answer.
+    uint32_t dst_ip_uint;
+    if (dst_ip.empty()) {
+        dst_ip_uint = 0xFFFFFFFF; // "255.255.255.255" equivalent
+    } else {
+        dst_ip_uint = network_utils::uint_ipv4_from_string(dst_ip);
+    }
+
     uint32_t src_ip_uint = network_utils::uint_ipv4_from_string(src_ip);
 
     // Fill out sockaddr_ll.

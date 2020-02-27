@@ -154,12 +154,11 @@ bool config_file::read_slave_config_file(std::string config_file_path, sConfigSl
             std::make_tuple("enable_arp_monitor=", &conf.enable_arp_monitor, mandatory_slave),
             std::make_tuple("enable_keep_alive=", &conf.enable_keep_alive, mandatory_slave),
             std::make_tuple("debug_disable_arp=", &conf.debug_disable_arp, 0),
-            std::make_tuple("enable_bpl_iface_status_notifications=",
-                            &conf.enable_bpl_iface_status_notifications, mandatory_slave),
             std::make_tuple("bridge_iface=", &conf.bridge_iface, 0),
             std::make_tuple("enable_system_hang_test=", &conf.enable_system_hang_test, 0),
             std::make_tuple("enable_son_slaves_watchdog=", &conf.enable_son_slaves_watchdog, 0),
             std::make_tuple("const_backhaul_slave=", &conf.const_backhaul_slave, 0),
+            std::make_tuple("no_vendor_specific=", &conf.no_vendor_specific, 0),
         };
         std::string config_type = "global";
         if (!read_config_file(config_file_path, slave_global_conf_args, config_type)) {
@@ -195,7 +194,6 @@ bool config_file::read_slave_config_file(std::string config_file_path, sConfigSl
                             mandatory_slave),
             std::make_tuple("hostap_iface_type=", &conf.hostap_iface_type[slave_num],
                             mandatory_slave),
-            std::make_tuple("hostap_iface=", &conf.hostap_iface[slave_num], mandatory_slave),
             std::make_tuple("hostap_ant_gain=", &conf.hostap_ant_gain[slave_num], mandatory_slave),
             std::make_tuple("sta_iface_filter_low=", &conf.sta_iface_filter_low[slave_num], 0),
         };

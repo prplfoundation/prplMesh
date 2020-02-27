@@ -60,6 +60,11 @@ std::string string_utils::trimmed_substr(const std::string &str)
     return std::string();
 }
 
+bool string_utils::is_empty(const std::string &str)
+{
+    return (str.find_first_not_of(WHITESPACE_CHARS) == std::string::npos);
+}
+
 std::string string_utils::bool_str(bool val)
 {
     return (val) ? std::string("true") : std::string("false");

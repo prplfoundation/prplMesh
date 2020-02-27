@@ -43,7 +43,6 @@ public:
         int stop_on_failure_attempts;
         bool enable_keep_alive;
         bool debug_disable_arp;
-        bool enable_bpl_iface_status_notifications;
         bool enable_repeater_mode;
         std::string backhaul_wire_iface;
         beerocks::eIfaceType backhaul_wire_iface_type;
@@ -55,6 +54,7 @@ public:
         beerocks::eIfaceType hostap_iface_type;
         int hostap_ant_gain;
         std::string radio_identifier; //mAP RUID
+        bool no_vendor_specific;
     } sSlaveConfig;
 
     typedef struct {
@@ -149,10 +149,6 @@ private:
     void monitor_stop();
     void log_son_config();
     void platform_notify_error(beerocks::bpl::eErrorCode code, const std::string &error_data);
-    void update_iface_status(bool is_ap, int8_t iface_status);
-    void send_iface_status();
-    void send_platform_iface_status_notif(beerocks::eRadioStatus radio_status,
-                                          bool status_operational);
     bool monitor_heartbeat_check();
     bool ap_manager_heartbeat_check();
     bool send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx);
@@ -204,6 +200,7 @@ private:
     sSlaveBackhaulParams backhaul_params;
     beerocks_message::sNodeHostap hostap_params;
     beerocks_message::sApChannelSwitch hostap_cs_params;
+    std::vector<wireless_utils::sChannelPreference> channel_preferences;
 
     SocketClient *platform_manager_socket = nullptr;
     SocketClient *backhaul_manager_socket = nullptr;
@@ -222,21 +219,11 @@ private:
 
     ap_manager_thread *ap_manager = nullptr;
 
-    beerocks::eRadioStatus iface_status_ap            = beerocks::eRadioStatus::INVALID;
-    beerocks::eRadioStatus iface_status_ap_prev       = beerocks::eRadioStatus::INVALID;
-    beerocks::eRadioStatus iface_status_bh            = beerocks::eRadioStatus::INVALID;
-    beerocks::eRadioStatus iface_status_bh_prev       = beerocks::eRadioStatus::INVALID;
-    beerocks::eRadioStatus iface_status_bh_wired      = beerocks::eRadioStatus::INVALID;
-    beerocks::eRadioStatus iface_status_bh_wired_prev = beerocks::eRadioStatus::INVALID;
-    bool iface_status_operational_state               = false;
-    bool iface_status_operational_state_prev          = false;
-
     // Encryption support - move to common library
     bool autoconfig_wsc_calculate_keys(WSC::m2 &m2, uint8_t authkey[32], uint8_t keywrapkey[16]);
     bool autoconfig_wsc_parse_m2_encrypted_settings(WSC::m2 &m2, uint8_t authkey[32],
-                                                    uint8_t keywrapkey[16], bool &backhaul,
-                                                    bool &fronthaul, bool &teardown,
-                                                    std::shared_ptr<WSC::cConfigData> &credentials);
+                                                    uint8_t keywrapkey[16],
+                                                    WSC::configData::config &config);
     bool autoconfig_wsc_authenticate(WSC::m2 &m2, uint8_t authkey[32]);
 
     std::unique_ptr<mapf::encryption::diffie_hellman> dh = nullptr;
@@ -249,14 +236,12 @@ private:
     bool handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_autoconfiguration_renew(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool autoconfig_wsc_add_m1();
-    bool add_radio_basic_capabilities();
+    bool send_operating_channel_report();
     bool handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_link_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_channel_preference_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_channel_selection_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_multi_ap_policy_config_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
-    bool handle_client_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
-    bool handle_ap_capability_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_client_association_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_client_steering_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_ack_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);

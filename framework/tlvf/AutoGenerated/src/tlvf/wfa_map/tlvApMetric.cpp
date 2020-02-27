@@ -50,7 +50,7 @@ tlvApMetric::sEstimatedService& tlvApMetric::estimated_service_parameters() {
 }
 
 uint8_t* tlvApMetric::estimated_service_info_field(size_t idx) {
-    if ( (m_estimated_service_info_field_idx__ <= 0) || (m_estimated_service_info_field_idx__ <= idx) ) {
+    if ( (m_estimated_service_info_field_idx__ == 0) || (m_estimated_service_info_field_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -60,10 +60,6 @@ uint8_t* tlvApMetric::estimated_service_info_field(size_t idx) {
 bool tlvApMetric::alloc_estimated_service_info_field(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list estimated_service_info_field, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(uint8_t) * count;

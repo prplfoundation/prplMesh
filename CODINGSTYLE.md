@@ -124,3 +124,10 @@ For very long sentences, subsentences may also be placed on a separate line.
 
 Non-inline blocks (lists, preformatted, ...) must be explicitly on a separate paragraph.
 I.e., leave a blank line before and after the block.
+
+### Klocwork 
+
+We use **Klocwork** as our static code analyzer.
+One of the most common issues that the Klocwork complaints about is comparing the return value of a function to nullptr instead of checking for non-zero return value.
+
+So to avoid creating more of these kinds of Klocwork issues, please always prefer `if (!ptr)` instead of `if (ptr == nullptr)` when the return type of the function is a smart pointer.

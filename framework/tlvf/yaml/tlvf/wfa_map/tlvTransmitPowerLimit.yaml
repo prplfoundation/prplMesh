@@ -11,7 +11,7 @@ tlvTransmitPowerLimit:
   length: uint16_t
   radio_uid: sMacAddr
   transmit_power_limit_dbm:
-    _type: uint8_t
+    _type: int8_t
     _comment: |
       Transmit Power Limit EIRP per 20 MHz bandwidth representing the nominal transmit power limit for this radio.
       The field is coded as a 2's complement signed integer in units of decibels relative to 1 mW (dBm).

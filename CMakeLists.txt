@@ -13,6 +13,8 @@ endif()
 option (BUILD_AGENT "Build EasyMesh agent" ON)
 option (BUILD_CONTROLLER "Build EasyMesh controller" ON)
 
+option(BUILD_SHARED_LIBS "Build shared libraries (.so) instead of static ones (.a)" ON)
+
 ## Generic checks and defaults
 
 include(FindPkgConfig)
@@ -107,7 +109,6 @@ set(BEEROCKS_BRIDGE_IFACE "br-lan")
 if (NOT DEFINED BEEROCKS_BH_WIRE_IFACE)
     set(BEEROCKS_BH_WIRE_IFACE "eth1")
 endif()
-set(BEEROCKS_NOTIFY 0)
 set(BEEROCKS_REPEATER_MODE 0)
 set(BEEROCKS_ENABLE_ARP_MONITOR 1)
 
@@ -123,7 +124,6 @@ set(BEEROCKS_LOG_SYSLOG_ENABLED     "false")
 if (TARGET_PLATFORM STREQUAL "openwrt")
     if (TARGET_PLATFORM_TYPE STREQUAL "ugw")
         add_definitions(-DBEEROCKS_UGW)
-        set(BEEROCKS_NOTIFY 1)
         set(BEEROCKS_REPEATER_MODE 1)
     else()
         set(BEEROCKS_WLAN2_IFACE "wlan1")
@@ -136,12 +136,13 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
     # Disable file and enable syslog logging
     set(BEEROCKS_LOG_FILES_ENABLED "false")
     set(BEEROCKS_LOG_SYSLOG_ENABLED "true")
+    set(BEEROCKS_LOG_FILES_AUTO_ROLL "false")
     set(BEEROCKS_LOG_FILES_PATH "/rdklogs/logs")
     set(BEEROCKS_LOG_FILES_SUFFIX ".txt.0")
     set(CMAKE_SKIP_RPATH TRUE)
 elseif (TARGET_PLATFORM STREQUAL "linux")
     add_definitions(-DBEEROCKS_LINUX)
-    set(BEEROCKS_BH_WIRE_IFACE "sim-eth0")
+    set(BEEROCKS_BH_WIRE_IFACE "eth0")
 endif()
 
 ## Components
@@ -154,3 +155,11 @@ endif()
 if (BUILD_CONTROLLER)
 add_subdirectory(controller)
 endif()
+
+## Version
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/version.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/version"
+)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/version DESTINATION config)
+file(COPY ${CMAKE_CURRENT_BINARY_DIR}/version DESTINATION "${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/config")

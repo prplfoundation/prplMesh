@@ -31,6 +31,7 @@ int8_t& cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::isEnable() {
 
 void cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_CLI_ENABLE_DIAGNOSTICS_MEASUREMENTS::finalize()
@@ -98,6 +99,7 @@ int8_t& cACTION_CLI_ENABLE_LOAD_BALANCER::isEnable() {
 
 void cACTION_CLI_ENABLE_LOAD_BALANCER::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_CLI_ENABLE_LOAD_BALANCER::finalize()
@@ -165,6 +167,7 @@ int8_t& cACTION_CLI_ENABLE_DEBUG::isEnable() {
 
 void cACTION_CLI_ENABLE_DEBUG::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_CLI_ENABLE_DEBUG::finalize()
@@ -232,6 +235,7 @@ int32_t& cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::attempts() {
 
 void cACTION_CLI_SET_SLAVES_STOP_ON_FAILURE_ATTEMPTS::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_attempts));
 }
 
@@ -304,6 +308,7 @@ int8_t& cACTION_CLI_RESPONSE_INT::currentValue() {
 
 void cACTION_CLI_RESPONSE_INT::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_CLI_RESPONSE_INT::finalize()
@@ -382,7 +387,7 @@ std::string cACTION_CLI_RESPONSE_STR::buffer_str() {
 }
 
 char* cACTION_CLI_RESPONSE_STR::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
@@ -391,8 +396,8 @@ char* cACTION_CLI_RESPONSE_STR::buffer(size_t length) {
 
 bool cACTION_CLI_RESPONSE_STR::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_CLI_RESPONSE_STR::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -402,10 +407,6 @@ bool cACTION_CLI_RESPONSE_STR::set_buffer(const char str[], size_t size) {
 bool cACTION_CLI_RESPONSE_STR::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -431,6 +432,7 @@ bool cACTION_CLI_RESPONSE_STR::alloc_buffer(size_t count) {
 
 void cACTION_CLI_RESPONSE_STR::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
 
@@ -516,6 +518,7 @@ uint16_t& cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::center_frequency() {
 
 void cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_client_mac->struct_swap();
     m_hostap_mac->struct_swap();
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_center_frequency));
@@ -601,6 +604,7 @@ sMacAddr& cACTION_CLI_OPTIMAL_PATH_TASK::client_mac() {
 
 void cACTION_CLI_OPTIMAL_PATH_TASK::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_client_mac->struct_swap();
 }
 
@@ -670,6 +674,7 @@ sMacAddr& cACTION_CLI_LOAD_BALANCER_TASK::ap_mac() {
 
 void cACTION_CLI_LOAD_BALANCER_TASK::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_ap_mac->struct_swap();
 }
 
@@ -735,6 +740,7 @@ cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::~cACTION_CLI_IRE_NETWORK_OPTIMIZATION
 }
 void cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_CLI_IRE_NETWORK_OPTIMIZATION_TASK::finalize()
@@ -796,6 +802,7 @@ sMacAddr& cACTION_CLI_DUMP_NODE_INFO::mac() {
 
 void cACTION_CLI_DUMP_NODE_INFO::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -873,6 +880,7 @@ uint16_t& cACTION_CLI_PING_SLAVE_REQUEST::size() {
 
 void cACTION_CLI_PING_SLAVE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_num_of_req));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_size));
@@ -960,6 +968,7 @@ uint16_t& cACTION_CLI_PING_ALL_SLAVES_REQUEST::size() {
 
 void cACTION_CLI_PING_ALL_SLAVES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_num_of_req));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_size));
 }
@@ -1035,6 +1044,7 @@ sMacAddr& cACTION_CLI_BACKHAUL_SCAN_RESULTS::mac() {
 
 void cACTION_CLI_BACKHAUL_SCAN_RESULTS::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
 }
 
@@ -1108,6 +1118,7 @@ sMacAddr& cACTION_CLI_BACKHAUL_ROAM_REQUEST::bssid() {
 
 void cACTION_CLI_BACKHAUL_ROAM_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_slave_mac->struct_swap();
     m_bssid->struct_swap();
 }
@@ -1189,6 +1200,7 @@ sMacAddr& cACTION_CLI_CLIENT_ALLOW_REQUEST::hostap_mac() {
 
 void cACTION_CLI_CLIENT_ALLOW_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_client_mac->struct_swap();
     m_hostap_mac->struct_swap();
 }
@@ -1270,6 +1282,7 @@ sMacAddr& cACTION_CLI_CLIENT_DISALLOW_REQUEST::hostap_mac() {
 
 void cACTION_CLI_CLIENT_DISALLOW_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_client_mac->struct_swap();
     m_hostap_mac->struct_swap();
 }
@@ -1345,8 +1358,8 @@ sMacAddr& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::client_mac() {
     return (sMacAddr&)(*m_client_mac);
 }
 
-uint32_t& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::type() {
-    return (uint32_t&)(*m_type);
+eDisconnectType& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::type() {
+    return (eDisconnectType&)(*m_type);
 }
 
 uint32_t& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::reason() {
@@ -1355,8 +1368,9 @@ uint32_t& cACTION_CLI_CLIENT_DISCONNECT_REQUEST::reason() {
 
 void cACTION_CLI_CLIENT_DISCONNECT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_client_mac->struct_swap();
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_type));
+    tlvf_swap(8*sizeof(eDisconnectType), reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_reason));
 }
 
@@ -1391,7 +1405,7 @@ size_t cACTION_CLI_CLIENT_DISCONNECT_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // client_mac
-    class_size += sizeof(uint32_t); // type
+    class_size += sizeof(eDisconnectType); // type
     class_size += sizeof(uint32_t); // reason
     return class_size;
 }
@@ -1408,9 +1422,9 @@ bool cACTION_CLI_CLIENT_DISCONNECT_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_client_mac->struct_init(); }
-    m_type = (uint32_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+    m_type = (eDisconnectType*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(eDisconnectType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eDisconnectType) << ") Failed!";
         return false;
     }
     m_reason = (uint32_t*)m_buff_ptr__;
@@ -1446,6 +1460,7 @@ uint32_t& cACTION_CLI_CLIENT_BSS_STEER_REQUEST::disassoc_timer_ms() {
 
 void cACTION_CLI_CLIENT_BSS_STEER_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_client_mac->struct_swap();
     m_bssid->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_disassoc_timer_ms));
@@ -1534,6 +1549,7 @@ sMacAddr& cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::client_mac() {
 
 void cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_hostap_mac->struct_swap();
     m_client_mac->struct_swap();
 }
@@ -1619,6 +1635,7 @@ uint8_t& cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::channel() {
 
 void cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_hostap_mac->struct_swap();
     m_client_mac->struct_swap();
 }
@@ -1705,7 +1722,7 @@ sMacAddr& cACTION_CLI_CLIENT_BEACON_11K_REQUEST::bssid() {
 }
 
 uint8_t* cACTION_CLI_CLIENT_BEACON_11K_REQUEST::ssid(size_t idx) {
-    if ( (m_ssid_idx__ <= 0) || (m_ssid_idx__ <= idx) ) {
+    if ( (m_ssid_idx__ == 0) || (m_ssid_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -1742,6 +1759,7 @@ int16_t& cACTION_CLI_CLIENT_BEACON_11K_REQUEST::op_class() {
 
 void cACTION_CLI_CLIENT_BEACON_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_client_mac->struct_swap();
     m_bssid->struct_swap();
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_duration));
@@ -1884,6 +1902,7 @@ uint8_t& cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::group_identity() {
 
 void cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_hostap_mac->struct_swap();
     m_client_mac->struct_swap();
     m_peer_mac->struct_swap();
@@ -1979,6 +1998,7 @@ sApChannelSwitch& cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::cs_params() {
 
 void cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
     m_cs_params->struct_swap();
 }
@@ -2068,6 +2088,7 @@ int8_t& cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::vap_id() {
 
 void cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_ap_mac->struct_swap();
     m_bssid->struct_swap();
 }
@@ -2165,6 +2186,7 @@ int8_t& cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::vap_id() {
 
 void cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_ap_mac->struct_swap();
     m_bssid->struct_swap();
 }
@@ -2248,6 +2270,7 @@ sMacAddr& cACTION_CLI_HOSTAP_STATS_MEASUREMENT::ap_mac() {
 
 void cACTION_CLI_HOSTAP_STATS_MEASUREMENT::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_CLI), reinterpret_cast<uint8_t*>(m_action_op));
     m_ap_mac->struct_swap();
 }
 

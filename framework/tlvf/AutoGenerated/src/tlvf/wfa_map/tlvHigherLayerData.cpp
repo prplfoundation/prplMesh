@@ -38,7 +38,7 @@ tlvHigherLayerData::eProtocol& tlvHigherLayerData::protocol() {
 }
 
 uint8_t* tlvHigherLayerData::payload(size_t idx) {
-    if ( (m_payload_idx__ <= 0) || (m_payload_idx__ <= idx) ) {
+    if ( (m_payload_idx__ == 0) || (m_payload_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
@@ -48,10 +48,6 @@ uint8_t* tlvHigherLayerData::payload(size_t idx) {
 bool tlvHigherLayerData::alloc_payload(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list payload, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(uint8_t) * count;
@@ -78,6 +74,7 @@ bool tlvHigherLayerData::alloc_payload(size_t count) {
 void tlvHigherLayerData::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
+    tlvf_swap(8*sizeof(eProtocol), reinterpret_cast<uint8_t*>(m_protocol));
 }
 
 bool tlvHigherLayerData::finalize()

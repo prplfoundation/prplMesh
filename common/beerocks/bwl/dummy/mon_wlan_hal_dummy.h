@@ -43,7 +43,8 @@ public:
     virtual bool sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token) override;
     virtual bool sta_statistics_11k_request(const SStatisticsRequest11k &req) override;
     virtual bool sta_link_measurements_11k_request(const std::string &sta_mac) override;
-
+    virtual bool channel_scan_trigger(int dwell_time_msec,
+                                      const std::vector<unsigned int> &channel_pool) override;
     // Protected methods:
 protected:
     virtual bool process_dummy_event(parsed_obj_map_t &parsed_obj) override;

@@ -31,7 +31,7 @@ class tlvApMetricQuery : public BaseClass
 {
     public:
         tlvApMetricQuery(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvApMetricQuery(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvApMetricQuery(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvApMetricQuery();
 
         const eTlvTypeMap& type();

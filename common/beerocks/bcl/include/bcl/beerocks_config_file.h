@@ -97,7 +97,6 @@ public:
         std::string enable_arp_monitor;
         std::string enable_keep_alive;
         std::string debug_disable_arp;
-        std::string enable_bpl_iface_status_notifications;
         std::string bridge_iface;
         std::string backhaul_preferred_bssid;
         std::string backhaul_wire_iface;
@@ -105,11 +104,11 @@ public:
         std::string enable_system_hang_test;
         std::string enable_son_slaves_watchdog;
         std::string const_backhaul_slave;
+        std::string no_vendor_specific;
         //[slaveX]
         std::string radio_identifier[IRE_MAX_SLAVES]; // mAP RUID
         std::string enable_repeater_mode[IRE_MAX_SLAVES];
         std::string hostap_iface_type[IRE_MAX_SLAVES];
-        std::string hostap_iface[IRE_MAX_SLAVES];
         std::string sta_iface[IRE_MAX_SLAVES];
         std::string sta_iface_filter_low[IRE_MAX_SLAVES];
         std::string hostap_ant_gain[IRE_MAX_SLAVES];

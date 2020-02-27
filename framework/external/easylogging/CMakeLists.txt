@@ -1,14 +1,19 @@
 project(elpp VERSION ${prplmesh_VERSION})
 
-add_definitions(-DELPP_THREAD_SAFE)
-add_definitions(-DELPP_FORCE_USE_STD_THREAD)
-add_definitions(-DELPP_NO_DEFAULT_LOG_FILE)
-add_definitions(-DELPP_SYSLOG)
-
 set(ELPP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_library(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/easylogging++.cc)
 
-add_library(${PROJECT_NAME} SHARED ${CMAKE_CURRENT_SOURCE_DIR}/easylogging++.cc)
+target_compile_definitions(${PROJECT_NAME}
+    PUBLIC
+        ELPP_THREAD_SAFE
+        ELPP_FORCE_USE_STD_THREAD
+        ELPP_NO_DEFAULT_LOG_FILE
+        ELPP_SYSLOG
+    PRIVATE
+        AUTO_INITIALIZE_EASYLOGGINGPP
+    )
+
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 target_include_directories(${PROJECT_NAME}
     PUBLIC

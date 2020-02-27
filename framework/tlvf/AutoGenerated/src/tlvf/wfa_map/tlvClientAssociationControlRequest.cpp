@@ -63,10 +63,6 @@ bool tlvClientAssociationControlRequest::alloc_sta_list(size_t count) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list sta_list, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(sMacAddr) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
@@ -96,6 +92,7 @@ void tlvClientAssociationControlRequest::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_bssid_to_block_client->struct_swap();
+    tlvf_swap(8*sizeof(eAssociationControl), reinterpret_cast<uint8_t*>(m_association_control));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_validity_period_sec));
     for (size_t i = 0; i < (size_t)*m_sta_list_length; i++){
         m_sta_list[i].struct_swap();

@@ -348,6 +348,106 @@ struct SLinkMeasurementsResponse11k {
     uint32_t dmg_link_adapt_ack_reference_timestamp;
 };
 
+enum eChannelScanResultMode : uint8_t {
+    eMode_NA             = 0x0,
+    eMode_AdHoc          = 0x1,
+    eMode_Infrastructure = 0x2,
+};
+
+enum eChannelScanResultEncryptionMode : uint8_t {
+    eEncryption_Mode_NA   = 0x0,
+    eEncryption_Mode_AES  = 0x1,
+    eEncryption_Mode_TKIP = 0x2,
+};
+
+enum eChannelScanResultSecurityMode : uint8_t {
+    eSecurity_Mode_None = 0x0,
+    eSecurity_Mode_WEP  = 0x1,
+    eSecurity_Mode_WPA  = 0x2,
+    eSecurity_Mode_WPA2 = 0x3,
+};
+
+enum eChannelScanResultOperatingFrequencyBand : uint8_t {
+    eOperating_Freq_Band_NA     = 0x0,
+    eOperating_Freq_Band_2_4GHz = 0x1,
+    eOperating_Freq_Band_5GHz   = 0x2,
+};
+
+enum eChannelScanResultStandards : uint8_t {
+    eStandard_NA       = 0x0,
+    eStandard_802_11a  = 0x1,
+    eStandard_802_11b  = 0x2,
+    eStandard_802_11g  = 0x3,
+    eStandard_802_11n  = 0x4,
+    eStandard_802_11ac = 0x5,
+};
+
+enum eChannelScanResultChannelBandwidth : uint8_t {
+    eChannel_Bandwidth_NA     = 0x0,
+    eChannel_Bandwidth_20MHz  = 0x1,
+    eChannel_Bandwidth_40MHz  = 0x2,
+    eChannel_Bandwidth_80MHz  = 0x3,
+    eChannel_Bandwidth_160MHz = 0x4,
+    eChannel_Bandwidth_80_80  = 0x5,
+};
+
+typedef struct sChannelScanResults {
+    //The current service set identifier in use by the neighboring WiFi SSID. The value MAY be empty for hidden SSIDs.
+    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH] = {'\0'};
+
+    //The BSSID used for the neighboring WiFi SSID.
+    sMacAddr bssid = {.oct = {0}};
+
+    //The mode the neighboring WiFi radio is operating in. Enumerate
+    eChannelScanResultMode mode = eMode_NA;
+
+    //The current radio channel used by the neighboring WiFi radio.
+    uint32_t channel = 0;
+
+    //An indicator of radio signal strength (RSSI) of the neighboring WiFi radio measured in dBm, as an average of the last 100 packets received.
+    int32_t signal_strength_dBm = 0;
+
+    //The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
+    std::vector<eChannelScanResultSecurityMode> security_mode_enabled;
+
+    //The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
+    std::vector<eChannelScanResultEncryptionMode> encryption_mode;
+
+    //Indicates the frequency band at which the radio this SSID instance is operating. Enumerate
+    eChannelScanResultOperatingFrequencyBand operating_frequency_band = eOperating_Freq_Band_NA;
+
+    //List items indicate which IEEE 802.11 standards thisResultinstance can support simultaneously, in the frequency band specified byOperatingFrequencyBand. Enumerate List
+    std::vector<eChannelScanResultStandards> supported_standards;
+
+    //Indicates which IEEE 802.11 standard that is detected for this Result. Enumerate
+    eChannelScanResultStandards operating_standards = eStandard_NA;
+
+    //Indicates the bandwidth at which the channel is operating. Enumerate
+    eChannelScanResultChannelBandwidth operating_channel_bandwidth = eChannel_Bandwidth_NA;
+
+    //Time interval (inms) between transmitting beacons.
+    uint32_t beacon_period_ms = 0;
+
+    //Indicator of average noise strength (indBm) received from the neighboring WiFi radio.
+    int32_t noise_dBm = 0;
+
+    //Basic data transmit rates (in Kbps) for the SSID.
+    std::vector<uint32_t> basic_data_transfer_rates_kbps;
+
+    //Data transmit rates (in Kbps) for unicast frames at which the SSID will permit a station to connect.
+    std::vector<uint32_t> supported_data_transfer_rates_kbps;
+
+    //The number of beacon intervals that elapse between transmission of Beacon frames containing a TIM element whose DTIM count field is 0. This value is transmitted in the DTIM Period field of beacon frames. [802.11-2012]
+    uint32_t dtim_period = 0;
+
+    //Indicates the fraction of the time AP senses that the channel is in use by the neighboring AP for transmissions.
+    uint32_t channel_utilization = 0;
+} sChannelScanResults;
+
+typedef struct {
+    sChannelScanResults channel_scan_results;
+} sCHANNEL_SCAN_RESULTS_NOTIFICATION;
+
 } // namespace bwl
 
 #endif // _BWL_MON_WLAN_HAL_TYPES_H_

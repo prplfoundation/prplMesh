@@ -50,6 +50,7 @@ void tlvClientAssociationEvent::class_swap()
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_client_mac->struct_swap();
     m_bssid->struct_swap();
+    tlvf_swap(8*sizeof(eAssociationEvent), reinterpret_cast<uint8_t*>(m_association_event));
 }
 
 bool tlvClientAssociationEvent::finalize()

@@ -56,6 +56,13 @@ public:
     static std::string trimmed_substr(const std::string &);
 
     ///
+    /// @brief check if the provided string is empty
+    ///
+    /// @return boolean true if the string contains only whitespace characters
+    ///
+    static bool is_empty(const std::string &);
+
+    ///
     /// @brief get a head and tail trimmed substring from provided string
     ///
     /// @return string representation of the boolean value ["true" | "false"]
@@ -66,7 +73,7 @@ public:
 
     static std::vector<std::string> str_split(const std::string &s, char delim);
 
-#ifndef __GCC__
+#ifndef __GNUC__
 #define __builtin_FILE() __FILE__
 #define __builtin_LINE() __LINE__
 #endif

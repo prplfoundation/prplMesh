@@ -17,7 +17,7 @@ endif()
 add_executable(${PROJECT_NAME} ${controller_sources} ${controller_tasks_sources} ${controller_db_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
 
-target_link_libraries(${PROJECT_NAME} bcl btl tlvf elpp btlvf)
+target_link_libraries(${PROJECT_NAME} bpl bcl btl tlvf elpp btlvf)
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${MODULE_PATH}/../bml
 )

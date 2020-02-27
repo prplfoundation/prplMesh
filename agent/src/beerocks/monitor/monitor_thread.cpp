@@ -15,6 +15,7 @@
 #include <beerocks/tlvf/beerocks_message.h>
 
 #include <cmath>
+#include <vector>
 
 using namespace beerocks;
 using namespace net;
@@ -79,10 +80,10 @@ void monitor_thread::stop_monitor_thread()
     } else {
 
         LOG(ERROR) << "disconnecting monitor_thread sockets";
-        if (mon_hal_ext_events || slave_socket)
-            LOG(DEBUG) << "stop_monitor_thread()";
-
+        LOG_IF(mon_hal_ext_events || mon_hal_nl_events || slave_socket, DEBUG)
+            << "stop_monitor_thread()";
         if (mon_hal_ext_events) {
+            LOG(DEBUG) << "stopping mon_hal_ext_events!";
             mon_rssi.stop();
             mon_stats.stop();
 #ifdef BEEROCKS_RDKB
@@ -96,12 +97,21 @@ void monitor_thread::stop_monitor_thread()
         }
 
         if (mon_hal_int_events) {
+            LOG(DEBUG) << "stopping mon_hal_int_events!";
             remove_socket(mon_hal_int_events);
             delete mon_hal_int_events;
             mon_hal_int_events = nullptr;
         }
 
+        if (mon_hal_nl_events) {
+            LOG(DEBUG) << "stopping mon_hal_nl_events!";
+            remove_socket(mon_hal_nl_events);
+            delete mon_hal_nl_events;
+            mon_hal_nl_events = nullptr;
+        }
+
         if (slave_socket) {
+            LOG(DEBUG) << "stopping slave_socket!";
             remove_socket(slave_socket);
             slave_socket->closeSocket();
             delete slave_socket;
@@ -133,6 +143,11 @@ bool monitor_thread::socket_disconnected(Socket *sd)
     } else if (mon_hal_int_events && (sd == mon_hal_int_events)) {
         LOG(ERROR) << "mon_hal_int_events socket disconnected!";
         thread_last_error_code = MONITOR_THREAD_ERROR_HAL_DISCONNECTED;
+        stop_monitor_thread();
+        return false;
+    } else if (mon_hal_nl_events && (sd == mon_hal_nl_events)) {
+        LOG(ERROR) << "mon_hal_nl_events socket disconnected!";
+        thread_last_error_code = MONITOR_THREAD_ERROR_NL_EVENTS_SOCKET_DISCONNECTED;
         stop_monitor_thread();
         return false;
     }
@@ -262,6 +277,17 @@ void monitor_thread::after_select(bool timeout)
                 return;
             }
 
+            int nl_events_fd = mon_wlan_hal->get_nl_events_fd();
+            if (nl_events_fd > 0) {
+                mon_hal_nl_events = new Socket(nl_events_fd);
+                add_socket(mon_hal_nl_events);
+                LOG(DEBUG) << "nl socket created for FD #" << nl_events_fd;
+            } else {
+                LOG(ERROR) << "Couldn't get NL socket ";
+                mon_hal_nl_events      = nullptr;
+                thread_last_error_code = MONITOR_THREAD_ERROR_NL_ATTACH_FAIL;
+            }
+
             // start local monitors //
             LOG(TRACE) << "mon_stats.start()";
             if (!mon_stats.start(&mon_db, slave_socket)) {
@@ -343,6 +369,19 @@ void monitor_thread::after_select(bool timeout)
                 thread_last_error_code = MONITOR_THREAD_ERROR_REPORT_PROCESS_FAIL;
                 stop_monitor_thread();
                 return;
+            }
+        }
+
+        // Process nl events
+        if (mon_hal_nl_events) {
+            if (read_ready(mon_hal_nl_events)) {
+                if (!mon_wlan_hal->process_nl_events()) {
+                    LOG(ERROR) << "process_nl_events() failed!";
+                    thread_last_error_code = MONITOR_THREAD_ERROR_NL_REPORT_PROCESS_FAIL;
+                    stop_monitor_thread();
+                    return;
+                }
+                clear_ready(mon_hal_nl_events);
             }
         }
 
@@ -638,6 +677,10 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         mon_rssi.conf_rx_rssi_notification_threshold_dbm =
             update->config().monitor_rx_rssi_notification_threshold_dbm;
         mon_rssi.conf_disable_initiative_arp = update->config().monitor_disable_initiative_arp;
+
+        // Mark the enable flag as "false" to force update in hostapd status.
+        // The status is polled every "MONITOR_DB_AP_POLLING_RATE_SEC" and update the value.
+        mon_db.set_hostapd_enabled(false);
         break;
     }
     case beerocks_message::ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST: {
@@ -690,6 +733,16 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         LOG(INFO) << "ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST=" << sta_mac
                   << " ip=" << sta_ipv4 << " vap_id=" << vap_id;
 
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+
+        if (!response) {
+            LOG(ERROR)
+                << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE message!";
+            return false;
+        }
+
         auto sta_node = mon_db.sta_find(sta_mac);
         if (sta_node) {
             mon_db.sta_erase(sta_mac);
@@ -698,12 +751,17 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         auto vap_node = mon_db.vap_get_by_id(vap_id);
         if (vap_node == nullptr) {
             LOG(ERROR) << "vap_id " << vap_id << " doesn't not exists";
+            response->success() = false;
+            message_com::send_cmdu(slave_socket, cmdu_tx);
             return false;
         }
 
         sta_node = mon_db.sta_add(sta_mac, vap_id);
         sta_node->set_ipv4(sta_ipv4);
         sta_node->set_bridge_4addr_mac(set_bridge_4addr_mac);
+
+        response->success() = true;
+        message_com::send_cmdu(slave_socket, cmdu_tx);
 #ifdef BEEROCKS_RDKB
         //clean rdkb monitor data if already in database.
         auto client = mon_rdkb_hal.conf_get_client(sta_mac);
@@ -714,6 +772,26 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             client->clearData();
         }
 #endif
+        break;
+    }
+    case beerocks_message::ACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION: {
+        LOG(TRACE) << "received ACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION";
+        auto notification =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>();
+        if (!notification) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION failed";
+            return false;
+        }
+        std::string sta_mac  = network_utils::mac_to_string(notification->mac());
+        std::string sta_ipv4 = network_utils::ipv4_to_string(notification->ipv4());
+
+        auto sta_node = mon_db.sta_find(sta_mac);
+        if (!sta_node) {
+            LOG(ERROR) << "sta " << sta_mac << " hasn't been found on mon_db";
+            return false;
+        }
+        sta_node->set_ipv4(sta_ipv4);
         break;
     }
 #ifdef BEEROCKS_RDKB
@@ -1106,6 +1184,52 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         mon_wlan_hal->sta_link_measurements_11k_request(mac_str);
         break;
     }
+    case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST: {
+        auto request =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST failed";
+            return false;
+        }
+
+        auto radio_mac         = request->scan_params().radio_mac;
+        auto dwell_time_ms     = request->scan_params().dwell_time_ms;
+        auto channel_pool      = request->scan_params().channel_pool;
+        auto channel_pool_size = request->scan_params().channel_pool_size;
+        auto channel_pool_vector =
+            std::vector<unsigned int>(channel_pool, channel_pool + channel_pool_size);
+        std::string channels;
+
+        //loop for priting the channal pool
+        for (int index = 0; index < int(channel_pool_size); index++) {
+            channels += ((index != 0) ? "," : "") + std::to_string(channel_pool[index]);
+        }
+
+        //debug print incoming information:
+        LOG(DEBUG) << std::endl
+                   << "scan_params:" << std::endl
+                   << "radio_mac=" << radio_mac << std::endl
+                   << "dwell_time_ms=" << dwell_time_ms << std::endl
+                   << "channel_pool_size=" << int(channel_pool_size) << std::endl
+                   << "channel_pool=" << channels;
+
+        auto response_out = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+        if (!response_out) {
+            LOG(ERROR)
+                << "Failed building cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE message!";
+            return false;
+        }
+
+        bool result = mon_wlan_hal->channel_scan_trigger(int(dwell_time_ms), channel_pool_vector);
+        LOG_IF(!result, ERROR) << "channel_scan_trigger Failed";
+
+        response_out->success() = (result) ? 1 : 0;
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unsupported MONITOR action_op: " << int(beerocks_header->action_op());
         break;
@@ -1368,6 +1492,109 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
         update_vaps_in_db();
 
+    } break;
+    case Event::Channel_Scan_Triggered: {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_TRIGGERED_NOTIFICATION>(cmdu_tx);
+        if (!notification) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_TRIGGERED_NOTIFICATION msg";
+            return false;
+        }
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+    } break;
+    case Event::Channel_Scan_New_Results_Ready:
+    case Event::Channel_Scan_Dump_Result: {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION>(cmdu_tx);
+        if (!notification) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION msg";
+            return false;
+        }
+
+        // If event == Channel_Scan_New_Results_Ready do nothing since is_dump's default is 0
+        if (event == Event::Channel_Scan_Dump_Result) {
+            auto msg = static_cast<bwl::sCHANNEL_SCAN_RESULTS_NOTIFICATION *>(data);
+
+            auto &in_result  = msg->channel_scan_results;
+            auto &out_result = notification->scan_results();
+
+            // Arrays
+            string_utils::copy_string(out_result.ssid, in_result.ssid,
+                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
+            std::copy_n(in_result.bssid.oct, sizeof(out_result.bssid.oct), out_result.bssid.oct);
+            std::copy(in_result.basic_data_transfer_rates_kbps.begin(),
+                      in_result.basic_data_transfer_rates_kbps.end(),
+                      out_result.basic_data_transfer_rates_kbps);
+            std::copy(in_result.supported_data_transfer_rates_kbps.begin(),
+                      in_result.supported_data_transfer_rates_kbps.end(),
+                      out_result.supported_data_transfer_rates_kbps);
+
+            // Primery values
+            out_result.channel             = in_result.channel;
+            out_result.signal_strength_dBm = in_result.signal_strength_dBm;
+            out_result.beacon_period_ms    = in_result.beacon_period_ms;
+            out_result.noise_dBm           = in_result.noise_dBm;
+            out_result.dtim_period         = in_result.dtim_period;
+            out_result.channel_utilization = in_result.channel_utilization;
+
+            // Enums
+            out_result.mode = beerocks_message::eChannelScanResultMode(uint8_t(in_result.mode));
+            out_result.operating_frequency_band =
+                beerocks_message::eChannelScanResultOperatingFrequencyBand(
+                    uint8_t(in_result.operating_frequency_band));
+            out_result.operating_standards = beerocks_message::eChannelScanResultStandards(
+                uint8_t(in_result.operating_standards));
+            out_result.operating_channel_bandwidth =
+                beerocks_message::eChannelScanResultChannelBandwidth(
+                    uint8_t(in_result.operating_channel_bandwidth));
+
+            // Enum list
+            int i = 0;
+            std::for_each(in_result.security_mode_enabled.begin(),
+                          in_result.security_mode_enabled.end(),
+                          [&i, &out_result](bwl::eChannelScanResultSecurityMode e) {
+                              out_result.security_mode_enabled[i++] =
+                                  beerocks_message::eChannelScanResultSecurityMode(uint8_t(e));
+                          });
+            i = 0;
+            std::for_each(in_result.encryption_mode.begin(), in_result.encryption_mode.end(),
+                          [&i, &out_result](bwl::eChannelScanResultEncryptionMode e) {
+                              out_result.encryption_mode[i++] =
+                                  beerocks_message::eChannelScanResultEncryptionMode(uint8_t(e));
+                          });
+            i = 0;
+            std::for_each(in_result.supported_standards.begin(),
+                          in_result.supported_standards.end(),
+                          [&i, &out_result](bwl::eChannelScanResultStandards e) {
+                              out_result.supported_standards[i++] =
+                                  beerocks_message::eChannelScanResultStandards(uint8_t(e));
+                          });
+
+            notification->is_dump() = 1;
+        }
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+    } break;
+    case Event::Channel_Scan_Finished: {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION>(cmdu_tx);
+        if (!notification) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION msg";
+            return false;
+        }
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+    } break;
+    case Event::Channel_Scan_Abort: {
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION>(cmdu_tx);
+        if (!notification) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION msg";
+            return false;
+        }
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;
 
     // Unhandled events

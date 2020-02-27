@@ -30,7 +30,7 @@ class tlvChannelSelectionResponse : public BaseClass
 {
     public:
         tlvChannelSelectionResponse(uint8_t* buff, size_t buff_len, bool parse = false);
-        tlvChannelSelectionResponse(std::shared_ptr<BaseClass> base, bool parse = false);
+        explicit tlvChannelSelectionResponse(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvChannelSelectionResponse();
 
         enum eResponseCode: uint8_t {

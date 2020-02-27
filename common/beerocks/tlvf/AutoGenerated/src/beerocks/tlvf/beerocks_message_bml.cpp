@@ -27,6 +27,7 @@ cACTION_BML_PING_REQUEST::~cACTION_BML_PING_REQUEST() {
 }
 void cACTION_BML_PING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_PING_REQUEST::finalize()
@@ -84,6 +85,7 @@ cACTION_BML_PING_RESPONSE::~cACTION_BML_PING_RESPONSE() {
 }
 void cACTION_BML_PING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_PING_RESPONSE::finalize()
@@ -141,6 +143,7 @@ cACTION_BML_NW_MAP_REQUEST::~cACTION_BML_NW_MAP_REQUEST() {
 }
 void cACTION_BML_NW_MAP_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_NW_MAP_REQUEST::finalize()
@@ -211,7 +214,7 @@ std::string cACTION_BML_NW_MAP_RESPONSE::buffer_str() {
 }
 
 char* cACTION_BML_NW_MAP_RESPONSE::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
@@ -220,8 +223,8 @@ char* cACTION_BML_NW_MAP_RESPONSE::buffer(size_t length) {
 
 bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -231,10 +234,6 @@ bool cACTION_BML_NW_MAP_RESPONSE::set_buffer(const char str[], size_t size) {
 bool cACTION_BML_NW_MAP_RESPONSE::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -260,6 +259,7 @@ bool cACTION_BML_NW_MAP_RESPONSE::alloc_buffer(size_t count) {
 
 void cACTION_BML_NW_MAP_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_node_num));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
@@ -353,7 +353,7 @@ std::string cACTION_BML_NW_MAP_UPDATE::buffer_str() {
 }
 
 char* cACTION_BML_NW_MAP_UPDATE::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
@@ -362,8 +362,8 @@ char* cACTION_BML_NW_MAP_UPDATE::buffer(size_t length) {
 
 bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -373,10 +373,6 @@ bool cACTION_BML_NW_MAP_UPDATE::set_buffer(const char str[], size_t size) {
 bool cACTION_BML_NW_MAP_UPDATE::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -402,6 +398,7 @@ bool cACTION_BML_NW_MAP_UPDATE::alloc_buffer(size_t count) {
 
 void cACTION_BML_NW_MAP_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_node_num));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
@@ -495,7 +492,7 @@ std::string cACTION_BML_STATS_UPDATE::buffer_str() {
 }
 
 char* cACTION_BML_STATS_UPDATE::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
@@ -504,8 +501,8 @@ char* cACTION_BML_STATS_UPDATE::buffer(size_t length) {
 
 bool cACTION_BML_STATS_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_STATS_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -515,10 +512,6 @@ bool cACTION_BML_STATS_UPDATE::set_buffer(const char str[], size_t size) {
 bool cACTION_BML_STATS_UPDATE::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -544,6 +537,7 @@ bool cACTION_BML_STATS_UPDATE::alloc_buffer(size_t count) {
 
 void cACTION_BML_STATS_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_num_of_stats_bulks));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
@@ -633,7 +627,7 @@ std::string cACTION_BML_EVENTS_UPDATE::buffer_str() {
 }
 
 char* cACTION_BML_EVENTS_UPDATE::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
@@ -642,8 +636,8 @@ char* cACTION_BML_EVENTS_UPDATE::buffer(size_t length) {
 
 bool cACTION_BML_EVENTS_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_EVENTS_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -653,10 +647,6 @@ bool cACTION_BML_EVENTS_UPDATE::set_buffer(const char str[], size_t size) {
 bool cACTION_BML_EVENTS_UPDATE::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -682,6 +672,7 @@ bool cACTION_BML_EVENTS_UPDATE::alloc_buffer(size_t count) {
 
 void cACTION_BML_EVENTS_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
 
@@ -755,6 +746,7 @@ cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST::~cACTION_BML_REGISTER_TO_NW_MAP_
 }
 void cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST::finalize()
@@ -812,6 +804,7 @@ cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE::~cACTION_BML_REGISTER_TO_NW_MAP
 }
 void cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_RESPONSE::finalize()
@@ -869,6 +862,7 @@ cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST::~cACTION_BML_UNREGISTER_FROM
 }
 void cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_REQUEST::finalize()
@@ -926,6 +920,7 @@ cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE::~cACTION_BML_UNREGISTER_FRO
 }
 void cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_NW_MAP_UPDATES_RESPONSE::finalize()
@@ -983,6 +978,7 @@ cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE::~cACTION_BML_SET_LEGACY_CLIENT_R
 }
 void cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_LEGACY_CLIENT_ROAMING_RESPONSE::finalize()
@@ -1040,6 +1036,7 @@ cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST::~cACTION_BML_GET_LEGACY_CLIENT_RO
 }
 void cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST::finalize()
@@ -1097,6 +1094,7 @@ cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST::~cACTION_BML_REGISTER_TO_EVENTS_
 }
 void cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST::finalize()
@@ -1154,6 +1152,7 @@ cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE::~cACTION_BML_REGISTER_TO_EVENTS
 }
 void cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE::finalize()
@@ -1211,6 +1210,7 @@ cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST::~cACTION_BML_UNREGISTER_FROM
 }
 void cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST::finalize()
@@ -1268,6 +1268,7 @@ cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE::~cACTION_BML_UNREGISTER_FRO
 }
 void cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE::finalize()
@@ -1325,6 +1326,7 @@ cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST::~cACTION_BML_REGISTER_TO_STATS_UP
 }
 void cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST::finalize()
@@ -1382,6 +1384,7 @@ cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE::~cACTION_BML_REGISTER_TO_STATS_U
 }
 void cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE::finalize()
@@ -1439,6 +1442,7 @@ cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST::~cACTION_BML_UNREGISTER_FROM_
 }
 void cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST::finalize()
@@ -1496,6 +1500,7 @@ cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE::~cACTION_BML_UNREGISTER_FROM
 }
 void cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE::finalize()
@@ -1557,6 +1562,7 @@ uint8_t& cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST::isEnable() {
 
 void cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST::finalize()
@@ -1624,6 +1630,7 @@ uint8_t& cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE::finalize()
@@ -1691,6 +1698,7 @@ uint8_t& cACTION_BML_SET_CLIENT_ROAMING_REQUEST::isEnable() {
 
 void cACTION_BML_SET_CLIENT_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_ROAMING_REQUEST::finalize()
@@ -1754,6 +1762,7 @@ cACTION_BML_SET_CLIENT_ROAMING_RESPONSE::~cACTION_BML_SET_CLIENT_ROAMING_RESPONS
 }
 void cACTION_BML_SET_CLIENT_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_ROAMING_RESPONSE::finalize()
@@ -1811,6 +1820,7 @@ cACTION_BML_GET_CLIENT_ROAMING_REQUEST::~cACTION_BML_GET_CLIENT_ROAMING_REQUEST(
 }
 void cACTION_BML_GET_CLIENT_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_ROAMING_REQUEST::finalize()
@@ -1872,6 +1882,7 @@ uint8_t& cACTION_BML_GET_CLIENT_ROAMING_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_CLIENT_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_ROAMING_RESPONSE::finalize()
@@ -1939,6 +1950,7 @@ uint8_t& cACTION_BML_SET_DFS_REENTRY_REQUEST::isEnable() {
 
 void cACTION_BML_SET_DFS_REENTRY_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_DFS_REENTRY_REQUEST::finalize()
@@ -2002,6 +2014,7 @@ cACTION_BML_SET_DFS_REENTRY_RESPONSE::~cACTION_BML_SET_DFS_REENTRY_RESPONSE() {
 }
 void cACTION_BML_SET_DFS_REENTRY_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_DFS_REENTRY_RESPONSE::finalize()
@@ -2059,6 +2072,7 @@ cACTION_BML_GET_DFS_REENTRY_REQUEST::~cACTION_BML_GET_DFS_REENTRY_REQUEST() {
 }
 void cACTION_BML_GET_DFS_REENTRY_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_DFS_REENTRY_REQUEST::finalize()
@@ -2120,6 +2134,7 @@ uint8_t& cACTION_BML_GET_DFS_REENTRY_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_DFS_REENTRY_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_DFS_REENTRY_RESPONSE::finalize()
@@ -2187,6 +2202,7 @@ uint8_t& cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::isEnable
 
 void cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::finalize()
@@ -2250,6 +2266,7 @@ cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::~cACTION_BML_SET
 }
 void cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::finalize()
@@ -2307,6 +2324,7 @@ cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::~cACTION_BML_GET_
 }
 void cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_REQUEST::finalize()
@@ -2368,6 +2386,7 @@ uint8_t& cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::isEnabl
 
 void cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_ROAMING_PREFER_SIGNAL_STRENGTH_RESPONSE::finalize()
@@ -2435,6 +2454,7 @@ uint8_t& cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST::isEnable() {
 
 void cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_BAND_STEERING_REQUEST::finalize()
@@ -2498,6 +2518,7 @@ cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE::~cACTION_BML_SET_CLIENT_BAND_STEE
 }
 void cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CLIENT_BAND_STEERING_RESPONSE::finalize()
@@ -2555,6 +2576,7 @@ cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST::~cACTION_BML_GET_CLIENT_BAND_STEER
 }
 void cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_BAND_STEERING_REQUEST::finalize()
@@ -2616,6 +2638,7 @@ uint8_t& cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CLIENT_BAND_STEERING_RESPONSE::finalize()
@@ -2683,6 +2706,7 @@ uint8_t& cACTION_BML_SET_IRE_ROAMING_REQUEST::isEnable() {
 
 void cACTION_BML_SET_IRE_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_IRE_ROAMING_REQUEST::finalize()
@@ -2746,6 +2770,7 @@ cACTION_BML_SET_IRE_ROAMING_RESPONSE::~cACTION_BML_SET_IRE_ROAMING_RESPONSE() {
 }
 void cACTION_BML_SET_IRE_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_IRE_ROAMING_RESPONSE::finalize()
@@ -2803,6 +2828,7 @@ cACTION_BML_GET_IRE_ROAMING_REQUEST::~cACTION_BML_GET_IRE_ROAMING_REQUEST() {
 }
 void cACTION_BML_GET_IRE_ROAMING_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_IRE_ROAMING_REQUEST::finalize()
@@ -2864,6 +2890,7 @@ uint8_t& cACTION_BML_GET_IRE_ROAMING_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_IRE_ROAMING_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_IRE_ROAMING_RESPONSE::finalize()
@@ -2931,6 +2958,7 @@ uint8_t& cACTION_BML_SET_LOAD_BALANCER_REQUEST::isEnable() {
 
 void cACTION_BML_SET_LOAD_BALANCER_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_LOAD_BALANCER_REQUEST::finalize()
@@ -2994,6 +3022,7 @@ cACTION_BML_SET_LOAD_BALANCER_RESPONSE::~cACTION_BML_SET_LOAD_BALANCER_RESPONSE(
 }
 void cACTION_BML_SET_LOAD_BALANCER_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_LOAD_BALANCER_RESPONSE::finalize()
@@ -3051,6 +3080,7 @@ cACTION_BML_GET_LOAD_BALANCER_REQUEST::~cACTION_BML_GET_LOAD_BALANCER_REQUEST() 
 }
 void cACTION_BML_GET_LOAD_BALANCER_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_LOAD_BALANCER_REQUEST::finalize()
@@ -3112,6 +3142,7 @@ uint8_t& cACTION_BML_GET_LOAD_BALANCER_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_LOAD_BALANCER_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_LOAD_BALANCER_RESPONSE::finalize()
@@ -3179,6 +3210,7 @@ uint8_t& cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST::isEnable() {
 
 void cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_SERVICE_FAIRNESS_REQUEST::finalize()
@@ -3242,6 +3274,7 @@ cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE::~cACTION_BML_SET_SERVICE_FAIRNESS_RES
 }
 void cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_SERVICE_FAIRNESS_RESPONSE::finalize()
@@ -3299,6 +3332,7 @@ cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST::~cACTION_BML_GET_SERVICE_FAIRNESS_REQU
 }
 void cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_SERVICE_FAIRNESS_REQUEST::finalize()
@@ -3360,6 +3394,7 @@ uint8_t& cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_SERVICE_FAIRNESS_RESPONSE::finalize()
@@ -3427,6 +3462,7 @@ sLoggingLevelChange& cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST::params() {
 
 void cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3492,6 +3528,7 @@ cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE::~cACTION_BML_CHANGE_MODULE_LOG
 }
 void cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE::finalize()
@@ -3553,6 +3590,7 @@ sWifiCredentials& cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST::params() {
 
 void cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3622,6 +3660,7 @@ uint32_t& cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE::error_code() {
 
 void cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -3690,6 +3729,7 @@ sRestrictedChannels& cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST::params() {
 
 void cACTION_BML_SET_RESTRICTED_CHANNELS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3759,6 +3799,7 @@ uint32_t& cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE::error_code() {
 
 void cACTION_BML_SET_RESTRICTED_CHANNELS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -3827,6 +3868,7 @@ sRestrictedChannels& cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST::params() {
 
 void cACTION_BML_GET_RESTRICTED_CHANNELS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3896,6 +3938,7 @@ sRestrictedChannels& cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE::params() {
 
 void cACTION_BML_GET_RESTRICTED_CHANNELS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
@@ -3965,6 +4008,7 @@ uint8_t& cACTION_BML_SET_CERTIFICATION_MODE_REQUEST::isEnable() {
 
 void cACTION_BML_SET_CERTIFICATION_MODE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CERTIFICATION_MODE_REQUEST::finalize()
@@ -4028,6 +4072,7 @@ cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE::~cACTION_BML_SET_CERTIFICATION_MODE
 }
 void cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_SET_CERTIFICATION_MODE_RESPONSE::finalize()
@@ -4085,6 +4130,7 @@ cACTION_BML_GET_CERTIFICATION_MODE_REQUEST::~cACTION_BML_GET_CERTIFICATION_MODE_
 }
 void cACTION_BML_GET_CERTIFICATION_MODE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CERTIFICATION_MODE_REQUEST::finalize()
@@ -4146,6 +4192,7 @@ uint8_t& cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE::isEnable() {
 
 void cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE::finalize()
@@ -4229,10 +4276,6 @@ bool cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::alloc_vap_list(size_t count) 
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list vap_list, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(sConfigVapInfo) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
@@ -4259,6 +4302,7 @@ bool cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::alloc_vap_list(size_t count) 
 
 void cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
     for (size_t i = 0; i < (size_t)*m_vap_list_size; i++){
         m_vap_list[i].struct_swap();
@@ -4344,6 +4388,7 @@ uint32_t& cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE::result() {
 
 void cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
 }
 
@@ -4428,10 +4473,6 @@ bool cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::alloc_vap_list(size_t count)
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list vap_list, abort!";
         return false;
     }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
-        return false;
-    }
     size_t len = sizeof(sConfigVapInfo) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
@@ -4458,6 +4499,7 @@ bool cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::alloc_vap_list(size_t count)
 
 void cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
     for (size_t i = 0; i < (size_t)*m_vap_list_size; i++){
         m_vap_list[i].struct_swap();
@@ -4543,6 +4585,7 @@ uint32_t& cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST::result() {
 
 void cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
 }
 
@@ -4623,6 +4666,7 @@ uint8_t& cACTION_BML_STEERING_SET_GROUP_REQUEST::remove() {
 
 void cACTION_BML_STEERING_SET_GROUP_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_steeringGroupIndex));
     m_cfg_2->struct_swap();
     m_cfg_5->struct_swap();
@@ -4713,6 +4757,7 @@ int32_t& cACTION_BML_STEERING_SET_GROUP_RESPONSE::error_code() {
 
 void cACTION_BML_STEERING_SET_GROUP_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -4797,6 +4842,7 @@ uint8_t& cACTION_BML_STEERING_CLIENT_SET_REQUEST::remove() {
 
 void cACTION_BML_STEERING_CLIENT_SET_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_steeringGroupIndex));
     m_bssid->struct_swap();
     m_client_mac->struct_swap();
@@ -4895,6 +4941,7 @@ int32_t& cACTION_BML_STEERING_CLIENT_SET_RESPONSE::error_code() {
 
 void cACTION_BML_STEERING_CLIENT_SET_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -4963,6 +5010,7 @@ uint8_t& cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST::unregister() {
 
 void cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
 bool cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST::finalize()
@@ -5030,6 +5078,7 @@ int32_t& cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE::error_code() {
 
 void cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -5114,9 +5163,11 @@ uint32_t& cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::reason() {
 
 void cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_steeringGroupIndex));
     m_bssid->struct_swap();
     m_client_mac->struct_swap();
+    tlvf_swap(8*sizeof(eDisconnectType), reinterpret_cast<uint8_t*>(m_type));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_reason));
 }
 
@@ -5211,6 +5262,7 @@ int32_t& cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE::error_code() {
 
 void cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -5287,6 +5339,7 @@ sMacAddr& cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::client_mac() {
 
 void cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_steeringGroupIndex));
     m_bssid->struct_swap();
     m_client_mac->struct_swap();
@@ -5371,6 +5424,7 @@ int32_t& cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE::error_code() {
 
 void cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_error_code));
 }
 
@@ -5444,7 +5498,7 @@ std::string cACTION_BML_STEERING_EVENTS_UPDATE::buffer_str() {
 }
 
 char* cACTION_BML_STEERING_EVENTS_UPDATE::buffer(size_t length) {
-    if( (m_buffer_idx__ <= 0) || (m_buffer_idx__ < length) ) {
+    if( (m_buffer_idx__ == 0) || (m_buffer_idx__ < length) ) {
         TLVF_LOG(ERROR) << "buffer length is smaller than requested length";
         return nullptr;
     }
@@ -5453,8 +5507,8 @@ char* cACTION_BML_STEERING_EVENTS_UPDATE::buffer(size_t length) {
 
 bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const std::string& str) { return set_buffer(str.c_str(), str.size()); }
 bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const char str[], size_t size) {
-    if (str == nullptr || size == 0) {
-        TLVF_LOG(WARNING) << "set_buffer received an empty string.";
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_buffer received a null pointer.";
         return false;
     }
     if (!alloc_buffer(size)) { return false; }
@@ -5464,10 +5518,6 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::set_buffer(const char str[], size_t siz
 bool cACTION_BML_STEERING_EVENTS_UPDATE::alloc_buffer(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list buffer, abort!";
-        return false;
-    }
-    if (count == 0) {
-        TLVF_LOG(WARNING) << "can't allocate 0 bytes";
         return false;
     }
     size_t len = sizeof(char) * count;
@@ -5493,6 +5543,7 @@ bool cACTION_BML_STEERING_EVENTS_UPDATE::alloc_buffer(size_t count) {
 
 void cACTION_BML_STEERING_EVENTS_UPDATE::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_buffer_size));
 }
 
@@ -5570,6 +5621,7 @@ sMacAddr& cACTION_BML_TRIGGER_TOPOLOGY_QUERY::al_mac() {
 
 void cACTION_BML_TRIGGER_TOPOLOGY_QUERY::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_al_mac->struct_swap();
 }
 
@@ -5643,6 +5695,7 @@ sMacAddr& cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::ruid() {
 
 void cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::class_swap()
 {
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     m_al_mac->struct_swap();
     m_ruid->struct_swap();
 }
@@ -5700,6 +5753,1065 @@ bool cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_ruid->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST::~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST() {
+}
+sMacAddr& cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST::radio_mac() {
+    return (sMacAddr&)(*m_radio_mac);
+}
+
+sChannelScanRequestParams& cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST::params() {
+    return (sChannelScanRequestParams&)(*m_params);
+}
+
+void cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    m_radio_mac->struct_swap();
+    m_params->struct_swap();
+}
+
+bool cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // radio_mac
+    class_size += sizeof(sChannelScanRequestParams); // params
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_radio_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_radio_mac->struct_init(); }
+    m_params = (sChannelScanRequestParams*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sChannelScanRequestParams))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sChannelScanRequestParams) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_params->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE::~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE() {
+}
+uint8_t& cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE::op_error_code() {
+    return (uint8_t&)(*m_op_error_code);
+}
+
+void cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // op_error_code
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_op_error_code = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST::~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST() {
+}
+sMacAddr& cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST::radio_mac() {
+    return (sMacAddr&)(*m_radio_mac);
+}
+
+void cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    m_radio_mac->struct_swap();
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // radio_mac
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_radio_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_radio_mac->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE::~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE() {
+}
+sChannelScanRequestParams& cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE::params() {
+    return (sChannelScanRequestParams&)(*m_params);
+}
+
+void cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    m_params->struct_swap();
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sChannelScanRequestParams); // params
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_params = (sChannelScanRequestParams*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sChannelScanRequestParams))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sChannelScanRequestParams) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_params->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST::~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST() {
+}
+sMacAddr& cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST::radio_mac() {
+    return (sMacAddr&)(*m_radio_mac);
+}
+
+uint8_t& cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST::isEnable() {
+    return (uint8_t&)(*m_isEnable);
+}
+
+void cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    m_radio_mac->struct_swap();
+}
+
+bool cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // radio_mac
+    class_size += sizeof(uint8_t); // isEnable
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_radio_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_radio_mac->struct_init(); }
+    m_isEnable = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE::cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE::~cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE() {
+}
+uint8_t& cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE::op_error_code() {
+    return (uint8_t&)(*m_op_error_code);
+}
+
+void cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // op_error_code
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_op_error_code = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST::~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST() {
+}
+sMacAddr& cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST::radio_mac() {
+    return (sMacAddr&)(*m_radio_mac);
+}
+
+void cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    m_radio_mac->struct_swap();
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // radio_mac
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_radio_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_radio_mac->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE::cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE::~cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE() {
+}
+uint8_t& cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE::isEnable() {
+    return (uint8_t&)(*m_isEnable);
+}
+
+void cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // isEnable
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_isEnable = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST::cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST::cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST::~cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST() {
+}
+sTriggerChannelScanParams& cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST::scan_params() {
+    return (sTriggerChannelScanParams&)(*m_scan_params);
+}
+
+void cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    m_scan_params->struct_swap();
+}
+
+bool cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sTriggerChannelScanParams); // scan_params
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_scan_params = (sTriggerChannelScanParams*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sTriggerChannelScanParams))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sTriggerChannelScanParams) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_scan_params->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE::cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE::cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE::~cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE() {
+}
+uint8_t& cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE::op_error_code() {
+    return (uint8_t&)(*m_op_error_code);
+}
+
+void cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // op_error_code
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_op_error_code = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST::~cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST() {
+}
+sMacAddr& cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST::radio_mac() {
+    return (sMacAddr&)(*m_radio_mac);
+}
+
+uint8_t& cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST::scan_mode() {
+    return (uint8_t&)(*m_scan_mode);
+}
+
+void cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    m_radio_mac->struct_swap();
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // radio_mac
+    class_size += sizeof(uint8_t); // scan_mode
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_radio_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_radio_mac->struct_init(); }
+    m_scan_mode = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::~cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE() {
+}
+uint8_t& cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::result_status() {
+    return (uint8_t&)(*m_result_status);
+}
+
+uint8_t& cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::op_error_code() {
+    return (uint8_t&)(*m_op_error_code);
+}
+
+uint8_t& cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::last() {
+    return (uint8_t&)(*m_last);
+}
+
+uint32_t& cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::results_size() {
+    return (uint32_t&)(*m_results_size);
+}
+
+std::tuple<bool, sChannelScanResults&> cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::results(size_t idx) {
+    bool ret_success = ( (m_results_idx__ > 0) && (m_results_idx__ > idx) );
+    size_t ret_idx = ret_success ? idx : 0;
+    if (!ret_success) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+    }
+    return std::forward_as_tuple(ret_success, m_results[ret_idx]);
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::alloc_results(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list results, abort!";
+        return false;
+    }
+    size_t len = sizeof(sChannelScanResults) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)&m_results[*m_results_size];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_results_idx__ += count;
+    *m_results_size += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { 
+        for (size_t i = m_results_idx__ - count; i < m_results_idx__; i++) { m_results[i].struct_init(); }
+    }
+    return true;
+}
+
+void cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_results_size));
+    for (size_t i = 0; i < (size_t)*m_results_size; i++){
+        m_results[i].struct_swap();
+    }
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // result_status
+    class_size += sizeof(uint8_t); // op_error_code
+    class_size += sizeof(uint8_t); // last
+    class_size += sizeof(uint32_t); // results_size
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_result_status = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_op_error_code = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_last = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_results_size = (uint32_t*)m_buff_ptr__;
+    if (!m_parse__) *m_results_size = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+        return false;
+    }
+    m_results = (sChannelScanResults*)m_buff_ptr__;
+    uint32_t results_size = *m_results_size;
+    if (m_parse__) {  tlvf_swap(32, reinterpret_cast<uint8_t*>(&results_size)); }
+    m_results_idx__ = results_size;
+    if (!buffPtrIncrementSafe(sizeof(sChannelScanResults) * (results_size))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sChannelScanResults) * (results_size) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST::cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST::cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST::~cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST() {
+}
+void cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE::cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE::cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE::~cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE() {
+}
+void cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    return class_size;
+}
+
+bool cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
     if (m_parse__) { class_swap(); }
     return true;
 }

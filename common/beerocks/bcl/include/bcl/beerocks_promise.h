@@ -9,6 +9,8 @@
 #ifndef _BEEROCKS_PROMISE_H_
 #define _BEEROCKS_PROMISE_H_
 
+#include "../../common/include/mapf/common/err.h"
+#include <easylogging++.h>
 #include <pthread.h>
 #include <sys/time.h>
 
@@ -22,25 +24,30 @@ public:
     // Set value for waiting threads
     void set_value(const T value)
     {
-        pthread_mutex_lock(&m_mut);
+        int err = pthread_mutex_lock(&m_mut);
+        mapf_assert(err == 0);
         m_value  = value;
         m_signal = 1;
-        pthread_cond_broadcast(&m_cond);
-        pthread_mutex_unlock(&m_mut);
+        err      = pthread_cond_broadcast(&m_cond);
+        mapf_assert(err == 0);
+        err = pthread_mutex_unlock(&m_mut);
+        mapf_assert(err == 0);
     }
-
     // Wait for a value to be set
     void wait()
     {
         // lock the mutex and wait for the conditional variable to be set
-        pthread_mutex_lock(&m_mut);
+        int err = pthread_mutex_lock(&m_mut);
+        mapf_assert(err == 0);
         // If signaled before the wait, no need to wait
         if (m_signal == 1) {
             m_signal = 0;
         } else {
-            pthread_cond_wait(&m_cond, &m_mut);
+            err = pthread_cond_wait(&m_cond, &m_mut);
+            mapf_assert(err == 0);
         }
-        pthread_mutex_unlock(&m_mut);
+        err = pthread_mutex_unlock(&m_mut);
+        mapf_assert(err == 0);
     }
 
     // Wait for a value to be set with timeout
@@ -48,27 +55,27 @@ public:
     {
         struct timeval now;
         struct timespec timeout;
-
         // set the absolut timeout
         gettimeofday(&now, NULL);
         timeout.tv_sec  = now.tv_sec + (timeout_ms / 1000);
         timeout.tv_nsec = (now.tv_usec + (timeout_ms % 1000) * 1000) * 1000;
 
-        int retcode = 0;
-
         // lock the mutex and wait for the conditional variable to be set or timeout
-        pthread_mutex_lock(&m_mut);
+        int err      = pthread_mutex_lock(&m_mut);
+        int err_wait = 0;
+        mapf_assert(err == 0);
         // If signaled before the wait, no need to wait
         if (m_signal == 1) {
             m_signal = 0;
         } else {
-            retcode = pthread_cond_timedwait(&m_cond, &m_mut, &timeout);
+            if ((err_wait = pthread_cond_timedwait(&m_cond, &m_mut, &timeout)) != 0) {
+                LOG(ERROR) << "pthread_cond_timedwait failed, error code: " << err;
+            }
+            err = pthread_mutex_unlock(&m_mut);
+            mapf_assert(err == 0);
         }
-        pthread_mutex_unlock(&m_mut);
-
-        if (retcode != 0)
+        if (err_wait)
             return false;
-
         return true;
     }
 

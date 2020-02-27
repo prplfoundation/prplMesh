@@ -31,7 +31,7 @@ endif ()
 
 if (NOT REVISION)
     execute_process(
-        COMMAND "git" "rev-parse" "HEAD"
+        COMMAND "git" "rev-parse" "--short" "HEAD"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_STRIP_TRAILING_WHITESPACE 
         OUTPUT_VARIABLE REVISION
@@ -39,7 +39,7 @@ if (NOT REVISION)
 endif()
 
 if (NOT BUILD_DATE)
-    execute_process(COMMAND "date" "+%F %T" OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE BUILD_DATE)
+    execute_process(COMMAND "date" "+%F_%H-%M-%S" OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE BUILD_DATE)
 endif()
 
 message(STATUS "prplmesh Version: ${prplmesh_VERSION}")

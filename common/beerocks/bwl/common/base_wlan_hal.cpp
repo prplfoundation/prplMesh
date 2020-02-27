@@ -14,9 +14,6 @@
 #include <sys/eventfd.h>
 #include <unistd.h>
 
-// Use easylogging++ instance of the main application
-SHARE_EASYLOGGINGPP(el::Helpers::storage())
-
 namespace bwl {
 
 base_wlan_hal::base_wlan_hal(HALType type, std::string iface_name, IfaceType iface_type,

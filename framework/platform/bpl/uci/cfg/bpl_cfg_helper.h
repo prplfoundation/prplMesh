@@ -63,15 +63,15 @@ int cfg_get_prplmesh_param_int(const std::string &param, int *buf);
 /**
  * Returns the value of ACS from DB
  *
- * @param [in] index interface index
+ * @param [in] interface_name interface name string
  * @param [out] channel channel number
  *
  * @return 0 on success or -1 on error.
  **/
-int cfg_get_channel(int index, int *channel);
+int cfg_get_channel(const std::string &interface_name, int *channel);
 
 /** API currently not implemented **/
-int cfg_get_wep_key(int index, int keyIndex, char *key);
+int cfg_get_wep_key(const std::string &interface_name, int keyIndex, char *key);
 
 /**
  * set the VAP credentials

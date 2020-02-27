@@ -20,9 +20,6 @@
 #define LOG_MAX_LEVELS 6
 #define LOGGING_DEFAULT_MAX_SIZE (size_t)100000
 
-// Use the easylogging++ instance from the parent process
-SHARE_EASYLOGGINGPP(el::Helpers::storage())
-
 class RollMonitor : public el::LogDispatchCallback {
 public:
     void enable(bool enable)
@@ -516,6 +513,9 @@ void logging::apply_settings()
     el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);
     el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
     el::Loggers::addFlag(el::LoggingFlag::StrictLogFileSizeCheck);
+    el::Loggers::addFlag(el::LoggingFlag::ForceDecBase);
+    el::Loggers::addFlag(el::LoggingFlag::ShowBase);
+    el::Loggers::addFlag(el::LoggingFlag::BoolAlpha);
 
     auto logger = el::Loggers::getLogger("default");
     if (!logger) {

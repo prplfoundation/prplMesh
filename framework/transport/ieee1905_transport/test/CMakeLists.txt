@@ -1,6 +1,6 @@
 if(BUILD_TESTS)
     add_executable(ieee1905_transport_test ieee1905_transport_test.cpp)
-    target_link_libraries(ieee1905_transport_test ieee1905_transport_lib ieee1905_transport_messages common mapf::elpp)
+    target_link_libraries(ieee1905_transport_test ieee1905_transport_lib ieee1905_transport_messages common elpp)
     install(TARGETS ieee1905_transport_test DESTINATION bin/tests)
     add_test(NAME ieee1905_transport_test COMMAND $<TARGET_FILE:ieee1905_transport_test>)
 endif()

@@ -64,6 +64,7 @@ uint16_t& cACTION_HEADER::length() {
 void cACTION_HEADER::class_swap()
 {
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_magic));
+    tlvf_swap(8*sizeof(eAction), reinterpret_cast<uint8_t*>(m_action));
     m_radio_mac->struct_swap();
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_id));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
