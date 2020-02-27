@@ -2664,8 +2664,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         std::string client_mac = network_utils::mac_to_string(notification->params().result.mac);
         std::string client_parent_mac = database.get_node_parent(client_mac);
         std::string bssid = database.get_hostap_vap_mac(hostap_mac, notification->params().vap_id);
-        bool is_parent    = (client_parent_mac ==
-                          database.get_hostap_vap_mac(bssid, notification->params().vap_id));
+        bool is_parent    = (client_parent_mac == bssid);
 
         int rx_rssi = int(notification->params().rx_rssi);
 
