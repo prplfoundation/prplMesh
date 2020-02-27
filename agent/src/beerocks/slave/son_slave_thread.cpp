@@ -4477,6 +4477,8 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
                          });
 
         if (is_restricted != preference.channels.end()) {
+            LOG(INFO) << "Current channel " << int(hostap_cs_params.channel)
+                      << " is restricted, switch required";
             switch_required = 1;
             break;
         }
@@ -4484,30 +4486,41 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
 
     // According to design only Resticted channels should be included in channel selection request
     if (switch_required) {
-        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
-            if (hostap_params.supported_channels[i].channel == 0)
-                continue;
-            for (auto preference : channel_preferences) {
-                auto is_restricted = std::find_if(
-                    preference.channels.begin(), preference.channels.end(),
-                    [&](const beerocks::message::sWifiChannel &wifi_channel) {
-                        return (
-                            preference.preference.oper_class ==
-                                wireless_utils::get_operating_class_by_channel(
-                                    hostap_params.supported_channels[i].channel,
-                                    (beerocks::eWiFiBandwidth)hostap_params.supported_channels[i]
-                                        .channel_bandwidth) &&
-                            hostap_params.supported_channels[i].channel == wifi_channel.channel);
-                    });
+        for (auto preference : channel_preferences) {
+            LOG(DEBUG) << "Preference operating class: " << int(preference.preference.oper_class);
+            for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+                auto channel         = hostap_params.supported_channels[i];
+                auto operating_class = wireless_utils::get_operating_class_by_channel(
+                    channel.channel,
+                    static_cast<beerocks::eWiFiBandwidth>(channel.channel_bandwidth));
 
-                if (is_restricted == preference.channels.end() &&
-                    !hostap_params.supported_channels[i].is_dfs_channel) {
-                    channel_to_switch = hostap_params.supported_channels[i];
-                    break;
+                // Skip channels from other operating classes
+                if (operating_class != preference.preference.oper_class) {
+                    continue;
                 }
-            }
-            if (channel_to_switch.channel != 0)
+                // Skip DFS channels
+                if (channel.is_dfs_channel) {
+                    LOG(DEBUG) << "Skip DFS channel " << int(channel.channel);
+                    continue;
+                }
+                auto is_restricted =
+                    std::find_if(preference.channels.begin(), preference.channels.end(),
+                                 [&](const beerocks::message::sWifiChannel &wifi_channel) {
+                                     return (channel.channel == wifi_channel.channel);
+                                 });
+                // Skip restricted channels
+                if (is_restricted != preference.channels.end()) {
+                    LOG(DEBUG) << "Skip restricted channel " << int(channel.channel);
+                    continue;
+                }
+                // If we got this far, we found a candidate channel, so switch to it
+                channel_to_switch = channel;
                 break;
+            }
+            if (channel_to_switch.channel) {
+                LOG(DEBUG) << "Switch to channel " << int(channel_to_switch.channel);
+                break;
+            }
         }
     }
 
