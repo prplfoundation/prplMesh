@@ -240,7 +240,7 @@ bool mon_wlan_hal_nl80211::update_stations_stats(const std::string vap_iface_nam
 
             // RX Phy Rate
             if (sinfo[NL80211_STA_INFO_RX_BITRATE]) {
-                sta_stats.tx_phy_rate_100kb =
+                sta_stats.rx_phy_rate_100kb =
                     parse_bitrate_func(sinfo[NL80211_STA_INFO_RX_BITRATE]) / 100;
             }
 
