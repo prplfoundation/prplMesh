@@ -3590,10 +3590,14 @@ int db::get_node_bw_int(std::shared_ptr<node> &n)
 }
 
 bool db::is_prplMesh(const std::string &mac) {
-    return get_node(mac).get()->is_prplmesh;
+    auto node = get_node(mac);
+	return node ? node.get()->is_prplmesh : false;
 }
 
 void db::set_prplMesh(const std::string &mac) {
+    if (!get_node(mac)) {
+        add_node(network_utils::mac_from_string(mac));
+    }
     get_node(mac).get()->is_prplmesh = true;
 }
 
