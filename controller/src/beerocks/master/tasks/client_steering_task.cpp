@@ -23,11 +23,11 @@ using namespace son;
 
 client_steering_task::client_steering_task(db &database_, ieee1905_1::CmduMessageTx &cmdu_tx_,
                                            task_pool &tasks_, std::string sta_mac_,
-                                           std::string hostap_mac_, bool disassoc_imminent_,
+                                           std::string target_bssid_, bool disassoc_imminent_,
                                            int disassoc_timer_ms_, bool steer_restricted_,
                                            std::string task_name_)
     : task(task_name_), database(database_), cmdu_tx(cmdu_tx_), tasks(tasks_), sta_mac(sta_mac_),
-      hostap_mac(hostap_mac_), //Chosen VAP BSSID to steer the client to
+      target_bssid(target_bssid_), //Chosen VAP BSSID to steer the client to
       disassoc_imminent(disassoc_imminent_), disassoc_timer_ms(disassoc_timer_ms_),
       steer_restricted(steer_restricted_)
 {
@@ -40,6 +40,8 @@ void client_steering_task::work()
         int prev_task_id = database.get_steering_task_id(sta_mac);
         tasks.kill_task(prev_task_id);
         database.assign_steering_task_id(sta_mac, id);
+
+        original_bssid = database.get_node_parent(sta_mac);
 
         steer_sta();
 
@@ -56,19 +58,19 @@ void client_steering_task::work()
     case FINALIZE: {
 
         if (!steering_success && disassoc_imminent) {
-            TASK_LOG(DEBUG) << "steering failed for " << sta_mac << " from " << original_hostap_mac
-                            << " to " << hostap_mac;
+            TASK_LOG(DEBUG) << "steering failed for " << sta_mac << " from " << original_bssid
+                            << " to " << target_bssid;
 
             /*
                  * might need to split this logic to high and low bands of 5GHz
                  * since some clients can support one but not the other
                  */
-            if (database.is_node_24ghz(original_hostap_mac) && database.is_node_5ghz(hostap_mac)) {
+            if (database.is_node_24ghz(original_bssid) && database.is_node_5ghz(target_bssid)) {
                 TASK_LOG(DEBUG) << "steering from 2.4GHz to 5GHz failed --> updating failed 5ghz "
                                    "steering attempt";
                 database.update_node_failed_5ghz_steer_attempt(sta_mac);
-            } else if (database.is_node_5ghz(original_hostap_mac) &&
-                       database.is_node_24ghz(hostap_mac)) {
+            } else if (database.is_node_5ghz(original_bssid) &&
+                       database.is_node_24ghz(target_bssid)) {
                 TASK_LOG(DEBUG) << "steering from 5GHz to 2.4GHz failed, updating failed 2.4ghz "
                                    "steering attempt";
                 database.update_node_failed_24ghz_steer_attempt(sta_mac);
@@ -92,8 +94,8 @@ void client_steering_task::steer_sta()
         }
     }
 
-    std::string radio_mac = database.get_node_parent_radio(hostap_mac);
-    original_hostap_mac   = database.get_node_parent(sta_mac);
+    std::string radio_mac = database.get_node_parent_radio(target_bssid);
+    original_bssid        = database.get_node_parent(sta_mac);
 
     // Send 17.1.27	Client Association Control Request
     if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
@@ -110,7 +112,7 @@ void client_steering_task::steer_sta()
     }
 
     association_control_request_tlv->bssid_to_block_client() =
-        network_utils::mac_from_string(hostap_mac);
+        network_utils::mac_from_string(target_bssid);
     association_control_request_tlv->association_control() =
         wfa_map::tlvClientAssociationControlRequest::UNBLOCK;
     association_control_request_tlv->validity_period_sec() = 0;
@@ -119,14 +121,14 @@ void client_steering_task::steer_sta()
     std::get<1>(sta_list_unblock) = network_utils::mac_from_string(sta_mac);
 
     auto agent_mac = database.get_node_parent_ire(radio_mac);
-    TASK_LOG(DEBUG) << "sending allow request for " << sta_mac << " to " << radio_mac
+    TASK_LOG(DEBUG) << "sending allow request for " << sta_mac << " to bssid " << target_bssid
                     << " id=" << int(id);
     son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
 
     // update bml listeners
     bml_task::client_allow_req_available_event client_allow_event;
     client_allow_event.sta_mac    = sta_mac;
-    client_allow_event.hostap_mac = hostap_mac;
+    client_allow_event.hostap_mac = target_bssid;
     client_allow_event.ip         = database.get_node_ipv4(sta_mac);
     tasks.push_event(database.get_bml_task_id(), bml_task::CLIENT_ALLOW_REQ_EVENT_AVAILABLE,
                      &client_allow_event);
@@ -141,14 +143,14 @@ void client_steering_task::steer_sta()
             LOG(ERROR) << "Failed building message!";
             return;
         }
-        roam_request->params().bssid   = network_utils::mac_from_string(hostap_mac);
-        roam_request->params().channel = database.get_node_channel(hostap_mac);
+        roam_request->params().bssid   = network_utils::mac_from_string(target_bssid);
+        roam_request->params().channel = database.get_node_channel(target_bssid);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
 
         // update bml listeners
         bml_task::bh_roam_req_available_event bh_roam_event;
-        bh_roam_event.bssid   = hostap_mac;
-        bh_roam_event.channel = database.get_node_channel(hostap_mac);
+        bh_roam_event.bssid   = target_bssid;
+        bh_roam_event.channel = database.get_node_channel(target_bssid);
         tasks.push_event(database.get_bml_task_id(), bml_task::BH_ROAM_REQ_EVENT_AVAILABLE,
                          &bh_roam_event);
 
@@ -156,7 +158,7 @@ void client_steering_task::steer_sta()
     }
 
     auto hostaps                   = database.get_active_hostaps();
-    std::string original_radio_mac = database.get_node_parent_radio(original_hostap_mac);
+    std::string original_radio_mac = database.get_node_parent_radio(original_bssid);
     hostaps.erase(radio_mac); // remove chosen hostap from the general list
     for (auto &hostap : hostaps) {
         /*
@@ -216,7 +218,7 @@ void client_steering_task::steer_sta()
     steering_request_tlv->request_flags().btm_disassociation_imminent_bit = disassoc_imminent;
 
     steering_request_tlv->btm_disassociation_timer_ms() = disassoc_timer_ms;
-    steering_request_tlv->bssid() = network_utils::mac_from_string(original_hostap_mac);
+    steering_request_tlv->bssid() = network_utils::mac_from_string(original_bssid);
 
     steering_request_tlv->alloc_sta_list();
     auto sta_list         = steering_request_tlv->sta_list(0);
@@ -224,22 +226,22 @@ void client_steering_task::steer_sta()
 
     steering_request_tlv->alloc_target_bssid_list();
     auto bssid_list                      = steering_request_tlv->target_bssid_list(0);
-    std::get<1>(bssid_list).target_bssid = network_utils::mac_from_string(hostap_mac);
+    std::get<1>(bssid_list).target_bssid = network_utils::mac_from_string(target_bssid);
     std::get<1>(bssid_list).target_bss_operating_class =
-        database.get_hostap_operating_class(network_utils::mac_from_string(hostap_mac));
-    std::get<1>(bssid_list).target_bss_channel_number = database.get_node_channel(hostap_mac);
+        database.get_hostap_operating_class(network_utils::mac_from_string(target_bssid));
+    std::get<1>(bssid_list).target_bss_channel_number = database.get_node_channel(target_bssid);
 
-    agent_mac = database.get_node_parent_ire(original_hostap_mac);
+    agent_mac = database.get_node_parent_ire(original_bssid);
     son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, original_radio_mac);
-    TASK_LOG(DEBUG) << "sending steering request, sta " << sta_mac << " steer from AP "
-                    << original_hostap_mac << " to AP " << hostap_mac << " channel "
+    TASK_LOG(DEBUG) << "sending steering request, sta " << sta_mac << " steer from bssid "
+                    << original_bssid << " to bssid " << target_bssid << " channel "
                     << std::to_string(std::get<1>(bssid_list).target_bss_channel_number)
                     << " disassoc_timer=" << disassoc_timer_ms
                     << " disassoc_imminent=" << disassoc_imminent << " id=" << int(id);
 
     // update bml listeners
     bml_task::bss_tm_req_available_event bss_tm_event;
-    bss_tm_event.target_bssid      = hostap_mac;
+    bss_tm_event.target_bssid      = target_bssid;
     bss_tm_event.disassoc_imminent = disassoc_imminent;
     tasks.push_event(database.get_bml_task_id(), bml_task::BSS_TM_REQ_EVENT_AVAILABLE,
                      &bss_tm_event);
