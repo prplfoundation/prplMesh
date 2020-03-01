@@ -164,40 +164,47 @@ void client_steering_task::steer_sta()
         /*
         * send disallow to all others
         */
-        agent_mac = database.get_node_parent_ire(hostap);
-        if (!cmdu_tx.create(0,
-                            ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
-            LOG(ERROR)
-                << "cmdu creation of type CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE, has failed";
-            return;
+        const auto &hostap_vaps = database.get_hostap_vap_list(hostap);
+        const auto &ssid        = database.get_hostap_ssid(target_bssid);
+        for (const auto &hostap_vap : hostap_vaps) {
+            if (hostap_vap.second.ssid != ssid) {
+                continue;
+            }
+
+            agent_mac = database.get_node_parent_ire(hostap);
+            if (!cmdu_tx.create(
+                    0, ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
+                LOG(ERROR) << "cmdu creation of type "
+                              "CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE, has failed";
+                return;
+            }
+
+            auto association_control_block_request_tlv =
+                cmdu_tx.addClass<wfa_map::tlvClientAssociationControlRequest>();
+            if (!association_control_block_request_tlv) {
+                LOG(ERROR) << "addClass wfa_map::tlvClientAssociationControlRequest failed";
+                return;
+            }
+            association_control_block_request_tlv->bssid_to_block_client() =
+                network_utils::mac_from_string(hostap_vap.second.mac);
+            association_control_block_request_tlv->association_control() =
+                wfa_map::tlvClientAssociationControlRequest::BLOCK;
+            association_control_block_request_tlv->validity_period_sec() =
+                steering_wait_time_ms / 1000;
+            association_control_block_request_tlv->alloc_sta_list();
+            auto sta_list_block         = association_control_block_request_tlv->sta_list(0);
+            std::get<1>(sta_list_block) = network_utils::mac_from_string(sta_mac);
+            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
+            TASK_LOG(DEBUG) << "sending disallow request for " << sta_mac << " to bssid "
+                            << hostap_vap.second.mac << " id=" << int(id);
+
+            // update bml listeners
+            bml_task::client_disallow_req_available_event client_disallow_event;
+            client_disallow_event.sta_mac    = sta_mac;
+            client_disallow_event.hostap_mac = hostap;
+            tasks.push_event(database.get_bml_task_id(),
+                             bml_task::CLIENT_DISALLOW_REQ_EVENT_AVAILABLE, &client_disallow_event);
         }
-
-        auto association_control_block_request_tlv =
-            cmdu_tx.addClass<wfa_map::tlvClientAssociationControlRequest>();
-        if (!association_control_block_request_tlv) {
-            LOG(ERROR) << "addClass wfa_map::tlvClientAssociationControlRequest failed";
-            return;
-        }
-
-        association_control_block_request_tlv->bssid_to_block_client() =
-            network_utils::mac_from_string(hostap);
-        association_control_block_request_tlv->association_control() =
-            wfa_map::tlvClientAssociationControlRequest::BLOCK;
-        association_control_block_request_tlv->validity_period_sec() = steering_wait_time_ms / 1000;
-        association_control_block_request_tlv->alloc_sta_list();
-        auto sta_list_block         = association_control_block_request_tlv->sta_list(0);
-        std::get<1>(sta_list_block) = network_utils::mac_from_string(sta_mac);
-
-        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
-        TASK_LOG(DEBUG) << "sending disallow request for " << sta_mac << " to " << hostap
-                        << " id=" << int(id);
-
-        // update bml listeners
-        bml_task::client_disallow_req_available_event client_disallow_event;
-        client_disallow_event.sta_mac    = sta_mac;
-        client_disallow_event.hostap_mac = hostap;
-        tasks.push_event(database.get_bml_task_id(), bml_task::CLIENT_DISALLOW_REQ_EVENT_AVAILABLE,
-                         &client_disallow_event);
     }
 
     // Send STEERING request
