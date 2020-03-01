@@ -4384,16 +4384,66 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
     return message_com::send_cmdu(ap_manager_socket, cmdu_tx);
 }
 
-bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+beerocks::message::sWifiChannel slave_thread::channel_selection_select_channel()
 {
-    const auto mid = cmdu_rx.getMessageId();
-    LOG(DEBUG) << "Received CHANNEL_SELECTION_REQUEST_MESSAGE, mid=" << std::dec << int(mid);
+    for (const auto &preference : channel_preferences) {
+        LOG(DEBUG) << "Preference operating class: " << int(preference.preference.oper_class);
+        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+            auto channel         = hostap_params.supported_channels[i];
+            auto operating_class = wireless_utils::get_operating_class_by_channel(
+                channel.channel, static_cast<beerocks::eWiFiBandwidth>(channel.channel_bandwidth));
 
-    bool power_limit_received = false;
-    int switch_required       = 0;
-    int power_limit           = 0;
-    beerocks::message::sWifiChannel channel_to_switch;
+            // Skip channels from other operating classes
+            if (operating_class != preference.preference.oper_class) {
+                continue;
+            }
+            // Skip DFS channels
+            if (channel.is_dfs_channel) {
+                LOG(DEBUG) << "Skip DFS channel " << int(channel.channel);
+                continue;
+            }
+            auto is_restricted =
+                std::find_if(preference.channels.begin(), preference.channels.end(),
+                             [&](const beerocks::message::sWifiChannel &wifi_channel) {
+                                 return (channel.channel == wifi_channel.channel);
+                             });
+            // Skip restricted channels
+            if (is_restricted != preference.channels.end()) {
+                LOG(DEBUG) << "Skip restricted channel " << int(channel.channel);
+                continue;
+            }
+            // If we got this far, we found a candidate channel, so switch to it
+            LOG(DEBUG) << "Selected channel " << int(channel.channel);
+            return channel;
+        }
+    }
 
+    LOG(ERROR) << "Could not find a suitable channel";
+    return beerocks::message::sWifiChannel();
+}
+
+bool slave_thread::channel_selection_current_channel_restricted()
+{
+    for (auto preference : channel_preferences) {
+        auto is_restricted =
+            std::find_if(preference.channels.begin(), preference.channels.end(),
+                         [&](const beerocks::message::sWifiChannel &wifi_channel) {
+                             return hostap_cs_params.channel == wifi_channel.channel;
+                         });
+
+        if (is_restricted != preference.channels.end()) {
+            LOG(INFO) << "Current channel " << int(hostap_cs_params.channel)
+                      << " is restricted, channel switch required";
+            return true;
+        }
+    }
+    LOG(INFO) << "Current channel " << int(hostap_cs_params.channel)
+              << " not restricted, channel switch not required";
+    return false;
+}
+
+bool slave_thread::channel_selection_get_channel_preference(ieee1905_1::CmduMessageRx &cmdu_rx)
+{
     channel_preferences.clear();
 
     for (auto channel_preference_tlv : cmdu_rx.getClassList<wfa_map::tlvChannelPreference>()) {
@@ -4450,7 +4500,13 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
         }
     }
 
-    for (auto tx_power_limit_tlv : cmdu_rx.getClassList<wfa_map::tlvTransmitPowerLimit>()) {
+    return true;
+}
+
+bool slave_thread::channel_selection_get_transmit_power_limit(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                              int &power_limit)
+{
+    for (const auto &tx_power_limit_tlv : cmdu_rx.getClassList<wfa_map::tlvTransmitPowerLimit>()) {
 
         const auto &ruid = tx_power_limit_tlv->radio_uid();
         if (ruid != hostap_params.iface_mac) {
@@ -4458,70 +4514,36 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
             continue;
         }
 
-        power_limit          = tx_power_limit_tlv->transmit_power_limit_dbm();
-        power_limit_received = true;
+        power_limit = tx_power_limit_tlv->transmit_power_limit_dbm();
         LOG(DEBUG) << std::dec << "received tlvTransmitPowerLimit " << (int)power_limit;
         // Only one limit per ruid
-        break;
+        return true;
     }
+    return false;
+}
+
+bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received CHANNEL_SELECTION_REQUEST_MESSAGE, mid=" << std::dec << int(mid);
+
+    if (!channel_selection_get_channel_preference(cmdu_rx)) {
+        LOG(ERROR) << "Failed to update channel preference";
+        return false;
+    }
+
+    int power_limit           = 0;
+    bool power_limit_received = channel_selection_get_transmit_power_limit(cmdu_rx, power_limit);
 
     // No preferences or power limit for current ruid
     if (channel_preferences.empty() && !power_limit_received)
         return true;
 
-    for (auto preference : channel_preferences) {
-        auto is_restricted =
-            std::find_if(preference.channels.begin(), preference.channels.end(),
-                         [&](const beerocks::message::sWifiChannel &wifi_channel) {
-                             return hostap_cs_params.channel == wifi_channel.channel;
-                         });
-
-        if (is_restricted != preference.channels.end()) {
-            LOG(INFO) << "Current channel " << int(hostap_cs_params.channel)
-                      << " is restricted, switch required";
-            switch_required = 1;
-            break;
-        }
-    }
-
     // According to design only Resticted channels should be included in channel selection request
+    auto switch_required = channel_selection_current_channel_restricted();
+    beerocks::message::sWifiChannel channel_to_switch;
     if (switch_required) {
-        for (auto preference : channel_preferences) {
-            LOG(DEBUG) << "Preference operating class: " << int(preference.preference.oper_class);
-            for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
-                auto channel         = hostap_params.supported_channels[i];
-                auto operating_class = wireless_utils::get_operating_class_by_channel(
-                    channel.channel,
-                    static_cast<beerocks::eWiFiBandwidth>(channel.channel_bandwidth));
-
-                // Skip channels from other operating classes
-                if (operating_class != preference.preference.oper_class) {
-                    continue;
-                }
-                // Skip DFS channels
-                if (channel.is_dfs_channel) {
-                    LOG(DEBUG) << "Skip DFS channel " << int(channel.channel);
-                    continue;
-                }
-                auto is_restricted =
-                    std::find_if(preference.channels.begin(), preference.channels.end(),
-                                 [&](const beerocks::message::sWifiChannel &wifi_channel) {
-                                     return (channel.channel == wifi_channel.channel);
-                                 });
-                // Skip restricted channels
-                if (is_restricted != preference.channels.end()) {
-                    LOG(DEBUG) << "Skip restricted channel " << int(channel.channel);
-                    continue;
-                }
-                // If we got this far, we found a candidate channel, so switch to it
-                channel_to_switch = channel;
-                break;
-            }
-            if (channel_to_switch.channel) {
-                LOG(DEBUG) << "Switch to channel " << int(channel_to_switch.channel);
-                break;
-            }
-        }
+        channel_to_switch = channel_selection_select_channel();
     }
 
     // build and send channel response message
