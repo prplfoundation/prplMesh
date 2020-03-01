@@ -41,8 +41,6 @@ void client_steering_task::work()
         tasks.kill_task(prev_task_id);
         database.assign_steering_task_id(sta_mac, id);
 
-        original_hostap_mac = database.get_node_parent(sta_mac);
-
         steer_sta();
 
         state = FINALIZE;
@@ -95,7 +93,7 @@ void client_steering_task::steer_sta()
     }
 
     std::string radio_mac = database.get_node_parent_radio(hostap_mac);
-    auto current_ap_mac   = database.get_node_parent(sta_mac);
+    original_hostap_mac   = database.get_node_parent(sta_mac);
 
     // Send 17.1.27	Client Association Control Request
     if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
@@ -218,7 +216,7 @@ void client_steering_task::steer_sta()
     steering_request_tlv->request_flags().btm_disassociation_imminent_bit = disassoc_imminent;
 
     steering_request_tlv->btm_disassociation_timer_ms() = disassoc_timer_ms;
-    steering_request_tlv->bssid() = network_utils::mac_from_string(current_ap_mac);
+    steering_request_tlv->bssid() = network_utils::mac_from_string(original_hostap_mac);
 
     steering_request_tlv->alloc_sta_list();
     auto sta_list         = steering_request_tlv->sta_list(0);
@@ -231,10 +229,10 @@ void client_steering_task::steer_sta()
         database.get_hostap_operating_class(network_utils::mac_from_string(hostap_mac));
     std::get<1>(bssid_list).target_bss_channel_number = database.get_node_channel(hostap_mac);
 
-    agent_mac = database.get_node_parent_ire(current_ap_mac);
+    agent_mac = database.get_node_parent_ire(original_hostap_mac);
     son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, original_radio_mac);
     TASK_LOG(DEBUG) << "sending steering request, sta " << sta_mac << " steer from AP "
-                    << current_ap_mac << " to AP " << hostap_mac << " channel "
+                    << original_hostap_mac << " to AP " << hostap_mac << " channel "
                     << std::to_string(std::get<1>(bssid_list).target_bss_channel_number)
                     << " disassoc_timer=" << disassoc_timer_ms
                     << " disassoc_imminent=" << disassoc_imminent << " id=" << int(id);
