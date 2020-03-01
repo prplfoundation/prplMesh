@@ -267,8 +267,7 @@ void client_steering_task::handle_event(int event_type, void *obj)
                             << " ,target bssid was " << target_bssid;
         }
     } else if (event_type == STA_DISCONNECTED) {
-        TASK_LOG(DEBUG) << "sta " << sta_mac
-                        << " disconnected after successful steering, proceeding to unblock";
+        TASK_LOG(DEBUG) << "sta " << sta_mac << " disconnected due to steering request";
     } else if (event_type == BSS_TM_REQUEST_REJECTED) {
         TASK_LOG(DEBUG) << "sta " << sta_mac << " rejected BSS_TM request";
         if (disassoc_imminent) {
