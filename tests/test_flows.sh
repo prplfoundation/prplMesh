@@ -363,7 +363,7 @@ test_client_steering_dummy() {
     send_bwl_event ${REPEATER1} wlan2 "EVENT AP-STA-CONNECTED ${sta_mac}"
     dbg "Confirm steering success by client connected"
     check_log ${GATEWAY} controller "steering successful for sta ${sta_mac}"
-    check_log ${GATEWAY} controller "sta ${sta_mac} disconnected after successful steering"
+    check_log ${GATEWAY} controller "sta ${sta_mac} disconnected due to steering request"
     return $check_error
 }
 
