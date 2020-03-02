@@ -985,6 +985,15 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<SSlaveSock
     auto tlvVendorSpecific = cmdu_tx.addClass<ieee1905_1::tlvVendorSpecific>();
     if (!tlvVendorSpecific) {
         LOG(ERROR) << "addClass ieee1905_1::tlvVendorSpecific failed";
+        return false;
+    }
+    if (!tlvVendorSpecific->alloc_payload()) {
+        LOG(ERROR) << "tlvVendorSpecific::alloc_payload failed";
+        return false;
+    }
+    if (!tlvVendorSpecific->finalize()) {
+        LOG(ERROR) << "tlvVendorSpecific::finalize failed";
+        return false;
     }
     tlvVendorSpecific->vendor_oui() = ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL;
 
