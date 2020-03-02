@@ -344,7 +344,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
 
     // Agent sent a VS TLVs. Mark it as prplMesh
     auto tlvVendorSpecific = cmdu_rx.getClass<ieee1905_1::tlvVendorSpecific>();
-    if (tlvVendorSpecific != nullptr) {
+    if (tlvVendorSpecific) {
         database.set_prplMesh(src_mac);
     }
 

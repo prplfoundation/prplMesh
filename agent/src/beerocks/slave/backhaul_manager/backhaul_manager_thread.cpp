@@ -927,9 +927,11 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<SSlaveSock
      * At the moment we mark any prplMesh-compliant device as Intel
      * We may want to change it in future
      */
-    if (!cmdu_tx.add_vs_tlv(ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL)) {
+    auto tlvVendorSpecific = cmdu_tx.addClass<ieee1905_1::tlvVendorSpecific>();
+    if (!tlvVendorSpecific) {
         LOG(ERROR) << "addClass ieee1905_1::tlvVendorSpecific failed";
     }
+    tlvVendorSpecific->vendor_oui() = ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL;
 
     auto tlvAlMacAddressType = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddressType>();
     if (!tlvAlMacAddressType) {
