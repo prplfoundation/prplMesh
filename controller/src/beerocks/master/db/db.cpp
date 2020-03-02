@@ -3591,7 +3591,7 @@ int db::get_node_bw_int(std::shared_ptr<node> &n)
 
 bool db::is_prplMesh(const std::string &mac) {
     auto node = get_node(mac);
-	return node ? node.get()->is_prplmesh : false;
+    return node ? node.get()->is_prplmesh : false;
 }
 
 void db::set_prplMesh(const std::string &mac) {
