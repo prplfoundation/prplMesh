@@ -922,17 +922,6 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<SSlaveSock
     auto p_cmdu_header =
         cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE);
 
-    /*
-     * TODO
-     * At the moment we mark any prplMesh-compliant device as Intel
-     * We may want to change it in future
-     */
-    auto tlvVendorSpecific = cmdu_tx.addClass<ieee1905_1::tlvVendorSpecific>();
-    if (!tlvVendorSpecific) {
-        LOG(ERROR) << "addClass ieee1905_1::tlvVendorSpecific failed";
-    }
-    tlvVendorSpecific->vendor_oui() = ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL;
-
     auto tlvAlMacAddressType = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddressType>();
     if (!tlvAlMacAddressType) {
         LOG(ERROR) << "addClass ieee1905_1::tlvAlMacAddressType failed";
@@ -987,6 +976,17 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<SSlaveSock
     }
     std::get<1>(searchedServiceTuple) =
         wfa_map::tlvSearchedService::eSearchedService::MULTI_AP_CONTROLLER;
+
+    /*
+     * TODO
+     * At the moment we mark any prplMesh-compliant device as Intel
+     * We may want to change it in future
+     */
+    auto tlvVendorSpecific = cmdu_tx.addClass<ieee1905_1::tlvVendorSpecific>();
+    if (!tlvVendorSpecific) {
+        LOG(ERROR) << "addClass ieee1905_1::tlvVendorSpecific failed";
+    }
+    tlvVendorSpecific->vendor_oui() = ieee1905_1::tlvVendorSpecific::eVendorOUI::OUI_INTEL;
 
     LOG(DEBUG) << "sending autoconfig search message, bridge_mac=" << bridge_info.mac;
     return send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
