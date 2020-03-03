@@ -17,14 +17,11 @@ RUN apt-get update \
 RUN useradd -ms /bin/bash openwrt
 
 ####
-## Pre-built OpenWrt
+## Prebuilt OpenWrt and prplMesh dependencies, but not the prplMesh ipk itself
 ####
-FROM openwrt-prerequisites as openwrt-prebuilt
+FROM openwrt-prerequisites as prplmesh-builder
 
 USER openwrt
-
-# optional: intel feed to use.
-ARG INTEL_FEED
 
 # The following args are mandatory, do not expect the build to
 # succeed without specifying them on the command line.
@@ -33,6 +30,13 @@ ARG INTEL_FEED
 ARG OPENWRT_REPOSITORY
 # Which OpenWrt version (commit hash) to use:
 ARG OPENWRT_VERSION
+# The variant to build (nl80211 or dwpal)
+ARG PRPLMESH_VARIANT
+
+# The feed to use to build prplMesh.
+ARG PRPL_FEED
+# optional: intel feed to use.
+ARG INTEL_FEED
 
 # Target to build for (CONFIG_TARGET_ will be prepended).
 # Example: TARGET_SYSTEM=mvebu
@@ -60,58 +64,29 @@ WORKDIR /home/openwrt/openwrt
 
 COPY --chown=openwrt:openwrt configs/base_${BASE_CONFIG}_config /home/openwrt/base_config
 
-RUN if [ -n "$INTEL_FEED" ] ; then \
+# We first install from the intel feed preferably, because
+# it replaces some packages from the "packages" feed.
+# If no intel feed is present, nothing will be done so it's still ok.
+RUN echo "src-git prpl ${PRPL_FEED}" >> feeds.conf.default \
+    && if [ -n "$INTEL_FEED" ] ; then \
         echo "src-git intel $INTEL_FEED" >> feeds.conf.default \
         && scripts/feeds update intel \
-        && scripts/feeds install intel_mips ; \
+        && scripts/feeds install intel_mips \
+        && scripts/feeds install -a -p intel ; \
     fi ;\
-    cp /home/openwrt/base_config .config \
+    scripts/feeds update -a \
+    && scripts/feeds install -a \
+    && cp /home/openwrt/base_config .config \
     && echo "CONFIG_TARGET_${TARGET_SYSTEM}=y" >> .config \
     && echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}=y" >> .config \
     && echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}_${TARGET_PROFILE}=y" >> .config \
+    && echo "CONFIG_PACKAGE_prplmesh${PRPLMESH_VARIANT}=y" >> .config \
     && make defconfig \
     && cat .config \
-    && make -j$(nproc) V=sc
+    && make -j$(nproc) V=sc \
+    && make package/feeds/prpl/prplmesh/clean
     # note that the result from diffconfig.sh with a minimal
     # configuration has the 3 CONFIG_TARGET items we set here, but NOT
     # the individual CONFIG_TARGET_${SUBTARGET} and
     # CONFIG_TARGET_${TARGET_PROFILE}, which means we don't need to
     # set them.
-
-####
-## Prebuilt openwrt and prplmesh dependencies
-####
-
-FROM openwrt-prebuilt as prplmesh-builder
-
-# The following args are mandatory, do not expect the build to
-# succeed without specifying them on the command line.
-#
-# TARGET_PLATFORM_TYPE currently needs to be specified, but will be
-# removed in the future.
-ARG TARGET_PLATFORM_TYPE
-# The feed to use to build prplMesh.
-ARG PRPL_FEED
-# The variant to build (nl80211 or dwpal)
-ARG PRPLMESH_VARIANT
-
-USER openwrt
-
-# We first install from the intel feed preferably, because
-# it replaces some packages from the "packages" feed.
-# If no intel feed is present, nothing will be done so it's still ok.
-RUN echo "src-git prpl ${PRPL_FEED}" >> feeds.conf.default \
-    && scripts/feeds update -a \
-    && scripts/feeds install -a -p intel \
-    && scripts/feeds install -a \
-    && echo "CONFIG_PACKAGE_prplmesh${PRPLMESH_VARIANT}=y" >> .config \
-    && make defconfig \
-    && cat .config \
-    && make package/feeds/prpl/prplmesh/compile -j$(nproc) V=sc \
-    && make package/feeds/prpl/prplmesh/compile -j$(nproc) \
-    && make package/feeds/prpl/prplmesh/clean
-    # For some reason, make has to be run twice because
-    # it still rebuilds some packages on the second run.
-    # On the third run, it's able to compile prplmesh only.
-    # V=sc turns on verbosity for the first command to
-    # make debugging easier.
