@@ -263,14 +263,14 @@ void client_steering_task::handle_event(int event_type, void *obj)
             TASK_LOG(DEBUG) << "aborting task";
             finish();
         }
-    } else if (event_type == BSS_TM_RESPONSE_RECEIVED) {
-        bss_tm_response_received = true;
+    } else if (event_type == BTM_REPORT_RECEIVED) {
+        btm_report_received = true;
     }
 }
 
 void client_steering_task::handle_task_end()
 {
-    if (!bss_tm_response_received) {
+    if (!btm_report_received) {
         TASK_LOG(DEBUG) << "node didn't respond to 11v request, updating failed attempt";
         database.update_node_11v_responsiveness(sta_mac, false);
     }

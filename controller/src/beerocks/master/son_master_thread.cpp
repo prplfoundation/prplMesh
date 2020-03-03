@@ -1025,11 +1025,11 @@ bool master_thread::handle_cmdu_1905_client_steering_btm_report_message(
     std::string client_mac = network_utils::mac_to_string(steering_btm_report->sta_mac());
     uint8_t status_code    = steering_btm_report->btm_status_code();
 
-    LOG(DEBUG) << "BSS_TM_RESP from client_mac=" << client_mac
+    LOG(DEBUG) << "BTM_REPORT from source bssid " << steering_btm_report->bssid() <<  " for client_mac=" << client_mac
                << " status_code=" << (int)status_code;
 
     int steering_task_id = database.get_steering_task_id(client_mac);
-    tasks.push_event(steering_task_id, client_steering_task::BSS_TM_RESPONSE_RECEIVED);
+    tasks.push_event(steering_task_id, client_steering_task::BTM_REPORT_RECEIVED);
     database.update_node_11v_responsiveness(client_mac, true);
 
     if (status_code != 0) {
