@@ -7,10 +7,9 @@
 ###############################################################
 
 scriptdir="$(cd "${0%/*}"; pwd)"
-rootdir="${scriptdir%/*/*}"
+rootdir=${scriptdir%/*/*/*}
 
-. ${rootdir}/tools/docker/functions.sh
-
+. ${scriptdir}/functions.sh
 main() {
     docker image inspect prplmesh-builder >/dev/null 2>&1 || {
         echo "Image prplmesh-build does not exist, creating..."
@@ -19,7 +18,7 @@ main() {
 
     # Default docker arguments
     docker_args="\
-    --workdir=$rootdir --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)} \
+    --workdir=${rootdir}/prplMesh --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)} \
     -e USER=${SUDO_USER:-${USER}} -v ${rootdir}:${rootdir} \
     --entrypoint=./tools/maptools.py \
     "
