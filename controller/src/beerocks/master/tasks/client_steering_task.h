@@ -19,7 +19,7 @@ public:
     enum events {
         STA_CONNECTED,
         STA_DISCONNECTED,
-        BSS_TM_RESPONSE_RECEIVED,
+        BTM_REPORT_RECEIVED,
         BSS_TM_REQUEST_REJECTED,
     };
 
@@ -48,7 +48,7 @@ private:
     bool steering_success  = false;
     bool disassoc_imminent = true;
     const int disassoc_timer_ms;
-    bool bss_tm_response_received = false;
+    bool btm_report_received = false;
     bool steer_restricted         = false;
 
     const static int steering_wait_time_ms = 25000;
