@@ -458,6 +458,30 @@ enum class eChannelScanOpErrCode : uint8_t {
 
 #define CHANNEL_SCAN_INVALID_PARAM -1
 
+/**
+ * @brief channel preference values
+ * 
+ * Based on Multi-AP specification 2.0 Table 23 - channel preference TLV format bits 7-4
+ */
+enum class eChannelPreference : uint8_t {
+    NON_OPERABLE = 0,
+    PREFERRED1,
+    PREFERRED2,
+    PREFERRED3,
+    PREFERRED4,
+    PREFERRED5,
+    PREFERRED6,
+    PREFERRED7,
+    PREFERRED8,
+    PREFERRED9,
+    PREFERRED10,
+    PREFERRED11,
+    PREFERRED12,
+    PREFERRED13,
+    PREFERRED14,
+    INVALID // 0b1111 is reserved
+};
+
 } // namespace beerocks
 
 #endif //_BEEROCKS_DEFINES_H_

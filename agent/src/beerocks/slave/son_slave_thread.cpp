@@ -4424,20 +4424,38 @@ beerocks::message::sWifiChannel slave_thread::channel_selection_select_channel()
 
 bool slave_thread::channel_selection_current_channel_restricted()
 {
-    for (auto preference : channel_preferences) {
+    auto channel         = hostap_cs_params.channel;
+    auto bw              = static_cast<beerocks::eWiFiBandwidth>(hostap_cs_params.bandwidth);
+    auto operating_class = wireless_utils::get_operating_class_by_channel(channel, bw);
+
+    for (const auto &preference : channel_preferences) {
+        // for now we handle only non-operable preference
+        // TODO - handle as part of https://github.com/prplfoundation/prplMesh/issues/725
+        if (static_cast<beerocks::eChannelPreference>(preference.preference.preference) !=
+            beerocks::eChannelPreference::NON_OPERABLE) {
+            LOG(WARNING) << "Ignoring operable channels preference";
+            continue;
+        }
+        // According to Table 23 in the MultiAP Specification, an empty channel list field
+        // indicates that the indicated preference applies to all channels in the operating class.
+        if (preference.preference.oper_class == operating_class && preference.channels.empty()) {
+            LOG(INFO) << "Current operating class " << int(operating_class) << " restricted,"
+                      << "channel switch required";
+            return true;
+        }
         auto is_restricted =
             std::find_if(preference.channels.begin(), preference.channels.end(),
-                         [&](const beerocks::message::sWifiChannel &wifi_channel) {
-                             return hostap_cs_params.channel == wifi_channel.channel;
+                         [&channel](const beerocks::message::sWifiChannel &wifi_channel) {
+                             return channel == wifi_channel.channel;
                          });
 
         if (is_restricted != preference.channels.end()) {
-            LOG(INFO) << "Current channel " << int(hostap_cs_params.channel)
+            LOG(INFO) << "Current channel " << int(channel)
                       << " is restricted, channel switch required";
             return true;
         }
     }
-    LOG(INFO) << "Current channel " << int(hostap_cs_params.channel)
+    LOG(INFO) << "Current channel " << int(channel)
               << " not restricted, channel switch not required";
     return false;
 }
@@ -4469,14 +4487,17 @@ bool slave_thread::channel_selection_get_channel_preference(ieee1905_1::CmduMess
             auto operating_class    = op_class_channels.operating_class();
             ss << "operating class=" << int(operating_class);
 
-            const auto &flags = op_class_channels.flags();
-            auto preference   = flags.preference;
-            auto reason_code  = flags.reason_code;
+            const auto &flags        = op_class_channels.flags();
+            auto preference          = flags.preference;
+            auto reason_code         = flags.reason_code;
+            auto channel_list_length = op_class_channels.channel_list_length();
             ss << ", preference=" << int(preference) << ", reason=" << int(reason_code);
             ss << ", channel_list={";
+            if (channel_list_length == 0) {
+                ss << "}";
+            }
 
             std::vector<beerocks::message::sWifiChannel> channels_list;
-            auto channel_list_length = op_class_channels.channel_list_length();
             for (int ch_idx = 0; ch_idx < channel_list_length; ch_idx++) {
                 auto channel = op_class_channels.channel_list(ch_idx);
                 if (!channel) {
