@@ -331,6 +331,9 @@ class test_flows:
         self.debug("Confirming BTM Report message was received")
         self.check_log(self.gateway, "controller", "CLIENT_STEERING_BTM_REPORT_MESSAGE")
 
+        self.debug("Checking BTM Report source bssid")
+        self.check_log(self.gateway, "controller", "BTM_REPORT from source bssid %s" % self.mac_repeater1_wlan0)
+
         self.debug("Confirming ACK message was received")
         self.check_log(self.repeater1, "agent_wlan0", "ACK_MESSAGE")
 
