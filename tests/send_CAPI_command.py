@@ -159,10 +159,28 @@ class UCCSocket:
             self.send_cmd(command)
             return self.get_reply(verbose)
 
-    def dev_get_parameter(self, parameter: str) -> str:
-        """Call dev_get_parameter and return the parameter, or raise KeyError if it is missing."""
-        reply = self.cmd_reply("dev_get_parameter,program,map,parameter,{}".format(parameter))
-        return reply[parameter]
+    def dev_get_parameter(self, parameter: str, **additional_parameters: str) -> str:
+        """Call dev_get_parameter and return the parameter, or raise KeyError if it is missing.
+
+        Parameters
+        ----------
+        parameter : str
+            The parameter to query. It is the "parameter" argument of the dev_get_parameter command.
+
+        additional_parameters : str
+            Additional keyword arguments are passed as additional parameters to the
+            dev_get_parameter command. This is needed for example to get the "macaddr" parameter,
+            which needs additional "ssid" and "ruid" parameters in the command.
+
+        Returns
+        -------
+        str
+            The value of the requested parameter.
+        """
+        command = "dev_get_parameter,program,map,parameter,{}".format(parameter)
+        if additional_parameters:
+            command += ',' + ','.join([','.join(param) for param in additional_parameters.items()])
+        return self.cmd_reply(command)[parameter]
 
     def dev_send_1905(self, dest: str, message_type: int, *tlvs: tlv) -> int:
         """Call dev_send_1905 to `dest` with CMDU type `message_type` and additional `tlvs`.
