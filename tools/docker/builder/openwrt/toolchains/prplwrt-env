@@ -1,0 +1,34 @@
+#!/bin/sh
+
+ROOT=$(pwd)/prplwrt
+
+echo "ROOT: ${ROOT}"
+
+#
+# Run Docker container
+#
+envvars="
+-e USER_ID=$(id -u)
+-e USER_NAME=$(id -un)
+-e GROUP_ID=$(id -g)
+-e GROUP_NAME=$(id -gn)
+"
+
+volumes="
+-v ${ROOT}:/workspace
+-v /srv/Packages:/srv/Packages
+-v ${HOME}/.ssh:/home/${USER}/.ssh
+"
+if [ -r ${HOME}/.gitconfig ] ; then
+    volumes="${volumes} -v ${HOME}/.gitconfig:/home/${USER}/.gitconfig"
+fi
+
+# Use 'sudo' to run docker container if the host's user is not in 'docker' group
+if [ $(groups | grep -cw docker) = "0" ] ; then
+    sudo="sudo "
+fi
+
+cmd="${sudo}docker run ${envvars} ${volumes} -it --rm prplwrt-build $@"
+echo ${cmd}
+echo
+exec ${cmd}
