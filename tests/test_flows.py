@@ -234,6 +234,33 @@ class test_flows:
         self.check_log(self.repeater1, "agent_wlan0", r".* Controller configuration \(WSC M2 Encrypted Settings\)")
         self.check_log(self.repeater1, "agent_wlan2", r".* Controller configuration \(WSC M2 Encrypted Settings\)")
 
+    def test_ap_config_renew(self):
+        # Regression test: MAC address should be case insensitive
+        mac_repeater1_upper = self.mac_repeater1.upper()
+        # Configure the controller and send renew
+        self.gateway_ucc.cmd_reply("DEV_RESET_DEFAULT")
+        self.gateway_ucc.cmd_reply(
+            "DEV_SET_CONFIG,"
+                "bss_info1,{mac_repeater1_upper} 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1,"
+                "bss_info2,{self.mac_repeater1} 8x Multi-AP-24G-2 0x0020 0x0008 maprocks2 1 0".format(**locals()))
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x000A,
+            tlv(0x01, 0x0006, "{" + self.mac_gateway + "}"),
+            tlv(0x0F, 0x0001, "{0x00}"),
+            tlv(0x10, 0x0001, "{0x00}"))
+
+        # Wait a bit for the renew to complete
+        time.sleep(3)
+
+        self.check_log(self.repeater1, "agent_wlan0", r"Received credentials for ssid: Multi-AP-24G-1 .* bss_type: 2")
+        self.check_log(self.repeater1, "agent_wlan0", r"Received credentials for ssid: Multi-AP-24G-2 .* bss_type: 1")
+        self.check_log(self.repeater1, "agent_wlan2", r".* tear down radio")
+
+        bssid1 = self.repeater1_ucc.dev_get_parameter('macaddr',
+                                                      ruid = '0x' + self.mac_repeater1_wlan0.replace(':', ''),
+                                                      ssid = 'Multi-AP-24G-1')
+        if not bssid1:
+            self.fail("repeater1 didn't configure Multi-AP-24G-1")
+
     def test_channel_selection(self):
         self.debug("Send channel preference query")
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8004)
