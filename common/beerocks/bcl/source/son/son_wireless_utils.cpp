@@ -587,13 +587,11 @@ wireless_utils::get_channel_preferences(const beerocks::message::sWifiChannel su
                 radar_affected_channels.push_back(supported_channels[i]);
             }
         }
+        sChannelPreference pref;
+        pref.reason = wfa_map::cPreferenceOperatingClasses::eReasonCode::
+            OPERATION_DISALLOWED_DUE_TO_RADAR_DETECTION_ON_A_DFS_CHANNEL;
         if (!radar_affected_channels.empty()) {
-            auto pref = beerocks::message::sPreference(
-                {oper_class.first, 0,
-                 wfa_map::cPreferenceOperatingClasses::eReasonCode::
-                     OPERATION_DISALLOWED_DUE_TO_RADAR_DETECTION_ON_A_DFS_CHANNEL});
-
-            preferences.push_back({pref, radar_affected_channels});
+            preferences.push_back(pref);
         }
     }
 

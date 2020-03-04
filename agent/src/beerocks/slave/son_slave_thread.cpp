@@ -2256,7 +2256,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             // on the first channel on the list and sFlags itself.
             // See: https://github.com/prplfoundation/prplMesh/issues/8
 
-            op_class_channels->operating_class() = preference.preference.oper_class;
+            op_class_channels->operating_class() = preference.oper_class;
             if (!op_class_channels->alloc_channel_list(preference.channels.size())) {
                 LOG(ERROR) << "alloc_channel_list() has failed!";
                 return false;
@@ -2269,9 +2269,9 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             }
 
             // Update channel list flags
-            op_class_channels->flags().preference = preference.preference.preference;
+            op_class_channels->flags().preference = preference.preference;
             op_class_channels->flags().reason_code =
-                (wfa_map::cPreferenceOperatingClasses::eReasonCode)preference.preference.reason;
+                (wfa_map::cPreferenceOperatingClasses::eReasonCode)preference.reason;
 
             // Push operating class object to the list of operating class objects
             if (!channel_preference_tlv->add_operating_classes_list(op_class_channels)) {
@@ -4387,14 +4387,14 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
 beerocks::message::sWifiChannel slave_thread::channel_selection_select_channel()
 {
     for (const auto &preference : channel_preferences) {
-        LOG(DEBUG) << "Preference operating class: " << int(preference.preference.oper_class);
+        LOG(DEBUG) << "Preference operating class: " << int(preference.oper_class);
         for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
             auto channel         = hostap_params.supported_channels[i];
             auto operating_class = wireless_utils::get_operating_class_by_channel(
                 channel.channel, static_cast<beerocks::eWiFiBandwidth>(channel.channel_bandwidth));
 
             // Skip channels from other operating classes
-            if (operating_class != preference.preference.oper_class) {
+            if (operating_class != preference.oper_class) {
                 continue;
             }
             // Skip DFS channels
@@ -4431,14 +4431,14 @@ bool slave_thread::channel_selection_current_channel_restricted()
     for (const auto &preference : channel_preferences) {
         // for now we handle only non-operable preference
         // TODO - handle as part of https://github.com/prplfoundation/prplMesh/issues/725
-        if (static_cast<beerocks::eChannelPreference>(preference.preference.preference) !=
-            beerocks::eChannelPreference::NON_OPERABLE) {
+        if (preference.preference !=
+            wfa_map::cPreferenceOperatingClasses::ePreference::NON_OPERABLE) {
             LOG(WARNING) << "Ignoring operable channels preference";
             continue;
         }
         // According to Table 23 in the MultiAP Specification, an empty channel list field
         // indicates that the indicated preference applies to all channels in the operating class.
-        if (preference.preference.oper_class == operating_class && preference.channels.empty()) {
+        if (preference.oper_class == operating_class && preference.channels.empty()) {
             LOG(INFO) << "Current operating class " << int(operating_class) << " restricted,"
                       << "channel switch required";
             return true;
@@ -4515,9 +4515,12 @@ bool slave_thread::channel_selection_get_channel_preference(ieee1905_1::CmduMess
                 channels_list.push_back(wifi_channel);
             }
             LOG(DEBUG) << ss.str();
-            auto pref =
-                beerocks::message::sPreference({operating_class, preference, uint8_t(reason_code)});
-            channel_preferences.push_back({pref, channels_list});
+            wireless_utils::sChannelPreference pref;
+            pref.oper_class = operating_class;
+            pref.preference = preference;
+            pref.reason     = uint8_t(reason_code);
+            pref.channels   = channels_list;
+            channel_preferences.push_back(pref);
         }
     }
 
