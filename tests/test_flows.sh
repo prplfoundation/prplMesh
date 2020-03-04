@@ -13,7 +13,7 @@
 # since it uses all radios. A better solution would of course be to properly configure all APs,
 # but just doing the optimal_path_dummy test first is simpler for the time being.
 # FIXME optimal_path_dummy temporarily disabled since it's broken
-ALL_TESTS="topology ap_config_renew ap_config_bss_tear_down
+ALL_TESTS="topology ap_config_bss_tear_down
            client_capability_query
            client_steering_dummy client_association_dummy client_steering_policy client_association
            higher_layer_data_payload_trigger"
@@ -113,31 +113,6 @@ send_bwl_event() {
     # $2: radio to send to (wlan0, wlan2)
     # $3: event string
     check docker exec $1 sh -c 'echo '"$3"' > /tmp/$USER/beerocks/'$2'/EVENT'
-}
-
-test_ap_config_renew() {
-    status "test autoconfig renew"
-
-    # Regression test: MAC address should be case insensitive
-    MAC_AGENT1=$(echo $mac_agent1 | tr a-z A-Z)
-    # Configure the controller and send renew
-    send_CAPI_command ${GATEWAY} "DEV_RESET_DEFAULT" $redirect
-    send_CAPI_command ${GATEWAY} "DEV_SET_CONFIG,bss_info1,$MAC_AGENT1 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1,bss_info2,$mac_agent1 8x Multi-AP-24G-2 0x0020 0x0008 maprocks2 1 0" $redirect
-    gw_mac_without_colons="$(printf $mac_gateway | tr -d :)"
-    send_CAPI_1905 ${GATEWAY} $mac_agent1 0x000A "tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}"
-
-    # Wait a bit for the renew to complete
-    sleep 3
-
-    check_log ${REPEATER1} agent_wlan0 "Received credentials for ssid: Multi-AP-24G-1 .* bss_type: 2"
-    check_log ${REPEATER1} agent_wlan0 "Received credentials for ssid: Multi-AP-24G-2 .* bss_type: 1"
-    check_log ${REPEATER1} agent_wlan2 ".* tear down radio"
-
-    mac_agent1_wlan0_hex=0x$(echo $mac_agent1_wlan0 | tr -d :)
-    send_CAPI_command ${REPEATER1} "dev_get_parameter,program,map,ruid,${mac_agent1_wlan0_hex},ssid,Multi-AP-24G-1,parameter,macaddr"
-    check [ "$capi_command_reply" = "status,COMPLETE,macaddr,$mac_agent1_wlan0" ];
-
-    return $check_error
 }
 
 test_ap_config_bss_tear_down() {
@@ -504,7 +479,6 @@ usage() {
     echo ""
     echo "  positional params:"
     echo "      topology - Topology discovery test"
-    echo "      ap_config_renew - AP configuration renew test"
     echo "      ap_config_bss_tear_down - AP configuration BSS Tear Down test"
     echo "      client_steering_dummy - Client Steering using dummy bwl"
     echo "      optimal_path_dummy - Optimal Path using dummy bwl"
