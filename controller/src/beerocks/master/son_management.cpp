@@ -1957,7 +1957,7 @@ void son_management::handle_bml_message(Socket *sd,
         // Clear flags
         auto result_status = eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
         auto op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
-        
+
         // Get scan statuses
         auto scan_in_progress = database.get_channel_scan_in_progress(radio_mac, is_single_scan);
         if (scan_in_progress) {
@@ -2003,7 +2003,7 @@ void son_management::handle_bml_message(Socket *sd,
             LOG(ERROR) << "Something went wrong, sending CMDU with error code: ["
                        << (int)op_error_code << "] & result status [" << (int)result_status << "].";
             auto response = gen_new_results_response();
-            send_results_response(response,result_status,op_error_code);
+            send_results_response(response, result_status, op_error_code);
 
             break;
         }
@@ -2012,7 +2012,8 @@ void son_management::handle_bml_message(Socket *sd,
         if (scan_results_size == 0) {
             LOG(DEBUG) << "no scan results are available";
             auto response = gen_new_results_response();
-            send_results_response(response,eChannelScanErrCode::CHANNEL_SCAN_RESULTS_EMPTY,op_error_code);
+            send_results_response(response, eChannelScanErrCode::CHANNEL_SCAN_RESULTS_EMPTY,
+                                  op_error_code);
             break;
         }
 
@@ -2025,13 +2026,13 @@ void son_management::handle_bml_message(Socket *sd,
             if (max_size < sizeof(dump)) {
 
                 LOG(DEBUG) << "Reached limit on CMDU, Sending..";
-                send_results_response(response,result_status,op_error_code, false);
+                send_results_response(response, result_status, op_error_code, false);
                 LOG(DEBUG) << "Creating new CMDU";
                 response = gen_new_results_response();
                 max_size = cmdu_tx.getMessageBuffLength() - reserved_size;
-            } 
+            }
             //LOG(DEBUG) << "Allocating space";
-            if(!response->alloc_results()) {
+            if (!response->alloc_results()) {
                 LOG(ERROR) << "Failed buffer allocation";
                 op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
                 break;
@@ -2039,17 +2040,17 @@ void son_management::handle_bml_message(Socket *sd,
             max_size -= sizeof(dump);
 
             auto num_of_res = response->results_size();
-            if(!std::get<0>(response->results(num_of_res - 1))) {
+            if (!std::get<0>(response->results(num_of_res - 1))) {
                 LOG(ERROR) << "Failed accessing results buffer";
                 op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
                 break;
             }
             auto &dump_msg = std::get<1>(response->results(num_of_res - 1));
 
-            dump_msg = dump;         
+            dump_msg = dump;
         }
         LOG(DEBUG) << "Finished all results, Sending final CMDU";
-        send_results_response(response,result_status,op_error_code, true);
+        send_results_response(response, result_status, op_error_code, true);
         break;
     }
     case beerocks_message::ACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST: {

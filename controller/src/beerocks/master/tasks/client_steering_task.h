@@ -49,7 +49,7 @@ private:
     bool disassoc_imminent = true;
     const int disassoc_timer_ms;
     bool btm_report_received = false;
-    bool steer_restricted         = false;
+    bool steer_restricted    = false;
 
     const static int steering_wait_time_ms = 25000;
 
