@@ -38,6 +38,7 @@ clang-format:
   artifacts:
     paths:
       - correct-formatting.patch
+    when: on_failure
 
 build-in-docker:
   extends: .in-prplmesh-builder
