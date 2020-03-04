@@ -15,6 +15,7 @@
 #include <tlvf/WSC/eWscAuth.h>
 #include <tlvf/WSC/eWscEncr.h>
 #include <tlvf/WSC/eWscVendorExt.h>
+#include <tlvf/wfa_map/tlvChannelPreference.h>
 
 #include <iostream>
 #include <list>
@@ -100,7 +101,9 @@ public:
     } sPhyRateBitRateEntry;
 
     typedef struct {
-        beerocks::message::sPreference preference;
+        uint8_t oper_class = 0;
+        uint8_t preference = wfa_map::cPreferenceOperatingClasses::ePreference::NON_OPERABLE;
+        uint8_t reason     = wfa_map::cPreferenceOperatingClasses::eReasonCode::UNSPECIFIED;
         std::vector<beerocks::message::sWifiChannel> channels;
     } sChannelPreference;
 
