@@ -68,6 +68,25 @@ class cPreferenceOperatingClasses : public BaseClass
         explicit cPreferenceOperatingClasses(std::shared_ptr<BaseClass> base, bool parse = false);
         ~cPreferenceOperatingClasses();
 
+        enum ePreference {
+            NON_OPERABLE = 0x0,
+            PREFERRED1 = 0x1,
+            PREFERRED2 = 0x2,
+            PREFERRED3 = 0x3,
+            PREFERRED4 = 0x4,
+            PREFERRED5 = 0x5,
+            PREFERRED6 = 0x6,
+            PREFERRED7 = 0x7,
+            PREFERRED8 = 0x8,
+            PREFERRED9 = 0x9,
+            PREFERRED10 = 0xa,
+            PREFERRED11 = 0xb,
+            PREFERRED12 = 0xc,
+            PREFERRED13 = 0xd,
+            PREFERRED14 = 0xe,
+            RESERVED = 0xf,
+        };
+        
         enum eReasonCode {
             UNSPECIFIED = 0x0,
             PROXIMATE_NON_802_11_INTERFERER_IN_LOCAL_ENVIRONMENT = 0x1,
