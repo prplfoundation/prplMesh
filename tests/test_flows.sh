@@ -13,10 +13,12 @@
 # since it uses all radios. A better solution would of course be to properly configure all APs,
 # but just doing the optimal_path_dummy test first is simpler for the time being.
 # FIXME optimal_path_dummy temporarily disabled since it's broken
-ALL_TESTS="topology ap_config_renew ap_config_bss_tear_down
-           client_capability_query
-           client_steering_dummy client_association_dummy client_steering_policy client_association
-           higher_layer_data_payload_trigger"
+#ALL_TESTS="topology ap_config_renew ap_config_bss_tear_down
+#           client_capability_query
+#           client_steering_dummy client_association_dummy client_steering_policy client_association
+#           higher_layer_data_payload_trigger maut_onboard_init"
+
+ALL_TESTS="maut_onboard_init"
 
 scriptdir="$(cd "${0%/*}"; pwd)"
 rootdir="${scriptdir%/*}"
@@ -74,7 +76,7 @@ send_CAPI_command() {
     [ -z "$ip" ] && return 1
     port="$(container_CAPI_port "$1")"
     [ -z "$port" ] && return 1
-    dbg "Sending to $ip:$port. Command: $2"
+    echo "Sending to $ip:$port. Command: $2"
     capi_command_result=$(mktemp)
     [ -z "$capi_command_result" ] && { err "Failed to create temp file"; return 1; }
     trap "rm -f $capi_command_result" EXIT
@@ -447,6 +449,42 @@ test_topology() {
     check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x0002
     dbg "Confirming topology query was received"
     check_log ${REPEATER1} agent "TOPOLOGY_QUERY_MESSAGE"
+    return $check_error
+}
+
+test_maut_onboard_init() {
+    status "test maut multi-ap onboarding and init"
+
+    # Regression test: MAC address should be case insensitive
+    MAC_AGENT1=$(echo $mac_agent1 | tr a-z A-Z)
+    gw_mac_without_colons="$(printf $mac_gateway | tr -d :)"
+    # Configure the controller
+    send_CAPI_command ${GATEWAY} "DEV_RESET_DEFAULT" $redirect
+    # Wait TIME_INIT - 2 minutes
+    sleep 12 #0
+
+    send_CAPI_command ${GATEWAY} "DEV_SET_CONFIG,bss_info1,$MAC_AGENT1 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1,bss_info2,$mac_agent1 8x Multi-AP-24G-2 0x0020 0x0008 maprocks2 1 0" $redirect
+    # Wait TIME_LOAD_BSS - 5 seconds
+    sleep 5
+
+    #configuring MAUT to default values
+    send_CAPI_command ${REPEATER1} "dev_set_config,name,PrplMeshCTTDUT,program,map,backhaul,eth"
+    sleep 5
+
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x8006 "tlv_type1,0x8B,tlv_length1,0x005F,tlv_value1,{0x${gw_mac_without_colons} 0x14}\
+    ,tlv_type2,0x8D,tlv_length2,0x0007,tlv_value2,{0x${gw_mac_without_colons} 0x14}\
+    ,tlv_type3,0x8B,tlv_length3,0x004C,tlv_value3,{0x${gw_mac_without_colons} 0x14}\
+    ,tlv_type4,0x8D,tlv_length4,0x0007,tlv_value4,{0x${gw_mac_without_colons} 0x14}"
+    sleep 30
+
+    # Send topology query to MAUT
+    check send_CAPI_1905 ${GATEWAY} $mac_agent1 0x0002
+    sleep 10
+
+    mac_agent1_wlan0_hex=0x$(echo $mac_agent1_wlan0 | tr -d :)
+    send_CAPI_command ${REPEATER1} "dev_get_parameter,program,map,ruid,${mac_agent1_wlan0_hex},ssid,Multi-AP-24G-1,parameter,macaddr"
+    check [ "$capi_command_reply" = "status,COMPLETE,macaddr,$mac_agent1_wlan0" ];
+
     return $check_error
 }
 
