@@ -219,7 +219,7 @@ class mapbuild(object):
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='build')):
         parser.help = "multiap_sw standalone build module"
-        parser.add_argument('modules', choices=['all', 'map', 'dep'] + dep_modules, nargs='+', help='module[s] to build')
+        parser.add_argument('modules', choices=['all', 'map', 'dep'] + dep_modules, nargs='*', default='map', help='module[s] to build')
         parser.add_argument('-c', '--commands', choices=build_targets, nargs='+', default=['make'], help="build command (default is clean+make)")
         parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
         parser.add_argument("--native", "-n", action="store_true", help="Build native (not cross compile - ignore external_toolchain.cfg)")
