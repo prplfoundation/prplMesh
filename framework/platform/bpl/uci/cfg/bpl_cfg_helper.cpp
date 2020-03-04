@@ -11,6 +11,8 @@
 #include "bpl_cfg_helper.h"
 #include "bpl_cfg_uci.h"
 
+#include "mapf/common/logger.h"
+
 namespace beerocks {
 namespace bpl {
 
@@ -66,20 +68,46 @@ int cfg_get_prplmesh_radio_param(int radio_id, const std::string &radio_param, c
     return cfg_uci_get(path, buf, buf_len);
 }
 
-int cfg_get_prplmesh_param_int(const std::string &param, int *buf)
+static int cfg_get_prplmesh_param_int_raw(const std::string &param, int *buf)
 {
     int status;
     char val[MAX_UCI_BUF_LEN] = "";
 
     status = cfg_get_prplmesh_param(param, val, MAX_UCI_BUF_LEN);
     if (status == RETURN_ERR)
-        return RETURN_ERR;
+        return RETURN_ERR_NOT_FOUND;
 
     status = sscanf_s(val, "%d", buf);
     if (status != 1)
-        return RETURN_ERR;
+        return RETURN_ERR_PARSE;
 
     return RETURN_OK;
+}
+
+int cfg_get_prplmesh_param_int(const std::string &param, int *buf)
+{
+    int status = cfg_get_prplmesh_param_int_raw(param, buf);
+    return status == RETURN_OK ? RETURN_OK : RETURN_ERR;
+}
+
+int cfg_get_prplmesh_param_int_default(const std::string &param, int *buf, int default_value)
+{
+    int status = cfg_get_prplmesh_param_int_raw(param, buf);
+    switch (status) {
+    case RETURN_OK:
+        return RETURN_OK;
+    case RETURN_ERR_NOT_FOUND:
+        *buf = default_value;
+        MAPF_INFO(__FUNCTION__ << ": missing parameter '" << param
+                               << "', using default: " << default_value);
+        return RETURN_OK;
+    case RETURN_ERR_PARSE:
+        MAPF_ERR(__FUNCTION__ << ": can't parse value for '" << param << "'");
+        return RETURN_ERR;
+    default:
+        MAPF_ERR(__FUNCTION__ << ": cfg_get_prplmesh_param_int_raw returned unexpected value");
+        return RETURN_ERR;
+    }
 }
 
 int cfg_get_channel(const std::string &interface_name, int *channel)

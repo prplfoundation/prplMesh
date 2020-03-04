@@ -84,6 +84,13 @@ namespace bpl {
 #define BPL_GW_DB_MANAGE_MODE_LEN (127 + 1) /* Maximal length of MANAGEMENT MODE string */
 #define BPL_GW_DB_OPER_MODE_LEN (127 + 1)   /* Maximal length of OPERATING MODE string */
 
+/* Default values */
+#define DEFAULT_STOP_ON_FAILURE_ATTEMPTS 1
+#define DEFAULT_RDKB_EXTENSIONS 0
+#define DEFAULT_BAND_STEERING 1
+#define DEFAULT_DFS_REENTRY 1
+#define DEFAULT_CLIENT_ROAMING 1
+
 /****************************************************************************/
 /******************************* Structures *********************************/
 /****************************************************************************/
