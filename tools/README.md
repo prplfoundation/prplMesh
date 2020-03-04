@@ -45,14 +45,9 @@ subcommand help:
 ./maptools.py <subcommand> --help
 ```
 ### Examples
-build all (default):
+build map (default):
 ```
-./maptools.py build all
-```
-
-build only map modules:
-```
-./maptools.py build map
+./maptools.py build
 ```
 
 build only dep modules(nng, safeclib, dwpal):
@@ -60,24 +55,24 @@ build only dep modules(nng, safeclib, dwpal):
 ./maptools.py build dep -n
 ```
 
-Build all with nng messaging library (needs to have nng installed):
+Build map with nng messaging library (needs to have nng installed):
 ```
-./maptools.py build all -f MSGLIB=nng
+./maptools.py build map -f MSGLIB=nng
 ```
 
 Clean and rebuild controller only:
 ```
-./maptools.py build controller -c clean make
+./maptools.py build map -c clean make
 ```
 
 Distclean (removes ../build folder):
 ```
-./maptools.py build all -c distclean
+./maptools.py build map -c clean
 ```
 
 To build with ninja (need to install the ninja tool in your distro first):
 ```
-./maptools.py build all -G Ninja
+./maptools.py build map -G Ninja
 ```
 Other generators (eclipse, codeblocks, ...) are available as well. Use
 `cmake -G` to list them. Note that the `--make-verbose` option only works with
