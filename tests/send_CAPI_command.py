@@ -15,6 +15,54 @@ class CAPIReply(Enum):
     INVALID = "status,INVALID"
     ERROR = "status,ERROR"
 
+class tlv:
+    """Representation of an 1905.1 TLV."""
+
+    def __init__(self, type_: int, length: int, value: str):
+        """A TLV has a type, a length and a value.
+
+        Parameters
+        ----------
+        type_ : int
+            The TLV type.
+
+        length : int
+            The length of the TLV. This must correspond to the length of `value`.
+
+        value : str
+            The TLV value, as a string. It must be formatted according to the UCC rules, i.e. with
+            curly braces and hexadecimal numbers.
+        """
+        self.type = type_
+        self.length = length
+        self.value = value
+
+    def format(self, tlv_num: int = 0) -> str:
+        """Format the TLV for the dev_send_1905 CAPI command.
+
+        Parameters
+        ----------
+        tlv_num : int
+            The TLV counter. In the CAPI command, if there are multiple TLVs, they must be numbered
+            starting from 1. `tlv_num` is that number. If there is only a single TLV, set it to
+            zero.
+
+        Returns
+        -------
+        str
+            The string representation of the TLV according to CAPI definition.
+        """
+        if tlv_num:
+            tlv_num = str(tlv_num)
+        else:
+            tlv_num = ''
+        return "tlv_type{tlv_num},0x{tlv_type:02x}," \
+                "tlv_length{tlv_num},0x{tlv_length:04x}," \
+                "tlv_value{tlv_num},{tlv_value}".format(tlv_num = tlv_num,
+                                                        tlv_type = self.type,
+                                                        tlv_length = self.length,
+                                                        tlv_value = self.value)
+
 
 class UCCSocket:
     """Abstraction of the target listening socket.
@@ -115,7 +163,7 @@ class UCCSocket:
         reply = self.cmd_reply("dev_get_parameter,program,map,parameter,{}".format(parameter))
         return reply[parameter]
 
-    def dev_send_1905(self, dest: str, message_type: int, *tlvs: Tuple[int, int, str]) -> int:
+    def dev_send_1905(self, dest: str, message_type: int, *tlvs: tlv) -> int:
         """Call dev_send_1905 to `dest` with CMDU type `message_type` and additional `tlvs`.
 
         Parameters
@@ -126,29 +174,18 @@ class UCCSocket:
         message_type : int
             The message type of the 1905.1 message to be sent, as an integer.
 
-        tlvs : Tuple[int, int, str]
-            A list of TLV descriptions. Each TLV is a 3-tuple (type, length, value). The type and
-            length are given as integers. The value is given as a string, formatted according to the
-            UCC rules, i.e. with curly braces and hexadecimal numbers.
+        tlvs : tlv
+            Additional arguments are the TLVs in the 1905.1 message, as `tlv` objects.
 
         Returns
         -------
         The MID of the message, as an integer.
         """
-        def format_tlv(tlv_num, tlv_type, tlv_length, tlv_value):
-            if tlv_num:
-                tlv_num = str(tlv_num)
-            else:
-                tlv_num = ''
-            return "tlv_type{tlv_num},0x{tlv_type:02x}," \
-                   "tlv_length{tlv_num},0x{tlv_length:04x}," \
-                   "tlv_value{tlv_num},{tlv_value}".format(**locals())
-
         cmd = "DEV_SEND_1905,DestALid,{dest:s},MessageTypeValue,0x{message_type:04x}".format(**locals())
         if len(tlvs) > 1:
-            cmd += ',' + ','.join([format_tlv(tlv_num + 1, *tlv) for (tlv_num, tlv) in enumerate(tlvs)])
+            cmd += ',' + ','.join([tlv.format(tlv_num + 1) for (tlv_num, tlv) in enumerate(tlvs)])
         elif tlvs:
-            cmd += ',' + format_tlv('', *tlvs[0])
+            cmd += ',' + tlvs[0].format()
         return int(self.cmd_reply(cmd)["mid"], base=0)
 
 
