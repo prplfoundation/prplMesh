@@ -2274,13 +2274,13 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         // Initialize the message
         memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE));
 
-        char MACAddress[MAC_ADDR_SIZE] = {0};
-        int status_code                = 0;
+        char MACAddress[MAC_ADDR_SIZE]                      = {0};
+        int status_code                                     = 0;
         char vap_name[beerocks::message::IFACE_NAME_LENGTH] = {0};
-        size_t numOfValidArgs[4]       = {0};
-        FieldsToParse fieldsToParse[]  = {
+        size_t numOfValidArgs[4]                            = {0};
+        FieldsToParse fieldsToParse[]                       = {
             {NULL /*opCode*/, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0},
-            {(void*) vap_name, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL,
+            {(void *)vap_name, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL,
              beerocks::message::IFACE_NAME_LENGTH},
             {(void *)MACAddress, &numOfValidArgs[2], DWPAL_STR_PARAM, NULL, sizeof(MACAddress)},
             {(void *)&status_code, &numOfValidArgs[3], DWPAL_INT_PARAM, "status_code=", 0},
@@ -2288,7 +2288,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
         if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse,
-                                         sizeof(vap_name) + sizeof(MACAddress) + sizeof(status_code)) == DWPAL_FAILURE) {
+                                         sizeof(vap_name) + sizeof(MACAddress) +
+                                             sizeof(status_code)) == DWPAL_FAILURE) {
             LOG(ERROR) << "DWPAL parse error ==> Abort";
             return false;
         }

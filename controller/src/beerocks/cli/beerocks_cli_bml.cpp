@@ -2012,8 +2012,8 @@ int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_res
 
     uint8_t status             = 0;
     unsigned int results_count = max_results_size;
-    int ret                    = bml_get_dcs_scan_results(ctx, radio_mac.c_str(), results,
-                                                          &results_count, &status, is_single_scan);
+    int ret = bml_get_dcs_scan_results(ctx, radio_mac.c_str(), results, &results_count, &status,
+                                       is_single_scan);
 
     if (ret == BML_RET_OK) {
         if (results_count > max_results_size) {
@@ -2066,8 +2066,7 @@ int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_res
     return 0;
 }
 
-template <typename T>
-const std::string cli_bml::string_from_int_array(T *arr, size_t arr_max_size)
+template <typename T> const std::string cli_bml::string_from_int_array(T *arr, size_t arr_max_size)
 {
     std::stringstream ss;
     if (arr) {

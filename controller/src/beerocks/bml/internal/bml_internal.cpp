@@ -1005,8 +1005,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                     LOG(DEBUG) << "Received response ["
                                << "opt code: " << int(op_error_code)
                                << ", status: " << int(*m_scan_results_status)
-                               << ", size: " << int(scan_results_size)
-                               << "].";
+                               << ", size: " << int(scan_results_size) << "].";
 
                     if (scan_results_size > 0) {
                         LOG(TRACE) << "currently " << m_scan_results->size() << " cached results, "
