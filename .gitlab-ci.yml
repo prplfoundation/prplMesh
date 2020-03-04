@@ -33,7 +33,7 @@ clang-format:
         ret=$?
         echo "Inconsistent formatting, please apply patch from artifacts"
         git diff > correct-formatting.patch
-        exit $?
+        exit $ret
       }
   artifacts:
     paths:
