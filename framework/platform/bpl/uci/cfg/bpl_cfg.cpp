@@ -113,9 +113,11 @@ int cfg_get_certification_mode()
 int cfg_get_stop_on_failure_attempts()
 {
     int retVal = -1;
-    if (cfg_get_prplmesh_param_int("stop_on_failure_attempts", &retVal) == RETURN_ERR) {
-        MAPF_ERR("cfg_get_stop_on_failure_attempts: Failed to read stop_on_failure_attempts "
-                 "parameter\n");
+    if (cfg_get_prplmesh_param_int_default("stop_on_failure_attempts", &retVal,
+                                           DEFAULT_STOP_ON_FAILURE_ATTEMPTS) == RETURN_ERR) {
+
+        MAPF_INFO("cfg_get_stop_on_failure_attempts: Failed to read stop_on_failure_attempts "
+                  "parameter\n");
         return RETURN_ERR;
     }
     return retVal;
@@ -134,8 +136,9 @@ int cfg_is_onboarding()
 int cfg_get_rdkb_extensions()
 {
     int retVal = -1;
-    if (cfg_get_prplmesh_param_int("rdkb_extensions", &retVal) == RETURN_ERR) {
-        printf("cfg_get_rdkb_extensions: Failed to read RDKB Extensions parameter\n");
+    if (cfg_get_prplmesh_param_int_default("rdkb_extensions", &retVal, DEFAULT_RDKB_EXTENSIONS) ==
+        RETURN_ERR) {
+        MAPF_INFO("cfg_get_rdkb_extensions: Failed to read RDKB Extensions parameter\n");
         return RETURN_ERR;
     }
     return retVal;
@@ -144,8 +147,9 @@ int cfg_get_rdkb_extensions()
 int cfg_get_band_steering()
 {
     int retVal = -1;
-    if (cfg_get_prplmesh_param_int("band_steering", &retVal) == RETURN_ERR) {
-        MAPF_ERR("cfg_get_band_steering: Failed to read BandSteering parameter\n");
+    if (cfg_get_prplmesh_param_int_default("band_steering", &retVal, DEFAULT_BAND_STEERING) ==
+        RETURN_ERR) {
+        MAPF_INFO("cfg_get_band_steering: Failed to read BandSteering parameter\n");
         return RETURN_ERR;
     }
     return retVal;
@@ -154,8 +158,9 @@ int cfg_get_band_steering()
 int cfg_get_dfs_reentry()
 {
     int retVal = -1;
-    if (cfg_get_prplmesh_param_int("dfs_reentry", &retVal) == RETURN_ERR) {
-        printf("cfg_get_dfs_reentry: Failed to read DfsReentry parameter\n");
+    if (cfg_get_prplmesh_param_int_default("dfs_reentry", &retVal, DEFAULT_DFS_REENTRY) ==
+        RETURN_ERR) {
+        MAPF_INFO("cfg_get_dfs_reentry: Failed to read DfsReentry parameter\n");
         return RETURN_ERR;
     }
     return retVal;
@@ -164,8 +169,10 @@ int cfg_get_dfs_reentry()
 int cfg_get_client_roaming()
 {
     int retVal = -1;
-    if (cfg_get_prplmesh_param_int("client_roaming", &retVal) == RETURN_ERR) {
-        MAPF_ERR("cfg_get_client_roaming: Failed to read ClientRoaming parameter\n");
+    if (cfg_get_prplmesh_param_int_default("client_roaming", &retVal, DEFAULT_CLIENT_ROAMING) ==
+        RETURN_ERR) {
+
+        MAPF_INFO("cfg_get_client_roaming: Failed to read ClientRoaming parameter\n");
         return RETURN_ERR;
     }
     return retVal;

@@ -61,6 +61,17 @@ int cfg_get_prplmesh_radio_param(int radio_id, const std::string &radio_param, c
 int cfg_get_prplmesh_param_int(const std::string &param, int *buf);
 
 /**
+ * Returns the value of requested integer type param from DB
+ *
+ * @param [in] param prplmesh param key string
+ * @param [in] default_value value to return if parameter is missing in DB
+ * @param [out] buf buffer to get value of requested param
+ *
+ * @return 0 on success or -1 on error.
+ **/
+int cfg_get_prplmesh_param_int_default(const std::string &param, int *buf, int default_value);
+
+/**
  * Returns the value of ACS from DB
  *
  * @param [in] interface_name interface name string

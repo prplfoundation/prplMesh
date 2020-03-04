@@ -39,6 +39,7 @@
 #define DUMMY_VAP_OFFSET 100
 #define MAX_NUM_OF_RADIOS 3
 
+#define RETURN_ERR_PARSE -3
 #define RETURN_ERR_NOT_FOUND -2
 #define RETURN_ERR -1
 #define RETURN_OK 0
