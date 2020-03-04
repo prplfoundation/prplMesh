@@ -2,34 +2,18 @@
 ---
 _include: {
   beerocks/tlvf/beerocks_message_action.h,
-  bcl/beerocks_message_structs.h,
+  beerocks/tlvf/beerocks_message_enums.h,
+  tlvf/common/sMacAddr.h,
 }
 
 _namespace: beerocks_message
-
-eWiFiSec:
-  _type: enum
-  _enum_storage: uint8_t
-  eWiFiSec_None: 0
-  eWiFiSec_WEP64: 1
-  eWiFiSec_WEP128: 2
-  eWiFiSec_WPA_PSK: 3
-  eWiFiSec_WPA2_PSK: 4
-  eWiFiSec_WPA_WPA2_PSK: 5
-
-eDHCPOp:
-  _type: enum
-  _enum_storage: uint8_t
-  eDHCPOp_Add: 0
-  eDHCPOp_Del: 1
-  eDHCPOp_Old: 2
 
 sVapInfo:
   _type: struct
   mac: sMacAddr 
   ssid: 
     _type: char 
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: [ WIFI_SSID_MAX_LENGTH ]
   backhaul_vap: uint8_t 
 
 sSonConfig:
@@ -55,22 +39,22 @@ sPlatformSettings:
   _type: struct
   front_ssid:
     _type: char    
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: [ WIFI_SSID_MAX_LENGTH ]
   front_pass:
     _type: char    
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+    _length: [ WIFI_PASS_MAX_LENGTH ]
   front_security_type:
     _type: char    
-    _length: [ "beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH" ]
+    _length: [ WIFI_SECURITY_TYPE_MAX_LENGTH ]
   back_ssid:
     _type: char    
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: [ WIFI_SSID_MAX_LENGTH ]
   back_pass:
     _type: char    
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+    _length: [ WIFI_PASS_MAX_LENGTH ]
   back_security_type:
     _type: char    
-    _length: [ "beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH" ]
+    _length: [ WIFI_SECURITY_TYPE_MAX_LENGTH ]
   onboarding: uint8_t 
   local_master: uint8_t 
   local_gw: uint8_t 
@@ -112,7 +96,7 @@ sApSetRestrictedFailsafe:
   failsafe_channel_bandwidth: uint8_t 
   restricted_channels:
     _type: uint8_t 
-    _length: [ "beerocks::message::RESTRICTED_CHANNEL_LENGTH" ]
+    _length: [ RESTRICTED_CHANNEL_LENGTH ]
   vht_center_frequency: uint16_t
 
 sApChannelSwitch:
@@ -176,16 +160,16 @@ sConfigVapInfo:
     _comment: # al_mac    
   ruid:
     _type: uint8_t
-    _length: [ "beerocks::net::MAC_ADDR_LEN" ]       
+    _length: [ "beerocks::net::MAC_ADDR_LEN" ]
   bssid:
     _type: uint8_t
-    _length: [ "beerocks::net::MAC_ADDR_LEN" ]        
+    _length: [ "beerocks::net::MAC_ADDR_LEN" ]
   ssid:
     _type: char 
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: [ WIFI_SSID_MAX_LENGTH ]
   key:
     _type: char 
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+    _length: [ WIFI_PASS_MAX_LENGTH ]
 
 sStaStatsParams:
   _type: struct
@@ -251,14 +235,14 @@ sNodeRssiMeasurement:
   rx_rssi: int8_t
   rx_snr: uint8_t
   rx_packets: int8_t
-  src_module: uint8_t 
+  src_module: eBeeRocksEntities 
   vap_id: int8_t
 
 sNodeHostap:
   _type: struct
   iface_name:
     _type: char  
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+    _length: [ IFACE_NAME_LENGTH ]
   iface_type: uint8_t    #beerocks::eIfaceType
   iface_mac: sMacAddr
   iface_is_5ghz: uint8_t
@@ -267,16 +251,16 @@ sNodeHostap:
   conducted_power: uint8_t 
   driver_version:
     _type: char  
-    _length: [ "beerocks::message::WIFI_DRIVER_VER_LENGTH" ]
+    _length: [ WIFI_DRIVER_VER_LENGTH ]
   supported_channels:
     _type: beerocks::message::sWifiChannel 
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]          
+    _length: [ SUPPORTED_CHANNELS_LENGTH ]
 
 sVapsList:
   _type: struct
   vaps:
     _type: sVapInfo 
-    _length: [ "beerocks::IFACE_TOTAL_VAPS" ]         
+    _length: [ "beerocks::IFACE_TOTAL_VAPS" ]
 
 sArpMonitorData:
   _type: struct
@@ -318,7 +302,7 @@ sNeighborSetParams11k:
   bssid: sMacAddr   #ap mac
   ssid:
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: [ WIFI_SSID_MAX_LENGTH ]
   op_class: uint8_t 
   channel: uint8_t 
   phy_type: uint8_t 
@@ -345,7 +329,7 @@ sNeighborRemoveParams11k:
   bssid: sMacAddr     #ap mac
   ssid:
     _type: char 
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: [ WIFI_SSID_MAX_LENGTH ]
   vap_id: int8_t
 
 sStaChannelLoadRequest11k:
@@ -420,7 +404,7 @@ sBeaconRequest11k:
   use_optional_ssid: uint8_t                   # bool
   ssid:
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]         # 36 bytes
+    _length: [ WIFI_SSID_MAX_LENGTH ]         # 36 bytes
 
   use_optional_ap_ch_report: uint8_t           # bool
   ap_ch_report:
@@ -582,7 +566,7 @@ sBackhaulParams:
   gw_manage_type: uint8_t 
   backhaul_scan_measurement_list:
     _type: beerocks::net::sScanResult  
-    _length: [ "beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH" ]
+    _length: [ BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH ]
 
 sBackhaulRoam:
   _type: struct
@@ -596,7 +580,7 @@ sBackhaulRssi:
 sLoggingLevelChange:
   _type: struct
   mac: sMacAddr
-  module_name: uint8_t  # beerocks::eBeeRocksModules
+  module_name: eBeeRocksProcesses
   log_level: uint8_t    # beerocks::eLogLevel
   enable: uint8_t 
 
@@ -604,20 +588,20 @@ sVersions:
   _type: struct
   master_version:
     _type: char 
-    _length: [ "beerocks::message::VERSION_LENGTH" ]
+    _length: [ VERSION_LENGTH ]
   slave_version:
     _type: char 
-    _length: [ "beerocks::message::VERSION_LENGTH" ]
+    _length: [ VERSION_LENGTH ]
 
 sWifiCredentials:
   _type: struct
   wifi_sec: eWiFiSec
   ssid:
    _type: char 
-   _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+   _length: [ WIFI_SSID_MAX_LENGTH ]
   pass:
     _type: char 
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+    _length: [ WIFI_PASS_MAX_LENGTH ]
   sec: uint8_t  # eWiFiSec
   # Place holder to use in future to identify diffrent VAPS (Home, Guest....) 
   vap_id: uint8_t 
@@ -632,29 +616,29 @@ sAdminCredentials:
   _type: struct
   user_password:
     _type: char 
-    _length: [ "beerocks::message::USER_PASS_LEN" ]
+    _length: [ USER_PASS_LEN ]
 
 sDeviceInfo:
   _type: struct
   manufacturer:
     _type: char
-    _length: [ "beerocks::message::DEV_INFO_STR_MAX_LEN" ]
+    _length: [ DEV_INFO_STR_MAX_LEN ]
   model_name:
     _type: char 
-    _length: [ "beerocks::message::DEV_INFO_STR_MAX_LEN" ]
+    _length: [ DEV_INFO_STR_MAX_LEN ]
   serial_number:
     _type: char 
-    _length: [ "beerocks::message::DEV_INFO_STR_MAX_LEN" ]
+    _length: [ DEV_INFO_STR_MAX_LEN ]
   
   lan_iface_name:
     _type: char 
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+    _length: [ IFACE_NAME_LENGTH ]
   lan_ip_address: uint32_t
   lan_network_mask: uint32_t
 
   wan_iface_name:
     _type: char 
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+    _length: [ IFACE_NAME_LENGTH ]
   wan_ip_address: uint32_t
   wan_network_mask: uint32_t
 
@@ -663,7 +647,7 @@ sRestrictedChannels:
   hostap_mac: sMacAddr
   restricted_channels:
     _type: uint8_t 
-    _length: [ "beerocks::message::RESTRICTED_CHANNEL_LENGTH" ]
+    _length: [ RESTRICTED_CHANNEL_LENGTH ]
   is_global: uint8_t 
 
 sSteeringApConfig:
@@ -748,40 +732,6 @@ sSteeringRrmCaps:
   lciMeas: uint8_t
   ftmRangeRpt: uint8_t
 
-eDisconnectSource:
-  _type: enum
-  _enum_storage: uint8_t
-  eDisconnect_Source_Unknown : 0
-  eDisconnect_Source_Local : 1
-  eDisconnect_Source_Remote : 2
-
-
-eDisconnectType:
-  _type: enum
-  _enum_storage: uint8_t
-  eDisconnect_Type_Unknown : 0
-  eDisconnect_Type_Disassoc : 1 
-  eDisconnect_Type_Deauth : 2
-
-
-eSteeringSnrChange:
-  _type: enum
-  _enum_storage: uint8_t
-  eWifi_Steering_Snr_Unchanged : 0           
-  eWifi_Steering_Snr_Higher : 1                      
-  eWifi_Steering_Snr_Lower : 2
-
-eSteeringEventType:
-  _type: enum
-  _enum_storage: uint8_t
-  eWifi_Steering_Event_Probe_Req : 1
-  eWifi_Steering_Event_Client_Connect : 2
-  eWifi_Steering_Event_Client_Disconnect : 3
-  eWifi_Steering_Event_Client_Activity : 4
-  eWifi_Steering_Event_Snr_Xing : 5
-  eWifi_Steering_Event_Snr : 6
-  eWifi_Steering_Event_Auth_Fail : 7
-
 sSteeringEvConnect:
   _type: struct
   client_mac: sMacAddr
@@ -835,7 +785,7 @@ sTriggerChannelScanParams:
     _comment: size of provided channel_pool
  channel_pool:
     _type: uint8_t
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+    _length: [ SUPPORTED_CHANNELS_LENGTH ]
     _comment: pool of channels to be scaned
 
 sChannelScanRequestParams:
@@ -854,63 +804,14 @@ sChannelScanRequestParams:
     _comment: an invalid (-1) value indicates this value is not requested
  channel_pool:
     _type: uint8_t 
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
-
-eChannelScanResultMode:
-  _type: enum
-  _enum_storage: uint8_t
-  eMode_NA: 0
-  eMode_AdHoc: 1
-  eMode_Infrastructure: 2
-
-eChannelScanResultEncryptionMode:
-  _type: enum
-  _enum_storage: uint8_t
-  eEncryption_Mode_NA: 0
-  eEncryption_Mode_AES: 1
-  eEncryption_Mode_TKIP: 2
-
-eChannelScanResultSecurityMode:
-  _type: enum
-  _enum_storage: uint8_t
-  eSecurity_Mode_None: 0
-  eSecurity_Mode_WEP: 1
-  eSecurity_Mode_WPA: 2
-  eSecurity_Mode_WPA2: 3
-
-eChannelScanResultOperatingFrequencyBand:
-  _type: enum
-  _enum_storage: uint8_t
-  eOperating_Freq_Band_NA: 0
-  eOperating_Freq_Band_2_4GHz: 1
-  eOperating_Freq_Band_5GHz: 2
-
-eChannelScanResultStandards:
-  _type: enum
-  _enum_storage: uint8_t
-  eStandard_NA: 0
-  eStandard_802_11a: 1
-  eStandard_802_11b: 2
-  eStandard_802_11g: 3
-  eStandard_802_11n: 4
-  eStandard_802_11ac: 5
-
-eChannelScanResultChannelBandwidth:
-  _type: enum
-  _enum_storage: uint8_t
-  eChannel_Bandwidth_NA: 0
-  eChannel_Bandwidth_20MHz: 1
-  eChannel_Bandwidth_40MHz: 2
-  eChannel_Bandwidth_80MHz: 3
-  eChannel_Bandwidth_160MHz: 4
-  eChannel_Bandwidth_80_80: 5
+    _length: [ SUPPORTED_CHANNELS_LENGTH ]
 
 sChannelScanResults:
   _type: struct
   ssid:
     _comment: The current service set identifier in use by the neighboring WiFi SSID. The value MAY be empty for hidden SSIDs.
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: [ WIFI_SSID_MAX_LENGTH ]
   bssid:
     _comment: The BSSID used for the neighboring WiFi SSID.
     _type: sMacAddr
@@ -926,18 +827,18 @@ sChannelScanResults:
   security_mode_enabled:
     _comment: The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
     _type: eChannelScanResultSecurityMode
-    _length: ["beerocks::message::CHANNEL_SCAN_LIST_LENGTH"]
+    _length: [CHANNEL_SCAN_LIST_LENGTH]
   encryption_mode:
     _comment: The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
     _type: eChannelScanResultEncryptionMode
-    _length: ["beerocks::message::CHANNEL_SCAN_LIST_LENGTH"]
+    _length: [CHANNEL_SCAN_LIST_LENGTH]
   operating_frequency_band:
     _comment: Indicates the frequency band at which the radio this SSID instance is operating. Enumerate
     _type: eChannelScanResultOperatingFrequencyBand
   supported_standards:
     _comment: List items indicate which IEEE 802.11 standards thisResultinstance can support simultaneously, in the frequency band specified byOperatingFrequencyBand. Enumerate List
     _type: eChannelScanResultStandards
-    _length: ["beerocks::message::CHANNEL_SCAN_LIST_LENGTH"]
+    _length: [CHANNEL_SCAN_LIST_LENGTH]
   operating_standards:
     _comment: Indicates which IEEE 802.11 standard that is detected for this Result. Enumerate
     _type: eChannelScanResultStandards
@@ -953,11 +854,11 @@ sChannelScanResults:
   basic_data_transfer_rates_kbps:
     _comment: Basic data transmit rates (in Kbps) for the SSID.
     _type: uint32_t
-    _length: ["beerocks::message::CHANNEL_SCAN_LIST_LENGTH"]
+    _length: [CHANNEL_SCAN_LIST_LENGTH]
   supported_data_transfer_rates_kbps:
     _comment: Data transmit rates (in Kbps) for unicast frames at which the SSID will permit a station to connect.
     _type: uint32_t
-    _length: ["beerocks::message::CHANNEL_SCAN_LIST_LENGTH"]
+    _length: [CHANNEL_SCAN_LIST_LENGTH]
   dtim_period:
     _comment: The number of beacon intervals that elapse between transmission of Beacon frames containing a TIM element whose DTIM count field is 0. This value is transmitted in the DTIM Period field of beacon frames. [802.11-2012]
     _type: uint32_t

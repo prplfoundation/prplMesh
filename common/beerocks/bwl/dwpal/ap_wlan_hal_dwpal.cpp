@@ -1375,7 +1375,7 @@ bool ap_wlan_hal_dwpal::restricted_channels_set(char *channel_list)
     // *** WARNING: It is possible to set restricted channel only from the supported channels list!
     // *** setting channel that is not in the list, will cause this function to fail!
     std::stringstream channel_list_str;
-    for (int i = 0; i < beerocks::message::RESTRICTED_CHANNEL_LENGTH; i++) {
+    for (int i = 0; i < RESTRICTED_CHANNEL_LENGTH; i++) {
         // Break after the last channel
         if (channel_list[i] == 0)
             break;
@@ -1416,7 +1416,7 @@ bool ap_wlan_hal_dwpal::restricted_channels_get(char *channel_list)
     LOG(DEBUG) << "GET_RESTRICTED_CHANNELS reply= " << reply;
     /* End of TEMP: Traces... */
 
-    memset(channel_list, 0, beerocks::message::RESTRICTED_CHANNEL_LENGTH);
+    memset(channel_list, 0, RESTRICTED_CHANNEL_LENGTH);
 
     // Convert the string to an array of bytes (int values)
     std::stringstream channel_list_stream(reply);
@@ -2078,9 +2078,9 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
     case Event::STA_Softblock_Drop: {
         LOG(DEBUG) << buffer;
 
-        char client_mac[MAC_ADDR_SIZE]                      = {0};
-        char vap_bssid[MAC_ADDR_SIZE]                       = {0};
-        char vap_name[beerocks::message::IFACE_NAME_LENGTH] = {0};
+        char client_mac[MAC_ADDR_SIZE]   = {0};
+        char vap_bssid[MAC_ADDR_SIZE]    = {0};
+        char vap_name[IFACE_NAME_LENGTH] = {0};
         uint8_t message_type;
         size_t numOfValidArgsForMsgType[5] = {0};
 

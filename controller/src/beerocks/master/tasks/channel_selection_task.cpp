@@ -356,7 +356,7 @@ void channel_selection_task::work()
         TASK_LOG(DEBUG) << "hostap_mac = " << slave_joined_event->hostap_mac
                         << " channel_ext_above_primary = "
                         << int(slave_joined_event->cs_params.channel_ext_above_primary);
-        for (int i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
+        for (int i = 0; i < beerocks_message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
             if (slave_joined_event->backhaul_scan_measurement_list[i].channel > 0) {
                 TASK_LOG(DEBUG)
                     << "mac = " << slave_joined_event->backhaul_scan_measurement_list[i].mac
@@ -514,7 +514,8 @@ void channel_selection_task::work()
             beerocks::utils::wifi_freq_to_channel(database.config.fail_safe_5G_frequency);
         request->params().failsafe_channel_bandwidth = database.config.fail_safe_5G_bw;
         request->params().vht_center_frequency       = database.config.fail_safe_5G_vht_frequency;
-        memset(request->params().restricted_channels, 0, message::RESTRICTED_CHANNEL_LENGTH);
+        memset(request->params().restricted_channels, 0,
+               beerocks_message::RESTRICTED_CHANNEL_LENGTH);
         auto agent_mac = database.get_node_parent_ire(hostap_mac);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap_mac);
 
@@ -542,10 +543,11 @@ void channel_selection_task::work()
             hostap_params.is_2G ? 0 : database.config.fail_safe_5G_bw;
         request->params().vht_center_frequency =
             hostap_params.is_2G ? 0 : database.config.fail_safe_5G_vht_frequency;
-        memset(request->params().restricted_channels, 0, message::RESTRICTED_CHANNEL_LENGTH);
+        memset(request->params().restricted_channels, 0,
+               beerocks_message::RESTRICTED_CHANNEL_LENGTH);
         fill_restricted_channels_from_ccl_and_supported(request->params().restricted_channels);
         TASK_LOG(INFO) << "***** send_restricted_channel to hostap: " << hostap_mac;
-        for (auto i = 0; i < message::RESTRICTED_CHANNEL_LENGTH; i++) {
+        for (auto i = 0; i < beerocks_message::RESTRICTED_CHANNEL_LENGTH; i++) {
             if (!request->params().restricted_channels[i]) {
                 continue;
             }
@@ -573,7 +575,8 @@ void channel_selection_task::work()
         }
         request->params().failsafe_channel           = 0;
         request->params().failsafe_channel_bandwidth = 0;
-        memset(request->params().restricted_channels, 0, message::RESTRICTED_CHANNEL_LENGTH);
+        memset(request->params().restricted_channels, 0,
+               beerocks_message::RESTRICTED_CHANNEL_LENGTH);
         TASK_LOG(INFO) << "***** clear 2.4G restricted channel for " << hostap_mac;
         auto agent_mac = database.get_node_parent_ire(hostap_mac);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap_mac);
@@ -602,10 +605,11 @@ void channel_selection_task::work()
             hostap_params.is_2G ? 0 : database.config.fail_safe_5G_bw;
         request->params().vht_center_frequency =
             hostap_params.is_2G ? 0 : database.config.fail_safe_5G_vht_frequency;
-        memset(request->params().restricted_channels, 0, message::RESTRICTED_CHANNEL_LENGTH);
+        memset(request->params().restricted_channels, 0,
+               beerocks_message::RESTRICTED_CHANNEL_LENGTH);
         fill_restricted_channels_from_ccl_busy_bands(request->params().restricted_channels);
         TASK_LOG(INFO) << "***** send_restricted_channel to hostap: " << hostap_mac;
-        for (auto i = 0; i < message::RESTRICTED_CHANNEL_LENGTH; i++) {
+        for (auto i = 0; i < beerocks_message::RESTRICTED_CHANNEL_LENGTH; i++) {
             if (request->params().restricted_channels[i] == 0) {
                 continue;
             }
@@ -696,7 +700,7 @@ void channel_selection_task::work()
         break;
     }
     case eState::ON_ACS_RESPONSE: {
-        //database.set_hostap_supported_channels(hostap_mac, acs_response_event->supported_channels, message::SUPPORTED_CHANNELS_LENGTH);
+        //database.set_hostap_supported_channels(hostap_mac, acs_response_event->supported_channels, beerocks_message::SUPPORTED_CHANNELS_LENGTH);
 
         cs_wait_for_event(eEvent::CSA_EVENT);
         set_events_timeout(CSA_NOTIFICATION_RESPONSE_WAIT_TIME);
@@ -1236,7 +1240,7 @@ void channel_selection_task::get_hostap_params()
         hostap_params.low_pass_filter_on   = slave_joined_event->low_pass_filter_on;
         hostap_params.bandwidth            = slave_joined_event->cs_params.bandwidth;
         backhaul_scan_measurement_list.clear();
-        for (auto i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
+        for (auto i = 0; i < beerocks_message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
             if (slave_joined_event->backhaul_scan_measurement_list[i].channel != 0) {
                 auto mac = network_utils::mac_to_string(
                     slave_joined_event->backhaul_scan_measurement_list[i].mac);
@@ -1863,7 +1867,7 @@ void channel_selection_task::wait_for_cac_completed(uint8_t channel, uint8_t ban
 
 void channel_selection_task::assign_config_global_restricted_channel_to_db()
 {
-    uint8_t restricted_channels[beerocks::message::RESTRICTED_CHANNEL_LENGTH] = {0};
+    uint8_t restricted_channels[beerocks_message::RESTRICTED_CHANNEL_LENGTH] = {0};
     std::copy(database.config.global_restricted_channels.begin(),
               database.config.global_restricted_channels.end(), restricted_channels);
     database.set_global_restricted_channels(restricted_channels);

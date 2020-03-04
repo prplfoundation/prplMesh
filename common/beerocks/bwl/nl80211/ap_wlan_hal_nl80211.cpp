@@ -431,7 +431,7 @@ bool ap_wlan_hal_nl80211::restricted_channels_set(char *channel_list)
 bool ap_wlan_hal_nl80211::restricted_channels_get(char *channel_list)
 {
     LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
-    memset(channel_list, 0, beerocks::message::RESTRICTED_CHANNEL_LENGTH);
+    memset(channel_list, 0, RESTRICTED_CHANNEL_LENGTH);
     return true;
 }
 

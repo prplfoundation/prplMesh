@@ -48,7 +48,7 @@ typedef struct sCliNetworkMapNodeSta {
 typedef struct sCliNetworkMapsNodeInfo {
     sMacAddr mac;
     beerocks::net::sIpv4Addr ipv4;
-    char name[beerocks::message::NODE_NAME_LENGTH];
+    char name[NODE_NAME_LENGTH];
     uint8_t type;
     uint8_t state;
     uint8_t channel;

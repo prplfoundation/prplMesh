@@ -33,38 +33,6 @@ namespace beerocks {
 // clang-format on
 #endif
 
-namespace message {
-
-enum eStructsConsts {
-    VERSION_LENGTH                = 16,
-    NODE_NAME_LENGTH              = 32,
-    IFACE_NAME_LENGTH             = 32 + 4, //need extra 1 byte for null termination + alignment
-    SUPPORTED_CHANNELS_LENGTH     = 64,     //support upto # channels, every channel item is 32-bit
-    HOSTAP_ERR_MSG_LENGTH         = 64,
-    WIFI_DRIVER_VER_LENGTH        = 32 + 4,
-    WIFI_SSID_MAX_LENGTH          = 32 + 1 + 3, //need extra 1 byte for null termination + alignment
-    WIFI_PASS_MAX_LENGTH          = 64 + 1 + 3, //need extra 1 byte for null termination + alignment
-    USER_PASS_LEN                 = 64 + 1 + 3, //need extra 1 byte for null termination + alignment
-    DEV_INFO_STR_MAX_LEN          = 32,
-    WPA_SCAN_FREQ_SEGMENTS        = 3,
-    WPA_SCAN_MAX_RESULTS          = 8,
-    RESTRICTED_CHANNEL_LENGTH     = 40,
-    WIFI_SECURITY_TYPE_MAX_LENGTH = 32,
-    BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH = 16,
-    PLATFORM_ERROR_DATA_SIZE             = 256,
-    WIFI_GENERIC_STRING_LENGTH           = 64,
-    WIFI_OPERATING_STRING_LENGTH         = 16,
-    WIFI_DATA_TRANSFER_RATES_LIST_LENGTH = 256,
-    CHANNEL_SCAN_LIST_LENGTH             = 8,
-};
-
-enum eMessageConsts {
-    MESSAGE_VERSION       = 6,
-    MESSAGE_MAGIC         = 0x55CDABEF,
-    MESSAGE_BUFFER_LENGTH = 4096,
-};
-} //namespace message
-
 enum eGlobals {
     HIERARCHY_MAX                           = 14,
     IRE_MAX_SLAVES                          = 3,
@@ -88,25 +56,6 @@ enum eGlobals {
     BH_SIGNAL_RSSI_THRESHOLD_HIGH           = -40,
     BH_SIGNAL_RSSI_THRESHOLD_HYSTERESIS     = 8,
     TOUCH_PID_TIMEOUT_SECONDS               = 4, // beerocks_watchdog cycle (10 secs) / 2 - 1
-};
-
-enum eBeeRocksProcesses : uint8_t {
-    BEEROCKS_PROCESS_NONE = 0,
-    BEEROCKS_PROCESS_ALL,
-    BEEROCKS_PROCESS_MASTER,
-    BEEROCKS_PROCESS_SLAVE,
-    BEEROCKS_PROCESS_MONITOR,
-    BEEROCKS_PROCESS_PLATFORM,
-};
-
-enum eBeeRocksEntities : uint8_t {
-    BEEROCKS_ENTITY_NONE             = 0,
-    BEEROCKS_ENTITY_MASTER           = 1,
-    BEEROCKS_ENTITY_SLAVE            = 2,
-    BEEROCKS_ENTITY_AP_MANAGER       = 3,
-    BEEROCKS_ENTITY_MONITOR          = 4,
-    BEEROCKS_ENTITY_BACKHAUL_MANAGER = 5,
-    BEEROCKS_ENTITY_PLATFORM_MANAGER = 6,
 };
 
 enum eBeeRocksResult : uint32_t {

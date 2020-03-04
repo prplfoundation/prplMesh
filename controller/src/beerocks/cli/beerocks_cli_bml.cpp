@@ -1644,7 +1644,7 @@ int cli_bml::analyzer_init(std::string remote_pc_ip)
         UTILS_SLEEP_MSEC(1000);
         int sel_ret = select.selectSocket();
         if (sel_ret > 0) {
-            m_analyzer_socket->readBytes(rx_buffer, message::MESSAGE_BUFFER_LENGTH,
+            m_analyzer_socket->readBytes(rx_buffer, beerocks_message::MESSAGE_BUFFER_LENGTH,
                                          m_analyzer_socket->getBytesReady());
             if (bml_nw_map_query(ctx)) {
                 std::cout << "failed to send bml_nw_map_query request" << std::endl;

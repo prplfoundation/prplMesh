@@ -73,7 +73,7 @@ public:
         uint8_t backhaul_is_wireless;
         uint8_t backhaul_iface_type;
         beerocks::net::sScanResult
-            backhaul_scan_measurement_list[beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];
+            backhaul_scan_measurement_list[beerocks_message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];
     } sSlaveBackhaulParams;
 
     enum eSlaveState {

@@ -20,10 +20,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOV
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<TARGET_PROPERTY:btlvf,INTERFACE_INCLUDE_DIRECTORIES>
         $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC tlvf elpp)
+target_link_libraries(${PROJECT_NAME} PUBLIC btlvf elpp)
 
 install(TARGETS ${PROJECT_NAME} EXPORT bclConfig
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

@@ -1800,7 +1800,7 @@ size_t cACTION_CLI_CLIENT_BEACON_11K_REQUEST::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // client_mac
     class_size += sizeof(sMacAddr); // bssid
-    class_size += beerocks::message::WIFI_SSID_MAX_LENGTH * sizeof(uint8_t); // ssid
+    class_size += WIFI_SSID_MAX_LENGTH * sizeof(uint8_t); // ssid
     class_size += sizeof(uint8_t); // use_optional_ssid
     class_size += sizeof(uint8_t); // channel
     class_size += sizeof(uint8_t); // measurement_mode
@@ -1830,11 +1830,11 @@ bool cACTION_CLI_CLIENT_BEACON_11K_REQUEST::init()
     }
     if (!m_parse__) { m_bssid->struct_init(); }
     m_ssid = (uint8_t*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(uint8_t) * (beerocks::message::WIFI_SSID_MAX_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (beerocks::message::WIFI_SSID_MAX_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(uint8_t) * (WIFI_SSID_MAX_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (WIFI_SSID_MAX_LENGTH) << ") Failed!";
         return false;
     }
-    m_ssid_idx__  = beerocks::message::WIFI_SSID_MAX_LENGTH;
+    m_ssid_idx__  = WIFI_SSID_MAX_LENGTH;
     m_use_optional_ssid = (uint8_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";

@@ -16,10 +16,10 @@ cACTION_BACKHAUL_REGISTER_REQUEST:
   _type: class
   sta_iface:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+    _length: [ IFACE_NAME_LENGTH ]
   hostap_iface:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+    _length: [ IFACE_NAME_LENGTH ]
   local_master: uint8_t
   local_gw: uint8_t
   sta_iface_filter_low: uint8_t
@@ -40,19 +40,19 @@ cACTION_BACKHAUL_ENABLE:
   iface_is_5ghz: uint8_t
   wire_iface:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+    _length: [ IFACE_NAME_LENGTH ]
   sta_iface:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+    _length: [ IFACE_NAME_LENGTH ]
   ap_iface:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+    _length: [ IFACE_NAME_LENGTH ]
   ssid:
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: [ WIFI_SSID_MAX_LENGTH ]
   pass:
     _type: char
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+    _length: [ WIFI_PASS_MAX_LENGTH ]
   security_type: uint32_t # bwl::sta_wlan_hal::Security
   preferred_bssid: sMacAddr
   wire_iface_type: uint8_t  
@@ -61,7 +61,7 @@ cACTION_BACKHAUL_ENABLE:
   backhaul_preferred_radio_band: uint8_t
   supported_channels_list:
     _type: beerocks::message::sWifiChannel 
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+    _length: [ SUPPORTED_CHANNELS_LENGTH ]
 
 cACTION_BACKHAUL_CONNECTED_NOTIFICATION:
   _type: class

@@ -45,7 +45,7 @@ bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::set_slave_version(const char str
         TLVF_LOG(WARNING) << "set_slave_version received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::VERSION_LENGTH) {
+    if (size > VERSION_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -129,7 +129,7 @@ bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::finalize()
 size_t cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += beerocks::message::VERSION_LENGTH * sizeof(char); // slave_version
+    class_size += VERSION_LENGTH * sizeof(char); // slave_version
     class_size += sizeof(sPlatformSettings); // platform_settings
     class_size += sizeof(sWlanSettings); // wlan_settings
     class_size += sizeof(sBackhaulParams); // backhaul_params
@@ -149,11 +149,11 @@ bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::init()
         return false;
     }
     m_slave_version = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::VERSION_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::VERSION_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (VERSION_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (VERSION_LENGTH) << ") Failed!";
         return false;
     }
-    m_slave_version_idx__  = beerocks::message::VERSION_LENGTH;
+    m_slave_version_idx__  = VERSION_LENGTH;
     m_platform_settings = (sPlatformSettings*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sPlatformSettings))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sPlatformSettings) << ") Failed!";
@@ -239,7 +239,7 @@ bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::set_master_version(const char str[],
         TLVF_LOG(WARNING) << "set_master_version received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::VERSION_LENGTH) {
+    if (size > VERSION_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -290,7 +290,7 @@ bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::finalize()
 size_t cACTION_CONTROL_SLAVE_JOINED_RESPONSE::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += beerocks::message::VERSION_LENGTH * sizeof(char); // master_version
+    class_size += VERSION_LENGTH * sizeof(char); // master_version
     class_size += sizeof(uint8_t); // err_code
     class_size += sizeof(sSonConfig); // config
     return class_size;
@@ -303,11 +303,11 @@ bool cACTION_CONTROL_SLAVE_JOINED_RESPONSE::init()
         return false;
     }
     m_master_version = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::VERSION_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::VERSION_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (VERSION_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (VERSION_LENGTH) << ") Failed!";
         return false;
     }
-    m_master_version_idx__  = beerocks::message::VERSION_LENGTH;
+    m_master_version_idx__  = VERSION_LENGTH;
     m_err_code = (uint8_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -1736,7 +1736,7 @@ void cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
-    for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
+    for (size_t i = 0; i < SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels[i].struct_swap();
     }
 }
@@ -1772,7 +1772,7 @@ size_t cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sApChannelSwitch); // cs_params
-    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels
+    class_size += SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels
     return class_size;
 }
 
@@ -1789,13 +1789,13 @@ bool cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::init()
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
     m_supported_channels = (beerocks::message::sWifiChannel*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (SUPPORTED_CHANNELS_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
         return false;
     }
-    m_supported_channels_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
+    m_supported_channels_idx__  = SUPPORTED_CHANNELS_LENGTH;
     if (!m_parse__) {
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels->struct_init(); }
+        for (size_t i = 0; i < SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels->struct_init(); }
     }
     if (m_parse__) { class_swap(); }
     return true;
@@ -4031,7 +4031,7 @@ bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::set_name(const char str[
         TLVF_LOG(WARNING) << "set_name received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::NODE_NAME_LENGTH) {
+    if (size > NODE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -4077,7 +4077,7 @@ size_t cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // mac
     class_size += sizeof(beerocks::net::sIpv4Addr); // ipv4
-    class_size += beerocks::message::NODE_NAME_LENGTH * sizeof(char); // name
+    class_size += NODE_NAME_LENGTH * sizeof(char); // name
     return class_size;
 }
 
@@ -4100,11 +4100,11 @@ bool cACTION_CONTROL_CLIENT_DHCP_COMPLETE_NOTIFICATION::init()
     }
     if (!m_parse__) { m_ipv4->struct_init(); }
     m_name = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::NODE_NAME_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::NODE_NAME_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (NODE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (NODE_NAME_LENGTH) << ") Failed!";
         return false;
     }
-    m_name_idx__  = beerocks::message::NODE_NAME_LENGTH;
+    m_name_idx__  = NODE_NAME_LENGTH;
     if (m_parse__) { class_swap(); }
     return true;
 }

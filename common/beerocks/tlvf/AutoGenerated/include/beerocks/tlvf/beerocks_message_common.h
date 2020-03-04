@@ -17,28 +17,14 @@
 #include <stdint.h>
 #include <tlvf/swap.h>
 #include "beerocks/tlvf/beerocks_message_action.h"
-#include "bcl/beerocks_message_structs.h"
+#include "beerocks/tlvf/beerocks_message_enums.h"
+#include "tlvf/common/sMacAddr.h"
 
 namespace beerocks_message {
 
-enum eWiFiSec: uint8_t {
-    eWiFiSec_None = 0x0,
-    eWiFiSec_WEP64 = 0x1,
-    eWiFiSec_WEP128 = 0x2,
-    eWiFiSec_WPA_PSK = 0x3,
-    eWiFiSec_WPA2_PSK = 0x4,
-    eWiFiSec_WPA_WPA2_PSK = 0x5,
-};
-
-enum eDHCPOp: uint8_t {
-    eDHCPOp_Add = 0x0,
-    eDHCPOp_Del = 0x1,
-    eDHCPOp_Old = 0x2,
-};
-
 typedef struct sVapInfo {
     sMacAddr mac;
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+    char ssid[WIFI_SSID_MAX_LENGTH];
     uint8_t backhaul_vap;
     void struct_swap(){
         mac.struct_swap();
@@ -73,12 +59,12 @@ typedef struct sSonConfig {
 } __attribute__((packed)) sSonConfig;
 
 typedef struct sPlatformSettings {
-    char front_ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
-    char front_pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
-    char front_security_type[beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH];
-    char back_ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
-    char back_pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
-    char back_security_type[beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH];
+    char front_ssid[WIFI_SSID_MAX_LENGTH];
+    char front_pass[WIFI_PASS_MAX_LENGTH];
+    char front_security_type[WIFI_SECURITY_TYPE_MAX_LENGTH];
+    char back_ssid[WIFI_SSID_MAX_LENGTH];
+    char back_pass[WIFI_PASS_MAX_LENGTH];
+    char back_security_type[WIFI_SECURITY_TYPE_MAX_LENGTH];
     uint8_t onboarding;
     uint8_t local_master;
     uint8_t local_gw;
@@ -123,7 +109,7 @@ typedef struct sWlanSettings {
 typedef struct sApSetRestrictedFailsafe {
     uint8_t failsafe_channel;
     uint8_t failsafe_channel_bandwidth;
-    uint8_t restricted_channels[beerocks::message::RESTRICTED_CHANNEL_LENGTH];
+    uint8_t restricted_channels[RESTRICTED_CHANNEL_LENGTH];
     uint16_t vht_center_frequency;
     void struct_swap(){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&vht_center_frequency));
@@ -234,8 +220,8 @@ typedef struct sConfigVapInfo {
     uint8_t al_mac[beerocks::net::MAC_ADDR_LEN];
     uint8_t ruid[beerocks::net::MAC_ADDR_LEN];
     uint8_t bssid[beerocks::net::MAC_ADDR_LEN];
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
-    char key[beerocks::message::WIFI_PASS_MAX_LENGTH];
+    char ssid[WIFI_SSID_MAX_LENGTH];
+    char key[WIFI_PASS_MAX_LENGTH];
     void struct_swap(){
     }
     void struct_init(){
@@ -349,12 +335,13 @@ typedef struct sNodeRssiMeasurement {
     int8_t rx_rssi;
     uint8_t rx_snr;
     int8_t rx_packets;
-    uint8_t src_module;
+    eBeeRocksEntities src_module;
     int8_t vap_id;
     void struct_swap(){
         result.struct_swap();
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&rx_phy_rate_100kb));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&tx_phy_rate_100kb));
+        tlvf_swap(8*sizeof(eBeeRocksEntities), reinterpret_cast<uint8_t*>(&src_module));
     }
     void struct_init(){
         result.struct_init();
@@ -362,24 +349,24 @@ typedef struct sNodeRssiMeasurement {
 } __attribute__((packed)) sNodeRssiMeasurement;
 
 typedef struct sNodeHostap {
-    char iface_name[beerocks::message::IFACE_NAME_LENGTH];
+    char iface_name[IFACE_NAME_LENGTH];
     uint8_t iface_type;
     sMacAddr iface_mac;
     uint8_t iface_is_5ghz;
     uint8_t ant_num;
     uint8_t ant_gain;
     uint8_t conducted_power;
-    char driver_version[beerocks::message::WIFI_DRIVER_VER_LENGTH];
-    beerocks::message::sWifiChannel supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+    char driver_version[WIFI_DRIVER_VER_LENGTH];
+    beerocks::message::sWifiChannel supported_channels[SUPPORTED_CHANNELS_LENGTH];
     void struct_swap(){
         iface_mac.struct_swap();
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
+        for (size_t i = 0; i < SUPPORTED_CHANNELS_LENGTH; i++){
             (supported_channels[i]).struct_swap();
         }
     }
     void struct_init(){
         iface_mac.struct_init();
-            for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+            for (size_t i = 0; i < SUPPORTED_CHANNELS_LENGTH; i++) {
                 (supported_channels[i]).struct_init();
             }
     }
@@ -480,7 +467,7 @@ typedef struct sNodeBssSteerResponse {
 
 typedef struct sNeighborSetParams11k {
     sMacAddr bssid;
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+    char ssid[WIFI_SSID_MAX_LENGTH];
     uint8_t op_class;
     uint8_t channel;
     uint8_t phy_type;
@@ -509,7 +496,7 @@ typedef struct sNeighborSetParams11k {
 
 typedef struct sNeighborRemoveParams11k {
     sMacAddr bssid;
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+    char ssid[WIFI_SSID_MAX_LENGTH];
     int8_t vap_id;
     void struct_swap(){
         bssid.struct_swap();
@@ -595,7 +582,7 @@ typedef struct sBeaconRequest11k {
     uint8_t mandatory_duration;
     uint8_t expected_reports_count;
     uint8_t use_optional_ssid;
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+    char ssid[WIFI_SSID_MAX_LENGTH];
     uint8_t use_optional_ap_ch_report;
     uint8_t ap_ch_report[237];
     uint8_t use_optional_req_elements;
@@ -784,7 +771,7 @@ typedef struct sBackhaulParams {
     uint8_t backhaul_iface_type;
     uint8_t is_backhaul_manager;
     uint8_t gw_manage_type;
-    beerocks::net::sScanResult backhaul_scan_measurement_list[beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];
+    beerocks::net::sScanResult backhaul_scan_measurement_list[BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];
     void struct_swap(){
         gw_ipv4.struct_swap();
         gw_bridge_mac.struct_swap();
@@ -794,7 +781,7 @@ typedef struct sBackhaulParams {
         backhaul_mac.struct_swap();
         backhaul_ipv4.struct_swap();
         backhaul_bssid.struct_swap();
-        for (size_t i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++){
+        for (size_t i = 0; i < BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++){
             (backhaul_scan_measurement_list[i]).struct_swap();
         }
     }
@@ -807,7 +794,7 @@ typedef struct sBackhaulParams {
         backhaul_mac.struct_init();
         backhaul_ipv4.struct_init();
         backhaul_bssid.struct_init();
-            for (size_t i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
+            for (size_t i = 0; i < BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
                 (backhaul_scan_measurement_list[i]).struct_init();
             }
     }
@@ -834,11 +821,12 @@ typedef struct sBackhaulRssi {
 
 typedef struct sLoggingLevelChange {
     sMacAddr mac;
-    uint8_t module_name;
+    eBeeRocksProcesses module_name;
     uint8_t log_level;
     uint8_t enable;
     void struct_swap(){
         mac.struct_swap();
+        tlvf_swap(8*sizeof(eBeeRocksProcesses), reinterpret_cast<uint8_t*>(&module_name));
     }
     void struct_init(){
         mac.struct_init();
@@ -846,8 +834,8 @@ typedef struct sLoggingLevelChange {
 } __attribute__((packed)) sLoggingLevelChange;
 
 typedef struct sVersions {
-    char master_version[beerocks::message::VERSION_LENGTH];
-    char slave_version[beerocks::message::VERSION_LENGTH];
+    char master_version[VERSION_LENGTH];
+    char slave_version[VERSION_LENGTH];
     void struct_swap(){
     }
     void struct_init(){
@@ -856,8 +844,8 @@ typedef struct sVersions {
 
 typedef struct sWifiCredentials {
     eWiFiSec wifi_sec;
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
-    char pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
+    char ssid[WIFI_SSID_MAX_LENGTH];
+    char pass[WIFI_PASS_MAX_LENGTH];
     uint8_t sec;
     uint8_t vap_id;
     uint8_t force;
@@ -878,7 +866,7 @@ typedef struct sOnboarding {
 } __attribute__((packed)) sOnboarding;
 
 typedef struct sAdminCredentials {
-    char user_password[beerocks::message::USER_PASS_LEN];
+    char user_password[USER_PASS_LEN];
     void struct_swap(){
     }
     void struct_init(){
@@ -886,13 +874,13 @@ typedef struct sAdminCredentials {
 } __attribute__((packed)) sAdminCredentials;
 
 typedef struct sDeviceInfo {
-    char manufacturer[beerocks::message::DEV_INFO_STR_MAX_LEN];
-    char model_name[beerocks::message::DEV_INFO_STR_MAX_LEN];
-    char serial_number[beerocks::message::DEV_INFO_STR_MAX_LEN];
-    char lan_iface_name[beerocks::message::IFACE_NAME_LENGTH];
+    char manufacturer[DEV_INFO_STR_MAX_LEN];
+    char model_name[DEV_INFO_STR_MAX_LEN];
+    char serial_number[DEV_INFO_STR_MAX_LEN];
+    char lan_iface_name[IFACE_NAME_LENGTH];
     uint32_t lan_ip_address;
     uint32_t lan_network_mask;
-    char wan_iface_name[beerocks::message::IFACE_NAME_LENGTH];
+    char wan_iface_name[IFACE_NAME_LENGTH];
     uint32_t wan_ip_address;
     uint32_t wan_network_mask;
     void struct_swap(){
@@ -907,7 +895,7 @@ typedef struct sDeviceInfo {
 
 typedef struct sRestrictedChannels {
     sMacAddr hostap_mac;
-    uint8_t restricted_channels[beerocks::message::RESTRICTED_CHANNEL_LENGTH];
+    uint8_t restricted_channels[RESTRICTED_CHANNEL_LENGTH];
     uint8_t is_global;
     void struct_swap(){
         hostap_mac.struct_swap();
@@ -1078,34 +1066,6 @@ typedef struct sSteeringRrmCaps {
     }
 } __attribute__((packed)) sSteeringRrmCaps;
 
-enum eDisconnectSource: uint8_t {
-    eDisconnect_Source_Unknown = 0x0,
-    eDisconnect_Source_Local = 0x1,
-    eDisconnect_Source_Remote = 0x2,
-};
-
-enum eDisconnectType: uint8_t {
-    eDisconnect_Type_Unknown = 0x0,
-    eDisconnect_Type_Disassoc = 0x1,
-    eDisconnect_Type_Deauth = 0x2,
-};
-
-enum eSteeringSnrChange: uint8_t {
-    eWifi_Steering_Snr_Unchanged = 0x0,
-    eWifi_Steering_Snr_Higher = 0x1,
-    eWifi_Steering_Snr_Lower = 0x2,
-};
-
-enum eSteeringEventType: uint8_t {
-    eWifi_Steering_Event_Probe_Req = 0x1,
-    eWifi_Steering_Event_Client_Connect = 0x2,
-    eWifi_Steering_Event_Client_Disconnect = 0x3,
-    eWifi_Steering_Event_Client_Activity = 0x4,
-    eWifi_Steering_Event_Snr_Xing = 0x5,
-    eWifi_Steering_Event_Snr = 0x6,
-    eWifi_Steering_Event_Auth_Fail = 0x7,
-};
-
 typedef struct sSteeringEvConnect {
     sMacAddr client_mac;
     sMacAddr bssid;
@@ -1207,7 +1167,7 @@ typedef struct sTriggerChannelScanParams {
     //size of provided channel_pool
     uint8_t channel_pool_size;
     //pool of channels to be scaned
-    uint8_t channel_pool[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+    uint8_t channel_pool[SUPPORTED_CHANNELS_LENGTH];
     void struct_swap(){
         radio_mac.struct_swap();
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&dwell_time_ms));
@@ -1226,7 +1186,7 @@ typedef struct sChannelScanRequestParams {
     int32_t interval_time_sec;
     //an invalid (-1) value indicates this value is not requested
     int8_t channel_pool_size;
-    uint8_t channel_pool[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+    uint8_t channel_pool[SUPPORTED_CHANNELS_LENGTH];
     void struct_swap(){
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&dwell_time_ms));
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&interval_time_sec));
@@ -1238,52 +1198,9 @@ typedef struct sChannelScanRequestParams {
     }
 } __attribute__((packed)) sChannelScanRequestParams;
 
-enum eChannelScanResultMode: uint8_t {
-    eMode_NA = 0x0,
-    eMode_AdHoc = 0x1,
-    eMode_Infrastructure = 0x2,
-};
-
-enum eChannelScanResultEncryptionMode: uint8_t {
-    eEncryption_Mode_NA = 0x0,
-    eEncryption_Mode_AES = 0x1,
-    eEncryption_Mode_TKIP = 0x2,
-};
-
-enum eChannelScanResultSecurityMode: uint8_t {
-    eSecurity_Mode_None = 0x0,
-    eSecurity_Mode_WEP = 0x1,
-    eSecurity_Mode_WPA = 0x2,
-    eSecurity_Mode_WPA2 = 0x3,
-};
-
-enum eChannelScanResultOperatingFrequencyBand: uint8_t {
-    eOperating_Freq_Band_NA = 0x0,
-    eOperating_Freq_Band_2_4GHz = 0x1,
-    eOperating_Freq_Band_5GHz = 0x2,
-};
-
-enum eChannelScanResultStandards: uint8_t {
-    eStandard_NA = 0x0,
-    eStandard_802_11a = 0x1,
-    eStandard_802_11b = 0x2,
-    eStandard_802_11g = 0x3,
-    eStandard_802_11n = 0x4,
-    eStandard_802_11ac = 0x5,
-};
-
-enum eChannelScanResultChannelBandwidth: uint8_t {
-    eChannel_Bandwidth_NA = 0x0,
-    eChannel_Bandwidth_20MHz = 0x1,
-    eChannel_Bandwidth_40MHz = 0x2,
-    eChannel_Bandwidth_80MHz = 0x3,
-    eChannel_Bandwidth_160MHz = 0x4,
-    eChannel_Bandwidth_80_80 = 0x5,
-};
-
 typedef struct sChannelScanResults {
     //The current service set identifier in use by the neighboring WiFi SSID. The value MAY be empty for hidden SSIDs.
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+    char ssid[WIFI_SSID_MAX_LENGTH];
     //The BSSID used for the neighboring WiFi SSID.
     sMacAddr bssid;
     //The mode the neighboring WiFi radio is operating in. Enumerate
@@ -1293,13 +1210,13 @@ typedef struct sChannelScanResults {
     //An indicator of radio signal strength (RSSI) of the neighboring WiFi radio measured in dBm, as an average of the last 100 packets received.
     int32_t signal_strength_dBm;
     //The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
-    eChannelScanResultSecurityMode security_mode_enabled[beerocks::message::CHANNEL_SCAN_LIST_LENGTH];
+    eChannelScanResultSecurityMode security_mode_enabled[CHANNEL_SCAN_LIST_LENGTH];
     //The type of encryption the neighboring WiFi SSID advertises. Enumerate List.
-    eChannelScanResultEncryptionMode encryption_mode[beerocks::message::CHANNEL_SCAN_LIST_LENGTH];
+    eChannelScanResultEncryptionMode encryption_mode[CHANNEL_SCAN_LIST_LENGTH];
     //Indicates the frequency band at which the radio this SSID instance is operating. Enumerate
     eChannelScanResultOperatingFrequencyBand operating_frequency_band;
     //List items indicate which IEEE 802.11 standards thisResultinstance can support simultaneously, in the frequency band specified byOperatingFrequencyBand. Enumerate List
-    eChannelScanResultStandards supported_standards[beerocks::message::CHANNEL_SCAN_LIST_LENGTH];
+    eChannelScanResultStandards supported_standards[CHANNEL_SCAN_LIST_LENGTH];
     //Indicates which IEEE 802.11 standard that is detected for this Result. Enumerate
     eChannelScanResultStandards operating_standards;
     //Indicates the bandwidth at which the channel is operating. Enumerate
@@ -1309,9 +1226,9 @@ typedef struct sChannelScanResults {
     //Indicator of average noise strength (indBm) received from the neighboring WiFi radio.
     int32_t noise_dBm;
     //Basic data transmit rates (in Kbps) for the SSID.
-    uint32_t basic_data_transfer_rates_kbps[beerocks::message::CHANNEL_SCAN_LIST_LENGTH];
+    uint32_t basic_data_transfer_rates_kbps[CHANNEL_SCAN_LIST_LENGTH];
     //Data transmit rates (in Kbps) for unicast frames at which the SSID will permit a station to connect.
-    uint32_t supported_data_transfer_rates_kbps[beerocks::message::CHANNEL_SCAN_LIST_LENGTH];
+    uint32_t supported_data_transfer_rates_kbps[CHANNEL_SCAN_LIST_LENGTH];
     //The number of beacon intervals that elapse between transmission of Beacon frames containing a TIM element whose DTIM count field is 0. This value is transmitted in the DTIM Period field of beacon frames. [802.11-2012]
     uint32_t dtim_period;
     //Indicates the fraction of the time AP senses that the channel is in use by the neighboring AP for transmissions.
@@ -1322,10 +1239,10 @@ typedef struct sChannelScanResults {
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&signal_strength_dBm));
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&beacon_period_ms));
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&noise_dBm));
-        for (size_t i = 0; i < beerocks::message::CHANNEL_SCAN_LIST_LENGTH; i++){
+        for (size_t i = 0; i < CHANNEL_SCAN_LIST_LENGTH; i++){
             tlvf_swap(32, reinterpret_cast<uint8_t*>(&(basic_data_transfer_rates_kbps[i])));
         }
-        for (size_t i = 0; i < beerocks::message::CHANNEL_SCAN_LIST_LENGTH; i++){
+        for (size_t i = 0; i < CHANNEL_SCAN_LIST_LENGTH; i++){
             tlvf_swap(32, reinterpret_cast<uint8_t*>(&(supported_data_transfer_rates_kbps[i])));
         }
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&dtim_period));

@@ -581,7 +581,7 @@ wireless_utils::get_channel_preferences(const beerocks::message::sWifiChannel su
 
     for (auto oper_class : operating_classes_list) {
         std::vector<beerocks::message::sWifiChannel> radar_affected_channels;
-        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+        for (uint8_t i = 0; i < beerocks_message::SUPPORTED_CHANNELS_LENGTH; i++) {
             if (has_operating_class_channel(oper_class.second, supported_channels[i]) &&
                 supported_channels[i].radar_affected) {
                 radar_affected_channels.push_back(supported_channels[i]);
@@ -612,7 +612,7 @@ std::vector<uint8_t> wireless_utils::get_supported_operating_classes(
     std::vector<uint8_t> operating_classes;
     //TODO handle regulatory domain operating classes
     for (auto oper_class : operating_classes_list) {
-        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+        for (uint8_t i = 0; i < beerocks_message::SUPPORTED_CHANNELS_LENGTH; i++) {
             if (has_operating_class_channel(oper_class.second, supported_channels[i])) {
                 operating_classes.push_back(oper_class.first);
                 break;
@@ -636,7 +636,7 @@ uint8_t wireless_utils::get_operating_class_max_tx_power(
     uint8_t max_tx_power = 0;
     auto oper_class      = operating_classes_list.at(operating_class);
 
-    for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+    for (uint8_t i = 0; i < beerocks_message::SUPPORTED_CHANNELS_LENGTH; i++) {
         if (has_operating_class_channel(oper_class, supported_channels[i])) {
             max_tx_power = std::max(max_tx_power, supported_channels[i].tx_pow);
         }
@@ -678,7 +678,7 @@ std::vector<uint8_t> wireless_utils::get_operating_class_non_oper_channels(
 
     for (auto op_class_channel : oper_class.channels) {
         uint8_t found = 0;
-        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+        for (uint8_t i = 0; i < beerocks_message::SUPPORTED_CHANNELS_LENGTH; i++) {
             if (op_class_channel == supported_channels[i].channel &&
                 oper_class.band == supported_channels[i].channel_bandwidth) {
                 found = 1;

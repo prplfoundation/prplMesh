@@ -1,7 +1,6 @@
 #
 ---
 _include: {
-  bcl/beerocks_message_structs.h,
   beerocks/tlvf/beerocks_message_action.h,
 }
 

@@ -10,10 +10,10 @@ cACTION_HEADER:
   _type: class
   magic:
     _type: uint32_t
-    _value_const: "beerocks::message::MESSAGE_MAGIC"
+    _value_const: MESSAGE_MAGIC
   version:
     _type: uint8_t
-    _value_const: "beerocks::message::MESSAGE_VERSION"
+    _value_const: MESSAGE_VERSION
   action: eAction 
   action_op:
     _type: uint8_t

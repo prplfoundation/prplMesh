@@ -1,0 +1,145 @@
+#
+---
+_namespace: beerocks_message
+
+eStructsConsts:
+  _type: enum
+  VERSION_LENGTH: 16
+  NODE_NAME_LENGTH: 32
+  IFACE_NAME_LENGTH: 33 # (32 + 1) need extra 1 byte for null termination
+  SUPPORTED_CHANNELS_LENGTH: 64
+  WIFI_DRIVER_VER_LENGTH: 33 # (32 + 1) need extra 1 byte for null termination
+  WIFI_SSID_MAX_LENGTH: 33 # (32 + 1) need extra 1 byte for null termination
+  WIFI_PASS_MAX_LENGTH: 65 # (64 + 1) need extra 1 byte for null termination
+  USER_PASS_LEN: 65 # (64 + 1) need extra 1 byte for null termination
+  DEV_INFO_STR_MAX_LEN: 32
+  RESTRICTED_CHANNEL_LENGTH: 40
+  WIFI_SECURITY_TYPE_MAX_LENGTH: 32
+  BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH: 16
+  PLATFORM_ERROR_DATA_SIZE: 256
+  CHANNEL_SCAN_LIST_LENGTH: 8
+
+eMessageConsts:
+  _type: enum
+  MESSAGE_VERSION: 6
+  MESSAGE_MAGIC: 0x55CDABEF
+  MESSAGE_BUFFER_LENGTH: 4096
+
+eBeeRocksProcesses:
+  _type: enum
+  _enum_storage: uint8_t
+  BEEROCKS_PROCESS_NONE: 0
+  BEEROCKS_PROCESS_ALL: 1
+  BEEROCKS_PROCESS_MASTER: 2
+  BEEROCKS_PROCESS_SLAVE: 3
+  BEEROCKS_PROCESS_MONITOR: 4
+  BEEROCKS_PROCESS_PLATFORM: 5
+
+eBeeRocksEntities:
+  _type: enum
+  _enum_storage: uint8_t
+  BEEROCKS_ENTITY_NONE: 0
+  BEEROCKS_ENTITY_MASTER: 1
+  BEEROCKS_ENTITY_SLAVE: 2
+  BEEROCKS_ENTITY_AP_MANAGER: 3
+  BEEROCKS_ENTITY_MONITOR: 4
+  BEEROCKS_ENTITY_BACKHAUL_MANAGER: 5
+  BEEROCKS_ENTITY_PLATFORM_MANAGER: 6
+
+eWiFiSec:
+  _type: enum
+  _enum_storage: uint8_t
+  eWiFiSec_None: 0
+  eWiFiSec_WEP64: 1
+  eWiFiSec_WEP128: 2
+  eWiFiSec_WPA_PSK: 3
+  eWiFiSec_WPA2_PSK: 4
+  eWiFiSec_WPA_WPA2_PSK: 5
+
+eDHCPOp:
+  _type: enum
+  _enum_storage: uint8_t
+  eDHCPOp_Add: 0
+  eDHCPOp_Del: 1
+  eDHCPOp_Old: 2
+
+eDisconnectSource:
+  _type: enum
+  _enum_storage: uint8_t
+  eDisconnect_Source_Unknown : 0
+  eDisconnect_Source_Local : 1
+  eDisconnect_Source_Remote : 2
+
+eDisconnectType:
+  _type: enum
+  _enum_storage: uint8_t
+  eDisconnect_Type_Unknown : 0
+  eDisconnect_Type_Disassoc : 1
+  eDisconnect_Type_Deauth : 2
+
+eSteeringSnrChange:
+  _type: enum
+  _enum_storage: uint8_t
+  eWifi_Steering_Snr_Unchanged : 0
+  eWifi_Steering_Snr_Higher : 1
+  eWifi_Steering_Snr_Lower : 2
+
+eSteeringEventType:
+  _type: enum
+  _enum_storage: uint8_t
+  eWifi_Steering_Event_Probe_Req : 1
+  eWifi_Steering_Event_Client_Connect : 2
+  eWifi_Steering_Event_Client_Disconnect : 3
+  eWifi_Steering_Event_Client_Activity : 4
+  eWifi_Steering_Event_Snr_Xing : 5
+  eWifi_Steering_Event_Snr : 6
+  eWifi_Steering_Event_Auth_Fail : 7
+
+eChannelScanResultMode:
+  _type: enum
+  _enum_storage: uint8_t
+  eMode_NA: 0
+  eMode_AdHoc: 1
+  eMode_Infrastructure: 2
+
+eChannelScanResultEncryptionMode:
+  _type: enum
+  _enum_storage: uint8_t
+  eEncryption_Mode_NA: 0
+  eEncryption_Mode_AES: 1
+  eEncryption_Mode_TKIP: 2
+
+eChannelScanResultSecurityMode:
+  _type: enum
+  _enum_storage: uint8_t
+  eSecurity_Mode_None: 0
+  eSecurity_Mode_WEP: 1
+  eSecurity_Mode_WPA: 2
+  eSecurity_Mode_WPA2: 3
+
+eChannelScanResultOperatingFrequencyBand:
+  _type: enum
+  _enum_storage: uint8_t
+  eOperating_Freq_Band_NA: 0
+  eOperating_Freq_Band_2_4GHz: 1
+  eOperating_Freq_Band_5GHz: 2
+
+eChannelScanResultStandards:
+  _type: enum
+  _enum_storage: uint8_t
+  eStandard_NA: 0
+  eStandard_802_11a: 1
+  eStandard_802_11b: 2
+  eStandard_802_11g: 3
+  eStandard_802_11n: 4
+  eStandard_802_11ac: 5
+
+eChannelScanResultChannelBandwidth:
+  _type: enum
+  _enum_storage: uint8_t
+  eChannel_Bandwidth_NA: 0
+  eChannel_Bandwidth_20MHz: 1
+  eChannel_Bandwidth_40MHz: 2
+  eChannel_Bandwidth_80MHz: 3
+  eChannel_Bandwidth_160MHz: 4
+  eChannel_Bandwidth_80_80: 5

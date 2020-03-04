@@ -68,19 +68,18 @@ static void config_logger(const std::string log_file = std::string())
 static void translate_channel_scan_results(const beerocks_message::sChannelScanResults &res_in,
                                            BML_NEIGHBOR_AP &res_out)
 {
-    string_utils::copy_string(res_out.ap_SSID, res_in.ssid,
-                              beerocks::message::WIFI_SSID_MAX_LENGTH);
+    string_utils::copy_string(res_out.ap_SSID, res_in.ssid, beerocks_message::WIFI_SSID_MAX_LENGTH);
     std::copy_n(res_in.bssid.oct, BML_MAC_ADDR_LEN, res_out.ap_BSSID);
-    std::copy_n(res_in.security_mode_enabled, beerocks::message::CHANNEL_SCAN_LIST_LENGTH,
+    std::copy_n(res_in.security_mode_enabled, beerocks_message::CHANNEL_SCAN_LIST_LENGTH,
                 res_out.ap_SecurityModeEnabled);
-    std::copy_n(res_in.encryption_mode, beerocks::message::CHANNEL_SCAN_LIST_LENGTH,
+    std::copy_n(res_in.encryption_mode, beerocks_message::CHANNEL_SCAN_LIST_LENGTH,
                 res_out.ap_EncryptionMode);
-    std::copy_n(res_in.supported_standards, beerocks::message::CHANNEL_SCAN_LIST_LENGTH,
+    std::copy_n(res_in.supported_standards, beerocks_message::CHANNEL_SCAN_LIST_LENGTH,
                 res_out.ap_SupportedStandards);
-    std::copy_n(res_in.basic_data_transfer_rates_kbps, beerocks::message::CHANNEL_SCAN_LIST_LENGTH,
+    std::copy_n(res_in.basic_data_transfer_rates_kbps, beerocks_message::CHANNEL_SCAN_LIST_LENGTH,
                 res_out.ap_BasicDataTransferRates);
     std::copy_n(res_in.supported_data_transfer_rates_kbps,
-                beerocks::message::CHANNEL_SCAN_LIST_LENGTH, res_out.ap_SupportedDataTransferRates);
+                beerocks_message::CHANNEL_SCAN_LIST_LENGTH, res_out.ap_SupportedDataTransferRates);
 
     res_out.ap_Channel                   = res_in.channel;
     res_out.ap_SignalStrength            = res_in.signal_strength_dBm;
@@ -906,10 +905,9 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                 std::copy_n(vap_element.al_mac, beerocks::net::MAC_ADDR_LEN, m_vaps[i].al_mac);
                 std::copy_n(vap_element.ruid, beerocks::net::MAC_ADDR_LEN, m_vaps[i].ruid);
                 std::copy_n(vap_element.bssid, beerocks::net::MAC_ADDR_LEN, m_vaps[i].bssid);
-                std::copy_n(vap_element.ssid, beerocks::message::WIFI_SSID_MAX_LENGTH,
+                std::copy_n(vap_element.ssid, beerocks_message::WIFI_SSID_MAX_LENGTH,
                             m_vaps[i].ssid);
-                std::copy_n(vap_element.key, beerocks::message::WIFI_PASS_MAX_LENGTH,
-                            m_vaps[i].key);
+                std::copy_n(vap_element.key, beerocks_message::WIFI_PASS_MAX_LENGTH, m_vaps[i].key);
             }
             *m_pvaps_list_size = i;
 
@@ -1186,10 +1184,10 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                 if (m_master_slave_versions != nullptr) {
                     string_utils::copy_string(m_master_slave_versions->master_version,
                                               response->versions().master_version,
-                                              message::VERSION_LENGTH);
+                                              beerocks_message::VERSION_LENGTH);
                     string_utils::copy_string(m_master_slave_versions->slave_version,
                                               response->versions().slave_version,
-                                              message::VERSION_LENGTH);
+                                              beerocks_message::VERSION_LENGTH);
                     m_prmMasterSlaveVersions->set_value(response->result() == 0);
                 } else {
                     LOG(DEBUG) << "m_master_slave_versions == nullptr !";
@@ -1270,8 +1268,8 @@ int bml_internal::bml_set_vap_list_credentials(const BML_VAP_INFO *vaps, const u
         std::copy_n(vaps[i].al_mac, beerocks::net::MAC_ADDR_LEN, vap_element.al_mac);
         std::copy_n(vaps[i].ruid, beerocks::net::MAC_ADDR_LEN, vap_element.ruid);
         std::copy_n(vaps[i].bssid, beerocks::net::MAC_ADDR_LEN, vap_element.bssid);
-        std::copy_n(vaps[i].ssid, beerocks::message::WIFI_SSID_MAX_LENGTH, vap_element.ssid);
-        std::copy_n(vaps[i].key, beerocks::message::WIFI_PASS_MAX_LENGTH, vap_element.key);
+        std::copy_n(vaps[i].ssid, beerocks_message::WIFI_SSID_MAX_LENGTH, vap_element.ssid);
+        std::copy_n(vaps[i].key, beerocks_message::WIFI_PASS_MAX_LENGTH, vap_element.key);
     }
 
     // Initialize the promise for receiving the response
@@ -1964,14 +1962,14 @@ int bml_internal::set_wifi_credentials(const std::string ssid, const std::string
     }
 
     // Max length should be 31 chars, need last byte for null char to avoid overflow
-    if (ssid.length() == 0 || ssid.length() >= message::WIFI_SSID_MAX_LENGTH) {
+    if (ssid.length() == 0 || ssid.length() >= beerocks_message::WIFI_SSID_MAX_LENGTH) {
         LOG(ERROR) << "Invalid SSID (Len = " << int(ssid.length()) << "): " << ssid;
         return (-BML_RET_INVALID_ARGS);
     }
 
     // Validate Pass length
     // Max length should be 63 chars, need last byte for null char to avoid overflow
-    if (pass.length() == 0 || pass.length() >= message::WIFI_PASS_MAX_LENGTH) {
+    if (pass.length() == 0 || pass.length() >= beerocks_message::WIFI_PASS_MAX_LENGTH) {
         LOG(ERROR) << "Invalid PASS (Len = " << int(pass.length()) << "): " << pass;
         return (-BML_RET_INVALID_ARGS);
     }
@@ -2025,8 +2023,10 @@ int bml_internal::set_wifi_credentials(const std::string ssid, const std::string
         return (-BML_RET_OP_FAILED);
     }
 
-    string_utils::copy_string(config->params().ssid, ssid.c_str(), message::WIFI_SSID_MAX_LENGTH);
-    string_utils::copy_string(config->params().pass, pass.c_str(), message::WIFI_PASS_MAX_LENGTH);
+    string_utils::copy_string(config->params().ssid, ssid.c_str(),
+                              beerocks_message::WIFI_SSID_MAX_LENGTH);
+    string_utils::copy_string(config->params().pass, pass.c_str(),
+                              beerocks_message::WIFI_PASS_MAX_LENGTH);
 
     switch (sec) {
     case BML_WLAN_SEC_NONE:
@@ -2267,8 +2267,8 @@ int bml_internal::bml_wps_onboarding(const char *iface)
         return (-BML_RET_OP_FAILED);
     }
 
-    string_utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH), iface,
-                              message::IFACE_NAME_LENGTH);
+    string_utils::copy_string(request->iface_name(beerocks_message::IFACE_NAME_LENGTH), iface,
+                              beerocks_message::IFACE_NAME_LENGTH);
 
     if (!message_com::send_cmdu(m_sockPlatform, cmdu_tx)) {
         LOG(ERROR) << "Failed sending ACTION_PLATFORM_WPS_ONBOARDING_REQUEST message!";
@@ -2766,15 +2766,15 @@ int bml_internal::set_log_level(const std::string module_name, const std::string
     }
 
     if (module_name == "master")
-        request->params().module_name = BEEROCKS_PROCESS_MASTER;
+        request->params().module_name = beerocks_message::BEEROCKS_PROCESS_MASTER;
     else if (module_name == "slave")
-        request->params().module_name = BEEROCKS_PROCESS_SLAVE;
+        request->params().module_name = beerocks_message::BEEROCKS_PROCESS_SLAVE;
     else if (module_name == "monitor")
-        request->params().module_name = BEEROCKS_PROCESS_MONITOR;
+        request->params().module_name = beerocks_message::BEEROCKS_PROCESS_MONITOR;
     else if (module_name == "platform")
-        request->params().module_name = BEEROCKS_PROCESS_MONITOR;
+        request->params().module_name = beerocks_message::BEEROCKS_PROCESS_MONITOR;
     else if (module_name == "all")
-        request->params().module_name = BEEROCKS_PROCESS_ALL;
+        request->params().module_name = beerocks_message::BEEROCKS_PROCESS_ALL;
     else {
         LOG(ERROR) << "module_name not valid";
         return -BML_RET_INVALID_ARGS;
@@ -2843,8 +2843,10 @@ int bml_internal::get_master_slave_versions(char *master_version, char *slave_ve
     // Clear the promise holder
     m_prmMasterSlaveVersions = nullptr;
 
-    string_utils::copy_string(master_version, sVersion.master_version, message::VERSION_LENGTH);
-    string_utils::copy_string(slave_version, sVersion.slave_version, message::VERSION_LENGTH);
+    string_utils::copy_string(master_version, sVersion.master_version,
+                              beerocks_message::VERSION_LENGTH);
+    string_utils::copy_string(slave_version, sVersion.slave_version,
+                              beerocks_message::VERSION_LENGTH);
 
     if (iRet != BML_RET_OK) {
         LOG(ERROR) << "master_slave_versions request failed!";

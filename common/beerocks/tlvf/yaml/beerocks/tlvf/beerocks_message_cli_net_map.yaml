@@ -21,7 +21,7 @@ sCliNetworkMapsNodeInfo:
   ipv4: beerocks::net::sIpv4Addr 
   name:
     _type: char 
-    _length: [ "beerocks::message::NODE_NAME_LENGTH" ]
+    _length: [ NODE_NAME_LENGTH ]
   type: uint8_t 
   state: uint8_t 
   channel: uint8_t 

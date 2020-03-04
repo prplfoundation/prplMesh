@@ -209,9 +209,10 @@ bool socket_thread::verify_cmdu(message::sUdsHeader *uds_header)
                 // assuming that the magic is the first data on the beerocks header
                 auto beerocks_magic = *(uint32_t *)(tlv_vendor_specific.payload());
                 swap_32(beerocks_magic);
-                if (beerocks_magic != message::MESSAGE_MAGIC) {
-                    THREAD_LOG(WARNING) << "mismatch magic " << std::hex << int(beerocks_magic)
-                                        << " != " << int(message::MESSAGE_MAGIC) << std::dec;
+                if (beerocks_magic != beerocks_message::MESSAGE_MAGIC) {
+                    THREAD_LOG(WARNING)
+                        << "mismatch magic " << std::hex << int(beerocks_magic)
+                        << " != " << int(beerocks_message::MESSAGE_MAGIC) << std::dec;
                     ret = false;
                     break;
                 }

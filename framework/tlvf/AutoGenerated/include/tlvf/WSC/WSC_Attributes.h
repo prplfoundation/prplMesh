@@ -16,15 +16,19 @@
 #include <cstddef>
 #include <stdint.h>
 #include <tlvf/swap.h>
-#include "tlvf/WSC/eWscAttributes.h"
-#include "tlvf/WSC/eWscAuth.h"
-#include "tlvf/WSC/eWscEncr.h"
 #include <string.h>
 #include <memory>
 #include <tlvf/BaseClass.h>
 #include <tlvf/ClassList.h>
 #include <tuple>
 #include <tlvf/tlvfutils.h>
+#include "tlvf/WSC/eWscAttributes.h"
+#include "tlvf/WSC/eWscLengths.h"
+#include "tlvf/WSC/eWscAuth.h"
+#include "tlvf/WSC/eWscEncr.h"
+#include "tlvf/WSC/eWscVendorId.h"
+#include "tlvf/WSC/eWscVendorExt.h"
+#include "tlvf/WSC/eWscDev.h"
 #include "tlvf/WSC/eWscValues8.h"
 #include "tlvf/WSC/eWscMessageType.h"
 #include "tlvf/WSC/eWscConn.h"
@@ -32,10 +36,6 @@
 #include "tlvf/WSC/eWscAssoc.h"
 #include "tlvf/WSC/eWscValues16.h"
 #include "tlvf/WSC/eWscState.h"
-#include "tlvf/WSC/eWscLengths.h"
-#include "tlvf/WSC/eWscVendorId.h"
-#include "tlvf/WSC/eWscVendorExt.h"
-#include "tlvf/WSC/eWscDev.h"
 #include "tlvf/common/sMacAddr.h"
 
 namespace WSC {

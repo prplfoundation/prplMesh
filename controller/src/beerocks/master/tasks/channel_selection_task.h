@@ -60,7 +60,7 @@ public:
         beerocks_message::sApChannelSwitch cs_params;
 
         beerocks::message::sWifiChannel
-            supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+            supported_channels[beerocks_message::SUPPORTED_CHANNELS_LENGTH];
     } sAcsResponse_event;
 
     typedef struct {
@@ -71,9 +71,9 @@ public:
         uint8_t channel;
         beerocks_message::sApChannelSwitch cs_params;
         beerocks::message::sWifiChannel
-            supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+            supported_channels[beerocks_message::SUPPORTED_CHANNELS_LENGTH];
         beerocks::net::sScanResult
-            backhaul_scan_measurement_list[beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];
+            backhaul_scan_measurement_list[beerocks_message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH];
     } sSlaveJoined_event;
 
     typedef struct {
@@ -94,7 +94,7 @@ public:
 
     typedef struct {
         sMacAddr hostap_mac;
-        uint8_t restricted_channels[beerocks::message::RESTRICTED_CHANNEL_LENGTH];
+        uint8_t restricted_channels[beerocks_message::RESTRICTED_CHANNEL_LENGTH];
     } sConfiguredRestrictedChannels_event;
 
 #define FOREACH_EVENT(EVENT)                                                                       \

@@ -113,7 +113,7 @@ bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::set_iface_name(const char str[
         TLVF_LOG(WARNING) << "set_iface_name received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::IFACE_NAME_LENGTH) {
+    if (size > IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -155,7 +155,7 @@ bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::finalize()
 size_t cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // iface_name
+    class_size += IFACE_NAME_LENGTH * sizeof(char); // iface_name
     return class_size;
 }
 
@@ -166,11 +166,11 @@ bool cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST::init()
         return false;
     }
     m_iface_name = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (IFACE_NAME_LENGTH) << ") Failed!";
         return false;
     }
-    m_iface_name_idx__  = beerocks::message::IFACE_NAME_LENGTH;
+    m_iface_name_idx__  = IFACE_NAME_LENGTH;
     if (m_parse__) { class_swap(); }
     return true;
 }
@@ -454,7 +454,7 @@ bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::set_hostname(const char str[], 
         TLVF_LOG(WARNING) << "set_hostname received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::NODE_NAME_LENGTH) {
+    if (size > NODE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -504,7 +504,7 @@ size_t cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::get_initial_size()
     class_size += sizeof(uint32_t); // op
     class_size += sizeof(sMacAddr); // mac
     class_size += sizeof(beerocks::net::sIpv4Addr); // ipv4
-    class_size += beerocks::message::NODE_NAME_LENGTH * sizeof(char); // hostname
+    class_size += NODE_NAME_LENGTH * sizeof(char); // hostname
     return class_size;
 }
 
@@ -537,11 +537,11 @@ bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::init()
     }
     if (!m_parse__) { m_ipv4->struct_init(); }
     m_hostname = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::NODE_NAME_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::NODE_NAME_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (NODE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (NODE_NAME_LENGTH) << ") Failed!";
         return false;
     }
-    m_hostname_idx__  = beerocks::message::NODE_NAME_LENGTH;
+    m_hostname_idx__  = NODE_NAME_LENGTH;
     if (m_parse__) { class_swap(); }
     return true;
 }
@@ -984,7 +984,7 @@ bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::set_iface_name(const char str[], s
         TLVF_LOG(WARNING) << "set_iface_name received a null pointer.";
         return false;
     }
-    if (size > beerocks::message::IFACE_NAME_LENGTH) {
+    if (size > IFACE_NAME_LENGTH) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -1026,7 +1026,7 @@ bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::finalize()
 size_t cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // iface_name
+    class_size += IFACE_NAME_LENGTH * sizeof(char); // iface_name
     return class_size;
 }
 
@@ -1037,11 +1037,11 @@ bool cACTION_PLATFORM_WPS_ONBOARDING_REQUEST::init()
         return false;
     }
     m_iface_name = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::IFACE_NAME_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (IFACE_NAME_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (IFACE_NAME_LENGTH) << ") Failed!";
         return false;
     }
-    m_iface_name_idx__  = beerocks::message::IFACE_NAME_LENGTH;
+    m_iface_name_idx__  = IFACE_NAME_LENGTH;
     if (m_parse__) { class_swap(); }
     return true;
 }
@@ -1924,7 +1924,7 @@ bool cACTION_PLATFORM_ERROR_NOTIFICATION::set_data(const char str[], size_t size
         TLVF_LOG(WARNING) << "set_data received a null pointer.";
         return false;
     }
-    if (size > 256) {
+    if (size > PLATFORM_ERROR_DATA_SIZE) {
         TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
         return false;
     }
@@ -1968,7 +1968,7 @@ size_t cACTION_PLATFORM_ERROR_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(uint32_t); // code
-    class_size += 256 * sizeof(char); // data
+    class_size += PLATFORM_ERROR_DATA_SIZE * sizeof(char); // data
     return class_size;
 }
 
@@ -1984,11 +1984,11 @@ bool cACTION_PLATFORM_ERROR_NOTIFICATION::init()
         return false;
     }
     m_data = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (256))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (256) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(char) * (PLATFORM_ERROR_DATA_SIZE))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (PLATFORM_ERROR_DATA_SIZE) << ") Failed!";
         return false;
     }
-    m_data_idx__  = 256;
+    m_data_idx__  = PLATFORM_ERROR_DATA_SIZE;
     if (m_parse__) { class_swap(); }
     return true;
 }

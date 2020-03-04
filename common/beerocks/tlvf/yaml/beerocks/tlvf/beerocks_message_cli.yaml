@@ -131,7 +131,7 @@ cACTION_CLI_CLIENT_BEACON_11K_REQUEST:
   bssid: sMacAddr 
   ssid:
     _type: uint8_t 
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: [ WIFI_SSID_MAX_LENGTH ]
   use_optional_ssid: uint8_t 
   channel: uint8_t 
   measurement_mode: uint8_t 

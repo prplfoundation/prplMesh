@@ -93,7 +93,7 @@ void dynamic_channel_selection_task::work()
             break;
         }
 
-        if (curr_channel_pool.size() > beerocks::message::SUPPORTED_CHANNELS_LENGTH) {
+        if (curr_channel_pool.size() > beerocks_message::SUPPORTED_CHANNELS_LENGTH) {
             LOG(ERROR) << "channel_pool is too big";
             m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_POOL_TOO_BIG;
             fsm_move_state(eState::ABORT_SCAN);

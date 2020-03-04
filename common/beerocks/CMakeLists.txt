@@ -4,7 +4,7 @@ add_subdirectory(tlvf)
 add_subdirectory(btl)
 add_subdirectory(scripts)
 
-# BWL depends on BCL, so make sure it's built first
+# BCL depends on BTLVF, so make sure it's built first
+add_dependencies(bcl btlvf)
 add_dependencies(bwl bcl)
-add_dependencies(btlvf bcl)
-add_dependencies(btl btlvf)
+add_dependencies(btl bcl)
