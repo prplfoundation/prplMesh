@@ -29,6 +29,25 @@ cPreferenceOperatingClasses:
     _length: [ channel_list_length ]
   flags: sFlags
 
+ePreference:
+  _type: enum
+  NON_OPERABLE: 0
+  PREFERRED1: 1
+  PREFERRED2: 2
+  PREFERRED3: 3
+  PREFERRED4: 4
+  PREFERRED5: 5
+  PREFERRED6: 6
+  PREFERRED7: 7
+  PREFERRED8: 8
+  PREFERRED9: 9
+  PREFERRED10: 10
+  PREFERRED11: 11
+  PREFERRED12: 12
+  PREFERRED13: 13
+  PREFERRED14: 14
+  RESERVED: 15
+
 eReasonCode:
   _type: enum
   UNSPECIFIED: 0
