@@ -262,6 +262,13 @@ class test_flows:
             return self.fail("Can't read {}".format(logfilename))
         return self.fail("'{}'\n\tin log of {} on {}".format(regex, program, device))
 
+    def send_bwl_event(self, device: str, radio: str, event: str) -> None:
+        """Send a bwl event `event` to `radio` on `device`."""
+        # The file is only available within the docker container so we need to use an echo command.
+        # Inside the container, $USER is set to the username that was used for starting it.
+        command = "echo \"{event}\" > /tmp/$USER/beerocks/{radio}/EVENT".format(**locals())
+        self.docker_command(device, 'sh', '-c', command)
+
     def run_tests(self):
         '''Run all tests as specified on the command line.'''
         total_errors = 0
