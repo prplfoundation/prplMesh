@@ -99,7 +99,15 @@ class test_flows:
             self.debug("Starting tcpdump, output file {}".format(outputfile))
             inspect = json.loads(subprocess.check_output(('docker', 'network', 'inspect',
                                                           'prplMesh-net-{}'.format(self.opts.unique_id))))
-            bridge = inspect[0]['plugins'][0]['bridge']
+            prplmesh_net = inspect[0]
+            # podman adds a 'plugins' indirection that docker doesn't have.
+            if 'plugins' in prplmesh_net:
+                bridge = prplmesh_net['plugins'][0]['bridge']
+            else:
+                # docker doesn't report the interface name of the bridge. So format it based on the
+                # ID.
+                bridge_id = prplmesh_net['Id']
+                bridge = 'br-' + bridge_id[:12]
             self.tcpdump_proc = subprocess.Popen(["tcpdump", "-i", bridge, "-w", outputfile], stderr=subprocess.PIPE)
             # tcpdump takes a while to start up. Wait for the appropriate output before continuing.
             # poll() so we exit the loop if tcpdump terminates for any reason.
