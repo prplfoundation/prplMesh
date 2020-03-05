@@ -1,0 +1,106 @@
+@startuml
+
+class Device {
+   al_mac
+
+   {abstract} deploy()
+   {abstract} run()
+   {abstract} stop()
+   send_CAPI_command()
+   send_1905()
+}
+
+
+Device <|-- DeviceDocker
+
+Device <|-- DeviceUbuntu
+
+Device <|-- DeviceRAX40
+
+class Process {
+   In every device, this class has an instance
+   for the controller, agent, slaves, monitors.
+
+   assertLog()
+   assertStatus()
+}
+
+Process <|-- ProcessDocker
+
+Device *-- Process
+
+class Radio {
+  mac
+
+  {abstract} assertHasVap()
+}
+
+class RadioDocker {
+  assertHasVap()
+}
+
+Radio <|-- RadioDocker
+
+Device *-- Radio
+
+class Station {
+mac
+
+{abstract} associate(bssid, ssid, password)
+{abstract} disassociate()
+}
+
+Station <|-- StationDummy
+
+Station <|-- StationOpenWrt
+
+class TestEnvironment {
+  Controlled by a configuration file (yaml)
+  Every developer has their own yaml file(s).
+  Contains IP address etc.
+  Contains type of Device to instantiate.
+  ---
+  Need some way to configure which device acts
+  as the gateway.
+  This is independent of the config yaml file.
+  ---
+  get_gateway()
+  get_repeater1()
+  get_repeater2()
+  get_repeater_or_gateway()
+}
+
+
+TestEnvironment *-- Device
+
+TestEnvironment *-- Station
+
+class FlowTest
+
+TestCase <|-- FlowTest
+
+TestSuite <|-- FlowTestSuite
+
+FlowTestSuite *-- FlowTest
+
+FlowTestSuite "1" -- "1" TestEnvironment
+
+class FlowTestSuite {
+  dev_reset_default()
+}
+
+FlowTest <|-- TopologyTest
+
+class TopologyTest {
+  test_topology()
+}
+
+class ClientSteeringTest {
+   test_client_association()
+   test_client_steering_dummy()
+   test_optimal_path_dummy()
+}
+
+FlowTest <|-- ClientSteeringTest
+
+@enduml
