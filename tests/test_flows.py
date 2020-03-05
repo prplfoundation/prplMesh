@@ -456,17 +456,13 @@ class test_flows:
                          "0xa4243444 0xa5253545 0xa6263646"))
         self.check_log(self.gateway, "controller", "Received AP_METRICS_RESPONSE_MESSAGE")
 
-        self.debug("Send 1905 Link metric query to agent 1 (neighbor agent 2)")
+        self.debug("Send 1905 Link metric query to agent 1 (neighbor gateway)")
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x0005,
-                                       tlv(0x08,0x0008,"0x01 {%s} 0x02" % self.mac_repeater2))
-        self.check_log(self.repeater1, "agent_wlan0", "Received LINK_METRIC_QUERY_MESSAGE")
-        # TODO agent should send response autonomously
-        self.repeater1_ucc.dev_send_1905(self.mac_gateway, 0x6,
-            tlv(0x09,0x0029,"{%s} {%s} {%s} {%s} 0x0100 0x01 0x00000000 0x0000e300 0x4230 0x0064 0x0300" %
-                (self.mac_repeater1, self.mac_repeater2, self.mac_repeater1_wlan0, self.mac_repeater2_wlan2)),
-            tlv(0x0a,0x0023,"{%s} {%s} {%s} {%s} 0x0100 0x00000007 0x00020000 0x31" %
-                (self.mac_repeater1, self.mac_repeater2, self.mac_repeater1, self.mac_repeater2)))
+                                       tlv(0x08,0x0008,"0x01 {%s} 0x02" % self.mac_gateway))
+        self.check_log(self.repeater1, "agent", "Received LINK_METRIC_QUERY_MESSAGE")
         self.check_log(self.gateway, "controller", "Received LINK_METRIC_RESPONSE_MESSAGE")
+        self.check_log(self.gateway, "controller", "Received TLV_TRANSMITTER_LINK_METRIC")
+        self.check_log(self.gateway, "controller", "Received TLV_RECEIVER_LINK_METRIC")
 
         # Trigger combined infra metrics
         self.debug("Send Combined infrastructure metrics message to agent 1")
