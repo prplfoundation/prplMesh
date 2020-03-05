@@ -2215,21 +2215,26 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
      * Set the number of local interfaces and fill info of each of the local interfaces, according
      * to IEEE_1905 section 6.4.5
      */
-    uint32_t speed;
-    if (network_utils::linux_iface_get_speed(m_sConfig.wire_iface, speed)) {
+
+    /**
+     * Add a LocalInterfaceInfo field for the wired interface, if any.
+     */
+    std::string local_interface_name = m_sConfig.wire_iface;
+    if (!local_interface_name.empty() &&
+        network_utils::linux_iface_is_up_and_running(local_interface_name)) {
+        ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+        if (!get_media_type(local_interface_name, ieee1905_1::eMediaTypeGroup::IEEE_802_3,
+                            media_type)) {
+            LOG(ERROR) << "Unable to compute media type for interface " << local_interface_name;
+            return false;
+        }
+
         std::shared_ptr<ieee1905_1::cLocalInterfaceInfo> localInterfaceInfo =
             tlvDeviceInformation->create_local_interface_list();
 
-        ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
-        if (SPEED_100 == speed) {
-            media_type = ieee1905_1::eMediaType::IEEE_802_3U_FAST_ETHERNET;
-        } else if (SPEED_1000 <= speed) {
-            media_type = ieee1905_1::eMediaType::IEEE_802_3AB_GIGABIT_ETHERNET;
-        }
-
         // default to zero mac if get_mac fails.
         std::string wire_iface_mac = network_utils::ZERO_MAC_STRING;
-        network_utils::linux_iface_get_mac(m_sConfig.wire_iface, wire_iface_mac);
+        network_utils::linux_iface_get_mac(local_interface_name, wire_iface_mac);
         localInterfaceInfo->mac()               = network_utils::mac_from_string(wire_iface_mac);
         localInterfaceInfo->media_type()        = media_type;
         localInterfaceInfo->media_info_length() = 0;
