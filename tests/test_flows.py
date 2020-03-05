@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import time
+from typing import Dict
 import json
 
 import send_CAPI_command
@@ -19,6 +20,34 @@ from send_CAPI_command import tlv
 
 '''Regular expression to match a MAC address in a bytes string.'''
 RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
+
+class map_vap:
+    '''Represents a VAP in the connection map.'''
+    def __init__(self, bssid: str, ssid: bytes):
+        self.bssid = bssid
+        self.ssid = ssid
+
+class map_radio:
+    '''Represents a radio in the connection map.'''
+    def __init__(self, uid: str):
+        self.uid = uid
+        self.vaps = {}
+
+    def add_vap(self, bssid: str, ssid: bytes):
+        vap = map_vap(bssid, ssid)
+        self.vaps[bssid] = vap
+        return vap
+
+class map_device:
+    '''Represents a device in the connection map.'''
+    def __init__(self, mac: str):
+        self.mac = mac
+        self.radios = {}
+
+    def add_radio(self, uid: str):
+        radio = map_radio(uid)
+        self.radios[uid] = radio
+        return radio
 
 class test_flows:
     def __init__(self):
@@ -132,6 +161,31 @@ class test_flows:
     def docker_command(self, device: str, *command: str) -> bytes:
         '''Execute `command` in docker container `device` and return its output.'''
         return subprocess.check_output(("docker", "exec", device) + command)
+
+    def beerocks_cli_command(self, command: str) -> bytes:
+        '''Execute `command` beerocks_cli command on the controller and return its output.'''
+        return self.docker_command(self.gateway,
+                                   os.path.join(self.installdir, "bin", "beerocks_cli"),
+                                   "-c",
+                                   command)
+
+    def get_conn_map(self) -> Dict[str, map_device]:
+        '''Get the connection map from the controller.'''
+        conn_map = {}
+        for line in self.beerocks_cli_command("bml_conn_map").split(b'\n'):
+            # TODO we need to parse indentation to get the exact topology.
+            # For the time being, just parse the repeaters.
+            bridge = re.search(rb' {8}IRE_BRIDGE: .* mac: ' + RE_MAC, line)
+            radio = re.match(rb' {16}RADIO: .* mac: ' + RE_MAC, line)
+            vap = re.match(rb' {20}fVAP.* bssid: ' + RE_MAC + rb', ssid: (?P<ssid>.*)$', line)
+            if bridge:
+                cur_agent = map_device(bridge.group('mac').decode('utf-8'))
+                conn_map[cur_agent.mac] = cur_agent
+            elif radio:
+                cur_radio = cur_agent.add_radio(radio.group('mac').decode('utf-8'))
+            elif vap:
+                cur_radio.add_vap(vap.group('mac').decode('utf-8'), vap.group('ssid'))
+        return conn_map
 
     def open_CAPI_socket(self, device: str, controller: bool = False) -> send_CAPI_command.UCCSocket:
         '''Open a CAPI socket to the agent (or controller, if set) on "device".'''
@@ -277,7 +331,16 @@ class test_flows:
 
         self.check_log(self.repeater1, "agent_wlan0", r"Received credentials for ssid: Multi-AP-24G-3 .* bss_type: 2")
         self.check_log(self.repeater1, "agent_wlan2", r".* tear down radio")
-        # TODO check that conn map was updated on controller
+        conn_map = self.get_conn_map()
+        repeater1 = conn_map[self.mac_repeater1]
+        repeater1_wlan0 = repeater1.radios[self.mac_repeater1_wlan0]
+        for vap in repeater1_wlan0.vaps.values():
+            if vap.ssid not in (b'Multi-AP-24G-3', b'N/A'):
+                self.fail('Wrong SSID: {vap.ssid} instead of Multi-AP-24G-3'.format(vap = vap))
+        repeater1_wlan2 = repeater1.radios[self.mac_repeater1_wlan2]
+        for vap in repeater1_wlan2.vaps.values():
+            if vap.ssid != b'N/A':
+                self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap = vap))
 
         # SSIDs have been removed for the CTT Agent1's front radio
         self.gateway_ucc.cmd_reply(
@@ -290,7 +353,16 @@ class test_flows:
 
         time.sleep(3)
         self.check_log(self.repeater1, "agent_wlan0", r".* tear down radio")
-        # TODO check that conn map was updated on controller
+        conn_map = self.get_conn_map()
+        repeater1 = conn_map[self.mac_repeater1]
+        repeater1_wlan0 = repeater1.radios[self.mac_repeater1_wlan0]
+        for vap in repeater1_wlan0.vaps.values():
+            if vap.ssid != b'N/A':
+                self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap = vap))
+        repeater1_wlan2 = repeater1.radios[self.mac_repeater1_wlan2]
+        for vap in repeater1_wlan2.vaps.values():
+            if vap.ssid != b'N/A':
+                self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap = vap))
 
     def test_channel_selection(self):
         self.debug("Send channel preference query")
