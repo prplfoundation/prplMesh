@@ -20,6 +20,7 @@ import send_CAPI_command
 RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
 
 class test_flows:
+    ieee1905_capture = []
     def __init__(self):
         self.tests = [attr[len('test_'):] for attr in dir(self) if attr.startswith('test_')]
 
@@ -112,6 +113,14 @@ class test_flows:
             else:
                 self.err("tcpdump terminated")
                 self.tcpdump_proc = None
+            # after tcpdump finishes, add a list of all ieee1905 packets for easier analysis
+            # first, generate a json file of the pcap dump
+            self.json_from_pcap = subprocess.run(['tshark', '-r', outputfile, '-T', 'json' '>tmp.json'])
+            if self.json_from_pcap.returncode == 0:
+                with open('tmp.json', 'r') as f:
+                    #filter out only relevant packets from the file
+                   ieee1905_packets =  filter(lambda x: "ieee1905" in x["_source"]["layers"],json.load(f))
+                   self.ieee1905_capture.extend(obj["_source"]["layers"] for obj in ieee1905_packets)
 
     def tcpdump_kill(self):
         '''Stop tcpdump if it is running.'''
