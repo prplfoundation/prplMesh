@@ -13,7 +13,7 @@
 # since it uses all radios. A better solution would of course be to properly configure all APs,
 # but just doing the optimal_path_dummy test first is simpler for the time being.
 # FIXME optimal_path_dummy temporarily disabled since it's broken
-ALL_TESTS="topology ap_config_bss_tear_down
+ALL_TESTS="topology
            client_capability_query
            client_steering_dummy client_association_dummy client_steering_policy client_association
            higher_layer_data_payload_trigger"
@@ -113,36 +113,6 @@ send_bwl_event() {
     # $2: radio to send to (wlan0, wlan2)
     # $3: event string
     check docker exec $1 sh -c 'echo '"$3"' > /tmp/$USER/beerocks/'$2'/EVENT'
-}
-
-test_ap_config_bss_tear_down() {
-    status "test ap config bss tear down"
-    # Regression test: MAC address should be case insensitive
-    MAC_AGENT1=$(echo $mac_agent1 | tr a-z A-Z)
-    # Configure the controller and send renew
-    send_CAPI_command ${GATEWAY} "DEV_RESET_DEFAULT" $redirect
-    send_CAPI_command ${GATEWAY} "DEV_SET_CONFIG,bss_info1,$mac_agent1 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1" $redirect
-
-    gw_mac_without_colons="$(printf $mac_gateway | tr -d :)"
-    send_CAPI_1905 ${GATEWAY} $mac_agent1 0x000A "tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}"
-
-    sleep 3
-    check_log ${REPEATER1} agent_wlan0 "ssid: Multi-AP-24G-1"
-    check_log ${REPEATER1} agent_wlan2 ".* tear down radio"
-    agent1_wlan0_ssid="$(send_bml_command bml_conn_map | sed -n "/fVAP.*$mac_agent1_wlan0/s/.*ssid: //p")"
-    check [ "$agent1_wlan0_ssid" = "Multi-AP-24G-1" ]
-
-    # SSIDs have been removed for the CTT Agent1's front radio
-    send_CAPI_command ${GATEWAY} "DEV_SET_CONFIG,bss_info1,$MAC_AGENT1 8x" $redirect
-    # Send renew message
-    send_CAPI_1905 ${GATEWAY} $mac_agent1 0x000A "tlv_type1,0x01,tlv_length1,0x0006,tlv_value1,0x${gw_mac_without_colons},tlv_type2,0x0F,tlv_length2,0x0001,tlv_value2,{0x00},tlv_type3,0x10,tlv_length3,0x0001,tlv_value3,{0x00}}"
-
-    sleep 3
-    check_log ${REPEATER1} agent_wlan0 ".* tear down radio"
-    agent1_wlan0_ssid="$(send_bml_command bml_conn_map | sed -n "/fVAP.*$mac_agent1_wlan0/s/.*ssid: //p")"
-    check [ "$agent1_wlan0_ssid" = "N/A" ]
-
-    return $check_error
 }
 
 test_client_capability_query() {
@@ -479,7 +449,6 @@ usage() {
     echo ""
     echo "  positional params:"
     echo "      topology - Topology discovery test"
-    echo "      ap_config_bss_tear_down - AP configuration BSS Tear Down test"
     echo "      client_steering_dummy - Client Steering using dummy bwl"
     echo "      optimal_path_dummy - Optimal Path using dummy bwl"
     echo "      client_association_dummy - Client Association Control Message using dummy bwl"
