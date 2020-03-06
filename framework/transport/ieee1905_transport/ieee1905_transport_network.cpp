@@ -32,6 +32,9 @@ public:
     // The two addresses are here to specify the AL MAC address and the interface's hardware address
     Ieee1905SocketFilter(const uint8_t *addr0 = NULL, const uint8_t *addr1 = NULL)
     {
+        MAPF_WARN_IF(!addr0 && !addr1,
+                     "at least one address should be specified for socket filter.");
+
         static const uint8_t ieee1905_multicast_address[ETH_ALEN] = {
             0x01, 0x80, 0xc2, 0x00, 0x00, 0x13}; // 01:80:c2:00:00:13
 
@@ -49,10 +52,6 @@ public:
         filter[7].k = (uint32_t)addr1[2] << 24 | (uint32_t)addr1[3] << 16 |
                       (uint32_t)addr1[4] << 8 | (uint32_t)addr1[5];
         filter[9].k = (uint32_t)addr1[0] << 8 | (uint32_t)addr1[1];
-
-        if (!addr0 && !addr1) {
-            MAPF_WARN("at least one address should be specified for socket filter.");
-        }
     }
 
     const struct sock_fprog &sock_fprog() const { return fprog; }
