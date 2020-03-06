@@ -25,6 +25,8 @@ public:
     Broker();
 
     Broker(const std::string &cfg);
+    Broker(const Broker &) = delete;
+    Broker &operator=(const Broker &) = delete;
 
     ~Broker();
 
