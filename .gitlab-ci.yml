@@ -67,3 +67,13 @@ run-tests-py:
   needs:
     - job: build-in-docker
 
+run-tests-2:
+    extends: run-tests
+run-tests-3:
+    extends: run-tests
+run-tests-4:
+    extends: run-tests
+run-tests-5:
+    extends: run-tests
+run-tests-6:
+    extends: run-tests
