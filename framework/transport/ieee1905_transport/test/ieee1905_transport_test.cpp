@@ -336,8 +336,8 @@ int main(int argc, char *argv[])
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
-            rc = bus.publisher().Send(cmdu_tx_msg);
-            if (rc != true) {
+            bool ret = bus.publisher().Send(cmdu_tx_msg);
+            if (!ret) {
                 success = false;
                 break;
             }
@@ -415,8 +415,8 @@ int main(int argc, char *argv[])
         MAPF_INFO("sending InterfaceConfigurationRequestMessage: "
                   << std::endl
                   << interface_configuration_request_msg);
-        rc = bus.publisher().Send(interface_configuration_request_msg);
-        if (rc != true) {
+        bool ret = bus.publisher().Send(interface_configuration_request_msg);
+        if (!ret) {
             MAPF_INFO("failed to send");
             success = false;
             break;
@@ -443,8 +443,8 @@ int main(int argc, char *argv[])
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
-            rc = bus.publisher().Send(cmdu_tx_msg);
-            if (rc != true) {
+            ret = bus.publisher().Send(cmdu_tx_msg);
+            if (!ret) {
                 MAPF_INFO("failed to send");
                 success = false;
                 break;
@@ -512,8 +512,8 @@ int main(int argc, char *argv[])
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
-            rc = bus.publisher().Send(cmdu_tx_msg);
-            if (rc != true)
+            ret = bus.publisher().Send(cmdu_tx_msg);
+            if (!ret)
                 break;
         }
 
@@ -530,8 +530,8 @@ int main(int argc, char *argv[])
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
-            rc = bus.publisher().Send(cmdu_tx_msg);
-            if (rc != true)
+            ret = bus.publisher().Send(cmdu_tx_msg);
+            if (!ret)
                 break;
         }
 
@@ -612,8 +612,8 @@ int main(int argc, char *argv[])
             std::fill_n(tlv + 3, tlvlen, *tlv);
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
-            rc = bus.publisher().Send(cmdu_tx_msg);
-            if (rc != true)
+            ret = bus.publisher().Send(cmdu_tx_msg);
+            if (!ret)
                 break;
         }
 
@@ -630,8 +630,8 @@ int main(int argc, char *argv[])
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
-            rc = bus.publisher().Send(cmdu_tx_msg);
-            if (rc != true)
+            ret = bus.publisher().Send(cmdu_tx_msg);
+            if (!ret)
                 break;
         }
 
@@ -653,8 +653,8 @@ int main(int argc, char *argv[])
             std::copy_n(ieee1905_header, sizeof(ieee1905_header), cmdu_tx_msg.data());
 
             MAPF_INFO("sending CmduTxMessage: " << std::endl << cmdu_tx_msg);
-            rc = bus.publisher().Send(cmdu_tx_msg);
-            if (rc != true) {
+            ret = bus.publisher().Send(cmdu_tx_msg);
+            if (!ret) {
                 MAPF_INFO("failed to send");
                 success = false;
                 break;
