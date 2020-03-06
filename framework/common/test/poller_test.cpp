@@ -125,15 +125,16 @@ protected:
 
             MAPF_INFO("rc = " << rc);
             poller_.PrintItems();
+            bool ret = false;
             if (poller_.CheckEvent(sub_)) {
-                rc = sub_.Receive(msg);
-                mapf_assert(rc == true);
+                ret = sub_.Receive(msg);
+                mapf_assert(ret);
                 MAPF_INFO("received message: " << msg << "\nFrame: " << msg.frame().str());
                 received++;
             }
             if (poller_.CheckEvent(sub2_)) {
-                rc = sub2_.Receive(msg);
-                mapf_assert(rc == true);
+                ret = sub2_.Receive(msg);
+                mapf_assert(ret);
                 MAPF_INFO("received message: " << msg << "\nFrame: " << msg.frame().str());
                 received++;
             }
