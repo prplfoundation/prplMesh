@@ -50,6 +50,7 @@ kill_tcpdump() {
 }
 
 container_ip() {
+    docker exec -t "$1" ip -f inet addr show 1>&2
     docker exec -t "$1" ip -f inet addr show "$bridge_name" | grep -Po 'inet \K[\d.]+'
 }
 
@@ -466,6 +467,14 @@ test_init() {
         }
     }
     kill_tcpdump
+
+    status "Container IPs"
+    status "${GATEWAY}"
+    container_ip ${GATEWAY}
+    status "${REPEATER1}"
+    container_ip ${REPEATER1}
+    status "${REPEATER2}"
+    container_ip ${REPEATER2}
 
     #save bml_conn_map output into a file.
     connmap=$(mktemp)
