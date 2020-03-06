@@ -6,6 +6,7 @@ _GO_KW
 .kwlp
 .kwps
 kw_reports
+__pycache__/
 # ignore artifacts for building w/ openwrt USE_SOURCE_DIR
 .built
 .built_check
