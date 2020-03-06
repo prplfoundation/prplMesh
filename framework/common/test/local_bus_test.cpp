@@ -62,7 +62,7 @@ protected:
         auto msg = mapf::MessageFactory::Instance().Create(kTopic, {data1, data2});
         mapf_assert(msg);
 
-        int rc = lbus_.publisher().Send(msg);
+        bool rc = lbus_.publisher().Send(msg);
         mapf_assert(rc == true);
         auto frames = [&msg]() {
             std::string frames;
