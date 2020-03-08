@@ -16,6 +16,9 @@ _multi_class_auto_insert:
 # CONTROL_SLAVE
 #################################################
 
+cACTION_CONTROL_SLAVE_HANDSHAKE_REQUEST:
+   _type: class
+
 cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION:
   _type: class
   slave_version:
