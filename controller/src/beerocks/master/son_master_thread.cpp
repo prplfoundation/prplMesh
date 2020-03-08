@@ -436,6 +436,31 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
     std::get<1>(supportedServiceTuple) =
         wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER;
 
+    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
+    if (beerocks_header) {
+        if (beerocks_header->action_op() !=
+            beerocks_message::ACTION_CONTROL_SLAVE_HANDSHAKE_REQUEST) {
+            LOG(WARNING) << "Invalid action op";
+            return false;
+        }
+        // mark slave as prplMesh
+        LOG(DEBUG) << "prplMesh agent: received ACTION_CONTROL_SLAVE_HANDSHAKE_REQUEST from "
+                   << src_mac;
+        database.set_prplmesh(network_utils::mac_from_string(src_mac));
+        // response with handshake response to mark the controller as prplmesh
+        auto response =
+            message_com::add_vs_tlv<beerocks_message::cACTION_CONTROL_SLAVE_HANDSHAKE_RESPONSE>(
+                cmdu_tx);
+        if (!response) {
+            LOG(ERROR) << "Failed adding cACTION_CONTROL_SLAVE_HANDSHAKE_RESPONSE";
+            return false;
+        }
+        message_com::get_beerocks_header(cmdu_tx)->actionhdr()->direction() =
+            beerocks::BEEROCKS_DIRECTION_AGENT;
+
+    } else {
+        LOG(DEBUG) << "Not prplMesh agent " << src_mac;
+    }
     LOG(DEBUG) << "sending autoconfig response message";
     return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
 }
