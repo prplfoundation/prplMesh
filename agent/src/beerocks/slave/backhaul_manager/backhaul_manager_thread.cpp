@@ -972,6 +972,17 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<SSlaveSock
     std::get<1>(searchedServiceTuple) =
         wfa_map::tlvSearchedService::eSearchedService::MULTI_AP_CONTROLLER;
 
+    // Add prplMesh handshake in a vendor specific TLV.
+    // If the controller is prplMesh, it will reply to the autoconfig search with
+    // handshake response.
+    auto request =
+        message_com::add_vs_tlv<beerocks_message::cACTION_CONTROL_SLAVE_HANDSHAKE_REQUEST>(cmdu_tx);
+    if (!request) {
+        LOG(ERROR) << "Failed adding cACTION_CONTROL_SLAVE_HANDSHAKE_REQUEST";
+        return false;
+    }
+    auto beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
+    beerocks_header->actionhdr()->direction() = beerocks::BEEROCKS_DIRECTION_CONTROLLER;
     LOG(DEBUG) << "sending autoconfig search message, bridge_mac=" << bridge_info.mac;
     return send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
 }
