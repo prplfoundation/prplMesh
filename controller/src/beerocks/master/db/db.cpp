@@ -3600,3 +3600,20 @@ void db::clear_vap_list()
 }
 
 const std::shared_ptr<db::vaps_list_t> db::get_vap_list() { return m_vap_list; }
+
+bool db::is_prplmesh(const sMacAddr &mac)
+{
+    auto node = get_node(mac);
+    if (!node) {
+        LOG(ERROR) << "can't find node with mac " << mac << ", consider as not prplmesh";
+        return false;
+    }
+    return node->is_prplmesh;
+}
+void db::set_prplmesh(const sMacAddr &mac)
+{
+    if (!get_node(mac)) {
+        add_node(mac);
+    }
+    get_node(mac)->is_prplmesh = true;
+}

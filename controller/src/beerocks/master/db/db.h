@@ -811,6 +811,9 @@ public:
         return settings.client_optimal_path_roaming_prefer_signal_strength;
     }
 
+    bool is_prplmesh(const sMacAddr &mac);
+    void set_prplmesh(const sMacAddr &mac);
+
     //
     // master_thread context
     //
