@@ -4434,7 +4434,10 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
 beerocks::message::sWifiChannel slave_thread::channel_selection_select_channel()
 {
     for (const auto &preference : channel_preferences) {
-        LOG(DEBUG) << "Preference operating class: " << int(preference.oper_class);
+        // Skip non-operable operating classes
+        if (preference.channels.empty()) {
+            continue;
+        }
         for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
             auto channel         = hostap_params.supported_channels[i];
             auto operating_class = wireless_utils::get_operating_class_by_channel(
