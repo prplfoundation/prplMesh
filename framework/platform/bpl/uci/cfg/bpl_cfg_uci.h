@@ -39,11 +39,6 @@
 #define DUMMY_VAP_OFFSET 100
 #define MAX_NUM_OF_RADIOS 3
 
-#define RETURN_ERR_PARSE -3
-#define RETURN_ERR_NOT_FOUND -2
-#define RETURN_ERR -1
-#define RETURN_OK 0
-
 /* use only even phy numbers since odd phy's are used for station interfaces */
 #define RADIO_INDEX_SKIP 2
 #define VAP_RPC_IDX_OFFSET 10
@@ -78,6 +73,11 @@ extern "C" {
 }
 
 #endif
+
+#define RETURN_ERR_PARSE -3
+#define RETURN_ERR_NOT_FOUND -2
+#define RETURN_ERR -1
+#define RETURN_OK 0
 
 namespace beerocks {
 namespace bpl {
