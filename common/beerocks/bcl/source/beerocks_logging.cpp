@@ -511,7 +511,6 @@ void logging::apply_settings()
 
     el::Loggers::addFlag(el::LoggingFlag::ImmediateFlush);
     el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);
-    el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
     el::Loggers::addFlag(el::LoggingFlag::StrictLogFileSizeCheck);
     el::Loggers::addFlag(el::LoggingFlag::ForceDecBase);
     el::Loggers::addFlag(el::LoggingFlag::ShowBase);
