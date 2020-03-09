@@ -3737,6 +3737,9 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
     }
 
     if (cmdu_tx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
+        if (!backhaul_params.is_prplmesh_controller) {
+            return true; // don't send VS messages to non prplmesh controllers
+        }
         auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
         if (!beerocks_header) {
             LOG(ERROR) << "Failed getting beerocks_header!";
