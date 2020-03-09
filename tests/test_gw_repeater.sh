@@ -77,12 +77,10 @@ main() {
 
     [ "$START_REPEATER" = "true" ] && {
         index=0
-        no_vendor="-n"
         for repeater in $REPEATER_NAMES; do
             status "Start Repeater (Remote Agent): $repeater"
-            ${rootdir}/tools/docker/run.sh -u ${UNIQUE_ID} ${VERBOSE_OPT} ${FORCE_OPT} start-agent -d -n ${repeater} -m aa:bb:cc:$index$index -- $no_vendor "$@"
+            ${rootdir}/tools/docker/run.sh -u ${UNIQUE_ID} ${VERBOSE_OPT} ${FORCE_OPT} start-agent -d -n ${repeater} -m aa:bb:cc:$index$index -- "$@"
             index=$((index+1))
-            no_vendor=
         done
     }
 
