@@ -170,19 +170,16 @@ test-on-netgear-rax40:
     TARGET_DEVICE_NAME: netgear-rax40-1
   needs: ["build-for-netgear-rax40"]
 
-run-certification-tests:
+.run-certification-tests:
   stage: test
   variables:
-    # TESTS_TO_RUN needs to be set by the user (or the pipeline schedule)
+    TESTS_TO_RUN: "MAP-4.2.1"
     GIT_CLONE_PATH: "/builds/prpl-foundation/prplMesh/"
     # device to test with: prplmesh for dummy bwl, netgear-rax40 for dwpal on rax40
-    DEVICE_UNDER_TEST: prplmesh
+    DEVICE_UNDER_TEST: netgear-rax40
+  before_script:
+    - tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/*.ipk
   script:
-      - |
-        if [ "$DEVICE_UNDER_TEST" != prplmesh ] ; then
-            echo "Deploying to $DEVICE_UNDER_TEST"
-            tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/*.ipk
-        fi
       - /easymesh_cert/run_test_file.sh -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
   artifacts:
     paths:
@@ -196,3 +193,23 @@ run-certification-tests:
   timeout: 24h
   rules:
     - if: '$TESTS_TO_RUN'
+
+4.2.1-marvell:
+  extends: .run-certification-tests
+  script:
+    - /easymesh_cert/run_test_file.sh -m "ci/mastertestinfo/${CI_JOB_NAME}.xml" -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
+
+4.2.1-mediatek:
+  extends: .run-certification-tests
+  script:
+    - /easymesh_cert/run_test_file.sh -m "ci/mastertestinfo/${CI_JOB_NAME}.xml" -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
+
+4.2.1-broadcom:
+  extends: .run-certification-tests
+  script:
+    - /easymesh_cert/run_test_file.sh -m "ci/mastertestinfo/${CI_JOB_NAME}.xml" -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
+
+4.2.1-qualcomm:
+  extends: .run-certification-tests
+  script:
+    - /easymesh_cert/run_test_file.sh -m "ci/mastertestinfo/${CI_JOB_NAME}.xml" -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
