@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MAP-Testplan-171023b>
+  <MAP-4.2.1>
+    <AGT>0</AGT>
+    <CNTLR>mediatekcntlr</CNTLR>
+    <STA>0</STA>
+    <DUTFile>
+      <_Value>MAUT-DEFAULT-CONFIG.txt</_Value>
+      <WPA2-Personal>0</WPA2-Personal>
+    </DUTFile>
+    <TestbedFile>
+      <_Value>CNTLR-DEFAULT-CONFIG-4.2.1.txt</_Value>
+    </TestbedFile>
+    <STAFile>
+      <_Value>0</_Value>
+      <WPA2-Personal>0</WPA2-Personal>
+    </STAFile>
+    <Server>
+      <TLS>0</TLS>
+      <Other>0</Other>
+    </Server>
+    <CheckFlag11n>Back_Eth</CheckFlag11n>
+    <DUT_CAT>MAUT</DUT_CAT>
+    <PrimaryTestbed>mediatekcntlr</PrimaryTestbed>
+    <TB_LIST>mediatekcntlr</TB_LIST>
+    <TB_CAT>CTTController</TB_CAT>
+    <WPS_Config>WPS_PushButton</WPS_Config>
+  </MAP-4.2.1>
+</MAP-Testplan-171023b>
