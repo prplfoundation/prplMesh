@@ -104,7 +104,6 @@ public:
         std::string enable_system_hang_test;
         std::string enable_son_slaves_watchdog;
         std::string const_backhaul_slave;
-        std::string no_vendor_specific;
         //[slaveX]
         std::string radio_identifier[IRE_MAX_SLAVES]; // mAP RUID
         std::string enable_repeater_mode[IRE_MAX_SLAVES];

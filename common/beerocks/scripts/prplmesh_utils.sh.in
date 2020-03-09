@@ -85,11 +85,6 @@ prplmesh_platform_db_init() {
         echo "certification_mode=1"
         echo "stop_on_failure_attempts=0" 
     } > @TMP_PATH@/prplmesh_platform_db
-
-    if [ "$NO_VENDOR_SPECIFIC" = true ]; then
-        sed '/^no_vendor_specific=0/s//no_vendor_specific=1/' \
-            @CMAKE_INSTALL_PREFIX@/config/beerocks_agent.conf > /tmp/beerocks_agent.conf
-    fi
 }
 
 prplmesh_framework_init() {
@@ -294,8 +289,8 @@ usage() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvm:npdC:D:'  -n 'parse-options' \
-        --long 'verbose,help,mode:,no-vendor-specific,platform-init,delete-logs,iface-ctrl,iface-data' \
+    OPTS=`getopt -o 'hvm:pdC:D:'  -n 'parse-options' \
+        --long 'verbose,help,mode:,platform-init,delete-logs,iface-ctrl,iface-data' \
         -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
@@ -307,7 +302,6 @@ main() {
             -v | --verbose)       VERBOSE=true; shift ;;
             -h | --help)          usage; exit 0; shift ;;
             -m | --mode)          PRPLMESH_MODE="$2"; shift; shift ;;
-            -n | --no-vendor-specific) NO_VENDOR_SPECIFIC=true; shift ;;
             -p | --platform-init) PLATFORM_INIT=true; shift ;;
             -d | --delete-logs)   DELETE_LOGS=true; shift ;;
             -C | --iface-ctrl)    CONTROL_IFACE="$2"; shift; shift ;;
@@ -320,7 +314,6 @@ main() {
     dbg VERBOSE=$VERBOSE
     dbg PLATFORM_INIT=$PLATFORM_INIT
     dbg DELETE_LOGS=$DELETE_LOGS
-    dbg NO_VENDOR_SPECIFIC="$NO_VENDOR_SPECIFIC"
 
     case $1 in
         "start")
@@ -358,7 +351,6 @@ main() {
 VERBOSE=false
 PLATFORM_INIT=@BEEROCKS_PLATFORM_INIT@
 DELETE_LOGS=false
-NO_VENDOR_SPECIFIC=false
 CONTROL_IFACE=
 DATA_IFACE=
 PRPLMESH_MODE="CA" # CA = Controller & Agent, A = Agent only, C = Controller only
