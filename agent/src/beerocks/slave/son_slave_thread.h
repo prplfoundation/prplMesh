@@ -61,6 +61,7 @@ public:
         std::string gw_ipv4;
         std::string gw_bridge_mac;
         std::string controller_bridge_mac;
+        bool is_prplmesh_controller;
         std::string bridge_iface;
         std::string bridge_mac;
         std::string bridge_ipv4;

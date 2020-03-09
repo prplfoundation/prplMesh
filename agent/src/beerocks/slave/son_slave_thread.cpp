@@ -1246,6 +1246,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
                 network_utils::mac_to_string(notification->params().gw_bridge_mac);
             backhaul_params.controller_bridge_mac =
                 network_utils::mac_to_string(notification->params().controller_bridge_mac);
+            backhaul_params.is_prplmesh_controller = notification->params().is_prplmesh_controller;
             backhaul_params.bridge_mac =
                 network_utils::mac_to_string(notification->params().bridge_mac);
             backhaul_params.bridge_ipv4 =
@@ -3320,6 +3321,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         LOG(INFO) << "gw_ipv4=" << backhaul_params.gw_ipv4;
         LOG(INFO) << "gw_bridge_mac=" << backhaul_params.gw_bridge_mac;
         LOG(INFO) << "controller_bridge_mac=" << backhaul_params.controller_bridge_mac;
+        LOG(INFO) << "is_prplmesh_controller=" << backhaul_params.is_prplmesh_controller;
         LOG(INFO) << "bridge_mac=" << backhaul_params.bridge_mac;
         LOG(INFO) << "bridge_ipv4=" << backhaul_params.bridge_ipv4;
         LOG(INFO) << "backhaul_iface=" << backhaul_params.backhaul_iface;
