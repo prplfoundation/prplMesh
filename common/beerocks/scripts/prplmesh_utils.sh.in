@@ -9,16 +9,37 @@
 SIG_TERM=-15
 SIG_KILL=-9
 
+printf() {
+    echo "$1"
+}
+
+pgrep() {
+    echo "grep: p1=$1, p2=$2, p3=$3" > /tmp/grep.txt
+    if [ "$1" = "-l" ]; then
+        ps | grep $2 | grep -v grep | awk '{print $1 " " $5}'
+    elif [ "$1" = "-fx" ]; then
+        ps | grep $1 | grep -v grep | awk '{print $1}'
+    else
+        ps | grep $1 | grep -v grep | awk '{print $1}'
+    fi
+}
+
+wc () {
+    cat | awk 'END{print NR}'
+}
+
 dbg() {
     [ "$VERBOSE" = "true" ] && echo "$@"
 }
 
 err() {
-    printf '\033[1;31m'"$@\n"'\033[0m'
+    #printf '\033[1;31m'"$@\n"'\033[0m'
+    printf "$@\n"
 }
 
 success() {
-    printf '\033[1;32m'"$@\n"'\033[0m'
+    #printf '\033[1;32m'"$@\n"'\033[0m'
+    printf "$@\n"
 }
 
 run() {
@@ -142,7 +163,10 @@ prplmesh_delete_logs() {
 
 prplmesh_watchdog() {
     # Store PIDs of the Controller and Agents
-    local CURR_PIDS="$(pgrep 'beerocks_(agent|controller)' | wc -l)"
+    local CURR_PIDS_AGENT="$(pgrep 'beerocks_agent' | wc -l)"
+    local CURR_PIDS_CONTROLLER="$(pgrep 'beerocks_controller' | wc -l)"
+    local CURR_PIDS=`echo "$CURR_PIDS_AGENT  $CURR_PIDS_CONTROLLER" | awk '{print $1 + $2 }'`
+    echo "agents: $CURR_PIDS_AGENT, controller: $CURR_PIDS_CONTROLLER"
     local PREV_PIDS="$CURR_PIDS"
 
     # Make sure there's at least one PID to monitor
@@ -154,7 +178,10 @@ prplmesh_watchdog() {
     # Monitor the number of running processes
     while [ $CURR_PIDS -ge $PREV_PIDS ]; do
         sleep 1
-        CURR_PIDS="$(pgrep 'beerocks_(agent|controller)' | wc -l)"
+        CURR_PIDS_AGENT="$(pgrep 'beerocks_agent' | wc -l)"
+        CURR_PIDS_CONTROLLER="$(pgrep 'beerocks_controller)' | wc -l)"
+        CURR_PIDS=`echo "$CURR_PIDS_AGENT  $CURR_PIDS_CONTROLLER" | awk '{print $1 + $2 }'`
+        echo "agents: $CURR_PIDS_AGENT, controller: $CURR_PIDS_CONTROLLER"
         if [ $CURR_PIDS -gt $PREV_PIDS ]; then
             PREV_PIDS=$CURR_PIDS
         fi
@@ -190,7 +217,8 @@ roll_logs_function()
         logFilesCountPostRoll=$(find ./*.*.log | wc -l)
 
         # All modules rolled
-        if [ "$logFilesCountPostRoll" -ge $((logFilesCountPreRoll * 2)) ]; then
+        arith_result = `echo "$logFilesCountPreRoll  2" | awk '{print $1 * $2 }'`
+        if [ "$logFilesCountPostRoll" -ge "$arith_result" ]; then
             break
         fi
 
@@ -199,7 +227,8 @@ roll_logs_function()
             break
         fi
         
-        rollTimeout=$((rollTimeout + 1))
+        arith_result = `echo "$rollTimeout  1" | awk '{print $1 + $2 }'`
+        rollTimeout="$arith_result"
         sleep 1
     done
 
@@ -216,7 +245,8 @@ roll_logs_function()
 
 start_function() {
     echo "$0: start"
-    [ `id -u` -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
+    #[ `id -u` -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
+    [ "$UID" -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
 
     [ "@BWL_TYPE@" = "DUMMY" -a "$PLATFORM_INIT" = "true" ] && platform_init
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_init
@@ -240,7 +270,8 @@ start_function() {
 
 stop_function() {
     echo "$0: stop"
-    [ `id -u` -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
+    #[ `id -u` -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
+    [ "$UID" -ne 0 ] && echo "$0: warning - this commands needs root privileges so might not work (are you root?)"
 
     [ "@BWL_TYPE@" = "DUMMY" -a "$PLATFORM_INIT" = "true" ] && platform_deinit
     [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_deinit
@@ -253,12 +284,14 @@ stop_function() {
 # Therefore added "($|[[:blank:]])" to the end of the regex expression which means the end of the 
 # line ($) or blank character ([[:blank:]])
 main_agent_operational() {
-    pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent($|[[:blank:]])" > /dev/null 2>&1 || return 1
+    #pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent($|[[:blank:]])" > /dev/null 2>&1 || return 1
+    ps -ef | grep bin | grep "@INSTALL_PATH@/bin/beerocks_agent" | grep -v "\-i" | grep -v grep > /dev/null 2>&1 || return 1
     grep -q 'CONNECTED --> OPERATIONAL' "$1/beerocks_agent@BEEROCKS_LOG_FILES_SUFFIX@"
 }
 
 radio_agent_operational() {
-    pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent -i $2($|[[:blank:]])" > /dev/null 2>&1 || return 1
+    #pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent -i $2($|[[:blank:]])" > /dev/null 2>&1 || return 1
+    ps -ef | grep bin | grep "@INSTALL_PATH@/bin/beerocks_agent -i $2" > /dev/null 2>&1 || return 1
     grep -q 'goto STATE_OPERATIONAL' "$1/beerocks_agent_$2@BEEROCKS_LOG_FILES_SUFFIX@"
 }
 
@@ -301,13 +334,13 @@ usage() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvm:npdC:D:'  -n 'parse-options' \
-        --long 'verbose,help,mode:,no-vendor-specific,platform-init,delete-logs,iface-ctrl,iface-data' \
-        -- "$@"`
-
-    if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
-
-    eval set -- "$OPTS"
+    #OPTS=`getopt -o 'hvm:npdC:D:'  -n 'parse-options' \
+    #    --long 'verbose,help,mode:,no-vendor-specific,platform-init,delete-logs,iface-ctrl,iface-data' \
+    #    -- "$@"`
+    #
+    #if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
+    #
+    #eval set -- "$OPTS"
 
     while true; do
         case "$1" in
@@ -371,6 +404,6 @@ DATA_IFACE=
 PRPLMESH_MODE="CA" # CA = Controller & Agent, A = Agent only, C = Controller only
 
 # Export MultiAP libs folder
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@INSTALL_PATH@/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@INSTALL_PATH@/lib
 
 main $@
