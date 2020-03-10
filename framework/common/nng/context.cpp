@@ -18,7 +18,7 @@ Context &Context::Instance()
 
 Context::~Context() { Close(); }
 
-Context::Context() {}
+Context::Context() : ctx_(nullptr) {}
 
 void Context::Close() {}
 

@@ -16,7 +16,7 @@
 
 namespace mapf {
 
-Broker::Broker() : frontend_(new msglib_socket), backend_(new msglib_socket)
+Broker::Broker() : frontend_(new msglib_socket), backend_(new msglib_socket), context_(nullptr)
 {
     int rc = nng_pub0_open_raw(&backend_->sd_);
     if (rc) {
