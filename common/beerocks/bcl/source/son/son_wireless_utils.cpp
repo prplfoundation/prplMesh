@@ -43,9 +43,11 @@ static const std::map<uint8_t, sOperatingClass> operating_classes_list = {
     {125,       {{149, 153, 157, 161, 165, 169},                               beerocks::BANDWIDTH_20}},
     {126,       {{149, 157},                                                   beerocks::BANDWIDTH_40}},
     {127,       {{153, 161},                                                   beerocks::BANDWIDTH_40}},
-    {128,       {{36,  40,  44,  48,  52,  56,  60,  64,  100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161}, beerocks::BANDWIDTH_80}},
-    {129,       {{50, 66, 82, 98, 114},                                        beerocks::BANDWIDTH_160}},
-    {130,       {{36,  40,  44,  48,  52,  56,  60,  64,  100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161}, beerocks::BANDWIDTH_160}}};
+//  {OP Class   {Channel center Frequency index},                              Bandwidth              }}
+    {128,       {{42, 58, 106, 122, 138, 155},                                 beerocks::BANDWIDTH_80}},
+    {129,       {{50, 114},                                                    beerocks::BANDWIDTH_160}},
+    {130,       {{42, 58, 106, 122, 138, 155},                                 beerocks::BANDWIDTH_80}}
+};
 // clang-format on
 
 constexpr beerocks::eWiFiAntNum
@@ -652,6 +654,14 @@ uint8_t wireless_utils::get_operating_class_max_tx_power(
 uint8_t wireless_utils::get_operating_class_by_channel(uint8_t channel,
                                                        beerocks::eWiFiBandwidth channel_bandwidth)
 {
+    // operating classes 128,129,130 use center channel **unlike the other classes**,
+    // so convert channel and bandwidth to center channel.
+    // For more info, refer to Table E-4 in the 802.11 specification.
+    if (channel_bandwidth >= beerocks::eWiFiBandwidth::BANDWIDTH_80) {
+        auto bw              = beerocks::utils::convert_bandwidth_to_int(channel_bandwidth);
+        auto vht_center_freq = beerocks::utils::wifi_channel_to_vht_center_freq(channel, bw, true);
+        channel              = beerocks::utils::wifi_freq_to_channel(vht_center_freq);
+    }
     for (auto oper_class : operating_classes_list) {
         if (oper_class.second.band == channel_bandwidth &&
             oper_class.second.channels.find(channel) != oper_class.second.channels.end()) {
