@@ -368,6 +368,12 @@ cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE:
   _type: class
   success: uint8_t
 
+cACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_REQUEST:
+  _type: class
+
+cACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE:
+  _type: class
+  success: uint8_t
 ################################################
 # MONITOR CHANNEL SCAN NOTIFICATIONS
 ################################################

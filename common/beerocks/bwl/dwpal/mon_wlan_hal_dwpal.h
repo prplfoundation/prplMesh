@@ -42,7 +42,7 @@ public:
     virtual bool sta_link_measurements_11k_request(const std::string &sta_mac) override;
     virtual bool channel_scan_trigger(int dwell_time_msec,
                                       const std::vector<unsigned int> &channel_pool) override;
-    virtual bool channel_scan_dump_results();
+    virtual bool channel_scan_dump_results() override;
     // Protected methods:
 protected:
     virtual bool process_dwpal_event(char *buffer, int bufLen, const std::string &opcode) override;

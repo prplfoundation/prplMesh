@@ -1953,9 +1953,9 @@ int cli_bml::start_dcs_single_scan(const std::string &radio_mac, int32_t dwell_t
     std::cout << "start_dcs_single_scan, mac=" << radio_mac << ", dwell_time=" << dwell_time
               << ", channel_pool=" << channel_pool << std::endl;
 
-    if (dwell_time <= 0) {
-        std::cout << __func__ << ", invalid input: dwell_time(" << dwell_time << ") <= 0"
-                  << std::endl;
+    if (dwell_time < 0) {
+        std::cout << __func__ << ", invalid input: dwell_time='" << dwell_time << "'."
+                  << " Only positive values are supported!" << std::endl;
         return -1;
     }
 

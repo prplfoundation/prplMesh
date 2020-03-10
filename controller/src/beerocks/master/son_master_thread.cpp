@@ -3383,6 +3383,10 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         LOG(TRACE) << "ACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE for mac " << hostap_mac;
         break;
     }
+    case beerocks_message::ACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE: {
+        LOG(TRACE) << "ACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE for mac " << hostap_mac;
+        break;
+    }
     case beerocks_message::ACTION_CONTROL_CHANNEL_SCAN_TRIGGERED_NOTIFICATION: {
         LOG(TRACE) << "DCS_task, sending SCAN_TRIGGERED for mac " << hostap_mac;
         auto notification =

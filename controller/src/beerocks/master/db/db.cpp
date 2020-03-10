@@ -2236,8 +2236,9 @@ bool db::set_channel_scan_dwell_time_msec(const sMacAddr &mac, int dwell_time_ms
     LOG(DEBUG) << (single_scan ? "single" : "continuous")
                << ", dwell time msec = " << dwell_time_msec;
 
-    if (dwell_time_msec <= 0) {
-        LOG(ERROR) << "Only >0 dwell time is supported!";
+    if (dwell_time_msec < 0) {
+        LOG(ERROR) << "Invalid dwell time: " << dwell_time_msec
+                   << ". Only positive values are supported!";
         return false;
     }
 
