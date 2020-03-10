@@ -2104,12 +2104,25 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         notification_out->client_mac() = notification_in->params().mac;
         notification_out->bssid()      = notification_in->params().bssid;
         if (!notification_in->params().association_frame) {
+            LOG(DEBUG) << "88888888888888888888888888888888888888888";
             LOG(DEBUG) << "no association frame";
+            LOG(DEBUG) << "88888888888888888888888888888888888888888";
+            notification_out->set_association_frame("");
         } else {
+            LOG(DEBUG) << "44444444444444444444444444444444444444444444444444444444444";
             notification_out->set_association_frame(
                 notification_in->params().association_frame,
-                strnlen(notification_in->params().association_frame, ASSOCIATION_FRAME_SIZE) + 1);
+                strnlen(notification_in->params().association_frame, ASSOCIATION_FRAME_SIZE));
+            // notification_out->set_association_frame("cococoococococo");
+            
+            LOG(DEBUG) << "44444444444444444444444444444444444444444444444444444444444";
         }
+
+        LOG(DEBUG) << "sssssssssssssssssssssssssssssssssssssssssssssssssssssssssss";
+        LOG(DEBUG) << notification_out->association_frame_str();
+        LOG(DEBUG) << notification_out->association_frame_length();
+
+        LOG(DEBUG) << "sssssssssssssssssssssssssssssssssssssssssssssssssssssssssss";
 
         // Send the message
         LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION for client "

@@ -1729,7 +1729,11 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION message!";
             return false;
         }
-
+        LOG(DEBUG) << "#################################################################";
+        LOG(DEBUG) << network_utils::mac_to_string(msg->client_mac());
+        LOG(DEBUG) << msg->association_frame_str();
+        LOG(DEBUG) << msg->association_frame_length();
+        LOG(DEBUG) << "##########################################################";
         //remove this client from other radios
         for (const auto &slave : m_radio_info_map) {
             auto associated_clients_map = slave.second.associated_clients_map;
@@ -1741,9 +1745,12 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         }
         // Set client association information for associated client
         std::string assoc_req;
-        if (!msg->association_frame()) {
+        if (!msg->association_frame_length()) {
             LOG(DEBUG) << "no association frame";
-            assoc_req = "dummy";
+            LOG(DEBUG) << msg->association_frame_str();
+            LOG(DEBUG) << msg->association_frame_length();
+            assoc_req = "mammmmy";
+
         } else {
             std::string assoc_frame(msg->association_frame());
             assoc_req = assoc_frame;

@@ -1786,6 +1786,7 @@ bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::init()
     }
     if (!m_parse__) { m_bssid->struct_init(); }
     m_association_frame = (char*)m_buff_ptr__;
+    m_association_frame_idx__ = getBuffRemainingBytes();
     if (m_parse__) { class_swap(); }
     return true;
 }

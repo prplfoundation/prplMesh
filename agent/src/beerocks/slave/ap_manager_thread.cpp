@@ -1130,6 +1130,10 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
             std::copy_n(msg->params.association_frame,
                         strnlen(msg->params.association_frame, ASSOCIATION_FRAME_SIZE) + 1,
                         notification->params().association_frame);
+            LOG(DEBUG) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+
+            LOG(DEBUG) << "association_frame = " << notification->params().association_frame;
+            LOG(DEBUG) << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
         }
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
