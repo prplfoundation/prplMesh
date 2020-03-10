@@ -33,9 +33,6 @@ set_target_properties(ubus PROPERTIES
 )
 endif()
 
-
-
-
 # Library
 set_target_properties(ubus PROPERTIES
     IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"

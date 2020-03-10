@@ -34,5 +34,13 @@ if (readline_FOUND)
     target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_READLINE)
 endif()
 
+if (TARGET_PLATFORM STREQUAL "econet")
+    include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../../common/econet/include
+    )
+endif()
+
+
+
 # Install
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})

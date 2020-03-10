@@ -17,6 +17,9 @@
 #include <limits.h>
 #include <sys/inotify.h>
 
+#ifdef BEEROCKS_ECONET
+#include <econet_defs.h>
+#endif
 #define UNHANDLED_EVENTS_LOGS 20
 
 namespace bwl {
@@ -292,8 +295,12 @@ bool base_wlan_hal_dummy::process_nl_events()
 
 bool base_wlan_hal_dummy::refresh_radio_info()
 {
-    //if (get_iface_name() == "wlan2") {
-    if (get_iface_name() == "rai0") {
+
+#ifdef BEEROCKS_ECONET
+    if (get_iface_name().find(econet::iface_prefix_5g) != std::string::npos) {
+#else
+    if (get_iface_name() == "wlan2") {
+#endif
         m_radio_info.is_5ghz = true;
     }
     std::string radio_mac;

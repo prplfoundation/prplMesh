@@ -14,6 +14,13 @@ if (TARGET_PLATFORM STREQUAL "rdkb")
     list(APPEND controller_tasks_sources  ${RDKB_SOURCES})
 endif()
 
+if (TARGET_PLATFORM STREQUAL "econet")
+    include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../../common/econet/include
+    )
+endif()
+
+
 add_executable(${PROJECT_NAME} ${controller_sources} ${controller_tasks_sources} ${controller_db_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
 

@@ -15,6 +15,10 @@
 #include <bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
 
+#ifdef BEEROCKS_ECONET
+#include "econet_defs.h"
+#endif
+
 #include <unordered_map>
 
 using namespace beerocks;
@@ -179,8 +183,11 @@ static void bml_utils_dump_conn_map(
 
             // ETHERNET
             auto eth_sw_mac_binary = network_utils::mac_from_string(node->mac);
-            //++eth_sw_mac_binary.oct[5]; // generate eth address from bridge address
-            eth_sw_mac_binary.oct[5] += 4; // generate eth address from bridge address
+#ifdef BEEROCKS_ECONET
+            eth_sw_mac_binary.oct[5] += econet::offset_generated_mac; // generate eth address from bridge address
+#else
+            ++eth_sw_mac_binary.oct[5]; // generate eth address from bridge address
+#endif
             auto eth_mac = network_utils::mac_to_string(eth_sw_mac_binary);
             ss << ind_inc(ind_str) << "ETHERNET:"
                << " mac: " << eth_mac << std::endl;

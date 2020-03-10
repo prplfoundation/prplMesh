@@ -18,6 +18,9 @@
 #ifdef BEEROCKS_RDKB
 #include "tasks/rdkb/rdkb_wlan_task.h"
 #endif
+#ifdef BEEROCKS_ECONET
+#include "econet_defs.h"
+#endif
 #include "db/db_algo.h"
 #include "db/network_map.h"
 #include "tasks/client_locating_task.h"
@@ -1775,8 +1778,11 @@ bool master_thread::handle_intel_slave_join(
 
         //TODO slave should include eth switch mac in the message
         auto eth_sw_mac_binary = notification->backhaul_params().bridge_mac;
-        //++eth_sw_mac_binary.oct[5];
-        eth_sw_mac_binary.oct[5] += 4;
+#ifdef BEEROCKS_ECONET
+        eth_sw_mac_binary.oct[5] += econet::offset_generated_mac;
+#else
+        ++eth_sw_mac_binary.oct[5];
+#endif
 
         std::string eth_switch_mac = network_utils::mac_to_string(eth_sw_mac_binary);
         database.add_node(network_utils::mac_from_string(eth_switch_mac),
@@ -1785,7 +1791,6 @@ bool master_thread::handle_intel_slave_join(
         database.set_node_name(eth_switch_mac, slave_name + "_ETH");
         database.set_node_ipv4(eth_switch_mac, bridge_ipv4);
         database.set_node_manufacturer(eth_switch_mac, "Intel");
-        LOG(DEBUG) << "*** Incremented and added client_mac = " << eth_switch_mac << " *** " << std::endl;
 
         //run locating task on ire
         if (!database.is_node_wireless(backhaul_mac)) {

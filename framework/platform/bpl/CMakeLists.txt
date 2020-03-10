@@ -97,6 +97,10 @@ elseif (TARGET_PLATFORM STREQUAL "econet")
     add_definitions(-DPLATFORM_DB_PATH_TEMP="${TMP_PATH}/prplmesh_platform_db")
     install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 
+    include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../common/econet/include
+    )
+
 else()
 
     message(WARNING "${BoldWhite}Skipping ${BoldGreen}${PROJECT_NAME}${BoldWhite} build for unsupported platform...${ColourReset}")

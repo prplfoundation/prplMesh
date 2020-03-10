@@ -11,6 +11,10 @@
 #include <easylogging++.h>
 #include <iomanip>
 
+#ifdef BEEROCKS_ECONET
+#include <econet_defs.h>
+#endif
+
 using namespace beerocks;
 
 int utils::write_to_file(std::string full_path, std::string val)
@@ -86,46 +90,54 @@ utils::sIfaceVapIds utils::get_ids_from_iface_string(const std::string &iface)
         return ids;
     }
 
-//    std::string::size_type pos = iface.find("wlan");
-//    if (pos == std::string::npos) {
-//        LOG(ERROR) << "iface does not contain the string 'wlan', function input string: " << iface;
-//        return ids;
-//    }
-//
-//    auto iface_num_str = iface.substr(pos + sizeof("wlan") - 1); // "x" or x.x"
-//    auto iface_num_vec = string_utils::str_split(iface_num_str, '.');
-//    if (iface_num_vec.size() == 0) {
-//        LOG(ERROR) << "Invalid interface name " << iface;
-//        return ids;
-//    }
-//
-//    ids.iface_id = string_utils::stoi(iface_num_vec[0]);
-//    ids.vap_id   = beerocks::IFACE_RADIO_ID;
-//    if (iface_num_vec.size() == 2) {
-//        int8_t vap_id = string_utils::stoi(iface_num_vec[1]);
-//        if ((vap_id < beerocks::IFACE_VAP_ID_MIN) || (vap_id > beerocks::IFACE_VAP_ID_MAX)) {
-//            LOG(DEBUG) << "Invalid VAP id " << vap_id << " for interface " << iface;
-//            return ids;
-//        }
-//        ids.vap_id = vap_id;
-//    }
-
-        std::string::size_type pos = iface.find("ra");
+#ifdef BEEROCKS_ECONET
+    uint16_t iface_id_start = 0;
+    std::string prefix = econet::iface_prefix_5g;
+    std::string::size_type pos = iface.find(prefix);
+    if (pos == std::string::npos) {
+        prefix = econet::iface_prefix_2g;
+        pos = iface.find(prefix);
         if (pos == std::string::npos) {
-            LOG(ERROR) << "iface does not contain the string 'ra', function input string: " << iface;
+            LOG(ERROR) << "iface does not contain the prefix '"  <<  econet::iface_prefix_2g  << "' or '"
+                << econet::iface_prefix_5g << "': " << iface;
             return ids;
         }
+    }
+    else {
+        iface_id_start += econet::num_2G_ifaces; //ra0..raN
+    }
+#else
+    std::string::size_type pos = iface.find("wlan");
+    if (pos == std::string::npos) {
+        LOG(ERROR) << "iface does not contain the string 'wlan', function input string: " << iface;
+        return ids;
+    }
+#endif
 
-        if (!iface.compare("ra0")){
-            ids.iface_id = 0;
-            ids.vap_id   = beerocks::IFACE_RADIO_ID;
+#ifdef BEEROCKS_ECONET
+    auto iface_num_str = iface.substr(pos + prefix.length() - 1); // "x" or x.x"
+#else
+    auto iface_num_str = iface.substr(pos + sizeof("wlan") - 1); // "x" or x.x""
+#endif
+    auto iface_num_vec = string_utils::str_split(iface_num_str, '.');
+    if (iface_num_vec.size() == 0) {
+        LOG(ERROR) << "Invalid interface name " << iface;
+        return ids;
+    }
+
+    ids.iface_id = string_utils::stoi(iface_num_vec[0]);
+#ifdef BEEROCKS_ECONET
+    ids.iface_id +=  iface_id_start;
+#endif
+    ids.vap_id   = beerocks::IFACE_RADIO_ID;
+    if (iface_num_vec.size() == 2) {
+        int8_t vap_id = string_utils::stoi(iface_num_vec[1]);
+        if ((vap_id < beerocks::IFACE_VAP_ID_MIN) || (vap_id > beerocks::IFACE_VAP_ID_MAX)) {
+            LOG(DEBUG) << "Invalid VAP id " << vap_id << " for interface " << iface;
             return ids;
         }
-        else if (!iface.compare("rai0")){
-            ids.iface_id = 1;
-            ids.vap_id   = beerocks::IFACE_RADIO_ID;
-            return ids;
-        }
+        ids.vap_id = vap_id;
+    }
 
     return ids;
 }

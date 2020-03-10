@@ -33,11 +33,9 @@ killall_program() {
     else
         KILL_SIG=$SIG_KILL
     fi
-    for PID in $(pgrep -f "$PROGRAM_NAME"); do
-        if [ "$(basename "$(readlink /proc/"$PID"/exe)")" = "$PROGRAM_NAME" ]; then
-            echo "kill $KILL_SIG $PID $PROGRAM_NAME";
-            kill $KILL_SIG "$PID" > /dev/null 2>&1;
-        fi
+    for PID in $(pgrep "$PROGRAM_NAME"); do
+        echo "kill $KILL_SIG $PID $PROGRAM_NAME";
+        kill $KILL_SIG $PID > /dev/null 2>&1;
     done
 }
 
@@ -192,10 +190,7 @@ roll_logs_function()
         logFilesCountPostRoll=$(find ./*.*.log | wc -l)
 
         # All modules rolled
-        LOGFILESCOUNTPREROLL=`echo ${logFilesCountPreRoll} 2 | awk '{print $1 * $2}'`
-#        if [ "$logFilesCountPostRoll" -ge $((logFilesCountPreRoll * 2)) ]; then
-        if [ "$logFilesCountPostRoll" -ge $LOGFILESCOUNTPREROLL ]; then
-
+        if [ "$logFilesCountPostRoll" -ge $((logFilesCountPreRoll * 2)) ]; then
             break
         fi
 
@@ -204,9 +199,7 @@ roll_logs_function()
             break
         fi
         
-#        rollTimeout=$((rollTimeout + 1))
-        ROLLTIMEOUT_VAL=`echo ${rollTimeout} 1 | awk '{print $1 * $2}'`
-        rollTimeout=$ROLLTIMEOUT_VAL
+        rollTimeout=$((rollTimeout + 1))
         sleep 1
     done
 
@@ -365,9 +358,6 @@ main() {
 
     # Give write permissions (linux only)
     if [ "@TARGET_PLATFORM@" = "linux" ]; then
-        chmod -R +o+w /tmp/${SUDO_USER:-${USER}}
-    fi
-    if [ "@TARGET_PLATFORM@" = "econet" ]; then
         chmod -R +o+w /tmp/${SUDO_USER:-${USER}}
     fi
 }

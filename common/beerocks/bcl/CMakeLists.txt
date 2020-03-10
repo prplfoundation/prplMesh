@@ -23,6 +23,12 @@ target_include_directories(${PROJECT_NAME}
         $<INSTALL_INTERFACE:include>
 )
 
+if (TARGET_PLATFORM STREQUAL "econet")
+    include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../econet/include
+    )
+endif()
+
 target_link_libraries(${PROJECT_NAME} PUBLIC tlvf elpp)
 
 install(TARGETS ${PROJECT_NAME} EXPORT bclConfig
