@@ -1,9 +1,6 @@
 import logging
 import argparse
 import os
-import getpass
-import subprocess
-import collections
 import shutil
 import yaml
 import glob
@@ -13,16 +10,17 @@ import tarfile
 
 logging.getLogger("paramiko").setLevel(logging.WARNING)
 logger = logging.getLogger("deploy")
-deploy_modules=['framework', 'common', 'controller', 'agent']
+deploy_modules = ['framework', 'common', 'controller', 'agent']
+
 
 class mapconnect(object):
-    SSHOPTIONS = "-oUserKnownHostsFile=/dev/null -oStrictHostKeyChecking=no" #default ssh options
+    SSHOPTIONS = "-oUserKnownHostsFile=/dev/null -oStrictHostKeyChecking=no"  # default ssh options
 
     def __init__(self, conf):
         self.proxy = conf['proxy']
         self.target = conf['target']
         self.__connect__()
-    
+
     def __connect__(self):
         ''' connect sftp and ssh clients '''
 
@@ -37,7 +35,8 @@ class mapconnect(object):
         self.client.load_system_host_keys()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         logger.info("connect SSH {}@{}".format(self.proxy['user'], self.proxy['ip']))
-        self.client.connect(self.proxy['ip'], port=22, username=self.proxy['user'], password=self.proxy['pass'])
+        self.client.connect(self.proxy['ip'], port=22,
+                            username=self.proxy['user'], password=self.proxy['pass'])
 
     def run(self, commands=[]):
         ''' Run commands on target via proxy '''
@@ -45,7 +44,8 @@ class mapconnect(object):
             logger.debug("@{} --> {}".format(self.proxy['ip'], c))
             stdin, stdout, stderr = self.client.exec_command(c)
             if stdout.channel.recv_exit_status():
-                logger.error("Command failed:\n{}\nexit code - {}, stderr - {}".format(c, stdout.channel.recv_exit_status(), stderr.read()))
+                logger.error("Command failed:\n{}\nexit code - {}, stderr - {}".format(
+                    c, stdout.channel.recv_exit_status(), stderr.read()))
 
     def upload(self, files, path):
         ''' Uploads files to the target via proxy
@@ -59,23 +59,39 @@ class mapconnect(object):
 
         # copy to proxy
         for lpath, ppath, perm, md5sum in update_list:
-             logger.info("Upload {} (md5sum {}) to {}:{} via {}".format(lpath, md5sum, self.target['ip'], path, self.proxy['ip']))
-             self.sftp.put(lpath, ppath)
+            logger.info("Upload {} (md5sum {}) to {}:{} via {}".format(
+                lpath, md5sum, self.target['ip'], path, self.proxy['ip']))
+            self.sftp.put(lpath, ppath)
 
-        ssh_cmd_template = 'sshpass -p {} ssh {} {}@{}'.format(self.target['pass'], mapconnect.SSHOPTIONS, self.target['user'], self.target['ip'])
+        ssh_cmd_template = 'sshpass -p {} ssh {} {}@{}'.format(
+            self.target['pass'], mapconnect.SSHOPTIONS, self.target['user'], self.target['ip'])
         mkdir_cmd = '{} "mkdir -p {}"'.format(ssh_cmd_template, path)
-        scp_cmd = 'sshpass -p {} scp -r {} {} {}@{}:{}'.format(self.target['pass'], mapconnect.SSHOPTIONS, ' '.join(['{}'.format(ppath) for lpath, ppath, perm, md5sum in update_list]), self.target['user'], self.target['ip'], path)
-        chmod_cmd = '{} "{}"'.format(ssh_cmd_template, ';'.join(['chmod {} {}'.format(perm, os.path.join(path, os.path.basename(lpath))) for lpath, ppath, perm, md5sum in update_list]))
+        scp_cmd = 'sshpass -p {} scp -r {} {} {}@{}:{}'.format(
+            self.target['pass'],
+            mapconnect.SSHOPTIONS,
+            ' '.join(['{}'.format(ppath) for lpath, ppath, perm, md5sum in update_list]),
+            self.target['user'],
+            self.target['ip'],
+            path)
+        chmod_cmd = '{} "{}"'.format(
+            ssh_cmd_template,
+            ';'.join(['chmod {} {}'.format(
+                perm,
+                os.path.join(path, os.path.basename(lpath)))
+                for lpath, ppath, perm, md5sum in update_list]))
 
         # run commands at proxy
         self.run([mkdir_cmd, scp_cmd, chmod_cmd])
 
         # delete from proxy
-        for lpath, ppath, perm, md5sum in update_list: self.sftp.remove(ppath)
+        for lpath, ppath, perm, md5sum in update_list:
+            self.sftp.remove(ppath)
+
 
 class mapcopy(object):
     def __init__(self, args):
-        if args.verbose: logger.setLevel(logging.DEBUG)
+        if args.verbose:
+            logger.setLevel(logging.DEBUG)
         self.modules_dir = os.path.realpath(args.map_path)
         conf_file = args.conf if args.conf else os.path.realpath(self.modules_dir + '/deploy.yaml')
         with open(conf_file, 'r') as f:
@@ -98,6 +114,7 @@ class mapcopy(object):
     def __str__(self):
         return str(self.args)
 
+
 def mkdir_p(path):
     try:
         os.makedirs(path)
@@ -107,33 +124,39 @@ def mkdir_p(path):
         else:
             raise
 
+
 def reset(tarinfo):
     tarinfo.uid = tarinfo.gid = 0
     tarinfo.uname = tarinfo.gname = "root"
     return tarinfo
 
+
 class mapdeploy(object):
     def __init__(self, args):
-        if args.verbose: logger.setLevel(logging.DEBUG)
-        modules = deploy_modules if 'all' in args.modules else [m for m in deploy_modules if m in args.modules]
+        if args.verbose:
+            logger.setLevel(logging.DEBUG)
+        modules = deploy_modules if 'all' in args.modules else [
+            m for m in deploy_modules if m in args.modules]
         self.modules_dir = os.path.realpath(args.map_path)
         self.build_dir = os.path.realpath(self.modules_dir + '/build')
         self.pack_dir = os.path.realpath(self.build_dir + '/pack')
-        
+
         conf_file = args.conf if args.conf else os.path.realpath(self.modules_dir + '/deploy.yaml')
-        logger.debug("modules_dir={}, build_dir={}, conf={}".format(self.modules_dir, self.build_dir, conf_file))
+        logger.debug("modules_dir={}, build_dir={}, conf={}".format(
+            self.modules_dir, self.build_dir, conf_file))
         with open(conf_file, 'r') as f:
             self.conf = yaml.load(f)
-            if not args.pack_only: self.connect = mapconnect(self.conf)
+            if not args.pack_only:
+                self.connect = mapconnect(self.conf)
             self.os = self.conf['target']['type']
-    
+
         logger.debug("deploy configuration: {}".format(self.conf))
         logger.info("{} deploy {}".format(self.os, modules))
 
         if os.path.exists(self.pack_dir):
             logger.info("Delete previous packing {}".format(self.pack_dir))
             shutil.rmtree(self.pack_dir)
-    
+
         for m in modules:
             logger.debug("pack {}".format(m))
             self.pack(m)
@@ -142,16 +165,18 @@ class mapdeploy(object):
         archive = os.path.join(self.pack_dir, "multiap_deploy.tar.gz")
         with tarfile.open(archive, "w:gz") as tar:
             tar.add(self.pack_dir, arcname='/', filter=reset)
-        deploy_sh = os.path.dirname(os.path.realpath(__file__)) + '/deploy_%s.sh' %self.os
+        deploy_sh = os.path.dirname(os.path.realpath(__file__)) + '/deploy_%s.sh' % self.os
         shutil.copy(deploy_sh, os.path.join(self.pack_dir, os.path.basename(deploy_sh)))
 
         # upload to target
-        if not args.pack_only: self.connect.upload([archive, deploy_sh], args.path)
+        if not args.pack_only:
+            self.connect.upload([archive, deploy_sh], args.path)
 
     def pack(self, name):
         pack_dir = self.pack_dir
         out_dir = os.path.join(self.build_dir, name, 'out')
-        pack_dirs = [(d,self.conf['deploy'][self.os][name][d]) for d in os.listdir(out_dir) if os.path.isdir(os.path.join(out_dir, d))]
+        pack_dirs = [(d, self.conf['deploy'][self.os][name][d])
+                     for d in os.listdir(out_dir) if os.path.isdir(os.path.join(out_dir, d))]
 
         for src, dst in pack_dirs:
             src_path = os.path.join(out_dir, src)
@@ -169,10 +194,14 @@ class mapdeploy(object):
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='deploy')):
         parser.help = "multiap_sw standalone deploy module"
-        parser.add_argument('modules', choices=['all'] + deploy_modules, nargs='+', help='module[s] to deploy')
+        parser.add_argument('modules', choices=['all'] +
+                            deploy_modules, nargs='+', help='module[s] to deploy')
         parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
-        parser.add_argument("--pack-only", action="store_true", help="only pack multiap for later deployment (multiap_deploy.tar.gz and deploy.sh)")
-        parser.add_argument("--path", "-p", default="/tmp/multiap/deploy/", help="path to deploy on in target")
+        parser.add_argument("--pack-only", action="store_true",
+                            help="only pack multiap for later deployment "
+                                 "(multiap_deploy.tar.gz and deploy.sh)")
+        parser.add_argument("--path", "-p", default="/tmp/multiap/deploy/",
+                            help="path to deploy on in target")
         parser.add_argument("--conf", "-c", help="path to deploy.yaml")
 
         return parser
