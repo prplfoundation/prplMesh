@@ -498,6 +498,27 @@ class test_flows:
                         .format(sta_mac2 = sta_mac2,
                                 mac_repeater1_wlan0 = self.mac_repeater1_wlan0))
 
+    def test_client_association_dummy(self):
+        sta_mac = "11:11:33:44:55:66"
+
+        self.debug("Connect dummy STA to wlan0")
+        self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
+        self.debug("Send client association control request to the chosen BSSID to steer the client (UNBLOCK) ")
+        self.beerocks_cli_command('client_allow {} {}'.format(sta_mac, self.mac_repeater1_wlan2))
+        time.sleep(1)
+
+        self.debug("Confirming Client Association Control Request message was received (UNBLOCK)")
+        self.check_log(self.repeater1, "agent_wlan2",
+                       r"Got client allow request for {}".format(sta_mac))
+
+        self.debug("Send client association control request to all other (BLOCK) ")
+        self.beerocks_cli_command('client_disallow {} {}'.format(sta_mac, self.mac_repeater1_wlan0))
+        time.sleep(1)
+
+        self.debug("Confirming Client Association Control Request message was received (BLOCK)")
+        self.check_log(self.repeater1, "agent_wlan0",
+                       r"Got client disallow request for {}".format(sta_mac))
+
     def test_client_steering_mandate(self):
         self.debug("Send topology request to agent 1")
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x0002)
