@@ -456,6 +456,48 @@ class test_flows:
         self.check_log(self.repeater1, "agent", "Received TLV_TRANSMITTER_LINK_METRIC")
         self.check_log(self.repeater1, "agent", "Received TLV_RECEIVER_LINK_METRIC")
 
+    def test_client_capability_query(self):
+        sta_mac1 = '00:00:00:11:00:22'
+        sta_mac2 = '00:00:00:11:00:33'
+
+        self.debug("Send client capability query for unconnected STA")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8009,
+                                       tlv(0x90,0x000C,
+                                           '{mac_repeater1_wlan0} {sta_mac1}'
+                                            .format(sta_mac1 = sta_mac1,
+                                                    mac_repeater1_wlan0 = self.mac_repeater1_wlan0)))
+        time.sleep(1)
+        self.debug("Confirming client capability query has been received on agent")
+        # check that both radio agents received it, in the future we'll add a check to verify which
+        # radio the query was intended for.
+        self.check_log(self.repeater1, "agent", r"CLIENT_CAPABILITY_QUERY_MESSAGE")
+
+        self.debug("Confirming client capability report message has been received on controller")
+        self.check_log(self.gateway, "controller", r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
+        self.check_log(self.gateway, "controller",
+                       r"Result Code= FAILURE, client MAC= {sta_mac1}, BSSID= {mac_repeater1_wlan0}"
+                        .format(sta_mac1 = sta_mac1,
+                                mac_repeater1_wlan0 = self.mac_repeater1_wlan0))
+
+        self.debug("Connect dummy STA to wlan0")
+        self.send_bwl_event(self.repeater1, "wlan0",
+                            "EVENT AP-STA-CONNECTED {sta_mac2}".format(sta_mac2 = sta_mac2))
+
+        self.debug("Send client capability query for connected STA")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8009,
+                                       tlv(0x90,0x000C,
+                                           '{mac_repeater1_wlan0} {sta_mac2}'
+                                            .format(sta_mac2 = sta_mac2,
+                                                    mac_repeater1_wlan0 = self.mac_repeater1_wlan0)))
+        time.sleep(1)
+
+        self.debug("Confirming client capability report message has been received on controller")
+        self.check_log(self.gateway, "controller", r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
+        self.check_log(self.gateway, "controller",
+                       r"Result Code= SUCCESS, client MAC= {sta_mac2}, BSSID= {mac_repeater1_wlan0}"
+                        .format(sta_mac2 = sta_mac2,
+                                mac_repeater1_wlan0 = self.mac_repeater1_wlan0))
+
     def test_client_steering_mandate(self):
         self.debug("Send topology request to agent 1")
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x0002)
