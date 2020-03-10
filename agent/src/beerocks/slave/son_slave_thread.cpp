@@ -4478,6 +4478,8 @@ bool slave_thread::channel_selection_current_channel_restricted()
     auto bw              = static_cast<beerocks::eWiFiBandwidth>(hostap_cs_params.bandwidth);
     auto operating_class = wireless_utils::get_operating_class_by_channel(channel, bw);
 
+    LOG(DEBUG) << "Current channel " << int(channel) << " bw " << int(bw) << " oper_class "
+              << int(operating_class);
     for (const auto &preference : channel_preferences) {
         // for now we handle only non-operable preference
         // TODO - handle as part of https://github.com/prplfoundation/prplMesh/issues/725
