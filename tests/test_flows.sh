@@ -14,7 +14,7 @@
 # but just doing the optimal_path_dummy test first is simpler for the time being.
 # FIXME optimal_path_dummy temporarily disabled since it's broken
 ALL_TESTS="topology
-           client_steering_dummy client_association_dummy client_steering_policy client_association
+           client_steering_dummy client_steering_policy client_association
            higher_layer_data_payload_trigger"
 
 scriptdir="$(cd "${0%/*}"; pwd)"
@@ -112,29 +112,6 @@ send_bwl_event() {
     # $2: radio to send to (wlan0, wlan2)
     # $3: event string
     check docker exec $1 sh -c 'echo '"$3"' > /tmp/$USER/beerocks/'$2'/EVENT'
-}
-
-test_client_association_dummy(){
-    status "test client association dummy"
-    check_error=0
-    sta_mac=11:11:33:44:55:66
-
-    dbg "Connect dummy STA to wlan0"
-    send_bwl_event ${REPEATER1} wlan0 "EVENT AP-STA-CONNECTED ${sta_mac}"
-    dbg "Send client association control request to the chosen BSSID to steer the client (UNBLOCK) "
-    eval send_bml_command "client_allow \"${sta_mac} ${mac_agent1_wlan2}\"" $redirect
-    sleep 1
-
-    dbg "Confirming Client Association Control Request message was received (UNBLOCK)"
-    check_log ${REPEATER1} agent_wlan2 "Got client allow request for ${sta_mac}"
-
-    dbg "Send client association control request to all other (BLOCK) "
-    eval send_bml_command "client_disallow \"${sta_mac} ${mac_agent1_wlan0}\"" $redirect
-    sleep 1
-
-    dbg "Confirming Client Association Control Request message was received (BLOCK)"
-    check_log ${REPEATER1} agent_wlan0 "Got client disallow request for ${sta_mac}"
-    return $check_error
 }
 
 wait_for_message() {
@@ -420,7 +397,6 @@ usage() {
     echo "      topology - Topology discovery test"
     echo "      client_steering_dummy - Client Steering using dummy bwl"
     echo "      optimal_path_dummy - Optimal Path using dummy bwl"
-    echo "      client_association_dummy - Client Association Control Message using dummy bwl"
     echo "      client_steering_policy - Setting Client Steering Policy test"
     echo "      client_association - Client Association Control Message test"
     echo "      higher_layer_data_payload_trigger - Higher layer data payload over 1905 trigger test"
