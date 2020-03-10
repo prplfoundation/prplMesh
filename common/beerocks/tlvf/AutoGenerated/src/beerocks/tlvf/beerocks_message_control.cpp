@@ -632,6 +632,7 @@ bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::init()
         return false;
     }
     m_data = (uint8_t*)m_buff_ptr__;
+    m_data_idx__ = getBuffRemainingBytes();
     if (m_parse__) { class_swap(); }
     return true;
 }
@@ -757,6 +758,7 @@ bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::init()
         return false;
     }
     m_data = (uint8_t*)m_buff_ptr__;
+    m_data_idx__ = getBuffRemainingBytes();
     if (m_parse__) { class_swap(); }
     return true;
 }
@@ -882,6 +884,7 @@ bool cACTION_CONTROL_AGENT_PING_REQUEST::init()
         return false;
     }
     m_data = (uint8_t*)m_buff_ptr__;
+    m_data_idx__ = getBuffRemainingBytes();
     if (m_parse__) { class_swap(); }
     return true;
 }
@@ -1007,6 +1010,7 @@ bool cACTION_CONTROL_AGENT_PING_RESPONSE::init()
         return false;
     }
     m_data = (uint8_t*)m_buff_ptr__;
+    m_data_idx__ = getBuffRemainingBytes();
     if (m_parse__) { class_swap(); }
     return true;
 }
