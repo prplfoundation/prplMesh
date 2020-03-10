@@ -3,7 +3,7 @@ import argparse
 import logging
 import socket
 from enum import Enum
-from typing import Union, Dict, Sequence, Tuple
+from typing import Dict, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class UCCSocket:
     CAPI commands from it.
     """
 
-    def __init__(self, host: str, port: int, timeout : int = 10):
+    def __init__(self, host: str, port: int, timeout: int = 10):
         """Constructor for UCCSocket
 
         Parameters
@@ -144,9 +144,11 @@ class UCCSocket:
                    "tlv_length{tlv_num},0x{tlv_length:04x}," \
                    "tlv_value{tlv_num},{tlv_value}".format(**locals())
 
-        cmd = "DEV_SEND_1905,DestALid,{dest:s},MessageTypeValue,0x{message_type:04x}".format(**locals())
+        cmd = "DEV_SEND_1905,DestALid,{dest:s},MessageTypeValue,0x{message_type:04x}"\
+            .format(**locals())
         if len(tlvs) > 1:
-            cmd += ',' + ','.join([format_tlv(tlv_num + 1, *tlv) for (tlv_num, tlv) in enumerate(tlvs)])
+            formatted_tlvs = [format_tlv(tlv_num + 1, *tlv) for (tlv_num, tlv) in enumerate(tlvs)]
+            cmd += ',' + ','.join(formatted_tlvs)
         elif tlvs:
             cmd += ',' + format_tlv('', *tlvs[0])
         return int(self.cmd_reply(cmd)["mid"], base=0)
