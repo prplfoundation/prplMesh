@@ -1745,8 +1745,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         //remove this client from other radios
         for (const auto &slave : m_radio_info_map) {
             auto associated_clients_map = slave.second.associated_clients_map;
-            for (const auto &vap : associated_clients_map) {
-                if (vap.second.find(msg->client_mac()) != vap.second.end()) {
+            for (const auto &client : associated_clients_map) {
+                if (client.second.find(msg->client_mac()) != client.second.end()) {
                     m_radio_info_map.erase(msg->client_mac());
                 }
             }
