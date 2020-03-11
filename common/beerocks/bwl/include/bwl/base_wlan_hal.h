@@ -168,6 +168,13 @@ public:
      */
     virtual std::string get_radio_mac() = 0;
 
+    /*!
+     * Returns the Radio's Hardware supported channels;
+     */
+    const std::vector<WiFiChannel> get_hw_supported_channels() const {
+        return m_hw_supported_channels;
+    }
+
     // Protected methods
 protected:
     /*!
@@ -209,6 +216,7 @@ protected:
     // Protected data-members:
 protected:
     RadioInfo m_radio_info;
+    std::vector<WiFiChannel> m_hw_supported_channels;
 
     HALState m_hal_state = HALState::Uninitialized;
 
