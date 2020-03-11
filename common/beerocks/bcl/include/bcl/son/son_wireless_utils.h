@@ -150,6 +150,9 @@ public:
                                      uint8_t operating_class);
     static std::vector<uint8_t> get_operating_class_non_oper_channels(
         const beerocks::message::sWifiChannel supported_channels[], uint8_t operating_class);
+    static uint8_t get_5g_center_channel(uint8_t channel,
+                                         beerocks::eWiFiBandwidth channel_bandwidth,
+                                         bool channel_ext_above_secondary);
     static uint8_t get_operating_class_by_channel(uint8_t channel,
                                                   beerocks::eWiFiBandwidth channel_bandwidth);
     static std::list<sChannelPreference>
