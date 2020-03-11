@@ -88,7 +88,7 @@ private:
     std::list<std::shared_ptr<SProbeEntry>> m_lstProbe;
 
     // Buffer for reading ARP packets
-    char m_arrArpPacket[ETH_FRAME_LEN];
+    char m_arrArpPacket[ETH_FRAME_LEN]{0};
 };
 
 } // namespace bpl
