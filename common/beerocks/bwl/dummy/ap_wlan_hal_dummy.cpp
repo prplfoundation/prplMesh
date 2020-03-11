@@ -379,8 +379,18 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
             LOG(ERROR) << "Failed reading mac parameter!";
             return false;
         }
-        msg->params.mac  = beerocks::net::network_utils::mac_from_string(tmp_str);
-        char assoc_req[] = "dummy association frame";
+        msg->params.mac = beerocks::net::network_utils::mac_from_string(tmp_str);
+        char assoc_req[] =
+            "00003A01029A96FB591100504322565F029A96FB591110E431141400000E4D756C74692D41502D3234472D"
+            "31010802040B0C121618242102001430140100000FAC040100000FAC040100000FAC02000032043048606C"
+            "3B10515153547374757677787C7D7E7F80823B160C01020304050C161718191A1B1C1D1E1F202180818246"
+            "057000000000460571505000047F0A04000A82214000408000DD070050F2020001002D1A2D1103FFFF0000"
+            "000000000000000000000000000018E6E10900BF0CB079D133FAFF0C03FAFF0C03C70110DD07506F9A1603"
+            "0103";
+        LOG(DEBUG) << "**********************************************************************";
+        auto x = reinterpret_cast<uint8_t *>(assoc_req);
+        LOG(DEBUG) << "reinterpret_cast<uint8_t *>(assoc_req) = " << x;
+        LOG(DEBUG) << "**********************************************************************";
 
         std::copy_n(assoc_req, strnlen(assoc_req, ASSOCIATION_FRAME_SIZE) + 1,
                     msg->params.association_frame);

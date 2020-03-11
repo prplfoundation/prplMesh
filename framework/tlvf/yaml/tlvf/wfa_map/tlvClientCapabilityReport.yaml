@@ -11,7 +11,7 @@ tlvClientCapabilityReport:
   length: uint16_t
   result_code: eResultCode
   association_frame:
-    _type: char
+    _type: uint8_t
     _length: [] 
 
 eResultCode:
