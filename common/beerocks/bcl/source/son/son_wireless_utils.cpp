@@ -644,6 +644,16 @@ uint8_t wireless_utils::get_operating_class_max_tx_power(
     return max_tx_power;
 }
 
+uint8_t wireless_utils::get_5g_center_channel(uint8_t start_channel,
+                                              beerocks::eWiFiBandwidth channel_bandwidth,
+                                              bool channel_ext_above_secondary)
+{
+    auto bw              = beerocks::utils::convert_bandwidth_to_int(channel_bandwidth);
+    auto vht_center_freq = beerocks::utils::wifi_channel_to_vht_center_freq(
+        start_channel, bw, channel_ext_above_secondary);
+    return beerocks::utils::wifi_freq_to_channel(vht_center_freq);
+}
+
 /**
  * @brief get operating class number by channel and channel bandwidth 
  *
