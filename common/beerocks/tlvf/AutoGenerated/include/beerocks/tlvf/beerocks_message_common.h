@@ -371,16 +371,23 @@ typedef struct sNodeHostap {
     uint8_t conducted_power;
     char driver_version[beerocks::message::WIFI_DRIVER_VER_LENGTH];
     beerocks::message::sWifiChannel supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+    beerocks::message::sWifiChannel hw_supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
     void struct_swap(){
         iface_mac.struct_swap();
         for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
             (supported_channels[i]).struct_swap();
+        }
+        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
+            (hw_supported_channels[i]).struct_swap();
         }
     }
     void struct_init(){
         iface_mac.struct_init();
             for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
                 (supported_channels[i]).struct_init();
+            }
+            for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+                (hw_supported_channels[i]).struct_init();
             }
     }
 } __attribute__((packed)) sNodeHostap;
