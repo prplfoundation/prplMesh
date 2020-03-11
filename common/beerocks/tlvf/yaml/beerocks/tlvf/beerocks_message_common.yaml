@@ -271,6 +271,9 @@ sNodeHostap:
   supported_channels:
     _type: beerocks::message::sWifiChannel 
     _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]          
+  hw_supported_channels:
+    _type: beerocks::message::sWifiChannel 
+    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]          
 
 sVapsList:
   _type: struct
