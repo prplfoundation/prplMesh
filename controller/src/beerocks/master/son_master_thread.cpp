@@ -1958,6 +1958,9 @@ bool master_thread::handle_intel_slave_join(
 
     database.set_hostap_supported_channels(radio_mac, notification->hostap().supported_channels,
                                            message::SUPPORTED_CHANNELS_LENGTH);
+    database.set_hostap_supported_channels(radio_mac,
+                                           notification->hostap().hw_supported_channels,
+                                           message::SUPPORTED_CHANNELS_LENGTH, true);
 
     if (database.get_node_5ghz_support(radio_mac)) {
         if (notification->low_pass_filter_on()) {
