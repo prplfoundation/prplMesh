@@ -43,6 +43,7 @@ enum eStructsConsts {
     HOSTAP_ERR_MSG_LENGTH         = 64,
     WIFI_DRIVER_VER_LENGTH        = 32 + 4,
     WIFI_SSID_MAX_LENGTH          = 32 + 1 + 3, //need extra 1 byte for null termination + alignment
+    ASSOCIATION_MAX_LENGTH        = 2048,
     WIFI_PASS_MAX_LENGTH          = 64 + 1 + 3, //need extra 1 byte for null termination + alignment
     USER_PASS_LEN                 = 64 + 1 + 3, //need extra 1 byte for null termination + alignment
     DEV_INFO_STR_MAX_LEN          = 32,
