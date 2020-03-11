@@ -31,6 +31,53 @@ Conversely, code that breaks the usual patterns takes more time to understand an
 Exceptions are not used at all in prplMesh code.
 If a standard library function is called that may throw an exception, make sure to do the necessary checks before, to make sure an exception cannot be thrown.
 
+#### Conditionals
+
+Use no spaces inside parentheses. The if and else keywords belong on separate lines.
+
+```cpp
+    if (condition) {    // no spaces inside parentheses
+        ...             // 4 space indent
+    } else if (...) {   // The else goes on the same line as the closing brace
+        ...
+    } else {
+        ...
+    }
+```
+
+Always put a space between the if and the open parenthesis. Also have a space between the close parenthesis and the curly brace.
+
+```cpp
+    if(condition) {   // Bad - space missing after IF
+    if (condition){   // Bad - space missing before {
+    if(condition){    // Doubly bad
+
+    if (condition) {  // Good - proper space after IF and before {
+```
+
+Always use curly braces, even for single-line statements. 
+It makes complex conditions or statements more readable, and can prevent runtime errors when using multi-line MACROs.
+
+```cpp
+    if (condition)      // Bad - curly braces missing
+        Foo();          // 4 space indent
+
+    if (condition) {    // Good
+        Bar();          // 4 space indent
+    }
+```
+
+Short conditional statements may be written on one line if this enhances readability. 
+You may use this only when the line is brief, simple and the statement does not use the else clause.
+Can also be used for inline return conditions, as long as the condition is surrounded with parentheses.
+
+Examples:
+```cpp
+    if (x == is_foo) { return new Foo(); }
+    if (x == is_bar) { return new Bar(); }
+    return (x == is_foo) ? Foo() : Bar();
+```
+
 #### Loops
 
 Avoid endless loops like `while (true)`.
