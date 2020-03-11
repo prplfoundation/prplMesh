@@ -89,7 +89,7 @@ Example:
     static const size_t max_tlv = 256;
     size_t tlv_idx;
     for (tlv_idx = 0; tlv_idx < max_tlv; tlv_idx++) {
-       ...
+        ...
     }
     if (tlv_idx == max_tlv) {
         LOG(ERROR) << "Reached stop condition";
@@ -109,10 +109,11 @@ If a ranged loop is not possible, still use C++-style iterator rather than index
 
 ```cpp
     for (auto it = nodes[i].begin(); it != nodes[i].end();) {
-        if (...)
+        if (...) {
             it = nodes[i].erase(it);
-        else
+        } else {
             it++;
+        }
     }
 ```
 
