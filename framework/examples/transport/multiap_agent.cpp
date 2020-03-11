@@ -49,7 +49,7 @@ public:
         //msg.metadata()->cookie = kCookie;
         memcpy(msg.data(), &kCmduHdr, sizeof(kCmduHdr));
         MAPF_INFO("sending CmduTxMessage: " << msg);
-        int rc = bus_.publisher().Send(msg);
+        bool rc = bus_.publisher().Send(msg);
         mapf_assert(rc == true);
     }
 
