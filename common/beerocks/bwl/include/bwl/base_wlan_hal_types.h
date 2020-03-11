@@ -252,6 +252,11 @@ typedef struct {
 } sHOSTAP_ENABLED_NOTIFICATION;
 
 #define SSID_MAX_SIZE beerocks::message::WIFI_SSID_MAX_LENGTH
+// The absolute maximum size of any frame according to the 802.11 specification
+// is MMPDU size of 2304 bytes. The actual size of an (re)association frame
+// should be in the range of a couple of hundreds of bytes, so be on the safe side
+// and set the maximum size to 2KB
+#define ASSOCIATION_FRAME_SIZE beerocks::message::ASSOCIATION_MAX_LENGTH
 #define MAC_ADDR_SIZE 18
 #define MAX_SUPPORTED_20M_CHANNELS beerocks::message::SUPPORTED_CHANNELS_LENGTH
 #define MAX_SUPPORTED_CHANNELS                                                                     \
