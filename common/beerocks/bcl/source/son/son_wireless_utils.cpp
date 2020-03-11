@@ -657,23 +657,23 @@ uint8_t wireless_utils::get_5g_center_channel(uint8_t start_channel,
 /**
  * @brief get operating class number by channel and channel bandwidth 
  *
- * @param channel current channel
- * @param center_channel vht center channel
- * @param channel_bandwidth current channel bandwidth
+ * @param channel current channel parameters
  * @return operating class number
  */
-uint8_t wireless_utils::get_operating_class_by_channel(uint8_t channel, uint8_t center_channel,
-                                                       beerocks::eWiFiBandwidth channel_bandwidth)
+uint8_t
+wireless_utils::get_operating_class_by_channel(const beerocks::message::sWifiChannel &channel)
 {
     // operating classes 128,129,130 use center channel **unlike the other classes**,
     // so convert channel and bandwidth to center channel.
     // For more info, refer to Table E-4 in the 802.11 specification.
-    if (channel_bandwidth >= beerocks::eWiFiBandwidth::BANDWIDTH_80) {
-        channel = center_channel;
+    auto ch = channel.channel;
+    auto bw = static_cast<beerocks::eWiFiBandwidth>(channel.channel_bandwidth);
+    if (bw >= beerocks::eWiFiBandwidth::BANDWIDTH_80) {
+        ch = wireless_utils::get_5g_center_channel(ch, bw, true);
     }
     for (auto oper_class : operating_classes_list) {
-        if (oper_class.second.band == channel_bandwidth &&
-            oper_class.second.channels.find(channel) != oper_class.second.channels.end()) {
+        if (oper_class.second.band == channel.channel_bandwidth &&
+            oper_class.second.channels.find(ch) != oper_class.second.channels.end()) {
             return oper_class.first;
         }
     }
