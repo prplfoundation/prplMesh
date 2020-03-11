@@ -26,6 +26,8 @@ class Socket {
 public:
     Socket();
     virtual ~Socket();
+    Socket(const Socket &) = delete;
+    Socket &operator=(const Socket &) = delete;
 
     // -1 - endless, 0 - one shot, >0 - num of retries
     int Connect(const std::string &addr, int max_retries = -1);
