@@ -1743,14 +1743,14 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         }
 
         //remove this client from other radios
-        for (const auto &slave : m_radio_info_map) {
-            auto associated_clients_map = slave.second.associated_clients_map;
-            for (const auto &vap : associated_clients_map) {
-                if (vap.second.find(msg->client_mac()) != vap.second.end()) {
-                    m_radio_info_map.erase(msg->client_mac());
-                }
-            }
-        }
+        // for (const auto &slave : m_radio_info_map) {
+        //     auto associated_clients_map = slave.second.associated_clients_map;
+        //     for (const auto &vap : associated_clients_map) {
+        //         if (vap.second.find(msg->client_mac()) != vap.second.end()) {
+        //             m_radio_info_map.erase(msg->client_mac());
+        //         }
+        //     }
+        // }
         // Set client association information for associated client
         std::string assoc_req(msg->association_frame() ? msg->association_frame() : "");
         auto &associated_clients =
