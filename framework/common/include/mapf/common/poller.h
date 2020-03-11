@@ -28,6 +28,9 @@ class Poller {
 public:
     Poller();
     virtual ~Poller();
+    Poller(const Poller &) = delete;
+    Poller &operator=(const Poller &) = delete;
+
     int Add(const Socket &socket, short events = MAPF_POLLIN);
     int Modify(const Socket &socket, short events);
     int Remove(const Socket &socket);
