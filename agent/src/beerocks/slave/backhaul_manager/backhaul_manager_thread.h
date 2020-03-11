@@ -10,6 +10,7 @@
 #define _BACKHAUL_MANAGER_THREAD_H
 
 #include "wan_monitor.h"
+#include <cstring>
 
 #include <bcl/beerocks_backport.h>
 #include <bcl/beerocks_config_file.h>
