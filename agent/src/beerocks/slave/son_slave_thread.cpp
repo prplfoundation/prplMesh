@@ -4432,6 +4432,50 @@ bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduM
     return message_com::send_cmdu(ap_manager_socket, cmdu_tx);
 }
 
+/**
+ * @brief Get the channel preference 
+ * 
+ * @param channel channel to check
+ * @param preference preference 
+ * @return NON_OPERABLE if channel is restricted, channel preference otherwise
+ */
+static uint8_t get_channel_preference(const beerocks::message::sWifiChannel channel,
+                                      const son::wireless_utils::sChannelPreference &preference)
+{
+    uint8_t center_channel = 0;
+    auto bw                = static_cast<beerocks::eWiFiBandwidth>(channel.channel_bandwidth);
+    auto operating_class   = wireless_utils::get_operating_class_by_channel(channel);
+
+    // consider channels in different operating classes as restricted
+    if (operating_class != preference.oper_class) {
+        return preference.preference;
+    }
+    // operating classes 128,129,130 use center channel **unlike the other classes**,
+    // so convert channel and bandwidth to center channel.
+    // For more info, refer to Table E-4 in the 802.11 specification.
+    if (operating_class == 128 || operating_class == 129 || operating_class == 130) {
+        center_channel = wireless_utils::get_5g_center_channel(channel.channel, bw, true);
+    }
+
+    // According to Table 23 in the MultiAP Specification, an empty channel list field
+    // indicates that the indicated preference applies to all channels in the operating class.
+    if (preference.channels.empty()) {
+        return preference.preference;
+    }
+    // explicitely restrict non-operable channels
+    auto channel_to_check =
+        (operating_class == 128 || operating_class == 129 || operating_class == 130)
+            ? center_channel
+            : channel.channel;
+    for (const auto &ch : preference.channels) {
+        if (channel_to_check == ch.channel) {
+            return preference.preference;
+        }
+    }
+    // default to the highest preference
+    return wfa_map::cPreferenceOperatingClasses::ePreference::PREFERRED14;
+}
+
 beerocks::message::sWifiChannel slave_thread::channel_selection_select_channel()
 {
     for (const auto &preference : channel_preferences) {
@@ -4440,41 +4484,21 @@ beerocks::message::sWifiChannel slave_thread::channel_selection_select_channel()
             continue;
         }
         for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
-            auto channel        = hostap_params.supported_channels[i];
-            auto bw             = static_cast<beerocks::eWiFiBandwidth>(channel.channel_bandwidth);
-            auto center_channel = wireless_utils::get_5g_center_channel(channel.channel, bw, true);
-            auto operating_class =
-                wireless_utils::get_operating_class_by_channel(channel.channel, center_channel, bw);
-
-            // Skip channels from other operating classes
-            if (operating_class != preference.oper_class) {
-                continue;
-            }
+            const auto &channel = hostap_params.supported_channels[i];
             // Skip DFS channels
-            if (hostap_params.supported_channels[i].is_dfs_channel) {
+            if (channel.is_dfs_channel) {
                 LOG(DEBUG) << "Skip DFS channel " << int(channel.channel);
                 continue;
             }
-            auto is_restricted =
-                std::find_if(preference.channels.begin(), preference.channels.end(),
-                             [&](const beerocks::message::sWifiChannel &wifi_channel) {
-                                 // operating classes 128,129,130 use center channel **unlike the other classes** (See Table E-4 in 802.11 spec)
-                                 if (operating_class == 128 || operating_class == 129 ||
-                                     operating_class == 130) {
-                                     return center_channel == wifi_channel.channel;
-                                 } else {
-                                     return (channel.channel == wifi_channel.channel);
-                                 }
-                             });
             // Skip restricted channels
-            if (is_restricted != preference.channels.end()) {
-                LOG(DEBUG) << "Skip restricted channel " << int(channel.channel)
-                           << " (center channel " << int(center_channel) << ")";
+            if (get_channel_preference(channel, preference) ==
+                wfa_map::cPreferenceOperatingClasses::ePreference::NON_OPERABLE) {
+                LOG(DEBUG) << "Skip restricted channel " << int(channel.channel);
                 continue;
             }
             // If we got this far, we found a candidate channel, so switch to it
             LOG(DEBUG) << "Selected channel " << int(channel.channel);
-            return hostap_params.supported_channels[i];
+            return channel;
         }
     }
 
@@ -4484,15 +4508,13 @@ beerocks::message::sWifiChannel slave_thread::channel_selection_select_channel()
 
 bool slave_thread::channel_selection_current_channel_restricted()
 {
-    auto bw      = static_cast<beerocks::eWiFiBandwidth>(hostap_cs_params.bandwidth);
-    auto channel = hostap_cs_params.channel;
-    auto center_channel =
-        beerocks::utils::wifi_freq_to_channel(hostap_cs_params.vht_center_frequency);
-    auto operating_class =
-        wireless_utils::get_operating_class_by_channel(channel, center_channel, bw);
+    beerocks::message::sWifiChannel channel;
+    channel.channel_bandwidth = hostap_cs_params.bandwidth;
+    channel.channel           = hostap_cs_params.channel;
+    auto operating_class      = wireless_utils::get_operating_class_by_channel(channel);
 
-    LOG(DEBUG) << "Current channel " << int(channel) << " center channel " << int(center_channel)
-               << " bw " << int(bw) << " oper_class " << int(operating_class);
+    LOG(DEBUG) << "Current channel " << int(channel.channel) << " bw "
+               << int(channel.channel_bandwidth) << " oper_class " << int(operating_class);
     for (const auto &preference : channel_preferences) {
         // for now we handle only non-operable preference
         // TODO - handle as part of https://github.com/prplfoundation/prplMesh/issues/725
@@ -4501,31 +4523,14 @@ bool slave_thread::channel_selection_current_channel_restricted()
             LOG(WARNING) << "Ignoring operable channels preference";
             continue;
         }
-        // According to Table 23 in the MultiAP Specification, an empty channel list field
-        // indicates that the indicated preference applies to all channels in the operating class.
-        if (preference.oper_class == operating_class && preference.channels.empty()) {
-            LOG(INFO) << "Current operating class " << int(operating_class) << " restricted,"
-                      << "channel switch required";
-            return true;
-        }
-        auto is_restricted = std::find_if(
-            preference.channels.begin(), preference.channels.end(),
-            [&](const beerocks::message::sWifiChannel &wifi_channel) {
-                // operating classes 128,129,130 use center channel **unlike the other classes** (See Table E-4 in 802.11 spec)
-                if (operating_class == 128 || operating_class == 129 || operating_class == 130) {
-                    return center_channel == wifi_channel.channel;
-                } else {
-                    return channel == wifi_channel.channel;
-                }
-            });
-
-        if (is_restricted != preference.channels.end()) {
-            LOG(INFO) << "Current channel " << int(channel) << " center channel"
-                      << int(center_channel) << " is restricted, channel switch required";
+        if (get_channel_preference(channel, preference) ==
+            wfa_map::cPreferenceOperatingClasses::ePreference::NON_OPERABLE) {
+            LOG(INFO) << "Current channel " << int(channel.channel)
+                      << " restricted, channel switch required";
             return true;
         }
     }
-    LOG(INFO) << "Current channel " << int(channel) << " center channel" << int(center_channel)
+    LOG(INFO) << "Current channel " << int(channel.channel)
               << " not restricted, channel switch not required";
     return false;
 }
@@ -4752,19 +4757,18 @@ bool slave_thread::send_operating_channel_report()
     }
 
     auto &operating_class_entry = std::get<1>(operating_class_entry_tuple);
-    auto bw                     = static_cast<beerocks::eWiFiBandwidth>(hostap_cs_params.bandwidth);
-    auto channel                = hostap_cs_params.channel;
-    auto center_channel =
-        beerocks::utils::wifi_freq_to_channel(hostap_cs_params.vht_center_frequency);
-    auto operating_class =
-        wireless_utils::get_operating_class_by_channel(channel, center_channel, bw);
+    beerocks::message::sWifiChannel channel;
+    channel.channel_bandwidth = hostap_cs_params.bandwidth;
+    channel.channel           = hostap_cs_params.channel;
+    auto center_channel       = utils::wifi_freq_to_channel(hostap_cs_params.vht_center_frequency);
+    auto operating_class      = wireless_utils::get_operating_class_by_channel(channel);
 
     operating_class_entry.operating_class = operating_class;
     // operating classes 128,129,130 use center channel **unlike the other classes** (See Table E-4 in 802.11 spec)
     operating_class_entry.channel_number =
         (operating_class == 128 || operating_class == 129 || operating_class == 130)
             ? center_channel
-            : channel;
+            : channel.channel;
     operating_channel_report_tlv->current_transmit_power() = hostap_cs_params.tx_power;
 
     return send_cmdu_to_controller(cmdu_tx);
