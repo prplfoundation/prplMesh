@@ -1782,15 +1782,16 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION));
         memset((char *)&msg->params.capabilities, 0, sizeof(msg->params.capabilities));
 
-        char VAP[SSID_MAX_SIZE]        = {0};
-        char MACAddress[MAC_ADDR_SIZE] = {0};
-        int supported_rates[16]        = {0};
-        int RRM_CAP[8]                 = {0};
-        int HT_MCS[16]                 = {0};
-        int16_t VHT_MCS[16]            = {0};
-        char ht_cap[8]                 = {0};
-        char vht_cap[16]               = {0};
-        size_t numOfValidArgs[20]      = {0};
+        char VAP[SSID_MAX_SIZE]                = {0};
+        char MACAddress[MAC_ADDR_SIZE]         = {0};
+        int supported_rates[16]                = {0};
+        int RRM_CAP[8]                         = {0};
+        int HT_MCS[16]                         = {0};
+        int16_t VHT_MCS[16]                    = {0};
+        char ht_cap[8]                         = {0};
+        char vht_cap[16]                       = {0};
+        size_t numOfValidArgs[20]              = {0};
+        char assoc_req[ASSOCIATION_FRAME_SIZE] = {0};
 
         FieldsToParse fieldsToParse[] = {
             {NULL /*opCode*/, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0},
@@ -1806,6 +1807,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
              "VHT_MCS=", sizeof(VHT_MCS)},
             {(void *)ht_cap, &numOfValidArgs[7], DWPAL_STR_PARAM, "HT_CAP=", sizeof(ht_cap)},
             {(void *)vht_cap, &numOfValidArgs[8], DWPAL_STR_PARAM, "VHT_CAP=", sizeof(vht_cap)},
+            {(void *)assoc_req, &numOfValidArgs[9], DWPAL_STR_PARAM,
+             "assoc_req=", sizeof(assoc_req)},
             {(void *)&msg->params.capabilities.btm_supported, &numOfValidArgs[9], DWPAL_CHAR_PARAM,
              "btm_supported=", 0},
             {(void *)&msg->params.capabilities.cell_capa, &numOfValidArgs[10], DWPAL_CHAR_PARAM,
@@ -1857,6 +1860,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         LOG(DEBUG) << "max_mcs          : " << (int)msg->params.capabilities.max_mcs;
         LOG(DEBUG) << "max_tx_power     : " << (int)msg->params.capabilities.max_tx_power;
         LOG(DEBUG) << "mumimo_supported : " << (int)msg->params.capabilities.mumimo_supported;
+        LOG(DEBUG) << "assoc_req: " << assoc_req;
 
         for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
             if (numOfValidArgs[i] == 0) {
