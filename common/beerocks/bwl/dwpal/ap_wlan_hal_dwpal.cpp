@@ -1550,7 +1550,7 @@ bool ap_wlan_hal_dwpal::read_supported_channels()
     FieldsToParse fieldsToParse[] = {
         {(void *)&chan, &numOfValidArgs[0], DWPAL_INT_PARAM, "chan=", 0},
         {(void *)dfs_state, &numOfValidArgs[1], DWPAL_STR_PARAM,
-         "(DFS state = ", sizeof(dfs_state)},
+        "(DFS state = ", sizeof(dfs_state)},
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
@@ -1569,9 +1569,14 @@ bool ap_wlan_hal_dwpal::read_supported_channels()
             return false;
         }
 
-        // LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[0] << " chan= " << chan;
-        // LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " dfs_state= " << dfs_state;
-
+        LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[0] << " chan= " << chan;
+        LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " dfs_state= " << dfs_state;
+        
+        m_hw_supported_channels[i].bandwidth   = 20;
+        m_hw_supported_channels[i].channel     = chan;
+        m_hw_supported_channels[i].bss_overlap = 0;
+        m_hw_supported_channels[i].is_dfs      = numOfValidArgs[1];
+        
         m_radio_info.supported_channels[i].bandwidth   = 20;
         m_radio_info.supported_channels[i].channel     = chan;
         m_radio_info.supported_channels[i].bss_overlap = 0;
