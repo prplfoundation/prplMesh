@@ -7,7 +7,7 @@ if (CMAKE_PROJECT_NAME STREQUAL "CMAKE_TRY_COMPILE")
     return()
 endif()
 
-message(" ***  econet in econet.cmake ***")
+message(" *** econet.cmake ***")
 
 # Workaround for https://www.cmake.org/Bug/view.php?id=14075
 set(CMAKE_CROSS_COMPILING ON)
@@ -16,8 +16,10 @@ set(CMAKE_CROSS_COMPILING ON)
 set(TARGET_PLATFORM "econet" CACHE STRING "EcoNet")
 
 set(PLATFORM_BUILD_NAME "target-mips-trenchip-linux-uclibc_rjo_en7528_le_7592_7613")
-message(" PRPLMESH_PLATFORM_BASE_DIR: ${PRPLMESH_PLATFORM_BASE_DIR}")
-message(" PRPLMESH_PLATFORM_TOOLCHAIN_PREFIX: ${PRPLMESH_PLATFORM_TOOLCHAIN_PREFIX}")
+message("Config: PRPLMESH_PLATFORM_BASE_DIR: ${PRPLMESH_PLATFORM_BASE_DIR}")
+message("Config: PRPLMESH_PLATFORM_TOOLCHAIN_PREFIX: ${PRPLMESH_PLATFORM_TOOLCHAIN_PREFIX}")
+message("Config: PRPLMESH_PLATFORM_TOOLCHAIN_C_COMPILER: ${PRPLMESH_PLATFORM_TOOLCHAIN_C_COMPILER}")
+message("Config: PRPLMESH_PLATFORM_TOOLCHAIN_CXX_COMPILER: ${PRPLMESH_PLATFORM_TOOLCHAIN_CXX_COMPILER}")
 
 #Platform base dir (SDK path)
 if (NOT DEFINED PRPLMESH_PLATFORM_BASE_DIR)
@@ -58,8 +60,6 @@ endif()
 
 message("${BoldWhite}Setting TOOLCHAIN for ${BoldGreen}'${TARGET_PLATFORM}'${BoldWhite} platform...${ColourReset}")
 
-# Workaround for https://www.cmake.org/Bug/view.php?id=14075
-set(CMAKE_CROSS_COMPILING ON)
 
 ## IS THIS NECESSARY HERE??
 # projects (mis)use `-isystem` to silence warnings from 3rd-party
@@ -72,13 +72,23 @@ set(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES ${PLATFORM_TOOLCHAIN_DIR} CACHE STRING 
 set(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES ${PLATFORM_TOOLCHAIN_DIR} CACHE STRING "")
 
 
-message(" # PKG_CONFIG_PATH default value: ${PKG_CONFIG_PATH} ")
-message(" # CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH} ")
-message(" # CMAKE_FIND_ROOT_PATH: ${CMAKE_FIND_ROOT_PATH} ")
+message("Config: PKG_CONFIG_PATH: ${PKG_CONFIG_PATH} ")
+message("Config: CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH} ")
+message("Config: CMAKE_FIND_ROOT_PATH: ${CMAKE_FIND_ROOT_PATH} ")
 
 ## Toolchain Programs
-set(CMAKE_C_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}gcc-5)
-set(CMAKE_CXX_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}g++-5)
+if (NOT DEFINED PRPLMESH_PLATFORM_TOOLCHAIN_C_COMPILER)
+    message(" PLATFORM_TOOLCHAIN_C_COMPILER not defined. Using default value: gcc-5 ")
+    set(CMAKE_C_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}gcc-5)
+else()
+    set(CMAKE_C_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}${PRPLMESH_PLATFORM_TOOLCHAIN_C_COMPILER})
+endif()
+if (NOT DEFINED PRPLMESH_PLATFORM_TOOLCHAIN_CXX_COMPILER)
+    message(" PLATFORM_TOOLCHAIN_CXX_COMPILER not defined. Using default value: g++-5 ")
+    set(CMAKE_CXX_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}g++-5)
+else()
+    set(CMAKE_CXX_COMPILER ${PLATFORM_TOOLCHAIN_PREFIX}${PRPLMESH_PLATFORM_TOOLCHAIN_CXX_COMPILER})
+endif()
 set( CMAKE_AR "${PLATFORM_TOOLCHAIN_PREFIX}ar" CACHE FILEPATH "Archiver" )
 set( CMAKE_RANLIB "${PLATFORM_TOOLCHAIN_PREFIX}ranlib" CACHE FILEPATH "Ranlib" )
 
@@ -109,12 +119,6 @@ endif()
 #   (Removes the need to set LD_LIBRARY_PATH manually when installing to a none standard location)
 #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_INSTALL_FULL_LIBDIR},-rpath-link=${PLATFORM_STAGING_DIR}/usr/lib")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=/tmp/prpl/lib/,-rpath-link=/tmp/prpl/lib")
-
-#Should this be here?
-#set(BEEROCKS_BRIDGE_IFACE "br0")
-#set(BEEROCKS_BH_WIRE_IFACE "eth0")
-#set(BEEROCKS_WLAN1_IFACE "ra0")
-#set(BEEROCKS_WLAN2_IFACE "rai0")
 
 # Platform link directories (remove if later not used!)
 #link_directories(${PLATFORM_STAGING_DIR}/usr/lib)
