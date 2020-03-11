@@ -252,6 +252,9 @@ typedef struct {
 } sHOSTAP_ENABLED_NOTIFICATION;
 
 #define SSID_MAX_SIZE beerocks::message::WIFI_SSID_MAX_LENGTH
+// ASSOCIATION_MAX_LENGTH is defined to be the maximum of the binary frame
+// but since it is represented as hex here. we need two hex characters per byte + a terminating \0.
+#define ASSOCIATION_FRAME_SIZE (2 * beerocks::message::ASSOCIATION_MAX_LENGTH + 1)
 #define MAC_ADDR_SIZE 18
 #define MAX_SUPPORTED_20M_CHANNELS beerocks::message::SUPPORTED_CHANNELS_LENGTH
 #define MAX_SUPPORTED_CHANNELS                                                                     \
