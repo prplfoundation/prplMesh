@@ -260,7 +260,8 @@ bool slave_thread::work()
 
 void slave_thread::process_keep_alive()
 {
-    if (!config.enable_keep_alive || !son_config.slave_keep_alive_retries) {
+    if (!config.enable_keep_alive || !son_config.slave_keep_alive_retries ||
+        !backhaul_params.is_prplmesh_controller) {
         return;
     }
 
