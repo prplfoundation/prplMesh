@@ -152,6 +152,7 @@ private:
 
     struct DeDuplicationKey {
         uint8_t src[ETH_ALEN];
+        uint8_t dst[ETH_ALEN];
         uint16_t
             messageType; // required to distinguish the case of Request / Reply (when the reply carries an out of sync MID)
         uint16_t messageId;
@@ -161,10 +162,13 @@ private:
         // implement Compare for the std::map template
         bool operator()(const DeDuplicationKey &lhs, const DeDuplicationKey &rhs) const
         {
-            // compare based on src address first then messageId, then fragmentId
+            // compare based on src and dst address first then messageId, then fragmentId
             int srccmp = memcmp(lhs.src, rhs.src, ETH_ALEN);
             if (srccmp)
                 return srccmp < 0;
+            int dstcmp = memcmp(lhs.dst, rhs.dst, ETH_ALEN);
+            if (dstcmp)
+                return dstcmp < 0;
             else if (lhs.messageType != rhs.messageType)
                 return lhs.messageType < rhs.messageType;
             else if (lhs.messageId != rhs.messageId)
