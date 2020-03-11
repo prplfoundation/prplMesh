@@ -147,6 +147,7 @@ public:
         beerocks::eIfaceType iface_type;
         std::string driver_version;
         std::vector<beerocks::message::sWifiChannel> supported_channels;
+        std::vector<beerocks::message::sWifiChannel> hw_supported_channels;
         uint8_t operating_class    = 0;
         int ant_gain               = 0;
         int conducted_power        = 0;

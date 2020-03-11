@@ -295,11 +295,12 @@ public:
 
     bool set_hostap_supported_channels(std::string mac,
                                        beerocks::message::sWifiChannel *supported_channels,
-                                       int length);
+                                       int length, bool use_hw_supported_channels = false);
     const std::vector<beerocks::message::sWifiChannel>
-    get_hostap_supported_channels(std::string mac);
-    std::string get_hostap_supported_channels_string(const std::string &radio_mac);
-
+    get_hostap_supported_channels(std::string mac, bool use_hw_supported_channels = false);
+    std::string get_hostap_supported_channels_string(const std::string &radio_mac,
+                                                     bool use_hw_supported_channels = false);
+    
     bool add_hostap_supported_operating_class(const std::string &radio_mac, uint8_t operating_class,
                                               uint8_t tx_power,
                                               const std::vector<uint8_t> &non_operable_channels);

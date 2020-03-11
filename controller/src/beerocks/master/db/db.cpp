@@ -1165,7 +1165,7 @@ int db::get_hostap_conducted_power(std::string mac)
 }
 
 bool db::set_hostap_supported_channels(std::string mac, beerocks::message::sWifiChannel *channels,
-                                       int length)
+                                       int length, bool use_hw_supported_channels)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1176,13 +1176,16 @@ bool db::set_hostap_supported_channels(std::string mac, beerocks::message::sWifi
         return false;
     }
     std::vector<beerocks::message::sWifiChannel> supported_channels_(channels, channels + length);
-    n->hostap->supported_channels = supported_channels_;
+
+    (use_hw_supported_channels ? n->hostap->hw_supported_channels : n->hostap->supported_channels)
+        .assign(supported_channels_.begin(), supported_channels_.end());
 
     if (n->hostap->supported_channels.size() == 0) {
         LOG(ERROR) << "No supported channels";
         return false;
     }
 
+    if (!use_hw_supported_channels) {
     if (wireless_utils::which_freq(n->hostap->supported_channels[0].channel) ==
         eFreqType::FREQ_5G) {
         n->supports_5ghz = true;
@@ -1194,12 +1197,13 @@ bool db::set_hostap_supported_channels(std::string mac, beerocks::message::sWifi
                    << int(n->hostap->supported_channels[0].channel);
         return false;
     }
+    }
 
     return true;
 }
 
 const std::vector<beerocks::message::sWifiChannel>
-db::get_hostap_supported_channels(std::string mac)
+db::get_hostap_supported_channels(std::string mac, bool use_hw_supported_channels)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1209,13 +1213,15 @@ db::get_hostap_supported_channels(std::string mac)
         LOG(WARNING) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
         return std::vector<beerocks::message::sWifiChannel>();
     }
-    return n->hostap->supported_channels;
+    return use_hw_supported_channels ? n->hostap->hw_supported_channels
+                                     : n->hostap->supported_channels;
 }
 
-std::string db::get_hostap_supported_channels_string(const std::string &radio_mac)
+std::string db::get_hostap_supported_channels_string(const std::string &radio_mac,
+                                                     bool use_hw_supported_channels)
 {
     std::ostringstream os;
-    auto supported_channels = get_hostap_supported_channels(radio_mac);
+    auto supported_channels = get_hostap_supported_channels(radio_mac, use_hw_supported_channels);
     for (const auto &val : supported_channels) {
         if (val.channel > 0) {
             os << " ch = " << int(val.channel) << " | dfs = " << int(val.is_dfs_channel)
