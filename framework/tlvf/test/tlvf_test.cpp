@@ -271,6 +271,10 @@ bool add_encrypted_settings(tlvWsc &tlv, uint8_t *keywrapkey, WSC::m2::config &m
 
 bool parse_encrypted_settings(std::shared_ptr<tlvWsc> tlv, uint8_t *keywrapkey, uint8_t *iv)
 {
+    if (!tlv) {
+        LOG(ERROR) << "tlv is nullptr!";
+        return false;
+    }
     auto m2 = WSC::m2::parse(*tlv);
     if (!m2) {
         LOG(ERROR) << "Not an M2!";
