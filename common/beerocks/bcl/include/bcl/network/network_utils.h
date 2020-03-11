@@ -79,6 +79,8 @@ public:
         struct in_addr nmask;
     } raw_iface_info;
 
+    static std::string hex_to_char_string(std::string hex);
+
     static std::string mac_to_string(const uint64_t mac);
     static std::string mac_to_string(const sMacAddr &mac);
     static std::string mac_to_string(const uint8_t *mac_address);

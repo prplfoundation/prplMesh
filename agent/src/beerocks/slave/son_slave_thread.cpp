@@ -2106,13 +2106,17 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         notification_out->client_mac() = notification_in->params().mac;
         notification_out->bssid()      = notification_in->params().bssid;
         if (!notification_in->params().association_frame) {
-            LOG(DEBUG) << "no association frame";
             notification_out->set_association_frame("");
         } else {
-            notification_out->set_association_frame(
-                notification_in->params().association_frame,
-                strnlen(notification_in->params().association_frame, ASSOCIATION_FRAME_SIZE) + 1);
+            auto len = strnlen(notification_in->params().association_frame, ASSOCIATION_FRAME_SIZE);
+            notification_out->set_association_frame(notification_in->params().association_frame,
+                                                    len + 1);
+            // notification_out->set_association_frame(
+            //     notification_in->params().association_frame,
+            //     strnlen(notification_in->params().association_frame, ASSOCIATION_FRAME_SIZE) + 1);
         }
+
+        LOG(DEBUG) << "association_frame = " << notification_out->association_frame_str();
 
         // Send the message
         LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION for client "

@@ -81,6 +81,19 @@ const std::string network_utils::WILD_MAC_STRING("ff:ff:ff:ff:ff:ff");
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+std::string network_utils::hex_to_char_string(std::string hex)
+{
+    auto len = hex.length();
+    std::string charStr;
+    for (size_t i = 0; i < len; i += 2) {
+        auto byte = hex.substr(i, 2);
+        char chr  = (char)(int)strtol(byte.c_str(), nullptr, 16);
+        LOG(DEBUG) << chr;
+        charStr.push_back(chr);
+    }
+    return charStr;
+}
+
 // Converts uint64_t mac address to string format
 std::string network_utils::mac_to_string(const uint64_t mac)
 {
