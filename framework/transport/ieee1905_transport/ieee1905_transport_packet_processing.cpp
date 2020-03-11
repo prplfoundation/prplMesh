@@ -121,9 +121,10 @@ bool Ieee1905Transport::de_duplicate_packet(Packet &packet)
     // search for entry matching packet
     DeDuplicationKey key;
     std::copy_n(packet.src, ETH_ALEN, key.src);
-    key.messageType = ((Ieee1905CmduHeader *)packet.payload.iov_base)->messageType;
-    key.messageId   = ((Ieee1905CmduHeader *)packet.payload.iov_base)->messageId;
-    key.fragmentId  = ((Ieee1905CmduHeader *)packet.payload.iov_base)->fragmentId;
+    std::copy_n(packet.dst, ETH_ALEN, key.dst);
+    key.messageType = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->messageType;
+    key.messageId   = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->messageId;
+    key.fragmentId  = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->fragmentId;
 
     auto it           = de_duplication_map_.find(key);
     bool is_duplicate = (it != de_duplication_map_.end());
