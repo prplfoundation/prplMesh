@@ -1022,9 +1022,12 @@ bool master_thread::handle_cmdu_1905_client_capability_report_message(
               << ", Result Code= " << result_code
               << ", client MAC= " << network_utils::mac_to_string(client_info_tlv->client_mac())
               << ", BSSID= " << network_utils::mac_to_string(client_info_tlv->bssid());
+        LOG(DEBUG) << "**********************************************************************";
 
     LOG_IF(!result_code.compare("SUCCESS"), DEBUG)
         << "(Re)Association Request frame= " << client_capability_report_tlv->association_frame();
+        LOG(DEBUG) << "**********************************************************************";
+
     return true;
 }
 
