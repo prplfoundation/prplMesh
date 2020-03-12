@@ -381,6 +381,10 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
         }
         msg->params.mac  = beerocks::net::network_utils::mac_from_string(tmp_str);
         char assoc_req[] = "dummy association frame";
+        LOG(DEBUG) << "**********************************************************************";
+        auto x = reinterpret_cast<uint8_t *>(assoc_req);
+        LOG(DEBUG) << "reinterpret_cast<uint8_t *>(assoc_req) = " << x;
+        LOG(DEBUG) << "**********************************************************************";
 
         std::copy_n(assoc_req, strnlen(assoc_req, ASSOCIATION_FRAME_SIZE) + 1,
                     msg->params.association_frame);
