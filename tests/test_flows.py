@@ -379,18 +379,88 @@ class TestFlows:
         self.check_log(self.repeater1, "agent_wlan0", "CHANNEL_PREFERENCE_QUERY_MESSAGE")
         self.check_log(self.repeater1, "agent_wlan2", "CHANNEL_PREFERENCE_QUERY_MESSAGE")
 
+        payload_empty = "0x14"
+
+        # payload_wlan0 - request for change channel on 6
+        payload_wlan0 = (
+            "0x14 "
+            "{0x51 {0x0C {0x01 0x02 0x03 0x04 0x05 0x07 0x08 0x09 0x0A 0x0B 0x0C 0x0D} 0x00}} "
+            "{0x52 {0x00 0x00}} "
+            "{0x53 {0x08 {0x01 0x02 0x03 0x04 0x05 0x07 0x08 0x09} 0x00}} "
+            "{0x54 {0x08 {0x05 0x07 0x08 0x09 0x0A 0x0B 0x0C 0x0D} 0x00}} "
+            "{0x73 {0x00 0x00}} "
+            "{0x74 {0x00 0x00}} "
+            "{0x75 {0x00 0x00}} "
+            "{0x76 {0x00 0x00}} "
+            "{0x77 {0x00 0x00}} "
+            "{0x78 {0x00 0x00}} "
+            "{0x79 {0x00 0x00}} "
+            "{0x7A {0x00 0x00}} "
+            "{0x7B {0x00 0x00}} "
+            "{0x7C {0x00 0x00}} "
+            "{0x7D {0x00 0x00}} "
+            "{0x7E {0x00 0x00}} "
+            "{0x7F {0x00 0x00}} "
+            "{0x80 {0x00 0x00}} "
+            "{0x81 {0x00 0x00}} "
+            "{0x82 {0x00 0x00}} "
+            )
+
+        # payload_wlan2  - request for change channel on 36
+        payload_wlan2 = (
+            "0x14 "
+            "{0x51 {0x00 0x00}} "
+            "{0x52 {0x00 0x00}} "
+            "{0x53 {0x00 0x00}} "
+            "{0x54 {0x00 0x00}} "
+            "{0x73 0x03 {0x28 0x2C 0x30} 0x00} "
+            "{0x74 0x01 {0x2C} 0x00} "
+            "{0x75 {0x00 0x00}} "
+            "{0x76 {0x00 0x00}} "
+            "{0x77 {0x00 0x00}} "
+            "{0x78 {0x00 0x00}} "
+            "{0x79 {0x00 0x00}} "
+            "{0x7A {0x00 0x00}} "
+            "{0x7B {0x00 0x00}} "
+            "{0x7C {0x00 0x00}} "
+            "{0x7D {0x00 0x00}} "
+            "{0x7E {0x00 0x00}} "
+            "{0x7F {0x00 0x00}} "
+            "{0x80 0x05 {0x3A 0x6A 0x7A 0x8A 0x9B} 0x00} "
+            "{0x81 {0x00 0x00}} "
+            "{0x82 {0x00 0x00}}"
+            )
+
         debug("Send channel selection request")
-        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8006)
+        mid = self.gateway_ucc.dev_send_1905(
+                self.mac_repeater1,
+                0x8006,
+                tlv(0x8B, 0x005F, "{} {}".format(self.mac_repeater1_wlan0, payload_wlan0)),
+                tlv(0x8D, 0x0007, "{} {}".format(self.mac_repeater1_wlan0, payload_empty)),
+                tlv(0x8B, 0x004C, "{} {}".format(self.mac_repeater1_wlan2, payload_wlan2)),
+                tlv(0x8D, 0x0007, "{} {}".format(self.mac_repeater1_wlan2, payload_empty))
+            )
         time.sleep(1)
+
+        debug("Confirming channel selection request has been received on controller")
+        self.check_log(self.gateway, "controller", r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(mid))
+
         debug("Confirming channel selection request has been received on agent")
+
         self.check_log(self.repeater1, "agent_wlan0", "CHANNEL_SELECTION_REQUEST_MESSAGE")
         self.check_log(self.repeater1, "agent_wlan2", "CHANNEL_SELECTION_REQUEST_MESSAGE")
 
-        # debug("Confirming 1905.1 Ack Message request was received on agent")
-        # TODO: When creating handler for the ACK message on the agent, replace lookup of this string
-        # TODO: currently controller sends empty channel selection request, so no switch is performed
-        # self.check_log(self.repeater1, "agent_wlan0", "ACK_MESSAGE")
-        # self.check_log(self.repeater1, "agent_wlan2", "ACK_MESSAGE")
+        self.check_log(
+            self.repeater1,
+            "agent_wlan0",
+            "ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START")
+
+        self.check_log(
+            self.repeater1,
+            "agent_wlan2",
+            "ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START")
+
+        self.check_log(self.gateway, "controller", "OPERATING_CHANNEL_REPORT_MESSAGE")
 
     def test_ap_capability_query(self):
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8001)
