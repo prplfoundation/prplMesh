@@ -818,6 +818,13 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
     }
 
     if (!database.setting_certification_mode()) {
+        // trigger Topology query
+        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE)) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
+
         // trigger channel selection
         if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE)) {
             LOG(ERROR) << "Failed building message!";
