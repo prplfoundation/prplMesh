@@ -1025,7 +1025,7 @@ bool master_thread::handle_cmdu_1905_client_capability_report_message(
 
     LOG_IF(!result_code.compare("SUCCESS"), DEBUG)
         << "(Re)Association Request frame= "
-        << client_capability_report_tlv->association_frame_str();
+        << client_capability_report_tlv->association_frame();
     return true;
 }
 
