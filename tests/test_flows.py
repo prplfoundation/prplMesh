@@ -164,10 +164,13 @@ class test_flows:
 
     def beerocks_cli_command(self, command: str) -> bytes:
         '''Execute `command` beerocks_cli command on the controller and return its output.'''
-        return self.docker_command(self.gateway,
+        self.debug("Send CLI command " + command)
+        res = self.docker_command(self.gateway,
                                    os.path.join(self.installdir, "bin", "beerocks_cli"),
                                    "-c",
                                    command)
+        self.debug("  Response: " + res.decode('utf-8', errors='replace').strip())
+        return res
 
     def get_conn_map(self) -> Dict[str, map_device]:
         '''Get the connection map from the controller.'''
