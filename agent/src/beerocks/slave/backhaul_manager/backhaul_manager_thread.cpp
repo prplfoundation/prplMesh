@@ -1902,7 +1902,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         auto associated_clients = m_radio_info_map[client_ruid].associated_clients_map[client_vap];
         auto associatedClientsTuple = associated_clients[client_info_tlv_r->client_mac()];
         // auto len                    = std::get<1>(associatedClientsTuple).length();
-        client_capability_report_tlv->alloc_association_frame(23);
+        client_capability_report_tlv->alloc_association_frame(1);
         auto s     = std::get<1>(associatedClientsTuple);
         char *cstr = &s[0];
         auto x     = reinterpret_cast<uint8_t *>(cstr);
@@ -1912,13 +1912,12 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
             LOG(DEBUG) << x[i];
         }
         // std::copy_n(x, 15, client_capability_report_tlv->association_frame());
-        std::copy_n(reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple)[0]), 23,
-                    client_capability_report_tlv->association_frame());
-        // client_capability_report_tlv->set_association_frame("dummmmy");
+        // std::copy_n(reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple)[0]), 23,
+                    // client_capability_report_tlv->association_frame());
         LOG(DEBUG) << "**********************************************************************";
         LOG(DEBUG) << "association_frame = " << std::get<1>(associatedClientsTuple);
-        LOG(DEBUG) << "association_frame on tlv = "
-                   << client_capability_report_tlv->association_frame();
+        // LOG(DEBUG) << "association_frame on tlv = "
+                //    << client_capability_report_tlv->association_frame();
         LOG(DEBUG) << "**********************************************************************";
 
     } else {
