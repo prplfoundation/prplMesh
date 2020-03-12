@@ -1510,11 +1510,19 @@ bool master_thread::handle_cmdu_1905_topology_notification(const std::string &sr
     auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received TOPOLOGY_NOTIFICATION_MESSAGE, mid=" << std::hex << int(mid);
 
+    // IEEE 1905.1 defines that TOPOLOGY_NOTIFICATION_MESSAGE must containt one 1905.1 AL MAC
+    // address type TLV, and MultiAp standard extend it with zero or one Client Association Event
+    // TLV. So if we didn't receive Client Association Event TLV, we need to send
+    // TOPOLOGY_QUERY_MESSAGE to figure out what has changed on the topology.
     auto client_association_event_tlv = cmdu_rx.getClass<wfa_map::tlvClientAssociationEvent>();
     if (!client_association_event_tlv) {
-        // The standard allows having zero TLV_CLIENT_ASSOCIATION_EVENT, in that case, there is no
-        // point to continue the handling of this message.
-        LOG(INFO) << "wfa_map::tlvClientAssociationEvent not found";
+        LOG(INFO) << "wfa_map::tlvClientAssociationEvent not found, sending TOPOLOGY_QUERY_MESSAGE";
+
+        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE)) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
         return true;
     }
 
