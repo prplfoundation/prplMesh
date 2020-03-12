@@ -25,6 +25,7 @@
  * over time this list is going to get very long
  */
 #include <tlvf/ieee_1905_1/eMessageType.h>
+#include <tlvf/ieee_1905_1/s802_11SpecificInformation.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvDeviceInformation.h>
@@ -1989,6 +1990,92 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     // This is something that cannot be done at this moment because the MediaType field
     // must be computed with information obtained through NL80211_CMD_GET_WIPHY command of DWPAL,
     // which is currently not supported. See "Send standard NL80211 commands using DWPAL #782"
+    // For now, fill from radio data with dummy values based on information we have.
+    for (const auto &soc : slaves_sockets) {
+        // Iterate on front radio iface and then switch to back radio iface
+        auto fill_radio_iface_info = [&](bool front_iface) {
+            LOG(DEBUG) << "filling interface information on radio="
+                       << (front_iface ? soc->radio_mac : soc->radio_mac + " backhaul");
+
+            // Skip Backhaul iteration iface when STA BWL is not allocated (Eth connection or GW).
+            if (!front_iface && !soc->sta_wlan_hal) {
+                LOG(TRACE) << "Skip radio interface with no active STA BWL, front_radio="
+                           << soc->radio_mac;
+                return false;
+            }
+
+            auto localInterfaceInfo = tlvDeviceInformation->create_local_interface_list();
+
+            localInterfaceInfo->mac() =
+                front_iface ? network_utils::mac_from_string(soc->radio_mac)
+                            : network_utils::mac_from_string(soc->sta_wlan_hal->get_radio_mac());
+
+            LOG(DEBUG) << "Added radio interface to tlvDeviceInformation: "
+                       << localInterfaceInfo->mac();
+
+            ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+            if (soc->freq_type == beerocks::eFreqType::FREQ_24G) {
+                media_type = ieee1905_1::eMediaType::IEEE_802_11N_2_4_GHZ;
+            } else if (soc->freq_type == beerocks::eFreqType::FREQ_5G) {
+                media_type = ieee1905_1::eMediaType::IEEE_802_11AC_5_GHZ;
+            } else {
+                LOG(ERROR) << "Unsupported freq_type=" << int(soc->freq_type)
+                           << ", iface=" << soc->hostap_iface;
+                return false;
+            }
+            localInterfaceInfo->media_type() = media_type;
+
+            ieee1905_1::s802_11SpecificInformation media_info = {};
+            localInterfaceInfo->alloc_media_info(sizeof(media_info));
+
+            // BSSID field is not defined well for interface. The common definition is in simple
+            // words "the AP/ETH mac that we are connected to".
+            // For fronthaul radio interface or unused backhaul interface put zero mac.
+            if (local_gw || m_sConfig.eType == SBackhaulConfig::EType::Wired || front_iface ||
+                (m_sConfig.eType == SBackhaulConfig::EType::Wireless &&
+                 soc->sta_iface != m_sConfig.wireless_iface)) {
+                media_info.network_membership = network_utils::ZERO_MAC;
+            } else {
+                media_info.network_membership =
+                    network_utils::mac_from_string(soc->sta_wlan_hal->get_bssid());
+            }
+
+            media_info.role =
+                front_iface ? ieee1905_1::eRole::AP : ieee1905_1::eRole::NON_AP_NON_PCP_STA;
+
+            // TODO: The Backhaul manager does not hold the information on the front radios.
+            // For now, put zeros and when the Agent management will be move to unified Agent thread
+            // this field will be filled. #435
+            media_info.ap_channel_bandwidth               = 0;
+            media_info.ap_channel_center_frequency_index1 = 0;
+            media_info.ap_channel_center_frequency_index2 = 0;
+
+            auto *media_info_ptr = localInterfaceInfo->media_info(0);
+            if (media_info_ptr == nullptr) {
+                LOG(ERROR) << "media_info is nullptr";
+                return false;
+            }
+
+            std::copy_n(reinterpret_cast<uint8_t *>(&media_info), sizeof(media_info),
+                        media_info_ptr);
+
+            tlvDeviceInformation->add_local_interface_list(localInterfaceInfo);
+
+            return true;
+        };
+
+        if (!fill_radio_iface_info(true)) {
+            LOG(DEBUG) << "filling interface information on radio=" << soc->radio_mac
+                       << " has failed!";
+            return false;
+        }
+
+        if (!fill_radio_iface_info(false)) {
+            LOG(DEBUG) << "filling interface information on radio=" << soc->radio_mac
+                       << " backhaul has failed!";
+            return false;
+        }
+    }
 
     auto tlvSupportedService = cmdu_tx.addClass<wfa_map::tlvSupportedService>();
     if (!tlvSupportedService) {
