@@ -32,7 +32,7 @@ typedef struct s802_11SpecificInformation {
     sMacAddr network_membership;
     eRole role;
     //Hex value of dot11CurrentChannelBandwidth
-    uint8_t ap_channel_band;
+    uint8_t ap_channel_bandwidth;
     //Hex value of dot11CurrentChannelCenterFrequencyIndex1
     uint8_t ap_channel_center_frequency_index1;
     //Hex value of dot11CurrentChannelCenterFrequencyIndex2
