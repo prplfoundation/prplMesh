@@ -36,6 +36,7 @@
 #include <tlvf/ieee_1905_1/eMessageType.h>
 #include <tlvf/ieee_1905_1/eTlvType.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
+#include <tlvf/ieee_1905_1/tlvAssociatedStaLinkMetrics.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
 #include <tlvf/ieee_1905_1/tlvMacAddress.h>
@@ -105,6 +106,7 @@ bool master_thread::init()
             ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE,
             ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE,
             ieee1905_1::eMessageType::ACK_MESSAGE,
+            ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE,
 
         })) {
         LOG(ERROR) << "Failed subscribing to the Bus";
@@ -303,6 +305,8 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
         return handle_cmdu_1905_ap_metric_response(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE:
         return handle_cmdu_1905_ap_capability_report(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_associated_sta_link_metrics_response(src_mac, cmdu_rx);
     default:
         break;
     }
@@ -1395,6 +1399,16 @@ bool master_thread::handle_cmdu_1905_ap_capability_report(const std::string &src
 {
     auto mid = cmdu_rx.getMessageId();
     LOG(INFO) << "Received AP_CAPABILITY_REPORT_MESSAGE, mid=" << std::dec << int(mid);
+
+    return true;
+}
+
+bool master_thread::handle_cmdu_1905_associated_sta_link_metrics_response(
+    const std::string &src_mac, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(INFO) << "Received ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE, mid=" << std::dec
+              << int(mid);
 
     return true;
 }

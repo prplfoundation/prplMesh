@@ -1,0 +1,26 @@
+#
+---
+_namespace: ieee1905_1
+
+tlvAssociatedStaLinkMetrics:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eTlvType
+    _value_const: TLV_ASSOCIATED_STA_LINK_METRICS
+  length: uint16_t
+  mac: sMacAddr
+  bss_number:
+    _type: uint8_t
+    _length_var: True
+  per_bss_sta_link_metrics:
+    _type: sPerBssStaLinkMetrics
+    _length: [bss_number]
+
+sPerBssStaLinkMetrics:
+  _type: struct
+  bssid: sMacAddr
+  mac_data_rate_downlink: uint32_t
+  mac_data_rate_uplink: uint32_t
+  uplink_rcpi: uint8_t
+

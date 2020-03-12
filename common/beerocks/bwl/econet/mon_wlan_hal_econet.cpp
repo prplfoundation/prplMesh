@@ -150,6 +150,12 @@ bool mon_wlan_hal_dummy::sta_link_measurements_11k_request(const std::string &st
     return true;
 }
 
+bool mon_wlan_hal_dummy::associated_sta_link_metrics_request(const std::string &sta_mac)
+{
+    LOG(TRACE) << __func__;
+    return true;
+}
+
 bool mon_wlan_hal_dummy::channel_scan_trigger(int dwell_time_msec,
                                               const std::vector<unsigned int> &channel_pool)
 {

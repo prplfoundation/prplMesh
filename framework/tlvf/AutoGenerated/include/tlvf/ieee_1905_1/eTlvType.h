@@ -39,6 +39,8 @@ enum class eTlvType : uint8_t {
     TLV_WSC = 0x11,
     TLV_PUSH_BUTTON_EVENT_NOTIFICATION = 0x12,
     TLV_PUSH_BUTTON_JOIN_NOTIFICATION = 0x13,
+    TLV_STA_MAC_ADDRESS_TYPE = 0x95,
+    TLV_ASSOCIATED_STA_LINK_METRICS = 0x96,
 };
 class eTlvTypeValidate {
 public:
@@ -64,6 +66,8 @@ public:
         case 0x11:
         case 0x12:
         case 0x13:
+        case 0x95:
+        case 0x96:
                 ret = true;
                 break;
             default:

@@ -1266,6 +1266,19 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         message_com::send_cmdu(slave_socket, cmdu_tx);
         break;
     }
+    case beerocks_message::ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY: {
+        auto request = beerocks_header->addClass<
+            beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY failed";
+            return false;
+        }
+
+        auto mac = request->mac();
+
+        mon_wlan_hal->associated_sta_link_metrics_request(net::network_utils::mac_to_string(mac));
+        break;
+    }
     default: {
         LOG(ERROR) << "Unsupported MONITOR action_op: " << int(beerocks_header->action_op());
         break;
@@ -1629,6 +1642,41 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
             LOG(ERROR) << "Failed building cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION msg";
             return false;
         }
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+    } break;
+    case Event::RRM_Associated_STA_Link_Metrics_Response: {
+        auto metrics_result = static_cast<bwl::sAssociatedStaLinkMetricsResults *>(data);
+        auto response       = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE>(cmdu_tx);
+
+        if (!response) {
+            LOG(ERROR)
+                << "Failed building cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE msg";
+            return false;
+        }
+
+        memcpy(response->sta_mac().oct, metrics_result->sta_mac.oct,
+               sizeof(response->sta_mac().oct));
+
+        if (!response->alloc_per_bss_associated_sta_link_metrics(metrics_result->bss_num)) {
+            LOG(ERROR) << "Failed alloc_per_bss_associated_sta_link_metrics";
+            return false;
+        }
+
+        for (size_t i = 0; i < response->bss_num(); ++i) {
+            auto &resp = std::get<1>(response->per_bss_associated_sta_link_metrics(i));
+            auto &metr = metrics_result->per_bss_metrics[i];
+
+            memcpy(resp.bssid.oct, metr.bssid.oct, sizeof(resp.bssid.oct));
+
+            resp.time_delta             = metr.time_delta;
+            resp.mac_data_rate_downlink = metr.mac_data_rate_downlink;
+            resp.mac_data_rate_uplink   = metr.mac_data_rate_uplink;
+            resp.uplink_rcpi            = metr.uplink_rcpi;
+        }
+
+        LOG(DEBUG) << "Sending cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE to slave";
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;

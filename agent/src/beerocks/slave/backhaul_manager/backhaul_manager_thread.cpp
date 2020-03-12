@@ -130,6 +130,7 @@ bool backhaul_manager::init()
             ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE,
             ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE,
             ieee1905_1::eMessageType::LINK_METRIC_QUERY_MESSAGE,
+            ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_QUERY_MESSAGE,
             ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE,
             ieee1905_1::eMessageType::ACK_MESSAGE,
         })) {

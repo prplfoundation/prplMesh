@@ -150,6 +150,25 @@ bool mon_wlan_hal_dummy::sta_link_measurements_11k_request(const std::string &st
     return true;
 }
 
+bool mon_wlan_hal_dummy::associated_sta_link_metrics_request(const std::string &sta_mac)
+{
+    LOG(TRACE) << __func__;
+    std::shared_ptr<sAssociatedStaLinkMetricsResults> response(
+        new sAssociatedStaLinkMetricsResults);
+    auto mac = beerocks::net::network_utils::mac_from_string(sta_mac);
+    memcpy(&response->sta_mac, &mac, sizeof(response->sta_mac));
+    response->bss_num = 3;
+    for (size_t i = 0; i < response->bss_num; ++i) {
+        sAssociatedStaLinkMetricsResults::perBssMetrics bss;
+        bss.mac_data_rate_downlink = 1;
+        bss.mac_data_rate_uplink   = 1;
+        bss.uplink_rcpi            = 123;
+        response->per_bss_metrics.push_back(bss);
+    }
+    event_queue_push(Event::RRM_Associated_STA_Link_Metrics_Response, response);
+    return true;
+}
+
 bool mon_wlan_hal_dummy::channel_scan_trigger(int dwell_time_msec,
                                               const std::vector<unsigned int> &channel_pool)
 {

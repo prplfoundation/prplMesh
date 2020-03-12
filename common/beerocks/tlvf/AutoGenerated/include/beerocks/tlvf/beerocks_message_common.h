@@ -1335,6 +1335,26 @@ typedef struct sChannelScanResults {
     }
 } __attribute__((packed)) sChannelScanResults;
 
+typedef struct sPerBssAssociatedStaLinkMetrics {
+    sMacAddr bssid;
+    //The time delta in ms between the time at which the earliest measurement
+    //that contributed to the data rate estimates were made,
+    //and the time at which this report was sent.
+    uint32_t time_delta;
+    uint32_t mac_data_rate_downlink;
+    uint32_t mac_data_rate_uplink;
+    uint8_t uplink_rcpi;
+    void struct_swap(){
+        bssid.struct_swap();
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&time_delta));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&mac_data_rate_downlink));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&mac_data_rate_uplink));
+    }
+    void struct_init(){
+        bssid.struct_init();
+    }
+} __attribute__((packed)) sPerBssAssociatedStaLinkMetrics;
+
 
 }; // close namespace: beerocks_message
 

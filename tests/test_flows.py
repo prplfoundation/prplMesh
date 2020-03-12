@@ -449,6 +449,13 @@ class test_flows:
                 (self.mac_repeater1, self.mac_repeater2, self.mac_repeater1, self.mac_repeater2)))
         self.check_log(self.gateway, "controller", "Received LINK_METRIC_RESPONSE_MESSAGE")
 
+        # Associated STA link metrics
+        self.debug("Send Associated STA Link metrics query")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x800D,
+                                       tlv(0x95, 0x0006, "{%s}" % self.mac_repeater2))
+        self.check_log(self.repeater1, "agent_wlan0", "Received ASSOCIATED_STA_LINK_METRICS_QUERY_MESSAGE")
+        self.check_log(self.gateway, "controller", "Received ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE")
+
         # Trigger combined infra metrics
         self.debug("Send Combined infrastructure metrics message to agent 1")
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8013)

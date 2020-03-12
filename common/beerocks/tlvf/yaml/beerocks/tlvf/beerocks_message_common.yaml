@@ -964,3 +964,20 @@ sChannelScanResults:
   channel_utilization:
     _comment: Indicates the fraction of the time AP senses that the channel is in use by the neighboring AP for transmissions.
     _type: uint32_t
+
+sPerBssAssociatedStaLinkMetrics:
+  _type: struct
+  bssid: sMacAddr
+  time_delta:
+    _type: uint32_t
+    _comment: |
+      The time delta in ms between the time at which the earliest measurement
+      that contributed to the data rate estimates were made,
+      and the time at which this report was sent.
+  mac_data_rate_downlink:
+    _type: uint32_t
+    comment: Estimated MAC Data Rate in downlink (in Mb/s).
+  mac_data_rate_uplink:
+    _type: uint32_t
+    comment: Estimated MAC Data Rate in uplink (in Mb/s).
+  uplink_rcpi: uint8_t

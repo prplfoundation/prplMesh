@@ -26,9 +26,13 @@
 
 #include <tlvf/WSC/AttrList.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
+#include <tlvf/ieee_1905_1/tlvAssociatedStaLinkMetrics.h>
 #include <tlvf/ieee_1905_1/tlvLinkMetricQuery.h>
+#include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
+#include <tlvf/ieee_1905_1/tlvStaMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
+#include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
 #include <tlvf/wfa_map/tlvApMetricQuery.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
@@ -378,6 +382,8 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_ap_metrics_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::LINK_METRIC_QUERY_MESSAGE:
         return handle_link_metrics_query(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_QUERY_MESSAGE:
+        return handle_associated_sta_link_metrics_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
         return handle_channel_preference_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
@@ -2959,6 +2965,47 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
         send_cmdu_to_controller(cmdu_tx);
         break;
     }
+    case beerocks_message::ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE: {
+        LOG(DEBUG) << "Received ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE";
+        auto response_in = beerocks_header->addClass<
+            beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE>();
+        if (!response_in) {
+            LOG(ERROR)
+                << "addClass cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE failed";
+            return false;
+        }
+
+        if (!cmdu_tx.create(
+                0, ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE)) {
+            LOG(ERROR) << "Failed building ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE !";
+            return false;
+        }
+
+        auto tlv = cmdu_tx.addClass<ieee1905_1::tlvAssociatedStaLinkMetrics>();
+        if (!tlv) {
+            LOG(ERROR) << "addClass tlvStaMacAddressType failed";
+        }
+
+        tlv->mac()        = response_in->sta_mac();
+        tlv->bss_number() = response_in->bss_num();
+
+        if (!tlv->alloc_per_bss_sta_link_metrics(tlv->bss_number())) {
+            LOG(ERROR) << "alloc_per_bss_sta_link_metrics failed";
+            return false;
+        }
+
+        for (size_t i = 0; i < tlv->bss_number(); ++i) {
+            auto &per_bss_in  = std::get<1>(response_in->per_bss_associated_sta_link_metrics(i));
+            auto &per_bss_out = std::get<1>(tlv->per_bss_sta_link_metrics(i));
+            per_bss_out.bssid = per_bss_in.bssid;
+            per_bss_out.mac_data_rate_downlink = per_bss_in.mac_data_rate_downlink;
+            per_bss_out.mac_data_rate_uplink   = per_bss_in.mac_data_rate_uplink;
+            per_bss_out.uplink_rcpi            = per_bss_in.uplink_rcpi;
+        }
+
+        send_cmdu_to_controller(cmdu_tx);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unknown MONITOR message, action_op: " << int(beerocks_header->action_op());
         return false;
@@ -4337,7 +4384,7 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
 
     auto steering_request_tlv = cmdu_rx.getClass<wfa_map::tlvSteeringRequest>();
     if (!steering_request_tlv) {
-        LOG(ERROR) << "addClass wfa_map::tlvSteeringRequest failed";
+        LOG(ERROR) << "getClass wfa_map::tlvSteeringRequest failed";
         return false;
     }
 
@@ -4413,6 +4460,35 @@ bool slave_thread::handle_link_metrics_query(Socket *sd, ieee1905_1::CmduMessage
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received LINK_METRIC_QUERY_MESSAGE, mid=" << std::hex << int(mid);
     // TODO add handling for Link metric query response}
+    return true;
+}
+
+bool slave_thread::handle_associated_sta_link_metrics_query(Socket *sd,
+                                                            ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received ASSOCIATED_STA_LINK_METRICS_QUERY_MESSAGE, mid=" << std::hex
+               << int(mid);
+
+    auto mac_tlv = cmdu_rx.getClass<ieee1905_1::tlvStaMacAddressType>();
+    if (!mac_tlv) {
+        LOG(ERROR)
+            << "ASSOCIATED_STA_LINK_METRICS_QUERY_MESSAGE does not have tlvStaMacAddressType";
+        return false;
+    }
+
+    auto request_out = message_com::create_vs_message<
+        beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY>(cmdu_tx, mid);
+
+    if (!request_out) {
+        LOG(ERROR)
+            << "Failed building ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY message!";
+        return false;
+    }
+
+    request_out->mac() = mac_tlv->mac();
+
+    message_com::send_cmdu(monitor_socket, cmdu_tx);
     return true;
 }
 

@@ -22,6 +22,7 @@
 #include <tlvf/ieee_1905_1/tlvPushButtonJoinNotification.h>
 #include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
+#include <tlvf/ieee_1905_1/tlvStaMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
@@ -149,6 +150,9 @@ std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
     }
     case (147): {
         return msg.addClass<wfa_map::tlvApMetricQuery>();
+    }
+    case (149): {
+        return msg.addClass<ieee1905_1::tlvStaMacAddressType>();
     }
     case (155): {
         return msg.addClass<wfa_map::tlvSteeringRequest>();

@@ -1326,6 +1326,205 @@ bool cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION::init()
     return true;
 }
 
+cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY::~cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY() {
+}
+sMacAddr& cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY::mac() {
+    return (sMacAddr&)(*m_mac);
+}
+
+void cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
+    m_mac->struct_swap();
+}
+
+bool cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // mac
+    return class_size;
+}
+
+bool cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_mac->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::~cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE() {
+}
+sMacAddr& cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::sta_mac() {
+    return (sMacAddr&)(*m_sta_mac);
+}
+
+uint8_t& cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::bss_num() {
+    return (uint8_t&)(*m_bss_num);
+}
+
+std::tuple<bool, sPerBssAssociatedStaLinkMetrics&> cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::per_bss_associated_sta_link_metrics(size_t idx) {
+    bool ret_success = ( (m_per_bss_associated_sta_link_metrics_idx__ > 0) && (m_per_bss_associated_sta_link_metrics_idx__ > idx) );
+    size_t ret_idx = ret_success ? idx : 0;
+    if (!ret_success) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+    }
+    return std::forward_as_tuple(ret_success, m_per_bss_associated_sta_link_metrics[ret_idx]);
+}
+
+bool cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::alloc_per_bss_associated_sta_link_metrics(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list per_bss_associated_sta_link_metrics, abort!";
+        return false;
+    }
+    size_t len = sizeof(sPerBssAssociatedStaLinkMetrics) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)&m_per_bss_associated_sta_link_metrics[*m_bss_num];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_per_bss_associated_sta_link_metrics_idx__ += count;
+    *m_bss_num += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { 
+        for (size_t i = m_per_bss_associated_sta_link_metrics_idx__ - count; i < m_per_bss_associated_sta_link_metrics_idx__; i++) { m_per_bss_associated_sta_link_metrics[i].struct_init(); }
+    }
+    return true;
+}
+
+void cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
+    m_sta_mac->struct_swap();
+    for (size_t i = 0; i < (size_t)*m_bss_num; i++){
+        m_per_bss_associated_sta_link_metrics[i].struct_swap();
+    }
+}
+
+bool cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // sta_mac
+    class_size += sizeof(uint8_t); // bss_num
+    return class_size;
+}
+
+bool cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_sta_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_sta_mac->struct_init(); }
+    m_bss_num = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_bss_num = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_per_bss_associated_sta_link_metrics = (sPerBssAssociatedStaLinkMetrics*)m_buff_ptr__;
+    uint8_t bss_num = *m_bss_num;
+    m_per_bss_associated_sta_link_metrics_idx__ = bss_num;
+    if (!buffPtrIncrementSafe(sizeof(sPerBssAssociatedStaLinkMetrics) * (bss_num))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sPerBssAssociatedStaLinkMetrics) * (bss_num) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
 cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();

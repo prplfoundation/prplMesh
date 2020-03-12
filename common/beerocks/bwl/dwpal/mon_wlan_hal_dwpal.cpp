@@ -784,6 +784,42 @@ bool mon_wlan_hal_dwpal::sta_link_measurements_11k_request(const std::string &st
     return true;
 }
 
+// This macro should not go to the production code
+#define hostapd_query(str)                                                                         \
+    {                                                                                              \
+        char *r = nullptr;                                                                         \
+        dwpal_send_cmd(str, &r);                                                                   \
+        LOG(DEBUG) << " hostapd req:  " << str;                                                    \
+        LOG(DEBUG) << " hostapd resp: " << (r ? r : "(null)");                                     \
+    }
+
+bool mon_wlan_hal_dwpal::associated_sta_link_metrics_request(const std::string &sta_mac)
+{
+    LOG(TRACE) << __func__;
+    std::shared_ptr<sAssociatedStaLinkMetricsResults> response(
+        new sAssociatedStaLinkMetricsResults);
+    //auto mac = beerocks::net::network_utils::mac_from_string(sta_mac);
+
+    hostapd_query("TRACK_STA_LIST");
+
+    LOG(DEBUG) << "sta_mac = " << sta_mac;
+
+    char *reply = nullptr;
+
+    std::string request = "STA " + sta_mac;
+
+    if (!dwpal_send_cmd(request, &reply)) {
+        LOG(ERROR) << __func__ << " failed";
+        return false;
+    }
+
+    (void)request;
+    LOG(DEBUG) << "hostapd reply: \n" << reply;
+
+    event_queue_push(Event::RRM_Associated_STA_Link_Metrics_Response, response);
+    return true;
+}
+
 bool mon_wlan_hal_dwpal::channel_scan_trigger(int dwell_time_msec,
                                               const std::vector<unsigned int> &channel_pool)
 {

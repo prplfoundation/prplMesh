@@ -448,6 +448,20 @@ typedef struct {
     sChannelScanResults channel_scan_results;
 } sCHANNEL_SCAN_RESULTS_NOTIFICATION;
 
+typedef struct {
+    typedef struct {
+        SMacAddr bssid;
+        uint32_t time_delta;
+        uint32_t mac_data_rate_downlink;
+        uint32_t mac_data_rate_uplink;
+        uint8_t uplink_rcpi;
+    } perBssMetrics;
+
+    SMacAddr sta_mac;
+    uint8_t bss_num;
+    std::vector<perBssMetrics> per_bss_metrics;
+} sAssociatedStaLinkMetricsResults;
+
 } // namespace bwl
 
 #endif // _BWL_MON_WLAN_HAL_TYPES_H_

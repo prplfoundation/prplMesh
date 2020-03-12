@@ -43,6 +43,7 @@ public:
     virtual bool channel_scan_trigger(int dwell_time_msec,
                                       const std::vector<unsigned int> &channel_pool) override;
     virtual bool channel_scan_dump_results() override;
+    virtual bool associated_sta_link_metrics_request(const std::string &sta_mac) override;
     // Protected methods:
 protected:
     virtual bool process_nl80211_event(parsed_obj_map_t &parsed_obj) override;

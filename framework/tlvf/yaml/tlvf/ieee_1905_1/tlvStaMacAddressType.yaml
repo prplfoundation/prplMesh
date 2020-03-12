@@ -1,0 +1,12 @@
+#
+---
+_namespace: ieee1905_1
+
+tlvStaMacAddressType:
+  _type: class
+  _is_tlv_class : True
+  type:
+    _type: eTlvType
+    _value_const: TLV_STA_MAC_ADDRESS_TYPE
+  length: uint16_t
+  mac: sMacAddr

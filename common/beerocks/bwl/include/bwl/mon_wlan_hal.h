@@ -34,6 +34,7 @@ public:
         RRM_Beacon_Response,
         RRM_STA_Statistics_Response,
         RRM_Link_Measurement_Response,
+        RRM_Associated_STA_Link_Metrics_Response,
         //CHANNEL_SCAN events
         Channel_Scan_Triggered,
         Channel_Scan_New_Results_Ready,
@@ -58,6 +59,8 @@ public:
     virtual bool channel_scan_trigger(int dwell_time_msec,
                                       const std::vector<unsigned int> &channel_pool)     = 0;
     virtual bool channel_scan_dump_results()                                             = 0;
+
+    virtual bool associated_sta_link_metrics_request(const std::string &sta_mac) = 0;
 };
 
 // mon HAL factory types
