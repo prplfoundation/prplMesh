@@ -86,8 +86,6 @@ private:
     static bool parse_params(const std::vector<std::string> &command_tokens,
                              std::unordered_map<std::string, std::string> &params,
                              std::string &err_string);
-    static bool create_cmdu(ieee1905_1::CmduMessageTx &cmdu_tx,
-                            ieee1905_1::eMessageType message_type, std::string &err_string);
 
     struct tlv_hex_t {
         std::string *type   = nullptr;
