@@ -13,9 +13,12 @@ import subprocess
 import sys
 import time
 import json
-
+import pyshark
+from itertools import takewhile
+from threading import Thread
 import send_CAPI_command
-
+import signal
+from datetime import datetime
 '''Regular expression to match a MAC address in a bytes string.'''
 RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
 
@@ -53,8 +56,81 @@ class test_flows:
         self.running = ''
         self.tcpdump_proc = None
         self.bridge_name = 'br-lan'
+        bridge = self.get_bridge_mac()
+        self.tshark_capture = pyshark.LiveCapture(interface=bridge)
 
 
+    def get_bridge_mac(self):
+        inspect = json.loads(subprocess.check_output(('docker', 'network', 'inspect',
+                                                          'prplMesh-net-{}'.format(self.opts.unique_id))))
+        prplmesh_net = inspect[0]
+        # podman adds a 'plugins' indirection that docker doesn't have.
+        if 'plugins' in prplmesh_net:
+            bridge = prplmesh_net['plugins'][0]['bridge']
+        else:   
+            # docker doesn't report the interface name of the bridge. So format it based on the
+            # ID.
+            bridge_id = prplmesh_net['Id']
+            bridge = 'br-' + bridge_id[:12]
+        return bridge
+    def start_tshark(self, bridge, duration=None,reset=False):
+        if reset:
+            self.captured_packets=[]
+        self.t=Thread(target=self.__capture,daemon=True,args=(bridge,duration,))
+        self.t.start()
+        #TODO: add a sleep() call to give tshark a time to properly initialize itself
+    def __capture(self, bridge, duration=None):
+        # for optional file output
+        self.outputfile = os.path.join(self.rootdir, 'logs','test_flows_tshark_logs.json')
+        try:
+            tshark_args = ['tshark','-Q','-i',bridge,'-T','json']
+            if duration:
+                self.tshark = subprocess.Popen(tshark_args+['-a',f'duration:{duration}'],shell=False,stdout=subprocess.PIPE)
+            else:
+                self.tshark = subprocess.Popen(tshark_args+['-a','duration:900'],shell=False,stdout=subprocess.PIPE)
+        except subprocess.CalledProcessError as e:
+            self.err(f'test {self.run_tests} failed, output: {e.output}')
+    def stop_tshark(self):
+        try:
+            self.check_tshark(proceed=False)
+        except:
+            self.err("tshark is acting up, help!")
+    def check_tshark(self, end=time.time(), start=None,file_output=False,proceed=True):
+        '''
+        ### Description
+        Looks into the tshark captured data, updating the global capture data
+        and returning the captured data from `start` to `end`
+        
+        ### Parameters
+        `end=time.time()` (datetime) upper bound for captured packets timestamp
+        `start=None` (datetime) lower bound for captured packets timestamp
+        `file_output=False` flag to determine if the captured data would be 
+        written to a file
+
+        `proceed=True` in order to read the captured data the tshark process
+        has to be terminated, this flag determines whether to it would be 
+        restarted afterwards
+
+        ### Returns
+
+        a collection of captured `ieee1905` packets
+        '''
+        if file_output:
+            with open(self.outputfile, "w+") as f:
+                f.write(f'\n{time.time()} - test {self.running}\n')
+        os.kill(self.tshark.pid,signal.SIGTERM)
+        stream = json.load(self.tshark.communicate()[0])
+        self.start_tshark(self.get_bridge_mac)
+        tshark_dump = filter(lambda x: self.check_datetime_in_bounds(self.get_time_for_packet(x),end,start), stream )
+        self.temp_capture =  filter(lambda x: "ieee1905" in x["_source"]["layers"],tshark_dump)
+        self.captured_packets.extend(self.temp_capture)
+        self.temp_capture = []
+    def check_datetime_in_bounds(self,dt: datetime,end: datetime = time.time(),start: datetime=None):
+        if start:
+            return start < dt and dt < end
+        return dt < end
+    def get_time_for_packet(self, packet):
+        return datetime.fromtimestamp(packet['_source']['layers']['frame']['frame.time'])
     def message(self, message: str, color: int = 0):
         '''Print a message, optionally in a color, preceded by the currently running test.'''
         full_message = '{:20} {}'.format(self.running, message)
@@ -186,7 +262,7 @@ class test_flows:
         mac_repeater2_wlan2_output = self.docker_command(self.repeater2, "ip", "-o",  "link", "list", "dev", "wlan2")
         self.mac_repeater2_wlan2 = re.search(rb"link/ether " + RE_MAC, mac_repeater2_wlan2_output).group('mac').decode()
         self.debug("Repeater2 wl2: {}".format(self.mac_repeater2_wlan2))
-
+        self.start_tshark(self.get_bridge_mac(),reset=True)
     def check_log(self, device: str, program: str, regex: str) -> bool:
         '''Verify that on "device" the logfile for "program" matches "regex", fail if not.'''
         logfilename = os.path.join(self.rootdir, 'logs', device, 'beerocks_{}.log'.format(program))
@@ -221,6 +297,7 @@ class test_flows:
             else:
                 self.ok()
             total_errors += self.check_error
+        t.stop_tshark()
         return total_errors
 
     # TEST DEFINITIONS #
@@ -258,7 +335,7 @@ class test_flows:
     def test_ap_capability_query(self):
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8001)
         time.sleep(1)
-
+        self.check_tshark()
         self.debug("Confirming ap capability query has been received on agent")
         self.check_log(self.repeater1, "agent", "AP_CAPABILITY_QUERY_MESSAGE")
 
