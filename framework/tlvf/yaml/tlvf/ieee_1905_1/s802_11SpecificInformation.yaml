@@ -15,7 +15,7 @@ s802_11SpecificInformation:
   _type: struct
   network_membership: sMacAddr
   role: eRole
-  ap_channel_band:
+  ap_channel_bandwidth:
     _type: uint8_t
     _comment: Hex value of dot11CurrentChannelBandwidth
   ap_channel_center_frequency_index1:
