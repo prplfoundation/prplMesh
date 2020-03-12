@@ -99,6 +99,8 @@ private:
                                                            ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_topology_notification(const std::string &src_mac,
                                                 ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_1905_topology_response(const std::string &src_mac,
+                                            ieee1905_1::CmduMessageRx &cmdu_rx);
 
     bool autoconfig_wsc_parse_radio_caps(
         std::string radio_mac, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps);

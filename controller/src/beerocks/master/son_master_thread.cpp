@@ -33,10 +33,13 @@
 #include <beerocks/tlvf/beerocks_message_1905_vs.h>
 #include <beerocks/tlvf/beerocks_message_control.h>
 
+#include <tlvf/ieee_1905_1/eMediaType.h>
 #include <tlvf/ieee_1905_1/eMessageType.h>
 #include <tlvf/ieee_1905_1/eTlvType.h>
+#include <tlvf/ieee_1905_1/s802_11SpecificInformation.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
+#include <tlvf/ieee_1905_1/tlvDeviceInformation.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
 #include <tlvf/ieee_1905_1/tlvMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
@@ -100,6 +103,7 @@ bool master_thread::init()
             ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE,
             ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE,
             ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE,
+            ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE,
@@ -297,6 +301,8 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
         return handle_cmdu_1905_higher_layer_data_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE:
         return handle_cmdu_1905_topology_notification(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_topology_response(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE:
         return handle_cmdu_1905_link_metric_response(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE:
@@ -1606,6 +1612,90 @@ bool master_thread::handle_cmdu_1905_topology_notification(const std::string &sr
 #endif
 
         son_actions::handle_dead_node(client_mac_str, bssid_str, database, cmdu_tx, tasks);
+    }
+
+    return true;
+}
+
+bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_mac,
+                                                       ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received TOPOLOGY_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
+
+    auto tlvDeviceInformation = cmdu_rx.getClass<ieee1905_1::tlvDeviceInformation>();
+    if (!tlvDeviceInformation) {
+        LOG(ERROR) << "ieee1905_1::tlvDeviceInformation not found";
+        return false;
+    }
+
+    const auto &al_mac = tlvDeviceInformation->mac();
+
+    // Get all Agent known fronthaul radios if exist, and compare it to what the Agent reports.
+    // If a radio exist on the database but not the tlvDeviceInformation, this radio node needs
+    // to be removed.
+    // This shall work in the opposite way as well: If it doesn't exist on the database, but
+    // reported in the TLV, then we need to add the node to the database. Of course this will remain
+    // as "TODO" for future task. Meanwhile parse properly the TLV, leaving the unused parts in
+    // comment for future implementation.
+    auto fronthaul_radios_on_db = database.get_node_children(
+        network_utils::mac_to_string(al_mac), beerocks::TYPE_SLAVE, beerocks::STATE_CONNECTED);
+
+    std::unordered_set<std::string> reported_fronthaul_radios;
+
+    for (uint8_t i = 0; i < tlvDeviceInformation->local_interface_list_length(); i++) {
+        const auto iface_info_tuple = tlvDeviceInformation->local_interface_list(i);
+        if (!std::get<0>(iface_info_tuple)) {
+            LOG(ERROR) << "Failed to get " << int(i) << " element of local iface info "
+                       << "on Device Information TLV";
+            return false;
+        }
+
+        auto &iface_info = std::get<1>(iface_info_tuple);
+
+        const auto &iface_mac = iface_info.mac();
+        auto iface_mac_str    = network_utils::mac_to_string(iface_mac);
+
+        const auto media_type = iface_info.media_type();
+
+        // For wireless interface it is defined on IEEE 1905.1 that the size of the media info
+        // is n=10 octets, which the size of s802_11SpecificInformation struct.
+        // For wired interface n=0.
+        if (media_type >= ieee1905_1::eMediaType::IEEE_802_11B_2_4_GHZ &&
+            media_type <= ieee1905_1::eMediaType::IEEE_802_11AF &&
+            iface_info.media_info_length() == 10) {
+
+            const auto media_info = reinterpret_cast<ieee1905_1::s802_11SpecificInformation *>(
+                iface_info.media_info(0));
+            const auto iface_role = media_info->role;
+
+            // For future implementation
+            // const auto &iface_bssid = media_info->network_membership;
+            // const auto iface_bw     = media_info->ap_channel_bandwidth;
+            // const auto iface_cf1    = media_info->ap_channel_center_frequency_index1;
+            // const auto iface_cf2    = media_info->ap_channel_center_frequency_index2;
+
+            if (iface_role == ieee1905_1::eRole::AP) {
+                reported_fronthaul_radios.insert(iface_mac_str);
+            }
+
+            LOG(DEBUG) << "New radio interface is reported, mac=" << iface_mac
+                       << ", AP=" << (iface_role == ieee1905_1::eRole::AP);
+
+            // TODO: Add/Update the node on the database
+        }
+    }
+
+    // If the database has radio mac that is not reported, remove its node from the db.
+    for (const auto &fronthaul_radio_on_db : fronthaul_radios_on_db) {
+        if (reported_fronthaul_radios.find(fronthaul_radio_on_db) ==
+            reported_fronthaul_radios.end()) {
+            LOG(DEBUG) << "radio " << fronthaul_radio_on_db
+                       << " is not reported on Device Information TLV, removing the radio node";
+            son_actions::handle_dead_node(fronthaul_radio_on_db,
+                                          database.get_node_parent(fronthaul_radio_on_db), database,
+                                          cmdu_tx, tasks);
+        }
     }
 
     return true;
