@@ -1,20 +1,21 @@
 import logging
 import argparse
 import os
-import getpass
 import subprocess
-import collections
 import shutil
 import multiprocessing
 
 logger = logging.getLogger("build")
-build_targets=['prepare', 'clean', 'make']
-dep_modules=['nng', 'safeclib', 'dwpal', 'hostapd', 'wpa_supplicant']
+build_targets = ['prepare', 'clean', 'make']
+dep_modules = ['nng', 'safeclib', 'dwpal', 'hostapd', 'wpa_supplicant']
 
 # base builder class
+
+
 class builder(object):
     def __init__(self, name, modules_dir, build_dir, install_dir):
-        logger.debug("modules_dir={}, build_dir={}, install_dir={}".format(modules_dir, build_dir, install_dir))
+        logger.debug("modules_dir={}, build_dir={}, install_dir={}".format(
+            modules_dir, build_dir, install_dir))
 
         self.name = name
         self.src_path = "{}/{}".format(modules_dir, name)
@@ -24,15 +25,22 @@ class builder(object):
 
         # If the STAGING_DIR environment variable is not set,
         # use an empty variable for suppressing compiler warnings
-        if not "STAGING_DIR" in os.environ:
+        if "STAGING_DIR" not in os.environ:
             self.env["STAGING_DIR"] = ""
 
     def __str__(self):
-        return "'{}' builder configuration:\n\tsrc_path: {}\n\tbuild_path: {}\n\tinstall_path: {}".format(self.name, self.src_path, self.build_path, self.install_path)
+        return "'{}' builder configuration:\n" \
+               "\tsrc_path: {}\n" \
+               "\tbuild_path: {}\n" \
+               "\tinstall_path: {}".format(self.name,
+                                           self.src_path,
+                                           self.build_path,
+                                           self.install_path)
 
     def clean(self):
         if os.path.exists(self.build_path):
-            logger.info("cleaning {} (Removing {})".format(self.name, os.path.abspath(self.build_path)))
+            logger.info("cleaning {} (Removing {})".format(
+                self.name, os.path.abspath(self.build_path)))
             shutil.rmtree(os.path.abspath(self.build_path))
 
     def prepare(self):
@@ -41,9 +49,11 @@ class builder(object):
     def make(self):
         raise NotImplementedError('make() function must be overrided')
 
+
 # cmake-based builder class
 class cmakebuilder(builder):
-    def __init__(self, name, modules_dir, build_dir, install_dir, cmake_verbose=False, make_verbose=False, cmake_flags=[], generator=None):
+    def __init__(self, name, modules_dir, build_dir, install_dir, cmake_verbose=False,
+                 make_verbose=False, cmake_flags=[], generator=None):
         self.cmake_verbose = cmake_verbose
         self.make_verbose = make_verbose
         self.cmake_flags = cmake_flags
@@ -64,7 +74,7 @@ class cmakebuilder(builder):
                "-H" + self.src_path,
                "-B" + self.build_path,
                "-DCMAKE_INSTALL_PREFIX=" + self.install_path]
-        cmd.extend(['-D%s' %f for f in self.cmake_flags])
+        cmd.extend(['-D%s' % f for f in self.cmake_flags])
         if self.cmake_verbose:
             cmd.append("--debug_output")
         if self.generator:
@@ -84,9 +94,11 @@ class cmakebuilder(builder):
         logger.info("building & installing {}: {}".format(self.name, " ".join(cmd)))
         subprocess.check_call(cmd, env=self.env)
 
+
 # automake-based builder class
 class acbuilder(builder):
-    def __init__(self, name, modules_dir, build_dir, install_dir, make_verbose=False, extra_config_args=()):
+    def __init__(self, name, modules_dir, build_dir, install_dir, make_verbose=False,
+                 extra_config_args=()):
         self.make_verbose = make_verbose
         self.extra_config_args = extra_config_args
         super(acbuilder, self).__init__(name, modules_dir, build_dir, install_dir)
@@ -128,6 +140,7 @@ class acbuilder(builder):
         logger.info("building & installing {}: {}".format(self.name, " ".join(cmd)))
         subprocess.check_call(cmd, env=self.env)
 
+
 # hostap builder class
 class hostapbuilder(builder):
     def __init__(self, name, config_dir, modules_dir, install_dir, make_verbose=False):
@@ -159,12 +172,15 @@ class hostapbuilder(builder):
         # may use pre-built object files while building
         self.clean()
 
+
 class mapbuild(object):
     def __init__(self, args):
-        if args.verbose: logger.setLevel(logging.DEBUG)
+        if args.verbose:
+            logger.setLevel(logging.DEBUG)
 
         commands = args.commands
-        _dep_modules = dep_modules if 'all' in args.modules or 'dep' in args.modules else [m for m in dep_modules if m in args.modules]
+        _dep_modules = dep_modules if 'all' in args.modules or 'dep' in args.modules\
+            else [m for m in dep_modules if m in args.modules]
 
         logger.info("{} {}".format(commands, ["map"] + _dep_modules))
 
@@ -178,12 +194,13 @@ class mapbuild(object):
                 modules_dir = os.path.join(os.path.realpath(args.map_path), "../hostap")
 
             if name == 'nng' or name == 'dwpal':
-                builder = cmakebuilder(name, modules_dir, build_dir, install_dir, args.cmake_verbose, args.make_verbose,
-                    args.cmake_flags, args.generator)
+                builder = cmakebuilder(name, modules_dir, build_dir, install_dir,
+                                       args.cmake_verbose, args.make_verbose,
+                                       args.cmake_flags, args.generator)
 
             if name == 'safeclib':
-                builder = acbuilder('safeclib', modules_dir, build_dir, install_dir, args.make_verbose,
-                                    ['--enable-strmax=65536'])
+                builder = acbuilder('safeclib', modules_dir, build_dir, install_dir,
+                                    args.make_verbose, ['--enable-strmax=65536'])
 
             if name == 'hostapd' or name == 'wpa_supplicant':
                 builder = hostapbuilder(name, os.path.join(args.map_path, "tools", "config"),
@@ -195,14 +212,15 @@ class mapbuild(object):
         modules_dir = os.path.realpath(args.map_path)
 
         map_cmake_flags = args.cmake_flags
-        if not args.native: 
+        if not args.native:
             if "CMAKE_TOOLCHAIN_FILE" in os.environ:
-                map_cmake_flags += ["CMAKE_TOOLCHAIN_FILE=" + os.path.abspath(os.environ.get('CMAKE_TOOLCHAIN_FILE'))]
+                map_cmake_flags += ["CMAKE_TOOLCHAIN_FILE=" +
+                                    os.path.abspath(os.environ.get('CMAKE_TOOLCHAIN_FILE'))]
             else:
                 map_cmake_flags += ["CMAKE_TOOLCHAIN_FILE=external_toolchain.cmake"]
 
-        builder = cmakebuilder(".", modules_dir, build_dir, install_dir, args.cmake_verbose, args.make_verbose,
-                               map_cmake_flags, args.generator)
+        builder = cmakebuilder(".", modules_dir, build_dir, install_dir, args.cmake_verbose,
+                               args.make_verbose, map_cmake_flags, args.generator)
 
         self.run_command(builder, commands)
 
@@ -219,14 +237,20 @@ class mapbuild(object):
     @staticmethod
     def configure_parser(parser=argparse.ArgumentParser(prog='build')):
         parser.help = "multiap_sw standalone build module"
-        parser.add_argument('modules', choices=['all', 'map', 'dep'] + dep_modules, nargs='*', default='map', help='module[s] to build')
-        parser.add_argument('-c', '--commands', choices=build_targets, nargs='+', default=['make'], help="build command (default is clean+make)")
+        parser.add_argument('modules', choices=['all', 'map', 'dep'] + dep_modules,
+                            nargs='*', default='map', help='module[s] to build')
+        parser.add_argument('-c', '--commands', choices=build_targets, nargs='+',
+                            default=['make'], help="build command (default is clean+make)")
         parser.add_argument("--verbose", "-v", action="store_true", help="verbosity on")
-        parser.add_argument("--native", "-n", action="store_true", help="Build native (not cross compile - ignore external_toolchain.cfg)")
+        parser.add_argument("--native", "-n", action="store_true",
+                            help="Build native (not cross compile - ignore external_toolchain.cfg)")
         parser.add_argument('-f', '--cmake-flags', nargs='+', default=[], help="extra cmake flags")
-        parser.add_argument("--cmake-verbose", action="store_true", help="cmake verbosity on (pass --debug-output to cmake command)")
-        parser.add_argument("--make-verbose", action="store_true", help="make verbosity on (pass VERBOSE=1 to make)")
-        parser.add_argument("--generator", "-G", help="Specify a build system generator (cfr. cmake -G)")
+        parser.add_argument("--cmake-verbose", action="store_true",
+                            help="cmake verbosity on (pass --debug-output to cmake command)")
+        parser.add_argument("--make-verbose", action="store_true",
+                            help="make verbosity on (pass VERBOSE=1 to make)")
+        parser.add_argument("--generator", "-G",
+                            help="Specify a build system generator (cfr. cmake -G)")
 
         return parser
 
