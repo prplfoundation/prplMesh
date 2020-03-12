@@ -1897,7 +1897,10 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         // Add frame body of the most recently received (Re)Association Request frame from this client
         auto associated_clients = m_radio_info_map[client_ruid].associated_clients_map[client_vap];
         auto associatedClientsTuple = associated_clients[client_info_tlv_r->client_mac()];
-        client_capability_report_tlv->set_association_frame(std::get<1>(associatedClientsTuple));
+        client_capability_report_tlv->set_association_frame("dummmmy");
+        LOG(DEBUG)<<"**********************************************************************";
+        LOG(DEBUG)<<"association_frame = "<<std::get<1>(associatedClientsTuple);
+        LOG(DEBUG)<<"**********************************************************************";
 
     } else {
         client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::FAILURE;
