@@ -583,6 +583,184 @@ class test_flows:
         self.debug("Confirming ACK message was received")
         self.check_log(self.repeater1, "agent_wlan0", "ACK_MESSAGE")
 
+    # Disabled because it sometimes fails (cfr. #711) and it has to be executed before any
+    # autoconfig test
+    def _test_optimal_path_dummy(self):
+        # TODO make sure the same SSID is configured on each radio
+        self.debug("Connect dummy STA to wlan0")
+        self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED 11:22:33:44:55:66")
+        self.debug("Pre-prepare RRM Beacon Response for association handling task")
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-40 rsni=40 bssid=aa:bb:cc:00:00:10")
+        self.debug("Confirming 11k request is done by association handling task")
+        self.wait_for_log(self.repeater1, "monitor_wlan0", r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:00:00:10 channel 1", 2)
+
+        self.debug("Update Stats")
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA STA-UPDATE-STATS 11:22:33:44:55:66 rssi=-38,-39,-40,-41 snr=38,39,40,41 uplink=1000 downlink=800")
+        self.debug("Pre-prepare RRM Beacon Responses for optimal path task")
+        #Response for IRE1, BSSID of wlan0.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=aa:bb:cc:11:00:10")
+        #Response for IRE1, BSSID of wlan2.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=aa:bb:cc:11:00:20")
+        #Response for IRE2, BSSID of wlan0.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-40 rsni=40 bssid=aa:bb:cc:00:00:10")
+        #Response for IRE2, BSSID of wlan2.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=aa:bb:cc:00:00:20")
+        #Response for GW, BSSID of wlan0.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=00:11:22:33:00:10")
+        #Response for GW, BSSID of wlan2.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=00:11:22:33:00:20")
+        self.debug("Confirming 11k request is done by optimal path task")
+        self.wait_for_log(self.repeater1, "monitor_wlan0", r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:11:00:20 channel 149", 20)
+
+        self.debug("Confirming 11k request is done by optimal path task")
+        self.wait_for_log(self.repeater1, "monitor_wlan0", r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:00:00:20 channel 149", 20)
+
+        self.debug("Confirming 11k request is done by optimal path task")
+        self.wait_for_log(self.repeater1, "monitor_wlan0", r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:11:00:10 channel 1", 20)
+
+        self.debug("Confirming 11k request is done by optimal path task")
+        self.wait_for_log(self.repeater1, "monitor_wlan0", r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid 00:11:22:33:00:20 channel 149", 20)
+
+        self.debug("Confirming 11k request is done by optimal path task")
+        self.wait_for_log(self.repeater1, "monitor_wlan0", r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid 00:11:22:33:00:10 channel 1", 20)
+
+        self.debug("Confirming no steer is done")
+        self.wait_for_log(self.gateway, "controller", r"could not find a better path for sta 11:22:33:44:55:66", 20)
+
+        # Steer scenario
+        self.debug("Update Stats")
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA STA-UPDATE-STATS 11:22:33:44:55:66 rssi=-58,-59,-60,-61 snr=18,19,20,21 uplink=100 downlink=80")
+        self.debug("Pre-prepare RRM Beacon Responses for optimal path task")
+        #Response for IRE1, BSSID of wlan0.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=aa:bb:cc:11:00:10")
+        #Response for IRE1, BSSID of wlan2.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=aa:bb:cc:11:00:20")
+        #Response for IRE2, BSSID of wlan0.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-60 rsni=20 bssid=aa:bb:cc:00:00:10")
+        #Response for IRE2, BSSID of wlan2.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=aa:bb:cc:00:00:20")
+        #Response for GW, BSSID of wlan0.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=00:11:22:33:00:10")
+        #Response for GW, BSSID of wlan2.0
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=00:11:22:33:00:20")
+        self.debug("Confirming steering is requested by optimal path task")
+        self.wait_for_log(self.gateway, "controller", r"optimal_path_task: steering", 20)
+
+        # Error scenario, sta doesn't support 11k
+        self.debug("Connect dummy STA to wlan0")
+        self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED 11:22:33:44:55:77")
+        self.debug("Pre-prepare RRM Beacon Response with error for association handling task")
+        self.send_bwl_event(self.repeater1, "wlan0", "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:77 channel=0 dialog_token=0 measurement_rep_mode=4 op_class=0 duration=0 rcpi=0 rsni=0 bssid=aa:bb:cc:00:00:10")
+        self.debug("Confirming 11k request is done by association handling task")
+        self.wait_for_log(self.repeater1, "monitor_wlan0", r"Beacon 11k request to sta 11:22:33:44:55:77 on bssid aa:bb:cc:00:00:10 channel 1", 20)
+
+        self.debug("Confirming STA doesn't support beacon measurement")
+        self.wait_for_log(self.gateway, "controller", r"setting sta 11:22:33:44:55:77 as beacon measurement unsupported", 20)
+
+        self.debug("Confirming optimal path falls back to RSSI measurements")
+        self.wait_for_log(self.gateway, "controller", r"requesting rssi measurements for 11:22:33:44:55:77", 20)
+
+    def test_client_steering_dummy(self):
+        sta_mac = "11:22:33:44:55:66"
+
+        self.debug("Connect dummy STA to wlan0")
+        self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
+        self.debug("Send steer request ")
+        self.beerocks_cli_command("steer_client {} {}".format(sta_mac, self.mac_repeater1_wlan2))
+        time.sleep(1)
+
+        self.debug("Confirming Client Association Control Request message was received (UNBLOCK)")
+        self.check_log(self.repeater1, "agent_wlan2", r"Got client allow request")
+
+        self.debug("Confirming Client Association Control Request message was received (BLOCK)")
+        self.check_log(self.repeater1, "agent_wlan0", r"Got client disallow request")
+
+        self.debug("Confirming Client Association Control Request message was received (BLOCK)")
+        self.check_log(self.repeater2, "agent_wlan0", r"Got client disallow request")
+
+        self.debug("Confirming Client Association Control Request message was received (BLOCK)")
+        self.check_log(self.repeater2, "agent_wlan2", r"Got client disallow request")
+
+        self.debug("Confirming Client Steering Request message was received - mandate")
+        self.check_log(self.repeater1, "agent_wlan0", r"Got steer request")
+
+        self.debug("Confirming BTM Report message was received")
+        self.check_log(self.gateway, "controller", r"CLIENT_STEERING_BTM_REPORT_MESSAGE")
+
+        self.debug("Confirming ACK message was received")
+        self.check_log(self.repeater1, "agent_wlan0", r"ACK_MESSAGE")
+
+        self.debug("Disconnect dummy STA from wlan0")
+        self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-DISCONNECTED {}".format(sta_mac))
+        # Make sure that controller sees disconnect before connect by waiting a little
+        time.sleep(1)
+
+        self.debug("Connect dummy STA to wlan2")
+        self.send_bwl_event(self.repeater1, "wlan2", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
+        self.debug("Confirm steering success by client connected")
+        self.check_log(self.gateway, "controller", r"steering successful for sta {}".format(sta_mac))
+        self.check_log(self.gateway, "controller", r"sta {} disconnected due to steering request".format(sta_mac))
+
+    def test_client_steering_policy(self):
+        self.debug("Send client steering policy to agent 1")
+        mid = self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8003,
+            tlv(0x89, 0x000C, "{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}"))
+        time.sleep(1)
+        self.debug("Confirming client steering policy has been received on agent")
+
+        self.check_log(self.repeater1, "agent_wlan0", r"MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE")
+        time.sleep(1)
+        self.debug("Confirming client steering policy ack message has been received on the controller")
+        self.check_log(self.gateway, "controller", r"ACK_MESSAGE, mid=0x{:04x}".format(mid))
+
+    def test_client_association(self):
+        self.debug("Send topology request to agent 1")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x0002)
+        self.debug("Confirming topology query was received")
+        self.check_log(self.repeater1, "agent", r"TOPOLOGY_QUERY_MESSAGE")
+
+        self.debug("Send client association control message")
+        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8016,
+            tlv(0x9D, 0x000F, "{%s 0x00 0x1E 0x01 {0x000000110022}}" % self.mac_repeater1_wlan0))
+
+        self.debug("Confirming client association control message has been received on agent")
+        # check that both radio agents received it,in the future we'll add a check to verify which
+        # radio the query was intended for.
+        self.check_log(self.repeater1, "agent_wlan0", r"CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE")
+        self.check_log(self.repeater1, "agent_wlan2", r"CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE")
+
+        self.debug("Confirming ACK message was received on controller")
+        self.check_log(self.gateway, "controller", r"ACK_MESSAGE")
+
+    def test_higher_layer_data_payload_trigger(self):
+        mac_gateway_hex = '0x' + self.mac_gateway.replace(':', '')
+        self.debug("mac_gateway_hex = " + mac_gateway_hex)
+        payload = 199 * (mac_gateway_hex + " ") + mac_gateway_hex
+
+        self.debug("Send Higher Layer Data message")
+        # MCUT sends Higher Layer Data message to CTT Agent1 by providing:
+        # Higher layer protocol = "0x00"
+        # Higher layer payload = 200 concatenated copies of the ALID of the MCUT (1200 octets)
+        mid = self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8018,
+                                             tlv(0xA0, 0x04b1, "{0x00 %s}" % payload))
+
+        self.debug("Confirming higher layer data message was received in the agent" )
+
+        self.check_log(self.repeater1, "agent", r"HIGHER_LAYER_DATA_MESSAGE")
+
+        self.debug("Confirming matching protocol and payload length")
+
+        self.check_log(self.repeater1, "agent", r"protocol: 0")
+        self.check_log(self.repeater1, "agent", r"payload_length: 0x4b0")
+
+        self.debug("Confirming ACK message was received in the controller")
+        self.check_log(self.gateway, "controller", r"ACK_MESSAGE, mid=0x{:04x}".format(mid))
+
+    def test_topology(self):
+        mid = self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x0002)
+        self.debug("Confirming topology query was received")
+        self.check_log(self.repeater1, "agent", r"TOPOLOGY_QUERY_MESSAGE")
+
 if __name__ == '__main__':
     t = test_flows()
     t.init()

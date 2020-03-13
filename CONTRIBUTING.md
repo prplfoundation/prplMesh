@@ -280,7 +280,7 @@ That means the following conditions must hold.
 * At least one maintainer has reviewed and approvied.
 * Code builds on Ubuntu, with `MSGLIB=zmq` and `BWL_TYPE=DUMMY`. Automatic with gitlab CI.
 * Unit tests run successfully. Automatic with gitlab CI.
-* For each new flow being added, `tests/test_flows.sh` must be updated accordingly to test the new flow.
+* For each new flow being added, `tests/test_flows.py` must be updated accordingly to test the new flow.
 * Run clang-format.sh. If it fixes lines you did not change, commit that separately.
 * Code builds for Turris Omnia, GL.inet B1300, and Netgear Nighthawk RAX40. Automatic with gitlab CI.
 * TODO valgrind / klockwork / clang-tidy / etc

@@ -86,28 +86,6 @@ run-tests:
   script:
     # Try to pull from dockerhub, if it fails, the run should fail
     - tools/docker/image-pull.sh
-    - tests/test_flows.sh -v -u $RANDOM
-
-  artifacts:
-    paths:
-      - logs
-    when: always
-
-  tags:
-    - docker
-    - docker-build
-
-  after_script:
-    - tools/docker/stop.sh -k -r
-  needs:
-    - job: build-in-docker
-
-run-tests-py:
-  stage: test
-  image: $CI_REGISTRY_IMAGE/tests-runner:18.09.7-dind
-  script:
-    # Try to pull from dockerhub, if it fails, the run should fail
-    - tools/docker/image-pull.sh
     - tests/test_flows.py -v -u $RANDOM
 
   artifacts:
