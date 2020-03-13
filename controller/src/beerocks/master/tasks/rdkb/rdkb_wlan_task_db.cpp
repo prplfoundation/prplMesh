@@ -126,7 +126,7 @@ rdkb_wlan_task_db::get_ap_config(const std::string &bssid)
         }
     }
     LOG(ERROR) << "can't find entry for bssid=" << bssid;
-    return std::make_pair(false, beerocks_message::sSteeringApConfig());
+    return std::make_pair(false, {});
 }
 
 std::unordered_map<std::string, std::shared_ptr<beerocks_message::sSteeringClientConfig>>
