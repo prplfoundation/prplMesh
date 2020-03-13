@@ -10,6 +10,7 @@
 #define _NODE_H_
 
 #include "../tasks/task.h"
+#include <bcl/network/network_utils.h>
 #include <tlvf/common/sMacAddr.h>
 #include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
 #include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
@@ -239,7 +240,7 @@ public:
         ap_metrics_data(){};
         ~ap_metrics_data(){};
 
-        sMacAddr bssid;
+        sMacAddr bssid                               = beerocks::net::network_utils::ZERO_MAC;
         uint8_t channel_utilization                  = 0;
         uint16_t number_of_stas_currently_associated = 0;
         std::vector<uint8_t> estimated_service_info_fields;
