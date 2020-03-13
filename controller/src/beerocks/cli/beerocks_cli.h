@@ -95,7 +95,7 @@ public:
     // Variables
     std::map<std::string, commandInfo> functionsMap;
     std::map<std::string, commandInfo>::const_iterator commandIt;
-    arguments args;
+    arguments args{};
     int commandNumOfArgs = 0;
     std::string command;
     std::vector<std::string> commandTokens;
