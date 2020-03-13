@@ -696,7 +696,7 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         }
 
         // Check if CMDU message type has preprepared CMDU which can be loaded
-        if (m_cmdu_tx.is_finalized() &&
+        if (tlv_hex_list.empty() && m_cmdu_tx.is_finalized() &&
             m_cmdu_tx.getMessageType() == ieee1905_1::eMessageType(message_type)) {
             m_cmdu_tx.setMessageId(g_mid); // force mid
             LOG(DEBUG) << "Send preset cmdu with mid " << std::hex << g_mid;
@@ -710,7 +710,7 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         } else {
             // CMDU was not loaded from preprepared buffer, and need to be created manually, and
             // use TLV data from the command (if exists)
-
+            m_cmdu_tx.reset();
             if (!cmdu_tx.create(g_mid, ieee1905_1::eMessageType(message_type))) {
                 LOG(ERROR) << "cmdu creation of type 0x" << message_type_str << ", has failed";
                 reply_ucc(eWfaCaStatus::ERROR, err_internal);
