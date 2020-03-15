@@ -1184,7 +1184,7 @@ bool db::set_hostap_supported_channels(std::string mac, beerocks::message::sWifi
         LOG(ERROR) << "No supported channels";
         return false;
     }
-
+    
     if (!use_hw_supported_channels) {
     if (wireless_utils::which_freq(n->hostap->supported_channels[0].channel) ==
         eFreqType::FREQ_5G) {
@@ -2276,16 +2276,13 @@ bool db::set_channel_scan_pool(const sMacAddr &mac, const std::unordered_set<uin
     }
 
     //Validate new dcs channel pool with hostap_supported_channels list
-    //This is a workaround
-    static uint8_t supported_channels_array[] = {
-        1,  2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  36,  40,  44,  48,  52,  56,  60,
-        64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161, 165};
-    static size_t supported_channels_array_size =
-        sizeof(supported_channels_array) / sizeof(uint8_t);
-    std::set<uint8_t> supported_channels(supported_channels_array,
-                                         supported_channels_array + supported_channels_array_size);
+    auto supported_channels =
+        get_hostap_supported_channels(network_utils::mac_to_string(mac), true);
     for (auto channel : channel_pool) {
-        if (supported_channels.find(channel) == supported_channels.end()) {
+        if (std::find_if(supported_channels.begin(), supported_channels.end(),
+                         [&channel](const beerocks::message::sWifiChannel &wifi_channel) {
+                             return wifi_channel.channel == channel;
+                         }) == supported_channels.end()) {
             //even if one channel is not supported reject all pool
             LOG(ERROR) << "channel #" << int(channel)
                        << " is invalid, setting channel pool failed !";
