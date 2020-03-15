@@ -1469,9 +1469,13 @@ void ap_manager_thread::handle_hostapd_attached()
 {
     LOG(DEBUG) << "handling enabled hostapd";
 
+    // Read HW supported channels by default.
+    ap_wlan_hal->read_supported_channels();
+    
     if (acs_enabled) {
         LOG(DEBUG) << "retrieving ACS report";
         int read_acs_attempt = 0;
+        // During each attempt the supported_channels are wiped and reset.
         while (!ap_wlan_hal->read_acs_report()) {
             read_acs_attempt++;
             if (read_acs_attempt >= READ_ACS_ATTEMPT_MAX) {
@@ -1483,8 +1487,6 @@ void ap_manager_thread::handle_hostapd_attached()
 
             usleep(ACS_READ_SLEEP_USC);
         }
-    } else {
-        ap_wlan_hal->read_supported_channels();
     }
 
     auto notification =
@@ -1516,6 +1518,8 @@ void ap_manager_thread::handle_hostapd_attached()
 
     // Copy the channels supported by the AP
     copy_radio_supported_channels(ap_wlan_hal, notification->params().supported_channels);
+    // Copy the channels supported by the AP
+    copy_radio_supported_channels(ap_wlan_hal, notification->params().hw_supported_channels, true);
 
     LOG(INFO) << "send ACTION_APMANAGER_JOINED_NOTIFICATION";
     LOG(INFO) << " mac = " << ap_wlan_hal->get_radio_mac();
@@ -1526,6 +1530,8 @@ void ap_manager_thread::handle_hostapd_attached()
     LOG(INFO) << " current bw = " << ap_wlan_hal->get_radio_info().bandwidth;
     LOG(INFO) << " supported_channels = " << std::endl
               << get_radio_supported_channels_string(ap_wlan_hal);
+    LOG(INFO) << " hw_supported_channels = " << std::endl
+              << get_radio_supported_channels_string(ap_wlan_hal, true);
 
     // Send CMDU
     message_com::send_cmdu(slave_socket, cmdu_tx);
