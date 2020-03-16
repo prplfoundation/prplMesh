@@ -1053,6 +1053,25 @@ class TlvF:
                 lines_cpp.append( "%sreturn &(m_%s[idx]);" % (self.getIndentation(1), param_name) )
                 lines_cpp.append( "}" )
                 lines_cpp.append( "" )
+                
+                if param_type_info.type == TypeInfo.UINT8:
+                    lines_h.append( "bool set_%s(const void* buffer, size_t size);" % (param_name) )
+                    lines_cpp.append( "bool %s::set_%s(const void* buffer, size_t size) {" % (obj_meta.name, param_name) )
+                    lines_cpp.append( "%sif (buffer == nullptr) {" % self.getIndentation(1))
+                    lines_cpp.append( '%sTLVF_LOG(WARNING) << "set_%s received a null pointer.";' %  (self.getIndentation(2), param_name) )
+                    lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
+                    lines_cpp.append( "%s}" % self.getIndentation(1) )
+                    if is_const_len or is_int_len:
+                        lines_cpp.append( "%sif (size > %s) {"  % (self.getIndentation(1), param_length))
+                        lines_cpp.append( '%sTLVF_LOG(ERROR) << "Received buffer size is smaller than buffer length";' %  self.getIndentation(2) )
+                        lines_cpp.append( "%sreturn false;" % self.getIndentation(2))
+                        lines_cpp.append( "%s}" % self.getIndentation(1) )
+                    else:
+                        lines_cpp.append( "%sif (!alloc_%s(size)) { return false; }"  % (self.getIndentation(1), param_name))
+                    lines_cpp.append( "%sstd::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_%s);" % (self.getIndentation(1), param_name))
+                    lines_cpp.append( "%sreturn true;" % self.getIndentation(1))
+                    lines_cpp.append( "}")
+
             else:
                 #add function to get reference
                 lines_h.append( "std::tuple<bool, %s&> %s(size_t idx);" % (param_type, param_name) )
