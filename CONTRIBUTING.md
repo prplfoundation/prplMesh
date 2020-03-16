@@ -271,6 +271,14 @@ Example use cases:
 
 If a PR is marked "don't merge" and it becomes ready (i.e. you did the necessary fixups and rebased on master), please remember to remove the tag again.
 
+### Testing
+
+Some changes are riskier than others, since they may break existing functionality which is not yet covered by prplMesh CI.
+Changing the topology handling, channel selection, autoconfig - developers should take extra care when modifying such code areas.
+So, it is expected from every developer to use his/hers good judgement, consult with the EasyMesh Test plan, and run real certification tests
+with real devices using the prplmesh CI infrastructure which allows triggering a test in the CI testbed for a given branch.
+For more information on how to trigger a test, see [Testing in CI](https://github.com/prplfoundation/prplMesh/wiki/Testing-in-CI).
+
 ### Definition of done
 
 Before a pull request can be merged, it must be considered "Done".
@@ -283,6 +291,7 @@ That means the following conditions must hold.
 * For each new flow being added, `tests/test_flows.py` must be updated accordingly to test the new flow.
 * Run clang-format.sh. If it fixes lines you did not change, commit that separately.
 * Code builds for Turris Omnia, GL.inet B1300, and Netgear Nighthawk RAX40. Automatic with gitlab CI.
+* Test at least one agent test in the CI testbed covering the changes done, if applicable.
 * TODO valgrind / klockwork / clang-tidy / etc
 
 ### Coding style
