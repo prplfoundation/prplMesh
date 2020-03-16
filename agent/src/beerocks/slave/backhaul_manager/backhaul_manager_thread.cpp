@@ -2025,7 +2025,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             if (!front_iface && !soc->sta_wlan_hal) {
                 LOG(TRACE) << "Skip radio interface with no active STA BWL, front_radio="
                            << soc->radio_mac;
-                return false;
+                return true;
             }
 
             auto localInterfaceInfo = tlvDeviceInformation->create_local_interface_list();
