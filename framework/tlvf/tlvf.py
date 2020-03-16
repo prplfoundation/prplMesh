@@ -89,6 +89,16 @@ class TypeInfo:
     STRUCT_INIT_FUNCTION_NAME = "struct_init()"
     CLASS_SWAP_FUNCTION_NAME = "class_swap()"
 
+    INT8 = "INT8"
+    UINT8 = "UINT8"
+    INT16 = "INT16"
+    UINT16 = "UINT16"
+    INT32 = "INT32"
+    UINT32 = "UINT32"
+    INT64 = "INT64"
+    UINT64 = "UINT64"
+    STD_TYPES = [INT8, UINT8, INT16, UINT16, INT32, UINT32, INT64, UINT64]
+
     def __init__(self, type_str):
         self.type_str = type_str
         self.type = TypeInfo.ERROR
@@ -96,52 +106,55 @@ class TypeInfo:
         self.swap_prefix = ""
         self.swap_suffix = ""
         self.swap_is_func = False
+        self.is_std_type = False
 
         if type(self.type_str) == str:
             if self.type_str.find("::") != -1:
                 self.type_str = type_str[type_str.rfind("::")+2:]
-            if ( self.type_str.startswith("uint") or self.type_str.startswith("int")):
-                if type_str.endswith("64_t"):
-                    self.type = TypeInfo.STD
+            if self.type_str.startswith("uint") or self.type_str.startswith("int"):
+                self.set_type(self.type_str[:-2].upper()) # [:-2] removing the '_t' suffix
+                if self.type == TypeInfo.INT64 or self.type == TypeInfo.UINT64:
                     self.swap_prefix = "tlvf_swap(64, reinterpret_cast<uint8_t*>("
                     self.swap_suffix = "))"
                     self.swap_needed = True
-                elif type_str.endswith("32_t"):
-                    self.type = TypeInfo.STD
+                elif self.type == TypeInfo.INT32 or self.type == TypeInfo.UINT32:
                     self.swap_prefix = "tlvf_swap(32, reinterpret_cast<uint8_t*>("
                     self.swap_suffix = "))"
                     self.swap_needed = True
-                elif type_str.endswith("16_t"):
-                    self.type = TypeInfo.STD
+                elif self.type == TypeInfo.INT16 or self.type == TypeInfo.UINT16:
                     self.swap_prefix = "tlvf_swap(16, reinterpret_cast<uint8_t*>("
                     self.swap_suffix = "))"
                     self.swap_needed = True
-                elif self.type_str.endswith("8_t"):
-                    self.type = TypeInfo.STD
+                elif not (self.type == TypeInfo.INT8 or self.type == TypeInfo.UINT8):
+                    self.set_type(TypeInfo.ERROR)
             elif self.type_str.startswith("char"):
-                self.type = TypeInfo.CHAR
+                self.set_type(TypeInfo.CHAR)
             elif self.type_str == "enum_class":
-                self.type = TypeInfo.ENUM_CLASS
+                self.set_type(TypeInfo.ENUM_CLASS)
             elif self.type_str == "size_t":
-                self.type = TypeInfo.ERROR
+                self.set_type(TypeInfo.ERROR)
             elif len(self.type_str) > 2 and (str(self.type_str[1]).isupper() or str(self.type_str[1]).isdigit()):
                 if self.type_str[0] == "e":
-                    self.type = TypeInfo.ENUM
+                    self.set_type(TypeInfo.ENUM)
                     self.swap_prefix = "tlvf_swap(8*sizeof(" + self.type_str + "), reinterpret_cast<uint8_t*>("
                     self.swap_suffix = "))"
                     self.swap_needed = True
                 elif self.type_str[0] == "s":
-                    self.type = TypeInfo.STRUCT
+                    self.set_type(TypeInfo.STRUCT)
                     self.swap_suffix = TypeInfo.STRUCT_SWAP_FUNCTION_NAME
                     self.swap_needed = True
                     self.swap_is_func = True
                 elif self.type_str[0] == "c":
-                    self.type = TypeInfo.CLASS
+                    self.set_type(TypeInfo.CLASS)
                     self.swap_suffix = TypeInfo.CLASS_SWAP_FUNCTION_NAME
                     self.swap_needed = True
                     self.swap_is_func = True
         elif str(self.type_str).isdigit():
-            self.type = TypeInfo.NUMBER
+            self.set_type(TypeInfo.NUMBER)
+
+    def set_type(self, new_type):
+        self.type = new_type
+        self.is_std_type = (self.type in TypeInfo.STD_TYPES)
 
     def __repr__(self):
         pp = pprint.PrettyPrinter(indent=4)
@@ -469,7 +482,7 @@ class TlvF:
                     except:
                         value = self.db_enum_storage_type[(param_type_real.type_str, param_type_real.type_str)]
                     param_type_info = TypeInfo(value[MetaData.KEY_ENUM_STORAGE])
-                    param_type_info.type = param_meta.type_info.type
+                    param_type_info.set_type(param_meta.type_info.type)
                     if param_meta.type == param_type_real.type_str:
                         self.include_list.append('"' + self.yaml_path + "/" + param_type + ".h" + '"')
 
@@ -925,7 +938,7 @@ class TlvF:
                 if TypeInfo(param_type).type == TypeInfo.STRUCT:
                     lines_cpp.append("%sfor (size_t i = 0; i < %s; i++) { m_%s->struct_init(); }" % (self.getIndentation(1), param_length, param_name))
                 elif (param_val_const or param_val):
-                    if param_type_info.type != TypeInfo.STD: self.abort("%s.yaml --> only std types are allowed in val / val_const" % self.yaml_fname)
+                    if not param_type_info.is_std_type: self.abort("%s.yaml --> only std types are allowed in val / val_const" % self.yaml_fname)
                     lines_cpp += ["%sfor (size_t i = 0; i < %s; i++){" % (self.getIndentation(1), str(param_length)),
                                  "%sm_%s[i] = %s;"% (self.getIndentation(2), param_name, str(param_val) if param_val != None else str(param_val_const)),
                                  "%s}" % (self.getIndentation(1))]
@@ -1030,7 +1043,7 @@ class TlvF:
                 lines_cpp.append( "%sreturn true;" % self.getIndentation(1))
                 lines_cpp.append( "}")
 
-            elif param_type_info.type == TypeInfo.STD:
+            elif param_type_info.is_std_type:
                 lines_h.append( "%s* %s(size_t idx = 0);" % (param_type, param_name) )
                 lines_cpp.append( "%s* %s::%s(size_t idx) {" % (param_type_full, obj_meta.name, param_name) )
                 lines_cpp.append( "%sif ( (m_%s_idx__ == 0) || (m_%s_idx__ <= idx) ) {" % (self.getIndentation(1), param_name, param_name) )
