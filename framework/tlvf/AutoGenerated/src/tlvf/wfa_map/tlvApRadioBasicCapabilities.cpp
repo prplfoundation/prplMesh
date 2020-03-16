@@ -254,6 +254,15 @@ uint8_t* cOperatingClassesInfo::statically_non_operable_channels_list(size_t idx
     return &(m_statically_non_operable_channels_list[idx]);
 }
 
+bool cOperatingClassesInfo::set_statically_non_operable_channels_list(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_statically_non_operable_channels_list received a null pointer.";
+        return false;
+    }
+    if (!alloc_statically_non_operable_channels_list(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_statically_non_operable_channels_list);
+    return true;
+}
 bool cOperatingClassesInfo::alloc_statically_non_operable_channels_list(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list statically_non_operable_channels_list, abort!";

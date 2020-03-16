@@ -1729,6 +1729,18 @@ uint8_t* cACTION_CLI_CLIENT_BEACON_11K_REQUEST::ssid(size_t idx) {
     return &(m_ssid[idx]);
 }
 
+bool cACTION_CLI_CLIENT_BEACON_11K_REQUEST::set_ssid(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_ssid received a null pointer.";
+        return false;
+    }
+    if (size > beerocks::message::WIFI_SSID_MAX_LENGTH) {
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than buffer length";
+        return false;
+    }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_ssid);
+    return true;
+}
 uint8_t& cACTION_CLI_CLIENT_BEACON_11K_REQUEST::use_optional_ssid() {
     return (uint8_t&)(*m_use_optional_ssid);
 }

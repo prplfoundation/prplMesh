@@ -545,6 +545,15 @@ uint8_t* cWscVendorExtWfa::vs_data(size_t idx) {
     return &(m_vs_data[idx]);
 }
 
+bool cWscVendorExtWfa::set_vs_data(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_vs_data received a null pointer.";
+        return false;
+    }
+    if (!alloc_vs_data(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_vs_data);
+    return true;
+}
 bool cWscVendorExtWfa::alloc_vs_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list vs_data, abort!";
@@ -908,6 +917,18 @@ uint8_t* cWscAttrEnrolleeNonce::nonce(size_t idx) {
     return &(m_nonce[idx]);
 }
 
+bool cWscAttrEnrolleeNonce::set_nonce(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_nonce received a null pointer.";
+        return false;
+    }
+    if (size > WSC_NONCE_LENGTH) {
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than buffer length";
+        return false;
+    }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_nonce);
+    return true;
+}
 void cWscAttrEnrolleeNonce::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
@@ -1008,6 +1029,18 @@ uint8_t* cWscAttrPublicKey::public_key(size_t idx) {
     return &(m_public_key[idx]);
 }
 
+bool cWscAttrPublicKey::set_public_key(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_public_key received a null pointer.";
+        return false;
+    }
+    if (size > WSC_PUBLIC_KEY_LENGTH) {
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than buffer length";
+        return false;
+    }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_public_key);
+    return true;
+}
 void cWscAttrPublicKey::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
@@ -2890,6 +2923,18 @@ uint8_t* cWscAttrUuidE::data(size_t idx) {
     return &(m_data[idx]);
 }
 
+bool cWscAttrUuidE::set_data(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_data received a null pointer.";
+        return false;
+    }
+    if (size > WSC_UUID_LENGTH) {
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than buffer length";
+        return false;
+    }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_data);
+    return true;
+}
 void cWscAttrUuidE::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
@@ -3084,6 +3129,18 @@ uint8_t* cWscAttrUuidR::data(size_t idx) {
     return &(m_data[idx]);
 }
 
+bool cWscAttrUuidR::set_data(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_data received a null pointer.";
+        return false;
+    }
+    if (size > WSC_UUID_LENGTH) {
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than buffer length";
+        return false;
+    }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_data);
+    return true;
+}
 void cWscAttrUuidR::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
@@ -3184,6 +3241,18 @@ uint8_t* cWscAttrAuthenticator::data(size_t idx) {
     return &(m_data[idx]);
 }
 
+bool cWscAttrAuthenticator::set_data(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_data received a null pointer.";
+        return false;
+    }
+    if (size > WSC_AUTHENTICATOR_LENGTH) {
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than buffer length";
+        return false;
+    }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_data);
+    return true;
+}
 void cWscAttrAuthenticator::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
@@ -3284,6 +3353,18 @@ uint8_t* cWscAttrRegistrarNonce::nonce(size_t idx) {
     return &(m_nonce[idx]);
 }
 
+bool cWscAttrRegistrarNonce::set_nonce(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_nonce received a null pointer.";
+        return false;
+    }
+    if (size > WSC_NONCE_LENGTH) {
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than buffer length";
+        return false;
+    }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_nonce);
+    return true;
+}
 void cWscAttrRegistrarNonce::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));

@@ -657,6 +657,15 @@ uint8_t* cACTION_CONTROL_CONTROLLER_PING_REQUEST::data(size_t idx) {
     return &(m_data[idx]);
 }
 
+bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::set_data(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_data received a null pointer.";
+        return false;
+    }
+    if (!alloc_data(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_data);
+    return true;
+}
 bool cACTION_CONTROL_CONTROLLER_PING_REQUEST::alloc_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
@@ -783,6 +792,15 @@ uint8_t* cACTION_CONTROL_CONTROLLER_PING_RESPONSE::data(size_t idx) {
     return &(m_data[idx]);
 }
 
+bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::set_data(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_data received a null pointer.";
+        return false;
+    }
+    if (!alloc_data(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_data);
+    return true;
+}
 bool cACTION_CONTROL_CONTROLLER_PING_RESPONSE::alloc_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
@@ -909,6 +927,15 @@ uint8_t* cACTION_CONTROL_AGENT_PING_REQUEST::data(size_t idx) {
     return &(m_data[idx]);
 }
 
+bool cACTION_CONTROL_AGENT_PING_REQUEST::set_data(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_data received a null pointer.";
+        return false;
+    }
+    if (!alloc_data(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_data);
+    return true;
+}
 bool cACTION_CONTROL_AGENT_PING_REQUEST::alloc_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";
@@ -1035,6 +1062,15 @@ uint8_t* cACTION_CONTROL_AGENT_PING_RESPONSE::data(size_t idx) {
     return &(m_data[idx]);
 }
 
+bool cACTION_CONTROL_AGENT_PING_RESPONSE::set_data(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_data received a null pointer.";
+        return false;
+    }
+    if (!alloc_data(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_data);
+    return true;
+}
 bool cACTION_CONTROL_AGENT_PING_RESPONSE::alloc_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";

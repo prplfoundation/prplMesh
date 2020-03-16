@@ -72,6 +72,7 @@ class cLocalInterfaceInfo : public BaseClass
         eMediaType& media_type();
         uint8_t& media_info_length();
         uint8_t* media_info(size_t idx = 0);
+        bool set_media_info(const void* buffer, size_t size);
         bool alloc_media_info(size_t count = 1);
         void class_swap() override;
         bool finalize() override;

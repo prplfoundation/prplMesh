@@ -281,6 +281,7 @@ class cWscVendorExtWfa : public BaseClass
         uint8_t& subelement_value();
         size_t vs_data_length() { return m_vs_data_idx__ * sizeof(uint8_t); }
         uint8_t* vs_data(size_t idx = 0);
+        bool set_vs_data(const void* buffer, size_t size);
         bool alloc_vs_data(size_t count = 1);
         void class_swap() override;
         bool finalize() override;
@@ -353,6 +354,7 @@ class cWscAttrEnrolleeNonce : public BaseClass
         eWscAttributes& type();
         const uint16_t& length();
         uint8_t* nonce(size_t idx = 0);
+        bool set_nonce(const void* buffer, size_t size);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -376,6 +378,7 @@ class cWscAttrPublicKey : public BaseClass
         eWscAttributes& type();
         const uint16_t& length();
         uint8_t* public_key(size_t idx = 0);
+        bool set_public_key(const void* buffer, size_t size);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -774,6 +777,7 @@ class cWscAttrUuidE : public BaseClass
         eWscAttributes& type();
         const uint16_t& length();
         uint8_t* data(size_t idx = 0);
+        bool set_data(const void* buffer, size_t size);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -818,6 +822,7 @@ class cWscAttrUuidR : public BaseClass
         eWscAttributes& type();
         const uint16_t& length();
         uint8_t* data(size_t idx = 0);
+        bool set_data(const void* buffer, size_t size);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -841,6 +846,7 @@ class cWscAttrAuthenticator : public BaseClass
         eWscAttributes& type();
         const uint16_t& length();
         uint8_t* data(size_t idx = 0);
+        bool set_data(const void* buffer, size_t size);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -864,6 +870,7 @@ class cWscAttrRegistrarNonce : public BaseClass
         eWscAttributes& type();
         const uint16_t& length();
         uint8_t* nonce(size_t idx = 0);
+        bool set_nonce(const void* buffer, size_t size);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();

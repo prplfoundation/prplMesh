@@ -42,6 +42,7 @@ class tlvHigherLayerData : public BaseClass
         eProtocol& protocol();
         size_t payload_length() { return m_payload_idx__ * sizeof(uint8_t); }
         uint8_t* payload(size_t idx = 0);
+        bool set_payload(const void* buffer, size_t size);
         bool alloc_payload(size_t count = 1);
         void class_swap() override;
         bool finalize() override;

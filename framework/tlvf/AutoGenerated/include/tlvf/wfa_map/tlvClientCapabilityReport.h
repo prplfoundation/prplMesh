@@ -43,6 +43,7 @@ class tlvClientCapabilityReport : public BaseClass
         eResultCode& result_code();
         uint8_t& association_frame_length();
         uint8_t* association_frame(size_t idx = 0);
+        bool set_association_frame(const void* buffer, size_t size);
         bool alloc_association_frame(size_t count = 1);
         void class_swap() override;
         bool finalize() override;

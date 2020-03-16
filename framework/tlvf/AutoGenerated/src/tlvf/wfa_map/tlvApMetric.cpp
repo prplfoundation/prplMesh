@@ -57,6 +57,15 @@ uint8_t* tlvApMetric::estimated_service_info_field(size_t idx) {
     return &(m_estimated_service_info_field[idx]);
 }
 
+bool tlvApMetric::set_estimated_service_info_field(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_estimated_service_info_field received a null pointer.";
+        return false;
+    }
+    if (!alloc_estimated_service_info_field(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_estimated_service_info_field);
+    return true;
+}
 bool tlvApMetric::alloc_estimated_service_info_field(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list estimated_service_info_field, abort!";

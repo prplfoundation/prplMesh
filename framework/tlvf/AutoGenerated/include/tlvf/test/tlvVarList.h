@@ -104,6 +104,7 @@ class cInner : public BaseClass
         const uint16_t& length();
         uint8_t& list_length();
         uint8_t* list(size_t idx = 0);
+        bool set_list(const void* buffer, size_t size);
         bool alloc_list(size_t count = 1);
         uint32_t& var1();
         size_t unknown_length_list_inner_length() { return m_unknown_length_list_inner_idx__ * sizeof(char); }
