@@ -471,7 +471,7 @@ class test_flows:
 
         self.debug("Send 1905 Link metric query to agent 1 (neighbor gateway)")
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x0005,
-                                       (0x08,0x0008,"0x01 {%s} 0x02" % self.mac_gateway))
+                                       tlv(0x08,0x0008,"0x01 {%s} 0x02" % self.mac_gateway))
         self.check_log(self.repeater1, "agent", "Received LINK_METRIC_QUERY_MESSAGE")
         self.check_log(self.gateway, "controller", "Received LINK_METRIC_RESPONSE_MESSAGE")
         self.check_log(self.gateway, "controller", "Received TLV_TRANSMITTER_LINK_METRIC")
