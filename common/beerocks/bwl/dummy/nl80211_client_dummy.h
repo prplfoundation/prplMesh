@@ -32,30 +32,41 @@ public:
     virtual ~nl80211_client_dummy();
 
     /**
+     * @brief Gets radio information.
+     *
+     * Radio information contains HT/VHT capabilities and the list of supported channels.
+     *
+     * @param[in] interface_name Interface name, either radio or Virtual AP (VAP).
+     * @param[out] radio_info Radio information.
+     *
+     * @return True on success and false otherwise.
+     */
+    virtual bool get_radio_info(const std::string &interface_name, radio_info &radio_info) override;
+
+    /**
      * @brief Gets station information.
      *
      * Fills station information with dummy data.
      *
-     * @param[in] local_interface_name Virtual AP (VAP) interface name.
+     * @param[in] interface_name Virtual AP (VAP) interface name.
      * @param[in] sta_mac_address MAC address of a station connected to the local interface.
      * @param[out] sta_info Station information.
      *
      * @return Dummy implementation returns always true.
      */
-    virtual bool get_sta_info(const std::string &local_interface_name,
-                              const sMacAddr &sta_mac_address, sStaInfo &sta_info) override;
+    bool get_sta_info(const std::string &interface_name, const sMacAddr &sta_mac_address,
+                      sta_info &sta_info) override;
 
     /**
      * @brief Set the tx power limit
      *
      * Set tx power limit for a radio
      *
-     * @param[in] local_interface_name radio interface name.
-     * @param[in] limit tx power limit in dBM to set 
+     * @param[in] interface_name radio interface name.
+     * @param[in] limit tx power limit in dBm to set
      * @return true success and false otherwise
      */
-    virtual bool set_tx_power_limit(const std::string &local_interface_name,
-                                    uint32_t limit) override;
+    bool set_tx_power_limit(const std::string &interface_name, uint32_t limit) override;
 };
 
 } // namespace bwl
