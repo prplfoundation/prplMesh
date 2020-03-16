@@ -662,6 +662,15 @@ uint8_t* cInner::list(size_t idx) {
     return &(m_list[idx]);
 }
 
+bool cInner::set_list(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_list received a null pointer.";
+        return false;
+    }
+    if (!alloc_list(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_list);
+    return true;
+}
 bool cInner::alloc_list(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list list, abort!";

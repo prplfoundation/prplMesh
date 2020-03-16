@@ -120,6 +120,7 @@ class cPreferenceOperatingClasses : public BaseClass
         uint8_t& operating_class();
         uint8_t& channel_list_length();
         uint8_t* channel_list(size_t idx = 0);
+        bool set_channel_list(const void* buffer, size_t size);
         bool alloc_channel_list(size_t count = 1);
         sFlags& flags();
         void class_swap() override;

@@ -45,6 +45,15 @@ uint8_t* tlvVendorSpecific::payload(size_t idx) {
     return &(m_payload[idx]);
 }
 
+bool tlvVendorSpecific::set_payload(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_payload received a null pointer.";
+        return false;
+    }
+    if (!alloc_payload(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_payload);
+    return true;
+}
 bool tlvVendorSpecific::alloc_payload(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list payload, abort!";

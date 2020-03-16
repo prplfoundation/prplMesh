@@ -89,6 +89,7 @@ class tlvApHeCapabilities : public BaseClass
         sMacAddr& radio_uid();
         uint8_t& supported_he_mcs_length();
         uint8_t* supported_he_mcs(size_t idx = 0);
+        bool set_supported_he_mcs(const void* buffer, size_t size);
         bool alloc_supported_he_mcs(size_t count = 1);
         sFlags1& flags1();
         sFlags2& flags2();

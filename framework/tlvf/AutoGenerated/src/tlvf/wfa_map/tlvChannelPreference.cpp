@@ -239,6 +239,15 @@ uint8_t* cPreferenceOperatingClasses::channel_list(size_t idx) {
     return &(m_channel_list[idx]);
 }
 
+bool cPreferenceOperatingClasses::set_channel_list(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_channel_list received a null pointer.";
+        return false;
+    }
+    if (!alloc_channel_list(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_channel_list);
+    return true;
+}
 bool cPreferenceOperatingClasses::alloc_channel_list(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list channel_list, abort!";

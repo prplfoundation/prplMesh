@@ -66,6 +66,7 @@ class tlvApMetric : public BaseClass
         sEstimatedService& estimated_service_parameters();
         size_t estimated_service_info_field_length() { return m_estimated_service_info_field_idx__ * sizeof(uint8_t); }
         uint8_t* estimated_service_info_field(size_t idx = 0);
+        bool set_estimated_service_info_field(const void* buffer, size_t size);
         bool alloc_estimated_service_info_field(size_t count = 1);
         void class_swap() override;
         bool finalize() override;

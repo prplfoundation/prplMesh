@@ -73,6 +73,7 @@ class cOperatingClassesInfo : public BaseClass
         uint8_t& maximum_transmit_power_dbm();
         uint8_t& statically_non_operable_channels_list_length();
         uint8_t* statically_non_operable_channels_list(size_t idx = 0);
+        bool set_statically_non_operable_channels_list(const void* buffer, size_t size);
         bool alloc_statically_non_operable_channels_list(size_t count = 1);
         void class_swap() override;
         bool finalize() override;

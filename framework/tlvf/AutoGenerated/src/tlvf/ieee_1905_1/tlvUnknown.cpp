@@ -41,6 +41,15 @@ uint8_t* tlvUnknown::data(size_t idx) {
     return &(m_data[idx]);
 }
 
+bool tlvUnknown::set_data(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_data received a null pointer.";
+        return false;
+    }
+    if (!alloc_data(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_data);
+    return true;
+}
 bool tlvUnknown::alloc_data(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list data, abort!";

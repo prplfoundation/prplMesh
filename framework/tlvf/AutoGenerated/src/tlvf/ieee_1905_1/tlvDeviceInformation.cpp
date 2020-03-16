@@ -243,6 +243,15 @@ uint8_t* cLocalInterfaceInfo::media_info(size_t idx) {
     return &(m_media_info[idx]);
 }
 
+bool cLocalInterfaceInfo::set_media_info(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_media_info received a null pointer.";
+        return false;
+    }
+    if (!alloc_media_info(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_media_info);
+    return true;
+}
 bool cLocalInterfaceInfo::alloc_media_info(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list media_info, abort!";

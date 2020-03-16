@@ -49,6 +49,15 @@ uint8_t* tlvApHeCapabilities::supported_he_mcs(size_t idx) {
     return &(m_supported_he_mcs[idx]);
 }
 
+bool tlvApHeCapabilities::set_supported_he_mcs(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_supported_he_mcs received a null pointer.";
+        return false;
+    }
+    if (!alloc_supported_he_mcs(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_supported_he_mcs);
+    return true;
+}
 bool tlvApHeCapabilities::alloc_supported_he_mcs(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list supported_he_mcs, abort!";
