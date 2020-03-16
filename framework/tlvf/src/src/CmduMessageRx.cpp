@@ -61,8 +61,9 @@ int CmduMessageRx::getNextTlvType() const
 
 uint16_t CmduMessageRx::getNextTlvLength() const
 {
-    if (!getCmduHeader())
-        return -1;
+    if (!getCmduHeader()) {
+        return UINT16_MAX;
+    }
     sTlvHeader *tlv = reinterpret_cast<sTlvHeader *>(msg.prevClass()->getBuffPtr());
 
     uint16_t tlv_length = tlv->length;
