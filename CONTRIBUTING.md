@@ -175,7 +175,8 @@ The workflow is explained in detail below. In summary, it consists of these step
 
 8. Review is approved by maintainers.
 9. Use `git rebase -i --autosquash master` to clean up the pull request.
-10. Pull request is merged by maintainers.
+10. If everything is ready, add the "ready for merge" label.
+11. The pull request will be merged automatically when CI succeeds.
 
 Start by creating a branch.
 We give branches a name following `<type>/<subject>`.
@@ -237,7 +238,9 @@ This will apply the fixup commits automatically.
 For the squash commits, it will stop in an editor to allow you to update the commit message.
 Just use the last commit message, remove all the rest.
 Finally, force-push the branch.
-The DCO check will now succeed and the pull request is ready for merging.
+The DCO check will now succeed.
+Add the "ready for merge" label to the pull request.
+When CI finishes and is successful, the pull request will be merged automatically.
 
 Note that there are a few cases where it is not possible to use fixup commits.
 In these cases, use rebase and create a clean series of commits again.
