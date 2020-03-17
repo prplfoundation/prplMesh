@@ -3,6 +3,7 @@ pull_request_rules:
     conditions:
       - "#approved-reviews-by>=2" # Require at least two approving reviewers
       - "#changes-requested-reviews-by=0" # Changes requested blocks the merge
+      - "label=ready for merge" # Must have ready for merge label
       - "label!=don't merge" # Don't merge label blocks the merge
       # All status checks must pass. Since mergify itself is a status check, this is a bit
       # recursive... So, explicitly say that there should be no unfinished (= neutral) status
