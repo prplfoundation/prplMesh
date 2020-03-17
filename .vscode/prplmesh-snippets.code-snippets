@@ -25,5 +25,21 @@
 			"}"
 		],
 		"description": "Create and check a variable that might be null, name is short for 'may be null'"
+	  },
+	"Log DEBUG": {
+		"prefix": "dbg",
+		"body": [
+		  "LOG(DEBUG) << ${1:your code here};"
+		],
+		"description": "Log DEBUG",
+		"scope": "cpp"
+	  },
+	  "Log ERROR": {
+		"prefix": "err",
+		"body": [
+		  "LOG(ERROR) << ${1:your code here};"
+		],
+		"description": "Log DEBUG",
+		"scope": "cpp"
 	  }
 }
