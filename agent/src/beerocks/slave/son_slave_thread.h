@@ -156,7 +156,7 @@ private:
 private:
     const int SELECT_TIMEOUT_MSEC                                     = 200;
     const int SLAVE_INIT_DELAY_SEC                                    = 4;
-    const int WAIT_FOR_JOINED_RESPONSE_TIMEOUT_SEC                    = 30;
+    const int WAIT_FOR_JOINED_RESPONSE_TIMEOUT_SEC                    = 5;
     const int WAIT_BEFORE_SEND_SLAVE_JOINED_NOTIFICATION_SEC          = 1;
     const int WAIT_BEFORE_SEND_BH_ENABLE_NOTIFICATION_SEC             = 1;
     const int WAIT_FOR_PLATFORM_MANAGER_REGISTER_RESPONSE_TIMEOUT_SEC = 600;
