@@ -1904,15 +1904,15 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         auto len                    = std::get<1>(associatedClientsTuple).length();
         client_capability_report_tlv->alloc_association_frame(len);
         auto s = std::get<1>(associatedClientsTuple);
-                LOG(DEBUG) << "**********************************************************************";
+        LOG(DEBUG) << "**********************************************************************";
 
         // uint8_t a[len] = {0};
         // uint8_t* p = a;
-                LOG(DEBUG) << "888888888888888888888888888888888888888888888888888888888";
+        LOG(DEBUG) << "888888888888888888888888888888888888888888888888888888888";
 
         // auto p = client_capability_report_tlv->association_frame(0);
         // char *cstr = &s[0];
-        auto x = reinterpret_cast<uint8_t*>(&s[0]);
+        auto x = reinterpret_cast<uint8_t *>(&s[0]);
         // for (size_t char_idx = 2; char_idx < s.size(); char_idx += 1) {
         //                     LOG(DEBUG) << "**********************************************************************";
 
@@ -1920,7 +1920,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         //     LOG(DEBUG)<<" "<<*p;
         //     p++;
         // }
-        
+
         LOG(DEBUG) << "7777777777777777777";
 
         // auto x     = reinterpret_cast<uint8_t *>(cstr);
@@ -1936,6 +1936,12 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         // client_capability_report_tlv->association_frame());
         LOG(DEBUG) << "**********************************************************************";
         LOG(DEBUG) << "association_frame = " << std::get<1>(associatedClientsTuple);
+        LOG(DEBUG) << "association_frame_length = " << len;
+
+        LOG(DEBUG) << "association_frame = " << client_capability_report_tlv->association_frame();
+        LOG(DEBUG) << "association_frame_length = "
+                   << client_capability_report_tlv->association_frame_length();
+
         // LOG(DEBUG) << "association_frame on tlv = "
         //    << client_capability_report_tlv->association_frame();
         LOG(DEBUG) << "**********************************************************************";
