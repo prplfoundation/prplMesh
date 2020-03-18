@@ -1904,17 +1904,34 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         auto len                    = std::get<1>(associatedClientsTuple).length();
         client_capability_report_tlv->alloc_association_frame(len);
         auto s = std::get<1>(associatedClientsTuple);
+                LOG(DEBUG) << "**********************************************************************";
+
+        // uint8_t a[len] = {0};
+        // uint8_t* p = a;
+                LOG(DEBUG) << "888888888888888888888888888888888888888888888888888888888";
+
+        // auto p = client_capability_report_tlv->association_frame(0);
+        // char *cstr = &s[0];
+        auto x = reinterpret_cast<uint8_t*>(&s[0]);
+        // for (size_t char_idx = 2; char_idx < s.size(); char_idx += 1) {
+        //                     LOG(DEBUG) << "**********************************************************************";
+
+        //     *p = std::stoi(s.substr(char_idx, 1), nullptr, 2);
+        //     LOG(DEBUG)<<" "<<*p;
+        //     p++;
+        // }
         
-        char *cstr = &s[0];
+        LOG(DEBUG) << "7777777777777777777";
+
         // auto x     = reinterpret_cast<uint8_t *>(cstr);
 
-        std::copy(cstr, cstr + len, client_capability_report_tlv->association_frame());
+        // std::copy(a, a + len, client_capability_report_tlv->association_frame());
 
         // // auto x = reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple));
         // for (int i = 0; i < 5; i++) {
         //     LOG(DEBUG) << x[i];
         // }
-        // std::copy_n(x, 15, client_capability_report_tlv->association_frame());
+        std::copy_n(x, len, client_capability_report_tlv->association_frame());
         // std::copy_n(reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple)[0]), 23,
         // client_capability_report_tlv->association_frame());
         LOG(DEBUG) << "**********************************************************************";
