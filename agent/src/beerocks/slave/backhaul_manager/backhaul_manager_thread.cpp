@@ -1903,16 +1903,17 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         auto associatedClientsTuple = associated_clients[client_info_tlv_r->client_mac()];
         auto len                    = std::get<1>(associatedClientsTuple).length();
         client_capability_report_tlv->alloc_association_frame(len);
-        auto s     = std::get<1>(associatedClientsTuple);
+        auto s = std::get<1>(associatedClientsTuple);
+        
         char *cstr = &s[0];
-        auto x     = reinterpret_cast<uint8_t *>(cstr);
+        // auto x     = reinterpret_cast<uint8_t *>(cstr);
 
-        std::copy(x, x + len, client_capability_report_tlv->association_frame());
+        std::copy(cstr, cstr + len, client_capability_report_tlv->association_frame());
 
-        // auto x = reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple));
-        for (int i = 0; i < 5; i++) {
-            LOG(DEBUG) << x[i];
-        }
+        // // auto x = reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple));
+        // for (int i = 0; i < 5; i++) {
+        //     LOG(DEBUG) << x[i];
+        // }
         // std::copy_n(x, 15, client_capability_report_tlv->association_frame());
         // std::copy_n(reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple)[0]), 23,
         // client_capability_report_tlv->association_frame());
