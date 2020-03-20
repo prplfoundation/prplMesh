@@ -274,6 +274,8 @@ Example use cases:
 
 If a PR is marked "don't merge" and it becomes ready (i.e. you did the necessary fixups and rebased on master), please remember to remove the tag again.
 
+A good example of a pull request with review, discussion, and several iterations is https://github.com/prplfoundation/prplMesh/pull/831.
+
 ### Testing
 
 Some changes are riskier than others, since they may break existing functionality which is not yet covered by prplMesh CI.
