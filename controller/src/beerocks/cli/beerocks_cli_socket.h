@@ -35,7 +35,7 @@ protected:
     virtual bool socket_disconnected(Socket *sd) override;
 
 private:
-    void setFunctionsMapAndArray();
+    void setFunctionsMapAndArray() override;
 
     bool waitResponseReady();
 
