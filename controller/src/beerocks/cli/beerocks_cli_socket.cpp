@@ -24,7 +24,7 @@ namespace beerocks {
 cli_socket::cli_socket(std::string temp_path_, std::string proxy_ip_)
 {
     master_socket = nullptr;
-    setFunctionsMapAndArray();
+    cli_socket::setFunctionsMapAndArray();
     wait_dump_node_info = false;
     wait_response       = false;
     proxy_ip            = proxy_ip_;
