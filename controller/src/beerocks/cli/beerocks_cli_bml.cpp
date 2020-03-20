@@ -292,7 +292,7 @@ SocketClient *cli_bml::m_analyzer_socket = nullptr;
 
 cli_bml::cli_bml(std::string beerocks_conf_path_)
 {
-    setFunctionsMapAndArray();
+    cli_bml::setFunctionsMapAndArray();
     beerocks_conf_path = beerocks_conf_path_;
 
     // Set BML easylogging context
