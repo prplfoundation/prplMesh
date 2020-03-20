@@ -6,13 +6,14 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}"; pwd)"
+scriptdir="$(cd "${0%/*}" && pwd)"
 rootdir="${scriptdir%/*/*}"
 
-. ${rootdir}/tools/docker/functions.sh
+# shellcheck source=functions.sh
+. "${rootdir}"/tools/docker/functions.sh
 
 usage() {
-    echo "usage: $(basename $0) [-hvd] [-i ip] [-n name] [-N network]"
+    echo "usage: $(basename "$0") [-hvd] [-i ip] [-n name] [-N network]"
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
@@ -20,9 +21,7 @@ usage() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvt:' --long verbose,help,tag:,options: -n 'parse-options' -- "$@"`
-
-    if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
+    if ! OPTS="$(getopt -o 'hvt:' --long verbose,help,tag:,options: -n 'parse-options' -- "$@")"; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
     eval set -- "$OPTS"
 
@@ -36,10 +35,10 @@ main() {
         esac
     done
 
-    docker image inspect prplmesh-runner$TAG >/dev/null 2>&1 || {
+    docker image inspect prplmesh-runner"$TAG" >/dev/null 2>&1 || {
         [ -n "$TAG" ] && { err "image prplmesh-runner$TAG doesn't exist, aborting"; exit 1; }
         dbg "Image prplmesh-runner$TAG does not exist, creating..."
-        run ${scriptdir}/image-build.sh
+        run "${scriptdir}"/image-build.sh
     }
 
     dbg "VERBOSE=${VERBOSE}"
@@ -52,10 +51,13 @@ main() {
                 --name prplMesh-clang-format"
 
     DOCKEROPTS="$DOCKEROPTS --rm"
-    
-    run docker container run --entrypoint "${rootdir}/clang-format.sh" ${DOCKEROPTS} prplmesh-runner$TAG "$@"
+
+    # TODO: replace DOCKEROPTS with a bash array (and require bash)
+    # We disable SC2086 because of the DOCKEROPTS variable
+    # shellcheck disable=SC2086
+    run docker container run --entrypoint "${rootdir}/clang-format.sh" ${DOCKEROPTS} prplmesh-builder"$TAG" "$@"
 }
 
 VERBOSE=false
 
-main $@
+main "$@"
