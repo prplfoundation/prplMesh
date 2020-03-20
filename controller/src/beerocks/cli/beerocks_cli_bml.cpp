@@ -306,7 +306,7 @@ cli_bml::cli_bml(std::string beerocks_conf_path_)
     select.setTimeout(&tval);
 }
 
-cli_bml::~cli_bml() { disconnect(); }
+cli_bml::~cli_bml() { cli_bml::disconnect(); }
 
 bool cli_bml::connect()
 {
