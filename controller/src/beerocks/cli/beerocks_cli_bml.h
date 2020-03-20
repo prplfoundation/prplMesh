@@ -80,7 +80,7 @@ public:
 
 private:
     // Help functions
-    void setFunctionsMapAndArray();
+    void setFunctionsMapAndArray() override;
     void printBmlReturnVals(const std::string &func_name, int ret_val);
 
     static void map_query_cb(const struct BML_NODE_ITER *node_iter, bool to_console);
