@@ -12,8 +12,8 @@
 #include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
-#define SCAN_TRIGGERED_WAIT_TIME_MSEC 20000
-#define SCAN_RESULTS_DUMP_WAIT_TIME_MSEC 40000
+#define SCAN_TRIGGERED_WAIT_TIME_MSEC 20000     //20 Sec
+#define SCAN_RESULTS_DUMP_WAIT_TIME_MSEC 210000 //3.5 Min
 
 std::string s_ar_states[] = {FOREACH_DCS_STATE(GENERATE_STRING)};
 std::string s_ar_events[] = {FOREACH_DCS_EVENT(GENERATE_STRING)};
