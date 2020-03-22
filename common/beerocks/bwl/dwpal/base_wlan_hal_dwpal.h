@@ -10,6 +10,7 @@
 #define _BWL_BASE_WLAN_HAL_DWPAL_H_
 
 #include <bwl/base_wlan_hal.h>
+#include <bwl/nl80211_client.h>
 
 #include <bcl/beerocks_state_machine.h>
 
@@ -87,6 +88,8 @@ protected:
                           size_t vendor_data_size);
     bool dwpal_nl_cmd_scan_dump();
     void *get_dwpal_nl_ctx() const { return (m_dwpal_nl_ctx); }
+
+    std::unique_ptr<nl80211_client> m_nl80211_client;
 
     // Private data-members:
 private:
