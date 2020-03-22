@@ -4682,21 +4682,18 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
         return false;
     }
 
-    // Currently, setting and reading tx power limit is not implemented
-    // in any or our BWL backends.
-    // Therefore, updating only the tx power limit does not result with an event
-    // which should trigger the agent to send the operating channel report
-    // with the new tx power, thus failing certification onboarding test 4.2.1.
-    // As a temporary workaround, always send the operating channel report regardless
-    // of the tx power setting.
-    // TODO - Fix as part of https://github.com/prplfoundation/prplMesh/issues/725
-    if (!switch_required) {
-        LOG(INFO) << "Channel switch not required, sending operating channel report";
+    // Normally, when a channel switch is required, a CSA notification
+    // will be received with the new channel setting which is when
+    // the agent will send the operating channel report.
+    // In case of only a tx power limit change, there will still be
+    // a CSA notification which will hold the new power limit and also
+    // trigger sending the operating channel report.
+    // If neither channel switch nor power limit change is required,
+    // we need to explicitly send the event.
+    if (!switch_required && !power_limit_received) {
+        LOG(DEBUG) << "Channel switch not required, sending operating channel report";
         send_operating_channel_report();
-        if (!power_limit_received) {
-            LOG(INFO) << "No power limit received - nothing else to do";
-            return true;
-        }
+        return true;
     }
 
     auto request_out = message_com::create_vs_message<
