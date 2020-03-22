@@ -52,20 +52,6 @@ static void copy_radio_supported_channels(std::shared_ptr<bwl::ap_wlan_hal> &ap_
     }
 }
 
-static int8_t get_tx_power(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal)
-{
-    auto radio_channels = ap_wlan_hal->get_radio_info().supported_channels;
-    uint8_t channel     = ap_wlan_hal->get_radio_info().channel;
-
-    for (uint8_t i = 0;
-         i < beerocks::message::SUPPORTED_CHANNELS_LENGTH && i < radio_channels.size(); i++) {
-        if (radio_channels[i].channel == channel)
-            return radio_channels[i].tx_pow;
-    }
-
-    return 0;
-}
-
 static std::string
 get_radio_supported_channels_string(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal)
 {
@@ -997,7 +983,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
 
 void ap_manager_thread::fill_cs_params(beerocks_message::sApChannelSwitch &params)
 {
-    params.tx_power  = get_tx_power(ap_wlan_hal);
+    params.tx_power  = ap_wlan_hal->get_radio_info().conducted_power;
     params.channel   = ap_wlan_hal->get_radio_info().channel;
     params.bandwidth = uint8_t(
         beerocks::utils::convert_bandwidth_to_enum(ap_wlan_hal->get_radio_info().bandwidth));
