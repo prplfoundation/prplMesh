@@ -63,6 +63,7 @@ main() {
 
     while true; do
         case "$1" in
+            -h|--help) usage; exit 0 ;;
             --certification-mode)
                 CERTIFICATION_MODE=true
                 shift
@@ -72,7 +73,7 @@ main() {
                 shift 2
                 ;;
             -- ) shift; break ;;
-            * ) err "unsupported argument $1"; usage; exit 1 ;;
+            * ) echo "unsupported argument $1"; usage; exit 1 ;;
         esac
     done
 
