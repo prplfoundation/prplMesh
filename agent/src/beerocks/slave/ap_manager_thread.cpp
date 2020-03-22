@@ -582,8 +582,24 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                    << beerocks::utils::convert_bandwidth_to_int(
                           (beerocks::eWiFiBandwidth)request->cs_params().bandwidth);
 
-        if (request->cs_params().channel == 0)
-            LOG(DEBUG) << "Start ACS";
+        LOG_IF(request->cs_params().channel == 0, DEBUG) << "Start ACS";
+
+        // Set transmit power
+        if (request->tx_limit_valid()) {
+            ap_wlan_hal->set_tx_power_limit(request->tx_limit());
+            if (ap_wlan_hal->get_radio_info().channel == request->cs_params().channel) {
+                LOG(DEBUG) << "Setting tx power without channel switch, send CSA notification";
+                auto notification = message_com::create_vs_message<
+                    beerocks_message::cACTION_APMANAGER_HOSTAP_CSA_NOTIFICATION>(cmdu_tx);
+                if (!notification) {
+                    LOG(ERROR) << "Failed building message!";
+                    return false;
+                }
+                ap_wlan_hal->refresh_radio_info();
+                fill_cs_params(notification->cs_params());
+                message_com::send_cmdu(slave_socket, cmdu_tx);
+            }
+        }
 
         // Set AP channel
         if (ap_wlan_hal->get_radio_info().channel != request->cs_params().channel &&
@@ -607,10 +623,6 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             message_com::send_cmdu(slave_socket, cmdu_tx);
             return false;
         }
-        //TODO: in case only tx power received need to send notification to slave as there
-        // is no event for this
-        if (request->tx_limit_valid())
-            ap_wlan_hal->set_tx_power_limit(request->tx_limit());
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_SET_NEIGHBOR_11K_REQUEST: {
