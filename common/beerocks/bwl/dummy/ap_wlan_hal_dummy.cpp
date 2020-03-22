@@ -327,7 +327,8 @@ bool ap_wlan_hal_dummy::read_supported_channels() { return true; }
 
 bool ap_wlan_hal_dummy::set_tx_power_limit(int tx_pow_limit)
 {
-    LOG(TRACE) << __func__ << " power limit: " << tx_pow_limit;
+    LOG(TRACE) << __func__ << " setting power limit: " << tx_pow_limit * 100 << " mBm";
+    m_radio_info.conducted_power = tx_pow_limit * 100;
     return true;
 }
 
