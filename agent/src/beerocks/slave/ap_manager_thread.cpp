@@ -1046,6 +1046,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
     case Event::CSA_Finished: {
 
         ap_wlan_hal->read_acs_report();
+        ap_wlan_hal->refresh_radio_info();
 
         LOG(INFO) << ((event == Event::ACS_Completed) ? "ACS_Completed" : "CSA_Finished:")
                   << " channel = " << int(ap_wlan_hal->get_radio_info().channel)
