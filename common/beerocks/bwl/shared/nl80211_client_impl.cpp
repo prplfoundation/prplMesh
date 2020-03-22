@@ -182,4 +182,32 @@ bool nl80211_client_impl::get_sta_info(const std::string &local_interface_name,
         });
 }
 
+bool nl80211_client_impl::set_tx_power_limit(const std::string &local_interface_name,
+                                             uint32_t limit)
+{
+    if (!m_socket) {
+        LOG(ERROR) << "Socket is NULL!";
+        return false;
+    }
+
+    // Get the interface index for given interface name
+    int iface_index = if_nametoindex(local_interface_name.c_str());
+    if (0 == iface_index) {
+        LOG(ERROR) << "Failed to read the index of interface " << local_interface_name << ": "
+                   << strerror(errno);
+
+        return false;
+    }
+
+    return m_socket.get()->send_receive_msg(
+        NL80211_CMD_SET_WIPHY, 0,
+        [&](struct nl_msg *msg) -> bool {
+            nla_put_u32(msg, NL80211_ATTR_IFINDEX, iface_index);
+            nla_put_u32(msg, NL80211_ATTR_WIPHY_TX_POWER_SETTING, NL80211_TX_POWER_LIMITED);
+            nla_put_u32(msg, NL80211_ATTR_WIPHY_TX_POWER_LEVEL, limit * 100); //mBm
+            return true;
+        },
+        [&](struct nl_msg *msg) -> bool { return true; });
+}
+
 } // namespace bwl

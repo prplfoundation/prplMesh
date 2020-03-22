@@ -44,6 +44,18 @@ public:
      */
     virtual bool get_sta_info(const std::string &local_interface_name,
                               const sMacAddr &sta_mac_address, sStaInfo &sta_info) override;
+
+    /**
+     * @brief Set the tx power limit
+     *
+     * Set tx power limit for a radio
+     *
+     * @param[in] local_interface_name radio interface name.
+     * @param[in] limit tx power limit in dBM to set 
+     * @return true success and false otherwise
+     */
+    virtual bool set_tx_power_limit(const std::string &local_interface_name,
+                                    uint32_t limit) override;
 };
 
 } // namespace bwl

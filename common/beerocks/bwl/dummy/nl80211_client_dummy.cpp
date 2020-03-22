@@ -48,4 +48,10 @@ bool nl80211_client_dummy::get_sta_info(const std::string &local_interface_name,
     return true;
 }
 
+bool nl80211_client_dummy::set_tx_power_limit(const std::string &local_interface_name,
+                                              uint32_t limit)
+{
+    return true;
+}
+
 } // namespace bwl
