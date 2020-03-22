@@ -10,6 +10,7 @@
 #define _BWL_BASE_WLAN_HAL_NL80211_H_
 
 #include <bwl/base_wlan_hal.h>
+#include <bwl/nl80211_client.h>
 
 #include <bcl/beerocks_state_machine.h>
 
@@ -78,6 +79,8 @@ protected:
     bool send_nl80211_msg(uint8_t command, int flags,
                           std::function<bool(struct nl_msg *msg)> msg_create,
                           std::function<bool(struct nl_msg *msg)> msg_handle);
+
+    std::unique_ptr<nl80211_client> m_nl80211_client;
 
     // Private data-members:
 private:
