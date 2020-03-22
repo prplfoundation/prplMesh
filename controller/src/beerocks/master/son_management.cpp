@@ -2071,6 +2071,18 @@ void son_management::handle_bml_message(Socket *sd,
             LOG(ERROR) << "Failed building message cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE !";
             return;
         }
+
+        // Get single scan status
+        auto single_scan_in_progress =
+            database.get_channel_scan_in_progress(request->scan_params().radio_mac, true);
+        if (single_scan_in_progress) {
+            LOG(ERROR) << "Single scan is still running!";
+            response->op_error_code() =
+                uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SCAN_IN_PROGRESS);
+            message_com::send_cmdu(sd, cmdu_tx);
+            break;
+        }
+
         auto radio_mac         = request->scan_params().radio_mac;
         auto dwell_time_ms     = request->scan_params().dwell_time_ms;
         auto channel_pool_size = request->scan_params().channel_pool_size;
