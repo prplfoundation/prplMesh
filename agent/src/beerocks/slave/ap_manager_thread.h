@@ -70,6 +70,7 @@ private:
     // bool hostap_handle_event(std::string& event, void* event_obj);
     void handle_hostapd_attached();
     bool handle_ap_enabled(int vap_id);
+    void fill_cs_params(beerocks_message::sApChannelSwitch &params);
     void stop_ap_manager_thread();
     void send_heartbeat();
     void send_steering_return_status(beerocks_message::eActionOp_APMANAGER ActionOp,
