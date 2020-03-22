@@ -603,17 +603,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 LOG(ERROR) << "Failed building message!";
                 return false;
             }
-
-            notification->cs_params().channel  = ap_wlan_hal->get_radio_info().channel;
-            notification->cs_params().tx_power = get_tx_power(ap_wlan_hal);
-            notification->cs_params().bandwidth =
-                uint8_t(beerocks::utils::convert_bandwidth_to_enum(
-                    ap_wlan_hal->get_radio_info().bandwidth));
-            notification->cs_params().channel_ext_above_primary =
-                ap_wlan_hal->get_radio_info().channel_ext_above;
-            notification->cs_params().vht_center_frequency =
-                ap_wlan_hal->get_radio_info().vht_center_freq;
-            notification->cs_params().switch_reason = beerocks::CH_SWITCH_REASON_UNKNOWN;
+            fill_cs_params(notification->cs_params());
             message_com::send_cmdu(slave_socket, cmdu_tx);
             return false;
         }
@@ -993,6 +983,18 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     return true;
 }
 
+void ap_manager_thread::fill_cs_params(beerocks_message::sApChannelSwitch &params)
+{
+    params.tx_power  = get_tx_power(ap_wlan_hal);
+    params.channel   = ap_wlan_hal->get_radio_info().channel;
+    params.bandwidth = uint8_t(
+        beerocks::utils::convert_bandwidth_to_enum(ap_wlan_hal->get_radio_info().bandwidth));
+    params.channel_ext_above_primary = ap_wlan_hal->get_radio_info().channel_ext_above;
+    params.vht_center_frequency      = ap_wlan_hal->get_radio_info().vht_center_freq;
+    params.switch_reason             = uint8_t(ap_wlan_hal->get_radio_info().last_csa_sw_reason);
+    params.is_dfs_channel            = ap_wlan_hal->get_radio_info().is_dfs_channel;
+}
+
 bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr)
 {
     if (!event_ptr) {
@@ -1043,9 +1045,6 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
                   << " last_csa_switch_reason enum = "
                   << int(ap_wlan_hal->get_radio_info().last_csa_sw_reason);
 
-        // CMDU Message
-        beerocks_message::sApChannelSwitch *msg_params = nullptr;
-
         if (event == Event::ACS_Completed) {
             auto notification = message_com::create_vs_message<
                 beerocks_message::cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION>(cmdu_tx);
@@ -1055,7 +1054,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
             }
             auto tuple_supported_channels = notification->supported_channels_list(0);
             copy_radio_supported_channels(ap_wlan_hal, &std::get<1>(tuple_supported_channels));
-            msg_params               = &notification->cs_params();
+            fill_cs_params(notification->cs_params());
             acs_completed_vap_update = true;
         } else {
             auto notification = message_com::create_vs_message<
@@ -1064,17 +1063,8 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
                 LOG(ERROR) << "Failed building message!";
                 return false;
             }
-            msg_params = &notification->cs_params();
+            fill_cs_params(notification->cs_params());
         }
-
-        msg_params->tx_power  = get_tx_power(ap_wlan_hal);
-        msg_params->channel   = ap_wlan_hal->get_radio_info().channel;
-        msg_params->bandwidth = uint8_t(
-            beerocks::utils::convert_bandwidth_to_enum(ap_wlan_hal->get_radio_info().bandwidth));
-        msg_params->channel_ext_above_primary = ap_wlan_hal->get_radio_info().channel_ext_above;
-        msg_params->vht_center_frequency      = ap_wlan_hal->get_radio_info().vht_center_freq;
-        msg_params->switch_reason  = uint8_t(ap_wlan_hal->get_radio_info().last_csa_sw_reason);
-        msg_params->is_dfs_channel = ap_wlan_hal->get_radio_info().is_dfs_channel;
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
 
