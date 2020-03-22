@@ -983,7 +983,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
 
 void ap_manager_thread::fill_cs_params(beerocks_message::sApChannelSwitch &params)
 {
-    params.tx_power  = ap_wlan_hal->get_radio_info().conducted_power;
+    params.tx_power  = ap_wlan_hal->get_radio_info().tx_power;
     params.channel   = ap_wlan_hal->get_radio_info().channel;
     params.bandwidth = uint8_t(
         beerocks::utils::convert_bandwidth_to_enum(ap_wlan_hal->get_radio_info().bandwidth));
@@ -1485,10 +1485,10 @@ void ap_manager_thread::handle_hostapd_attached()
 
     notification->params().iface_type = uint8_t(ap_wlan_hal->get_iface_type());
     notification->params().iface_mac = network_utils::mac_from_string(ap_wlan_hal->get_radio_mac());
-    notification->params().iface_is_5ghz   = ap_wlan_hal->get_radio_info().is_5ghz;
-    notification->params().ant_num         = ap_wlan_hal->get_radio_info().ant_num;
-    notification->params().conducted_power = ap_wlan_hal->get_radio_info().conducted_power;
-    notification->cs_params().channel      = ap_wlan_hal->get_radio_info().channel;
+    notification->params().iface_is_5ghz = ap_wlan_hal->get_radio_info().is_5ghz;
+    notification->params().ant_num       = ap_wlan_hal->get_radio_info().ant_num;
+    notification->params().tx_power      = ap_wlan_hal->get_radio_info().tx_power;
+    notification->cs_params().channel    = ap_wlan_hal->get_radio_info().channel;
     notification->cs_params().channel_ext_above_primary =
         ap_wlan_hal->get_radio_info().channel_ext_above;
     notification->cs_params().vht_center_frequency = ap_wlan_hal->get_radio_info().vht_center_freq;
@@ -1501,7 +1501,7 @@ void ap_manager_thread::handle_hostapd_attached()
     LOG(INFO) << "send ACTION_APMANAGER_JOINED_NOTIFICATION";
     LOG(INFO) << " mac = " << ap_wlan_hal->get_radio_mac();
     LOG(INFO) << " ant_num = " << ap_wlan_hal->get_radio_info().ant_num;
-    LOG(INFO) << " conducted_power = " << ap_wlan_hal->get_radio_info().conducted_power;
+    LOG(INFO) << " tx_power = " << ap_wlan_hal->get_radio_info().tx_power;
     LOG(INFO) << " current channel = " << ap_wlan_hal->get_radio_info().channel;
     LOG(INFO) << " vht_center_frequency = " << ap_wlan_hal->get_radio_info().vht_center_freq;
     LOG(INFO) << " current bw = " << ap_wlan_hal->get_radio_info().bandwidth;

@@ -193,8 +193,8 @@ bool nl80211_client_impl::set_tx_power_limit(const std::string &local_interface_
     // Get the interface index for given interface name
     int iface_index = if_nametoindex(local_interface_name.c_str());
     if (0 == iface_index) {
-        LOG(ERROR) << "Failed to read the index of interface '" << local_interface_name << "': "
-                   << strerror(errno);
+        LOG(ERROR) << "Failed to read the index of interface '" << local_interface_name
+                   << "': " << strerror(errno);
 
         return false;
     }

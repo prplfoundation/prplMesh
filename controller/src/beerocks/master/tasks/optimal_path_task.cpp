@@ -461,11 +461,11 @@ void optimal_path_task::work()
                     TASK_LOG(DEBUG) << "sta_phy_tx_rate_100kb=" << int(sta_phy_tx_rate_100kb);
 
                     son::wireless_utils::sPhyApParams hostap_params;
-                    hostap_params.is_5ghz         = hostap_is_5ghz;
-                    hostap_params.bw              = hostap_bw;
-                    hostap_params.ant_num         = database.get_hostap_ant_num(hostap);
-                    hostap_params.ant_gain        = database.get_hostap_ant_gain(hostap);
-                    hostap_params.conducted_power = database.get_hostap_conducted_power(hostap);
+                    hostap_params.is_5ghz  = hostap_is_5ghz;
+                    hostap_params.bw       = hostap_bw;
+                    hostap_params.ant_num  = database.get_hostap_ant_num(hostap);
+                    hostap_params.ant_gain = database.get_hostap_ant_gain(hostap);
+                    hostap_params.tx_power = database.get_hostap_tx_power(hostap);
 
                     current_ul_params = son::wireless_utils::estimate_ul_params(
                         rx_rssi, sta_phy_tx_rate_100kb, sta_capabilities, hostap_params.bw,
@@ -544,11 +544,11 @@ void optimal_path_task::work()
                     TASK_LOG(DEBUG) << "sta_phy_tx_rate_100kb=" << int(sta_phy_tx_rate_100kb);
 
                     son::wireless_utils::sPhyApParams hostap_params;
-                    hostap_params.is_5ghz         = database.is_node_5ghz(hostap);
-                    hostap_params.bw              = database.get_node_bw(hostap);
-                    hostap_params.ant_num         = database.get_hostap_ant_num(hostap);
-                    hostap_params.ant_gain        = database.get_hostap_ant_gain(hostap);
-                    hostap_params.conducted_power = database.get_hostap_conducted_power(hostap);
+                    hostap_params.is_5ghz  = database.is_node_5ghz(hostap);
+                    hostap_params.bw       = database.get_node_bw(hostap);
+                    hostap_params.ant_num  = database.get_hostap_ant_num(hostap);
+                    hostap_params.ant_gain = database.get_hostap_ant_gain(hostap);
+                    hostap_params.tx_power = database.get_hostap_tx_power(hostap);
 
                     sta_capabilities =
                         database.get_station_capabilities(sta_mac, hostap_params.is_5ghz);
@@ -939,10 +939,10 @@ void optimal_path_task::work()
                             << " ht_bw=" << int(sta_capabilities->ht_bw)
                             << " vht_bw=" << int(sta_capabilities->vht_bw);
 
-            hostap_params.bw              = database.get_node_bw(hostap);
-            hostap_params.ant_num         = database.get_hostap_ant_num(hostap);
-            hostap_params.ant_gain        = database.get_hostap_ant_gain(hostap);
-            hostap_params.conducted_power = database.get_hostap_conducted_power(hostap);
+            hostap_params.bw       = database.get_node_bw(hostap);
+            hostap_params.ant_num  = database.get_hostap_ant_num(hostap);
+            hostap_params.ant_gain = database.get_hostap_ant_gain(hostap);
+            hostap_params.tx_power = database.get_hostap_tx_power(hostap);
 
             if (!hostap_sibling) {
                 int8_t rx_rssi, rx_packets;

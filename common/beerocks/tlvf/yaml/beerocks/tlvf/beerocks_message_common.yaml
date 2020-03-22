@@ -264,7 +264,7 @@ sNodeHostap:
   iface_is_5ghz: uint8_t
   ant_num: uint8_t 
   ant_gain: uint8_t 
-  conducted_power: uint8_t 
+  tx_power: uint8_t 
   driver_version:
     _type: char  
     _length: [ "beerocks::message::WIFI_DRIVER_VER_LENGTH" ]

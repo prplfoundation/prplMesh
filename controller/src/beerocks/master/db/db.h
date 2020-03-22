@@ -290,8 +290,8 @@ public:
     bool set_hostap_ant_gain(std::string mac, int ant_gain);
     int get_hostap_ant_gain(std::string mac);
 
-    bool set_hostap_conducted_power(std::string mac, int conducted_power);
-    int get_hostap_conducted_power(std::string mac);
+    bool set_hostap_tx_power(std::string mac, int tx_power);
+    int get_hostap_tx_power(std::string mac);
 
     bool set_hostap_supported_channels(std::string mac,
                                        beerocks::message::sWifiChannel *supported_channels,

@@ -148,7 +148,7 @@ std::ostream &operator<<(std::ostream &os, const node &n)
             }
         }
         os << " AntGain: " << int(n.hostap->ant_gain) << std::endl
-           << " ConductedPower: " << int(n.hostap->conducted_power) << std::endl
+           << " ConductedPower: " << int(n.hostap->tx_power) << std::endl
            << " AntNum: " << int(n.capabilities.ant_num) << std::endl
            << " Statistics:" << std::endl
            << "   LastUpdate: "

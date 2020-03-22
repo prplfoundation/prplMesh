@@ -88,7 +88,7 @@ struct RadioInfo {
     int vht_center_freq             = 0;
     bool is_dfs_channel             = false;
     int ant_num                     = 0;
-    int conducted_power             = 0;
+    int tx_power                    = 0;
     ChanSwReason last_csa_sw_reason = ChanSwReason::Unknown;
     std::vector<WiFiChannel> supported_channels;
     std::unordered_map<int, VAPElement> available_vaps; // key = vap_id

@@ -205,7 +205,7 @@ wireless_utils::estimate_ul_params(int ul_rssi, uint16_t sta_phy_tx_rate_100kb,
 int wireless_utils::estimate_dl_rssi(int ul_rssi, int tx_power, const sPhyApParams &ap_params)
 {
     int eirp_sta   = tx_power;
-    int eirp_ap    = ap_params.ant_gain + ap_params.conducted_power;
+    int eirp_ap    = ap_params.ant_gain + ap_params.tx_power;
     int ant_factor = ANT_FACTOR_2X2;
     float pathloss;
     int dl_rssi;
