@@ -1973,7 +1973,7 @@ bool master_thread::handle_intel_slave_join(
               << "    ant_num=" << int(notification->hostap().ant_num)
               << " ant_gain=" << int(notification->hostap().ant_gain)
               << " channel=" << int(notification->cs_params().channel)
-              << " conducted=" << int(notification->hostap().conducted_power) << std::endl
+              << " conducted=" << int(notification->hostap().tx_power) << std::endl
               << "    radio_mac=" << radio_mac << std::endl;
 
     bool local_master = (bool)notification->platform_settings().local_master;
@@ -2055,7 +2055,7 @@ bool master_thread::handle_intel_slave_join(
 
     database.set_hostap_ant_num(radio_mac, (beerocks::eWiFiAntNum)notification->hostap().ant_num);
     database.set_hostap_ant_gain(radio_mac, notification->hostap().ant_gain);
-    database.set_hostap_conducted_power(radio_mac, notification->hostap().conducted_power);
+    database.set_hostap_tx_power(radio_mac, notification->hostap().tx_power);
 
     database.set_node_name(radio_mac, slave_name + "_AP");
     database.set_node_ipv4(radio_mac, bridge_ipv4);
@@ -2343,10 +2343,10 @@ bool master_thread::handle_non_intel_slave_join(
     database.set_hostap_iface_type(radio_mac, IFACE_TYPE_WIFI_UNSPECIFIED);
 
     // TODO number of antennas comes from HT/VHT capabilities (implicit from NxM)
-    // TODO ant_gain and conducted_power will not be set
+    // TODO ant_gain and tx_power will not be set
     database.set_hostap_ant_num(radio_mac, beerocks::eWiFiAntNum::ANT_NONE);
     database.set_hostap_ant_gain(radio_mac, 0);
-    database.set_hostap_conducted_power(radio_mac, 0);
+    database.set_hostap_tx_power(radio_mac, 0);
     database.set_hostap_active(radio_mac, true);
     database.set_node_name(radio_mac, manufacturer + "_AP");
     database.set_node_manufacturer(radio_mac, manufacturer);

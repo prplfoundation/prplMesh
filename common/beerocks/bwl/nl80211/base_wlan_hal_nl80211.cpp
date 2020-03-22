@@ -658,8 +658,8 @@ bool base_wlan_hal_nl80211::refresh_radio_info()
     } else {
 
         // Unavailable
-        m_radio_info.ant_num         = 0;
-        m_radio_info.conducted_power = 0;
+        m_radio_info.ant_num  = 0;
+        m_radio_info.tx_power = 0;
 
         int ieee80211ac = beerocks::string_utils::stoi(reply["ieee80211ac"]);
 

@@ -368,7 +368,7 @@ typedef struct sNodeHostap {
     uint8_t iface_is_5ghz;
     uint8_t ant_num;
     uint8_t ant_gain;
-    uint8_t conducted_power;
+    uint8_t tx_power;
     char driver_version[beerocks::message::WIFI_DRIVER_VER_LENGTH];
     beerocks::message::sWifiChannel supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
     void struct_swap(){

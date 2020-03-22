@@ -1137,7 +1137,7 @@ int db::get_hostap_ant_gain(std::string mac)
     return n->hostap->ant_gain;
 }
 
-bool db::set_hostap_conducted_power(std::string mac, int conducted_power)
+bool db::set_hostap_tx_power(std::string mac, int tx_power)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1147,11 +1147,11 @@ bool db::set_hostap_conducted_power(std::string mac, int conducted_power)
         LOG(WARNING) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
         return false;
     }
-    n->hostap->conducted_power = conducted_power;
+    n->hostap->tx_power = tx_power;
     return true;
 }
 
-int db::get_hostap_conducted_power(std::string mac)
+int db::get_hostap_tx_power(std::string mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1161,7 +1161,7 @@ int db::get_hostap_conducted_power(std::string mac)
         LOG(WARNING) << __FUNCTION__ << "node " << mac << " is not a valid hostap!";
         return -1;
     }
-    return n->hostap->conducted_power;
+    return n->hostap->tx_power;
 }
 
 bool db::set_hostap_supported_channels(std::string mac, beerocks::message::sWifiChannel *channels,

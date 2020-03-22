@@ -83,7 +83,7 @@ public:
         beerocks::eWiFiBandwidth bw;
         beerocks::eWiFiAntNum ant_num;
         int ant_gain;
-        int conducted_power;
+        int tx_power;
     } sPhyApParams;
 
     typedef struct {

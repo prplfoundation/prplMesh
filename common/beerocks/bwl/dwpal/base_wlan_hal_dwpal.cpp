@@ -735,8 +735,7 @@ bool base_wlan_hal_dwpal::refresh_radio_info()
         size_t numOfValidArgs[7]      = {0};
         FieldsToParse fieldsToParse[] = {
             {(void *)&m_radio_info.ant_num, &numOfValidArgs[0], DWPAL_INT_PARAM, "TxAntennas=", 0},
-            {(void *)&m_radio_info.conducted_power, &numOfValidArgs[1], DWPAL_INT_PARAM,
-             "TxPower=", 0},
+            {(void *)&m_radio_info.tx_power, &numOfValidArgs[1], DWPAL_INT_PARAM, "TxPower=", 0},
             {(void *)&m_radio_info.bandwidth, &numOfValidArgs[2], DWPAL_INT_PARAM,
              "OperatingChannelBandwidt=", 0},
             {(void *)&m_radio_info.vht_center_freq, &numOfValidArgs[3], DWPAL_INT_PARAM, "Cf1=", 0},
@@ -757,7 +756,7 @@ bool base_wlan_hal_dwpal::refresh_radio_info()
         /* TEMP: Traces... */
         // LOG(DEBUG) << "GET_RADIO_INFO reply=\n" << reply;
         // LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[0] << " ant_num= " << m_radio_info.ant_num;
-        // LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " conducted_power= " << m_radio_info.conducted_power;
+        // LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " tx_power= " << m_radio_info.tx_power;
         // LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2] << " bandwidth= " << m_radio_info.bandwidth;
         // LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3] << " vht_center_freq= " << m_radio_info.vht_center_freq;
         // LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " wifi_ctrl_enabled= " << m_radio_info.wifi_ctrl_enabled;

@@ -300,10 +300,10 @@ void load_balancer_task::work()
                 continue;
             }
 
-            hostap_params.bw              = database.get_node_bw(hostap);
-            hostap_params.ant_num         = database.get_hostap_ant_num(hostap);
-            hostap_params.ant_gain        = database.get_hostap_ant_gain(hostap);
-            hostap_params.conducted_power = database.get_hostap_conducted_power(hostap);
+            hostap_params.bw       = database.get_node_bw(hostap);
+            hostap_params.ant_num  = database.get_hostap_ant_num(hostap);
+            hostap_params.ant_gain = database.get_hostap_ant_gain(hostap);
+            hostap_params.tx_power = database.get_hostap_tx_power(hostap);
 
             int ul_rssi;
             //int estimated_ul_rssi, hostap_dl_rssi = beerocks::RSSI_INVALID;
@@ -373,7 +373,7 @@ void load_balancer_task::work()
                     // son::wireless_utils::calculate_basic_phy_rate_100kb(database.get_node_max_supported_phy_rate_100kb(chosen_client),
                     //         database.get_hostap_ant_num(hostap),
                     //         database.get_hostap_ant_gain(hostap), 
-                    //         database.get_hostap_conducted_power(hostap), 
+                    //         database.get_hostap_tx_power(hostap), 
                     //         database.get_rssi_rx_measurement(chosen_client, hostap), 
                     //         database.get_node_rx_phy_rate_100kb(chosen_client),
                     //         sta_is_5ghz,
