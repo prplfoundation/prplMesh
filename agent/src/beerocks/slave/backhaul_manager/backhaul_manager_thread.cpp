@@ -2323,13 +2323,13 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         if (!fill_radio_iface_info(true)) {
             LOG(DEBUG) << "filling interface information on radio=" << soc->radio_mac
                        << " has failed!";
-            return false;
+            return true;
         }
 
         if (!fill_radio_iface_info(false)) {
             LOG(DEBUG) << "filling interface information on radio=" << soc->radio_mac
                        << " backhaul has failed!";
-            return false;
+            return true;
         }
     }
 
