@@ -9,6 +9,10 @@ rm -rf /home/openwrt/prplMesh/build
 make package/feeds/prpl/prplmesh/prepare USE_SOURCE_DIR="/home/openwrt/prplMesh" V=s
 make package/feeds/prpl/prplmesh/compile V=sc -j"$(nproc)"
 mkdir -p artifacts
-find bin -name 'prplmesh*.ipk' -exec cp -v {} "artifacts/prplmesh-${TARGET_PROFILE}-${OPENWRT_VERSION}-${PRPLMESH_VERSION}.ipk" \;
-
+cat << EOT >> artifacts/prplmesh.buildinfo
+TARGET_PROFILE=${TARGET_PROFILE}
+OPENWRT_VERSION=${OPENWRT_VERSION}
+PRPLMESH_VERSION=${PRPLMESH_VERSION}
+EOT
+find bin -name 'prplmesh*.ipk' -exec cp -v {} "artifacts/prplmesh.ipk" \;
 find bin/targets/"$TARGET_SYSTEM"/"$SUBTARGET"/ -type f -maxdepth 1 -exec cp -v {} "artifacts/" \;
