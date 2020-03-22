@@ -12,6 +12,7 @@
 #include <bcl/beerocks_utils.h>
 #include <bcl/network/network_utils.h>
 #include <bcl/son/son_wireless_utils.h>
+#include <bwl/nl80211_client_factory.h>
 
 #include <easylogging++.h>
 
@@ -204,8 +205,10 @@ base_wlan_hal_nl80211::base_wlan_hal_nl80211(HALType type, std::string iface_nam
                                              hal_conf_t hal_conf)
     : base_wlan_hal(type, iface_name, IfaceType::Intel, callback, hal_conf),
       beerocks::beerocks_fsm<nl80211_fsm_state, nl80211_fsm_event>(nl80211_fsm_state::Delay),
+      m_nl80211_client(nl80211_client_factory::create_instance()),
       m_wpa_ctrl_buffer_size(wpa_ctrl_buffer_size)
 {
+    LOG_IF(!m_nl80211_client, FATAL) << "Failed to create nl80211_client instance";
     // Allocate wpa_ctrl buffer
     if (m_wpa_ctrl_buffer_size) {
         m_wpa_ctrl_buffer = std::shared_ptr<char>(new char[m_wpa_ctrl_buffer_size], [](char *obj) {

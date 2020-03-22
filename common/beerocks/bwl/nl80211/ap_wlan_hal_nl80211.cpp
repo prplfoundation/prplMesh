@@ -572,8 +572,7 @@ bool ap_wlan_hal_nl80211::read_supported_channels()
 
 bool ap_wlan_hal_nl80211::set_tx_power_limit(int tx_pow_limit)
 {
-    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
-    return true;
+    return m_nl80211_client->set_tx_power_limit(m_radio_info.iface_name, tx_pow_limit);
 }
 
 bool ap_wlan_hal_nl80211::set_vap_enable(const std::string &iface_name, const bool enable)
