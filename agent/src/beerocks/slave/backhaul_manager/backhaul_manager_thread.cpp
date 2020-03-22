@@ -1725,18 +1725,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             }
         }
 
-        if (m_eFSMState >= EState::CONNECT_TO_MASTER) {
-            LOG(INFO) << "Sending topology notification on reconnected son_slave";
-            auto cmdu_header =
-                cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE);
-            if (!cmdu_header) {
-                LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
-                return false;
-            }
-            cmdu_header->flags().relay_indicator = true;
-            return send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
-        }
-
         LOG(DEBUG) << "ACTION_BACKHAUL_REGISTER_REQUEST sta_iface=" << soc->sta_iface
                    << " local_master=" << int(local_master) << " local_gw=" << int(local_gw)
                    << " hostap_iface=" << soc->hostap_iface;
@@ -1783,6 +1771,18 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         LOG(DEBUG) << "ACTION_BACKHAUL_ENABLE hostap_iface=" << soc->hostap_iface
                    << " sta_iface=" << soc->sta_iface << " mac=" << mac
                    << " is_5ghz=" << int(request->iface_is_5ghz());
+
+        if (m_eFSMState >= EState::CONNECT_TO_MASTER) {
+            LOG(INFO) << "Sending topology notification on reconnected son_slave";
+            auto cmdu_header =
+                cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE);
+            if (!cmdu_header) {
+                LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
+                return false;
+            }
+            cmdu_header->flags().relay_indicator = true;
+            send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
+        }
 
         // If we're already connected, send a notification to the slave
         if (FSM_IS_IN_STATE(OPERATIONAL)) {
