@@ -35,6 +35,8 @@ private:
 
     std::vector<sMasterSockets *> master_sockets;
     std::string master_uds;
+
+    void release_sockets();
 };
 } // namespace beerocks
 

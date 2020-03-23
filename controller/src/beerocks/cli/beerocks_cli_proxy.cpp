@@ -24,7 +24,7 @@ cli_proxy::cli_proxy(std::string master_uds_) : socket_thread()
     set_select_timeout(SELECT_TIMEOUT_MSC);
 }
 
-cli_proxy::~cli_proxy() { on_thread_stop(); }
+cli_proxy::~cli_proxy() { release_sockets(); }
 
 int cli_proxy::server_port() { return beerocks::CLI_PROXY_TCP_PORT; }
 
@@ -34,23 +34,7 @@ bool cli_proxy::init()
     return socket_thread::init();
 }
 
-void cli_proxy::on_thread_stop()
-{
-    while (master_sockets.size() > 0) {
-        auto soc = master_sockets.back();
-        if (soc) {
-            if (soc->cli_client) {
-                remove_socket(soc->cli_client);
-                delete soc->cli_client;
-            }
-            if (soc->master) {
-                remove_socket(soc->master);
-                delete soc->master;
-            }
-        }
-        master_sockets.pop_back();
-    }
-}
+void cli_proxy::on_thread_stop() { release_sockets(); }
 
 void cli_proxy::socket_connected(Socket *sd)
 {
@@ -141,4 +125,22 @@ bool cli_proxy::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         // LOG(DEBUG) << "send message to cli_client action_op=" << int(beerocks_header->action_op()) << " size=" << int(len);
     }
     return true;
+}
+
+void cli_proxy::release_sockets()
+{
+    while (master_sockets.size() > 0) {
+        auto soc = master_sockets.back();
+        if (soc) {
+            if (soc->cli_client) {
+                remove_socket(soc->cli_client);
+                delete soc->cli_client;
+            }
+            if (soc->master) {
+                remove_socket(soc->master);
+                delete soc->master;
+            }
+        }
+        master_sockets.pop_back();
+    }
 }
