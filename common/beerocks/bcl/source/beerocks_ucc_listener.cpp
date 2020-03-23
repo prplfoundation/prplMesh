@@ -506,6 +506,12 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
 {
     LOG(DEBUG) << "Received WFA-CA, command=\"" << command << "\"";
 
+    // send back first reply
+    if (!reply_ucc(eWfaCaStatus::RUNNING)) {
+        LOG(ERROR) << "failed to send reply";
+        return;
+    }
+
     std::string err_string;
 
     auto forbidden_chars = check_forbidden_chars(command);
@@ -530,24 +536,11 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
 
     switch (command_type) {
     case eWfaCaCommand::CA_GET_VERSION: {
-        // send back first reply
-        if (!reply_ucc(eWfaCaStatus::RUNNING)) {
-            LOG(ERROR) << "failed to send reply";
-            break;
-        }
-
         // Send back second reply
         reply_ucc(eWfaCaStatus::COMPLETE, std::string("version,") + BEEROCKS_VERSION);
         break;
     }
     case eWfaCaCommand::DEVICE_GET_INFO: {
-
-        // send back first reply
-        if (!reply_ucc(eWfaCaStatus::RUNNING)) {
-            LOG(ERROR) << "failed to send reply";
-            break;
-        }
-
         // Send back second reply
         reply_ucc(eWfaCaStatus::COMPLETE, fill_version_reply_string());
         break;
@@ -557,10 +550,6 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         if (!parse_params(cmd_tokens_vec, params, err_string)) {
             LOG(ERROR) << err_string;
             reply_ucc(eWfaCaStatus::INVALID, err_string);
-            break;
-        }
-        if (!reply_ucc(eWfaCaStatus::RUNNING)) {
-            LOG(ERROR) << "failed to send reply";
             break;
         }
         std::string value;
@@ -635,13 +624,6 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         }
 
         // TODO: Find out what to do with value of param "name".
-
-        // send back first reply
-        if (!reply_ucc(eWfaCaStatus::RUNNING)) {
-            LOG(ERROR) << "failed to send reply";
-            break;
-        }
-
         clear_configuration();
 
         // Send back second reply
@@ -686,12 +668,6 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         if (!get_send_1905_1_tlv_hex_list(tlv_hex_list, params, err_string)) {
             LOG(ERROR) << err_string;
             reply_ucc(eWfaCaStatus::INVALID, err_string);
-            break;
-        }
-
-        // Send back first reply
-        if (!reply_ucc(eWfaCaStatus::RUNNING)) {
-            LOG(ERROR) << "failed to send reply";
             break;
         }
 
@@ -775,12 +751,6 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
             }
         }
 
-        // Send back first reply
-        if (!reply_ucc(eWfaCaStatus::RUNNING)) {
-            LOG(ERROR) << "failed to send reply";
-            break;
-        }
-
         if (!handle_dev_set_config(params, err_string)) {
             LOG(ERROR) << err_string;
             reply_ucc(eWfaCaStatus::INVALID, err_string);
@@ -789,7 +759,6 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
 
         // Send back second reply
         reply_ucc(eWfaCaStatus::COMPLETE);
-
         break;
     }
     default: {
