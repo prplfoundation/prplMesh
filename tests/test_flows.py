@@ -15,8 +15,7 @@ import time
 from typing import Dict
 import json
 
-import send_CAPI_command
-from send_CAPI_command import tlv
+from capi import tlv, UCCSocket
 
 '''Regular expression to match a MAC address in a bytes string.'''
 RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
@@ -190,7 +189,7 @@ class test_flows:
                 cur_radio.add_vap(vap.group('mac').decode('utf-8'), vap.group('ssid'))
         return conn_map
 
-    def open_CAPI_socket(self, device: str, controller: bool = False) -> send_CAPI_command.UCCSocket:
+    def open_CAPI_socket(self, device: str, controller: bool = False) -> UCCSocket:
         '''Open a CAPI socket to the agent (or controller, if set) on "device".'''
         # First, get the UCC port from the config file
         if controller:
@@ -202,7 +201,7 @@ class test_flows:
 
         device_ip_output = self.docker_command(device, 'ip', '-f', 'inet', 'addr', 'show', self.bridge_name)
         device_ip = re.search(r'inet (?P<ip>[0-9.]+)', device_ip_output.decode('utf-8')).group('ip')
-        return send_CAPI_command.UCCSocket(device_ip, ucc_port)
+        return UCCSocket(device_ip, ucc_port)
 
     def init(self):
         '''Initialize the tests.'''
