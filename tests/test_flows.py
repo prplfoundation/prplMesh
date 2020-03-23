@@ -20,35 +20,39 @@ from capi import tlv, UCCSocket
 '''Regular expression to match a MAC address in a bytes string.'''
 RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
 
-class map_vap:
+
+class MapVap:
     '''Represents a VAP in the connection map.'''
     def __init__(self, bssid: str, ssid: bytes):
         self.bssid = bssid
         self.ssid = ssid
 
-class map_radio:
+
+class MapRadio:
     '''Represents a radio in the connection map.'''
     def __init__(self, uid: str):
         self.uid = uid
         self.vaps = {}
 
     def add_vap(self, bssid: str, ssid: bytes):
-        vap = map_vap(bssid, ssid)
+        vap = MapVap(bssid, ssid)
         self.vaps[bssid] = vap
         return vap
 
-class map_device:
+
+class MapDevice:
     '''Represents a device in the connection map.'''
     def __init__(self, mac: str):
         self.mac = mac
         self.radios = {}
 
     def add_radio(self, uid: str):
-        radio = map_radio(uid)
+        radio = MapRadio(uid)
         self.radios[uid] = radio
         return radio
 
-class test_flows:
+
+class TestFlows:
     def __init__(self):
         self.tests = [attr[len('test_'):] for attr in dir(self) if attr.startswith('test_')]
 
@@ -171,7 +175,7 @@ class test_flows:
         self.debug("  Response: " + res.decode('utf-8', errors='replace').strip())
         return res
 
-    def get_conn_map(self) -> Dict[str, map_device]:
+    def get_conn_map(self) -> Dict[str, MapDevice]:
         '''Get the connection map from the controller.'''
         conn_map = {}
         for line in self.beerocks_cli_command("bml_conn_map").split(b'\n'):
@@ -181,7 +185,7 @@ class test_flows:
             radio = re.match(rb' {16}RADIO: .* mac: ' + RE_MAC, line)
             vap = re.match(rb' {20}fVAP.* bssid: ' + RE_MAC + rb', ssid: (?P<ssid>.*)$', line)
             if bridge:
-                cur_agent = map_device(bridge.group('mac').decode('utf-8'))
+                cur_agent = MapDevice(bridge.group('mac').decode('utf-8'))
                 conn_map[cur_agent.mac] = cur_agent
             elif radio:
                 cur_radio = cur_agent.add_radio(radio.group('mac').decode('utf-8'))
@@ -769,8 +773,9 @@ class test_flows:
         self.debug("Confirming topology query was received")
         self.check_log(self.repeater1, "agent", r"TOPOLOGY_QUERY_MESSAGE")
 
+
 if __name__ == '__main__':
-    t = test_flows()
+    t = TestFlows()
     t.init()
     if t.run_tests():
         sys.exit(1)
