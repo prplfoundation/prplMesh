@@ -21,11 +21,11 @@ public:
     cli_socket(std::string temp_path_, std::string proxy_ip_ = std::string());
     ~cli_socket();
 
-    bool connect();
-    void disconnect();
-    bool is_connected() { return (master_socket != nullptr); }
-    bool start() { return socket_thread::start(); }
-    void stop() { socket_thread::stop(); }
+    bool connect() override;
+    void disconnect() override;
+    bool is_connected() override { return (master_socket != nullptr); }
+    bool start() override { return socket_thread::start(); }
+    void stop() override { socket_thread::stop(); }
     void print_help(bool print_header = true) { help(print_header); }
 
 protected:
