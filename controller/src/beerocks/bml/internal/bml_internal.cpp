@@ -2162,9 +2162,8 @@ int bml_internal::get_wifi_credentials(int vap_id, char *ssid, char *pass, int *
     *sec = sWifiCredentials.sec;
 
     //clear the memory with password in it.
-    memset(&sWifiCredentials.pass, 0, sizeof(sWifiCredentials.pass));
-    //memset might be optimized and compiler might not set it 0 if its not used after memset
-    *(volatile char *)sWifiCredentials.pass = *(volatile char *)sWifiCredentials.pass;
+    volatile char *creds_pass = const_cast<volatile char *>(sWifiCredentials.pass);
+    std::fill(creds_pass, creds_pass + sizeof(sWifiCredentials.pass), 0);
 
     if (iRet != BML_RET_OK) {
         LOG(ERROR) << "Configuration get failed!";
@@ -2334,10 +2333,8 @@ int bml_internal::get_administrator_credentials(char *user_password)
                               BML_NODE_USER_PASS_LEN);
 
     //clear the memory with password in it.
-    memset(&AdminCredentials.user_password, 0, sizeof(AdminCredentials.user_password));
-    //memset might be optimized and compiler might not set it 0 if its not used after memset
-    *(volatile char *)AdminCredentials.user_password =
-        *(volatile char *)AdminCredentials.user_password;
+    volatile char *creds_pass = const_cast<volatile char *>(AdminCredentials.user_password);
+    std::fill(creds_pass, creds_pass + sizeof(AdminCredentials.user_password), 0);
 
     if (iRet != BML_RET_OK) {
         LOG(ERROR) << "Configuration get failed!";
