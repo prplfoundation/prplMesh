@@ -192,6 +192,13 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
 
     auto &backhaul_param = params["backhaul"];
     std::transform(backhaul_param.begin(), backhaul_param.end(), backhaul_param.begin(), ::tolower);
+    // TODO - add wireless backhaul support.
+    // For now, this causes slave reset and the test to hang,
+    // so return not supported.
+    if (backhaul_param != "eth") {
+        err_string = "wireless backhaul not supported";
+        return false;
+    }
     m_selected_backhaul = backhaul_param;
 
     auto timeout =
