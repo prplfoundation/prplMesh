@@ -31,7 +31,7 @@ cli_socket::cli_socket(std::string temp_path_, std::string proxy_ip_)
     temp_path           = temp_path_;
 }
 
-cli_socket::~cli_socket() { disconnect(); }
+cli_socket::~cli_socket() { cli_socket::disconnect(); }
 
 bool cli_socket::init()
 {
