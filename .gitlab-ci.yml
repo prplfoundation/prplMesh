@@ -11,7 +11,7 @@ cppcheck:
   script:
     # cppcheck runs in the alpine image because every new release brings useful improvements
     # (the versions from Ubuntu get old too quickly)
-    - tools/docker/static-analysis/cppcheck.sh common
+    - tools/docker/static-analysis/cppcheck.sh common framework
   artifacts:
     paths:
       - cppcheck_results.txt
