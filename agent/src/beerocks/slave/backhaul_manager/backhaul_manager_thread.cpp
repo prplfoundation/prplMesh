@@ -1844,6 +1844,19 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
 }
 
+static std::string string_to_hex(const std::string &input)
+{
+    static const char hex_digits[] = "0123456789ABCDEF";
+
+    std::string output;
+    output.reserve(input.length() * 2);
+    for (unsigned char c : input) {
+        output.push_back(hex_digits[c >> 4]);
+        output.push_back(hex_digits[c & 15]);
+    }
+    return output;
+}
+
 bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                       const std::string &src_mac)
 {
@@ -1902,23 +1915,27 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         auto associated_clients = m_radio_info_map[client_ruid].associated_clients_map[client_vap];
         auto associatedClientsTuple = associated_clients[client_info_tlv_r->client_mac()];
         auto len                    = std::get<1>(associatedClientsTuple).length();
-        client_capability_report_tlv->alloc_association_frame(1);
-        // auto s = std::get<1>(associatedClientsTuple);
+        auto s                      = std::get<1>(associatedClientsTuple);
         LOG(DEBUG) << "**********************************************************************";
 
-        
+        auto hex_string = string_to_hex(s);
+        auto len_hex    = hex_string.length();
+        LOG(DEBUG) << "hex_string_length = " << len_hex;
+        client_capability_report_tlv->alloc_association_frame(len_hex);
+
         LOG(DEBUG) << "888888888888888888888888888888888888888888888888888888888";
 
         // auto x = reinterpret_cast<uint8_t *>(&s[0]);
-      
+
+        auto x = &hex_string[0];
 
         LOG(DEBUG) << "7777777777777777777";
+        // std::copy_n(hex_string, len_hex,
+        //             client_capability_report_tlv->association_frame());
 
+        // std::copy(hex_string, a + len, client_capability_report_tlv->association_frame());
 
-        // std::copy(a, a + len, client_capability_report_tlv->association_frame());
-
-        
-        // std::copy_n(x, 10, client_capability_report_tlv->association_frame());
+        std::copy_n(x, len_hex, client_capability_report_tlv->association_frame());
         // std::copy_n(reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple)[0]), 23,
         // client_capability_report_tlv->association_frame());
         LOG(DEBUG) << "**********************************************************************";
