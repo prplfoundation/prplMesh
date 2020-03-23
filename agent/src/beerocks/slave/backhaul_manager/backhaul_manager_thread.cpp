@@ -1902,7 +1902,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         auto associated_clients = m_radio_info_map[client_ruid].associated_clients_map[client_vap];
         auto associatedClientsTuple = associated_clients[client_info_tlv_r->client_mac()];
         auto len                    = std::get<1>(associatedClientsTuple).length();
-        client_capability_report_tlv->alloc_association_frame(len);
+        client_capability_report_tlv->alloc_association_frame(15);
         auto s = std::get<1>(associatedClientsTuple);
         LOG(DEBUG) << "**********************************************************************";
 
@@ -1931,7 +1931,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         // for (int i = 0; i < 5; i++) {
         //     LOG(DEBUG) << x[i];
         // }
-        std::copy_n(x, len, client_capability_report_tlv->association_frame());
+        std::copy_n(x, 10, client_capability_report_tlv->association_frame());
         // std::copy_n(reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple)[0]), 23,
         // client_capability_report_tlv->association_frame());
         LOG(DEBUG) << "**********************************************************************";
