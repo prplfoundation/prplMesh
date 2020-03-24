@@ -27,6 +27,13 @@ flake8:
   script:
     - flake8 --verbose $FLAKE8_FILES
 
+flake8-diff:
+  stage: build
+  image: pipelinecomponents/flake8:f087c4c
+  script:
+    - apk add --update --no-cache git
+    - git diff -U0 origin/master | flake8 --verbose --diff
+
 clang-format:
   extends: .in-prplmesh-builder
   stage: build
