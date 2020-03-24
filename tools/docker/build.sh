@@ -9,7 +9,7 @@
 scriptdir="$(cd "${0%/*}"; pwd)"
 rootdir="${scriptdir%/*/*}"
 
-. ${rootdir}/tools/docker/functions.sh
+. ${rootdir}/tools/functions.sh
 
 main() {
     docker image inspect prplmesh-builder >/dev/null 2>&1 || {

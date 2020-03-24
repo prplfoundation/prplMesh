@@ -9,7 +9,7 @@
 scriptdir="$(cd "${0%/*}"; pwd)"
 rootdir="${scriptdir%/*/*}"
 
-. ${rootdir}/tools/docker/functions.sh
+. ${rootdir}/tools/functions.sh
 
 usage() {
     echo "usage: $(basename $0) [-hvbt]"

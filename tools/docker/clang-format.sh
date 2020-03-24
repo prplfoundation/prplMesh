@@ -10,7 +10,7 @@ scriptdir="$(cd "${0%/*}" && pwd)"
 rootdir="${scriptdir%/*/*}"
 
 # shellcheck source=functions.sh
-. "${rootdir}"/tools/docker/functions.sh
+. "${rootdir}"/tools/functions.sh
 
 usage() {
     echo "usage: $(basename "$0") [-hvd] [-i ip] [-n name] [-N network]"
