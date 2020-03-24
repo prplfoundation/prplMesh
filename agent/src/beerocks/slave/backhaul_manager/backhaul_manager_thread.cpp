@@ -1921,7 +1921,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         auto hex_string = string_to_hex(s);
         auto len_hex    = hex_string.length();
         LOG(DEBUG) << "hex_string_length = " << len_hex;
-        client_capability_report_tlv->alloc_association_frame(len);
+        client_capability_report_tlv->alloc_association_frame(184);
 
         LOG(DEBUG) << "888888888888888888888888888888888888888888888888888888888";
 
