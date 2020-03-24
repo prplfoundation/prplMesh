@@ -56,30 +56,6 @@ class TestFlows:
     def __init__(self):
         self.tests = [attr[len('test_'):] for attr in dir(self) if attr.startswith('test_')]
 
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--tcpdump", "-t", action='store_true', default=False,
-                            help="capture the packets during each test")
-        parser.add_argument("--verbose", "-v", action='store_true', default=False,
-                            help="report each action")
-        parser.add_argument("--stop-on-failure", "-s", action='store_true', default=False,
-                            help="exit on the first failure")
-        user = os.getenv("SUDO_USER", os.getenv("USER", ""))
-        parser.add_argument("--unique-id", "-u", type=str, default=user,
-                            help="append UNIQUE_ID to all container names, e.g. gateway-<UNIQUE_ID>; "
-                                 "defaults to {}".format(user))
-        parser.add_argument("--skip-init", action='store_true', default=False,
-                            help="don't start up the containers")
-        parser.add_argument("tests", nargs='*',
-                            help="tests to run; if not specified, run all tests: " + ", ".join(self.tests))
-        self.opts = parser.parse_args()
-
-        if not self.opts.tests:
-            self.opts.tests = self.tests
-
-        unknown_tests = [test for test in self.opts.tests if test not in self.tests]
-        if unknown_tests:
-            parser.error("Unknown tests: {}".format(', '.join(unknown_tests)))
-
         self.rootdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
         self.installdir = os.path.join(self.rootdir, 'build', 'install')
         self.running = ''
@@ -776,6 +752,32 @@ class TestFlows:
 
 if __name__ == '__main__':
     t = TestFlows()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--tcpdump", "-t", action='store_true', default=False,
+                        help="capture the packets during each test")
+    parser.add_argument("--verbose", "-v", action='store_true', default=False,
+                        help="report each action")
+    parser.add_argument("--stop-on-failure", "-s", action='store_true', default=False,
+                        help="exit on the first failure")
+    user = os.getenv("SUDO_USER", os.getenv("USER", ""))
+    parser.add_argument("--unique-id", "-u", type=str, default=user,
+                        help="append UNIQUE_ID to all container names, e.g. gateway-<UNIQUE_ID>; "
+                             "defaults to {}".format(user))
+    parser.add_argument("--skip-init", action='store_true', default=False,
+                        help="don't start up the containers")
+    parser.add_argument("tests", nargs='*',
+                        help="tests to run; if not specified, run all tests: " + ", ".join(t.tests))
+    options = parser.parse_args()
+
+    if not options.tests:
+        options.tests = t.tests
+
+    unknown_tests = [test for test in options.tests if test not in t.tests]
+    if unknown_tests:
+        parser.error("Unknown tests: {}".format(', '.join(unknown_tests)))
+
+    t.opts = options
     t.init()
     if t.run_tests():
         sys.exit(1)
