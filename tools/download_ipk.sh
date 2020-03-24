@@ -19,9 +19,11 @@ usage() {
 download() {
     # URL for downloading the prplmesh.ipk according to
     # https://docs.gitlab.com/ee/ci/pipelines/job_artifacts.html#downloading-the-latest-artifacts
-    URL="https://gitlab.com/prpl-foundation/prplmesh/-/jobs/artifacts/$BRANCH/raw/build/$DEVICE/prplmesh.ipk?job=build-for-$DEVICE"
+    IPK_URL="https://gitlab.com/prpl-foundation/prplmesh/-/jobs/artifacts/$BRANCH/raw/build/$DEVICE/prplmesh.ipk?job=build-for-$DEVICE"
+    BUILDINFO_URL="https://gitlab.com/prpl-foundation/prplmesh/-/jobs/artifacts/$BRANCH/raw/build/$DEVICE/prplmesh.buildinfo?job=build-for-$DEVICE"
     # curl options - fail on error (-f), follow redirect (-L)
-    curl -f -L "$URL" --output "$IPK_PATH"/prplmesh.ipk
+    curl -f -L "$IPK_URL" --output "$IPK_PATH"/prplmesh.ipk
+    curl -f -L "$BUILDINFO_URL" --output "$IPK_PATH"/prplmesh.buildinfo
 }
 
 main() {
