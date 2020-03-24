@@ -243,10 +243,12 @@ class TestFlows:
         command = "echo \"{event}\" > /tmp/$USER/beerocks/{radio}/EVENT".format(**locals())
         self.docker_command(device, 'sh', '-c', command)
 
-    def run_tests(self):
+    def run_tests(self, tests):
         '''Run all tests as specified on the command line.'''
         total_errors = 0
-        for test in self.opts.tests:
+        if not tests:
+            tests = self.tests
+        for test in tests:
             self.start_test(test)
             self.tcpdump_start()
             self.check_error = 0
@@ -746,9 +748,6 @@ if __name__ == '__main__':
                         help="tests to run; if not specified, run all tests: " + ", ".join(t.tests))
     options = parser.parse_args()
 
-    if not options.tests:
-        options.tests = t.tests
-
     unknown_tests = [test for test in options.tests if test not in t.tests]
     if unknown_tests:
         parser.error("Unknown tests: {}".format(', '.join(unknown_tests)))
@@ -759,5 +758,5 @@ if __name__ == '__main__':
 
     t.opts = options
     t.init()
-    if t.run_tests():
+    if t.run_tests(options.tests):
         sys.exit(1)
