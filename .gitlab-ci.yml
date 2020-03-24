@@ -19,6 +19,14 @@ cppcheck:
   tags:
     - docker
 
+flake8:
+  stage: build
+  image: pipelinecomponents/flake8:f087c4c
+  variables:
+      FLAKE8_FILES: "tests/capi.py"
+  script:
+    - flake8 --verbose $FLAKE8_FILES
+
 clang-format:
   extends: .in-prplmesh-builder
   stage: build
