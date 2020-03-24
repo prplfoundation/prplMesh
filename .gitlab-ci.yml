@@ -23,7 +23,7 @@ flake8:
   stage: build
   image: pipelinecomponents/flake8:f087c4c
   variables:
-      FLAKE8_FILES: "tests/capi.py"
+      FLAKE8_FILES: "tests/capi.py tests/opts.py"
   script:
     - flake8 --verbose $FLAKE8_FILES
 
