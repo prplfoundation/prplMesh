@@ -3,7 +3,7 @@
 scriptdir="$(cd "${0%/*}"; pwd)"
 rootdir="${scriptdir%/*/*/*}"
 
-. "${rootdir}/tools/docker/functions.sh"
+. "${rootdir}/tools/functions.sh"
 
 OUTPUT_FILE="$rootdir/cppcheck_results.txt"
 INCLUDES="\
