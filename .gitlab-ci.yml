@@ -173,18 +173,15 @@ test-on-netgear-rax40:
 run-certification-tests:
   stage: test
   variables:
-    TESTS_TO_RUN: "MAP-4.2.1"
+    TESTS_TO_RUN: "MAP-4.6.2_BHWIFI_FH24G"
     GIT_CLONE_PATH: "/builds/prpl-foundation/prplMesh/"
     # device to test with: prplmesh for dummy bwl, netgear-rax40 for dwpal on rax40
   script:
-      - /easymesh_cert/run_test_file.sh -d mediatek -o logs $TESTS_TO_RUN
+      - /easymesh_cert/run_test_file.sh -d marvell -o logs $TESTS_TO_RUN
   artifacts:
     paths:
       - logs
     when: always
-  needs:
-    - job: build-in-docker
-    - job: build-for-netgear-rax40
   tags:
     - certs-tests
   timeout: 24h
