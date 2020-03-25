@@ -33,6 +33,10 @@ namespace beerocks {
 // clang-format on
 #endif
 
+namespace ieee1905_1_consts {
+static constexpr int DISCOVERY_NOTIFICATION_TIMEOUT_SEC = 60;
+}
+
 namespace message {
 
 enum eStructsConsts {

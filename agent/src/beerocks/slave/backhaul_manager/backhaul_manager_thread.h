@@ -13,6 +13,7 @@
 
 #include <bcl/beerocks_backport.h>
 #include <bcl/beerocks_config_file.h>
+#include <bcl/beerocks_defines.h>
 #include <bcl/beerocks_socket_thread.h>
 #include <bcl/network/network_utils.h>
 #include <btl/btl.h>
@@ -210,9 +211,8 @@ private:
     const int DEAUTH_REASON_PASSPHRASE_MISMACH        = 2;
     const int AUTOCONFIG_DISCOVERY_TIMEOUT_SECONDS    = 1;
     const int MAX_FAILED_AUTOCONFIG_SEARCH_ATTEMPTS   = 20;
-    const int DISCOVERY_NOTIFICATION_TIMEOUT_SEC      = 60; // According to specification
     const int DISCOVERY_NEIGHBOUR_REMOVAL_TIMEOUT =
-        DISCOVERY_NOTIFICATION_TIMEOUT_SEC + 3; // 3 seconds grace period
+        ieee1905_1_consts::DISCOVERY_NOTIFICATION_TIMEOUT_SEC + 3; // 3 seconds grace period
 
     std::chrono::steady_clock::time_point state_time_stamp_timeout;
     int state_attempts;
