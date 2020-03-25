@@ -271,6 +271,7 @@ public:
     std::set<std::string> get_node_siblings(std::string mac, int type = beerocks::TYPE_ANY);
     std::set<std::string> get_node_children(std::string mac, int type = beerocks::TYPE_ANY,
                                             int state = beerocks::STATE_ANY);
+    std::list<sMacAddr> get_1905_1_neighbors(const sMacAddr &al_mac);
     std::string get_node_key(const std::string &al_mac, const std::string &ruid);
 
     //
