@@ -11,7 +11,6 @@
 #include "bml_task.h"
 #include "ire_network_optimization_task.h"
 
-#include <bcl/beerocks_utils.h>
 #include <bcl/network/network_utils.h>
 #include <bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
@@ -333,8 +332,8 @@ void channel_selection_task::work()
     }
     case eState::ON_SLAVE_JOINED: {
 
-        auto freq                      = utils::wifi_channel_to_freq(slave_joined_event->channel);
-        auto vht_center_frequency      = slave_joined_event->cs_params.vht_center_frequency;
+        auto freq                 = wireless_utils::channel_to_freq(slave_joined_event->channel);
+        auto vht_center_frequency = slave_joined_event->cs_params.vht_center_frequency;
         auto channel_ext_above_primary = slave_joined_event->cs_params.channel_ext_above_primary;
 
         auto channel_ext_above_secondary = (freq < vht_center_frequency) ? true : false;
@@ -511,7 +510,7 @@ void channel_selection_task::work()
             return;
         }
         request->params().failsafe_channel =
-            beerocks::utils::wifi_freq_to_channel(database.config.fail_safe_5G_frequency);
+            wireless_utils::freq_to_channel(database.config.fail_safe_5G_frequency);
         request->params().failsafe_channel_bandwidth = database.config.fail_safe_5G_bw;
         request->params().vht_center_frequency       = database.config.fail_safe_5G_vht_frequency;
         memset(request->params().restricted_channels, 0, message::RESTRICTED_CHANNEL_LENGTH);
@@ -537,7 +536,7 @@ void channel_selection_task::work()
         request->params().failsafe_channel =
             hostap_params.is_2G
                 ? 0
-                : beerocks::utils::wifi_freq_to_channel(database.config.fail_safe_5G_frequency);
+                : wireless_utils::freq_to_channel(database.config.fail_safe_5G_frequency);
         request->params().failsafe_channel_bandwidth =
             hostap_params.is_2G ? 0 : database.config.fail_safe_5G_bw;
         request->params().vht_center_frequency =
@@ -596,7 +595,7 @@ void channel_selection_task::work()
         request->params().failsafe_channel =
             hostap_params.is_2G
                 ? 0
-                : beerocks::utils::wifi_freq_to_channel(database.config.fail_safe_5G_frequency);
+                : wireless_utils::freq_to_channel(database.config.fail_safe_5G_frequency);
         ;
         request->params().failsafe_channel_bandwidth =
             hostap_params.is_2G ? 0 : database.config.fail_safe_5G_bw;
@@ -718,7 +717,7 @@ void channel_selection_task::work()
                        << " vht_center_frequency = "
                        << uint16_t(csa_event->cs_params.vht_center_frequency);
 
-        auto freq                 = utils::wifi_channel_to_freq(csa_event->cs_params.channel);
+        auto freq                 = wireless_utils::channel_to_freq(csa_event->cs_params.channel);
         auto vht_center_frequency = csa_event->cs_params.vht_center_frequency;
 
         auto channel_ext_above_secondary = (freq < vht_center_frequency) ? true : false;
@@ -891,7 +890,7 @@ void channel_selection_task::work()
                        << " channel = " << int(csa_event->cs_params.channel)
                        << " channel_ext_above_primary = "
                        << int(csa_event->cs_params.channel_ext_above_primary);
-        auto freq                      = utils::wifi_channel_to_freq(csa_event->cs_params.channel);
+        auto freq = wireless_utils::channel_to_freq(csa_event->cs_params.channel);
         auto prev_vht_center_frequency = database.get_hostap_vht_center_frequency(hostap_mac);
         auto prev_channel              = database.get_node_channel(hostap_mac);
         auto prev_bandwidth            = database.get_node_bw(hostap_mac);
@@ -1532,7 +1531,7 @@ bool channel_selection_task::ccl_fill_channel_switch_request_with_least_used_cha
         channel_switch_request.channel   = min_channels.begin()->first;
         channel_switch_request.bandwidth = beerocks::BANDWIDTH_80;
         align_channel_to_80Mhz();
-        channel_switch_request.vht_center_frequency = utils::wifi_channel_to_vht_center_freq(
+        channel_switch_request.vht_center_frequency = wireless_utils::channel_to_vht_center_freq(
             channel_switch_request.channel,
             beerocks::utils::convert_bandwidth_to_int(
                 beerocks::eWiFiBandwidth(channel_switch_request.bandwidth)),
@@ -1576,7 +1575,7 @@ bool channel_selection_task::ccl_fill_channel_switch_request_with_least_used_cha
         channel_switch_request.channel   = it_res->first;
         channel_switch_request.bandwidth = beerocks::BANDWIDTH_80;
         align_channel_to_80Mhz();
-        channel_switch_request.vht_center_frequency = utils::wifi_channel_to_vht_center_freq(
+        channel_switch_request.vht_center_frequency = wireless_utils::channel_to_vht_center_freq(
             channel_switch_request.channel,
             utils::convert_bandwidth_to_int(
                 beerocks::eWiFiBandwidth(channel_switch_request.bandwidth)),
@@ -1717,7 +1716,7 @@ bool channel_selection_task::fill_restricted_channels_from_ccl_busy_bands(uint8_
     int channel_step = CHANNEL_20MHZ_STEP;
 
     auto channel                     = channel_switch_request.channel;
-    auto freq                        = utils::wifi_channel_to_freq(channel);
+    auto freq                        = wireless_utils::channel_to_freq(channel);
     auto vht_center_frequency        = channel_switch_request.vht_center_frequency;
     auto channel_ext_above_secondary = (freq < vht_center_frequency) ? true : false;
 
@@ -1763,7 +1762,7 @@ bool channel_selection_task::acs_result_match()
 {
     TASK_LOG(DEBUG) << "*****************acs_result_match**************************** :";
     auto channel                     = channel_switch_request.channel;
-    auto freq                        = utils::wifi_channel_to_freq(channel);
+    auto freq                        = wireless_utils::channel_to_freq(channel);
     auto vht_center_frequency        = channel_switch_request.vht_center_frequency;
     auto channel_ext_above_secondary = (freq < vht_center_frequency) ? true : false;
     TASK_LOG(DEBUG) << "channel_ext_above_secondary  = " << int(channel_ext_above_secondary)

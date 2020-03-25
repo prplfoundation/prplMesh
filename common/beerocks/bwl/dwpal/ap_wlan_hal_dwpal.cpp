@@ -1110,7 +1110,7 @@ bool ap_wlan_hal_dwpal::sta_unassoc_rssi_measurement(const std::string &mac, int
 {
     // Convert values to strings
     std::string chanBandwidth     = std::to_string(bw);
-    std::string centerFreq        = std::to_string(beerocks::utils::wifi_channel_to_freq(chan));
+    std::string centerFreq        = std::to_string(son::wireless_utils::channel_to_freq(chan));
     std::string waveVhtCenterFreq = std::to_string(vht_center_frequency);
 
     // Build command string
@@ -1183,7 +1183,7 @@ bool ap_wlan_hal_dwpal::switch_channel(int chan, int bw, int vht_center_frequenc
     } else {
         m_drop_csa = false;
 
-        int freq                              = beerocks::utils::wifi_channel_to_freq(chan);
+        int freq                              = son::wireless_utils::channel_to_freq(chan);
         std::string freq_str                  = std::to_string(freq);
         std::string wave_vht_center_frequency = std::to_string(vht_center_frequency);
 
@@ -1298,7 +1298,7 @@ bool ap_wlan_hal_dwpal::failsafe_channel_set(int chan, int bw, int vht_center_fr
     // Build command string
     if (chan) {
         std::string bw_str   = std::to_string(bw);
-        std::string chan_str = std::to_string(beerocks::utils::wifi_channel_to_freq(chan));
+        std::string chan_str = std::to_string(son::wireless_utils::channel_to_freq(chan));
         std::string freq_str = std::to_string(vht_center_frequency);
         LOG(DEBUG) << "chan_str = " << chan_str << " bw_str = " << bw_str
                    << " vht_freq_str = " << freq_str;
@@ -1363,7 +1363,7 @@ bool ap_wlan_hal_dwpal::failsafe_channel_get(int &chan, int &bw)
     } else if (!strncmp(freq, "ACS", 3)) {
         chan = bw = 0;
     } else {
-        chan = beerocks::utils::wifi_freq_to_channel(beerocks::string_utils::stoi(freq));
+        chan = son::wireless_utils::freq_to_channel(beerocks::string_utils::stoi(freq));
     }
 
     return true;
@@ -2370,7 +2370,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             }
         }
 
-        msg->params.channel   = beerocks::utils::wifi_freq_to_channel(msg->params.frequency);
+        msg->params.channel   = son::wireless_utils::freq_to_channel(msg->params.frequency);
         msg->params.bandwidth = dwpal_bw_to_beerocks_bw(chan_width);
 
         // Add the message to the queue
@@ -2423,7 +2423,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             }
         }
 
-        msg->params.channel   = beerocks::utils::wifi_freq_to_channel(msg->params.frequency);
+        msg->params.channel   = son::wireless_utils::freq_to_channel(msg->params.frequency);
         msg->params.bandwidth = dwpal_bw_to_beerocks_bw(chan_width);
 
         // Add the message to the queue

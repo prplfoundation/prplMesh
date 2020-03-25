@@ -306,7 +306,7 @@ bool ap_wlan_hal_nl80211::switch_channel(int chan, int bw, int vht_center_freque
         return false;
     }
 
-    int freq                              = beerocks::utils::wifi_channel_to_freq(chan);
+    int freq                              = son::wireless_utils::channel_to_freq(chan);
     std::string freq_str                  = std::to_string(freq);
     std::string wave_vht_center_frequency = std::to_string(vht_center_frequency);
 
@@ -416,7 +416,7 @@ bool ap_wlan_hal_nl80211::failsafe_channel_get(int &chan, int &bw)
             return false;
         }
         bw   = beerocks::string_utils::stoi(tmp_vec[1]);
-        chan = beerocks::utils::wifi_freq_to_channel(freq);
+        chan = son::wireless_utils::freq_to_channel(freq);
     }
 
     return true;
@@ -529,7 +529,7 @@ bool ap_wlan_hal_nl80211::read_supported_channels()
 
                             freq = nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_FREQ]);
                             m_radio_info.supported_channels[idx].channel =
-                                beerocks::utils::wifi_freq_to_channel(freq);
+                                son::wireless_utils::freq_to_channel(freq);
 
                             if (tb_freq[NL80211_FREQUENCY_ATTR_MAX_TX_POWER]) {
                                 m_radio_info.supported_channels[idx].tx_pow =
@@ -680,7 +680,7 @@ bool ap_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
             return false;
         }
         m_radio_info.channel =
-            beerocks::utils::wifi_freq_to_channel(beerocks::string_utils::stoi(parsed_obj["freq"]));
+            son::wireless_utils::freq_to_channel(beerocks::string_utils::stoi(parsed_obj["freq"]));
         m_radio_info.bandwidth          = wpa_bw_to_beerocks_bw(bandwidth);
         m_radio_info.channel_ext_above  = beerocks::string_utils::stoi(parsed_obj["ch_offset"]);
         m_radio_info.vht_center_freq    = beerocks::string_utils::stoi(parsed_obj["cf1"]);

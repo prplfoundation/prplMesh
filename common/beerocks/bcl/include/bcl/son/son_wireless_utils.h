@@ -121,6 +121,10 @@ public:
                                   const beerocks::eWiFiBandwidth bw, uint8_t &mcs,
                                   uint8_t &short_gi);
 
+    static int channel_to_freq(int channel);
+    static int freq_to_channel(int freq);
+    static uint16_t channel_to_vht_center_freq(int channel, int bandwidth,
+                                               bool channel_ext_above_secondary);
     static beerocks::eFreqType which_freq(uint32_t chn);
     static bool is_same_freq_band(int chn1, int chn2);
     static beerocks::eSubbandType which_subband(uint32_t chn);
