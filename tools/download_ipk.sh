@@ -23,7 +23,7 @@ download() {
     BUILDINFO_URL="https://gitlab.com/prpl-foundation/prplmesh/-/jobs/artifacts/$BRANCH/raw/build/$DEVICE/prplmesh.buildinfo?job=build-for-$DEVICE"
     # curl options - fail on error (-f), follow redirect (-L)
     curl -f -L "$IPK_URL" --output "$IPK_PATH"/prplmesh.ipk
-    curl -f -L "$BUILDINFO_URL" --output "$IPK_PATH"/prplmesh.buildinfo
+    curl -f -L "$BUILDINFO_URL" --output "$IPK_PATH"/prplmesh_buildinfo.txt
 }
 
 main() {

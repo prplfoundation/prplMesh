@@ -78,11 +78,12 @@ main() {
     cat "$PRPLMESH_BUILDINFO"
 
     info "deploy latest ipk to $TARGET_DEVICE_SSH"
-    run "$TOOLS_PATH"/deploy_ipk.sh "$TARGET_DEVICE_SSH" "$IPK"
+    run "$TOOLS_PATH"/deploy_ipk.sh "$TARGET_DEVICE_SSH" "$PRPLMESH_IPK"
 
     info "Start running tests"
     run "$EASYMESH_CERT_PATH"/run_test_file.sh -o "$LOG_FOLDER" -d "$TARGET_DEVICE" "$TESTS" "$VERBOSE_OPT"
-    mv prplmesh.{ipk,buildinfo} "$LOG_FOLDER"
+    mv "$PRPLMESH_IPK" "$LOG_FOLDER"
+    mv "$PRPLMESH_BUILDINFO" "$LOG_FOLDER"
 
     if [ -n "$OWNCLOUD_UPLOAD" ]; then
         info "Uploading $LOG_FOLDER to $OWNCLOUD_PATH"
@@ -92,8 +93,8 @@ main() {
 }
 
 BRANCH=master
-IPK=prplmesh.ipk
-PRPLMESH_BUILDINFO=prplmesh.buildinfo
+PRPLMESH_IPK=prplmesh.ipk
+PRPLMESH_BUILDINFO=prplmesh_buildinfo.txt
 TOOLS_PATH="$rootdir/tools"
 EASYMESH_CERT_PATH=$(realpath "$rootdir/../easymesh_cert")
 TARGET_DEVICE="netgear-rax40"
