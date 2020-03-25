@@ -14,7 +14,7 @@ import sys
 import time
 from typing import Dict
 import json
-
+from threading import Thread
 import send_CAPI_command
 from send_CAPI_command import tlv
 from datetime import datetime
@@ -97,6 +97,22 @@ class test_flows:
             bridge_id = prplmesh_net['Id']
             bridge = 'br-' + bridge_id[:12]
         return bridge
+
+    def start_tshark(self, bridge, duration=None, reset=False):
+        self.tshark_instances = {}
+        self.tshark_capture = {}
+        if reset:
+            for t in self.tshark_instances:
+                try:
+                    t.captured_packets = []
+                finally:
+                    pass
+        for test_index, test_name in enumerate(self.opts.tests):
+            self.tshark_instances[test_name] = Thread(
+                target=self.__capture, daemon=True, args=(test_index, test_name, bridge, duration,))
+
+        for test_name, test_thread in self.tshark_instances.items():
+            test_thread.start()
 
     def __capture(self, test_index, test_name, bridge, duration=None):
         
@@ -251,6 +267,9 @@ class test_flows:
         self.gateway = 'gateway-' + self.opts.unique_id
         self.repeater1 = 'repeater1-' + self.opts.unique_id
         self.repeater2 = 'repeater2-' + self.opts.unique_id
+        self.start_tshark(self.get_bridge_mac(), reset=True)
+        self.status('Starting tshark processes, wait 10s...')
+        time.sleep(10)
         if not self.opts.skip_init:
             self.tcpdump_start()
             try:
