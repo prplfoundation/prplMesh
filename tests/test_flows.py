@@ -17,6 +17,7 @@ import json
 from threading import Thread
 import send_CAPI_command
 from send_CAPI_command import tlv
+import signal
 from datetime import datetime
 
 '''Regular expression to match a MAC address in a bytes string.'''
@@ -132,6 +133,47 @@ class test_flows:
                     tshark_args+['-a', 'duration:900'], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as e:
             self.err(f'test {self.run_tests} failed, output: {e.output}')
+    def check_tshark(self, target_thread_name=None, end=time.time(), start=None, file_output=False):
+        '''
+        ### Description
+        Looks into the tshark captured data, updating the global capture data
+        and returning the captured data from `start` to `end`
+
+        ### Parameters
+        `target_thread_name=None` (str) dictionary key (in self.tshark_instances) of the thread running tshark, if None, the method
+        defaults to self.running (i.e. the current running test)
+
+        `end=time.time()` (datetime) upper bound for captured packets timestamp
+
+        `start=None` (datetime) lower bound for captured packets timestamp
+
+        `file_output=False` flag to determine if the captured data would be 
+        written to a file
+
+        ### Returns
+
+        a collection of captured `ieee1905` packets
+        '''
+        # if file_output:
+        #     with open(self.outputfile, "w+") as f:
+        #         f.write(f'\n{time.time()} - test {self.running}\n')
+        if not target_thread_name:
+            tshark_proc = self.tshark_instances[self.running].proc
+        else:
+            tshark_proc = self.tshark_instances[target_thread_name].proc
+        os.kill(tshark_proc.pid, signal.SIGTERM)
+        raw_stream = tshark_proc.communicate()
+        stream = json.loads(raw_stream[0])
+        tshark_dump = filter(lambda x: self.check_time_in_bounds(
+            self.get_time_for_packet(x), end, start), stream)
+        temp_capture = list(filter(
+            lambda x: "ieee1905" in x["_source"]["layers"], tshark_dump))
+        if target_thread_name:
+            self.tshark_capture[target_thread_name] = temp_capture
+        else:
+            self.tshark_capture[self.running] = temp_capture
+        return temp_capture
+
     def check_time_in_bounds(self, timestamp, end=time.time(), start=None):
         if start:
             return start < timestamp and timestamp < end
