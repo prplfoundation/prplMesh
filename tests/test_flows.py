@@ -83,6 +83,19 @@ class test_flows:
         self.tcpdump_proc = None
         self.bridge_name = 'br-lan'
 
+    def get_bridge_mac(self):
+        inspect = json.loads(subprocess.check_output(('docker', 'network', 'inspect',
+                                                      'prplMesh-net-{}'.format(self.opts.unique_id))))
+        prplmesh_net = inspect[0]
+        # podman adds a 'plugins' indirection that docker doesn't have.
+        if 'plugins' in prplmesh_net:
+            bridge = prplmesh_net['plugins'][0]['bridge']
+        else:
+            # docker doesn't report the interface name of the bridge. So format it based on the
+            # ID.
+            bridge_id = prplmesh_net['Id']
+            bridge = 'br-' + bridge_id[:12]
+        return bridge
 
     def message(self, message: str, color: int = 0):
         '''Print a message, optionally in a color, preceded by the currently running test.'''
