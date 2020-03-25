@@ -134,6 +134,13 @@ class test_flows:
                     tshark_args+['-a', 'duration:900'], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as e:
             self.err(f'test {self.run_tests} failed, output: {e.output}')
+
+    def check_tlv_name(self, st: str, packets):
+        try:
+            return any([st.lower() in map(lambda x: x.lower(), packet['_source']['layers']['ieee1905']) for packet in filter(lambda y: 'ieee1905' in y['_source']['layers'], packets)])
+        except KeyError:
+            return False
+
     def check_tshark(self, target_thread_name=None, end=time.time(), start=None, file_output=False):
         '''
         ### Description
