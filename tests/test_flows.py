@@ -98,6 +98,24 @@ class test_flows:
             bridge = 'br-' + bridge_id[:12]
         return bridge
 
+    def __capture(self, test_index, test_name, bridge, duration=None):
+        
+        # `test_index` currently unused, but might be useful for file output
+        
+        # for optional file output
+        # self.outputfile = os.path.join(
+        #     self.rootdir, 'logs', f'tshark_log_{test_name}.json')
+        
+        try:
+            tshark_args = ['tshark', '-Q', '-i', bridge, '-T', 'json']
+            if duration:
+                self.tshark_instances[test_name].proc = subprocess.Popen(
+                    tshark_args+['-a', f'duration:{duration}'], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            else:
+                self.tshark_instances[test_name].proc = subprocess.Popen(
+                    tshark_args+['-a', 'duration:900'], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as e:
+            self.err(f'test {self.run_tests} failed, output: {e.output}')
     def check_time_in_bounds(self, timestamp, end=time.time(), start=None):
         if start:
             return start < timestamp and timestamp < end
