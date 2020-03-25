@@ -81,7 +81,7 @@ main() {
     run "$TOOLS_PATH"/deploy_ipk.sh "$TARGET_DEVICE_SSH" "$PRPLMESH_IPK"
 
     info "Start running tests"
-    run "$EASYMESH_CERT_PATH"/run_test_file.sh -o "$LOG_FOLDER" -d "$TARGET_DEVICE" "$TESTS" "$VERBOSE_OPT"
+    "$EASYMESH_CERT_PATH"/run_test_file.sh -o "$LOG_FOLDER" -d "$TARGET_DEVICE" "$TESTS" "$VERBOSE_OPT"
     mv "$PRPLMESH_IPK" "$LOG_FOLDER"
     mv "$PRPLMESH_BUILDINFO" "$LOG_FOLDER"
 
