@@ -1004,6 +1004,35 @@ std::set<std::string> db::get_node_children(std::string mac, int type, int state
     return children_macs;
 }
 
+std::list<sMacAddr> db::get_1905_1_neighbors(const sMacAddr &al_mac)
+{
+    auto al_mac_str = network_utils::mac_to_string(al_mac);
+    std::list<sMacAddr> neighbors_al_macs;
+    auto all_al_macs = get_nodes(beerocks::TYPE_IRE);
+
+    // According to IEEE 1905.1 a neighbor is defined as a first circle only, so we need to filter
+    // out the childrens from second circle and above.
+    for (const auto &al_mac_iter : all_al_macs) {
+        if (get_node_parent_ire(al_mac_iter) == al_mac_str) {
+            neighbors_al_macs.push_back(network_utils::mac_from_string(al_mac_iter));
+        }
+    }
+
+    // Add the parent bridge as well to the neighbors list
+    auto parent_bridge = get_node_parent_ire(network_utils::mac_to_string(al_mac));
+    if (!parent_bridge.empty()) {
+        neighbors_al_macs.push_back(network_utils::mac_from_string(parent_bridge));
+    }
+
+    // Add siblings Nodes
+    auto siblings = get_node_siblings(al_mac_str, beerocks::TYPE_IRE);
+    for (const auto &sibling : siblings) {
+        neighbors_al_macs.push_back(network_utils::mac_from_string(sibling));
+    }
+
+    return neighbors_al_macs;
+}
+
 //
 // Capabilities
 //
