@@ -17,6 +17,7 @@ import json
 
 import send_CAPI_command
 from send_CAPI_command import tlv
+from datetime import datetime
 
 '''Regular expression to match a MAC address in a bytes string.'''
 RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
@@ -96,6 +97,15 @@ class test_flows:
             bridge_id = prplmesh_net['Id']
             bridge = 'br-' + bridge_id[:12]
         return bridge
+
+    def check_time_in_bounds(self, timestamp, end=time.time(), start=None):
+        if start:
+            return start < timestamp and timestamp < end
+        return timestamp < end
+
+    def get_time_for_packet(self, packet):
+        return float(packet['_source']['layers']['frame']['frame.time_epoch'])
+        # return datetime.fromtimestamp(float(packet_time))
 
     def message(self, message: str, color: int = 0):
         '''Print a message, optionally in a color, preceded by the currently running test.'''
