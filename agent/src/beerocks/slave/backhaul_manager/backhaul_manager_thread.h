@@ -75,6 +75,8 @@ private:
     bool handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
 
     // 1905 messages handlers
+    bool handle_1905_topology_discovery(const std::string &src_mac,
+                                        ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_1905_autoconfiguration_response(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                 const std::string &src_mac);
     bool handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
@@ -208,6 +210,9 @@ private:
     const int DEAUTH_REASON_PASSPHRASE_MISMACH        = 2;
     const int AUTOCONFIG_DISCOVERY_TIMEOUT_SECONDS    = 1;
     const int MAX_FAILED_AUTOCONFIG_SEARCH_ATTEMPTS   = 20;
+    const int DISCOVERY_NOTIFICATION_TIMEOUT_SEC      = 60; // According to specification
+    const int DISCOVERY_NEIGHBOUR_REMOVAL_TIMEOUT =
+        DISCOVERY_NOTIFICATION_TIMEOUT_SEC + 3; // 3 seconds grace period
 
     std::chrono::steady_clock::time_point state_time_stamp_timeout;
     int state_attempts;
