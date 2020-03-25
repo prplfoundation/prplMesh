@@ -99,7 +99,6 @@ bool master_thread::init()
             ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE,
             ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE,
-            ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE,
             ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE,
             ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE,
             ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE,
@@ -295,8 +294,6 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
         return handle_cmdu_1905_client_capability_report_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE:
         return handle_cmdu_1905_operating_channel_report(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE:
-        return handle_cmdu_1905_topology_discovery(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE:
         return handle_cmdu_1905_higher_layer_data_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE:
@@ -1451,30 +1448,6 @@ bool master_thread::handle_cmdu_1905_operating_channel_report(const std::string 
     }
 
     return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
-}
-
-bool master_thread::handle_cmdu_1905_topology_discovery(const std::string &src_mac,
-                                                        ieee1905_1::CmduMessageRx &cmdu_rx)
-{
-    auto mid = cmdu_rx.getMessageId();
-    LOG(INFO) << "Received TOPOLOGY_DISCOVERY_MESSAGE, mid=" << std::dec << int(mid);
-    auto tlvAlMac = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddressType>();
-    if (!tlvAlMac) {
-        LOG(ERROR) << "addClass tlvAlMacAddressType failed";
-        return false;
-    }
-    auto al_mac = network_utils::mac_to_string(tlvAlMac->mac());
-    if (database.has_node(tlvAlMac->mac())) {
-        LOG(DEBUG) << "Skip setting AL MAC " << al_mac << " node";
-        return true;
-    }
-    LOG(DEBUG) << "adding node " << al_mac << " under " << network_utils::ZERO_MAC_STRING
-               << ", and mark as type " << beerocks::TYPE_IRE;
-    database.add_node(network_utils::mac_from_string(al_mac), network_utils::ZERO_MAC,
-                      beerocks::TYPE_IRE);
-    database.set_node_state(al_mac, beerocks::STATE_CONNECTED);
-
-    return true;
 }
 
 bool master_thread::handle_cmdu_1905_higher_layer_data_message(const std::string &src_mac,

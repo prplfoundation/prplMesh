@@ -85,8 +85,6 @@ private:
                                                      ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_operating_channel_report(const std::string &src_mac,
                                                    ieee1905_1::CmduMessageRx &cmdu_rx);
-    bool handle_cmdu_1905_topology_discovery(const std::string &src_mac,
-                                             ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_ack_message(const std::string &src_mac,
                                       ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_1905_higher_layer_data_message(const std::string &src_mac,
