@@ -19,6 +19,7 @@ import send_CAPI_command
 from send_CAPI_command import tlv
 import signal
 from datetime import datetime
+import atexit
 
 '''Regular expression to match a MAC address in a bytes string.'''
 RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
@@ -872,8 +873,17 @@ class test_flows:
         self.debug("Confirming topology query was received")
         self.check_log(self.repeater1, "agent", r"TOPOLOGY_QUERY_MESSAGE")
 
+    def on_exit(self):
+        for name, thr in self.tshark_instances.items():
+            try:
+                os.kill(thr.proc.pid, signal.SIGTERM)
+            finally:
+                pass
+
+
 if __name__ == '__main__':
     t = test_flows()
+    atexit.register(t.on_exit)
     t.init()
     if t.run_tests():
         sys.exit(1)
