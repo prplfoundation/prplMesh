@@ -366,14 +366,20 @@ int wireless_utils::channel_to_freq(int channel)
 
 int wireless_utils::freq_to_channel(int freq)
 {
-    if (freq == 2484)
+    /* see 802.11-2007 17.3.8.3.2 and Annex J */
+    if (freq == 2484) {
         return 14;
-
-    if (freq < 2484)
+    } else if (freq < 2484) {
         return (freq - 2407) / 5;
-
-    /* FIXME: dot11ChannelStartingFactor (802.11-2007 17.3.8.3.2) */
-    return freq / 5 - 1000;
+    } else if (freq >= 4910 && freq <= 4980) {
+        return (freq - 4000) / 5;
+    } else if (freq <= 45000) { /* DMG band lower limit */
+        return (freq - 5000) / 5;
+    } else if (freq >= 58320 && freq <= 64800) {
+        return (freq - 56160) / 2160;
+    } else {
+        return 0;
+    }
 }
 
 uint16_t wireless_utils::channel_to_vht_center_freq(int channel, int bandwidth,
@@ -575,10 +581,10 @@ std::vector<uint8_t> wireless_utils::get_5g_20MHz_channels(beerocks::eWiFiBandwi
         LOG(ERROR) << "INVALID BW:" << bw;
     }
     }
-        std::for_each(std::begin(channels), std::end(channels),
-                      [](uint8_t channel) { LOG(DEBUG) << "channel:" << int(channel); });
-        return channels;
-    }
+    std::for_each(std::begin(channels), std::end(channels),
+                  [](uint8_t channel) { LOG(DEBUG) << "channel:" << int(channel); });
+    return channels;
+}
 
 uint8_t wireless_utils::channel_step_multiply(bool channel_ext_above_secondary,
                                               bool channel_ext_above_primary)

@@ -122,6 +122,13 @@ public:
                                   uint8_t &short_gi);
 
     static int channel_to_freq(int channel);
+
+    /**
+     * @brief Obtains the channel number that corresponds to given frequency value.
+     *
+     * @param freq frequency value in MHz.
+     * @return channel number.
+     */
     static int freq_to_channel(int freq);
     static uint16_t channel_to_vht_center_freq(int channel, int bandwidth,
                                                bool channel_ext_above_secondary);
