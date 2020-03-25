@@ -132,7 +132,7 @@ static bool dwpal_get_channel_scan_freq(const std::vector<unsigned int> &channel
             return false;
         }
 
-        scan_params.freq[freq_index] = beerocks::utils::wifi_channel_to_freq(int(channel));
+        scan_params.freq[freq_index] = son::wireless_utils::channel_to_freq(int(channel));
         LOG(DEBUG) << "channel scan pool add center frequency=" << scan_params.freq[freq_index];
         freq_index++;
     }
@@ -376,7 +376,7 @@ static bool translate_nl_data_to_bwl_results(sChannelScanResults &results,
         } else {
             results.operating_frequency_band = eOperating_Freq_Band_2_4GHz;
         }
-        results.channel = beerocks::utils::wifi_freq_to_channel(freq);
+        results.channel = son::wireless_utils::freq_to_channel(freq);
     }
 
     // get beacon period

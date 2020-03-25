@@ -675,7 +675,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
 
                         notification->params().backhaul_bssid =
                             network_utils::mac_from_string(soc->sta_wlan_hal->get_bssid());
-                        // notification->params().backhaul_freq          = utils::wifi_channel_to_freq(soc->sta_wlan_hal->get_channel()); // HACK temp disabled because of a bug on endian converter
+                        // notification->params().backhaul_freq          = son::wireless_utils::channel_to_freq(soc->sta_wlan_hal->get_channel()); // HACK temp disabled because of a bug on endian converter
                         notification->params().backhaul_channel = soc->sta_wlan_hal->get_channel();
                         // TODO - Specify true WiFi model from config (safe to derive from hostap_iface_type?)
                         notification->params().backhaul_iface_type  = IFACE_TYPE_WIFI_INTEL;

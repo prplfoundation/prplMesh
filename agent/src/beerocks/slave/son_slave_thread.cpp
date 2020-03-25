@@ -4761,8 +4761,8 @@ bool slave_thread::send_operating_channel_report()
     beerocks::message::sWifiChannel channel;
     channel.channel_bandwidth = hostap_cs_params.bandwidth;
     channel.channel           = hostap_cs_params.channel;
-    auto center_channel       = utils::wifi_freq_to_channel(hostap_cs_params.vht_center_frequency);
-    auto operating_class      = wireless_utils::get_operating_class_by_channel(channel);
+    auto center_channel  = wireless_utils::freq_to_channel(hostap_cs_params.vht_center_frequency);
+    auto operating_class = wireless_utils::get_operating_class_by_channel(channel);
 
     operating_class_entry.operating_class = operating_class;
     // operating classes 128,129,130 use center channel **unlike the other classes** (See Table E-4 in 802.11 spec)

@@ -353,6 +353,54 @@ bool wireless_utils::get_mcs_from_rate(const uint16_t rate, const beerocks::eWiF
     return false;
 }
 
+int wireless_utils::channel_to_freq(int channel)
+{
+    if (channel == 14)
+        return 2484;
+
+    if (channel < 14)
+        return (channel * 5) + 2407;
+
+    return (channel + 1000) * 5;
+}
+
+int wireless_utils::freq_to_channel(int freq)
+{
+    if (freq == 2484)
+        return 14;
+
+    if (freq < 2484)
+        return (freq - 2407) / 5;
+
+    /* FIXME: dot11ChannelStartingFactor (802.11-2007 17.3.8.3.2) */
+    return freq / 5 - 1000;
+}
+
+uint16_t wireless_utils::channel_to_vht_center_freq(int channel, int bandwidth,
+                                                    bool channel_ext_above_secondary)
+{
+    int freq = channel_to_freq(channel);
+    uint16_t vht_center_freq;
+    switch (bandwidth) {
+    case 20:
+        vht_center_freq = freq;
+        break;
+    case 40:
+        vht_center_freq = freq + (channel_ext_above_secondary ? 10 : -10);
+        break;
+    case 80:
+        vht_center_freq = freq + (channel_ext_above_secondary ? 30 : -30);
+        break;
+    case 160:
+        vht_center_freq = freq + (channel_ext_above_secondary ? 70 : -70);
+        break;
+    default:
+        LOG(ERROR) << "invalid bandwidth!";
+        return -1;
+    }
+    return vht_center_freq;
+}
+
 beerocks::eFreqType wireless_utils::which_freq(uint32_t chn)
 {
     if ((1 <= chn) && (chn <= BAND_5G_CHANNEL_CHECK)) {
@@ -496,41 +544,41 @@ std::vector<uint8_t> wireless_utils::get_5g_20MHz_channels(beerocks::eWiFiBandwi
     LOG(INFO) << "vht_center_frequency = " << int(vht_center_frequency);
     switch (bw) {
     case beerocks::BANDWIDTH_20: {
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency));
+        channels.push_back(freq_to_channel(vht_center_frequency));
         break;
     }
     case beerocks::BANDWIDTH_40: {
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency - 10));
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency + 10));
+        channels.push_back(freq_to_channel(vht_center_frequency - 10));
+        channels.push_back(freq_to_channel(vht_center_frequency + 10));
         break;
     }
     case beerocks::BANDWIDTH_80: {
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency - 30));
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency - 10));
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency + 10));
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency + 30));
+        channels.push_back(freq_to_channel(vht_center_frequency - 30));
+        channels.push_back(freq_to_channel(vht_center_frequency - 10));
+        channels.push_back(freq_to_channel(vht_center_frequency + 10));
+        channels.push_back(freq_to_channel(vht_center_frequency + 30));
         break;
     }
     case beerocks::BANDWIDTH_80_80:
     case beerocks::BANDWIDTH_160: {
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency - 70));
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency - 50));
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency - 30));
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency - 10));
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency + 10));
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency + 30));
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency + 50));
-        channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency + 70));
+        channels.push_back(freq_to_channel(vht_center_frequency - 70));
+        channels.push_back(freq_to_channel(vht_center_frequency - 50));
+        channels.push_back(freq_to_channel(vht_center_frequency - 30));
+        channels.push_back(freq_to_channel(vht_center_frequency - 10));
+        channels.push_back(freq_to_channel(vht_center_frequency + 10));
+        channels.push_back(freq_to_channel(vht_center_frequency + 30));
+        channels.push_back(freq_to_channel(vht_center_frequency + 50));
+        channels.push_back(freq_to_channel(vht_center_frequency + 70));
         break;
     }
     default: {
         LOG(ERROR) << "INVALID BW:" << bw;
     }
     }
-    std::for_each(std::begin(channels), std::end(channels),
-                  [](uint8_t channel) { LOG(DEBUG) << "channel:" << int(channel); });
-    return channels;
-}
+        std::for_each(std::begin(channels), std::end(channels),
+                      [](uint8_t channel) { LOG(DEBUG) << "channel:" << int(channel); });
+        return channels;
+    }
 
 uint8_t wireless_utils::channel_step_multiply(bool channel_ext_above_secondary,
                                               bool channel_ext_above_primary)
@@ -649,10 +697,10 @@ uint8_t wireless_utils::get_5g_center_channel(uint8_t start_channel,
                                               beerocks::eWiFiBandwidth channel_bandwidth,
                                               bool channel_ext_above_secondary)
 {
-    auto bw              = beerocks::utils::convert_bandwidth_to_int(channel_bandwidth);
-    auto vht_center_freq = beerocks::utils::wifi_channel_to_vht_center_freq(
-        start_channel, bw, channel_ext_above_secondary);
-    return beerocks::utils::wifi_freq_to_channel(vht_center_freq);
+    auto bw = beerocks::utils::convert_bandwidth_to_int(channel_bandwidth);
+    auto vht_center_freq =
+        channel_to_vht_center_freq(start_channel, bw, channel_ext_above_secondary);
+    return freq_to_channel(vht_center_freq);
 }
 
 /**

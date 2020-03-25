@@ -190,7 +190,7 @@ static void bml_utils_dump_conn_map(
                    << utils::convert_channel_ext_above_to_string(
                           radio->channel_ext_above_secondary, (beerocks::eWiFiBandwidth)radio->bw)
                    << ", freq: "
-                   << std::to_string(beerocks::utils::wifi_channel_to_freq(radio->channel)) << "MHz"
+                   << std::to_string(son::wireless_utils::channel_to_freq(radio->channel)) << "MHz"
                    << std::endl;
 
                 // VAP

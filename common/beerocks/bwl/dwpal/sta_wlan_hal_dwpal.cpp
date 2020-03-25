@@ -176,7 +176,7 @@ int sta_wlan_hal_dwpal::get_scan_results(const std::string &ssid, std::vector<SS
 
         SScanResult ap;
         ap.bssid   = beerocks::net::network_utils::mac_from_string(scan_results[i].bssid);
-        ap.channel = beerocks::utils::wifi_freq_to_channel(scan_results[i].frequency);
+        ap.channel = son::wireless_utils::freq_to_channel(scan_results[i].frequency);
         ap.rssi    = scan_results[i].rssi;
 
         list.insert(list.begin(), ap);
@@ -213,7 +213,7 @@ bool sta_wlan_hal_dwpal::connect(const std::string &ssid, const std::string &pas
         return false;
     }
 
-    auto freq = beerocks::utils::wifi_channel_to_freq(int(channel));
+    auto freq = son::wireless_utils::channel_to_freq(int(channel));
 
     // Update network parameters
     if (!set_network_params(network_id, ssid, bssid, sec, mem_only_psk, pass, hidden_ssid, freq)) {
@@ -306,7 +306,7 @@ bool sta_wlan_hal_dwpal::roam(const std::string &bssid, uint8_t channel)
         return false;
     }
 
-    auto freq = beerocks::utils::wifi_channel_to_freq(int(channel));
+    auto freq = son::wireless_utils::channel_to_freq(int(channel));
     if (!set_network(m_active_network_id, "freq_list", std::to_string(freq))) {
         LOG(ERROR) << "Failed setting frequency on iface " << get_iface_name();
         return false;
@@ -363,7 +363,7 @@ bool sta_wlan_hal_dwpal::unassoc_rssi_measurement(const std::string &mac, int ch
 
     // Convert values to strings
     std::string chanBandwidth       = std::to_string(bw);
-    std::string centerFreq          = std::to_string(beerocks::utils::wifi_channel_to_freq(chan));
+    std::string centerFreq          = std::to_string(son::wireless_utils::channel_to_freq(chan));
     std::string waveVhtCenterFreq   = std::to_string(vht_center_frequency);
 
     // Create a new object
@@ -729,7 +729,7 @@ void sta_wlan_hal_dwpal::update_status(const ConnectionStatus &connection_status
 {
     m_active_network_id = connection_status.id;
     m_active_bssid      = connection_status.bssid;
-    m_active_channel    = beerocks::utils::wifi_freq_to_channel(connection_status.freq);
+    m_active_channel    = son::wireless_utils::freq_to_channel(connection_status.freq);
     m_active_ssid       = connection_status.ssid;
 
     LOG(DEBUG) << "m_active_network_id= " << m_active_network_id;
