@@ -264,7 +264,7 @@ int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN])
 #ifdef BEEROCKS_ECONET
     std::string iface_prefix = econet::iface_prefix_2g;
     int16_t iface_num = radio_num;
-    if (radio_num > econet::num_2G_ifaces)
+    if (radio_num >= econet::num_2G_ifaces)
     {
         iface_prefix = econet::iface_prefix_5g;
         iface_num = iface_num - econet::num_2G_ifaces;

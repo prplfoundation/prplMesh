@@ -67,7 +67,11 @@ enum eMessageConsts {
 
 enum eGlobals {
     HIERARCHY_MAX                           = 14,
+#ifdef BEEROCKS_ECONET
+    IRE_MAX_SLAVES                          = 2,
+#else
     IRE_MAX_SLAVES                          = 3,
+#endif
     KEEP_ALIVE_INTERVAL_MSC                 = 20000,
     RSSI_MAX                                = 20,
     RSSI_MIN                                = -100,
