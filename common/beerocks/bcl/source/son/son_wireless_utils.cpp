@@ -511,6 +511,7 @@ std::vector<uint8_t> wireless_utils::get_5g_20MHz_channels(beerocks::eWiFiBandwi
         channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency + 30));
         break;
     }
+    case beerocks::BANDWIDTH_80_80:
     case beerocks::BANDWIDTH_160: {
         channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency - 70));
         channels.push_back(beerocks::utils::wifi_freq_to_channel(vht_center_frequency - 50));
