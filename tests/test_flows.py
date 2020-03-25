@@ -525,9 +525,12 @@ class test_flows:
         # self.check_log(self.repeater1, "agent_wlan2", "ACK_MESSAGE")
 
     def test_ap_capability_query(self):
+        start_time = time.time()
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8001)
-        time.sleep(1)
-
+        time.sleep(2)
+        captured = self.check_tshark()
+        found = self.check_tlv_name('ap capability', captured)
+        self.status(f"AP Capability captured? {found}")
         self.debug("Confirming ap capability query has been received on agent")
         self.check_log(self.repeater1, "agent", "AP_CAPABILITY_QUERY_MESSAGE")
 
