@@ -180,6 +180,7 @@ int utils::convert_bandwidth_to_int(beerocks::eWiFiBandwidth bandwidth)
     case beerocks::BANDWIDTH_80:
         bandwidth_int = 80;
         break;
+    case beerocks::BANDWIDTH_80_80:
     case beerocks::BANDWIDTH_160:
         bandwidth_int = 160;
         break;
@@ -199,6 +200,7 @@ std::string utils::convert_channel_ext_above_to_string(bool channel_ext_above_se
         break;
     case beerocks::BANDWIDTH_40:
     case beerocks::BANDWIDTH_80:
+    case beerocks::BANDWIDTH_80_80:
     case beerocks::BANDWIDTH_160:
         if (channel_ext_above_secondary) {
             return "H";
