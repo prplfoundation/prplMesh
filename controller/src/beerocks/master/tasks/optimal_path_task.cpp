@@ -91,7 +91,7 @@ void optimal_path_task::work()
         auto steer_vaps = database.config.load_steer_on_vaps;
         if (steer_vaps.find(current_vap_name) == std::string::npos) {
             TASK_LOG(INFO) << "current hostap vap:" << current_vap_name << " mac:" << sta_mac
-                           << "is not in steer list:" << steer_vaps << " aborting optimal task"
+                           << " is not in steer list:" << steer_vaps << " aborting optimal task"
                            << std::endl;
             finish();
             return;
