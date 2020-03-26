@@ -72,13 +72,19 @@ main() {
     info "Tests to run: $TESTS"
 
     info "download latest ipk from branch $BRANCH"
-    run "$TOOLS_PATH"/download_ipk.sh --branch "$BRANCH"
+    "$TOOLS_PATH"/download_ipk.sh --branch "$BRANCH" || {
+        err "Failed to download prplmesh.ipk, abort"
+        exit 1
+    }
     
     info "prplmesh build info:"
     cat "$PRPLMESH_BUILDINFO"
 
     info "deploy latest ipk to $TARGET_DEVICE_SSH"
-    run "$TOOLS_PATH"/deploy_ipk.sh "$TARGET_DEVICE_SSH" "$PRPLMESH_IPK"
+    "$TOOLS_PATH"/deploy_ipk.sh "$TARGET_DEVICE_SSH" "$PRPLMESH_IPK" || {
+        err "Failed to deploy prplmesh.ipk, abort"
+        exit 1
+    }
 
     info "Start running tests"
     "$EASYMESH_CERT_PATH"/run_test_file.sh -o "$LOG_FOLDER" -d "$TARGET_DEVICE" "$TESTS" "$VERBOSE_OPT"
@@ -87,7 +93,10 @@ main() {
 
     if [ -n "$OWNCLOUD_UPLOAD" ]; then
         info "Uploading $LOG_FOLDER to $OWNCLOUD_PATH"
-        "$scriptdir"/upload_to_owncloud.sh "$OWNCLOUD_PATH" "$LOG_FOLDER"
+        "$scriptdir"/upload_to_owncloud.sh "$OWNCLOUD_PATH" "$LOG_FOLDER" || {
+            err "Failed to upload $LOG_FOLDER"
+            exit 1
+        }
     fi
     info "done"
 }
