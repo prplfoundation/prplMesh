@@ -1929,7 +1929,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
 
         auto x = &r[0];
 
-        LOG(DEBUG) << "7777777777777777777";
+        LOG(DEBUG) << "777777888888887777777777777";
         // std::copy_n(hex_string, len_hex,
         //             client_capability_report_tlv->association_frame());
 
