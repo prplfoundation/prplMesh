@@ -4657,10 +4657,6 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
     int power_limit           = 0;
     bool power_limit_received = channel_selection_get_transmit_power_limit(cmdu_rx, power_limit);
 
-    // No preferences or power limit for current ruid
-    if (channel_preferences.empty() && !power_limit_received)
-        return true;
-
     // According to design only Resticted channels should be included in channel selection request
     auto switch_required = channel_selection_current_channel_restricted();
     beerocks::message::sWifiChannel channel_to_switch;
