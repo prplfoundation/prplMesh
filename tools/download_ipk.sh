@@ -10,6 +10,7 @@ usage() {
     echo "usage: $(basename "$0") [-hbd]"
     echo "  options:"
     echo "      -h|--help - show this help menu"
+    echo "      -v|--verbose - add verbosity"
     echo "      --branch  - branch to use (default master)"
     echo "      --device  - device to use (default netgear-rax40)"
     echo "      --path    - path to copy ipk to (default .)"
@@ -22,12 +23,12 @@ download() {
     IPK_URL="https://gitlab.com/prpl-foundation/prplmesh/-/jobs/artifacts/$BRANCH/raw/build/$DEVICE/prplmesh.ipk?job=build-for-$DEVICE"
     BUILDINFO_URL="https://gitlab.com/prpl-foundation/prplmesh/-/jobs/artifacts/$BRANCH/raw/build/$DEVICE/prplmesh.buildinfo?job=build-for-$DEVICE"
     # curl options - fail on error (-f), follow redirect (-L)
-    curl -f -L "$IPK_URL" --output "$IPK_PATH"/prplmesh.ipk
-    curl -f -L "$BUILDINFO_URL" --output "$IPK_PATH"/prplmesh_buildinfo.txt
+    curl ${QUIET:+ -s -S} -f -L "$IPK_URL" --output "$IPK_PATH"/prplmesh.ipk
+    curl ${QUIET:+ -s -S} -f -L "$BUILDINFO_URL" --output "$IPK_PATH"/prplmesh_buildinfo.txt
 }
 
 main() {
-    if ! OPTS=$(getopt -o 'h' --long help,branch:,device:,path: -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hv' --long help,verbose,branch:,device:,path: -n 'parse-options' -- "$@"); then
         echo "Failed parsing options." >&2
         usage
         exit 1
@@ -40,6 +41,11 @@ main() {
             -h|--help)
                 usage
                 exit 0
+                ;;
+            -v|--verbose)
+                QUIET=
+                VERBOSE=true
+                shift
                 ;;
             --branch)
                 BRANCH="$2"
@@ -64,5 +70,7 @@ main() {
 DEVICE=netgear-rax40
 BRANCH=master
 IPK_PATH=.
+VERBOSE=false
+QUIET=true
 
 main "$@"
