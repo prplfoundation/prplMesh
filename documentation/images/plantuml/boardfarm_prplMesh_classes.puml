@@ -1,0 +1,155 @@
+@startuml
+package boardfarm_generic <<Frame>> {
+
+    class LinuxDevice {
+    }
+
+    class OpenWrtRouter {
+        string prompt
+        string lan_iface
+        string wan_iface
+        IPv4Network lan_network
+        IPv4Address lan_gateway
+
+        __init__()
+        install_package()
+        wait_for_boot()
+        get_wan_iface()
+        get_wan_proto()
+        config_wan_proto()
+        enable_ssh()
+        uci_allow_wan_ssh()
+    }
+}
+
+package prplMesh_devices <<Frame>> {
+
+    class prplWRT {
+        string model
+        IPv4Network wan_network
+        IPv4Address wan_gateway
+
+        check_status()
+    }
+
+    class prplMesh_docker {
+        string model
+        string wan_iface
+        string lan_iface
+        IPv4Network lan_network
+        IPv4Address lan_gateway
+        IPv4Network wan_network
+        IPv4Address wan_gateway
+
+        check_status()
+    }
+
+    class sniffer {
+        int listening_ports
+        string listening_proto
+        string iface
+
+        catch_message()
+        set_port()
+        set_proto()
+        start_monitor()
+        stop_monitor()
+    }
+
+    class wired_sniffer {
+        string model
+
+        __init__()
+    }
+
+    class wireless_sniffer {
+        string model
+        uint channel
+
+        __init__()
+        set_ssid()
+        set_bsid()
+        get_channel()
+        get_bandwith()
+    }
+}
+
+package prplMesh_entities <<Frame>> {
+
+    class prplMesh_agent {
+        int port
+        IPv4Address ip
+
+        __init__()
+        get_radio()
+        get_status()
+        check_log()
+    }
+
+    class prplMesh_radio {
+        string mac
+        int status
+
+        get_mac()
+        get_status()
+        get_txpower()
+        get_rxpower()
+    }
+
+    class prplMesh_radio_dummy {
+
+        check_log()
+        get_mac()
+        get_status()
+        get_txpower()
+        get_rxpower()
+    }
+
+    class prplMesh_radio_hw {
+
+        get_mac()
+        get_status()
+        get_txpower()
+        get_rxpower()
+    }
+
+    class prplMesh_controller {
+        int port
+        IPv4Address ip
+
+        __init__()
+        get_alid()
+        get_status()
+        check_log()
+    }
+}
+
+package tests {
+
+    class CAPI {
+        string dest_alid
+        string payload
+
+        send()
+        set_alid()
+        get_alid()
+        set_payload()
+        get_payload()
+    }
+}
+
+prplMesh_docker --* prplMesh_controller
+prplMesh_docker --* prplMesh_agent
+prplMesh_docker --|> LinuxDevice
+OpenWrtRouter <|-- prplWRT
+prplMesh_controller *-- prplWRT
+prplMesh_agent *-- prplWRT
+prplMesh_radio *-- prplMesh_agent
+LinuxDevice <|-- OpenWrtRouter
+LinuxDevice <|-- sniffer
+sniffer <|-- wired_sniffer
+sniffer <|-- wireless_sniffer
+prplMesh_radio <|-- prplMesh_radio_hw
+prplMesh_radio <|-- prplMesh_radio_dummy
+
+@enduml
