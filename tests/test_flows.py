@@ -120,28 +120,6 @@ class TestFlows:
 
         env.launch_environment_docker(unique_id, skip_init)
 
-        mac_repeater1_wlan0_output = self.docker_command(
-            self.repeater1, "ip", "-o", "link", "list", "dev", "wlan0")
-        self.mac_repeater1_wlan0 = re.search(
-            rb"link/ether " + RE_MAC, mac_repeater1_wlan0_output).group('mac').decode()
-        debug("Repeater1 wl0: {}".format(self.mac_repeater1_wlan0))
-        mac_repeater1_wlan2_output = self.docker_command(
-            self.repeater1, "ip", "-o", "link", "list", "dev", "wlan2")
-        self.mac_repeater1_wlan2 = re.search(
-            rb"link/ether " + RE_MAC, mac_repeater1_wlan2_output).group('mac').decode()
-        debug("Repeater1 wl2: {}".format(self.mac_repeater1_wlan2))
-
-        mac_repeater2_wlan0_output = self.docker_command(
-            self.repeater2, "ip", "-o", "link", "list", "dev", "wlan0")
-        self.mac_repeater2_wlan0 = re.search(
-            rb"link/ether " + RE_MAC, mac_repeater2_wlan0_output).group('mac').decode()
-        debug("Repeater2 wl0: {}".format(self.mac_repeater2_wlan0))
-        mac_repeater2_wlan2_output = self.docker_command(
-            self.repeater2, "ip", "-o", "link", "list", "dev", "wlan2")
-        self.mac_repeater2_wlan2 = re.search(
-            rb"link/ether " + RE_MAC, mac_repeater2_wlan2_output).group('mac').decode()
-        debug("Repeater2 wl2: {}".format(self.mac_repeater2_wlan2))
-
     def _check_log_internal(self, device: str, program: str, regex: str, start_line: int):
         '''Search for regex in logfile for program on device.'''
         logfilename = os.path.join(self.rootdir, 'logs', device, 'beerocks_{}.log'.format(program))
@@ -260,7 +238,7 @@ class TestFlows:
 
         bssid1 = env.agents[0].dev_get_parameter('macaddr',
                                                  ruid='0x' +
-                                                 self.mac_repeater1_wlan0.replace(':', ''),
+                                                 env.agents[0].radios[0].mac.replace(':', ''),
                                                  ssid='Multi-AP-24G-1')
         if not bssid1:
             self.fail("repeater1 didn't configure Multi-AP-24G-1")
@@ -284,11 +262,11 @@ class TestFlows:
         self.check_log(self.repeater1, "agent_wlan2", r".* tear down radio")
         conn_map = self.get_conn_map()
         repeater1 = conn_map[env.agents[0].mac]
-        repeater1_wlan0 = repeater1.radios[self.mac_repeater1_wlan0]
+        repeater1_wlan0 = repeater1.radios[env.agents[0].radios[0].mac]
         for vap in repeater1_wlan0.vaps.values():
             if vap.ssid not in (b'Multi-AP-24G-3', b'N/A'):
                 self.fail('Wrong SSID: {vap.ssid} instead of Multi-AP-24G-3'.format(vap=vap))
-        repeater1_wlan2 = repeater1.radios[self.mac_repeater1_wlan2]
+        repeater1_wlan2 = repeater1.radios[env.agents[0].radios[1].mac]
         for vap in repeater1_wlan2.vaps.values():
             if vap.ssid != b'N/A':
                 self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap=vap))
@@ -306,11 +284,11 @@ class TestFlows:
         self.check_log(self.repeater1, "agent_wlan0", r".* tear down radio")
         conn_map = self.get_conn_map()
         repeater1 = conn_map[env.agents[0].mac]
-        repeater1_wlan0 = repeater1.radios[self.mac_repeater1_wlan0]
+        repeater1_wlan0 = repeater1.radios[env.agents[0].radios[0].mac]
         for vap in repeater1_wlan0.vaps.values():
             if vap.ssid != b'N/A':
                 self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap=vap))
-        repeater1_wlan2 = repeater1.radios[self.mac_repeater1_wlan2]
+        repeater1_wlan2 = repeater1.radios[env.agents[0].radios[1].mac]
         for vap in repeater1_wlan2.vaps.values():
             if vap.ssid != b'N/A':
                 self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap=vap))
@@ -369,9 +347,9 @@ class TestFlows:
             cs_req_mid = env.controller.dev_send_1905(
                 env.agents[0].mac,
                 0x8006,
-                tlv(0x8D, 0x0007, '{} 0x{:02x}'.format(self.mac_repeater1_wlan0,
+                tlv(0x8D, 0x0007, '{} 0x{:02x}'.format(env.agents[0].radios[0].mac,
                                                        payload_transmit_power)),
-                tlv(0x8D, 0x0007, '{} 0x{:02x}'.format(self.mac_repeater1_wlan2,
+                tlv(0x8D, 0x0007, '{} 0x{:02x}'.format(env.agents[0].radios[1].mac,
                                                        payload_transmit_power))
             )
             time.sleep(1)
@@ -474,10 +452,10 @@ class TestFlows:
             mid = env.controller.dev_send_1905(
                 env.agents[0].mac,
                 0x8006,
-                tlv(0x8B, 0x005F, '{} {}'.format(self.mac_repeater1_wlan0, payload_wlan0)),
-                tlv(0x8D, 0x0007, '{} 0x{:2x}'.format(self.mac_repeater1_wlan0, tp20dBm)),
-                tlv(0x8B, 0x004C, '{} {}'.format(self.mac_repeater1_wlan0, payload_wlan2)),
-                tlv(0x8D, 0x0007, '{} 0x{:2x}'.format(self.mac_repeater1_wlan2, tp20dBm))
+                tlv(0x8B, 0x005F, '{} {}'.format(env.agents[0].radios[0].mac, payload_wlan0)),
+                tlv(0x8D, 0x0007, '{} 0x{:2x}'.format(env.agents[0].radios[0].mac, tp20dBm)),
+                tlv(0x8B, 0x004C, '{} {}'.format(env.agents[0].radios[1].mac, payload_wlan2)),
+                tlv(0x8D, 0x0007, '{} 0x{:2x}'.format(env.agents[0].radios[1].mac, tp20dBm))
             )
             time.sleep(1)
 
@@ -566,16 +544,16 @@ class TestFlows:
     def test_combined_infra_metrics(self):
         debug("Send AP Metrics query message to agent 1")
         env.controller.dev_send_1905(env.agents[0].mac, 0x800B,
-                                     tlv(0x93, 0x0007, "0x01 {%s}" % (self.mac_repeater1_wlan0)))
+                                     tlv(0x93, 0x0007, "0x01 {%s}" % (env.agents[0].radios[0].mac)))
         self.check_log(self.repeater1, "agent_wlan0", "Received AP_METRICS_QUERY_MESSAGE")
         # TODO agent should send response autonomously, with same MID.
         # AP metrics TLV
-        tlv1 = tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (self.mac_repeater1_wlan0))
+        tlv1 = tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (env.agents[0].radios[0].mac))
         # STA metrics TLV with no metrics
         tlv2 = tlv(0x96, 0x0007, "{55:44:33:22:11:00} 0x00")
         # STA metrics TLV for STA connected to this BSS
         tlv3 = tlv(0x96, 0x001a,
-                   "{66:44:33:22:11:00} 0x01 {%s} 0x11223344 0x1a2a3a4a 0x1b2b3b4b 0x55" % self.mac_repeater1_wlan0)  # noqa E501
+                   "{66:44:33:22:11:00} 0x01 {%s} 0x11223344 0x1a2a3a4a 0x1b2b3b4b 0x55" % env.agents[0].radios[0].mac)  # noqa E501
         # STA traffic stats TLV for same STA
         tlv4 = tlv(0xa2, 0x0022,
                    "{55:44:33:22:11:00} 0x10203040 0x11213141 0x12223242 0x13233343 0x14243444 0x15253545 0x16263646")  # noqa E501
@@ -584,14 +562,14 @@ class TestFlows:
 
         debug("Send AP Metrics query message to agent 2")
         env.controller.dev_send_1905(env.agents[1].mac, 0x800B,
-                                     tlv(0x93, 0x0007, "0x01 {%s}" % self.mac_repeater2_wlan2))
+                                     tlv(0x93, 0x0007, "0x01 {%s}" % env.agents[1].radios[1].mac))
         self.check_log(self.repeater2, "agent_wlan2", "Received AP_METRICS_QUERY_MESSAGE")
         # TODO agent should send response autonomously
         # Same as above but with different STA MAC addresses, different values and
         # skipping the empty one
-        tlv1 = tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (self.mac_repeater2_wlan2))
+        tlv1 = tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (env.agents[1].radios[1].mac))
         tlv3 = tlv(0x96, 0x001a,
-                   "{77:44:33:22:11:00} 0x01 {%s} 0x19293949 0x10203040 0x11213141 0x99" % self.mac_repeater2_wlan2)  # noqa E501
+                   "{77:44:33:22:11:00} 0x01 {%s} 0x19293949 0x10203040 0x11213141 0x99" % env.agents[1].radios[1].mac)  # noqa E501
         tlv4 = tlv(0xa2, 0x0022,
                    "{77:44:33:22:11:00} 0xa0203040 0xa1213141 0xa2223242 0xa3233343 0xa4243444 0xa5253545 0xa6263646")  # noqa E501
         env.agents[1].dev_send_1905(env.controller.mac, 0x800C, tlv1, tlv3, tlv4)
@@ -619,7 +597,7 @@ class TestFlows:
         debug("Send client capability query for unconnected STA")
         env.controller.dev_send_1905(env.agents[0].mac, 0x8009,
                                      tlv(0x90, 0x000C,
-                                         '{} {}'.format(self.mac_repeater1_wlan0, sta_mac1)))
+                                         '{} {}'.format(env.agents[0].radios[0].mac, sta_mac1)))
         time.sleep(1)
         debug("Confirming client capability query has been received on agent")
         # check that both radio agents received it, in the future we'll add a check to verify which
@@ -631,7 +609,7 @@ class TestFlows:
         self.check_log(self.gateway, "controller",
                        r"Result Code= FAILURE, client MAC= {sta_mac1}, BSSID= {mac_repeater1_wlan0}"
                        .format(sta_mac1=sta_mac1,
-                               mac_repeater1_wlan0=self.mac_repeater1_wlan0))
+                               mac_repeater1_wlan0=env.agents[0].radios[0].mac))
 
         debug("Connect dummy STA to wlan0")
         self.send_bwl_event(self.repeater1, "wlan0",
@@ -640,7 +618,7 @@ class TestFlows:
         debug("Send client capability query for connected STA")
         env.controller.dev_send_1905(env.agents[0].mac, 0x8009,
                                      tlv(0x90, 0x000C,
-                                         '{} {}'.format(self.mac_repeater1_wlan0, sta_mac2)))
+                                         '{} {}'.format(env.agents[0].radios[0].mac, sta_mac2)))
         time.sleep(1)
 
         debug("Confirming client capability report message has been received on controller")
@@ -648,7 +626,7 @@ class TestFlows:
         self.check_log(self.gateway, "controller",
                        r"Result Code= SUCCESS, client MAC= {sta_mac2}, BSSID= {mac_repeater1_wlan0}"
                        .format(sta_mac2=sta_mac2,
-                               mac_repeater1_wlan0=self.mac_repeater1_wlan0))
+                               mac_repeater1_wlan0=env.agents[0].radios[0].mac))
 
     def test_client_association_dummy(self):
         sta_mac = "11:11:33:44:55:66"
@@ -656,7 +634,7 @@ class TestFlows:
         debug("Connect dummy STA to wlan0")
         self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
         debug("Send client association control request to the chosen BSSID (UNBLOCK)")
-        self.beerocks_cli_command('client_allow {} {}'.format(sta_mac, self.mac_repeater1_wlan2))
+        self.beerocks_cli_command('client_allow {} {}'.format(sta_mac, env.agents[0].radios[1].mac))
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
@@ -664,7 +642,8 @@ class TestFlows:
                        r"Got client allow request for {}".format(sta_mac))
 
         debug("Send client association control request to all other (BLOCK) ")
-        self.beerocks_cli_command('client_disallow {} {}'.format(sta_mac, self.mac_repeater1_wlan0))
+        self.beerocks_cli_command('client_disallow {} {}'.format(sta_mac,
+                                                                 env.agents[0].radios[0].mac))
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (BLOCK)")
@@ -687,7 +666,7 @@ class TestFlows:
         debug("Send Client Steering Request message for Steering Mandate to CTT Agent1")
         env.controller.dev_send_1905(env.agents[0].mac, 0x8014,
                                        tlv(0x9B, 0x001b,
-                                           "{%s 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {%s 0x73 0x24}}" % (self.mac_repeater1_wlan0, self.mac_repeater2_wlan0)))  # noqa E501
+                                           "{%s 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {%s 0x73 0x24}}" % (env.agents[0].radios[0].mac, env.agents[1].radios[0].mac)))  # noqa E501
         time.sleep(1)
         debug("Confirming Client Steering Request message was received - mandate")
         self.check_log(self.repeater1, "agent_wlan0", "Got steer request")
@@ -697,14 +676,14 @@ class TestFlows:
 
         debug("Checking BTM Report source bssid")
         self.check_log(self.gateway, "controller", "BTM_REPORT from source bssid %s" %
-                       self.mac_repeater1_wlan0)
+                       env.agents[0].radios[0].mac)
 
         debug("Confirming ACK message was received")
         self.check_log(self.repeater1, "agent_wlan0", "ACK_MESSAGE")
 
         env.controller.dev_send_1905(env.agents[0].mac, 0x8014,
                                        tlv(0x9B, 0x000C,
-                                           "{%s 0x00 0x000A 0x0000 0x00}" % self.mac_repeater1_wlan0))  # noqa E501
+                                           "{%s 0x00 0x000A 0x0000 0x00}" % env.agents[0].radios[0].mac))  # noqa E501
         time.sleep(1)
         debug("Confirming Client Steering Request message was received - Opportunity")
         self.check_log(self.repeater1, "agent_wlan0", "CLIENT_STEERING_REQUEST_MESSAGE")
@@ -827,7 +806,7 @@ class TestFlows:
         debug("Connect dummy STA to wlan0")
         self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
         debug("Send steer request ")
-        self.beerocks_cli_command("steer_client {} {}".format(sta_mac, self.mac_repeater1_wlan2))
+        self.beerocks_cli_command("steer_client {} {}".format(sta_mac, env.agents[0].radios[1].mac))
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
@@ -898,7 +877,7 @@ class TestFlows:
         debug("Send client association control message")
         env.controller.dev_send_1905(env.agents[0].mac, 0x8016,
                                        tlv(0x9D, 0x000F,
-                                           "{%s 0x00 0x1E 0x01 {0x000000110022}}" % self.mac_repeater1_wlan0))  # noqa E501
+                                           "{%s 0x00 0x1E 0x01 {0x000000110022}}" % env.agents[0].radios[0].mac))  # noqa E501
 
         debug("Confirming client association control message has been received on agent")
         # check that both radio agents received it,in the future we'll add a check to verify which

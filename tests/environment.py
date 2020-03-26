@@ -51,6 +51,18 @@ class ALEntity:
         raise NotImplementedError("command is not implemented in abstract class ALEntity")
 
 
+class Radio:
+    '''Abstract representation of a radio on a MultiAP agent.
+
+    This provides basic information about the radio, e.g. its mac address, and functionality for
+    checking its status.
+    '''
+    def __init__(self, agent: ALEntity, mac: str):
+        self.agent = agent
+        agent.radios.append(self)
+        self.mac = mac
+
+
 # The following variables are initialized as None, and have to be set when a concrete test
 # environment is started.
 wired_sniffer = None
@@ -100,9 +112,22 @@ class ALEntityDocker(ALEntity):
 
         super().__init__(mac, ucc_socket, is_controller)
 
+        # We always have two radios, wlan0 and wlan2
+        RadioDocker(self, "wlan0")
+        RadioDocker(self, "wlan2")
+
     def command(self, *command: str) -> bytes:
         '''Execute `command` in docker container and return its output.'''
         return subprocess.check_output(("docker", "exec", self.name) + command)
+
+
+class RadioDocker(Radio):
+    '''Docker implementation of a radio.'''
+    def __init__(self, agent: ALEntityDocker, iface_name: str):
+        self.iface_name = iface_name
+        ip_output = agent.command("ip", "-o",  "link", "list", "dev", self.iface_name).decode()
+        mac = re.search(r"link/ether (([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})", ip_output).group(1)
+        super().__init__(agent, mac)
 
 
 def _get_bridge_interface(unique_id):
@@ -157,4 +182,8 @@ def launch_environment_docker(unique_id: str, skip_init: bool = False):
 
     debug('controller: {}'.format(controller.mac))
     debug('agent1: {}'.format(agents[0].mac))
+    debug('agent1 wlan0: {}'.format(agents[0].radios[0].mac))
+    debug('agent1 wlan2: {}'.format(agents[0].radios[1].mac))
     debug('agent2: {}'.format(agents[1].mac))
+    debug('agent2 wlan0: {}'.format(agents[1].radios[0].mac))
+    debug('agent2 wlan2: {}'.format(agents[1].radios[1].mac))
