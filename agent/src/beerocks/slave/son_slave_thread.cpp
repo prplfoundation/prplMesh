@@ -4371,11 +4371,30 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
         return true;
     } else {
-        //TODO Add handling of steering opportunity
+
+        // Handling of steering opportunity
+
+        // NOTE: the implementation below does not actually take the steering
+        // opportunity and tries to steer. Instead, it just reports ACK
+        // and steering-completed.
+        // Taking no action is a legitimate result of steering opporunity request,
+        // and this is what is done here.
+        // Later in time we may actually implement the opportunity to steer.
+
         LOG(DEBUG) << "Request Mode bit is not set - Steering Opportunity";
+
+        auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+
+        if (!cmdu_tx_header) {
+            LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+            return false;
+        }
+
+        LOG(DEBUG) << "sending ACK message back to controller";
+        send_cmdu_to_controller(cmdu_tx);
+
         // build and send steering completed message
-        auto cmdu_tx_header =
-            cmdu_tx.create(0, ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE);
+        cmdu_tx_header = cmdu_tx.create(0, ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE);
 
         if (!cmdu_tx_header) {
             LOG(ERROR) << "cmdu creation of type STEERING_COMPLETED_MESSAGE, has failed";
