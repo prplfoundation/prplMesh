@@ -1,0 +1,42 @@
+@startuml
+node "Switch" {
+    [eth_port_DUT_WAN]
+    [eth_port_host]
+}
+
+frame "Host" {
+    [boardfarm]
+    [Controller]
+    [bridge]
+    boardfarm -> Controller : CAPIs
+    bridge <- eth_host
+    Controller -> bridge
+}
+
+frame "DUT" {
+    [Console]
+    [Agent]
+    [Radio1]
+    [Radio2]
+    Agent -down-> Radio1
+    Agent -down-> Radio2
+    Radio1 -down-> WLAN
+    Radio2 -down-> WLAN
+    Agent -right-> WAN
+}
+
+frame "Backhaul sniffer" {
+    [ethernet_listener]
+}
+
+frame "Fronthaul sniffer" {
+    [wireless_listener]
+}
+
+eth_host -- eth_port_host
+WAN -- eth_port_DUT_WAN
+ethernet_listener -- bridge
+boardfarm -down- Console : UART
+wireless_listener - WLAN
+
+@enduml
