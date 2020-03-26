@@ -81,7 +81,10 @@ RUN echo "src-git prpl ${PRPL_FEED}" >> feeds.conf.default \
     && echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}=y" >> .config \
     && echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}_${TARGET_PROFILE}=y" >> .config \
     && echo "CONFIG_PACKAGE_prplmesh${PRPLMESH_VARIANT}=y" >> .config \
-    && make defconfig \
+    && if [ "$TARGET_PROFILE" = "DEVICE_NETGEAR_RAX40" ] ; then \
+        cat feeds/intel/rax40.profile >> .config ;\
+    fi ;\
+    make defconfig \
     && cat .config \
     && make -j$(nproc) V=sc \
     && make package/feeds/prpl/prplmesh/clean
