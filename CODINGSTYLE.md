@@ -14,13 +14,57 @@ In these cases, it can be overridden by surrounding it with `clang-format-off` a
 
 ### Naming convention
 
-* Almost everything uses `lower_snake_case`.
+* Local variables uses `lower_snake_case`.
 * `#define` uses `UPPER_SNAKE_CASE`.
 * Everything is in a namespace.
 * Therefore, there are no prefixes.
-* Private data members have an "m" prefix: `m_data`.
-* Getter functions use the name without "m": `data()`.
-* Setter functions use the "set" prefix: `set_data(value)`.
+
+#### Structs
+
+Structs shall only be used for "plain-old-data" POD type with no logic or any functions except a data member initialization function (constructor).
+Structs shall not have protected or private members.
+Structs shall not inherit, not shall others inherit from it.
+
+* Struct definition shall use camel case with `s` prefix: `sSomeStruct`.
+* Struct members and initialization function shall use `lower_snake_case` with no prefix.
+* Struct shall not be defined with `typedef` keyword on C++ code.
+
+```cpp
+struct sSomeStruct {
+    int x_foo;
+    int y_bar;
+};
+```
+
+#### Classes
+
+Classes shall be used to create complex object with functions and logic in it.
+
+* Class definition shall use Pascal Case: `SomeClass`.
+* Class members and functions shall use `lower_snake_case`. 
+* Class data members have an `m_` prefix: `m_data`.
+
+```cpp
+class SomeClass {
+public:
+    SomeClass();
+    ~SomeClass()
+
+    set_foo(int foo);
+    int calculate_something(int param_1, int param_2);
+private:
+    int x_foo;
+    int y_bar;
+};
+```
+
+#### Other types
+
+Any other type shall be defined with `lower_snake_case` with `_t` suffix:
+
+```cpp
+typedef std::list<std::string> string_list_t;
+```
 
 ### Coding patterns
 
