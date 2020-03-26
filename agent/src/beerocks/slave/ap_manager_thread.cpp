@@ -983,7 +983,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
 
 void ap_manager_thread::fill_cs_params(beerocks_message::sApChannelSwitch &params)
 {
-    params.tx_power  = (int8_t)ap_wlan_hal->get_radio_info().tx_power;
+    params.tx_power  = static_cast<int8_t>(ap_wlan_hal->get_radio_info().tx_power);
     params.channel   = ap_wlan_hal->get_radio_info().channel;
     params.bandwidth = uint8_t(
         beerocks::utils::convert_bandwidth_to_enum(ap_wlan_hal->get_radio_info().bandwidth));
