@@ -95,8 +95,6 @@ upload-artifacts:
     - ln -s "$CI_OWNCLOUD_PASSWORD" ~/.netrc
     - sed -i 's/^/machine ftp.essensium.com login prplmesh-robot-ci password /' ~/.netrc
     - ci/upload_to_owncloud.sh -v --overwrite-remote-path "artifacts/$CI_JOB_ID" artifacts/latest ./build
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master"
   dependencies:
     - build-in-docker
     - build-for-netgear-rax40
