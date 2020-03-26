@@ -1,3 +1,8 @@
+stages:
+  - build
+  - test
+  - upload
+
 .in-prplmesh-builder:
   image:
     name: prplfoundationinc/prplmesh-builder:ubuntu-18.04
@@ -82,6 +87,21 @@ build-in-docker-static:
   extends: build-in-docker
   variables:
     EXTRA_CMAKE_FLAGS: "-DBUILD_SHARED_LIBS=OFF"
+
+upload-artifacts:
+  stage: upload
+  extends: .in-prplmesh-builder
+  script:
+    - ln -s "$CI_OWNCLOUD_PASSWORD" ~/.netrc
+    - sed -i 's/^/machine ftp.essensium.com login prplmesh-robot-ci password /' ~/.netrc
+    - ci/upload_to_owncloud.sh -v --overwrite-remote-path "artifacts/$CI_JOB_ID" artifacts/latest ./build
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+  dependencies:
+    - build-in-docker
+    - build-for-netgear-rax40
+    - build-for-glinet-b1300
+    - build-for-turris-omnia
 
 .run-test-in-docker:
   stage: test
