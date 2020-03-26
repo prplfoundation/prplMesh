@@ -1917,7 +1917,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         auto len                    = std::get<1>(associatedClientsTuple).length();
         auto s                      = std::get<1>(associatedClientsTuple);
         LOG(DEBUG) << "**********************************************************************";
-
+        auto r = s.substr(29, len-9);
         auto hex_string = string_to_hex(s);
         auto len_hex    = hex_string.length();
         LOG(DEBUG) << "hex_string_length = " << len_hex;
@@ -1927,7 +1927,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
 
         // auto x = reinterpret_cast<uint8_t *>(&s[0]);
 
-        auto x = &s[0];
+        auto x = &r[0];
 
         LOG(DEBUG) << "7777777777777777777";
         // std::copy_n(hex_string, len_hex,
@@ -1935,7 +1935,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
 
         // std::copy(hex_string, a + len, client_capability_report_tlv->association_frame());
 
-        std::copy_n(x, len, client_capability_report_tlv->association_frame());
+        std::copy_n(x, len-37, client_capability_report_tlv->association_frame());
         // std::copy_n(reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple)[0]), 23,
         // client_capability_report_tlv->association_frame());
         LOG(DEBUG) << "**********************************************************************";
