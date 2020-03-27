@@ -14,11 +14,10 @@ import sys
 import platform
 import time
 from typing import Dict
-import json
 
+import environment as env
 from capi import tlv, UCCSocket
 from opts import debug, err, message, opts, status
-import sniffer
 
 '''Regular expression to match a MAC address in a bytes string.'''
 RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
@@ -78,42 +77,13 @@ class TestFlows:
         self.running = test
         status(test + " starting")
 
-    def get_bridge_interface(self):
-        '''Use docker network inspect to get the docker bridge interface.'''
-        docker_network = 'prplMesh-net-{}'.format(self.opts.unique_id)
-        docker_network_inspect_cmd = ('docker', 'network', 'inspect', docker_network)
-        inspect_result = subprocess.run(docker_network_inspect_cmd, stdout=subprocess.PIPE)
-        if inspect_result.returncode != 0:
-            # Assume network doesn't exist yet. Create it.
-            # This is normally done by test_gw_repeater.sh, but we need it earlier to be able to
-            # start tcpdump
-            # Raise an exception if it fails (check=True).
-            subprocess.run(('docker', 'network', 'create', docker_network), check=True,
-                           stdout=subprocess.DEVNULL)
-            # Inspect again, now raise if it fails (check=True).
-            inspect_result = subprocess.run(docker_network_inspect_cmd, check=True,
-                                            stdout=subprocess.PIPE)
-
-        inspect = json.loads(inspect_result.stdout)
-        prplmesh_net = inspect[0]
-        # podman adds a 'plugins' indirection that docker doesn't have.
-        if 'plugins' in prplmesh_net:
-            bridge = prplmesh_net['plugins'][0]['bridge']
-        else:
-            # docker doesn't report the interface name of the bridge. So format it based on the
-            # ID.
-            bridge_id = prplmesh_net['Id']
-            bridge = 'br-' + bridge_id[:12]
-
-        return bridge
-
     def tcpdump_start(self):
         '''Start tcpdump if enabled by config.'''
-        self.sniffer.start('test_{}'.format(self.running))
+        env.wired_sniffer.start('test_{}'.format(self.running))
 
     def tcpdump_kill(self):
         '''Stop tcpdump if it is running.'''
-        self.sniffer.stop()
+        env.wired_sniffer.stop()
 
     def docker_command(self, device: str, *command: str) -> bytes:
         '''Execute `command` in docker container `device` and return its output.'''
@@ -171,24 +141,15 @@ class TestFlows:
 
         return UCCSocket(device_ip, ucc_port)
 
-    def init(self):
+    def init(self, unique_id: str, skip_init: bool):
         '''Initialize the tests.'''
         self.start_test('init')
-        self.gateway = 'gateway-' + self.opts.unique_id
-        self.repeater1 = 'repeater1-' + self.opts.unique_id
-        self.repeater2 = 'repeater2-' + self.opts.unique_id
+        self.gateway = 'gateway-' + unique_id
+        self.repeater1 = 'repeater1-' + unique_id
+        self.repeater2 = 'repeater2-' + unique_id
         self.on_wsl = "microsoft" in platform.uname()[3].lower()
 
-        self.sniffer = sniffer.Sniffer(self.get_bridge_interface())
-
-        if not self.opts.skip_init:
-            self.tcpdump_start()
-            try:
-                subprocess.check_call((os.path.join(self.rootdir, "tests", "test_gw_repeater.sh"),
-                                       "-f", "-u", self.opts.unique_id, "-g", self.gateway,
-                                       "-r", self.repeater1, "-r", self.repeater2, "-d", "7"))
-            finally:
-                self.tcpdump_kill()
+        env.launch_environment_docker(unique_id, skip_init)
 
         self.gateway_ucc = self.open_CAPI_socket(self.gateway, True)
         self.repeater1_ucc = self.open_CAPI_socket(self.repeater1)
@@ -1003,7 +964,6 @@ if __name__ == '__main__':
     opts.tcpdump_dir = os.path.join(t.rootdir, 'logs')
     opts.stop_on_failure = options.stop_on_failure
 
-    t.opts = options
-    t.init()
+    t.init(options.unique_id, options.skip_init)
     if t.run_tests(options.tests):
         sys.exit(1)
