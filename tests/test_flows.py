@@ -76,22 +76,42 @@ class TestFlows:
         self.running = test
         status(test + " starting")
 
+    def get_bridge_interface(self):
+        '''Use docker network inspect to get the docker bridge interface.'''
+        docker_network = 'prplMesh-net-{}'.format(self.opts.unique_id)
+        docker_network_inspect_cmd = ('docker', 'network', 'inspect', docker_network)
+        inspect_result = subprocess.run(docker_network_inspect_cmd, stdout=subprocess.PIPE)
+        if inspect_result.returncode != 0:
+            # Assume network doesn't exist yet. Create it.
+            # This is normally done by test_gw_repeater.sh, but we need it earlier to be able to
+            # start tcpdump
+            # Raise an exception if it fails (check=True).
+            subprocess.run(('docker', 'network', 'create', docker_network), check=True,
+                           stdout=subprocess.DEVNULL)
+            # Inspect again, now raise if it fails (check=True).
+            inspect_result = subprocess.run(docker_network_inspect_cmd, check=True,
+                                            stdout=subprocess.PIPE)
+
+        inspect = json.loads(inspect_result.stdout)
+        prplmesh_net = inspect[0]
+        # podman adds a 'plugins' indirection that docker doesn't have.
+        if 'plugins' in prplmesh_net:
+            bridge = prplmesh_net['plugins'][0]['bridge']
+        else:
+            # docker doesn't report the interface name of the bridge. So format it based on the
+            # ID.
+            bridge_id = prplmesh_net['Id']
+            bridge = 'br-' + bridge_id[:12]
+
+        return bridge
+
     def tcpdump_start(self):
         '''Start tcpdump if enabled by config.'''
         if opts.tcpdump:
             outputfile = os.path.join(self.rootdir, 'logs', 'test_{}.pcap'.format(self.running))
             debug("Starting tcpdump, output file {}".format(outputfile))
-            inspect = json.loads(subprocess.check_output(('docker', 'network', 'inspect',
-                                                          'prplMesh-net-{}'.format(self.opts.unique_id))))
-            prplmesh_net = inspect[0]
-            # podman adds a 'plugins' indirection that docker doesn't have.
-            if 'plugins' in prplmesh_net:
-                bridge = prplmesh_net['plugins'][0]['bridge']
-            else:
-                # docker doesn't report the interface name of the bridge. So format it based on the
-                # ID.
-                bridge_id = prplmesh_net['Id']
-                bridge = 'br-' + bridge_id[:12]
+            bridge = self.get_bridge_interface()
+
             self.tcpdump_proc = subprocess.Popen(["tcpdump", "-i", bridge, "-w", outputfile], stderr=subprocess.PIPE)
             # tcpdump takes a while to start up. Wait for the appropriate output before continuing.
             # poll() so we exit the loop if tcpdump terminates for any reason.
