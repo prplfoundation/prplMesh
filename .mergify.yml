@@ -21,3 +21,11 @@ pull_request_rules:
         # rebased.
         strict: smart
         strict_method: rebase
+
+  - name: Remove redundant labels
+    conditions:
+      - "merged"
+    actions:
+      label:
+        # These labels are potentially confusing for merged PRs, so remove them
+        remove: ["ready for merge", "help wanted", "don't merge", "wait for platform test"]
