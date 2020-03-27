@@ -72,7 +72,7 @@ main() {
     info "Tests to run: $TESTS"
 
     info "download latest ipk from branch $BRANCH"
-    "$TOOLS_PATH"/download_ipk.sh --branch "$BRANCH" || {
+    "$TOOLS_PATH"/download_ipk.sh --branch "$BRANCH" ${VERBOSE:+ -v} || {
         err "Failed to download prplmesh.ipk, abort"
         exit 1
     }
@@ -87,7 +87,7 @@ main() {
     }
 
     info "Start running tests"
-    "$EASYMESH_CERT_PATH"/run_test_file.sh -o "$LOG_FOLDER" -d "$TARGET_DEVICE" "$TESTS" "$VERBOSE_OPT"
+    "$EASYMESH_CERT_PATH"/run_test_file.sh -o "$LOG_FOLDER" -d "$TARGET_DEVICE" "$TESTS" ${VERBOSE:+ -v}
     mv "$PRPLMESH_IPK" "$LOG_FOLDER"
     mv "$PRPLMESH_BUILDINFO" "$LOG_FOLDER"
 
