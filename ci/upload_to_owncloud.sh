@@ -59,8 +59,11 @@ main() {
                     dbg "Create directory: $dir"
                     curl ${QUIET:+ -s -S} -f -n -X MKCOL "$OWNCLOUD_URL/$user/$remote_path/$dir"
                     printf . # show progress
+                    # rename all log file extensions to .txt since owncloud web interface doesn't
+                    # understand .log extension
+                    find "$(dirname "$local_path")/$dir/" -maxdepth 1 -type f -name "*.log" -exec bash -c 'mv "$1" "${1%.log}".txt' - '{}' \;
                     # get the list of files to upload in the format <file>,<file>,...,<file>
-                    files=$(find "$(dirname "$local_path")/$dir/" -type f -maxdepth 1 -print0 | tr '\0' ',' | sed 's/,$//')
+                    files=$(find "$(dirname "$local_path")/$dir/" -maxdepth 1 -type f -print0 | tr '\0' ',' | sed 's/,$//')
                     dbg "$files"
                     [ -n "$files" ] && {
                         curl ${QUIET:+ -s -S} -f -n -T "{$files}" "$OWNCLOUD_URL/$user/$remote_path/$dir/" || {
