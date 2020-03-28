@@ -225,7 +225,7 @@ class TestFlows:
 
     def _check_log_internal(self, device: str, program: str, regex: str) -> bool:
         '''Search for regex in logfile for program on device.'''
-        logfilename = os.path.join(self.rootdir, 'logs', device, 'beerocks_{}.log'.format(program))
+        logfilename = os.path.join(self.rootdir, 'logs', device, 'beerocks_{}.txt'.format(program))
         with open(logfilename) as logfile:
             for line in logfile.readlines():
                 if re.search(regex, line):

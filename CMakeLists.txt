@@ -118,7 +118,7 @@ set(BEEROCKS_ENABLE_ARP_MONITOR 1)
 # Logging configuration
 set(BEEROCKS_LOG_FILES_ENABLED      "true")
 set(BEEROCKS_LOG_FILES_PATH         "${TMP_PATH}/logs")
-set(BEEROCKS_LOG_FILES_SUFFIX       ".log")
+set(BEEROCKS_LOG_FILES_SUFFIX       ".txt")
 set(BEEROCKS_LOG_FILES_AUTO_ROLL    "true")
 set(BEEROCKS_LOG_STDOUT_ENABLED     "false")
 set(BEEROCKS_LOG_SYSLOG_ENABLED     "false")
