@@ -171,6 +171,7 @@ bool tlvClientAssociationControlRequest::init()
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eAssociationControl); }
     m_validity_period_sec = (uint16_t*)m_buff_ptr__;
+    if (!m_parse__) *m_validity_period_sec = 0x0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
