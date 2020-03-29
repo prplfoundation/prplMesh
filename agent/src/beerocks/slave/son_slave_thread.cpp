@@ -4305,8 +4305,9 @@ bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::Cmd
             return false;
         }
 
-        request_out->mac()   = sta_mac;
-        request_out->bssid() = bssid;
+        request_out->mac()                 = sta_mac;
+        request_out->bssid()               = bssid;
+        request_out->validity_period_sec() = association_control_request_tlv->validity_period_sec();
     }
 
     message_com::send_cmdu(ap_manager_socket, cmdu_tx);
