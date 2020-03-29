@@ -141,7 +141,7 @@ main() {
     if [ -n "$TAG" ] ; then
         image_tag="$TAG"
     else
-        image_tag="prplmesh-builder-${TARGET}:${OPENWRT_VERSION}"
+        image_tag="prplmesh-builder-${TARGET_DEVICE}:${OPENWRT_VERSION}"
         dbg "image tag not set, using default value $image_tag"
     fi
 
