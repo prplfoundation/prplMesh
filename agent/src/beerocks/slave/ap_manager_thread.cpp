@@ -1667,3 +1667,17 @@ void ap_manager_thread::send_steering_return_status(beerocks_message::eActionOp_
     }
     return;
 }
+
+void ap_manager_thread::remove_client_from_disallowed_list(const sMacAddr &mac,
+                                                           const sMacAddr &bssid)
+{
+    auto it = std::find_if(m_disallowed_clients.begin(), m_disallowed_clients.end(),
+                           [&](const son::ap_manager_thread::disallowed_client_t &element) {
+                               return ((element.mac == mac) && (element.bssid == bssid));
+                           });
+
+    if (it != m_disallowed_clients.end()) {
+        // remove client from the disallow list
+        m_disallowed_clients.erase(it);
+    }
+}

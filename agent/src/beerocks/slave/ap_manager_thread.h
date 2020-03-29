@@ -87,6 +87,7 @@ private:
     void send_heartbeat();
     void send_steering_return_status(beerocks_message::eActionOp_APMANAGER ActionOp,
                                      int32_t status);
+    void remove_client_from_disallowed_list(const sMacAddr &mac, const sMacAddr &bssid);
 
     std::string slave_uds;
     uint8_t wifi_channel;
