@@ -196,7 +196,9 @@ void client_steering_task::steer_sta()
             std::get<1>(sta_list_block) = network_utils::mac_from_string(sta_mac);
             son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
             TASK_LOG(DEBUG) << "sending disallow request for " << sta_mac << " to bssid "
-                            << hostap_vap.second.mac << " id=" << int(id);
+                            << hostap_vap.second.mac << " with validity period = "
+                            << association_control_block_request_tlv->validity_period_sec()
+                            << "sec,  id=" << int(id);
 
             // update bml listeners
             bml_task::client_disallow_req_available_event client_disallow_event;
