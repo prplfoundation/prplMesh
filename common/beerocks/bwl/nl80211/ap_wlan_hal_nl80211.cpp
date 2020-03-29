@@ -445,129 +445,36 @@ bool ap_wlan_hal_nl80211::read_acs_report()
 // based on print_channels_handler() iw/phy.c
 bool ap_wlan_hal_nl80211::read_supported_channels()
 {
-    LOG(TRACE) << __func__ << " for interface: " << get_radio_info().iface_name;
+    auto ifname = get_radio_info().iface_name;
+    LOG(TRACE) << "for interface: " << ifname;
+
+    bwl::nl80211_client::radio_info radio_info;
+
+    if (!m_nl80211_client->get_radio_info(ifname, radio_info)) {
+        LOG(TRACE) << "Failed to get channels info from nl80211";
+        return false;
+    }
+    std::vector<bwl::WiFiChannel> supported_channels;
+    for (auto const &band : radio_info.bands) {
+        for (auto const &pair : band.supported_channels) {
+            auto &channel_info = pair.second;
+            for (auto bw : channel_info.supported_bandwidths) {
+                bwl::WiFiChannel channel;
+                channel.channel   = channel_info.number;
+                channel.bandwidth = beerocks::utils::convert_bandwidth_to_int(bw);
+                channel.tx_pow    = channel_info.tx_power;
+                channel.is_dfs    = channel_info.is_dfs;
+                supported_channels.push_back(channel);
+            }
+        }
+    }
 
     // Clear the supported channels vector
     m_radio_info.supported_channels.clear();
     // Resize the supported channels vector
-    m_radio_info.supported_channels.resize(MAX_SUPPORTED_20M_CHANNELS);
-
-    auto ret = send_nl80211_msg(
-        NL80211_CMD_GET_WIPHY, 0,
-        // Create the message
-        [&](struct nl_msg *msg) -> bool { return true; },
-        // Handle the reponse
-        [&](struct nl_msg *msg) -> bool {
-            struct nlattr *tb_msg[NL80211_ATTR_MAX + 1];
-            struct genlmsghdr *gnlh = (struct genlmsghdr *)nlmsg_data(nlmsg_hdr(msg));
-            struct nlattr *tb_band[NL80211_BAND_ATTR_MAX + 1] = {};
-            struct nlattr *tb_freq[NL80211_FREQUENCY_ATTR_MAX + 1];
-            static struct nla_policy freq_policy[NL80211_FREQUENCY_ATTR_MAX + 1];
-            freq_policy[NL80211_FREQUENCY_ATTR_FREQ]         = {.type = NLA_U32};
-            freq_policy[NL80211_FREQUENCY_ATTR_DISABLED]     = {.type = NLA_FLAG};
-            freq_policy[NL80211_FREQUENCY_ATTR_RADAR]        = {.type = NLA_FLAG};
-            freq_policy[NL80211_FREQUENCY_ATTR_MAX_TX_POWER] = {.type = NLA_U32};
-
-            struct nlattr *nl_band;
-            struct nlattr *nl_freq;
-            int rem_band, rem_freq, last_band = 0;
-            bool width_40, width_80, width_160;
-            uint8_t idx = 0;
-
-            width_40 = width_80 = width_160 = false;
-
-            nla_parse(tb_msg, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0),
-                      NULL);
-            if (tb_msg[NL80211_ATTR_WIPHY_BANDS]) {
-                nla_for_each_nested(nl_band, tb_msg[NL80211_ATTR_WIPHY_BANDS], rem_band)
-                {
-                    if (last_band != nl_band->nla_type) {
-                        width_40 = width_80 = width_160 = false;
-                        last_band                       = nl_band->nla_type;
-                    }
-                    nla_parse(tb_band, NL80211_BAND_ATTR_MAX, (struct nlattr *)nla_data(nl_band),
-                              nla_len(nl_band), NULL);
-
-                    if (tb_band[NL80211_BAND_ATTR_HT_CAPA]) {
-                        uint16_t cap = nla_get_u16(tb_band[NL80211_BAND_ATTR_HT_CAPA]);
-
-                        if (cap & BIT(1))
-                            width_40 = true;
-                    }
-
-                    if (tb_band[NL80211_BAND_ATTR_VHT_CAPA]) {
-                        uint16_t capa;
-
-                        width_80 = true;
-
-                        capa = nla_get_u32(tb_band[NL80211_BAND_ATTR_VHT_CAPA]);
-                        switch ((capa >> 2) & 3) {
-                        case 2:
-                            /* width_80p80 = true; */
-                            /* fall through */
-                        case 1:
-                            width_160 = true;
-                            break;
-                        }
-                    }
-
-                    if (tb_band[NL80211_BAND_ATTR_FREQS]) {
-                        nla_for_each_nested(nl_freq, tb_band[NL80211_BAND_ATTR_FREQS], rem_freq)
-                        {
-                            uint32_t freq;
-
-                            nla_parse(tb_freq, NL80211_FREQUENCY_ATTR_MAX,
-                                      (struct nlattr *)nla_data(nl_freq), nla_len(nl_freq),
-                                      freq_policy);
-                            if (!tb_freq[NL80211_FREQUENCY_ATTR_FREQ] ||
-                                tb_freq[NL80211_FREQUENCY_ATTR_DISABLED] ||
-                                (tb_freq[NL80211_FREQUENCY_ATTR_NO_IR] &&
-                                 tb_freq[__NL80211_FREQUENCY_ATTR_NO_IBSS]) ||
-                                tb_freq[__NL80211_FREQUENCY_ATTR_NO_IBSS]) {
-                                continue;
-                            }
-
-                            freq = nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_FREQ]);
-                            m_radio_info.supported_channels[idx].channel =
-                                son::wireless_utils::freq_to_channel(freq);
-
-                            if (tb_freq[NL80211_FREQUENCY_ATTR_MAX_TX_POWER]) {
-                                m_radio_info.supported_channels[idx].tx_pow =
-                                    0.01 *
-                                    nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_MAX_TX_POWER]);
-                            }
-
-                            if (tb_freq[NL80211_FREQUENCY_ATTR_RADAR])
-                                m_radio_info.supported_channels[idx].is_dfs = 1;
-
-                            if (!tb_freq[NL80211_FREQUENCY_ATTR_NO_20MHZ])
-                                m_radio_info.supported_channels[idx].bandwidth = 20;
-                            if (width_40 && (!tb_freq[NL80211_FREQUENCY_ATTR_NO_HT40_MINUS] ||
-                                             !tb_freq[NL80211_FREQUENCY_ATTR_NO_HT40_PLUS])) {
-                                m_radio_info.supported_channels[idx].bandwidth = 40;
-                            }
-                            if (width_80 && !tb_freq[NL80211_FREQUENCY_ATTR_NO_80MHZ])
-                                m_radio_info.supported_channels[idx].bandwidth = 80;
-                            if (width_160 && !tb_freq[NL80211_FREQUENCY_ATTR_NO_160MHZ])
-                                m_radio_info.supported_channels[idx].bandwidth = 160;
-
-                            if (tb_freq[NL80211_FREQUENCY_ATTR_DFS_STATE] &&
-                                nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_DFS_STATE]) ==
-                                    NL80211_DFS_UNAVAILABLE) {
-                                m_radio_info.supported_channels[idx].radar_affected = 1;
-                            }
-                            idx++;
-                        }
-                    }
-                }
-            }
-            return true;
-        });
-
-    if (!ret)
-        LOG(TRACE) << "Failed to get channels info";
-
-    return ret;
+    m_radio_info.supported_channels.insert(m_radio_info.supported_channels.begin(),
+                                           supported_channels.begin(), supported_channels.end());
+    return true;
 }
 
 bool ap_wlan_hal_nl80211::set_tx_power_limit(int tx_pow_limit)
