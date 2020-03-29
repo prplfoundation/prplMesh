@@ -625,6 +625,7 @@ class cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST : public BaseClass
         }
         sMacAddr& mac();
         sMacAddr& bssid();
+        uint16_t& validity_period_sec();
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -634,6 +635,7 @@ class cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST : public BaseClass
         eActionOp_APMANAGER* m_action_op = nullptr;
         sMacAddr* m_mac = nullptr;
         sMacAddr* m_bssid = nullptr;
+        uint16_t* m_validity_period_sec = nullptr;
 };
 
 class cACTION_APMANAGER_CLIENT_ALLOW_REQUEST : public BaseClass

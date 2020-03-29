@@ -2008,11 +2008,16 @@ sMacAddr& cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::bssid() {
     return (sMacAddr&)(*m_bssid);
 }
 
+uint16_t& cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::validity_period_sec() {
+    return (uint16_t&)(*m_validity_period_sec);
+}
+
 void cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_mac->struct_swap();
     m_bssid->struct_swap();
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_validity_period_sec));
 }
 
 bool cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::finalize()
@@ -2047,6 +2052,7 @@ size_t cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // mac
     class_size += sizeof(sMacAddr); // bssid
+    class_size += sizeof(uint16_t); // validity_period_sec
     return class_size;
 }
 
@@ -2068,6 +2074,11 @@ bool cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST::init()
         return false;
     }
     if (!m_parse__) { m_bssid->struct_init(); }
+    m_validity_period_sec = (uint16_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__) { class_swap(); }
     return true;
 }
