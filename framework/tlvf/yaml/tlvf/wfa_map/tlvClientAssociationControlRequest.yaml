@@ -11,7 +11,13 @@ tlvClientAssociationControlRequest:
   length: uint16_t
   bssid_to_block_client: sMacAddr
   association_control: eAssociationControl
-  validity_period_sec: uint16_t
+  validity_period_sec:
+    _type: uint16_t
+    # According to section 11.6 in the Multi-AP Specification
+    # The Validity Period field in a Client Association Control Request message 
+    # with Association Control field set to 0x01 (Client Unblocking) is ignored
+    # setting default to 0 for all cases
+    _value: 0
   sta_list_length:
     _type: uint8_t
     _length_var: True
