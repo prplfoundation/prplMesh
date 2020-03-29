@@ -766,9 +766,11 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             return true;
         }
 
-        LOG(DEBUG) << "CLIENT_ALLOW: mac = " << sta_mac << ", bssid = " << bssid;
+        remove_client_from_disallowed_list(request->mac(), request->bssid());
 
+        LOG(DEBUG) << "CLIENT_ALLOW: mac = " << sta_mac << ", bssid = " << bssid;
         ap_wlan_hal->sta_allow(sta_mac, bssid);
+
         break;
     }
     case beerocks_message::ACTION_APMANAGER_READ_ACS_REPORT_REQUEST: {
