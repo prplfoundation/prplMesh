@@ -1527,64 +1527,35 @@ bool ap_wlan_hal_dwpal::read_acs_report()
 
 bool ap_wlan_hal_dwpal::read_supported_channels()
 {
-    char *reply = nullptr;
-    if (!dwpal_send_cmd("GET_HW_FEATURES", &reply)) {
-        LOG(ERROR) << __func__ << " failed";
+    auto ifname = get_radio_info().iface_name;
+    LOG(TRACE) << "for interface: " << ifname;
+
+    bwl::nl80211_client::radio_info radio_info;
+
+    if (!m_nl80211_client->get_radio_info(ifname, radio_info)) {
+        LOG(TRACE) << "Failed to get channels info from nl80211";
         return false;
     }
-
-    size_t replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
-    for (size_t i = 0; i < replyLen; i++) {
-        if (reply[i] == ')') {
-            reply[i] = ' ';
+    std::vector<bwl::WiFiChannel> supported_channels;
+    for (auto const &band : radio_info.bands) {
+        for (auto const &pair : band.supported_channels) {
+            auto &channel_info = pair.second;
+            for (auto bw : channel_info.supported_bandwidths) {
+                bwl::WiFiChannel channel;
+                channel.channel   = channel_info.number;
+                channel.bandwidth = beerocks::utils::convert_bandwidth_to_int(bw);
+                channel.tx_pow    = channel_info.tx_power;
+                channel.is_dfs    = channel_info.is_dfs;
+                supported_channels.push_back(channel);
+            }
         }
     }
 
-    LOG(DEBUG) << "GET_HW_FEATURES replylen=" << (int)replyLen;
-    LOG(DEBUG) << "GET_HW_FEATURES reply=\n" << reply;
-
-    size_t numOfValidArgs[2] = {0};
-    int chan                 = -1;
-    char dfs_state[50]       = {0};
-
-    FieldsToParse fieldsToParse[] = {
-        {(void *)&chan, &numOfValidArgs[0], DWPAL_INT_PARAM, "chan=", 0},
-        {(void *)dfs_state, &numOfValidArgs[1], DWPAL_STR_PARAM,
-         "(DFS state = ", sizeof(dfs_state)},
-        /* Must be at the end */
-        {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
-
-    rsize_t dmaxLen = (rsize_t)replyLen;
-    char *p2str     = nullptr;
-    char *lineMsg   = strtok_s(reply, &dmaxLen, "\n", &p2str);
-    int i           = 0;
-    while (lineMsg != NULL) {
-        size_t lineLen = strnlen(lineMsg, HOSTAPD_TO_DWPAL_MSG_LENGTH);
-
-        // TODO: fieldsToParse.field should be contained in one struct and struct size should be
-        //       passed to the dwpal_string_to_struct_parse - a security fix for multiline reply
-        if (dwpal_string_to_struct_parse(lineMsg, lineLen, fieldsToParse, sizeof(dfs_state)) ==
-            DWPAL_FAILURE) {
-            LOG(ERROR) << "DWPAL parse error ==> Abort";
-            return false;
-        }
-
-        // LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[0] << " chan= " << chan;
-        // LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " dfs_state= " << dfs_state;
-
-        m_radio_info.supported_channels[i].bandwidth   = 20;
-        m_radio_info.supported_channels[i].channel     = chan;
-        m_radio_info.supported_channels[i].bss_overlap = 0;
-        m_radio_info.supported_channels[i].is_dfs      = numOfValidArgs[1];
-
-        i++;
-
-        chan = -1;
-        memset(dfs_state, 0, sizeof(dfs_state));
-
-        lineMsg = strtok_s(NULL, &dmaxLen, "\n", &p2str);
-    }
-
+    // Clear the supported channels vector
+    m_radio_info.supported_channels.clear();
+    // Resize the supported channels vector
+    m_radio_info.supported_channels.insert(m_radio_info.supported_channels.begin(),
+                                           supported_channels.begin(), supported_channels.end());
     return true;
 }
 
