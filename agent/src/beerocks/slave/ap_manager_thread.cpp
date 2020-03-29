@@ -387,6 +387,9 @@ void ap_manager_thread::after_select(bool timeout)
                 now + std::chrono::seconds(HEARTBEAT_NOTIFICATION_DELAY_SEC);
         }
     }
+
+    // allow clients with expired blocking period timer
+    allow_expired_clients();
 }
 
 bool ap_manager_thread::socket_disconnected(Socket *sd)
@@ -704,9 +707,41 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             //AP does not have the requested vap, probably will be handled on the other AP
             return true;
         }
+
         LOG(DEBUG) << "CLIENT_DISALLOW: mac = " << sta_mac << ", bssid = " << bssid;
 
         ap_wlan_hal->sta_deny(sta_mac, bssid);
+
+        // Check if validity period is set then add it to the "disallowed client timeouts" list
+        // This list will be polled in after_select()
+        // When validity period is timed out sta_allow will be called.
+        if (request->validity_period_sec()) {
+
+            disallowed_client_t disallowed_client;
+
+            // calculate new disallow timeout from client validity period parameter [sec]
+            disallowed_client.timeout = std::chrono::steady_clock::now() +
+                                        std::chrono::seconds(request->validity_period_sec());
+            disallowed_client.mac   = request->mac();
+            disallowed_client.bssid = request->bssid();
+
+            // Remove old disallow period timeout from the list before inserting new
+            remove_client_from_disallowed_list(request->mac(), request->bssid());
+
+            // insert new disallow timeout to the list
+            m_disallowed_clients.push_back(disallowed_client);
+
+            LOG(DEBUG) << "client " << disallowed_client.mac
+                       << " will be allowed to accosiate with bssid " << disallowed_client.bssid
+                       << " in "
+                       << std::chrono::duration_cast<std::chrono::seconds>(
+                              disallowed_client.timeout - std::chrono::steady_clock::now())
+                              .count()
+                       << "sec";
+        } else {
+            LOG(WARNING) << "CLIENT_DISALLOW validity period set to 0, STA mac " << request->mac()
+                         << " will remain blocked from bssid " << request->bssid();
+        }
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_ALLOW_REQUEST: {
