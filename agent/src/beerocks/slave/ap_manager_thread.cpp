@@ -693,6 +693,17 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
 
         std::string sta_mac = network_utils::mac_to_string(request->mac());
         std::string bssid   = network_utils::mac_to_string(request->bssid());
+
+        const auto &vap_unordered_map = ap_wlan_hal->get_radio_info().available_vaps;
+        auto it = std::find_if(vap_unordered_map.begin(), vap_unordered_map.end(),
+                               [&](const std::pair<int, bwl::VAPElement> &element) {
+                                   return element.second.mac == bssid;
+                               });
+
+        if (it == vap_unordered_map.end()) {
+            //AP does not have the requested vap, probably will be handled on the other AP
+            return true;
+        }
         LOG(DEBUG) << "CLIENT_DISALLOW: mac = " << sta_mac << ", bssid = " << bssid;
 
         ap_wlan_hal->sta_deny(sta_mac, bssid);
@@ -708,6 +719,18 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
 
         std::string sta_mac = network_utils::mac_to_string(request->mac());
         std::string bssid   = network_utils::mac_to_string(request->bssid());
+
+        const auto &vap_unordered_map = ap_wlan_hal->get_radio_info().available_vaps;
+        auto it = std::find_if(vap_unordered_map.begin(), vap_unordered_map.end(),
+                               [&](const std::pair<int, bwl::VAPElement> &element) {
+                                   return element.second.mac == bssid;
+                               });
+
+        if (it == vap_unordered_map.end()) {
+            //AP does not have the requested vap, probably will be handled on the other AP
+            return true;
+        }
+
         LOG(DEBUG) << "CLIENT_ALLOW: mac = " << sta_mac << ", bssid = " << bssid;
 
         ap_wlan_hal->sta_allow(sta_mac, bssid);
