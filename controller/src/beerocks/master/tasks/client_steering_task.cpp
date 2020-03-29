@@ -274,6 +274,8 @@ void client_steering_task::handle_event(int event_type, void *obj)
             TASK_LOG(DEBUG) << "disassoc_imminent flag is true, proceeding as usual";
         } else {
             TASK_LOG(DEBUG) << "aborting task";
+            // need to remove client from blacklist ASAP and not wait until the disallow period ends.
+            son_actions::unblock_sta(database, cmdu_tx, sta_mac);
             finish();
         }
     } else if (event_type == BTM_REPORT_RECEIVED) {
@@ -288,7 +290,4 @@ void client_steering_task::handle_task_end()
         database.update_node_11v_responsiveness(sta_mac, false);
     }
     database.set_node_handoff_flag(sta_mac, false);
-    if (!steer_restricted) {
-        son_actions::unblock_sta(database, cmdu_tx, sta_mac);
-    }
 }
