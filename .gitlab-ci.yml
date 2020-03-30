@@ -24,6 +24,20 @@ cppcheck:
   tags:
     - docker
 
+cppcheck-diff:
+  stage: build
+  image: prplfoundationinc/prplmesh-builder:alpine-3.11.3
+  script:
+    - ci/cppcheck/cppcheck-new-issues.sh
+  artifacts:
+    paths:
+      - cppcheck_results.txt
+    expire_in: 4 weeks
+    when: always
+  tags:
+    - docker
+
+
 flake8:
   stage: build
   image: pipelinecomponents/flake8:f087c4c
