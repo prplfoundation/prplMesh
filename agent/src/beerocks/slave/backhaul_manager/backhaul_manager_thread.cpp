@@ -1844,18 +1844,18 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
 }
 
-static std::string string_to_hex(const std::string &input)
-{
-    static const char hex_digits[] = "0123456789ABCDEF";
+// static std::string string_to_hex(const std::string &input)
+// {
+//     static const char hex_digits[] = "0123456789ABCDEF";
 
-    std::string output;
-    output.reserve(input.length() * 2);
-    for (unsigned char c : input) {
-        output.push_back(hex_digits[c >> 4]);
-        output.push_back(hex_digits[c & 15]);
-    }
-    return output;
-}
+//     std::string output;
+//     output.reserve(input.length() * 2);
+//     for (unsigned char c : input) {
+//         output.push_back(hex_digits[c >> 4]);
+//         output.push_back(hex_digits[c & 15]);
+//     }
+//     return output;
+// }
 
 bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                       const std::string &src_mac)
@@ -1914,20 +1914,37 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         // Add frame body of the most recently received (Re)Association Request frame from this client
         auto associated_clients = m_radio_info_map[client_ruid].associated_clients_map[client_vap];
         auto associatedClientsTuple = associated_clients[client_info_tlv_r->client_mac()];
-        auto len                    = std::get<1>(associatedClientsTuple).length();
-        auto s                      = std::get<1>(associatedClientsTuple);
+        // auto len                    = std::get<1>(associatedClientsTuple).length();
+        auto s = std::get<1>(associatedClientsTuple);
         LOG(DEBUG) << "**********************************************************************";
+        auto s_len = s.length();
+        LOG(DEBUG) << "s_len= " << s_len;
+        auto sub_str = s.substr(56, s_len - 56 - 18);
+        // reverse(sub_str.begin(), sub_str.end());
+        LOG(DEBUG) << "888888888888888888888888888888888888888888888888888888888";
 
-        auto hex_string = string_to_hex(s);
-        auto len_hex    = hex_string.length();
-        LOG(DEBUG) << "hex_string_length = " << len_hex;
-        client_capability_report_tlv->alloc_association_frame(len);
+        LOG(DEBUG) << "sub_str= " << sub_str;
 
         LOG(DEBUG) << "888888888888888888888888888888888888888888888888888888888";
 
-        auto x = reinterpret_cast<uint8_t *>(&s[56]);
+        auto len = sub_str.length();
+
+        // client_capability_report_tlv->alloc_association_frame(len);
+
+        // auto x = reinterpret_cast<uint8_t *>(&s[56]);
 
         // auto x = &s[56];
+
+        uint8_t array[sizeof(len / 2)];
+        for (size_t i = 0; i < len; i = i + 2) {
+            auto r     = sub_str.substr(i, 2);
+            uint16_t num = std::stoi(r, nullptr, 16);
+            memcpy(&array[i / 2], &num, 1);
+        }
+
+        LOG(DEBUG) << "******************       len of num = " << len/2
+                   << "****************************************************";
+        client_capability_report_tlv->alloc_association_frame(len/2);
 
         LOG(DEBUG) << "7777777777777777777";
         // std::copy_n(hex_string, len_hex,
@@ -1935,12 +1952,12 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
 
         // std::copy(hex_string, a + len, client_capability_report_tlv->association_frame());
 
-        std::copy_n(x, len-56-9*2, client_capability_report_tlv->association_frame());
+        std::copy_n(&array[0], len, client_capability_report_tlv->association_frame());
         // std::copy_n(reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple)[0]), 23,
         // client_capability_report_tlv->association_frame());
         LOG(DEBUG) << "**********************************************************************";
         LOG(DEBUG) << "association_frame = " << std::get<1>(associatedClientsTuple);
-        LOG(DEBUG) << "association_frame_length = " << len;
+        // LOG(DEBUG) << "association_frame_length = " << len;
 
         LOG(DEBUG) << "association_frame = " << client_capability_report_tlv->association_frame();
         LOG(DEBUG) << "association_frame_length = "
