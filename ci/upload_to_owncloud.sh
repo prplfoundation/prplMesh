@@ -51,8 +51,9 @@ main() {
     [ -n "$1" ] || { usage; err "Missing local-path"; exit 1; }
     local_path="$1"; shift
     status=0
+    OWNCLOUD_BROWSE_URL="https://ftp.essensium.com/owncloud/index.php/apps/files/?dir=$remote_path/$(basename "$local_path")"
 
-    info "upload $local_path to $OWNCLOUD_BROWSE_URL/$remote_path/$(basename $local_path)"
+    info "upload $local_path to $OWNCLOUD_BROWSE_URL"
     find "$local_path" -type d -exec \
         realpath {} --relative-to="$(dirname "$local_path")" \; | {
             return=0
@@ -84,7 +85,6 @@ main() {
 }
 
 OWNCLOUD_URL="https://ftp.essensium.com/owncloud/remote.php/dav/files"
-OWNCLOUD_BROWSE_URL="https://ftp.essensium.com/owncloud/index.php/apps/files/?dir=/prplmesh/certification"
 user="${user:=$(cut -f 4 -d ' '  < ~/.netrc)}"
 
 main "$@"
