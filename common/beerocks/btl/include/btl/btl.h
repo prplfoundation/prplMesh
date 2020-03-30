@@ -51,8 +51,6 @@ protected:
     bool send_cmdu_to_bus(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
                           const std::string &src_mac, uint16_t length);
 
-    static const std::string MULTICAST_MAC_ADDR;
-
 private:
     bool bus_init();
     bool bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,

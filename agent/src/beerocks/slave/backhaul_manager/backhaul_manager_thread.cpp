@@ -484,7 +484,8 @@ bool backhaul_manager::socket_disconnected(Socket *sd)
                     LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
                     return false;
                 }
-                send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
+
+                send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
             }
             return false;
         } else {
@@ -596,7 +597,7 @@ void backhaul_manager::after_select(bool timeout)
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return;
         }
-        send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
+        send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
     }
 }
 
@@ -1136,7 +1137,7 @@ bool backhaul_manager::send_1905_topology_discovery_message()
     tlvMac->mac() = network_utils::mac_from_string(bridge_info.mac);
 
     LOG(DEBUG) << "send_1905_topology_discovery_message, bridge_mac=" << bridge_info.mac;
-    return send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
+    return send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
 }
 
 bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> soc)
@@ -1226,7 +1227,7 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<SSlaveSock
     auto beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
     beerocks_header->actionhdr()->direction() = beerocks::BEEROCKS_DIRECTION_CONTROLLER;
     LOG(DEBUG) << "sending autoconfig search message, bridge_mac=" << bridge_info.mac;
-    return send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
+    return send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
 }
 
 bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
@@ -1611,7 +1612,7 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
     if (from_bus(sd)) {
 
         // Filter messages which are not destined to this agent
-        if (dst_mac != MULTICAST_MAC_ADDR && dst_mac != bridge_info.mac) {
+        if (dst_mac != network_utils::MULTICAST_1905_MAC_ADDR && dst_mac != bridge_info.mac) {
             LOG(DEBUG) << "handle_cmdu() - dropping msg, dst_mac=" << dst_mac
                        << ", local_bridge_mac=" << bridge_info.mac;
             return true;
@@ -1790,7 +1791,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
                 LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
                 return false;
             }
-            send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
+            send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
         }
 
         // If we're already connected, send a notification to the slave
@@ -2744,7 +2745,7 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return false;
         }
-        send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
+        send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
     }
     return true;
 }

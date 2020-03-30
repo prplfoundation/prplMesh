@@ -39,6 +39,7 @@ public:
     static const std::string ZERO_MAC_STRING;
     static const sMacAddr ZERO_MAC;
     static const std::string WILD_MAC_STRING;
+    static const std::string MULTICAST_1905_MAC_ADDR;
 
     typedef struct {
         uint16_t htype;

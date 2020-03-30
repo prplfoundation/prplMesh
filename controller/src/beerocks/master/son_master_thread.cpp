@@ -231,7 +231,8 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
 
         // Filter messages which are not destined to the controller
-        if (dst_mac != MULTICAST_MAC_ADDR && dst_mac != database.get_local_bridge_mac()) {
+        if (dst_mac != network_utils::MULTICAST_1905_MAC_ADDR &&
+            dst_mac != database.get_local_bridge_mac()) {
             return true;
         }
 
