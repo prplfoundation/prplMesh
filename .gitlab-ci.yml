@@ -101,7 +101,7 @@ run-tests:
   script:
     # Try to pull from dockerhub, if it fails, the run should fail
     - tools/docker/image-pull.sh
-    - tests/test_flows.py -v -u $RANDOM
+    - tests/test_flows.py -v -u $RANDOM --tcpdump
 
   artifacts:
     paths:
