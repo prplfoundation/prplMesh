@@ -511,7 +511,6 @@ bool backhaul_manager::socket_disconnected(Socket *sd)
                     LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
                     return false;
                 }
-                cmdu_header->flags().relay_indicator = true;
                 send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
             }
             return false;
@@ -624,7 +623,6 @@ void backhaul_manager::after_select(bool timeout)
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return;
         }
-        cmdu_header->flags().relay_indicator = true;
         send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
     }
 }
@@ -1813,7 +1811,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
                 LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
                 return false;
             }
-            cmdu_header->flags().relay_indicator = true;
             send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
         }
 
@@ -2771,7 +2768,6 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return false;
         }
-        cmdu_header->flags().relay_indicator = true;
         send_cmdu_to_bus(cmdu_tx, MULTICAST_MAC_ADDR, bridge_info.mac);
     }
     return true;
