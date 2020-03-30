@@ -53,11 +53,15 @@ main() {
 
     info "upload $local_path to $OWNCLOUD_BROWSE_URL/$remote_path/$(basename "$local_path") (using user $user)"
     if ! find "$local_path" -type d -exec \
-            realpath {} --relative-to="$(dirname "$local_path")" \; | \
+            realpath {} --relative-to="$(dirname "$local_path")" \; | {
+                error=0
                 while read -r -s dir; do
                     printf . # show progress
                     dbg "Create directory: $dir"
-                    curl ${QUIET:+ -s -S} -f -n -X MKCOL "$OWNCLOUD_URL/$user/$remote_path/$dir"
+                    curl ${QUIET:+ -s -S} -f -n -X MKCOL "$OWNCLOUD_URL/$user/$remote_path/$dir" || {
+                        error="$?"
+                        err "Failed to create dir: $remote_path/$dir/ (error $error)"
+                    }
                     printf . # show progress
                     # get the list of files to upload in the format <file>,<file>,...,<file>
                     files=$(find "$(dirname "$local_path")/$dir/" -type f -maxdepth 1 -print0 | tr '\0' ',' | sed 's/,$//')
@@ -66,10 +70,11 @@ main() {
                         curl ${QUIET:+ -s -S} -f -n -T "{$files}" "$OWNCLOUD_URL/$user/$remote_path/$dir/" || {
                             error="$?"
                             err "Failed to upload files to $remote_path/$dir/ (error $error)"
-                            exit $error
                         }
                     }
                 done
+                return $error
+            }
     then
         echo
         err "Upload failed"
