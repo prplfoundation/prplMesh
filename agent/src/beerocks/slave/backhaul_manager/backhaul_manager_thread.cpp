@@ -1935,22 +1935,24 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
 
         // auto x = &s[56];
 
-        uint8_t array[sizeof(len / 2)];
+        uint8_t array[len / 2];
         for (size_t i = 0; i < len; i = i + 2) {
-            auto r     = sub_str.substr(i, 2);
+            auto r       = sub_str.substr(i, 2);
             uint16_t num = std::stoi(r, nullptr, 16);
             memcpy(&array[i / 2], &num, 1);
         }
 
-        LOG(DEBUG) << "******************       len of num = " << len/2
+        LOG(DEBUG) << "******************       len of num = " << len / 2
                    << "****************************************************";
-        client_capability_report_tlv->alloc_association_frame(len/2);
+        client_capability_report_tlv->alloc_association_frame(len / 2);
 
         LOG(DEBUG) << "7777777777777777777";
         // std::copy_n(hex_string, len_hex,
         //             client_capability_report_tlv->association_frame());
 
-        std::copy(&array[0], &array[0] + len/2, client_capability_report_tlv->association_frame());
+        // auto a = &array[0];
+        std::copy(&array[0], &array[0] + len / 2,
+                  client_capability_report_tlv->association_frame());
 
         // std::copy_n(array, len/2, client_capability_report_tlv->association_frame());
         // std::copy_n(reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple)[0]), 23,
@@ -1959,7 +1961,8 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         LOG(DEBUG) << "association_frame = " << std::get<1>(associatedClientsTuple);
         // LOG(DEBUG) << "association_frame_length = " << len;
 
-        LOG(DEBUG) << "association_frame = " << client_capability_report_tlv->association_frame()[0];
+        LOG(DEBUG) << "association_frame = "
+                   << client_capability_report_tlv->association_frame()[0];
         LOG(DEBUG) << "association_frame_length = "
                    << client_capability_report_tlv->association_frame_length();
 
