@@ -336,6 +336,12 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
                     tasks.kill_task(prev_task_id);
                 }
             }
+
+            // If there is an instance of association handling task, kill it
+            int association_handling_task_id = database.get_association_handling_task_id(mac);
+            if (tasks.is_task_running(association_handling_task_id)) {
+                tasks.kill_task(association_handling_task_id);
+            }
         }
 
         // close slave socket
