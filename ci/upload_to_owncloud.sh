@@ -39,7 +39,7 @@ main() {
     while true; do
         case "$1" in
             -h | --help)            usage; exit 0;;
-            -v | --verbose)         export VERBOSE=true; shift;;
+            -v | --verbose)         VERBOSE=true; QUIET=false; shift;;
             -u | --owncloud-url)    OWNCLOUD_URL="$2"; shift 2;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1;;
@@ -61,7 +61,7 @@ main() {
                 printf . # show progress
                 dbg "Create directory: $dir"
                 echo "$OWNCLOUD_URL/$user/$remote_path/$dir"
-                curl -s -S -f -n -X MKCOL "$OWNCLOUD_URL/$user/$remote_path/$dir" || {
+                curl ${QUIET:+-s -S} -f -n -X MKCOL "$OWNCLOUD_URL/$user/$remote_path/$dir" || {
                         err "Failed to create dir: $remote_path/$dir/"
                         return=1
                 }
@@ -70,7 +70,7 @@ main() {
                 files=$(find "$(dirname "$local_path")/$dir/" -type f -maxdepth 1 -print0 | tr '\0' ',' | sed 's/,$//')
                 dbg "$files"
                 [ -n "$files" ] && {
-                    curl -s -S -f -n -T "{$files}" "$OWNCLOUD_URL/$user/$remote_path/$dir/" || {
+                    curl ${QUIET:+-s -S} -f -n -T "{$files}" "$OWNCLOUD_URL/$user/$remote_path/$dir/" || {
                         err "Failed to upload files to $remote_path/$dir/"
                         return=1
                     }
