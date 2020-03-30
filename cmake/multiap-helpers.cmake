@@ -29,12 +29,12 @@ if (${FORCE_COLORED_OUTPUT})
     endif ()
 endif ()
 
-if (NOT REVISION)
+if (NOT PRPLMESH_REVISION)
     execute_process(
         COMMAND "git" "rev-parse" "--short" "HEAD"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_STRIP_TRAILING_WHITESPACE 
-        OUTPUT_VARIABLE REVISION
+        OUTPUT_VARIABLE PRPLMESH_REVISION
     )
 endif()
 
@@ -44,4 +44,4 @@ endif()
 
 message(STATUS "prplmesh Version: ${prplmesh_VERSION}")
 message(STATUS "prplmesh Build Date: ${BUILD_DATE}")
-message(STATUS "prplmesh Revision: ${REVISION}")
+message(STATUS "prplmesh Revision: ${PRPLMESH_REVISION}")
