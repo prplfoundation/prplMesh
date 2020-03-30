@@ -1950,9 +1950,9 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         // std::copy_n(hex_string, len_hex,
         //             client_capability_report_tlv->association_frame());
 
-        // std::copy(hex_string, a + len, client_capability_report_tlv->association_frame());
+        std::copy(&array[0], &array[0] + len/2, client_capability_report_tlv->association_frame());
 
-        std::copy_n(array, len/2, client_capability_report_tlv->association_frame());
+        // std::copy_n(array, len/2, client_capability_report_tlv->association_frame());
         // std::copy_n(reinterpret_cast<uint8_t *>(&std::get<1>(associatedClientsTuple)[0]), 23,
         // client_capability_report_tlv->association_frame());
         LOG(DEBUG) << "**********************************************************************";
