@@ -64,6 +64,8 @@ Alternatively, [tools/maptools.py](tools/README.md) can be used to build and ins
 
 Note - to build and run with Docker, see provided [building with docker](tools/docker/README.md)
 
+Build artifacts are also available through the following link: https://ftp.essensium.com/owncloud/index.php/s/Sp7esHfmfH3bfwn .
+
 ## Running Instructions
 
 Once built, prplMesh controller, agent and framework can be started using `prplmesh_utils.sh`:
