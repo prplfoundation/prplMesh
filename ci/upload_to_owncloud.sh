@@ -74,5 +74,6 @@ main() {
 
 OWNCLOUD_URL="https://ftp.essensium.com/owncloud/remote.php/dav/files"
 OWNCLOUD_BROWSE_URL="https://ftp.essensium.com/owncloud/index.php/apps/files/?dir=/prplmesh/certification"
+user="${user:=$(cut -f 4 -d ' '  < ~/.netrc)}"
 
 main "$@"
