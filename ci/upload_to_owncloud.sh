@@ -50,6 +50,7 @@ main() {
     remote_path="$1"; shift
     [ -n "$1" ] || { usage; err "Missing local-path"; exit 1; }
     local_path="$1"; shift
+    OWNCLOUD_BROWSE_URL="https://ftp.essensium.com/owncloud/index.php/apps/files/?dir=$remote_path/$(basename "$local_path")"
 
     info "upload $local_path to $OWNCLOUD_BROWSE_URL/$remote_path/$(basename "$local_path") (using user $user)"
     if ! find "$local_path" -type d -exec \
