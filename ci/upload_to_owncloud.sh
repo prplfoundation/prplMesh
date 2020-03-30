@@ -50,14 +50,20 @@ main() {
     remote_path="$1"; shift
     [ -n "$1" ] || { usage; err "Missing local-path"; exit 1; }
     local_path="$1"; shift
+    status=0
 
     info "upload $local_path to $OWNCLOUD_BROWSE_URL/$remote_path/$(basename $local_path)"
     find "$local_path" -type d -exec \
-        realpath {} --relative-to="$(dirname "$local_path")" \; | \
+        realpath {} --relative-to="$(dirname "$local_path")" \; | {
+            return=0
             while read -r -s dir; do
                 printf . # show progress
-                dbg "Create directory: $dir" 
-                curl -s -S -f -n -X MKCOL "$OWNCLOUD_URL/$user/$remote_path/$dir"
+                dbg "Create directory: $dir"
+                echo "$OWNCLOUD_URL/$user/$remote_path/$dir"
+                curl -s -S -f -n -X MKCOL "$OWNCLOUD_URL/$user/$remote_path/$dir" || {
+                        err "Failed to create dir: $remote_path/$dir/"
+                        return=1
+                }
                 printf . # show progress
                 # get the list of files to upload in the format <file>,<file>,...,<file>
                 files=$(find "$(dirname "$local_path")/$dir/" -type f -maxdepth 1 -print0 | tr '\0' ',' | sed 's/,$//')
@@ -65,11 +71,16 @@ main() {
                 [ -n "$files" ] && {
                     curl -s -S -f -n -T "{$files}" "$OWNCLOUD_URL/$user/$remote_path/$dir/" || {
                         err "Failed to upload files to $remote_path/$dir/"
+                        return=1
                     }
                 }
             done
+            return $return
+        }
+    status=$?
     printf '\n'
     info "done"
+    return $status
 }
 
 OWNCLOUD_URL="https://ftp.essensium.com/owncloud/remote.php/dav/files"
