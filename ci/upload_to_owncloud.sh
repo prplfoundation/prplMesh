@@ -136,7 +136,7 @@ main() {
     [ -n "$1" ] || { usage; err "Missing local-path"; exit 1; }
     local_path="$1"; shift
 
-    info "upload $local_path to $OWNCLOUD_BROWSE_URL/$remote_path/$(basename "$local_path") (using user $user)"
+    info "upload $local_path to $remote_path at $OWNCLOUD_URL (using user $user)"
 
     if ! command -v uuidgen > /dev/null ; then
         err "You need uuidgen to use this script. Please install it and try again."
@@ -193,7 +193,6 @@ main() {
 }
 
 OWNCLOUD_URL="https://ftp.essensium.com/owncloud/remote.php/dav/files"
-OWNCLOUD_BROWSE_URL="https://ftp.essensium.com/owncloud/index.php/apps/files/?dir=/prplmesh/certification"
 QUIET=true
 user=$(awk '/ftp.essensium.com/{getline; print $4}' ~/.netrc)
 
