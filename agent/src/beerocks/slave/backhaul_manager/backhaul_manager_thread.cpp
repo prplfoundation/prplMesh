@@ -1925,9 +1925,9 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
 
         LOG(DEBUG) << "888888888888888888888888888888888888888888888888888888888";
 
-        // auto x = reinterpret_cast<uint8_t *>(&s[0]);
+        auto x = reinterpret_cast<uint8_t *>(&s[56]);
 
-        auto x = &s[56];
+        // auto x = &s[56];
 
         LOG(DEBUG) << "7777777777777777777";
         // std::copy_n(hex_string, len_hex,
