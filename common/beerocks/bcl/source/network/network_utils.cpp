@@ -76,6 +76,7 @@ const std::string network_utils::ZERO_IP_STRING("0.0.0.0");
 const std::string network_utils::ZERO_MAC_STRING("00:00:00:00:00:00");
 const sMacAddr network_utils::ZERO_MAC{.oct = {0}};
 const std::string network_utils::WILD_MAC_STRING("ff:ff:ff:ff:ff:ff");
+const std::string network_utils::MULTICAST_1905_MAC_ADDR("01:80:c2:00:00:13");
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
