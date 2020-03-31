@@ -30,6 +30,7 @@ enum eMediaType: uint16_t {
     IEEE_802_11AC_5_GHZ = 0x105,
     IEEE_802_11AD_60_GHZ = 0x106,
     IEEE_802_11AF = 0x107,
+    IEEE_802_11AX = 0x108,
     IEEE_1901_WAVELET = 0x200,
     IEEE_1901_FFT = 0x201,
     MOCA_V1_1 = 0x300,

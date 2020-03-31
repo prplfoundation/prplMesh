@@ -506,6 +506,14 @@ uint8_t& cACTION_BACKHAUL_ENABLE::backhaul_preferred_radio_band() {
     return (uint8_t&)(*m_backhaul_preferred_radio_band);
 }
 
+beerocks::eFreqType& cACTION_BACKHAUL_ENABLE::frequency_band() {
+    return (beerocks::eFreqType&)(*m_frequency_band);
+}
+
+beerocks::eWiFiBandwidth& cACTION_BACKHAUL_ENABLE::max_bandwidth() {
+    return (beerocks::eWiFiBandwidth&)(*m_max_bandwidth);
+}
+
 std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_BACKHAUL_ENABLE::supported_channels_list(size_t idx) {
     bool ret_success = ( (m_supported_channels_list_idx__ > 0) && (m_supported_channels_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
@@ -521,6 +529,8 @@ void cACTION_BACKHAUL_ENABLE::class_swap()
     m_iface_mac->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_security_type));
     m_preferred_bssid->struct_swap();
+    tlvf_swap(8*sizeof(beerocks::eFreqType), reinterpret_cast<uint8_t*>(m_frequency_band));
+    tlvf_swap(8*sizeof(beerocks::eWiFiBandwidth), reinterpret_cast<uint8_t*>(m_max_bandwidth));
     for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels_list[i].struct_swap();
     }
@@ -569,6 +579,8 @@ size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
     class_size += sizeof(uint8_t); // wireless_iface_type
     class_size += sizeof(uint8_t); // mem_only_psk
     class_size += sizeof(uint8_t); // backhaul_preferred_radio_band
+    class_size += sizeof(beerocks::eFreqType); // frequency_band
+    class_size += sizeof(beerocks::eWiFiBandwidth); // max_bandwidth
     class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
     return class_size;
 }
@@ -649,6 +661,16 @@ bool cACTION_BACKHAUL_ENABLE::init()
     m_backhaul_preferred_radio_band = (uint8_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_frequency_band = (beerocks::eFreqType*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::eFreqType))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::eFreqType) << ") Failed!";
+        return false;
+    }
+    m_max_bandwidth = (beerocks::eWiFiBandwidth*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::eWiFiBandwidth))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::eWiFiBandwidth) << ") Failed!";
         return false;
     }
     m_supported_channels_list = (beerocks::message::sWifiChannel*)m_buff_ptr__;
