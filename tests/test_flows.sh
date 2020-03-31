@@ -197,9 +197,8 @@ test_client_capability_query() {
     dbg "Confirming client capability report message has been received on controller"
     check_log ${GATEWAY} controller "Received CLIENT_CAPABILITY_REPORT_MESSAGE"
     check_log ${GATEWAY} controller "Result Code= SUCCESS, client MAC= ${sta_mac2}, BSSID= ${mac_agent1_wlan0}"
-    check_log ${GATEWAY} controller "(Re)Association Request frame= dummy association frame"
     return $check_error
-}
+}   
 
 test_client_association_dummy(){
     status "test client association dummy"
