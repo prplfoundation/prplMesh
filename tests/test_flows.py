@@ -18,6 +18,7 @@ import json
 
 from capi import tlv, UCCSocket
 from opts import debug, err, message, opts, status
+import sniffer
 
 '''Regular expression to match a MAC address in a bytes string.'''
 RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
@@ -108,32 +109,11 @@ class TestFlows:
 
     def tcpdump_start(self):
         '''Start tcpdump if enabled by config.'''
-        if opts.tcpdump:
-            os.makedirs(os.path.join(self.rootdir, 'logs'), exist_ok=True)
-            outputfile = os.path.join(self.rootdir, 'logs', 'test_{}.pcap'.format(self.running))
-            debug("Starting tcpdump, output file {}".format(outputfile))
-            bridge = self.get_bridge_interface()
-
-            self.tcpdump_proc = subprocess.Popen(["tcpdump", "-i", bridge, "-w", outputfile], stderr=subprocess.PIPE)
-            # tcpdump takes a while to start up. Wait for the appropriate output before continuing.
-            # poll() so we exit the loop if tcpdump terminates for any reason.
-            while not self.tcpdump_proc.poll():
-                line = self.tcpdump_proc.stderr.readline()
-                debug(line.decode()[:-1])  # strip off newline
-                if line.startswith(b"tcpdump: listening on " + bridge.encode()):
-                    # Make sure it doesn't block due to stderr buffering
-                    self.tcpdump_proc.stderr.close()
-                    break
-            else:
-                err("tcpdump terminated")
-                self.tcpdump_proc = None
+        self.sniffer.start('test_{}'.format(self.running))
 
     def tcpdump_kill(self):
         '''Stop tcpdump if it is running.'''
-        if self.tcpdump_proc:
-            status("Terminating tcpdump")
-            self.tcpdump_proc.terminate()
-            self.tcpdump_proc = None
+        self.sniffer.stop()
 
     def docker_command(self, device: str, *command: str) -> bytes:
         '''Execute `command` in docker container `device` and return its output.'''
@@ -198,6 +178,9 @@ class TestFlows:
         self.repeater1 = 'repeater1-' + self.opts.unique_id
         self.repeater2 = 'repeater2-' + self.opts.unique_id
         self.on_wsl = "microsoft" in platform.uname()[3].lower()
+
+        self.sniffer = sniffer.Sniffer(self.get_bridge_interface())
+
         if not self.opts.skip_init:
             self.tcpdump_start()
             try:
@@ -1017,6 +1000,7 @@ if __name__ == '__main__':
 
     opts.verbose = options.verbose
     opts.tcpdump = options.tcpdump
+    opts.tcpdump_dir = os.path.join(t.rootdir, 'logs')
     opts.stop_on_failure = options.stop_on_failure
 
     t.opts = options
