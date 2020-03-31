@@ -29,6 +29,52 @@ usage() {
     echo ""
 }
 
+create_dir() {
+    # create dir $1 in $OWNCLOUD_URL/$user/.
+    # if $2 is true, try to delete any existing dir first.
+    #
+    # note: parent directories are not created automatically, so make sure
+    #       to create them if they don't exist yet.
+    #
+    # uses:
+    #   OWNCLOUD_URL
+    #   user
+    local dir delete status
+    dir="$1"
+    delete="$2"
+    status=0
+
+    dbg "Create directory: $dir"
+    if [ "$delete" = true ] ; then
+        curl ${QUIET:+-s -S} -f -n -X DELETE "$OWNCLOUD_URL/$user/$dir" > /dev/null 2>&1
+    fi
+    curl ${QUIET:+ -s -S} -f -n -X MKCOL "$OWNCLOUD_URL/$user/$dir" || {
+        status="$?"
+        err "Failed to create dir: $dir (error $status)"
+    }
+    return "$status"
+}
+
+upload_files() {
+    # Upload files given as arguments.
+    # $1 the directory to upload to (make sure it exists already).
+    # $2 the files to upload, comma separated.
+    # uses:
+    #
+    #   OWNCLOUD_URL
+    #   user
+    local dir files status
+    dir="$1"
+    files="$2"
+    status=0
+
+    curl ${QUIET:+ -s -S} -f -n -T "{$files}" "$OWNCLOUD_URL/$user/$dir/" || {
+        status="$?"
+        err "Failed to upload files to $dir (error $status)"
+    }
+    return "$status"
+}
+
 main() {
     if ! OPTS=$(getopt -o 'hvu:' --long help,verbose,url: -n 'parse-options' -- "$@"); then
         echo echo "Failed parsing options." >&2; usage; exit 1
@@ -57,10 +103,8 @@ main() {
                 error=0
                 while read -r -s dir; do
                     printf . # show progress
-                    dbg "Create directory: $dir"
-                    curl ${QUIET:+ -s -S} -f -n -X MKCOL "$OWNCLOUD_URL/$user/$remote_path/$dir" || {
+                    create_dir "$remote_path/$dir" || {
                         error="$?"
-                        err "Failed to create dir: $remote_path/$dir/ (error $error) skipping."
                         continue
                     }
                     printf . # show progress
@@ -68,9 +112,8 @@ main() {
                     files=$(find "$(dirname "$local_path")/$dir/" -type f -maxdepth 1 -print0 | tr '\0' ',' | sed 's/,$//')
                     dbg "$files"
                     [ -n "$files" ] && {
-                        curl ${QUIET:+ -s -S} -f -n -T "{$files}" "$OWNCLOUD_URL/$user/$remote_path/$dir/" || {
+                        upload_files "remote_path/$dir" "$files" || {
                             error="$?"
-                            err "Failed to upload files to $remote_path/$dir/ (error $error)"
                         }
                     }
                 done
