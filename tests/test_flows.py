@@ -64,8 +64,6 @@ class TestFlows:
         self.rootdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
         self.installdir = os.path.join(self.rootdir, 'build', 'install')
         self.running = ''
-        self.tcpdump_proc = None
-        self.bridge_name = 'br-lan'
 
     def fail(self, msg: str) -> bool:
         '''Print a red error message, increment failure count and return False.'''
