@@ -88,7 +88,7 @@ public:
      * @return True on success and false otherwise.
      */
     virtual bool send_receive_msg(std::function<bool(struct nl_msg *msg)> msg_create,
-                                  std::function<bool(struct nl_msg *msg)> msg_handle);
+                                  std::function<void(struct nl_msg *msg)> msg_handle);
 
 protected:
     /**
