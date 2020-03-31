@@ -108,6 +108,7 @@ class TestFlows:
     def tcpdump_start(self):
         '''Start tcpdump if enabled by config.'''
         if opts.tcpdump:
+            os.makedirs(os.path.join(self.rootdir, 'logs'), exist_ok=True)
             outputfile = os.path.join(self.rootdir, 'logs', 'test_{}.pcap'.format(self.running))
             debug("Starting tcpdump, output file {}".format(outputfile))
             bridge = self.get_bridge_interface()
