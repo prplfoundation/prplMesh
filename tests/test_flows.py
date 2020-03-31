@@ -77,14 +77,6 @@ class TestFlows:
         self.running = test
         status(test + " starting")
 
-    def tcpdump_start(self):
-        '''Start tcpdump if enabled by config.'''
-        env.wired_sniffer.start('test_{}'.format(self.running))
-
-    def tcpdump_kill(self):
-        '''Stop tcpdump if it is running.'''
-        env.wired_sniffer.stop()
-
     def docker_command(self, device: str, *command: str) -> bytes:
         '''Execute `command` in docker container `device` and return its output.'''
         return subprocess.check_output(("docker", "exec", device) + command)
@@ -239,13 +231,14 @@ class TestFlows:
         if not tests:
             tests = self.tests
         for test in tests:
+            test_full = 'test_' + test
             self.start_test(test)
-            self.tcpdump_start()
+            env.wired_sniffer.start(test_full)
             self.check_error = 0
             try:
-                getattr(self, 'test_' + test)()
+                getattr(self, test_full)()
             finally:
-                self.tcpdump_kill()
+                env.wired_sniffer.stop()
             if self.check_error != 0:
                 err(test + " failed")
             else:
