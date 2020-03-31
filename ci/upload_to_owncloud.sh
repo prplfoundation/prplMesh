@@ -75,6 +75,26 @@ upload_files() {
     return "$status"
 }
 
+move() {
+    # move $1 to $2 on remote.
+    # if $2 already exists, it's completely overwritten.
+    #
+    # uses:
+    #   OWNCLOUD_URL
+    #   user
+    local src dst status
+    src="$1"
+    dst="$2"
+    status=0
+    dbg "Moving \"$src\" to \"$dst\" on the remote"
+    curl ${QUIET:+-s -S} -f -n -X MOVE --header \
+         "Destination: $OWNCLOUD_URL/$user/$dst" "$OWNCLOUD_URL/$user/$src" || {
+        status="$?"
+        err "Failed to move $src to $dst (error $status)"
+    }
+    return "$status"
+}
+
 main() {
     if ! OPTS=$(getopt -o 'hvu:' --long help,verbose,url: -n 'parse-options' -- "$@"); then
         echo echo "Failed parsing options." >&2; usage; exit 1
