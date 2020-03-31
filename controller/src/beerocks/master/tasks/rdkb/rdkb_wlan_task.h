@@ -119,6 +119,7 @@ private:
     std::vector<sBmlRdkbWlanListener> bml_rdkb_wlan_listeners_sockets;
 
     bool is_bml_rdkb_wlan_listener_exist();
+    bool is_bml_rdkb_wlan_listener_socket(Socket *sd);
     Socket *get_bml_rdkb_wlan_socket_at(uint32_t idx);
     bool get_bml_rdkb_wlan_events_update_enable(Socket *sd);
     bool set_bml_rdkb_wlan_events_update_enable(Socket *sd, bool update_enable);

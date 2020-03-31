@@ -377,16 +377,18 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
     case STEERING_REMOVE_SOCKET: {
         if (obj) {
             auto event_obj = (listener_general_register_unregister_event *)obj;
-            TASK_LOG(DEBUG) << "STEERING_REMOVE_SOCKET event was received";
+            if (is_bml_rdkb_wlan_listener_socket(event_obj->sd)) {
+                TASK_LOG(DEBUG) << "STEERING_REMOVE_SOCKET event was received";
 
-            if (!set_bml_rdkb_wlan_events_update_enable(event_obj->sd, false)) {
-                TASK_LOG(ERROR) << "fail in set_bml_rdkb_wlan_events_update_enable";
-            }
+                if (!set_bml_rdkb_wlan_events_update_enable(event_obj->sd, false)) {
+                    TASK_LOG(ERROR) << "fail in set_bml_rdkb_wlan_events_update_enable";
+                }
 
-            remove_bml_rdkb_wlan_socket(event_obj->sd);
+                remove_bml_rdkb_wlan_socket(event_obj->sd);
 
-            if (!is_bml_rdkb_wlan_listener_exist()) {
-                state = IDLE;
+                if (!is_bml_rdkb_wlan_listener_exist()) {
+                    state = IDLE;
+                }
             }
         }
         break;
@@ -844,6 +846,19 @@ bool rdkb_wlan_task::is_bml_rdkb_wlan_listener_exist()
         listener_exist = (*it).events_updates;
         if (listener_exist) {
             return true;
+        }
+    }
+    return false;
+}
+
+bool rdkb_wlan_task::is_bml_rdkb_wlan_listener_socket(Socket *sd)
+{
+    if (sd) {
+        for (auto it = bml_rdkb_wlan_listeners_sockets.begin();
+             it < bml_rdkb_wlan_listeners_sockets.end(); it++) {
+            if (sd == (*it).sd) {
+                return true;
+            }
         }
     }
     return false;
