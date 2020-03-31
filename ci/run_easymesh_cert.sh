@@ -54,7 +54,7 @@ main() {
             -h | --help)            usage; exit 0;;
             -b | --branch)          BRANCH="$2"; shift 2;;
             -o | --log-folder)      LOG_FOLDER="$2"; shift 2;;
-            -v | --verbose)         VERBOSE=true; VERBOSE_OPT="-v"; shift;;
+            -v | --verbose)         VERBOSE=true; shift;;
             -e | --easymesh-cert)   EASYMESH_CERT_PATH="$2"; shift 2;;
             --owncloud-upload)      OWNCLOUD_UPLOAD=true; shift;;
             --owncloud-path)        OWNCLOUD_PATH="$2"; shift 2;;
