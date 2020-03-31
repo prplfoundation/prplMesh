@@ -2253,14 +2253,12 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         tlvDeviceInformation->add_local_interface_list(localInterfaceInfo);
     }
 
-    // TODO: Add a LocalInterfaceInfo field for each wireless interface.
-    // This is something that cannot be done at this moment because the MediaType field
-    // must be computed with information obtained through NL80211_CMD_GET_WIPHY command of DWPAL,
-    // which is currently not supported. See "Send standard NL80211 commands using DWPAL #782"
-    // For now, fill from radio data with dummy values based on information we have.
+    /**
+     * Add a LocalInterfaceInfo field for each wireless interface.
+     */
     for (const auto &soc : slaves_sockets) {
         // Iterate on front radio iface and then switch to back radio iface
-        auto fill_radio_iface_info = [&](bool front_iface) {
+        auto fill_radio_iface_info = [&](ieee1905_1::eMediaType media_type, bool front_iface) {
             LOG(DEBUG) << "filling interface information on radio="
                        << (front_iface ? soc->radio_mac : soc->radio_mac + " backhaul");
 
@@ -2280,16 +2278,6 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             LOG(DEBUG) << "Added radio interface to tlvDeviceInformation: "
                        << localInterfaceInfo->mac();
 
-            ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
-            if (soc->freq_type == beerocks::eFreqType::FREQ_24G) {
-                media_type = ieee1905_1::eMediaType::IEEE_802_11N_2_4_GHZ;
-            } else if (soc->freq_type == beerocks::eFreqType::FREQ_5G) {
-                media_type = ieee1905_1::eMediaType::IEEE_802_11AC_5_GHZ;
-            } else {
-                LOG(ERROR) << "Unsupported freq_type=" << int(soc->freq_type)
-                           << ", iface=" << soc->hostap_iface;
-                return false;
-            }
             localInterfaceInfo->media_type() = media_type;
 
             ieee1905_1::s802_11SpecificInformation media_info = {};
@@ -2331,13 +2319,22 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             return true;
         };
 
-        if (!fill_radio_iface_info(true)) {
+        std::string local_interface_name = soc->hostap_iface;
+
+        ieee1905_1::eMediaTypeGroup media_type_group = ieee1905_1::eMediaTypeGroup::IEEE_802_11;
+        ieee1905_1::eMediaType media_type            = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+        if (!get_media_type(local_interface_name, media_type_group, media_type)) {
+            LOG(ERROR) << "Unable to compute media type for interface " << local_interface_name;
+            return false;
+        }
+
+        if (!fill_radio_iface_info(media_type, true)) {
             LOG(DEBUG) << "filling interface information on radio=" << soc->radio_mac
                        << " has failed!";
             return true;
         }
 
-        if (!fill_radio_iface_info(false)) {
+        if (!fill_radio_iface_info(media_type, false)) {
             LOG(DEBUG) << "filling interface information on radio=" << soc->radio_mac
                        << " backhaul has failed!";
             return true;
