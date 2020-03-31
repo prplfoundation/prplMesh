@@ -283,6 +283,33 @@ private:
     std::unordered_map<sMacAddr, sRadioInfo> m_radio_info_map;
 
     /**
+     * @brief Gets media type group for given interface.
+     *
+     * @param[in] interface_name Name of the local interface.
+     * @param[in, out] media_type_group The media type group of the connecting interface.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool get_media_type_group(const std::string &interface_name,
+                              ieee1905_1::eMediaTypeGroup &media_type_group);
+
+    /**
+     * @brief Gets media type for given interface.
+     *
+     * The mechanism to use to obtain media type depends on the media type group:
+     * Ethernet, WiFi, MoCA, etc.
+     *
+     * @param[in] interface_name Name of the local interface.
+     * @param[in] media_type_group The media type group of the connecting interface.
+     * @param[in, out] media_type The underlying network technology of the connecting interface.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool get_media_type(const std::string &interface_name,
+                        ieee1905_1::eMediaTypeGroup media_type_group,
+                        ieee1905_1::eMediaType &media_type);
+
+    /**
      * @brief Gets the list of neighbor links from topology database.
      *
      * Neighbor links are pairs (interface, neighbor) where 'interface' is the name of the interface
