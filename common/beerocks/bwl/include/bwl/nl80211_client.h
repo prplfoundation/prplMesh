@@ -171,6 +171,23 @@ public:
          * @return True if this band is the 5GHz band and false otherwise.
          */
         bool is_5ghz_band() const { return beerocks::eFreqType::FREQ_5G == get_frequency_band(); }
+
+        /**
+         * @brief Gets the maximum supported bandwidth by all the channels in the band.
+         *
+         * @return Maximum supported bandwidth
+         */
+        beerocks::eWiFiBandwidth get_max_bandwidth() const
+        {
+            beerocks::eWiFiBandwidth max_bandwith = beerocks::eWiFiBandwidth::BANDWIDTH_UNKNOWN;
+
+            for (const auto &it : supported_channels) {
+                channel_info channel = it.second;
+                max_bandwith         = std::max(max_bandwith, channel.get_max_bandwidth());
+            }
+
+            return max_bandwith;
+        }
     };
 
     /**
