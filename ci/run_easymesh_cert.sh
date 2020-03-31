@@ -19,13 +19,13 @@ usage() {
     echo "usage: $(basename $0) [-hboev] <test> [test]"
     echo "  options:"
     echo "      -h|--help - display this help."
+    echo "      -v|--verbose - set verbosity (ucc logs also redirected to stdout)"
     echo "      -b|--branch - prplmesh branch to use (default master latest)"
     echo "      -o|--log-folder - path to put the logs to (make sure it does not contain previous logs)."
     echo "      -e|--easymesh-cert - path to easymesh_cert repository (default ../easymesh_cert)"
+    echo "      -s|--ssh - target device ssh name (defined in ~/.ssh/config). (default: $TARGET_DEVICE_SSH)"
     echo "      --owncloud-upload - whether or not to upload results to owncloud. (default: false)"
     echo "      --owncloud-path - relative path in the owncloud server to upload results to. (default: $OWNCLOUD_PATH)"
-    echo "      -v|--verbose - set verbosity (ucc logs also redirected to stdout)"
-    echo "      -s|--ssh - target device ssh name (defined in ~/.ssh/config). (default: $TARGET_DEVICE_SSH)"
     echo "'test' can either be a test name, or the path to a file containing"
     echo " test names (newline-separated)."
     echo
@@ -43,22 +43,24 @@ usage() {
 }
 
 main() {
-    OPTS=$(getopt -o 'hb:o:e:s:v' --long help,branch:,log-folder:,easymesh-cert:,owncloud-upload,owncloud-path:,ssh:,verbose -n 'parse-options' -- "$@")
-
-    if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; usage; exit 1 ; fi
+    if ! OPTS=$(getopt -o 'hvb:o:e:s:' --long help,verbose,branch:,log-folder:,easymesh-cert:,ssh:,owncloud-upload,owncloud-path: -n 'parse-options' -- "$@"); then
+        err "Failed parsing options." >&2
+        usage
+        exit 1
+    fi
 
     eval set -- "$OPTS"
 
     while true; do
         case "$1" in
             -h | --help)            usage; exit 0;;
+            -v | --verbose)         VERBOSE=true; shift;;
             -b | --branch)          BRANCH="$2"; shift 2;;
             -o | --log-folder)      LOG_FOLDER="$2"; shift 2;;
-            -v | --verbose)         VERBOSE=true; shift;;
             -e | --easymesh-cert)   EASYMESH_CERT_PATH="$2"; shift 2;;
+            -s | --ssh)             TARGET_DEVICE_SSH="$2"; shift 2;;
             --owncloud-upload)      OWNCLOUD_UPLOAD=true; shift;;
             --owncloud-path)        OWNCLOUD_PATH="$2"; shift 2;;
-            -s | --ssh)             TARGET_DEVICE_SSH="$2"; shift 2;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1;;
         esac
