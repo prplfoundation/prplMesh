@@ -1640,14 +1640,14 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
         const auto &iface_mac = iface_info.mac();
         auto iface_mac_str    = network_utils::mac_to_string(iface_mac);
 
-        const auto media_type = iface_info.media_type();
+        const auto media_type       = iface_info.media_type();
+        const auto media_type_group = media_type >> 8;
 
         // For wireless interface it is defined on IEEE 1905.1 that the size of the media info
         // is n=10 octets, which the size of s802_11SpecificInformation struct.
         // For wired interface n=0.
-        if (media_type >= ieee1905_1::eMediaType::IEEE_802_11B_2_4_GHZ &&
-            media_type <= ieee1905_1::eMediaType::IEEE_802_11AF &&
-            iface_info.media_info_length() == 10) {
+        if ((ieee1905_1::eMediaTypeGroup::IEEE_802_11 == media_type_group) &&
+            (iface_info.media_info_length() == 10)) {
 
             const auto media_info = reinterpret_cast<ieee1905_1::s802_11SpecificInformation *>(
                 iface_info.media_info(0));
