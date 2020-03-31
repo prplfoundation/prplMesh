@@ -137,12 +137,29 @@ main() {
     local_path="$1"; shift
 
     info "upload $local_path to $OWNCLOUD_BROWSE_URL/$remote_path/$(basename "$local_path") (using user $user)"
+
+    if ! command -v uuidgen > /dev/null ; then
+        err "You need uuidgen to use this script. Please install it and try again."
+        exit 1
+    fi
+
+    # We'll group uploads in the following directory in the user home
+    # we don't care if create_dir fails because it may already exist:
+    create_dir "temp_uploads" > /dev/null 2>&1
+
+    remote_temp_path="temp_uploads/$(uuidgen)"
+    create_dir "$remote_temp_path"
+
+    info "Using temporary path $remote_temp_path"
+
+    status=0
+
     if ! find "$local_path" -type d -exec \
             realpath {} --relative-to="$(dirname "$local_path")" \; | {
                 error=0
                 while read -r -s dir; do
                     printf . # show progress
-                    create_dir "$remote_path/$dir" || {
+                    create_dir "$remote_temp_path/$dir" || {
                         error="$?"
                         continue
                     }
@@ -151,7 +168,7 @@ main() {
                     files=$(find "$(dirname "$local_path")/$dir/" -type f -maxdepth 1 -print0 | tr '\0' ',' | sed 's/,$//')
                     dbg "$files"
                     [ -n "$files" ] && {
-                        upload_files "remote_path/$dir" "$files" || {
+                        upload_files "$remote_temp_path/$dir" "$files" || {
                             error="$?"
                         }
                     }
@@ -160,11 +177,19 @@ main() {
             }
     then
         echo
-        err "Upload failed"
-        return 1
+        err "Uploading to a temporary directory failed!"
+        status=1
+    else
+        success "Uploading to a temporary directory succeeded!"
     fi
     echo
-    success "Upload success"
+
+    info "Moving the temporary directory $remote_temp_path to $remote_path"
+    move "$remote_temp_path" "$remote_path" || {
+        status="$?"
+    }
+
+    return "$status"
 }
 
 OWNCLOUD_URL="https://ftp.essensium.com/owncloud/remote.php/dav/files"
