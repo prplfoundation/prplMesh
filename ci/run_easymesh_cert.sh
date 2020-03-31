@@ -22,6 +22,7 @@ usage() {
     echo "      -v|--verbose - set verbosity (ucc logs also redirected to stdout)"
     echo "      -o|--log-folder - path to put the logs to (make sure it does not contain previous logs)."
     echo "      -e|--easymesh-cert - path to easymesh_cert repository (default ../easymesh_cert)"
+    echo "      -d|--device - select DUT device to use, valid options - glinet-1300, netgear-rax40, turris-omnia, marvell, qualcomm, broadcom, mediatek (default: netgear-rax40)"
     echo "      -s|--ssh - target device ssh name (defined in ~/.ssh/config). (default: $TARGET_DEVICE_SSH)"
     echo "      --owncloud-upload - whether or not to upload results to owncloud. (default: false)"
     echo "      --owncloud-path - relative path in the owncloud server to upload results to. (default: $OWNCLOUD_PATH)"
@@ -42,7 +43,20 @@ usage() {
     echo ""
 }
 
+is_prplmesh_device() {
+    case "$1" in
+        netgear-rax40) return 0;;
+        turris-omnia) return 0;;
+        glinet-1300) return 0;;
+    esac
+    return 1
+}
+
 upgrade_prplmesh() {
+    if ! is_prplmesh_device "$TARGET_DEVICE"; then
+        echo "skip prplmesh upgrade for non prplmesh device $TARGET_DEVICE"
+        return 1
+    fi
     info "download latest ipk"
     "$TOOLS_PATH"/download_ipk.sh ${VERBOSE:+ -v} || {
         err "Failed to download prplmesh.ipk, abort"
@@ -60,7 +74,7 @@ upgrade_prplmesh() {
 }
 
 main() {
-    if ! OPTS=$(getopt -o 'hvb:o:e:s:' --long help,verbose,log-folder:,easymesh-cert:,ssh:,owncloud-upload,owncloud-path:,skip-upgrade -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hvb:o:e:d:s:' --long help,verbose,log-folder:,easymesh-cert:,device:,ssh:,owncloud-upload,owncloud-path:,skip-upgrade -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2
         usage
         exit 1
@@ -74,6 +88,7 @@ main() {
             -v | --verbose)         VERBOSE=true; shift;;
             -o | --log-folder)      LOG_FOLDER="$2"; shift 2;;
             -e | --easymesh-cert)   EASYMESH_CERT_PATH="$2"; shift 2;;
+            -d | --device)          TARGET_DEVICE="$2"; shift 2;;
             -s | --ssh)             TARGET_DEVICE_SSH="$2"; shift 2;;
             --owncloud-upload)      OWNCLOUD_UPLOAD=true; shift;;
             --owncloud-path)        OWNCLOUD_PATH="$2"; shift 2;;
@@ -90,9 +105,9 @@ main() {
 
     info "Logs location: $LOG_FOLDER"
     info "Tests to run: $TESTS"
-    info "Device: $DEVICE"
+    info "Device: $TARGET_DEVICE"
 
-    [ "$DEVICE" = "netgear-rax40" ] && [ "$UPGRADE_PRPLMESH" = "true" ] && {
+    [ "$UPGRADE_PRPLMESH" = "true" ] && {
         upgrade_prplmesh
         mv "$PRPLMESH_IPK" "$LOG_FOLDER"
         mv "$PRPLMESH_BUILDINFO" "$LOG_FOLDER"
@@ -102,8 +117,13 @@ main() {
     "$EASYMESH_CERT_PATH"/run_test_file.sh -o "$LOG_FOLDER" -d "$TARGET_DEVICE" "$TESTS" ${VERBOSE:+ -v}
 
     if [ -n "$OWNCLOUD_UPLOAD" ]; then
-        info "Uploading $LOG_FOLDER to $OWNCLOUD_PATH"
-        "$scriptdir"/upload_to_owncloud.sh "$OWNCLOUD_PATH" "$LOG_FOLDER" || {
+        if is_prplmesh_device "$TARGET_DEVICE"; then
+            REMOTE_PATH="$TARGET_DEVICE"
+        else
+            REMOTE_PATH="certified/$TARGET_DEVICE"
+        fi
+        info "Uploading $LOG_FOLDER to $OWNCLOUD_PATH/$REMOTE_PATH"
+        "$scriptdir"/upload_to_owncloud.sh "$OWNCLOUD_PATH/$REMOTE_PATH" "$LOG_FOLDER" || {
             err "Failed to upload $LOG_FOLDER"
             exit 1
         }
