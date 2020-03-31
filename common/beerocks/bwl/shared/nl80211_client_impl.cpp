@@ -48,6 +48,102 @@ nl80211_client_impl::nl80211_client_impl(std::unique_ptr<nl80211_socket> socket)
 {
 }
 
+bool nl80211_client_impl::get_interface_info(const std::string &interface_name,
+                                             interface_info &interface_info)
+{
+    interface_info = {};
+
+    if (!m_socket) {
+        LOG(ERROR) << "Socket is NULL!";
+        return false;
+    }
+
+    // Get the interface index for given interface name
+    int iface_index = if_nametoindex(interface_name.c_str());
+    if (0 == iface_index) {
+        LOG(ERROR) << "Failed to read the index of interface " << interface_name << ": "
+                   << strerror(errno);
+
+        return false;
+    }
+
+    return m_socket.get()->send_receive_msg(
+        NL80211_CMD_GET_INTERFACE, 0,
+        [&](struct nl_msg *msg) -> bool {
+            nla_put_u32(msg, NL80211_ATTR_IFINDEX, iface_index);
+
+            return true;
+        },
+        [&](struct nl_msg *msg) {
+            struct nlattr *tb[NL80211_ATTR_MAX + 1];
+            struct genlmsghdr *gnlh = (struct genlmsghdr *)nlmsg_data(nlmsg_hdr(msg));
+
+            // Parse the netlink message
+            if (nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0),
+                          NULL)) {
+                LOG(ERROR) << "Failed to parse netlink message!";
+                return;
+            }
+
+            if (tb[NL80211_ATTR_IFNAME]) {
+                size_t length = nla_len(tb[NL80211_ATTR_IFNAME]);
+                const uint8_t *data =
+                    static_cast<const uint8_t *>(nla_data(tb[NL80211_ATTR_IFNAME]));
+
+                for (size_t i = 0; i < length; i++) {
+                    interface_info.name += static_cast<char>(data[i]);
+                }
+            }
+
+            if (tb[NL80211_ATTR_IFINDEX]) {
+                interface_info.index = nla_get_u32(tb[NL80211_ATTR_IFINDEX]);
+            } else {
+                LOG(DEBUG) << "NL80211_ATTR_IFINDEX attribute is missing";
+            }
+
+            if (tb[NL80211_ATTR_MAC]) {
+                const uint8_t *data = static_cast<const uint8_t *>(nla_data(tb[NL80211_ATTR_MAC]));
+
+                std::copy_n(data, sizeof(interface_info.addr.oct), interface_info.addr.oct);
+            }
+
+            if (tb[NL80211_ATTR_SSID]) {
+                size_t length       = nla_len(tb[NL80211_ATTR_SSID]);
+                const uint8_t *data = static_cast<const uint8_t *>(nla_data(tb[NL80211_ATTR_SSID]));
+
+                for (size_t i = 0; i < length; i++) {
+                    interface_info.ssid += static_cast<char>(data[i]);
+                }
+            }
+
+            if (tb[NL80211_ATTR_IFTYPE]) {
+                interface_info.type = nla_get_u32(tb[NL80211_ATTR_IFTYPE]);
+            } else {
+                LOG(DEBUG) << "NL80211_ATTR_IFTYPE attribute is missing";
+            }
+
+            if (tb[NL80211_ATTR_WIPHY]) {
+                interface_info.wiphy = nla_get_u32(tb[NL80211_ATTR_WIPHY]);
+            } else {
+                LOG(DEBUG) << "NL80211_ATTR_WIPHY attribute is missing";
+            }
+
+            if (tb[NL80211_ATTR_CHANNEL_WIDTH]) {
+                LOG(DEBUG) << "NL80211_ATTR_CHANNEL_WIDTH"
+                           << nla_get_u32(tb[NL80211_ATTR_CHANNEL_WIDTH]);
+            }
+
+            if (tb[NL80211_ATTR_CENTER_FREQ1]) {
+                LOG(DEBUG) << "NL80211_ATTR_CENTER_FREQ1"
+                           << nla_get_u32(tb[NL80211_ATTR_CENTER_FREQ1]);
+            }
+            if (tb[NL80211_ATTR_CENTER_FREQ2]) {
+                LOG(DEBUG) << "NL80211_ATTR_CENTER_FREQ2"
+                           << nla_get_u32(tb[NL80211_ATTR_CENTER_FREQ2]);
+            }
+        });
+}
+
 bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radio_info &radio_info)
 {
     int last_band    = -1;
