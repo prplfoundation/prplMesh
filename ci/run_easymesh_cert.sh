@@ -103,6 +103,7 @@ main() {
     [ -n "$TESTS" ] || TESTS="$EASYMESH_CERT_PATH/tests/all_agent_tests.txt"
     [ -n "$LOG_FOLDER" ] || LOG_FOLDER="$EASYMESH_CERT_PATH/logs/$(date +%F_%H-%M-%S)"
 
+    mkdir -p "$LOG_FOLDER"
     info "Logs location: $LOG_FOLDER"
     info "Tests to run: $TESTS"
     info "Device: $TARGET_DEVICE"
@@ -132,7 +133,7 @@ main() {
 }
 
 PRPLMESH_IPK=prplmesh.ipk
-PRPLMESH_BUILDINFO=prplmesh_buildinfo.txt
+PRPLMESH_BUILDINFO=prplmesh.buildinfo
 TOOLS_PATH="$rootdir/tools"
 EASYMESH_CERT_PATH=$(realpath "$rootdir/../easymesh_cert")
 TARGET_DEVICE="netgear-rax40"
