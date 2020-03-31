@@ -65,7 +65,7 @@ bool nl80211_socket::connect()
 
 bool nl80211_socket::send_receive_msg(int command, int flags,
                                       std::function<bool(struct nl_msg *msg)> msg_create,
-                                      std::function<bool(struct nl_msg *msg)> msg_handle)
+                                      std::function<void(struct nl_msg *msg)> msg_handle)
 {
     return netlink_socket::send_receive_msg(
         [&](struct nl_msg *msg) -> bool {

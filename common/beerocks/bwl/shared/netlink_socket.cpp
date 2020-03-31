@@ -48,7 +48,7 @@ void netlink_socket::close()
 }
 
 bool netlink_socket::send_receive_msg(std::function<bool(struct nl_msg *msg)> msg_create,
-                                      std::function<bool(struct nl_msg *msg)> msg_handle)
+                                      std::function<void(struct nl_msg *msg)> msg_handle)
 {
     if (!m_nl_socket) {
         LOG(ERROR) << "Cannot use unallocated socket!";
@@ -101,9 +101,7 @@ bool netlink_socket::send_receive_msg(std::function<bool(struct nl_msg *msg)> ms
     // function that calls the capturing lambda function.
     static thread_local std::function<int(struct nl_msg * msg, void *arg)> nl_handler_cb_wrapper;
     nl_handler_cb_wrapper = [&](struct nl_msg *msg, void *arg) -> int {
-        if (!msg_handle(msg)) {
-            LOG(ERROR) << "User's netlink handler function failed!";
-        }
+        msg_handle(msg);
         return NL_SKIP;
     };
     auto nl_handler_cb = [](struct nl_msg *msg, void *arg) -> int {
