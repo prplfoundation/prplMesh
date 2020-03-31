@@ -56,6 +56,52 @@ class nl80211_client {
 
 public:
     /**
+     * @brief Interface information
+     *
+     * Information obtained with NL80211_CMD_GET_INTERFACE command through a NL80211 socket.
+     * See <linux/nl80211.h> for a description of each field.
+     */
+    struct interface_info {
+
+        /**
+         * Network interface name.
+         * Obtained from NL80211_ATTR_IFNAME
+         */
+        std::string name;
+
+        /**
+         * Network interface index of the device to operate on.
+         * Obtained from NL80211_ATTR_IFINDEX
+         */
+        uint32_t index = 0;
+
+        /**
+         * MAC address of the interface.
+         * Obtained from NL80211_ATTR_MAC
+         */
+        sMacAddr addr;
+
+        /**
+         * SSID of the interface.
+         * Obtained from NL80211_ATTR_SSID
+         */
+        std::string ssid;
+
+        /**
+         * Type of virtual interface.
+         * Obtained from NL80211_ATTR_IFTYPE
+         * Possible values are defined in enum nl80211_iftype in <linux/nl80211.h>
+         */
+        uint32_t type = 0;
+
+        /**
+         * Index of wiphy to operate on.
+         * Obtained from NL80211_ATTR_WIPHY
+         */
+        uint32_t wiphy = 0;
+    };
+
+    /**
      * @brief Channel information
      *
      * Used in band_info structure as each band contains a map of supported channels.
@@ -228,6 +274,20 @@ public:
      * @brief Class destructor.
      */
     virtual ~nl80211_client() = default;
+
+    /**
+     * @brief Gets interface information.
+     *
+     * Interface information contains, among others, the MAC address and SSID of the given network
+     * interface.
+     *
+     * @param[in] interface_name Interface name, either radio or Virtual AP (VAP).
+     * @param[out] interface_info Interface information.
+     *
+     * @return True on success and false otherwise.
+     */
+    virtual bool get_interface_info(const std::string &interface_name,
+                                    interface_info &interface_info) = 0;
 
     /**
      * @brief Gets radio information.

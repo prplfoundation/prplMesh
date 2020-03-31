@@ -32,6 +32,19 @@ public:
     virtual ~nl80211_client_dummy();
 
     /**
+     * @brief Gets interface information.
+     *
+     * Interface information contains, among others, the MAC address and SSID of the given network
+     * interface.
+     *
+     * @param[in] interface_name Interface name, either radio or Virtual AP (VAP).
+     * @param[out] interface_info Interface information.
+     *
+     * @return True on success and false otherwise.
+     */
+    virtual bool get_interface_info(const std::string &interface_name,
+                                    interface_info &interface_info) override;
+    /**
      * @brief Gets radio information.
      *
      * Radio information contains HT/VHT capabilities and the list of supported channels.
