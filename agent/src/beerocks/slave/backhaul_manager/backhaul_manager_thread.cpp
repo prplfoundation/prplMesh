@@ -1844,18 +1844,6 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
 }
 
-// static std::string string_to_hex(const std::string &input)
-// {
-//     static const char hex_digits[] = "0123456789ABCDEF";
-
-//     std::string output;
-//     output.reserve(input.length() * 2);
-//     for (unsigned char c : input) {
-//         output.push_back(hex_digits[c >> 4]);
-//         output.push_back(hex_digits[c & 15]);
-//     }
-//     return output;
-// }
 
 bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                       const std::string &src_mac)
@@ -1914,38 +1902,16 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         // Add frame body of the most recently received (Re)Association Request frame from this client
         auto associated_clients = m_radio_info_map[client_ruid].associated_clients_map[client_vap];
         auto associatedClientsTuple = associated_clients[client_info_tlv_r->client_mac()];
-        auto sub_str = std::get<1>(associatedClientsTuple);
-        LOG(DEBUG) << "**********************************************************************";
-        // auto s_len = s.length();
-        // LOG(DEBUG) << "s_len= " << s_len;
-        // auto sub_str = s.substr(56, s_len - 56 - 18);
-        // LOG(DEBUG) << "888888888888888888888888888888888888888888888888888888888";
+        auto assoc_req              = std::get<1>(associatedClientsTuple);
 
-        // LOG(DEBUG) << "sub_str= " << sub_str;
+        auto len = assoc_req.length();
 
-        // LOG(DEBUG) << "888888888888888888888888888888888888888888888888888888888";
+        auto assoc_frame_body = network_utils::hex_to_char_string(assoc_req);
+        
 
-        auto len = sub_str.length();
-
-
-
-
-        std::string newString;
-        for (size_t i = 0; i < len; i += 2) {
-            auto byte = sub_str.substr(i, 2);
-            char chr  = (char)(int)strtol(byte.c_str(), nullptr, 16);
-            LOG(DEBUG) << chr;
-            newString.push_back(chr);
-        }
-
-        LOG(DEBUG) << "******************       len of num = " << len / 2
-                   << "****************************************************";
         client_capability_report_tlv->alloc_association_frame(len / 2);
 
-        LOG(DEBUG) << newString;
-
-        
-        std::copy(&newString[0], &newString[0] + len / 2,
+        std::copy(&assoc_frame_body[0], &assoc_frame_body[0] + len / 2,
                   client_capability_report_tlv->association_frame());
 
         LOG(DEBUG) << "**********************************************************************";
@@ -1955,7 +1921,6 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
                    << client_capability_report_tlv->association_frame()[0];
         LOG(DEBUG) << "association_frame_length = "
                    << client_capability_report_tlv->association_frame_length();
-
 
     } else {
         client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::FAILURE;
