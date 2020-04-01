@@ -22,6 +22,23 @@ using namespace mapf;
 namespace beerocks {
 namespace bpl {
 
+int cfg_get_hostap_iface_steer_vaps(int32_t radio_num,
+                                    char hostap_iface_steer_vaps[BPL_LOAD_STEER_ON_VAPS_LEN])
+{
+    if (!hostap_iface_steer_vaps) {
+        MAPF_ERR("invalid input: hostap_iface_steer_vaps is NULL");
+        return RETURN_ERR;
+    }
+
+    if (radio_num < 0) {
+        MAPF_ERR("invalid input: radio_num < 0");
+        return RETURN_ERR;
+    }
+
+    return cfg_get_prplmesh_radio_param(radio_num, "hostap_iface_steer_vaps",
+                                        hostap_iface_steer_vaps, BPL_LOAD_STEER_ON_VAPS_LEN);
+}
+
 int cfg_is_enabled()
 {
     int retVal = -1;
