@@ -40,23 +40,20 @@ check_wsl() {
     status "Running in WSL"
     
     # Read GW & Repeater UCC ports
-    local GW_UCC_PORT
-    GW_UCC_PORT=$(grep ucc_listener_port \
-    "${rootdir}"/build/install/config/beerocks_controller.conf | \
+    local GW_UCC_PORT=$(grep ucc_listener_port \
+    ${rootdir}/build/install/config/beerocks_controller.conf | \
     awk -F'[= ]' '{ print $2 }')
 
-    local RP_UCC_PORT
-    RP_UCC_PORT=$(grep ucc_listener_port \
-    "${rootdir}"/build/install/config/beerocks_agent.conf | \
+    local RP_UCC_PORT=$(grep ucc_listener_port \
+    ${rootdir}/build/install/config/beerocks_agent.conf | \
     awk -F'[= ]' '{ print $2 }')
 
     # In addition to exporting the UCC port on the host, we also
     # need to make sure that the container's IP doesn't change.
     # Docker fails to route traffic from the host to the containers
     # if the IP is anything but what was allocated by the daemon
-    # when the container was created
-    GW_EXTRA_OPT="--expose ${GW_UCC_PORT} --publish 127.0.0.1::${GW_UCC_PORT} --ipaddr 0.0.0.0"
-    RP_EXTRA_OPT="--expose ${RP_UCC_PORT} --publish 127.0.0.1::${RP_UCC_PORT} --ipaddr 0.0.0.0"
+    GW_EXTRA_OPT="--port ${GW_UCC_PORT} --publish --ipaddr 0.0.0.0"
+    RP_EXTRA_OPT="--port ${RP_UCC_PORT} --publish --ipaddr 0.0.0.0"
 }
 
 main() {
@@ -101,8 +98,8 @@ main() {
 
     [ "$START_GATEWAY" = "true" ] && {
         status "Start GW (Controller + local Agent)"
-        "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" "${VERBOSE_OPT}" "${FORCE_OPT}" "${GW_EXTRA_OPT}" \
-        start-controller-agent -d -n "${GW_NAME}" -m 00:11:22:33 -- "$@"
+        ${rootdir}/tools/docker/run.sh -u ${UNIQUE_ID} ${VERBOSE_OPT} ${FORCE_OPT} ${GW_EXTRA_OPT} \
+        start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33 -- "$@"
     }
 
     [ "$START_GATEWAY" = "true" ] && [ "$START_REPEATER" = "true" ] && {
@@ -114,8 +111,8 @@ main() {
         index=0
         for repeater in $REPEATER_NAMES; do
             status "Start Repeater (Remote Agent): $repeater"
-            "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" "${VERBOSE_OPT}" "${FORCE_OPT}" "${RP_EXTRA_OPT}" \
-            start-agent -d -n "${repeater}" -m aa:bb:cc:"$index$index" -- "$@"
+            ${rootdir}/tools/docker/run.sh -u ${UNIQUE_ID} ${VERBOSE_OPT} ${FORCE_OPT} ${RP_EXTRA_OPT} \
+            start-agent -d -n ${repeater} -m aa:bb:cc:$index$index -- "$@"
             index=$((index+1))
         done
     }
