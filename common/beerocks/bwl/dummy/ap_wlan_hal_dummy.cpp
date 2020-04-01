@@ -392,7 +392,12 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
         LOG(DEBUG) << "reinterpret_cast<uint8_t *>(assoc_req) = " << x;
         LOG(DEBUG) << "**********************************************************************";
 
-        std::copy_n(assoc_req, strnlen(assoc_req, ASSOCIATION_FRAME_SIZE) + 1,
+        auto s_len = strnlen(assoc_req, ASSOCIATION_FRAME_SIZE);
+        LOG(DEBUG) << "s_len= " << s_len;
+        auto sub_str = std::string(&assoc_req[56], s_len-56-18);
+
+
+        std::copy_n(&sub_str[0], sub_str.length() + 1,
                     msg->params.association_frame);
         bool caps_valid = true;
         SRadioCapabilitiesStrings caps_strings;
