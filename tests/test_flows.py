@@ -279,8 +279,9 @@ class TestFlows:
         self.gateway_ucc.cmd_reply("DEV_RESET_DEFAULT")
         self.gateway_ucc.cmd_reply(
             "DEV_SET_CONFIG,"
-            "bss_info1,{mac_repeater1_upper} 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1,"
-            "bss_info2,{self.mac_repeater1} 8x Multi-AP-24G-2 0x0020 0x0008 maprocks2 1 0".format(**locals()))
+            "bss_info1,{} 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1,"
+            "bss_info2,{} 8x Multi-AP-24G-2 0x0020 0x0008 maprocks2 1 0"
+            .format(mac_repeater1_upper, self.mac_repeater1))
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x000A,
                                        tlv(0x01, 0x0006, "{" + self.mac_gateway + "}"),
                                        tlv(0x0F, 0x0001, "{0x00}"),
