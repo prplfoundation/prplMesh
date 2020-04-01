@@ -11,6 +11,7 @@ import os
 import re
 import subprocess
 import sys
+import platform
 import time
 from typing import Dict
 import json
@@ -176,8 +177,18 @@ class TestFlows:
         with open(os.path.join(self.installdir, 'config', config_file_name)) as config_file:
             ucc_port = re.search(r'ucc_listener_port=(?P<port>[0-9]+)', config_file.read()).group('port')
 
-        device_ip_output = self.docker_command(device, 'ip', '-f', 'inet', 'addr', 'show', self.bridge_name)
-        device_ip = re.search(r'inet (?P<ip>[0-9.]+)', device_ip_output.decode('utf-8')).group('ip')
+        # On WSL, connect to the locally exposed container port
+        if self.on_wsl:
+            published_port_output = subprocess.check_output(
+                ["docker", "port", device, ucc_port]).decode('utf-8').split(":")
+            device_ip = published_port_output[0]
+            ucc_port = int(published_port_output[1])
+        else:
+            device_ip_output = self.docker_command(
+                device, 'ip', '-f', 'inet', 'addr', 'show', self.bridge_name)
+            device_ip = re.search(
+                r'inet (?P<ip>[0-9.]+)', device_ip_output.decode('utf-8')).group('ip')
+
         return UCCSocket(device_ip, ucc_port)
 
     def init(self):
@@ -186,6 +197,7 @@ class TestFlows:
         self.gateway = 'gateway-' + self.opts.unique_id
         self.repeater1 = 'repeater1-' + self.opts.unique_id
         self.repeater2 = 'repeater2-' + self.opts.unique_id
+        self.on_wsl = "microsoft" in platform.uname()[3].lower()
         if not self.opts.skip_init:
             self.tcpdump_start()
             try:
@@ -223,6 +235,14 @@ class TestFlows:
     def _check_log_internal(self, device: str, program: str, regex: str, start_line: int):
         '''Search for regex in logfile for program on device.'''
         logfilename = os.path.join(self.rootdir, 'logs', device, 'beerocks_{}.log'.format(program))
+
+        # WSL doesn't support symlinks on NTFS, so resolve the symlink manually
+        if self.on_wsl:
+            logfilename = os.path.join(
+                self.rootdir, 'logs', device,
+                subprocess.check_output(["tail", "-2", logfilename]).
+                decode('utf-8').rstrip(' \t\r\n\0'))
+
         with open(logfilename) as logfile:
             for (i, v) in enumerate(logfile.readlines()):
                 if i <= start_line:
