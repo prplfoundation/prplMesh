@@ -179,10 +179,9 @@ class TestFlows:
 
         # On WSL, connect to the locally exposed container port
         if self.on_wsl:
-            published_port_output = subprocess.check_output(
-                ["docker", "port", device, ucc_port]).decode('utf-8').split(":")
-            device_ip = published_port_output[0]
-            ucc_port = int(published_port_output[1])
+            device_ip = "127.0.0.1"
+            ucc_port = int(subprocess.check_output(
+                ["docker", "port", device, ucc_port]).decode('utf-8').split(":")[1])
         else:
             device_ip_output = self.docker_command(
                 device, 'ip', '-f', 'inet', 'addr', 'show', self.bridge_name)
