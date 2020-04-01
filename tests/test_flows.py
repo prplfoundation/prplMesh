@@ -917,6 +917,19 @@ class TestFlows:
         self.check_log(self.gateway, "controller", r"steering successful for sta {}".format(sta_mac))
         self.check_log(self.gateway, "controller", r"sta {} disconnected due to steering request".format(sta_mac))
 
+        # Make sure that all blocked agents send UNBLOCK messages at the end of
+        # disallow period (default 25 sec)
+        time.sleep(25)
+
+        debug("Confirming Client Association Control Request message was received (UNBLOCK)")
+        self.check_log(self.repeater1, "agent_wlan0", r"Got client allow request")
+
+        debug("Confirming Client Association Control Request message was received (UNBLOCK)")
+        self.check_log(self.repeater2, "agent_wlan0", r"Got client allow request")
+
+        debug("Confirming Client Association Control Request message was received (UNBLOCK)")
+        self.check_log(self.repeater2, "agent_wlan2", r"Got client allow request")
+
     def test_client_steering_policy(self):
         debug("Send client steering policy to agent 1")
         mid = self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8003,
