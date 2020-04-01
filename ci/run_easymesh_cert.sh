@@ -123,7 +123,7 @@ main() {
             REMOTE_PATH="certified/$TARGET_DEVICE"
         fi
         info "Uploading $LOG_FOLDER to $OWNCLOUD_PATH/$REMOTE_PATH"
-        "$scriptdir"/upload_to_owncloud.sh "$OWNCLOUD_PATH/$REMOTE_PATH" "$LOG_FOLDER" || {
+        "$scriptdir"/owncloud/upload_to_owncloud.sh "$OWNCLOUD_PATH/$REMOTE_PATH" "$LOG_FOLDER" || {
             err "Failed to upload $LOG_FOLDER"
             exit 1
         }
