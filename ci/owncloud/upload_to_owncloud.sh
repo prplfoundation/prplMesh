@@ -56,7 +56,8 @@ main() {
     [ -n "$1" ] || { usage; err "Missing local-path"; exit 1; }
     local_path="$1"; shift
 
-    info "upload $local_path to $remote_path at $OWNCLOUD_URL (using user $user)"
+    size=$(du -hcs $local_path | grep total | cut -f1)
+    info "upload $size from $local_path to $remote_path at $OWNCLOUD_URL (using user $user)"
 
     if ! command -v uuidgen > /dev/null ; then
         err "You need uuidgen to use this script. Please install it and try again."
@@ -74,6 +75,7 @@ main() {
 
     status=0
 
+    start=$(date +%s)
     if ! find "$local_path" -type d -exec \
             realpath {} --relative-to="$(dirname "$local_path")" \; | {
                 error=0
@@ -93,21 +95,25 @@ main() {
                         }
                     }
                 done
+                echo
                 return $error
             }
     then
-        echo
         err "Uploading to a temporary directory failed!"
         status=1
     else
         success "Uploading to a temporary directory succeeded!"
     fi
-    echo
+    end=$(date +%s)
+    echo "Runtime: $((end-start)) seconds"
 
     info "Moving the temporary directory $remote_temp_path to $remote_path"
+    start=$(date +%s)
     move "$remote_temp_path" "$remote_path" || {
         status="$?"
     }
+    end=$(date +%s)
+    echo "Runtime: $((end-start)) seconds"
 
     return "$status"
 }
