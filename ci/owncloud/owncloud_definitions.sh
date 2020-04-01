@@ -92,7 +92,32 @@ copy() {
     return "$status"
 }
 
+browse_url() {
+    # Calculate and echo the browse url for a relative path
+    #
+    # $1 base url name - "artifacts" or "certification"
+    # $2 relative path from the base_url
+    #
+    # Uses:
+    #   OWNCLOUD_PUBLIC_URLS
+    local relative_path base_url browse_url
+    base_url="${OWNCLOUD_PUBLIC_URLS[$1]}"
+    relative_path="$2"
+
+    browse_url="$base_url?path="
+    for dir in $(echo "$relative_path" | tr "/" "\\n"); do
+        browse_url="$browse_url%2F$dir"
+    done
+
+    echo "$browse_url"
+}
+
 OWNCLOUD_URL="https://ftp.essensium.com/owncloud/remote.php/dav/files"
+
+declare -A OWNCLOUD_PUBLIC_URLS
+OWNCLOUD_PUBLIC_URLS["certification"]="https://ftp.essensium.com/owncloud/index.php/s/ketl3eFhIgwcweZ"
+OWNCLOUD_PUBLIC_URLS["artifacts"]="https://ftp.essensium.com/owncloud/index.php/s/pzpSry7KOskL4Wi"
+
 user=$(awk '/ftp.essensium.com/{getline; print $4}' ~/.netrc)
 
 if [ ! "$#" = 0 ] ; then
