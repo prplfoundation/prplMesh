@@ -1,11 +1,7 @@
 #!/bin/bash
 
-scriptdir="$(cd "${0%/*}" && pwd)"
-rootdir=$(realpath "$scriptdir/../../")
-
-# shellcheck source=../tools/functions.sh
-. "$rootdir/tools/functions.sh"
-
+# shellcheck source=../../tools/functions.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../../tools/functions.sh"
 
 create_dir() {
     # create dir $1 in $OWNCLOUD_URL/$user/.
