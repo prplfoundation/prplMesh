@@ -1939,12 +1939,19 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         for (size_t i = 0; i < len; i = i + 2) {
             auto r       = sub_str.substr(i, 2);
             uint16_t num = std::stoi(r, nullptr, 16);
-            memcpy(&array[i / 2], &num, 1);
+            std::memcpy(&array[i / 2], &num, 1);
         }
 
         LOG(DEBUG) << "******************       len of num = " << len / 2
                    << "****************************************************";
         client_capability_report_tlv->alloc_association_frame(len / 2);
+
+        if (array[0] == ' ') {
+            LOG(DEBUG) << "True";
+        }
+        for (auto x : array) {
+            LOG(DEBUG) << x;
+        }
 
         LOG(DEBUG) << "7777777777777777777";
         // std::copy_n(hex_string, len_hex,
