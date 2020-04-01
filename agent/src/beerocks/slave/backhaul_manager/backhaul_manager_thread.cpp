@@ -1935,7 +1935,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
 
         // auto x = &s[56];
 
-        uint8_t array[len / 2];
+        uint8_t array[len / 2] = {0};
         for (size_t i = 0; i < len; i = i + 2) {
             auto r       = sub_str.substr(i, 2);
             uint16_t num = std::stoi(r, nullptr, 16);
