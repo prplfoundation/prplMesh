@@ -1940,7 +1940,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
             auto r       = sub_str.substr(i, 2);
             uint16_t num = std::stoi(r, nullptr, 16);
             LOG(DEBUG) << "num = " << num;
-            std::memcpy(&array[i / 2], &num, 1);
+            std::memcpy(&array[i / 2], &num, sizeof(num));
         }
 
         LOG(DEBUG) << "******************       len of num = " << len / 2
