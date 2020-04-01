@@ -978,7 +978,7 @@ class TestFlows:
     def test_topology(self):
         mid = self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x0002)
         debug("Confirming topology query was received")
-        self.check_log(self.repeater1, "agent", r"TOPOLOGY_QUERY_MESSAGE")
+        self.check_log(self.repeater1, "agent", r"TOPOLOGY_QUERY_MESSAGE.*mid={:d}".format(mid))
 
 
 if __name__ == '__main__':
