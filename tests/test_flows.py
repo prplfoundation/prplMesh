@@ -205,9 +205,9 @@ class TestFlows:
         '''Verify that on "device" the logfile for "program" matches "regex", fail if not.'''
         try:
             # HACK check_log is often used immediately after triggering a message on the other side.
-            # That message needs some time to arrive on the receiver. Since our python script is pretty fast,
-            # we tend to check it too quickly. As a simple workaround, add a small sleep here.
-            # The good solution is to retry with a small timeout.
+            # That message needs some time to arrive on the receiver. Since our python script is
+            # pretty fast, we tend to check it too quickly. As a simple workaround, add a small
+            # sleep here. The good solution is to retry with a small timeout.
             time.sleep(.1)
             result, line, value = self._check_log_internal(device, program, regex, start_line)
             if result:
@@ -606,18 +606,17 @@ class TestFlows:
                                        tlv(0x93, 0x0007, "0x01 {%s}" % (self.mac_repeater1_wlan0)))
         self.check_log(self.repeater1, "agent_wlan0", "Received AP_METRICS_QUERY_MESSAGE")
         # TODO agent should send response autonomously, with same MID.
-        # tlv1 == AP metrics TLV
-        # tlv2 == STA metrics TLV with no metrics
-        # tlv3 == STA metrics TLV for STA connected to this BSS
-        # tlv4 == STA traffic stats TLV for same STA
-        self.repeater1_ucc.dev_send_1905(self.mac_gateway, 0x800C,
-                                         tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (
-                                             self.mac_repeater1_wlan0)),
-                                         tlv(0x96, 0x0007, "{55:44:33:22:11:00} 0x00"),
-                                         tlv(0x96, 0x001a, "{66:44:33:22:11:00} 0x01 {%s} 0x11223344 0x1a2a3a4a 0x1b2b3b4b 0x55" %
-                                             self.mac_repeater1_wlan0),
-                                         tlv(0xa2, 0x0022, "{55:44:33:22:11:00} 0x10203040 0x11213141 0x12223242 0x13233343 "
-                                             "0x14243444 0x15253545 0x16263646"))
+        # AP metrics TLV
+        tlv1 = tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (self.mac_repeater1_wlan0))
+        # STA metrics TLV with no metrics
+        tlv2 = tlv(0x96, 0x0007, "{55:44:33:22:11:00} 0x00")
+        # STA metrics TLV for STA connected to this BSS
+        tlv3 = tlv(0x96, 0x001a,
+                   "{66:44:33:22:11:00} 0x01 {%s} 0x11223344 0x1a2a3a4a 0x1b2b3b4b 0x55" % self.mac_repeater1_wlan0)  # noqa E501
+        # STA traffic stats TLV for same STA
+        tlv4 = tlv(0xa2, 0x0022,
+                   "{55:44:33:22:11:00} 0x10203040 0x11213141 0x12223242 0x13233343 0x14243444 0x15253545 0x16263646")  # noqa E501
+        self.repeater1_ucc.dev_send_1905(self.mac_gateway, 0x800C, tlv1, tlv2, tlv3, tlv4)
         self.check_log(self.gateway, "controller", "Received AP_METRICS_RESPONSE_MESSAGE")
 
         debug("Send AP Metrics query message to agent 2")
@@ -627,13 +626,12 @@ class TestFlows:
         # TODO agent should send response autonomously
         # Same as above but with different STA MAC addresses, different values and
         # skipping the empty one
-        self.repeater2_ucc.dev_send_1905(self.mac_gateway, 0x800C,
-                                         tlv(0x94, 0x0010, "{%s} 0x11 0x1002 0x90 0x1c2c3c 0x1d2d3d" %
-                                             self.mac_repeater2_wlan2),
-                                         tlv(0x96, 0x001a, "{77:44:33:22:11:00} 0x01 {%s} 0x19293949 0x10203040 0x11213141 0x99" %
-                                             self.mac_repeater2_wlan2),
-                                         tlv(0xa2, 0x0022, "{77:44:33:22:11:00} 0xa0203040 0xa1213141 0xa2223242 0xa3233343 "
-                                             "0xa4243444 0xa5253545 0xa6263646"))
+        tlv1 = tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (self.mac_repeater2_wlan2))
+        tlv3 = tlv(0x96, 0x001a,
+                   "{77:44:33:22:11:00} 0x01 {%s} 0x19293949 0x10203040 0x11213141 0x99" % self.mac_repeater2_wlan2)  # noqa E501
+        tlv4 = tlv(0xa2, 0x0022,
+                   "{77:44:33:22:11:00} 0xa0203040 0xa1213141 0xa2223242 0xa3233343 0xa4243444 0xa5253545 0xa6263646")  # noqa E501
+        self.repeater2_ucc.dev_send_1905(self.mac_gateway, 0x800C, tlv1, tlv3, tlv4)
         self.check_log(self.gateway, "controller", "Received AP_METRICS_RESPONSE_MESSAGE")
 
         debug("Send 1905 Link metric query to agent 1 (neighbor gateway)")
