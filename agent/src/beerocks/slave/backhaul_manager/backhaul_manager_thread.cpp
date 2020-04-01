@@ -44,11 +44,13 @@
 #include <tlvf/wfa_map/tlvApOperationalBSS.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvAssociatedClients.h>
+#include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvErrorCode.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
+#include <tlvf/wfa_map/tlvStaMacAddressType.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
 
 // BPL Error Codes
@@ -357,6 +359,7 @@ bool backhaul_manager::init()
             ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE,
             ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE,
             ieee1905_1::eMessageType::LINK_METRIC_QUERY_MESSAGE,
+            ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_QUERY_MESSAGE,
             ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE,
             ieee1905_1::eMessageType::ACK_MESSAGE,
         })) {
@@ -2099,8 +2102,12 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     case ieee1905_1::eMessageType::COMBINED_INFRASTRUCTURE_METRICS_MESSAGE: {
         return handle_1905_combined_infrastructure_metrics(cmdu_rx, src_mac);
     }
-    case ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE:
+    case ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE: {
         return handle_client_capability_query(cmdu_rx, src_mac);
+    }
+    case ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_QUERY_MESSAGE: {
+        return handle_associated_sta_link_metrics_query(cmdu_rx, src_mac);
+    }
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
@@ -2121,6 +2128,55 @@ bool backhaul_manager::get_sta_bssid(const sMacAddr &sta_mac, sMacAddr &bssid)
         }
     }
     return false;
+}
+
+bool backhaul_manager::handle_associated_sta_link_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                                const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received ASSOCIATED_STA_LINK_METRICS_QUERY_MESSAGE , mid=" << std::dec
+               << int(mid);
+
+    if (!cmdu_tx.create(mid,
+                        ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE)) {
+        LOG(ERROR)
+            << "cmdu creation of type ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE, has failed";
+        return false;
+    }
+
+    auto mac = cmdu_rx.getClass<wfa_map::tlvStaMacAddressType>();
+    if (!mac) {
+        LOG(ERROR) << "Failed to get mac address";
+        return false;
+    }
+
+    auto assoc_link_metrics = cmdu_tx.addClass<wfa_map::tlvAssociatedStaLinkMetrics>();
+    if (!assoc_link_metrics) {
+        LOG(ERROR) << "Failed to create tlvAssociatedStaLinkMetrics tlv";
+        return false;
+    }
+
+    // Check if it is an error scenario - if the STA specified in the STA link Query message is not associated
+    // with any of the BSS operated by the Multi-AP Agent
+    sMacAddr bssid;
+    if (!get_sta_bssid(mac->sta_mac(), bssid)) {
+        LOG(ERROR) << "client with mac address " << mac->sta_mac() << " not found";
+        //Add an Error Code TLV
+        auto error_code_tlv = cmdu_tx.addClass<wfa_map::tlvErrorCode>();
+        if (!error_code_tlv) {
+            LOG(ERROR) << "addClass wfa_map::tlvErrorCode has failed";
+            return false;
+        }
+        error_code_tlv->reason_code() =
+            wfa_map::tlvErrorCode::STA_NOT_ASSOCIATED_WITH_ANY_BSS_OPERATED_BY_THE_AGENT;
+        error_code_tlv->sta_mac() = mac->sta_mac();
+    } else {
+        LOG(DEBUG) << "client with mac address " << mac->sta_mac() << " connected to " << bssid;
+        //TODO
+    }
+
+    LOG(DEBUG) << "Send a ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE back to controller";
+    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,

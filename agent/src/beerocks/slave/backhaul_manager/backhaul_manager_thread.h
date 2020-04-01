@@ -99,6 +99,8 @@ private:
      * @return false otherwise
      */
     bool get_sta_bssid(const sMacAddr &sta_mac, sMacAddr &bssid);
+    bool handle_associated_sta_link_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                  const std::string &src_mac);
     //bool sta_handle_event(const std::string &iface,const std::string& event_name, void* event_obj);
     bool hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr, std::string iface);
 
