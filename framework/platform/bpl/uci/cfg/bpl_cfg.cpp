@@ -110,6 +110,13 @@ int cfg_get_certification_mode()
     return retVal;
 }
 
+int cfg_get_load_steer_on_vaps(int num_of_interfaces,
+                               char load_steer_on_vaps[BPL_LOAD_STEER_ON_VAPS_LEN])
+{
+
+    return RETURN_OK;
+}
+
 int cfg_get_stop_on_failure_attempts()
 {
     int retVal = -1;
