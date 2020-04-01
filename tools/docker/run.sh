@@ -48,7 +48,7 @@ gateway_netid_length() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvdfi:m:n:N:o:t:e:p:u:' --long verbose,help,detach,force,ipaddr:,mac:,name:,network:,entrypoint:,tag:,expose:,publish:,options:,unique-id: -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvdfi:m:n:N:o:t:p:Pu:' --long verbose,help,detach,force,ipaddr:,mac:,name:,network:,entrypoint:,tag:,port:,publish,options:,unique-id: -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -66,7 +66,8 @@ main() {
             -u | --unique-id)   UNIQUE_ID="$2"; shift; shift ;;
             -t | --tag)         TAG=":$2"; shift; shift ;;
             -e | --expose)      PORT="${PORT} --expose $2"; shift; shift ;;
-            -p | --publish)     PUBLISH="${PUBLISH} -p ${2}"; shift; shift ;;
+            -p | --port)        PORT="$2"; shift; shift ;;
+            -P | --publish)     PUBLISH="-P"; shift ;;
             -N | --network)     NETWORK="$2"; shift; shift ;;
             --entrypoint)       ENTRYPOINT="$2"; shift; shift ;;
             -- ) shift; break ;;
@@ -110,7 +111,7 @@ main() {
                 -e INSTALL_DIR=${installdir}
                 --privileged
                 --network ${NETWORK}
-                ${PORT} ${PUBLISH}
+                --expose ${PORT} ${PUBLISH}
                 -v ${installdir}:${installdir}
                 -v ${rootdir}:${rootdir}
                 -v ${rootdir}/logs/${NAME}:/tmp/${SUDO_USER:-${USER}}/beerocks/logs
