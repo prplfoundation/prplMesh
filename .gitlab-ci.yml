@@ -238,6 +238,6 @@ run-certification-tests:
     - job: build-for-netgear-rax40
   tags:
     - certs-tests
-  timeout: 24h
+  timeout: 36h
   rules:
     - if: '$TESTS_TO_RUN'
