@@ -4424,10 +4424,10 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     // one immidiate drawback is that if there is another test that depends on the beacon _values_
     // for farther test the system - it will fail for sure.
 
-    // 1. send ACK to the controller
     auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received BEACON_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid);
 
+    // 1. send ACK to the controller
     if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
         LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
         return false;
@@ -4438,16 +4438,33 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
         return false;
     }
 
+    /*
     // 2. forward the request to the monitor
-    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::BEACON_METRICS_QUERY_MESSAGE)) {
-        LOG(ERROR) << "cmdu creation of type BEACON_METRICS_QUERY_MESSAGE, has failed";
-        return false;
-    }
+    // using vs message
 
-    if (!message_com::send_cmdu(monitor_socket, cmdu_tx)) {
-        LOG(ERROR) << "failed sending ACK to the controller";
+    // create vs message
+    auto request_out = message_com::create_vs_message<
+        beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST>(cmdu_tx,mid);
+    if (request_out == nullptr) {
+        LOG(ERROR) << "Failed building ACTION_MONITOR_CLIENT_BEACON_11K_REQUEST message!";
         return false;
-    }
+    } 
+
+	auto& measurement_request = request_out.params();
+	measurement_request.bssid 					= cmdu_rx.bssid();
+	measurement_request.channel 				= cmdu_rx.chnnel_number();
+	
+	measurement_request.measurement_mode		= beerocks::MEASURE_MODE_ACTIVE;
+	measurement_request.duration				= beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
+
+	measurement_request.measurement_mode		= beerocks::MEASURE_MODE_PASSIVE;
+	measurement_request.duration				= beerocks::BEACON_MEASURE_DEFAULT_PASSIVE_DURATION;
+
+	measurement_request.expected_reports_count 	= 1;
+
+	measurement_request.rand_ival				= beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
+	measurement_request.sta_mac					= cmdu_rx.associated_sta_mac();
+
 
     // 3. fake a response
     if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE)) {
@@ -4459,6 +4476,7 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
         LOG(ERROR) << "failed sending BEACON_METRICS_QUERY_MESSAGE to the controller";
         return false;
     }
+    */
 
     return true;
 }
