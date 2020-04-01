@@ -727,8 +727,8 @@ class TestFlows:
 
         debug("Send Client Steering Request message for Steering Mandate to CTT Agent1")
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8014,
-                                       tlv(0x9B, 0x001b, "{%s 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {%s 0x73 0x24}}" %
-                                           (self.mac_repeater1_wlan0, self.mac_repeater2_wlan0)))
+                                       tlv(0x9B, 0x001b,
+                                           "{%s 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {%s 0x73 0x24}}" % (self.mac_repeater1_wlan0, self.mac_repeater2_wlan0)))  # noqa E501
         time.sleep(1)
         debug("Confirming Client Steering Request message was received - mandate")
         self.check_log(self.repeater1, "agent_wlan0", "Got steer request")
@@ -744,7 +744,8 @@ class TestFlows:
         self.check_log(self.repeater1, "agent_wlan0", "ACK_MESSAGE")
 
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8014,
-                                       tlv(0x9B, 0x000C, "{%s 0x00 0x000A 0x0000 0x00}" % self.mac_repeater1_wlan0))
+                                       tlv(0x9B, 0x000C,
+                                           "{%s 0x00 0x000A 0x0000 0x00}" % self.mac_repeater1_wlan0))  # noqa E501
         time.sleep(1)
         debug("Confirming Client Steering Request message was received - Opportunity")
         self.check_log(self.repeater1, "agent_wlan0", "CLIENT_STEERING_REQUEST_MESSAGE")
@@ -766,52 +767,52 @@ class TestFlows:
         self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED 11:22:33:44:55:66")
         debug("Pre-prepare RRM Beacon Response for association handling task")
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-40 rsni=40 bssid=aa:bb:cc:00:00:10")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-40 rsni=40 bssid=aa:bb:cc:00:00:10")  # noqa E501
         debug("Confirming 11k request is done by association handling task")
         self.wait_for_log(self.repeater1, "monitor_wlan0",
-                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:00:00:10 channel 1", 2)
+                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:00:00:10 channel 1", 2)  # noqa E501
 
         debug("Update Stats")
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA STA-UPDATE-STATS 11:22:33:44:55:66 rssi=-38,-39,-40,-41 snr=38,39,40,41 uplink=1000 downlink=800")
+                            "DATA STA-UPDATE-STATS 11:22:33:44:55:66 rssi=-38,-39,-40,-41 snr=38,39,40,41 uplink=1000 downlink=800")  # noqa E501
         debug("Pre-prepare RRM Beacon Responses for optimal path task")
         # Response for IRE1, BSSID of wlan0.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=aa:bb:cc:11:00:10")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=aa:bb:cc:11:00:10")  # noqa E501
         # Response for IRE1, BSSID of wlan2.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=aa:bb:cc:11:00:20")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=aa:bb:cc:11:00:20")  # noqa E501
         # Response for IRE2, BSSID of wlan0.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-40 rsni=40 bssid=aa:bb:cc:00:00:10")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-40 rsni=40 bssid=aa:bb:cc:00:00:10")  # noqa E501
         # Response for IRE2, BSSID of wlan2.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=aa:bb:cc:00:00:20")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=aa:bb:cc:00:00:20")  # noqa E501
         # Response for GW, BSSID of wlan0.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=00:11:22:33:00:10")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=00:11:22:33:00:10")  # noqa E501
         # Response for GW, BSSID of wlan2.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=00:11:22:33:00:20")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-80 rsni=10 bssid=00:11:22:33:00:20")  # noqa E501
         debug("Confirming 11k request is done by optimal path task")
         self.wait_for_log(self.repeater1, "monitor_wlan0",
-                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:11:00:20 channel 149", 20)
+                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:11:00:20 channel 149", 20)  # noqa E501
 
         debug("Confirming 11k request is done by optimal path task")
         self.wait_for_log(self.repeater1, "monitor_wlan0",
-                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:00:00:20 channel 149", 20)
+                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:00:00:20 channel 149", 20)  # noqa E501
 
         debug("Confirming 11k request is done by optimal path task")
         self.wait_for_log(self.repeater1, "monitor_wlan0",
-                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:11:00:10 channel 1", 20)
+                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid aa:bb:cc:11:00:10 channel 1", 20)  # noqa E501
 
         debug("Confirming 11k request is done by optimal path task")
         self.wait_for_log(self.repeater1, "monitor_wlan0",
-                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid 00:11:22:33:00:20 channel 149", 20)
+                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid 00:11:22:33:00:20 channel 149", 20)  # noqa E501
 
         debug("Confirming 11k request is done by optimal path task")
         self.wait_for_log(self.repeater1, "monitor_wlan0",
-                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid 00:11:22:33:00:10 channel 1", 20)
+                          r"Beacon 11k request to sta 11:22:33:44:55:66 on bssid 00:11:22:33:00:10 channel 1", 20)  # noqa E501
 
         debug("Confirming no steer is done")
         self.wait_for_log(self.gateway, "controller",
@@ -820,26 +821,26 @@ class TestFlows:
         # Steer scenario
         debug("Update Stats")
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA STA-UPDATE-STATS 11:22:33:44:55:66 rssi=-58,-59,-60,-61 snr=18,19,20,21 uplink=100 downlink=80")
+                            "DATA STA-UPDATE-STATS 11:22:33:44:55:66 rssi=-58,-59,-60,-61 snr=18,19,20,21 uplink=100 downlink=80")  # noqa E501
         debug("Pre-prepare RRM Beacon Responses for optimal path task")
         # Response for IRE1, BSSID of wlan0.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=aa:bb:cc:11:00:10")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=aa:bb:cc:11:00:10")  # noqa E501
         # Response for IRE1, BSSID of wlan2.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=aa:bb:cc:11:00:20")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=aa:bb:cc:11:00:20")  # noqa E501
         # Response for IRE2, BSSID of wlan0.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-60 rsni=20 bssid=aa:bb:cc:00:00:10")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-60 rsni=20 bssid=aa:bb:cc:00:00:10")  # noqa E501
         # Response for IRE2, BSSID of wlan2.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=aa:bb:cc:00:00:20")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=aa:bb:cc:00:00:20")  # noqa E501
         # Response for GW, BSSID of wlan0.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=00:11:22:33:00:10")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=1 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=00:11:22:33:00:10")  # noqa E501
         # Response for GW, BSSID of wlan2.0
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=00:11:22:33:00:20")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:66 channel=149 dialog_token=0 measurement_rep_mode=0 op_class=0 duration=50 rcpi=-30 rsni=50 bssid=00:11:22:33:00:20")  # noqa E501
         debug("Confirming steering is requested by optimal path task")
         self.wait_for_log(self.gateway, "controller", r"optimal_path_task: steering", 20)
 
@@ -848,10 +849,10 @@ class TestFlows:
         self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED 11:22:33:44:55:77")
         debug("Pre-prepare RRM Beacon Response with error for association handling task")
         self.send_bwl_event(self.repeater1, "wlan0",
-                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:77 channel=0 dialog_token=0 measurement_rep_mode=4 op_class=0 duration=0 rcpi=0 rsni=0 bssid=aa:bb:cc:00:00:10")
+                            "DATA RRM-BEACON-REP-RECEIVED 11:22:33:44:55:77 channel=0 dialog_token=0 measurement_rep_mode=4 op_class=0 duration=0 rcpi=0 rsni=0 bssid=aa:bb:cc:00:00:10")  # noqa E501
         debug("Confirming 11k request is done by association handling task")
         self.wait_for_log(self.repeater1, "monitor_wlan0",
-                          r"Beacon 11k request to sta 11:22:33:44:55:77 on bssid aa:bb:cc:00:00:10 channel 1", 20)
+                          r"Beacon 11k request to sta 11:22:33:44:55:77 on bssid aa:bb:cc:00:00:10 channel 1", 20)  # noqa E501
 
         debug("Confirming STA doesn't support beacon measurement")
         self.wait_for_log(self.gateway, "controller",
@@ -920,7 +921,7 @@ class TestFlows:
     def test_client_steering_policy(self):
         debug("Send client steering policy to agent 1")
         mid = self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8003,
-                                             tlv(0x89, 0x000C, "{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}"))
+                                             tlv(0x89, 0x000C, "{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}"))  # noqa E501
         time.sleep(1)
         debug("Confirming client steering policy has been received on agent")
 
@@ -937,7 +938,8 @@ class TestFlows:
 
         debug("Send client association control message")
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8016,
-                                       tlv(0x9D, 0x000F, "{%s 0x00 0x1E 0x01 {0x000000110022}}" % self.mac_repeater1_wlan0))
+                                       tlv(0x9D, 0x000F,
+                                           "{%s 0x00 0x1E 0x01 {0x000000110022}}" % self.mac_repeater1_wlan0))  # noqa E501
 
         debug("Confirming client association control message has been received on agent")
         # check that both radio agents received it,in the future we'll add a check to verify which
