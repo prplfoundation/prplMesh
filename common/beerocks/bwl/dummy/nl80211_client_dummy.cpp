@@ -13,10 +13,6 @@
 
 namespace bwl {
 
-nl80211_client_dummy::nl80211_client_dummy() {}
-
-nl80211_client_dummy::~nl80211_client_dummy() {}
-
 bool nl80211_client_dummy::get_interface_info(const std::string &interface_name,
                                               interface_info &interface_info)
 {
