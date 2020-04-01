@@ -141,6 +141,18 @@ Example:
     }
 ```
 
+Prefer to use std algorithms as much as possible.
+Get to know std algorithms.
+std algorithms are better than hand crafted loops.
+std algorithms are thoroughly tested, well documented, and do exactly as expected.
+std algoritms are also well documented.
+```cpp
+std::transform(in.begin(), in.end(), out.begin(), 
+               [](/*...*/) -> /*...*/ {
+                   /*...*/
+               } );
+```
+
 Prefer to use ranged loops if at all possible:
 
 ```cpp
@@ -282,6 +294,77 @@ success:
     return result;
 }
 ```
+
+## Comments
+Comments are important part of the code base.
+Comments are not compiled, nor have any influence on run time or any machinary.
+Comments are for humans, for developers, for us.
+Comments have the sole purpose of keeping the code maintainable.
+A good comment is a one that you, the writer of the comment, can understand after a while, after getting out of the context of writing it.
+Comments are written for future readers, it may be the future you, it may be someone else - write your comments with this in mind.
+Comments normaly explain the *why* and not the *what*.
+
+### Simple Comments
+It is useless to state the obvious:
+```cpp
+// checking that the pointer is not null
+if (ptr){
+}
+```
+
+However, it is extremely helpful to state our expectations:
+```cpp
+// it is legal to receive an empty pointer.
+// in case of exiting pointer pointer we need to ...
+// and in case it is null we need to ...
+if (ptr){
+} else {
+}
+```
+
+### Spanning Comments
+Sometimes the code is not trivial even if it doesn't do tricky things. 
+It just has its logic that might be buried in a few lines of technical details that have nothing to do with the logic itself, like error exits. Sometimes it is hard to see the intent behind the mechanics of the code.
+In these cases it is more maintainable to comment the different sections in the function and their logic.
+A small example can be seen [here](https://github.com/prplfoundation/prplMesh/blob/20388c47cf61f9419576fa223fd140e17adcb67d/agent/src/beerocks/slave/son_slave_thread.cpp#L4373-L4405).
+This else clause starts with a story about what is done in it. 
+In this case not what would you expect. 
+It also states why it is fine and suggests future changes.
+Later in the code the promise that was taken in the initial comment is implemented.
+It is useful to read the first comment, then look forward in the code for more comments that support the story on top, and only then dive into the code to ensure it does what it says it does.
+
+Here is another (imaginary) example that "tells the story" and makes it much easier to follow the code structure and logic even before reading the code itself:
+```cpp
+// in this section we have to gather information from few resources:
+// A, B and C.
+// The best would be to have all of them, but it is also legal and
+// possible to progress with A and C only.
+// therefore we try to get A, then we try to get C,
+// and upon success we try to get B as well.
+// the action is taken at the end.
+
+// get A
+/* 10 lines of complex machinery, iterating on a complex data structure */
+
+// get C
+/* 22 lines of code with 5 exit points in various conditions */
+
+// get B
+auto b = getB();
+
+// take the action
+if (a && b && c) {
+    actionABC(a, b, c);
+} else if (a && b) {
+    actionAC(a, c);
+} else {
+// error
+}
+```
+### Poor Comments
+One indication for poor commenting process is that developers don't read comments.
+It means that they get used to comments that are irrelevant, hard to read or just outdated.
+This situation is in many cases worse then non commented code at all, because developers, seeking for assistance are reading misleading comments.
 
 ## Python code
 
