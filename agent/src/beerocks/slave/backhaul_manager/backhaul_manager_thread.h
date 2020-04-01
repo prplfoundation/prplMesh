@@ -90,6 +90,15 @@ private:
     bool handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
     bool handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                         const std::string &src_mac);
+    /**
+     * @brief Get bssid to which sta_mac is associated
+     * 
+     * @param[in] sta_mac mac address of sta
+     * @param[in,out] bssid to which the sta is connected
+     * @return true if the sta is connected to one of the bss's operated by the agent
+     * @return false otherwise
+     */
+    bool get_sta_bssid(const sMacAddr &sta_mac, sMacAddr &bssid);
     //bool sta_handle_event(const std::string &iface,const std::string& event_name, void* event_obj);
     bool hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr, std::string iface);
 

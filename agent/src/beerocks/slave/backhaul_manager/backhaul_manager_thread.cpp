@@ -2110,6 +2110,20 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
 }
 
+bool backhaul_manager::get_sta_bssid(const sMacAddr &sta_mac, sMacAddr &bssid)
+{
+    for (const auto &slave : m_radio_info_map) {
+        auto associated_clients_map = slave.second.associated_clients_map;
+        for (const auto &vap : associated_clients_map) {
+            if (vap.second.find(sta_mac) != vap.second.end()) {
+                bssid = vap.first;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                       const std::string &src_mac)
 {
@@ -2125,16 +2139,8 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
     //Check if it is an error scenario - if the STA specified in the Client Capability Query message is not associated
     //with any of the BSS operated by the Multi-AP Agent [ though the TLV does contain a BSSID, the specification
     // says that we should answer if the client is associated with any BSS on this agent.]
-    bool associated_client_found = false;
-    for (const auto &slave : m_radio_info_map) {
-        auto associated_clients_map = slave.second.associated_clients_map;
-        for (const auto &vap : associated_clients_map) {
-            if (vap.second.find(client_info_tlv_r->client_mac()) != vap.second.end()) {
-                associated_client_found = true;
-                break;
-            }
-        }
-    }
+    sMacAddr bssid;
+    bool associated_client_found = get_sta_bssid(client_info_tlv_r->client_mac(), bssid);
 
     // send CLIENT_CAPABILITY_REPORT_MESSAGE back to the controller
     if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE)) {
