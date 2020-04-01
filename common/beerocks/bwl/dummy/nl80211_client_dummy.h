@@ -22,16 +22,6 @@ class nl80211_client_dummy : public nl80211_client {
 
 public:
     /**
-     * @brief Class constructor.
-     */
-    nl80211_client_dummy();
-
-    /**
-     * @brief Class destructor.
-     */
-    virtual ~nl80211_client_dummy();
-
-    /**
      * @brief Gets interface information.
      *
      * Interface information contains, among others, the MAC address and SSID of the given network
