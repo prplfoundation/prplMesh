@@ -28,9 +28,10 @@ flake8:
   stage: build
   image: pipelinecomponents/flake8:f087c4c
   variables:
-      FLAKE8_FILES: "tests/capi.py tests/opts.py tests/environment.py"
+    FLAKE8_FILES: "tests/*.py"
   script:
-    - flake8 --verbose $FLAKE8_FILES
+    - apk add --update --no-cache git
+    - git ls-files -z -- $FLAKE8_FILES | xargs -0 -t flake8 --verbose
 
 flake8-diff:
   stage: build
