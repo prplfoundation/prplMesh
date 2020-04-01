@@ -39,4 +39,4 @@ ADD start-controller /usr/bin
 ADD start-agent /usr/bin
 ADD start-controller-agent /usr/bin
 
-ENTRYPOINT ["/root/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/root/entrypoint.sh"]
