@@ -1844,7 +1844,6 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
 }
 
-
 bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                       const std::string &src_mac)
 {
@@ -1907,20 +1906,10 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         auto len = assoc_req.length();
 
         auto assoc_frame_body = network_utils::hex_to_char_string(assoc_req);
-        
-
         client_capability_report_tlv->alloc_association_frame(len / 2);
 
         std::copy(&assoc_frame_body[0], &assoc_frame_body[0] + len / 2,
                   client_capability_report_tlv->association_frame());
-
-        LOG(DEBUG) << "**********************************************************************";
-        LOG(DEBUG) << "association_frame = " << std::get<1>(associatedClientsTuple);
-
-        LOG(DEBUG) << "association_frame = "
-                   << client_capability_report_tlv->association_frame()[0];
-        LOG(DEBUG) << "association_frame_length = "
-                   << client_capability_report_tlv->association_frame_length();
 
     } else {
         client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::FAILURE;
