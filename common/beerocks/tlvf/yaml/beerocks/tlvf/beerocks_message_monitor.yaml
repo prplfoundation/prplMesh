@@ -90,6 +90,20 @@ cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION:
   _type: class
   params: sApActivityNotificationParams 
 
+cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY:
+  _type: class
+  mac: sMacAddr
+
+cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE:
+  _type: class
+  sta_mac: sMacAddr
+  bss_num:
+    _type: uint8_t
+    _length_var: True
+  per_bss_associated_sta_link_metrics:
+    _type: sPerBssAssociatedStaLinkMetrics
+    _length: [bss_num]
+
 #################################################
 # HOSTAP
 #################################################
