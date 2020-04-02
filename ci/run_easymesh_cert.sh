@@ -121,9 +121,9 @@ main() {
 
     if [ -n "$OWNCLOUD_UPLOAD" ]; then
         if is_prplmesh_device "$TARGET_DEVICE"; then
-            REMOTE_PATH="$TARGET_DEVICE"
+            REMOTE_PATH="$TARGET_DEVICE/$(basename "$LOG_FOLDER")"
         else
-            REMOTE_PATH="certified/$TARGET_DEVICE"
+            REMOTE_PATH="certified/$TARGET_DEVICE/$(basename "$LOG_FOLDER")"
         fi
         info "Uploading $LOG_FOLDER to $OWNCLOUD_PATH/$REMOTE_PATH"
         "$scriptdir"/owncloud/upload_to_owncloud.sh "$OWNCLOUD_PATH/$REMOTE_PATH" "$LOG_FOLDER" || {
