@@ -33,6 +33,40 @@ usage() {
     echo ""
 }
 
+upload() {
+    # Recursively upload directory from local path to remote path
+    #
+    # $1 - local path to directory
+    # $2 - remote path to upload to
+
+    local local_path remote_path
+    local_path="$1"
+    remote_path="$2"
+
+    create_dir "$remote_path"
+    find "$local_path" -type d -exec \
+            realpath {} --relative-to="$(dirname "$local_path")" \; | {
+                error=0
+                while read -r -s dir; do
+                    printf . # show progress
+                    create_dir "$remote_path/$dir" || {
+                        error="$?"
+                        continue
+                    }
+                    printf . # show progress
+                    # get the list of files to upload in the format <file>,<file>,...,<file>
+                    files=$(find "$(dirname "$local_path")/$dir/" -type f -maxdepth 1 -print0 | tr '\0' ',' | sed 's/,$//')
+                    dbg "$files"
+                    [ -n "$files" ] && {
+                        upload_files "$remote_path/$dir" "$files" || {
+                            error="$?"
+                        }
+                    }
+                done
+                echo
+                return $error
+            }
+}
 
 main() {
     if ! OPTS=$(getopt -o 'hvu:' --long help,verbose,url: -n 'parse-options' -- "$@"); then
@@ -67,55 +101,20 @@ main() {
     # We'll group uploads in the following directory in the user home
     # we don't care if create_dir fails because it may already exist:
     create_dir "temp_uploads" > /dev/null 2>&1
-
     remote_temp_path="temp_uploads/$(uuidgen)"
-    create_dir "$remote_temp_path"
-
-    info "Using temporary path $remote_temp_path"
-
-    status=0
-
+    
+    echo "upload $local_path to $remote_path"
     start=$(date +%s)
-    if ! find "$local_path" -type d -exec \
-            realpath {} --relative-to="$(dirname "$local_path")" \; | {
-                error=0
-                while read -r -s dir; do
-                    printf . # show progress
-                    create_dir "$remote_temp_path/$dir" || {
-                        error="$?"
-                        continue
-                    }
-                    printf . # show progress
-                    # get the list of files to upload in the format <file>,<file>,...,<file>
-                    files=$(find "$(dirname "$local_path")/$dir/" -type f -maxdepth 1 -print0 | tr '\0' ',' | sed 's/,$//')
-                    dbg "$files"
-                    [ -n "$files" ] && {
-                        upload_files "$remote_temp_path/$dir" "$files" || {
-                            error="$?"
-                        }
-                    }
-                done
-                echo
-                return $error
-            }
-    then
-        err "Uploading to a temporary directory failed!"
-        status=1
-    else
-        success "Uploading to a temporary directory succeeded!"
-    fi
+    upload "$local_path" "$remote_temp_path" || { err "Uploading to a temporary directory failed with status $?"; exit 1; }
     end=$(date +%s)
     echo "Runtime: $((end-start)) seconds"
 
-    info "Moving the temporary directory $remote_temp_path to $remote_path"
+    echo "Moving the temporary directory $remote_temp_path to $remote_path"
     start=$(date +%s)
-    move "$remote_temp_path" "$remote_path" || {
-        status="$?"
-    }
+    move "$remote_temp_path" "$remote_path" || { err "Move temporary directory failed with status $?"; exit 1; }
     end=$(date +%s)
     echo "Runtime: $((end-start)) seconds"
-
-    return "$status"
+    success "Upload $local_path to $remote_path succeeded."
 }
 
 QUIET=true
