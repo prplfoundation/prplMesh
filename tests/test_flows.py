@@ -120,8 +120,12 @@ class TestFlows:
 
         env.launch_environment_docker(unique_id, skip_init)
 
-    def _check_log_internal(self, device: str, program: str, regex: str, start_line: int):
-        '''Search for regex in logfile for program on device.'''
+    def check_log(self, device: str, program: str, regex: str, start_line: int = 0) -> bool:
+        '''Verify that on "device" the logfile for "program" matches "regex", fail if not.'''
+        return self.wait_for_log(device, program, regex, start_line, 0.3)
+
+    def wait_for_log(self, device: str, program: str, regex: str, start_line: int,
+                     timeout: float) -> bool:
         logfilename = os.path.join(self.rootdir, 'logs', device, 'beerocks_{}.log'.format(program))
 
         # WSL doesn't support symlinks on NTFS, so resolve the symlink manually
@@ -131,45 +135,26 @@ class TestFlows:
                 subprocess.check_output(["tail", "-2", logfilename]).
                 decode('utf-8').rstrip(' \t\r\n\0'))
 
-        with open(logfilename) as logfile:
-            for (i, v) in enumerate(logfile.readlines()):
-                if i <= start_line:
-                    continue
-                search = re.search(regex, v)
-                if search:
-                    debug("Found '{}'\n\tin {}".format(regex, logfilename))
-                    return (True, i, search.groups())
-        return (False, start_line, None)
-
-    def check_log(self, device: str, program: str, regex: str, start_line=0):
-        '''Verify that on "device" the logfile for "program" matches "regex", fail if not.'''
-        try:
-            # HACK check_log is often used immediately after triggering a message on the other side.
-            # That message needs some time to arrive on the receiver. Since our python script is
-            # pretty fast, we tend to check it too quickly. As a simple workaround, add a small
-            # sleep here. The good solution is to retry with a small timeout.
-            time.sleep(.1)
-            result, line, value = self._check_log_internal(device, program, regex, start_line)
-            if result:
-                return True, line, value
-            else:
-                return \
-                    self.fail("'{}'\n\tin log of {} on {}".format(
-                        regex, program, device)), line, None
-        except OSError:
-            return self.fail("Can't read log of {} on {}".format(program, device)), line, None
-
-    def wait_for_log(self, device: str, program: str, regex: str, timeout: float) -> bool:
         deadline = time.monotonic() + timeout
         try:
-            while time.monotonic() < deadline:
-                if self._check_log_internal(device, program, regex):
-                    return True
-                time.sleep(1)
+            while True:
+                with open(logfilename) as logfile:
+                    for (i, v) in enumerate(logfile.readlines()):
+                        if i <= start_line:
+                            continue
+                        search = re.search(regex, v)
+                        if search:
+                            debug("Found '{}'\n\tin {}".format(regex, logfilename))
+                            return (True, i, search.groups())
+                if time.monotonic() < deadline:
+                    time.sleep(.3)
+                else:
+                    self.fail("'{}'\n\tin log of {} on {} after {}s".format(regex, program,
+                                                                            device, timeout))
+                    return (False, start_line, None)
         except OSError:
-            return self.fail("Can't read log of {} on {}".format(program, device))
-        return self.fail("'{}'\n\tin log of {} on {} after {}s".format(regex, program,
-                                                                       device, timeout))
+            self.fail("Can't read log of {} on {}".format(program, device))
+            return (False, start_line, None)
 
     def send_bwl_event(self, device: str, radio: str, event: str) -> None:
         """Send a bwl event `event` to `radio` on `device`."""
