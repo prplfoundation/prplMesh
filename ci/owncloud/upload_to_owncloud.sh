@@ -28,8 +28,28 @@ usage() {
     echo ""
 }
 
+create_dirs() {
+    # Recursively create directory path in remote
+    # $1 remote path to create
+    local path IFS
+    path=
+    IFS='/'
+    for dir in $1; do
+        if [ -z "$path" ]; then
+            create_dir "$dir"
+            path="$dir"
+        else
+            create_dir "$path/$dir"
+            path="$path/$dir"
+        fi
+    done
+    # just in case the shell does not implement 'local'
+    unset IFS
+}
+
 upload() {
     # Recursively upload directory from local path to remote path
+    # remote path hirerchy should be created in advance using create_dirs
     #
     # $1 - local path to directory
     # $2 - remote path to upload to
@@ -38,7 +58,6 @@ upload() {
     local_path="$1"
     remote_path="$2"
 
-    create_dir "$remote_path"
     find "$local_path" -type d -exec \
             realpath {} --relative-to="$(dirname "$local_path")" \; | {
                 error=0
@@ -95,9 +114,12 @@ main() {
 
     # We'll group uploads in the following directory in the user home
     # we don't care if create_dir fails because it may already exist:
-    create_dir "temp_uploads" > /dev/null 2>&1
     remote_temp_path="temp_uploads/$(uuidgen)"
-    
+    create_dirs "$remote_temp_path" >/dev/null 2>&1
+
+    # Similarly, create the hirerchy for the remote path
+    create_dirs "$remote_path" >/dev/null 2>&1
+
     echo "upload $local_path to $remote_path"
     start=$(date +%s)
     upload "$local_path" "$remote_temp_path" || { err "Uploading to a temporary directory failed with status $?"; exit 1; }
