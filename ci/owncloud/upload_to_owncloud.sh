@@ -6,15 +6,10 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}" && pwd)"
-rootdir=$(realpath "$scriptdir/../../")
-
 # shellcheck source=../../tools/functions.sh
-. "$rootdir/tools/functions.sh"
-
+. "$(dirname "${BASH_SOURCE[0]}")/../../tools/functions.sh"
 # shellcheck source=./owncloud_definitions.sh
-. "$scriptdir/owncloud_definitions.sh"
-
+. "$(dirname "${BASH_SOURCE[0]}")/owncloud_definitions.sh"
 
 usage() {
     echo "usage: $(basename "$0") [-hv] <user> <password> <remote-path> <local-path>"
