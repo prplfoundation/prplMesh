@@ -108,6 +108,40 @@ browse_url() {
     echo "$browse_url"
 }
 
+download_url() {
+    # Calculate and echo the download url for a relative path
+    #
+    # $1 base url name - "artifacts" or "certification"
+    # $2 relative path from the base_url
+    #
+    # Uses:
+    #   OWNCLOUD_PUBLIC_URLS
+    local relative_path filename base_url browse_url
+    base_url="${OWNCLOUD_PUBLIC_URLS[$1]}"
+    relative_path="${2%/*}"
+    filename="${2##*/}"
+
+    download_url="$base_url/download?path="
+    for dir in $(echo "$relative_path" | tr "/" "\\n"); do
+        download_url="$download_url%2F$dir"
+    done
+
+    echo "$download_url&files=$filename"
+}
+
+download_artifact() {
+    # Downloads a file from the artifacts public folder
+    #
+    # $1 relative path from the artifacts folder
+    # $2 local path including filename
+    local base_url download_path
+
+    download_url="$(download_url artifacts "$1")"
+    download_path=${2-$(basename "$1")}
+    # curl options - fail on error (-f), follow redirect (-L)
+    curl ${QUIET:+ -s -S} -f -L "$download_url" --output "$download_path"
+}
+
 OWNCLOUD_URL="https://ftp.essensium.com/owncloud/remote.php/dav/files"
 
 declare -A OWNCLOUD_PUBLIC_URLS
