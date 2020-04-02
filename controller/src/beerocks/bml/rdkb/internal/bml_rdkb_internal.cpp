@@ -132,7 +132,9 @@ int bml_rdkb_internal::steering_client_set(uint32_t steeringGroupIndex, const BM
         request->config().snrHighXing      = config->snrHighXing;
         request->config().snrLowXing       = config->snrLowXing;
         request->config().authRejectReason = config->authRejectReason;
-        request->remove()                  = 0;
+        if (request->config().snrProbeHWM > 0) {
+            request->remove() = 0;
+        }
     }
 
     if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
