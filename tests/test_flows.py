@@ -979,8 +979,9 @@ class TestFlows:
 
     def test_beacon_report_query(self):
         # send beacon query request
+        debug("sending beacon report query to repeater 1")
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8011,
-            tlv(0x99, 20, "11:22:33:44:55:66", 0x73, 0xFFFFFFFFFFFF, 0x02, 0x00, 0x01, 0x03, 0x73, 0x24, 0x30 ))
+            tlv(0x99, 20, "11:22:33:44:55:66 0x73 0xFFFFFFFFFFFF 0x02 0x00 0x01 0x03 0x73 0x24 0x30"))
 
 if __name__ == '__main__':
     t = TestFlows()
