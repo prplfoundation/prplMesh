@@ -143,5 +143,6 @@ main() {
 }
 
 QUIET=true
+DIRECT_UPLOAD=false
 
 main "$@"
