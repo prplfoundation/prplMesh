@@ -220,17 +220,20 @@ class TestFlows:
         self.mac_repeater2_wlan2 = re.search(rb"link/ether " + RE_MAC, mac_repeater2_wlan2_output).group('mac').decode()
         debug("Repeater2 wl2: {}".format(self.mac_repeater2_wlan2))
 
-    def _check_log_internal(self, device: str, program: str, regex: str) -> bool:
+    def _check_log_internal(self, device: str, program: str, regex: str, start_line: int):
         '''Search for regex in logfile for program on device.'''
         logfilename = os.path.join(self.rootdir, 'logs', device, 'beerocks_{}.log'.format(program))
         with open(logfilename) as logfile:
-            for line in logfile.readlines():
-                if re.search(regex, line):
+            for (i, v) in enumerate(logfile.readlines()):
+                if i <= start_line:
+                    continue
+                search = re.search(regex, v)
+                if search:
                     debug("Found '{}'\n\tin {}".format(regex, logfilename))
-                    return True
-        return False
+                    return (True, i, search.groups())
+        return (False, start_line, None)
 
-    def check_log(self, device: str, program: str, regex: str) -> bool:
+    def check_log(self, device: str, program: str, regex: str, start_line=0):
         '''Verify that on "device" the logfile for "program" matches "regex", fail if not.'''
         try:
             # HACK check_log is often used immediately after triggering a message on the other side.
@@ -238,12 +241,14 @@ class TestFlows:
             # we tend to check it too quickly. As a simple workaround, add a small sleep here.
             # The good solution is to retry with a small timeout.
             time.sleep(.1)
-            if self._check_log_internal(device, program, regex):
-                return True
+            result, line, value = self._check_log_internal(device, program, regex, start_line)
+            if result:
+                return True, line, value
             else:
-                return self.fail("'{}'\n\tin log of {} on {}".format(regex, program, device))
+                return \
+                  self.fail("'{}'\n\tin log of {} on {}".format(regex, program, device)), line, None
         except OSError:
-            return self.fail("Can't read log of {} on {}".format(program, device))
+            return self.fail("Can't read log of {} on {}".format(program, device)), line, None
 
     def wait_for_log(self, device: str, program: str, regex: str, timeout: float) -> bool:
         deadline = time.monotonic() + timeout
