@@ -121,6 +121,18 @@ int64_t string_utils::stoi(const std::string &str, const char *calling_file, int
     return val;
 }
 
+std::string string_utils::hex_to_char_string(std::string hex)
+{
+    auto len = hex.length();
+    std::string charStr;
+    for (size_t i = 0; i < len; i += 2) {
+        auto byte = hex.substr(i, 2);
+        char chr  = (char)(int)strtol(byte.c_str(), nullptr, 16);
+        charStr.push_back(chr);
+    }
+    return charStr;
+}
+
 std::string string_utils::int_to_hex_string(const unsigned int integer,
                                             const uint8_t number_of_digits)
 {

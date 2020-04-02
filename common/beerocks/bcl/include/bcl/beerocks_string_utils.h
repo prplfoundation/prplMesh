@@ -81,6 +81,8 @@ public:
     static int64_t stoi(const std::string &str, const char *calling_file = __builtin_FILE(),
                         int calling_line = __builtin_LINE());
 
+    static std::string hex_to_char_string(std::string hex);
+
     static std::string int_to_hex_string(const unsigned int integer,
                                          const uint8_t number_of_digits);
 };
