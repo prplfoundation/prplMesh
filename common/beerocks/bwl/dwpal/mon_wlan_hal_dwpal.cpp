@@ -394,7 +394,7 @@ static bool translate_nl_data_to_bwl_results(sChannelScanResults &results,
     }
 
     //get information elements from information-elements-buffer or from beacon
-    if (bss[NL80211_BSS_BEACON_IES]) {
+    if (bss[NL80211_BSS_BEACON_IES] || bss[NL80211_BSS_INFORMATION_ELEMENTS]) {
         enum nl80211_bss ies_index = (bss[NL80211_BSS_INFORMATION_ELEMENTS])
                                          ? NL80211_BSS_INFORMATION_ELEMENTS
                                          : NL80211_BSS_BEACON_IES;
