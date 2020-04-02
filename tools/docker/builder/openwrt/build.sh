@@ -176,7 +176,7 @@ VERBOSE=false
 BUILD_OPTIONS=""
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='9d2efd'
-PRPL_FEED='https://git.prpl.dev/prplmesh/iwlwav.git^6749d406d243465e06b4f518767b2d1b9372e3f5'
+PRPL_FEED='https://git.prpl.dev/prplmesh/iwlwav.git^6265989f2c47f7b42f64d25f455443b87902582e'
 INTEL_FEED=""
 BASE_CONFIG=default
 
