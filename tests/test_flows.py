@@ -384,7 +384,92 @@ class TestFlows:
         self.check_log(self.repeater1, "agent_wlan0", "CHANNEL_PREFERENCE_QUERY_MESSAGE")
         self.check_log(self.repeater1, "agent_wlan2", "CHANNEL_PREFERENCE_QUERY_MESSAGE")
 
+        debug("Send empty channel selection request")
+        cs_req_mid = self.gateway_ucc.dev_send_1905(self.mac_repeater1,
+                                                    0x8006, tlv(0x00, 0x0000, "{}"))
+        time.sleep(1)
+
+        debug("Confirming channel selection request has been received on controller")
+        self.check_log(
+            self.gateway,
+            "controller",
+            r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(cs_req_mid)
+        )
+
+        debug("Confirming empty channel selection request has been received on agent")
+        self.check_log(self.repeater1, "agent_wlan0", "CHANNEL_SELECTION_REQUEST_MESSAGE")
+        self.check_log(self.repeater1, "agent_wlan2", "CHANNEL_SELECTION_REQUEST_MESSAGE")
+
+        debug("Confirming OPERATING_CHANNEL_REPORT_MESSAGE message has been received on \
+            controller with mid")
+
+        result, ocrm_line, mid_match = self.check_log(
+                                            self.gateway, "controller",
+                                            r'.+OPERATING_CHANNEL_REPORT_MESSAGE,\smid=(\d+)'
+                                        )
+        if (mid_match):
+            debug("Confirming ACK_MESSAGE from the controller \
+                with same mid as OPERATING_CHANNEL_REPORT_MESSAGE")
+            self.check_log(
+                self.repeater1,
+                "agent_wlan0",
+                "ACK_MESSAGE, mid={}".format(mid_match[0])
+            )
+
+            self.check_log(
+                self.repeater1,
+                "agent_wlan2",
+                "ACK_MESSAGE, mid={}".format(mid_match[0])
+            )
+
         tp20dBm = 0x14
+        tp21dBm = 0x15
+
+        for payload_transmit_power in (tp20dBm, tp21dBm):
+            debug("Send empty channel selection request with changing tx_power_limit")
+            cs_req_mid = self.gateway_ucc.dev_send_1905(
+                            self.mac_repeater1,
+                            0x8006,
+                            tlv(0x8D, 0x0007, '{} 0x{:02x}'.format(self.mac_repeater1_wlan0,
+                                payload_transmit_power)),
+                            tlv(0x8D, 0x0007, '{} 0x{:02x}'.format(self.mac_repeater1_wlan2,
+                                payload_transmit_power))
+                        )
+            time.sleep(1)
+
+            self.check_log(
+                self.gateway,
+                "controller",
+                r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(cs_req_mid)
+            )
+
+            self.check_log(self.repeater1, "agent_wlan0", "CHANNEL_SELECTION_REQUEST_MESSAGE")
+            self.check_log(self.repeater1, "agent_wlan2", "CHANNEL_SELECTION_REQUEST_MESSAGE")
+
+            self.check_log(self.repeater1, "agent_wlan0",
+                           "tlvTransmitPowerLimit {}".format(payload_transmit_power))
+            self.check_log(self.repeater1, "agent_wlan2",
+                           "tlvTransmitPowerLimit {}".format(payload_transmit_power))
+
+            self.check_log(self.gateway, "controller", "tx_power={}".format(payload_transmit_power))
+
+            result, ocrm_line, mid_match = self.check_log(
+                                                self.gateway, "controller",
+                                                r'.+OPERATING_CHANNEL_REPORT_MESSAGE,\smid=(\d+)',
+                                                ocrm_line
+                                            )
+            if (result):
+                self.check_log(
+                    self.repeater1,
+                    "agent_wlan0",
+                    "ACK_MESSAGE, mid={}".format(mid_match[0])
+                )
+
+                self.check_log(
+                    self.repeater1,
+                    "agent_wlan2",
+                    "ACK_MESSAGE, mid={}".format(mid_match[0])
+                )
 
         # payload_wlan0 - request for change channel on 6
         payload_wlan0 = (
@@ -463,7 +548,8 @@ class TestFlows:
             self.check_log(
                 self.gateway,
                 "controller",
-                r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(mid))
+                r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(mid)
+            )
 
             debug(
                 "Confirming channel selection request has been received on agent,step {}".format(i))
@@ -497,7 +583,8 @@ class TestFlows:
 
             result, ocrm_line, mid_match = self.check_log(
                                         self.gateway, "controller",
-                                        r'.+OPERATING_CHANNEL_REPORT_MESSAGE,\smid=(\d+)')
+                                        r'.+OPERATING_CHANNEL_REPORT_MESSAGE,\smid=(\d+)',
+                                        ocrm_line)
 
             if (mid_match):
                 self.check_log(
