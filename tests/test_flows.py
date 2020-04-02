@@ -85,20 +85,10 @@ class TestFlows:
         '''Execute `command` in docker container `device` and return its output.'''
         return subprocess.check_output(("docker", "exec", device) + command)
 
-    def beerocks_cli_command(self, command: str) -> bytes:
-        '''Execute `command` beerocks_cli command on the controller and return its output.'''
-        debug("Send CLI command " + command)
-        res = self.docker_command(self.gateway,
-                                  os.path.join(self.installdir, "bin", "beerocks_cli"),
-                                  "-c",
-                                  command)
-        debug("  Response: " + res.decode('utf-8', errors='replace').strip())
-        return res
-
     def get_conn_map(self) -> Dict[str, MapDevice]:
         '''Get the connection map from the controller.'''
         conn_map = {}
-        for line in self.beerocks_cli_command("bml_conn_map").split(b'\n'):
+        for line in env.beerocks_cli_command("bml_conn_map").split(b'\n'):
             # TODO we need to parse indentation to get the exact topology.
             # For the time being, just parse the repeaters.
             bridge = re.search(rb' {8}IRE_BRIDGE: .* mac: ' + RE_MAC, line)
@@ -116,7 +106,6 @@ class TestFlows:
     def init(self, unique_id: str, skip_init: bool):
         '''Initialize the tests.'''
         self.start_test('init')
-        self.gateway = 'gateway-' + unique_id
         self.repeater1 = 'repeater1-' + unique_id
         self.repeater2 = 'repeater2-' + unique_id
 
@@ -565,15 +554,15 @@ class TestFlows:
         debug("Connect dummy STA to wlan0")
         self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
         debug("Send client association control request to the chosen BSSID (UNBLOCK)")
-        self.beerocks_cli_command('client_allow {} {}'.format(sta_mac, env.agents[0].radios[1].mac))
+        env.beerocks_cli_command('client_allow {} {}'.format(sta_mac, env.agents[0].radios[1].mac))
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
         self.check_log(env.agents[0].radios[1], r"Got client allow request for {}".format(sta_mac))
 
         debug("Send client association control request to all other (BLOCK) ")
-        self.beerocks_cli_command('client_disallow {} {}'.format(sta_mac,
-                                                                 env.agents[0].radios[0].mac))
+        env.beerocks_cli_command('client_disallow {} {}'.format(sta_mac,
+                                                                env.agents[0].radios[0].mac))
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (BLOCK)")
@@ -633,7 +622,7 @@ class TestFlows:
         debug("Connect dummy STA to wlan0")
         self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
         debug("Send steer request ")
-        self.beerocks_cli_command("steer_client {} {}".format(sta_mac, env.agents[0].radios[1].mac))
+        env.beerocks_cli_command("steer_client {} {}".format(sta_mac, env.agents[0].radios[1].mac))
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")

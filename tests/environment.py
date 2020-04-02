@@ -33,10 +33,11 @@ class ALEntity:
     it is implemented in prplMesh and it allows us to have e.g. a separate UCCSocket to controller
     and agent.
     '''
-
-    def __init__(self, mac: str, ucc_socket: UCCSocket, is_controller: bool = False):
+    def __init__(self, mac: str, ucc_socket: UCCSocket, installdir: str,
+                 is_controller: bool = False):
         self.mac = mac
         self.ucc_socket = ucc_socket
+        self.installdir = installdir
         self.is_controller = is_controller
         self.radios = []
 
@@ -51,6 +52,13 @@ class ALEntity:
         Example: command('ip', 'addr') to get IP addresses of all interfaces.
         '''
         raise NotImplementedError("command is not implemented in abstract class ALEntity")
+
+    def prplmesh_command(self, command: str, *args: str) -> bytes:
+        '''Run `command` with "args" on the device and return its output as bytes.
+
+        "command" is relative to the installation directory of prplmesh, e.g. "bin/beerocks_cli".
+        '''
+        return self.command(os.path.join(self.installdir, command), *args)
 
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         '''Poll the entity's logfile until it contains "regex" or times out.'''
@@ -79,6 +87,14 @@ class Radio:
 wired_sniffer = None
 controller = None
 agents = []
+
+
+def beerocks_cli_command(command: str) -> bytes:
+    '''Execute `command` beerocks_cli command on the controller and return its output.'''
+    debug("Send CLI command " + command)
+    res = controller.prplmesh_command("bin/beerocks_cli", "-c", command)
+    debug("  Response: " + res.decode('utf-8', errors='replace').strip())
+    return res
 
 
 # Concrete implementation with docker
@@ -154,7 +170,7 @@ class ALEntityDocker(ALEntity):
         ucc_socket = UCCSocket(device_ip, ucc_port)
         mac = ucc_socket.dev_get_parameter('ALid')
 
-        super().__init__(mac, ucc_socket, is_controller)
+        super().__init__(mac, ucc_socket, installdir, is_controller)
 
         # We always have two radios, wlan0 and wlan2
         RadioDocker(self, "wlan0")
