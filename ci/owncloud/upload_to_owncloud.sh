@@ -70,7 +70,7 @@ upload() {
 
 main() {
     if ! OPTS=$(getopt -o 'hvu:' --long help,verbose,url: -n 'parse-options' -- "$@"); then
-        echo echo "Failed parsing options." >&2; usage; exit 1
+        echo "Failed parsing options." >&2; usage; exit 1
     fi
 
     eval set -- "$OPTS"
