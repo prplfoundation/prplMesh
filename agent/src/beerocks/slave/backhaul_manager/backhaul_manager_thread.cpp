@@ -2170,13 +2170,27 @@ bool backhaul_manager::handle_associated_sta_link_metrics_query(ieee1905_1::Cmdu
         error_code_tlv->reason_code() =
             wfa_map::tlvErrorCode::STA_NOT_ASSOCIATED_WITH_ANY_BSS_OPERATED_BY_THE_AGENT;
         error_code_tlv->sta_mac() = mac->sta_mac();
+
+        LOG(DEBUG) << "Send a ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE back to controller";
+        return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+
     } else {
         LOG(DEBUG) << "client with mac address " << mac->sta_mac() << " connected to " << bssid;
         //TODO
-    }
+        auto request_out = message_com::create_vs_message<
+        beerocks_message::cACTION_BACKHAUL_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY>(cmdu_tx, mid);
 
-    LOG(DEBUG) << "Send a ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE back to controller";
-    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+        if (!request_out) {
+            LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY message!";
+           return false;
+        }
+
+        request_out->mac() = mac->sta_mac();
+
+        std::string mac_str = network_utils::mac_to_string(mac->sta_mac());
+        LOG(DEBUG) << "Sending cACTION_BACKHAUL_CLIENT_ASSOCIATED_STA_LINK_METRIC_QUERY to " << mac_str;
+        return send_cmdu_to_bus(cmdu_tx, mac_str, bridge_info.mac);
+    }
 }
 
 bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
