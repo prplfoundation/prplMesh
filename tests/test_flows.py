@@ -8,7 +8,6 @@
 
 import argparse
 import os
-import subprocess
 import sys
 import time
 from typing import Union
@@ -44,18 +43,6 @@ class TestFlows:
         self.running = test
         status(test + " starting")
 
-    def docker_command(self, device: str, *command: str) -> bytes:
-        '''Execute `command` in docker container `device` and return its output.'''
-        return subprocess.check_output(("docker", "exec", device) + command)
-
-    def init(self, unique_id: str, skip_init: bool):
-        '''Initialize the tests.'''
-        self.start_test('init')
-        self.repeater1 = 'repeater1-' + unique_id
-        self.repeater2 = 'repeater2-' + unique_id
-
-        env.launch_environment_docker(unique_id, skip_init)
-
     def check_log(self, entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
                   start_line: int = 0) -> bool:
         '''Verify that the logfile for "entity_or_radio" matches "regex", fail if not.'''
@@ -67,13 +54,6 @@ class TestFlows:
         if not result:
             self.__fail_no_message()
         return result, line, match
-
-    def send_bwl_event(self, device: str, radio: str, event: str) -> None:
-        """Send a bwl event `event` to `radio` on `device`."""
-        # The file is only available within the docker container so we need to use an echo command.
-        # Inside the container, $USER is set to the username that was used for starting it.
-        command = "echo \"{event}\" > /tmp/$USER/beerocks/{radio}/EVENT".format(**locals())
-        self.docker_command(device, 'sh', '-c', command)
 
     def run_tests(self, tests):
         '''Run all tests as specified on the command line.'''
@@ -456,13 +436,13 @@ class TestFlows:
         self.check_log(env.agents[0], "Received TLV_RECEIVER_LINK_METRIC")
 
     def test_client_capability_query(self):
-        sta_mac1 = '00:00:00:11:00:22'
-        sta_mac2 = '00:00:00:11:00:33'
+        sta1 = env.Station.create()
+        sta2 = env.Station.create()
 
         debug("Send client capability query for unconnected STA")
         env.controller.dev_send_1905(env.agents[0].mac, 0x8009,
                                      tlv(0x90, 0x000C,
-                                         '{} {}'.format(env.agents[0].radios[0].mac, sta_mac1)))
+                                         '{} {}'.format(env.agents[0].radios[0].mac, sta1.mac)))
         time.sleep(1)
         debug("Confirming client capability query has been received on agent")
         # check that both radio agents received it, in the future we'll add a check to verify which
@@ -472,47 +452,44 @@ class TestFlows:
         debug("Confirming client capability report message has been received on controller")
         self.check_log(env.controller, r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
         self.check_log(env.controller,
-                       r"Result Code= FAILURE, client MAC= {sta_mac1}, BSSID= {mac_repeater1_wlan0}"
-                       .format(sta_mac1=sta_mac1,
-                               mac_repeater1_wlan0=env.agents[0].radios[0].mac))
+                       r"Result Code= FAILURE, client MAC= {}, BSSID= {}"
+                       .format(sta1.mac, env.agents[0].radios[0].mac))
 
         debug("Connect dummy STA to wlan0")
-        self.send_bwl_event(self.repeater1, "wlan0",
-                            "EVENT AP-STA-CONNECTED {sta_mac2}".format(sta_mac2=sta_mac2))
+        env.agents[0].radios[0].vaps[0].associate(sta2)
 
         debug("Send client capability query for connected STA")
         env.controller.dev_send_1905(env.agents[0].mac, 0x8009,
                                      tlv(0x90, 0x000C,
-                                         '{} {}'.format(env.agents[0].radios[0].mac, sta_mac2)))
+                                         '{} {}'.format(env.agents[0].radios[0].mac, sta2.mac)))
         time.sleep(1)
 
         debug("Confirming client capability report message has been received on controller")
         self.check_log(env.controller, r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
         self.check_log(env.controller,
-                       r"Result Code= SUCCESS, client MAC= {sta_mac2}, BSSID= {mac_repeater1_wlan0}"
-                       .format(sta_mac2=sta_mac2,
-                               mac_repeater1_wlan0=env.agents[0].radios[0].mac))
+                       r"Result Code= SUCCESS, client MAC= {}, BSSID= {}"
+                       .format(sta2.mac, env.agents[0].radios[0].mac))
 
     def test_client_association_dummy(self):
-        sta_mac = "11:11:33:44:55:66"
+        sta = env.Station.create()
 
         debug("Connect dummy STA to wlan0")
-        self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
+        env.agents[0].radios[0].vaps[0].associate(sta)
         debug("Send client association control request to the chosen BSSID (UNBLOCK)")
-        env.beerocks_cli_command('client_allow {} {}'.format(sta_mac, env.agents[0].radios[1].mac))
+        env.beerocks_cli_command('client_allow {} {}'.format(sta.mac, env.agents[0].radios[1].mac))
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
-        self.check_log(env.agents[0].radios[1], r"Got client allow request for {}".format(sta_mac))
+        self.check_log(env.agents[0].radios[1], r"Got client allow request for {}".format(sta.mac))
 
         debug("Send client association control request to all other (BLOCK) ")
-        env.beerocks_cli_command('client_disallow {} {}'.format(sta_mac,
+        env.beerocks_cli_command('client_disallow {} {}'.format(sta.mac,
                                                                 env.agents[0].radios[0].mac))
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (BLOCK)")
         self.check_log(env.agents[0].radios[0],
-                       r"Got client disallow request for {}".format(sta_mac))
+                       r"Got client disallow request for {}".format(sta.mac))
 
     def test_client_steering_mandate(self):
         debug("Send topology request to agent 1")
@@ -562,12 +539,12 @@ class TestFlows:
         self.check_log(env.agents[0].radios[0], "ACK_MESSAGE")
 
     def test_client_steering_dummy(self):
-        sta_mac = "11:22:33:44:55:66"
+        sta = env.Station.create()
 
         debug("Connect dummy STA to wlan0")
-        self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
+        env.agents[0].radios[0].vaps[0].associate(sta)
         debug("Send steer request ")
-        env.beerocks_cli_command("steer_client {} {}".format(sta_mac, env.agents[0].radios[1].mac))
+        env.beerocks_cli_command("steer_client {} {}".format(sta.mac, env.agents[0].radios[1].mac))
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
@@ -592,16 +569,16 @@ class TestFlows:
         self.check_log(env.agents[0].radios[0], r"ACK_MESSAGE")
 
         debug("Disconnect dummy STA from wlan0")
-        self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-DISCONNECTED {}".format(sta_mac))
+        env.agents[0].radios[0].vaps[0].disassociate(sta)
         # Make sure that controller sees disconnect before connect by waiting a little
         time.sleep(1)
 
         debug("Connect dummy STA to wlan2")
-        self.send_bwl_event(self.repeater1, "wlan2", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
+        env.agents[0].radios[1].vaps[0].associate(sta)
         debug("Confirm steering success by client connected")
-        self.check_log(env.controller, r"steering successful for sta {}".format(sta_mac))
+        self.check_log(env.controller, r"steering successful for sta {}".format(sta.mac))
         self.check_log(env.controller,
-                       r"sta {} disconnected due to steering request".format(sta_mac))
+                       r"sta {} disconnected due to steering request".format(sta.mac))
 
         # Make sure that all blocked agents send UNBLOCK messages at the end of
         # disallow period (default 25 sec)
@@ -707,6 +684,8 @@ if __name__ == '__main__':
     opts.tcpdump_dir = os.path.join(t.rootdir, 'logs')
     opts.stop_on_failure = options.stop_on_failure
 
-    t.init(options.unique_id, options.skip_init)
+    t.start_test('init')
+    env.launch_environment_docker(options.unique_id, options.skip_init)
+
     if t.run_tests(options.tests):
         sys.exit(1)

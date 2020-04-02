@@ -76,10 +76,50 @@ class Radio:
         self.agent = agent
         agent.radios.append(self)
         self.mac = mac
+        self.vaps = []
 
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         '''Poll the radio's logfile until it contains "regex" or times out.'''
         raise NotImplementedError("wait_for_log is not implemented in abstract class Radio")
+
+
+class Station:
+    '''Placeholder for a wireless (fronthaul) station.
+
+    Unlike the other classes, this is not an abstract class. Instead, it is a placeholder that
+    represents a station. Handling the station is actually done through the VirtualAP concrete
+    implementation.
+    '''
+    def __init__(self, mac: str):
+        self.mac = mac
+
+    __mac_base = 0
+
+    @staticmethod
+    def create():
+        '''Generate a Station placeholder with a random MAC address.'''
+        mac = '51:a1:10:20:{:02x}:{:02x}'.format(int(Station.__mac_base / 256),
+                                                 Station.__mac_base % 256)
+        Station.__mac_base += 1
+        if Station.__mac_base > 256*256:
+            Station.__mac_base = 0
+        return Station(mac)
+
+
+class VirtualAP:
+    '''Abstract representation of a VAP on a MultiAP Radio.'''
+    def __init__(self, radio: Radio, bssid: str):
+        self.radio = radio
+        radio.vaps.append(self)
+        self.bssid = bssid
+
+    def associate(self, sta: Station) -> bool:
+        '''Associate "sta" with this VAP.'''
+        raise NotImplementedError("associate is not implemented in abstract class VirtualAP")
+
+    def disassociate(self, sta: Station) -> bool:
+        '''Disassociate "sta" from this VAP.'''
+        raise NotImplementedError("disassociate is not implemented in abstract class VirtualAP")
 
 
 # The following variables are initialized as None, and have to be set when a concrete test
@@ -195,10 +235,34 @@ class RadioDocker(Radio):
         mac = re.search(r"link/ether (([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})", ip_output).group(1)
         super().__init__(agent, mac)
 
+        # Since dummy bwl always uses the first VAP, in practice we always have a single VAP with
+        # the radio MAC as the bssid.
+        VirtualAPDocker(self, mac)
+
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         '''Poll the radio's logfile until it contains "regex" or times out.'''
         program = "agent_" + self.iface_name
         return _docker_wait_for_log(self.agent.name, program, regex, start_line, timeout)
+
+    def send_bwl_event(self, event: str) -> None:
+        # The file is only available within the docker container so we need to use an echo command.
+        # Inside the container, $USER is set to the username that was used for starting it.
+        command = "echo \"{}\" > /tmp/$USER/beerocks/{}/EVENT".format(event, self.iface_name)
+        self.agent.command('sh', '-c', command)
+
+
+class VirtualAPDocker(VirtualAP):
+    '''Docker implementation of a VAP.'''
+    def __init__(self, radio: RadioDocker, bssid: str):
+        super().__init__(radio, bssid)
+
+    def associate(self, sta: Station) -> bool:
+        '''Associate "sta" with this VAP.'''
+        self.radio.send_bwl_event("EVENT AP-STA-CONNECTED {}".format(sta.mac))
+
+    def disassociate(self, sta: Station) -> bool:
+        '''Disassociate "sta" from this VAP.'''
+        self.radio.send_bwl_event("EVENT AP-STA-DISCONNECTED {}".format(sta.mac))
 
 
 def _get_bridge_interface(unique_id):
