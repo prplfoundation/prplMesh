@@ -4438,7 +4438,6 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
         return false;
     }
 
-    /*
     // 2. forward the request to the monitor
     // using vs message
 
@@ -4450,33 +4449,37 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
         return false;
     } 
 
-	auto& measurement_request = request_out.params();
-	measurement_request.bssid 					= cmdu_rx.bssid();
-	measurement_request.channel 				= cmdu_rx.chnnel_number();
+    // get the correct type of the message
+    auto beaconMetricsQuery = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
+
+    if (!beaconMetricsQuery) {
+        LOG(ERROR) << "tlvBeaconMetricsQuery missing - ignoring beacon metrics query message";
+        return false;
+    } 
+
+
+    // fill the parameters
+	auto& measurement_request = request_out->params();
+	measurement_request.bssid 					= beaconMetricsQuery->bssid();
+	measurement_request.channel 				= beaconMetricsQuery->channel_number();
 	
 	measurement_request.measurement_mode		= beerocks::MEASURE_MODE_ACTIVE;
 	measurement_request.duration				= beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
 
+    /*
 	measurement_request.measurement_mode		= beerocks::MEASURE_MODE_PASSIVE;
 	measurement_request.duration				= beerocks::BEACON_MEASURE_DEFAULT_PASSIVE_DURATION;
+    */
 
 	measurement_request.expected_reports_count 	= 1;
 
 	measurement_request.rand_ival				= beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
-	measurement_request.sta_mac					= cmdu_rx.associated_sta_mac();
+	measurement_request.sta_mac					= beaconMetricsQuery->associated_sta_mac();
 
 
-    // 3. fake a response
-    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE)) {
-        LOG(ERROR) << "cmdu creation of type BEACON_METRICS_QUERY_MESSAGE, has failed";
-        return false;
-    }
+    message_com::send_cmdu(monitor_socket, cmdu_tx);
 
-    if (!send_cmdu_to_controller(cmdu_tx)) {
-        LOG(ERROR) << "failed sending BEACON_METRICS_QUERY_MESSAGE to the controller";
-        return false;
-    }
-    */
+    // where is the response???
 
     return true;
 }
