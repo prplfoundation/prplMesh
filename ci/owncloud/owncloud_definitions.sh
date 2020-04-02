@@ -150,6 +150,7 @@ OWNCLOUD_PUBLIC_URLS["artifacts"]="https://ftp.essensium.com/owncloud/index.php/
 
 user=$(awk '/ftp.essensium.com/{getline; print $4}' ~/.netrc)
 
-if [ ! "$#" = 0 ] ; then
+# Check if script is being sourced
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
     "$@"
 fi
