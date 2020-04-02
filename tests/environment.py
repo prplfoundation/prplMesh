@@ -10,9 +10,10 @@ import os
 import platform
 import re
 import subprocess
+import time
 
 from capi import UCCSocket
-from opts import debug
+from opts import debug, err
 import sniffer
 
 
@@ -32,6 +33,7 @@ class ALEntity:
     it is implemented in prplMesh and it allows us to have e.g. a separate UCCSocket to controller
     and agent.
     '''
+
     def __init__(self, mac: str, ucc_socket: UCCSocket, is_controller: bool = False):
         self.mac = mac
         self.ucc_socket = ucc_socket
@@ -50,6 +52,10 @@ class ALEntity:
         '''
         raise NotImplementedError("command is not implemented in abstract class ALEntity")
 
+    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+        '''Poll the entity's logfile until it contains "regex" or times out.'''
+        raise NotImplementedError("wait_for_log is not implemented in abstract class ALEntity")
+
 
 class Radio:
     '''Abstract representation of a radio on a MultiAP agent.
@@ -57,10 +63,15 @@ class Radio:
     This provides basic information about the radio, e.g. its mac address, and functionality for
     checking its status.
     '''
+
     def __init__(self, agent: ALEntity, mac: str):
         self.agent = agent
         agent.radios.append(self)
         self.mac = mac
+
+    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+        '''Poll the radio's logfile until it contains "regex" or times out.'''
+        raise NotImplementedError("wait_for_log is not implemented in abstract class Radio")
 
 
 # The following variables are initialized as None, and have to be set when a concrete test
@@ -74,6 +85,39 @@ agents = []
 
 rootdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 installdir = os.path.join(rootdir, 'build', 'install')
+on_wsl = "microsoft" in platform.uname()[3].lower()
+
+
+def _docker_wait_for_log(container: str, program: str, regex: str, start_line: int,
+                         timeout: float) -> bool:
+    logfilename = os.path.join(rootdir, 'logs', container, 'beerocks_{}.log'.format(program))
+    # WSL doesn't support symlinks on NTFS, so resolve the symlink manually
+    if on_wsl:
+        logfilename = os.path.join(
+            rootdir, 'logs', container,
+            subprocess.check_output(["tail", "-2", logfilename]).decode('utf-8').
+            rstrip(' \t\r\n\0'))
+
+    deadline = time.monotonic() + timeout
+    try:
+        while True:
+            with open(logfilename) as logfile:
+                for (i, v) in enumerate(logfile.readlines()):
+                    if i <= start_line:
+                        continue
+                    search = re.search(regex, v)
+                    if search:
+                        debug("Found '{}'\n\tin {}".format(regex, logfilename))
+                        return (True, i, search.groups())
+            if time.monotonic() < deadline:
+                time.sleep(.3)
+            else:
+                err("'{}'\n\tin log of {} on {} after {}s".format(regex, program, container,
+                                                                  timeout))
+                return (False, start_line, None)
+    except OSError:
+        err("Can't read log of {} on {}".format(program, container))
+        return (False, start_line, None)
 
 
 class ALEntityDocker(ALEntity):
@@ -81,10 +125,10 @@ class ALEntityDocker(ALEntity):
 
     The entity is defined from the name of the container, the rest is derived from that.
     '''
+
     def __init__(self, name: str, is_controller: bool = False):
         self.name = name
         self.bridge_name = 'br-lan'
-        self.on_wsl = "microsoft" in platform.uname()[3].lower()
 
         # First, get the UCC port from the config file
         if is_controller:
@@ -96,7 +140,7 @@ class ALEntityDocker(ALEntity):
                 re.search(r'ucc_listener_port=(?P<port>[0-9]+)', config_file.read()).group('port')
 
         # On WSL, connect to the locally exposed container port
-        if self.on_wsl:
+        if on_wsl:
             published_port_output = subprocess.check_output(
                 ["docker", "port", name, ucc_port]).decode('utf-8').split(":")
             device_ip = published_port_output[0]
@@ -120,14 +164,25 @@ class ALEntityDocker(ALEntity):
         '''Execute `command` in docker container and return its output.'''
         return subprocess.check_output(("docker", "exec", self.name) + command)
 
+    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+        '''Poll the entity's logfile until it contains "regex" or times out.'''
+        program = "controller" if self.is_controller else "agent"
+        return _docker_wait_for_log(self.name, program, regex, start_line, timeout)
+
 
 class RadioDocker(Radio):
     '''Docker implementation of a radio.'''
+
     def __init__(self, agent: ALEntityDocker, iface_name: str):
         self.iface_name = iface_name
         ip_output = agent.command("ip", "-o",  "link", "list", "dev", self.iface_name).decode()
         mac = re.search(r"link/ether (([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})", ip_output).group(1)
         super().__init__(agent, mac)
+
+    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+        '''Poll the radio's logfile until it contains "regex" or times out.'''
+        program = "agent_" + self.iface_name
+        return _docker_wait_for_log(self.agent.name, program, regex, start_line, timeout)
 
 
 def _get_bridge_interface(unique_id):

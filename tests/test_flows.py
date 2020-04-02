@@ -11,9 +11,8 @@ import os
 import re
 import subprocess
 import sys
-import platform
 import time
-from typing import Dict
+from typing import Dict, Union
 
 import environment as env
 from capi import tlv
@@ -65,13 +64,17 @@ class TestFlows:
         self.installdir = os.path.join(self.rootdir, 'build', 'install')
         self.running = ''
 
-    def fail(self, msg: str) -> bool:
-        '''Print a red error message, increment failure count and return False.'''
+    def __fail_no_message(self) -> bool:
+        '''Increment failure count and return False.'''
         self.check_error += 1
-        err('FAIL: {}'.format(msg))
         if opts.stop_on_failure:
             sys.exit(1)
         return False
+
+    def fail(self, msg: str) -> bool:
+        '''Print a red error message, increment failure count and return False.'''
+        err('FAIL: {}'.format(msg))
+        return self.__fail_no_message()
 
     def start_test(self, test: str):
         '''Call this at the beginning of a test.'''
@@ -116,45 +119,20 @@ class TestFlows:
         self.gateway = 'gateway-' + unique_id
         self.repeater1 = 'repeater1-' + unique_id
         self.repeater2 = 'repeater2-' + unique_id
-        self.on_wsl = "microsoft" in platform.uname()[3].lower()
 
         env.launch_environment_docker(unique_id, skip_init)
 
-    def check_log(self, device: str, program: str, regex: str, start_line: int = 0) -> bool:
-        '''Verify that on "device" the logfile for "program" matches "regex", fail if not.'''
-        return self.wait_for_log(device, program, regex, start_line, 0.3)
+    def check_log(self, entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
+                  start_line: int = 0) -> bool:
+        '''Verify that the logfile for "entity_or_radio" matches "regex", fail if not.'''
+        return self.wait_for_log(entity_or_radio, regex, start_line, 0.3)
 
-    def wait_for_log(self, device: str, program: str, regex: str, start_line: int,
-                     timeout: float) -> bool:
-        logfilename = os.path.join(self.rootdir, 'logs', device, 'beerocks_{}.log'.format(program))
-
-        # WSL doesn't support symlinks on NTFS, so resolve the symlink manually
-        if self.on_wsl:
-            logfilename = os.path.join(
-                self.rootdir, 'logs', device,
-                subprocess.check_output(["tail", "-2", logfilename]).
-                decode('utf-8').rstrip(' \t\r\n\0'))
-
-        deadline = time.monotonic() + timeout
-        try:
-            while True:
-                with open(logfilename) as logfile:
-                    for (i, v) in enumerate(logfile.readlines()):
-                        if i <= start_line:
-                            continue
-                        search = re.search(regex, v)
-                        if search:
-                            debug("Found '{}'\n\tin {}".format(regex, logfilename))
-                            return (True, i, search.groups())
-                if time.monotonic() < deadline:
-                    time.sleep(.3)
-                else:
-                    self.fail("'{}'\n\tin log of {} on {} after {}s".format(regex, program,
-                                                                            device, timeout))
-                    return (False, start_line, None)
-        except OSError:
-            self.fail("Can't read log of {} on {}".format(program, device))
-            return (False, start_line, None)
+    def wait_for_log(self, entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
+                     start_line: int, timeout: float) -> bool:
+        result, line, match = entity_or_radio.wait_for_log(regex, start_line, timeout)
+        if not result:
+            self.__fail_no_message()
+        return result, line, match
 
     def send_bwl_event(self, device: str, radio: str, event: str) -> None:
         """Send a bwl event `event` to `radio` on `device`."""
@@ -188,13 +166,13 @@ class TestFlows:
 
     def test_initial_ap_config(self):
         '''Check initial configuration on repeater1.'''
-        self.check_log(self.repeater1, "agent_wlan0", r"WSC Global authentication success")
-        self.check_log(self.repeater1, "agent_wlan2", r"WSC Global authentication success")
-        self.check_log(self.repeater1, "agent_wlan0", r"KWA \(Key Wrap Auth\) success")
-        self.check_log(self.repeater1, "agent_wlan2", r"KWA \(Key Wrap Auth\) success")
-        self.check_log(self.repeater1, "agent_wlan0",
+        self.check_log(env.agents[0].radios[0], r"WSC Global authentication success")
+        self.check_log(env.agents[0].radios[1], r"WSC Global authentication success")
+        self.check_log(env.agents[0].radios[0], r"KWA \(Key Wrap Auth\) success")
+        self.check_log(env.agents[0].radios[1], r"KWA \(Key Wrap Auth\) success")
+        self.check_log(env.agents[0].radios[0],
                        r".* Controller configuration \(WSC M2 Encrypted Settings\)")
-        self.check_log(self.repeater1, "agent_wlan2",
+        self.check_log(env.agents[0].radios[1],
                        r".* Controller configuration \(WSC M2 Encrypted Settings\)")
 
     def test_ap_config_renew(self):
@@ -215,11 +193,11 @@ class TestFlows:
         # Wait a bit for the renew to complete
         time.sleep(3)
 
-        self.check_log(self.repeater1, "agent_wlan0",
+        self.check_log(env.agents[0].radios[0],
                        r"Received credentials for ssid: Multi-AP-24G-1 .* bss_type: 2")
-        self.check_log(self.repeater1, "agent_wlan0",
+        self.check_log(env.agents[0].radios[0],
                        r"Received credentials for ssid: Multi-AP-24G-2 .* bss_type: 1")
-        self.check_log(self.repeater1, "agent_wlan2", r".* tear down radio")
+        self.check_log(env.agents[0].radios[1], r".* tear down radio")
 
         bssid1 = env.agents[0].dev_get_parameter('macaddr',
                                                  ruid='0x' +
@@ -242,9 +220,9 @@ class TestFlows:
         # Wait a bit for the renew to complete
         time.sleep(3)
 
-        self.check_log(self.repeater1, "agent_wlan0",
+        self.check_log(env.agents[0].radios[0],
                        r"Received credentials for ssid: Multi-AP-24G-3 .* bss_type: 2")
-        self.check_log(self.repeater1, "agent_wlan2", r".* tear down radio")
+        self.check_log(env.agents[0].radios[1], r".* tear down radio")
         conn_map = self.get_conn_map()
         repeater1 = conn_map[env.agents[0].mac]
         repeater1_wlan0 = repeater1.radios[env.agents[0].radios[0].mac]
@@ -266,7 +244,7 @@ class TestFlows:
                                      tlv(0x10, 0x0001, "{0x00}"))
 
         time.sleep(3)
-        self.check_log(self.repeater1, "agent_wlan0", r".* tear down radio")
+        self.check_log(env.agents[0].radios[0], r".* tear down radio")
         conn_map = self.get_conn_map()
         repeater1 = conn_map[env.agents[0].mac]
         repeater1_wlan0 = repeater1.radios[env.agents[0].radios[0].mac]
@@ -283,8 +261,8 @@ class TestFlows:
         env.controller.dev_send_1905(env.agents[0].mac, 0x8004)
         time.sleep(1)
         debug("Confirming channel preference query has been received on agent")
-        self.check_log(self.repeater1, "agent_wlan0", "CHANNEL_PREFERENCE_QUERY_MESSAGE")
-        self.check_log(self.repeater1, "agent_wlan2", "CHANNEL_PREFERENCE_QUERY_MESSAGE")
+        self.check_log(env.agents[0].radios[0], "CHANNEL_PREFERENCE_QUERY_MESSAGE")
+        self.check_log(env.agents[0].radios[1], "CHANNEL_PREFERENCE_QUERY_MESSAGE")
 
         debug("Send empty channel selection request")
         cs_req_mid = env.controller.dev_send_1905(env.agents[0].mac,
@@ -292,37 +270,25 @@ class TestFlows:
         time.sleep(1)
 
         debug("Confirming channel selection request has been received on controller")
-        self.check_log(
-            self.gateway,
-            "controller",
-            r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(cs_req_mid)
-        )
+        self.check_log(env.controller,
+                       r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(cs_req_mid))
 
         debug("Confirming empty channel selection request has been received on agent")
-        self.check_log(self.repeater1, "agent_wlan0", "CHANNEL_SELECTION_REQUEST_MESSAGE")
-        self.check_log(self.repeater1, "agent_wlan2", "CHANNEL_SELECTION_REQUEST_MESSAGE")
+        self.check_log(env.agents[0].radios[0], "CHANNEL_SELECTION_REQUEST_MESSAGE")
+        self.check_log(env.agents[0].radios[1], "CHANNEL_SELECTION_REQUEST_MESSAGE")
 
         debug("Confirming OPERATING_CHANNEL_REPORT_MESSAGE message has been received on \
             controller with mid")
 
         result, ocrm_line, mid_match = self.check_log(
-            self.gateway, "controller",
+            env.controller,
             r'.+OPERATING_CHANNEL_REPORT_MESSAGE,\smid=(\d+)'
         )
         if (mid_match):
             debug("Confirming ACK_MESSAGE from the controller \
                 with same mid as OPERATING_CHANNEL_REPORT_MESSAGE")
-            self.check_log(
-                self.repeater1,
-                "agent_wlan0",
-                "ACK_MESSAGE, mid={}".format(mid_match[0])
-            )
-
-            self.check_log(
-                self.repeater1,
-                "agent_wlan2",
-                "ACK_MESSAGE, mid={}".format(mid_match[0])
-            )
+            self.check_log(env.agents[0].radios[0], "ACK_MESSAGE, mid={}".format(mid_match[0]))
+            self.check_log(env.agents[0].radios[1], "ACK_MESSAGE, mid={}".format(mid_match[0]))
 
         tp20dBm = 0x14
         tp21dBm = 0x15
@@ -339,39 +305,28 @@ class TestFlows:
             )
             time.sleep(1)
 
-            self.check_log(
-                self.gateway,
-                "controller",
-                r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(cs_req_mid)
-            )
+            self.check_log(env.controller,
+                           r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(cs_req_mid))
 
-            self.check_log(self.repeater1, "agent_wlan0", "CHANNEL_SELECTION_REQUEST_MESSAGE")
-            self.check_log(self.repeater1, "agent_wlan2", "CHANNEL_SELECTION_REQUEST_MESSAGE")
+            self.check_log(env.agents[0].radios[0], "CHANNEL_SELECTION_REQUEST_MESSAGE")
+            self.check_log(env.agents[0].radios[1], "CHANNEL_SELECTION_REQUEST_MESSAGE")
 
-            self.check_log(self.repeater1, "agent_wlan0",
+            self.check_log(env.agents[0].radios[0],
                            "tlvTransmitPowerLimit {}".format(payload_transmit_power))
-            self.check_log(self.repeater1, "agent_wlan2",
+            self.check_log(env.agents[0].radios[1],
                            "tlvTransmitPowerLimit {}".format(payload_transmit_power))
 
-            self.check_log(self.gateway, "controller", "tx_power={}".format(payload_transmit_power))
+            self.check_log(env.controller, "tx_power={}".format(payload_transmit_power))
 
             result, ocrm_line, mid_match = self.check_log(
-                self.gateway, "controller",
+                env.controller,
                 r'.+OPERATING_CHANNEL_REPORT_MESSAGE,\smid=(\d+)',
                 ocrm_line
             )
             if (result):
-                self.check_log(
-                    self.repeater1,
-                    "agent_wlan0",
-                    "ACK_MESSAGE, mid={}".format(mid_match[0])
-                )
+                self.check_log(env.agents[0].radios[0], "ACK_MESSAGE, mid={}".format(mid_match[0]))
 
-                self.check_log(
-                    self.repeater1,
-                    "agent_wlan2",
-                    "ACK_MESSAGE, mid={}".format(mid_match[0])
-                )
+                self.check_log(env.agents[0].radios[1], "ACK_MESSAGE, mid={}".format(mid_match[0]))
 
         # payload_wlan0 - request for change channel on 6
         payload_wlan0 = (
@@ -447,71 +402,62 @@ class TestFlows:
             debug(
                 "Confirming channel selection request has been received on controller,\
                     step {}".format(i))
-            self.check_log(
-                self.gateway,
-                "controller",
-                r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(mid)
-            )
+            self.check_log(env.controller,
+                           r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(mid))
 
             debug(
                 "Confirming channel selection request has been received on agent,step {}".format(i))
 
-            self.check_log(self.repeater1, "agent_wlan0", "CHANNEL_SELECTION_REQUEST_MESSAGE")
-            self.check_log(self.repeater1, "agent_wlan2", "CHANNEL_SELECTION_REQUEST_MESSAGE")
+            self.check_log(env.agents[0].radios[0], "CHANNEL_SELECTION_REQUEST_MESSAGE")
+            self.check_log(env.agents[0].radios[1], "CHANNEL_SELECTION_REQUEST_MESSAGE")
 
             debug(
                 "Confirming tlvTransmitPowerLimit has been received with correct value on \
                     agent, step {}".format(i))
 
-            self.check_log(
-                self.repeater1, "agent_wlan0", "tlvTransmitPowerLimit {}".format(tp20dBm))
+            self.check_log(env.agents[0].radios[0], "tlvTransmitPowerLimit {}".format(tp20dBm))
 
-            self.check_log(self.repeater1, "agent_wlan0",
+            self.check_log(env.agents[0].radios[0],
                            "ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START")
 
-            self.check_log(
-                self.repeater1, "agent_wlan2", "tlvTransmitPowerLimit {}".format(tp20dBm))
+            self.check_log(env.agents[0].radios[1], "tlvTransmitPowerLimit {}".format(tp20dBm))
 
-            self.check_log(self.repeater1, "agent_wlan2",
+            self.check_log(env.agents[0].radios[0],
                            "ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START")
 
             debug("Confirming CHANNEL_SELECTION_RESPONSE_MESSAGE has been received, \
                 step {}".format(i))
 
-            self.check_log(self.gateway, "controller", "CHANNEL_SELECTION_RESPONSE_MESSAGE")
+            self.check_log(env.controller, "CHANNEL_SELECTION_RESPONSE_MESSAGE")
 
             debug("Confirming OPERATING_CHANNEL_REPORT_MESSAGE has been received on \
                 controller step {}".format(i))
 
             result, ocrm_line, mid_match = self.check_log(
-                self.gateway, "controller",
+                env.controller,
                 r'.+OPERATING_CHANNEL_REPORT_MESSAGE,\smid=(\d+)',
                 ocrm_line)
 
             if (mid_match):
-                self.check_log(
-                    self.repeater1,
-                    "agent_wlan0",
-                    "ACK_MESSAGE, mid={}".format(mid_match[0]))
+                self.check_log(env.agents[0].radios[0],
+                               "ACK_MESSAGE, mid={}".format(mid_match[0]))
 
-                self.check_log(
-                    self.repeater1,
-                    "agent_wlan2",
-                    "ACK_MESSAGE, mid={}".format(mid_match[0]))
+                self.check_log(env.agents[0].radios[1],
+                               "ACK_MESSAGE, mid={}".format(mid_match[0]))
 
             debug("Confirming tx_power has been received with correct value on controller, \
                 step {}".format(i))
-            self.check_log(self.gateway, "controller", "tx_power={}".format(tp20dBm))
+            self.check_log(env.controller, "tx_power={}".format(tp20dBm))
 
     def test_ap_capability_query(self):
         env.controller.dev_send_1905(env.agents[0].mac, 0x8001)
         time.sleep(1)
 
         debug("Confirming ap capability query has been received on agent")
-        self.check_log(self.repeater1, "agent", "AP_CAPABILITY_QUERY_MESSAGE")
+        self.check_log(env.agents[0], "AP_CAPABILITY_QUERY_MESSAGE")
 
         debug("Confirming ap capability report has been received on controller")
-        self.check_log(self.gateway, "controller", "AP_CAPABILITY_REPORT_MESSAGE")
+        self.check_log(env.controller, "AP_CAPABILITY_REPORT_MESSAGE")
 
     def test_link_metric_query(self):
         env.controller.dev_send_1905(env.agents[0].mac, 0x0005,
@@ -519,18 +465,18 @@ class TestFlows:
         time.sleep(1)
 
         debug("Confirming link metric query has been received on agent")
-        self.check_log(self.repeater1, "agent", "Received LINK_METRIC_QUERY_MESSAGE")
+        self.check_log(env.agents[0], "Received LINK_METRIC_QUERY_MESSAGE")
 
         debug("Confirming link metric response has been received on controller")
-        self.check_log(self.gateway, "controller", "Received LINK_METRIC_RESPONSE_MESSAGE")
-        self.check_log(self.gateway, "controller", "Received TLV_TRANSMITTER_LINK_METRIC")
-        self.check_log(self.gateway, "controller", "Received TLV_RECEIVER_LINK_METRIC")
+        self.check_log(env.controller, "Received LINK_METRIC_RESPONSE_MESSAGE")
+        self.check_log(env.controller, "Received TLV_TRANSMITTER_LINK_METRIC")
+        self.check_log(env.controller, "Received TLV_RECEIVER_LINK_METRIC")
 
     def test_combined_infra_metrics(self):
         debug("Send AP Metrics query message to agent 1")
         env.controller.dev_send_1905(env.agents[0].mac, 0x800B,
                                      tlv(0x93, 0x0007, "0x01 {%s}" % (env.agents[0].radios[0].mac)))
-        self.check_log(self.repeater1, "agent_wlan0", "Received AP_METRICS_QUERY_MESSAGE")
+        self.check_log(env.agents[0].radios[0], "Received AP_METRICS_QUERY_MESSAGE")
         # TODO agent should send response autonomously, with same MID.
         # AP metrics TLV
         tlv1 = tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (env.agents[0].radios[0].mac))
@@ -543,12 +489,12 @@ class TestFlows:
         tlv4 = tlv(0xa2, 0x0022,
                    "{55:44:33:22:11:00} 0x10203040 0x11213141 0x12223242 0x13233343 0x14243444 0x15253545 0x16263646")  # noqa E501
         env.agents[0].dev_send_1905(env.controller.mac, 0x800C, tlv1, tlv2, tlv3, tlv4)
-        self.check_log(self.gateway, "controller", "Received AP_METRICS_RESPONSE_MESSAGE")
+        self.check_log(env.controller, "Received AP_METRICS_RESPONSE_MESSAGE")
 
         debug("Send AP Metrics query message to agent 2")
         env.controller.dev_send_1905(env.agents[1].mac, 0x800B,
                                      tlv(0x93, 0x0007, "0x01 {%s}" % env.agents[1].radios[1].mac))
-        self.check_log(self.repeater2, "agent_wlan2", "Received AP_METRICS_QUERY_MESSAGE")
+        self.check_log(env.agents[1].radios[1], "Received AP_METRICS_QUERY_MESSAGE")
         # TODO agent should send response autonomously
         # Same as above but with different STA MAC addresses, different values and
         # skipping the empty one
@@ -558,22 +504,22 @@ class TestFlows:
         tlv4 = tlv(0xa2, 0x0022,
                    "{77:44:33:22:11:00} 0xa0203040 0xa1213141 0xa2223242 0xa3233343 0xa4243444 0xa5253545 0xa6263646")  # noqa E501
         env.agents[1].dev_send_1905(env.controller.mac, 0x800C, tlv1, tlv3, tlv4)
-        self.check_log(self.gateway, "controller", "Received AP_METRICS_RESPONSE_MESSAGE")
+        self.check_log(env.controller, "Received AP_METRICS_RESPONSE_MESSAGE")
 
         debug("Send 1905 Link metric query to agent 1 (neighbor gateway)")
         env.controller.dev_send_1905(env.agents[0].mac, 0x0005,
                                      tlv(0x08, 0x0008, "0x01 {%s} 0x02" % env.controller.mac))
-        self.check_log(self.repeater1, "agent", "Received LINK_METRIC_QUERY_MESSAGE")
-        self.check_log(self.gateway, "controller", "Received LINK_METRIC_RESPONSE_MESSAGE")
-        self.check_log(self.gateway, "controller", "Received TLV_TRANSMITTER_LINK_METRIC")
-        self.check_log(self.gateway, "controller", "Received TLV_RECEIVER_LINK_METRIC")
+        self.check_log(env.agents[0], "Received LINK_METRIC_QUERY_MESSAGE")
+        self.check_log(env.controller, "Received LINK_METRIC_RESPONSE_MESSAGE")
+        self.check_log(env.controller, "Received TLV_TRANSMITTER_LINK_METRIC")
+        self.check_log(env.controller, "Received TLV_RECEIVER_LINK_METRIC")
 
         # Trigger combined infra metrics
         debug("Send Combined infrastructure metrics message to agent 1")
         env.controller.dev_send_1905(env.agents[0].mac, 0x8013)
-        self.check_log(self.repeater1, "agent", "Received COMBINED_INFRASTRUCTURE_METRICS")
-        self.check_log(self.repeater1, "agent", "Received TLV_TRANSMITTER_LINK_METRIC")
-        self.check_log(self.repeater1, "agent", "Received TLV_RECEIVER_LINK_METRIC")
+        self.check_log(env.agents[0], "Received COMBINED_INFRASTRUCTURE_METRICS")
+        self.check_log(env.agents[0], "Received TLV_TRANSMITTER_LINK_METRIC")
+        self.check_log(env.agents[0], "Received TLV_RECEIVER_LINK_METRIC")
 
     def test_client_capability_query(self):
         sta_mac1 = '00:00:00:11:00:22'
@@ -587,11 +533,11 @@ class TestFlows:
         debug("Confirming client capability query has been received on agent")
         # check that both radio agents received it, in the future we'll add a check to verify which
         # radio the query was intended for.
-        self.check_log(self.repeater1, "agent", r"CLIENT_CAPABILITY_QUERY_MESSAGE")
+        self.check_log(env.agents[0], r"CLIENT_CAPABILITY_QUERY_MESSAGE")
 
         debug("Confirming client capability report message has been received on controller")
-        self.check_log(self.gateway, "controller", r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
-        self.check_log(self.gateway, "controller",
+        self.check_log(env.controller, r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
+        self.check_log(env.controller,
                        r"Result Code= FAILURE, client MAC= {sta_mac1}, BSSID= {mac_repeater1_wlan0}"
                        .format(sta_mac1=sta_mac1,
                                mac_repeater1_wlan0=env.agents[0].radios[0].mac))
@@ -607,8 +553,8 @@ class TestFlows:
         time.sleep(1)
 
         debug("Confirming client capability report message has been received on controller")
-        self.check_log(self.gateway, "controller", r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
-        self.check_log(self.gateway, "controller",
+        self.check_log(env.controller, r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
+        self.check_log(env.controller,
                        r"Result Code= SUCCESS, client MAC= {sta_mac2}, BSSID= {mac_repeater1_wlan0}"
                        .format(sta_mac2=sta_mac2,
                                mac_repeater1_wlan0=env.agents[0].radios[0].mac))
@@ -623,8 +569,7 @@ class TestFlows:
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
-        self.check_log(self.repeater1, "agent_wlan2",
-                       r"Got client allow request for {}".format(sta_mac))
+        self.check_log(env.agents[0].radios[1], r"Got client allow request for {}".format(sta_mac))
 
         debug("Send client association control request to all other (BLOCK) ")
         self.beerocks_cli_command('client_disallow {} {}'.format(sta_mac,
@@ -632,7 +577,7 @@ class TestFlows:
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (BLOCK)")
-        self.check_log(self.repeater1, "agent_wlan0",
+        self.check_log(env.agents[0].radios[0],
                        r"Got client disallow request for {}".format(sta_mac))
 
     def test_client_steering_mandate(self):
@@ -640,13 +585,13 @@ class TestFlows:
         env.controller.dev_send_1905(env.agents[0].mac, 0x0002)
         time.sleep(1)
         debug("Confirming topology query was received")
-        self.check_log(self.repeater1, "agent", "TOPOLOGY_QUERY_MESSAGE")
+        self.check_log(env.agents[0], "TOPOLOGY_QUERY_MESSAGE")
 
         debug("Send topology request to agent 2")
         env.controller.dev_send_1905(env.agents[1].mac, 0x0002)
         time.sleep(1)
         debug("Confirming topology query was received")
-        self.check_log(self.repeater2, "agent", "TOPOLOGY_QUERY_MESSAGE")
+        self.check_log(env.agents[1], "TOPOLOGY_QUERY_MESSAGE")
 
         debug("Send Client Steering Request message for Steering Mandate to CTT Agent1")
         env.controller.dev_send_1905(env.agents[0].mac, 0x8014,
@@ -654,33 +599,33 @@ class TestFlows:
                                            "{%s 0xe0 0x0000 0x1388 0x01 {0x000000110022} 0x01 {%s 0x73 0x24}}" % (env.agents[0].radios[0].mac, env.agents[1].radios[0].mac)))  # noqa E501
         time.sleep(1)
         debug("Confirming Client Steering Request message was received - mandate")
-        self.check_log(self.repeater1, "agent_wlan0", "Got steer request")
+        self.check_log(env.agents[0].radios[0], "Got steer request")
 
         debug("Confirming BTM Report message was received")
-        self.check_log(self.gateway, "controller", "CLIENT_STEERING_BTM_REPORT_MESSAGE")
+        self.check_log(env.controller, "CLIENT_STEERING_BTM_REPORT_MESSAGE")
 
         debug("Checking BTM Report source bssid")
-        self.check_log(self.gateway, "controller", "BTM_REPORT from source bssid %s" %
+        self.check_log(env.controller, "BTM_REPORT from source bssid %s" %
                        env.agents[0].radios[0].mac)
 
         debug("Confirming ACK message was received")
-        self.check_log(self.repeater1, "agent_wlan0", "ACK_MESSAGE")
+        self.check_log(env.agents[0].radios[0], "ACK_MESSAGE")
 
         env.controller.dev_send_1905(env.agents[0].mac, 0x8014,
                                        tlv(0x9B, 0x000C,
                                            "{%s 0x00 0x000A 0x0000 0x00}" % env.agents[0].radios[0].mac))  # noqa E501
         time.sleep(1)
         debug("Confirming Client Steering Request message was received - Opportunity")
-        self.check_log(self.repeater1, "agent_wlan0", "CLIENT_STEERING_REQUEST_MESSAGE")
+        self.check_log(env.agents[0].radios[0], "CLIENT_STEERING_REQUEST_MESSAGE")
 
         debug("Confirming ACK message was received")
-        self.check_log(self.gateway, "controller", "ACK_MESSAGE")
+        self.check_log(env.controller, "ACK_MESSAGE")
 
         debug("Confirming steering completed message was received")
-        self.check_log(self.gateway, "controller", "STEERING_COMPLETED_MESSAGE")
+        self.check_log(env.controller, "STEERING_COMPLETED_MESSAGE")
 
         debug("Confirming ACK message was received")
-        self.check_log(self.repeater1, "agent_wlan0", "ACK_MESSAGE")
+        self.check_log(env.agents[0].radios[0], "ACK_MESSAGE")
 
     def test_client_steering_dummy(self):
         sta_mac = "11:22:33:44:55:66"
@@ -692,25 +637,25 @@ class TestFlows:
         time.sleep(1)
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
-        self.check_log(self.repeater1, "agent_wlan2", r"Got client allow request")
+        self.check_log(env.agents[0].radios[1], r"Got client allow request")
 
         debug("Confirming Client Association Control Request message was received (BLOCK)")
-        self.check_log(self.repeater1, "agent_wlan0", r"Got client disallow request")
+        self.check_log(env.agents[0].radios[0], r"Got client disallow request")
 
         debug("Confirming Client Association Control Request message was received (BLOCK)")
-        self.check_log(self.repeater2, "agent_wlan0", r"Got client disallow request")
+        self.check_log(env.agents[1].radios[0], r"Got client disallow request")
 
         debug("Confirming Client Association Control Request message was received (BLOCK)")
-        self.check_log(self.repeater2, "agent_wlan2", r"Got client disallow request")
+        self.check_log(env.agents[1].radios[1], r"Got client disallow request")
 
         debug("Confirming Client Steering Request message was received - mandate")
-        self.check_log(self.repeater1, "agent_wlan0", r"Got steer request")
+        self.check_log(env.agents[0].radios[0], r"Got steer request")
 
         debug("Confirming BTM Report message was received")
-        self.check_log(self.gateway, "controller", r"CLIENT_STEERING_BTM_REPORT_MESSAGE")
+        self.check_log(env.controller, r"CLIENT_STEERING_BTM_REPORT_MESSAGE")
 
         debug("Confirming ACK message was received")
-        self.check_log(self.repeater1, "agent_wlan0", r"ACK_MESSAGE")
+        self.check_log(env.agents[0].radios[0], r"ACK_MESSAGE")
 
         debug("Disconnect dummy STA from wlan0")
         self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-DISCONNECTED {}".format(sta_mac))
@@ -720,9 +665,8 @@ class TestFlows:
         debug("Connect dummy STA to wlan2")
         self.send_bwl_event(self.repeater1, "wlan2", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
         debug("Confirm steering success by client connected")
-        self.check_log(self.gateway, "controller",
-                       r"steering successful for sta {}".format(sta_mac))
-        self.check_log(self.gateway, "controller",
+        self.check_log(env.controller, r"steering successful for sta {}".format(sta_mac))
+        self.check_log(env.controller,
                        r"sta {} disconnected due to steering request".format(sta_mac))
 
         # Make sure that all blocked agents send UNBLOCK messages at the end of
@@ -730,13 +674,13 @@ class TestFlows:
         time.sleep(25)
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
-        self.check_log(self.repeater1, "agent_wlan0", r"Got client allow request")
+        self.check_log(env.agents[0].radios[0], r"Got client allow request")
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
-        self.check_log(self.repeater2, "agent_wlan0", r"Got client allow request")
+        self.check_log(env.agents[1].radios[0], r"Got client allow request")
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
-        self.check_log(self.repeater2, "agent_wlan2", r"Got client allow request")
+        self.check_log(env.agents[1].radios[1], r"Got client allow request")
 
     def test_client_steering_policy(self):
         debug("Send client steering policy to agent 1")
@@ -745,16 +689,16 @@ class TestFlows:
         time.sleep(1)
         debug("Confirming client steering policy has been received on agent")
 
-        self.check_log(self.repeater1, "agent_wlan0", r"MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE")
+        self.check_log(env.agents[0].radios[0], r"MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE")
         time.sleep(1)
         debug("Confirming client steering policy ack message has been received on the controller")
-        self.check_log(self.gateway, "controller", r"ACK_MESSAGE, mid=0x{:04x}".format(mid))
+        self.check_log(env.controller, r"ACK_MESSAGE, mid=0x{:04x}".format(mid))
 
     def test_client_association(self):
         debug("Send topology request to agent 1")
         env.controller.dev_send_1905(env.agents[0].mac, 0x0002)
         debug("Confirming topology query was received")
-        self.check_log(self.repeater1, "agent", r"TOPOLOGY_QUERY_MESSAGE")
+        self.check_log(env.agents[0], r"TOPOLOGY_QUERY_MESSAGE")
 
         debug("Send client association control message")
         env.controller.dev_send_1905(env.agents[0].mac, 0x8016,
@@ -764,11 +708,11 @@ class TestFlows:
         debug("Confirming client association control message has been received on agent")
         # check that both radio agents received it,in the future we'll add a check to verify which
         # radio the query was intended for.
-        self.check_log(self.repeater1, "agent_wlan0", r"CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE")
-        self.check_log(self.repeater1, "agent_wlan2", r"CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE")
+        self.check_log(env.agents[0].radios[0], r"CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE")
+        self.check_log(env.agents[0].radios[1], r"CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE")
 
         debug("Confirming ACK message was received on controller")
-        self.check_log(self.gateway, "controller", r"ACK_MESSAGE")
+        self.check_log(env.controller, r"ACK_MESSAGE")
 
     def test_higher_layer_data_payload_trigger(self):
         mac_gateway_hex = '0x' + env.controller.mac.replace(':', '')
@@ -784,20 +728,20 @@ class TestFlows:
 
         debug("Confirming higher layer data message was received in the agent")
 
-        self.check_log(self.repeater1, "agent", r"HIGHER_LAYER_DATA_MESSAGE")
+        self.check_log(env.agents[0], r"HIGHER_LAYER_DATA_MESSAGE")
 
         debug("Confirming matching protocol and payload length")
 
-        self.check_log(self.repeater1, "agent", r"protocol: 0")
-        self.check_log(self.repeater1, "agent", r"payload_length: 0x4b0")
+        self.check_log(env.agents[0], r"protocol: 0")
+        self.check_log(env.agents[0], r"payload_length: 0x4b0")
 
         debug("Confirming ACK message was received in the controller")
-        self.check_log(self.gateway, "controller", r"ACK_MESSAGE, mid=0x{:04x}".format(mid))
+        self.check_log(env.controller, r"ACK_MESSAGE, mid=0x{:04x}".format(mid))
 
     def test_topology(self):
         mid = env.controller.dev_send_1905(env.agents[0].mac, 0x0002)
         debug("Confirming topology query was received")
-        self.check_log(self.repeater1, "agent", r"TOPOLOGY_QUERY_MESSAGE.*mid={:d}".format(mid))
+        self.check_log(env.agents[0], r"TOPOLOGY_QUERY_MESSAGE.*mid={:d}".format(mid))
 
 
 if __name__ == '__main__':
