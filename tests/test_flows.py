@@ -21,9 +21,6 @@ from opts import debug, err, message, opts, status
 class TestFlows:
     def __init__(self):
         self.tests = [attr[len('test_'):] for attr in dir(self) if attr.startswith('test_')]
-
-        self.rootdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-        self.installdir = os.path.join(self.rootdir, 'build', 'install')
         self.running = ''
 
     def __fail_no_message(self) -> bool:
@@ -681,7 +678,8 @@ if __name__ == '__main__':
 
     opts.verbose = options.verbose
     opts.tcpdump = options.tcpdump
-    opts.tcpdump_dir = os.path.join(t.rootdir, 'logs')
+
+    opts.tcpdump_dir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..', 'logs'))
     opts.stop_on_failure = options.stop_on_failure
 
     t.start_test('init')
