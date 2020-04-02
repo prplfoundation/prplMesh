@@ -8,52 +8,15 @@
 
 import argparse
 import os
-import re
 import subprocess
 import sys
 import time
-from typing import Dict, Union
+from typing import Union
 
+import connmap
 import environment as env
 from capi import tlv
 from opts import debug, err, message, opts, status
-
-'''Regular expression to match a MAC address in a bytes string.'''
-RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
-
-
-class MapVap:
-    '''Represents a VAP in the connection map.'''
-
-    def __init__(self, bssid: str, ssid: bytes):
-        self.bssid = bssid
-        self.ssid = ssid
-
-
-class MapRadio:
-    '''Represents a radio in the connection map.'''
-
-    def __init__(self, uid: str):
-        self.uid = uid
-        self.vaps = {}
-
-    def add_vap(self, bssid: str, ssid: bytes):
-        vap = MapVap(bssid, ssid)
-        self.vaps[bssid] = vap
-        return vap
-
-
-class MapDevice:
-    '''Represents a device in the connection map.'''
-
-    def __init__(self, mac: str):
-        self.mac = mac
-        self.radios = {}
-
-    def add_radio(self, uid: str):
-        radio = MapRadio(uid)
-        self.radios[uid] = radio
-        return radio
 
 
 class TestFlows:
@@ -84,24 +47,6 @@ class TestFlows:
     def docker_command(self, device: str, *command: str) -> bytes:
         '''Execute `command` in docker container `device` and return its output.'''
         return subprocess.check_output(("docker", "exec", device) + command)
-
-    def get_conn_map(self) -> Dict[str, MapDevice]:
-        '''Get the connection map from the controller.'''
-        conn_map = {}
-        for line in env.beerocks_cli_command("bml_conn_map").split(b'\n'):
-            # TODO we need to parse indentation to get the exact topology.
-            # For the time being, just parse the repeaters.
-            bridge = re.search(rb' {8}IRE_BRIDGE: .* mac: ' + RE_MAC, line)
-            radio = re.match(rb' {16}RADIO: .* mac: ' + RE_MAC, line)
-            vap = re.match(rb' {20}fVAP.* bssid: ' + RE_MAC + rb', ssid: (?P<ssid>.*)$', line)
-            if bridge:
-                cur_agent = MapDevice(bridge.group('mac').decode('utf-8'))
-                conn_map[cur_agent.mac] = cur_agent
-            elif radio:
-                cur_radio = cur_agent.add_radio(radio.group('mac').decode('utf-8'))
-            elif vap:
-                cur_radio.add_vap(vap.group('mac').decode('utf-8'), vap.group('ssid'))
-        return conn_map
 
     def init(self, unique_id: str, skip_init: bool):
         '''Initialize the tests.'''
@@ -212,7 +157,7 @@ class TestFlows:
         self.check_log(env.agents[0].radios[0],
                        r"Received credentials for ssid: Multi-AP-24G-3 .* bss_type: 2")
         self.check_log(env.agents[0].radios[1], r".* tear down radio")
-        conn_map = self.get_conn_map()
+        conn_map = connmap.get_conn_map()
         repeater1 = conn_map[env.agents[0].mac]
         repeater1_wlan0 = repeater1.radios[env.agents[0].radios[0].mac]
         for vap in repeater1_wlan0.vaps.values():
@@ -234,7 +179,7 @@ class TestFlows:
 
         time.sleep(3)
         self.check_log(env.agents[0].radios[0], r".* tear down radio")
-        conn_map = self.get_conn_map()
+        conn_map = connmap.get_conn_map()
         repeater1 = conn_map[env.agents[0].mac]
         repeater1_wlan0 = repeater1.radios[env.agents[0].radios[0].mac]
         for vap in repeater1_wlan0.vaps.values():
