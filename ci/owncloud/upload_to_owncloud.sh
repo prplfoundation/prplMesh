@@ -17,6 +17,7 @@ usage() {
     echo "      -h|--help - display this help."
     echo "      -v|--verbose - enable verbosity"
     echo "      -u|--url - webDAV URL (default https://ftp.essensium.com/owncloud/remote.php/dav/files/USERNAME)"
+    echo "      --direct - direct upload without first uploading to a temporary directory (default false)"
     echo
     echo "  positional arguments:"
     echo "      remote-path - path in the cloud, relative to the user home to upload"
@@ -83,7 +84,7 @@ upload() {
 }
 
 main() {
-    if ! OPTS=$(getopt -o 'hvu:' --long help,verbose,url: -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hvu:' --long help,verbose,owncloud-url:,direct -n 'parse-options' -- "$@"); then
         echo "Failed parsing options." >&2; usage; exit 1
     fi
 
@@ -94,6 +95,7 @@ main() {
             -h | --help)            usage; exit 0;;
             -v | --verbose)         export VERBOSE=true; QUIET=; shift;;
             -u | --owncloud-url)    OWNCLOUD_URL="$2"; shift 2;;
+            --direct)               DIRECT_UPLOAD=true; shift;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1;;
         esac
@@ -115,22 +117,28 @@ main() {
     # We'll group uploads in the following directory in the user home
     # we don't care if create_dir fails because it may already exist:
     remote_temp_path="temp_uploads/$(uuidgen)"
-    create_dirs "$remote_temp_path" >/dev/null 2>&1
-
-    # Similarly, create the hirerchy for the remote path
+    upload_path="$remote_temp_path"
+    if [ "$DIRECT_UPLOAD" = "true" ]; then
+        upload_path="$remote_path"
+    else
+        create_dirs "$remote_temp_path" >/dev/null 2>&1
+    fi
+    # Similarly, create the hierarchy for the remote path
     create_dirs "$remote_path" >/dev/null 2>&1
 
-    echo "upload $local_path to $remote_path"
+    echo "upload $local_path to $upload_path"
     start=$(date +%s)
-    upload "$local_path" "$remote_temp_path" || { err "Uploading to a temporary directory failed with status $?"; exit 1; }
+    upload "$local_path" "$upload_path" || { err "Upload failed with status $?"; exit 1; }
     end=$(date +%s)
     echo "Runtime: $((end-start)) seconds"
 
-    echo "Moving the temporary directory $remote_temp_path to $remote_path"
-    start=$(date +%s)
-    move "$remote_temp_path" "$remote_path" || { err "Move temporary directory failed with status $?"; exit 1; }
-    end=$(date +%s)
-    echo "Runtime: $((end-start)) seconds"
+    if [ "$DIRECT_UPLOAD" = "false" ]; then
+        echo "Moving the temporary directory $upload_path to $remote_path"
+        start=$(date +%s)
+        move "$remote_temp_path" "$remote_path" || { err "Move temporary directory failed with status $?"; exit 1; }
+        end=$(date +%s)
+        echo "Runtime: $((end-start)) seconds"
+    fi
     success "Upload $local_path to $remote_path succeeded."
 }
 
