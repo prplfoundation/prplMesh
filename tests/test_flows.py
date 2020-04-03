@@ -537,7 +537,7 @@ class TestFlows:
                     0x8006,
                     tlv(0x8B, 0x005F, '{} {}'.format(self.mac_repeater1_wlan0, payload_wlan0)),
                     tlv(0x8D, 0x0007, '{} 0x{:2x}'.format(self.mac_repeater1_wlan0, tp20dBm)),
-                    tlv(0x8B, 0x004C, '{} {}'.format(self.mac_repeater1_wlan0, payload_wlan2)),
+                    tlv(0x8B, 0x004C, '{} {}'.format(self.mac_repeater1_wlan2, payload_wlan2)),
                     tlv(0x8D, 0x0007, '{} 0x{:2x}'.format(self.mac_repeater1_wlan2, tp20dBm))
             )
             time.sleep(1)
