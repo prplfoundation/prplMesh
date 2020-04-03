@@ -136,7 +136,9 @@ class TypeInfo:
             elif len(self.type_str) > 2 and (str(self.type_str[1]).isupper() or str(self.type_str[1]).isdigit()):
                 if self.type_str[0] == "e":
                     self.set_type(TypeInfo.ENUM)
-                    self.swap_prefix = "tlvf_swap(8*sizeof(" + self.type_str + "), reinterpret_cast<uint8_t*>("
+                    self.swap_prefix = "tlvf_swap(8*sizeof("
+                    self.swap_prefix += type_str
+                    self.swap_prefix += "), reinterpret_cast<uint8_t*>("
                     self.swap_suffix = "))"
                     self.swap_needed = True
                 elif self.type_str[0] == "s":
