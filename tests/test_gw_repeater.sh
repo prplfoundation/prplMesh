@@ -6,13 +6,14 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}"; pwd)"
+scriptdir=$(cd "${0%/*}" || exit 1; pwd)
 rootdir="${scriptdir%/*}"
 
-. ${rootdir}/tools/functions.sh
+# shellcheck source=../tools/functions.sh
+. "${rootdir}/tools/functions.sh"
 
 usage() {
-    echo "usage: $(basename $0) [-hv] [-d delay]"
+    echo "usage: $(basename "${0}") [-hv] [-d delay]"
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
@@ -41,12 +42,12 @@ check_wsl() {
     # Read GW & Repeater UCC ports
     local GW_UCC_PORT
     GW_UCC_PORT=$(grep ucc_listener_port \
-    "${rootdir}/build/install/config/beerocks_controller.conf" | \
+    "${rootdir}"/build/install/config/beerocks_controller.conf | \
     awk -F'[= ]' '{ print $2 }')
 
     local RP_UCC_PORT
     RP_UCC_PORT=$(grep ucc_listener_port \
-    "${rootdir}/build/install/config/beerocks_agent.conf" | \
+    "${rootdir}"/build/install/config/beerocks_agent.conf | \
     awk -F'[= ]' '{ print $2 }')
 
     # In addition to exporting the UCC port on the host, we also
@@ -59,15 +60,15 @@ check_wsl() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvd:fg:r:u:' --long help,verbose,rm,gateway-only,repeater-only,delay:,force,gateway:,repeater:,unique-id: -n 'parse-options' -- "$@"`
-
-    if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
+    if ! OPTS=$(getopt -o 'hvd:fg:r:u:' --long help,verbose,rm,gateway-only,repeater-only,delay:,force,gateway:,repeater:,unique-id: -n 'parse-options' -- "$@"); then
+        err "Failed parsing options." >&2 ; usage; exit 1 ; 
+    fi
 
     eval set -- "$OPTS"
 
     while true; do
         case "$1" in
-            -v | --verbose)       VERBOSE=true; VERBOSE_OPT="-v"; shift ;;
+            -v | --verbose)       VERBOSE_OPT="-v"; shift ;;
             -h | --help)          usage; exit 0; shift ;;
             -d | --delay)         DELAY="$2"; shift; shift ;;
             -f | --force)         FORCE_OPT="-f"; shift ;;
@@ -90,64 +91,63 @@ main() {
     REPEATER_NAMES=${REPEATER_NAMES-repeater-${UNIQUE_ID}}
     GW_NAME=${GW_NAME-gateway-${UNIQUE_ID}}
 
-    dbg REMOVE=$REMOVE
-    dbg GW_NAME=$GW_NAME
-    dbg REPEATER_NAMES=$REPEATER_NAMES
-    dbg START_GATEWAY=$START_GATEWAY
-    dbg START_REPEATER=$START_REPEATER
-    dbg DELAY=$DELAY
-    dbg UNIQUE_ID=$UNIQUE_ID
+    dbg REMOVE="${REMOVE}"
+    dbg GW_NAME="${GW_NAME}"
+    dbg REPEATER_NAMES="${REPEATER_NAMES}"
+    dbg START_GATEWAY="${START_GATEWAY}"
+    dbg START_REPEATER="${START_REPEATER}"
+    dbg DELAY="${DELAY}"
+    dbg UNIQUE_ID="${UNIQUE_ID}"
 
     [ "$START_GATEWAY" = "true" ] && {
         status "Start GW (Controller + local Agent)"
-        ${rootdir}/tools/docker/run.sh -u ${UNIQUE_ID} ${VERBOSE_OPT} ${FORCE_OPT} ${GW_EXTRA_OPT} \
-        start-controller-agent -d -n ${GW_NAME} -m 00:11:22:33 -- "$@"
+        "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" "${VERBOSE_OPT}" "${FORCE_OPT}" "${GW_EXTRA_OPT}" \
+        start-controller-agent -d -n "${GW_NAME}" -m 00:11:22:33 -- "$@"
     }
 
-    [ "$START_GATEWAY" = "true" -a "$START_REPEATER" = "true" ] && {
+    [ "$START_GATEWAY" = "true" ] && [ "$START_REPEATER" = "true" ] && {
         status "Delay ${DELAY} seconds..."
-        sleep ${DELAY}
+        sleep "${DELAY}"
     }
 
     [ "$START_REPEATER" = "true" ] && {
         index=0
         for repeater in $REPEATER_NAMES; do
             status "Start Repeater (Remote Agent): $repeater"
-            ${rootdir}/tools/docker/run.sh -u ${UNIQUE_ID} ${VERBOSE_OPT} ${FORCE_OPT} ${RP_EXTRA_OPT} \
-            start-agent -d -n ${repeater} -m aa:bb:cc:$index$index -- "$@"
+            "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" "${VERBOSE_OPT}" "${FORCE_OPT}" "${RP_EXTRA_OPT}" \
+            start-agent -d -n "${repeater}" -m aa:bb:cc:"$index$index" -- "$@"
             index=$((index+1))
         done
     }
 
     status "Delay ${DELAY} seconds..."
-    sleep ${DELAY}
+    sleep "${DELAY}"
 
     error=0
     [ "$START_GATEWAY" = "true" ] && report "GW operational" \
-        ${rootdir}/tools/docker/test.sh ${VERBOSE_OPT} -n ${GW_NAME}
+        "${rootdir}"/tools/docker/test.sh "${VERBOSE_OPT}" -n "${GW_NAME}"
 
 
     [ "$START_REPEATER" = "true" ] && {
         for repeater in $REPEATER_NAMES
         do
             report "Repeater $repeater operational" \
-            ${rootdir}/tools/docker/test.sh ${VERBOSE_OPT} -n ${repeater}
+            "${rootdir}"/tools/docker/test.sh "${VERBOSE_OPT}" -n "${repeater}"
         done
     }
 
     [ "$REMOVE" = "true" ] && {
         status "Deleting containers ${GW_NAME} ${REPEATER_NAMES}"
-        docker rm -f ${GW_NAME} ${REPEATER_NAMES} >/dev/null 2>&1
+        docker rm -f "${GW_NAME}" "${REPEATER_NAMES}" >/dev/null 2>&1
     }
 
     return $error
 }
 
-VERBOSE=false
 REMOVE=false
 START_GATEWAY=true
 START_REPEATER=true
 UNIQUE_ID=${SUDO_USER:-${USER}}
 DELAY=5
 
-main $@
+main "$@"
