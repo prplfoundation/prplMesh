@@ -1555,6 +1555,9 @@ void ap_manager_thread::handle_hostapd_attached()
     notification->cs_params().bandwidth            = uint8_t(
         beerocks::utils::convert_bandwidth_to_enum(ap_wlan_hal->get_radio_info().bandwidth));
 
+    notification->params().frequency_band = ap_wlan_hal->get_radio_info().frequency_band;
+    notification->params().max_bandwidth  = ap_wlan_hal->get_radio_info().max_bandwidth;
+
     // Copy the channels supported by the AP
     copy_radio_supported_channels(ap_wlan_hal, notification->params().supported_channels);
 

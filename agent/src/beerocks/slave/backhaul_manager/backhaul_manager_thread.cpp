@@ -25,7 +25,6 @@
  * move all these includes into a separate header because
  * over time this list is going to get very long
  */
-#include <tlvf/ieee_1905_1/eMessageType.h>
 #include <tlvf/ieee_1905_1/s802_11SpecificInformation.h>
 #include <tlvf/ieee_1905_1/tlv1905NeighborDevice.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
@@ -1781,6 +1780,12 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             return false;
         }
 
+        auto radio_info = m_radio_info_map[request->iface_mac()];
+
+        radio_info.interface_name = request->ap_iface();
+        radio_info.frequency_band = request->frequency_band();
+        radio_info.max_bandwidth  = request->max_bandwidth();
+
         std::string mac = network_utils::mac_to_string(request->iface_mac());
 
         auto tuple_supported_channels = request->supported_channels_list(0);
@@ -1792,7 +1797,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         auto channels = &std::get<1>(tuple_supported_channels);
 
         std::copy_n(channels, beerocks::message::SUPPORTED_CHANNELS_LENGTH,
-                    m_radio_info_map[request->iface_mac()].supported_channels.begin());
+                    radio_info.supported_channels.begin());
 
         soc->radio_mac             = mac;
         soc->freq_type             = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
