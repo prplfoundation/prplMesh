@@ -265,6 +265,8 @@ sNodeHostap:
   ant_num: uint8_t 
   ant_gain: uint8_t 
   tx_power: uint8_t 
+  frequency_band: beerocks::eFreqType
+  max_bandwidth: beerocks::eWiFiBandwidth 
   driver_version:
     _type: char  
     _length: [ "beerocks::message::WIFI_DRIVER_VER_LENGTH" ]
