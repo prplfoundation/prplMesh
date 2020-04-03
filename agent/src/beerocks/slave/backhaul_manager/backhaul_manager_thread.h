@@ -21,6 +21,8 @@
 
 #include <beerocks/tlvf/beerocks_message_header.h>
 
+#include <tlvf/ieee_1905_1/eMediaType.h>
+
 #include "../agent_ucc_listener.h"
 
 #include <future>
@@ -263,7 +265,12 @@ private:
      * the TLVs to include in notification messages or responses to CDMU query messages.
      */
     struct sRadioInfo {
-        beerocks_message::sVapsList vaps_list; /**< List of VAPs in radio. */
+        std::string interface_name; /**< Name of the radio interface */
+        beerocks::eFreqType frequency_band =
+            beerocks::eFreqType::FREQ_UNKNOWN; /**< Frequency band */
+        beerocks::eWiFiBandwidth max_bandwidth =
+            beerocks::eWiFiBandwidth::BANDWIDTH_UNKNOWN; /**< Maximum supported bandwidth */
+        beerocks_message::sVapsList vaps_list;           /**< List of VAPs in radio. */
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
             supported_channels; /**< Array of supported channels in radio. */
         std::unordered_map<sMacAddr, associated_clients_t>
