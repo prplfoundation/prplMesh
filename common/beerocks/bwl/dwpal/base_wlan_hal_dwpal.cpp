@@ -710,6 +710,23 @@ bool base_wlan_hal_dwpal::refresh_radio_info()
 {
     char *reply = nullptr;
 
+    /**
+     * Obtain frequency band and maximum supported bandwidth using NL80211.
+     * As this information does not change, this is required the first time this method is called
+     * only.
+     */
+    if (beerocks::eFreqType::FREQ_UNKNOWN == m_radio_info.frequency_band) {
+        nl80211_client::radio_info radio_info;
+        if (m_nl80211_client->get_radio_info(get_iface_name(), radio_info)) {
+            if (!radio_info.bands.empty()) {
+                nl80211_client::band_info band_info = radio_info.bands.at(0);
+
+                m_radio_info.frequency_band = band_info.get_frequency_band();
+                m_radio_info.max_bandwidth  = band_info.get_max_bandwidth();
+            }
+        }
+    }
+
     // TODO: Add radio_info get for station
 
     // Station HAL

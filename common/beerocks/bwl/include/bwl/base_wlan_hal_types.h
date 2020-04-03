@@ -77,18 +77,21 @@ enum class WiFiSec { Invalid = 0, None, WEP_64, WEP_128, WPA_PSK, WPA2_PSK, WPA_
 
 struct RadioInfo {
     std::string iface_name;
-    IfaceType iface_type            = IfaceType::Unsupported;
-    bool radio_enabled              = false;
-    int wifi_ctrl_enabled           = 0; // Hostapd / wpa_supplicant
-    bool tx_enabled                 = false;
-    bool is_5ghz                    = false;
-    int channel                     = 0;
-    int bandwidth                   = 0;
-    int channel_ext_above           = 0;
-    int vht_center_freq             = 0;
-    bool is_dfs_channel             = false;
-    int ant_num                     = 0;
-    int tx_power                    = 0;
+    IfaceType iface_type               = IfaceType::Unsupported;
+    bool radio_enabled                 = false;
+    int wifi_ctrl_enabled              = 0; // Hostapd / wpa_supplicant
+    bool tx_enabled                    = false;
+    bool is_5ghz                       = false;
+    int channel                        = 0;
+    int bandwidth                      = 0;
+    int channel_ext_above              = 0;
+    int vht_center_freq                = 0;
+    bool is_dfs_channel                = false;
+    int ant_num                        = 0;
+    int tx_power                       = 0;
+    beerocks::eFreqType frequency_band = beerocks::eFreqType::FREQ_UNKNOWN; /**< Frequency band */
+    beerocks::eWiFiBandwidth max_bandwidth =
+        beerocks::eWiFiBandwidth::BANDWIDTH_UNKNOWN; /**< Maximum supported bandwidth */
     ChanSwReason last_csa_sw_reason = ChanSwReason::Unknown;
     std::vector<WiFiChannel> supported_channels;
     std::unordered_map<int, VAPElement> available_vaps; // key = vap_id
