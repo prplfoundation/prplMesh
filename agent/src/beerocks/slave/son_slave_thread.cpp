@@ -4442,12 +4442,13 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     // using vs message
 
     // create vs message
-    auto request_out = message_com::create_vs_message<
-        beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST>(cmdu_tx,mid);
+    auto request_out =
+        message_com::create_vs_message<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST>(
+            cmdu_tx, mid);
     if (request_out == nullptr) {
         LOG(ERROR) << "Failed building ACTION_MONITOR_CLIENT_BEACON_11K_REQUEST message!";
         return false;
-    } 
+    }
 
     // get the correct type of the message
     auto beaconMetricsQuery = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
@@ -4455,27 +4456,25 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     if (!beaconMetricsQuery) {
         LOG(ERROR) << "tlvBeaconMetricsQuery missing - ignoring beacon metrics query message";
         return false;
-    } 
-
+    }
 
     // fill the parameters
-	auto& measurement_request = request_out->params();
-	measurement_request.bssid 					= beaconMetricsQuery->bssid();
-	measurement_request.channel 				= beaconMetricsQuery->channel_number();
-	
-	measurement_request.measurement_mode		= beerocks::MEASURE_MODE_ACTIVE;
-	measurement_request.duration				= beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
+    auto &measurement_request   = request_out->params();
+    measurement_request.bssid   = beaconMetricsQuery->bssid();
+    measurement_request.channel = beaconMetricsQuery->channel_number();
+
+    measurement_request.measurement_mode = beerocks::MEASURE_MODE_ACTIVE;
+    measurement_request.duration         = beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
 
     /*
 	measurement_request.measurement_mode		= beerocks::MEASURE_MODE_PASSIVE;
 	measurement_request.duration				= beerocks::BEACON_MEASURE_DEFAULT_PASSIVE_DURATION;
     */
 
-	measurement_request.expected_reports_count 	= 1;
+    measurement_request.expected_reports_count = 1;
 
-	measurement_request.rand_ival				= beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
-	measurement_request.sta_mac					= beaconMetricsQuery->associated_sta_mac();
-
+    measurement_request.rand_ival = beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
+    measurement_request.sta_mac   = beaconMetricsQuery->associated_sta_mac();
 
     message_com::send_cmdu(monitor_socket, cmdu_tx);
 

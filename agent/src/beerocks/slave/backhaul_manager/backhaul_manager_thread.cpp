@@ -40,6 +40,7 @@
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
+#include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
 #include <tlvf/wfa_map/tlvApOperationalBSS.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
@@ -1653,7 +1654,8 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
         // Handle the CMDU message. If the message was processed locally
         // (by the Backhaul Manager), this function will return 'true'.
         // Otherwise, it should be forwarded to the slaves.
-        if (handle_1905_1_message(cmdu_rx, src_mac)) {
+        Socket *destinationAP = nullptr;
+        if (handle_1905_1_message(cmdu_rx, src_mac, destinationAP)) {
             //function returns true if message doesn't need to be forwarded
             return true;
         }
@@ -1662,16 +1664,25 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
 
         // Message from controller (bus) to agent (uds)
         // Send the data (uds_header + cmdu) how it is on UDS, without changing it
+        //
 
-        // Forward cmdu to all slaves how it is on UDS, without changing it
         cmdu_rx.swap(); // swap back before forwarding
-        for (auto soc_iter : slaves_sockets) {
-            if (!message_com::forward_cmdu_to_uds(soc_iter->slave, cmdu_rx, length)) {
+
+        if (destinationAP) {
+            // Forward cmdu to all slaves how it is on UDS, without changing it
+            for (auto soc_iter : slaves_sockets) {
+                if (!message_com::forward_cmdu_to_uds(soc_iter->slave, cmdu_rx, length)) {
+                    LOG(ERROR) << "forward_cmdu_to_uds() failed - " << print_cmdu_types(uds_header)
+                               << " sd=" << intptr_t(soc_iter->slave);
+                }
+            }
+        } else {
+            // Forward only to the desired destination
+            if (!message_com::forward_cmdu_to_uds(destinationAP, cmdu_rx, length)) {
                 LOG(ERROR) << "forward_cmdu_to_uds() failed - " << print_cmdu_types(uds_header)
-                           << " sd=" << intptr_t(soc_iter->slave);
+                           << " sd=" << intptr_t(destinationAP);
             }
         }
-
     } else { // from uds to bus or local handling (ACTION_BACKHAUL)
 
         // Check for local handling
@@ -2060,7 +2071,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 }
 
 bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                             const std::string &src_mac)
+                                             const std::string &src_mac, Socket *&forward_to)
 {
     /*
      * return values:
@@ -2102,6 +2113,10 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
     case ieee1905_1::eMessageType::CLIENT_CAPABILITY_QUERY_MESSAGE:
         return handle_client_capability_query(cmdu_rx, src_mac);
+
+    case ieee1905_1::eMessageType::BEACON_METRICS_QUERY_MESSAGE: {
+        return handle_1905_beacon_metrics_query(cmdu_rx, src_mac, forward_to);
+    }
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
@@ -2889,6 +2904,30 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
     } else {
         LOG(TRACE) << "no state change";
     }
+    return true;
+}
+
+bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                          const std::string &src_mac, Socket *&forward_to)
+{
+    auto tlvBeaconMetricsQuery = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
+    if (tlvBeaconMetricsQuery) {
+
+        const sMacAddr& requiredMac = tlvBeaconMetricsQuery->associated_sta_mac();
+        auto it = std::find_if(
+            slaves_sockets.begin(),
+            slaves_sockets.end(),
+            [&requiredMac]( const std::shared_ptr<SSlaveSockets> slave )
+            {
+                return slave->ruid == requiredMac;
+            });
+        if (it!=slaves_sockets.end()) {
+            forward_to = (*it)->slave;
+        } 
+    } else {
+        return false;
+    } 
+
     return true;
 }
 

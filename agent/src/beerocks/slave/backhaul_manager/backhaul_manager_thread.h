@@ -73,7 +73,8 @@ private:
                                std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header);
     bool handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> soc,
                                        ieee1905_1::CmduMessageRx &cmdu_rx);
-    bool handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
+    bool handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac,
+                               Socket *&forward_to);
 
     // 1905 messages handlers
     bool handle_1905_topology_discovery(const std::string &src_mac,
@@ -87,6 +88,8 @@ private:
                                        const std::string &src_mac);
     bool handle_1905_combined_infrastructure_metrics(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                      const std::string &src_mac);
+    bool handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                          const std::string &src_mac, Socket *&forward_to);
     bool handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
     bool handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                         const std::string &src_mac);
