@@ -169,6 +169,27 @@ bool agent_ucc_listener::send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmd
     return m_backhaul_manager_ctx.send_cmdu_to_bus(cmdu_tx, dest_mac, m_bridge_mac);
 }
 
+bool agent_ucc_listener::handle_start_wps_registration(
+    std::unordered_map<std::string, std::string> &params, std::string &err_string)
+{
+    auto band = params.find("band");
+    if (band == params.end()) {
+        err_string = "missing band parameter";
+        return false;
+    }
+    auto method = params.find("wpsconfigmethod");
+    if (method == params.end()) {
+        err_string = "missing method parameter";
+        return false;
+    }
+    if (method->second != "PBC") {
+        err_string = "invalid WpsConfigMethod, supporting only PBC";
+        return false;
+    }
+    // TODO trigger WPS PBC on the selected band
+    return true;
+}
+
 /**
  * @brief Handle DEV_SET_CONFIG command. Parse the command and save the parameters on the agent.
  * 
