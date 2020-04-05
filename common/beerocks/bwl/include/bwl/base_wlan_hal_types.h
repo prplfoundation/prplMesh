@@ -77,9 +77,7 @@ enum eBackhaulVapType : uint8_t {
 };
 
 struct backhaul_vap_list_element_t {
-    std::string bssid;
-    bool enabled;
-    eBackhaulVapType type;
+    sMacAddr bssid;
 };
 
 enum class ChanSwReason { Unknown = 0, Radar = 1, CoEx_20 = 2, CoEx_40 = 3 };
