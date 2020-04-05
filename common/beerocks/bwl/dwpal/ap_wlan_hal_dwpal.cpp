@@ -934,6 +934,96 @@ bool ap_wlan_hal_dwpal::sta_bss_steer(const std::string &mac, const std::string 
     return true;
 }
 
+static bool set_vap_multiap_mode(std::vector<std::string> &vap_hostapd_config,
+                                 WSC::eWscVendorExtSubelementBssType bss_type,
+                                 std::list<bwl::backhaul_vap_list_element_t> &backhaul_vaps_list)
+{
+    std::string bssid, ifname;
+    if (!hostapd_config_get_value(vap_hostapd_config, "bssid", bssid)) {
+        LOG(ERROR) << "Failed to get VAP BSSID";
+        return false;
+    }
+    if (!hostapd_config_get_value(vap_hostapd_config, "bss", ifname)) {
+        LOG(ERROR) << "Failed to get VAP ifname (bss)";
+        return false;
+    }
+    backhaul_vaps_list.remove_if([&](const bwl::backhaul_vap_list_element_t &element) {
+        return (element.bssid == beerocks::net::network_utils::mac_from_string(bssid));
+    });
+    bool backhaul  = !!(bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS);
+    bool fronthaul = !!(bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS);
+    bool teardown  = (bss_type == WSC::eWscVendorExtSubelementBssType::TEARDOWN);
+    LOG(DEBUG) << "Configuring VAP " << ifname << ": bssid=" << bssid
+               << ", backhaul=" << beerocks::string_utils::bool_str(backhaul)
+               << ", teardown=" << beerocks::string_utils::bool_str(teardown);
+    // BSS type (backhaul, fronthaul or both)
+    // Use Intel Mesh-Mode (upstream Multi-AP functionality not supported by Intel):
+    // Not supporting hybrid mode for in mesh mode (TODO - move to hybrid mode after
+    // https://github.com/prplfoundation/prplMesh/issues/889)
+    if (fronthaul && backhaul) {
+        LOG(ERROR) << "Not supporting hybrid VAP";
+        return false;
+    }
+    hostapd_config_set_value(vap_hostapd_config, "mesh_mode", backhaul ? "bAP" : "fAP");
+    hostapd_config_set_value(vap_hostapd_config, "sFourAddrMode", backhaul ? "1" : "");
+    hostapd_config_set_value(vap_hostapd_config, "max_num_sta", backhaul ? "1" : "");
+    hostapd_config_set_value(vap_hostapd_config, "start_disabled", teardown ? "1" : "0");
+
+    // add to backhaul vaps list
+    if (backhaul) {
+        backhaul_vap_list_element_t element;
+        element.bssid = beerocks::net::network_utils::mac_from_string(bssid);
+        backhaul_vaps_list.push_back(std::move(element));
+    }
+    return true;
+}
+
+bool ap_wlan_hal_dwpal::set_multiap_wps(
+    std::map<std::string, std::vector<std::string>> &hostapd_config_vaps)
+{
+    // Find first fAP VAP
+    auto fap = std::find_if(hostapd_config_vaps.begin(), hostapd_config_vaps.end(),
+                            [&](const std::pair<std::string, std::vector<std::string>> &vap) {
+                                return (std::find(vap.second.begin(), vap.second.end(),
+                                                  "mesh_mode=fAP") != vap.second.end());
+                            });
+    if (fap == hostapd_config_vaps.end()) {
+        LOG(DEBUG) << "No fronthaul configured, wps will not be set.";
+        return false;
+    }
+
+    // Find first bAP VAP
+    auto bap = std::find_if(hostapd_config_vaps.begin(), hostapd_config_vaps.end(),
+                            [&](const std::pair<std::string, std::vector<std::string>> &vap) {
+                                return (std::find(vap.second.begin(), vap.second.end(),
+                                                  "mesh_mode=bAP") != vap.second.end());
+                            });
+    if (bap == hostapd_config_vaps.end()) {
+        LOG(DEBUG) << "No backhaul configured, wps credentials for backhaul will not be set.";
+        return false;
+    }
+
+    // Get the backhaul ssid and passphrase which are needed to configure
+    // multiap wps in the fronthaul on which WPS PBC will run.
+    std::string backhaul_ssid, backhaul_passphrase;
+    if (!hostapd_config_get_value(bap->second, "ssid", backhaul_ssid)) {
+        LOG(ERROR) << "Failed to get " << bap->first << " ssid";
+        return false;
+    }
+    if (!hostapd_config_get_value(bap->second, "wpa_passphrase", backhaul_passphrase)) {
+        LOG(ERROR) << "Failed to get " << bap->first << "wpa_passphrase";
+        return false;
+    }
+
+    // Oddly enough, multi_ap_backhaul_wpa_passphrase has to be quoted, while wpa_passphrase does not...
+    backhaul_ssid = "\"" + backhaul_ssid + "\"";
+    hostapd_config_set_value(fap->second, "multi_ap_backhaul_ssid", backhaul_ssid);
+    hostapd_config_set_value(fap->second, "multi_ap_backhaul_wpa_passphrase", backhaul_passphrase);
+
+    LOG(DEBUG) << "Successfully configured Multi-AP WPS for backhaul VAPs";
+    return true;
+}
+
 bool ap_wlan_hal_dwpal::update_vap_credentials(
     std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list,
     std::list<bwl::backhaul_vap_list_element_t> &backhaul_vaps_list)
@@ -994,7 +1084,8 @@ bool ap_wlan_hal_dwpal::update_vap_credentials(
         }
         LOG(DEBUG) << "Autoconfiguration for ssid: " << bss_info_conf.ssid
                    << " auth_type: " << auth_type << " encr_type: " << enc_type
-                   << " network_key: " << bss_info_conf.network_key << " bss_type: " << bss_type;
+                   << " network_key: " << bss_info_conf.network_key << " bss_type: " << std::hex
+                   << int(bss_info_conf.bss_type);
 
         // We cannot configure STAs here
         if ((bss_info_conf.bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_STA) != 0) {
@@ -1030,28 +1121,14 @@ bool ap_wlan_hal_dwpal::update_vap_credentials(
             return false;
         }
 
-        // BSS type (backhaul, fronthaul or both)
-        // From hostap 2.8
-        // Enable Multi-AP functionality
-        // 0 = disabled (default)
-        // 1 = AP support backhaul BSS
-        // 2 = AP support fronthaul BSS
-        // 3 = AP supports both backhaul BSS and fronthaul BSS
-        int multi_ap = 0;
-        if ((bss_info_conf.bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS) != 0) {
-            multi_ap |= 0x01;
-        }
-        if ((bss_info_conf.bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS) != 0) {
-            multi_ap |= 0x02;
-        }
-        hostapd_config_set_value(vap_hostapd_config, "multi_ap", multi_ap);
-
-        // Finally enable the VAP
-        hostapd_config_set_value(vap_hostapd_config, "start_disabled", "0");
+        // Set multi_ap mode
+        set_vap_multiap_mode(vap_hostapd_config, bss_info_conf.bss_type, backhaul_vaps_list);
 
         // Successfully updated the VAP, move on to the the next
         ++hostapd_vap_iterator;
     }
+
+    set_multiap_wps(hostapd_config_vaps);
 
     // Disable the remaining VAPs
     for (; hostapd_vap_iterator != hostapd_config_vaps.end(); ++hostapd_vap_iterator) {

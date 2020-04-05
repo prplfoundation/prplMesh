@@ -87,22 +87,23 @@ static void copy_vaps_info(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal,
 
         // If the VAP ID exists
         if (radio_vaps.find(vap_id) != radio_vaps.end()) {
-            const auto &curr_vap = radio_vaps.at(vap_id);
+            const auto &curr_vap  = radio_vaps.at(vap_id);
+            sMacAddr curr_vap_mac = network_utils::mac_from_string(curr_vap.mac);
 
             // mark backhaul vaps
             auto it = std::find_if(backhaul_vaps_list.begin(), backhaul_vaps_list.end(),
                                    [&](const bwl::backhaul_vap_list_element_t &vap) {
-                                       return (vap.bssid == curr_vap.mac);
+                                       return (vap.bssid == curr_vap_mac);
                                    });
 
             bool bVAP = (it != backhaul_vaps_list.end());
 
-            LOG(DEBUG) << "vap_id = " << int(vap_id) << ", mac = " << curr_vap.mac
+            LOG(DEBUG) << "vap_id = " << int(vap_id) << ", mac = " << curr_vap_mac
                        << ", ssid = " << curr_vap.ssid
                        << ", backhaul_vap = " << beerocks::string_utils::bool_str(bVAP);
 
             // Copy the VAP MAC and SSID
-            vaps[i].mac = network_utils::mac_from_string(curr_vap.mac);
+            vaps[i].mac = curr_vap_mac;
             mapf::utils::copy_string(vaps[i].ssid, curr_vap.ssid.c_str(),
                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
             vaps[i].backhaul_vap = bVAP;
@@ -257,20 +258,6 @@ void ap_manager_thread::after_select(bool timeout)
                 stop_ap_manager_thread();
                 return;
             }
-
-            // remove irrelevant bssids from backhaul vap list
-            bwl::eBackhaulVapType current_type;
-            if (!ap_wlan_hal->get_radio_info().is_5ghz) {
-                current_type = bwl::eBackhaulVapType::BH_VAP_TYPE_2G;
-            } else if (low_filter) {
-                current_type = bwl::eBackhaulVapType::BH_VAP_TYPE_5G_SECONDARY;
-            } else {
-                current_type = bwl::eBackhaulVapType::BH_VAP_TYPE_5G;
-            }
-
-            backhaul_vaps_list.remove_if([&](const bwl::backhaul_vap_list_element_t &element) {
-                return (element.type != current_type);
-            });
 
             // Set the time for the first radio info polling
             next_heartbeat_notification_timestamp =
@@ -1585,11 +1572,12 @@ bool ap_manager_thread::handle_ap_enabled(int vap_id)
     }
 
     const auto vap_info = vap_iter->second;
+    sMacAddr vap_bssid  = network_utils::mac_from_string(vap_info.mac);
 
     // mark backhaul vaps
     auto it = std::find_if(backhaul_vaps_list.begin(), backhaul_vaps_list.end(),
                            [&](const bwl::backhaul_vap_list_element_t &backhaul_elem) {
-                               return (backhaul_elem.bssid == vap_info.mac);
+                               return (backhaul_elem.bssid == vap_bssid);
                            });
 
     bool bVAP = (it != backhaul_vaps_list.end());
@@ -1608,7 +1596,7 @@ bool ap_manager_thread::handle_ap_enabled(int vap_id)
     notification->vap_id() = vap_id;
 
     // Copy the VAP MAC and SSID
-    notification->vap_info().mac = network_utils::mac_from_string(vap_info.mac);
+    notification->vap_info().mac = vap_bssid;
     mapf::utils::copy_string(notification->vap_info().ssid, vap_info.ssid.c_str(),
                              beerocks::message::WIFI_SSID_MAX_LENGTH);
     notification->vap_info().backhaul_vap = bVAP;

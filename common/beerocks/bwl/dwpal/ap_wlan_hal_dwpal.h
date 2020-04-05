@@ -87,6 +87,7 @@ protected:
     }
 
 private:
+    bool set_multiap_wps(std::map<std::string, std::vector<std::string>> &hostapd_config_vaps);
     // Unassociated measurement state variables
     std::chrono::steady_clock::time_point m_unassoc_measure_start;
     int m_unassoc_measure_window_size = 0;
