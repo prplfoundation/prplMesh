@@ -91,12 +91,17 @@ prplmesh_framework_init() {
     echo "prplmesh_framework_init - starting local_bus and ieee1905_transport processes..."
     @INSTALL_PATH@/bin/local_bus &
     @INSTALL_PATH@/bin/ieee1905_transport &
+
+    # This is required for solveing issue which causing meesges not geeting to their destination.
+    # For more information see: https://github.com/prplfoundation/prplMesh/pull/1029#issuecomment-608353274
+    ebtables -A FORWARD -d 01:80:c2:00:00:13 -j DROP
 }
 
 prplmesh_framework_deinit() {
     echo "prplmesh_framework_deinit - killing local_bus and ieee1905_transport processes..."
     killall_program local_bus
     killall_program ieee1905_transport
+    ebtables -D FORWARD -d 01:80:c2:00:00:13 -j DROP
 }
 
 prplmesh_controller_start() {
