@@ -110,7 +110,7 @@ main() {
             SUBTARGET=xrx500
             TARGET_PROFILE=DEVICE_NETGEAR_RAX40
             PRPLMESH_VARIANT="-dwpal"
-            PRPL_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^6265989f2c47f7b42f64d25f455443b87902582e"
+            PRPL_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^98ba3cfaa63d36941c47e390a665f05c8b64a228"
             INTEL_FEED="https://git.prpl.dev/prplmesh/feed-intel.git^e3eca4e93286eb4346f0196b2816a3be97287482"
             BASE_CONFIG=gcc8
             ;;

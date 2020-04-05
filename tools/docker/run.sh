@@ -22,6 +22,7 @@ usage() {
     echo "      -m|--mac - base MAC address for interfaces in the container"
     echo "      -n|--name - container name (for later easy attach)"
     echo "      -p|--port - port to expose on the container"
+    echo "      -P|--publish - publish all exposed ports to the host"
     echo "      -I|--image - docker network to which to attach the container"
     echo "      -N|--network - docker network to which to attach the container"
     echo "      -u|--unique-id - unique id to add as suffix to container and network names"
@@ -47,7 +48,7 @@ gateway_netid_length() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvdfi:m:n:N:o:t:p:u:' --long verbose,help,detach,force,ipaddr:,mac:,name:,network:,entrypoint:,tag:,port:,options:,unique-id: -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvdfi:m:n:N:o:t:e:p:u:' --long verbose,help,detach,force,ipaddr:,mac:,name:,network:,entrypoint:,tag:,expose:,publish:,options:,unique-id: -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -64,7 +65,8 @@ main() {
             -n | --name)        NAME="$2"; shift; shift ;;
             -u | --unique-id)   UNIQUE_ID="$2"; shift; shift ;;
             -t | --tag)         TAG=":$2"; shift; shift ;;
-            -p | --port)        PORT=":$2"; shift; shift ;;
+            -e | --expose)      PORT="${PORT} --expose $2"; shift; shift ;;
+            -p | --publish)     PUBLISH="${PUBLISH} -p ${2}"; shift; shift ;;
             -N | --network)     NETWORK="$2"; shift; shift ;;
             --entrypoint)       ENTRYPOINT="$2"; shift; shift ;;
             -- ) shift; break ;;
@@ -99,6 +101,7 @@ main() {
     dbg "IPADDR=${IPADDR}"
     dbg "BASE_MAC=${BASE_MAC}"
     dbg "PORT=${PORT}"
+    dbg "PUBLISH=${PUBLISH}"
     dbg "NAME=${NAME}"
     dbg "FORCE=${FORCE}"
     dbg "UNIQUE_ID=${UNIQUE_ID}"
@@ -107,7 +110,7 @@ main() {
                 -e INSTALL_DIR=${installdir}
                 --privileged
                 --network ${NETWORK}
-                --expose ${PORT}
+                ${PORT} ${PUBLISH}
                 -v ${installdir}:${installdir}
                 -v ${rootdir}:${rootdir}
                 -v ${rootdir}/logs/${NAME}:/tmp/${SUDO_USER:-${USER}}/beerocks/logs
@@ -140,7 +143,7 @@ UNIQUE_ID=${SUDO_USER:-${USER}}
 IPADDR=
 NAME=prplMesh
 ENTRYPOINT=
-PORT=5000
+PORT="--expose 5000"
 BASE_MAC=44:55:66:77
 
 main $@
