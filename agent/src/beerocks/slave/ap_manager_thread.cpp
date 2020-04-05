@@ -1681,3 +1681,18 @@ void ap_manager_thread::remove_client_from_disallowed_list(const sMacAddr &mac,
         m_disallowed_clients.erase(it);
     }
 }
+
+void ap_manager_thread::allow_expired_clients()
+{
+    // check if any client disallow period has expired and allow it.
+    for (auto it = m_disallowed_clients.begin(); it != m_disallowed_clients.end();) {
+        if (std::chrono::steady_clock::now() > it->timeout) {
+            LOG(DEBUG) << "CLIENT_ALLOW: mac = " << it->mac << ", bssid = " << it->bssid;
+            ap_wlan_hal->sta_allow(network_utils::mac_to_string(it->mac),
+                                   network_utils::mac_to_string(it->bssid));
+            m_disallowed_clients.erase(it);
+        } else {
+            it++;
+        }
+    }
+}
