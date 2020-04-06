@@ -1,0 +1,79 @@
+{
+    "prplmesh_dummy": {
+        "name": "gateway",
+        "board_type": "prplmesh_docker",
+        "conn_cmd": "",
+        "controller": {
+            "type": "controller_dummy",
+            "ucc_port": 8002
+        },
+        "devices": [
+            {
+                "name": "repeater1",
+                "type": "prplmesh_docker",
+                "conn_cmd": "",
+                "agent": {
+                    "type": "agent_dummy",
+                    "ucc_port": 8005,
+                    "radios": [
+                        {
+                            "type": "radio_dummy",
+                            "iface": "wlan0"
+                        },
+                        {
+                            "type": "radio_dummy",
+                            "iface": "wlan2"
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "repeater2",
+                "type": "prplmesh_docker",
+                "conn_cmd": "",
+                "agent": {
+                    "type": "agent_dummy",
+                    "ucc_port": 8006,
+                    "radios": [
+                        {
+                            "type": "radio_dummy",
+                            "iface": "wlan0"
+                        },
+                        {
+                            "type": "radio_dummy",
+                            "iface": "wlan2"
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "rax1": {
+        "board_type": "prplmesh_docker",
+        "conn_cmd": "cu -l /dev/ttyUSB0 -s 115200",
+        "controller": {
+            "type": "controller_dummy",
+            "ucc_port": 8002
+        },
+        "devices": [
+            {
+                "name": "agent",
+                "type": "RAX40",
+                "agents": {
+                    "type": "prplmesh_agent_hw",
+                    "ucc_port": 8002,
+                    "radios": [
+                        {
+                            "type": "prplmesh_radio_hw",
+                            "iface": "wlan0"
+                        },
+                        {
+                            "type": "prplmesh_radio_hw",
+                            "iface": "wlan2"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

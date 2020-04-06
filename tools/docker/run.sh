@@ -44,7 +44,7 @@ generate_container_random_ip() {
 }
 
 gateway_netid_length() {
-    docker network inspect prplMesh-net-${UNIQUE_ID} --format "{{(index .IPAM.Config 0).Subnet}}" | sed -rn 's/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{2})$/\1/p'
+    docker network inspect "$1" --format "{{(index .IPAM.Config 0).Subnet}}" | sed -rn 's/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{2})$/\1/p'
 }
 
 main() {
@@ -80,7 +80,7 @@ main() {
         run ${scriptdir}/image-build.sh
     }
 
-    NETWORK=prplMesh-net-${UNIQUE_ID}
+    NETWORK=${NETWORK:-"prplMesh-net-${UNIQUE_ID}"}
     docker network inspect ${NETWORK} >/dev/null 2>&1 || {
         dbg "Network $NETWORK does not exist, creating..."
         run docker network create ${NETWORK} >/dev/null 2>&1
@@ -89,10 +89,10 @@ main() {
 
     [ -z "$IPADDR" -a -n "$NETWORK" ] && {
         dbg "Generate random IP for container $NAME for network $NETWORK"
-        IPADDR=$(generate_container_random_ip $NETWORK)
+        IPADDR=$(generate_container_random_ip ${NETWORK})
     }
 
-    IPADDR="${IPADDR}$(gateway_netid_length)"
+    IPADDR="${IPADDR}$(gateway_netid_length ${NETWORK})"
 
     dbg "VERBOSE=${VERBOSE}"
     dbg "DETACH=${DETACH}"
