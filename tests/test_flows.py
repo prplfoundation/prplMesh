@@ -703,6 +703,7 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c"""
                        r"Result Code= SUCCESS, client MAC= {sta_mac2}, BSSID= {mac_repeater1_wlan0}"
                         .format(sta_mac2 = sta_mac2,
                                 mac_repeater1_wlan0 = self.mac_repeater1_wlan0))
+        
         for line in association_frame.splitlines():
             self.check_log(self.gateway, "controller", r"{}".format(line))
 
