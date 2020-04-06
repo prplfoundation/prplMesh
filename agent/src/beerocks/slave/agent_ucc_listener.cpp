@@ -169,6 +169,19 @@ bool agent_ucc_listener::send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmd
     return m_backhaul_manager_ctx.send_cmdu_to_bus(cmdu_tx, dest_mac, m_bridge_mac);
 }
 
+static enum eFreqType band_to_freq(const std::string &band)
+{
+    if (band == "24G") {
+        return eFreqType::FREQ_24G;
+    } else if (band == "5GL") {
+        return eFreqType::FREQ_5G;
+    } else if (band == "5GH") {
+        return eFreqType::FREQ_5G;
+    } else {
+        return eFreqType::FREQ_UNKNOWN;
+    }
+}
+
 bool agent_ucc_listener::handle_start_wps_registration(
     std::unordered_map<std::string, std::string> &params, std::string &err_string)
 {
@@ -186,8 +199,50 @@ bool agent_ucc_listener::handle_start_wps_registration(
         err_string = "invalid WpsConfigMethod, supporting only PBC";
         return false;
     }
-    // TODO trigger WPS PBC on the selected band
-    return true;
+
+    auto freq      = band_to_freq(band->second);
+    auto radio_mac = m_backhaul_manager_ctx.freq_to_radio_mac(freq);
+    if (radio_mac.empty()) {
+        err_string = "Failed to get radio mac for " + band->second;
+        return false;
+    }
+
+    auto it = vaps_map.find(radio_mac);
+    if (it == vaps_map.end()) {
+        err_string = "radio_mac " + radio_mac + " not found";
+        return false;
+    }
+
+    // According to the Multi-AP specification section 5.2, a backhaul STA onboards the agent
+    // using an extension to the WPS PBC onboarding method.
+    // The Agent must advertise WPS on the fronthaul, and during WPS registration
+    // the backhaul credentials are sent in the WPS M8 message.
+    // Therefore, make sure we have fronthaul and backhaul VAPs configured,
+    // then trigger WPS on the first found fAP.
+    sMacAddr fronthaul_bssid = network_utils::ZERO_MAC;
+    sMacAddr backhaul_bssid  = network_utils::ZERO_MAC;
+    // trigger WPS BPC on first fAP bssid
+    for (const auto &vap : it->second.vaps) {
+        if (fronthaul_bssid == network_utils::ZERO_MAC && !vap.backhaul_vap) {
+            fronthaul_bssid = vap.mac;
+        }
+        if (backhaul_bssid == network_utils::ZERO_MAC && vap.backhaul_vap) {
+            backhaul_bssid = vap.mac;
+        }
+    }
+    if (fronthaul_bssid == network_utils::ZERO_MAC) {
+        err_string = "No fAP found for radio_mac " + radio_mac;
+        return false;
+    }
+    if (backhaul_bssid == network_utils::ZERO_MAC) {
+        err_string = "No bAP found for radio_mac " + radio_mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "Trigger WPS PBC on radio mac " << radio_mac << " bssid " << fronthaul_bssid;
+    err_string = "Failed to start wps pbc";
+    return m_backhaul_manager_ctx.start_wps_pbc(network_utils::mac_from_string(radio_mac),
+                                                fronthaul_bssid);
 }
 
 /**
