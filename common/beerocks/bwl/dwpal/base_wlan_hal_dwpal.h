@@ -110,6 +110,8 @@ private:
 
     char m_wpa_ctrl_buffer[HOSTAPD_TO_DWPAL_MSG_LENGTH];
     size_t m_wpa_ctrl_buffer_size = HOSTAPD_TO_DWPAL_MSG_LENGTH;
+
+    int m_nl_get_failed_attempts = 0;
 };
 
 } // namespace dwpal
