@@ -3592,4 +3592,45 @@ bool backhaul_manager::add_ap_he_capabilities(const sRadioInfo &radio_info)
     return true;
 }
 
+const std::string backhaul_manager::freq_to_radio_mac(enum eFreqType freq) const
+{
+    auto it =
+        std::find_if(slaves_sockets.begin(), slaves_sockets.end(),
+                     [&](std::shared_ptr<sRadioInfo> slave) { return slave->freq_type == freq; });
+
+    if (it == slaves_sockets.end()) {
+        LOG(ERROR) << "couldn't find slave for freq " << int(freq);
+        return std::string();
+    }
+
+    auto slave = *it;
+    return network_utils::mac_to_string(slave->radio_mac);
+}
+
+bool backhaul_manager::start_wps_pbc(const sMacAddr &radio_mac, const sMacAddr &bssid)
+{
+    auto msg =
+        message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_START_WPS_PBC_REQUEST>(
+            cmdu_tx);
+    if (!msg) {
+        LOG(ERROR) << "Failed building message!";
+        return false;
+    }
+
+    auto it = std::find_if(
+        slaves_sockets.begin(), slaves_sockets.end(),
+        [&](std::shared_ptr<sRadioInfo> slave) { return slave->radio_mac == radio_mac; });
+    if (it == slaves_sockets.end()) {
+        LOG(ERROR) << "couldn't find slave for radio mac " << radio_mac;
+        return false;
+    }
+
+    msg->bssid() = bssid;
+
+    auto soc = *it;
+    LOG(DEBUG) << "Start WPS PBC registration on interface " << soc->hostap_iface << ", bssid"
+               << bssid;
+    return message_com::send_cmdu(soc->slave, cmdu_tx);
+}
+
 } // namespace beerocks
