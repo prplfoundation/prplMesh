@@ -21,6 +21,7 @@ extern "C" {
 }
 
 #define UNHANDLED_EVENTS_LOGS 20
+#define MAX_ALLOWED_CONSECUTIVE_NL_MSG_GET_FAILURES 3
 
 namespace bwl {
 namespace dwpal {
@@ -578,12 +579,28 @@ bool base_wlan_hal_dwpal::process_nl_events()
     };
     auto nl_handler_cb = [](struct nl_msg *msg) -> DWPAL_Ret { return nl_handler_cb_wrapper(msg); };
 
-    //parsing will be done in callback function
+    // parsing will be done in callback function
+    // Added failure on attempt counter for dwpal_driver_nl_msg_get operation to prevent unnecessary
+    // monitor thread restarts in case of a one-time buffer glitch in dwpal-nl-parser.
+    //
+    // The above-mentioned scenario can happen when 2 sockets are using dwpal_driver_nl_msg_get
+    // simultaneously and receiving an event at the same time.
+    // If max-retries is reached, the process_nl_events() fails and the
+    // monitor_thread_stop will be performed.
     if (dwpal_driver_nl_msg_get(m_dwpal_nl_ctx, DWPAL_NL_UNSOLICITED_EVENT, NULL, nl_handler_cb) ==
         DWPAL_FAILURE) {
         LOG(ERROR) << " dwpal_driver_nl_msg_get failed,"
                    << " ctx=" << m_dwpal_nl_ctx;
-        return false;
+
+        dwpal_nl_consecutive_msg_get_failures++;
+        LOG(DEBUG) << "consecutive-nl-msg-get-failures counter:"
+                   << dwpal_nl_consecutive_msg_get_failures;
+
+        if (dwpal_nl_consecutive_msg_get_failures >= MAX_ALLOWED_CONSECUTIVE_NL_MSG_GET_FAILURES) {
+            LOG(ERROR) << " max allowed consecutive-nl-msg-get-failures reached,"
+                       << " ctx=" << m_dwpal_nl_ctx << ", returning error!";
+            return false;
+        }
     }
 
     return true;
