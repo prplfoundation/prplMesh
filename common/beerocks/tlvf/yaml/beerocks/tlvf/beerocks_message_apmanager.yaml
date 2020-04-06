@@ -140,6 +140,7 @@ cACTION_APMANAGER_CLIENT_DISALLOW_REQUEST:
   _type: class
   mac: sMacAddr
   bssid: sMacAddr
+  validity_period_sec: uint16_t
 
 cACTION_APMANAGER_CLIENT_ALLOW_REQUEST:
   _type: class

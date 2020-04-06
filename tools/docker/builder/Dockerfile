@@ -32,6 +32,7 @@ RUN apt-get update && apt-get install -y \
     python-yaml \
     python3 \
     python3-yaml \
+    uuid-runtime \
     vim \
     && rm -rf /var/lib/apt/lists/*
 

@@ -25,7 +25,6 @@
  * move all these includes into a separate header because
  * over time this list is going to get very long
  */
-#include <tlvf/ieee_1905_1/eMessageType.h>
 #include <tlvf/ieee_1905_1/s802_11SpecificInformation.h>
 #include <tlvf/ieee_1905_1/tlv1905NeighborDevice.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
@@ -83,71 +82,45 @@ namespace beerocks {
 const char *backhaul_manager::s_arrStates[] = {FOREACH_STATE(GENERATE_STRING)};
 
 /**
- * @brief Gets media type group for given interface.
+ * IEEE Std 1905.1, Table 6-12—Media type (intfType)
  *
- * @param[in] interface_name Name of the local interface.
- * @param[in, out] media_type_group The media type group of the connecting interface.
- *
- * @return True on success and false otherwise.
+ * Value and Description         Frequency  MaxBandwith  Comments
+ * 0 IEEE 802.11b (2.4 GHz)      2.4 GHz    22 MHz       Not supported
+ * 1 IEEE 802.11g (2.4 GHz)      2.4 GHz    20 MHz
+ * 2 IEEE 802.11a (5 GHz)        5 GHz      20 MHz
+ * 3 IEEE 802.11n (2.4 GHz)      2.4 GHz    40 MHz
+ * 4 IEEE 802.11n (5 GHz)        5 GHz      40 MHz
+ * 5 IEEE 802.11ac (5 GHz)       5 GHz      80 MHz
+ * 6 IEEE 802.11ad (60 GHz)      60 GHz     160 MHz      Not supported
+ * 7 IEEE 802.11af (whitespace)                          Not supported
+ * 8 IEEE 802.11ax (2.4 GHz)     2.4 GHz    160 MHz      Not included in Table 6-12—Media type (intfType), WiFi6 is specified to use 0x0108 in R2
+ * 8 IEEE 802.11ax (5 GHz)       5 GHz      160 MHz      Not included in Table 6-12—Media type (intfType), WiFi6 is specified to use 0x0108 in R2
  */
-static bool get_media_type_group(const std::string &interface_name,
-                                 ieee1905_1::eMediaTypeGroup &media_type_group)
-{
-    // TODO: Currently, only Ethernet is supported
-    // When dealing with WiFi interfaces in task #792, use NL80211_CMD_GET_INTERFACE command to
-    // find out if media type group is WiFi
-    media_type_group = ieee1905_1::eMediaTypeGroup::IEEE_802_3;
+static const std::vector<std::tuple<eFreqType, eWiFiBandwidth, ieee1905_1::eMediaType>>
+    table_6_12_media_type //
+    {
+        {eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_20, //
+         ieee1905_1::eMediaType::IEEE_802_11G_2_4_GHZ},
 
-    return true;
-}
+        {eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_20, //
+         ieee1905_1::eMediaType::IEEE_802_11A_5_GHZ},
 
-/**
- * @brief Gets media type for given interface.
- *
- * The mechanism to use to obtain media type depends on the media type group:
- * Ethernet, WiFi, MoCA, etc.
- *
- * @param[in] interface_name Name of the local interface.
- * @param[in] media_type_group The media type group of the connecting interface.
- * @param[in, out] media_type The underlying network technology of the connecting interface.
- *
- * @return True on success and false otherwise.
- */
-static bool get_media_type(const std::string &interface_name,
-                           ieee1905_1::eMediaTypeGroup media_type_group,
-                           ieee1905_1::eMediaType &media_type)
-{
-    bool result = false;
+        {eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_40, //
+         ieee1905_1::eMediaType::IEEE_802_11N_2_4_GHZ},
 
-    if (ieee1905_1::eMediaTypeGroup::IEEE_802_3 == media_type_group) {
-        uint32_t speed;
-        if (network_utils::linux_iface_get_speed(interface_name, speed)) {
-            if (SPEED_100 == speed) {
-                media_type = ieee1905_1::eMediaType::IEEE_802_3U_FAST_ETHERNET;
-            } else if (SPEED_1000 <= speed) {
-                media_type = ieee1905_1::eMediaType::IEEE_802_3AB_GIGABIT_ETHERNET;
-            } else {
-                media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
-            }
+        {eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_40, //
+         ieee1905_1::eMediaType::IEEE_802_11N_5_GHZ},
 
-            result = true;
-        }
-    } else if (ieee1905_1::eMediaTypeGroup::IEEE_802_11 == media_type_group) {
-        // TODO: Not supported yet
-        LOG(ERROR) << "IEEE_802_11 media is not supported yet";
-    } else if (ieee1905_1::eMediaTypeGroup::IEEE_1901 == media_type_group) {
-        // TODO: Not supported yet
-        LOG(ERROR) << "IEEE_1901 media is not supported yet";
-    } else if (ieee1905_1::eMediaTypeGroup::MoCA == media_type_group) {
-        // TODO: Not supported yet
-        LOG(ERROR) << "MoCA media is not supported yet";
-    } else {
-        media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
-        result     = true;
-    }
+        {eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_80, //
+         ieee1905_1::eMediaType::IEEE_802_11AC_5_GHZ},
 
-    return result;
-}
+        {eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_160, //
+         ieee1905_1::eMediaType::IEEE_802_11AX},
+
+        {eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_160, //
+         ieee1905_1::eMediaType::IEEE_802_11AX},
+
+    };
 
 /**
  * @brief Adds link metrics to response message.
@@ -1781,6 +1754,12 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             return false;
         }
 
+        auto radio_info = m_radio_info_map[request->iface_mac()];
+
+        radio_info.interface_name = request->ap_iface();
+        radio_info.frequency_band = request->frequency_band();
+        radio_info.max_bandwidth  = request->max_bandwidth();
+
         std::string mac = network_utils::mac_to_string(request->iface_mac());
 
         auto tuple_supported_channels = request->supported_channels_list(0);
@@ -1792,7 +1771,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         auto channels = &std::get<1>(tuple_supported_channels);
 
         std::copy_n(channels, beerocks::message::SUPPORTED_CHANNELS_LENGTH,
-                    m_radio_info_map[request->iface_mac()].supported_channels.begin());
+                    radio_info.supported_channels.begin());
 
         soc->radio_mac             = mac;
         soc->freq_type             = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
@@ -2274,14 +2253,12 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         tlvDeviceInformation->add_local_interface_list(localInterfaceInfo);
     }
 
-    // TODO: Add a LocalInterfaceInfo field for each wireless interface.
-    // This is something that cannot be done at this moment because the MediaType field
-    // must be computed with information obtained through NL80211_CMD_GET_WIPHY command of DWPAL,
-    // which is currently not supported. See "Send standard NL80211 commands using DWPAL #782"
-    // For now, fill from radio data with dummy values based on information we have.
+    /**
+     * Add a LocalInterfaceInfo field for each wireless interface.
+     */
     for (const auto &soc : slaves_sockets) {
         // Iterate on front radio iface and then switch to back radio iface
-        auto fill_radio_iface_info = [&](bool front_iface) {
+        auto fill_radio_iface_info = [&](ieee1905_1::eMediaType media_type, bool front_iface) {
             LOG(DEBUG) << "filling interface information on radio="
                        << (front_iface ? soc->radio_mac : soc->radio_mac + " backhaul");
 
@@ -2301,16 +2278,6 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             LOG(DEBUG) << "Added radio interface to tlvDeviceInformation: "
                        << localInterfaceInfo->mac();
 
-            ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
-            if (soc->freq_type == beerocks::eFreqType::FREQ_24G) {
-                media_type = ieee1905_1::eMediaType::IEEE_802_11N_2_4_GHZ;
-            } else if (soc->freq_type == beerocks::eFreqType::FREQ_5G) {
-                media_type = ieee1905_1::eMediaType::IEEE_802_11AC_5_GHZ;
-            } else {
-                LOG(ERROR) << "Unsupported freq_type=" << int(soc->freq_type)
-                           << ", iface=" << soc->hostap_iface;
-                return false;
-            }
             localInterfaceInfo->media_type() = media_type;
 
             ieee1905_1::s802_11SpecificInformation media_info = {};
@@ -2352,13 +2319,22 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             return true;
         };
 
-        if (!fill_radio_iface_info(true)) {
+        std::string local_interface_name = soc->hostap_iface;
+
+        ieee1905_1::eMediaTypeGroup media_type_group = ieee1905_1::eMediaTypeGroup::IEEE_802_11;
+        ieee1905_1::eMediaType media_type            = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+        if (!get_media_type(local_interface_name, media_type_group, media_type)) {
+            LOG(ERROR) << "Unable to compute media type for interface " << local_interface_name;
+            return false;
+        }
+
+        if (!fill_radio_iface_info(media_type, true)) {
             LOG(DEBUG) << "filling interface information on radio=" << soc->radio_mac
                        << " has failed!";
             return true;
         }
 
-        if (!fill_radio_iface_info(false)) {
+        if (!fill_radio_iface_info(media_type, false)) {
             LOG(DEBUG) << "filling interface information on radio=" << soc->radio_mac
                        << " backhaul has failed!";
             return true;
@@ -3419,6 +3395,69 @@ std::shared_ptr<bwl::sta_wlan_hal> backhaul_manager::get_wireless_hal(std::strin
     }
 
     return slave_sk->second->sta_wlan_hal;
+}
+
+bool backhaul_manager::get_media_type_group(const std::string &interface_name,
+                                            ieee1905_1::eMediaTypeGroup &media_type_group)
+{
+    // TODO: Currently, only Ethernet is supported
+    // When dealing with WiFi interfaces in task #792, use NL80211_CMD_GET_INTERFACE command to
+    // find out if media type group is WiFi
+    media_type_group = ieee1905_1::eMediaTypeGroup::IEEE_802_3;
+
+    return true;
+}
+
+bool backhaul_manager::get_media_type(const std::string &interface_name,
+                                      ieee1905_1::eMediaTypeGroup media_type_group,
+                                      ieee1905_1::eMediaType &media_type)
+{
+    bool result = false;
+
+    if (ieee1905_1::eMediaTypeGroup::IEEE_802_3 == media_type_group) {
+        uint32_t speed;
+        if (network_utils::linux_iface_get_speed(interface_name, speed)) {
+            if (SPEED_100 == speed) {
+                media_type = ieee1905_1::eMediaType::IEEE_802_3U_FAST_ETHERNET;
+            } else if (SPEED_1000 <= speed) {
+                media_type = ieee1905_1::eMediaType::IEEE_802_3AB_GIGABIT_ETHERNET;
+            } else {
+                media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+            }
+
+            result = true;
+        }
+    } else if (ieee1905_1::eMediaTypeGroup::IEEE_802_11 == media_type_group) {
+
+        for (const auto &radio_info_entry : m_radio_info_map) {
+            auto radio_info = radio_info_entry.second;
+
+            if (interface_name == radio_info.interface_name) {
+
+                for (const auto &tuple : table_6_12_media_type) {
+                    if ((std::get<0>(tuple) == radio_info.frequency_band) &&
+                        (std::get<1>(tuple) == radio_info.max_bandwidth)) {
+                        media_type = std::get<2>(tuple);
+
+                        break;
+                    }
+                }
+
+                break;
+            }
+        }
+    } else if (ieee1905_1::eMediaTypeGroup::IEEE_1901 == media_type_group) {
+        // TODO: Not supported yet
+        LOG(ERROR) << "IEEE_1901 media is not supported yet";
+    } else if (ieee1905_1::eMediaTypeGroup::MoCA == media_type_group) {
+        // TODO: Not supported yet
+        LOG(ERROR) << "MoCA media is not supported yet";
+    } else {
+        media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+        result     = true;
+    }
+
+    return result;
 }
 
 bool backhaul_manager::get_neighbor_links(

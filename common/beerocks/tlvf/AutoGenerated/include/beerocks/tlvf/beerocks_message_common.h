@@ -369,10 +369,14 @@ typedef struct sNodeHostap {
     uint8_t ant_num;
     uint8_t ant_gain;
     uint8_t tx_power;
+    beerocks::eFreqType frequency_band;
+    beerocks::eWiFiBandwidth max_bandwidth;
     char driver_version[beerocks::message::WIFI_DRIVER_VER_LENGTH];
     beerocks::message::sWifiChannel supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
     void struct_swap(){
         iface_mac.struct_swap();
+        tlvf_swap(8*sizeof(beerocks::eFreqType), reinterpret_cast<uint8_t*>(&frequency_band));
+        tlvf_swap(8*sizeof(beerocks::eWiFiBandwidth), reinterpret_cast<uint8_t*>(&max_bandwidth));
         for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
             (supported_channels[i]).struct_swap();
         }

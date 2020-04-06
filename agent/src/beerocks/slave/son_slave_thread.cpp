@@ -3250,6 +3250,9 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                   config.backhaul_wireless_iface.c_str(),
                                   message::IFACE_NAME_LENGTH);
 
+        bh_enable->frequency_band() = hostap_params.frequency_band;
+        bh_enable->max_bandwidth()  = hostap_params.max_bandwidth;
+
         auto tuple_supported_channels = bh_enable->supported_channels_list(0);
         if (!std::get<0>(tuple_supported_channels)) {
             LOG(ERROR) << "getting supported channels has failed!";
@@ -4305,8 +4308,9 @@ bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::Cmd
             return false;
         }
 
-        request_out->mac()   = sta_mac;
-        request_out->bssid() = bssid;
+        request_out->mac()                 = sta_mac;
+        request_out->bssid()               = bssid;
+        request_out->validity_period_sec() = association_control_request_tlv->validity_period_sec();
     }
 
     message_com::send_cmdu(ap_manager_socket, cmdu_tx);

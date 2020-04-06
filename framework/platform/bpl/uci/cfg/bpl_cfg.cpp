@@ -22,6 +22,23 @@ using namespace mapf;
 namespace beerocks {
 namespace bpl {
 
+int cfg_get_hostap_iface_steer_vaps(int32_t radio_num,
+                                    char hostap_iface_steer_vaps[BPL_LOAD_STEER_ON_VAPS_LEN])
+{
+    if (!hostap_iface_steer_vaps) {
+        MAPF_ERR("invalid input: hostap_iface_steer_vaps is NULL");
+        return RETURN_ERR;
+    }
+
+    if (radio_num < 0) {
+        MAPF_ERR("invalid input: radio_num < 0");
+        return RETURN_ERR;
+    }
+
+    return cfg_get_prplmesh_radio_param(radio_num, "hostap_iface_steer_vaps",
+                                        hostap_iface_steer_vaps, BPL_LOAD_STEER_ON_VAPS_LEN);
+}
+
 int cfg_is_enabled()
 {
     int retVal = -1;
@@ -108,6 +125,45 @@ int cfg_get_certification_mode()
         return RETURN_ERR;
     }
     return retVal;
+}
+
+int cfg_get_load_steer_on_vaps(int num_of_interfaces,
+                               char load_steer_on_vaps[BPL_LOAD_STEER_ON_VAPS_LEN])
+{
+    if (num_of_interfaces < 1) {
+        MAPF_ERR("invalid input: max num_of_interfaces value < 1");
+        return RETURN_ERR;
+    }
+
+    if (!load_steer_on_vaps) {
+        MAPF_ERR("invalid input: load_steer_on_vaps is NULL");
+        return RETURN_ERR;
+    }
+
+    std::string load_steer_on_vaps_str;
+    char hostap_iface_steer_vaps[BPL_LOAD_STEER_ON_VAPS_LEN] = {0};
+    for (int index = 0; index < num_of_interfaces; index++) {
+        if (cfg_get_hostap_iface_steer_vaps(index, hostap_iface_steer_vaps) == RETURN_ERR) {
+            MAPF_ERR("failed to get wifi interface steer vaps for agent" << index);
+        } else {
+            if (std::string(hostap_iface_steer_vaps).length() > 0) {
+                if (!load_steer_on_vaps_str.empty()) {
+                    load_steer_on_vaps_str.append(",");
+                }
+                // for linux implementation the wlan?.0 vaps are used for band steering
+                load_steer_on_vaps_str.append(std::string(hostap_iface_steer_vaps));
+            }
+        }
+    }
+    if (load_steer_on_vaps_str.empty()) {
+        MAPF_DBG("steer vaps list is empty");
+        return RETURN_OK;
+    }
+
+    utils::copy_string(load_steer_on_vaps, load_steer_on_vaps_str.c_str(),
+                       BPL_LOAD_STEER_ON_VAPS_LEN);
+
+    return RETURN_OK;
 }
 
 int cfg_get_stop_on_failure_attempts()

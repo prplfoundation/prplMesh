@@ -56,7 +56,8 @@ int bml_rdkb_steering_set_group(BML_CTX ctx, uint32_t steeringGroupIndex,
 
 /*
 * Call this function to add/modify/remove per-client configuration config of client_mac.
-* To remove a client configuration call with NULL as config.
+* In order to remove a client configuration call with NULL as "config" parameter 
+* or set config.snrProbeHWM to 0.
 * @param[in] steeringGroupIndex   Wifi Steering Group index
 * @param[in] bssid                AP bssid.
 * @param[in] client_mac           The Client's MAC address.

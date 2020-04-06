@@ -62,8 +62,9 @@ namespace bpl {
 #define BPL_CERTIFICATION_MODE_ON 1
 
 /* Platform Information */
-#define BPL_USER_PASS_LEN (64 + 1)     /* Maximal length of USER_PASS */
-#define BPL_SERIAL_NUMBER_LEN (64 + 1) /* Maximal length of SERIAL_NUMBER */
+#define BPL_USER_PASS_LEN (64 + 1)           /* Maximal length of USER_PASS */
+#define BPL_SERIAL_NUMBER_LEN (64 + 1)       /* Maximal length of SERIAL_NUMBER */
+#define BPL_LOAD_STEER_ON_VAPS_LEN (127 + 1) /* Maximal length of LOAD_STEER_ON_VAPS string */
 
 /* Platform notification types */
 #define BPL_NOTIF_VER_MISMATCH 1 /* Version mismatch detected */
@@ -266,6 +267,18 @@ int cfg_get_management_mode();
  * @return -1 Error.
  */
 int cfg_get_certification_mode();
+
+/**
+ * Returns the comma-separated list of VAPs to steer on.
+ *
+ * @param [int] num_of_interfaces Max num of interfaces.
+ * @param [out] load_steer_on_vaps VAPs to steer on (up to 128 bytes in length).
+ *
+ * @return 0 Success.
+ * @return -1 Error.
+ */
+int cfg_get_load_steer_on_vaps(int num_of_interfaces,
+                               char load_steer_on_vaps[BPL_LOAD_STEER_ON_VAPS_LEN]);
 
 /**
  * Returns the maximum number of failures allowed on agent before stopping its execution.

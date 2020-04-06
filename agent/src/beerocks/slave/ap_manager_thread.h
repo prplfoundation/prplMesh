@@ -47,6 +47,18 @@ public:
         eBackhaulVapType type;
     };
 
+    /**
+     * disallowed client parameters
+     * Used to save clients mac, bssid that the client is disallowed from and 
+     * validity period of time (blocking) 
+     * so we could unblock it when the period expires
+     */
+    struct disallowed_client_t {
+        sMacAddr mac;
+        sMacAddr bssid;
+        std::chrono::steady_clock::time_point timeout;
+    };
+
     enum eThreadErrors : uint32_t {
         APMANAGER_THREAD_ERROR_NO_ERROR            = 0,
         APMANAGER_THREAD_ERROR_HOSTAP_DISABLED     = 1,
@@ -75,6 +87,8 @@ private:
     void send_heartbeat();
     void send_steering_return_status(beerocks_message::eActionOp_APMANAGER ActionOp,
                                      int32_t status);
+    void remove_client_from_disallowed_list(const sMacAddr &mac, const sMacAddr &bssid);
+    void allow_expired_clients();
 
     std::string slave_uds;
     uint8_t wifi_channel;
@@ -82,6 +96,7 @@ private:
     bool low_filter;
     int bss_steer_valid_int;
     int bss_steer_imminent_valid_int;
+    std::vector<disallowed_client_t> m_disallowed_clients;
 
     std::list<backhaul_vap_list_element_t> backhaul_vaps_list;
 

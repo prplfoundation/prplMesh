@@ -50,13 +50,11 @@ nl80211_client_impl::nl80211_client_impl(std::unique_ptr<nl80211_socket> socket)
 
 bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radio_info &radio_info)
 {
-    struct channels_ctx {
-        int last_band;
-        bool width_40;
-        bool width_80;
-        bool width_80_80;
-        bool width_160;
-    } ctx{};
+    int last_band    = -1;
+    bool width_40    = false;
+    bool width_80    = false;
+    bool width_80_80 = false;
+    bool width_160   = false;
 
     radio_info = {};
 
@@ -75,13 +73,14 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
     }
 
     return m_socket.get()->send_receive_msg(
-        NL80211_CMD_GET_WIPHY, 0,
+        NL80211_CMD_GET_WIPHY, NLM_F_DUMP,
         [&](struct nl_msg *msg) -> bool {
             nla_put_u32(msg, NL80211_ATTR_IFINDEX, iface_index);
+            nla_put_flag(msg, NL80211_ATTR_SPLIT_WIPHY_DUMP);
 
             return true;
         },
-        [&](struct nl_msg *msg) -> bool {
+        [&](struct nl_msg *msg) {
             struct nlattr *tb[NL80211_ATTR_MAX + 1];
             struct genlmsghdr *gnlh = static_cast<genlmsghdr *>(nlmsg_data(nlmsg_hdr(msg)));
 
@@ -89,12 +88,11 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
             if (nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0),
                           NULL)) {
                 LOG(ERROR) << "Failed to parse netlink message!";
-                return false;
+                return;
             }
 
             if (!tb[NL80211_ATTR_WIPHY_BANDS]) {
-                LOG(ERROR) << "NL80211_ATTR_WIPHY_BANDS attribute is missing";
-                return false;
+                return;
             }
 
             struct nlattr *nl_band;
@@ -103,27 +101,36 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
             nla_for_each_nested(nl_band, tb[NL80211_ATTR_WIPHY_BANDS], rem_band)
             {
                 struct nlattr *tb_band[NL80211_BAND_ATTR_MAX + 1];
-                band_info band{};
 
-                if (ctx.last_band != nl_band->nla_type) {
-                    ctx.width_40    = false;
-                    ctx.width_80    = false;
-                    ctx.width_80_80 = false;
-                    ctx.width_160   = false;
-                    ctx.last_band   = nl_band->nla_type;
+                if (last_band != nl_band->nla_type) {
+                    width_40    = false;
+                    width_80    = false;
+                    width_80_80 = false;
+                    width_160   = false;
+                    last_band   = nl_band->nla_type;
+
+                    band_info band{};
+                    radio_info.bands.push_back(band);
                 }
+
+                if (radio_info.bands.empty()) {
+                    LOG(ERROR) << "Array of bands is empty";
+                    return;
+                }
+
+                band_info &band = radio_info.bands.at(radio_info.bands.size() - 1);
 
                 if (nla_parse(tb_band, NL80211_BAND_ATTR_MAX,
                               static_cast<nlattr *>(nla_data(nl_band)), nla_len(nl_band), NULL)) {
                     LOG(ERROR) << "Failed to parse wiphy band " << nl_band->nla_type + 1 << "!";
-                    return false;
+                    return;
                 }
 
                 if (tb_band[NL80211_BAND_ATTR_HT_CAPA]) {
                     band.ht_capability = nla_get_u16(tb_band[NL80211_BAND_ATTR_HT_CAPA]);
 
                     if (band.ht_capability & BIT(1)) {
-                        ctx.width_40 = true;
+                        width_40 = true;
                     }
 
                     if (tb_band[NL80211_BAND_ATTR_HT_MCS_SET]) {
@@ -138,29 +145,23 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
                                           "attribute. Expected length: "
                                        << expected_length << ", actual length: " << actual_length;
                         }
-                    } else {
-                        LOG(DEBUG) << "NL80211_BAND_ATTR_VHT_MCS_SET attribute is missing";
                     }
-                } else {
-                    LOG(DEBUG) << "NL80211_BAND_ATTR_HT_CAPA attribute is missing";
                 }
 
                 if (tb_band[NL80211_BAND_ATTR_VHT_CAPA]) {
                     band.vht_capability = nla_get_u32(tb_band[NL80211_BAND_ATTR_VHT_CAPA]);
 
-                    ctx.width_80 = true;
+                    width_80 = true;
 
                     switch ((band.vht_capability >> 2) & 3) {
                     case 2:
-                        ctx.width_80_80 = true;
-                        ctx.width_160   = true;
+                        width_80_80 = true;
+                        width_160   = true;
                         break;
                     case 1:
-                        ctx.width_160 = true;
+                        width_160 = true;
                         break;
                     }
-                } else {
-                    LOG(DEBUG) << "NL80211_BAND_ATTR_VHT_CAPA attribute is missing";
                 }
 
                 if (tb_band[NL80211_BAND_ATTR_VHT_MCS_SET]) {
@@ -175,13 +176,10 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
                                       "attribute. Expected length: "
                                    << expected_length << ", actual length: " << actual_length;
                     }
-                } else {
-                    LOG(DEBUG) << "NL80211_BAND_ATTR_VHT_MCS_SET attribute is missing";
                 }
 
                 if (!tb_band[NL80211_BAND_ATTR_FREQS]) {
-                    LOG(ERROR) << "NL80211_BAND_ATTR_FREQS attribute is missing";
-                    return false;
+                    return;
                 }
 
                 struct nlattr *nl_freq;
@@ -201,7 +199,7 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
                                   static_cast<nlattr *>(nla_data(nl_freq)), nla_len(nl_freq),
                                   freq_policy)) {
                         LOG(ERROR) << "Failed to parse frequency " << nl_freq->nla_type + 1 << "!";
-                        return false;
+                        return;
                     }
 
                     if (!tb_freq[NL80211_FREQUENCY_ATTR_FREQ] ||
@@ -216,8 +214,6 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
                     if (tb_freq[NL80211_FREQUENCY_ATTR_MAX_TX_POWER]) {
                         channel.tx_power =
                             nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_MAX_TX_POWER]) / 100;
-                    } else {
-                        LOG(DEBUG) << "NL80211_FREQUENCY_ATTR_MAX_TX_POWER attribute is missing";
                     }
 
                     if (tb_freq[NL80211_FREQUENCY_ATTR_RADAR]) {
@@ -235,21 +231,21 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
                         channel.supported_bandwidths.push_back(
                             beerocks::eWiFiBandwidth::BANDWIDTH_20);
                     }
-                    if (ctx.width_40 && (!tb_freq[NL80211_FREQUENCY_ATTR_NO_HT40_MINUS] ||
-                                         !tb_freq[NL80211_FREQUENCY_ATTR_NO_HT40_PLUS])) {
+                    if (width_40 && (!tb_freq[NL80211_FREQUENCY_ATTR_NO_HT40_MINUS] ||
+                                     !tb_freq[NL80211_FREQUENCY_ATTR_NO_HT40_PLUS])) {
                         channel.supported_bandwidths.push_back(
                             beerocks::eWiFiBandwidth::BANDWIDTH_40);
                     }
-                    if (ctx.width_80 && !tb_freq[NL80211_FREQUENCY_ATTR_NO_80MHZ]) {
+                    if (width_80 && !tb_freq[NL80211_FREQUENCY_ATTR_NO_80MHZ]) {
                         channel.supported_bandwidths.push_back(
                             beerocks::eWiFiBandwidth::BANDWIDTH_80);
                     }
-                    if (ctx.width_80_80 && !tb_freq[NL80211_FREQUENCY_ATTR_NO_80MHZ]) {
+                    if (width_80_80 && !tb_freq[NL80211_FREQUENCY_ATTR_NO_80MHZ]) {
                         // NL80211_FREQUENCY_ATTR_NO_80MHZ includes 80+80 channels
                         channel.supported_bandwidths.push_back(
                             beerocks::eWiFiBandwidth::BANDWIDTH_80_80);
                     }
-                    if (ctx.width_160 && !tb_freq[NL80211_FREQUENCY_ATTR_NO_160MHZ]) {
+                    if (width_160 && !tb_freq[NL80211_FREQUENCY_ATTR_NO_160MHZ]) {
                         // NL80211_FREQUENCY_ATTR_NO_160MHZ does not include 80+80 channels
                         channel.supported_bandwidths.push_back(
                             beerocks::eWiFiBandwidth::BANDWIDTH_160);
@@ -263,11 +259,7 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
 
                     band.supported_channels[channel.number] = channel;
                 }
-
-                radio_info.bands.push_back(band);
             }
-
-            return true;
         });
 }
 
@@ -315,7 +307,7 @@ bool nl80211_client_impl::get_sta_info(const std::string &interface_name,
 
             return true;
         },
-        [&](struct nl_msg *msg) -> bool {
+        [&](struct nl_msg *msg) {
             struct nlattr *tb[NL80211_ATTR_MAX + 1];
             struct genlmsghdr *gnlh = static_cast<genlmsghdr *>(nlmsg_data(nlmsg_hdr(msg)));
             struct nlattr *sinfo[NL80211_STA_INFO_MAX + 1];
@@ -324,19 +316,19 @@ bool nl80211_client_impl::get_sta_info(const std::string &interface_name,
             if (nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0),
                           NULL)) {
                 LOG(ERROR) << "Failed to parse netlink message!";
-                return false;
+                return;
             }
 
             if (!tb[NL80211_ATTR_STA_INFO]) {
                 LOG(ERROR) << "STA stats missing!";
-                return false;
+                return;
             }
 
             // Parse nested station stats
             if (nla_parse_nested(sinfo, NL80211_STA_INFO_MAX, tb[NL80211_ATTR_STA_INFO],
                                  stats_policy)) {
                 LOG(ERROR) << "Failed to parse nested STA attributes!";
-                return false;
+                return;
             }
 
             if (sinfo[NL80211_STA_INFO_INACTIVE_TIME]) {
@@ -424,8 +416,6 @@ bool nl80211_client_impl::get_sta_info(const std::string &interface_name,
             } else {
                 LOG(DEBUG) << "NL80211_STA_INFO_RX_BITRATE attribute is missing";
             }
-
-            return true;
         });
 }
 
@@ -453,7 +443,7 @@ bool nl80211_client_impl::set_tx_power_limit(const std::string &interface_name, 
             nla_put_u32(msg, NL80211_ATTR_WIPHY_TX_POWER_LEVEL, limit * 100); //mBm
             return true;
         },
-        [&](struct nl_msg *msg) -> bool { return true; });
+        [&](struct nl_msg *msg) {});
 }
 
 } // namespace bwl

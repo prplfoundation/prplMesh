@@ -127,7 +127,6 @@ static void fill_master_config(son::db::sDbMasterConfig &master_conf,
     master_conf.load_client_optimal_path_roaming =
         (main_master_conf.load_client_optimal_path_roaming == "1");
     master_conf.load_client_11k_roaming    = (main_master_conf.load_client_11k_roaming == "1");
-    master_conf.load_steer_on_vaps         = main_master_conf.load_steer_on_vaps;
     master_conf.load_legacy_client_roaming = (main_master_conf.load_legacy_client_roaming == "1");
     master_conf.load_load_balancing        = (main_master_conf.load_load_balancing == "1");
     master_conf.load_diagnostics_measurements =
@@ -212,6 +211,13 @@ static void fill_master_config(son::db::sDbMasterConfig &master_conf,
 
     // platform settings
     master_conf.certification_mode = beerocks::bpl::cfg_get_certification_mode();
+    char load_steer_on_vaps[BPL_LOAD_STEER_ON_VAPS_LEN] = {0};
+    if (beerocks::bpl::cfg_get_load_steer_on_vaps(beerocks::IRE_MAX_SLAVES, load_steer_on_vaps) <
+        0) {
+        master_conf.load_steer_on_vaps = std::string();
+    } else {
+        master_conf.load_steer_on_vaps = std::string(load_steer_on_vaps);
+    }
 }
 
 int main(int argc, char *argv[])

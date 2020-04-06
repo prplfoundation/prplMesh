@@ -292,9 +292,15 @@ bool base_wlan_hal_dummy::process_nl_events()
 
 bool base_wlan_hal_dummy::refresh_radio_info()
 {
+    m_radio_info.max_bandwidth = beerocks::eWiFiBandwidth::BANDWIDTH_40;
+
     if (get_iface_name() == "wlan2") {
-        m_radio_info.is_5ghz = true;
+        m_radio_info.is_5ghz        = true;
+        m_radio_info.frequency_band = beerocks::eFreqType::FREQ_5G;
+    } else {
+        m_radio_info.frequency_band = beerocks::eFreqType::FREQ_24G;
     }
+
     std::string radio_mac;
     beerocks::net::network_utils::linux_iface_get_mac(m_radio_info.iface_name, radio_mac);
     for (int vap_id = 0; vap_id < predefined_vaps_num; vap_id++) {

@@ -1,3 +1,8 @@
+stages:
+  - build
+  - test
+  - upload
+
 .in-prplmesh-builder:
   image:
     name: prplfoundationinc/prplmesh-builder:ubuntu-18.04
@@ -23,9 +28,10 @@ flake8:
   stage: build
   image: pipelinecomponents/flake8:f087c4c
   variables:
-      FLAKE8_FILES: "tests/capi.py tests/opts.py"
+    FLAKE8_FILES: "tests/*.py"
   script:
-    - flake8 --verbose $FLAKE8_FILES
+    - apk add --update --no-cache git
+    - git ls-files -z -- $FLAKE8_FILES | xargs -0 -t flake8 --verbose
 
 flake8-diff:
   stage: build
@@ -82,6 +88,31 @@ build-in-docker-static:
   extends: build-in-docker
   variables:
     EXTRA_CMAKE_FLAGS: "-DBUILD_SHARED_LIBS=OFF"
+
+upload-artifacts:
+  stage: upload
+  extends: .in-prplmesh-builder
+  script:
+    # the owncloud password is stored in the file pointed by "$CI_OWNCLOUD_PASSWORD".
+    # We can only store the password in it, since spaces are not supported in Gitlab masked variables.
+    # We symlink the file to .netrc and pre-pend to it to avoid manipulating the password itself
+    # on the command line.
+    - ln -s "$CI_OWNCLOUD_PASSWORD" ~/.netrc
+    - sed --follow-symlinks -i 's/^/machine ftp.essensium.com login prplmesh-robot-ci password /' ~/.netrc
+    - ci/owncloud/upload_to_owncloud.sh -v "artifacts/$CI_COMMIT_SHA-$CI_JOB_ID" ./build
+    - |
+      if [ $CI_COMMIT_BRANCH = "master" ] ; then
+          echo "Updating the 'latest' folder"
+          # Copying takes a lot of time, and we want the "latest" folder to be updated
+          # "as fast as possible", so we make a copy and move it:
+          ci/owncloud/owncloud_definitions.sh copy "artifacts/$CI_COMMIT_SHA-$CI_JOB_ID" "temp_uploads/latest_$CI_COMMIT_SHA-$CI_JOB_ID"
+          ci/owncloud/owncloud_definitions.sh move "temp_uploads/latest_$CI_COMMIT_SHA-$CI_JOB_ID" "artifacts/latest"
+      fi
+  needs:
+    - build-in-docker
+    - build-for-netgear-rax40
+    - build-for-glinet-b1300
+    - build-for-turris-omnia
 
 .run-test-in-docker:
   stage: test
@@ -208,6 +239,6 @@ run-certification-tests:
     - job: build-for-netgear-rax40
   tags:
     - certs-tests
-  timeout: 24h
+  timeout: 36h
   rules:
     - if: '$TESTS_TO_RUN'

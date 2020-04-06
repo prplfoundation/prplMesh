@@ -387,6 +387,9 @@ void ap_manager_thread::after_select(bool timeout)
                 now + std::chrono::seconds(HEARTBEAT_NOTIFICATION_DELAY_SEC);
         }
     }
+
+    // allow clients with expired blocking period timer
+    allow_expired_clients();
 }
 
 bool ap_manager_thread::socket_disconnected(Socket *sd)
@@ -693,9 +696,52 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
 
         std::string sta_mac = network_utils::mac_to_string(request->mac());
         std::string bssid   = network_utils::mac_to_string(request->bssid());
+
+        const auto &vap_unordered_map = ap_wlan_hal->get_radio_info().available_vaps;
+        auto it = std::find_if(vap_unordered_map.begin(), vap_unordered_map.end(),
+                               [&](const std::pair<int, bwl::VAPElement> &element) {
+                                   return element.second.mac == bssid;
+                               });
+
+        if (it == vap_unordered_map.end()) {
+            //AP does not have the requested vap, probably will be handled on the other AP
+            return true;
+        }
+
         LOG(DEBUG) << "CLIENT_DISALLOW: mac = " << sta_mac << ", bssid = " << bssid;
 
         ap_wlan_hal->sta_deny(sta_mac, bssid);
+
+        // Check if validity period is set then add it to the "disallowed client timeouts" list
+        // This list will be polled in after_select()
+        // When validity period is timed out sta_allow will be called.
+        if (request->validity_period_sec()) {
+
+            disallowed_client_t disallowed_client;
+
+            // calculate new disallow timeout from client validity period parameter [sec]
+            disallowed_client.timeout = std::chrono::steady_clock::now() +
+                                        std::chrono::seconds(request->validity_period_sec());
+            disallowed_client.mac   = request->mac();
+            disallowed_client.bssid = request->bssid();
+
+            // Remove old disallow period timeout from the list before inserting new
+            remove_client_from_disallowed_list(request->mac(), request->bssid());
+
+            // insert new disallow timeout to the list
+            m_disallowed_clients.push_back(disallowed_client);
+
+            LOG(DEBUG) << "client " << disallowed_client.mac
+                       << " will be allowed to accosiate with bssid " << disallowed_client.bssid
+                       << " in "
+                       << std::chrono::duration_cast<std::chrono::seconds>(
+                              disallowed_client.timeout - std::chrono::steady_clock::now())
+                              .count()
+                       << "sec";
+        } else {
+            LOG(WARNING) << "CLIENT_DISALLOW validity period set to 0, STA mac " << request->mac()
+                         << " will remain blocked from bssid " << request->bssid();
+        }
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_ALLOW_REQUEST: {
@@ -708,9 +754,23 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
 
         std::string sta_mac = network_utils::mac_to_string(request->mac());
         std::string bssid   = network_utils::mac_to_string(request->bssid());
-        LOG(DEBUG) << "CLIENT_ALLOW: mac = " << sta_mac << ", bssid = " << bssid;
 
+        const auto &vap_unordered_map = ap_wlan_hal->get_radio_info().available_vaps;
+        auto it = std::find_if(vap_unordered_map.begin(), vap_unordered_map.end(),
+                               [&](const std::pair<int, bwl::VAPElement> &element) {
+                                   return element.second.mac == bssid;
+                               });
+
+        if (it == vap_unordered_map.end()) {
+            //AP does not have the requested vap, probably will be handled on the other AP
+            return true;
+        }
+
+        remove_client_from_disallowed_list(request->mac(), request->bssid());
+
+        LOG(DEBUG) << "CLIENT_ALLOW: mac = " << sta_mac << ", bssid = " << bssid;
         ap_wlan_hal->sta_allow(sta_mac, bssid);
+
         break;
     }
     case beerocks_message::ACTION_APMANAGER_READ_ACS_REPORT_REQUEST: {
@@ -1495,6 +1555,9 @@ void ap_manager_thread::handle_hostapd_attached()
     notification->cs_params().bandwidth            = uint8_t(
         beerocks::utils::convert_bandwidth_to_enum(ap_wlan_hal->get_radio_info().bandwidth));
 
+    notification->params().frequency_band = ap_wlan_hal->get_radio_info().frequency_band;
+    notification->params().max_bandwidth  = ap_wlan_hal->get_radio_info().max_bandwidth;
+
     // Copy the channels supported by the AP
     copy_radio_supported_channels(ap_wlan_hal, notification->params().supported_channels);
 
@@ -1643,4 +1706,33 @@ void ap_manager_thread::send_steering_return_status(beerocks_message::eActionOp_
     }
     }
     return;
+}
+
+void ap_manager_thread::remove_client_from_disallowed_list(const sMacAddr &mac,
+                                                           const sMacAddr &bssid)
+{
+    auto it = std::find_if(m_disallowed_clients.begin(), m_disallowed_clients.end(),
+                           [&](const son::ap_manager_thread::disallowed_client_t &element) {
+                               return ((element.mac == mac) && (element.bssid == bssid));
+                           });
+
+    if (it != m_disallowed_clients.end()) {
+        // remove client from the disallow list
+        m_disallowed_clients.erase(it);
+    }
+}
+
+void ap_manager_thread::allow_expired_clients()
+{
+    // check if any client disallow period has expired and allow it.
+    for (auto it = m_disallowed_clients.begin(); it != m_disallowed_clients.end();) {
+        if (std::chrono::steady_clock::now() > it->timeout) {
+            LOG(DEBUG) << "CLIENT_ALLOW: mac = " << it->mac << ", bssid = " << it->bssid;
+            ap_wlan_hal->sta_allow(network_utils::mac_to_string(it->mac),
+                                   network_utils::mac_to_string(it->bssid));
+            m_disallowed_clients.erase(it);
+        } else {
+            it++;
+        }
+    }
 }

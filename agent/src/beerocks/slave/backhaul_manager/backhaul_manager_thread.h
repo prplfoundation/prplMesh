@@ -21,6 +21,8 @@
 
 #include <beerocks/tlvf/beerocks_message_header.h>
 
+#include <tlvf/ieee_1905_1/eMediaType.h>
+
 #include "../agent_ucc_listener.h"
 
 #include <future>
@@ -263,7 +265,12 @@ private:
      * the TLVs to include in notification messages or responses to CDMU query messages.
      */
     struct sRadioInfo {
-        beerocks_message::sVapsList vaps_list; /**< List of VAPs in radio. */
+        std::string interface_name; /**< Name of the radio interface */
+        beerocks::eFreqType frequency_band =
+            beerocks::eFreqType::FREQ_UNKNOWN; /**< Frequency band */
+        beerocks::eWiFiBandwidth max_bandwidth =
+            beerocks::eWiFiBandwidth::BANDWIDTH_UNKNOWN; /**< Maximum supported bandwidth */
+        beerocks_message::sVapsList vaps_list;           /**< List of VAPs in radio. */
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
             supported_channels; /**< Array of supported channels in radio. */
         std::unordered_map<sMacAddr, associated_clients_t>
@@ -274,6 +281,33 @@ private:
      * @brief Map of radio information structures indexed by radio uid.
      */
     std::unordered_map<sMacAddr, sRadioInfo> m_radio_info_map;
+
+    /**
+     * @brief Gets media type group for given interface.
+     *
+     * @param[in] interface_name Name of the local interface.
+     * @param[in, out] media_type_group The media type group of the connecting interface.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool get_media_type_group(const std::string &interface_name,
+                              ieee1905_1::eMediaTypeGroup &media_type_group);
+
+    /**
+     * @brief Gets media type for given interface.
+     *
+     * The mechanism to use to obtain media type depends on the media type group:
+     * Ethernet, WiFi, MoCA, etc.
+     *
+     * @param[in] interface_name Name of the local interface.
+     * @param[in] media_type_group The media type group of the connecting interface.
+     * @param[in, out] media_type The underlying network technology of the connecting interface.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool get_media_type(const std::string &interface_name,
+                        ieee1905_1::eMediaTypeGroup media_type_group,
+                        ieee1905_1::eMediaType &media_type);
 
     /**
      * @brief Gets the list of neighbor links from topology database.
