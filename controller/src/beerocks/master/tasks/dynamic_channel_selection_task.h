@@ -39,6 +39,7 @@ public:
 #define FOREACH_DCS_EVENT(EVENT)                                                                   \
     EVENT(INVALID_EVENT)                                                                           \
     EVENT(TRIGGER_SINGLE_SCAN)                                                                     \
+    EVENT(SCAN_TRIGGER_FAILED)                                                                     \
     EVENT(SCAN_TRIGGERED)                                                                          \
     EVENT(SCAN_RESULTS_READY)                                                                      \
     EVENT(SCAN_RESULTS_DUMP)                                                                       \

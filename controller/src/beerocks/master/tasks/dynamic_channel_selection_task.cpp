@@ -250,6 +250,10 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         m_is_single_scan_pending = true;
         break;
     }
+    case eEvent::SCAN_TRIGGER_FAILED: {
+        TASK_LOG(DEBUG) << "SCAN_TRIGGER_FAILED received";
+        break;
+    }
     case eEvent::SCAN_TRIGGERED: {
         TASK_LOG(DEBUG) << "SCAN_TRIGGERED received";
         if (fsm_in_state(eState::WAIT_FOR_SCAN_TRIGGERED)) {
