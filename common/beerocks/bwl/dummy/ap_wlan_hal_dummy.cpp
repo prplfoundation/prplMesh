@@ -390,10 +390,18 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
             "000000000000000000000000000018E6E10900BF0CB079D133FAFF0C03FAFF0C03C70110DD07506F9A1603"
             "0103";
 
-        auto assoc_req_len = strnlen(assoc_req, ASSOCIATION_FRAME_SIZE);
-        auto sub_str       = std::string(&assoc_req[56], assoc_req_len - 56 - 18);
+        auto assoc_req_len                   = strnlen(assoc_req, ASSOCIATION_FRAME_SIZE);
+        auto sub_str                         = std::string(&assoc_req[56], assoc_req_len - 56 - 18);
+        msg->params.association_frame_length = sub_str.length();
 
-        std::copy_n(&sub_str[0], sub_str.length() + 1, msg->params.association_frame);
+        LOG(DEBUG)
+            << "*********************************************************************************";
+        LOG(DEBUG) << "msg->params.association_frame_length= "
+                   << msg->params.association_frame_length;
+        LOG(DEBUG)
+            << "*********************************************************************************";
+
+        std::copy_n(&sub_str[0], sub_str.length(), msg->params.association_frame);
         bool caps_valid = true;
         SRadioCapabilitiesStrings caps_strings;
         if (!dummy_obj_read_str("SupportedRates", parsed_obj, &tmp_str)) {

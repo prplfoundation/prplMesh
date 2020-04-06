@@ -255,9 +255,18 @@ private:
      * Associated client information is later used to fill in the Associated Clients TLV
      * in the Topology Response message.
      */
-    typedef std::unordered_map<sMacAddr,
-                               std::tuple<std::chrono::steady_clock::time_point, std::string>>
-        associated_clients_t;
+
+    struct sClientInfo {
+        sMacAddr client_mac;
+        std::chrono::steady_clock::time_point t;
+        size_t asso_len;
+        uint8_t assoc_req[ASSOCIATION_FRAME_SIZE];
+    };
+
+    // typedef std::unordered_map<sMacAddr,
+    //                            std::tuple<std::chrono::steady_clock::time_point, std::string>>
+    //     associated_clients_t;
+    typedef std::unordered_map<sMacAddr, sClientInfo> associated_clients_t;
 
     /**
      * @brief Information gathered about a radio.

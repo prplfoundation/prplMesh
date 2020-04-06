@@ -2010,15 +2010,31 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             }
         }
         // Set client association information for associated client
-        std::string assoc_req(msg->association_frame() ? msg->association_frame() : "");
+        // std::string assoc_req;
+        // if(!msg->association_frame_length()){
+        //     assoc_req = "";
+        // }else{
+        //     assoc_req = std::string(msg->association_frame(),msg->association_frame() + msg->association_frame_length());
+
+        // }
+        // std::string assoc_req(msg->association_frame_length() ? std::string(msg->association_frame()) : "");
         auto &associated_clients =
             m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
 
-        associated_clients[msg->client_mac()] =
-            make_tuple(std::chrono::steady_clock::now(), assoc_req);
-        auto associatedClientsTuple = associated_clients[msg->client_mac()];
+        // sClientInfo s = {msg->client_mac(),std::chrono::steady_clock::now(),msg->association_frame()};
+        sClientInfo s;
+        s.client_mac = msg->client_mac();
+        s.t          = std::chrono::steady_clock::now();
+        s.asso_len   = msg->association_frame_length();
+        memcpy(s.assoc_req, msg->association_frame(), s.asso_len);
+        associated_clients[msg->client_mac()] = s;
 
-        LOG(DEBUG) << "association frame= " << std::get<1>(associatedClientsTuple);
+        LOG(DEBUG) << "******************    msg->association_frame_length()="
+                   << msg->association_frame_length() << "       ***********";
+        // make_tuple(std::chrono::steady_clock::now(), assoc_req);
+        // auto associatedClientsTuple = associated_clients[msg->client_mac()];
+
+        // LOG(DEBUG) << "association frame= " << std::get<1>(associatedClientsTuple);
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION: {
@@ -2159,12 +2175,21 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         LOG(DEBUG) << "Result Code: SUCCESS";
         // Add frame body of the most recently received (Re)Association Request frame from this client
         auto associated_clients = m_radio_info_map[client_ruid].associated_clients_map[client_vap];
-        auto associatedClientsTuple = associated_clients[client_info_tlv_r->client_mac()];
-        auto assoc_req              = std::get<1>(associatedClientsTuple);
-        auto len                    = assoc_req.length();
-        auto assoc_frame_body       = string_utils::hex_to_char_string(assoc_req);
-        client_capability_report_tlv->alloc_association_frame(len / 2);
-        std::copy(&assoc_frame_body[0], &assoc_frame_body[0] + len / 2,
+        auto sAssociatedClients = associated_clients[client_info_tlv_r->client_mac()];
+        auto assoc_             = sAssociatedClients.assoc_req;
+        auto assoc_req          = std::string(assoc_, assoc_ + sAssociatedClients.asso_len);
+
+        auto assoc_frame_body = string_utils::hex_to_char_string(assoc_req);
+
+        LOG(DEBUG) << "******************************************************************";
+        LOG(DEBUG) << "          sAssociatedClients.asso_len / 2 = "
+                   << sAssociatedClients.asso_len / 2;
+        LOG(DEBUG) << "          assoc_req.len = " << assoc_req.length() / 2;
+        LOG(DEBUG) << "          assoc_frame_body.len = " << assoc_frame_body.length();
+
+        LOG(DEBUG) << "******************************************************************";
+        client_capability_report_tlv->alloc_association_frame(sAssociatedClients.asso_len / 2);
+        std::copy(&assoc_frame_body[0], &assoc_frame_body[0] + sAssociatedClients.asso_len / 2,
                   client_capability_report_tlv->association_frame());
 
     } else {
@@ -2515,7 +2540,8 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
                     // the timestamp of its last association.
                     for (const auto &associated_client : associated_clients) {
                         auto client_mac       = associated_client.first;
-                        auto association_time = std::get<0>(associated_client.second);
+                        auto association_time = associated_client.second.t;
+                        // auto association_time = std::get<0>(associated_client.second);
 
                         auto elapsed =
                             std::chrono::duration_cast<std::chrono::seconds>(now - association_time)

@@ -1167,17 +1167,24 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
             return false;
         }
 
-        notification->params().mac          = msg->params.mac;
-        notification->params().vap_id       = msg->params.vap_id;
-        notification->params().bssid        = network_utils::mac_from_string(vap_node->second.mac);
-        notification->params().capabilities = msg->params.capabilities;
+        notification->mac()          = msg->params.mac;
+        notification->vap_id()       = msg->params.vap_id;
+        notification->bssid()        = network_utils::mac_from_string(vap_node->second.mac);
+        notification->capabilities() = msg->params.capabilities;
         if (!msg->params.association_frame) {
             LOG(DEBUG) << "no association frame";
         } else {
-            std::copy_n(msg->params.association_frame,
-                        strnlen(msg->params.association_frame, ASSOCIATION_FRAME_SIZE) + 1,
-                        notification->params().association_frame);
-            LOG(DEBUG) << "association_frame = " << notification->params().association_frame;
+            LOG(DEBUG) << "***********************    notification_in->association_frame_length()"
+                       << msg->params.association_frame_length << " ********************";
+
+            // notification->alloc_association_frame(msg->params.association_frame_length + 1);
+            notification->set_association_frame(msg->params.association_frame,
+                                                msg->params.association_frame_length);
+            // std::copy_n(msg->params.association_frame,
+            //             msg->params.association_frame_length,
+            //             notification->params().association_frame);
+            LOG(DEBUG) << "association_frame = " << notification->association_frame();
+            LOG(DEBUG) << "association_frame_len = " << notification->association_frame_length();
         }
 
         message_com::send_cmdu(slave_socket, cmdu_tx);

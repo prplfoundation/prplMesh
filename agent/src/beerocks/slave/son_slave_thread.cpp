@@ -2084,7 +2084,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
         LOG(TRACE) << "received ACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION";
-        std::string client_mac = network_utils::mac_to_string(notification_in->params().mac);
+        std::string client_mac = network_utils::mac_to_string(notification_in->mac());
         LOG(INFO) << "client associated sta_mac=" << client_mac;
 
         if (!master_socket) {
@@ -2097,19 +2097,28 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             beerocks_message::cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
         if (!notification_out) {
             LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION message!";
-            break;
+            return false;
         }
 
         notification_out->iface_mac()  = hostap_params.iface_mac;
-        notification_out->client_mac() = notification_in->params().mac;
-        notification_out->bssid()      = notification_in->params().bssid;
-        if (!notification_in->params().association_frame) {
+        notification_out->client_mac() = notification_in->mac();
+        notification_out->bssid()      = notification_in->bssid();
+        if (!notification_in->association_frame_length()) {
             LOG(DEBUG) << "no association frame";
-            notification_out->set_association_frame("");
+            // notification_out->set_association_frame("");
         } else {
-            auto len = strnlen(notification_in->params().association_frame, ASSOCIATION_FRAME_SIZE);
-            notification_out->set_association_frame(notification_in->params().association_frame,
-                                                    len + 1);
+            // auto len = strnlen(notification_in->params().association_frame, ASSOCIATION_FRAME_SIZE);
+            LOG(DEBUG) << "************************************************************************"
+                          "*********";
+
+            LOG(DEBUG) << "***********************    notification_in->association_frame_length()"
+                       << notification_in->association_frame_length() << " ********************";
+
+            LOG(DEBUG) << "************************************************************************"
+                          "*********";
+            // notification_out->alloc_association_frame(notification_in->association_frame_length());
+            notification_out->set_association_frame(notification_in->association_frame(),
+                                                    notification_in->association_frame_length());
         }
 
         // Send the message
@@ -2130,8 +2139,8 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             LOG(ERROR) << "addClass tlvClientAssociationEvent failed";
             return false;
         }
-        client_association_event_tlv->client_mac() = notification_in->params().mac;
-        client_association_event_tlv->bssid()      = notification_in->params().bssid;
+        client_association_event_tlv->client_mac() = notification_in->mac();
+        client_association_event_tlv->bssid()      = notification_in->bssid();
         client_association_event_tlv->association_event() =
             wfa_map::tlvClientAssociationEvent::CLIENT_HAS_JOINED_THE_BSS;
 
@@ -2147,10 +2156,10 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
                 return false;
             }
 
-            vs_tlv->mac()          = notification_in->params().mac;
-            vs_tlv->bssid()        = notification_in->params().bssid;
-            vs_tlv->vap_id()       = notification_in->params().vap_id;
-            vs_tlv->capabilities() = notification_in->params().capabilities;
+            vs_tlv->mac()          = notification_in->mac();
+            vs_tlv->bssid()        = notification_in->bssid();
+            vs_tlv->vap_id()       = notification_in->vap_id();
+            vs_tlv->capabilities() = notification_in->capabilities();
         }
 
         send_cmdu_to_controller(cmdu_tx);

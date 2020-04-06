@@ -1690,28 +1690,21 @@ sMacAddr& cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::bssid() {
     return (sMacAddr&)(*m_bssid);
 }
 
-std::string cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::association_frame_str() {
-    char *association_frame_ = association_frame();
-    if (!association_frame_) { return std::string(); }
-    return std::string(association_frame_, m_association_frame_idx__);
-}
-
-char* cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::association_frame(size_t length) {
-    if( (m_association_frame_idx__ == 0) || (m_association_frame_idx__ < length) ) {
-        TLVF_LOG(ERROR) << "association_frame length is smaller than requested length";
+uint8_t* cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::association_frame(size_t idx) {
+    if ( (m_association_frame_idx__ == 0) || (m_association_frame_idx__ <= idx) ) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
     }
-    return ((char*)m_association_frame);
+    return &(m_association_frame[idx]);
 }
 
-bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::set_association_frame(const std::string& str) { return set_association_frame(str.c_str(), str.size()); }
-bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::set_association_frame(const char str[], size_t size) {
-    if (str == nullptr) {
+bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::set_association_frame(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
         TLVF_LOG(WARNING) << "set_association_frame received a null pointer.";
         return false;
     }
     if (!alloc_association_frame(size)) { return false; }
-    std::copy(str, str + size, m_association_frame);
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_association_frame);
     return true;
 }
 bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::alloc_association_frame(size_t count) {
@@ -1719,7 +1712,7 @@ bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::alloc_association_frame(si
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list association_frame, abort!";
         return false;
     }
-    size_t len = sizeof(char) * count;
+    size_t len = sizeof(uint8_t) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
@@ -1807,7 +1800,7 @@ bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_bssid->struct_init(); }
-    m_association_frame = (char*)m_buff_ptr__;
+    m_association_frame = (uint8_t*)m_buff_ptr__;
     m_association_frame_idx__ = getBuffRemainingBytes();
     if (m_parse__) { class_swap(); }
     return true;

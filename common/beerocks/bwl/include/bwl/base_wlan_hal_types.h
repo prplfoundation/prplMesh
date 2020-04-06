@@ -193,7 +193,8 @@ typedef struct {
     uint8_t reserved1;
     uint8_t reserved2;
     uint8_t reserved3;
-    char association_frame[beerocks::message::ASSOCIATION_MAX_LENGTH];
+    size_t association_frame_length;
+    uint8_t association_frame[beerocks::message::ASSOCIATION_MAX_LENGTH];
 } sClientAssociationParams;
 
 typedef struct {
