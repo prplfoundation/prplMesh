@@ -252,6 +252,13 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
     }
     case eEvent::SCAN_TRIGGER_FAILED: {
         TASK_LOG(DEBUG) << "SCAN_TRIGGER_FAILED received";
+        if (fsm_in_state(eState::WAIT_FOR_SCAN_TRIGGERED)) {
+            auto scan_trigger_failed_event = reinterpret_cast<sScanEvent *>(obj);
+            event_handled                  = true;
+            m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
+            clear_pending_events();
+            fsm_move_state(eState::ABORT_SCAN);
+        }
         break;
     }
     case eEvent::SCAN_TRIGGERED: {
