@@ -694,18 +694,18 @@ class TestFlows:
     def test_client_capability_query(self):
         sta_mac1 = '00:00:00:11:00:22'
         sta_mac2 = '00:00:00:11:00:33'
-        association_frame = """00 0e 4d 75 6c 74 69 2d 41 50 2d 32 34 47 2d 31 
-01 08 02 04 0b 0c 12 16 18 24 21 02 00 14 30 14 
-01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f 
-ac 02 00 00 32 04 30 48 60 6c 3b 10 51 51 53 54 
-73 74 75 76 77 78 7c 7d 7e 7f 80 82 3b 16 0c 01 
-02 03 04 05 0c 16 17 18 19 1a 1b 1c 1d 1e 1f 20 
-21 80 81 82 46 05 70 00 00 00 00 46 05 71 50 50 
-00 04 7f 0a 04 00 0a 82 21 40 00 40 80 00 dd 07 
-00 50 f2 02 00 01 00 2d 1a 2d 11 03 ff ff 00 00 
-00 00 00 00 00 00 00 00 00 00 00 00 00 00 18 e6 
-e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c 
-03 c7 01 10 """
+
+        association_frame = """00 0e 4d 75 6c 74 69 2d 41 50 2d 32 34 47 2d 31
+01 08 02 04 0b 0c 12 16 18 24 21 02 00 14 30 14
+01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f
+ac 02 00 00 32 04 30 48 60 6c 3b 10 51 51 53 54
+73 74 75 76 77 78 7c 7d 7e 7f 80 82 3b 16 0c 01
+02 03 04 05 0c 16 17 18 19 1a 1b 1c 1d 1e 1f 20
+21 80 81 82 46 05 70 00 00 00 00 46 05 71 50 50
+00 04 7f 0a 04 00 0a 82 21 40 00 40 80 00 dd 07
+00 50 f2 02 00 01 00 2d 1a 2d 11 03 ff ff 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 18 e6
+e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c"""
 
         debug("Send client capability query for unconnected STA")
         self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8009,
@@ -743,12 +743,9 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         self.check_log(self.gateway, "controller",
                        r"Result Code= SUCCESS, client MAC= {sta_mac2}, BSSID= {mac_repeater1_wlan0}"
                         .format(sta_mac2 = sta_mac2,
-                                mac_repeater1_wlan0 = self.mac_repeater1_wlan0))        
-        
-        for line in association_frame.splitlines( ):
-            self.check_log(self.gateway, "controller",
-                       r"{line}"
-                        .format(line = line))
+                                mac_repeater1_wlan0 = self.mac_repeater1_wlan0))
+        for line in association_frame.splitlines():
+            self.check_log(self.gateway, "controller", r"{}".format(line))
 
     def test_client_association_dummy(self):
         sta_mac = "11:11:33:44:55:66"

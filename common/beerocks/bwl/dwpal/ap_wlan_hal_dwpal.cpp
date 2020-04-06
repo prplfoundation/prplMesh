@@ -1903,6 +1903,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         msg->params.capabilities = {};
         auto assoc_frame_len     = strnlen(assoc_req, ASSOCIATION_FRAME_SIZE);
         auto sub_str             = std::string(&assoc_req[56], assoc_frame_len - 56 - 18);
+        msg->params.association_frame_length = sub_str.length();
 
         std::copy_n(&sub_str[0], sub_str.length() + 1, msg->params.association_frame);
 

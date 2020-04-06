@@ -117,9 +117,17 @@ cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST:
   _type: class
   params: sNeighborRemoveParams11k
 
+
 cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION:
   _type: class
-  params: sClientAssociationParams
+  mac: sMacAddr
+  bssid: sMacAddr
+  capabilities: beerocks::message::sRadioCapabilities
+  vap_id: int8_t
+  association_frame:
+    _type: uint8_t
+    _length: [] 
+  # params: sClientAssociationParams
 
 cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION:
   _type: class
@@ -212,3 +220,12 @@ cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE:
     _type: beerocks::message::sWifiChannel
     _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
 
+# cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION:
+#   _type: class
+#   mac: sMacAddr
+#   bssid: sMacAddr
+#   capabilities: beerocks::message::sRadioCapabilities
+#   vap_id: int8_t
+#   association_frame:
+#     _type: uint8_t
+#     _length: [] 

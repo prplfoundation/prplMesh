@@ -140,15 +140,19 @@ sDfsChannelAvailable:
   bandwidth: uint8_t      #beerocks::eWiFiBandwidth
   vht_center_frequency: uint16_t  
 
-sClientAssociationParams:
-  _type: struct
-  mac: sMacAddr
-  bssid: sMacAddr
-  capabilities: beerocks::message::sRadioCapabilities
-  vap_id: int8_t
-  association_frame:
-    _type: char
-    _length: [ "beerocks::message::ASSOCIATION_MAX_LENGTH" ] 
+# sClientAssociationParams:
+#   _type: struct
+#   mac: sMacAddr
+#   bssid: sMacAddr
+#   capabilities: beerocks::message::sRadioCapabilities
+#   vap_id: int8_t
+#   association_frame:
+#     _type: uint8_t
+#     _length: [ "beerocks::message::ASSOCIATION_MAX_LENGTH" ] 
+
+
+
+
 
 sClientDisconnectionParams:
   _type: struct
