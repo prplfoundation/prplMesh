@@ -533,7 +533,10 @@ class cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION);
         }
-        sClientAssociationParams& params();
+        sMacAddr& mac();
+        sMacAddr& bssid();
+        beerocks::message::sRadioCapabilities& capabilities();
+        int8_t& vap_id();
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -541,7 +544,10 @@ class cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
     private:
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
-        sClientAssociationParams* m_params = nullptr;
+        sMacAddr* m_mac = nullptr;
+        sMacAddr* m_bssid = nullptr;
+        beerocks::message::sRadioCapabilities* m_capabilities = nullptr;
+        int8_t* m_vap_id = nullptr;
 };
 
 class cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION : public BaseClass

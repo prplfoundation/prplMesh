@@ -174,23 +174,6 @@ typedef struct sDfsChannelAvailable {
     }
 } __attribute__((packed)) sDfsChannelAvailable;
 
-typedef struct sClientAssociationParams {
-    sMacAddr mac;
-    sMacAddr bssid;
-    beerocks::message::sRadioCapabilities capabilities;
-    int8_t vap_id;
-    void struct_swap(){
-        mac.struct_swap();
-        bssid.struct_swap();
-        capabilities.struct_swap();
-    }
-    void struct_init(){
-        mac.struct_init();
-        bssid.struct_init();
-        capabilities.struct_init();
-    }
-} __attribute__((packed)) sClientAssociationParams;
-
 typedef struct sClientDisconnectionParams {
     sMacAddr mac;
     sMacAddr bssid;
