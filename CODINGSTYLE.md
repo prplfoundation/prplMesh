@@ -196,6 +196,93 @@ In the following example, the empty string is the sentinel value indicating fail
 std::string parse_bss_info(const std::string &bss_info_str, db::bss_info_conf_t &bss_info_conf);
 ```
 
+Prefer to use multiple points of exit from functions.  
+One might argue that it is less confusing if there is only a single exit point, but it leads to more nesting and therefore more indentation which makes the code less readable.  
+Another advantage of using multiple points of exit is that you can check preconditions and exit early at the start of a function, so that you know in the body of the function that certain conditions are true, without the entire body of the function being indented 5 miles off to the right.  
+This usually minimizes the number of scopes you have to worry about, which makes code much easier to follow.  
+Multiple points of exit means that you can exit anywhere you please.  
+This used to be more confusing in the old days, but now that we have syntax-coloring editors and compilers that detect unreachable code, it's a lot easier to deal with.
+
+Avoid using `goto` - The goto failure pattern is a corollary of the multiple exit points.  
+It applies when there is cleanup to do, but since we use C++, there should never be any cleanup to do (it should all be handled by automatic variables).
+
+Examples:
+
+Good - multiple points of exit:
+
+```cpp
+bool func()
+{
+    if (something) {
+        // do something
+        return true;
+    } else if (something else) {
+        // do something else
+        return false;
+    } else {
+        return false;
+    }
+}
+```
+
+Another example - the idea is to not use an else clause in this case to reduce indentation levels:
+
+```cpp
+bool func(int arg1)
+{
+    // validate arguments
+    if (arg1 < 0) {
+        return false;
+    }
+
+    // do something
+
+    return true;
+}
+```
+
+Bad - Single point of exit which adds an unecessary indentation level to the else clause, and makes the function longer:
+
+```cpp
+bool func(int arg1)
+{
+    bool result = false;
+
+    // validate arguments
+    if (arg1 < 0) {
+        result = false;
+    } else {
+        // do something
+    }
+
+    return result;
+}
+```
+
+
+Bad - single point of exit with `goto`:
+
+```cpp
+bool func()
+{
+    bool result = false;
+    if (something) {
+        goto failure;
+    }
+    // do something
+    if (some condition) {
+        goto failure;
+    }
+    result = true; // success
+    goto success;
+
+failure:
+    cleanup();
+success:
+    return result;
+}
+```
+
 ## Python code
 
 Follow PEP8.
