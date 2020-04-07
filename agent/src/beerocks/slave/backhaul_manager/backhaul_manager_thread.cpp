@@ -2919,40 +2919,37 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
 
         LOG(DEBUG) << "the requested STA mac is: " << requiredMac;
 
-        // 1. in m_radio_info_map find the radio-info entry
-        // that one of its keys in its associated clients
-        // is the required-mac. The existance of the key
-        // is sufficient:
-        // for each radio-agent-mac in m_radio_info_map -->
-        //      if sRadioInfo.associated_clients_map[requiredMac] // exists
-        //          break;
-        // 2. if we are not at the end of m_radio_info_map it means that we
-        // have the correct agent mac in hand
-        // we use this mac to search for the Socket in slaves_sockets
+        // radio-info-map - holds the map of all radios
+        // each radio has a list of: associated-clients (vaps)
+        // the associated-clients has a list of all connected STA
+        // therefore -
+        // we iterate over radio-info-map
+        //      we iterate over its associated-clients
+        //          we search for the requested mac
+         
 
         // 1. find the correct associated client
         const sMacAddr *radioMac = nullptr;
         for (auto &radio : m_radio_info_map) {
-            // debug
+
             LOG(DEBUG) << "printing radio info map for: " << radio.first;
-            for ( auto& it : radio.second.associated_clients_map ) {
-                LOG(DEBUG) << "STA (VAP??): " << it.first;
-            }
+            for ( const auto& client : radio.second.associated_clients_map ) {
 
-            // end debug
-            if (radio.second.associated_clients_map.find(requiredMac) !=
-                radio.second.associated_clients_map.end()) {
-                radioMac = &radio.first;
-                break;
-            }
-        }
+                LOG(DEBUG) << "client: " << client.first;
 
+                if (client.second.find(requiredMac) != client.second.end()) {
+                    radioMac = &radio.first;
+                    break;
+                }
+            }
+            if (radioMac) break; 
+        } 
 
         if (radioMac) {
             LOG(DEBUG) << "found the mac of the radio that has the sattion. radio: " << *radioMac << "; station: " << requiredMac;
             auto it = std::find_if(slaves_sockets.begin(), slaves_sockets.end(),
                                    [&radioMac](const std::shared_ptr<SSlaveSockets> slave) {
-                                       return slave->ruid == *radioMac;
+                                       return network_utils::mac_from_string(slave->radio_mac) == *radioMac;
                                    });
             if (it != slaves_sockets.end()) {
                 LOG(DEBUG) << "found the socket to send to the agent that will send to:" << *radioMac << " for STA: " << requiredMac;
