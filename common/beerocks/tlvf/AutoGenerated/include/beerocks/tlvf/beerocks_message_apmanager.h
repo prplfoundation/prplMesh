@@ -537,6 +537,10 @@ class cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
         sMacAddr& bssid();
         beerocks::message::sRadioCapabilities& capabilities();
         int8_t& vap_id();
+        size_t association_frame_length() { return m_association_frame_idx__ * sizeof(uint8_t); }
+        uint8_t* association_frame(size_t idx = 0);
+        bool set_association_frame(const void* buffer, size_t size);
+        bool alloc_association_frame(size_t count = 1);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -548,6 +552,9 @@ class cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
         sMacAddr* m_bssid = nullptr;
         beerocks::message::sRadioCapabilities* m_capabilities = nullptr;
         int8_t* m_vap_id = nullptr;
+        uint8_t* m_association_frame = nullptr;
+        size_t m_association_frame_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION : public BaseClass
