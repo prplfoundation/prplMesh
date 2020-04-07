@@ -1,0 +1,238 @@
+.certification:dummy:
+  stage: certification-dummy
+  extends: .certification-generic
+  variables:
+    DEVICE_UNDER_TEST: "prplmesh"
+  needs:
+    - job: build-in-docker
+
+MAP-5.3.1:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.3.1:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.4.1_ETH_FH24G:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.4.1_ETH_FH24G:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.4.1_ETH_FH5GL:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.4.1_ETH_FH5GL:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.4.1_ETH_FH5GH:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.4.1_ETH_FH5GH:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.4.2_ETH_FH24G:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.4.2_ETH_FH24G:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.4.2_ETH_FH5GL:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.4.2_ETH_FH5GL:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.4.2_ETH_FH5GH:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.4.2_ETH_FH5GH:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.4.3_ETH_FH24G:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.4.3_ETH_FH24G:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.4.3_ETH_FH5GL:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.4.3_ETH_FH5GL:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.4.3_ETH_FH5GH:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.4.3_ETH_FH5GH:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.5.1:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.5.1:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.6.1:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.6.1:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.6.2_ETH_FH24G:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.6.2_ETH_FH24G:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.6.2_ETH_FH5GL:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.6.2_ETH_FH5GL:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.6.2_ETH_FH5GH:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.6.2_ETH_FH5GH:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.7.1:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.7.1:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.8.1_ETH_FH24G:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.8.1_ETH_FH24G:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.8.2_ETH_FH24G:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.8.2_ETH_FH24G:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.8.2_ETH_FH5GL:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.8.2_ETH_FH5GL:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.8.2_ETH_FH5GH:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.8.2_ETH_FH5GH:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.8.3_ETH_FH5GL:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.8.3_ETH_FH5GL:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.10.1:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.10.1:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-5.10.2:dummy:
+  extends: .certification:dummy
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-5.10.2:dummy.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
