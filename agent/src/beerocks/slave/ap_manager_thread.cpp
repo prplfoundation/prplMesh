@@ -1167,10 +1167,10 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
             return false;
         }
 
-        notification->params().mac          = msg->params.mac;
-        notification->params().vap_id       = msg->params.vap_id;
-        notification->params().bssid        = network_utils::mac_from_string(vap_node->second.mac);
-        notification->params().capabilities = msg->params.capabilities;
+        notification->mac()          = msg->params.mac;
+        notification->vap_id()       = msg->params.vap_id;
+        notification->bssid()        = network_utils::mac_from_string(vap_node->second.mac);
+        notification->capabilities() = msg->params.capabilities;
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
 
