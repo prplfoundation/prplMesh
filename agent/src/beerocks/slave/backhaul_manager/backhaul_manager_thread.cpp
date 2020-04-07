@@ -2936,7 +2936,7 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
             // debug
             LOG(DEBUG) << "printing radio info map for: " << radio.first;
             for ( auto& it : radio.second.associated_clients_map ) {
-                LOG(DEBUG) << "STA: " << it.first;
+                LOG(DEBUG) << "STA (VAP??): " << it.first;
             }
 
             // end debug
