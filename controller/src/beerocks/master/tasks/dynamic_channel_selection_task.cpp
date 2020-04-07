@@ -108,15 +108,16 @@ void dynamic_channel_selection_task::work()
         if (m_is_single_scan_pending) {
             m_is_single_scan         = true;
             m_is_single_scan_pending = false;
+            LOG(DEBUG) << "single scan is pending, trigger single scan";
             fsm_move_state(eState::TRIGGER_SCAN);
         } else if (database.get_channel_scan_is_enabled(m_radio_mac)) {
             auto now = std::chrono::steady_clock::now();
 
             if (now > m_next_scan_timestamp_interval) {
+                LOG(DEBUG) << "interval condition is met, trigger scan";
                 m_is_single_scan = false;
                 fsm_move_state(eState::TRIGGER_SCAN);
                 m_last_scan_try_timestamp = now;
-                LOG(DEBUG) << "interval condition is met, trigger scan";
             }
         }
         break;
