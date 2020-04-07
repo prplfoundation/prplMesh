@@ -3439,7 +3439,7 @@ bool backhaul_manager::get_media_type(const std::string &interface_name,
                     if ((std::get<0>(tuple) == radio_info.frequency_band) &&
                         (std::get<1>(tuple) == radio_info.max_bandwidth)) {
                         media_type = std::get<2>(tuple);
-
+                        result     = true;
                         break;
                     }
                 }
