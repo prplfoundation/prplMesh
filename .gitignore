@@ -16,3 +16,4 @@ __pycache__/
 .quilt_checked
 .source_dir
 ipkg-*/
+.vscode
