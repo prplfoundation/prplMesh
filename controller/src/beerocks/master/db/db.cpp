@@ -2395,6 +2395,23 @@ const std::list<sChannelScanResults> &db::get_channel_scan_results(const sMacAdd
 
 bool db::try_lock_scan_permission(int task_id)
 {
+    if (task_id < 0) {
+        LOG(ERROR) << "invalid input, task_id(" << task_id << ") < 0";
+        return false;
+    }
+
+    if (-1 != m_scan_locked_by_task_id) {
+        return false;
+    }
+
+    if (task_id == m_scan_locked_by_task_id) {
+        LOG(DEBUG) << "scan permission already locked by task requesting to lock! task_id=" << task_id;
+        return true;
+    }
+
+    LOG(DEBUG) << "scan permission locked successfully for task_id=" << task_id;
+    m_scan_locked_by_task_id = task_id;
+    
     return true;
 }
 

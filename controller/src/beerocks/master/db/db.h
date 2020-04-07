@@ -926,6 +926,9 @@ private:
 
     master_thread *m_master_thread_ctx = nullptr;
     const std::string m_local_bridge_mac;
+
+    // task_id==-1 means lock is free
+    int m_scan_locked_by_task_id = -1;
 };
 
 } // namespace son
