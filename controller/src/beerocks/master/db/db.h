@@ -564,6 +564,24 @@ public:
     const std::list<sChannelScanResults> &get_channel_scan_results(const sMacAddr &mac,
                                                                    bool single_scan);
 
+    /**
+     * @brief Lock permission for channel scan
+     * 
+     * @param task_id: id of task requesting to lock the scan permission
+     * @return true on success
+     * @return false on failure (if failed to lock or locked by other task)
+     */
+    bool try_lock_scan_permission(int task_id);
+
+    /**
+     * @brief Unlock permission for channel scan
+     * 
+     * @param task_id: id of task requesting to unlock the scan permission
+     * @return true on success
+     * @return false on failure (if failed to release or unlocked by other task)
+     */
+    bool unlock_scan_permission(int task_id);
+
     //
     // CLI
     //

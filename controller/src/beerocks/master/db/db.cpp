@@ -2393,6 +2393,16 @@ const std::list<sChannelScanResults> &db::get_channel_scan_results(const sMacAdd
     return (single_scan ? hostap->single_scan_results : hostap->continuous_scan_results);
 }
 
+bool db::try_lock_scan_permission(int task_id)
+{
+    return true;
+}
+
+bool db::unlock_scan_permission(int task_id)
+{
+    return true;
+}
+
 //
 // CLI
 //
