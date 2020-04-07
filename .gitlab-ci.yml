@@ -1,6 +1,8 @@
 stages:
   - build
   - test
+  - certification-dummy
+  - certification-netgear-rax40
   - upload
 
 .in-prplmesh-builder:
@@ -256,3 +258,8 @@ run-certification-tests:
   timeout: 36h
   rules:
     - if: '$TESTS_TO_RUN'
+
+include:
+  - local: '/ci/certification/generic.yml'
+  - local: '/ci/certification/dummy.yml'
+  - local: '/ci/certification/netgear-rax40.yml'
