@@ -653,10 +653,19 @@ class TestFlows:
 
 
     def test_beacon_report_query(self):
+
+        sta_mac = '00:01:02:aa:bb:ee'
+
+        debug("Connect dummy STA to wlan0")
+        self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
+
         # send beacon query request
-        debug("sending beacon report query to repeater 1")
-        self.gateway_ucc.dev_send_1905(self.mac_repeater1, 0x8011,
-            tlv(0x99, 20, "11:22:33:44:55:66 0x73 0xFFFFFFFFFFFF 0x02 0x00 0x01 0x03 0x73 0x24 0x30"))
+        debug("Sending beacon report query to repeater 1:")
+        request='{mac} 0x73 0xFFFFFFFFFFFF 0x02 0x00 0x01 0x03 0x73 0x24 0x30'.format(mac=sta_mac)
+        debug(request)
+
+        self.gateway_ucc.dev_send_1905(self.mac_repeater2, 0x8011,
+                tlv(0x99, 0x0014, "{" + request + "}"))
 
 if __name__ == '__main__':
     t = TestFlows()
@@ -693,3 +702,21 @@ if __name__ == '__main__':
 
     if t.run_tests(options.tests):
         sys.exit(1)
+
+# this is (probably) the tlv for 0x8011 according to the SPEC.
+# however, it does not flow. investigation s needed:
+#                tlv(0x99, 0x0016, "{11:22:33:44:55:66 0x73 0xFF 0XFFFFFFFFFFFF 0x02 0x00 0x01 0x02 0x73 0x24 0x30 0x00}"))
+#                tlv(0x99, 0x0014, 
+#                    associated: "{11:22:33:44:55:66} 
+#                    op class: 0x73 
+#                    channel:  0xff
+#                    bssid: 0xffffffffffff 
+#                    reporting detail: 0x02 
+#                    ssid length: 0x00 
+#                    ap-channel-report-list-len: 0x01 
+#                    inner-channel-report-list-len: 0x02 
+#                    operating class: 0x73 
+#                    channels: 0x24 0x30
+#                    number of element id: 0"))
+
+
