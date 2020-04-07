@@ -1905,7 +1905,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         auto sub_str             = std::string(&assoc_req[56], assoc_frame_len - 56 - 18);
         msg->params.association_frame_length = sub_str.length();
 
-        std::copy_n(&sub_str[0], sub_str.length() , msg->params.association_frame);
+        std::copy_n(&sub_str[0], sub_str.length(), msg->params.association_frame);
 
         std::string ht_cap_str(ht_cap);
         get_ht_mcs_capabilities(HT_MCS, ht_cap_str, msg->params.capabilities);
