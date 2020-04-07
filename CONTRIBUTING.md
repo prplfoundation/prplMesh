@@ -276,6 +276,41 @@ If a PR is marked "don't merge" and it becomes ready (i.e. you did the necessary
 
 A good example of a pull request with review, discussion, and several iterations is https://github.com/prplfoundation/prplMesh/pull/831.
 
+### Design reviews
+
+Every new feature / big change should be accompanied with a design review (DR).
+It makes sure that the contributor gets proper guidance from more experienced prplMesh maintainers / contributors, prevents  merging bad code "since its already there", and in general allows for better quality.
+
+**Do not start working on a feature before a DR is approved by the community**. This will lead to potentially wasted effort, since you might go in the wrong direction, or in a worse scenario - "bad" code getting into our codebase, which we would really like to avoid.
+> Tip - if you are not sure if a certain feature / bug fix requires a DR - ask first in #prplmesh-dev channel in slack.
+
+The DR document shall be written in Markdown (.md) format, and will be the first commit in the Pull Request, under the documentation folder. For example, a DR which changes the autoconfiguration flow should be added to `documentation/flows/autoconfig`.
+
+A good DR document normally includes an introduction, detailed description and references sections.
+The introduction section should give a first reader an overview of the feature. Think of it as an "abstract" of a scientific paper. It should summarize, in 2-4 paragraphs, the major aspects of the entire feature, the problem it aims to solve, current state analysis of the feature in prplmesh, and a brief summary of the proposed solution\[s\].
+
+As an example, let us assume we are implementing station measurements flow in prplmesh.
+The introduction section should summarize the station measurements flow and refer the reader to the Multi-AP specification, explain that currently this flow is implemented in vendor specific messages since station measurements is used to gather uplink and downlink metrics which affect steering decisions, and describe how the EasyMesh flow should be adopted:
+
+> **Introduction**
+> 
+> Station measurements (AKA Per-STA measurements) defines the protocol for a Multi-AP Agent to convey link metrics information on a per-STA basis (\[1\].10.3), as a response to a Multi-AP controller's *Associated Link Metrics Query Message*.
+> The Multi-AP Agent shall respond within 1 second with an *Associated Link Metrics Response Message* containing one *Associated Link Metrics TLV* for the specified station. The information within this TLV contains the station's measured estimated uplink/downlink MAC (phy) data rates and RCPI (Receive Signal Strength Indication) which are used by the controller in steering decisions.
+> 
+> Currently, station measurements are implemented in prplMesh with vendor specific messages. This means that only prplMesh controllers are supported, and therefore test 4.7.7 in the EasyMesh testplan \[2\] cannot pass in the testbed.
+> The current implementation starts when the prplMesh controller is notified on a new connected station and starts the association handling task, which in turn, sends a vendor specific message to the prplMesh agent to start monitoring this client. Then, when the controller needs to take decision regarding this client, it sends `ACTION_CONTROL_HOSTAP_STATS_MEASUREMENTS_REQUEST` to the agent. The response contains, among other statiscis, the station measurements.
+> 
+> In order to support non-prplmesh controllers and eventually pass test 4.7.7 in the agent certification, the vendor specific flow will be replaced with the standard EasyMesh flows. This will be done in stages, as will be explained in the detailed design section, by automatically start monitoring connected clients when the controller is not prplmesh, and adding a non-vendor specific exit and entry points to the station measurement EasyMesh flow, finally replacing the current vendor specific altogether.
+
+The detailed description section should dive into details and must include UML diagram\[s\] of the current prplMesh state, and the proposed solution\[s\].
+> Tip - use [plantuml](https://plantuml.com/) format to describe UML diagrams.
+
+The references section should include a list of all references used in the DR:
+> **References**
+>
+> \[1\] Multi-AP Specification Version 2.0  
+> \[2\] EasyMesh Test plan 1.0  
+
 ### Testing
 
 Some changes are riskier than others, since they may break existing functionality which is not yet covered by prplMesh CI.
