@@ -61,7 +61,6 @@
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
-#include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
 #include <tlvf/wfa_map/tlvApHeCapabilities.h>
 #include <tlvf/wfa_map/tlvApHtCapabilities.h>
@@ -69,6 +68,7 @@
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApVhtCapabilities.h>
 #include <tlvf/wfa_map/tlvAssociatedClients.h>
+#include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvErrorCode.h>
@@ -1666,7 +1666,7 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
 
         cmdu_rx.swap(); // swap back before forwarding
 
-        if (destinationAP) {
+        if (!destinationAP) {
             // Forward cmdu to all slaves how it is on UDS, without changing it
             for (auto soc_iter : slaves_sockets) {
                 if (!message_com::forward_cmdu_to_uds(soc_iter->slave, cmdu_rx, length)) {
@@ -2907,27 +2907,72 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
 }
 
 bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                          const std::string &src_mac, Socket *&forward_to)
+                                                        const std::string &src_mac,
+                                                        Socket *&forward_to)
 {
+    LOG(INFO) << "now going to handle BEACON METRICS QUERY";
+
+    // extract the desired STA mac
     auto tlvBeaconMetricsQuery = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
     if (tlvBeaconMetricsQuery) {
+        const sMacAddr &requiredMac = tlvBeaconMetricsQuery->associated_sta_mac();
 
-        const sMacAddr& requiredMac = tlvBeaconMetricsQuery->associated_sta_mac();
-        auto it = std::find_if(
-            slaves_sockets.begin(),
-            slaves_sockets.end(),
-            [&requiredMac]( const std::shared_ptr<SSlaveSockets> slave )
-            {
-                return slave->ruid == requiredMac;
-            });
-        if (it!=slaves_sockets.end()) {
-            forward_to = (*it)->slave;
-        } 
+        LOG(DEBUG) << "the requested STA mac is: " << requiredMac;
+
+        // 1. in m_radio_info_map find the radio-info entry
+        // that one of its keys in its associated clients
+        // is the required-mac. The existance of the key
+        // is sufficient:
+        // for each radio-agent-mac in m_radio_info_map -->
+        //      if sRadioInfo.associated_clients_map[requiredMac] // exists
+        //          break;
+        // 2. if we are not at the end of m_radio_info_map it means that we
+        // have the correct agent mac in hand
+        // we use this mac to search for the Socket in slaves_sockets
+
+        // 1. find the correct associated client
+        const sMacAddr *radioMac = nullptr;
+        for (auto &radio : m_radio_info_map) {
+            // debug
+            LOG(DEBUG) << "printing radio info map for: " << radio.first;
+            for ( auto& it : radio.second.associated_clients_map ) {
+                LOG(DEBUG) << "STA: " << it.first;
+            }
+
+            // end debug
+            if (radio.second.associated_clients_map.find(requiredMac) !=
+                radio.second.associated_clients_map.end()) {
+                radioMac = &radio.first;
+                break;
+            }
+        }
+
+
+        if (radioMac) {
+            LOG(DEBUG) << "found the mac of the radio that has the sattion. radio: " << *radioMac << "; station: " << requiredMac;
+            auto it = std::find_if(slaves_sockets.begin(), slaves_sockets.end(),
+                                   [&radioMac](const std::shared_ptr<SSlaveSockets> slave) {
+                                       return slave->ruid == *radioMac;
+                                   });
+            if (it != slaves_sockets.end()) {
+                LOG(DEBUG) << "found the socket to send to the agent that will send to:" << *radioMac << " for STA: " << requiredMac;
+                forward_to = (*it)->slave;
+            } else {
+                LOG(DEBUG) << "didn't find the socket to send to :" << *radioMac << "; this is strange";
+            }
+        }
+        else
+        {
+            LOG(DEBUG) << "couldn't find any agent for the requested mac: " << requiredMac; 
+        }
     } else {
-        return false;
-    } 
+        LOG(ERROR) << "handle_1905_beacon_metrics_query should handle only tlvBeaconMetrics, but got something else: " <<
+            std::hex << (uint16_t)cmdu_rx.getMessageType(); 
+        return true;
+    }
 
-    return true;
+    // more work to do at the caller
+    return false;
 }
 
 bool backhaul_manager::send_slaves_enable()

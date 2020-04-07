@@ -28,6 +28,7 @@
 #include <tlvf/ieee_1905_1/tlvUnknown.h>
 #include <tlvf/ieee_1905_1/tlvVendorSpecific.h>
 #include <tlvf/ieee_1905_1/tlvWsc.h>
+#include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
 #include <tlvf/wfa_map/tlvApMetricQuery.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
@@ -190,6 +191,9 @@ std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
     }
     case (147): {
         return msg.addClass<wfa_map::tlvApMetricQuery>();
+    }
+    case (153): {
+        return msg.addClass<wfa_map::tlvBeaconMetricsQuery>();
     }
     case (155): {
         return msg.addClass<wfa_map::tlvSteeringRequest>();
