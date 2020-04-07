@@ -272,8 +272,8 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         if (fsm_in_state(eState::WAIT_FOR_SCAN_TRIGGERED)) {
             auto scan_trigger_failed_event = reinterpret_cast<sScanEvent *>(obj);
             event_handled                  = true;
-            TASK_LOG(DEBUG) << "SCAN_TRIGGER_FAILED handled on:"
-                            << scan_trigger_failed_event->radio_mac.oct;
+            TASK_LOG(WARNING) << "failed to trigger a scan on:"
+                              << scan_trigger_failed_event->radio_mac.oct << ", aborting scan";
             m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
             clear_pending_events();
             fsm_move_state(eState::ABORT_SCAN);
