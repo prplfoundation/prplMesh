@@ -1,0 +1,14 @@
+.certification-generic:
+  variables:
+    # DEVICE_UNDER_TEST need to be set when extending the job
+    GIT_CLONE_PATH: "/builds/prpl-foundation/prplMesh/"
+  script:
+      - echo $CI_COMMIT_DESCRIPTION
+      - /easymesh_cert/run_test_file.sh -o logs -d $DEVICE_UNDER_TEST "${CI_JOB_NAME%%:*}"
+  artifacts:
+    paths:
+      - logs
+    when: always
+  tags:
+    - certs-tests
+  timeout: 30min
