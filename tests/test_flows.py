@@ -655,16 +655,18 @@ class TestFlows:
     def test_beacon_report_query(self):
 
         sta_mac = '00:01:02:aa:bb:ee'
+        repeater = self.repeater1
+        mac_repeater = self.mac_repeater1
 
         debug("Connect dummy STA to wlan0")
-        self.send_bwl_event(self.repeater1, "wlan0", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
+        self.send_bwl_event(repeater, "wlan0", "EVENT AP-STA-CONNECTED {}".format(sta_mac))
 
         # send beacon query request
-        debug("Sending beacon report query to repeater 1:")
+        debug("Sending beacon report query to repeater:")
         request='{mac} 0x73 0xFFFFFFFFFFFF 0x02 0x00 0x01 0x03 0x73 0x24 0x30'.format(mac=sta_mac)
         debug(request)
 
-        self.gateway_ucc.dev_send_1905(self.mac_repeater2, 0x8011,
+        self.gateway_ucc.dev_send_1905(mac_repeater, 0x8011,
                 tlv(0x99, 0x0014, "{" + request + "}"))
 
 if __name__ == '__main__':
