@@ -3444,6 +3444,12 @@ bool backhaul_manager::get_media_type(const std::string &interface_name,
                     }
                 }
 
+                /**
+                 * Media type has been successfully computed for given interface.
+                 * Notice however that returned media type can be UNKNONWN_MEDIA if frequency
+                 * band and max bandwidth were not found in table_6_12_media_type.
+                 */
+                result = true;
                 break;
             }
         }
