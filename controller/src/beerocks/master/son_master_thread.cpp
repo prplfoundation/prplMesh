@@ -3558,18 +3558,18 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             LOG(ERROR) << "addClass cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE failed";
             return false;
         }
-        //get the mac from hostap_mac
         auto radio_mac = network_utils::mac_from_string(hostap_mac);
 
         if (!response->success()) {
-            LOG(ERROR) << "failed to trigger scan on radio(" << radio_mac
+            LOG(ERROR) << "Failed to trigger scan on radio (" << radio_mac
                        << "): sending notification to DCS task";
 
             dynamic_channel_selection_task::sScanEvent new_event;
             new_event.radio_mac = radio_mac;
             auto taskId         = database.get_dynamic_channel_selection_task_id(radio_mac);
             if (taskId == -1) {
-                LOG(ERROR) << "no task for the requested mac (" << radio_mac << ") could be found!";
+                LOG(ERROR) << "No DCS task for the requested mac (" << radio_mac
+                           << ") is currently running!";
                 break;
             }
 
@@ -3601,7 +3601,8 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         new_event.radio_mac = radio_mac;
         auto taskID         = database.get_dynamic_channel_selection_task_id(radio_mac);
         if (taskID == -1) {
-            LOG(ERROR) << "no task for the requested mac (" << radio_mac << ") could be found!";
+            LOG(ERROR) << "No DCS task for the requested mac (" << radio_mac
+                       << ") is currently running!";
         } else {
             tasks.push_event(taskID, (int)dynamic_channel_selection_task::eEvent::SCAN_TRIGGERED,
                              (void *)&new_event);
