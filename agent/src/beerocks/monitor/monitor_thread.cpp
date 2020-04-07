@@ -1223,10 +1223,10 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             return false;
         }
 
-        bool result = mon_wlan_hal->channel_scan_trigger(int(dwell_time_ms), channel_pool_vector);
-        LOG_IF(!result, ERROR) << "channel_scan_trigger Failed";
+        response_out->success() =
+            mon_wlan_hal->channel_scan_trigger(int(dwell_time_ms), channel_pool_vector);
+        LOG_IF(!response_out->success(), ERROR) << "channel_scan_trigger Failed";
 
-        response_out->success() = (result) ? 1 : 0;
         message_com::send_cmdu(slave_socket, cmdu_tx);
         break;
     }
