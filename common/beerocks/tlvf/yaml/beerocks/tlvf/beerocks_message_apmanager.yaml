@@ -119,7 +119,10 @@ cACTION_APMANAGER_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST:
 
 cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION:
   _type: class
-  params: sClientAssociationParams
+  mac: sMacAddr
+  bssid: sMacAddr
+  capabilities: beerocks::message::sRadioCapabilities
+  vap_id: int8_t
 
 cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION:
   _type: class
