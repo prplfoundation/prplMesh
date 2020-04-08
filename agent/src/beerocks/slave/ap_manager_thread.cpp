@@ -1562,12 +1562,15 @@ void ap_manager_thread::handle_hostapd_attached()
     copy_radio_supported_channels(ap_wlan_hal, notification->params().supported_channels);
 
     LOG(INFO) << "send ACTION_APMANAGER_JOINED_NOTIFICATION";
+    LOG(INFO) << " iface = " << ap_wlan_hal->get_iface_name();
     LOG(INFO) << " mac = " << ap_wlan_hal->get_radio_mac();
     LOG(INFO) << " ant_num = " << ap_wlan_hal->get_radio_info().ant_num;
     LOG(INFO) << " tx_power = " << ap_wlan_hal->get_radio_info().tx_power;
     LOG(INFO) << " current channel = " << ap_wlan_hal->get_radio_info().channel;
     LOG(INFO) << " vht_center_frequency = " << ap_wlan_hal->get_radio_info().vht_center_freq;
     LOG(INFO) << " current bw = " << ap_wlan_hal->get_radio_info().bandwidth;
+    LOG(INFO) << " frequency_band = " << ap_wlan_hal->get_radio_info().frequency_band;
+    LOG(INFO) << " max_bandwidth = " << ap_wlan_hal->get_radio_info().max_bandwidth;
     LOG(INFO) << " supported_channels = " << std::endl
               << get_radio_supported_channels_string(ap_wlan_hal);
 
