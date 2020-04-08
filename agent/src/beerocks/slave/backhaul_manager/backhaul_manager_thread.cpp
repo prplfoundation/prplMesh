@@ -2033,8 +2033,19 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         }
 
         // Set client association information for associated client
-        auto &associated_clients              = soc->associated_clients_map[msg->bssid()];
-        associated_clients[msg->client_mac()] = std::chrono::steady_clock::now();
+        //remove this client from other radios
+        remove_client_from_all_radios(msg->client_mac());
+
+        auto &associated_clients = soc->associated_clients_map[msg->bssid()];
+
+        sClientInfo client_info;
+        client_info.client_mac = msg->client_mac();
+        client_info.bssid      = msg->bssid();
+        client_info.time_stamp = std::chrono::steady_clock::now();
+        client_info.asso_len   = msg->association_frame_length();
+        memcpy(client_info.assoc_req, msg->association_frame(), client_info.asso_len);
+        associated_clients[msg->client_mac()] = client_info;
+
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION: {
