@@ -42,7 +42,7 @@ flake8:
   stage: build
   image: pipelinecomponents/flake8:f087c4c
   variables:
-    FLAKE8_FILES: "tests/*.py tools/beerocks_analyzer/conf/conf1.py tools/beerocks_analyzer/*.py tools/commends/*.py"
+    FLAKE8_FILES: "tests/*.py tools/beerocks_analyzer/conf/conf1.py tools/beerocks_analyzer/*.py tools/commands/*.py"
   script:
     - apk add --update --no-cache git
     - git ls-files -z -- $FLAKE8_FILES | xargs -0 -t flake8 --verbose
