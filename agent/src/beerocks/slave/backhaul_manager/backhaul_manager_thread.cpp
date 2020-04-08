@@ -2930,6 +2930,18 @@ bool backhaul_manager::send_slaves_enable()
     return true;
 }
 
+void backhaul_manager::remove_client_from_all_radios(sMacAddr &client_mac)
+{
+    for (const auto &slave : slaves_sockets) {
+        const auto &associated_clients_map = slave->associated_clients_map;
+        for (const auto &client : associated_clients_map) {
+            if (client.second.find(client_mac) != client.second.end()) {
+                slaves_sockets.remove(slave);
+            }
+        }
+    }
+}
+
 bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr,
                                          std::string iface)
 {
