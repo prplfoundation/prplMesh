@@ -1755,7 +1755,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             return false;
         }
 
-        auto radio_info = m_radio_info_map[request->iface_mac()];
+        auto &radio_info = m_radio_info_map[request->iface_mac()];
 
         radio_info.interface_name = request->ap_iface();
         radio_info.frequency_band = request->frequency_band();
