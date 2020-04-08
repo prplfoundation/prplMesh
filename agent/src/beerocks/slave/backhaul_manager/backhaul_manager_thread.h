@@ -242,6 +242,15 @@ private:
 
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
 
+    struct sClientInfo {
+        sMacAddr client_mac;
+        sMacAddr radio_mac; // ruid
+        sMacAddr bssid;     // VAP mac
+        std::chrono::steady_clock::time_point time_stamp;
+        size_t asso_len;
+        uint8_t assoc_req[ASSOCIATION_FRAME_SIZE];
+    };
+
     /**
      * @brief Type definition for associated clients information.
      *
