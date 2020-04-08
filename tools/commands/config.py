@@ -151,7 +151,7 @@ class mapcfg(object):
         if self.args.board_id:
             try:
                 board = chdlabv2(self.args.board_id, self.args.user)
-            except ImportError as e:
+            except ImportError:
                 board = chdlabv3(self.args.board_id, self.args.setup_id, self.args.user)
             except RuntimeError as e:
                 logger.error("board jira failure (%s)" % e)
