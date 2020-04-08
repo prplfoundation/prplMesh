@@ -2446,7 +2446,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     // Multi-AP Agent
     bool shall_include_associated_clients_tlv = false;
     for (const auto &radio_info_entry : m_radio_info_map) {
-        auto associated_clients_map = radio_info_entry.second.associated_clients_map;
+        const auto &associated_clients_map = radio_info_entry.second.associated_clients_map;
         for (const auto &associated_clients_entry : associated_clients_map) {
             auto associated_clients = associated_clients_entry.second;
             if (associated_clients.size() > 0) {
@@ -2472,7 +2472,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
 
         // Fill in Associated Clients TLV
         for (const auto &radio_info_entry : m_radio_info_map) {
-            auto associated_clients_map = radio_info_entry.second.associated_clients_map;
+            const auto &associated_clients_map = radio_info_entry.second.associated_clients_map;
 
             // Associated clients map contains sets of associated clients grouped by BSSID
             for (const auto &associated_clients_entry : associated_clients_map) {
