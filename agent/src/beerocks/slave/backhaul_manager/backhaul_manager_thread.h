@@ -254,18 +254,21 @@ private:
     /**
      * @brief Type definition for associated clients information.
      *
-     * Associated client information consists of:
+     * Associated client information consists of sClientInfo strucrt, which has the 
+     * following fields:
      * - The MAC address of the 802.11 client that associates to a BSS.
      * - Timestamp of the 802.11 client's last association to this Multi-AP device.
+     * - The length of the association frame.
+     * - the association frame itself.
      *
      * Associated client information is gathered from
      * ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION events received from slave threads.
      *
      * Associated client information is later used to fill in the Associated Clients TLV
-     * in the Topology Response message.
+     * in the Topology Response message and Client Capability Response message.
      */
-    typedef std::unordered_map<sMacAddr, std::chrono::steady_clock::time_point>
-        associated_clients_t;
+
+    typedef std::unordered_map<sMacAddr, sClientInfo> associated_clients_t;
 
     /**
      * @brief Information gathered about a radio.
