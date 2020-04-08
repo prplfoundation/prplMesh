@@ -101,6 +101,8 @@ private:
     void platform_notify_error(bpl::eErrorCode code, const std::string &error_data);
     bool send_slaves_enable();
 
+    void remove_client_from_all_radios(sMacAddr &client_mac);
+
     std::shared_ptr<bwl::sta_wlan_hal> get_wireless_hal(std::string iface = "");
 
 private:
