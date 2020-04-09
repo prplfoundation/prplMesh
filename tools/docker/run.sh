@@ -6,13 +6,14 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}"; pwd)"
-rootdir="${scriptdir%/*/*}"
+scriptdir=$(dirname "$(readlink -f "$0")")
+rootdir=$(realpath "$scriptdir/../..")
 
-. ${rootdir}/tools/functions.sh
+# shellcheck source=tools/functions.sh
+. "${rootdir}/tools/functions.sh"
 
 usage() {
-    echo "usage: $(basename $0) [-hvd] [-i ip] [-n name] [-N network]"
+    echo "usage: $(basename "$0") [-hvd] [-i ip] [-n name] [-N network]"
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
@@ -31,10 +32,10 @@ usage() {
 
 iprand(){
     ipaddr=$1
-    rand=`shuf -i 2-254 -n 1`
-    ip_hex=$(printf '%.2X%.2X%.2X%.2X\n' `echo $ipaddr | sed -e 's/\./ /g'`)
-    ip_hex_rand=$(printf %.8X `echo $(( 0x$ip_hex + $rand ))`)
-    ip_rand=$(printf '%d.%d.%d.%d\n' `echo $ip_hex_rand | sed -r 's/(..)/0x\1 /g'`)
+    rand=$(shuf -i 2-254 -n 1)
+    ip_hex=$(printf '%.2X%.2X%.2X%.2X\n' $(echo "$ipaddr" | sed -e 's/\./ /g'))
+    ip_hex_rand=$(printf %.8X "$(( 0x$ip_hex + rand ))")
+    ip_rand=$(printf '%d.%d.%d.%d\n' $(echo "$ip_hex_rand" | sed -r 's/(..)/0x\1 /g'))
     echo "$ip_rand"
 }
 
@@ -48,9 +49,9 @@ gateway_netid_length() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvdfi:m:n:N:o:t:e:p:u:' --long verbose,help,detach,force,ipaddr:,mac:,name:,network:,entrypoint:,tag:,expose:,publish:,options:,unique-id: -n 'parse-options' -- "$@"`
-
-    if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
+    if ! OPTS=$(getopt -o 'hvdfi:m:n:N:o:t:e:p:u:' --long verbose,help,detach,force,ipaddr:,mac:,name:,network:,entrypoint:,tag:,expose:,publish:,options:,unique-id: -n 'parse-options' -- "$@"); then
+        err "Failed parsing options." >&2; usage; exit 1
+    fi
 
     eval set -- "$OPTS"
 
@@ -74,25 +75,25 @@ main() {
         esac
     done
 
-    docker image inspect prplmesh-runner$TAG >/dev/null 2>&1 || {
+    docker image inspect "prplmesh-runner$TAG" >/dev/null 2>&1 || {
         [ -n "$TAG" ] && { err "image prplmesh-runner$TAG doesn't exist, aborting"; exit 1; }
         dbg "Image prplmesh-runner$TAG does not exist, creating..."
-        run ${scriptdir}/image-build.sh
+        run "${scriptdir}/image-build.sh"
     }
 
-    NETWORK=${NETWORK:-prplMesh-net-${UNIQUE_ID}}
-    docker network inspect ${NETWORK} >/dev/null 2>&1 || {
+    NETWORK="${NETWORK:-prplMesh-net-${UNIQUE_ID}}"
+    docker network inspect "${NETWORK}" >/dev/null 2>&1 || {
         dbg "Network ${NETWORK} does not exist, creating..."
-        run docker network create ${NETWORK} >/dev/null 2>&1
+        run docker network create "${NETWORK}" >/dev/null 2>&1
         echo "network ${NETWORK}" >> "${scriptdir}/.test_containers"
     }
 
-    [ -z "$IPADDR" -a -n "$NETWORK" ] && {
+    [ -z "$IPADDR" ] && [ -n "$NETWORK" ] && {
         dbg "Generate random IP for container $NAME for network $NETWORK"
-        IPADDR=$(generate_container_random_ip ${NETWORK})
+        IPADDR="$(generate_container_random_ip "${NETWORK}")"
     }
 
-    IPADDR="${IPADDR}$(gateway_netid_length ${NETWORK})"
+    IPADDR="${IPADDR}$(gateway_netid_length "${NETWORK}")"
 
     dbg "VERBOSE=${VERBOSE}"
     dbg "DETACH=${DETACH}"
@@ -133,7 +134,7 @@ main() {
 
     # Save the container name so that it can easily be stopped/removed later
     echo "$NAME" >> "${scriptdir}/.test_containers"
-    run docker container run ${DOCKEROPTS} prplmesh-runner$TAG $IPADDR "$BASE_MAC" "$@"
+    run docker container run ${DOCKEROPTS} "prplmesh-runner$TAG" "$IPADDR" "$BASE_MAC" "$@"
 }
 
 VERBOSE=false
@@ -146,4 +147,4 @@ ENTRYPOINT=
 PORT="--expose 5000"
 BASE_MAC=44:55:66:77
 
-main $@
+main "$@"
