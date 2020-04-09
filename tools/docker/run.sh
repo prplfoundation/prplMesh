@@ -13,13 +13,12 @@ rootdir=$(realpath "$scriptdir/../..")
 . "${rootdir}/tools/functions.sh"
 
 usage() {
-    echo "usage: $(basename "$0") [-hvd] [-i ip] [-n name] [-N network]"
+    echo "usage: $(basename "$0") [-hvd] [-n name] [-N network]"
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
     echo "      -d|--detach - run in background"
     echo "      -f|--force - if the container is already running, kill it and restart"
-    echo "      -i|--ipaddr - ipaddr for container br-lan (should be in network subnet)"
     echo "      -m|--mac - base MAC address for interfaces in the container"
     echo "      -n|--name - container name (for later easy attach)"
     echo "      -p|--port - port to expose on the container"
@@ -30,26 +29,12 @@ usage() {
     echo "      --entrypoint - use a different entrypoint for the container"
 }
 
-iprand(){
-    ipaddr=$1
-    rand=$(shuf -i 2-254 -n 1)
-    ip_hex=$(printf '%.2X%.2X%.2X%.2X\n' $(echo "$ipaddr" | sed -e 's/\./ /g'))
-    ip_hex_rand=$(printf %.8X "$(( 0x$ip_hex + rand ))")
-    ip_rand=$(printf '%d.%d.%d.%d\n' $(echo "$ip_hex_rand" | sed -r 's/(..)/0x\1 /g'))
-    echo "$ip_rand"
-}
-
-generate_container_random_ip() {
-    gateway_ip="$(docker network inspect "$1" --format "{{(index .IPAM.Config 0).Gateway}}")"
-    iprand "${gateway_ip}"
-}
-
 gateway_netid_length() {
     docker network inspect "$1" --format "{{(index .IPAM.Config 0).Subnet}}" | sed -rn 's/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{2})$/\1/p'
 }
 
 main() {
-    if ! OPTS=$(getopt -o 'hvdfi:m:n:N:o:t:e:p:u:' --long verbose,help,detach,force,ipaddr:,mac:,name:,network:,entrypoint:,tag:,expose:,publish:,options:,unique-id: -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hvdfm:n:N:o:t:e:p:u:' --long verbose,help,detach,force,mac:,name:,network:,entrypoint:,tag:,expose:,publish:,options:,unique-id: -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2; usage; exit 1
     fi
 
@@ -61,7 +46,6 @@ main() {
             -h | --help)        usage; exit 0; shift ;;
             -d | --detach)      DETACH=true; shift ;;
             -f | --force)       FORCE=true; shift ;;
-            -i | --ipaddr)      IPADDR="$2"; shift; shift ;;
             -m | --mac)         BASE_MAC="$2"; shift; shift ;;
             -n | --name)        NAME="$2"; shift; shift ;;
             -u | --unique-id)   UNIQUE_ID="$2"; shift; shift ;;
@@ -88,18 +72,10 @@ main() {
         echo "network ${NETWORK}" >> "${scriptdir}/.test_containers"
     }
 
-    [ -z "$IPADDR" ] && [ -n "$NETWORK" ] && {
-        dbg "Generate random IP for container $NAME for network $NETWORK"
-        IPADDR="$(generate_container_random_ip "${NETWORK}")"
-    }
-
-    IPADDR="${IPADDR}$(gateway_netid_length "${NETWORK}")"
-
     dbg "VERBOSE=${VERBOSE}"
     dbg "DETACH=${DETACH}"
     dbg "NETWORK=${NETWORK}"
     dbg "IMAGE=prplmesh-runner$TAG"
-    dbg "IPADDR=${IPADDR}"
     dbg "BASE_MAC=${BASE_MAC}"
     dbg "PORT=${PORT}"
     dbg "PUBLISH=${PUBLISH}"
@@ -134,14 +110,13 @@ main() {
 
     # Save the container name so that it can easily be stopped/removed later
     echo "$NAME" >> "${scriptdir}/.test_containers"
-    run docker container run ${DOCKEROPTS} "prplmesh-runner$TAG" "$IPADDR" "$BASE_MAC" "$@"
+    run docker container run ${DOCKEROPTS} "prplmesh-runner$TAG" "$BASE_MAC" "$@"
 }
 
 VERBOSE=false
 DETACH=false
 FORCE=false
 UNIQUE_ID=${SUDO_USER:-${USER}}
-IPADDR=
 NAME=prplMesh
 ENTRYPOINT=
 PORT="--expose 5000"

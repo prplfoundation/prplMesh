@@ -50,13 +50,8 @@ check_wsl() {
     "${rootdir}"/build/install/config/beerocks_agent.conf | \
     awk -F'[= ]' '{ print $2 }')
 
-    # In addition to exporting the UCC port on the host, we also
-    # need to make sure that the container's IP doesn't change.
-    # Docker fails to route traffic from the host to the containers
-    # if the IP is anything but what was allocated by the daemon
-    # when the container was created
-    GW_EXTRA_OPT="--expose ${GW_UCC_PORT} --publish 127.0.0.1::${GW_UCC_PORT} --ipaddr 0.0.0.0"
-    RP_EXTRA_OPT="--expose ${RP_UCC_PORT} --publish 127.0.0.1::${RP_UCC_PORT} --ipaddr 0.0.0.0"
+    GW_EXTRA_OPT="--expose ${GW_UCC_PORT} --publish 127.0.0.1::${GW_UCC_PORT}"
+    RP_EXTRA_OPT="--expose ${RP_UCC_PORT} --publish 127.0.0.1::${RP_UCC_PORT}"
 }
 
 main() {
