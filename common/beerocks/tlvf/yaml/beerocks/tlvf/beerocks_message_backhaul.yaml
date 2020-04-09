@@ -56,6 +56,16 @@ cACTION_BACKHAUL_ENABLE:
   backhaul_preferred_radio_band: uint8_t
   frequency_band: beerocks::eFreqType
   max_bandwidth: beerocks::eWiFiBandwidth 
+  ht_supported: uint8_t #bool
+  ht_capability: uint16_t
+  ht_mcs_set:
+    _type: uint8_t
+    _length: [ "beerocks::message::HT_MCS_SET_SIZE" ]
+  vht_supported: uint8_t #bool
+  vht_capability: uint32_t
+  vht_mcs_set:
+    _type: uint8_t
+    _length: [ "beerocks::message::VHT_MCS_SET_SIZE" ]
   supported_channels_list:
     _type: beerocks::message::sWifiChannel 
     _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
