@@ -4,7 +4,7 @@
 #
 #
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019 the prplMesh contributors (see AUTHORS.md)
 #
 #
 #
