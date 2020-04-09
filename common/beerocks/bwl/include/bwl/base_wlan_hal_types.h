@@ -92,6 +92,14 @@ struct RadioInfo {
     beerocks::eFreqType frequency_band = beerocks::eFreqType::FREQ_UNKNOWN; /**< Frequency band */
     beerocks::eWiFiBandwidth max_bandwidth =
         beerocks::eWiFiBandwidth::BANDWIDTH_UNKNOWN; /**< Maximum supported bandwidth */
+    bool ht_supported      = false;                  /**< Is HT supported flag */
+    uint16_t ht_capability = 0;                      /**< HT capabilities */
+    std::basic_string<uint8_t>
+        ht_mcs_set; /**< 16-byte attribute containing the MCS set as defined in 802.11n */
+    bool vht_supported      = false; /**< Is VHT supported flag */
+    uint32_t vht_capability = 0;     /**< VHT capabilities */
+    std::basic_string<uint8_t>
+        vht_mcs_set; /**< 32-byte attribute containing the MCS set as defined in 802.11ac */
     ChanSwReason last_csa_sw_reason = ChanSwReason::Unknown;
     std::vector<WiFiChannel> supported_channels;
     std::unordered_map<int, VAPElement> available_vaps; // key = vap_id

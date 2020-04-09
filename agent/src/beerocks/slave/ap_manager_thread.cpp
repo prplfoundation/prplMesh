@@ -1557,6 +1557,14 @@ void ap_manager_thread::handle_hostapd_attached()
 
     notification->params().frequency_band = ap_wlan_hal->get_radio_info().frequency_band;
     notification->params().max_bandwidth  = ap_wlan_hal->get_radio_info().max_bandwidth;
+    notification->params().ht_supported   = ap_wlan_hal->get_radio_info().ht_supported;
+    notification->params().ht_capability  = ap_wlan_hal->get_radio_info().ht_capability;
+    std::copy_n(ap_wlan_hal->get_radio_info().ht_mcs_set.data(), beerocks::message::HT_MCS_SET_SIZE,
+                notification->params().ht_mcs_set);
+    notification->params().vht_supported  = ap_wlan_hal->get_radio_info().vht_supported;
+    notification->params().vht_capability = ap_wlan_hal->get_radio_info().vht_capability;
+    std::copy_n(ap_wlan_hal->get_radio_info().vht_mcs_set.data(),
+                beerocks::message::VHT_MCS_SET_SIZE, notification->params().vht_mcs_set);
 
     // Copy the channels supported by the AP
     copy_radio_supported_channels(ap_wlan_hal, notification->params().supported_channels);
@@ -1571,6 +1579,10 @@ void ap_manager_thread::handle_hostapd_attached()
     LOG(INFO) << " current bw = " << ap_wlan_hal->get_radio_info().bandwidth;
     LOG(INFO) << " frequency_band = " << ap_wlan_hal->get_radio_info().frequency_band;
     LOG(INFO) << " max_bandwidth = " << ap_wlan_hal->get_radio_info().max_bandwidth;
+    LOG(INFO) << " ht_supported = " << ap_wlan_hal->get_radio_info().ht_supported;
+    LOG(INFO) << " ht_capability = " << std::hex << ap_wlan_hal->get_radio_info().ht_capability;
+    LOG(INFO) << " vht_supported = " << ap_wlan_hal->get_radio_info().vht_supported;
+    LOG(INFO) << " vht_capability = " << std::hex << ap_wlan_hal->get_radio_info().vht_capability;
     LOG(INFO) << " supported_channels = " << std::endl
               << get_radio_supported_channels_string(ap_wlan_hal);
 
