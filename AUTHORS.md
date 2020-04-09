@@ -18,12 +18,14 @@ This file lists all contributors.
 - Fancy Qian
 - Frederik Van Bogaert
 - Gal Wiener
+- Intel Corporation
 - Itay Elenzweig
 - Juan Schroeder
 - KC Chen
 - Lior Amram
 - Maksym Bielan
 - Mario Maz
+- MaxLinear
 - Moran Shoeg
 - Ostap Slyusar
 - Pavel Levitsky
@@ -38,3 +40,14 @@ This file lists all contributors.
 - Yevheniy-Vilhelm Vall
 - Yaniv Yitzhak
 - Yuriy Masechko
+
+In addition, some parts were copied from other projects.
+
+- nl80211_client_impl.cpp contains code copied from [`iw`](http://git.sipsolutions.net/iw.git/)
+  - Johannes Berg
+  - Andy Lutomirski
+  - Mike Kershaw
+  - Luis R. Rodriguez
+- easylogging++ is forked from https://github.com/amrayn/easyloggingpp
+  - Zuhd Web Services
+  - @abumusamq
