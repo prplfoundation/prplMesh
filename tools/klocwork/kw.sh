@@ -21,7 +21,7 @@ declare PLATFORM_TYPE
 ROOT_PATH=$(realpath "$(pwd)"/../../)
 PLATFORM_TYPE=$PRPLMESH_PLATFORM_TYPE
 
-echo platfrom identified: $PLATFORM_TYPE
+echo platform identified: "$PLATFORM_TYPE"
 
 # Remove old compilation script
 rm -rf _GO_KW
