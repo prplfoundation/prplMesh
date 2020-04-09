@@ -27,5 +27,5 @@ run ip link set      dev wlan2    up
 run ip address add   dev br-lan "$bridge_ip"
 run ip link set      dev br-lan   up
 
-cd ${INSTALL_DIR}
+cd "${INSTALL_DIR}" || exit 1
 exec /bin/bash "$@"
