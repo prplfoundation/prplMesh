@@ -40,6 +40,21 @@ Code should adhere to the [coding style](#coding-style).
 Note that everybody follows these same guidelines.
 Core contributors, occasional contributors and maintainers are all alike.
 
+### Copyright
+
+The copyright over the code is shared between all contributors.
+To simplify tracking this information, the [AUTHORS](AUTHORS.md) file list all contributors.
+Individual files don't.
+Therefore, if you make a significant (i.e. copyrightable) contribution, add yourself to AUTHORS.md (in a separate commit).
+
+Every file must have the following copyright header:
+```
+SPDX-License-Identifier: BSD-2-Clause-Patent
+Copyright (c) 2020 the prplMesh contributors (see AUTHORS.md)
+This code is subject to the terms of the BSD+Patent license.
+See LICENSE file for more details.
+```
+
 ### Commits
 
 The code history is considered a very important aspect of the source code of the project.
