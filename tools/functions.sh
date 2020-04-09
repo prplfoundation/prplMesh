@@ -1,3 +1,4 @@
+# shellcheck shell=sh
 ###############################################################
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 # SPDX-FileCopyrightText: 2019-2020 the prplMesh contributors (see AUTHORS.md)
@@ -5,10 +6,11 @@
 # See LICENSE file for more details.
 ###############################################################
 
-installdir="${rootdir}/build/install"
+# shellcheck disable=SC2034
+installdir="${rootdir:?}/build/install"
 
 dbg() {
-    if [ "$VERBOSE" = "true" ]; then echo "$(basename $0): $*"; fi
+    if [ "$VERBOSE" = "true" ]; then echo "$(basename "$0"): $*"; fi
 }
 
 status() {
