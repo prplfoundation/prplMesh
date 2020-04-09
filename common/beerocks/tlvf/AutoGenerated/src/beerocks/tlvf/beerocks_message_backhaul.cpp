@@ -471,6 +471,62 @@ beerocks::eWiFiBandwidth& cACTION_BACKHAUL_ENABLE::max_bandwidth() {
     return (beerocks::eWiFiBandwidth&)(*m_max_bandwidth);
 }
 
+uint8_t& cACTION_BACKHAUL_ENABLE::ht_supported() {
+    return (uint8_t&)(*m_ht_supported);
+}
+
+uint16_t& cACTION_BACKHAUL_ENABLE::ht_capability() {
+    return (uint16_t&)(*m_ht_capability);
+}
+
+uint8_t* cACTION_BACKHAUL_ENABLE::ht_mcs_set(size_t idx) {
+    if ( (m_ht_mcs_set_idx__ == 0) || (m_ht_mcs_set_idx__ <= idx) ) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
+    }
+    return &(m_ht_mcs_set[idx]);
+}
+
+bool cACTION_BACKHAUL_ENABLE::set_ht_mcs_set(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_ht_mcs_set received a null pointer.";
+        return false;
+    }
+    if (size > beerocks::message::HT_MCS_SET_SIZE) {
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than buffer length";
+        return false;
+    }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_ht_mcs_set);
+    return true;
+}
+uint8_t& cACTION_BACKHAUL_ENABLE::vht_supported() {
+    return (uint8_t&)(*m_vht_supported);
+}
+
+uint32_t& cACTION_BACKHAUL_ENABLE::vht_capability() {
+    return (uint32_t&)(*m_vht_capability);
+}
+
+uint8_t* cACTION_BACKHAUL_ENABLE::vht_mcs_set(size_t idx) {
+    if ( (m_vht_mcs_set_idx__ == 0) || (m_vht_mcs_set_idx__ <= idx) ) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
+    }
+    return &(m_vht_mcs_set[idx]);
+}
+
+bool cACTION_BACKHAUL_ENABLE::set_vht_mcs_set(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_vht_mcs_set received a null pointer.";
+        return false;
+    }
+    if (size > beerocks::message::VHT_MCS_SET_SIZE) {
+        TLVF_LOG(ERROR) << "Received buffer size is smaller than buffer length";
+        return false;
+    }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_vht_mcs_set);
+    return true;
+}
 std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_BACKHAUL_ENABLE::supported_channels_list(size_t idx) {
     bool ret_success = ( (m_supported_channels_list_idx__ > 0) && (m_supported_channels_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
@@ -488,6 +544,8 @@ void cACTION_BACKHAUL_ENABLE::class_swap()
     m_preferred_bssid->struct_swap();
     tlvf_swap(8*sizeof(beerocks::eFreqType), reinterpret_cast<uint8_t*>(m_frequency_band));
     tlvf_swap(8*sizeof(beerocks::eWiFiBandwidth), reinterpret_cast<uint8_t*>(m_max_bandwidth));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_ht_capability));
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_vht_capability));
     for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels_list[i].struct_swap();
     }
@@ -536,6 +594,12 @@ size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
     class_size += sizeof(uint8_t); // backhaul_preferred_radio_band
     class_size += sizeof(beerocks::eFreqType); // frequency_band
     class_size += sizeof(beerocks::eWiFiBandwidth); // max_bandwidth
+    class_size += sizeof(uint8_t); // ht_supported
+    class_size += sizeof(uint16_t); // ht_capability
+    class_size += beerocks::message::HT_MCS_SET_SIZE * sizeof(uint8_t); // ht_mcs_set
+    class_size += sizeof(uint8_t); // vht_supported
+    class_size += sizeof(uint32_t); // vht_capability
+    class_size += beerocks::message::VHT_MCS_SET_SIZE * sizeof(uint8_t); // vht_mcs_set
     class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
     return class_size;
 }
@@ -617,6 +681,38 @@ bool cACTION_BACKHAUL_ENABLE::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::eWiFiBandwidth) << ") Failed!";
         return false;
     }
+    m_ht_supported = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_ht_capability = (uint16_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
+    m_ht_mcs_set = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t) * (beerocks::message::HT_MCS_SET_SIZE))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (beerocks::message::HT_MCS_SET_SIZE) << ") Failed!";
+        return false;
+    }
+    m_ht_mcs_set_idx__  = beerocks::message::HT_MCS_SET_SIZE;
+    m_vht_supported = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_vht_capability = (uint32_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+        return false;
+    }
+    m_vht_mcs_set = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t) * (beerocks::message::VHT_MCS_SET_SIZE))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (beerocks::message::VHT_MCS_SET_SIZE) << ") Failed!";
+        return false;
+    }
+    m_vht_mcs_set_idx__  = beerocks::message::VHT_MCS_SET_SIZE;
     m_supported_channels_list = (beerocks::message::sWifiChannel*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
