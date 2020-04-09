@@ -263,7 +263,16 @@ private:
 
         beerocks::eWiFiBandwidth max_bandwidth =
             beerocks::eWiFiBandwidth::BANDWIDTH_UNKNOWN; /**< Maximum supported bandwidth */
-        beerocks_message::sVapsList vaps_list;           /**< List of VAPs in radio. */
+        bool ht_supported      = false;                  /**< Is HT supported flag */
+        uint16_t ht_capability = 0;                      /**< HT capabilities */
+        std::array<uint8_t, beerocks::message::HT_MCS_SET_SIZE>
+            ht_mcs_set; /**< 16-byte attribute containing the MCS set as defined in 802.11n */
+        bool vht_supported      = false; /**< Is VHT supported flag */
+        uint32_t vht_capability = 0;     /**< VHT capabilities */
+        std::array<uint8_t, beerocks::message::VHT_MCS_SET_SIZE>
+            vht_mcs_set; /**< 32-byte attribute containing the MCS set as defined in 802.11ac */
+        bool he_supported = false;             /**< Is HE supported flag */
+        beerocks_message::sVapsList vaps_list; /**< List of VAPs in radio. */
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
             supported_channels; /**< Array of supported channels in radio. */
         std::unordered_map<sMacAddr, associated_clients_t>

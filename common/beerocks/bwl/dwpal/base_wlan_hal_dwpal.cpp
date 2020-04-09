@@ -738,6 +738,13 @@ bool base_wlan_hal_dwpal::refresh_radio_info()
 
                 m_radio_info.frequency_band = band_info.get_frequency_band();
                 m_radio_info.max_bandwidth  = band_info.get_max_bandwidth();
+                m_radio_info.ht_supported   = band_info.ht_supported;
+                m_radio_info.ht_capability  = band_info.ht_capability;
+                m_radio_info.ht_mcs_set.assign(band_info.ht_mcs_set, sizeof(band_info.ht_mcs_set));
+                m_radio_info.vht_supported  = band_info.vht_supported;
+                m_radio_info.vht_capability = band_info.vht_capability;
+                m_radio_info.vht_mcs_set.assign(band_info.vht_mcs_set,
+                                                sizeof(band_info.vht_mcs_set));
             }
         }
     }

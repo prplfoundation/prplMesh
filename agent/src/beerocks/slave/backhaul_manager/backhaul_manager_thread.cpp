@@ -1768,6 +1768,13 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         soc->controller_discovered = false;
         soc->max_bandwidth         = request->max_bandwidth();
 
+        soc->ht_supported  = request->ht_supported();
+        soc->ht_capability = request->ht_capability();
+        std::copy_n(request->ht_mcs_set(), soc->ht_mcs_set.size(), soc->ht_mcs_set.begin());
+        soc->vht_supported  = request->vht_supported();
+        soc->vht_capability = request->vht_capability();
+        std::copy_n(request->vht_mcs_set(), soc->vht_mcs_set.size(), soc->vht_mcs_set.begin());
+
         LOG(DEBUG) << "ACTION_BACKHAUL_ENABLE hostap_iface=" << soc->hostap_iface
                    << " sta_iface=" << soc->sta_iface << " band=" << int(request->frequency_band());
 

@@ -3244,6 +3244,14 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
 
         bh_enable->frequency_band() = hostap_params.frequency_band;
         bh_enable->max_bandwidth()  = hostap_params.max_bandwidth;
+        bh_enable->ht_supported()   = hostap_params.ht_supported;
+        bh_enable->ht_capability()  = hostap_params.ht_capability;
+        std::copy_n(hostap_params.ht_mcs_set, beerocks::message::HT_MCS_SET_SIZE,
+                    bh_enable->ht_mcs_set());
+        bh_enable->vht_supported()  = hostap_params.vht_supported;
+        bh_enable->vht_capability() = hostap_params.vht_capability;
+        std::copy_n(hostap_params.vht_mcs_set, beerocks::message::VHT_MCS_SET_SIZE,
+                    bh_enable->vht_mcs_set());
 
         auto tuple_supported_channels = bh_enable->supported_channels_list(0);
         if (!std::get<0>(tuple_supported_channels)) {
