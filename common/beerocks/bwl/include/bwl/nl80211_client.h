@@ -24,7 +24,7 @@
  * According to <linux/nl80211.h>, NL80211_BAND_ATTR_HT_MCS_SET is a 16-byte attribute containing
  * the MCS set as defined in 802.11n
  */
-static constexpr size_t ht_mcs_set_size = 16;
+static constexpr size_t ht_mcs_set_size = beerocks::message::HT_MCS_SET_SIZE;
 
 /**
  * @brief Length of VHT MCS set.
@@ -32,7 +32,7 @@ static constexpr size_t ht_mcs_set_size = 16;
  * According to <linux/nl80211.h>, NL80211_BAND_ATTR_VHT_MCS_SET is a 32-byte attribute containing
  * the MCS set as defined in 802.11ac
  */
-static constexpr size_t vht_mcs_set_size = 32;
+static constexpr size_t vht_mcs_set_size = beerocks::message::VHT_MCS_SET_SIZE;
 
 namespace bwl {
 
