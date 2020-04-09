@@ -60,6 +60,8 @@ enum eStructsConsts {
     WIFI_OPERATING_STRING_LENGTH         = 16,
     WIFI_DATA_TRANSFER_RATES_LIST_LENGTH = 256,
     CHANNEL_SCAN_LIST_LENGTH             = 8,
+    HT_MCS_SET_SIZE                      = 16,
+    VHT_MCS_SET_SIZE                     = 32,
 };
 
 enum eMessageConsts {
