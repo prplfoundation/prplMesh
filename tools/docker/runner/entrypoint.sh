@@ -11,14 +11,11 @@ run() {
     "$@" || exit $?
 }
 
-bridge_ip="$1"; shift
 base_mac="$1"; shift
 
-# If the requested bridge ip is 0.0.0.0, use the ip address that
-# was allocated by the daemon to this container (from eth0)
-if [[ ${bridge_ip} == 0.0.0.0* ]]; then
-    bridge_ip="$(ip addr show dev eth0 | grep inet | awk '{print $2}')"
-fi
+# Use the ip address that was allocated by the daemon to this
+# container (from eth0)
+bridge_ip="$(ip addr show dev eth0 | grep inet | awk '{print $2}')"
 
 run ip link add          br-lan   address "${base_mac}:00:00" type bridge
 run ip link add          wlan0    address "${base_mac}:00:10" type dummy
