@@ -4,7 +4,7 @@
 #
 #
 #
-# SPDX-FileCopyrightText: 2019 the prplMesh contributors (see AUTHORS.md)
+# SPDX-FileCopyrightText: 2019-2020 the prplMesh contributors (see AUTHORS.md)
 #
 #
 #
