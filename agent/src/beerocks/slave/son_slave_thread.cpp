@@ -3234,14 +3234,10 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             bh_enable->wireless_iface_type() = config.backhaul_wireless_iface_type;
         }
 
-        bh_enable->iface_mac()     = hostap_params.iface_mac;
-        bh_enable->iface_is_5ghz() = hostap_params.iface_is_5ghz;
+        bh_enable->iface_mac() = hostap_params.iface_mac;
         bh_enable->preferred_bssid() =
             network_utils::mac_from_string(config.backhaul_preferred_bssid);
 
-        // necessary to erase all pending enable slaves on backhaul manager
-        string_utils::copy_string(bh_enable->ap_iface(message::IFACE_NAME_LENGTH),
-                                  config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
         string_utils::copy_string(bh_enable->sta_iface(message::IFACE_NAME_LENGTH),
                                   config.backhaul_wireless_iface.c_str(),
                                   message::IFACE_NAME_LENGTH);
