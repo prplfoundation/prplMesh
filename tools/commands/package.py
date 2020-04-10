@@ -12,7 +12,7 @@ package_modules = ['framework', 'common', 'controller', 'agent', 'tools']
 license = os.path.realpath(os.path.dirname(os.path.realpath(__file__)) + '/../LICENSE')
 header_template = '''/* SPDX-License-Identifier: BSD-2-Clause-Patent
  *
- * SPDX-FileCopyrightText: 2016-2019 the prplMesh contributors (see AUTHORS.md)
+ * SPDX-FileCopyrightText: 2016-2020 the prplMesh contributors (see AUTHORS.md)
  *
  * This code is subject to the terms of the BSD+Patent license.
  * See LICENSE file for more details.
