@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2012-2018 Zuhd Web Services
+// SPDX-FileCopyrightText: 2012-2018 @abumusamq
 //
 //  Bismillah ar-Rahmaan ar-Raheem
 //
