@@ -115,7 +115,6 @@ private:
         bool sta_iface_filter_low      = false;
         bool slave_is_backhaul_manager = false;
         bool controller_discovered     = false;
-        sMacAddr ruid;
 
         std::shared_ptr<bwl::sta_wlan_hal> sta_wlan_hal;
         Socket *sta_hal_ext_events = nullptr;
