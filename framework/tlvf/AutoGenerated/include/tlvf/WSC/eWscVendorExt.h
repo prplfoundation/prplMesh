@@ -21,9 +21,11 @@ namespace WSC {
 
 enum eWscVendorExtSubelementBssType {
     BACKHAUL_STA = 0x80,
+    FRONTHAUL_BACKHAUL_BSS = 0x60,
     BACKHAUL_BSS = 0x40,
     FRONTHAUL_BSS = 0x20,
     TEARDOWN = 0x10,
+    ERROR_TYPE = 0x0,
 };
 
 enum eWscVendorExtVersionIE {

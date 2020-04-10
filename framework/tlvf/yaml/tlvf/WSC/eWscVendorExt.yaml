@@ -5,9 +5,11 @@ _namespace: WSC
 eWscVendorExtSubelementBssType:
   _type: enum
   BACKHAUL_STA: 0x80
+  FRONTHAUL_BACKHAUL_BSS: 0x60 # (FRONTHAUL_BSS | BACKHAUL_BSS)
   BACKHAUL_BSS: 0x40
   FRONTHAUL_BSS: 0x20
   TEARDOWN: 0x10
+  ERROR_TYPE: 0
 
 eWscVendorExtVersionIE:
   _type: enum
