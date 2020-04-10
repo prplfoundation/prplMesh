@@ -1,6 +1,10 @@
-/* SPDX-License-Identifier: BSD-2-Clause-Patent
+/* SPDX-License-Identifier: BSD-2-Clause-Patent AND ISC
  *
  * SPDX-FileCopyrightText: 2020 the prplMesh contributors (see AUTHORS.md)
+ * SPDX-FileCopyrightText: 2007, 2008 Johannes Berg
+ * SPDX-FileCopyrightText: 2007 Andy Lutomirski
+ * SPDX-FileCopyrightText: 2007 Mike Kershaw
+ * SPDX-FileCopyrightText: 2008-2009 Luis R. Rodriguez
  *
  * This code is subject to the terms of the BSD+Patent license.
  * See LICENSE file for more details.
