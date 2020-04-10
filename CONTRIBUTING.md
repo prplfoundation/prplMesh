@@ -50,7 +50,7 @@ Therefore, if you make a significant (i.e. copyrightable) contribution, add your
 Every file must have the following copyright header:
 ```
 SPDX-License-Identifier: BSD-2-Clause-Patent
-Copyright (c) 2020 the prplMesh contributors (see AUTHORS.md)
+SPDX-FileCopyrightText: 2020 the prplMesh contributors (see AUTHORS.md)
 This code is subject to the terms of the BSD+Patent license.
 See LICENSE file for more details.
 ```
