@@ -95,10 +95,6 @@ uint8_t& cACTION_BACKHAUL_REGISTER_REQUEST::onboarding() {
     return (uint8_t&)(*m_onboarding);
 }
 
-sMacAddr& cACTION_BACKHAUL_REGISTER_REQUEST::ruid() {
-    return (sMacAddr&)(*m_ruid);
-}
-
 uint8_t& cACTION_BACKHAUL_REGISTER_REQUEST::certification_mode() {
     return (uint8_t&)(*m_certification_mode);
 }
@@ -106,7 +102,6 @@ uint8_t& cACTION_BACKHAUL_REGISTER_REQUEST::certification_mode() {
 void cACTION_BACKHAUL_REGISTER_REQUEST::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
-    m_ruid->struct_swap();
 }
 
 bool cACTION_BACKHAUL_REGISTER_REQUEST::finalize()
@@ -145,7 +140,6 @@ size_t cACTION_BACKHAUL_REGISTER_REQUEST::get_initial_size()
     class_size += sizeof(uint8_t); // local_gw
     class_size += sizeof(uint8_t); // sta_iface_filter_low
     class_size += sizeof(uint8_t); // onboarding
-    class_size += sizeof(sMacAddr); // ruid
     class_size += sizeof(uint8_t); // certification_mode
     return class_size;
 }
@@ -188,12 +182,6 @@ bool cACTION_BACKHAUL_REGISTER_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_ruid = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
-        return false;
-    }
-    if (!m_parse__) { m_ruid->struct_init(); }
     m_certification_mode = (uint8_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -1596,10 +1584,6 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
 }
 cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::~cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION() {
 }
-sMacAddr& cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::ruid() {
-    return (sMacAddr&)(*m_ruid);
-}
-
 sVapsList& cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::params() {
     return (sVapsList&)(*m_params);
 }
@@ -1607,7 +1591,6 @@ sVapsList& cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::params() {
 void cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
-    m_ruid->struct_swap();
     m_params->struct_swap();
 }
 
@@ -1641,7 +1624,6 @@ bool cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::finalize()
 size_t cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(sMacAddr); // ruid
     class_size += sizeof(sVapsList); // params
     return class_size;
 }
@@ -1652,12 +1634,6 @@ bool cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_ruid = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
-        return false;
-    }
-    if (!m_parse__) { m_ruid->struct_init(); }
     m_params = (sVapsList*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sVapsList))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sVapsList) << ") Failed!";
@@ -1678,10 +1654,6 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
 }
 cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::~cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION() {
 }
-sMacAddr& cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::iface_mac() {
-    return (sMacAddr&)(*m_iface_mac);
-}
-
 sMacAddr& cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::client_mac() {
     return (sMacAddr&)(*m_client_mac);
 }
@@ -1693,7 +1665,6 @@ sMacAddr& cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::bssid() {
 void cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
-    m_iface_mac->struct_swap();
     m_client_mac->struct_swap();
     m_bssid->struct_swap();
 }
@@ -1728,7 +1699,6 @@ bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::finalize()
 size_t cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(sMacAddr); // iface_mac
     class_size += sizeof(sMacAddr); // client_mac
     class_size += sizeof(sMacAddr); // bssid
     return class_size;
@@ -1740,12 +1710,6 @@ bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_iface_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
-        return false;
-    }
-    if (!m_parse__) { m_iface_mac->struct_init(); }
     m_client_mac = (sMacAddr*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
@@ -1772,10 +1736,6 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
 }
 cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::~cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION() {
 }
-sMacAddr& cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::iface_mac() {
-    return (sMacAddr&)(*m_iface_mac);
-}
-
 sMacAddr& cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::client_mac() {
     return (sMacAddr&)(*m_client_mac);
 }
@@ -1787,7 +1747,6 @@ sMacAddr& cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::bssid() {
 void cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
-    m_iface_mac->struct_swap();
     m_client_mac->struct_swap();
     m_bssid->struct_swap();
 }
@@ -1822,7 +1781,6 @@ bool cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::finalize()
 size_t cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(sMacAddr); // iface_mac
     class_size += sizeof(sMacAddr); // client_mac
     class_size += sizeof(sMacAddr); // bssid
     return class_size;
@@ -1834,12 +1792,6 @@ bool cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_iface_mac = (sMacAddr*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
-        return false;
-    }
-    if (!m_parse__) { m_iface_mac->struct_init(); }
     m_client_mac = (sMacAddr*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";

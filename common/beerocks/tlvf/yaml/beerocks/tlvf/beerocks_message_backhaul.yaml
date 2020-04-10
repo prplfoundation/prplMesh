@@ -24,7 +24,6 @@ cACTION_BACKHAUL_REGISTER_REQUEST:
   local_gw: uint8_t
   sta_iface_filter_low: uint8_t
   onboarding: uint8_t
-  ruid: sMacAddr
   certification_mode: uint8_t
 
 cACTION_BACKHAUL_REGISTER_RESPONSE:
@@ -119,17 +118,14 @@ cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE:
 
 cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION:
   _type: class
-  ruid: sMacAddr
   params: sVapsList
 
 cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION:
   _type: class
-  iface_mac: sMacAddr
   client_mac: sMacAddr
   bssid: sMacAddr
 
 cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION:
   _type: class
-  iface_mac: sMacAddr
   client_mac: sMacAddr
   bssid: sMacAddr
