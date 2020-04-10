@@ -37,6 +37,8 @@ ARG PRPLMESH_VARIANT
 ARG PRPL_FEED
 # optional: intel feed to use.
 ARG INTEL_FEED
+# optional: iwlwav feed to use.
+ARG IWLWAV_FEED
 
 # Target to build for (CONFIG_TARGET_ will be prepended).
 # Example: TARGET_SYSTEM=mvebu
@@ -67,12 +69,18 @@ COPY --chown=openwrt:openwrt configs/base_${BASE_CONFIG}_config /home/openwrt/ba
 # We first install from the intel feed preferably, because
 # it replaces some packages from the "packages" feed.
 # If no intel feed is present, nothing will be done so it's still ok.
-RUN echo "src-git prpl ${PRPL_FEED}" >> feeds.conf.default \
+RUN cp feeds.conf.default feeds.conf \
+    && echo "src-git prpl $PRPL_FEED" >> feeds.conf \
     && if [ -n "$INTEL_FEED" ] ; then \
-        echo "src-git intel $INTEL_FEED" >> feeds.conf.default \
+        echo "src-git intel $INTEL_FEED" >> feeds.conf \
         && scripts/feeds update intel \
         && scripts/feeds install intel_mips \
         && scripts/feeds install -a -p intel ; \
+    fi ;\
+    if [ -n "$IWLWAV_FEED" ] ; then \
+        echo "src-git iwlwav $IWLWAV_FEED" >> feeds.conf \
+        && scripts/feeds update iwlwav \
+        && scripts/feeds install -a -p iwlwav ; \
     fi ;\
     scripts/feeds update -a \
     && scripts/feeds install -a \
