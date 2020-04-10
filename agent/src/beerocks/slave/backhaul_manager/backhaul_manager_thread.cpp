@@ -2257,12 +2257,12 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         // Iterate on front radio iface and then switch to back radio iface
         auto fill_radio_iface_info = [&](ieee1905_1::eMediaType media_type, bool front_iface) {
             LOG(DEBUG) << "filling interface information on radio="
-                       << (front_iface ? soc->radio_mac : soc->radio_mac + " backhaul");
+                       << (front_iface ? soc->hostap_iface : soc->sta_iface);
 
             // Skip Backhaul iteration iface when STA BWL is not allocated (Eth connection or GW).
             if (!front_iface && !soc->sta_wlan_hal) {
                 LOG(TRACE) << "Skip radio interface with no active STA BWL, front_radio="
-                           << soc->radio_mac;
+                           << soc->hostap_iface;
                 return true;
             }
 
@@ -2326,13 +2326,13 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         }
 
         if (!fill_radio_iface_info(media_type, true)) {
-            LOG(DEBUG) << "filling interface information on radio=" << soc->radio_mac
+            LOG(DEBUG) << "filling interface information on radio=" << soc->hostap_iface
                        << " has failed!";
             return true;
         }
 
         if (!fill_radio_iface_info(media_type, false)) {
-            LOG(DEBUG) << "filling interface information on radio=" << soc->radio_mac
+            LOG(DEBUG) << "filling interface information on radio=" << soc->hostap_iface
                        << " backhaul has failed!";
             return true;
         }
@@ -2875,7 +2875,7 @@ bool backhaul_manager::send_slaves_enable()
         if (soc->sta_iface == m_sConfig.wireless_iface) {
             notification->channel() = iface_hal->get_channel();
         }
-        LOG(DEBUG) << "Sending enable to slave " << soc->radio_mac
+        LOG(DEBUG) << "Sending enable to slave " << soc->hostap_iface
                    << ", channel=" << int(notification->channel());
 
         message_com::send_cmdu(soc->slave, cmdu_tx);
