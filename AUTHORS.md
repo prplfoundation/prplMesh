@@ -51,3 +51,5 @@ In addition, some parts were copied from other projects.
 - easylogging++ is forked from https://github.com/amrayn/easyloggingpp
   - Zuhd Web Services
   - @abumusamq
+- encryption.cpp contains code copied from [Broadband Forum meshComms](https://github.com/BroadbandForum/meshComms)
+  - Broadband Forum
