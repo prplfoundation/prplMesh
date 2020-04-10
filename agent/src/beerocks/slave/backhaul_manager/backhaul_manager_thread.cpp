@@ -1849,8 +1849,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
                                << ", Wired: " << m_sConfig.wire_iface;
                 }
             }
-
-            soc->slave_iface_type = (beerocks::eIfaceType)request->wireless_iface_type();
         }
         break;
     }
