@@ -1914,7 +1914,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             break;
         }
 
-        notification_out->iface_mac()  = hostap_params.iface_mac;
         notification_out->client_mac() = notification_in->params().mac;
         notification_out->bssid()      = notification_in->params().bssid;
 
@@ -2100,7 +2099,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             break;
         }
 
-        notification_out->iface_mac()  = hostap_params.iface_mac;
         notification_out->client_mac() = notification_in->params().mac;
         notification_out->bssid()      = notification_in->params().bssid;
 

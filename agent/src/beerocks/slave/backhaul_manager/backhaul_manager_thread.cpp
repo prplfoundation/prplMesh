@@ -1998,7 +1998,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
         // Set client association information for associated client
         auto &associated_clients =
-            m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
+            m_radio_info_map[soc->radio_mac].associated_clients_map[msg->bssid()];
         associated_clients[msg->client_mac()] = std::chrono::steady_clock::now();
         break;
     }
@@ -2016,7 +2016,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
         // If exists, remove client association information for disconnected client
         auto &associated_clients =
-            m_radio_info_map[msg->iface_mac()].associated_clients_map[msg->bssid()];
+            m_radio_info_map[soc->radio_mac].associated_clients_map[msg->bssid()];
         auto it = associated_clients.find(msg->client_mac());
         if (it != associated_clients.end()) {
             associated_clients.erase(it);
