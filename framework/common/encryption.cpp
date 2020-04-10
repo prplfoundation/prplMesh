@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: BSD-2-Clause-Patent
  *
- * Copyright (c) 2017, Broadband Forum
- * Copyright (c) 2019 the prplMesh contributors (see AUTHORS.md)
+ * SPDX-FileCopyrightText: 2017, Broadband Forum
+ * SPDX-FileCopyrightText: 2019 the prplMesh contributors (see AUTHORS.md)
  *
  * This code is subject to the terms of the BSD+Patent license.
  * See LICENSE file for more details.
