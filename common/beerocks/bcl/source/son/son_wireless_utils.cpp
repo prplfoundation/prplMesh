@@ -832,3 +832,34 @@ beerocks::eBssType wireless_utils::wsc_to_bwl_bss_type(WSC::eWscVendorExtSubelem
 
     return beerocks::BSS_TYPE_INVALID;
 }
+
+std::list<uint8_t> wireless_utils::string_to_wsc_oper_class(const std::string &operating_class)
+{
+    std::list<uint8_t> radio_24g = {81, 82, 83, 84};
+    std::list<uint8_t> radio_5g  = {115, 116, 117, 118, 119, 120, 121, 122,
+                                   123, 124, 125, 126, 127, 128, 129, 130};
+
+    if (operating_class == "24g") {
+        return radio_24g;
+    } else if (operating_class == "5g") {
+        return radio_5g;
+    } else if (operating_class == "24g-5g") {
+        radio_24g.merge(radio_5g);
+        return radio_24g;
+    } else {
+        return {};
+    }
+}
+
+WSC::eWscVendorExtSubelementBssType wireless_utils::string_to_wsc_bss_type(const std::string &bss_type)
+{
+    if (bss_type == "backhaul") {
+        return WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS;
+    } else if (bss_type == "fronthaul") {
+        return WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS;
+    } else if (bss_type == "fronthaul-backhaul") {
+        return WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BACKHAUL_BSS;
+    } else {
+        return WSC::eWscVendorExtSubelementBssType::ERROR_TYPE;
+    }
+}
