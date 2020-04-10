@@ -4,7 +4,7 @@ Copyright (c) 2020 the prplMesh contributors
 This code is subject to the terms of the BSD+Patent license.
 See LICENSE file for more details.
 -->
-The prplMesh project is copyright its contributors.
+The prplMesh project is copyright 2016-2020 its contributors.
 This file lists all contributors.
 
 - Adam Dov
@@ -51,5 +51,3 @@ In addition, some parts were copied from other projects.
 - easylogging++ is forked from https://github.com/amrayn/easyloggingpp
   - Zuhd Web Services
   - @abumusamq
-- encryption.cpp contains code copied from [Broadband Forum meshComms](https://github.com/BroadbandForum/meshComms)
-  - Broadband Forum
