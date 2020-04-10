@@ -1978,9 +1978,9 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             return false;
         }
 
-        m_radio_info_map[msg->ruid()].vaps_list = msg->params();
+        m_radio_info_map[soc->radio_mac].vaps_list = msg->params();
         if (m_agent_ucc_listener) {
-            m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(msg->ruid()),
+            m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(soc->radio_mac),
                                                    msg->params());
         }
         break;
