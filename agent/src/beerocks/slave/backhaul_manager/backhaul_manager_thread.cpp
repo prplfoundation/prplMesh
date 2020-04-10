@@ -913,7 +913,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 auto selected_ruid_it = std::find_if(
                     slaves_sockets.begin(), slaves_sockets.end(),
                     [&selected_backhaul](std::shared_ptr<SSlaveSockets> soc) {
-                        return network_utils::mac_from_string(selected_backhaul) == soc->ruid;
+                        return network_utils::mac_from_string(selected_backhaul) == soc->radio_mac;
                     });
 
                 if (!selected_backhaul.empty() && selected_ruid_it == slaves_sockets.end()) {
@@ -1771,7 +1771,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         std::copy_n(channels, beerocks::message::SUPPORTED_CHANNELS_LENGTH,
                     radio_info.supported_channels.begin());
 
-        soc->ruid                  = request->iface_mac();
         soc->radio_mac             = request->iface_mac();
         soc->freq_type             = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
                                                    : beerocks::eFreqType::FREQ_24G);
