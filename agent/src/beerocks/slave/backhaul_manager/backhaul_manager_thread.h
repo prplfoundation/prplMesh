@@ -111,11 +111,10 @@ private:
         std::string radio_mac;
         std::string hostap_iface;
         std::string sta_iface;
-        eFreqType freq_type              = eFreqType::FREQ_UNKNOWN;
-        bool sta_iface_filter_low        = false;
-        bool slave_is_backhaul_manager   = false;
-        bool controller_discovered       = false;
-        bool operational_on_registration = false;
+        eFreqType freq_type            = eFreqType::FREQ_UNKNOWN;
+        bool sta_iface_filter_low      = false;
+        bool slave_is_backhaul_manager = false;
+        bool controller_discovered     = false;
         eIfaceType slave_iface_type;
         sMacAddr ruid;
 
