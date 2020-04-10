@@ -1708,7 +1708,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
         soc->sta_iface.assign(request->sta_iface(message::IFACE_NAME_LENGTH));
         soc->hostap_iface.assign(request->hostap_iface(message::IFACE_NAME_LENGTH));
-        soc->ruid                 = request->ruid();
         soc->sta_iface_filter_low = request->sta_iface_filter_low();
         local_master              = request->local_master();
         local_gw                  = request->local_gw();
@@ -1772,6 +1771,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         std::copy_n(channels, beerocks::message::SUPPORTED_CHANNELS_LENGTH,
                     radio_info.supported_channels.begin());
 
+        soc->ruid                  = request->iface_mac();
         soc->radio_mac             = mac;
         soc->freq_type             = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
                                                    : beerocks::eFreqType::FREQ_24G);
