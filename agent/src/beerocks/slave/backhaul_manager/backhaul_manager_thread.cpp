@@ -1772,7 +1772,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
                     radio_info.supported_channels.begin());
 
         soc->ruid                  = request->iface_mac();
-        soc->radio_mac             = mac;
+        soc->radio_mac             = request->iface_mac();
         soc->freq_type             = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
                                                    : beerocks::eFreqType::FREQ_24G);
         soc->controller_discovered = false;
@@ -2269,7 +2269,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             auto localInterfaceInfo = tlvDeviceInformation->create_local_interface_list();
 
             localInterfaceInfo->mac() =
-                front_iface ? network_utils::mac_from_string(soc->radio_mac)
+                front_iface ? soc->radio_mac
                             : network_utils::mac_from_string(soc->sta_wlan_hal->get_radio_mac());
 
             LOG(DEBUG) << "Added radio interface to tlvDeviceInformation: "

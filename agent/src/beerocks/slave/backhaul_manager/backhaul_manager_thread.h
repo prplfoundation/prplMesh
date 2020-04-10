@@ -108,7 +108,7 @@ private:
 
     struct SSlaveSockets {
         Socket *slave = nullptr;
-        std::string radio_mac;
+        sMacAddr radio_mac;
         std::string hostap_iface;
         std::string sta_iface;
         eFreqType freq_type            = eFreqType::FREQ_UNKNOWN;
