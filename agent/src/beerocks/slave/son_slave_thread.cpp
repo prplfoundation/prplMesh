@@ -1764,7 +1764,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
 
         notification_out2->params() = notification_in->params();
-        notification_out2->ruid()   = hostap_params.iface_mac;
         LOG(TRACE) << "send ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION";
         message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
 
