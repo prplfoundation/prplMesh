@@ -277,7 +277,7 @@ private:
     /**
      * @brief Map of radio information structures indexed by radio uid.
      */
-    std::unordered_map<sMacAddr, sRadioInfo> m_radio_info_map;
+    std::unordered_map<sMacAddr, std::shared_ptr<sRadioInfo>> m_radio_info_map;
 
     /**
      * @brief Gets media type group for given interface.

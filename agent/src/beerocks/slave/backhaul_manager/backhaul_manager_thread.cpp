@@ -1752,11 +1752,15 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             return false;
         }
 
-        auto &radio_info = m_radio_info_map[request->iface_mac()];
+        auto radio_info = m_radio_info_map[request->iface_mac()];
+        if (!radio_info) {
+            radio_info = std::make_shared<sRadioInfo>();
+            m_radio_info_map[request->iface_mac()] = radio_info;
+        }
 
-        radio_info.interface_name = request->ap_iface();
-        radio_info.frequency_band = request->frequency_band();
-        radio_info.max_bandwidth  = request->max_bandwidth();
+        radio_info->interface_name = request->ap_iface();
+        radio_info->frequency_band = request->frequency_band();
+        radio_info->max_bandwidth  = request->max_bandwidth();
 
         std::string mac = network_utils::mac_to_string(request->iface_mac());
 
@@ -1769,7 +1773,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         auto channels = &std::get<1>(tuple_supported_channels);
 
         std::copy_n(channels, beerocks::message::SUPPORTED_CHANNELS_LENGTH,
-                    radio_info.supported_channels.begin());
+                    radio_info->supported_channels.begin());
 
         soc->radio_mac             = request->iface_mac();
         soc->freq_type             = (request->iface_is_5ghz() ? beerocks::eFreqType::FREQ_5G
@@ -1978,7 +1982,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
             return false;
         }
 
-        m_radio_info_map[soc->radio_mac].vaps_list = msg->params();
+        m_radio_info_map[soc->radio_mac]->vaps_list = msg->params();
         if (m_agent_ucc_listener) {
             m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(soc->radio_mac),
                                                    msg->params());
@@ -1998,7 +2002,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
         // Set client association information for associated client
         auto &associated_clients =
-            m_radio_info_map[soc->radio_mac].associated_clients_map[msg->bssid()];
+            m_radio_info_map[soc->radio_mac]->associated_clients_map[msg->bssid()];
         associated_clients[msg->client_mac()] = std::chrono::steady_clock::now();
         break;
     }
@@ -2016,7 +2020,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
 
         // If exists, remove client association information for disconnected client
         auto &associated_clients =
-            m_radio_info_map[soc->radio_mac].associated_clients_map[msg->bssid()];
+            m_radio_info_map[soc->radio_mac]->associated_clients_map[msg->bssid()];
         auto it = associated_clients.find(msg->client_mac());
         if (it != associated_clients.end()) {
             associated_clients.erase(it);
@@ -2101,7 +2105,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
     // says that we should answer if the client is associated with any BSS on this agent.]
     bool associated_client_found = false;
     for (const auto &slave : m_radio_info_map) {
-        auto associated_clients_map = slave.second.associated_clients_map;
+        auto associated_clients_map = slave.second->associated_clients_map;
         for (const auto &vap : associated_clients_map) {
             if (vap.second.find(client_info_tlv_r->client_mac()) != vap.second.end()) {
                 associated_client_found = true;
@@ -2177,7 +2181,7 @@ bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmd
 
     for (const auto &radio_info : m_radio_info_map) {
         auto radio_mac          = radio_info.first;
-        auto supported_channels = radio_info.second.supported_channels;
+        auto supported_channels = radio_info.second->supported_channels;
 
         if (!tlvf_utils::add_ap_radio_basic_capabilities(cmdu_tx, radio_mac, supported_channels)) {
             return false;
@@ -2417,7 +2421,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
 
     for (const auto &radio_info : m_radio_info_map) {
         auto ruid      = radio_info.first;
-        auto vaps_list = radio_info.second.vaps_list;
+        auto vaps_list = radio_info.second->vaps_list;
 
         auto radio_list         = tlvApOperationalBSS->create_radio_list();
         radio_list->radio_uid() = ruid;
@@ -2441,7 +2445,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     // Multi-AP Agent
     bool shall_include_associated_clients_tlv = false;
     for (const auto &radio_info_entry : m_radio_info_map) {
-        auto associated_clients_map = radio_info_entry.second.associated_clients_map;
+        auto associated_clients_map = radio_info_entry.second->associated_clients_map;
         for (const auto &associated_clients_entry : associated_clients_map) {
             auto associated_clients = associated_clients_entry.second;
             if (associated_clients.size() > 0) {
@@ -2467,7 +2471,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
 
         // Fill in Associated Clients TLV
         for (const auto &radio_info_entry : m_radio_info_map) {
-            auto associated_clients_map = radio_info_entry.second.associated_clients_map;
+            auto associated_clients_map = radio_info_entry.second->associated_clients_map;
 
             // Associated clients map contains sets of associated clients grouped by BSSID
             for (const auto &associated_clients_entry : associated_clients_map) {
@@ -3426,7 +3430,7 @@ bool backhaul_manager::get_media_type(const std::string &interface_name,
     } else if (ieee1905_1::eMediaTypeGroup::IEEE_802_11 == media_type_group) {
 
         for (const auto &radio_info_entry : m_radio_info_map) {
-            auto radio_info = radio_info_entry.second;
+            const auto &radio_info = *radio_info_entry.second;
 
             if (interface_name == radio_info.interface_name) {
 
