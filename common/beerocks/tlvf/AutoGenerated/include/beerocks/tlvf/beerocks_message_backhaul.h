@@ -49,7 +49,6 @@ class cACTION_BACKHAUL_REGISTER_REQUEST : public BaseClass
         uint8_t& local_gw();
         uint8_t& sta_iface_filter_low();
         uint8_t& onboarding();
-        sMacAddr& ruid();
         uint8_t& certification_mode();
         void class_swap() override;
         bool finalize() override;
@@ -67,7 +66,6 @@ class cACTION_BACKHAUL_REGISTER_REQUEST : public BaseClass
         uint8_t* m_local_gw = nullptr;
         uint8_t* m_sta_iface_filter_low = nullptr;
         uint8_t* m_onboarding = nullptr;
-        sMacAddr* m_ruid = nullptr;
         uint8_t* m_certification_mode = nullptr;
 };
 
@@ -467,7 +465,6 @@ class cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION : public BaseClass
         static eActionOp_BACKHAUL get_action_op(){
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION);
         }
-        sMacAddr& ruid();
         sVapsList& params();
         void class_swap() override;
         bool finalize() override;
@@ -476,7 +473,6 @@ class cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION : public BaseClass
     private:
         bool init();
         eActionOp_BACKHAUL* m_action_op = nullptr;
-        sMacAddr* m_ruid = nullptr;
         sVapsList* m_params = nullptr;
 };
 
@@ -490,7 +486,6 @@ class cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
         static eActionOp_BACKHAUL get_action_op(){
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION);
         }
-        sMacAddr& iface_mac();
         sMacAddr& client_mac();
         sMacAddr& bssid();
         void class_swap() override;
@@ -500,7 +495,6 @@ class cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
     private:
         bool init();
         eActionOp_BACKHAUL* m_action_op = nullptr;
-        sMacAddr* m_iface_mac = nullptr;
         sMacAddr* m_client_mac = nullptr;
         sMacAddr* m_bssid = nullptr;
 };
@@ -515,7 +509,6 @@ class cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION : public BaseClass
         static eActionOp_BACKHAUL get_action_op(){
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION);
         }
-        sMacAddr& iface_mac();
         sMacAddr& client_mac();
         sMacAddr& bssid();
         void class_swap() override;
@@ -525,7 +518,6 @@ class cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION : public BaseClass
     private:
         bool init();
         eActionOp_BACKHAUL* m_action_op = nullptr;
-        sMacAddr* m_iface_mac = nullptr;
         sMacAddr* m_client_mac = nullptr;
         sMacAddr* m_bssid = nullptr;
 };
