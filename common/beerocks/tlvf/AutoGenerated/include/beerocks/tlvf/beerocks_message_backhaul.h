@@ -120,7 +120,6 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_ENABLE);
         }
         sMacAddr& iface_mac();
-        uint8_t& iface_is_5ghz();
         std::string wire_iface_str();
         char* wire_iface(size_t length = 0);
         bool set_wire_iface(const std::string& str);
@@ -129,10 +128,6 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         char* sta_iface(size_t length = 0);
         bool set_sta_iface(const std::string& str);
         bool set_sta_iface(const char buffer[], size_t size);
-        std::string ap_iface_str();
-        char* ap_iface(size_t length = 0);
-        bool set_ap_iface(const std::string& str);
-        bool set_ap_iface(const char buffer[], size_t size);
         std::string ssid_str();
         char* ssid(size_t length = 0);
         bool set_ssid(const std::string& str);
@@ -158,14 +153,11 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         bool init();
         eActionOp_BACKHAUL* m_action_op = nullptr;
         sMacAddr* m_iface_mac = nullptr;
-        uint8_t* m_iface_is_5ghz = nullptr;
         char* m_wire_iface = nullptr;
         size_t m_wire_iface_idx__ = 0;
         int m_lock_order_counter__ = 0;
         char* m_sta_iface = nullptr;
         size_t m_sta_iface_idx__ = 0;
-        char* m_ap_iface = nullptr;
-        size_t m_ap_iface_idx__ = 0;
         char* m_ssid = nullptr;
         size_t m_ssid_idx__ = 0;
         char* m_pass = nullptr;
