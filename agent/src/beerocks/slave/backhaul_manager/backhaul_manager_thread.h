@@ -50,7 +50,7 @@ public:
 
 private:
     // Forward declaration
-    struct SSlaveSockets;
+    struct sRadioInfo;
 
     virtual bool handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx) override;
     virtual void before_select() override;
@@ -64,16 +64,17 @@ private:
     bool backhaul_fsm_wired(bool &skip_select);
     bool backhaul_fsm_wireless(bool &skip_select);
     bool is_front_radio(std::string mac);
-    bool finalize_slaves_connect_state(
-        bool fConnected, std::shared_ptr<SSlaveSockets> pSocket = nullptr); // cmdu_duplicate
+    bool
+    finalize_slaves_connect_state(bool fConnected,
+                                  std::shared_ptr<sRadioInfo> pSocket = nullptr); // cmdu_duplicate
 
-    bool send_autoconfig_search_message(std::shared_ptr<SSlaveSockets> soc);
+    bool send_autoconfig_search_message(std::shared_ptr<sRadioInfo> soc);
     bool send_1905_topology_discovery_message();
 
     // cmdu handlers
     bool handle_master_message(ieee1905_1::CmduMessageRx &cmdu_rx,
                                std::shared_ptr<beerocks_message::cACTION_HEADER> beerocks_header);
-    bool handle_slave_backhaul_message(std::shared_ptr<SSlaveSockets> soc,
+    bool handle_slave_backhaul_message(std::shared_ptr<sRadioInfo> soc,
                                        ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
 
@@ -106,21 +107,6 @@ private:
 private:
     const std::string &beerocks_temp_path;
 
-    struct SSlaveSockets {
-        Socket *slave = nullptr;
-        sMacAddr radio_mac;
-        std::string hostap_iface;
-        std::string sta_iface;
-        eFreqType freq_type            = eFreqType::FREQ_UNKNOWN;
-        bool sta_iface_filter_low      = false;
-        bool slave_is_backhaul_manager = false;
-        bool controller_discovered     = false;
-
-        std::shared_ptr<bwl::sta_wlan_hal> sta_wlan_hal;
-        Socket *sta_hal_ext_events = nullptr;
-        Socket *sta_hal_int_events = nullptr;
-    };
-
     SocketClient *master_discovery_socket = nullptr;
 
     struct SBackhaulConfig {
@@ -150,7 +136,7 @@ private:
 
         // Slave handling the active wireless connection
         // std::shared_ptr<bwl::sta_wlan_hal> active_slave_hal;
-        std::unordered_map<std::string, std::shared_ptr<SSlaveSockets>> slave_iface_socket;
+        std::unordered_map<std::string, std::shared_ptr<sRadioInfo>> slave_iface_socket;
 
     } m_sConfig;
 
@@ -165,7 +151,7 @@ private:
     std::set<std::string> pending_slave_ifaces;
     std::set<std::string> pending_slave_sta_ifaces;
 
-    std::list<std::shared_ptr<SSlaveSockets>> slaves_sockets;
+    std::list<std::shared_ptr<sRadioInfo>> slaves_sockets;
     std::shared_ptr<SocketClient> m_scPlatform;
     net::network_utils::iface_info bridge_info;
 
@@ -256,15 +242,25 @@ private:
         associated_clients_t;
 
     /**
-     * @brief Information gathered about a radio.
+     * @brief Information gathered about a radio (= slave).
      *
      * Radio information is obtained from messages sent by slave threads and is used to build
      * the TLVs to include in notification messages or responses to CDMU query messages.
      */
     struct sRadioInfo {
-        std::string interface_name; /**< Name of the radio interface */
-        beerocks::eFreqType frequency_band =
-            beerocks::eFreqType::FREQ_UNKNOWN; /**< Frequency band */
+        Socket *slave = nullptr;  /**< Socket connection to the slave */
+        sMacAddr radio_mac;       /**< Radio ID (= radio MAC address) */
+        std::string hostap_iface; /**< Name of the radio interface */
+        std::string sta_iface;    /**< Name of the bSTA interface on the radio (if any) */
+        eFreqType freq_type            = eFreqType::FREQ_UNKNOWN;
+        bool sta_iface_filter_low      = false;
+        bool slave_is_backhaul_manager = false;
+        bool controller_discovered     = false;
+
+        std::shared_ptr<bwl::sta_wlan_hal> sta_wlan_hal;
+        Socket *sta_hal_ext_events = nullptr;
+        Socket *sta_hal_int_events = nullptr;
+
         beerocks::eWiFiBandwidth max_bandwidth =
             beerocks::eWiFiBandwidth::BANDWIDTH_UNKNOWN; /**< Maximum supported bandwidth */
         beerocks_message::sVapsList vaps_list;           /**< List of VAPs in radio. */
@@ -273,11 +269,6 @@ private:
         std::unordered_map<sMacAddr, associated_clients_t>
             associated_clients_map; /**< Associated clients grouped by BSSID. */
     };
-
-    /**
-     * @brief Map of radio information structures indexed by radio uid.
-     */
-    std::unordered_map<sMacAddr, std::shared_ptr<sRadioInfo>> m_radio_info_map;
 
     /**
      * @brief Gets media type group for given interface.
