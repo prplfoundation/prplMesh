@@ -3,19 +3,18 @@
 scriptdir="$(cd "${0%/*}"; pwd)"
 rootdir="${scriptdir%/*/*/*/*}"
 
+# shellcheck source=tools/functions.sh
 . "${rootdir}/tools/functions.sh"
 
 usage() {
-    echo "usage: $(basename $0) -d <target_device> [-hfiortv]"
+    echo "usage: $(basename "$0") -d <target_device> [-hfiortv]"
     echo "  options:"
     echo "      -h|--help - show this help menu"
-    echo "      -b|--build-options - add docker build options"
     echo "      -d|--target-device the device to build for"
     echo "      -i|--image - build the docker image only"
     echo "      -o|--openwrt-version - the openwrt version to use"
     echo "      -r|--openwrt-repository - the openwrt repository to use"
     echo "      -t|--tag - the tag to use for the builder image"
-    echo "      -v|--verbose - verbosity on"
     echo " -d is always required."
     echo ""
     echo "The following environment variables will affect the build:"
@@ -37,7 +36,6 @@ build_image() {
            --build-arg PRPLMESH_VARIANT \
            --build-arg INTEL_FEED \
            --build-arg BASE_CONFIG \
-           $BUILD_OPTIONS \
            "$scriptdir/"
 }
 
@@ -71,9 +69,11 @@ main() {
         exit 1
     fi
 
-    OPTS=`getopt -o 'hb:d:io:r:t:v' --long help,build-options:,device:,image,openwrt-version:,openwrt-repository:,tag:,verbose -n 'parse-options' -- "$@"`
-
-    if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
+    if ! OPTS=$(getopt -o 'hd:io:r:t:' --long help,target-device:,image,openwrt-version:,openwrt-repository:,tag: -n 'parse-options' -- "$@"); then
+        err "Failed parsing options." >&2
+        usage
+        exit 1
+    fi
 
     eval set -- "$OPTS"
 
@@ -82,13 +82,11 @@ main() {
     while true; do
         case "$1" in
             -h | --help)               usage; exit 0; shift ;;
-            -b | --build-options)      BUILD_OPTIONS="$2"; shift; shift ;;
             -d | --target-device)      TARGET_DEVICE="$2"; shift ; shift ;;
             -i | --image)              IMAGE_ONLY=true; shift ;;
             -o | --openwrt-version)    OPENWRT_VERSION="$2"; shift; shift ;;
             -r | --openwrt-repository) OPENWRT_REPOSITORY="$2"; shift; shift ;;
             -t | --tag)                TAG="$2"; shift ; shift ;;
-            -v | --verbose)            VERBOSE=true; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
@@ -124,7 +122,6 @@ main() {
             ;;
     esac
 
-    dbg "BUILD_OPTIONS=$BUILD_OPTIONS"
     dbg "OPENWRT_REPOSITORY=$OPENWRT_REPOSITORY"
     dbg "OPENWRT_VERSION=$OPENWRT_VERSION"
     dbg "BASE_CONFIG=$BASE_CONFIG"
@@ -172,8 +169,6 @@ main() {
 }
 
 IMAGE_ONLY=false
-VERBOSE=false
-BUILD_OPTIONS=""
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='30c0f8b1e23a59c3e15c4eb329d5689b55280529'
 PRPL_FEED='https://git.prpl.dev/prplmesh/iwlwav.git^6749d406d243465e06b4f518767b2d1b9372e3f5'
