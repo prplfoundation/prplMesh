@@ -6,13 +6,14 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}"; pwd)"
+scriptdir="$(cd "${0%/*}" || exit 1; pwd)"
 rootdir="${scriptdir%/*/*}"
 
-. ${rootdir}/tools/functions.sh
+# shellcheck source=../../tools/functions.sh
+. "${rootdir}/tools/functions.sh"
 
 usage() {
-    echo "usage: $(basename $0) [-hvbt]"
+    echo "usage: $(basename "$0") [-hvbt]"
     echo "  mandatory:"
     echo "      type - image type <runner/builder>"
     echo "  options:"
@@ -23,9 +24,11 @@ usage() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvb:t:' --long verbose,help,base-image,tag -n 'parse-options' -- "$@"`
-
-    if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
+    if ! OPTS=$(getopt -o 'hvb:t:' --long verbose,help,base-image,tag -n 'parse-options' -- "$@"); then
+        err "Failed parsing options." >&2
+        usage
+        exit 1
+    fi
 
     eval set -- "$OPTS"
 
@@ -40,25 +43,25 @@ main() {
         esac
     done
 
-    dbg IMAGE=$IMAGE
-    dbg TAG=$TAG
-    dbg rootdir=$rootdir
+    dbg "IMAGE=$IMAGE"
+    dbg "TAG=$TAG"
+    dbg "rootdir=$rootdir"
 
     info "Base docker image $IMAGE"
     info "Generating builder docker image (prplmesh-builder$TAG)"
     run docker image build \
-        --build-arg image=$IMAGE \
-        --tag prplmesh-builder$TAG \
-        ${scriptdir}/builder
+        --build-arg image="$IMAGE" \
+        --tag "prplmesh-builder$TAG" \
+        "${scriptdir}/builder"
 
     info "Generating runner docker image (prplmesh-runner$TAG)"
     run docker image build \
-        --build-arg image=$IMAGE \
-        --tag prplmesh-runner$TAG \
-        ${scriptdir}/runner
+        --build-arg image="$IMAGE" \
+        --tag "prplmesh-runner$TAG" \
+        "${scriptdir}/runner"
 }
 
 VERBOSE=false
 IMAGE="ubuntu:18.04"
 
-main $@
+main "$@"
