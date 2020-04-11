@@ -18,7 +18,7 @@ rootdir=$(realpath "$scriptdir/../")
 . "$rootdir/ci/owncloud/owncloud_definitions.sh"
 
 usage() {
-    echo "usage: $(basename $0) [-hboev] <test> [test]"
+    echo "usage: $(basename "$0") [-hboev] <test> [test]"
     echo "  options:"
     echo "      -h|--help - display this help."
     echo "      -v|--verbose - set verbosity (ucc logs also redirected to stdout)"
