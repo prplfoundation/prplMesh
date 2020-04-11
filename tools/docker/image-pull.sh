@@ -17,7 +17,6 @@ usage() {
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
     echo "      -b|--base-image - Base OS image to use (Dockerfile 'FROM')"
-    echo "      -n|--native - Use the same base OS image as the running system"
     echo "      -t|--tag - tag to add to prplmesh-builder and prplmesh-runner images"
 }
 
@@ -34,7 +33,7 @@ pull_and_tag() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvnb:t:' --long verbose,help,base-image,tag -n 'parse-options' -- "$@"`
+    OPTS=`getopt -o 'hvb:t:' --long verbose,help,base-image,tag -n 'parse-options' -- "$@"`
 
     if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
 
@@ -45,11 +44,6 @@ main() {
             -v | --verbose)         VERBOSE=true; shift ;;
             -h | --help)            usage; exit 0; shift ;;
             -b | --base-image)      IMAGE="$2"; shift ; shift ;;
-            -n | --native)          IMAGE=$(
-                                        . /etc/os-release
-                                        distro="$(echo $NAME | awk '{print tolower($0)}')"
-                                        echo "$distro:$VERSION_ID"
-                                    ); shift ;;
             -t | --tag)             TAG=":$2"; shift ; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
@@ -68,7 +62,6 @@ main() {
 }
 
 VERBOSE=false
-NATIVE=false
 IMAGE="ubuntu:18.04"
 
 main $@
