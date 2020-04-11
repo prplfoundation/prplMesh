@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage() {
-    echo "usage: $(basename $0) <target>"
+    echo "usage: $(basename "$0") <target>"
 }
 
 if [ -z "$1" ] ; then
