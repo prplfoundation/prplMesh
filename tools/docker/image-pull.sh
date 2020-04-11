@@ -6,13 +6,14 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}"; pwd)"
+scriptdir="$(cd "${0%/*}" || exit 1; pwd)"
 rootdir="${scriptdir%/*/*}"
 
-. ${rootdir}/tools/functions.sh
+# shellcheck source=../../tools/functions.sh
+. "${rootdir}/tools/functions.sh"
 
 usage() {
-    echo "usage: $(basename $0) [-hvbt]"
+    echo "usage: $(basename "$0") [-hvbt]"
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
@@ -33,15 +34,16 @@ pull_and_tag() {
 }
 
 main() {
-    OPTS=`getopt -o 'hvb:t:' --long verbose,help,base-image,tag -n 'parse-options' -- "$@"`
-
-    if [ $? != 0 ] ; then err "Failed parsing options." >&2 ; usage; exit 1 ; fi
+    if ! OPTS=$(getopt -o 'hb:t:' --long help,base-image,tag -n 'parse-options' -- "$@"); then
+        err "Failed parsing options." >&2
+        usage
+        exit 1
+    fi
 
     eval set -- "$OPTS"
 
     while true; do
         case "$1" in
-            -v | --verbose)         VERBOSE=true; shift ;;
             -h | --help)            usage; exit 0; shift ;;
             -b | --base-image)      IMAGE="$2"; shift ; shift ;;
             -t | --tag)             TAG=":$2"; shift ; shift ;;
@@ -61,7 +63,6 @@ main() {
     pull_and_tag runner "$base_image" "$TAG"
 }
 
-VERBOSE=false
 IMAGE="ubuntu:18.04"
 
-main $@
+main "$@"
