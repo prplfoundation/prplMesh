@@ -109,7 +109,7 @@ main() {
     [ -n "$1" ] || { usage; err "Missing local-path"; exit 1; }
     local_path="$1"; shift
 
-    size=$(du -hcs $local_path | grep total | cut -f1)
+    size=$(du -hcs "$local_path" | grep total | cut -f1)
     info "upload $size from $local_path to $remote_path at $OWNCLOUD_URL (using user $user)"
 
     if ! command -v uuidgen > /dev/null ; then
