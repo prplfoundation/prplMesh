@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ###############################################################
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 # SPDX-FileCopyrightText: 2019-2020 the prplMesh contributors (see AUTHORS.md)
@@ -6,32 +6,33 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}"; pwd)"
+scriptdir="$(cd "${0%/*}" || exit 1; pwd)"
 rootdir="${scriptdir%/*/*}"
 
-. ${rootdir}/tools/functions.sh
+# shellcheck source=../../tools/functions.sh
+. "${rootdir}/tools/functions.sh"
 
 main() {
     docker image inspect prplmesh-builder >/dev/null 2>&1 || {
         echo "Image prplmesh-build does not exist, creating..."
-        run ${scriptdir}/image-build.sh
+        run "${scriptdir}"/image-build.sh
     }
 
     # Default docker arguments
-    docker_args="\
-    --workdir=$rootdir --user=${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)} \
-    -e USER=${SUDO_USER:-${USER}} -v ${rootdir}:${rootdir} \
-    --entrypoint=./tools/maptools.py \
-    "
+    docker_args=(
+        --workdir "${rootdir}"
+        --user "${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)}"
+        -e "USER=${SUDO_USER:-${USER}}"
+        -v "${rootdir}:${rootdir}"
+        --entrypoint "./tools/maptools.py"
+    )
 
     # Add platform base directory mapping into the container
-    if [ ! -z "${PRPLMESH_PLATFORM_BASE_DIR}" ]; then
-        docker_args="${docker_args} \
-        -v ${PRPLMESH_PLATFORM_BASE_DIR}:${PRPLMESH_PLATFORM_BASE_DIR} \
-        "
+    if [ -n "${PRPLMESH_PLATFORM_BASE_DIR}" ]; then
+        docker_args+=(-v "${PRPLMESH_PLATFORM_BASE_DIR}:${PRPLMESH_PLATFORM_BASE_DIR}")
     fi
 
-    run docker container run ${docker_args} --rm prplmesh-builder build $@
+    run docker container run "${docker_args[@]}" --rm prplmesh-builder build "$@"
 }
 
-main $@
+main "$@"
