@@ -1873,6 +1873,12 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         msg->params.mac          = beerocks::net::network_utils::mac_from_string(MACAddress);
         msg->params.capabilities = {};
 
+        //convert the hex string to binary
+        auto binary_str                      = get_binary_association_frame(assoc_req);
+        msg->params.association_frame_length = binary_str.length();
+
+        std::copy_n(&binary_str[0], binary_str.length(), msg->params.association_frame);
+
         std::string ht_cap_str(ht_cap);
         get_ht_mcs_capabilities(HT_MCS, ht_cap_str, msg->params.capabilities);
 
