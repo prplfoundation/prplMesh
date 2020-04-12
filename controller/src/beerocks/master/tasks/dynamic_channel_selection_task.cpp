@@ -117,6 +117,11 @@ void dynamic_channel_selection_task::work()
         break;
     }
     case eState::TRIGGER_SCAN: {
+        // get permission to scan
+        if (!database.try_lock_scan_permission(id)) {
+            break;
+        }
+
         LOG(TRACE) << "TRIGGER_SCAN, mac=" << m_radio_mac << ", scan_type is "
                    << ((m_is_single_scan) ? "single-scan" : "continuous-scan");
 
@@ -186,6 +191,10 @@ void dynamic_channel_selection_task::work()
     case eState::SCAN_DONE: {
         LOG(TRACE) << "SCAN_DONE";
 
+        auto unlock = database.unlock_scan_permission(id);
+        LOG_IF(!unlock, FATAL) << "failed to unlock scan permission for task_id=" << id
+                               << "on radio=" << m_radio_mac;
+
         //update next continuous scan time
         if (!m_is_single_scan) {
             auto interval =
@@ -204,6 +213,10 @@ void dynamic_channel_selection_task::work()
     }
     case eState::ABORT_SCAN: {
         LOG(ERROR) << "aborting scan for mac=" << m_radio_mac << ", last_scan_timestamp is not set";
+
+        auto unlock = database.unlock_scan_permission(id);
+        LOG_IF(!unlock, FATAL) << "failed to unlock scan permission for task_id=" << id
+                               << "on radio=" << m_radio_mac;
 
         database.set_channel_scan_results_status(m_radio_mac, m_last_scan_error_code,
                                                  m_is_single_scan);
