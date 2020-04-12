@@ -346,6 +346,11 @@ public:
      * @return true on success or false on error.
      */
     virtual bool generate_connected_clients_events() = 0;
+
+private:
+    static const int tagged_patameters_idx = 56;
+    static const int wifi_alliance_tag_len = 18;
+
 };
 
 // AP HAL factory types
