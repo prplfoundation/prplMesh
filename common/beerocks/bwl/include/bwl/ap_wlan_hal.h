@@ -10,6 +10,7 @@
 #define _BWL_AP_WLAN_HAL_H_
 
 #include "base_wlan_hal.h"
+#include <bcl/beerocks_string_utils.h>
 
 namespace bwl {
 
@@ -351,6 +352,16 @@ private:
     static const int tagged_patameters_idx = 56;
     static const int wifi_alliance_tag_len = 18;
 
+protected:
+    std::string get_binary_association_frame(const char assoc_req[])
+    {
+        auto sub_str_len = strnlen(assoc_req, ASSOCIATION_FRAME_SIZE) -
+                           ap_wlan_hal::tagged_patameters_idx - ap_wlan_hal::wifi_alliance_tag_len;
+        auto sub_str = std::string(&assoc_req[ap_wlan_hal::tagged_patameters_idx], sub_str_len);
+
+        //convert the hex string to binary
+        return beerocks::string_utils::hex_to_char_string(sub_str);
+    };
 };
 
 // AP HAL factory types
