@@ -2416,7 +2416,29 @@ bool db::try_lock_scan_permission(int task_id)
     return true;
 }
 
-bool db::unlock_scan_permission(int task_id) { return true; }
+bool db::unlock_scan_permission(int task_id)
+{
+    if (task_id < 0) {
+        LOG(ERROR) << "invalid input, task_id(" << task_id << ") < 0";
+        return false;
+    }
+
+    if (-1 == m_scan_locked_by_task_id) {
+        LOG(DEBUG) << "scan permission already unlocked! task_id=" << task_id;
+        return true;
+    }
+
+    if (task_id != m_scan_locked_by_task_id) {
+        LOG(ERROR) << "failed to unlock scan permission by task_id(" << task_id
+                   << "), scan is locked by other task_id(" << m_scan_locked_by_task_id << ")";
+        return false;
+    }
+
+    m_scan_locked_by_task_id = -1;
+    LOG(DEBUG) << "scan permission unlocked successfully for task_id=" << task_id;
+
+    return true;
+}
 
 //
 // CLI
