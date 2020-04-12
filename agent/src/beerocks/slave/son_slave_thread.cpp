@@ -4419,18 +4419,6 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
 bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
                                                        ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    // implementation to pass certification tests only
-    // (it does NOT take the required actions to work properly out of the certificagtion env)
-    // 1. send ACK to the controller                    - as required.
-    // 2. forward the request to STA (via the monitor)  - as required.
-    // 3. send dummy response to the controller         - not as required.
-    // The reason to this implementation is that the monitor does not support
-    // this request at the moment, and therefore the correct flow cannot be implemented.
-    // on the other hand, the test only checks that the correct messages were sent.
-    // so it is possible to fake the flow.
-    // one immidiate drawback is that if there is another test that depends on the beacon _values_
-    // for farther test the system - it will fail for sure.
-
     auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received BEACON_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid);
 
@@ -4467,30 +4455,33 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
 
     // fill the parameters
     /*
+    Legend: 
+        V - fine, we have value
+        ? - don't know where to take the value from
     V uint8_t measurement_mode;
     V uint8_t channel;
-    int16_t op_class;
-    uint16_t repeats;
+    ? int16_t op_class;
+    V uint16_t repeats;
     V uint16_t rand_ival;
     V uint16_t duration;
     V sMacAddr sta_mac;
     V sMacAddr bssid;
-    uint8_t parallel;
-    uint8_t enable;
-    uint8_t request;
-    uint8_t report;
-    uint8_t mandatory_duration;
+    V uint8_t parallel;
+    V uint8_t enable;
+    V uint8_t request;
+    V uint8_t report;
+    V uint8_t mandatory_duration;
     V uint8_t expected_reports_count;
-    uint8_t use_optional_ssid;
-    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
-    uint8_t use_optional_ap_ch_report;
-    uint8_t ap_ch_report[237];
-    uint8_t use_optional_req_elements;
-    uint8_t req_elements[13];
-    uint8_t use_optional_wide_band_ch_switch;
-    uint32_t new_ch_width;
-    uint32_t new_ch_center_freq_seg_0;
-    uint32_t new_ch_center_freq_seg_1;
+    V uint8_t use_optional_ssid;
+    V char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+    ? uint8_t use_optional_ap_ch_report;
+    ? uint8_t ap_ch_report[237];
+    ? uint8_t use_optional_req_elements;
+    ? uint8_t req_elements[13];
+    ? uint8_t use_optional_wide_band_ch_switch;
+    ? uint32_t new_ch_width;
+    ? uint32_t new_ch_center_freq_seg_0;
+    ? uint32_t new_ch_center_freq_seg_1;
     */
 
     auto &measurement_request = request_out->params();
@@ -4516,6 +4507,29 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     measurement_request.use_optional_ssid  = 0;
     string_utils::copy_string((char *)measurement_request.ssid, beaconMetricsQuery->ssid(),
                               message::WIFI_SSID_MAX_LENGTH);
+    measurement_request.use_optional_ap_ch_report =
+        beaconMetricsQuery->ap_channel_reports_list_length();
+    //
+    // FixMe:
+    // here (I think) we need to copy m_ap_channel_reports_list from the 1905 beaconMetricsQuery
+    // into ap_ch_report char array of the vs message (measurement_request)
+    // currently not supported
+    if (0 != measurement_request.use_optional_ap_ch_report) {
+        LOG(ERROR) << "unsupported optional channel report in the request";
+    }
+    // end FixMe
+
+    // FixMe:
+    // the same is true for use_optional_req_elements and req_elements
+    // end FixMe
+
+    // FixMe:
+    // measurement_request.op_class = ??
+    // measurement_request.use_optional_wide_band_ch_switch = ??
+    // measurement_request.new_ch_width = ??
+    // measurement_request.new_ch_center_freq_seg_0 = ??
+    // measurement_request.new_ch_center_freq_seg_1 = ??
+    // end FixMe
 
     message_com::send_cmdu(monitor_socket, cmdu_tx);
 
