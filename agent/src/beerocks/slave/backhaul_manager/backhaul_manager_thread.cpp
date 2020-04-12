@@ -102,6 +102,35 @@ namespace beerocks {
 #define FSM_CURR_STATE_STR s_arrStates[int(m_eFSMState)]
 
 //////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// Helper Functions /////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+template <class SlavesContainer, class MAC>
+std::shared_ptr<backhaul_manager::sRadioInfo> findRadioInfo(const SlavesContainer &slave_container,
+                                                            const MAC &mac)
+{
+    // for each radio info in the container
+    //      for each associated client
+    //          find if there is an entry with the given mac within this associated client
+
+    for (const auto &slave : slave_container) {
+        if (slave) {
+            LOG(DEBUG) << "looking into radio info for (hostap_iface): " << slave->hostap_iface;
+
+            for (const auto &client : slave->associated_clients_map) {
+                LOG(DEBUG) << "client: " << client.first;
+
+                if (client.second.find(mac) != client.second.end()) {
+                    return slave;
+                }
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Static Members ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -2914,59 +2943,26 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
 
     // extract the desired STA mac
     auto tlvBeaconMetricsQuery = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
-    if (tlvBeaconMetricsQuery) {
-        const sMacAddr &requiredMac = tlvBeaconMetricsQuery->associated_sta_mac();
-
-        LOG(DEBUG) << "the requested STA mac is: " << requiredMac;
-
-        // radio-info-map - holds the map of all radios
-        // each radio has a list of: associated-clients (vaps)
-        // the associated-clients has a list of all connected STA
-        // therefore -
-        // we iterate over radio-info-map
-        //      we iterate over its associated-clients
-        //          we search for the requested mac
-         
-
-        // 1. find the correct associated client
-        const sMacAddr *radioMac = nullptr;
-        for (auto &radio : m_radio_info_map) {
-
-            LOG(DEBUG) << "printing radio info map for: " << radio.first;
-            for ( const auto& client : radio.second.associated_clients_map ) {
-
-                LOG(DEBUG) << "client: " << client.first;
-
-                if (client.second.find(requiredMac) != client.second.end()) {
-                    radioMac = &radio.first;
-                    break;
-                }
-            }
-            if (radioMac) break; 
-        } 
-
-        if (radioMac) {
-            LOG(DEBUG) << "found the mac of the radio that has the sattion. radio: " << *radioMac << "; station: " << requiredMac;
-            auto it = std::find_if(slaves_sockets.begin(), slaves_sockets.end(),
-                                   [&radioMac](const std::shared_ptr<SSlaveSockets> slave) {
-                                       return network_utils::mac_from_string(slave->radio_mac) == *radioMac;
-                                   });
-            if (it != slaves_sockets.end()) {
-                LOG(DEBUG) << "found the socket to send to the agent that will send to:" << *radioMac << " for STA: " << requiredMac;
-                forward_to = (*it)->slave;
-            } else {
-                LOG(DEBUG) << "didn't find the socket to send to :" << *radioMac << "; this is strange";
-            }
-        }
-        else
-        {
-            LOG(DEBUG) << "couldn't find any agent for the requested mac: " << requiredMac; 
-        }
-    } else {
-        LOG(ERROR) << "handle_1905_beacon_metrics_query should handle only tlvBeaconMetrics, but got something else: " <<
-            std::hex << (uint16_t)cmdu_rx.getMessageType(); 
-        return true;
+    if (!tlvBeaconMetricsQuery) {
+        LOG(ERROR) << "handle_1905_beacon_metrics_query should handle only tlvBeaconMetrics, but "
+                      "got something else: 0x"
+                   << std::hex << (uint16_t)cmdu_rx.getMessageType();
+        return false;
     }
+
+    const sMacAddr &requiredMac = tlvBeaconMetricsQuery->associated_sta_mac();
+
+    LOG(DEBUG) << "the requested STA mac is: " << requiredMac;
+
+    auto radio = findRadioInfo(slaves_sockets, requiredMac);
+
+    if (!radio) {
+        LOG(WARNING) << "couldn't find any agent for the requested mac: " << requiredMac;
+    }
+
+    LOG(DEBUG) << "found the radio that has the sation. radio: " << radio->radio_mac
+               << "; station: " << requiredMac;
+    forward_to = radio->slave;
 
     // more work to do at the caller
     return false;

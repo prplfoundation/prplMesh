@@ -4448,6 +4448,14 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     // 2. forward the request to the monitor
     // using vs message
 
+    // validation - get the correct type of the message
+    auto beaconMetricsQuery = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
+
+    if (!beaconMetricsQuery) {
+        LOG(ERROR) << "tlvBeaconMetricsQuery missing - ignoring beacon metrics query message";
+        return false;
+    }
+
     // create vs message
     auto request_out =
         message_com::create_vs_message<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST>(
@@ -4457,35 +4465,59 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
         return false;
     }
 
-    // get the correct type of the message
-    auto beaconMetricsQuery = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
-
-    if (!beaconMetricsQuery) {
-        LOG(ERROR) << "tlvBeaconMetricsQuery missing - ignoring beacon metrics query message";
-        return false;
-    }
-
     // fill the parameters
-    auto &measurement_request   = request_out->params();
+    /*
+    V uint8_t measurement_mode;
+    V uint8_t channel;
+    int16_t op_class;
+    uint16_t repeats;
+    V uint16_t rand_ival;
+    V uint16_t duration;
+    V sMacAddr sta_mac;
+    V sMacAddr bssid;
+    uint8_t parallel;
+    uint8_t enable;
+    uint8_t request;
+    uint8_t report;
+    uint8_t mandatory_duration;
+    V uint8_t expected_reports_count;
+    uint8_t use_optional_ssid;
+    char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+    uint8_t use_optional_ap_ch_report;
+    uint8_t ap_ch_report[237];
+    uint8_t use_optional_req_elements;
+    uint8_t req_elements[13];
+    uint8_t use_optional_wide_band_ch_switch;
+    uint32_t new_ch_width;
+    uint32_t new_ch_center_freq_seg_0;
+    uint32_t new_ch_center_freq_seg_1;
+    */
+
+    auto &measurement_request = request_out->params();
+
     measurement_request.bssid   = beaconMetricsQuery->bssid();
     measurement_request.channel = beaconMetricsQuery->channel_number();
 
     measurement_request.measurement_mode = beerocks::MEASURE_MODE_ACTIVE;
     measurement_request.duration         = beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
 
-    /*
-	measurement_request.measurement_mode		= beerocks::MEASURE_MODE_PASSIVE;
-	measurement_request.duration				= beerocks::BEACON_MEASURE_DEFAULT_PASSIVE_DURATION;
-    */
-
     measurement_request.expected_reports_count = 1;
 
     measurement_request.rand_ival = beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
     measurement_request.sta_mac   = beaconMetricsQuery->associated_sta_mac();
 
-    message_com::send_cmdu(monitor_socket, cmdu_tx);
+    // values based on https://github.com/prplfoundation/prplMesh/pull/1114#discussion_r406326546
+    measurement_request.repeats            = 0;
+    measurement_request.parallel           = 0;
+    measurement_request.enable             = 0;
+    measurement_request.request            = 1;
+    measurement_request.report             = 0;
+    measurement_request.mandatory_duration = 0;
+    measurement_request.use_optional_ssid  = 0;
+    string_utils::copy_string((char *)measurement_request.ssid, beaconMetricsQuery->ssid(),
+                              message::WIFI_SSID_MAX_LENGTH);
 
-    // where is the response???
+    message_com::send_cmdu(monitor_socket, cmdu_tx);
 
     return true;
 }

@@ -83,7 +83,9 @@ void Ieee1905Transport::handle_local_bus_cmdu_tx_message(CmduTxMessage &msg)
         }
 
         if (msg.metadata()->msg_type != ntohs(ch->messageType)) {
-            MAPF_WARN("CmduTxMessage messageType mismatch: cmdu: " << std::hex << msg.metadata()->msg_type << " packet: " << ntohs(ch->messageType));
+            MAPF_WARN("CmduTxMessage messageType mismatch: cmdu: "
+                      << std::hex << msg.metadata()->msg_type
+                      << " packet: " << ntohs(ch->messageType));
         }
     }
 
