@@ -513,6 +513,17 @@ public:
                                bool single_scan);
 
     /**
+     * @brief Validate the channel scan pool
+     * 
+     * @param mac:          MAC address of radio
+     * @param channel_pool: Channel pool of channel scan
+     * @return true if pool is valid
+     * @return false if pool is invalid
+     */
+    bool is_channel_scan_pool_supported(const sMacAddr &mac,
+                                        const std::unordered_set<uint8_t> &channel_pool);
+
+    /**
      * @brief Get the channel scan pool object
      * 
      * @param mac:         MAC address of radio

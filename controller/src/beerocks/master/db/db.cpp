@@ -2291,6 +2291,24 @@ int db::get_channel_scan_dwell_time_msec(const sMacAddr &mac, bool single_scan)
         .dwell_time_msec;
 }
 
+bool db::is_channel_scan_pool_supported(const sMacAddr &mac,
+                                        const std::unordered_set<uint8_t> &channel_pool)
+{
+    auto supported_channels = get_hostap_supported_channels(network_utils::mac_to_string(mac));
+    for (const auto &channel : channel_pool) {
+        auto found_channel =
+            std::find_if(supported_channels.begin(), supported_channels.end(),
+                         [&channel](const beerocks::message::sWifiChannel &supported_channel) {
+                             return supported_channel.channel == channel;
+                         });
+        if (found_channel == supported_channels.end()) {
+            LOG(ERROR) << "channel #" << int(channel) << " is not supported";
+            return false;
+        }
+    }
+    return true;
+}
+
 bool db::set_channel_scan_pool(const sMacAddr &mac, const std::unordered_set<uint8_t> &channel_pool,
                                bool single_scan)
 {
@@ -2300,22 +2318,9 @@ bool db::set_channel_scan_pool(const sMacAddr &mac, const std::unordered_set<uin
         return false;
     }
 
-    //Validate new dcs channel pool with hostap_supported_channels list
-    //This is a workaround
-    static uint8_t supported_channels_array[] = {
-        1,  2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  36,  40,  44,  48,  52,  56,  60,
-        64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161, 165};
-    static size_t supported_channels_array_size =
-        sizeof(supported_channels_array) / sizeof(uint8_t);
-    std::set<uint8_t> supported_channels(supported_channels_array,
-                                         supported_channels_array + supported_channels_array_size);
-    for (auto channel : channel_pool) {
-        if (supported_channels.find(channel) == supported_channels.end()) {
-            //even if one channel is not supported reject all pool
-            LOG(ERROR) << "channel #" << int(channel)
-                       << " is invalid, setting channel pool failed !";
-            return false;
-        }
+    if (!is_channel_scan_pool_supported(mac, channel_pool)) {
+        LOG(ERROR) << "setting channel pool failed, one of the channels is not supported!";
+        return false;
     }
 
     (single_scan ? hostap->single_scan_config : hostap->continuous_scan_config).channel_pool =
