@@ -58,12 +58,11 @@ class TestFlows:
         if not tests:
             tests = self.tests
         for test in tests:
-            test_full = 'test_' + test
             self.start_test(test)
-            env.wired_sniffer.start(test_full)
+            env.wired_sniffer.start(test)
             self.check_error = 0
             try:
-                getattr(self, test_full)()
+                getattr(self, 'test_' + test)()
             finally:
                 env.wired_sniffer.stop()
             if self.check_error != 0:
@@ -366,9 +365,11 @@ class TestFlows:
 
         debug("Confirming ap capability query has been received on agent")
         self.check_log(env.agents[0], "AP_CAPABILITY_QUERY_MESSAGE")
-
+        
         debug("Confirming ap capability report has been received on controller")
         self.check_log(env.controller, "AP_CAPABILITY_REPORT_MESSAGE")
+        
+        
 
     def test_link_metric_query(self):
         env.controller.dev_send_1905(env.agents[0].mac, 0x0005,
@@ -656,8 +657,6 @@ if __name__ == '__main__':
     t = TestFlows()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tcpdump", "-t", action='store_true', default=False,
-                        help="capture the packets during each test")
     parser.add_argument("--verbose", "-v", action='store_true', default=False,
                         help="report each action")
     parser.add_argument("--stop-on-failure", "-s", action='store_true', default=False,
@@ -677,7 +676,6 @@ if __name__ == '__main__':
         parser.error("Unknown tests: {}".format(', '.join(unknown_tests)))
 
     opts.verbose = options.verbose
-    opts.tcpdump = options.tcpdump
 
     opts.tcpdump_dir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..', 'logs'))
     opts.stop_on_failure = options.stop_on_failure
