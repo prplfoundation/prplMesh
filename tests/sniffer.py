@@ -7,7 +7,7 @@
 
 import os
 import subprocess
-
+import json
 from opts import debug, err, opts, status
 
 
@@ -17,6 +17,7 @@ class Sniffer:
         self.interface = interface
         self.tcpdump_proc = None
         self.outputfiles = {}
+        self.captures = {}
 
     def start(self, test_name):
         '''Start tcpdump.'''
@@ -43,7 +44,7 @@ class Sniffer:
     def get_packet_capture(self, test_name):
         tshark_command = ['tshark', '-r', self.outputfiles[test_name], '-T', 'json']
         self.tshark_proc = subprocess.run(
-            tshark_command, stdout=subprocess.PIPE)
+            tshark_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             capture = json.loads(self.tshark_proc.stdout)
             def ieee_filter(x): return 'ieee1905' in x['_source']['layers']
