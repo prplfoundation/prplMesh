@@ -6,6 +6,7 @@
  * See LICENSE file for more details.
  */
 
+#include <bcl/beerocks_utils.h>
 #include <bcl/network/network_utils.h>
 #include <btl/btl.h>
 #include <easylogging++.h>
@@ -106,30 +107,28 @@ bool transport_socket_thread::configure_ieee1905_transport_interfaces(
 {
     LOG_IF(!bus, FATAL) << "Bus is not allocated!";
 
-    int bridge_if_index = network_utils::linux_get_iface_index(bridge_iface);
-
     mapf::InterfaceConfigurationRequestMessage interface_configuration_request_msg;
     using Flags = mapf::InterfaceConfigurationRequestMessage::Flags;
 
     uint32_t n = 0;
-    if (bridge_if_index) {
-        interface_configuration_request_msg.metadata()->interfaces[n].if_index = bridge_if_index;
-        interface_configuration_request_msg.metadata()->interfaces[n].flags |= Flags::IS_BRIDGE;
-        n++;
-        THREAD_LOG(DEBUG) << "adding bridge " << bridge_iface
-                          << " to ieee1905 transport, bridge_if_index=" << bridge_if_index;
-    }
+    string_utils::copy_string(interface_configuration_request_msg.metadata()->interfaces[n].ifname,
+                              bridge_iface.c_str(), IF_NAMESIZE);
+    interface_configuration_request_msg.metadata()->interfaces[n].flags |= Flags::IS_BRIDGE;
+    n++;
+    THREAD_LOG(DEBUG) << "adding bridge " << bridge_iface
+                      << " to ieee1905 transport, bridge iface=" << bridge_iface;
     for (const auto &iface : ifaces) {
-        int if_index = network_utils::linux_get_iface_index(iface);
-        interface_configuration_request_msg.metadata()->interfaces[n].if_index = if_index;
-        interface_configuration_request_msg.metadata()->interfaces[n].bridge_if_index =
-            bridge_if_index;
+        string_utils::copy_string(
+            interface_configuration_request_msg.metadata()->interfaces[n].ifname, iface.c_str(),
+            IF_NAMESIZE);
+        string_utils::copy_string(
+            interface_configuration_request_msg.metadata()->interfaces[n].bridge_ifname,
+            bridge_iface.c_str(), IF_NAMESIZE);
         interface_configuration_request_msg.metadata()->interfaces[n].flags |=
             Flags::ENABLE_IEEE1905_TRANSPORT;
         n++;
-        THREAD_LOG(DEBUG) << "adding interface " << iface
-                          << " to ieee1905 transport, if_index=" << if_index
-                          << " bridge_if_index=" << bridge_if_index;
+        THREAD_LOG(DEBUG) << "adding interface " << iface << " to ieee1905 transport"
+                          << " bridge=" << bridge_iface;
     }
     interface_configuration_request_msg.metadata()->numInterfaces = n;
     THREAD_LOG(DEBUG) << "numInterfaces=" << n;

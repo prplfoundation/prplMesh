@@ -12,6 +12,7 @@
 #include <mapf/common/message.h>
 
 #include <iomanip>
+#include <net/if.h>
 #include <netinet/ether.h>
 #include <sstream>
 
@@ -268,9 +269,10 @@ public:
     };
 
     struct Interface {
-        uint32_t if_index = 0; // the linux interface index of the specified interface
-        uint32_t bridge_if_index =
-            0; // the interface index of the bridge to which this interface belong to (or zero if it does not belong to a bridge)
+        // the linux interface index of the specified interface
+        char ifname[IF_NAMESIZE];
+        // the interface index of the bridge to which this interface belong to (or zero if it does not belong to a bridge)
+        char bridge_ifname[IF_NAMESIZE];
         uint32_t flags = 0;
     };
 
@@ -315,8 +317,8 @@ public:
 
         for (int i = 0; i < int(m->numInterfaces) && i < kMaxInterfaces; i++) {
             ss << "  interface " << i << ":"
-               << " if_index: " << m->interfaces[i].if_index
-               << " in bridge: " << m->interfaces[i].bridge_if_index << " flags:"
+               << " name: " << m->interfaces[i].ifname
+               << " in bridge: " << m->interfaces[i].bridge_ifname << " flags:"
                << ((m->interfaces[i].flags & Flags::ENABLE_IEEE1905_TRANSPORT) ? " transport" : "")
                << ((m->interfaces[i].flags & Flags::IS_BRIDGE) ? " bridge" : "") << std::endl;
         }

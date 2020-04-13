@@ -12,6 +12,7 @@
 #include <mapf/transport/ieee1905_transport.h>
 
 #include <mapf/common/logger.h>
+#include <mapf/common/utils.h>
 
 #include <arpa/inet.h>
 #include <ctype.h>
@@ -137,10 +138,10 @@
 //
 
 #define MAX_IFS 16
-static unsigned int ieee1905_bridge_if_index     = 0;
-static unsigned int ieee1905_if_indexes[MAX_IFS] = {0};
-static bool only_configure_interfaces            = false;
-static bool use_unicast_address                  = false;
+static std::string ieee1905_bridge_ifname;
+static std::string ieee1905_ifnames[MAX_IFS];
+static bool only_configure_interfaces = false;
+static bool use_unicast_address       = false;
 static uint8_t unicast_address[6];
 using namespace mapf;
 
@@ -251,18 +252,10 @@ int main(int argc, char *argv[])
     while ((c = getopt(argc, argv, "b:i:u:x")) != -1) {
         switch (c) {
         case 'b':
-            ieee1905_bridge_if_index = if_nametoindex(optarg);
-            if (ieee1905_bridge_if_index == 0) {
-                fprintf(stderr, "unknown interface %s\n", optarg);
-                return false;
-            }
+            ieee1905_bridge_ifname = std::string(optarg);
             break;
         case 'i':
-            ieee1905_if_indexes[interfaces] = if_nametoindex(optarg);
-            if (ieee1905_if_indexes[interfaces] == 0) {
-                fprintf(stderr, "unknown interface %s\n", optarg);
-                return false;
-            }
+            ieee1905_ifnames[interfaces] = std::string(optarg);
             interfaces++;
             break;
         case 'x':
@@ -393,18 +386,20 @@ int main(int argc, char *argv[])
         // inform the 1905 Transport on the required interface configuration (as specified on the command line)
         InterfaceConfigurationRequestMessage interface_configuration_request_msg;
         uint32_t n = 0;
-        if (ieee1905_bridge_if_index) {
+        if (!ieee1905_bridge_ifname.empty()) {
             using Flags = InterfaceConfigurationRequestMessage::Flags;
-            interface_configuration_request_msg.metadata()->interfaces[n].if_index =
-                ieee1905_bridge_if_index;
+            mapf::utils::copy_string(
+                interface_configuration_request_msg.metadata()->interfaces[n].ifname,
+                ieee1905_bridge_ifname.c_str(), IF_NAMESIZE);
             interface_configuration_request_msg.metadata()->interfaces[n].flags |= Flags::IS_BRIDGE;
             n++;
         }
         for (int i = 0; i < MAX_IFS; i++) {
-            if (ieee1905_if_indexes[i]) {
+            if (!ieee1905_ifnames[i].empty()) {
                 using Flags = InterfaceConfigurationRequestMessage::Flags;
-                interface_configuration_request_msg.metadata()->interfaces[n].if_index =
-                    ieee1905_if_indexes[i];
+                mapf::utils::copy_string(
+                    interface_configuration_request_msg.metadata()->interfaces[n].ifname,
+                    ieee1905_ifnames[i].c_str(), IF_NAMESIZE);
                 interface_configuration_request_msg.metadata()->interfaces[n].flags |=
                     Flags::ENABLE_IEEE1905_TRANSPORT;
                 n++;
