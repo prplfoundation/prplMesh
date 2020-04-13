@@ -78,7 +78,7 @@ void Ieee1905Transport::run()
 
             if (network_interface.fd >= 0 && !network_interface.is_bridge) {
                 MAPF_DBG("check for events on interface " << network_interface.ifname << ".");
-                auto revents = poller_.CheckEvent(network_interface.fd);
+                revents = poller_.CheckEvent(network_interface.fd);
                 if (revents & MAPF_POLLIN) {
                     MAPF_DBG("got MAPF_POLLIN event on interface " << network_interface.ifname
                                                                    << ".");
