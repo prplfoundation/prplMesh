@@ -4436,7 +4436,7 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     // 2. forward the request to the monitor
     // using vs message
 
-    // validation - get the correct type of the message
+    // get the correct type of the message
     auto beaconMetricsQuery = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
 
     if (!beaconMetricsQuery) {
