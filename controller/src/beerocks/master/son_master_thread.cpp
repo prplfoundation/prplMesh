@@ -1764,6 +1764,16 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
     return true;
 }
 
+bool master_thread::handle_cmdu_1905_beacon_response(const std::string &src_mac,
+                                      ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    // here we need to extract and keep the data received from the STA
+    // but currently we'll just print that we are here
+    auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "got beacon response from STA. mid: 0x" << std::hex << mid;
+    return true;
+}
+
 bool master_thread::handle_intel_slave_join(
     const std::string &src_mac, std::shared_ptr<wfa_map::tlvApRadioBasicCapabilities> radio_caps,
     beerocks::beerocks_header &beerocks_header, ieee1905_1::CmduMessageTx &cmdu_tx)

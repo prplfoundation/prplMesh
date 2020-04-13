@@ -1054,30 +1054,30 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         // DEBUG DEBUG DEBUG
         // Fake Response
         auto response = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>(cmdu_tx, beerocks_header->id());
+            beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>(cmdu_tx,
+                                                                          beerocks_header->id());
         if (response == nullptr) {
-            LOG(ERROR)
-                << "Failed building cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE message!";
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE message!";
             break;
         }
 
         // TODO: TEMPORARY CONVERSION!
-        response->params().channel                  = 1;
-        response->params().op_class                 = 2;
-        response->params().dialog_token             = 3;
-        response->params().measurement_token        = 4;
-        response->params().rep_mode                 = 5;
-        response->params().phy_type                 = 6;
-        response->params().frame_type               = 7;
-        response->params().rcpi                     = 8;
-        response->params().rsni                     = 9;
-        response->params().ant_id                   = 10;
-        response->params().duration                 = 11;
-        response->params().parent_tsf               = 12;
-        response->params().start_time               = 13;
-        response->params().new_ch_width             = 14;
-        response->params().new_ch_center_freq_seg_0 = 15;
-        response->params().new_ch_center_freq_seg_1 = 16;
+        response->params().channel                          = 1;
+        response->params().op_class                         = 2;
+        response->params().dialog_token                     = 3;
+        response->params().measurement_token                = 4;
+        response->params().rep_mode                         = 5;
+        response->params().phy_type                         = 6;
+        response->params().frame_type                       = 7;
+        response->params().rcpi                             = 8;
+        response->params().rsni                             = 9;
+        response->params().ant_id                           = 10;
+        response->params().duration                         = 11;
+        response->params().parent_tsf                       = 12;
+        response->params().start_time                       = 13;
+        response->params().new_ch_width                     = 14;
+        response->params().new_ch_center_freq_seg_0         = 15;
+        response->params().new_ch_center_freq_seg_1         = 16;
         response->params().use_optional_wide_band_ch_switch = 17;
         std::copy_n("abcdefghijklmnop", sizeof(response->params().sta_mac.oct),
                     response->params().sta_mac.oct);
@@ -1085,22 +1085,10 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                     response->params().bssid.oct);
 
         LOG(DEBUG) << "DEBUG DEBUG: Sending beacon measurement reponse on BSSID: "
-                  << response->params().bssid << " to task_id: " << beerocks_header->id();
+                   << response->params().bssid << " to task_id: " << beerocks_header->id();
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
         // end DEBUG DEBUG DEBUG
-
-
-
-
-
-
-
-
-
-
-
-
 
         break;
     }
