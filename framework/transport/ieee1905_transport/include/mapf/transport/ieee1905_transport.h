@@ -17,6 +17,7 @@
 #include <chrono>
 #include <linux/netlink.h>
 #include <map>
+#include <net/if.h>
 
 //
 // Notes:
@@ -51,6 +52,14 @@ public:
     void run();
 
 private:
+    std::string if_index2name(unsigned int index)
+    {
+        char ifname[IF_NAMESIZE] = {0};
+        if (if_indextoname(index, ifname)) {
+            return std::string(ifname);
+        }
+        return std::string();
+    }
     // network interface status table
     // this table holds all the network interfaces that are to be used by
     // the transport.
