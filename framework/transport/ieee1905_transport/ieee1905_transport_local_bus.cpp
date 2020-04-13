@@ -6,6 +6,7 @@
  * See LICENSE file for more details.
  */
 
+#include <mapf/common/utils.h>
 #include <mapf/transport/ieee1905_transport.h>
 
 #include <arpa/inet.h>
@@ -93,7 +94,7 @@ void Ieee1905Transport::handle_local_bus_cmdu_tx_message(CmduTxMessage &msg)
 void Ieee1905Transport::handle_local_bus_interface_configuration_request_message(
     InterfaceConfigurationRequestMessage &msg)
 {
-    std::map<unsigned int, NetworkInterface> updated_network_interfaces;
+    std::map<std::string, NetworkInterface> updated_network_interfaces;
 
     // fill an interfaces std::map with the specified interfaces
     for (int i = 0; i < int(msg.metadata()->numInterfaces); i++) {
@@ -105,16 +106,18 @@ void Ieee1905Transport::handle_local_bus_interface_configuration_request_message
             continue;
         }
 
-        unsigned int if_index = if_nametoindex(msg.metadata()->interfaces[i].ifname);
+        std::string ifname        = std::string(msg.metadata()->interfaces[i].ifname);
+        std::string bridge_ifname = std::string(msg.metadata()->interfaces[i].bridge_ifname);
+        unsigned int if_index     = if_nametoindex(ifname.c_str());
 
-        if (updated_network_interfaces.count(if_index) > 0) {
+        if (updated_network_interfaces.count(ifname) > 0) {
             MAPF_ERR("ignoring duplicate entry for interface " << if_index << ".");
             continue;
         }
 
-        updated_network_interfaces[if_index].bridge_if_index =
-            if_nametoindex(msg.metadata()->interfaces[i].bridge_ifname);
-        updated_network_interfaces[if_index].is_bridge =
+        updated_network_interfaces[ifname].ifname      = ifname;
+        updated_network_interfaces[ifname].bridge_name = bridge_ifname;
+        updated_network_interfaces[ifname].is_bridge =
             msg.metadata()->interfaces[i].flags & Flags::IS_BRIDGE;
     }
 
@@ -163,14 +166,15 @@ void Ieee1905Transport::publish_interface_configuration_indication()
     InterfaceConfigurationIndicationMessage indication_msg;
     uint32_t n = 0;
     for (auto it = network_interfaces_.begin(); it != network_interfaces_.end(); ++it) {
-        using Flags             = InterfaceConfigurationRequestMessage::Flags;
-        unsigned int if_index   = it->first;
-        auto &network_interface = it->second;
+        using Flags = InterfaceConfigurationRequestMessage::Flags;
+        auto &iface = it->second;
 
-        if_indextoname(if_index, indication_msg.metadata()->interfaces[n].ifname);
-        if_indextoname(network_interface.bridge_if_index,
-                       indication_msg.metadata()->interfaces[n].bridge_ifname);
-        if (network_interface.is_bridge) {
+        mapf::utils::copy_string(indication_msg.metadata()->interfaces[n].ifname,
+                                 iface.ifname.c_str(), IF_NAMESIZE);
+        mapf::utils::copy_string(indication_msg.metadata()->interfaces[n].bridge_ifname,
+                                 iface.bridge_name.c_str(), IF_NAMESIZE);
+
+        if (iface.is_bridge) {
             indication_msg.metadata()->interfaces[n].flags |= Flags::IS_BRIDGE;
         } else {
             indication_msg.metadata()->interfaces[n].flags |= Flags::ENABLE_IEEE1905_TRANSPORT;

@@ -70,11 +70,15 @@ int Ieee1905Transport::handle_netlink_message(struct nlmsghdr *msghdr)
     if (msghdr->nlmsg_type == RTM_NEWLINK || msghdr->nlmsg_type == RTM_DELLINK) {
         struct ifinfomsg *ifi = (struct ifinfomsg *)NLMSG_DATA(msghdr);
         bool is_active        = (ifi->ifi_flags & IFF_RUNNING) && (ifi->ifi_flags & IFF_UP);
-
+        std::string ifname    = if_index2name(ifi->ifi_index);
+        if (ifname.empty()) {
+            MAPF_DBG("Failed to get interface name for index " << ifi->ifi_index);
+            return false;
+        }
         MAPF_DBG("received netlink RTM_NEWLINK/RTM_DELLINK message (interface "
-                 << ifi->ifi_index << " is " << (is_active ? "active" : "inactive") << ").");
+                 << ifname << " is " << (is_active ? "active" : "inactive") << ").");
 
-        if (ifi->ifi_index > 0 && network_interfaces_.count(ifi->ifi_index) > 0) {
+        if (ifi->ifi_index > 0 && network_interfaces_.count(ifname) > 0) {
             handle_interface_status_change((unsigned)ifi->ifi_index, is_active);
         } else if (ifi->ifi_index < 0) {
             MAPF_WARN("bad interface index (" << ifi->ifi_index << ") in netlink message.");

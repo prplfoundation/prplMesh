@@ -74,21 +74,22 @@ void Ieee1905Transport::run()
 
         // check for events on all active network interface sockets
         for (auto it = network_interfaces_.begin(); it != network_interfaces_.end(); ++it) {
-            unsigned int if_index   = it->first;
             auto &network_interface = it->second;
 
             if (network_interface.fd >= 0 && !network_interface.is_bridge) {
-                MAPF_DBG("check for events on interface " << if_index << ".");
+                MAPF_DBG("check for events on interface " << network_interface.ifname << ".");
                 auto revents = poller_.CheckEvent(network_interface.fd);
                 if (revents & MAPF_POLLIN) {
-                    MAPF_DBG("got MAPF_POLLIN event on interface " << if_index << ".");
+                    MAPF_DBG("got MAPF_POLLIN event on interface " << network_interface.ifname
+                                                                   << ".");
                     handle_interface_pollin_event(network_interface.fd);
                 }
                 if (revents & MAPF_POLLERR) {
                     // this could happen whenever an interface comes down
-                    MAPF_DBG("got MAPF_POLLERR event on interface " << if_index
+                    MAPF_DBG("got MAPF_POLLERR event on interface " << network_interface.ifname
                                                                     << " (disabling it).");
-                    handle_interface_status_change(if_index, false);
+                    handle_interface_status_change(if_nametoindex(network_interface.ifname.c_str()),
+                                                   false);
                 }
             }
         }

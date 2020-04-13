@@ -81,15 +81,15 @@ private:
 };
 
 void Ieee1905Transport::update_network_interfaces(
-    std::map<unsigned int, NetworkInterface> updated_network_interfaces)
+    std::map<std::string, NetworkInterface> updated_network_interfaces)
 {
     // find and remove interfaces that are no longer in use
     for (auto it = network_interfaces_.begin(); it != network_interfaces_.end();) {
-        unsigned int if_index   = it->first;
         auto &network_interface = it->second;
+        auto &ifname            = network_interface.ifname;
 
-        if (updated_network_interfaces.count(it->first) == 0) {
-            MAPF_DBG("interface " << if_index << " is no longer used.");
+        if (updated_network_interfaces.count(ifname) == 0) {
+            MAPF_INFO("interface " << ifname << " is no longer used.");
             if (network_interface.fd >= 0) {
                 poller_.Remove(network_interface.fd);
                 close(network_interface.fd);
@@ -104,45 +104,52 @@ void Ieee1905Transport::update_network_interfaces(
     // add new interfaces or update existing ones
     for (auto it = updated_network_interfaces.begin(); it != updated_network_interfaces.end();
          ++it) {
-        unsigned int if_index           = it->first;
         auto &updated_network_interface = it->second;
+        auto &ifname                    = updated_network_interface.ifname;
+        unsigned int if_index           = if_nametoindex(ifname.c_str());
 
-        MAPF_DBG("interface " << if_index << " is used.");
-        network_interfaces_[if_index].bridge_if_index = updated_network_interface.bridge_if_index;
-        network_interfaces_[if_index].is_bridge       = updated_network_interface.is_bridge;
+        MAPF_INFO("interface " << ifname << " if_index " << if_index << " is used.");
+        network_interfaces_[ifname].ifname      = updated_network_interface.ifname;
+        network_interfaces_[ifname].bridge_name = updated_network_interface.bridge_name;
+        network_interfaces_[ifname].is_bridge   = updated_network_interface.is_bridge;
 
         // must be called before open_interface_socket (address is used for packet filtering)
-        if (!get_interface_mac_addr(if_index, network_interfaces_[if_index].addr)) {
+        if (!get_interface_mac_addr(if_index, network_interfaces_[ifname].addr)) {
             MAPF_WARN("cannot get address of interface " << if_index << ".");
         }
 
-        if (network_interfaces_[if_index].fd < 0) {
+        if (network_interfaces_[ifname].fd < 0) {
             // if the interface is not already open, try to open it and add it to the poller loop
             if (!open_interface_socket(if_index)) {
                 MAPF_WARN("cannot open interface " << if_index << ".");
             }
 
             // add interface raw socket fd to poller loop (unless it's a bridge interface)
-            if (!network_interfaces_[if_index].is_bridge && network_interfaces_[if_index].fd >= 0) {
-                poller_.Add(network_interfaces_[if_index].fd);
+            if (!network_interfaces_[ifname].is_bridge && network_interfaces_[ifname].fd >= 0) {
+                poller_.Add(network_interfaces_[ifname].fd);
             }
         }
 
-        if (network_interfaces_[if_index].is_bridge) {
+        if (network_interfaces_[ifname].is_bridge) {
             // use the last set bridge address as AL MAC address (there should be a single bridge interface configured at any given time)
             // TODO: let the Multi-AP Agent set the AL MAC address using proper API and remove this code
-            set_al_mac_addr(network_interfaces_[if_index].addr);
+            set_al_mac_addr(network_interfaces_[ifname].addr);
         }
     }
 }
 
 bool Ieee1905Transport::open_interface_socket(unsigned int if_index)
 {
-    MAPF_DBG("opening raw socket on interface " << if_index << ".");
+    std::string ifname = if_index2name(if_index);
+    if (ifname.empty()) {
+        MAPF_ERR("Failed to get interface name for index " << if_index);
+        return false;
+    }
+    MAPF_DBG("opening raw socket on interface " << ifname << ".");
 
-    if (network_interfaces_[if_index].fd != -1) {
-        close(network_interfaces_[if_index].fd);
-        network_interfaces_[if_index].fd = -1;
+    if (network_interfaces_[ifname].fd != -1) {
+        close(network_interfaces_[ifname].fd);
+        network_interfaces_[ifname].fd = -1;
     }
 
     // Note to developer: The current implementation uses AF_PACKET socket with SOCK_RAW protocol which means we receive
@@ -178,7 +185,7 @@ bool Ieee1905Transport::open_interface_socket(unsigned int if_index)
         return false;
     }
 
-    network_interfaces_[if_index].fd = sockfd;
+    network_interfaces_[ifname].fd = sockfd;
 
     attach_interface_socket_filter(if_index);
 
@@ -187,7 +194,13 @@ bool Ieee1905Transport::open_interface_socket(unsigned int if_index)
 
 bool Ieee1905Transport::attach_interface_socket_filter(unsigned int if_index)
 {
-    if (!network_interfaces_.count(if_index)) {
+    std::string ifname = if_index2name(if_index);
+    if (ifname.empty()) {
+        MAPF_ERR("Failed to get interface name for index " << if_index);
+        return false;
+    }
+
+    if (!network_interfaces_.count(ifname)) {
         MAPF_ERR("un-tracked interface " << if_index << ".");
         return false;
     }
@@ -199,7 +212,7 @@ bool Ieee1905Transport::attach_interface_socket_filter(unsigned int if_index)
     struct packet_mreq mr = {0};
     mr.mr_ifindex         = if_index;
     mr.mr_type            = PACKET_MR_PROMISC;
-    if (setsockopt(network_interfaces_[if_index].fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr,
+    if (setsockopt(network_interfaces_[ifname].fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr,
                    sizeof(mr)) == -1) {
         MAPF_ERR("cannot put interface in promiscuous mode \"" << strerror(errno) << "\" (" << errno
                                                                << ").");
@@ -208,10 +221,10 @@ bool Ieee1905Transport::attach_interface_socket_filter(unsigned int if_index)
 
     // prepare linux packet filter for this interface
     struct sock_fprog fprog =
-        Ieee1905SocketFilter(al_mac_addr_, network_interfaces_[if_index].addr).sock_fprog();
+        Ieee1905SocketFilter(al_mac_addr_, network_interfaces_[ifname].addr).sock_fprog();
 
     // attach filter
-    if (setsockopt(network_interfaces_[if_index].fd, SOL_SOCKET, SO_ATTACH_FILTER, &fprog,
+    if (setsockopt(network_interfaces_[ifname].fd, SOL_SOCKET, SO_ATTACH_FILTER, &fprog,
                    sizeof(fprog)) == -1) {
         MAPF_ERR("cannot attach socket filter \"" << strerror(errno) << "\" (" << errno << ").");
         return false;
@@ -222,25 +235,31 @@ bool Ieee1905Transport::attach_interface_socket_filter(unsigned int if_index)
 
 void Ieee1905Transport::handle_interface_status_change(unsigned int if_index, bool is_active)
 {
-    if (!network_interfaces_.count(if_index)) {
-        MAPF_ERR("un-tracked interface " << if_index << ".");
+    std::string ifname = if_index2name(if_index);
+    if (ifname.empty()) {
+        MAPF_ERR("Failed to get interface name for index " << if_index);
         return;
     }
 
-    MAPF_DBG("interface " << if_index << " is now " << (is_active ? "active" : "inactive") << ".");
-
-    if (!is_active && network_interfaces_[if_index].fd >= 0) {
-        poller_.Remove(network_interfaces_[if_index].fd);
-        close(network_interfaces_[if_index].fd);
-        network_interfaces_[if_index].fd = -1;
+    if (!network_interfaces_.count(ifname)) {
+        MAPF_ERR("un-tracked interface " << ifname << ".");
+        return;
     }
 
-    if (is_active && network_interfaces_[if_index].fd < 0) {
+    MAPF_INFO("interface " << ifname << " is now " << (is_active ? "active" : "inactive") << ".");
+
+    if (!is_active && network_interfaces_[ifname].fd >= 0) {
+        poller_.Remove(network_interfaces_[ifname].fd);
+        close(network_interfaces_[ifname].fd);
+        network_interfaces_[ifname].fd = -1;
+    }
+
+    if (is_active && network_interfaces_[ifname].fd < 0) {
         if (!open_interface_socket(if_index)) {
             MAPF_ERR("cannot open network interface " << if_index << ".");
         }
-        if (network_interfaces_[if_index].fd >= 0)
-            poller_.Add(network_interfaces_[if_index].fd);
+        if (network_interfaces_[ifname].fd >= 0)
+            poller_.Add(network_interfaces_[ifname].fd);
     }
 }
 
@@ -333,10 +352,15 @@ bool Ieee1905Transport::get_interface_mac_addr(unsigned int if_index, uint8_t *a
 
 bool Ieee1905Transport::send_packet_to_network_interface(unsigned int if_index, Packet &packet)
 {
-    MAPF_DBG("sending packet on interface " << if_index << ".");
+    std::string ifname = if_index2name(if_index);
+    if (ifname.empty()) {
+        MAPF_ERR("Failed to get interface name for index " << if_index);
+        return false;
+    }
+    MAPF_DBG("sending packet on interface " << ifname << ".");
 
-    if (!network_interfaces_.count(if_index)) {
-        MAPF_ERR("un-tracked interface " << if_index << ".");
+    if (!network_interfaces_.count(ifname)) {
+        MAPF_ERR("un-tracked interface " << ifname << ".");
         return false;
     }
 
@@ -349,7 +373,7 @@ bool Ieee1905Transport::send_packet_to_network_interface(unsigned int if_index, 
 
     packet.header = {.iov_base = &eh, .iov_len = sizeof(eh)};
 
-    int fd             = network_interfaces_[if_index].fd;
+    int fd             = network_interfaces_[ifname].fd;
     struct iovec iov[] = {packet.header, packet.payload};
     int n              = writev(fd, iov, sizeof(iov) / sizeof(struct iovec));
 
@@ -372,8 +396,9 @@ void Ieee1905Transport::set_al_mac_addr(const uint8_t *addr)
 
     // refresh packet filtering on all active interfaces to use the new AL MAC address
     for (auto it = network_interfaces_.begin(); it != network_interfaces_.end(); ++it) {
-        unsigned int if_index   = it->first;
         auto &network_interface = it->second;
+        auto &ifname            = network_interface.ifname;
+        unsigned int if_index   = if_nametoindex(ifname.c_str());
 
         if (network_interface.fd >= 0) {
             attach_interface_socket_filter(if_index);

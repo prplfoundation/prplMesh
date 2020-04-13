@@ -407,9 +407,14 @@ bool Ieee1905Transport::forward_packet(Packet &packet)
             return false;
         }
     } else if (packet.dst_if_type == CmduRxMessage::IF_TYPE_NET && packet.dst_if_index != 0) {
-        MAPF_DBG("forwarding packet to interface " << packet.dst_if_index << ".");
-        if (network_interfaces_.count(packet.dst_if_index) == 0) {
-            MAPF_ERR("un-tracked interface " << packet.dst_if_index << ".");
+        std::string ifname = if_index2name(packet.dst_if_index);
+        if (ifname.empty()) {
+            MAPF_ERR("Coudn't find ifname for index " << packet.dst_if_index);
+            return false;
+        }
+        MAPF_DBG("forwarding packet to interface " << ifname << ".");
+        if (network_interfaces_.count(ifname) == 0) {
+            MAPF_ERR("un-tracked interface " << ifname << ".");
             return false;
         }
         if (!fragment_and_send_packet_to_network_interface(packet.dst_if_index, packet)) {
@@ -490,8 +495,9 @@ bool Ieee1905Transport::forward_packet(Packet &packet)
         }
         if (forward_to_network_interfaces || forward_to_bridge) {
             for (auto it = network_interfaces_.begin(); it != network_interfaces_.end(); ++it) {
-                unsigned int if_index   = it->first;
                 auto &network_interface = it->second;
+                auto &ifname            = it->second.ifname;
+                unsigned int if_index   = if_nametoindex(ifname.c_str());
 
                 if (((forward_to_bridge && network_interface.is_bridge) ||
                      (forward_to_network_interfaces && !network_interface.is_bridge)) &&
@@ -499,7 +505,7 @@ bool Ieee1905Transport::forward_packet(Packet &packet)
                     !(packet.src_if_type == CmduRxMessage::IF_TYPE_NET &&
                       packet.src_if_index == if_index)) { /* avoid loop-back */
                     if (!fragment_and_send_packet_to_network_interface(if_index, packet)) {
-                        MAPF_ERR("cannot forward packet to network inteface " << if_index << ".");
+                        MAPF_ERR("cannot forward packet to network inteface " << ifname << ".");
                     }
                 }
             }
