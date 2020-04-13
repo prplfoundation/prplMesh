@@ -365,12 +365,12 @@ class TestFlows:
 
         debug("Confirming ap capability query has been received on agent")
         self.check_log(env.agents[0], "AP_CAPABILITY_QUERY_MESSAGE")
+        capability_query = env.wired_sniffer.get_packets_for_cmdu_type(self.running,0x8001)
         
         debug("Confirming ap capability report has been received on controller")
         self.check_log(env.controller, "AP_CAPABILITY_REPORT_MESSAGE")
+        capability_report = env.wired_sniffer.get_packets_for_cmdu_type(self.running,0x8002)
         
-        
-
     def test_link_metric_query(self):
         env.controller.dev_send_1905(env.agents[0].mac, 0x0005,
                                      tlv(0x08, 0x0002, "0x00 0x02"))
