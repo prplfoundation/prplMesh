@@ -654,19 +654,19 @@ class TestFlows:
 
     def test_beacon_report_query(self):
 
-        sta  = env.Station.create()
+        # associated STA
+        sta = env.Station.create()
 
         # for testing non existing STA, the error flow
         sta1 = env.Station.create()
 
-        debug("Connect dummy STA to wlan0")
+        debug("Connect dummy STA (" + sta.mac + ") to wlan0")
         env.agents[0].radios[0].vaps[0].associate(sta)
 
         # send beacon query request
         debug("Sending beacon report query to repeater:")
         request='{mac} 0x73 0xFFFFFFFFFFFF 0x02 0x00 0x01 0x03 0x73 0x24 0x30'.format(mac=sta1.mac)
-        debug(request)
-
+        debug(request) 
         env.controller.dev_send_1905(env.agents[0].mac, 0x8011, tlv(0x99, 0x0014, "{" + request + "}"))
 
 if __name__ == '__main__':

@@ -54,6 +54,7 @@
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
+#include <tlvf/wfa_map/tlvErrorCode.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvRadioOperationRestriction.h>
@@ -987,8 +988,20 @@ bool master_thread::handle_cmdu_1905_ack_message(const std::string &src_mac,
                                                  ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
+
+    // extract error code, if any
+    std::stringstream errorSS;
+    auto error_tlv = cmdu_rx.getClass<wfa_map::tlvErrorCode>();
+    if (error_tlv) {
+        errorSS << "0x" << error_tlv->reason_code();
+    } else {
+        errorSS << "no error";
+    }
+
+    LOG(DEBUG) << "Received ACK_MESSAGE, mid:" << std::hex << int(mid)
+               << " tlv error code: " << errorSS.str();
+
     //TODO: the ACK should be sent to the correct task and will be done as part of agent certification
-    LOG(DEBUG) << "Received ACK_MESSAGE, mid=" << std::hex << int(mid);
     return true;
 }
 
