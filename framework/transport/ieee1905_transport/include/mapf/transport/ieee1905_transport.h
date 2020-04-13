@@ -60,20 +60,25 @@ private:
         }
         return std::string();
     }
+
+    struct NetworkInterface {
+        /// the file descriptor of the socket bound to this interface (or -1 if inactive)
+        int fd = -1;
+        /// mac address of the interface
+        uint8_t addr[ETH_ALEN] = {0};
+        /// interface name
+        std::string ifname;
+        /// the bridge's interface name (if this interface is in a bridge)
+        std::string bridge_name;
+        /// is this interface a bridge interface
+        bool is_bridge = false;
+    };
     // network interface status table
     // this table holds all the network interfaces that are to be used by
     // the transport.
     //
-    // interface index (if_index) is used as Key to the table
-    struct NetworkInterface {
-        int fd =
-            -1; // the file descriptor of the socket bound to this interface (or -1 if inactive)
-        uint8_t addr[ETH_ALEN] = {0};
-        unsigned int bridge_if_index =
-            0;                  // the bridge's interface index (if this interface is in a bridge)
-        bool is_bridge = false; // is this interface a bridge interface
-    };
-    std::map<unsigned int, NetworkInterface> network_interfaces_;
+    // interface name (ifname) is used as Key to the table
+    std::map<std::string, NetworkInterface> network_interfaces_;
 
     // netlink socket file descriptor (used to track network interface status)
     int netlink_fd_ = -1;
@@ -242,7 +247,7 @@ private:
     // NETWORK INTERFACE STUFF
     //
     void
-    update_network_interfaces(std::map<unsigned int, NetworkInterface> updated_network_interfaces);
+    update_network_interfaces(std::map<std::string, NetworkInterface> updated_network_interfaces);
     bool open_interface_socket(unsigned int if_index);
     bool attach_interface_socket_filter(unsigned int if_index);
     void handle_interface_status_change(unsigned int if_index, bool is_active);

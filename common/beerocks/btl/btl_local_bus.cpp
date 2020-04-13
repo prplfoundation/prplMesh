@@ -111,17 +111,17 @@ bool transport_socket_thread::configure_ieee1905_transport_interfaces(
     using Flags = mapf::InterfaceConfigurationRequestMessage::Flags;
 
     uint32_t n = 0;
-    string_utils::copy_string(interface_configuration_request_msg.metadata()->interfaces[n].ifname,
-                              bridge_iface.c_str(), IF_NAMESIZE);
+    mapf::utils::copy_string(interface_configuration_request_msg.metadata()->interfaces[n].ifname,
+                             bridge_iface.c_str(), IF_NAMESIZE);
     interface_configuration_request_msg.metadata()->interfaces[n].flags |= Flags::IS_BRIDGE;
     n++;
     THREAD_LOG(DEBUG) << "adding bridge " << bridge_iface
                       << " to ieee1905 transport, bridge iface=" << bridge_iface;
     for (const auto &iface : ifaces) {
-        string_utils::copy_string(
+        mapf::utils::copy_string(
             interface_configuration_request_msg.metadata()->interfaces[n].ifname, iface.c_str(),
             IF_NAMESIZE);
-        string_utils::copy_string(
+        mapf::utils::copy_string(
             interface_configuration_request_msg.metadata()->interfaces[n].bridge_ifname,
             bridge_iface.c_str(), IF_NAMESIZE);
         interface_configuration_request_msg.metadata()->interfaces[n].flags |=
