@@ -265,9 +265,8 @@ class VirtualAPDocker(VirtualAP):
         self.radio.send_bwl_event("EVENT AP-STA-DISCONNECTED {}".format(sta.mac))
 
 
-def _get_bridge_interface(unique_id):
+def _get_bridge_interface(docker_network):
     '''Use docker network inspect to get the docker bridge interface.'''
-    docker_network = 'prplMesh-net-{}'.format(unique_id)
     docker_network_inspect_cmd = ('docker', 'network', 'inspect', docker_network)
     inspect_result = subprocess.run(docker_network_inspect_cmd, stdout=subprocess.PIPE)
     if inspect_result.returncode != 0:
@@ -296,8 +295,8 @@ def _get_bridge_interface(unique_id):
 
 def launch_environment_docker(unique_id: str, skip_init: bool = False):
     global wired_sniffer
-    wired_sniffer = sniffer.Sniffer(_get_bridge_interface(unique_id),
-                                    opts.tcpdump, opts.tcpdump_dir)
+    iface = _get_bridge_interface('prplMesh-net-{}'.format(unique_id))
+    wired_sniffer = sniffer.Sniffer(iface, opts.tcpdump, opts.tcpdump_dir)
 
     gateway = 'gateway-' + unique_id
     repeater1 = 'repeater1-' + unique_id
