@@ -13,7 +13,7 @@ import subprocess
 import time
 
 from capi import UCCSocket
-from opts import debug, err
+from opts import opts, debug, err
 import sniffer
 
 
@@ -296,7 +296,8 @@ def _get_bridge_interface(unique_id):
 
 def launch_environment_docker(unique_id: str, skip_init: bool = False):
     global wired_sniffer
-    wired_sniffer = sniffer.Sniffer(_get_bridge_interface(unique_id))
+    wired_sniffer = sniffer.Sniffer(_get_bridge_interface(unique_id),
+                                    opts.tcpdump, opts.tcpdump_dir)
 
     gateway = 'gateway-' + unique_id
     repeater1 = 'repeater1-' + unique_id

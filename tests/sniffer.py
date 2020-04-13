@@ -8,21 +8,23 @@
 import os
 import subprocess
 
-from opts import debug, err, opts, status
+from opts import debug, err, status
 
 
 class Sniffer:
     '''Captures packets on an interface.'''
-    def __init__(self, interface: str):
+    def __init__(self, interface: str, use_tcpdump: bool, tcpdump_log_dir: str):
         self.interface = interface
+        self.use_tcpdump = use_tcpdump
+        self.tcpdump_log_dir = tcpdump_log_dir
         self.tcpdump_proc = None
 
     def start(self, outputfile_basename):
         '''Start tcpdump if enabled by config.'''
-        if opts.tcpdump:
+        if self.use_tcpdump:
             debug("Starting tcpdump, output file {}.pcap".format(outputfile_basename))
-            os.makedirs(os.path.join(opts.tcpdump_dir, 'logs'), exist_ok=True)
-            outputfile = os.path.join(opts.tcpdump_dir, outputfile_basename) + ".pcap"
+            os.makedirs(os.path.join(self.tcpdump_log_dir, 'logs'), exist_ok=True)
+            outputfile = os.path.join(self.tcpdump_log_dir, outputfile_basename) + ".pcap"
             command = ["tcpdump", "-i", self.interface, "-w", outputfile]
             self.tcpdump_proc = subprocess.Popen(command, stderr=subprocess.PIPE)
             # tcpdump takes a while to start up. Wait for the appropriate output before continuing.
