@@ -9,6 +9,7 @@
 #include <mapf/transport/ieee1905_transport.h>
 
 #include <arpa/inet.h>
+#include <net/if.h>
 
 namespace mapf {
 
@@ -104,7 +105,7 @@ void Ieee1905Transport::handle_local_bus_interface_configuration_request_message
             continue;
         }
 
-        unsigned int if_index = msg.metadata()->interfaces[i].if_index;
+        unsigned int if_index = if_nametoindex(msg.metadata()->interfaces[i].ifname);
 
         if (updated_network_interfaces.count(if_index) > 0) {
             MAPF_ERR("ignoring duplicate entry for interface " << if_index << ".");
@@ -112,7 +113,7 @@ void Ieee1905Transport::handle_local_bus_interface_configuration_request_message
         }
 
         updated_network_interfaces[if_index].bridge_if_index =
-            msg.metadata()->interfaces[i].bridge_if_index;
+            if_nametoindex(msg.metadata()->interfaces[i].bridge_ifname);
         updated_network_interfaces[if_index].is_bridge =
             msg.metadata()->interfaces[i].flags & Flags::IS_BRIDGE;
     }
@@ -166,9 +167,9 @@ void Ieee1905Transport::publish_interface_configuration_indication()
         unsigned int if_index   = it->first;
         auto &network_interface = it->second;
 
-        indication_msg.metadata()->interfaces[n].if_index = if_index;
-        indication_msg.metadata()->interfaces[n].bridge_if_index =
-            network_interface.bridge_if_index;
+        if_indextoname(if_index, indication_msg.metadata()->interfaces[n].ifname);
+        if_indextoname(network_interface.bridge_if_index,
+                       indication_msg.metadata()->interfaces[n].bridge_ifname);
         if (network_interface.is_bridge) {
             indication_msg.metadata()->interfaces[n].flags |= Flags::IS_BRIDGE;
         } else {
