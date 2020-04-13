@@ -665,7 +665,7 @@ class TestFlows:
 
         # send beacon query request
         debug("Sending beacon report query to repeater:")
-        request='{mac} 0x73 0xFFFFFFFFFFFF 0x02 0x00 0x01 0x03 0x73 0x24 0x30'.format(mac=sta1.mac)
+        request='{mac} 0x73 0xFFFFFFFFFFFF 0x02 0x00 0x01 0x03 0x73 0x24 0x30'.format(mac=sta.mac)
         debug(request) 
         env.controller.dev_send_1905(env.agents[0].mac, 0x8011, tlv(0x99, 0x0014, "{" + request + "}"))
 
