@@ -279,36 +279,38 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
                                                ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     switch (cmdu_rx.getMessageType()) {
+    case ieee1905_1::eMessageType::ACK_MESSAGE:
+        return handle_cmdu_1905_ack_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE:
         return handle_cmdu_1905_autoconfiguration_search(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE:
         return handle_cmdu_1905_autoconfiguration_WSC(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE:
+        return handle_cmdu_1905_ap_capability_report(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_ap_metric_response(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_beacon_response(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE:
         return handle_cmdu_1905_channel_preference_report(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE:
         return handle_cmdu_1905_channel_selection_response(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE:
-        return handle_cmdu_1905_steering_completed_message(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::ACK_MESSAGE:
-        return handle_cmdu_1905_ack_message(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE:
-        return handle_cmdu_1905_client_steering_btm_report_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE:
         return handle_cmdu_1905_client_capability_report_message(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE:
-        return handle_cmdu_1905_operating_channel_report(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE:
+        return handle_cmdu_1905_client_steering_btm_report_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE:
         return handle_cmdu_1905_higher_layer_data_message(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_link_metric_response(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE:
+        return handle_cmdu_1905_operating_channel_report(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE:
+        return handle_cmdu_1905_steering_completed_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE:
         return handle_cmdu_1905_topology_notification(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE:
         return handle_cmdu_1905_topology_response(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE:
-        return handle_cmdu_1905_link_metric_response(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE:
-        return handle_cmdu_1905_ap_metric_response(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE:
-        return handle_cmdu_1905_ap_capability_report(src_mac, cmdu_rx);
     default:
         break;
     }
