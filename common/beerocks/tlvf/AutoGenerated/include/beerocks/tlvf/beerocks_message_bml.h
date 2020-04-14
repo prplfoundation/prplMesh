@@ -1114,15 +1114,15 @@ class cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE : public BaseClass
         eActionOp_BML* m_action_op = nullptr;
 };
 
-class cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST : public BaseClass
+class cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST : public BaseClass
 {
     public:
-        cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST();
+        cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST();
 
         static eActionOp_BML get_action_op(){
-            return (eActionOp_BML)(ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST);
+            return (eActionOp_BML)(ACTION_BML_WIFI_CREDENTIALS_SET_REQUEST);
         }
         sWifiCredentials& params();
         void class_swap() override;
@@ -1135,15 +1135,15 @@ class cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST : public BaseClass
         sWifiCredentials* m_params = nullptr;
 };
 
-class cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE : public BaseClass
+class cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE : public BaseClass
 {
     public:
-        cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE();
+        cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE();
 
         static eActionOp_BML get_action_op(){
-            return (eActionOp_BML)(ACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE);
+            return (eActionOp_BML)(ACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE);
         }
         uint32_t& error_code();
         void class_swap() override;
