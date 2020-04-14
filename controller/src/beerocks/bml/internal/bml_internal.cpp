@@ -772,10 +772,10 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                                 " but no one is waiting...";
             }
         } break;
-        case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE: {
+        case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE: {
             auto response =
                 beerocks_header
-                    ->addClass<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE>();
+                    ->addClass<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE>();
 
             // Signal any waiting threads
             if (m_prmWiFiCredentialsUpdate) {
@@ -2014,11 +2014,12 @@ int bml_internal::set_wifi_credentials(const std::string ssid, const std::string
         }
     }
 
-    auto config = message_com::create_vs_message<
-        beerocks_message::cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST>(cmdu_tx);
+    auto config =
+        message_com::create_vs_message<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST>(
+            cmdu_tx);
 
     if (config == nullptr) {
-        LOG(ERROR) << "Failed building ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST message!";
+        LOG(ERROR) << "Failed building ACTION_BML_WIFI_CREDENTIALS_SET_REQUEST message!";
         // Clear the promise holder
         m_prmWiFiCredentialsUpdate = nullptr;
         return (-BML_RET_OP_FAILED);

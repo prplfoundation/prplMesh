@@ -1503,8 +1503,8 @@ void son_management::handle_bml_message(Socket *sd,
         message_com::send_cmdu(sd, cmdu_tx);
         break;
     }
-    case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST: {
-        LOG(TRACE) << "ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST";
+    case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_SET_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_WIFI_CREDENTIALS_SET_REQUEST";
         // TODO: trigger auto-config, probaly it will be a good idea to change the message to
         // "ACTION_BML_UPDATE_CONFIGURATION_REQUEST"
         break;
