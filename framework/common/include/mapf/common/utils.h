@@ -30,6 +30,23 @@ namespace utils {
  */
 std::string dump_buffer(uint8_t *buffer, size_t len);
 
+
+/**
+ * @brief a bytes buffer
+ *
+ * This class represents a collection of opaque bytes.
+ */
+class bytes : public std::basic_string<uint8_t> {
+public:
+    bytes()
+        : std::basic_string<uint8_t>()
+    {}
+
+    bytes(const uint8_t* buf, size_t buf_size)
+        : std::basic_string<uint8_t>(buf, buf_size)
+    {}
+};
+
 } // namespace utils
 } // namespace mapf
 #endif // MAPFUTILS_H_
