@@ -107,21 +107,25 @@ void dynamic_channel_selection_task::work()
             m_is_single_scan         = true;
             m_is_single_scan_pending = false;
             LOG(DEBUG) << "single scan is pending, trigger single scan";
-            fsm_move_state(eState::TRIGGER_SCAN);
+            fsm_move_state(eState::PRE_SCAN);
         } else if (database.get_channel_scan_is_enabled(m_radio_mac)) {
-            auto now = std::chrono::steady_clock::now();
-
-            if (now > m_next_scan_timestamp_interval) {
+            if (std::chrono::steady_clock::now() > m_next_scan_timestamp_interval) {
                 m_is_single_scan = false;
                 LOG(DEBUG) << "interval condition is met, trigger scan";
-                fsm_move_state(eState::TRIGGER_SCAN);
-                m_last_scan_try_timestamp = now;
+                fsm_move_state(eState::PRE_SCAN);
             }
         }
         break;
     }
     case eState::PRE_SCAN: {
-        LOG(TRACE) << "PRE_SCAN, mac=" << m_radio_mac;
+        if (start_scan()) {
+            LOG(TRACE) << "PRE_SCAN, mac=" << m_radio_mac << ", scan_type is "
+                       << ((m_is_single_scan) ? "single-scan" : "continuous-scan");
+            if (!m_is_single_scan) {
+                m_last_scan_try_timestamp = std::chrono::steady_clock::now();
+            }
+            fsm_move_state(eState::TRIGGER_SCAN);
+        }
         break;
     }
     case eState::TRIGGER_SCAN: {
@@ -213,6 +217,10 @@ void dynamic_channel_selection_task::work()
     }
     case eState::FINISH: {
         LOG(TRACE) << "finish scan for mac=" << m_radio_mac;
+
+        if (!finish_scan()) {
+            TASK_LOG(ERROR) << "scan abort event received for a task that isn't the scanning task";
+        }
 
         database.set_channel_scan_results_status(m_radio_mac, m_last_scan_error_code,
                                                  m_is_single_scan);

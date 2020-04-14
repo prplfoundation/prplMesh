@@ -27,7 +27,7 @@ class dynamic_channel_selection_task : public task, public std::enable_shared_fr
 public:
     dynamic_channel_selection_task(db &database, ieee1905_1::CmduMessageTx &cmdu_tx_,
                                    task_pool &tasks_, sMacAddr radio_mac_);
-    virtual ~dynamic_channel_selection_task() {}
+    virtual ~dynamic_channel_selection_task() { finish_scan(); }
 
     struct sScanEvent {
         sMacAddr radio_mac;
