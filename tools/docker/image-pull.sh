@@ -23,14 +23,14 @@ usage() {
 
 pull_and_tag() {
     name="$1"
-    upstream_tag="$2"
+    base_image="$2"
     local_tag="$3"
 
-    repo="prplfoundationinc/$name:$upstream_tag"
+    repo="registry.gitlab.com/prpl-foundation/prplmesh/$name-$base_image"
 
-    info "Pulling $name$local_tag from $repo"
+    info "Pulling $name from $repo"
     run docker pull "$repo"
-    run docker tag "$repo" "$name$local_tag"
+    run docker tag "$repo" "prplmesh-$name$local_tag"
 }
 
 main() {
@@ -59,12 +59,12 @@ main() {
     dbg "TAG=$TAG"
     dbg "rootdir=$rootdir"
 
-    # The tag used in dockerhub is the base image with : converted to -
-    upstream_tag="$(echo "$IMAGE" | tr : -)"
-    info "Base docker image $IMAGE -> tag $tag"
+    # The registry used in Gitlab has the base image name appended with : converted to -
+    base_image="$(echo "$IMAGE" | tr : -)"
+    info "Base docker image $IMAGE"
 
-    pull_and_tag prplmesh-builder "$upstream_tag" "$TAG"
-    pull_and_tag prplmesh-runner "$upstream_tag" "$TAG"
+    pull_and_tag builder "$base_image" "$TAG"
+    pull_and_tag runner "$base_image" "$TAG"
 }
 
 VERBOSE=false
