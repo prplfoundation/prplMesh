@@ -760,8 +760,6 @@ if __name__ == '__main__':
     t = TestFlows()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tcpdump", "-t", action='store_true', default=False,
-                        help="capture the packets during each test")
     parser.add_argument("--verbose", "-v", action='store_true', default=False,
                         help="report each action")
     parser.add_argument("--stop-on-failure", "-s", action='store_true', default=False,
@@ -781,7 +779,6 @@ if __name__ == '__main__':
         parser.error("Unknown tests: {}".format(', '.join(unknown_tests)))
 
     opts.verbose = options.verbose
-    opts.tcpdump = options.tcpdump
 
     opts.tcpdump_dir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..', 'logs'))
     opts.stop_on_failure = options.stop_on_failure
