@@ -297,7 +297,7 @@ def _get_bridge_interface(docker_network):
 def launch_environment_docker(unique_id: str, skip_init: bool = False):
     global wired_sniffer
     iface = _get_bridge_interface('prplMesh-net-{}'.format(unique_id))
-    wired_sniffer = sniffer.Sniffer(iface, opts.tcpdump, opts.tcpdump_dir)
+    wired_sniffer = sniffer.Sniffer(iface, True, opts.tcpdump_dir)
 
     gateway = 'gateway-' + unique_id
     repeater1 = 'repeater1-' + unique_id
