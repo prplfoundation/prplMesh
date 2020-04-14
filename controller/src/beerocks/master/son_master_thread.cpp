@@ -1766,7 +1766,7 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
 }
 
 bool master_thread::handle_cmdu_1905_beacon_response(const std::string &src_mac,
-                                      ieee1905_1::CmduMessageRx &cmdu_rx)
+                                                     ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     // here we need to extract and keep the data received from the STA
     // but currently we'll just print that we are here

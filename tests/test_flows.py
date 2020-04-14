@@ -651,23 +651,23 @@ class TestFlows:
         debug("Confirming topology query was received")
         self.check_log(env.agents[0], r"TOPOLOGY_QUERY_MESSAGE.*mid={:d}".format(mid))
 
-
     def test_beacon_report_query(self):
-
         # associated STA
         sta = env.Station.create()
 
         # for testing non existing STA, the error flow
-        sta1 = env.Station.create()
+        # sta1 = env.Station.create()
 
         debug("Connect dummy STA (" + sta.mac + ") to wlan0")
         env.agents[0].radios[0].vaps[0].associate(sta)
 
         # send beacon query request
         debug("Sending beacon report query to repeater:")
-        request='{mac} 0x73 0xFFFFFFFFFFFF 0x02 0x00 0x01 0x03 0x73 0x24 0x30'.format(mac=sta.mac)
-        debug(request) 
-        env.controller.dev_send_1905(env.agents[0].mac, 0x8011, tlv(0x99, 0x0014, "{" + request + "}"))
+        request = '{mac} 0x73 0xFFFFFFFFFFFF 0x02 0x00 0x01 0x03 0x73 0x24 0x30'.format(mac=sta.mac)
+        debug(request)
+        env.controller.dev_send_1905(env.agents[0].mac, 0x8011,
+                                     tlv(0x99, 0x0014, "{" + request + "}"))
+
 
 if __name__ == '__main__':
     t = TestFlows()
@@ -707,18 +707,17 @@ if __name__ == '__main__':
 
 # this is (probably) the tlv for 0x8011 according to the SPEC.
 # however, it does not flow. investigation s needed:
-#                tlv(0x99, 0x0016, "{11:22:33:44:55:66 0x73 0xFF 0XFFFFFFFFFFFF 0x02 0x00 0x01 0x02 0x73 0x24 0x30 0x00}"))
-#                tlv(0x99, 0x0014, 
-#                    associated: "{11:22:33:44:55:66} 
-#                    op class: 0x73 
+#                tlv(0x99, 0x0016, "{11:22:33:44:55:66 0x73 0xFF
+#                                    0XFFFFFFFFFFFF 0x02 0x00 0x01 0x02 0x73 0x24 0x30 0x00}"))
+#                tlv(0x99, 0x0014,
+#                    associated: "{11:22:33:44:55:66}
+#                    op class: 0x73
 #                    channel:  0xff
-#                    bssid: 0xffffffffffff 
-#                    reporting detail: 0x02 
-#                    ssid length: 0x00 
-#                    ap-channel-report-list-len: 0x01 
-#                    inner-channel-report-list-len: 0x02 
-#                    operating class: 0x73 
+#                    bssid: 0xffffffffffff
+#                    reporting detail: 0x02
+#                    ssid length: 0x00
+#                    ap-channel-report-list-len: 0x01
+#                    inner-channel-report-list-len: 0x02
+#                    operating class: 0x73
 #                    channels: 0x24 0x30
 #                    number of element id: 0"))
-
-
