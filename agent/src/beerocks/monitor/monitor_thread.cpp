@@ -1053,6 +1053,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         // DEBUG DEBUG DEBUG
         // Fake Response
+        /*
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>(cmdu_tx,
                                                                           beerocks_header->id());
@@ -1088,6 +1089,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
         // end DEBUG DEBUG DEBUG
+        */
 
         break;
     }
