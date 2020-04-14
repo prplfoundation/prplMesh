@@ -2083,6 +2083,48 @@ class cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE : public BaseClass
         uint32_t* m_error_code = nullptr;
 };
 
+class cACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST : public BaseClass
+{
+    public:
+        cACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST);
+        }
+        sMacAddr& al_mac();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        sMacAddr* m_al_mac = nullptr;
+};
+
+class cACTION_BML_WIFI_CREDENTIALS_CLEAR_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_BML_WIFI_CREDENTIALS_CLEAR_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_BML_WIFI_CREDENTIALS_CLEAR_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_WIFI_CREDENTIALS_CLEAR_RESPONSE();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_WIFI_CREDENTIALS_CLEAR_RESPONSE);
+        }
+        uint32_t& error_code();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        uint32_t* m_error_code = nullptr;
+};
+
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_BML_H_
