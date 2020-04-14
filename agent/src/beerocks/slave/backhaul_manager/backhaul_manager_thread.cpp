@@ -2012,9 +2012,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<SSlaveSocke
         client_info.radio_mac  = msg->iface_mac();
         client_info.bssid      = msg->bssid();
         client_info.time_stamp = std::chrono::steady_clock::now();
-        client_info.asso_len   = msg->association_frame_length();
-        memcpy(client_info.assoc_req, msg->association_frame(), client_info.asso_len);
-        associated_clients[msg->client_mac()] = client_info;
+        client_info.assoc_req.assign(msg->association_frame(), msg->association_frame_length());
 
         break;
     }
