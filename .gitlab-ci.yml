@@ -165,7 +165,7 @@ run-tests:
   stage: test
   image: $CI_REGISTRY_IMAGE/tests-runner:18.09.7-dind
   script:
-    - tests/test_flows.py -v -u $RANDOM --tcpdump
+    - tests/test_flows.py -v -u $RANDOM
 
   artifacts:
     paths:
