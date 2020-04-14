@@ -1061,7 +1061,6 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             break;
         }
 
-        // TODO: TEMPORARY CONVERSION!
         response->params().channel                          = 1;
         response->params().op_class                         = 2;
         response->params().dialog_token                     = 3;
@@ -1081,7 +1080,7 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         response->params().use_optional_wide_band_ch_switch = 17;
         std::copy_n("abcdefghijklmnop", sizeof(response->params().sta_mac.oct),
                     response->params().sta_mac.oct);
-        std::copy_n("testingtesting123", sizeof(response->params().bssid.oct),
+        std::copy_n(request->params().bssid.oct, sizeof(response->params().bssid.oct),
                     response->params().bssid.oct);
 
         LOG(DEBUG) << "DEBUG DEBUG: Sending beacon measurement reponse on BSSID: "
