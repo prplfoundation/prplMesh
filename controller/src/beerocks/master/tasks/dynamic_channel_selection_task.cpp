@@ -18,6 +18,9 @@
 std::string s_ar_states[] = {FOREACH_DCS_STATE(GENERATE_STRING)};
 std::string s_ar_events[] = {FOREACH_DCS_EVENT(GENERATE_STRING)};
 
+int dynamic_channel_selection_task::m_scanning_task_id =
+    -1; // Currently scanning task id. -1 means no scan in progress.
+
 dynamic_channel_selection_task::dynamic_channel_selection_task(db &database_,
                                                                ieee1905_1::CmduMessageTx &cmdu_tx_,
                                                                task_pool &tasks_,
@@ -115,6 +118,10 @@ void dynamic_channel_selection_task::work()
                 m_last_scan_try_timestamp = now;
             }
         }
+        break;
+    }
+    case eState::PRE_SCAN: {
+        LOG(TRACE) << "PRE_SCAN, mac=" << m_radio_mac;
         break;
     }
     case eState::TRIGGER_SCAN: {
@@ -435,3 +442,29 @@ void dynamic_channel_selection_task::fsm_move_state(eState new_state)
     m_fsm_state = new_state;
 }
 bool dynamic_channel_selection_task::fsm_in_state(eState state) { return m_fsm_state == state; }
+
+bool dynamic_channel_selection_task::start_scan()
+{
+    if (m_scanning_task_id != -1) {
+        return false;
+    }
+    // set scanning task id to current task id
+    m_scanning_task_id = id;
+    return true;
+}
+
+bool dynamic_channel_selection_task::finish_scan()
+{
+    if (m_scanning_task_id == -1) {
+        return true;
+    }
+
+    if (m_scanning_task_id != id) {
+        TASK_LOG(ERROR) << "finish scan is called for a task that isn't the scanning task";
+        return false;
+    }
+
+    // scan by current task is finished
+    m_scanning_task_id = -1;
+    return true;
+}
