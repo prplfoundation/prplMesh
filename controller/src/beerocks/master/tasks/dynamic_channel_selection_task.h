@@ -52,6 +52,7 @@ public:
 #define FOREACH_DCS_STATE(STATE)                                                                   \
     STATE(INIT)                                                                                    \
     STATE(IDLE)                                                                                    \
+    STATE(PRE_SCAN)                                                                                \
     STATE(TRIGGER_SCAN)                                                                            \
     STATE(WAIT_FOR_SCAN_TRIGGERED)                                                                 \
     STATE(WAIT_FOR_RESULTS_READY)                                                                  \
@@ -72,6 +73,8 @@ private:
     void dcs_wait_for_event(eEvent cs_event);
     void fsm_move_state(eState new_state);
     bool fsm_in_state(eState state);
+    bool start_scan();
+    bool finish_scan();
 
     beerocks::eChannelScanErrCode dcs_request_scan_trigger();
     beerocks::eChannelScanErrCode dcs_request_scan_dump();
@@ -91,6 +94,8 @@ private:
 
     bool m_is_single_scan_pending = false;
     bool m_is_single_scan         = false;
+
+    static int m_scanning_task_id; // Currently scanning task id. -1 means no scan in progress.
 };
 } //namespace son
 #endif
