@@ -99,6 +99,7 @@ bool master_thread::init()
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE,
             ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE,
             ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE,
+            ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE,
