@@ -56,6 +56,14 @@ flake8-diff:
     - apk add --update --no-cache git
     - git diff -U0 origin/master | flake8 --verbose --diff
 
+shellcheck:
+  stage: build
+  image: koalaman/shellcheck-alpine:v0.7.1
+  before_script:
+    - apk add --update --no-cache git
+  script:
+      - git ls-files -z '*.sh' '*.sh.in'  | xargs -0 shellcheck -x -P tools:ci/owncloud
+
 clang-format:
   extends: .in-prplmesh-builder
   stage: build
