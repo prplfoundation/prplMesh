@@ -2153,8 +2153,8 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         LOG(DEBUG) << "Result Code: SUCCESS";
         // Add frame body of the most recently received (Re)Association Request frame from this client
 
-        client_capability_report_tlv->set_association_frame(client_info.assoc_req,
-                                                            client_info.asso_len);
+        client_capability_report_tlv->set_association_frame(client_info.assoc_req.c_str(),
+                                                            client_info.assoc_req.size());
 
     } else {
         client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::FAILURE;
