@@ -11,8 +11,89 @@ import subprocess
 from opts import debug, err, status
 
 
+class TlvStruct:
+    '''Represents part of an IEEE1905.1 TLV in a Packet.'''
+
+    def __init__(self, captured, level):
+        '''Convert the dict from tshark JSON into a TlvStruct.'''
+        for name, value in captured.items():
+            name = name.split('.', level)[-1].lower()
+            name = name.translate(str.maketrans('. ', '__'))
+            if name.endswith('_list') and isinstance(value, dict):
+                name = name[:-len('_list')]
+                # Normally, wireshark converts list fields to JSON as follows:
+                # {"Operating classes list": {"Operating class 0": {...}, "Operating class 1": ...}}
+                # However, there seems to be a bug for an operating class's channel list in the
+                # channel preference TLV: the middle dictionary is left out, and only a single
+                # channel is shown. To work around this, treat the channel list specially.
+                if len(value) == 1 and not isinstance(list(value.values())[0], dict):
+                    value = [TlvStruct(value, level + 1)]
+                else:
+                    value = [TlvStruct(v, level + 1) for k, v in value.items()]
+            setattr(self, name, value)
+
+    def __repr__(self):
+        return "{" + ", ".join(["{!r}: {!r}".format(k, v) for k, v in self.__dict__.items()
+                                if not k.startswith('_')]) + "}"
+
+
+class Tlv(TlvStruct):
+    '''Represents an IEEE1905.1 TLV in a Packet.'''
+
+    def __init__(self, captured):
+        '''Convert the dict from tshark JSON into a Tlv.'''
+        super().__init__(captured, 1)
+        self.tlv_type = int(self.tlv_type)
+        self.tlv_length = int(self.tlv_length)
+
+
+class Packet:
+    '''Represents a single (IEEE1905.1) packet.'''
+
+    def __init__(self, captured):
+        '''Convert the dict from tshark JSON into a Packet.'''
+        # Only the layers are of interest, discard the rest
+        self.layers = captured['_source']['layers']
+        self.frame_number = int(self.layers['frame']['frame.number'], 0)
+        self.frame_time_epoch = float(self.layers['frame']['frame.time_epoch'])
+        self.frame_time = self.layers['frame']['frame.time']
+        self.eth_src = self.layers['eth']['eth.src']
+        self.eth_dst = self.layers['eth']['eth.dst']
+        ieee1905 = self.layers.get('ieee1905')
+        if ieee1905:
+            self.ieee1905 = True
+            self.ieee1905_message_type = int(ieee1905['ieee1905.message_type'], 0)
+            self.ieee1905_mid = int(ieee1905['ieee1905.message_id'], 0)
+            self.ieee1905_fragment_id = int(ieee1905['ieee1905.fragment_id'], 0)
+            flags_tree = ieee1905['ieee1905.flags_tree']
+            self.ieee1905_last_fragment = bool(int(flags_tree['ieee1905.last_fragment']))
+            self.ieee1905_relay_indicator = bool(int(flags_tree['ieee1905.relay_indicator']))
+            self.ieee1905_tlvs = [Tlv(fields)
+                                  for name, fields in ieee1905.items()
+                                  if not name.startswith('ieee1905.') and
+                                  fields['ieee1905.tlv_type'] != '0']
+        else:
+            self.ieee1905 = False
+
+    def __repr__(self):
+        d = {
+            "frame_number": self.frame_number,
+            "frame_time": self.frame_time,
+            "eth_src": self.eth_src,
+            "eth_dst": self.eth_dst
+        }
+        if self.ieee1905:
+            d["message_type"] = hex(self.ieee1905_message_type)
+            d["mid"] = hex(self.ieee1905_mid)
+            if self.ieee1905_relay_indicator:
+                d["relay"] = "1"
+            d["tlvs"] = self.ieee1905_tlvs
+        return "{" + ", ".join(["{!r}: {!r}".format(k, v) for k, v in d.items()]) + "}"
+
+
 class Sniffer:
     '''Captures packets on an interface.'''
+
     def __init__(self, interface: str, tcpdump_log_dir: str):
         self.interface = interface
         self.tcpdump_log_dir = tcpdump_log_dir
@@ -54,7 +135,7 @@ class Sniffer:
             return []
         try:
             capture = json.loads(tshark_result.stdout)
-            return capture
+            return [Packet(x) for x in capture]
         except json.JSONDecodeError as error:
             err("capture JSON decoding failed: %s".format(error))
             return []
