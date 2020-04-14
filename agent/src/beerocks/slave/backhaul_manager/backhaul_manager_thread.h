@@ -22,6 +22,7 @@
 #include <beerocks/tlvf/beerocks_message_header.h>
 
 #include <tlvf/ieee_1905_1/eMediaType.h>
+#include <mapf/common/utils.h>
 
 #include "../agent_ucc_listener.h"
 
@@ -249,8 +250,7 @@ private:
         sMacAddr radio_mac; // ruid
         sMacAddr bssid;     // VAP mac
         std::chrono::steady_clock::time_point time_stamp;
-        size_t asso_len;
-        uint8_t assoc_req[ASSOCIATION_FRAME_SIZE];
+        mapf::utils::bytes assoc_req;
     };
 
     /**
