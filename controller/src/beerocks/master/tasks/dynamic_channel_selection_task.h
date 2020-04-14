@@ -57,7 +57,8 @@ public:
     STATE(WAIT_FOR_RESULTS_READY)                                                                  \
     STATE(WAIT_FOR_RESULTS_DUMP)                                                                   \
     STATE(SCAN_DONE)                                                                               \
-    STATE(ABORT_SCAN)
+    STATE(ABORT_SCAN)                                                                              \
+    STATE(FINISH)
 
     // State ENUM
     enum class eState { FOREACH_DCS_STATE(GENERATE_ENUM) };

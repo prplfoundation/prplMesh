@@ -195,16 +195,17 @@ void dynamic_channel_selection_task::work()
         }
 
         m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
-        database.set_channel_scan_results_status(m_radio_mac, m_last_scan_error_code,
-                                                 m_is_single_scan);
-
-        database.set_channel_scan_in_progress(m_radio_mac, false, m_is_single_scan);
-        m_is_single_scan = false;
-        fsm_move_state(eState::IDLE);
+        fsm_move_state(eState::FINISH);
         break;
     }
     case eState::ABORT_SCAN: {
         LOG(ERROR) << "aborting scan for mac=" << m_radio_mac << ", last_scan_timestamp is not set";
+
+        fsm_move_state(eState::FINISH);
+        break;
+    }
+    case eState::FINISH: {
+        LOG(TRACE) << "finish scan for mac=" << m_radio_mac;
 
         database.set_channel_scan_results_status(m_radio_mac, m_last_scan_error_code,
                                                  m_is_single_scan);
