@@ -132,4 +132,6 @@ Delete all images - `docker rmi $(docker images -q)`
 
 Delete all containers - `docker rm $(docker ps -a -q)`
 
+Fetch the logs of a specific container - `docker logs CONTAINER`
+
 Proxy - The recommended way to work with docker behind a proxy is by [configuring the docker client to pass proxy information to containers automatically](https://docs.docker.com/network/proxy/).
