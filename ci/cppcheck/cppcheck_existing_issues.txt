@@ -218,7 +218,6 @@
 '/builds/prpl-foundation/prplMesh/controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Variable 'cli_ptr' is assigned a value that is never used. [unreadVariable]    beerocks::cli *cli_ptr = &cli_soc;
 '/builds/prpl-foundation/prplMesh/controller/src/beerocks/cli/beerocks_cli_bml.cpp: performance: Function parameter 'ind' should be passed by const reference. [passedByValue]    const std::string &parent_bssid, const std::string ind, std::stringstream &ss)
 '/builds/prpl-foundation/prplMesh/controller/src/beerocks/cli/beerocks_cli_bml.cpp: performance: Function parameter 'beerocks_conf_path_' should be passed by const reference. [passedByValue]cli_bml::cli_bml(std::string beerocks_conf_path_)
-'/builds/prpl-foundation/prplMesh/agent/src/beerocks/monitor/monitor_thread.cpp: style: Local variable 'now' shadows outer variable [shadowVariable]        auto now = std::chrono::steady_clock::now();
 '/builds/prpl-foundation/prplMesh/agent/src/beerocks/monitor/monitor_thread.cpp: style: Local variable 'time_span' shadows outer variable [shadowVariable]        auto time_span =
 '/builds/prpl-foundation/prplMesh/controller/src/beerocks/cli/beerocks_cli.cpp: performance: Prefer prefix ++/-- operators for non-primitive types. [postfixOperator]         it++) {
 '/builds/prpl-foundation/prplMesh/agent/src/beerocks/monitor/monitor_thread.cpp: style: Variable 'iface' is assigned a value that is never used. [unreadVariable]        std::string iface = radio_node->get_iface();
