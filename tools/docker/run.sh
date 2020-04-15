@@ -19,7 +19,6 @@ usage() {
     echo "      -v|--verbose - verbosity on"
     echo "      -d|--detach - run in background"
     echo "      -f|--force - if the container is already running, kill it and restart"
-    echo "      -m|--mac - base MAC address for interfaces in the container"
     echo "      -n|--name - container name (for later easy attach)"
     echo "      -p|--port - port to expose on the container"
     echo "      -P|--publish - publish all exposed ports to the host"
@@ -34,7 +33,7 @@ gateway_netid_length() {
 }
 
 main() {
-    if ! OPTS=$(getopt -o 'hvdfm:n:N:o:t:e:p:u:' --long verbose,help,detach,force,mac:,name:,network:,entrypoint:,tag:,expose:,publish:,options:,unique-id: -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hvdfn:N:o:t:e:p:u:' --long verbose,help,detach,force,name:,network:,entrypoint:,tag:,expose:,publish:,options:,unique-id: -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2; usage; exit 1
     fi
 
@@ -46,7 +45,6 @@ main() {
             -h | --help)        usage; exit 0; shift ;;
             -d | --detach)      DETACH=true; shift ;;
             -f | --force)       FORCE=true; shift ;;
-            -m | --mac)         BASE_MAC="$2"; shift; shift ;;
             -n | --name)        NAME="$2"; shift; shift ;;
             -u | --unique-id)   UNIQUE_ID="$2"; shift; shift ;;
             -t | --tag)         TAG=":$2"; shift; shift ;;
@@ -76,7 +74,6 @@ main() {
     dbg "DETACH=${DETACH}"
     dbg "NETWORK=${NETWORK}"
     dbg "IMAGE=prplmesh-runner$TAG"
-    dbg "BASE_MAC=${BASE_MAC}"
     dbg "PORT=${PORT}"
     dbg "PUBLISH=${PUBLISH}"
     dbg "NAME=${NAME}"
@@ -110,7 +107,7 @@ main() {
 
     # Save the container name so that it can easily be stopped/removed later
     echo "$NAME" >> "${scriptdir}/.test_containers"
-    run docker container run ${DOCKEROPTS} "prplmesh-runner$TAG" "$BASE_MAC" "$@"
+    run docker container run ${DOCKEROPTS} "prplmesh-runner$TAG" "$@"
 }
 
 VERBOSE=false
@@ -120,6 +117,5 @@ UNIQUE_ID=${SUDO_USER:-${USER}}
 NAME=prplMesh
 ENTRYPOINT=
 PORT="--expose 5000"
-BASE_MAC=44:55:66:77
 
 main "$@"
