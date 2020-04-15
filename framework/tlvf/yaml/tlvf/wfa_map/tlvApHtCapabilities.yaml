@@ -10,9 +10,9 @@ tlvApHtCapabilities:
     _value_const: TLV_AP_HT_CAPABILITIES
   length: uint16_t
   radio_uid: sMacAddr
-  flags: sFalgs
+  flags: sFlags
 
-sFalgs:
+sFlags:
   _type: struct
   _bit_field: uint8_t
   max_num_of_supported_tx_spatial_streams:
