@@ -150,7 +150,15 @@ int bml_event_register_cb(BML_CTX ctx, BML_EVENT_CB cb);
  */
 int bml_set_wifi_credentials(BML_CTX ctx, const char *ssid, const char *pass, int sec, int vap_id,
                              int force);
-
+/**
+ * Removes the Wi-Fi credentials for the client with AL-MAC
+ *
+ * @param [in] ctx BML Context.
+ * @param [in] al_mac client AL-MAC address
+ *
+ * @return BML_RET_OK on success.
+ */
+int bml_clear_wifi_credentials(BML_CTX ctx, const char *al_mac);
 /**
  * Get Wi-Fi credentials (SSID and security) for the beerocks network.
  *
