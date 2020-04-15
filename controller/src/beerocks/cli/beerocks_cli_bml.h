@@ -108,6 +108,7 @@ private:
     int stat_register_cb_caller(int numOfArgs);
     int events_register_cb_caller(int numOfArgs);
     int set_wifi_credentials_caller(int numOfArgs);
+    int clear_wifi_credentials_caller(int numOfArgs);
     int get_wifi_credentials_caller(int numOfArgs);
     int set_onboarding_state_caller(int numOfArgs);
     int get_onboarding_state_caller(int numOfArgs);
@@ -156,6 +157,7 @@ private:
     int events_register_cb(const std::string &optional = std::string());
     int set_wifi_credentials(const std::string &ssid, const std::string &pass, int sec = 4,
                              int vap_id = 0, int force = 1);
+    int clear_wifi_credentials(const std::string &al_mac);
     int get_wifi_credentials(int vap_id = 0);
     int set_onboarding_state(int enable);
     int get_onboarding_state();

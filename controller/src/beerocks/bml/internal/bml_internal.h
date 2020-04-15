@@ -54,6 +54,14 @@ public:
     // Set the wireless lan SSID and password
     int set_wifi_credentials(const std::string ssid, const std::string pass, int sec, int vap_id,
                              int force);
+    /**
+    * @brief Clear wifi credentials for specific AL-MAC
+    *
+    * @param al_mac al_mac client AL-MAC address
+    *
+    * @return BML_RET_OK if success, error code otherwise
+    */
+    int clear_wifi_credentials(const sMacAddr &al_mac);
 
     // Get wireless SSID and security
     int get_wifi_credentials(int vap_id, char *ssid, char *pass, int *sec);
@@ -284,6 +292,7 @@ private:
     beerocks::promise<bool> *m_prmSetVapListCreds       = nullptr;
     beerocks::promise<bool> *m_prmOnboard               = nullptr;
     beerocks::promise<bool> *m_prmWiFiCredentialsUpdate = nullptr;
+    beerocks::promise<bool> *m_prmWiFiCredentialsClear  = nullptr;
     beerocks::promise<bool> *m_prmWiFiCredentialsGet    = nullptr;
     beerocks::promise<bool> *m_prmAdminCredentialsGet   = nullptr;
     beerocks::promise<bool> *m_prmDeviceInfoGet         = nullptr;
