@@ -166,6 +166,12 @@ public:
     struct band_info {
 
         /**
+         * Is HT supported flag.
+         * Set to true if NL80211_BAND_ATTR_HT_CAPA attribute is included in response.
+         */
+        bool ht_supported = false;
+
+        /**
          * Value of NL80211_BAND_ATTR_HT_CAPA, see iw/util.c print_ht_capability() as a bit
          * interpretation example.
          */
@@ -178,6 +184,12 @@ public:
         uint8_t ht_mcs_set[ht_mcs_set_size];
 
         /**
+         * Is VHT supported flag.
+         * Set to true if NL80211_BAND_ATTR_VHT_CAPA attribute is included in response.
+         */
+        bool vht_supported = false;
+
+        /**
          * Value of NL80211_BAND_ATTR_VHT_CAPA, see iw/util.c print_vht_info() as a bit
          * interpretation example.
          */
@@ -188,6 +200,14 @@ public:
          * interpretation example.
          */
         uint8_t vht_mcs_set[vht_mcs_set_size];
+
+        /**
+         * Is HE supported flag.
+         * Set to true if NL80211_BAND_ATTR_IFTYPE_DATA attribute is included in response.
+         */
+        bool he_supported = false;
+
+        // TODO: add HE capability, MCS set and whatever else is required to report HE capabilities
 
         /**
          * Channels supported in this band (obtained from NL80211_BAND_ATTR_FREQS).

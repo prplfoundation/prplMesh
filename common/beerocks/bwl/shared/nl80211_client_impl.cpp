@@ -227,28 +227,30 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
                 }
 
                 if (tb_band[NL80211_BAND_ATTR_HT_CAPA]) {
+                    band.ht_supported  = true;
                     band.ht_capability = nla_get_u16(tb_band[NL80211_BAND_ATTR_HT_CAPA]);
 
                     if (band.ht_capability & BIT(1)) {
                         width_40 = true;
                     }
+                }
 
-                    if (tb_band[NL80211_BAND_ATTR_HT_MCS_SET]) {
-                        size_t expected_length = sizeof(band.ht_mcs_set);
-                        size_t actual_length   = nla_len(tb_band[NL80211_BAND_ATTR_HT_MCS_SET]);
+                if (tb_band[NL80211_BAND_ATTR_HT_MCS_SET]) {
+                    size_t expected_length = sizeof(band.ht_mcs_set);
+                    size_t actual_length   = nla_len(tb_band[NL80211_BAND_ATTR_HT_MCS_SET]);
 
-                        if (actual_length <= expected_length) {
-                            memcpy(band.ht_mcs_set, nla_data(tb_band[NL80211_BAND_ATTR_HT_MCS_SET]),
-                                   actual_length);
-                        } else {
-                            LOG(DEBUG) << "Invalid length for NL80211_BAND_ATTR_HT_MCS_SET "
-                                          "attribute. Expected length: "
-                                       << expected_length << ", actual length: " << actual_length;
-                        }
+                    if (actual_length <= expected_length) {
+                        memcpy(band.ht_mcs_set, nla_data(tb_band[NL80211_BAND_ATTR_HT_MCS_SET]),
+                               actual_length);
+                    } else {
+                        LOG(DEBUG) << "Invalid length for NL80211_BAND_ATTR_HT_MCS_SET "
+                                      "attribute. Expected length: "
+                                   << expected_length << ", actual length: " << actual_length;
                     }
                 }
 
                 if (tb_band[NL80211_BAND_ATTR_VHT_CAPA]) {
+                    band.vht_supported  = true;
                     band.vht_capability = nla_get_u32(tb_band[NL80211_BAND_ATTR_VHT_CAPA]);
 
                     width_80 = true;
@@ -277,6 +279,19 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
                                    << expected_length << ", actual length: " << actual_length;
                     }
                 }
+
+                /**
+                 * TODO: add HE support
+                 *
+                 * Inside NL80211_BAND_ATTR_IFTYPE_DATA, if HE is supported, there is
+                 * NL80211_BAND_IFTYPE_ATTR_HE_CAP_MAC, NL80211_BAND_IFTYPE_ATTR_HE_CAP_PHY,
+                 * NL80211_BAND_IFTYPE_ATTR_HE_CAP_MCS_SET, NL80211_BAND_IFTYPE_ATTR_HE_CAP_PPE.
+                 *
+                 * If RAX40 doesn't support HE, the attribute will be missing. In that case, we
+                 * can just add a TODO for HE support for the moment. It doesn't make sense adding
+                 * it if we can't test it.
+                 */
+                band.he_supported = false;
 
                 if (!tb_band[NL80211_BAND_ATTR_FREQS]) {
                     return;
