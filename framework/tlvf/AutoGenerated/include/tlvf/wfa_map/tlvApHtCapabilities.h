@@ -34,7 +34,7 @@ class tlvApHtCapabilities : public BaseClass
         explicit tlvApHtCapabilities(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvApHtCapabilities();
 
-        typedef struct sFalgs {
+        typedef struct sFlags {
             #if defined(__LITTLE_ENDIAN_BITFIELD)
             uint8_t reserved : 1;
             uint8_t ht_support_40mhz : 1;
@@ -56,12 +56,12 @@ class tlvApHtCapabilities : public BaseClass
             }
             void struct_init(){
             }
-        } __attribute__((packed)) sFalgs;
+        } __attribute__((packed)) sFlags;
         
         const eTlvTypeMap& type();
         const uint16_t& length();
         sMacAddr& radio_uid();
-        sFalgs& flags();
+        sFlags& flags();
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -71,7 +71,7 @@ class tlvApHtCapabilities : public BaseClass
         eTlvTypeMap* m_type = nullptr;
         uint16_t* m_length = nullptr;
         sMacAddr* m_radio_uid = nullptr;
-        sFalgs* m_flags = nullptr;
+        sFlags* m_flags = nullptr;
 };
 
 }; // close namespace: wfa_map

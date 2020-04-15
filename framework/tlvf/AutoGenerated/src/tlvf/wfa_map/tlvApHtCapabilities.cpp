@@ -37,8 +37,8 @@ sMacAddr& tlvApHtCapabilities::radio_uid() {
     return (sMacAddr&)(*m_radio_uid);
 }
 
-tlvApHtCapabilities::sFalgs& tlvApHtCapabilities::flags() {
-    return (sFalgs&)(*m_flags);
+tlvApHtCapabilities::sFlags& tlvApHtCapabilities::flags() {
+    return (sFlags&)(*m_flags);
 }
 
 void tlvApHtCapabilities::class_swap()
@@ -82,7 +82,7 @@ size_t tlvApHtCapabilities::get_initial_size()
     class_size += sizeof(eTlvTypeMap); // type
     class_size += sizeof(uint16_t); // length
     class_size += sizeof(sMacAddr); // radio_uid
-    class_size += sizeof(sFalgs); // flags
+    class_size += sizeof(sFlags); // flags
     return class_size;
 }
 
@@ -111,12 +111,12 @@ bool tlvApHtCapabilities::init()
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_radio_uid->struct_init(); }
-    m_flags = (sFalgs*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sFalgs))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sFalgs) << ") Failed!";
+    m_flags = (sFlags*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sFlags))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sFlags) << ") Failed!";
         return false;
     }
-    if(m_length && !m_parse__){ (*m_length) += sizeof(sFalgs); }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(sFlags); }
     if (!m_parse__) { m_flags->struct_init(); }
     if (m_parse__) { class_swap(); }
     if (m_parse__) {
