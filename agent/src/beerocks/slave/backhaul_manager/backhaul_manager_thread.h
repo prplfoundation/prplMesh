@@ -326,12 +326,48 @@ private:
      * @brief List of known 1905 neighbor devices
      * 
      * key:     1905.1 device AL-MAC
-     * value:   Last timestam receiving discovery message from AL-MAC
+     * value:   Last timestamp receiving discovery message from AL-MAC
      * Devices are being added to the list when receiving a 1905.1 Topology Discovery message from
      * an unknown 1905.1 device. Every 1905.1 device shall send this message every 60 seconds, and
      * we update the time stamp in which the message is received.
      */
     std::unordered_map<sMacAddr, std::chrono::steady_clock::time_point> m_1905_neighbor_devices;
+
+    /**
+     * @brief Adds an AP HT Capabilities TLV to AP Capability Report message.
+     *
+     * TLV is added to message only if given radio supports HT capabilities.
+     * See section 17.2.8 of Multi-AP Specification for details.
+     *
+     * @param radio_info Radio structure containing the information required to fill in the TLV.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool add_ap_ht_capabilities(const sRadioInfo &radio_info);
+
+    /**
+     * @brief Adds an AP VHT Capabilities TLV to AP Capability Report message.
+     *
+     * TLV is added to message only if given radio supports VHT capabilities.
+     * See section 17.2.9 of Multi-AP Specification for details.
+     *
+     * @param radio_info Radio structure containing the information required to fill in the TLV.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool add_ap_vht_capabilities(const sRadioInfo &radio_info);
+
+    /**
+     * @brief Adds an AP HE Capabilities TLV to AP Capability Report message.
+     *
+     * TLV is added to message only if given radio supports HE capabilities.
+     * See section 17.2.10 of Multi-AP Specification for details.
+     *
+     * @param radio_info Radio structure containing the information required to fill in the TLV.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool add_ap_he_capabilities(const sRadioInfo &radio_info);
 
     /*
  * State Machines
