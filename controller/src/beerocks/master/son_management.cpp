@@ -1509,6 +1509,32 @@ void son_management::handle_bml_message(Socket *sd,
         // "ACTION_BML_UPDATE_CONFIGURATION_REQUEST"
         break;
     }
+    case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST";
+
+        auto request =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST failed";
+            return;
+        }
+
+        auto al_mac = request->al_mac();
+        database.clear_bss_info_configuration(al_mac);
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_WIFI_CREDENTIALS_CLEAR_RESPONSE>(cmdu_tx,
+                                                                           beerocks_header->id());
+        if (!response) {
+            LOG(ERROR) << "Failed building message cACTION_BML_WIFI_CREDENTIALS_CLEAR_RESPONSE ! ";
+        } else {
+            if (message_com::send_cmdu(sd, cmdu_tx) == false) {
+                LOG(ERROR) << "Error sending cmdu message";
+            }
+        }
+        break;
+    }
     case beerocks_message::ACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST: {
 
         uint32_t result = 1; //1-fail 0-success

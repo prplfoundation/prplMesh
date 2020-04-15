@@ -786,6 +786,20 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                     << "Received CREDENTIALS_UPDATE_RESPONSE response, but no one is waiting...";
             }
         } break;
+        case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_CLEAR_RESPONSE: {
+            auto response =
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_CLEAR_RESPONSE>();
+
+            // Signal any waiting threads
+            if (m_prmWiFiCredentialsClear) {
+                m_prmWiFiCredentialsClear->set_value(response->error_code() == 0);
+                m_prmWiFiCredentialsClear = nullptr;
+            } else {
+                LOG(WARNING)
+                    << "Received CREDENTIALS_CLEAR_RESPONSE response, but no one is waiting...";
+            }
+        } break;
         case beerocks_message::ACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE: {
             //Signal any waiting threads
             if (!wake_up(beerocks_message::ACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_REQUEST, 0)) {
@@ -2091,6 +2105,69 @@ int bml_internal::set_wifi_credentials(const std::string ssid, const std::string
     }
 
     return (iRet);
+}
+
+int bml_internal::clear_wifi_credentials(const sMacAddr &al_mac)
+{
+    beerocks::promise<bool> prmWiFiCredentialsClear;
+    int iOpTimeout = 60000; // Default timeout
+
+    if (!m_sockPlatform && !connect_to_platform()) {
+        return (-BML_RET_CONNECT_FAIL);
+    }
+
+    // Command supported only on local master
+    if (!is_local_master()) {
+        LOG(ERROR) << "Command supported only on local master!";
+        return (-BML_RET_OP_NOT_SUPPORTED);
+    }
+
+    // Initialize the promise for receiving the response
+    m_prmWiFiCredentialsClear = &prmWiFiCredentialsClear;
+
+    // If the socket is not valid, attempt to re-establish the connection
+    if (!m_sockMaster) {
+        int iRet = connect_to_master();
+        if (iRet != BML_RET_OK) {
+            // Clear the promise holder
+            m_prmWiFiCredentialsClear = nullptr;
+            return iRet;
+        }
+    }
+
+    auto clear_request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST>(cmdu_tx);
+
+    if (!clear_request) {
+        LOG(ERROR) << "Failed building ACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST message!";
+        // Clear the promise holder
+        m_prmWiFiCredentialsClear = nullptr;
+        return (-BML_RET_OP_FAILED);
+    }
+
+    clear_request->al_mac() = al_mac;
+
+    LOG(TRACE) << "Sending clear message to master for AL-MAC: "
+               << network_utils::mac_to_string(al_mac);
+
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending clear message!";
+        // Clear the promise holder
+        m_prmWiFiCredentialsClear = nullptr;
+        return (-BML_RET_OP_FAILED);
+    }
+
+    if (!prmWiFiCredentialsClear.wait_for(iOpTimeout)) {
+        LOG(WARNING) << "Timeout while waiting for configuration clear response...";
+        // Clear the promise holder
+        m_prmWiFiCredentialsClear = nullptr;
+        return (-BML_RET_TIMEOUT);
+    }
+
+    // Clear the promise holder
+    m_prmWiFiCredentialsClear = nullptr;
+
+    return BML_RET_OK;
 }
 
 int bml_internal::get_wifi_credentials(int vap_id, char *ssid, char *pass, int *sec)
