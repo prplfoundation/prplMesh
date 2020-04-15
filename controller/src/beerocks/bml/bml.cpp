@@ -205,6 +205,17 @@ int bml_clear_wifi_credentials(BML_CTX ctx, const char *al_mac)
     return (pBML->clear_wifi_credentials(al_mac_addr));
 }
 
+int bml_update_wifi_credentials(BML_CTX ctx, const char *al_mac)
+{
+    if (!al_mac)
+        return (-BML_RET_INVALID_ARGS);
+
+    auto al_mac_addr   = network_utils::mac_from_string(al_mac);
+    bml_internal *pBML = (bml_internal *)ctx;
+
+    return (pBML->update_wifi_credentials(al_mac_addr));
+}
+
 int bml_get_wifi_credentials(BML_CTX ctx, int vap_id, char *ssid, char *pass, int *sec)
 {
     // Validate input parameters
