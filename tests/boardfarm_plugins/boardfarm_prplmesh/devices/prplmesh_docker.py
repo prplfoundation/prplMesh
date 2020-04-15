@@ -6,8 +6,10 @@
 import os
 import time
 
-from environment import ALEntityDocker
+import boardfarm
+from environment import ALEntityDocker, _get_bridge_interface
 from .prplmesh_base import PrplMeshBase
+from sniffer import Sniffer
 
 rootdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..'))
 
@@ -58,6 +60,8 @@ class PrplMeshDocker(PrplMeshBase):
             time.sleep(self.delay)
             self.agent_entity = ALEntityDocker(self.name, is_controller=False)
 
+        self.wired_sniffer = Sniffer(_get_bridge_interface(self.docker_network),
+                                     True, boardfarm.config.output_dir)
         self.check_status()
 
     def __del__(self):
