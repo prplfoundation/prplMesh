@@ -624,7 +624,6 @@ bool monitor_thread::update_ap_stats()
         radio_stats.sta_count += vap_node->sta_get_count();
 
         // Update the measurement timestamp
-        auto now = std::chrono::steady_clock::now();
         auto time_span =
             std::chrono::duration_cast<std::chrono::milliseconds>(now - vap_stats.last_update_time);
         vap_stats.delta_ms         = float(time_span.count());
