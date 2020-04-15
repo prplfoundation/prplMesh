@@ -6,6 +6,28 @@
  * See LICENSE file for more details.
  */
 
+/**
+ * This file uses code copied from `iw` (http://git.sipsolutions.net/iw.git/)
+ *
+ * Copyright (c) 2007, 2008 Johannes Berg
+ * Copyright (c) 2007    Andy Lutomirski
+ * Copyright (c) 2007    Mike Kershaw
+ * Copyright (c) 2008-2009   Luis R. Rodriguez
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ */
+
 #include "backhaul_manager_thread.h"
 
 #include "../link_metrics/ieee802_3_link_metrics_collector.h"
@@ -40,8 +62,11 @@
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
+#include <tlvf/wfa_map/tlvApHeCapabilities.h>
+#include <tlvf/wfa_map/tlvApHtCapabilities.h>
 #include <tlvf/wfa_map/tlvApOperationalBSS.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
+#include <tlvf/wfa_map/tlvApVhtCapabilities.h>
 #include <tlvf/wfa_map/tlvAssociatedClients.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
@@ -2178,6 +2203,18 @@ bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmd
         if (!tlvf_utils::add_ap_radio_basic_capabilities(cmdu_tx, radio_mac, supported_channels)) {
             return false;
         }
+
+        if (!add_ap_ht_capabilities(*slave)) {
+            return false;
+        }
+
+        if (!add_ap_vht_capabilities(*slave)) {
+            return false;
+        }
+
+        if (!add_ap_he_capabilities(*slave)) {
+            return false;
+        }
     }
 
     LOG(DEBUG) << "Sending AP_CAPABILITY_REPORT_MESSAGE , mid: " << std::hex << (int)mid;
@@ -3469,6 +3506,88 @@ bool backhaul_manager::get_neighbor_links(
     if ((neighbor_mac_filter == network_utils::ZERO_MAC) || (neighbor_mac_filter == neighbor)) {
         neighbor_links_map[m_sConfig.wire_iface].push_back(neighbor);
     }
+
+    return true;
+}
+
+bool backhaul_manager::add_ap_ht_capabilities(const sRadioInfo &radio_info)
+{
+    if (!radio_info.ht_supported) {
+        return true;
+    }
+
+    auto tlv = cmdu_tx.addClass<wfa_map::tlvApHtCapabilities>();
+    if (!tlv) {
+        LOG(ERROR) << "Error creating TLV_AP_HT_CAPABILITIES";
+        return false;
+    }
+
+    tlv->radio_uid() = radio_info.radio_mac;
+
+    /**
+     * See iw/util.c for details on how to compute fields.
+     * Code has been preserved as close as possible to that in the iw command line tool.
+     */
+    bool tx_mcs_set_defined = !!(radio_info.ht_mcs_set[12] & (1 << 0));
+    if (tx_mcs_set_defined) {
+        tlv->flags().max_num_of_supported_tx_spatial_streams = (radio_info.ht_mcs_set[12] >> 2) & 3;
+        tlv->flags().max_num_of_supported_rx_spatial_streams = 0; // TODO: Compute value (#1163)
+    }
+    tlv->flags().short_gi_support_20mhz = radio_info.ht_capability & BIT(5);
+    tlv->flags().short_gi_support_40mhz = radio_info.ht_capability & BIT(6);
+    tlv->flags().ht_support_40mhz       = radio_info.ht_capability & BIT(1);
+
+    return true;
+}
+
+bool backhaul_manager::add_ap_vht_capabilities(const sRadioInfo &radio_info)
+{
+    if (!radio_info.vht_supported) {
+        return true;
+    }
+
+    auto tlv = cmdu_tx.addClass<wfa_map::tlvApVhtCapabilities>();
+    if (!tlv) {
+        LOG(ERROR) << "Error creating TLV_AP_VHT_CAPABILITIES";
+        return false;
+    }
+
+    tlv->radio_uid() = radio_info.radio_mac;
+
+    /**
+     * See iw/util.c for details on how to compute fields
+     * Code has been preserved as close as possible to that in the iw command line tool.
+     */
+    tlv->supported_vht_tx_mcs() = radio_info.vht_mcs_set[4] | (radio_info.vht_mcs_set[5] << 8);
+    tlv->supported_vht_rx_mcs() = radio_info.vht_mcs_set[0] | (radio_info.vht_mcs_set[1] << 8);
+    tlv->flags1().max_num_of_supported_tx_spatial_streams = 0; // TODO: Compute value (#1163)
+    tlv->flags1().max_num_of_supported_rx_spatial_streams = 0; // TODO: Compute value (#1163)
+    tlv->flags1().short_gi_support_80mhz                  = radio_info.vht_capability & BIT(5);
+    tlv->flags1().short_gi_support_160mhz_and_80_80mhz    = radio_info.vht_capability & BIT(6);
+    tlv->flags2().vht_support_80_80mhz  = ((radio_info.vht_capability >> 2) & 3) == 2;
+    tlv->flags2().vht_support_160mhz    = ((radio_info.vht_capability >> 2) & 3) == 1;
+    tlv->flags2().su_beamformer_capable = radio_info.vht_capability & BIT(11);
+    tlv->flags2().mu_beamformer_capable = radio_info.vht_capability & BIT(19);
+
+    return true;
+}
+
+bool backhaul_manager::add_ap_he_capabilities(const sRadioInfo &radio_info)
+{
+    if (!radio_info.he_supported) {
+        return true;
+    }
+
+    auto tlv = cmdu_tx.addClass<wfa_map::tlvApHeCapabilities>();
+    if (!tlv) {
+        LOG(ERROR) << "Error creating TLV_AP_HE_CAPABILITIES";
+        return false;
+    }
+
+    tlv->radio_uid() = radio_info.radio_mac;
+
+    // TODO: Fetch the AP HE Capabilities from the Wi-Fi driver via the Netlink socket and include
+    // them into AP HE Capabilities TLV (#1162)
 
     return true;
 }
