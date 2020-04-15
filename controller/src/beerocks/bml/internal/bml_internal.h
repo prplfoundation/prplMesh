@@ -63,6 +63,15 @@ public:
     */
     int clear_wifi_credentials(const sMacAddr &al_mac);
 
+    /**
+    * @brief Update wifi credentials for specific AL-MAC
+    *
+    * @param al_mac al_mac client AL-MAC address
+    *
+    * @return BML_RET_OK if success, error code otherwise
+    */
+    int update_wifi_credentials(const sMacAddr &al_mac);
+
     // Get wireless SSID and security
     int get_wifi_credentials(int vap_id, char *ssid, char *pass, int *sec);
 

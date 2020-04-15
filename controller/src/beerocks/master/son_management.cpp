@@ -1535,6 +1535,35 @@ void son_management::handle_bml_message(Socket *sd,
         }
         break;
     }
+    case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST";
+        uint32_t ret = 0;
+        auto request =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_WIFI_CREDENTIALS_UPDATE_REQUEST failed";
+            return;
+        }
+
+        ret = son_actions::send_ap_config_renew_msg(cmdu_tx, database, request->al_mac());
+        if (!ret) {
+            LOG(ERROR) << "Failed son_actions::send_ap_config_renew_msg ! ";
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE>(cmdu_tx,
+                                                                            beerocks_header->id());
+        if (!response) {
+            LOG(ERROR) << "Failed building message cACTION_BML_WIFI_CREDENTIALS_UPDATE_RESPONSE ! ";
+        } else {
+            response->error_code() = ret;
+            if (message_com::send_cmdu(sd, cmdu_tx) == false) {
+                LOG(ERROR) << "Error sending cmdu message";
+            }
+        }
+        break;
+    }
     case beerocks_message::ACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST: {
 
         uint32_t result = 1; //1-fail 0-success
