@@ -11,15 +11,13 @@ run() {
     "$@" || exit $?
 }
 
-base_mac="$1"; shift
-
 # Use the ip address that was allocated by the daemon to this
 # container (from eth0)
 bridge_ip="$(ip addr show dev eth0 | grep inet | awk '{print $2}')"
 
-run ip link add          br-lan   address "${base_mac}:00:00" type bridge
-run ip link add          wlan0    address "${base_mac}:00:10" type dummy
-run ip link add          wlan2    address "${base_mac}:00:20" type dummy
+run ip link add          br-lan   type bridge
+run ip link add          wlan0    type dummy
+run ip link add          wlan2    type dummy
 run ip link set      dev eth0     master br-lan
 run ip link set      dev wlan0    master br-lan
 run ip link set      dev wlan2    master br-lan

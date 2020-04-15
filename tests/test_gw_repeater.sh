@@ -97,7 +97,7 @@ main() {
     [ "$START_GATEWAY" = "true" ] && {
         status "Start GW (Controller + local Agent)"
         "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} ${GW_EXTRA_OPT} \
-            start-controller-agent -d -n "${GW_NAME}" -m 00:11:22:33 -- "$@"
+            start-controller-agent -d -n "${GW_NAME}" -- "$@"
     }
 
     [ "$START_GATEWAY" = "true" ] && [ "$START_REPEATER" = "true" ] && {
@@ -106,12 +106,10 @@ main() {
     }
 
     [ "$START_REPEATER" = "true" ] && {
-        index=0
         for repeater in $REPEATER_NAMES; do
             status "Start Repeater (Remote Agent): $repeater"
             "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} ${RP_EXTRA_OPT} \
-                start-agent -d -n "${repeater}" -m aa:bb:cc:"$index$index" -- "$@"
-            index=$((index+1))
+                start-agent -d -n "${repeater}" -- "$@"
         done
     }
 
