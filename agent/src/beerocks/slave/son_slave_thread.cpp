@@ -4530,7 +4530,7 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     measurement_request.report             = 0;
     measurement_request.mandatory_duration = 0;
     measurement_request.use_optional_ssid  = 0;
-    string_utils::copy_string((char *)measurement_request.ssid, beaconMetricsQuery->ssid(),
+    string_utils::copy_string(beaconMetricsQuery->ssid(), (char *)measurement_request.ssid,
                               message::WIFI_SSID_MAX_LENGTH);
     measurement_request.use_optional_ap_ch_report =
         beaconMetricsQuery->ap_channel_reports_list_length();
