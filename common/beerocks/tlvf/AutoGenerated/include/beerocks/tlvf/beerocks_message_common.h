@@ -188,7 +188,6 @@ typedef struct sClientMonitoringParams {
     sMacAddr mac;
     sMacAddr bridge_4addr_mac;
     beerocks::net::sIpv4Addr ipv4;
-    uint8_t channel;
     int8_t vap_id;
     uint8_t is_ire;
     void struct_swap(){
