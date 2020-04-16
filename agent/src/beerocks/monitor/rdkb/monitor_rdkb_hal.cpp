@@ -304,7 +304,7 @@ std::shared_ptr<rdkb_hal_sta_config> monitor_rdkb_hal::conf_get_client(const std
     return conf_find_client(sta_mac);
 }
 
-std::shared_ptr<rdkb_hal_sta_config> monitor_rdkb_hal::conf_find_client(const std::string sta_mac)
+std::shared_ptr<rdkb_hal_sta_config> monitor_rdkb_hal::conf_find_client(const std::string &sta_mac)
 {
 
     auto it = conf_stas.find(sta_mac);

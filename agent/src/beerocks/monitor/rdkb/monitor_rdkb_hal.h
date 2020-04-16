@@ -19,7 +19,7 @@
 namespace son {
 class rdkb_hal_ap_config {
 public:
-    explicit rdkb_hal_ap_config(const int8_t apIndex_) { apIndex = apIndex_; }
+    explicit rdkb_hal_ap_config(const int8_t apIndex_) : apIndex(apIndex_) {}
 
     void setInactCheckIntervalSec(unsigned interval) { inactCheckIntervalSec = interval; }
     void setInactCheckThresholdSec(unsigned interval) { inactCheckThresholdSec = interval; }
@@ -54,7 +54,7 @@ public:
         uint32_t sample_packets; // number of packets in the last poll cycle.
     };
 
-    explicit rdkb_hal_sta_config(const std::string mac_) { mac = mac_; }
+    explicit rdkb_hal_sta_config(const std::string &mac_) : mac(mac_) {}
 
     void setSnrInactXing(int8_t threshold) { snrInactXing = threshold; }
     void setSnrHighXing(int8_t threshold) { snrHighXing = threshold; }
@@ -91,10 +91,10 @@ public:
 private:
     std::string getStateString(client_state_t state);
     std::string mac;
-    int8_t vapIndex;
-    int8_t snrInactXing; /* Inactive SNR crossing threshold */
-    int8_t snrHighXing;  /* High SNR crossing threshold     */
-    int8_t snrLowXing;   /* Low SNR crossing threshold      */
+    int8_t vapIndex     = -1;
+    int8_t snrInactXing = 0; /* Inactive SNR crossing threshold */
+    int8_t snrHighXing  = 0; /* High SNR crossing threshold     */
+    int8_t snrLowXing   = 0; /* Low SNR crossing threshold      */
 
     std::chrono::steady_clock::time_point startTime      = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point lastSampleTime = std::chrono::steady_clock::now();
@@ -153,7 +153,7 @@ private:
     void send_snr_crossing_event(const std::string &sta_mac, monitor_sta_node::SStaStats &sta_stats,
                                  crossing_status_t threshs, int8_t vap_id);
     template <typename T, typename K> bool conf_erase(T &conf, K k);
-    std::shared_ptr<rdkb_hal_sta_config> conf_find_client(const std::string sta_mac);
+    std::shared_ptr<rdkb_hal_sta_config> conf_find_client(const std::string &sta_mac);
     std::shared_ptr<rdkb_hal_ap_config> conf_find_ap(const int8_t vap_id);
     void print_debug_info(mon_rdkb_debug_info_t &mdi, bool pkts_count_en);
 
