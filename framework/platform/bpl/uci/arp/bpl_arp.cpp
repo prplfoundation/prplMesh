@@ -10,6 +10,8 @@
 #include <bpl/bpl_arp.h>
 #include <bpl/bpl_err.h>
 
+#include <mapf/common/utils.h>
+
 #include "monitor/arp_monitor.h"
 
 #include <sys/socket.h>
@@ -217,7 +219,7 @@ int arp_get_bridge_iface(const char bridge[BPL_ARP_IFACE_NAME_LEN],
         portno_to_iface(pFDB->port_no, bridge, ifname);
 
         // Return the interface name
-        utils::copy_string(iface, ifname, BPL_ARP_IFACE_NAME_LEN);
+        mapf::utils::copy_string(iface, ifname, BPL_ARP_IFACE_NAME_LEN);
         break;
     }
 

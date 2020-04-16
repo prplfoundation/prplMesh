@@ -15,7 +15,8 @@
 #include "bpl_cfg_helper.h"
 #include "bpl_cfg_uci.h"
 
-#include "mapf/common/logger.h"
+#include <mapf/common/logger.h>
+#include <mapf/common/utils.h>
 
 using namespace mapf;
 
@@ -160,8 +161,8 @@ int cfg_get_load_steer_on_vaps(int num_of_interfaces,
         return RETURN_OK;
     }
 
-    utils::copy_string(load_steer_on_vaps, load_steer_on_vaps_str.c_str(),
-                       BPL_LOAD_STEER_ON_VAPS_LEN);
+    mapf::utils::copy_string(load_steer_on_vaps, load_steer_on_vaps_str.c_str(),
+                             BPL_LOAD_STEER_ON_VAPS_LEN);
 
     return RETURN_OK;
 }

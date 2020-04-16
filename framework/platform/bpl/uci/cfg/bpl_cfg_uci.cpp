@@ -9,6 +9,8 @@
 #include "bpl_cfg_uci.h"
 #include "../../common/utils/utils.h"
 
+#include <mapf/common/utils.h>
+
 #include <string>
 
 extern "C" {
@@ -258,7 +260,7 @@ int cfg_uci_get_wireless_from_ifname(enum paramType type, const char *interface_
         }
 
         char path[MAX_UCI_BUF_LEN] = "";
-        utils::copy_string(path, path_str.c_str(), MAX_UCI_BUF_LEN);
+        mapf::utils::copy_string(path, path_str.c_str(), MAX_UCI_BUF_LEN);
 
         if (cfg_uci_get(path, value, MAX_UCI_BUF_LEN) != RETURN_OK) {
             ERROR("%s option N/A. path=%s\n", __func__, path);

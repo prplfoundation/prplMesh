@@ -18,6 +18,7 @@
 #include <bcl/beerocks_string_utils.h>
 #include <bcl/beerocks_version.h>
 #include <easylogging++.h>
+#include <mapf/common/utils.h>
 
 #include <chrono>
 
@@ -109,7 +110,7 @@ static char *dupstr(const std::string &s)
         sigterm_handler(0);
         return nullptr;
     }
-    beerocks::string_utils::copy_string(r, s.c_str(), r_len);
+    mapf::utils::copy_string(r, s.c_str(), r_len);
     return r;
 }
 

@@ -1556,8 +1556,8 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
             auto &out_result = notification->scan_results();
 
             // Arrays
-            string_utils::copy_string(out_result.ssid, in_result.ssid,
-                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
+            mapf::utils::copy_string(out_result.ssid, in_result.ssid,
+                                     beerocks::message::WIFI_SSID_MAX_LENGTH);
             std::copy_n(in_result.bssid.oct, sizeof(out_result.bssid.oct), out_result.bssid.oct);
             std::copy(in_result.basic_data_transfer_rates_kbps.begin(),
                       in_result.basic_data_transfer_rates_kbps.end(),

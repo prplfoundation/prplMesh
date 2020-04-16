@@ -10,6 +10,8 @@
 #include "internal/bml_internal.h"
 
 #include <bcl/network/network_utils.h>
+#include <mapf/common/utils.h>
+
 #include <easylogging++.h>
 
 using namespace beerocks::net;
@@ -249,7 +251,7 @@ int bml_get_serial_number(BML_CTX ctx, char *serial_number)
     }
 
     // Copy only the serial number
-    beerocks::string_utils::copy_string(serial_number, device_info.serial_number, BML_DEV_INFO_LEN);
+    mapf::utils::copy_string(serial_number, device_info.serial_number, BML_DEV_INFO_LEN);
 
     return 0;
 }
@@ -470,8 +472,8 @@ int bml_get_master_slave_versions(BML_CTX ctx, char *master_version, char *slave
 
     bml_internal *pBML = (bml_internal *)ctx;
     if (pBML->is_local_master()) {
-        beerocks::string_utils::copy_string(master_version, bml_get_bml_version(), BML_VERSION_LEN);
-        beerocks::string_utils::copy_string(slave_version, bml_get_bml_version(), BML_VERSION_LEN);
+        mapf::utils::copy_string(master_version, bml_get_bml_version(), BML_VERSION_LEN);
+        mapf::utils::copy_string(slave_version, bml_get_bml_version(), BML_VERSION_LEN);
         return BML_RET_OK;
     }
 

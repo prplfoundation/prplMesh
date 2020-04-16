@@ -22,6 +22,7 @@ typedef int socklen_t;
 #include <sys/un.h>
 
 #include <bcl/beerocks_string_utils.h>
+#include <mapf/common/utils.h>
 
 #define closesocket close
 #define ioctlsocket ioctl
@@ -247,7 +248,7 @@ SocketServer::SocketServer(const std::string &uds_path, int connections, SocketM
 
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
-    beerocks::string_utils::copy_string(addr.sun_path, uds_path.c_str(), sizeof(addr.sun_path));
+    mapf::utils::copy_string(addr.sun_path, uds_path.c_str(), sizeof(addr.sun_path));
 
     if (mode == SocketModeNonBlocking) {
         u_long arg = 1;
@@ -356,7 +357,7 @@ SocketClient::SocketClient(const std::string &uds_path, long readTimeout)
     struct sockaddr_un addr;
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
-    beerocks::string_utils::copy_string(addr.sun_path, uds_path.c_str(), sizeof(addr.sun_path));
+    mapf::utils::copy_string(addr.sun_path, uds_path.c_str(), sizeof(addr.sun_path));
 
     if (::connect(m_socket, (sockaddr *)&addr, sizeof(addr))) {
         m_error = "connect() to " + uds_path + " failed: " + strerror(errno);
