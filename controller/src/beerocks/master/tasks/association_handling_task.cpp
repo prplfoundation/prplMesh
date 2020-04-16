@@ -104,11 +104,9 @@ void association_handling_task::work()
             return;
         }
 
-        request->params().mac  = tlvf::mac_from_string(sta_mac);
-        request->params().ipv4 = network_utils::ipv4_from_string(database.get_node_ipv4(sta_mac));
-        request->params().channel = database.get_node_channel(sta_mac);
-        request->params().vap_id  = database.get_node_vap_id(sta_mac);
-        request->params().is_ire  = false;
+        request->params().mac    = tlvf::mac_from_string(sta_mac);
+        request->params().ipv4   = network_utils::ipv4_from_string(database.get_node_ipv4(sta_mac));
+        request->params().is_ire = false;
 
         //add bridge mac for ires
         if (database.get_node_type(sta_mac) == beerocks::TYPE_IRE_BACKHAUL) {
