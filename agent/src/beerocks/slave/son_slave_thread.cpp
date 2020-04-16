@@ -4509,37 +4509,37 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     ? uint32_t new_ch_center_freq_seg_1;
     */
 
-    auto &measurement_request = request_out->params();
+    auto &measurement_request_out = request_out->params();
 
-    measurement_request.bssid   = beaconMetricsQuery->bssid();
-    measurement_request.channel = beaconMetricsQuery->channel_number();
+    measurement_request_out.bssid   = beaconMetricsQuery->bssid();
+    measurement_request_out.channel = beaconMetricsQuery->channel_number();
 
-    measurement_request.measurement_mode = beerocks::MEASURE_MODE_ACTIVE;
-    measurement_request.duration         = beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
+    measurement_request_out.measurement_mode = beerocks::MEASURE_MODE_ACTIVE;
+    measurement_request_out.duration         = beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
 
-    measurement_request.expected_reports_count = 1;
+    measurement_request_out.expected_reports_count = 1;
 
-    measurement_request.rand_ival = beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
-    measurement_request.sta_mac   = beaconMetricsQuery->associated_sta_mac();
+    measurement_request_out.rand_ival = beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
+    measurement_request_out.sta_mac   = beaconMetricsQuery->associated_sta_mac();
 
     // values based on https://github.com/prplfoundation/prplMesh/pull/1114#discussion_r406326546
-    measurement_request.repeats            = 0;
-    measurement_request.parallel           = 0;
-    measurement_request.enable             = 0;
-    measurement_request.request            = 1;
-    measurement_request.report             = 0;
-    measurement_request.mandatory_duration = 0;
-    measurement_request.use_optional_ssid  = 0;
-    string_utils::copy_string(beaconMetricsQuery->ssid(), (char *)measurement_request.ssid,
+    measurement_request_out.repeats            = 0;
+    measurement_request_out.parallel           = 0;
+    measurement_request_out.enable             = 0;
+    measurement_request_out.request            = 1;
+    measurement_request_out.report             = 0;
+    measurement_request_out.mandatory_duration = 0;
+    measurement_request_out.use_optional_ssid  = 0;
+    string_utils::copy_string(measurement_request_out.ssid, beaconMetricsQuery->ssid_str().c_str(),
                               message::WIFI_SSID_MAX_LENGTH);
-    measurement_request.use_optional_ap_ch_report =
+    measurement_request_out.use_optional_ap_ch_report =
         beaconMetricsQuery->ap_channel_reports_list_length();
-    //
+
     // FixMe:
     // here (I think) we need to copy m_ap_channel_reports_list from the 1905 beaconMetricsQuery
-    // into ap_ch_report char array of the vs message (measurement_request)
+    // into ap_ch_report char array of the vs message (measurement_request_out)
     // currently not supported
-    if (0 != measurement_request.use_optional_ap_ch_report) {
+    if (0 != measurement_request_out.use_optional_ap_ch_report) {
         LOG(ERROR) << "unsupported optional channel report in the request";
     }
     // end FixMe
@@ -4549,11 +4549,11 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     // end FixMe
 
     // FixMe:
-    // measurement_request.op_class = ??
-    // measurement_request.use_optional_wide_band_ch_switch = ??
-    // measurement_request.new_ch_width = ??
-    // measurement_request.new_ch_center_freq_seg_0 = ??
-    // measurement_request.new_ch_center_freq_seg_1 = ??
+    // measurement_request_out.op_class = ??
+    // measurement_request_out.use_optional_wide_band_ch_switch = ??
+    // measurement_request_out.new_ch_width = ??
+    // measurement_request_out.new_ch_center_freq_seg_0 = ??
+    // measurement_request_out.new_ch_center_freq_seg_1 = ??
     // end FixMe
 
     message_com::send_cmdu(monitor_socket, cmdu_tx);
