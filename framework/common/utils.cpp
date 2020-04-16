@@ -6,7 +6,9 @@
  * See LICENSE file for more details.
  */
 
+#include <algorithm>
 #include <iomanip>
+#include <mapf/common/logger.h>
 #include <mapf/common/utils.h>
 #include <sstream>
 
@@ -22,6 +24,21 @@ std::string dump_buffer(uint8_t *buffer, size_t len)
         hexdump << std::endl;
     }
     return hexdump.str();
+}
+
+void copy_string(char *dst, const char *src, size_t dst_len)
+{
+    const char *src_end = std::find(src, src + dst_len, '\0');
+    std::copy(src, src_end, dst);
+    std::ptrdiff_t src_size = src_end - src;
+    std::ptrdiff_t dst_size = dst_len;
+    if (src_size < dst_size) {
+        dst[src_size] = 0;
+    } else {
+        dst[dst_size - 1] = 0;
+        MAPF_ERR("copy_string() overflow, src string:'" << src << "'"
+                                                        << " dst_size=" << dst_size << std::endl);
+    }
 }
 
 } // namespace utils

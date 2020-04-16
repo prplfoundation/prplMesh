@@ -30,6 +30,15 @@ namespace utils {
  */
 std::string dump_buffer(uint8_t *buffer, size_t len);
 
+/**
+ * @brief copy string from buffer pointed by src into buffer pointed by dst
+ * 
+ * @param dst destination buffer
+ * @param src src buffer
+ * @param dst_len destination length
+ */
+void copy_string(char *dst, const char *src, size_t dst_len);
+
 } // namespace utils
 } // namespace mapf
 #endif // MAPFUTILS_H_
