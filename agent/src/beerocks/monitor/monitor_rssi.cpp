@@ -356,8 +356,8 @@ void monitor_rssi::process()
 
 void monitor_rssi::send_rssi_measurement_response(std::string &sta_mac, monitor_sta_node *sta_node)
 {
-    auto id_list    = sta_node->get_rx_rssi_request_id_list();
-    auto &sta_stats = sta_node->get_stats();
+    auto id_list          = sta_node->get_rx_rssi_request_id_list();
+    const auto &sta_stats = sta_node->get_stats();
 
     int rx_packets = mon_db->MONITOR_ARP_PKT_NUM;
 
@@ -388,8 +388,8 @@ void monitor_rssi::send_rssi_measurement_response(std::string &sta_mac, monitor_
 
 void monitor_rssi::monitor_idle_station(std::string &sta_mac, monitor_sta_node *sta_node)
 {
-    auto current_time = std::chrono::steady_clock::now();
-    auto &sta_stats   = sta_node->get_stats();
+    auto current_time     = std::chrono::steady_clock::now();
+    const auto &sta_stats = sta_node->get_stats();
     if ((sta_stats.hal_stats.rx_bytes < m_idle_unit_rx_threshold) &&
         (sta_stats.hal_stats.tx_bytes < m_idle_unit_tx_threshold)) {
         if (!sta_node->idle_detected) {
