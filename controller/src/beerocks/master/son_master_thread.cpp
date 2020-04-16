@@ -1001,7 +1001,7 @@ bool master_thread::handle_cmdu_1905_ack_message(const std::string &src_mac,
         errorSS << "no error";
     }
 
-    LOG(DEBUG) << "Received ACK_MESSAGE, mid=0x" << std::hex << int(mid)
+    LOG(DEBUG) << "Received ACK_MESSAGE, mid=" << std::hex << int(mid)
                << " tlv error code: " << errorSS.str();
 
     //TODO: the ACK should be sent to the correct task and will be done as part of agent certification
