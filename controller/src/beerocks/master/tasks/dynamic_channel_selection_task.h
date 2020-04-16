@@ -93,8 +93,13 @@ private:
         beerocks::eChannelScanErrCode::CHANNEL_SCAN_INVALID_PARAMS;
     eEvent m_dcs_waiting_for_event = eEvent::INVALID_EVENT;
 
-    bool m_is_single_scan_pending = false;
-    bool m_is_single_scan         = false;
+    // The single scan request scan-parameters and scan-results are stored separately from the
+    // scan-parameters and scan-results of the continuous scans. This enables the support of both
+    // continuous-scans mode and single-scan-request simultaneously.
+    // The following data-members are used to read the scan parameters and save the scan results of
+    // the scan that is currently handled.
+    bool m_single_scan_request_pending = false;
+    bool m_single_scan                 = false;
 
     static int m_scanning_task_id; // Currently scanning task id. -1 means no scan in progress.
 };
