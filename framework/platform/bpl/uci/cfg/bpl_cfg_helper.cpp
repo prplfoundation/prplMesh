@@ -11,7 +11,8 @@
 #include "bpl_cfg_helper.h"
 #include "bpl_cfg_uci.h"
 
-#include "mapf/common/logger.h"
+#include <mapf/common/logger.h>
+#include <mapf/common/utils.h>
 
 namespace beerocks {
 namespace bpl {
@@ -24,7 +25,7 @@ int cfg_get_index_from_interface(const std::string &inputIfName, int *nIndex)
     if (!nIndex) {
         return RETURN_ERR;
     }
-    utils::copy_string(ifname, inputIfName.c_str(), BPL_IFNAME_LEN);
+    mapf::utils::copy_string(ifname, inputIfName.c_str(), BPL_IFNAME_LEN);
 
     const paramType ifType = (inputIfName.find('.') != std::string::npos) ? TYPE_VAP : TYPE_RADIO;
 
@@ -119,7 +120,7 @@ int cfg_get_channel(const std::string &interface_name, int *channel)
     char channel_num[MAX_UCI_BUF_LEN] = {0};
     char ifname[BPL_IFNAME_LEN]       = {0};
 
-    utils::copy_string(ifname, interface_name.c_str(), BPL_IFNAME_LEN);
+    mapf::utils::copy_string(ifname, interface_name.c_str(), BPL_IFNAME_LEN);
     if (cfg_uci_get_wireless_from_ifname(TYPE_RADIO, ifname, "channel", channel_num) != RETURN_OK) {
         return RETURN_ERR;
     }

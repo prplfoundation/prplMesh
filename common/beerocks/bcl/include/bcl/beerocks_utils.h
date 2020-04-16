@@ -9,6 +9,8 @@
 #ifndef _BEEROCKS_UTILS_H_
 #define _BEEROCKS_UTILS_H_
 
+#include <mapf/common/utils.h>
+
 #include "beerocks_defines.h"
 #include "beerocks_string_utils.h"
 

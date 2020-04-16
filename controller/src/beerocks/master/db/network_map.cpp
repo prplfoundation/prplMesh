@@ -245,7 +245,7 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
     }
 
     network_utils::ipv4_from_string(node->ip_v4, n->ipv4);
-    string_utils::copy_string(node->name, n->name.c_str(), sizeof(node->name));
+    mapf::utils::copy_string(node->name, n->name.c_str(), sizeof(node->name));
 
     // GW/IRE specific parameters
     if (n_type != beerocks::TYPE_CLIENT) {
@@ -265,9 +265,9 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
                                                c->mac); // local parent backhaul
 
                 // Copy the interface name
-                string_utils::copy_string(node->data.gw_ire.radio[i].iface_name,
-                                          database.get_hostap_iface_name(c->mac).c_str(),
-                                          BML_NODE_IFACE_NAME_LEN);
+                mapf::utils::copy_string(node->data.gw_ire.radio[i].iface_name,
+                                         database.get_hostap_iface_name(c->mac).c_str(),
+                                         BML_NODE_IFACE_NAME_LEN);
 
                 // Radio Vendor
                 switch (database.get_hostap_iface_type(c->mac)) {
@@ -279,9 +279,9 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
                 }
 
                 // Copy the driver version string
-                string_utils::copy_string(node->data.gw_ire.radio[i].driver_version,
-                                          database.get_hostap_driver_version(c->mac).c_str(),
-                                          BML_WLAN_DRIVER_VERSION_LEN);
+                mapf::utils::copy_string(node->data.gw_ire.radio[i].driver_version,
+                                         database.get_hostap_driver_version(c->mac).c_str(),
+                                         BML_WLAN_DRIVER_VERSION_LEN);
 
                 node->data.gw_ire.radio[i].channel       = !c->channel ? 255 : c->channel;
                 node->data.gw_ire.radio[i].cac_completed = c->hostap->cac_completed;
@@ -299,9 +299,9 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
                     const auto &vap = (c->hostap->vaps_info[vap_id]);
                     network_utils::mac_from_string(node->data.gw_ire.radio[i].vap[vap_id].bssid,
                                                    vap.mac);
-                    string_utils::copy_string(node->data.gw_ire.radio[i].vap[vap_id].ssid,
-                                              vap.ssid.c_str(),
-                                              sizeof(node->data.gw_ire.radio[i].vap[0].ssid));
+                    mapf::utils::copy_string(node->data.gw_ire.radio[i].vap[vap_id].ssid,
+                                             vap.ssid.c_str(),
+                                             sizeof(node->data.gw_ire.radio[i].vap[0].ssid));
                     node->data.gw_ire.radio[i].vap[vap_id].backhaul_vap = vap.backhaul_vap;
                 }
                 ++i;

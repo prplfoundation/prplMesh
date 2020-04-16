@@ -105,8 +105,8 @@ copy_vaps_info(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal,
 
             // Copy the VAP MAC and SSID
             vaps[i].mac = network_utils::mac_from_string(curr_vap.mac);
-            beerocks::string_utils::copy_string((char *)vaps[i].ssid, curr_vap.ssid.c_str(),
-                                                beerocks::message::WIFI_SSID_MAX_LENGTH);
+            mapf::utils::copy_string(vaps[i].ssid, curr_vap.ssid.c_str(),
+                                     beerocks::message::WIFI_SSID_MAX_LENGTH);
             vaps[i].backhaul_vap = bVAP;
         }
     }
@@ -1537,11 +1537,11 @@ void ap_manager_thread::handle_hostapd_attached()
         return;
     }
 
-    string_utils::copy_string(notification->params().iface_name,
-                              ap_wlan_hal->get_iface_name().c_str(), message::IFACE_NAME_LENGTH);
-    string_utils::copy_string(notification->params().driver_version,
-                              ap_wlan_hal->get_radio_driver_version().c_str(),
-                              message::WIFI_DRIVER_VER_LENGTH);
+    mapf::utils::copy_string(notification->params().iface_name,
+                             ap_wlan_hal->get_iface_name().c_str(), message::IFACE_NAME_LENGTH);
+    mapf::utils::copy_string(notification->params().driver_version,
+                             ap_wlan_hal->get_radio_driver_version().c_str(),
+                             message::WIFI_DRIVER_VER_LENGTH);
 
     notification->params().iface_type = uint8_t(ap_wlan_hal->get_iface_type());
     notification->params().iface_mac = network_utils::mac_from_string(ap_wlan_hal->get_radio_mac());
@@ -1679,9 +1679,8 @@ bool ap_manager_thread::handle_ap_enabled(int vap_id)
 
     // Copy the VAP MAC and SSID
     notification->vap_info().mac = network_utils::mac_from_string(vap_info.mac);
-    beerocks::string_utils::copy_string((char *)notification->vap_info().ssid,
-                                        vap_info.ssid.c_str(),
-                                        beerocks::message::WIFI_SSID_MAX_LENGTH);
+    mapf::utils::copy_string(notification->vap_info().ssid, vap_info.ssid.c_str(),
+                             beerocks::message::WIFI_SSID_MAX_LENGTH);
     notification->vap_info().backhaul_vap = bVAP;
 
     message_com::send_cmdu(slave_socket, cmdu_tx);

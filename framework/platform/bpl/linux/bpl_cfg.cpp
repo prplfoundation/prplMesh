@@ -8,8 +8,9 @@
 
 #include "../common/utils/utils.h"
 #include "../common/utils/utils_net.h"
-#include "mapf/common/logger.h"
 #include <bpl/bpl_cfg.h>
+#include <mapf/common/logger.h>
+#include <mapf/common/utils.h>
 
 using namespace mapf;
 
@@ -195,8 +196,8 @@ int cfg_get_load_steer_on_vaps(int num_of_interfaces,
         return RETURN_OK;
     }
 
-    utils::copy_string(load_steer_on_vaps, load_steer_on_vaps_str.c_str(),
-                       BPL_LOAD_STEER_ON_VAPS_LEN);
+    mapf::utils::copy_string(load_steer_on_vaps, load_steer_on_vaps_str.c_str(),
+                             BPL_LOAD_STEER_ON_VAPS_LEN);
 
     return RETURN_OK;
 }
@@ -250,8 +251,8 @@ int cfg_get_backhaul_vaps(char *backhaul_vaps_buf, const int buf_len)
 int cfg_get_beerocks_credentials(const int radio_dir, char ssid[BPL_SSID_LEN],
                                  char pass[BPL_PASS_LEN], char sec[BPL_SEC_LEN])
 {
-    utils::copy_string(ssid, "test_beerocks_ssid", BPL_SSID_LEN);
-    utils::copy_string(sec, "None", BPL_SEC_LEN);
+    mapf::utils::copy_string(ssid, "test_beerocks_ssid", BPL_SSID_LEN);
+    mapf::utils::copy_string(sec, "None", BPL_SEC_LEN);
     return RETURN_OK;
 }
 
@@ -301,7 +302,7 @@ int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN])
     // 0,1 for Turris-Omnia and GLInet
     // we return 0,1,2 and the upper layer filters the non-supported interface
     std::string iface_str("wlan" + std::to_string(radio_num));
-    utils::copy_string(hostap_iface, iface_str.c_str(), BPL_IFNAME_LEN);
+    mapf::utils::copy_string(hostap_iface, iface_str.c_str(), BPL_IFNAME_LEN);
     return RETURN_OK;
 }
 

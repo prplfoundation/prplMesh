@@ -627,8 +627,7 @@ void cli_bml::map_query_cb(const struct BML_NODE_ITER *node_iter, bool to_consol
                 std::cout << "ERROR: MARK sign > print_buffer available length" << std::endl;
                 return;
             } else {
-                beerocks::string_utils::copy_string(p, ss.str().c_str(),
-                                                    sizeof(pThis->print_buffer));
+                mapf::utils::copy_string(p, ss.str().c_str(), sizeof(pThis->print_buffer));
                 p += offset;
             }
         }

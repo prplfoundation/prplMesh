@@ -160,7 +160,7 @@ void association_handling_task::work()
             parent_mac); // the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
         //measurement_request.params.use_optional_ssid = true;
         measurement_request->params().expected_reports_count = 1;
-        //string_utils::copy_string((char*)measurement_request.params.ssid, database.get_hostap_vap_ssid(parent_mac).c_str(), sizeof(measurement_request.params.ssid));
+        //mapf::utils::copy_string(measurement_request.params.ssid, database.get_hostap_vap_ssid(parent_mac).c_str(), sizeof(measurement_request.params.ssid));
         add_pending_mac(radio_mac, beerocks_message::ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE);
         TASK_LOG(DEBUG) << "requested beacon measurement request from sta: " << sta_mac
                         << " on hostap: " << parent_mac;

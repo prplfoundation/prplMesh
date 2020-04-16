@@ -68,8 +68,7 @@ static void config_logger(const std::string log_file = std::string())
 static void translate_channel_scan_results(const beerocks_message::sChannelScanResults &res_in,
                                            BML_NEIGHBOR_AP &res_out)
 {
-    string_utils::copy_string(res_out.ap_SSID, res_in.ssid,
-                              beerocks::message::WIFI_SSID_MAX_LENGTH);
+    mapf::utils::copy_string(res_out.ap_SSID, res_in.ssid, beerocks::message::WIFI_SSID_MAX_LENGTH);
     std::copy_n(res_in.bssid.oct, BML_MAC_ADDR_LEN, res_out.ap_BSSID);
     std::copy_n(res_in.security_mode_enabled, beerocks::message::CHANNEL_SCAN_LIST_LENGTH,
                 res_out.ap_SecurityModeEnabled);
@@ -1184,12 +1183,12 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             // Signal any waiting threads
             if (m_prmMasterSlaveVersions) {
                 if (m_master_slave_versions != nullptr) {
-                    string_utils::copy_string(m_master_slave_versions->master_version,
-                                              response->versions().master_version,
-                                              message::VERSION_LENGTH);
-                    string_utils::copy_string(m_master_slave_versions->slave_version,
-                                              response->versions().slave_version,
-                                              message::VERSION_LENGTH);
+                    mapf::utils::copy_string(m_master_slave_versions->master_version,
+                                             response->versions().master_version,
+                                             message::VERSION_LENGTH);
+                    mapf::utils::copy_string(m_master_slave_versions->slave_version,
+                                             response->versions().slave_version,
+                                             message::VERSION_LENGTH);
                     m_prmMasterSlaveVersions->set_value(response->result() == 0);
                 } else {
                     LOG(DEBUG) << "m_master_slave_versions == nullptr !";
@@ -2025,8 +2024,8 @@ int bml_internal::set_wifi_credentials(const std::string ssid, const std::string
         return (-BML_RET_OP_FAILED);
     }
 
-    string_utils::copy_string(config->params().ssid, ssid.c_str(), message::WIFI_SSID_MAX_LENGTH);
-    string_utils::copy_string(config->params().pass, pass.c_str(), message::WIFI_PASS_MAX_LENGTH);
+    mapf::utils::copy_string(config->params().ssid, ssid.c_str(), message::WIFI_SSID_MAX_LENGTH);
+    mapf::utils::copy_string(config->params().pass, pass.c_str(), message::WIFI_PASS_MAX_LENGTH);
 
     switch (sec) {
     case BML_WLAN_SEC_NONE:
@@ -2155,9 +2154,9 @@ int bml_internal::get_wifi_credentials(int vap_id, char *ssid, char *pass, int *
     // Clear the promise holder
     m_prmWiFiCredentialsGet = nullptr;
 
-    string_utils::copy_string(ssid, sWifiCredentials.ssid, BML_NODE_SSID_LEN);
+    mapf::utils::copy_string(ssid, sWifiCredentials.ssid, BML_NODE_SSID_LEN);
     if (pass != nullptr) {
-        string_utils::copy_string(pass, sWifiCredentials.pass, BML_NODE_PASS_LEN);
+        mapf::utils::copy_string(pass, sWifiCredentials.pass, BML_NODE_PASS_LEN);
     }
     *sec = sWifiCredentials.sec;
 
@@ -2266,8 +2265,8 @@ int bml_internal::bml_wps_onboarding(const char *iface)
         return (-BML_RET_OP_FAILED);
     }
 
-    string_utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH), iface,
-                              message::IFACE_NAME_LENGTH);
+    mapf::utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH), iface,
+                             message::IFACE_NAME_LENGTH);
 
     if (!message_com::send_cmdu(m_sockPlatform, cmdu_tx)) {
         LOG(ERROR) << "Failed sending ACTION_PLATFORM_WPS_ONBOARDING_REQUEST message!";
@@ -2329,8 +2328,7 @@ int bml_internal::get_administrator_credentials(char *user_password)
     // Clear the promise holder
     m_prmAdminCredentialsGet = nullptr;
 
-    string_utils::copy_string(user_password, AdminCredentials.user_password,
-                              BML_NODE_USER_PASS_LEN);
+    mapf::utils::copy_string(user_password, AdminCredentials.user_password, BML_NODE_USER_PASS_LEN);
 
     //clear the memory with password in it.
     volatile char *creds_pass = const_cast<volatile char *>(AdminCredentials.user_password);
@@ -2387,20 +2385,19 @@ int bml_internal::get_device_info(BML_DEVICE_INFO &device_info)
     // Clear the promise holder
     m_prmDeviceInfoGet = nullptr;
 
-    string_utils::copy_string(device_info.manufacturer, DeviceInfo.manufacturer, BML_DEV_INFO_LEN);
-    string_utils::copy_string(device_info.model_name, DeviceInfo.model_name, BML_DEV_INFO_LEN);
-    string_utils::copy_string(device_info.serial_number, DeviceInfo.serial_number,
-                              BML_DEV_INFO_LEN);
+    mapf::utils::copy_string(device_info.manufacturer, DeviceInfo.manufacturer, BML_DEV_INFO_LEN);
+    mapf::utils::copy_string(device_info.model_name, DeviceInfo.model_name, BML_DEV_INFO_LEN);
+    mapf::utils::copy_string(device_info.serial_number, DeviceInfo.serial_number, BML_DEV_INFO_LEN);
 
     // LAN
-    string_utils::copy_string(device_info.lan_iface_name, DeviceInfo.lan_iface_name,
-                              BML_IFACE_NAME_LEN);
+    mapf::utils::copy_string(device_info.lan_iface_name, DeviceInfo.lan_iface_name,
+                             BML_IFACE_NAME_LEN);
     device_info.lan_ip_address   = DeviceInfo.lan_ip_address;
     device_info.lan_network_mask = DeviceInfo.lan_network_mask;
 
     // WAN
-    string_utils::copy_string(device_info.wan_iface_name, DeviceInfo.wan_iface_name,
-                              BML_IFACE_NAME_LEN);
+    mapf::utils::copy_string(device_info.wan_iface_name, DeviceInfo.wan_iface_name,
+                             BML_IFACE_NAME_LEN);
     device_info.wan_ip_address   = DeviceInfo.wan_ip_address;
     device_info.wan_network_mask = DeviceInfo.wan_network_mask;
 
@@ -2840,8 +2837,8 @@ int bml_internal::get_master_slave_versions(char *master_version, char *slave_ve
     // Clear the promise holder
     m_prmMasterSlaveVersions = nullptr;
 
-    string_utils::copy_string(master_version, sVersion.master_version, message::VERSION_LENGTH);
-    string_utils::copy_string(slave_version, sVersion.slave_version, message::VERSION_LENGTH);
+    mapf::utils::copy_string(master_version, sVersion.master_version, message::VERSION_LENGTH);
+    mapf::utils::copy_string(slave_version, sVersion.slave_version, message::VERSION_LENGTH);
 
     if (iRet != BML_RET_OK) {
         LOG(ERROR) << "master_slave_versions request failed!";

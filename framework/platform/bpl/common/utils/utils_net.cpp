@@ -23,6 +23,7 @@
 #include <sys/types.h>
 
 #include <mapf/common/logger.h>
+#include <mapf/common/utils.h>
 
 namespace beerocks {
 namespace bpl {
@@ -122,7 +123,7 @@ bool linux_iface_get_mac(const std::string &iface, std::string &mac)
     }
 
     ifr.ifr_addr.sa_family = AF_INET;
-    utils::copy_string(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
+    mapf::utils::copy_string(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
     if (ioctl(fd, SIOCGIFHWADDR, &ifr) == -1) {
         MAPF_ERR("SIOCGIFHWADDR");
         close(fd);
@@ -147,7 +148,7 @@ bool linux_iface_get_ip(const std::string &iface, std::string &ip)
     }
 
     ifr.ifr_addr.sa_family = AF_INET;
-    utils::copy_string(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
+    mapf::utils::copy_string(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
 
     if (ioctl(fd, SIOCGIFADDR, &ifr) == -1) {
         MAPF_ERR("SIOCGIFADDR");
