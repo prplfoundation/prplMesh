@@ -16,7 +16,7 @@ typedef struct sVendorOUI {
     uint8_t upper;
     uint8_t middle;
     uint8_t lower;
-    sVendorOUI(uint32_t val)
+    explicit sVendorOUI(uint32_t val)
     {
         lower  = val & 0xFF;
         middle = (val >> 8) & 0xFF;

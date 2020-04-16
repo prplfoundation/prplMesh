@@ -29,7 +29,7 @@ public:
 
 template <typename T> class MessageMaker : public MessageMakerBase {
 public:
-    MessageMaker(const std::string &topic_prefix) : topic_prefix_(topic_prefix)
+    explicit MessageMaker(const std::string &topic_prefix) : topic_prefix_(topic_prefix)
     {
         MessageFactory::Instance().RegisterMaker(topic_prefix, this);
     }

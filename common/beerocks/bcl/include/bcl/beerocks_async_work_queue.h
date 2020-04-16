@@ -45,7 +45,7 @@ private:
     template <typename R> struct Task : public BasicTask {
         std::packaged_task<R()> task;
 
-        Task(std::function<R()> func) : task(func) {}
+        explicit Task(std::function<R()> func) : task(func) {}
 
         void execute() { task(); }
     };

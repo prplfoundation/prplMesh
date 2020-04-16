@@ -17,7 +17,7 @@ namespace mapf {
 class Dummy2Message : public Message {
 public:
     static const std::string kTopicPrefix;
-    Dummy2Message(const std::string &topic) : Message(topic)
+    explicit Dummy2Message(const std::string &topic) : Message(topic)
     {
         std::cout << "Building Dummy2Message, prefix=" << kTopicPrefix << std::endl;
     }

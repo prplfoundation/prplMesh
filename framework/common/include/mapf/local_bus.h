@@ -18,7 +18,7 @@ static const std::string kLocalBusConf(std::string(MAPF_ROOT) + "/share/local_bu
 
 class LocalBusInterface : public BrokerInterface {
 public:
-    LocalBusInterface(Context &ctx) : BrokerInterface(ctx, kLocalBusConf) {}
+    explicit LocalBusInterface(Context &ctx) : BrokerInterface(ctx, kLocalBusConf) {}
     ~LocalBusInterface() {}
 };
 } // namespace mapf

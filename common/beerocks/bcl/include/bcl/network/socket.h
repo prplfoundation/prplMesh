@@ -43,7 +43,7 @@ typedef unsigned __int64 ssize_t;
 
 class Socket {
 public:
-    Socket(SOCKET s, long readTimeout = 1000);
+    explicit Socket(SOCKET s, long readTimeout = 1000);
     Socket(SOCKET s, std::string peer_ip, int port_port, long readTimeout = 1000);
     Socket(const std::string &uds_path = std::string(), long readTimeout = 1000);
     virtual ~Socket();
@@ -97,7 +97,7 @@ private:
 
 class SocketClient : public Socket {
 public:
-    SocketClient(const std::string &uds_path, long readTimeout = 1000);
+    explicit SocketClient(const std::string &uds_path, long readTimeout = 1000);
     SocketClient(const std::string &host, int port, int connect_timeout_msec = -1,
                  long readTimeout = 1000);
 };

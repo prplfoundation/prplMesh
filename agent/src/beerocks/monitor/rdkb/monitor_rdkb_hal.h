@@ -19,7 +19,7 @@
 namespace son {
 class rdkb_hal_ap_config {
 public:
-    rdkb_hal_ap_config(const int8_t apIndex_) { apIndex = apIndex_; }
+    explicit rdkb_hal_ap_config(const int8_t apIndex_) { apIndex = apIndex_; }
 
     void setInactCheckIntervalSec(unsigned interval) { inactCheckIntervalSec = interval; }
     void setInactCheckThresholdSec(unsigned interval) { inactCheckThresholdSec = interval; }
@@ -54,7 +54,7 @@ public:
         uint32_t sample_packets; // number of packets in the last poll cycle.
     };
 
-    rdkb_hal_sta_config(const std::string mac_) { mac = mac_; }
+    explicit rdkb_hal_sta_config(const std::string mac_) { mac = mac_; }
 
     void setSnrInactXing(int8_t threshold) { snrInactXing = threshold; }
     void setSnrHighXing(int8_t threshold) { snrHighXing = threshold; }
@@ -133,7 +133,7 @@ public:
         snr_change_t inactive;
     } crossing_status_t;
 
-    monitor_rdkb_hal(ieee1905_1::CmduMessageTx &cmdu_tx_);
+    explicit monitor_rdkb_hal(ieee1905_1::CmduMessageTx &cmdu_tx_);
     ~monitor_rdkb_hal() {}
     bool start(monitor_db *mon_db_, Socket *slave_socket_);
     void stop();

@@ -29,7 +29,8 @@ public:
         bool verbose          = false;
     };
 
-    SocketTest(mapf::Context &context, SocketTestConfig *cfg = nullptr, const char *name = "")
+    explicit SocketTest(mapf::Context &context, SocketTestConfig *cfg = nullptr,
+                        const char *name = "")
         : name_(name), pub_(context), sub_(context)
     {
         if (cfg)
@@ -84,7 +85,7 @@ private:
 // test sending single string
 class SocketTestString : public SocketTest {
 public:
-    SocketTestString(mapf::Context &ctx, SocketTestConfig *cfg = nullptr)
+    explicit SocketTestString(mapf::Context &ctx, SocketTestConfig *cfg = nullptr)
         : SocketTest(ctx, cfg, "SocketTestString")
     {
     }
@@ -109,7 +110,7 @@ public:
 // test sending single frame
 class SocketTestFrame : public SocketTest {
 public:
-    SocketTestFrame(mapf::Context &ctx, SocketTestConfig *cfg = nullptr)
+    explicit SocketTestFrame(mapf::Context &ctx, SocketTestConfig *cfg = nullptr)
         : SocketTest(ctx, cfg, "SocketTestFrame")
     {
     }
@@ -134,7 +135,7 @@ public:
 // test sending a message with a single frame
 class SocketTestMessage : public SocketTest {
 public:
-    SocketTestMessage(mapf::Context &ctx, SocketTestConfig *cfg = nullptr)
+    explicit SocketTestMessage(mapf::Context &ctx, SocketTestConfig *cfg = nullptr)
         : SocketTest(ctx, cfg, "SocketTestMessage")
     {
     }
@@ -161,7 +162,7 @@ public:
 // test sending a message with a 2 frames
 class SocketTestMessageMult : public SocketTest {
 public:
-    SocketTestMessageMult(mapf::Context &ctx, SocketTestConfig *cfg = nullptr)
+    explicit SocketTestMessageMult(mapf::Context &ctx, SocketTestConfig *cfg = nullptr)
         : SocketTest(ctx, cfg, "SocketTestMessageMult")
     {
     }
@@ -199,7 +200,7 @@ public:
 // test sending a message with a 2 frames, receive with MessageFactory
 class SocketTestMessageMultFactory : public SocketTest {
 public:
-    SocketTestMessageMultFactory(mapf::Context &ctx, SocketTestConfig *cfg = nullptr)
+    explicit SocketTestMessageMultFactory(mapf::Context &ctx, SocketTestConfig *cfg = nullptr)
         : SocketTest(ctx, cfg, "SocketTestMessageMultFactory")
     {
     }

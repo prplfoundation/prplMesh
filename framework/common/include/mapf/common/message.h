@@ -27,7 +27,7 @@ public:
 
     class Frame {
     public:
-        Frame(size_t len, const void *init_data = nullptr)
+        explicit Frame(size_t len, const void *init_data = nullptr)
             : data_(std::make_shared<std::vector<uint8_t>>(len))
         {
             if (init_data)
@@ -66,7 +66,7 @@ public:
 
     Message() {}
 
-    Message(const std::string &topic) : topic_(topic) {}
+    explicit Message(const std::string &topic) : topic_(topic) {}
 
     Message(const std::string &topic, std::initializer_list<Frame> frames) : Message(topic)
     {

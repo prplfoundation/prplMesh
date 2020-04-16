@@ -21,7 +21,7 @@ namespace mapf {
 class MessageTest1 : public Message {
 public:
     static const std::string kTopicPrefix;
-    MessageTest1(const std::string &topic) : Message(topic)
+    explicit MessageTest1(const std::string &topic) : Message(topic)
     {
         std::cout << "Building MessageTest1, prefix=" << kTopicPrefix << std::endl;
     }
@@ -41,7 +41,7 @@ const std::string MessageTest1::kTopicPrefix = "test1.";
 class MessageTest2 : public Message {
 public:
     static const std::string kTopicPrefix;
-    MessageTest2(const std::string &topic) : Message(topic)
+    explicit MessageTest2(const std::string &topic) : Message(topic)
     {
         std::cout << "Building MessageTest2, prefix=" << kTopicPrefix << std::endl;
     }

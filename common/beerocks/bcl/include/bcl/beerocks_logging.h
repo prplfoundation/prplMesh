@@ -38,8 +38,8 @@ public:
     log_levels()                   = default;
     ~log_levels()                  = default;
     log_levels(const log_levels &) = default;
-    log_levels(const std::set<std::string> &log_levels);
-    log_levels(const std::string &log_level_str);
+    explicit log_levels(const std::set<std::string> &log_levels);
+    explicit log_levels(const std::string &log_level_str);
     log_levels &operator=(const log_levels &rhs);
     log_levels &operator=(const std::string &log_level_str);
     log_levels operator&(const log_levels &rhs);
@@ -75,8 +75,8 @@ public:
 
     logging(const std::string config_path = std::string(),
             std::string module_name       = BEEROCKS_LOGGING_MODULE_NAME);
-    logging(const settings_t &settings, bool cache_settings = false,
-            std::string module_name = BEEROCKS_LOGGING_MODULE_NAME);
+    explicit logging(const settings_t &settings, bool cache_settings = false,
+                     std::string module_name = BEEROCKS_LOGGING_MODULE_NAME);
     logging(const beerocks::config_file::SConfigLog &settings, std::string module_name,
             bool cache_settings = false);
     ~logging() = default;

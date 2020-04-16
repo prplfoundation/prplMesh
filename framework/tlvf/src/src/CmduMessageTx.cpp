@@ -68,7 +68,7 @@ std::shared_ptr<tlvVendorSpecific> CmduMessageTx::add_vs_tlv(tlvVendorSpecific::
         return nullptr;
 
     //set vendor specific oui
-    tlv->vendor_oui() = (uint32_t)voui;
+    tlv->vendor_oui() = sVendorOUI(voui);
 
     return tlv;
 }

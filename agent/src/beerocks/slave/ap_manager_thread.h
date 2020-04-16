@@ -22,7 +22,7 @@ namespace son {
 class ap_manager_thread : public beerocks::socket_thread {
 
 public:
-    ap_manager_thread(std::string slave_uds_);
+    explicit ap_manager_thread(std::string slave_uds_);
     virtual ~ap_manager_thread();
 
     struct ap_manager_conf_t {

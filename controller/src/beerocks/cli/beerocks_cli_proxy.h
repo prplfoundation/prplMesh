@@ -15,7 +15,7 @@
 namespace beerocks {
 class cli_proxy : public socket_thread {
 public:
-    cli_proxy(std::string master_uds_);
+    explicit cli_proxy(std::string master_uds_);
     ~cli_proxy();
 
     virtual bool init() override;

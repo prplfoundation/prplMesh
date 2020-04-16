@@ -20,7 +20,7 @@
 
 class PollerTest {
 public:
-    PollerTest(mapf::Context &ctx, const char *name = "")
+    explicit PollerTest(mapf::Context &ctx, const char *name = "")
         : name_(name), pub_(ctx), sub_(ctx), sub2_(ctx)
     {
         int rc = pub_.Connect(kPubAddr);
