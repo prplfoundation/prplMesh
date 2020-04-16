@@ -59,15 +59,14 @@ beerocks::eChannelScanErrCode dynamic_channel_selection_task::dcs_request_scan_t
         return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
     }
 
-    int32_t dwell_time_msec =
-        database.get_channel_scan_dwell_time_msec(m_radio_mac, m_is_single_scan);
+    int32_t dwell_time_msec = database.get_channel_scan_dwell_time_msec(m_radio_mac, m_single_scan);
     if (dwell_time_msec <= 0) {
         LOG(ERROR) << "invalid dwell_time <= 0";
         return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INVALID_PARAMS;
     }
 
     //get current channel pool from DB
-    auto &curr_channel_pool = database.get_channel_scan_pool(m_radio_mac, m_is_single_scan);
+    auto &curr_channel_pool = database.get_channel_scan_pool(m_radio_mac, m_single_scan);
     if (curr_channel_pool.empty()) {
         LOG(ERROR) << "empty channel pool is not supported. please set channel pool for mac="
                    << m_radio_mac;
@@ -103,14 +102,14 @@ void dynamic_channel_selection_task::work()
         break;
     }
     case eState::IDLE: {
-        if (m_is_single_scan_pending) {
-            m_is_single_scan         = true;
-            m_is_single_scan_pending = false;
+        if (m_single_scan_request_pending) {
+            m_single_scan                 = true;
+            m_single_scan_request_pending = false;
             LOG(DEBUG) << "single scan is pending, trigger single scan";
             fsm_move_state(eState::PRE_SCAN);
         } else if (database.get_channel_scan_is_enabled(m_radio_mac)) {
             if (std::chrono::steady_clock::now() > m_next_scan_timestamp_interval) {
-                m_is_single_scan = false;
+                m_single_scan = false;
                 LOG(DEBUG) << "interval condition is met, trigger scan";
                 fsm_move_state(eState::PRE_SCAN);
             }
@@ -120,8 +119,8 @@ void dynamic_channel_selection_task::work()
     case eState::PRE_SCAN: {
         if (start_scan()) {
             LOG(TRACE) << "PRE_SCAN, mac=" << m_radio_mac << ", scan_type is "
-                       << ((m_is_single_scan) ? "single-scan" : "continuous-scan");
-            if (!m_is_single_scan) {
+                       << ((m_single_scan) ? "single-scan" : "continuous-scan");
+            if (!m_single_scan) {
                 m_last_scan_try_timestamp = std::chrono::steady_clock::now();
             }
             fsm_move_state(eState::TRIGGER_SCAN);
@@ -130,17 +129,17 @@ void dynamic_channel_selection_task::work()
     }
     case eState::TRIGGER_SCAN: {
         LOG(TRACE) << "TRIGGER_SCAN, mac=" << m_radio_mac << ", scan_type is "
-                   << ((m_is_single_scan) ? "single-scan" : "continuous-scan");
+                   << ((m_single_scan) ? "single-scan" : "continuous-scan");
 
         // Before sending any request, set the scan_in_progress flag to true
         // So another scan request would not launch on the same radio simultaneously
-        database.set_channel_scan_in_progress(m_radio_mac, true, m_is_single_scan);
+        database.set_channel_scan_in_progress(m_radio_mac, true, m_single_scan);
 
         // When a scan is requested, check the Dwell time parameter,
         // Normally send a "trigger scan" request.
         // but on a dwell time = 0 scenario, sent a "scan dump" request
         auto ret = beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
-        if (database.get_channel_scan_dwell_time_msec(m_radio_mac, m_is_single_scan) != 0) {
+        if (database.get_channel_scan_dwell_time_msec(m_radio_mac, m_single_scan) != 0) {
             // Send the "trigger scan" request and continue on to WAIT_FOR_SCAN_TRIGGERED
             if ((ret = dcs_request_scan_trigger()) !=
                 beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS) {
@@ -199,7 +198,7 @@ void dynamic_channel_selection_task::work()
         LOG(TRACE) << "SCAN_DONE";
 
         //update next continuous scan time
-        if (!m_is_single_scan) {
+        if (!m_single_scan) {
             auto interval =
                 std::chrono::seconds(database.get_channel_scan_interval_sec(m_radio_mac));
             m_next_scan_timestamp_interval = m_last_scan_try_timestamp + interval;
@@ -223,9 +222,9 @@ void dynamic_channel_selection_task::work()
         }
 
         database.set_channel_scan_results_status(m_radio_mac, m_last_scan_error_code,
-                                                 m_is_single_scan);
-        database.set_channel_scan_in_progress(m_radio_mac, false, m_is_single_scan);
-        m_is_single_scan = false;
+                                                 m_single_scan);
+        database.set_channel_scan_in_progress(m_radio_mac, false, m_single_scan);
+        m_single_scan = false;
 
         fsm_move_state(eState::IDLE);
         break;
@@ -264,7 +263,7 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         auto single_scan_event = reinterpret_cast<sScanEvent *>(obj);
         event_handled          = true;
         TASK_LOG(DEBUG) << "TRIGGER_SINGLE_SCAN handled on:" << single_scan_event->radio_mac.oct;
-        m_is_single_scan_pending = true;
+        m_single_scan_request_pending = true;
         break;
     }
     case eEvent::SCAN_TRIGGER_FAILED: {
@@ -305,7 +304,7 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
             TASK_LOG(DEBUG) << "SCAN_RESULTS_READY handled on:"
                             << scan_results_ready_event->radio_mac.oct;
 
-            if (!database.clear_channel_scan_results(m_radio_mac, m_is_single_scan)) {
+            if (!database.clear_channel_scan_results(m_radio_mac, m_single_scan)) {
                 TASK_LOG(ERROR) << "failed to clear scan results";
                 m_last_scan_error_code =
                     beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
@@ -332,11 +331,11 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
                             << scan_results_dump_event->radio_mac.oct;
             auto channel = scan_results_dump_event->udata.scan_results.channel;
 
-            if (!database.is_channel_in_pool(m_radio_mac, channel, m_is_single_scan)) {
+            if (!database.is_channel_in_pool(m_radio_mac, channel, m_single_scan)) {
                 LOG(DEBUG) << "channel is not in channel pool - ignoring results";
             } else if (!database.add_channel_scan_results(
                            m_radio_mac, scan_results_dump_event->udata.scan_results,
-                           m_is_single_scan)) {
+                           m_single_scan)) {
                 TASK_LOG(ERROR) << "failed to save scan results";
                 m_last_scan_error_code =
                     beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
