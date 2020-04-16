@@ -18,7 +18,7 @@ namespace beerocks {
 
 class cli_socket : public socket_thread, public cli {
 public:
-    cli_socket(std::string temp_path_, std::string proxy_ip_ = std::string());
+    explicit cli_socket(std::string temp_path_, std::string proxy_ip_ = std::string());
     ~cli_socket();
 
     bool connect() override;

@@ -115,7 +115,7 @@ public:
     {
         m_init_succeeded = true;
     };
-    tlvPrefilledData(std::shared_ptr<BaseClass> base, bool parse = false)
+    explicit tlvPrefilledData(std::shared_ptr<BaseClass> base, bool parse = false)
         : BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse)
     {
         m_init_succeeded = true;

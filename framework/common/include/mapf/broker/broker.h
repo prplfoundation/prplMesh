@@ -24,7 +24,7 @@ class Broker {
 public:
     Broker();
 
-    Broker(const std::string &cfg);
+    explicit Broker(const std::string &cfg);
     Broker(const Broker &) = delete;
     Broker &operator=(const Broker &) = delete;
 

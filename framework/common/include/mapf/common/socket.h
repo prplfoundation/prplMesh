@@ -46,7 +46,7 @@ protected:
 
 class PubSocket : public Socket {
 public:
-    PubSocket(Context &ctx);
+    explicit PubSocket(Context &ctx);
     std::ostream &Print(std::ostream &s) const override;
     bool Pollable() const override { return false; }
     bool Send(const std::unique_ptr<Message> &msg, int flags = 0);
@@ -61,7 +61,7 @@ private:
 
 class SubSocket : public Socket {
 public:
-    SubSocket(Context &ctx);
+    explicit SubSocket(Context &ctx);
 
     std::ostream &Print(std::ostream &s) const override;
 

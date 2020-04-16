@@ -158,7 +158,7 @@ public:
     // Public methods:
 public:
     // Constructor
-    beerocks_fsm_state(const TState &state) : m_state(state) {}
+    explicit beerocks_fsm_state(const TState &state) : m_state(state) {}
 
     // Set handler for state entry
     void set_entry_action(const TAction &action) { m_entry_action = action; }
@@ -347,7 +347,7 @@ public:
     // Public methods
 public:
     // Constructor
-    beerocks_fsm(TState init_state)
+    explicit beerocks_fsm(TState init_state)
         : m_init_state(init_state), m_curr_state(init_state), m_started(false)
     {
     }

@@ -20,7 +20,7 @@ namespace son {
 class monitor_stats {
 
 public:
-    monitor_stats(ieee1905_1::CmduMessageTx &cmdu_tx_);
+    explicit monitor_stats(ieee1905_1::CmduMessageTx &cmdu_tx_);
     ~monitor_stats() {}
     bool start(monitor_db *mon_db_, Socket *slave_socket_);
     void stop();

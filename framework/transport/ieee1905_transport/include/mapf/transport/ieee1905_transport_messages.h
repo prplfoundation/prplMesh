@@ -184,7 +184,10 @@ public:
 
     CmduTxConfirmationMessage() : CmduTxConfirmationMessage("", {}) {}
 
-    CmduTxConfirmationMessage(const std::string &topic) : CmduTxConfirmationMessage(topic, {}) {}
+    explicit CmduTxConfirmationMessage(const std::string &topic)
+        : CmduTxConfirmationMessage(topic, {})
+    {
+    }
 
     CmduTxConfirmationMessage(const std::string &topic, std::initializer_list<Frame> frames)
         : Message(topic, frames)

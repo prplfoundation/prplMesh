@@ -46,7 +46,7 @@ public:
 
 struct BrokerConfig {
     BrokerConfig() {}
-    BrokerConfig(const std::string &path) : path(path) {}
+    explicit BrokerConfig(const std::string &path) : path(path) {}
     ~BrokerConfig(){};
     int Parse();
     void Print();

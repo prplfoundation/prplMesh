@@ -19,7 +19,7 @@
 class LocalBusTestMessage : public mapf::Message {
 public:
     static const std::string kTopicPrefix;
-    LocalBusTestMessage(const std::string &topic) : Message(topic) {}
+    explicit LocalBusTestMessage(const std::string &topic) : Message(topic) {}
     LocalBusTestMessage(const std::string &topic, std::initializer_list<Message::Frame> frames)
         : Message(topic, frames)
     {

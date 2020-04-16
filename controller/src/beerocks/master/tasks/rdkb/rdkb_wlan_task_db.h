@@ -62,7 +62,7 @@ class rdkb_wlan_task_db {
         unsigned int inactivity_check_threshold_sec;
         std::unordered_map<std::string, std::shared_ptr<client_config>> client_config_list;
 
-        ap_config(const beerocks_message::sSteeringApConfig &config_)
+        explicit ap_config(const beerocks_message::sSteeringApConfig &config_)
         {
             bssid                   = beerocks::net::network_utils::mac_to_string(config_.bssid);
             util_check_interval_sec = config_.utilCheckIntervalSec;
