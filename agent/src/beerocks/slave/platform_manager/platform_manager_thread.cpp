@@ -311,7 +311,7 @@ main_thread::main_thread(config_file::sConfigSlave config_,
     }
 }
 
-main_thread::~main_thread() { on_thread_stop(); }
+main_thread::~main_thread() { main_thread::on_thread_stop(); }
 
 void main_thread::add_slave_socket(Socket *sd, const std::string &iface_name)
 {
