@@ -69,8 +69,6 @@ public:
     ///
     static std::string bool_str(bool val);
 
-    static void copy_string(char *dst, const char *src, size_t dst_len);
-
     static std::vector<std::string> str_split(const std::string &s, char delim);
 
 #ifndef __GNUC__

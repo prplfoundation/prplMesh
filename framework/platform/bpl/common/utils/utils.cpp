@@ -42,19 +42,6 @@ void trim(std::string &str, std::string additional_chars)
     rtrim(str, additional_chars);
 }
 
-void copy_string(char *dst, const char *src, size_t dst_len)
-{
-    const char *src_end = std::find((char *)src, ((char *)src) + dst_len, '\0');
-    std::copy(src, src_end, dst);
-    std::ptrdiff_t src_size = src_end - src;
-    std::ptrdiff_t dst_size = dst_len;
-    if (src_size < dst_size) {
-        dst[src_size] = 0;
-    } else {
-        dst[dst_size - 1] = 0;
-    }
-}
-
 int64_t stoi(std::string str)
 {
     std::stringstream val_s(str);
