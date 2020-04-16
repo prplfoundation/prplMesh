@@ -70,21 +70,6 @@ std::string string_utils::bool_str(bool val)
     return (val) ? std::string("true") : std::string("false");
 }
 
-void string_utils::copy_string(char *dst, const char *src, size_t dst_len)
-{
-    const char *src_end = std::find((char *)src, ((char *)src) + dst_len, '\0');
-    std::copy(src, src_end, dst);
-    std::ptrdiff_t src_size = src_end - src;
-    std::ptrdiff_t dst_size = dst_len;
-    if (src_size < dst_size) {
-        dst[src_size] = 0;
-    } else {
-        dst[dst_size - 1] = 0;
-        LOG(ERROR) << "copy_string() overflow, src string:'" << src << "'"
-                   << " dst_size=" << dst_size << std::endl;
-    }
-}
-
 std::vector<std::string> string_utils::str_split(const std::string &s, char delim)
 {
     std::vector<std::string> elems;
