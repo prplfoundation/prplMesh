@@ -75,9 +75,10 @@ target_include_directories(common
 				$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/>
 		)
 
-install(TARGETS common
+install(TARGETS common EXPORT mapfCommon
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
+install(EXPORT mapfCommon NAMESPACE mapf:: DESTINATION lib/cmake/mapfCommon)
 add_subdirectory(test)
