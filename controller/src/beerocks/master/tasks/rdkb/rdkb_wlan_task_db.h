@@ -27,8 +27,8 @@ class rdkb_wlan_task_db {
 
         client_config(const std::string &mac_,
                       const beerocks_message::sSteeringClientConfig &config_)
+            : mac(mac_)
         {
-            mac                     = mac_;
             snr_probe_req_hwm       = config_.snrProbeHWM;
             snr_probe_req_lwm       = config_.snrProbeLWM;
             snr_auth_frame_hwm      = config_.snrAuthHWM;
