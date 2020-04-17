@@ -479,3 +479,60 @@ bool son_actions::send_cmdu_to_agent(const std::string &dest_mac,
 
     return master_thread_ctx->send_cmdu_to_bus(cmdu_tx, dest_mac, database.get_local_bridge_mac());
 }
+
+bool son_actions::send_ap_config_renew_msg(ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
+                                           const sMacAddr &al_mac)
+{
+    bool result = true;
+
+    auto al_mac_addr    = network_utils::mac_to_string(al_mac);
+    auto controller_mac = database.get_local_bridge_mac();
+
+    auto ires = database.get_all_connected_ires();
+
+    if (ires.find(al_mac_addr) != ires.end()) {
+
+        auto cmdu_header =
+            cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE);
+
+        if (!cmdu_header) {
+            LOG(ERROR) << "Failed building IEEE1905 AP_AUTOCONFIGURATION_RENEW_MESSAGE";
+        }
+
+        auto tlvAlMac = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddressType>();
+        if (!tlvAlMac) {
+            LOG(ERROR) << "Failed addClass ieee1905_1::tlvAlMacAddressType";
+            result = false;
+        }
+
+        tlvAlMac->mac() = network_utils::mac_from_string(controller_mac);
+
+        auto tlvSupportedRole = cmdu_tx.addClass<ieee1905_1::tlvSupportedRole>();
+        if (!tlvSupportedRole) {
+            LOG(ERROR) << "Failed addClass ieee1905_1::tlvSupportedRole";
+            result = false;
+        }
+
+        tlvSupportedRole->value() = ieee1905_1::tlvSupportedRole::REGISTRAR;
+
+        auto tlvSupportedFreqBand = cmdu_tx.addClass<ieee1905_1::tlvSupportedFreqBand>();
+        if (!tlvSupportedFreqBand) {
+            LOG(ERROR) << "Failed addClass ieee1905_1::tlvSupportedFreqBand";
+            result = false;
+        }
+
+        tlvSupportedFreqBand->value() =
+            ieee1905_1::tlvSupportedFreqBand::eValue(ieee1905_1::tlvSupportedFreqBand::BAND_2_4G |
+                                                     ieee1905_1::tlvSupportedFreqBand::BAND_5G);
+
+        LOG(INFO) << "Send AP_AUTOCONFIGURATION_RENEW_MESSAGE al_mac: " << al_mac_addr;
+        son_actions::send_cmdu_to_agent(al_mac_addr, cmdu_tx, database);
+
+    } else {
+        LOG(ERROR) << "Failed sending AP_AUTOCONFIGURATION_RENEW_MESSAGE, agent with AL-MAC: "
+                   << al_mac_addr << " does not exist in database";
+        result = false;
+    }
+
+    return result;
+}
