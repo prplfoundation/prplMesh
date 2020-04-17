@@ -14,6 +14,11 @@
 #include <bcl/beerocks_message_structs.h>
 #include <bcl/beerocks_utils.h>
 
+#include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
+#include <tlvf/ieee_1905_1/tlvLinkMetricQuery.h>
+#include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
+#include <tlvf/ieee_1905_1/tlvSupportedRole.h>
+
 #define CLI_LOG(a) LOG(a)
 
 #define LOG_CLI(LEVEL, msg)                                                                        \
@@ -52,6 +57,8 @@ public:
                                              const wireless_utils::sBssInfoConf &bss_info_conf);
     static bool send_cmdu_to_agent(const std::string &dest_mac, ieee1905_1::CmduMessageTx &cmdu_tx,
                                    db &database, const std::string &radio_mac = std::string());
+    static bool send_ap_config_renew_msg(ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
+                                         const sMacAddr &al_mac);
 
 private:
     static bool
