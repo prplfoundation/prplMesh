@@ -18,7 +18,7 @@ run() {
 }
 
 usage() {
-    echo "usage: $(basename $0) [-hrv]"
+    echo "usage: $(basename "$0") [-hrv]"
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -r|--rdkb-root - path to rdkb root (default is PWD)"
