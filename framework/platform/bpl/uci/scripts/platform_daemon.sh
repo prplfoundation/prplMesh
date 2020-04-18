@@ -23,7 +23,7 @@ repeater_to_ap()
     /opt/beerocks/apm_utils.sh stop
 
     # Kill DHCP client
-    ps -A | grep [d]hcp | awk '{print $1;}' | xargs kill
+    pgrep [d]hcp | xargs kill
 
     # start DHCP server
     dnsmasq -u nobody --dhcp-authoritative -P 4096 -C /var/dnsmasq.conf
@@ -35,12 +35,12 @@ repeater_to_ap()
 static_init()
 {
     # Check if repeater mode
-    if [ $(uci get beerocks.config.management_mode) != "Proprietary-Mesh" ]
+    if [ "$(uci get beerocks.config.management_mode)" != "Proprietary-Mesh" ]
     then 
         echo "not Repeater"
         exit 1;
     fi
-    if [ $(uci get beerocks.config.operating_mode) != "WDS-Repeater" ]
+    if [ "$(uci get beerocks.config.operating_mode)" != "WDS-Repeater" ]
     then 
         echo "not Repeater"
         exit 1;
@@ -54,7 +54,7 @@ static_init()
 
     # Kill DHCP server
     echo "Kill DHCP server"
-    ps -A | grep [d]ns | awk '{print $1;}' | xargs kill
+    pgrep [d]ns | xargs kill
 
     # Set bridge ip to 0.0.0.0
     echo "Set bridge ip to 0.0.0.0"
