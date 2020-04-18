@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ###############################################################
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 # SPDX-FileCopyrightText: 2019-2020 the prplMesh contributors (see AUTHORS.md)
@@ -11,7 +11,7 @@
 # test scripts.
 #
 
-scriptdir="$(cd "${0%/*}"; pwd)"
+scriptdir="$(cd "${0%/*}" && pwd)"
 
 usage() {
     echo "usage: $(basename "$0") [-hkr]"
@@ -25,7 +25,11 @@ main() {
     local stop_cmd remove containers_file
     containers_file="${scriptdir}/.test_containers"
     stop_cmd=stop
-    OPTS=$(getopt -o 'hkr' --long help,kill,remove -n 'parse-options' -- "$@")
+    if ! OPTS=$(getopt -o 'hkr' --long help,kill,remove -n 'parse-options' -- "$@"); then
+        err "Failed parsing options." >&2
+        usage
+        exit 1
+    fi
 
     if [ ! -f "$containers_file" ] ; then
         exit 0
