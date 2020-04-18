@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ###############################################################
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 # SPDX-FileCopyrightText: 2019-2020 the prplMesh contributors (see AUTHORS.md)
@@ -48,8 +48,8 @@ main() {
             -n | --name)        NAME="$2"; shift; shift ;;
             -u | --unique-id)   UNIQUE_ID="$2"; shift; shift ;;
             -t | --tag)         TAG=":$2"; shift; shift ;;
-            -e | --expose)      PORT="${PORT} --expose $2"; shift; shift ;;
-            -p | --publish)     PUBLISH="${PUBLISH} -p ${2}"; shift; shift ;;
+            -e | --expose)      PORT+=(--expose "$2"); shift; shift ;;
+            -p | --publish)     PUBLISH+=(-p "$2"); shift; shift ;;
             -N | --network)     NETWORK="$2"; shift; shift ;;
             --entrypoint)       ENTRYPOINT="$2"; shift; shift ;;
             -- ) shift; break ;;
@@ -74,27 +74,30 @@ main() {
     dbg "DETACH=${DETACH}"
     dbg "NETWORK=${NETWORK}"
     dbg "IMAGE=prplmesh-runner$TAG"
-    dbg "PORT=${PORT}"
-    dbg "PUBLISH=${PUBLISH}"
+    dbg "PORT=${PORT[*]}"
+    dbg "PUBLISH=${PUBLISH[*]}"
     dbg "NAME=${NAME}"
     dbg "FORCE=${FORCE}"
     dbg "UNIQUE_ID=${UNIQUE_ID}"
 
-    DOCKEROPTS="-e USER=${SUDO_USER:-${USER}}
-                -e INSTALL_DIR=${installdir}
-                --privileged
-                --network ${NETWORK}
-                ${PORT} ${PUBLISH}
-                -v ${installdir}:${installdir}
-                -v ${rootdir}:${rootdir}
-                -v ${rootdir}/logs/${NAME}:/tmp/${SUDO_USER:-${USER}}/beerocks/logs
-                --name ${NAME}"
+    DOCKEROPTS=(
+        -e "USER=${SUDO_USER:-${USER}}"
+        -e "INSTALL_DIR=${installdir}"
+        --privileged
+        --network "${NETWORK}"
+        "${PORT[@]}"
+        "${PUBLISH[@]}"
+        -v "${installdir}:${installdir}"
+        -v "${rootdir}:${rootdir}"
+        -v "${rootdir}/logs/${NAME}:/tmp/${SUDO_USER:-${USER}}/beerocks/logs"
+        --name "${NAME}"
+    )
 
-    [ -n "$ENTRYPOINT" ] && DOCKEROPTS="$DOCKEROPTS --entrypoint $ENTRYPOINT"
+    [ -n "$ENTRYPOINT" ] && DOCKEROPTS+=(--entrypoint "$ENTRYPOINT")
     if [ "$DETACH" = "false" ]; then
-        DOCKEROPTS="$DOCKEROPTS --rm"
+        DOCKEROPTS+=(--rm)
     else
-        DOCKEROPTS="$DOCKEROPTS -d"
+        DOCKEROPTS+=(-d)
     fi
     if docker ps -a --format '{{ .Names }}' --filter name="${NAME}" | grep -q -x "${NAME}"; then
         info "Container ${NAME} is already running"
@@ -107,7 +110,7 @@ main() {
 
     # Save the container name so that it can easily be stopped/removed later
     echo "$NAME" >> "${scriptdir}/.test_containers"
-    run docker container run ${DOCKEROPTS} "prplmesh-runner$TAG" "$@"
+    run docker container run "${DOCKEROPTS[@]}" "prplmesh-runner$TAG" "$@"
 }
 
 VERBOSE=false
@@ -116,6 +119,6 @@ FORCE=false
 UNIQUE_ID=${SUDO_USER:-${USER}}
 NAME=prplMesh
 ENTRYPOINT=
-PORT="--expose 5000"
+PORT=(--expose 5000)
 
 main "$@"
