@@ -571,7 +571,26 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
             reply_ucc(eWfaCaStatus::INVALID, err_string);
             break;
         }
-        if (!handle_start_wps_registration(params, err_string)) {
+        auto band = params.find("band");
+        if (band == params.end()) {
+            err_string = "missing band parameter";
+            LOG(ERROR) << err_string;
+            reply_ucc(eWfaCaStatus::INVALID, err_string);
+            break;
+        }
+        auto method = params.find("wpsconfigmethod");
+        if (method == params.end()) {
+            err_string = "missing method parameter";
+            LOG(ERROR) << err_string;
+            reply_ucc(eWfaCaStatus::INVALID, err_string);
+            break;
+        } else if (method->second != "PBC") {
+            err_string = "invalid WpsConfigMethod, supporting only PBC";
+            LOG(ERROR) << err_string;
+            reply_ucc(eWfaCaStatus::INVALID, err_string);
+            break;
+        }
+        if (!handle_start_wps_registration(band->second, err_string)) {
             LOG(ERROR) << err_string;
             reply_ucc(eWfaCaStatus::INVALID, err_string);
             break;

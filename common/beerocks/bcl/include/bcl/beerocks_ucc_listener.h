@@ -45,7 +45,7 @@ protected:
                                           const std::string &dest_mac = std::string()) = 0;
     virtual bool handle_dev_set_config(std::unordered_map<std::string, std::string> &params,
                                        std::string &err_string)                        = 0;
-    virtual bool handle_start_wps_registration(std::unordered_map<std::string, std::string> &params,
+    virtual bool handle_start_wps_registration(const std::string &band,
                                                std::string &err_string)                = 0;
     virtual bool handle_dev_get_param(std::unordered_map<std::string, std::string> &params,
                                       std::string &value)                              = 0;

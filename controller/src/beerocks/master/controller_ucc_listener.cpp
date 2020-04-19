@@ -108,8 +108,8 @@ bool controller_ucc_listener::send_cmdu_to_destination(ieee1905_1::CmduMessageTx
     return son_actions::send_cmdu_to_agent(dest_mac, cmdu_tx, m_database);
 }
 
-bool controller_ucc_listener::handle_start_wps_registration(
-    std::unordered_map<std::string, std::string> &params, std::string &err_string)
+bool controller_ucc_listener::handle_start_wps_registration(const std::string &band,
+                                                            std::string &err_string)
 {
     err_string = "wps registration not supported in controller mode";
     return false;

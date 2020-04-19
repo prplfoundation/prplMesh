@@ -182,28 +182,13 @@ static enum eFreqType band_to_freq(const std::string &band)
     }
 }
 
-bool agent_ucc_listener::handle_start_wps_registration(
-    std::unordered_map<std::string, std::string> &params, std::string &err_string)
+bool agent_ucc_listener::handle_start_wps_registration(const std::string &band,
+                                                       std::string &err_string)
 {
-    auto band = params.find("band");
-    if (band == params.end()) {
-        err_string = "missing band parameter";
-        return false;
-    }
-    auto method = params.find("wpsconfigmethod");
-    if (method == params.end()) {
-        err_string = "missing method parameter";
-        return false;
-    }
-    if (method->second != "PBC") {
-        err_string = "invalid WpsConfigMethod, supporting only PBC";
-        return false;
-    }
-
-    auto freq      = band_to_freq(band->second);
+    auto freq      = band_to_freq(band);
     auto radio_mac = m_backhaul_manager_ctx.freq_to_radio_mac(freq);
     if (radio_mac.empty()) {
-        err_string = "Failed to get radio mac for " + band->second;
+        err_string = "Failed to get radio mac for " + band;
         return false;
     }
 
