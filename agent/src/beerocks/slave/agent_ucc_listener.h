@@ -55,8 +55,7 @@ private:
     bool validate_destination_alid(const std::string &dest_alid) override;
     bool send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmdu_tx,
                                   const std::string &dest_mac = std::string()) override;
-    bool handle_start_wps_registration(std::unordered_map<std::string, std::string> &params,
-                                       std::string &err_string) override;
+    bool handle_start_wps_registration(const std::string &band, std::string &err_string) override;
     bool handle_dev_set_config(std::unordered_map<std::string, std::string> &params,
                                std::string &err_string) override;
     bool handle_dev_get_param(std::unordered_map<std::string, std::string> &params,
