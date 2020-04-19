@@ -348,6 +348,15 @@ public:
      * @return true on success or false on error.
      */
     virtual bool generate_connected_clients_events() = 0;
+
+    /*!
+     * Start WPS PBC procedure on a given VAP 
+     *
+     * @param iface_name VAP interface on which to start WPS PBC
+     *
+     * @return true on success or false on error
+     */
+    virtual bool start_wps_pbc(const std::string &iface_name) = 0;
 };
 
 // AP HAL factory types

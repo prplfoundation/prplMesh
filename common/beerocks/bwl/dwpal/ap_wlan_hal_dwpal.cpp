@@ -1720,6 +1720,17 @@ bool ap_wlan_hal_dwpal::generate_connected_clients_events()
     return ret;
 }
 
+bool ap_wlan_hal_dwpal::start_wps_pbc(const std::string &ifname)
+{
+    LOG(DEBUG) << "Start WPS PBC on interface " << ifname;
+    std::string cmd = "WPS_PBC " + ifname;
+    if (!dwpal_send_cmd(cmd)) {
+        LOG(ERROR) << "start_wps_pbc() failed!";
+        return false;
+    }
+    return true;
+}
+
 std::string ap_wlan_hal_dwpal::get_radio_driver_version() { return std::string("NA"); }
 
 static bool is_acs_completed_scan(char *buffer, int bufLen)

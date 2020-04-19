@@ -500,6 +500,12 @@ bool ap_wlan_hal_nl80211::generate_connected_clients_events()
     return true;
 }
 
+bool ap_wlan_hal_nl80211::start_wps_pbc(const std::string &iface_name)
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
+    return true;
+}
+
 std::string ap_wlan_hal_nl80211::get_radio_driver_version() { return "nl80211"; }
 
 bool ap_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
