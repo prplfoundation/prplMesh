@@ -74,6 +74,7 @@ public:
     virtual bool set_vap_enable(const std::string &iface_name, const bool enable) override;
     virtual bool get_vap_enable(const std::string &iface_name, bool &enable) override;
     virtual bool generate_connected_clients_events() override;
+    virtual bool start_wps_pbc(const std::string &iface_name) override;
 
     // Protected methods:
 protected:
