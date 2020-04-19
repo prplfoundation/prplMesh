@@ -185,16 +185,6 @@ static bool fill_platform_settings(
         (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
          platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
 
-    // fill backhaul vaps
-    auto *p             = back_vaps;
-    int num_of_elements = sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid) /
-                          sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid[0]);
-    for (int i = 0; i < num_of_elements; i++) {
-        std::copy_n(p, BPL_MAC_ADDR_OCTETS_LEN,
-                    msg->platform_settings().backhaul_vaps_bssid[i].oct);
-        p += BPL_MAC_ADDR_OCTETS_LEN;
-    }
-
     msg->platform_settings().onboarding          = uint8_t(platform_common_conf.onboarding);
     msg->platform_settings().dfs_reentry_enabled = uint8_t(platform_common_conf.dfs_reentry);
     msg->platform_settings().rdkb_extensions_enabled =

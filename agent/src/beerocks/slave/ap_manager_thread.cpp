@@ -110,36 +110,6 @@ static void copy_vaps_info(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal,
     }
 }
 
-static bool enable_backhaul_vap(std::shared_ptr<bwl::ap_wlan_hal> ap_wlan_hal,
-                                std::list<bwl::backhaul_vap_list_element_t> &backhaul_vaps_list,
-                                std::set<std::string> &connected_ires, bool enable,
-                                uint8_t vap_id = beerocks::IFACE_ID_INVALID)
-{
-
-    if (!enable && (connected_ires.size() == backhaul_vaps_list.size() - 1))
-        return false;
-
-    uint8_t vap_idx = 0;
-    for (auto &vap : backhaul_vaps_list) {
-        if (enable && !vap.enabled) {
-            // always enable the first disabled
-            vap.enabled         = true;
-            auto vap_iface_name = beerocks::utils::get_iface_string_from_iface_vap_ids(
-                ap_wlan_hal->get_radio_info().iface_name, vap_idx);
-            return ap_wlan_hal->set_vap_enable(vap_iface_name, true);
-        } else if (!enable && vap_id == vap_idx) {
-            // always disable a specific vap_id
-            vap.enabled         = false;
-            auto vap_iface_name = beerocks::utils::get_iface_string_from_iface_vap_ids(
-                ap_wlan_hal->get_radio_info().iface_name, vap_idx);
-            return ap_wlan_hal->set_vap_enable(vap_iface_name, false);
-        }
-        vap_idx++;
-    }
-
-    return false;
-}
-
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -163,16 +133,6 @@ void ap_manager_thread::ap_manager_config(ap_manager_conf_t &conf)
     acs_enabled  = (conf.channel == 0);
     wifi_channel = conf.channel;
     low_filter   = conf.iface_filter_low;
-
-    // initialize backhaul_vaps_list
-    int num_of_elements = sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid) /
-                          sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid[0]);
-    for (int i = 0; i < num_of_elements; i++) {
-        bwl::backhaul_vap_list_element_t element = {};
-        element.bssid = network_utils::mac_to_string(conf.backhaul_vaps_bssid[i]);
-        element.type  = bwl::eBackhaulVapType(i % 3);
-        backhaul_vaps_list.push_back(std::move(element));
-    }
 
     using namespace std::placeholders; // for `_1`
 
@@ -262,15 +222,6 @@ void ap_manager_thread::after_select(bool timeout)
     }
     /////////
 
-    pending_disable_vaps.remove_if([&](pending_disable_vap_t &pending_vap) {
-        if (std::chrono::steady_clock::now() > pending_vap.timeout) {
-            enable_backhaul_vap(ap_wlan_hal, backhaul_vaps_list, connected_ires, false,
-                                pending_vap.vap_id);
-            return true;
-        }
-        return false;
-    });
-
     if (ap_hal_int_events == nullptr) { // ap not attached
         auto attach_state = ap_wlan_hal->attach();
 
@@ -320,13 +271,6 @@ void ap_manager_thread::after_select(bool timeout)
             backhaul_vaps_list.remove_if([&](const bwl::backhaul_vap_list_element_t &element) {
                 return (element.type != current_type);
             });
-
-            // enable first vap
-            if (enable_backhaul_vap(ap_wlan_hal, backhaul_vaps_list, connected_ires, true)) {
-                // update master about the updated vap list
-                // Note: this could be removed if bwl vap list will contain disabled backhaul vaps
-                ap_wlan_hal->refresh_vaps_info();
-            }
 
             // Set the time for the first radio info polling
             next_heartbeat_notification_timestamp =
@@ -1139,18 +1083,6 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
         std::string client_mac = network_utils::mac_to_string(msg->params.mac);
 
         LOG(INFO) << "STA_Connected mac = " << client_mac;
-
-        auto it = std::find_if(
-            pending_disable_vaps.begin(), pending_disable_vaps.end(),
-            [&](pending_disable_vap_t vap) { return (vap.vap_id == msg->params.vap_id); });
-
-        if (it != pending_disable_vaps.end()) {
-            pending_disable_vaps.erase(it);
-            if (enable_backhaul_vap(ap_wlan_hal, backhaul_vaps_list, connected_ires, true)) {
-                // update master about the updated vap list
-                // Note: this could be removed if bwl vap list will contain disabled backhaul vaps
-            }
-        }
 
         auto notification = message_com::create_vs_message<
             beerocks_message::cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);

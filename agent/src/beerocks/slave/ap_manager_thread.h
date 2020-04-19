@@ -30,7 +30,6 @@ public:
         beerocks::eIfaceType hostap_iface_type;
         int channel;
         bool iface_filter_low;
-        sMacAddr *backhaul_vaps_bssid; // array
     };
 
     void ap_manager_config(ap_manager_conf_t &conf);
