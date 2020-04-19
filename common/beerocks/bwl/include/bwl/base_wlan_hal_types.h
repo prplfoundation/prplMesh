@@ -70,6 +70,18 @@ struct VAPElement {
     }
 };
 
+enum eBackhaulVapType : uint8_t {
+    BH_VAP_TYPE_2G           = 0,
+    BH_VAP_TYPE_5G           = 1,
+    BH_VAP_TYPE_5G_SECONDARY = 2,
+};
+
+struct backhaul_vap_list_element_t {
+    std::string bssid;
+    bool enabled;
+    eBackhaulVapType type;
+};
+
 enum class ChanSwReason { Unknown = 0, Radar = 1, CoEx_20 = 2, CoEx_40 = 3 };
 
 // WLAN Security Types

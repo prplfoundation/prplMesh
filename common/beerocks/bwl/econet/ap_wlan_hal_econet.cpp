@@ -174,7 +174,8 @@ bool ap_wlan_hal_dummy::sta_bss_steer(const std::string &mac, const std::string 
 }
 
 bool ap_wlan_hal_dummy::update_vap_credentials(
-    std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list)
+    std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list,
+    std::list<bwl::backhaul_vap_list_element_t> &backhaul_vaps_list)
 {
     int vap_id = beerocks::IFACE_VAP_ID_MIN;
 
