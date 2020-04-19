@@ -261,7 +261,8 @@ bool ap_wlan_hal_nl80211::sta_bss_steer(const std::string &mac, const std::strin
 }
 
 bool ap_wlan_hal_nl80211::update_vap_credentials(
-    std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list)
+    std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list,
+    std::list<bwl::backhaul_vap_list_element_t> &backhaul_vaps_list)
 {
     //TODO Implement #346
     return true;

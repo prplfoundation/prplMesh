@@ -164,12 +164,14 @@ public:
      * Update wifi credentials.
      *
      * @param [in] List of wifi credentials.
+     * @param [in/out] List of backhaul vaps to update
      *
      * @return true on success or false on error.
      */
 
     virtual bool
-    update_vap_credentials(std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list) = 0;
+    update_vap_credentials(std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list,
+                           std::list<bwl::backhaul_vap_list_element_t> &backhaul_vaps_list) = 0;
 
     /*!
      * TODO: Move to the base class?

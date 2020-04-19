@@ -67,10 +67,9 @@ get_radio_supported_channels_string(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_h
     return os.str();
 }
 
-static void
-copy_vaps_info(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal,
-               std::list<son::ap_manager_thread::backhaul_vap_list_element_t> &backhaul_vaps_list,
-               beerocks_message::sVapInfo vaps[])
+static void copy_vaps_info(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal,
+                           std::list<bwl::backhaul_vap_list_element_t> &backhaul_vaps_list,
+                           beerocks_message::sVapInfo vaps[])
 {
     if (!ap_wlan_hal->refresh_vaps_info()) {
         LOG(ERROR) << "Failed to refresh vaps info!";
@@ -91,11 +90,10 @@ copy_vaps_info(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal,
             const auto &curr_vap = radio_vaps.at(vap_id);
 
             // mark backhaul vaps
-            auto it =
-                std::find_if(backhaul_vaps_list.begin(), backhaul_vaps_list.end(),
-                             [&](const son::ap_manager_thread::backhaul_vap_list_element_t &vap) {
-                                 return (vap.bssid == curr_vap.mac);
-                             });
+            auto it = std::find_if(backhaul_vaps_list.begin(), backhaul_vaps_list.end(),
+                                   [&](const bwl::backhaul_vap_list_element_t &vap) {
+                                       return (vap.bssid == curr_vap.mac);
+                                   });
 
             bool bVAP = (it != backhaul_vaps_list.end());
 
@@ -112,10 +110,10 @@ copy_vaps_info(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal,
     }
 }
 
-static bool enable_backhaul_vap(
-    std::shared_ptr<bwl::ap_wlan_hal> ap_wlan_hal,
-    std::list<son::ap_manager_thread::backhaul_vap_list_element_t> &backhaul_vaps_list,
-    std::set<std::string> &connected_ires, bool enable, uint8_t vap_id = beerocks::IFACE_ID_INVALID)
+static bool enable_backhaul_vap(std::shared_ptr<bwl::ap_wlan_hal> ap_wlan_hal,
+                                std::list<bwl::backhaul_vap_list_element_t> &backhaul_vaps_list,
+                                std::set<std::string> &connected_ires, bool enable,
+                                uint8_t vap_id = beerocks::IFACE_ID_INVALID)
 {
 
     if (!enable && (connected_ires.size() == backhaul_vaps_list.size() - 1))
@@ -170,9 +168,9 @@ void ap_manager_thread::ap_manager_config(ap_manager_conf_t &conf)
     int num_of_elements = sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid) /
                           sizeof(beerocks_message::sPlatformSettings::backhaul_vaps_bssid[0]);
     for (int i = 0; i < num_of_elements; i++) {
-        backhaul_vap_list_element_t element = {};
+        bwl::backhaul_vap_list_element_t element = {};
         element.bssid = network_utils::mac_to_string(conf.backhaul_vaps_bssid[i]);
-        element.type  = eBackhaulVapType(i % 3);
+        element.type  = bwl::eBackhaulVapType(i % 3);
         backhaul_vaps_list.push_back(std::move(element));
     }
 
@@ -310,16 +308,16 @@ void ap_manager_thread::after_select(bool timeout)
             }
 
             // remove irrelevant bssids from backhaul vap list
-            eBackhaulVapType current_type;
+            bwl::eBackhaulVapType current_type;
             if (!ap_wlan_hal->get_radio_info().is_5ghz) {
-                current_type = BH_VAP_TYPE_2G;
+                current_type = bwl::eBackhaulVapType::BH_VAP_TYPE_2G;
             } else if (low_filter) {
-                current_type = BH_VAP_TYPE_5G_SECONDARY;
+                current_type = bwl::eBackhaulVapType::BH_VAP_TYPE_5G_SECONDARY;
             } else {
-                current_type = BH_VAP_TYPE_5G;
+                current_type = bwl::eBackhaulVapType::BH_VAP_TYPE_5G;
             }
 
-            backhaul_vaps_list.remove_if([&](const backhaul_vap_list_element_t &element) {
+            backhaul_vaps_list.remove_if([&](const bwl::backhaul_vap_list_element_t &element) {
                 return (element.type != current_type);
             });
 
@@ -946,7 +944,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             bss_info_conf_list.push_back(bss_info_conf);
         }
 
-        ap_wlan_hal->update_vap_credentials(bss_info_conf_list);
+        ap_wlan_hal->update_vap_credentials(bss_info_conf_list, backhaul_vaps_list);
 
         break;
     }
@@ -1658,7 +1656,7 @@ bool ap_manager_thread::handle_ap_enabled(int vap_id)
 
     // mark backhaul vaps
     auto it = std::find_if(backhaul_vaps_list.begin(), backhaul_vaps_list.end(),
-                           [&](const backhaul_vap_list_element_t &backhaul_elem) {
+                           [&](const bwl::backhaul_vap_list_element_t &backhaul_elem) {
                                return (backhaul_elem.bssid == vap_info.mac);
                            });
 
