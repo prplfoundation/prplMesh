@@ -4539,9 +4539,9 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     // here (I think) we need to copy m_ap_channel_reports_list from the 1905 beaconMetricsQuery
     // into ap_ch_report char array of the vs message (measurement_request_out)
     // currently not supported
-    if (0 != measurement_request_out.use_optional_ap_ch_report) {
-        LOG(ERROR) << "unsupported optional channel report in the request";
-    }
+    // if (0 != measurement_request_out.use_optional_ap_ch_report) {
+    //    LOG(ERROR) << "unsupported optional channel report in the request";
+    // }
     // end FixMe
 
     // FixMe:
