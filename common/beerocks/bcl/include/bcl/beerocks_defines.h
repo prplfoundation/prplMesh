@@ -389,6 +389,7 @@ enum eFreqType {
     FREQ_5G     = 1,
     FREQ_58G    = 2,
     FREQ_24G_5G = 3,
+    FREQ_60G    = 4,
     FREQ_AUTO,
     FREQ_UNKNOWN,
 };
