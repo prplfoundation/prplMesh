@@ -107,6 +107,15 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
 }
 cACTION_APMANAGER_JOINED_NOTIFICATION::~cACTION_APMANAGER_JOINED_NOTIFICATION() {
 }
+std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_APMANAGER_JOINED_NOTIFICATION::supported_channels(size_t idx) {
+    bool ret_success = ( (m_supported_channels_idx__ > 0) && (m_supported_channels_idx__ > idx) );
+    size_t ret_idx = ret_success ? idx : 0;
+    if (!ret_success) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+    }
+    return std::forward_as_tuple(ret_success, m_supported_channels[ret_idx]);
+}
+
 sNodeHostap& cACTION_APMANAGER_JOINED_NOTIFICATION::params() {
     return (sNodeHostap&)(*m_params);
 }
@@ -118,6 +127,9 @@ sApChannelSwitch& cACTION_APMANAGER_JOINED_NOTIFICATION::cs_params() {
 void cACTION_APMANAGER_JOINED_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
+    for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++){
+        m_supported_channels[i].struct_swap();
+    }
     m_params->struct_swap();
     m_cs_params->struct_swap();
 }
@@ -152,6 +164,7 @@ bool cACTION_APMANAGER_JOINED_NOTIFICATION::finalize()
 size_t cACTION_APMANAGER_JOINED_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
+    class_size += beerocks::message::RADIO_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels
     class_size += sizeof(sNodeHostap); // params
     class_size += sizeof(sApChannelSwitch); // cs_params
     return class_size;
@@ -162,6 +175,15 @@ bool cACTION_APMANAGER_JOINED_NOTIFICATION::init()
     if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
+    }
+    m_supported_channels = (beerocks::message::sWifiChannel*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::RADIO_CHANNELS_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::RADIO_CHANNELS_LENGTH) << ") Failed!";
+        return false;
+    }
+    m_supported_channels_idx__  = beerocks::message::RADIO_CHANNELS_LENGTH;
+    if (!m_parse__) {
+        for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++) { m_supported_channels->struct_init(); }
     }
     m_params = (sNodeHostap*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sNodeHostap))) {

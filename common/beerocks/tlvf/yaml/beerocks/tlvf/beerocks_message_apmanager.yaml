@@ -25,6 +25,9 @@ cACTION_APMANAGER_4ADDR_STA_JOINED:
  
 cACTION_APMANAGER_JOINED_NOTIFICATION:
   _type: class
+  supported_channels:
+    _type: beerocks::message::sWifiChannel 
+    _length: [ "beerocks::message::RADIO_CHANNELS_LENGTH" ]
   params: sNodeHostap
   cs_params: sApChannelSwitch
 

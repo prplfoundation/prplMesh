@@ -1569,6 +1569,9 @@ void ap_manager_thread::handle_hostapd_attached()
                 beerocks::message::VHT_MCS_SET_SIZE, notification->params().vht_mcs_set);
 
     // Copy the channels supported by the AP
+    auto tuple_supported_channels = notification->supported_channels(0);
+    copy_radio_channels(ap_wlan_hal->get_radio_info().supported_channels,
+                        &std::get<1>(tuple_supported_channels));
     copy_radio_channels(ap_wlan_hal->get_radio_info().preferred_channels,
                         notification->params().preferred_channels);
 
@@ -1588,6 +1591,8 @@ void ap_manager_thread::handle_hostapd_attached()
     LOG(INFO) << " vht_capability = " << std::hex << ap_wlan_hal->get_radio_info().vht_capability;
     LOG(INFO) << " preferred_channels = " << std::endl
               << get_radio_channels_string(ap_wlan_hal->get_radio_info().preferred_channels);
+    LOG(INFO) << " supported_channels = " << std::endl
+              << get_radio_channels_string(ap_wlan_hal->get_radio_info().supported_channels);
 
     // Send CMDU
     message_com::send_cmdu(slave_socket, cmdu_tx);

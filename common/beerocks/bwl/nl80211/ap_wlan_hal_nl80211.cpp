@@ -469,7 +469,7 @@ bool ap_wlan_hal_nl80211::read_supported_channels()
         }
     }
 
-    m_radio_info.preferred_channels.insert(m_radio_info.preferred_channels.begin(),
+    m_radio_info.supported_channels.insert(m_radio_info.supported_channels.begin(),
                                            supported_channels.begin(), supported_channels.end());
     return true;
 }
