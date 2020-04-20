@@ -200,6 +200,7 @@ private:
     sSlaveBackhaulParams backhaul_params;
     beerocks_message::sNodeHostap hostap_params;
     beerocks_message::sApChannelSwitch hostap_cs_params;
+    std::vector<beerocks::message::sWifiChannel> supported_channels;
     std::vector<wireless_utils::sChannelPreference> channel_preferences;
 
     SocketClient *platform_manager_socket = nullptr;
