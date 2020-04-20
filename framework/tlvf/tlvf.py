@@ -745,7 +745,7 @@ class TlvF:
                 lines_h.append("std::shared_ptr<%s> %s() { return m_%s_ptr; }" % (param_type, param_name, param_name))
 
                 # Add param handling to init function
-                lines_cpp.append("m_%s = (%s*)m_%s__;" % ( param_name, param_type, self.MEMBER_BUFF_PTR))
+                lines_cpp.append("m_%s = reinterpret_cast<%s*>(m_%s__);" % ( param_name, param_type, self.MEMBER_BUFF_PTR))
                 lines_cpp.append("if (m_%s__) {" %(self.MEMBER_PARSE))
                 lines_cpp.append("%sauto %s = create_%s();" %( self.getIndentation(1), param_name, param_name))
                 lines_cpp.append("%sif (!%s) {" %(self.getIndentation(1), param_name))
