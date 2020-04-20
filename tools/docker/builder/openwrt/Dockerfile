@@ -94,7 +94,7 @@ RUN cp feeds.conf.default feeds.conf \
     fi ;\
     make defconfig \
     && cat .config \
-    && make -j$(nproc) V=sc \
+    && make -j$(nproc) \
     && make package/feeds/prpl/prplmesh/clean
     # note that the result from diffconfig.sh with a minimal
     # configuration has the 3 CONFIG_TARGET items we set here, but NOT
