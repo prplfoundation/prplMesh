@@ -33,8 +33,9 @@ using namespace beerocks::net;
 /////////////////////////// Local Module Functions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-static void copy_radio_channels(std::vector<bwl::WiFiChannel> radio_channels,
-                                beerocks::message::sWifiChannel dest_channels[])
+static void copy_radio_channels(
+    std::array<bwl::WiFiChannel, beerocks::message::RADIO_CHANNELS_LENGTH> radio_channels,
+    beerocks::message::sWifiChannel dest_channels[])
 {
 
     // Copy the channels
@@ -51,7 +52,8 @@ static void copy_radio_channels(std::vector<bwl::WiFiChannel> radio_channels,
     }
 }
 
-static std::string get_radio_channels_string(std::vector<bwl::WiFiChannel> radio_channels)
+static std::string get_radio_channels_string(
+    std::array<bwl::WiFiChannel, beerocks::message::RADIO_CHANNELS_LENGTH> radio_channels)
 {
     std::ostringstream os;
     for (auto val : radio_channels) {
@@ -784,9 +786,9 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(ERROR) << "Failed building message!";
             return false;
         }
-        auto tuple_supported_channels = response->supported_channels_list(0);
-        copy_radio_channels(ap_wlan_hal->get_radio_info().supported_channels,
-                            &std::get<1>(tuple_supported_channels));
+        auto tuple_preferred_channels = response->preferred_channels_list(0);
+        copy_radio_channels(ap_wlan_hal->get_radio_info().preferred_channels,
+                            &std::get<1>(tuple_preferred_channels));
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
         break;
@@ -1110,9 +1112,9 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
                 LOG(ERROR) << "Failed building message!";
                 return false;
             }
-            auto tuple_supported_channels = notification->supported_channels_list(0);
-            copy_radio_channels(ap_wlan_hal->get_radio_info().supported_channels,
-                                &std::get<1>(tuple_supported_channels));
+            auto tuple_preferred_channels = notification->preferred_channels_list(0);
+            copy_radio_channels(ap_wlan_hal->get_radio_info().preferred_channels,
+                                &std::get<1>(tuple_preferred_channels));
             fill_cs_params(notification->cs_params());
             acs_completed_vap_update = true;
         } else {
@@ -1567,8 +1569,8 @@ void ap_manager_thread::handle_hostapd_attached()
                 beerocks::message::VHT_MCS_SET_SIZE, notification->params().vht_mcs_set);
 
     // Copy the channels supported by the AP
-    copy_radio_channels(ap_wlan_hal->get_radio_info().supported_channels,
-                        notification->params().supported_channels);
+    copy_radio_channels(ap_wlan_hal->get_radio_info().preferred_channels,
+                        notification->params().preferred_channels);
 
     LOG(INFO) << "send ACTION_APMANAGER_JOINED_NOTIFICATION";
     LOG(INFO) << " iface = " << ap_wlan_hal->get_iface_name();
@@ -1584,8 +1586,8 @@ void ap_manager_thread::handle_hostapd_attached()
     LOG(INFO) << " ht_capability = " << std::hex << ap_wlan_hal->get_radio_info().ht_capability;
     LOG(INFO) << " vht_supported = " << ap_wlan_hal->get_radio_info().vht_supported;
     LOG(INFO) << " vht_capability = " << std::hex << ap_wlan_hal->get_radio_info().vht_capability;
-    LOG(INFO) << " supported_channels = " << std::endl
-              << get_radio_channels_string(ap_wlan_hal->get_radio_info().supported_channels);
+    LOG(INFO) << " preferred_channels = " << std::endl
+              << get_radio_channels_string(ap_wlan_hal->get_radio_info().preferred_channels);
 
     // Send CMDU
     message_com::send_cmdu(slave_socket, cmdu_tx);

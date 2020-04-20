@@ -89,7 +89,7 @@ cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION:
 cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION:
   _type: class
   cs_params: sApChannelSwitch
-  supported_channels_list:
+  preferred_channels_list:
     _type: beerocks::message::sWifiChannel
     _length: [ "beerocks::message::RADIO_CHANNELS_LENGTH" ]
 
@@ -209,7 +209,7 @@ cACTION_APMANAGER_READ_ACS_REPORT_REQUEST:
 
 cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE:
   _type: class
-  supported_channels_list:
+  preferred_channels_list:
     _type: beerocks::message::sWifiChannel
     _length: [ "beerocks::message::RADIO_CHANNELS_LENGTH" ]
 

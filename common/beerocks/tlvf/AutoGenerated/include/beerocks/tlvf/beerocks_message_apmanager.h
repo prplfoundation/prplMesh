@@ -383,7 +383,7 @@ class cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION : public BaseClass
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION);
         }
         sApChannelSwitch& cs_params();
-        std::tuple<bool, beerocks::message::sWifiChannel&> supported_channels_list(size_t idx);
+        std::tuple<bool, beerocks::message::sWifiChannel&> preferred_channels_list(size_t idx);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -392,8 +392,8 @@ class cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION : public BaseClass
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
         sApChannelSwitch* m_cs_params = nullptr;
-        beerocks::message::sWifiChannel* m_supported_channels_list = nullptr;
-        size_t m_supported_channels_list_idx__ = 0;
+        beerocks::message::sWifiChannel* m_preferred_channels_list = nullptr;
+        size_t m_preferred_channels_list_idx__ = 0;
         int m_lock_order_counter__ = 0;
 };
 
@@ -971,7 +971,7 @@ class cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE : public BaseClass
         static eActionOp_APMANAGER get_action_op(){
             return (eActionOp_APMANAGER)(ACTION_APMANAGER_READ_ACS_REPORT_RESPONSE);
         }
-        std::tuple<bool, beerocks::message::sWifiChannel&> supported_channels_list(size_t idx);
+        std::tuple<bool, beerocks::message::sWifiChannel&> preferred_channels_list(size_t idx);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -979,8 +979,8 @@ class cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE : public BaseClass
     private:
         bool init();
         eActionOp_APMANAGER* m_action_op = nullptr;
-        beerocks::message::sWifiChannel* m_supported_channels_list = nullptr;
-        size_t m_supported_channels_list_idx__ = 0;
+        beerocks::message::sWifiChannel* m_preferred_channels_list = nullptr;
+        size_t m_preferred_channels_list_idx__ = 0;
         int m_lock_order_counter__ = 0;
 };
 

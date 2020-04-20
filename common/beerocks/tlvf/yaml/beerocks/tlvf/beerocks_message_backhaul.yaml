@@ -66,7 +66,7 @@ cACTION_BACKHAUL_ENABLE:
   vht_mcs_set:
     _type: uint8_t
     _length: [ "beerocks::message::VHT_MCS_SET_SIZE" ]
-  supported_channels_list:
+  preferred_channels_list:
     _type: beerocks::message::sWifiChannel 
     _length: [ "beerocks::message::RADIO_CHANNELS_LENGTH" ]
 
