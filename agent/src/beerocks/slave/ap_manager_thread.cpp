@@ -1512,6 +1512,7 @@ void ap_manager_thread::handle_hostapd_attached()
 {
     LOG(DEBUG) << "handling enabled hostapd";
 
+    ap_wlan_hal->read_supported_channels();
     if (acs_enabled) {
         LOG(DEBUG) << "retrieving ACS report";
         int read_acs_attempt = 0;
@@ -1527,7 +1528,7 @@ void ap_manager_thread::handle_hostapd_attached()
             usleep(ACS_READ_SLEEP_USC);
         }
     } else {
-        ap_wlan_hal->read_supported_channels();
+        ap_wlan_hal->update_preference_channels_from_supported_channels();
     }
 
     auto notification =

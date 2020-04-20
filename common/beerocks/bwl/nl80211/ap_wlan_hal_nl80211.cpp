@@ -474,6 +474,12 @@ bool ap_wlan_hal_nl80211::read_supported_channels()
     return true;
 }
 
+bool ap_wlan_hal_nl80211::update_preference_channels_from_supported_channels()
+{
+    m_radio_info.preferred_channels = m_radio_info.supported_channels;
+    return true;
+}
+
 bool ap_wlan_hal_nl80211::set_tx_power_limit(int tx_pow_limit)
 {
     return m_nl80211_client->set_tx_power_limit(m_radio_info.iface_name, tx_pow_limit);

@@ -311,12 +311,20 @@ public:
     virtual bool read_acs_report() = 0;
 
     /*!
-     * Read the supported channls from the hardware
+     * Read the supported channels from the hardware
      * On successful completion the information can be retrieved 
      *
      * @return true on success or false on error.
      */
     virtual bool read_supported_channels() = 0;
+
+     /*!
+     * Copy the supported channels  to the preferred channels 
+     * On successful completion the preferred channels  can be retrieved 
+     *
+     * @return true on success or false on error.
+     */
+    virtual bool update_preference_channels_from_supported_channels() = 0;
 
     /*!
      * Set Transmit Power Limit 

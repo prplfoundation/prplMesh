@@ -368,6 +368,12 @@ bool ap_wlan_hal_dummy::read_supported_channels()
     return true;
 }
 
+bool ap_wlan_hal_dummy::update_preference_channels_from_supported_channels()
+{
+    m_radio_info.preferred_channels = m_radio_info.supported_channels;
+    return true;
+}
+
 bool ap_wlan_hal_dummy::set_tx_power_limit(int tx_pow_limit)
 {
     LOG(TRACE) << __func__ << " power limit: " << tx_pow_limit;
