@@ -28,6 +28,76 @@ MAP-4.2.3_ETH_FH24G:netgear-rax40:
     - when: manual
       allow_failure: true
 
+MAP-4.2.3_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.2.3_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.2.3_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.2.3_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.3.1_ETH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.3.1_ETH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.3.2_ETH_FH24G:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.3.2_ETH_FH24G:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.3.2_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.3.2_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.3.2_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.3.2_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.4.1_ETH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.4.1_ETH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
 MAP-4.4.2_ETH_FH24G:netgear-rax40:
   extends: .certification:netgear-rax40
   rules:
@@ -38,12 +108,92 @@ MAP-4.4.2_ETH_FH24G:netgear-rax40:
     - when: manual
       allow_failure: true
 
-MAP-4.5.2_ETH_FH5GL:netgear-rax40:
+MAP-4.4.2_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.4.2_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.4.2_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.4.2_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.4.3_ETH_FH24G:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.4.3_ETH_FH24G:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.4.3_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.4.3_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.4.3_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.4.3_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.5.1_ETH:netgear-rax40:
   extends: .certification:netgear-rax40
   rules:
     # If the last commit description contains the test name and we're not on master, run it.
     # Otherwise, make it a manual job
     - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.5.1_ETH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.5.2_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.5.2_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.5.3_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.5.3_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.5.3_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.5.3_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
       when: on_success
     - when: manual
       allow_failure: true
@@ -68,6 +218,36 @@ MAP-4.6.2_ETH_FH24G:netgear-rax40:
     - when: manual
       allow_failure: true
 
+MAP-4.6.2_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.6.2_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.6.2_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.6.2_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.6.3_ETH_FH24G:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.6.3_ETH_FH24G:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
 MAP-4.7.3_ETH:netgear-rax40:
   extends: .certification:netgear-rax40
   rules:
@@ -88,12 +268,52 @@ MAP-4.7.4_ETH_FH24G:netgear-rax40:
     - when: manual
       allow_failure: true
 
+MAP-4.7.4_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.4_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.7.4_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.4_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
 MAP-4.7.5_ETH_FH24G:netgear-rax40:
   extends: .certification:netgear-rax40
   rules:
     # If the last commit description contains the test name and we're not on master, run it.
     # Otherwise, make it a manual job
     - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.5_ETH_FH24G:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.7.5_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.5_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.7.5_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.5_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
       when: on_success
     - when: manual
       allow_failure: true
@@ -108,12 +328,82 @@ MAP-4.7.6_ETH_FH24G:netgear-rax40:
     - when: manual
       allow_failure: true
 
+MAP-4.7.6_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.6_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.7.6_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.6_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
 MAP-4.7.7_ETH_FH24G:netgear-rax40:
   extends: .certification:netgear-rax40
   rules:
     # If the last commit description contains the test name and we're not on master, run it.
     # Otherwise, make it a manual job
     - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.7_ETH_FH24G:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.7.7_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.7_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.7.7_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.7_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.7.8_ETH_FH24G:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.8_ETH_FH24G:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.7.8_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.8_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.7.8_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.7.8_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
       when: on_success
     - when: manual
       allow_failure: true
@@ -138,6 +428,26 @@ MAP-4.8.1_ETH_FH24G:netgear-rax40:
     - when: manual
       allow_failure: true
 
+MAP-4.8.1_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.8.1_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.8.1_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.8.1_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
 MAP-4.8.2_ETH_FH24G:netgear-rax40:
   extends: .certification:netgear-rax40
   rules:
@@ -148,12 +458,62 @@ MAP-4.8.2_ETH_FH24G:netgear-rax40:
     - when: manual
       allow_failure: true
 
+MAP-4.8.2_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.8.2_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.8.2_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.8.2_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
 MAP-4.8.3_ETH_FH5GL:netgear-rax40:
   extends: .certification:netgear-rax40
   rules:
     # If the last commit description contains the test name and we're not on master, run it.
     # Otherwise, make it a manual job
-    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.8.2_ETH_FH24G:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.8.3_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.8.4_ETH_FH24G:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.8.4_ETH_FH24G:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.8.4_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.8.4_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.8.4_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.8.4_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
       when: on_success
     - when: manual
       allow_failure: true
@@ -168,12 +528,52 @@ MAP-4.8.5_ETH_FH24G:netgear-rax40:
     - when: manual
       allow_failure: true
 
+MAP-4.8.5_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.8.5_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.8.5_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.8.5_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
 MAP-4.10.3_ETH_FH24G:netgear-rax40:
   extends: .certification:netgear-rax40
   rules:
     # If the last commit description contains the test name and we're not on master, run it.
     # Otherwise, make it a manual job
     - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.10.3_ETH_FH24G:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.10.3_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.10.3_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.10.3_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.10.3_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
       when: on_success
     - when: manual
       allow_failure: true
@@ -188,6 +588,26 @@ MAP-4.10.4_ETH_FH24G:netgear-rax40:
     - when: manual
       allow_failure: true
 
+MAP-4.10.4_ETH_FH5GL:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.10.4_ETH_FH5GL:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.10.4_ETH_FH5GH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.10.4_ETH_FH5GH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
 MAP-4.11.1_ETH:netgear-rax40:
   extends: .certification:netgear-rax40
   rules:
@@ -197,3 +617,24 @@ MAP-4.11.1_ETH:netgear-rax40:
       when: on_success
     - when: manual
       allow_failure: true
+
+MAP-4.12.1_ETH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.12.1_ETH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+MAP-4.12.2_ETH:netgear-rax40:
+  extends: .certification:netgear-rax40
+  rules:
+    # If the last commit description contains the test name and we're not on master, run it.
+    # Otherwise, make it a manual job
+    - if: '$CI_COMMIT_DESCRIPTION =~ /.*MAP-4.12.2_ETH:netgear-rax40.*/ && $CI_COMMIT_REF_NAME != "master"'
+      when: on_success
+    - when: manual
+      allow_failure: true
+
