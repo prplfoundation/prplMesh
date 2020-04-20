@@ -68,7 +68,7 @@ cACTION_BACKHAUL_ENABLE:
     _length: [ "beerocks::message::VHT_MCS_SET_SIZE" ]
   supported_channels_list:
     _type: beerocks::message::sWifiChannel 
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+    _length: [ "beerocks::message::RADIO_CHANNELS_LENGTH" ]
 
 cACTION_BACKHAUL_CONNECTED_NOTIFICATION:
   _type: class

@@ -546,7 +546,7 @@ void cACTION_BACKHAUL_ENABLE::class_swap()
     tlvf_swap(8*sizeof(beerocks::eWiFiBandwidth), reinterpret_cast<uint8_t*>(m_max_bandwidth));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_ht_capability));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_vht_capability));
-    for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
+    for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++){
         m_supported_channels_list[i].struct_swap();
     }
 }
@@ -600,7 +600,7 @@ size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
     class_size += sizeof(uint8_t); // vht_supported
     class_size += sizeof(uint32_t); // vht_capability
     class_size += beerocks::message::VHT_MCS_SET_SIZE * sizeof(uint8_t); // vht_mcs_set
-    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
+    class_size += beerocks::message::RADIO_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels_list
     return class_size;
 }
 
@@ -714,13 +714,13 @@ bool cACTION_BACKHAUL_ENABLE::init()
     }
     m_vht_mcs_set_idx__  = beerocks::message::VHT_MCS_SET_SIZE;
     m_supported_channels_list = (beerocks::message::sWifiChannel*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::RADIO_CHANNELS_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::RADIO_CHANNELS_LENGTH) << ") Failed!";
         return false;
     }
-    m_supported_channels_list_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
+    m_supported_channels_list_idx__  = beerocks::message::RADIO_CHANNELS_LENGTH;
     if (!m_parse__) {
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
+        for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++) { m_supported_channels_list->struct_init(); }
     }
     if (m_parse__) { class_swap(); }
     return true;

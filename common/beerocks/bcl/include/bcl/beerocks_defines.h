@@ -43,7 +43,7 @@ enum eStructsConsts {
     VERSION_LENGTH                = 16,
     NODE_NAME_LENGTH              = 32,
     IFACE_NAME_LENGTH             = 32 + 4, //need extra 1 byte for null termination + alignment
-    SUPPORTED_CHANNELS_LENGTH     = 64,     //support upto # channels, every channel item is 32-bit
+    RADIO_CHANNELS_LENGTH         = 128,    //support upto # channels, every channel item is 32-bit
     HOSTAP_ERR_MSG_LENGTH         = 64,
     WIFI_DRIVER_VER_LENGTH        = 32 + 4,
     WIFI_SSID_MAX_LENGTH          = 32 + 1 + 3, //need extra 1 byte for null termination + alignment

@@ -39,7 +39,7 @@ static void copy_radio_supported_channels(std::shared_ptr<bwl::ap_wlan_hal> &ap_
     auto radio_channels = ap_wlan_hal->get_radio_info().supported_channels;
 
     // Copy the channels
-    for (uint i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH && i < radio_channels.size();
+    for (uint i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH && i < radio_channels.size();
          i++) {
 
         supported_channels[i].channel        = radio_channels[i].channel;

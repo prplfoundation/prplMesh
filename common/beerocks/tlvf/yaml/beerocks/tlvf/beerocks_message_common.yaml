@@ -282,7 +282,7 @@ sNodeHostap:
     _length: [ "beerocks::message::WIFI_DRIVER_VER_LENGTH" ]
   supported_channels:
     _type: beerocks::message::sWifiChannel 
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]          
+    _length: [ "beerocks::message::RADIO_CHANNELS_LENGTH" ]          
 
 sVapsList:
   _type: struct
@@ -847,7 +847,7 @@ sTriggerChannelScanParams:
     _comment: size of provided channel_pool
  channel_pool:
     _type: uint8_t
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+    _length: [ "beerocks::message::RADIO_CHANNELS_LENGTH" ]
     _comment: pool of channels to be scaned
 
 sChannelScanRequestParams:
@@ -866,7 +866,7 @@ sChannelScanRequestParams:
     _comment: an invalid (-1) value indicates this value is not requested
  channel_pool:
     _type: uint8_t 
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+    _length: [ "beerocks::message::RADIO_CHANNELS_LENGTH" ]
 
 eChannelScanResultMode:
   _type: enum

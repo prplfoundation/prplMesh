@@ -695,7 +695,7 @@ void channel_selection_task::work()
         break;
     }
     case eState::ON_ACS_RESPONSE: {
-        //database.set_hostap_supported_channels(hostap_mac, acs_response_event->supported_channels, message::SUPPORTED_CHANNELS_LENGTH);
+        //database.set_hostap_supported_channels(hostap_mac, acs_response_event->supported_channels, message::RADIO_CHANNELS_LENGTH);
 
         cs_wait_for_event(eEvent::CSA_EVENT);
         set_events_timeout(CSA_NOTIFICATION_RESPONSE_WAIT_TIME);

@@ -378,20 +378,20 @@ typedef struct sNodeHostap {
     uint32_t vht_capability;
     uint8_t vht_mcs_set[beerocks::message::VHT_MCS_SET_SIZE];
     char driver_version[beerocks::message::WIFI_DRIVER_VER_LENGTH];
-    beerocks::message::sWifiChannel supported_channels[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+    beerocks::message::sWifiChannel supported_channels[beerocks::message::RADIO_CHANNELS_LENGTH];
     void struct_swap(){
         iface_mac.struct_swap();
         tlvf_swap(8*sizeof(beerocks::eFreqType), reinterpret_cast<uint8_t*>(&frequency_band));
         tlvf_swap(8*sizeof(beerocks::eWiFiBandwidth), reinterpret_cast<uint8_t*>(&max_bandwidth));
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&ht_capability));
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&vht_capability));
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
+        for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++){
             (supported_channels[i]).struct_swap();
         }
     }
     void struct_init(){
         iface_mac.struct_init();
-            for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+            for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++) {
                 (supported_channels[i]).struct_init();
             }
     }
@@ -1219,7 +1219,7 @@ typedef struct sTriggerChannelScanParams {
     //size of provided channel_pool
     uint8_t channel_pool_size;
     //pool of channels to be scaned
-    uint8_t channel_pool[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+    uint8_t channel_pool[beerocks::message::RADIO_CHANNELS_LENGTH];
     void struct_swap(){
         radio_mac.struct_swap();
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&dwell_time_ms));
@@ -1238,7 +1238,7 @@ typedef struct sChannelScanRequestParams {
     int32_t interval_time_sec;
     //an invalid (-1) value indicates this value is not requested
     int8_t channel_pool_size;
-    uint8_t channel_pool[beerocks::message::SUPPORTED_CHANNELS_LENGTH];
+    uint8_t channel_pool[beerocks::message::RADIO_CHANNELS_LENGTH];
     void struct_swap(){
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&dwell_time_ms));
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&interval_time_sec));

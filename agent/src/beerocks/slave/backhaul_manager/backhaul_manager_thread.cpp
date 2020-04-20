@@ -1784,7 +1784,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         auto channels = &std::get<1>(tuple_supported_channels);
 
-        std::copy_n(channels, beerocks::message::SUPPORTED_CHANNELS_LENGTH,
+        std::copy_n(channels, beerocks::message::RADIO_CHANNELS_LENGTH,
                     soc->supported_channels.begin());
 
         soc->radio_mac             = request->iface_mac();

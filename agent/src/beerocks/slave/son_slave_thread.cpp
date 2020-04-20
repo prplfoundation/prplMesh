@@ -1789,7 +1789,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         notification_out->cs_params()     = notification_in->cs_params();
         auto tuple_in_supported_channels  = notification_in->supported_channels_list(0);
         auto tuple_out_supported_channels = notification_out->supported_channels(0);
-        std::copy_n(&std::get<1>(tuple_in_supported_channels), message::SUPPORTED_CHANNELS_LENGTH,
+        std::copy_n(&std::get<1>(tuple_in_supported_channels), message::RADIO_CHANNELS_LENGTH,
                     &std::get<1>(tuple_out_supported_channels));
         send_cmdu_to_controller(cmdu_tx);
         send_operating_channel_report();
@@ -2239,7 +2239,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
 
         auto tuple_supported_channels = response->supported_channels_list(0);
-        std::copy_n(&std::get<1>(tuple_supported_channels), message::SUPPORTED_CHANNELS_LENGTH,
+        std::copy_n(&std::get<1>(tuple_supported_channels), message::RADIO_CHANNELS_LENGTH,
                     hostap_params.supported_channels);
 
         // build channel preference report
@@ -3258,7 +3258,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             break;
         }
 
-        std::copy_n(hostap_params.supported_channels, message::SUPPORTED_CHANNELS_LENGTH,
+        std::copy_n(hostap_params.supported_channels, message::RADIO_CHANNELS_LENGTH,
                     &std::get<1>(tuple_supported_channels));
 
         // Send the message
@@ -3383,7 +3383,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
+        std::array<beerocks::message::sWifiChannel, beerocks::message::RADIO_CHANNELS_LENGTH>
             supported_channels;
         std::copy_n(std::begin(hostap_params.supported_channels), supported_channels.size(),
                     supported_channels.begin());
@@ -4500,7 +4500,7 @@ beerocks::message::sWifiChannel slave_thread::channel_selection_select_channel()
         if (preference.channels.empty()) {
             continue;
         }
-        for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
+        for (uint8_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++) {
             const auto &channel  = hostap_params.supported_channels[i];
             auto operating_class = wireless_utils::get_operating_class_by_channel(channel);
 

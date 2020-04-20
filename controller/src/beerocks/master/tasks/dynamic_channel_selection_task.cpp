@@ -73,7 +73,7 @@ beerocks::eChannelScanErrCode dynamic_channel_selection_task::dcs_request_scan_t
         return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INVALID_PARAMS;
     }
 
-    if (curr_channel_pool.size() > beerocks::message::SUPPORTED_CHANNELS_LENGTH) {
+    if (curr_channel_pool.size() > beerocks::message::RADIO_CHANNELS_LENGTH) {
         LOG(ERROR) << "channel_pool is too big";
         return beerocks::eChannelScanErrCode::CHANNEL_SCAN_POOL_TOO_BIG;
     }

@@ -1892,7 +1892,7 @@ void cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
-    for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
+    for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++){
         m_supported_channels[i].struct_swap();
     }
 }
@@ -1928,7 +1928,7 @@ size_t cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sApChannelSwitch); // cs_params
-    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels
+    class_size += beerocks::message::RADIO_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // supported_channels
     return class_size;
 }
 
@@ -1945,13 +1945,13 @@ bool cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::init()
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
     m_supported_channels = (beerocks::message::sWifiChannel*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::RADIO_CHANNELS_LENGTH))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::RADIO_CHANNELS_LENGTH) << ") Failed!";
         return false;
     }
-    m_supported_channels_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
+    m_supported_channels_idx__  = beerocks::message::RADIO_CHANNELS_LENGTH;
     if (!m_parse__) {
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_supported_channels->struct_init(); }
+        for (size_t i = 0; i < beerocks::message::RADIO_CHANNELS_LENGTH; i++) { m_supported_channels->struct_init(); }
     }
     if (m_parse__) { class_swap(); }
     return true;

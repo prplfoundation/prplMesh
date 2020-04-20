@@ -2102,7 +2102,7 @@ bool master_thread::handle_intel_slave_join(
     database.set_node_manufacturer(radio_mac, "Intel");
 
     database.set_hostap_supported_channels(radio_mac, notification->hostap().supported_channels,
-                                           message::SUPPORTED_CHANNELS_LENGTH);
+                                           message::RADIO_CHANNELS_LENGTH);
 
     if (database.get_node_5ghz_support(radio_mac)) {
         if (notification->low_pass_filter_on()) {
@@ -2239,9 +2239,9 @@ bool master_thread::autoconfig_wsc_parse_radio_caps(
 {
     // read all operating class list
     auto operating_classes_list_length = radio_caps->operating_classes_info_list_length();
-    if (operating_classes_list_length > beerocks::message::SUPPORTED_CHANNELS_LENGTH) {
+    if (operating_classes_list_length > beerocks::message::RADIO_CHANNELS_LENGTH) {
         LOG(WARNING) << "operating class info list larger then maximum supported channels";
-        operating_classes_list_length = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
+        operating_classes_list_length = beerocks::message::RADIO_CHANNELS_LENGTH;
     }
     for (int oc_idx = 0; oc_idx < operating_classes_list_length; oc_idx++) {
         std::stringstream ss;
@@ -2560,7 +2560,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         new_event->hostap_mac         = network_utils::mac_from_string(hostap_mac);
         new_event->cs_params          = notification->cs_params();
         auto tuple_supported_channels = notification->supported_channels(0);
-        std::copy_n(&std::get<1>(tuple_supported_channels), message::SUPPORTED_CHANNELS_LENGTH,
+        std::copy_n(&std::get<1>(tuple_supported_channels), message::RADIO_CHANNELS_LENGTH,
                     new_event->supported_channels);
         tasks.push_event(database.get_channel_selection_task_id(),
                          (int)channel_selection_task::eEvent::ACS_RESPONSE_EVENT,
