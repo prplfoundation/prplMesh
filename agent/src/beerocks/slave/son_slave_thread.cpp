@@ -33,6 +33,8 @@
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
+#include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
+#include <tlvf/wfa_map/tlvBeaconMetricsResponse.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
@@ -369,24 +371,27 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
     keep_alive_retries = 0;
 
     switch (cmdu_message_type) {
-    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE:
-        return handle_autoconfiguration_wsc(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::ACK_MESSAGE:
+        return handle_ack_message(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE:
         return handle_autoconfiguration_renew(sd, cmdu_rx);
-    case ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE:
-        return handle_client_association_request(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE:
+        return handle_autoconfiguration_wsc(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE:
         return handle_ap_metrics_query(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::BEACON_METRICS_QUERY_MESSAGE:
+        return handle_beacon_metrics_query_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
         return handle_channel_preference_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
         return handle_channel_selection_request(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE:
+        return handle_client_association_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CLIENT_STEERING_REQUEST_MESSAGE:
         return handle_client_steering_request(sd, cmdu_rx);
-    case ieee1905_1::eMessageType::ACK_MESSAGE:
-        return handle_ack_message(sd, cmdu_rx);
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE:
         return handle_multi_ap_policy_config_request(sd, cmdu_rx);
+
     default:
         LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
         return false;
@@ -4534,6 +4539,128 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
         LOG(DEBUG) << "sending STEERING_COMPLETED_MESSAGE back to controller";
         return send_cmdu_to_controller(cmdu_tx);
     }
+}
+
+bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
+                                                       ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received BEACON_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid);
+
+    // 1. send ACK to the controller
+    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+
+    if (!send_cmdu_to_controller(cmdu_tx)) {
+        LOG(ERROR) << "failed sending ACK to the controller";
+        return false;
+    }
+
+    // 2. forward the request to the monitor
+    // using vs message
+
+    // get the correct type of the message
+    auto beaconMetricsQuery = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
+
+    if (!beaconMetricsQuery) {
+        LOG(ERROR) << "tlvBeaconMetricsQuery missing - ignoring beacon metrics query message";
+        return false;
+    }
+
+    // create vs message
+    auto request_out =
+        message_com::create_vs_message<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST>(
+            cmdu_tx, mid);
+    if (request_out == nullptr) {
+        LOG(ERROR) << "Failed building ACTION_MONITOR_CLIENT_BEACON_11K_REQUEST message!";
+        return false;
+    }
+
+    // fill the parameters
+    /*
+    Legend: 
+        V - fine, we have value
+        ? - don't know where to take the value from
+    V uint8_t measurement_mode;
+    V uint8_t channel;
+    ? int16_t op_class;
+    V uint16_t repeats;
+    V uint16_t rand_ival;
+    V uint16_t duration;
+    V sMacAddr sta_mac;
+    V sMacAddr bssid;
+    V uint8_t parallel;
+    V uint8_t enable;
+    V uint8_t request;
+    V uint8_t report;
+    V uint8_t mandatory_duration;
+    V uint8_t expected_reports_count;
+    V uint8_t use_optional_ssid;
+    V char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+    ? uint8_t use_optional_ap_ch_report;
+    ? uint8_t ap_ch_report[237];
+    ? uint8_t use_optional_req_elements;
+    ? uint8_t req_elements[13];
+    ? uint8_t use_optional_wide_band_ch_switch;
+    ? uint32_t new_ch_width;
+    ? uint32_t new_ch_center_freq_seg_0;
+    ? uint32_t new_ch_center_freq_seg_1;
+    */
+
+    auto &measurement_request_out = request_out->params();
+
+    measurement_request_out.bssid   = beaconMetricsQuery->bssid();
+    measurement_request_out.channel = beaconMetricsQuery->channel_number();
+
+    measurement_request_out.measurement_mode = beerocks::MEASURE_MODE_ACTIVE;
+    measurement_request_out.duration         = beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
+
+    measurement_request_out.expected_reports_count = 1;
+
+    measurement_request_out.rand_ival = beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
+    measurement_request_out.sta_mac   = beaconMetricsQuery->associated_sta_mac();
+
+    // values based on https://github.com/prplfoundation/prplMesh/pull/1114#discussion_r406326546
+    measurement_request_out.repeats            = 0;
+    measurement_request_out.parallel           = 0;
+    measurement_request_out.enable             = 0;
+    measurement_request_out.request            = 1;
+    measurement_request_out.report             = 0;
+    measurement_request_out.mandatory_duration = 0;
+    measurement_request_out.use_optional_ssid  = 0;
+
+    mapf::utils::copy_string(measurement_request_out.ssid, beaconMetricsQuery->ssid_str().c_str(),
+                             message::WIFI_SSID_MAX_LENGTH);
+
+    measurement_request_out.use_optional_ap_ch_report =
+        beaconMetricsQuery->ap_channel_reports_list_length();
+
+    // FixMe:
+    // here (I think) we need to copy m_ap_channel_reports_list from the 1905 beaconMetricsQuery
+    // into ap_ch_report char array of the vs message (measurement_request_out)
+    // currently not supported
+    // if (0 != measurement_request_out.use_optional_ap_ch_report) {
+    //    LOG(ERROR) << "unsupported optional channel report in the request";
+    // }
+    // end FixMe
+
+    // FixMe:
+    // the same is true for use_optional_req_elements and req_elements
+    // end FixMe
+
+    // FixMe:
+    // measurement_request_out.op_class = ??
+    // measurement_request_out.use_optional_wide_band_ch_switch = ??
+    // measurement_request_out.new_ch_width = ??
+    // measurement_request_out.new_ch_center_freq_seg_0 = ??
+    // measurement_request_out.new_ch_center_freq_seg_1 = ??
+    // end FixMe
+
+    message_com::send_cmdu(monitor_socket, cmdu_tx);
+
+    return true;
 }
 
 bool slave_thread::handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
