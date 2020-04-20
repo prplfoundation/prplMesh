@@ -13,7 +13,7 @@ tlvBeaconMetricsQuery:
   operating_class: uint8_t
   channel_number: uint8_t
   bssid: sMacAddr
-  reporting_detail_value: uin8_t
+  reporting_detail_value: uint8_t
   ssid_length:
     _type: uint8_t
     _length_var: True
