@@ -2564,7 +2564,11 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
         break;
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE: {
-        LOG(TRACE) << "ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE id=" << int(beerocks_header->id());
+        int mid = int(beerocks_header->id());
+        LOG(TRACE) << "ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE id: 0x" << std::hex << mid;
+
+        // flow: extract data from response_in (vendor specific response) and build
+        // with the extracted data 1905 reponse_out message
         auto response_in =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>();
@@ -2572,6 +2576,7 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
             LOG(ERROR) << "addClass ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE failed";
             break;
         }
+        /* old vs response:
         auto response_out = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>(cmdu_tx,
                                                                           beerocks_header->id());
@@ -2580,6 +2585,25 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
             break;
         }
         response_out->params() = response_in->params();
+        */
+
+        // new 1905 response:
+        if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE)) {
+            LOG(ERROR) << "cmdu creation of type BEACON_METRICS_RESPONSE_MESSAGE, has failed";
+            return false;
+        }
+
+        auto response_out = cmdu_tx.addClass<wfa_map::tlvBeaconMetricsResponse>();
+        if (!response_out) {
+            LOG(ERROR) << "addClass wfa_map::tlvBeaconMetricsResponse failed";
+            return false;
+        }
+
+        // fill response_out with values from reposne_in
+        // ...
+        // ...
+
+        // send the response
         send_cmdu_to_controller(cmdu_tx);
         break;
     }
