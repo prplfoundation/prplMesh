@@ -54,6 +54,7 @@
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
+#include <tlvf/wfa_map/tlvErrorCode.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvRadioOperationRestriction.h>
@@ -93,22 +94,23 @@ bool master_thread::init()
     }
 
     if (!bus_subscribe(std::vector<ieee1905_1::eMessageType>{
-            ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE,
+            ieee1905_1::eMessageType::ACK_MESSAGE,
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE,
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE,
+            ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE,
+            ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE,
+            ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE,
+            ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE,
             ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE,
-            ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE,
             ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE,
+            ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE,
+            ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE,
             ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE,
             ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE,
             ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE,
-            ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE,
-            ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE,
-            ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE,
-            ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE,
-            ieee1905_1::eMessageType::ACK_MESSAGE,
+            ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE,
 
         })) {
         LOG(ERROR) << "Failed subscribing to the Bus";
@@ -278,36 +280,38 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
                                                ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     switch (cmdu_rx.getMessageType()) {
+    case ieee1905_1::eMessageType::ACK_MESSAGE:
+        return handle_cmdu_1905_ack_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE:
         return handle_cmdu_1905_autoconfiguration_search(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE:
         return handle_cmdu_1905_autoconfiguration_WSC(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE:
+        return handle_cmdu_1905_ap_capability_report(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_ap_metric_response(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_beacon_response(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE:
         return handle_cmdu_1905_channel_preference_report(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE:
         return handle_cmdu_1905_channel_selection_response(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE:
-        return handle_cmdu_1905_steering_completed_message(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::ACK_MESSAGE:
-        return handle_cmdu_1905_ack_message(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE:
-        return handle_cmdu_1905_client_steering_btm_report_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE:
         return handle_cmdu_1905_client_capability_report_message(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE:
-        return handle_cmdu_1905_operating_channel_report(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::CLIENT_STEERING_BTM_REPORT_MESSAGE:
+        return handle_cmdu_1905_client_steering_btm_report_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE:
         return handle_cmdu_1905_higher_layer_data_message(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_link_metric_response(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::OPERATING_CHANNEL_REPORT_MESSAGE:
+        return handle_cmdu_1905_operating_channel_report(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::STEERING_COMPLETED_MESSAGE:
+        return handle_cmdu_1905_steering_completed_message(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE:
         return handle_cmdu_1905_topology_notification(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE:
         return handle_cmdu_1905_topology_response(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::LINK_METRIC_RESPONSE_MESSAGE:
-        return handle_cmdu_1905_link_metric_response(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE:
-        return handle_cmdu_1905_ap_metric_response(src_mac, cmdu_rx);
-    case ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE:
-        return handle_cmdu_1905_ap_capability_report(src_mac, cmdu_rx);
     default:
         break;
     }
@@ -995,8 +999,20 @@ bool master_thread::handle_cmdu_1905_ack_message(const std::string &src_mac,
                                                  ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
+
+    // extract error code, if any
+    std::stringstream errorSS;
+    auto error_tlv = cmdu_rx.getClass<wfa_map::tlvErrorCode>();
+    if (error_tlv) {
+        errorSS << "0x" << error_tlv->reason_code();
+    } else {
+        errorSS << "no error";
+    }
+
+    LOG(DEBUG) << "Received ACK_MESSAGE, mid=" << std::hex << int(mid)
+               << " tlv error code: " << errorSS.str();
+
     //TODO: the ACK should be sent to the correct task and will be done as part of agent certification
-    LOG(DEBUG) << "Received ACK_MESSAGE, mid=" << std::hex << int(mid);
     return true;
 }
 
@@ -1762,6 +1778,16 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
         }
     }
 
+    return true;
+}
+
+bool master_thread::handle_cmdu_1905_beacon_response(const std::string &src_mac,
+                                                     ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    // here we need to extract and keep the data received from the STA
+    // but currently we'll just print that we are here
+    auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "got beacon response from STA. mid: 0x" << std::hex << mid;
     return true;
 }
 
