@@ -248,6 +248,7 @@ private:
     bool handle_multi_ap_policy_config_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_client_association_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_client_steering_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_beacon_metrics_query_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_ack_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 };
 
