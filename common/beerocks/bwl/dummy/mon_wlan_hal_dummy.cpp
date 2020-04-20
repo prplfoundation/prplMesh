@@ -88,10 +88,18 @@ bool mon_wlan_hal_dummy::update_stations_stats(const std::string vap_iface_name,
     SStaStats dummy_sta_stats;
     auto dummy_sta = m_dummy_stas_map.find(sta_mac);
 
+    // prevent endless reports
+    static bool stat_state_changed = true;
     if (dummy_sta == m_dummy_stas_map.end()) {
-        LOG(WARNING) << "No stats for sta " << sta_mac;
+        if (stat_state_changed) {
+            LOG(WARNING) << "No stats for sta " << sta_mac;
+            stat_state_changed = false;
+        }
         return false;
     }
+
+    // now there are statistics
+    stat_state_changed = true;
 
     dummy_sta_stats = dummy_sta->second.sta_stats;
 
