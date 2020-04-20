@@ -90,7 +90,7 @@ RUN cp feeds.conf.default feeds.conf \
     && echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}_${TARGET_PROFILE}=y" >> .config \
     && echo "CONFIG_PACKAGE_prplmesh${PRPLMESH_VARIANT}=y" >> .config \
     && if [ "$TARGET_PROFILE" = "DEVICE_NETGEAR_RAX40" ] ; then \
-        cat feeds/intel/rax40.profile >> .config ;\
+        grep -v -E 'CONFIG_SDK|CONFIG_MAKE_TOOLCHAIN' feeds/intel/rax40.profile >> .config ;\
     fi ;\
     make defconfig \
     && cat .config \
