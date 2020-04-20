@@ -564,7 +564,7 @@ bool tlvTestVarList::init()
         // swap back since complex_list will be swapped as part of the whole class swap
         complex_list->class_swap();
     }
-    m_var1 = (cInner*)m_buff_ptr__;
+    m_var1 = reinterpret_cast<cInner*>(m_buff_ptr__);
     if (m_parse__) {
         auto var1 = create_var1();
         if (!var1) {
@@ -578,7 +578,7 @@ bool tlvTestVarList::init()
         // swap back since var1 will be swapped as part of the whole class swap
         var1->class_swap();
     }
-    m_var3 = (cInner*)m_buff_ptr__;
+    m_var3 = reinterpret_cast<cInner*>(m_buff_ptr__);
     if (m_parse__) {
         auto var3 = create_var3();
         if (!var3) {
