@@ -8,7 +8,10 @@ rootdir="${scriptdir%/*/*}"
 
 
 # generate the list of current issues in the same format as the known issues:
-"$rootdir"/tools/docker/static-analysis/cppcheck.sh "$rootdir" "--template='{file}: {severity}: {message} [{id}]{code}'" > /dev/null 2>&1
+"$rootdir"/tools/docker/static-analysis/cppcheck.sh "$rootdir" "--template={file}: {severity}: {message} [{id}]{code}" > /dev/null 2>&1
+
+# Remove the caret lines, we don't need them:
+sed -i '/^\s*\^\s*$/d' "$rootdir/cppcheck_results.txt"
 
 mapfile -t issues < <(grep -E ".+: .+: .+ \[.+\] .*$"  "$rootdir/cppcheck_results.txt")
 
@@ -18,7 +21,7 @@ do
     if ! grep -q -F "$i" "$rootdir"/ci/cppcheck/cppcheck_existing_issues.txt ; then
         status=1
         err "New issue:"
-        grep -F -A2 "$i" "$rootdir/cppcheck_results.txt"
+        grep -F "$i" "$rootdir/cppcheck_results.txt"
     fi
 done
 

@@ -1,762 +1,381 @@
-'common/beerocks/bcl/include/bcl/network/socket.h: style: Statements following return, break, continue, goto or throw will never be executed. [unreachableCode]        m_error.clear();
-        ^'
-'agent/src/beerocks/monitor/monitor_rssi.cpp: style: Local variable 'sta_vap_id' shadows outer variable [shadowVariable]            auto sta_vap_id = sta_node->get_vap_id();
-                 ^'
-'agent/src/beerocks/monitor/rdkb/monitor_rdkb_hal.cpp: style: Consecutive return, break, continue, goto or throw statements are unnecessary. [duplicateBreak]        break;
-        ^'
-'agent/src/beerocks/slave/agent_ucc_listener.cpp: style: struct member 'sVapElement::backhaul_vap' is never used. [unusedStructMember]    bool backhaul_vap;
-         ^'
-'agent/src/beerocks/monitor/monitor_thread.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]        if (poll_last) {
-            ^'
-'agent/src/beerocks/monitor/monitor_thread.cpp: style: Local variable 'time_span' shadows outer variable [shadowVariable]        auto time_span =
-             ^'
-'agent/src/beerocks/monitor/monitor_thread.cpp: style: Variable 'iface' is assigned a value that is never used. [unreadVariable]        std::string iface = radio_node->get_iface();
-                          ^'
-'agent/src/beerocks/monitor/monitor_thread.cpp: style: Variable 'id' is assigned a value that is never used. [unreadVariable]        int id        = 0;
-                      ^'
-'agent/src/beerocks/slave/backhaul_manager/wan_monitor.cpp: warning: Member variable 'wan_monitor::m_arrNLBuff' is not initialized in the constructor. [uninitMemberVar]wan_monitor::wan_monitor() : m_iNetlinkFD(-1) {}
-             ^'
-'agent/src/beerocks/slave/ap_manager_thread.cpp: warning: Member variable 'ap_manager_thread::wifi_channel' is not initialized in the constructor. [uninitMemberVar]ap_manager_thread::ap_manager_thread(std::string slave_uds_)
-                   ^'
-'agent/src/beerocks/slave/ap_manager_thread.cpp: warning: Member variable 'ap_manager_thread::acs_enabled' is not initialized in the constructor. [uninitMemberVar]ap_manager_thread::ap_manager_thread(std::string slave_uds_)
-                   ^'
-'agent/src/beerocks/slave/ap_manager_thread.cpp: warning: Member variable 'ap_manager_thread::low_filter' is not initialized in the constructor. [uninitMemberVar]ap_manager_thread::ap_manager_thread(std::string slave_uds_)
-                   ^'
-'agent/src/beerocks/slave/ap_manager_thread.cpp: performance: Variable 'slave_uds' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    slave_uds   = slave_uds_;
-    ^'
-'agent/src/beerocks/slave/beerocks_slave_main.cpp: style: Parameter 'beerocks_slave_conf' can be declared with const [constParameter]static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
-                                                                             ^'
-'agent/src/beerocks/slave/ap_manager_thread.cpp: performance: Function parameter 'slave_uds_' should be passed by const reference. [passedByValue]ap_manager_thread::ap_manager_thread(std::string slave_uds_)
-                                                 ^'
-'agent/src/beerocks/slave/ap_manager_thread.cpp: style: Parameter 'conf' can be declared with const [constParameter]void ap_manager_thread::ap_manager_config(ap_manager_conf_t &conf)
-                                                             ^'
-'agent/src/beerocks/slave/ap_manager_thread.cpp: style: Redundant checking of STL container element existence before removing it. [redundantIfRemove]                if (connected_ires.find(mac) != connected_ires.end()) {
-                    ^'
-'agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: warning: Member variable 'backhaul_manager::state_attempts' is not initialized in the constructor. [uninitMemberVar]backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
-                  ^'
-'agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: warning: Member variable 'backhaul_manager::selected_bssid_channel' is not initialized in the constructor. [uninitMemberVar]backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
-                  ^'
-'agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: warning: Member variable 'backhaul_manager::roam_selected_bssid_channel' is not initialized in the constructor. [uninitMemberVar]backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
-                  ^'
-'agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: performance: Variable 'pending_slave_ifaces' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    pending_slave_ifaces                   = slave_ap_ifaces_;
-    ^'
-'agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'local_interface_name' shadows outer variable [shadowVariable]        std::string local_interface_name = soc->hostap_iface;
-                    ^'
-'agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'supportedServiceTuple' shadows outer variable [shadowVariable]        auto supportedServiceTuple = tlvSupportedService->supported_service_list(1);
-             ^'
-'agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'iface_hal' shadows outer variable [shadowVariable]                            auto iface_hal = get_wireless_hal(sta_iface);
-                                 ^'
-'agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]                    if (soc->hostap_iface == config_const_bh_slave) {
-                                                                    ^'
-'agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]                if (soc_iter->slave == sd) {
-                                           ^'
-'agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Variable 'p_cmdu_header' is assigned a value that is never used. [unreadVariable]    auto p_cmdu_header =
-                       ^'
-'agent/src/beerocks/slave/link_metrics/ieee802_3_link_metrics_collector.cpp: style: The scope of the variable 'msg_ptr' can be reduced. [variableScope]            struct nlmsghdr *msg_ptr; /* pointer to current message part */
-                             ^'
-'agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Comparison of a boolean expression with an integer. [compareBoolExpressionWithInt]    if (bpl::dhcp_mon_stop() == false) {
-                             ^'
-'agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Member variable 'main_thread::m_uiArpMonIP' is not initialized in the constructor. [uninitMemberVar]main_thread::main_thread(const config_file::sConfigSlave &config_,
-             ^'
-'agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Member variable 'main_thread::m_uiArpMonMask' is not initialized in the constructor. [uninitMemberVar]main_thread::main_thread(const config_file::sConfigSlave &config_,
-             ^'
-'agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Member variable 'main_thread::is_onboarding_on_init' is not initialized in the constructor. [uninitMemberVar]main_thread::main_thread(const config_file::sConfigSlave &config_,
-             ^'
-'agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Member variable 'main_thread::platform_common_conf' is not initialized in the constructor. [uninitMemberVar]main_thread::main_thread(const config_file::sConfigSlave &config_,
-             ^'
-'agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Redundant assignment of '*(volatile char*)pass' to itself. [selfAssignment]        *(volatile char *)pass = *(volatile char *)pass;
-                               ^'
-'agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Redundant assignment of '*(volatile char*)pass' to itself. [selfAssignment]            *(volatile char *)pass = *(volatile char *)pass;
-                                   ^'
-'common/beerocks/bcl/source/beerocks_logging.cpp: style: The class 'NetLogger' does not have a constructor although it has private member variables. [noConstructor]class NetLogger : public el::LogDispatchCallback {
-^'
-'common/beerocks/bcl/source/beerocks_logging.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        str += elt + ", ";
-            ^'
-'common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Variable 'command_type_str' can be declared with const [constVariable]    auto &command_type_str = *cmd_tokens_vec.begin();
-          ^'
-'common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Parameter 'tlv_hex_list' can be declared with const [constParameter]bool tlvPrefilledData::add_tlvs_from_list(std::list<beerocks_ucc_listener::tlv_hex_t> &tlv_hex_list,
-                                                                                       ^'
-'common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Consider using std::transform algorithm instead of a raw loop. [useStlAlgorithm]        mandatory_params.push_back(param_name.first);
-                         ^'
-'common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]                          validate_binary_notation(value) || validate_decimal_notation(value))) {
-                                                                                                ^'
-'common/beerocks/bcl/source/network/socket.cpp: performance: Variable 'm_socket' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    m_socket           = s;
-    ^'
-'common/beerocks/bcl/source/network/socket.cpp: performance: Variable 'm_socket' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    m_socket    = s;
-    ^'
-'common/beerocks/bcl/source/network/socket.cpp: performance: Variable 'm_peer_ip' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    m_peer_ip   = peer_ip;
-    ^'
-'common/beerocks/bcl/source/network/socket.cpp: style: The scope of the variable 'i' can be reduced. [variableScope]    unsigned i;
-             ^'
-'common/beerocks/bcl/source/network/socket.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]        if (soc == s) {
-                      ^'
-'common/beerocks/bcl/source/network/socket.cpp: style: Unused variable: it [unusedVariable]        std::vector<Socket *>::iterator it;
-                                        ^'
-'common/beerocks/bcl/source/network/network_utils.cpp: style: Condition '!up' is always true [knownConditionTrueFalse]    while (!up) {
-           ^'
-'common/beerocks/bcl/source/network/network_utils.cpp: style: The scope of the variable 'rtInfo_ret' can be reduced. [variableScope]    int rtInfo_ret;
-        ^'
-'common/beerocks/bcl/source/network/network_utils.cpp: style: Local variable 'ecmd' shadows outer variable [shadowVariable]            struct ethtool_cmd ecmd;
-                               ^'
-'common/beerocks/bcl/source/network/network_utils.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (ip_info.iface == iface_name) {
-                                         ^'
-'common/beerocks/bcl/source/network/network_utils.cpp: information: Skipping configuration 'SIOCBRADDIF' since the value of 'SIOCBRADDIF' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]    err             = ioctl(br_socket_fd, SIOCBRADDIF, &ifr);
-^'
-'common/beerocks/bcl/source/network/network_utils.cpp: information: Skipping configuration 'SIOCBRDELIF' since the value of 'SIOCBRDELIF' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]    err             = ioctl(br_socket_fd, SIOCBRDELIF, &ifr);
-^'
-'agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::platform_settings' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
-              ^'
-'agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::wlan_settings' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
-              ^'
-'agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::son_config' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
-              ^'
-'agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::connected_4addr_mode' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
-              ^'
-'agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::hostap_params_available' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
-              ^'
-'agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::backhaul_params' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
-              ^'
-'agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::hostap_params' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
-              ^'
-'agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::hostap_cs_params' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
-              ^'
-'agent/src/beerocks/slave/son_slave_thread.cpp: performance: Variable 'slave_uds' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    slave_uds   = conf.temp_path + std::string(BEEROCKS_SLAVE_UDS) + "_" + conf.hostap_iface;
-    ^'
-'common/beerocks/bcl/source/son/son_wireless_utils.cpp: style: Condition 'prev_bw<=bw' is always true [knownConditionTrueFalse]    } else if (prev_bw <= bw) {
-                       ^'
-'common/beerocks/bcl/source/son/son_wireless_utils.cpp: style: The scope of the variable 'rate_temp' can be reduced. [variableScope]    uint16_t rate_temp;
-             ^'
-'common/beerocks/bcl/source/son/son_wireless_utils.cpp: style: The scope of the variable 'diff_temp' can be reduced. [variableScope]    uint16_t diff_temp;
-             ^'
-'agent/src/beerocks/slave/son_slave_thread.cpp: style: Local variable 'notification' shadows outer variable [shadowVariable]        auto notification = message_com::create_vs_message<
-             ^'
-'agent/src/beerocks/slave/son_slave_thread.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]        if (channel_to_check == ch.channel) {
-                                            ^'
-'framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport.h: style: The class 'Ieee1905Transport' does not have a constructor although it has private member variables. [noConstructor]class Ieee1905Transport {
-^'
-'framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: The function 'topic' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]    virtual const std::string topic() const
-                              ^'
-'framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: The function 'print' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]    virtual std::ostream &print(std::ostream &os) const
-                          ^'
-'framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: The function 'topic_prefix' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]    virtual const std::string topic_prefix() const { return kTopicPrefix; }
-                              ^'
-'framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: The function 'topic' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]    virtual const std::string topic() const { return topic_prefix(); }
-                              ^'
-'framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: C-style pointer casting [cstyleCast]    Metadata *metadata() const { return (Metadata *)frames().back().data(); };
-                                        ^'
-'framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: C-style pointer casting [cstyleCast]        return (Metadata *)frames().back().data();
-               ^'
-'framework/common/include/mapf/common/message.h: style: Local variable 'frame' shadows outer function [shadowFunction]        for (auto frame : frames)
-                  ^'
-'framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: Local variable 'topic' shadows outer function [shadowFunction]        std::ostringstream topic;
-                           ^'
-'framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'xsub_secret' should be passed by const reference. [passedByValue]    BrokerSecurity(bool enable, unsigned int key_len, std::string xsub_secret,
-                                                                  ^'
-'framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'xsub_public' should be passed by const reference. [passedByValue]                   std::string xsub_public, std::string pub_secret, std::string pub_public,
-                               ^'
-'framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'pub_secret' should be passed by const reference. [passedByValue]                   std::string xsub_public, std::string pub_secret, std::string pub_public,
-                                                        ^'
-'framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'pub_public' should be passed by const reference. [passedByValue]                   std::string xsub_public, std::string pub_secret, std::string pub_public,
-                                                                                ^'
-'framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'xpub_secret' should be passed by const reference. [passedByValue]                   std::string xpub_secret, std::string xpub_public, std::string sub_secret,
-                               ^'
-'framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'xpub_public' should be passed by const reference. [passedByValue]                   std::string xpub_secret, std::string xpub_public, std::string sub_secret,
-                                                        ^'
-'framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'sub_secret' should be passed by const reference. [passedByValue]                   std::string xpub_secret, std::string xpub_public, std::string sub_secret,
-                                                                                 ^'
-'framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'sub_public' should be passed by const reference. [passedByValue]                   std::string sub_public)
-                               ^'
-'framework/common/include/mapf/common/logger.h: performance: Function parameter 'param' should be passed by const reference. [passedByValue]        void set_level(std::string param) { level_ = param; }
-                                   ^'
-'framework/common/include/mapf/common/logger.h: performance: Function parameter 'param' should be passed by const reference. [passedByValue]        void set_file_path(std::string param) { file_path_ = param; }
-                                       ^'
-'framework/common/include/mapf/broker/broker_interface.h: performance: Function parameter 'sync_topic' should be passed by const reference. [passedByValue]    BrokerInterface(Context &ctx, const std::string &cfg, std::string sync_topic = "hello")
-                                                                      ^'
-'framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: performance: Function parameter 'prefix' should be passed by const reference. [passedByValue]    static const std::string build_topic(const std::string prefix, uint16_t ether_type,
-                                                           ^'
-'common/beerocks/btl/btl_local_bus.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (!subscribe_topic_to_bus(bus, msg_type)) {
-                                                    ^'
-'common/beerocks/bwl/dummy/ap_wlan_hal_dummy.cpp: style: struct member 'DUMMY_acs_report_get::Ch' is never used. [unusedStructMember]    int Ch;
-        ^'
-'common/beerocks/bwl/dummy/ap_wlan_hal_dummy.cpp: style: struct member 'DUMMY_acs_report_get::BW' is never used. [unusedStructMember]    int BW;
-        ^'
-'common/beerocks/bwl/dummy/ap_wlan_hal_dummy.cpp: style: struct member 'DUMMY_acs_report_get::DFS' is never used. [unusedStructMember]    int DFS;
-        ^'
-'common/beerocks/bwl/dummy/ap_wlan_hal_dummy.cpp: style: struct member 'DUMMY_acs_report_get::bss' is never used. [unusedStructMember]    int bss;
-        ^'
-'common/beerocks/bwl/dummy/mon_wlan_hal_dummy.cpp: style: The scope of the variable 'tmp_int' can be reduced. [variableScope]    int64_t tmp_int;
-            ^'
-'common/beerocks/bwl/dwpal/ap_wlan_hal_dwpal.cpp: information: This file is not analyzed. Cppcheck failed to extract a valid configuration. Use -v for more details. [noValidConfiguration]
-^'
-'common/beerocks/bwl/dwpal/base_wlan_hal_dwpal.cpp: style: Consider using std::count_if algorithm instead of a raw loop. [useStlAlgorithm]                        attached++;
-                        ^'
-'common/beerocks/bwl/dwpal/mon_wlan_hal_dwpal.cpp: style: The scope of the variable 'rate_mbs_fp_8_1' can be reduced. [variableScope]    uint8_t rate_mbs_fp_8_1;
-            ^'
-'common/beerocks/bwl/dwpal/mon_wlan_hal_dwpal.cpp: style: The scope of the variable 'rate_kbs' can be reduced. [variableScope]    uint32_t rate_kbs;
-             ^'
-'common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::Ch' is never used. [unusedStructMember]    int Ch;
-        ^'
-'common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::BW' is never used. [unusedStructMember]    int BW;
-        ^'
-'common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::DFS' is never used. [unusedStructMember]    int DFS;
-        ^'
-'common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::bss' is never used. [unusedStructMember]    int bss;
-        ^'
-'common/beerocks/bwl/econet/mon_wlan_hal_econet.cpp: style: The scope of the variable 'tmp_int' can be reduced. [variableScope]    int64_t tmp_int;
-            ^'
-'common/beerocks/bwl/nl80211/base_wlan_hal_nl80211.cpp: style: C-style pointer casting [cstyleCast]                m_fd_ext_events = wpa_ctrl_get_fd((wpa_ctrl *)m_wpa_ctrl_event);
-                                                  ^'
-'common/beerocks/bwl/nl80211/base_wlan_hal_nl80211.cpp: style: A pointer can not be negative so it is either pointless or an error to check if it is. [pointerLessThanZero]    if (err < 0) {
-            ^'
-'common/beerocks/bwl/shared/netlink_socket.cpp: style: Local variable 'rc' shadows outer variable [shadowVariable]        int rc = nl_recvmsgs(m_nl_socket.get(), nl_callback.get());
-            ^'
-'common/beerocks/bwl/shared/nl80211_socket.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (result) {
-        ^'
-'common/beerocks/tlvf/src/src/beerocks_message.cpp: style: Parameter 'cmdu' can be declared with const [constParameter]message::sUdsHeader *message_com::get_uds_header(ieee1905_1::CmduMessage &cmdu)
-                                                                          ^'
-'common/beerocks/tlvf/src/src/beerocks_message.cpp: style: Parameter 'cmdu_rx' can be declared with const [constParameter]bool message_com::forward_cmdu_to_uds(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx,
-                                                                             ^'
-'controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_BSS_TM_REQ *)(event->data);
-                          ^'
-'controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_BH_ROAM_REQ *)(event->data);
-                          ^'
-'controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_CLIENT_ALLOW_REQ *)(event->data);
-                          ^'
-'controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_ACS_START *)(event->data);
-                          ^'
-'controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_CSA_NOTIFICATION *)(event->data);
-                          ^'
-'controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION *)(event->data);
-                          ^'
-'controller/src/beerocks/bml/bml.cpp: style: C-style pointer casting [cstyleCast]    bml_internal *pBML = (bml_internal *)ctx;
-                         ^'
-'controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_STEERING *)(event->data);
-                          ^'
-'controller/src/beerocks/bml/rdkb/internal/bml_rdkb_internal.h: style: The function 'process_cmdu_header' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]    virtual int process_cmdu_header(std::shared_ptr<beerocks::beerocks_header> beerocks_header);
-                ^'
-'controller/src/beerocks/bml/rdkb/bml_rdkb.cpp: style: C-style pointer casting [cstyleCast]    bml_rdkb_internal *pBML = (bml_rdkb_internal *)ctx;
-                              ^'
-'controller/src/beerocks/cli/beerocks_cli.cpp: performance: Prefer prefix ++/-- operators for non-primitive types. [postfixOperator]         it++) {
-         ^'
-'controller/src/beerocks/bml/rdkb/internal/bml_rdkb_internal.cpp: style: C-style pointer casting [cstyleCast]        event->data = GET_MESSAGE_POINTER(BML_EVENT_STEERING, data_buffer, size);
-                      ^'
-'controller/src/beerocks/bml/rdkb/internal/bml_rdkb_internal.cpp: style: Variable 'iRet' is reassigned a value before the old one has been used. [redundantAssignment]    iRet = prmRdkbWlan.get_value();
-         ^'
-'controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Redundant initialization for 'cli_ptr'. The initialized value is overwritten before it is read. [redundantInitialization]    beerocks::cli *cli_ptr = &cli_soc;
-                           ^'
-'controller/src/beerocks/cli/beerocks_cli_bml.h: performance: Function parameter 'iface' should be passed by const reference. [passedByValue]    int wps_onboarding(const std::string iface = std::string());
-                                         ^'
-'controller/src/beerocks/cli/beerocks_cli_main.cpp: performance: Function parameter 'temp_path' should be passed by const reference. [passedByValue]static void cli_tcp_proxy(std::string temp_path)
-                                      ^'
-'controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        cmd += token + " ";
-            ^'
-'controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Variable 'pos' is assigned a value that is never used. [unreadVariable]        } else if ((pos = token->find("!")) != std::string::npos) {
-                        ^'
-'controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Variable 'cli_ptr' is assigned a value that is never used. [unreadVariable]    beerocks::cli *cli_ptr = &cli_soc;
-                           ^'
-'controller/src/beerocks/cli/beerocks_cli_bml.cpp: performance: Function parameter 'ind' should be passed by const reference. [passedByValue]    const std::string &parent_bssid, const std::string ind, std::stringstream &ss)
-                                                       ^'
-'controller/src/beerocks/cli/beerocks_cli_bml.cpp: performance: Function parameter 'beerocks_conf_path_' should be passed by const reference. [passedByValue]cli_bml::cli_bml(std::string beerocks_conf_path_)
-                             ^'
-'controller/src/beerocks/cli/beerocks_cli_proxy.cpp: performance: Variable 'master_uds' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    master_uds  = master_uds_;
-    ^'
-'controller/src/beerocks/cli/beerocks_cli_proxy.cpp: performance: Function parameter 'master_uds_' should be passed by const reference. [passedByValue]cli_proxy::cli_proxy(std::string master_uds_) : socket_thread()
-                                 ^'
-'controller/src/beerocks/master/db/node.h: performance: Variable 'timestamp' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]            timestamp = std::chrono::steady_clock::now();
-            ^'
-'controller/src/beerocks/master/beerocks_master_main.cpp: style: Parameter 'main_master_conf' can be declared with const [constParameter]                               beerocks::config_file::sConfigMaster &main_master_conf)
-                                                                     ^'
-'controller/src/beerocks/master/beerocks_master_main.cpp: style: Variable 'bridge_iface' can be declared with const [constVariable]    auto &bridge_iface = beerocks_slave_conf.bridge_iface;
-          ^'
-'controller/src/beerocks/cli/beerocks_cli_socket.cpp: performance: Function parameter 'temp_path_' should be passed by const reference. [passedByValue]cli_socket::cli_socket(std::string temp_path_, std::string proxy_ip_)
-                                   ^'
-'controller/src/beerocks/cli/beerocks_cli_socket.cpp: performance: Function parameter 'proxy_ip_' should be passed by const reference. [passedByValue]cli_socket::cli_socket(std::string temp_path_, std::string proxy_ip_)
-                                                           ^'
-'controller/src/beerocks/cli/beerocks_cli_socket.cpp: performance: Function parameter 'mode' should be passed by const reference. [passedByValue]                                      uint16_t repeats, int16_t op_class, std::string mode)
-                                                                                      ^'
-'controller/src/beerocks/master/controller_ucc_listener.cpp: style: Variable 'operating_class_str' can be declared with const [constVariable]    auto &operating_class_str = confs[1];
-          ^'
-'controller/src/beerocks/master/controller_ucc_listener.cpp: style: Variable 'authentication_type_str' can be declared with const [constVariable]    auto &authentication_type_str = confs[3];
-          ^'
-'controller/src/beerocks/master/controller_ucc_listener.cpp: style: Variable 'encryption_type_str' can be declared with const [constVariable]    auto &encryption_type_str = confs[4];
-          ^'
-'controller/src/beerocks/master/controller_ucc_listener.cpp: style: Variable 'bit_6_str' can be declared with const [constVariable]    auto &bit_6_str = confs[6];
-          ^'
-'controller/src/beerocks/master/controller_ucc_listener.cpp: style: Variable 'bit_5_str' can be declared with const [constVariable]    auto &bit_5_str = confs[7];
-          ^'
-'controller/src/beerocks/master/db/db.cpp: style: Non-boolean value returned from function returning bool [returnNonBoolInBooleanFunction]        return -1;
-        ^'
-'controller/src/beerocks/master/db/db.cpp: style: The scope of the variable 'listener_exist' can be reduced. [variableScope]    bool listener_exist;
-         ^'
-'controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'name' should be passed by const reference. [passedByValue]bool db::set_node_name(const std::string &mac, std::string name)
-                                                           ^'
-'controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'ssid' should be passed by const reference. [passedByValue]bool db::add_vap(const std::string &radio_mac, int vap_id, std::string bssid, std::string ssid,
-                                                                                          ^'
-'controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'iface_name' should be passed by const reference. [passedByValue]bool db::set_hostap_iface_name(const std::string &mac, std::string iface_name)
-                                                                   ^'
-'controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'version' should be passed by const reference. [passedByValue]bool db::set_hostap_driver_version(const std::string &mac, std::string version)
-                                                                       ^'
-'controller/src/beerocks/master/db/db.cpp: style: Parameter 'n' can be declared with const [constParameter]int db::get_node_bw_int(std::shared_ptr<node> &n)
-                                               ^'
-'controller/src/beerocks/master/db/db.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]            get_node_state(hostap) == beerocks::STATE_CONNECTED) {
-                                                                 ^'
-'controller/src/beerocks/master/db/db.cpp: style: Consider using std::transform algorithm instead of a raw loop. [useStlAlgorithm]        neighbors_al_macs.push_back(network_utils::mac_from_string(sibling));
-                          ^'
-'controller/src/beerocks/master/db/db.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (it.second.mac == mac) {
-                                  ^'
-'controller/src/beerocks/master/db/db.cpp: style: Variable '(*it).map_updates' is assigned a value that is never used. [unreadVariable]                (*it).map_updates = update_enable;
-                                  ^'
-'controller/src/beerocks/master/db/db.cpp: style: Variable '(*it).stats_updates' is assigned a value that is never used. [unreadVariable]                (*it).stats_updates = update_enable;
-                                    ^'
-'controller/src/beerocks/master/db/db.cpp: style: Variable '(*it).events_updates' is assigned a value that is never used. [unreadVariable]                (*it).events_updates = update_enable;
-                                     ^'
-'controller/src/beerocks/master/db/network_map.cpp: style: Parameter 'buffer_size' can be declared with const [constParameter]                                               uint8_t *tx_buffer, std::ptrdiff_t &buffer_size,
-                                                                                   ^'
-'controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_BSS_TM_REQ, response->buffer(0), size);
-                  ^'
-'controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_BH_ROAM_REQ, response->buffer(0), size);
-                  ^'
-'controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_ALLOW_REQ, response->buffer(0), size);
-                  ^'
-'controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_DISALLOW_REQ, response->buffer(0), size);
-                  ^'
-'controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_ACS_START, response->buffer(0), size);
-                  ^'
-'controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_CSA_NOTIFICATION, response->buffer(0), size);
-                  ^'
-'controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]        GET_MESSAGE_POINTER(BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION, response->buffer(0), size);
-        ^'
-'controller/src/beerocks/master/son_actions.cpp: style: The scope of the variable 'prev_task_id' can be reduced. [variableScope]    int prev_task_id;
-        ^'
-'controller/src/beerocks/master/son_actions.cpp: style: Local variable 'prev_task_id' shadows outer variable [shadowVariable]        int prev_task_id = database.get_association_handling_task_id(mac);
-            ^'
-'controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 'sta_mac' should be passed by const reference. [passedByValue]                                                     std::string sta_mac, std::string bssid)
-                                                                 ^'
-'controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 'bssid' should be passed by const reference. [passedByValue]                                                     std::string sta_mac, std::string bssid)
-                                                                                      ^'
-'controller/src/beerocks/master/son_actions.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]            if (operating_class == operating_class_info.operating_class()) {
-                                                                           ^'
-'controller/src/beerocks/master/son_master_thread.cpp: style: Redundant initialization for 'interface'. The initialized value is overwritten before it is read. [redundantInitialization]                    auto interface = std::get<1>(interface_tuple);
-                                   ^'
-'controller/src/beerocks/master/son_master_thread.cpp: style: The scope of the variable 'old_link_metrics_removed' can be reduced. [variableScope]    bool old_link_metrics_removed = false;
-         ^'
-'controller/src/beerocks/master/son_master_thread.cpp: style: Parameter 'link_metric_data' can be declared with const [constParameter]        &link_metric_data)
-         ^'
-'controller/src/beerocks/master/son_master_thread.cpp: style: Parameter 'ap_metric_data' can be declared with const [constParameter]print_ap_metric_map(std::unordered_map<sMacAddr, son::node::ap_metrics_data> &ap_metric_data)
-                                                                              ^'
-'controller/src/beerocks/master/son_master_thread.cpp: style: Variable 'ap_metric_data' can be declared with const [constVariable]    auto &ap_metric_data = database.get_ap_metric_data_map();
-          ^'
-'controller/src/beerocks/master/son_master_thread.cpp: style: Parameter 'm1' can be declared with const [constParameter]    WSC::m1 &m1, std::string bridge_mac, std::string radio_mac, ieee1905_1::CmduMessageTx &cmdu_tx)
-             ^'
-'controller/src/beerocks/master/son_master_thread.cpp: style: Variable 'old_link_metrics_removed' is assigned a value that is never used. [unreadVariable]            old_link_metrics_removed = true;
-                                     ^'
-'controller/src/beerocks/master/tasks/association_handling_task.cpp: performance: Function parameter 'sta_mac_' should be passed by const reference. [passedByValue]                                                     task_pool &tasks_, std::string sta_mac_,
-                                                                                    ^'
-'controller/src/beerocks/master/tasks/association_handling_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                                     std::string task_name_)
-                                                                 ^'
-'controller/src/beerocks/master/tasks/bml_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj = (connection_change_event *)obj;
-                             ^'
-'controller/src/beerocks/master/tasks/bml_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj = (stats_info_available_event *)obj;
-                             ^'
-'controller/src/beerocks/master/tasks/bml_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj = (listener_general_register_unregister_event *)obj;
-                             ^'
-'controller/src/beerocks/master/tasks/bml_task.cpp: style: Local variable 'idx' shadows outer variable [shadowVariable]            int idx = 0;
-                ^'
-'controller/src/beerocks/master/tasks/bml_task.cpp: style: Local variable 'sd' shadows outer variable [shadowVariable]            Socket *sd;
-                    ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                acs_response_event = (sAcsResponse_event *)obj;
-                                     ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                csa_event    = (sCsa_event *)obj;
-                               ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                restricted_channel_response_event = (sRestrictedChannelResponse_event *)obj;
-                                                    ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                slave_joined_event = (sSlaveJoined_event *)event_obj;
-                                     ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                csa_event = (sCsa_event *)event_obj;
-                            ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                hostap_channel_request_event = (sHostapChannelRequest_event *)event_obj;
-                                               ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                ap_activity_idle = (sApActivityIdle_event *)event_obj;
-                                   ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                    (sDfsReEntrySampleSteeredClients_event *)event_obj;
-                    ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                dfs_cac_pending_hostap = (sDfsCacPendinghostap_event *)event_obj;
-                                         ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                    cac_completed_event = (sCacCompleted_event *)event_obj;
-                                          ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                dfs_channel_available = (sDfsChannelAvailable_event *)event_obj;
-                                        ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                configured_restricted_channels = (sConfiguredRestrictedChannels_event *)event_obj;
-                                                 ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]        auto new_event = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsReEntrySampleSteeredClients_event);
-                         ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]            auto new_event        = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsCacPendinghostap_event);
-                                    ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]    auto new_event             = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsCacPendinghostap_event);
-                                 ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: Redundant initialization for 'hostap_parent_type'. The initialized value is overwritten before it is read. [redundantInitialization]        auto hostap_parent_type = database.get_node_type(hostap_parent_mac);
-                                ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: The scope of the variable 'channel_80Mhz_step' can be reduced. [variableScope]    auto channel_80Mhz_step = CHANNEL_80MHZ_STEP;
-         ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: performance: Function parameter 'mac' should be passed by const reference. [passedByValue]void channel_selection_task::queue_clear_mac(std::string mac)
-                                                         ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: performance: Function parameter 'set_reentry_client' should be passed by const reference. [passedByValue]                 [&](std::string set_reentry_client) {
-                                 ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]            if (database.is_hostap_backhaul_manager(sibling)) {
-                                                              ^'
-'controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (database.is_node_5ghz(gw_slave)) {
-                                             ^'
-'controller/src/beerocks/master/tasks/client_locating_task.cpp: performance: Function parameter 'client_mac_' should be passed by const reference. [passedByValue]                                           task_pool &tasks_, std::string client_mac_,
-                                                                          ^'
-'controller/src/beerocks/master/tasks/client_locating_task.cpp: performance: Function parameter 'eth_switch_' should be passed by const reference. [passedByValue]                                           std::string eth_switch_, std::string task_name_)
-                                                       ^'
-'controller/src/beerocks/master/tasks/client_locating_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                           std::string eth_switch_, std::string task_name_)
-                                                                                ^'
-'controller/src/beerocks/master/tasks/client_steering_task.cpp: performance: Function parameter 'sta_mac_' should be passed by const reference. [passedByValue]                                           task_pool &tasks_, std::string sta_mac_,
-                                                                          ^'
-'controller/src/beerocks/master/tasks/client_steering_task.cpp: performance: Function parameter 'target_bssid_' should be passed by const reference. [passedByValue]                                           std::string target_bssid_, bool disassoc_imminent_,
-                                                       ^'
-'controller/src/beerocks/master/tasks/client_steering_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                           std::string task_name_)
-                                                       ^'
-'controller/src/beerocks/master/son_management.cpp: style: Variable 'result_status' is assigned a value that is never used. [unreadVariable]        auto result_status = eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
-                           ^'
-'controller/src/beerocks/master/son_management.cpp: style: Variable 'op_error_code' is assigned a value that is never used. [unreadVariable]        auto op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
-                           ^'
-'controller/src/beerocks/master/son_management.cpp: style: Variable 'op_error_code' is assigned a value that is never used. [unreadVariable]            op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SCAN_IN_PROGRESS;
-                          ^'
-'controller/src/beerocks/master/son_management.cpp: style: Variable 'result_status' is assigned a value that is never used. [unreadVariable]            result_status = last_scan_success;
-                          ^'
-'controller/src/beerocks/master/tasks/dynamic_channel_selection_task.cpp: style: Redundant initialization for 'ret'. The initialized value is overwritten before it is read. [redundantInitialization]        auto ret = beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
-                 ^'
-'controller/src/beerocks/master/tasks/ire_network_optimization_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                                             std::string task_name_)
-                                                                         ^'
-'controller/src/beerocks/master/tasks/load_balancer_task.cpp: style: Variable 'client_efficiency_ratio' is reassigned a value before the old one has been used. [redundantAssignment]                client_efficiency_ratio =
-                                        ^'
-'controller/src/beerocks/master/tasks/load_balancer_task.cpp: style: The scope of the variable 'chosen_hostap_bytes_per_second_gained' can be reduced. [variableScope]        int chosen_hostap_bytes_per_second_gained = INT32_MIN;
-            ^'
-'controller/src/beerocks/master/tasks/load_balancer_task.cpp: performance: Function parameter 'ire_mac_' should be passed by const reference. [passedByValue]                                       task_pool &tasks_, std::string ire_mac_,
-                                                                      ^'
-'controller/src/beerocks/master/tasks/load_balancer_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                       std::string task_name_)
-                                                   ^'
-'controller/src/beerocks/master/tasks/network_health_check_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                                     std::string task_name_)
-                                                                 ^'
-'controller/src/beerocks/master/tasks/network_health_check_task.cpp: style: Redundant checking of STL container element existence before removing it. [redundantIfRemove]            if (suspected_dis_clients.find(pending_node) != suspected_dis_clients.end()) {
-                ^'
-'controller/src/beerocks/master/tasks/optimal_path_task.cpp: style: The scope of the variable 'dl_snr' can be reduced. [variableScope]                uint8_t dl_snr;
-                        ^'
-'controller/src/beerocks/master/tasks/optimal_path_task.cpp: style: The scope of the variable 'found_band_match' can be reduced. [variableScope]        bool found_band_match;
-             ^'
-'controller/src/beerocks/master/tasks/optimal_path_task.cpp: style: Local variable 'it' shadows outer variable [shadowVariable]        for (auto it : hostap_candidates) {
-                  ^'
-'controller/src/beerocks/master/tasks/optimal_path_task.cpp: style: Variable 'parent_mac' is assigned a value that is never used. [unreadVariable]    std::string parent_mac = database.get_node_parent(node_mac);
-                           ^'
-'controller/src/beerocks/master/tasks/optimal_path_task.cpp: performance: Prefer prefix ++/-- operators for non-primitive types. [postfixOperator]                    potential_ap_iter++;
-                    ^'
-'controller/src/beerocks/master/tasks/optimal_path_task.cpp: performance: Prefer prefix ++/-- operators for non-primitive types. [postfixOperator]                potential_ap_iter++;
-                ^'
-'controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task_db.h: performance: Variable 'bssid' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]            bssid                   = beerocks::net::network_utils::mac_to_string(config_.bssid);
-            ^'
-'controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task_db.cpp: style: Parameter 'bssid' can be declared with const [constParameter]int32_t rdkb_wlan_task_db::get_group_index(const std::string &client_mac, std::string &bssid)
-                                                                                       ^'
-'controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj = (listener_general_register_unregister_event *)obj;
-                             ^'
-'controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj         = (steering_client_disconnect_request_event *)obj;
-                                     ^'
-'controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj = (steering_rssi_measurement_request_event *)obj;
-                             ^'
-'controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: C-style pointer casting [cstyleCast]        auto event_obj = (steering_slave_join_event *)obj;
-                         ^'
-'controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: The scope of the variable 'listener_exist' can be reduced. [variableScope]    bool listener_exist;
-         ^'
-'controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: Local variable 'update' shadows outer variable [shadowVariable]            auto update = message_com::create_vs_message<
-                 ^'
-'controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: Variable '(*it).events_updates' is assigned a value that is never used. [unreadVariable]                (*it).events_updates = update_enable;
-                                     ^'
-'controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]task::task(std::string task_name_, std::string node_mac)
-                       ^'
-'controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'node_mac' should be passed by const reference. [passedByValue]task::task(std::string task_name_, std::string node_mac)
-                                               ^'
-'controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'mac' should be passed by const reference. [passedByValue]void task::add_pending_mac(std::string mac, beerocks_message::eActionOp_CONTROL action_op)
-                                       ^'
-'framework/common/broker_interface.cpp: style: Parameter 'msg' can be declared with const [constParameter]void BrokerInterface::SyncSend(Message &msg)
-                                        ^'
-'framework/common/encryption.cpp: style: struct member 'Anonymous1::emsk' is never used. [unusedStructMember]            uint8_t emsk[32];
-                    ^'
-'framework/common/encryption.cpp: style: Variable 'kdf_key_length.i' is assigned a value that is never used. [unreadVariable]    kdf_key_length.i = htonl(sizeof(keys.keys) * 8);
-                     ^'
-'framework/common/encryption.cpp: style: Variable 'kdf_iter.i' is assigned a value that is never used. [unreadVariable]        kdf_iter.i = htonl(iter);
-                   ^'
-'framework/common/logger.cpp: style: Condition '!init_performed' is always true [knownConditionTrueFalse]    if (!init_performed) {
-        ^'
-'framework/common/logger.cpp: performance: Function parameter 'logger_name' should be passed by const reference. [passedByValue]void Logger::Config::SetValuesFromJson(struct json_object *jlogger, std::string logger_name)
-                                                                                ^'
-'framework/common/logger.cpp: style: The scope of the variable 'length' can be reduced. [variableScope]    int fd = -1, length = -1, i = 0, ret = 0;
-                 ^'
-'framework/common/logger.cpp: style: Variable 'length' is assigned a value that is never used. [unreadVariable]    int fd = -1, length = -1, i = 0, ret = 0;
-                        ^'
-'framework/common/nng/socket.cpp: style: Parameter 'frame' can be declared with const [constParameter]bool SubSocket::Receive(Message::Frame &frame, int flags)
-                                        ^'
-'framework/common/nng/socket.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        totalLen += frame.len();
-                 ^'
-'framework/common/test/encryption_test.cpp: performance: Function parameter 'message' should be passed by const reference. [passedByValue]static bool check(int &errors, bool check, std::string message)
-                                                       ^'
-'framework/common/test/encryption_test.cpp: style: Variable 'key1_length' is assigned a value that is never used. [unreadVariable]    key1_length    = sizeof(key1);
-                   ^'
-'framework/common/test/message_test.cpp: style: Local variable 'f1' shadows outer variable [shadowVariable]        mapf::Message::Frame f1;
-                             ^'
-'framework/common/test/poller_test.cpp: style: Variable 'rc' is reassigned a value before the old one has been used. [redundantAssignment]        rc = poller_.Remove(sub_);
-           ^'
-'framework/common/test/poller_test.cpp: style: The scope of the variable 'rc' can be reduced. [variableScope]        int attempts = 0, max_attempts = 100, rc;
-                                              ^'
-'framework/common/test/socket_test.cpp: style: Parameter 'cfg' can be declared with const [constParameter]int start_broker(SocketTest::SocketTestConfig &cfg)
-                                               ^'
-'framework/common/test/socket_test.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]                frames += f.str() + ", ";
-                       ^'
-'framework/common/zmq/socket.cpp: style: Parameter 'frame' can be declared with const [constParameter]bool SubSocket::Receive(Message::Frame &frame, int flags)
-                                        ^'
-'framework/external/easylogging/easylogging++.cc: information: This file is not analyzed. Cppcheck failed to extract a valid configuration. Use -v for more details. [noValidConfiguration]
-^'
-'framework/platform/bpl/common/utils/utils.cpp: performance: Function parameter 'additional_chars' should be passed by const reference. [passedByValue]void ltrim(std::string &str, std::string additional_chars)
-                                         ^'
-'framework/platform/bpl/common/utils/utils.cpp: performance: Function parameter 'additional_chars' should be passed by const reference. [passedByValue]void rtrim(std::string &str, std::string additional_chars)
-                                         ^'
-'framework/platform/bpl/common/utils/utils.cpp: performance: Function parameter 'additional_chars' should be passed by const reference. [passedByValue]void trim(std::string &str, std::string additional_chars)
-                                        ^'
-'framework/platform/bpl/common/utils/utils.cpp: style: Unused variable: return_string [unusedVariable]    std::string return_string;
-                ^'
-'framework/platform/bpl/linux/bpl_cfg.cpp: information: Skipping configuration 'PLATFORM_DB_PATH' since the value of 'PLATFORM_DB_PATH' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]        in_conf_file.open(PLATFORM_DB_PATH);
-^'
-'framework/platform/bpl/linux/bpl_cfg.cpp: information: Skipping configuration 'PLATFORM_DB_PATH' since the value of 'PLATFORM_DB_PATH' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]            MAPF_ERR("Failed oppening file " << PLATFORM_DB_PATH);
-^'
-'framework/platform/bpl/test/bpl_test.cpp: portability: fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems. [fflushOnInputStream]        fflush(stdin);
-        ^'
-'framework/platform/bpl/test/bpl_test.cpp: portability: fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems. [fflushOnInputStream]            fflush(stdin);
-            ^'
-'framework/platform/bpl/uci/arp/bpl_arp.cpp: style: C-style pointer casting [cstyleCast]    arp_monitor *pArpMon = (arp_monitor *)ctx;
-                           ^'
-'framework/platform/bpl/uci/arp/monitor/arp_monitor.cpp: style: The scope of the variable 'type' can be reduced. [variableScope]        unsigned short type;
-                       ^'
-'framework/platform/bpl/uci/arp/monitor/arp_monitor.cpp: performance: Function parameter 'strIface' should be passed by const reference. [passedByValue]int arp_monitor::start(std::string strIface)
-                                   ^'
-'framework/platform/bpl/uci/cfg/bpl_cfg.cpp: style: The scope of the variable 'retVal' can be reduced. [variableScope]    int retVal = 0;
-        ^'
-'framework/platform/bpl/uci/cfg/bpl_cfg.cpp: style: Variable 'retVal' is assigned a value that is never used. [unreadVariable]    int retVal = 0;
-               ^'
-'framework/platform/bpl/uci/arp/monitor/arp_monitor.cpp: style: Unused variable: ipv4_str [unusedVariable]        std::string ipv4_str;
-                    ^'
-'framework/platform/bpl/uci/dhcp/bpl_dhcp.cpp: style: struct member 'dhcp_event_request::data' is never used. [unusedStructMember]    char data[];
-         ^'
-'framework/platform/bpl/uci/cfg/bpl_cfg_uci.cpp: style: The scope of the variable 'scanf_res' can be reduced. [variableScope]        int scanf_res;
-            ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/cCmduHeader.cpp: style: C-style pointer casting [cstyleCast]    m_flags = (sFlags*)m_buff_ptr__;
-              ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlv1905NeighborDevice.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvAlMacAddressType.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvAutoconfigFreqBand.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlv1905NeighborDevice.cpp: style: C-style pointer casting [cstyleCast]    m_mac_al_1905_device = (sMacAl1905Device*)m_buff_ptr__;
-                           ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvAutoconfigFreqBand.cpp: style: C-style pointer casting [cstyleCast]    m_value = (eValue*)m_buff_ptr__;
-              ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvEndOfMessage.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvDeviceBridgingCapability.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvDeviceInformation.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvLinkMetricQuery.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvLinkMetricResultCode.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvLinkMetricResultCode.cpp: style: C-style pointer casting [cstyleCast]    m_value = (eValue*)m_buff_ptr__;
-              ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvMacAddress.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvNon1905neighborDeviceList.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/WSC/WSC_Attributes.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvPushButtonEventNotification.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvPushButtonEventNotification.cpp: style: C-style pointer casting [cstyleCast]    m_media_type_list = (sMediaType*)m_buff_ptr__;
-                        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvPushButtonJoinNotification.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvReceiverLinkMetric.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvReceiverLinkMetric.cpp: style: C-style pointer casting [cstyleCast]    m_interface_pair_info = (sInterfacePairInfo*)m_buff_ptr__;
-                            ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSearchedRole.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSearchedRole.cpp: style: C-style pointer casting [cstyleCast]    m_value = (eValue*)m_buff_ptr__;
-              ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSupportedFreqBand.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSupportedFreqBand.cpp: style: C-style pointer casting [cstyleCast]    m_value = (eValue*)m_buff_ptr__;
-              ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSupportedRole.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSupportedRole.cpp: style: C-style pointer casting [cstyleCast]    m_value = (eValue*)m_buff_ptr__;
-              ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvTransmitterLinkMetric.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvTransmitterLinkMetric.cpp: style: C-style pointer casting [cstyleCast]    m_interface_pair_info = (sInterfacePairInfo*)m_buff_ptr__;
-                            ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvVendorSpecific.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvWsc.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApCapability.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApCapability.cpp: style: C-style pointer casting [cstyleCast]    m_value = (sValue*)m_buff_ptr__;
-              ^'
-'framework/tlvf/AutoGenerated/include/tlvf/test/tlvVarList.h: style: The function 'isPostInitSucceeded' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]        bool isPostInitSucceeded();
-             ^'
-'framework/tlvf/AutoGenerated/src/tlvf/test/tlvVarList.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApHeCapabilities.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApHeCapabilities.cpp: style: C-style pointer casting [cstyleCast]    m_flags1 = (sFlags1*)m_buff_ptr__;
-               ^'
-'framework/tlvf/AutoGenerated/src/tlvf/test/tlvVarList.cpp: style: C-style pointer casting [cstyleCast]    m_complex_list = (cInner*)m_buff_ptr__;
-                     ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApHeCapabilities.cpp: style: C-style pointer casting [cstyleCast]    m_flags2 = (sFlags2*)m_buff_ptr__;
-               ^'
-'framework/tlvf/AutoGenerated/src/tlvf/test/tlvVarList.cpp: style: C-style pointer casting [cstyleCast]    m_var1 = (cInner*)m_buff_ptr__;
-             ^'
-'framework/tlvf/AutoGenerated/src/tlvf/test/tlvVarList.cpp: style: C-style pointer casting [cstyleCast]    m_var3 = (cInner*)m_buff_ptr__;
-             ^'
-'framework/tlvf/AutoGenerated/src/tlvf/test/tlvVarList.cpp: style: C-style pointer casting [cstyleCast]    m_unknown_length_list = (cInner*)m_buff_ptr__;
-                            ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApHtCapabilities.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApHtCapabilities.cpp: style: C-style pointer casting [cstyleCast]    m_flags = (sFlags*)m_buff_ptr__;
-              ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApMetric.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApMetric.cpp: style: C-style pointer casting [cstyleCast]    m_estimated_service_parameters = (sEstimatedService*)m_buff_ptr__;
-                                     ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApMetricQuery.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApOperationalBSS.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApRadioBasicCapabilities.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApRadioIdentifier.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApVhtCapabilities.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApVhtCapabilities.cpp: style: C-style pointer casting [cstyleCast]    m_flags1 = (sFlags1*)m_buff_ptr__;
-               ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApVhtCapabilities.cpp: style: C-style pointer casting [cstyleCast]    m_flags2 = (sFlags2*)m_buff_ptr__;
-               ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvAssociatedClients.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvAssociatedStaLinkMetrics.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvAssociatedStaLinkMetrics.cpp: style: C-style pointer casting [cstyleCast]    m_bssid_info_list = (sBssidInfo*)m_buff_ptr__;
-                        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvChannelPreference.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvChannelPreference.cpp: style: C-style pointer casting [cstyleCast]    m_flags = (sFlags*)m_buff_ptr__;
-              ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvChannelSelectionResponse.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvChannelSelectionResponse.cpp: style: C-style pointer casting [cstyleCast]    m_response_code = (eResponseCode*)m_buff_ptr__;
-                      ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientAssociationControlRequest.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientAssociationControlRequest.cpp: style: C-style pointer casting [cstyleCast]    m_association_control = (eAssociationControl*)m_buff_ptr__;
-                            ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientAssociationEvent.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientAssociationEvent.cpp: style: C-style pointer casting [cstyleCast]    m_association_event = (eAssociationEvent*)m_buff_ptr__;
-                          ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientCapabilityReport.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientCapabilityReport.cpp: style: C-style pointer casting [cstyleCast]    m_result_code = (eResultCode*)m_buff_ptr__;
-                    ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientInfo.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvErrorCode.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvErrorCode.cpp: style: C-style pointer casting [cstyleCast]    m_reason_code = (eReasonCode*)m_buff_ptr__;
-                    ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvHigherLayerData.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvHigherLayerData.cpp: style: C-style pointer casting [cstyleCast]    m_protocol = (eProtocol*)m_buff_ptr__;
-                 ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvMetricReportingPolicy.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvMetricReportingPolicy.cpp: style: C-style pointer casting [cstyleCast]    m_metrics_reporting_conf_list = (sMetricsReportingConf*)m_buff_ptr__;
-                                    ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvOperatingChannelReport.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvOperatingChannelReport.cpp: style: C-style pointer casting [cstyleCast]    m_operating_classes_list = (sOperatingClasses*)m_buff_ptr__;
-                               ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSearchedService.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSearchedService.cpp: style: C-style pointer casting [cstyleCast]    m_searched_service_list = (eSearchedService*)m_buff_ptr__;
-                              ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSearchedService.cpp: style: Argument 'sizeof(eSearchedService)*(searched_service_list_length)' to function buffPtrIncrementSafe is always 0 [constArgument]    if (!buffPtrIncrementSafe(sizeof(eSearchedService) * (searched_service_list_length))) {
-                                                       ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvRadioOperationRestriction.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvRadioOperationRestriction.cpp: style: C-style pointer casting [cstyleCast]    m_channel_list = (sChannelInfo*)m_buff_ptr__;
-                     ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvStaMacAddressType.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringBTMReport.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringPolicy.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringPolicy.cpp: style: C-style pointer casting [cstyleCast]    m_radio_ap_control_policy_list = (sRadioApControlPolicy*)m_buff_ptr__;
-                                     ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringRequest.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringRequest.cpp: style: C-style pointer casting [cstyleCast]    m_request_flags = (sRequestFlags*)m_buff_ptr__;
-                      ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringRequest.cpp: style: C-style pointer casting [cstyleCast]    m_target_bssid_list = (sTargetBssidInfo*)m_buff_ptr__;
-                          ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSupportedService.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSupportedService.cpp: style: C-style pointer casting [cstyleCast]    m_supported_service_list = (eSupportedService*)m_buff_ptr__;
-                               ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSupportedService.cpp: style: Argument 'sizeof(eSupportedService)*(supported_service_list_length)' to function buffPtrIncrementSafe is always 0 [constArgument]    if (!buffPtrIncrementSafe(sizeof(eSupportedService) * (supported_service_list_length))) {
-                                                        ^'
-'framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvTransmitPowerLimit.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
-        ^'
-'framework/tlvf/src/src/ClassList.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        msg_len += c->getLen();
-                ^'
-'framework/transport/ieee1905_transport/ieee1905_transport_local_bus.cpp: style: C-style pointer casting [cstyleCast]        Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
-                                 ^'
-'framework/transport/ieee1905_transport/ieee1905_transport_local_bus.cpp: style: C-style pointer casting [cstyleCast]        Ieee1905CmduHeader *ch   = (Ieee1905CmduHeader *)packet.payload.iov_base;
-                                   ^'
-'framework/transport/ieee1905_transport/ieee1905_transport_local_bus.cpp: style: Parameter 'msg' can be declared with const [constParameter]void Ieee1905Transport::handle_local_bus_cmdu_tx_message(CmduTxMessage &msg)
-                                                                        ^'
-'framework/transport/ieee1905_transport/ieee1905_transport_local_bus.cpp: style: Parameter 'msg' can be declared with const [constParameter]    InterfaceConfigurationRequestMessage &msg)
-                                          ^'
-'framework/tlvf/test/tlvf_test.cpp: style: The scope of the variable 'expected' can be reduced. [variableScope]            uint16_t expected = 0x0bb0;
-                     ^'
-'framework/tlvf/test/tlvf_test.cpp: style: Local variable 'cmplx' shadows outer variable [shadowVariable]        auto cmplx = std::get<1>(tlv4->complex_list(i));
-             ^'
-'framework/tlvf/test/tlvf_test.cpp: style: Local variable 'cmplx' shadows outer variable [shadowVariable]            auto cmplx = std::get<1>(tlv4->complex_list(0));
-                 ^'
-'framework/tlvf/test/tlvf_test.cpp: style: Local variable 'cmplx' shadows outer variable [shadowVariable]            auto cmplx = std::get<1>(tlv4->complex_list(1));
-                 ^'
-'framework/tlvf/test/tlvf_test.cpp: style: Variable 'tlv1' is assigned a value that is never used. [unreadVariable]    auto tlv1 = msg.addClass<tlvNon1905neighborDeviceList>();
-              ^'
-'framework/tlvf/test/tlvf_test.cpp: style: Variable 'tlv2' is assigned a value that is never used. [unreadVariable]    auto tlv2 = msg.addClass<tlvLinkMetricQuery>();
-              ^'
-'framework/tlvf/test/tlvf_test.cpp: style: Variable 'tlv3' is assigned a value that is never used. [unreadVariable]    auto tlv3 = msg.addClass<tlvWsc>();
-              ^'
-'framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: C-style pointer casting [cstyleCast]        Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
-                                 ^'
-'framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: C-style pointer casting [cstyleCast]    Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
-                             ^'
-'framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: C-style pointer casting [cstyleCast]                Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
-                                         ^'
-'framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: Parameter 'packet' can be declared with const [constParameter]bool Ieee1905Transport::verify_packet(Packet &packet)
-                                              ^'
+common/beerocks/bcl/include/bcl/network/socket.h: style: Statements following return, break, continue, goto or throw will never be executed. [unreachableCode]        m_error.clear();
+agent/src/beerocks/monitor/monitor_rssi.cpp: style: Local variable 'sta_vap_id' shadows outer variable [shadowVariable]            auto sta_vap_id = sta_node->get_vap_id();
+agent/src/beerocks/monitor/rdkb/monitor_rdkb_hal.cpp: style: Consecutive return, break, continue, goto or throw statements are unnecessary. [duplicateBreak]        break;
+agent/src/beerocks/slave/agent_ucc_listener.cpp: style: struct member 'sVapElement::backhaul_vap' is never used. [unusedStructMember]    bool backhaul_vap;
+agent/src/beerocks/monitor/monitor_thread.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]        if (poll_last) {
+agent/src/beerocks/monitor/monitor_thread.cpp: style: Local variable 'time_span' shadows outer variable [shadowVariable]        auto time_span =
+agent/src/beerocks/monitor/monitor_thread.cpp: style: Variable 'iface' is assigned a value that is never used. [unreadVariable]        std::string iface = radio_node->get_iface();
+agent/src/beerocks/monitor/monitor_thread.cpp: style: Variable 'id' is assigned a value that is never used. [unreadVariable]        int id        = 0;
+agent/src/beerocks/slave/backhaul_manager/wan_monitor.cpp: warning: Member variable 'wan_monitor::m_arrNLBuff' is not initialized in the constructor. [uninitMemberVar]wan_monitor::wan_monitor() : m_iNetlinkFD(-1) {}
+agent/src/beerocks/slave/ap_manager_thread.cpp: warning: Member variable 'ap_manager_thread::wifi_channel' is not initialized in the constructor. [uninitMemberVar]ap_manager_thread::ap_manager_thread(std::string slave_uds_)
+agent/src/beerocks/slave/ap_manager_thread.cpp: warning: Member variable 'ap_manager_thread::acs_enabled' is not initialized in the constructor. [uninitMemberVar]ap_manager_thread::ap_manager_thread(std::string slave_uds_)
+agent/src/beerocks/slave/ap_manager_thread.cpp: warning: Member variable 'ap_manager_thread::low_filter' is not initialized in the constructor. [uninitMemberVar]ap_manager_thread::ap_manager_thread(std::string slave_uds_)
+agent/src/beerocks/slave/ap_manager_thread.cpp: performance: Variable 'slave_uds' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    slave_uds   = slave_uds_;
+agent/src/beerocks/slave/ap_manager_thread.cpp: performance: Function parameter 'slave_uds_' should be passed by const reference. [passedByValue]ap_manager_thread::ap_manager_thread(std::string slave_uds_)
+agent/src/beerocks/slave/ap_manager_thread.cpp: style: Parameter 'conf' can be declared with const [constParameter]void ap_manager_thread::ap_manager_config(ap_manager_conf_t &conf)
+agent/src/beerocks/slave/ap_manager_thread.cpp: style: Redundant checking of STL container element existence before removing it. [redundantIfRemove]                if (connected_ires.find(mac) != connected_ires.end()) {
+agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: warning: Member variable 'backhaul_manager::state_attempts' is not initialized in the constructor. [uninitMemberVar]backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
+agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: warning: Member variable 'backhaul_manager::selected_bssid_channel' is not initialized in the constructor. [uninitMemberVar]backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
+agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: warning: Member variable 'backhaul_manager::roam_selected_bssid_channel' is not initialized in the constructor. [uninitMemberVar]backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
+agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: performance: Variable 'pending_slave_ifaces' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    pending_slave_ifaces                   = slave_ap_ifaces_;
+agent/src/beerocks/slave/beerocks_slave_main.cpp: style: Parameter 'beerocks_slave_conf' can be declared with const [constParameter]static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
+agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'local_interface_name' shadows outer variable [shadowVariable]        std::string local_interface_name = soc->hostap_iface;
+agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'supportedServiceTuple' shadows outer variable [shadowVariable]        auto supportedServiceTuple = tlvSupportedService->supported_service_list(1);
+agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'iface_hal' shadows outer variable [shadowVariable]                            auto iface_hal = get_wireless_hal(sta_iface);
+agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]                    if (soc->hostap_iface == config_const_bh_slave) {
+agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]                if (soc_iter->slave == sd) {
+agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Variable 'p_cmdu_header' is assigned a value that is never used. [unreadVariable]    auto p_cmdu_header =
+agent/src/beerocks/slave/link_metrics/ieee802_3_link_metrics_collector.cpp: style: The scope of the variable 'msg_ptr' can be reduced. [variableScope]            struct nlmsghdr *msg_ptr; /* pointer to current message part */
+agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Comparison of a boolean expression with an integer. [compareBoolExpressionWithInt]    if (bpl::dhcp_mon_stop() == false) {
+agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Member variable 'main_thread::m_uiArpMonIP' is not initialized in the constructor. [uninitMemberVar]main_thread::main_thread(const config_file::sConfigSlave &config_,
+agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Member variable 'main_thread::m_uiArpMonMask' is not initialized in the constructor. [uninitMemberVar]main_thread::main_thread(const config_file::sConfigSlave &config_,
+agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Member variable 'main_thread::is_onboarding_on_init' is not initialized in the constructor. [uninitMemberVar]main_thread::main_thread(const config_file::sConfigSlave &config_,
+agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Member variable 'main_thread::platform_common_conf' is not initialized in the constructor. [uninitMemberVar]main_thread::main_thread(const config_file::sConfigSlave &config_,
+agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Redundant assignment of '*(volatile char*)pass' to itself. [selfAssignment]        *(volatile char *)pass = *(volatile char *)pass;
+agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Redundant assignment of '*(volatile char*)pass' to itself. [selfAssignment]            *(volatile char *)pass = *(volatile char *)pass;
+common/beerocks/bcl/source/beerocks_logging.cpp: style: The class 'NetLogger' does not have a constructor although it has private member variables. [noConstructor]class NetLogger : public el::LogDispatchCallback {
+common/beerocks/bcl/source/beerocks_logging.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        str += elt + ", ";
+common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Variable 'command_type_str' can be declared with const [constVariable]    auto &command_type_str = *cmd_tokens_vec.begin();
+common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Parameter 'tlv_hex_list' can be declared with const [constParameter]bool tlvPrefilledData::add_tlvs_from_list(std::list<beerocks_ucc_listener::tlv_hex_t> &tlv_hex_list,
+common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Consider using std::transform algorithm instead of a raw loop. [useStlAlgorithm]        mandatory_params.push_back(param_name.first);
+common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]                          validate_binary_notation(value) || validate_decimal_notation(value))) {
+common/beerocks/bcl/source/network/socket.cpp: performance: Variable 'm_socket' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    m_socket           = s;
+common/beerocks/bcl/source/network/socket.cpp: performance: Variable 'm_socket' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    m_socket    = s;
+common/beerocks/bcl/source/network/socket.cpp: performance: Variable 'm_peer_ip' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    m_peer_ip   = peer_ip;
+common/beerocks/bcl/source/network/socket.cpp: style: The scope of the variable 'i' can be reduced. [variableScope]    unsigned i;
+common/beerocks/bcl/source/network/socket.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]        if (soc == s) {
+common/beerocks/bcl/source/network/socket.cpp: style: Unused variable: it [unusedVariable]        std::vector<Socket *>::iterator it;
+common/beerocks/bcl/source/network/network_utils.cpp: style: Condition '!up' is always true [knownConditionTrueFalse]    while (!up) {
+common/beerocks/bcl/source/network/network_utils.cpp: style: The scope of the variable 'rtInfo_ret' can be reduced. [variableScope]    int rtInfo_ret;
+common/beerocks/bcl/source/network/network_utils.cpp: style: Local variable 'ecmd' shadows outer variable [shadowVariable]            struct ethtool_cmd ecmd;
+common/beerocks/bcl/source/network/network_utils.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (ip_info.iface == iface_name) {
+common/beerocks/bcl/source/network/network_utils.cpp: information: Skipping configuration 'SIOCBRADDIF' since the value of 'SIOCBRADDIF' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]    err             = ioctl(br_socket_fd, SIOCBRADDIF, &ifr);
+common/beerocks/bcl/source/network/network_utils.cpp: information: Skipping configuration 'SIOCBRDELIF' since the value of 'SIOCBRDELIF' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]    err             = ioctl(br_socket_fd, SIOCBRDELIF, &ifr);
+common/beerocks/bcl/source/son/son_wireless_utils.cpp: style: Condition 'prev_bw<=bw' is always true [knownConditionTrueFalse]    } else if (prev_bw <= bw) {
+common/beerocks/bcl/source/son/son_wireless_utils.cpp: style: The scope of the variable 'rate_temp' can be reduced. [variableScope]    uint16_t rate_temp;
+common/beerocks/bcl/source/son/son_wireless_utils.cpp: style: The scope of the variable 'diff_temp' can be reduced. [variableScope]    uint16_t diff_temp;
+agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::platform_settings' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
+agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::wlan_settings' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
+agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::son_config' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
+agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::connected_4addr_mode' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
+agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::hostap_params_available' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
+agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::backhaul_params' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
+agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::hostap_params' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
+agent/src/beerocks/slave/son_slave_thread.cpp: warning: Member variable 'slave_thread::hostap_cs_params' is not initialized in the constructor. [uninitMemberVar]slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
+agent/src/beerocks/slave/son_slave_thread.cpp: performance: Variable 'slave_uds' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    slave_uds   = conf.temp_path + std::string(BEEROCKS_SLAVE_UDS) + "_" + conf.hostap_iface;
+agent/src/beerocks/slave/son_slave_thread.cpp: style: Local variable 'notification' shadows outer variable [shadowVariable]        auto notification = message_com::create_vs_message<
+agent/src/beerocks/slave/son_slave_thread.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]        if (channel_to_check == ch.channel) {
+framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport.h: style: The class 'Ieee1905Transport' does not have a constructor although it has private member variables. [noConstructor]class Ieee1905Transport {
+framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: The function 'topic' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]    virtual const std::string topic() const
+framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: The function 'print' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]    virtual std::ostream &print(std::ostream &os) const
+framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: The function 'topic_prefix' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]    virtual const std::string topic_prefix() const { return kTopicPrefix; }
+framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: The function 'topic' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]    virtual const std::string topic() const { return topic_prefix(); }
+framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: C-style pointer casting [cstyleCast]    Metadata *metadata() const { return (Metadata *)frames().back().data(); };
+framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: C-style pointer casting [cstyleCast]        return (Metadata *)frames().back().data();
+framework/common/include/mapf/common/message.h: style: Local variable 'frame' shadows outer function [shadowFunction]        for (auto frame : frames)
+framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: Local variable 'topic' shadows outer function [shadowFunction]        std::ostringstream topic;
+framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'xsub_secret' should be passed by const reference. [passedByValue]    BrokerSecurity(bool enable, unsigned int key_len, std::string xsub_secret,
+framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'xsub_public' should be passed by const reference. [passedByValue]                   std::string xsub_public, std::string pub_secret, std::string pub_public,
+framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'pub_secret' should be passed by const reference. [passedByValue]                   std::string xsub_public, std::string pub_secret, std::string pub_public,
+framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'pub_public' should be passed by const reference. [passedByValue]                   std::string xsub_public, std::string pub_secret, std::string pub_public,
+framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'xpub_secret' should be passed by const reference. [passedByValue]                   std::string xpub_secret, std::string xpub_public, std::string sub_secret,
+framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'xpub_public' should be passed by const reference. [passedByValue]                   std::string xpub_secret, std::string xpub_public, std::string sub_secret,
+framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'sub_secret' should be passed by const reference. [passedByValue]                   std::string xpub_secret, std::string xpub_public, std::string sub_secret,
+framework/common/include/mapf/broker/broker_config.h: performance: Function parameter 'sub_public' should be passed by const reference. [passedByValue]                   std::string sub_public)
+framework/common/include/mapf/common/logger.h: performance: Function parameter 'param' should be passed by const reference. [passedByValue]        void set_level(std::string param) { level_ = param; }
+framework/common/include/mapf/common/logger.h: performance: Function parameter 'param' should be passed by const reference. [passedByValue]        void set_file_path(std::string param) { file_path_ = param; }
+framework/common/include/mapf/broker/broker_interface.h: performance: Function parameter 'sync_topic' should be passed by const reference. [passedByValue]    BrokerInterface(Context &ctx, const std::string &cfg, std::string sync_topic = "hello")
+framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: performance: Function parameter 'prefix' should be passed by const reference. [passedByValue]    static const std::string build_topic(const std::string prefix, uint16_t ether_type,
+common/beerocks/btl/btl_local_bus.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (!subscribe_topic_to_bus(bus, msg_type)) {
+common/beerocks/bwl/dummy/ap_wlan_hal_dummy.cpp: style: struct member 'DUMMY_acs_report_get::Ch' is never used. [unusedStructMember]    int Ch;
+common/beerocks/bwl/dummy/ap_wlan_hal_dummy.cpp: style: struct member 'DUMMY_acs_report_get::BW' is never used. [unusedStructMember]    int BW;
+common/beerocks/bwl/dummy/ap_wlan_hal_dummy.cpp: style: struct member 'DUMMY_acs_report_get::DFS' is never used. [unusedStructMember]    int DFS;
+common/beerocks/bwl/dummy/ap_wlan_hal_dummy.cpp: style: struct member 'DUMMY_acs_report_get::bss' is never used. [unusedStructMember]    int bss;
+common/beerocks/bwl/dummy/mon_wlan_hal_dummy.cpp: style: The scope of the variable 'tmp_int' can be reduced. [variableScope]    int64_t tmp_int;
+common/beerocks/bwl/dwpal/ap_wlan_hal_dwpal.cpp: information: This file is not analyzed. Cppcheck failed to extract a valid configuration. Use -v for more details. [noValidConfiguration]
+common/beerocks/bwl/dwpal/base_wlan_hal_dwpal.cpp: style: Consider using std::count_if algorithm instead of a raw loop. [useStlAlgorithm]                        attached++;
+common/beerocks/bwl/dwpal/mon_wlan_hal_dwpal.cpp: style: The scope of the variable 'rate_mbs_fp_8_1' can be reduced. [variableScope]    uint8_t rate_mbs_fp_8_1;
+common/beerocks/bwl/dwpal/mon_wlan_hal_dwpal.cpp: style: The scope of the variable 'rate_kbs' can be reduced. [variableScope]    uint32_t rate_kbs;
+common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::Ch' is never used. [unusedStructMember]    int Ch;
+common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::BW' is never used. [unusedStructMember]    int BW;
+common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::DFS' is never used. [unusedStructMember]    int DFS;
+common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::bss' is never used. [unusedStructMember]    int bss;
+common/beerocks/bwl/econet/mon_wlan_hal_econet.cpp: style: The scope of the variable 'tmp_int' can be reduced. [variableScope]    int64_t tmp_int;
+common/beerocks/bwl/nl80211/base_wlan_hal_nl80211.cpp: style: C-style pointer casting [cstyleCast]                m_fd_ext_events = wpa_ctrl_get_fd((wpa_ctrl *)m_wpa_ctrl_event);
+common/beerocks/bwl/nl80211/base_wlan_hal_nl80211.cpp: style: A pointer can not be negative so it is either pointless or an error to check if it is. [pointerLessThanZero]    if (err < 0) {
+common/beerocks/bwl/shared/netlink_socket.cpp: style: Local variable 'rc' shadows outer variable [shadowVariable]        int rc = nl_recvmsgs(m_nl_socket.get(), nl_callback.get());
+common/beerocks/bwl/shared/nl80211_socket.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (result) {
+common/beerocks/tlvf/src/src/beerocks_message.cpp: style: Parameter 'cmdu' can be declared with const [constParameter]message::sUdsHeader *message_com::get_uds_header(ieee1905_1::CmduMessage &cmdu)
+common/beerocks/tlvf/src/src/beerocks_message.cpp: style: Parameter 'cmdu_rx' can be declared with const [constParameter]bool message_com::forward_cmdu_to_uds(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx,
+controller/src/beerocks/bml/bml.cpp: style: C-style pointer casting [cstyleCast]    bml_internal *pBML = (bml_internal *)ctx;
+controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_BSS_TM_REQ *)(event->data);
+controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_BH_ROAM_REQ *)(event->data);
+controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_CLIENT_ALLOW_REQ *)(event->data);
+controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_ACS_START *)(event->data);
+controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_CSA_NOTIFICATION *)(event->data);
+controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION *)(event->data);
+controller/src/beerocks/bml/bml_utils.cpp: style: C-style pointer casting [cstyleCast]        auto event_data = (BML_EVENT_STEERING *)(event->data);
+controller/src/beerocks/cli/beerocks_cli.cpp: performance: Prefer prefix ++/-- operators for non-primitive types. [postfixOperator]         it++) {
+controller/src/beerocks/bml/rdkb/internal/bml_rdkb_internal.h: style: The function 'process_cmdu_header' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]    virtual int process_cmdu_header(std::shared_ptr<beerocks::beerocks_header> beerocks_header);
+controller/src/beerocks/bml/rdkb/bml_rdkb.cpp: style: C-style pointer casting [cstyleCast]    bml_rdkb_internal *pBML = (bml_rdkb_internal *)ctx;
+controller/src/beerocks/bml/rdkb/internal/bml_rdkb_internal.cpp: style: C-style pointer casting [cstyleCast]        event->data = GET_MESSAGE_POINTER(BML_EVENT_STEERING, data_buffer, size);
+controller/src/beerocks/bml/rdkb/internal/bml_rdkb_internal.cpp: style: Variable 'iRet' is reassigned a value before the old one has been used. [redundantAssignment]    iRet = prmRdkbWlan.get_value();
+controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Redundant initialization for 'cli_ptr'. The initialized value is overwritten before it is read. [redundantInitialization]    beerocks::cli *cli_ptr = &cli_soc;
+controller/src/beerocks/cli/beerocks_cli_bml.h: performance: Function parameter 'iface' should be passed by const reference. [passedByValue]    int wps_onboarding(const std::string iface = std::string());
+controller/src/beerocks/cli/beerocks_cli_main.cpp: performance: Function parameter 'temp_path' should be passed by const reference. [passedByValue]static void cli_tcp_proxy(std::string temp_path)
+controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        cmd += token + " ";
+controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Variable 'pos' is assigned a value that is never used. [unreadVariable]        } else if ((pos = token->find("!")) != std::string::npos) {
+controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Variable 'cli_ptr' is assigned a value that is never used. [unreadVariable]    beerocks::cli *cli_ptr = &cli_soc;
+controller/src/beerocks/cli/beerocks_cli_bml.cpp: performance: Function parameter 'ind' should be passed by const reference. [passedByValue]    const std::string &parent_bssid, const std::string ind, std::stringstream &ss)
+controller/src/beerocks/cli/beerocks_cli_bml.cpp: performance: Function parameter 'beerocks_conf_path_' should be passed by const reference. [passedByValue]cli_bml::cli_bml(std::string beerocks_conf_path_)
+controller/src/beerocks/cli/beerocks_cli_proxy.cpp: performance: Variable 'master_uds' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]    master_uds  = master_uds_;
+controller/src/beerocks/cli/beerocks_cli_proxy.cpp: performance: Function parameter 'master_uds_' should be passed by const reference. [passedByValue]cli_proxy::cli_proxy(std::string master_uds_) : socket_thread()
+controller/src/beerocks/master/db/node.h: performance: Variable 'timestamp' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]            timestamp = std::chrono::steady_clock::now();
+controller/src/beerocks/master/beerocks_master_main.cpp: style: Parameter 'main_master_conf' can be declared with const [constParameter]                               beerocks::config_file::sConfigMaster &main_master_conf)
+controller/src/beerocks/master/beerocks_master_main.cpp: style: Variable 'bridge_iface' can be declared with const [constVariable]    auto &bridge_iface = beerocks_slave_conf.bridge_iface;
+controller/src/beerocks/master/controller_ucc_listener.cpp: style: Variable 'operating_class_str' can be declared with const [constVariable]    auto &operating_class_str = confs[1];
+controller/src/beerocks/master/controller_ucc_listener.cpp: style: Variable 'authentication_type_str' can be declared with const [constVariable]    auto &authentication_type_str = confs[3];
+controller/src/beerocks/master/controller_ucc_listener.cpp: style: Variable 'encryption_type_str' can be declared with const [constVariable]    auto &encryption_type_str = confs[4];
+controller/src/beerocks/master/controller_ucc_listener.cpp: style: Variable 'bit_6_str' can be declared with const [constVariable]    auto &bit_6_str = confs[6];
+controller/src/beerocks/master/controller_ucc_listener.cpp: style: Variable 'bit_5_str' can be declared with const [constVariable]    auto &bit_5_str = confs[7];
+controller/src/beerocks/cli/beerocks_cli_socket.cpp: performance: Function parameter 'temp_path_' should be passed by const reference. [passedByValue]cli_socket::cli_socket(std::string temp_path_, std::string proxy_ip_)
+controller/src/beerocks/cli/beerocks_cli_socket.cpp: performance: Function parameter 'proxy_ip_' should be passed by const reference. [passedByValue]cli_socket::cli_socket(std::string temp_path_, std::string proxy_ip_)
+controller/src/beerocks/cli/beerocks_cli_socket.cpp: performance: Function parameter 'mode' should be passed by const reference. [passedByValue]                                      uint16_t repeats, int16_t op_class, std::string mode)
+controller/src/beerocks/master/db/db.cpp: style: Non-boolean value returned from function returning bool [returnNonBoolInBooleanFunction]        return -1;
+controller/src/beerocks/master/db/db.cpp: style: The scope of the variable 'listener_exist' can be reduced. [variableScope]    bool listener_exist;
+controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'name' should be passed by const reference. [passedByValue]bool db::set_node_name(const std::string &mac, std::string name)
+controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'ssid' should be passed by const reference. [passedByValue]bool db::add_vap(const std::string &radio_mac, int vap_id, std::string bssid, std::string ssid,
+controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'iface_name' should be passed by const reference. [passedByValue]bool db::set_hostap_iface_name(const std::string &mac, std::string iface_name)
+controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'version' should be passed by const reference. [passedByValue]bool db::set_hostap_driver_version(const std::string &mac, std::string version)
+controller/src/beerocks/master/db/db.cpp: style: Parameter 'n' can be declared with const [constParameter]int db::get_node_bw_int(std::shared_ptr<node> &n)
+controller/src/beerocks/master/db/db.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]            get_node_state(hostap) == beerocks::STATE_CONNECTED) {
+controller/src/beerocks/master/db/db.cpp: style: Consider using std::transform algorithm instead of a raw loop. [useStlAlgorithm]        neighbors_al_macs.push_back(network_utils::mac_from_string(sibling));
+controller/src/beerocks/master/db/db.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (it.second.mac == mac) {
+controller/src/beerocks/master/db/db.cpp: style: Variable '(*it).map_updates' is assigned a value that is never used. [unreadVariable]                (*it).map_updates = update_enable;
+controller/src/beerocks/master/db/db.cpp: style: Variable '(*it).stats_updates' is assigned a value that is never used. [unreadVariable]                (*it).stats_updates = update_enable;
+controller/src/beerocks/master/db/db.cpp: style: Variable '(*it).events_updates' is assigned a value that is never used. [unreadVariable]                (*it).events_updates = update_enable;
+controller/src/beerocks/master/db/network_map.cpp: style: Parameter 'buffer_size' can be declared with const [constParameter]                                               uint8_t *tx_buffer, std::ptrdiff_t &buffer_size,
+controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_BSS_TM_REQ, response->buffer(0), size);
+controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_BH_ROAM_REQ, response->buffer(0), size);
+controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_ALLOW_REQ, response->buffer(0), size);
+controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_DISALLOW_REQ, response->buffer(0), size);
+controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_ACS_START, response->buffer(0), size);
+controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_CSA_NOTIFICATION, response->buffer(0), size);
+controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]        GET_MESSAGE_POINTER(BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION, response->buffer(0), size);
+controller/src/beerocks/master/son_actions.cpp: style: The scope of the variable 'prev_task_id' can be reduced. [variableScope]    int prev_task_id;
+controller/src/beerocks/master/son_actions.cpp: style: Local variable 'prev_task_id' shadows outer variable [shadowVariable]        int prev_task_id = database.get_association_handling_task_id(mac);
+controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 'sta_mac' should be passed by const reference. [passedByValue]                                                     std::string sta_mac, std::string bssid)
+controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 'bssid' should be passed by const reference. [passedByValue]                                                     std::string sta_mac, std::string bssid)
+controller/src/beerocks/master/son_actions.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]            if (operating_class == operating_class_info.operating_class()) {
+controller/src/beerocks/master/son_master_thread.cpp: style: Redundant initialization for 'interface'. The initialized value is overwritten before it is read. [redundantInitialization]                    auto interface = std::get<1>(interface_tuple);
+controller/src/beerocks/master/son_master_thread.cpp: style: The scope of the variable 'old_link_metrics_removed' can be reduced. [variableScope]    bool old_link_metrics_removed = false;
+controller/src/beerocks/master/son_master_thread.cpp: style: Parameter 'link_metric_data' can be declared with const [constParameter]        &link_metric_data)
+controller/src/beerocks/master/son_master_thread.cpp: style: Parameter 'ap_metric_data' can be declared with const [constParameter]print_ap_metric_map(std::unordered_map<sMacAddr, son::node::ap_metrics_data> &ap_metric_data)
+controller/src/beerocks/master/son_master_thread.cpp: style: Variable 'ap_metric_data' can be declared with const [constVariable]    auto &ap_metric_data = database.get_ap_metric_data_map();
+controller/src/beerocks/master/son_master_thread.cpp: style: Parameter 'm1' can be declared with const [constParameter]    WSC::m1 &m1, std::string bridge_mac, std::string radio_mac, ieee1905_1::CmduMessageTx &cmdu_tx)
+controller/src/beerocks/master/son_master_thread.cpp: style: Variable 'old_link_metrics_removed' is assigned a value that is never used. [unreadVariable]            old_link_metrics_removed = true;
+controller/src/beerocks/master/tasks/association_handling_task.cpp: performance: Function parameter 'sta_mac_' should be passed by const reference. [passedByValue]                                                     task_pool &tasks_, std::string sta_mac_,
+controller/src/beerocks/master/tasks/association_handling_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                                     std::string task_name_)
+controller/src/beerocks/master/tasks/bml_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj = (connection_change_event *)obj;
+controller/src/beerocks/master/tasks/bml_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj = (stats_info_available_event *)obj;
+controller/src/beerocks/master/tasks/bml_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj = (listener_general_register_unregister_event *)obj;
+controller/src/beerocks/master/tasks/bml_task.cpp: style: Local variable 'idx' shadows outer variable [shadowVariable]            int idx = 0;
+controller/src/beerocks/master/tasks/bml_task.cpp: style: Local variable 'sd' shadows outer variable [shadowVariable]            Socket *sd;
+controller/src/beerocks/master/tasks/client_locating_task.cpp: performance: Function parameter 'client_mac_' should be passed by const reference. [passedByValue]                                           task_pool &tasks_, std::string client_mac_,
+controller/src/beerocks/master/tasks/client_locating_task.cpp: performance: Function parameter 'eth_switch_' should be passed by const reference. [passedByValue]                                           std::string eth_switch_, std::string task_name_)
+controller/src/beerocks/master/tasks/client_locating_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                           std::string eth_switch_, std::string task_name_)
+controller/src/beerocks/master/tasks/client_steering_task.cpp: performance: Function parameter 'sta_mac_' should be passed by const reference. [passedByValue]                                           task_pool &tasks_, std::string sta_mac_,
+controller/src/beerocks/master/tasks/client_steering_task.cpp: performance: Function parameter 'target_bssid_' should be passed by const reference. [passedByValue]                                           std::string target_bssid_, bool disassoc_imminent_,
+controller/src/beerocks/master/tasks/client_steering_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                           std::string task_name_)
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                acs_response_event = (sAcsResponse_event *)obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                csa_event    = (sCsa_event *)obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                restricted_channel_response_event = (sRestrictedChannelResponse_event *)obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                slave_joined_event = (sSlaveJoined_event *)event_obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                csa_event = (sCsa_event *)event_obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                hostap_channel_request_event = (sHostapChannelRequest_event *)event_obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                ap_activity_idle = (sApActivityIdle_event *)event_obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                    (sDfsReEntrySampleSteeredClients_event *)event_obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                dfs_cac_pending_hostap = (sDfsCacPendinghostap_event *)event_obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                    cac_completed_event = (sCacCompleted_event *)event_obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                dfs_channel_available = (sDfsChannelAvailable_event *)event_obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]                configured_restricted_channels = (sConfiguredRestrictedChannels_event *)event_obj;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]        auto new_event = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsReEntrySampleSteeredClients_event);
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]            auto new_event        = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsCacPendinghostap_event);
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]    auto new_event             = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsCacPendinghostap_event);
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: Redundant initialization for 'hostap_parent_type'. The initialized value is overwritten before it is read. [redundantInitialization]        auto hostap_parent_type = database.get_node_type(hostap_parent_mac);
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: The scope of the variable 'channel_80Mhz_step' can be reduced. [variableScope]    auto channel_80Mhz_step = CHANNEL_80MHZ_STEP;
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: performance: Function parameter 'mac' should be passed by const reference. [passedByValue]void channel_selection_task::queue_clear_mac(std::string mac)
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: performance: Function parameter 'set_reentry_client' should be passed by const reference. [passedByValue]                 [&](std::string set_reentry_client) {
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]            if (database.is_hostap_backhaul_manager(sibling)) {
+controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (database.is_node_5ghz(gw_slave)) {
+controller/src/beerocks/master/son_management.cpp: style: Variable 'result_status' is assigned a value that is never used. [unreadVariable]        auto result_status = eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
+controller/src/beerocks/master/son_management.cpp: style: Variable 'op_error_code' is assigned a value that is never used. [unreadVariable]        auto op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
+controller/src/beerocks/master/son_management.cpp: style: Variable 'op_error_code' is assigned a value that is never used. [unreadVariable]            op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SCAN_IN_PROGRESS;
+controller/src/beerocks/master/son_management.cpp: style: Variable 'result_status' is assigned a value that is never used. [unreadVariable]            result_status = last_scan_success;
+controller/src/beerocks/master/tasks/ire_network_optimization_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                                             std::string task_name_)
+controller/src/beerocks/master/tasks/dynamic_channel_selection_task.cpp: style: Redundant initialization for 'ret'. The initialized value is overwritten before it is read. [redundantInitialization]        auto ret = beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
+controller/src/beerocks/master/tasks/load_balancer_task.cpp: style: Variable 'client_efficiency_ratio' is reassigned a value before the old one has been used. [redundantAssignment]                client_efficiency_ratio =
+controller/src/beerocks/master/tasks/load_balancer_task.cpp: style: The scope of the variable 'chosen_hostap_bytes_per_second_gained' can be reduced. [variableScope]        int chosen_hostap_bytes_per_second_gained = INT32_MIN;
+controller/src/beerocks/master/tasks/load_balancer_task.cpp: performance: Function parameter 'ire_mac_' should be passed by const reference. [passedByValue]                                       task_pool &tasks_, std::string ire_mac_,
+controller/src/beerocks/master/tasks/load_balancer_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                       std::string task_name_)
+controller/src/beerocks/master/tasks/network_health_check_task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]                                                     std::string task_name_)
+controller/src/beerocks/master/tasks/network_health_check_task.cpp: style: Redundant checking of STL container element existence before removing it. [redundantIfRemove]            if (suspected_dis_clients.find(pending_node) != suspected_dis_clients.end()) {
+controller/src/beerocks/master/tasks/optimal_path_task.cpp: style: The scope of the variable 'dl_snr' can be reduced. [variableScope]                uint8_t dl_snr;
+controller/src/beerocks/master/tasks/optimal_path_task.cpp: style: The scope of the variable 'found_band_match' can be reduced. [variableScope]        bool found_band_match;
+controller/src/beerocks/master/tasks/optimal_path_task.cpp: style: Local variable 'it' shadows outer variable [shadowVariable]        for (auto it : hostap_candidates) {
+controller/src/beerocks/master/tasks/optimal_path_task.cpp: style: Variable 'parent_mac' is assigned a value that is never used. [unreadVariable]    std::string parent_mac = database.get_node_parent(node_mac);
+controller/src/beerocks/master/tasks/optimal_path_task.cpp: performance: Prefer prefix ++/-- operators for non-primitive types. [postfixOperator]                    potential_ap_iter++;
+controller/src/beerocks/master/tasks/optimal_path_task.cpp: performance: Prefer prefix ++/-- operators for non-primitive types. [postfixOperator]                potential_ap_iter++;
+controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task_db.h: performance: Variable 'bssid' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]            bssid                   = beerocks::net::network_utils::mac_to_string(config_.bssid);
+controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task_db.cpp: style: Parameter 'bssid' can be declared with const [constParameter]int32_t rdkb_wlan_task_db::get_group_index(const std::string &client_mac, std::string &bssid)
+controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj = (listener_general_register_unregister_event *)obj;
+controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj         = (steering_client_disconnect_request_event *)obj;
+controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: C-style pointer casting [cstyleCast]            auto event_obj = (steering_rssi_measurement_request_event *)obj;
+controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: C-style pointer casting [cstyleCast]        auto event_obj = (steering_slave_join_event *)obj;
+controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: The scope of the variable 'listener_exist' can be reduced. [variableScope]    bool listener_exist;
+controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: Local variable 'update' shadows outer variable [shadowVariable]            auto update = message_com::create_vs_message<
+controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: Variable '(*it).events_updates' is assigned a value that is never used. [unreadVariable]                (*it).events_updates = update_enable;
+controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]task::task(std::string task_name_, std::string node_mac)
+controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'node_mac' should be passed by const reference. [passedByValue]task::task(std::string task_name_, std::string node_mac)
+controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'mac' should be passed by const reference. [passedByValue]void task::add_pending_mac(std::string mac, beerocks_message::eActionOp_CONTROL action_op)
+framework/common/broker_interface.cpp: style: Parameter 'msg' can be declared with const [constParameter]void BrokerInterface::SyncSend(Message &msg)
+framework/common/encryption.cpp: style: struct member 'Anonymous1::emsk' is never used. [unusedStructMember]            uint8_t emsk[32];
+framework/common/encryption.cpp: style: Variable 'kdf_key_length.i' is assigned a value that is never used. [unreadVariable]    kdf_key_length.i = htonl(sizeof(keys.keys) * 8);
+framework/common/encryption.cpp: style: Variable 'kdf_iter.i' is assigned a value that is never used. [unreadVariable]        kdf_iter.i = htonl(iter);
+framework/common/logger.cpp: style: Condition '!init_performed' is always true [knownConditionTrueFalse]    if (!init_performed) {
+framework/common/logger.cpp: performance: Function parameter 'logger_name' should be passed by const reference. [passedByValue]void Logger::Config::SetValuesFromJson(struct json_object *jlogger, std::string logger_name)
+framework/common/logger.cpp: style: The scope of the variable 'length' can be reduced. [variableScope]    int fd = -1, length = -1, i = 0, ret = 0;
+framework/common/logger.cpp: style: Variable 'length' is assigned a value that is never used. [unreadVariable]    int fd = -1, length = -1, i = 0, ret = 0;
+framework/common/nng/socket.cpp: style: Parameter 'frame' can be declared with const [constParameter]bool SubSocket::Receive(Message::Frame &frame, int flags)
+framework/common/nng/socket.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        totalLen += frame.len();
+framework/common/test/encryption_test.cpp: performance: Function parameter 'message' should be passed by const reference. [passedByValue]static bool check(int &errors, bool check, std::string message)
+framework/common/test/encryption_test.cpp: style: Variable 'key1_length' is assigned a value that is never used. [unreadVariable]    key1_length    = sizeof(key1);
+framework/common/test/message_test.cpp: style: Local variable 'f1' shadows outer variable [shadowVariable]        mapf::Message::Frame f1;
+framework/common/test/poller_test.cpp: style: Variable 'rc' is reassigned a value before the old one has been used. [redundantAssignment]        rc = poller_.Remove(sub_);
+framework/common/test/poller_test.cpp: style: The scope of the variable 'rc' can be reduced. [variableScope]        int attempts = 0, max_attempts = 100, rc;
+framework/common/test/socket_test.cpp: style: Parameter 'cfg' can be declared with const [constParameter]int start_broker(SocketTest::SocketTestConfig &cfg)
+framework/common/test/socket_test.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]                frames += f.str() + ", ";
+framework/common/zmq/socket.cpp: style: Parameter 'frame' can be declared with const [constParameter]bool SubSocket::Receive(Message::Frame &frame, int flags)
+framework/external/easylogging/easylogging++.cc: information: This file is not analyzed. Cppcheck failed to extract a valid configuration. Use -v for more details. [noValidConfiguration]
+framework/platform/bpl/common/utils/utils.cpp: performance: Function parameter 'additional_chars' should be passed by const reference. [passedByValue]void ltrim(std::string &str, std::string additional_chars)
+framework/platform/bpl/common/utils/utils.cpp: performance: Function parameter 'additional_chars' should be passed by const reference. [passedByValue]void rtrim(std::string &str, std::string additional_chars)
+framework/platform/bpl/common/utils/utils.cpp: performance: Function parameter 'additional_chars' should be passed by const reference. [passedByValue]void trim(std::string &str, std::string additional_chars)
+framework/platform/bpl/common/utils/utils.cpp: style: Unused variable: return_string [unusedVariable]    std::string return_string;
+framework/platform/bpl/linux/bpl_cfg.cpp: information: Skipping configuration 'PLATFORM_DB_PATH' since the value of 'PLATFORM_DB_PATH' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]        in_conf_file.open(PLATFORM_DB_PATH);
+framework/platform/bpl/linux/bpl_cfg.cpp: information: Skipping configuration 'PLATFORM_DB_PATH' since the value of 'PLATFORM_DB_PATH' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]            MAPF_ERR("Failed oppening file " << PLATFORM_DB_PATH);
+framework/platform/bpl/test/bpl_test.cpp: portability: fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems. [fflushOnInputStream]        fflush(stdin);
+framework/platform/bpl/test/bpl_test.cpp: portability: fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems. [fflushOnInputStream]            fflush(stdin);
+framework/platform/bpl/uci/arp/bpl_arp.cpp: style: C-style pointer casting [cstyleCast]    arp_monitor *pArpMon = (arp_monitor *)ctx;
+framework/platform/bpl/uci/arp/monitor/arp_monitor.cpp: style: The scope of the variable 'type' can be reduced. [variableScope]        unsigned short type;
+framework/platform/bpl/uci/arp/monitor/arp_monitor.cpp: performance: Function parameter 'strIface' should be passed by const reference. [passedByValue]int arp_monitor::start(std::string strIface)
+framework/platform/bpl/uci/arp/monitor/arp_monitor.cpp: style: Unused variable: ipv4_str [unusedVariable]        std::string ipv4_str;
+framework/platform/bpl/uci/cfg/bpl_cfg.cpp: style: The scope of the variable 'retVal' can be reduced. [variableScope]    int retVal = 0;
+framework/platform/bpl/uci/cfg/bpl_cfg.cpp: style: Variable 'retVal' is assigned a value that is never used. [unreadVariable]    int retVal = 0;
+framework/platform/bpl/uci/dhcp/bpl_dhcp.cpp: style: struct member 'dhcp_event_request::data' is never used. [unusedStructMember]    char data[];
+framework/platform/bpl/uci/cfg/bpl_cfg_uci.cpp: style: The scope of the variable 'scanf_res' can be reduced. [variableScope]        int scanf_res;
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/cCmduHeader.cpp: style: C-style pointer casting [cstyleCast]    m_flags = (sFlags*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlv1905NeighborDevice.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlv1905NeighborDevice.cpp: style: C-style pointer casting [cstyleCast]    m_mac_al_1905_device = (sMacAl1905Device*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvAlMacAddressType.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvAutoconfigFreqBand.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvAutoconfigFreqBand.cpp: style: C-style pointer casting [cstyleCast]    m_value = (eValue*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvDeviceBridgingCapability.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvDeviceInformation.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvEndOfMessage.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvLinkMetricQuery.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvLinkMetricResultCode.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvLinkMetricResultCode.cpp: style: C-style pointer casting [cstyleCast]    m_value = (eValue*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvMacAddress.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/WSC/WSC_Attributes.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvNon1905neighborDeviceList.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvPushButtonEventNotification.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvPushButtonEventNotification.cpp: style: C-style pointer casting [cstyleCast]    m_media_type_list = (sMediaType*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvPushButtonJoinNotification.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvReceiverLinkMetric.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvReceiverLinkMetric.cpp: style: C-style pointer casting [cstyleCast]    m_interface_pair_info = (sInterfacePairInfo*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSearchedRole.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSupportedFreqBand.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSupportedFreqBand.cpp: style: C-style pointer casting [cstyleCast]    m_value = (eValue*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSearchedRole.cpp: style: C-style pointer casting [cstyleCast]    m_value = (eValue*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSupportedRole.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvSupportedRole.cpp: style: C-style pointer casting [cstyleCast]    m_value = (eValue*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvTransmitterLinkMetric.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvTransmitterLinkMetric.cpp: style: C-style pointer casting [cstyleCast]    m_interface_pair_info = (sInterfacePairInfo*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvVendorSpecific.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/ieee_1905_1/tlvWsc.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApCapability.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApCapability.cpp: style: C-style pointer casting [cstyleCast]    m_value = (sValue*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApHeCapabilities.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/include/tlvf/test/tlvVarList.h: style: The function 'isPostInitSucceeded' overrides a function in a base class but is not marked with a 'override' specifier. [missingOverride]        bool isPostInitSucceeded();
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApHeCapabilities.cpp: style: C-style pointer casting [cstyleCast]    m_flags1 = (sFlags1*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/test/tlvVarList.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApHeCapabilities.cpp: style: C-style pointer casting [cstyleCast]    m_flags2 = (sFlags2*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/test/tlvVarList.cpp: style: C-style pointer casting [cstyleCast]    m_complex_list = (cInner*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/test/tlvVarList.cpp: style: C-style pointer casting [cstyleCast]    m_var1 = (cInner*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/test/tlvVarList.cpp: style: C-style pointer casting [cstyleCast]    m_var3 = (cInner*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/test/tlvVarList.cpp: style: C-style pointer casting [cstyleCast]    m_unknown_length_list = (cInner*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApHtCapabilities.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApHtCapabilities.cpp: style: C-style pointer casting [cstyleCast]    m_flags = (sFlags*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApMetric.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApMetric.cpp: style: C-style pointer casting [cstyleCast]    m_estimated_service_parameters = (sEstimatedService*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApMetricQuery.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApOperationalBSS.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApRadioBasicCapabilities.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApRadioIdentifier.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApVhtCapabilities.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApVhtCapabilities.cpp: style: C-style pointer casting [cstyleCast]    m_flags1 = (sFlags1*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvApVhtCapabilities.cpp: style: C-style pointer casting [cstyleCast]    m_flags2 = (sFlags2*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvAssociatedStaLinkMetrics.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvAssociatedStaLinkMetrics.cpp: style: C-style pointer casting [cstyleCast]    m_bssid_info_list = (sBssidInfo*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvAssociatedClients.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvChannelPreference.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvChannelPreference.cpp: style: C-style pointer casting [cstyleCast]    m_flags = (sFlags*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvChannelSelectionResponse.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvChannelSelectionResponse.cpp: style: C-style pointer casting [cstyleCast]    m_response_code = (eResponseCode*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientAssociationControlRequest.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientAssociationControlRequest.cpp: style: C-style pointer casting [cstyleCast]    m_association_control = (eAssociationControl*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientAssociationEvent.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientAssociationEvent.cpp: style: C-style pointer casting [cstyleCast]    m_association_event = (eAssociationEvent*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientCapabilityReport.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientCapabilityReport.cpp: style: C-style pointer casting [cstyleCast]    m_result_code = (eResultCode*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvClientInfo.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvErrorCode.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvErrorCode.cpp: style: C-style pointer casting [cstyleCast]    m_reason_code = (eReasonCode*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvHigherLayerData.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvHigherLayerData.cpp: style: C-style pointer casting [cstyleCast]    m_protocol = (eProtocol*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvMetricReportingPolicy.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvMetricReportingPolicy.cpp: style: C-style pointer casting [cstyleCast]    m_metrics_reporting_conf_list = (sMetricsReportingConf*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvOperatingChannelReport.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvOperatingChannelReport.cpp: style: C-style pointer casting [cstyleCast]    m_operating_classes_list = (sOperatingClasses*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvRadioOperationRestriction.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvRadioOperationRestriction.cpp: style: C-style pointer casting [cstyleCast]    m_channel_list = (sChannelInfo*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSearchedService.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSearchedService.cpp: style: C-style pointer casting [cstyleCast]    m_searched_service_list = (eSearchedService*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSearchedService.cpp: style: Argument 'sizeof(eSearchedService)*(searched_service_list_length)' to function buffPtrIncrementSafe is always 0 [constArgument]    if (!buffPtrIncrementSafe(sizeof(eSearchedService) * (searched_service_list_length))) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvStaMacAddressType.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringBTMReport.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringPolicy.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringPolicy.cpp: style: C-style pointer casting [cstyleCast]    m_radio_ap_control_policy_list = (sRadioApControlPolicy*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringRequest.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringRequest.cpp: style: C-style pointer casting [cstyleCast]    m_request_flags = (sRequestFlags*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSteeringRequest.cpp: style: C-style pointer casting [cstyleCast]    m_target_bssid_list = (sTargetBssidInfo*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSupportedService.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSupportedService.cpp: style: C-style pointer casting [cstyleCast]    m_supported_service_list = (eSupportedService*)m_buff_ptr__;
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvSupportedService.cpp: style: Argument 'sizeof(eSupportedService)*(supported_service_list_length)' to function buffPtrIncrementSafe is always 0 [constArgument]    if (!buffPtrIncrementSafe(sizeof(eSupportedService) * (supported_service_list_length))) {
+framework/tlvf/AutoGenerated/src/tlvf/wfa_map/tlvTransmitPowerLimit.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]    if (m_parse__) {
+framework/tlvf/src/src/ClassList.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        msg_len += c->getLen();
+framework/transport/ieee1905_transport/ieee1905_transport_local_bus.cpp: style: C-style pointer casting [cstyleCast]        Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
+framework/transport/ieee1905_transport/ieee1905_transport_local_bus.cpp: style: C-style pointer casting [cstyleCast]        Ieee1905CmduHeader *ch   = (Ieee1905CmduHeader *)packet.payload.iov_base;
+framework/transport/ieee1905_transport/ieee1905_transport_local_bus.cpp: style: Parameter 'msg' can be declared with const [constParameter]void Ieee1905Transport::handle_local_bus_cmdu_tx_message(CmduTxMessage &msg)
+framework/transport/ieee1905_transport/ieee1905_transport_local_bus.cpp: style: Parameter 'msg' can be declared with const [constParameter]    InterfaceConfigurationRequestMessage &msg)
+framework/tlvf/test/tlvf_test.cpp: style: The scope of the variable 'expected' can be reduced. [variableScope]            uint16_t expected = 0x0bb0;
+framework/tlvf/test/tlvf_test.cpp: style: Local variable 'cmplx' shadows outer variable [shadowVariable]        auto cmplx = std::get<1>(tlv4->complex_list(i));
+framework/tlvf/test/tlvf_test.cpp: style: Local variable 'cmplx' shadows outer variable [shadowVariable]            auto cmplx = std::get<1>(tlv4->complex_list(0));
+framework/tlvf/test/tlvf_test.cpp: style: Local variable 'cmplx' shadows outer variable [shadowVariable]            auto cmplx = std::get<1>(tlv4->complex_list(1));
+framework/tlvf/test/tlvf_test.cpp: style: Variable 'tlv1' is assigned a value that is never used. [unreadVariable]    auto tlv1 = msg.addClass<tlvNon1905neighborDeviceList>();
+framework/tlvf/test/tlvf_test.cpp: style: Variable 'tlv2' is assigned a value that is never used. [unreadVariable]    auto tlv2 = msg.addClass<tlvLinkMetricQuery>();
+framework/tlvf/test/tlvf_test.cpp: style: Variable 'tlv3' is assigned a value that is never used. [unreadVariable]    auto tlv3 = msg.addClass<tlvWsc>();
+framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: C-style pointer casting [cstyleCast]        Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
+framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: C-style pointer casting [cstyleCast]    Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
+framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: C-style pointer casting [cstyleCast]                Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
+framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: Parameter 'packet' can be declared with const [constParameter]bool Ieee1905Transport::verify_packet(Packet &packet)
