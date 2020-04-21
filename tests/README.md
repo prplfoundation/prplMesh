@@ -1,5 +1,53 @@
 This directory contains the end-to-end tests of prplMesh
 
+## API for writing tests
+
+Several helper classes are available that abstract the entities involved in the tests.
+The test environment prepares these before the tests are started.
+
+- `env.controller`, `env.agents[0]` and `env.agents[1]` are `ALEntity` objects with the following attributes:
+    - `mac`: the AL-MAC address of the entity, to be used e.g. when sending a CMDU to it.
+    - `radios`: on agents only, list of radios on this agent (see below).
+    - `command(...)`: run command with arguments on the device, return its output as bytes.
+    - `prplmesh_command(...)`: run the prplmesh command (e.g. `beerocks_cli`) with arguments on the device, return its output as bytes.
+      This is essentially the same as `command` but it prepends the installation directory of prplmesh.
+    - `wait_for_log(regex, start_line, timeout)`: wait for maximum `timeout` seconds for `regex` to appear in the log of the device on a line after `start_line`.
+      This looks in the `beerocks_controller.log` or `beerocks_agent.log` file.
+      Don't use this function directly, use `self.wait_for_log` or `self.check_log` instead (see below).
+    - `cmd_reply(command)`: Send CAPI `command` string to the entity, return its reply as a dictionary.
+      If the reply is INVALID or ERROR, an exception is raised.
+    - `dev_get_parameter(parameter, **additional_parameters)`: Send the DEV_GET_PARAMETER CAPI command to get `parameter`.
+      `additional_parameters` are required for some parameters.
+      Returns the value of that parameter as a string.
+    - `dev_send_1905(dest, message_type, *tlvs)`: send the DEV_SEND_1905 CAPI command to triger the sending of a CMDU of type `message_type` to the `dest` MAC address and returns the MID.
+      `tlvs` are objects of type `tlv` which specify the TLVs to include.
+      `tlv(type, length, value)` constructs a TLV.
+      `type` and `length` are integers, `value` is a string with hex values (including 0x) or MAC addresses and optional `{}` delimiters.
+- `Radio` objects are accessed through the agents and have the following attributes:
+    - `mac`:  The radio UID of this radio.
+    - `vaps`: list of VAPs configured on this radio, see below.
+    - `wait_for_log(regex, start_line, timeout)`: wait for maximum `timeout` seconds for `regex` to appear in the log of the device on a line after `start_line`.
+      This looks in the `beerocks_agent_wlanX.log` file, where wlanX corresponds to the radio.
+      Don't use this function directly, use `self.wait_for_log` or `self.check_log` instead (see below).
+- `VirtualAP` objects are accessed through radios and have the following attributes:
+    - `bssid`: The BSSID of this VAP.
+    - `associate(sta)`: associate a Station (see below) with this VAP.
+      Only possible if an SSID is configured on this VAP.
+    - `disassociate(sta)`: disassociate a Station (see below) from this VAP.
+- `Station` objects are created with `Station.create()`.
+  Every time a test needs to use a station, a new one should be generated.
+  This makes sure every test uses a unique station MAC address and different tests don't influence each other.
+  The station's MAC address is accessible through the `mac` attribute.
+- `env.wired_sniffer` is a capture of the 1905.1 communication between agents.
+  This will be documented once https://github.com/prplfoundation/prplMesh/pull/1145 is merged.
+- The base class of the test has a number of helpers that can be accessed through `self`:
+    - `self.fail(msg)`: Report a test failure with `msg`.
+    - `self.wait_for_log(entity_or_radio, regex, start_line, timeout)`: call wait_for_log on the entity or radio.
+      If it fails, mark it as a failure (cfr. `self.fail()`).
+    - `self.check_log(entity_or_radio, regex, start_line)`: check if `regex` can be found in the log of `entity_or_radio` after `start_line`.
+      If it fails, mark it as a failure (cfr. `self.fail()`).
+      `start_line` is optional.
+
 ## Description of tests
 
 ### ap_config_renew
