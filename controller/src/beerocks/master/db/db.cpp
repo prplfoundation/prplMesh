@@ -1248,8 +1248,9 @@ std::string db::get_hostap_supported_channels_string(const std::string &radio_ma
     for (const auto &val : supported_channels) {
         if (val.channel > 0) {
             os << " ch = " << int(val.channel) << " | dfs = " << int(val.is_dfs_channel)
-               << " | tx_pow = " << int(val.tx_pow) << " | noise = " << int(val.noise)
-               << " [dbm] | bss_overlap = " << int(val.bss_overlap) << std::endl;
+               << " | bw = " << int(val.channel_bandwidth) << " | tx_pow = " << int(val.tx_pow)
+               << " | noise = " << int(val.noise) << " [dbm]"
+               << " | bss_overlap = " << int(val.bss_overlap) << std::endl;
         }
     }
 
