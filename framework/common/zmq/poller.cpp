@@ -115,7 +115,7 @@ int Poller::Remove(const Socket &socket)
     errno   = 0;
     auto it = items_->Find(&socket);
     if (it != items_->items_.end()) {
-        items_->items_.erase(it);
+        it = items_->items_.erase(it);
         return 0;
     } else {
         errno = ENONET;
@@ -131,7 +131,7 @@ int Poller::Remove(int fd)
     errno   = 0;
     auto it = items_->Find(fd);
     if (it != items_->items_.end()) {
-        items_->items_.erase(it);
+        it = items_->items_.erase(it);
         return 0;
     } else {
         errno = ENONET;

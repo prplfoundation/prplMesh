@@ -334,7 +334,7 @@ void monitor_db::sta_erase(const std::string sta_mac)
     if (it != sta_nodes.end()) {
         auto vap_id = it->second->get_vap_id();
         delete it->second;
-        sta_nodes.erase(it);
+        it            = sta_nodes.erase(it);
         auto vap_node = vap_get_by_id(vap_id);
         if (vap_node) {
             vap_node->sta_count_dec();

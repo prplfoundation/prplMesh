@@ -352,7 +352,7 @@ void SubSocket::EraseSubscription(const std::string &topic)
 {
     auto it = FindSubscription(topic);
     if (it != topics_.end())
-        topics_.erase(it);
+        it = topics_.erase(it);
 }
 
 } // namespace mapf

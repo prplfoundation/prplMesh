@@ -49,7 +49,7 @@ void task::event_received(int event_type, void *obj)
     if (it == pending_events.end()) {
         TASK_LOG(DEBUG) << "received non-pending event " << event_type;
     } else {
-        pending_events.erase(it);
+        it = pending_events.erase(it);
     }
 
     handle_event(event_type, obj);

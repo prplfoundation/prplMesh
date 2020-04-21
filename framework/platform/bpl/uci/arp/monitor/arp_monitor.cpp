@@ -488,7 +488,7 @@ int arp_monitor::process_arp(BPL_ARP_MON_ENTRY &sArpMonData)
         // Found our node
         if (!std::memcmp(&node->mac, pArpHeader->sender_mac, ETH_ALEN)) {
             iTaskID = node->iTaskID;
-            m_lstProbe.erase(iter);
+            iter    = m_lstProbe.erase(iter);
             break;
         }
 
