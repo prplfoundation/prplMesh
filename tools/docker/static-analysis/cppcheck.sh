@@ -29,10 +29,11 @@ run_cppcheck() {
              --force \
              --error-exitcode=1 \
              --enable=warning,style,information \
+             -rp="$rootdir" \
              -j"$(nproc)" \
              -q \
              $INCLUDES \
-             "$@" 2>&1 | tee "$OUTPUT_FILE"
+             "$@" 2>&1 | sed "s|$rootdir/||g" | tee "$OUTPUT_FILE"
 }
 
 colorize_severity() {
