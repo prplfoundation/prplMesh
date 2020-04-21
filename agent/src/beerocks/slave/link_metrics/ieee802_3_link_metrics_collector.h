@@ -15,8 +15,6 @@ namespace beerocks {
 class ieee802_3_link_metrics_collector : public link_metrics_collector {
 
 public:
-    virtual ~ieee802_3_link_metrics_collector();
-
     /**
      * @brief Gets link metrics information.
      *
