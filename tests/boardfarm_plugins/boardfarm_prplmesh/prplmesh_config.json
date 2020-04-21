@@ -4,6 +4,17 @@
         "board_type": "prplmesh_docker",
         "role": "controller",
         "conn_cmd": "",
-        "devices": []
+        "devices": [
+            {
+                "name": "repeater1",
+                "type": "prplmesh_docker",
+                "conn_cmd": ""
+            },
+            {
+                "name": "repeater2",
+                "type": "prplmesh_docker",
+                "conn_cmd": ""
+            }
+        ]
     }
 }
