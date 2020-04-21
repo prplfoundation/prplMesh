@@ -1,5 +1,5 @@
 #!/bin/bash
-# Simple wrapper script to easymesh_cert/run_test_file.sh
+# Simple wrapper script to easymesh_cert/run_test_file.py
 # which also updates to the latest prplmesh IPK, run the tests and
 # uploads the results
 ###############################################################
@@ -117,7 +117,7 @@ main() {
     }
     
     info "Start running tests"
-    "$EASYMESH_CERT_PATH"/run_test_file.sh -o "$LOG_FOLDER" -d "$TARGET_DEVICE" "$TESTS" ${VERBOSE:+ -v}
+    sudo "$EASYMESH_CERT_PATH"/run_test_file.py -o "$LOG_FOLDER" -d "$TARGET_DEVICE" "$TESTS" ${VERBOSE:+ -v}
 
     if [ -n "$OWNCLOUD_UPLOAD" ]; then
         if is_prplmesh_device "$TARGET_DEVICE"; then
