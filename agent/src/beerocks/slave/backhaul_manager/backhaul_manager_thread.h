@@ -274,10 +274,10 @@ private:
         Socket *sta_hal_ext_events = nullptr;
         Socket *sta_hal_int_events = nullptr;
 
-        beerocks::eWiFiBandwidth max_bandwidth =
-            beerocks::eWiFiBandwidth::BANDWIDTH_UNKNOWN; /**< Maximum supported bandwidth */
-        bool ht_supported      = false;                  /**< Is HT supported flag */
-        uint16_t ht_capability = 0;                      /**< HT capabilities */
+        eWiFiBandwidth max_bandwidth =
+            eWiFiBandwidth::BANDWIDTH_UNKNOWN; /**< Maximum supported bandwidth */
+        bool ht_supported      = false;        /**< Is HT supported flag */
+        uint16_t ht_capability = 0;            /**< HT capabilities */
         std::array<uint8_t, beerocks::message::HT_MCS_SET_SIZE>
             ht_mcs_set; /**< 16-byte attribute containing the MCS set as defined in 802.11n */
         bool vht_supported      = false; /**< Is VHT supported flag */
