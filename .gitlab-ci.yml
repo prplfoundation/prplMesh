@@ -276,7 +276,7 @@ run-certification-tests:
             echo "Deploying to $DEVICE_UNDER_TEST"
             tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/prplmesh.ipk
         fi
-      - /easymesh_cert/run_test_file.sh -v -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
+      - sudo /easymesh_cert/run_test_file.py -v -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
   artifacts:
     paths:
       - logs
