@@ -25,6 +25,7 @@ RUN apk add --update --no-cache \
     py2-pip \
     python2 \
     readline-dev \
+    sed \
     && apk add --update --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
     clang-extra-tools
 # clang-extra-tools needs to be fetched from the edge repository for now
