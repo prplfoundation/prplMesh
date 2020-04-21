@@ -21,6 +21,7 @@
 
 #include <beerocks/tlvf/beerocks_message_header.h>
 
+#include <tlvf/ieee_1905_1/eLinkMetricsType.h>
 #include <tlvf/ieee_1905_1/eMediaType.h>
 
 #include "../agent_ucc_listener.h"
@@ -364,21 +365,22 @@ private:
     create_link_metrics_collector(const sLinkInterface &link_interface) const;
 
     /**
-     * @brief Gets the list of neighbor links from topology database.
+     * @brief Gets the list of neighbors connected to this device (from topology database).
      *
-     * Neighbor links are pairs (interface, neighbor) where 'interface' is the name of the interface
-     * that connects to the neighbor device and 'neighbor' is the MAC address of the neighbor device.
+     * The keys of the returned map are interfaces in this device which connect to one or more
+     * neighbor device. The values are the list of neighbors connected to that interface.
      *
-     * @param[in] neighbor_mac_filter Optional MAC address to filter the neighbor links to be
+     * @param[in] neighbor_mac_filter Optional 1905.1 AL MAC address to filter the links to be
      * returned. A value of network_utils::ZERO_MAC means no filter has to be applied. A specific
-     * MAC address means that only links to that device must be included.
-     * @param[in, out] neighbor_links_map Map containing lists of neighbors grouped by the interface
-     * that connects to them.
+     * MAC address means that only links to that neighbor device must be included.
+     * @param[in, out] neighbor_links_map Map of neighbor links (interfaces x neighbors).
      *
      * @return True on success and false otherwise.
      */
-    bool get_neighbor_links(const sMacAddr &neighbor_mac_filter,
-                            std::map<std::string, std::vector<sMacAddr>> &neighbor_links_map);
+    bool
+    get_neighbor_links(const sMacAddr &neighbor_mac_filter,
+                       std::map<sLinkInterface, std::vector<sLinkNeighbor>> &neighbor_links_map);
+
     /*
      * @brief List of known 1905 neighbor devices
      * 
@@ -425,6 +427,24 @@ private:
      * @return True on success and false otherwise.
      */
     bool add_ap_he_capabilities(const sRadioInfo &radio_info);
+
+    /**
+     * @brief Adds link metric TLVs to response message.
+     *
+     * Creates a Transmitter Link Metric TLV or a Receiver Link Metric TLV or both and adds them to
+     * the Link Metric Response message.
+     *
+     * @param[in] reporter_al_mac 1905.1 AL MAC address of the device that transmits the response message.
+     * @param[in] link_interface Connecting interface in this device.
+     * @param[in] link_neighbor Neighbor connected to interface.
+     * @param[in] link_metrics Metrics information associated to the link between the local interface and the neighbor's interface.
+     * @param[in] link_metrics_type The link metrics type requested: TX, RX or both.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool add_link_metrics(const sMacAddr &reporter_al_mac, const sLinkInterface &link_interface,
+                          const sLinkNeighbor &link_neighbor, const sLinkMetrics &link_metrics,
+                          ieee1905_1::eLinkMetricsType link_metrics_type);
 
     /*
  * State Machines
