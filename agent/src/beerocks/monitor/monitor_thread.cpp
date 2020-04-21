@@ -1050,6 +1050,47 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         for (int i = 0; i < request->params().expected_reports_count; i++) {
             pending_11k_events.insert(std::make_pair("RRM_EVENT_BEACON_REP_RXED", event_11k));
         }
+
+        // DEBUG DEBUG DEBUG
+        // Fake Response
+        /*
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>(cmdu_tx,
+                                                                          beerocks_header->id());
+        if (response == nullptr) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE message!";
+            break;
+        }
+
+        response->params().channel                          = 1;
+        response->params().op_class                         = 2;
+        response->params().dialog_token                     = 3;
+        response->params().measurement_token                = 4;
+        response->params().rep_mode                         = 5;
+        response->params().phy_type                         = 6;
+        response->params().frame_type                       = 7;
+        response->params().rcpi                             = 8;
+        response->params().rsni                             = 9;
+        response->params().ant_id                           = 10;
+        response->params().duration                         = 11;
+        response->params().parent_tsf                       = 12;
+        response->params().start_time                       = 13;
+        response->params().new_ch_width                     = 14;
+        response->params().new_ch_center_freq_seg_0         = 15;
+        response->params().new_ch_center_freq_seg_1         = 16;
+        response->params().use_optional_wide_band_ch_switch = 17;
+        std::copy_n("abcdefghijklmnop", sizeof(response->params().sta_mac.oct),
+                    response->params().sta_mac.oct);
+        std::copy_n(request->params().bssid.oct, sizeof(response->params().bssid.oct),
+                    response->params().bssid.oct);
+
+        LOG(DEBUG) << "DEBUG DEBUG: Sending beacon measurement reponse on BSSID: "
+                   << response->params().bssid << " to task_id: " << beerocks_header->id();
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+        // end DEBUG DEBUG DEBUG
+        */
+
         break;
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST: {
