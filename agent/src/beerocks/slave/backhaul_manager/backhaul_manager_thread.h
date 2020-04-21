@@ -323,17 +323,6 @@ private:
     };
 
     /**
-     * @brief Gets media type group for given interface.
-     *
-     * @param[in] interface_name Name of the local interface.
-     * @param[in, out] media_type_group The media type group of the connecting interface.
-     *
-     * @return True on success and false otherwise.
-     */
-    bool get_media_type_group(const std::string &interface_name,
-                              ieee1905_1::eMediaTypeGroup &media_type_group);
-
-    /**
      * @brief Gets media type for given interface.
      *
      * The mechanism to use to obtain media type depends on the media type group:

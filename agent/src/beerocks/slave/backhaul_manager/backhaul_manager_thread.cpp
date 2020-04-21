@@ -3390,17 +3390,6 @@ std::shared_ptr<bwl::sta_wlan_hal> backhaul_manager::get_wireless_hal(std::strin
     return slave_sk->second->sta_wlan_hal;
 }
 
-bool backhaul_manager::get_media_type_group(const std::string &interface_name,
-                                            ieee1905_1::eMediaTypeGroup &media_type_group)
-{
-    // TODO: Currently, only Ethernet is supported
-    // When dealing with WiFi interfaces in task #792, use NL80211_CMD_GET_INTERFACE command to
-    // find out if media type group is WiFi
-    media_type_group = ieee1905_1::eMediaTypeGroup::IEEE_802_3;
-
-    return true;
-}
-
 bool backhaul_manager::get_media_type(const std::string &interface_name,
                                       ieee1905_1::eMediaTypeGroup media_type_group,
                                       ieee1905_1::eMediaType &media_type)
