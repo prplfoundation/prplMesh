@@ -449,7 +449,7 @@ static void hostapd_config_set_value(std::vector<std::string> &hostapd_config,
                                });
     // Delete the key-value if found
     if (it_str != hostapd_config.end()) {
-        hostapd_config.erase(it_str);
+        it_str = hostapd_config.erase(it_str);
     }
     // If the new value is provided add the key back with that new value
     if (value.length() != 0) {

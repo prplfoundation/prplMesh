@@ -109,7 +109,7 @@ bool rdkb_wlan_task_db::clear_steering_group_config(int index)
         LOG(ERROR) << "can't find steering group index=" << index;
         return false;
     } else {
-        steering_group_list.erase(it);
+        it = steering_group_list.erase(it);
         return true;
     }
 }

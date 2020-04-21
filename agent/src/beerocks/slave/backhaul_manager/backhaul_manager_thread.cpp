@@ -2053,7 +2053,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         auto &associated_clients = soc->associated_clients_map[msg->bssid()];
         auto it                  = associated_clients.find(msg->client_mac());
         if (it != associated_clients.end()) {
-            associated_clients.erase(it);
+            it = associated_clients.erase(it);
         }
         break;
     }

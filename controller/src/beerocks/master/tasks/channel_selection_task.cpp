@@ -835,7 +835,7 @@ void channel_selection_task::work()
 
         if (it_cac != std::end(hostaps_cac_pending)) {
             database.set_hostap_cac_completed(it_cac->first, true);
-            hostaps_cac_pending.erase(it_cac);
+            it_cac = hostaps_cac_pending.erase(it_cac);
             TASK_LOG(DEBUG) << "hostap_mac - " << hostap_mac
                             << " cac completed - found in pending cac - erasing, update DB";
 
@@ -1200,7 +1200,7 @@ bool channel_selection_task::cac_pending_hostap_check()
             TASK_LOG(INFO) << "cac_complete_delta = " << int(cac_complete_delta)
                            << " > ( CAC_COMPLETED_WAIT_TIME = 11 min )";
             dfs_cac_pending_hostap->timeout_expired = true;
-            hostaps_cac_pending.erase(it_cac_pending);
+            it_cac_pending                          = hostaps_cac_pending.erase(it_cac_pending);
             return true;
         } else {
             //inject again the event to check for cac completed.

@@ -1147,7 +1147,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
             [&](pending_disable_vap_t vap) { return (vap.vap_id == msg->params.vap_id); });
 
         if (it != pending_disable_vaps.end()) {
-            pending_disable_vaps.erase(it);
+            it = pending_disable_vaps.erase(it);
             if (enable_backhaul_vap(ap_wlan_hal, backhaul_vaps_list, connected_ires, true)) {
                 // update master about the updated vap list
                 // Note: this could be removed if bwl vap list will contain disabled backhaul vaps
@@ -1732,7 +1732,7 @@ void ap_manager_thread::remove_client_from_disallowed_list(const sMacAddr &mac,
 
     if (it != m_disallowed_clients.end()) {
         // remove client from the disallow list
-        m_disallowed_clients.erase(it);
+        it = m_disallowed_clients.erase(it);
     }
 }
 

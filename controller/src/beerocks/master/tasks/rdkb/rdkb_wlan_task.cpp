@@ -920,7 +920,7 @@ void rdkb_wlan_task::remove_bml_rdkb_wlan_socket(Socket *sd)
         for (auto it = bml_rdkb_wlan_listeners_sockets.begin();
              it < bml_rdkb_wlan_listeners_sockets.end(); it++) {
             if (sd == (*it).sd) {
-                bml_rdkb_wlan_listeners_sockets.erase(it);
+                it = bml_rdkb_wlan_listeners_sockets.erase(it);
                 return;
             }
         }
@@ -1135,7 +1135,7 @@ std::pair<bool, Socket *> rdkb_wlan_task::check_for_pending_events(int event)
         pending_events.clear();
         return res;
     } else if (std::distance(ret.first, ret.second) > 1) {
-        pending_events.erase(it);
+        it  = pending_events.erase(it);
         res = std::make_pair(true, nullptr);
         return res;
     }

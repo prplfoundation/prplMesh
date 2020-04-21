@@ -1407,7 +1407,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
                 std::copy_n(hal_data->bssid.oct, sizeof(response->params().bssid.oct),
                             response->params().bssid.oct);
 
-                pending_11k_events.erase(it);
+                it = pending_11k_events.erase(it);
                 LOG(INFO) << "Sending beacon measurement reponse on BSSID: "
                           << response->params().bssid << " to task_id: " << id;
 

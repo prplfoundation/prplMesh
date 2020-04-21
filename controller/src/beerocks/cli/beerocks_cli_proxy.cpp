@@ -72,7 +72,7 @@ bool cli_proxy::socket_disconnected(Socket *sd)
                 remove_socket(soc->master);
                 delete soc->master;
             }
-            master_sockets.erase(it);
+            it = master_sockets.erase(it);
             return false;
         }
     }

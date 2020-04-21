@@ -137,7 +137,7 @@ bool db::remove_node(const sMacAddr &mac)
             // map may include 2 keys to same node - if so remove other key-node pair from map
             // if removed by mac
             if (network_utils::mac_to_string(mac) == node_mac) {
-                nodes[i].erase(it);
+                it = nodes[i].erase(it);
                 // if ruid_key exists for this node
                 if (!ruid_key.empty()) {
                     nodes[i].erase(ruid_key);
@@ -2409,7 +2409,7 @@ void db::remove_cli_socket(Socket *sd)
     if (sd) {
         for (auto it = cli_debug_sockets.begin(); it < cli_debug_sockets.end(); it++) {
             if (sd == (*it)) {
-                cli_debug_sockets.erase(it);
+                it = cli_debug_sockets.erase(it);
                 return;
             }
         }
@@ -2464,7 +2464,7 @@ void db::remove_bml_socket(Socket *sd)
     if (sd) {
         for (auto it = bml_listeners_sockets.begin(); it < bml_listeners_sockets.end(); it++) {
             if (sd == (*it).sd) {
-                bml_listeners_sockets.erase(it);
+                it = bml_listeners_sockets.erase(it);
                 return;
             }
         }
