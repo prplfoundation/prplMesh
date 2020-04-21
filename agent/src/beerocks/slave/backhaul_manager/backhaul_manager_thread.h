@@ -24,6 +24,7 @@
 #include <tlvf/ieee_1905_1/eMediaType.h>
 
 #include "../agent_ucc_listener.h"
+#include "../link_metrics/link_metrics.h"
 
 #include <future>
 #include <list>
@@ -346,6 +347,21 @@ private:
     bool get_media_type(const std::string &interface_name,
                         ieee1905_1::eMediaTypeGroup media_type_group,
                         ieee1905_1::eMediaType &media_type);
+
+    /**
+     * @brief Creates a new link metrics collector for given media type.
+     *
+     * Creates a new link metrics collector suitable for the underlying network technology of the
+     * connecting interface.
+     * Collector choice depends on bits 15 to 8 of media type, that is, the media type group.
+     *
+     * @param[in] iface_mac MAC address of the connecting interface.
+     * @param[in] media_type The underlying network technology of the connecting interface.
+     *
+     * @return Link metrics collector on success and nullptr otherwise.
+     */
+    std::unique_ptr<link_metrics_collector>
+    create_link_metrics_collector(const sLinkInterface &link_interface) const;
 
     /**
      * @brief Gets the list of neighbor links from topology database.
