@@ -677,6 +677,28 @@ bool network_utils::linux_iface_get_mac(const std::string &iface, std::string &m
     return true;
 }
 
+bool network_utils::linux_iface_get_name(const sMacAddr &mac, std::string &iface)
+{
+    bool found = false;
+    struct if_nameindex *pif;
+    struct if_nameindex *head;
+    std::string mac_to_find = network_utils::mac_to_string(mac);
+
+    head = pif = if_nameindex();
+    while (pif->if_index && (!found)) {
+        std::string if_mac;
+        if (linux_iface_get_mac(pif->if_name, if_mac) && (if_mac == mac_to_find)) {
+            iface = pif->if_name;
+            found = true;
+        }
+        pif++;
+    }
+
+    if_freenameindex(head);
+
+    return found;
+}
+
 bool network_utils::linux_iface_get_ip(const std::string &iface, std::string &ip)
 {
     struct ifreq ifr;
