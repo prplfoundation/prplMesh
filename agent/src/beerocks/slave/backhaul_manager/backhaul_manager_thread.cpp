@@ -108,7 +108,7 @@ namespace beerocks {
 const char *backhaul_manager::s_arrStates[] = {FOREACH_STATE(GENERATE_STRING)};
 
 /**
- * IEEE Std 1905.1, Table 6-12—Media type (intfType)
+ * IEEE Std 1905.1, Table 6-12—Media type (intfType) for IEEE 802.11 interfaces
  *
  * Value and Description         Frequency  MaxBandwith  Comments
  * 0 IEEE 802.11b (2.4 GHz)      2.4 GHz    22 MHz       Not supported
@@ -123,7 +123,7 @@ const char *backhaul_manager::s_arrStates[] = {FOREACH_STATE(GENERATE_STRING)};
  * 8 IEEE 802.11ax (5 GHz)       5 GHz      160 MHz      Not included in Table 6-12—Media type (intfType), WiFi6 is specified to use 0x0108 in R2
  */
 static const std::vector<std::tuple<eFreqType, eWiFiBandwidth, ieee1905_1::eMediaType>>
-    table_6_12_media_type //
+    table_6_12_media_type_802_11 //
     {
         {eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_20, //
          ieee1905_1::eMediaType::IEEE_802_11G_2_4_GHZ},
@@ -149,157 +149,67 @@ static const std::vector<std::tuple<eFreqType, eWiFiBandwidth, ieee1905_1::eMedi
     };
 
 /**
- * @brief Adds link metrics to response message.
+ * @brief Gets media type from given frequency band and max bandwidth values.
  *
- * Gets link metrics of the interface between the reporter AL MAC and the neighbor AL MAC.
- * Creates a Transmitter Link Metric TLV or a Receiver Link Metric TLV or both and adds them to
- * the response message.
+ * Media type value is obtained by looking up into table_6_12_media_type_802_11 table.
+ * Returns UNKNONWN_MEDIA if frequency band and max bandwidth are not found in table.
  *
- * @param[in] local_interface_name Name of the local interface.
- * @param[in] media_type The underlying network technology of the connecting interface.
- * @param[in] reporter_al_mac 1905.1 AL MAC address of the device that transmits the response message.
- * @param[in] neighbor_al_mac 1905.1 AL MAC address of a neighbor of the receiving device.
- * @param[in] link_metrics_type The link metrics type requested: TX, RX or both.
- * @param[in, out] cmdu_tx CMDU response message where TLVs must be added to.
+ * @param frequency_band Frequency band
+ * @param max_bandwidth Maximum bandwidth
+ * @return Media type value as per table_6_12_media_type_802_11 table.
+ */
+static ieee1905_1::eMediaType get_802_11_media_type(eFreqType frequency_band,
+                                                    eWiFiBandwidth max_bandwidth)
+{
+    for (const auto &tuple : table_6_12_media_type_802_11) {
+        if ((std::get<0>(tuple) == frequency_band) && (std::get<1>(tuple) == max_bandwidth)) {
+            return std::get<2>(tuple);
+        }
+    }
+
+    return ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+}
+
+/**
+ * @brief Gets the MAC address of given interface.
+ *
+ * @param[in] iface_name Name of the network interface.
+ * @param[out] iface_mac MAC address of the network interface on success and ZERO_MAC on error.
  *
  * @return True on success and false otherwise.
  */
-static bool add_link_metrics(const std::string &local_interface_name,
-                             ieee1905_1::eMediaType media_type, const sMacAddr &reporter_al_mac,
-                             const sMacAddr &neighbor_al_mac,
-                             ieee1905_1::eLinkMetricsType link_metrics_type,
-                             ieee1905_1::CmduMessageTx &cmdu_tx)
+static bool get_iface_mac(const std::string &iface_name, sMacAddr &iface_mac)
 {
-    /**
-     * Metrics information associated to the link between the local interface and the neighbor's interface.
-     */
-    sLinkMetrics link_metrics;
-
-    /**
-     * Link metrics collector to use to get link metrics in the connecting interface.
-     */
-    std::unique_ptr<link_metrics_collector> collector;
-
-    /**
-     * Get a link metrics collector suitable for the underlying network technology of the
-     * connecting interface.
-     * Collector choice depends on bits 15 to 8 of media type.
-     */
-    uint8_t media_type_msb = media_type >> 8;
-    if (0 == media_type_msb) {
-        collector = std::make_unique<ieee802_3_link_metrics_collector>();
-    } else if (1 == media_type_msb) {
-        // TODO: Create a collector for wireless interfaces
-        //collector = std::make_unique<ieee802_11_link_metrics_collector>();
-        LOG(ERROR) << "Unsupported media type: " << std::hex << (int)media_type;
-    } else {
-        LOG(ERROR) << "Unsupported media type: " << std::hex << (int)media_type;
-        return false;
+    std::string mac;
+    if (network_utils::linux_iface_get_mac(iface_name, mac)) {
+        iface_mac = network_utils::mac_from_string(mac);
+        return true;
     }
 
-    /**
-     * Get link metrics information
-     */
-    if (collector &&
-        collector->get_link_metrics(local_interface_name, neighbor_al_mac, link_metrics)) {
+    LOG(ERROR) << "Failed getting MAC address for interface: " << iface_name;
+    iface_mac = network_utils::ZERO_MAC;
 
-        /**
-         * Get MAC address for local interface.
-         */
-        std::string mac;
-        if (!network_utils::linux_iface_get_mac(local_interface_name, mac)) {
-            LOG(ERROR) << "Failed getting MAC address for interface: " << local_interface_name;
-            return false;
-        }
-        sMacAddr local_interface_mac = network_utils::mac_from_string(mac);
+    return false;
+}
 
-        /**
-         * Add Transmitter Link Metric TLV if specifically requested or both requested
-         */
-        if ((ieee1905_1::eLinkMetricsType::TX_LINK_METRICS_ONLY == link_metrics_type) ||
-            (ieee1905_1::eLinkMetricsType::BOTH_TX_AND_RX_LINK_METRICS == link_metrics_type)) {
-            auto tlvTransmitterLinkMetric =
-                cmdu_tx.addClass<ieee1905_1::tlvTransmitterLinkMetric>();
-            if (!tlvTransmitterLinkMetric) {
-                LOG(ERROR) << "addClass ieee1905_1::tlvTransmitterLinkMetric failed";
-                return false;
-            }
-
-            tlvTransmitterLinkMetric->reporter_al_mac() = reporter_al_mac;
-            tlvTransmitterLinkMetric->neighbor_al_mac() = neighbor_al_mac;
-
-            if (!tlvTransmitterLinkMetric->alloc_interface_pair_info()) {
-                LOG(ERROR) << "alloc_interface_pair_info failed";
-                return false;
-            }
-            auto interface_pair_info = tlvTransmitterLinkMetric->interface_pair_info(0);
-            if (!std::get<0>(interface_pair_info)) {
-                LOG(ERROR) << "Failed accessing interface_pair_info";
-                return false;
-            }
-            auto interfacePairInfo             = std::get<1>(interface_pair_info);
-            interfacePairInfo.rc_interface_mac = local_interface_mac;
-            // TODO: This is not correct... We actually have to get this from the topology
-            // discovery message, which will give us the neighbor interface MAC.
-            interfacePairInfo.neighbor_interface_mac    = neighbor_al_mac;
-            interfacePairInfo.link_metric_info.intfType = media_type;
-            // TODO
-            //Indicates whether or not the 1905.1 link includes one or more IEEE 802.1 bridges
-            //eIEEE802_1BridgeFlag IEEE802_1BridgeFlag;
-            interfacePairInfo.link_metric_info.packet_errors =
-                link_metrics.transmitter.packet_errors;
-            interfacePairInfo.link_metric_info.transmitted_packets =
-                link_metrics.transmitter.transmitted_packets;
-            interfacePairInfo.link_metric_info.mac_throughput_capacity =
-                std::min(link_metrics.transmitter.mac_throughput_capacity_mbps,
-                         static_cast<uint32_t>(UINT16_MAX));
-            interfacePairInfo.link_metric_info.link_availability =
-                link_metrics.transmitter.link_availability;
-            interfacePairInfo.link_metric_info.phy_rate =
-                std::min(link_metrics.transmitter.phy_rate_mbps, static_cast<uint32_t>(UINT16_MAX));
-        }
-
-        /**
-         * Add Receiver Link Metric TLV if specifically requested or both requested
-         */
-        if ((ieee1905_1::eLinkMetricsType::RX_LINK_METRICS_ONLY == link_metrics_type) ||
-            (ieee1905_1::eLinkMetricsType::BOTH_TX_AND_RX_LINK_METRICS == link_metrics_type)) {
-            auto tlvReceiverLinkMetric = cmdu_tx.addClass<ieee1905_1::tlvReceiverLinkMetric>();
-            if (!tlvReceiverLinkMetric) {
-                LOG(ERROR) << "addClass ieee1905_1::tlvReceiverLinkMetric failed";
-                return false;
-            }
-
-            tlvReceiverLinkMetric->reporter_al_mac() = reporter_al_mac;
-            tlvReceiverLinkMetric->neighbor_al_mac() = neighbor_al_mac;
-
-            if (!tlvReceiverLinkMetric->alloc_interface_pair_info()) {
-                LOG(ERROR) << "alloc_interface_pair_info failed";
-                return false;
-            }
-            auto interface_pair_info = tlvReceiverLinkMetric->interface_pair_info(0);
-            if (!std::get<0>(interface_pair_info)) {
-                LOG(ERROR) << "Failed accessing interface_pair_info";
-                return false;
-            }
-            auto interfacePairInfo             = std::get<1>(interface_pair_info);
-            interfacePairInfo.rc_interface_mac = local_interface_mac;
-            // TODO: This is not correct... We actually have to get this from the topology
-            // discovery message, which will give us the neighbor interface MAC.
-            interfacePairInfo.neighbor_interface_mac         = neighbor_al_mac;
-            interfacePairInfo.link_metric_info.intfType      = media_type;
-            interfacePairInfo.link_metric_info.packet_errors = link_metrics.receiver.packet_errors;
-            interfacePairInfo.link_metric_info.packets_received =
-                link_metrics.receiver.packets_received;
-            interfacePairInfo.link_metric_info.rssi_db = link_metrics.receiver.rssi;
-        }
-    } else {
-        LOG(ERROR) << "Unable to get link link_metrics for interface " << local_interface_name
-                   << " and neighbor " << network_utils::mac_to_string(neighbor_al_mac);
-        return false;
+/**
+ * @brief Gets the name of the interface with given MAC address.
+ *
+ * @param[in] iface_mac MAC address of the network interface.
+ * @param[out] iface_name Name of the network interface on success and empty string on error.
+ *
+ * @return True on success and false otherwise.
+ */
+static bool get_iface_name(const sMacAddr &iface_mac, std::string &iface_name)
+{
+    if (network_utils::linux_iface_get_name(iface_mac, iface_name)) {
+        return true;
     }
 
-    return true;
+    LOG(ERROR) << "Failed getting interface name for MAC address: " << iface_mac;
+    iface_name.clear();
+
+    return false;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2692,9 +2602,9 @@ bool backhaul_manager::handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &
 
     /**
      * Get the list of neighbor links from the topology database.
-     * Neighbor links are grouped by the interface that connects to them.
+     * Neighbors are grouped by the interface that connects to them.
      */
-    std::map<std::string, std::vector<sMacAddr>> neighbor_links_map;
+    std::map<sLinkInterface, std::vector<sLinkNeighbor>> neighbor_links_map;
     if (!get_neighbor_links(neighbor_al_mac, neighbor_links_map)) {
         LOG(ERROR) << "Failed to get the list of neighbor links";
         return false;
@@ -2714,6 +2624,9 @@ bool backhaul_manager::handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &
             return false;
         }
 
+        LOG(INFO) << "Invalid neighbor 1905.1 AL ID specified: "
+                  << network_utils::mac_to_string(neighbor_al_mac);
+
         tlvLinkMetricResultCode->value() = ieee1905_1::tlvLinkMetricResultCode::INVALID_NEIGHBOR;
     } else {
 
@@ -2722,25 +2635,31 @@ bool backhaul_manager::handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &
          * obtained from topology database
          */
         for (const auto &entry : neighbor_links_map) {
-            std::string local_interface_name = entry.first;
-            std::vector<sMacAddr> neighbors  = entry.second;
+            auto interface        = entry.first;
+            const auto &neighbors = entry.second;
 
-            ieee1905_1::eMediaTypeGroup media_type_group = ieee1905_1::eMediaTypeGroup::UNKNOWN;
-            if (!get_media_type_group(local_interface_name, media_type_group)) {
-                LOG(ERROR) << "Unable to compute media type group for interface "
-                           << local_interface_name;
-                return false;
-            }
-
-            ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
-            if (!get_media_type(local_interface_name, media_type_group, media_type)) {
-                LOG(ERROR) << "Unable to compute media type for interface " << local_interface_name;
-                return false;
+            std::unique_ptr<link_metrics_collector> collector =
+                create_link_metrics_collector(interface);
+            if (!collector) {
+                continue;
             }
 
             for (const auto &neighbor : neighbors) {
-                if (!add_link_metrics(local_interface_name, media_type, reporter_al_mac, neighbor,
-                                      link_metrics_type, cmdu_tx)) {
+
+                LOG(TRACE) << "Getting link metrics for interface " << interface.iface_name
+                           << " (MediaType = " << std::hex << (int)interface.media_type
+                           << ") and neighbor " << neighbor.iface_mac;
+
+                sLinkMetrics link_metrics;
+                if (!collector->get_link_metrics(interface.iface_name, neighbor.iface_mac,
+                                                 link_metrics)) {
+                    LOG(ERROR) << "Unable to get link metrics for interface "
+                               << interface.iface_name << " and neighbor " << neighbor.iface_mac;
+                    return false;
+                }
+
+                if (!add_link_metrics(reporter_al_mac, interface, neighbor, link_metrics,
+                                      link_metrics_type)) {
                     return false;
                 }
             }
@@ -3503,27 +3422,17 @@ bool backhaul_manager::get_media_type(const std::string &interface_name,
         }
     } else if (ieee1905_1::eMediaTypeGroup::IEEE_802_11 == media_type_group) {
 
-        for (auto slave : slaves_sockets) {
-            if (interface_name == slave->hostap_iface) {
-
-                for (const auto &tuple : table_6_12_media_type) {
-                    if ((std::get<0>(tuple) == slave->freq_type) &&
-                        (std::get<1>(tuple) == slave->max_bandwidth)) {
-                        media_type = std::get<2>(tuple);
-
-                        break;
-                    }
-                }
-
-                /**
-                 * Media type has been successfully computed for given interface.
-                 * Notice however that returned media type can be UNKNONWN_MEDIA if frequency
-                 * band and max bandwidth were not found in table_6_12_media_type.
-                 */
-                result = true;
-                break;
-            }
+        auto it = std::find_if(slaves_sockets.begin(), slaves_sockets.end(),
+                               [&](const std::shared_ptr<sRadioInfo> &radio_info) {
+                                   return interface_name == radio_info->hostap_iface;
+                               });
+        if (it != slaves_sockets.end()) {
+            auto radio_info = *it;
+            media_type =
+                beerocks::get_802_11_media_type(radio_info->freq_type, radio_info->max_bandwidth);
+            result = true;
         }
+
     } else if (ieee1905_1::eMediaTypeGroup::IEEE_1901 == media_type_group) {
         // TODO: Not supported yet
         LOG(ERROR) << "IEEE_1901 media is not supported yet";
@@ -3556,21 +3465,77 @@ backhaul_manager::create_link_metrics_collector(const sLinkInterface &link_inter
     LOG(ERROR) << "Unable to create link metrics collector for interface '"
                << link_interface.iface_name << "' (unsupported media type " << std::hex
                << (int)media_type << ")";
+
     return nullptr;
 }
 
 bool backhaul_manager::get_neighbor_links(
     const sMacAddr &neighbor_mac_filter,
-    std::map<std::string, std::vector<sMacAddr>> &neighbor_links_map)
+    std::map<sLinkInterface, std::vector<sLinkNeighbor>> &neighbor_links_map)
 {
-
     // TODO: Topology Database is required to implement this method.
     // Since we don't have it yet, method will return a single neighbor, the controller (which is
     // BTW incorrect for the second repeater if we have a chain topology, because then the
-    // controller is not a neighbor).
-    sMacAddr neighbor = network_utils::mac_from_string(controller_bridge_mac);
-    if ((neighbor_mac_filter == network_utils::ZERO_MAC) || (neighbor_mac_filter == neighbor)) {
-        neighbor_links_map[m_sConfig.wire_iface].push_back(neighbor);
+    // controller is not a neighbor) connected through the wired backhaul interface
+
+    sLinkInterface wired_interface;
+    wired_interface.iface_name = m_sConfig.wire_iface;
+
+    if (!get_media_type(wired_interface.iface_name, ieee1905_1::eMediaTypeGroup::IEEE_802_3,
+                        wired_interface.media_type)) {
+        LOG(ERROR) << "Unable to compute media type for interface " << wired_interface.iface_name;
+        return false;
+    }
+
+    if (!get_iface_mac(wired_interface.iface_name, wired_interface.iface_mac)) {
+        return false;
+    }
+
+    sLinkNeighbor neighbor;
+    neighbor.iface_mac = network_utils::mac_from_string(controller_bridge_mac);
+    neighbor.al_mac    = neighbor.iface_mac;
+    if ((neighbor_mac_filter == network_utils::ZERO_MAC) ||
+        (neighbor_mac_filter == neighbor.al_mac)) {
+        neighbor_links_map[wired_interface].push_back(neighbor);
+    }
+
+    // Also include a link for each associated client
+    for (const auto &slave : slaves_sockets) {
+
+        for (const auto &associated_clients_entry : slave->associated_clients_map) {
+            auto bssid              = associated_clients_entry.first;
+            auto associated_clients = associated_clients_entry.second;
+
+            sLinkInterface interface;
+            if (!get_iface_name(bssid, interface.iface_name)) {
+                LOG(ERROR) << "Unable to get interface name for BSSID " << bssid;
+                return false;
+            }
+
+            interface.iface_mac = bssid;
+            interface.media_type =
+                beerocks::get_802_11_media_type(slave->freq_type, slave->max_bandwidth);
+
+            if (ieee1905_1::eMediaType::UNKNONWN_MEDIA == interface.media_type) {
+                LOG(ERROR) << "Unknown media type for interface " << interface.iface_name;
+                return false;
+            }
+
+            LOG(TRACE) << "Getting neighbors connected to interface " << interface.iface_name
+                       << " with BSSID " << bssid;
+
+            for (const auto &associated_client : associated_clients) {
+                // TODO: This is not correct... We actually have to get this from the topology
+                // discovery message, which will give us the neighbor interface and AL MAC addresses.
+                neighbor.iface_mac = associated_client.first;
+                neighbor.al_mac    = neighbor.iface_mac;
+
+                if ((neighbor_mac_filter == network_utils::ZERO_MAC) ||
+                    (neighbor_mac_filter == neighbor.al_mac)) {
+                    neighbor_links_map[interface].push_back(neighbor);
+                }
+            }
+        }
     }
 
     return true;
@@ -3654,6 +3619,91 @@ bool backhaul_manager::add_ap_he_capabilities(const sRadioInfo &radio_info)
 
     // TODO: Fetch the AP HE Capabilities from the Wi-Fi driver via the Netlink socket and include
     // them into AP HE Capabilities TLV (#1162)
+
+    return true;
+}
+
+bool backhaul_manager::add_link_metrics(const sMacAddr &reporter_al_mac,
+                                        const sLinkInterface &link_interface,
+                                        const sLinkNeighbor &link_neighbor,
+                                        const sLinkMetrics &link_metrics,
+                                        ieee1905_1::eLinkMetricsType link_metrics_type)
+{
+    /**
+     * Add Transmitter Link Metric TLV if specifically requested or both requested
+     */
+    if ((ieee1905_1::eLinkMetricsType::TX_LINK_METRICS_ONLY == link_metrics_type) ||
+        (ieee1905_1::eLinkMetricsType::BOTH_TX_AND_RX_LINK_METRICS == link_metrics_type)) {
+        auto tlvTransmitterLinkMetric = cmdu_tx.addClass<ieee1905_1::tlvTransmitterLinkMetric>();
+        if (!tlvTransmitterLinkMetric) {
+            LOG(ERROR) << "addClass ieee1905_1::tlvTransmitterLinkMetric failed";
+            return false;
+        }
+
+        tlvTransmitterLinkMetric->reporter_al_mac() = reporter_al_mac;
+        tlvTransmitterLinkMetric->neighbor_al_mac() = link_neighbor.al_mac;
+
+        if (!tlvTransmitterLinkMetric->alloc_interface_pair_info()) {
+            LOG(ERROR) << "alloc_interface_pair_info failed";
+            return false;
+        }
+        auto interface_pair_info = tlvTransmitterLinkMetric->interface_pair_info(0);
+        if (!std::get<0>(interface_pair_info)) {
+            LOG(ERROR) << "Failed accessing interface_pair_info";
+            return false;
+        }
+        auto interfacePairInfo                      = std::get<1>(interface_pair_info);
+        interfacePairInfo.rc_interface_mac          = link_interface.iface_mac;
+        interfacePairInfo.neighbor_interface_mac    = link_neighbor.iface_mac;
+        interfacePairInfo.link_metric_info.intfType = link_interface.media_type;
+        // TODO
+        //Indicates whether or not the 1905.1 link includes one or more IEEE 802.1 bridges
+        interfacePairInfo.link_metric_info.IEEE802_1BridgeFlag =
+            ieee1905_1::tlvTransmitterLinkMetric::LINK_DOES_NOT_INCLUDE_BRIDGE;
+        interfacePairInfo.link_metric_info.packet_errors = link_metrics.transmitter.packet_errors;
+        interfacePairInfo.link_metric_info.transmitted_packets =
+            link_metrics.transmitter.transmitted_packets;
+        interfacePairInfo.link_metric_info.mac_throughput_capacity =
+            std::min(link_metrics.transmitter.mac_throughput_capacity_mbps,
+                     static_cast<uint32_t>(UINT16_MAX));
+        interfacePairInfo.link_metric_info.link_availability =
+            link_metrics.transmitter.link_availability;
+        interfacePairInfo.link_metric_info.phy_rate =
+            std::min(link_metrics.transmitter.phy_rate_mbps, static_cast<uint32_t>(UINT16_MAX));
+    }
+
+    /**
+     * Add Receiver Link Metric TLV if specifically requested or both requested
+     */
+    if ((ieee1905_1::eLinkMetricsType::RX_LINK_METRICS_ONLY == link_metrics_type) ||
+        (ieee1905_1::eLinkMetricsType::BOTH_TX_AND_RX_LINK_METRICS == link_metrics_type)) {
+        auto tlvReceiverLinkMetric = cmdu_tx.addClass<ieee1905_1::tlvReceiverLinkMetric>();
+        if (!tlvReceiverLinkMetric) {
+            LOG(ERROR) << "addClass ieee1905_1::tlvReceiverLinkMetric failed";
+            return false;
+        }
+
+        tlvReceiverLinkMetric->reporter_al_mac() = reporter_al_mac;
+        tlvReceiverLinkMetric->neighbor_al_mac() = link_neighbor.al_mac;
+
+        if (!tlvReceiverLinkMetric->alloc_interface_pair_info()) {
+            LOG(ERROR) << "alloc_interface_pair_info failed";
+            return false;
+        }
+        auto interface_pair_info = tlvReceiverLinkMetric->interface_pair_info(0);
+        if (!std::get<0>(interface_pair_info)) {
+            LOG(ERROR) << "Failed accessing interface_pair_info";
+            return false;
+        }
+        auto interfacePairInfo                           = std::get<1>(interface_pair_info);
+        interfacePairInfo.rc_interface_mac               = link_interface.iface_mac;
+        interfacePairInfo.neighbor_interface_mac         = link_neighbor.iface_mac;
+        interfacePairInfo.link_metric_info.intfType      = link_interface.media_type;
+        interfacePairInfo.link_metric_info.packet_errors = link_metrics.receiver.packet_errors;
+        interfacePairInfo.link_metric_info.packets_received =
+            link_metrics.receiver.packets_received;
+        interfacePairInfo.link_metric_info.rssi_db = link_metrics.receiver.rssi;
+    }
 
     return true;
 }
