@@ -739,6 +739,9 @@ bool mon_wlan_hal_dwpal::sta_beacon_11k_request(const SBeaconRequest11k &req, in
         cmd += " ssid=" + req_ssid;
     }
 
+    // ToDo:
+    // use ap_ch_report in the request.
+
     // send command
     if (!dwpal_send_cmd(cmd, &reply)) {
         LOG(ERROR) << __func__ << " failed";
