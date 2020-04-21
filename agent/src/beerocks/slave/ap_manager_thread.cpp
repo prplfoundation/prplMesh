@@ -1744,7 +1744,7 @@ void ap_manager_thread::allow_expired_clients()
             LOG(DEBUG) << "CLIENT_ALLOW: mac = " << it->mac << ", bssid = " << it->bssid;
             ap_wlan_hal->sta_allow(network_utils::mac_to_string(it->mac),
                                    network_utils::mac_to_string(it->bssid));
-            m_disallowed_clients.erase(it);
+            it = m_disallowed_clients.erase(it);
         } else {
             it++;
         }
