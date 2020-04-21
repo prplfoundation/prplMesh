@@ -4571,6 +4571,8 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received BEACON_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid);
 
+    /*
+    // Note: No need to send ack - the backhaul already sent the ACK
     // 1. send ACK to the controller
     if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
         LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
@@ -4581,6 +4583,7 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
         LOG(ERROR) << "failed sending ACK to the controller";
         return false;
     }
+    */
 
     // 2. forward the request to the monitor
     // using vs message
@@ -4607,9 +4610,10 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     Legend: 
         V - fine, we have value
         ? - don't know where to take the value from
+        U - uncertain, set but not sure it is the correct value
     V uint8_t measurement_mode;
     V uint8_t channel;
-    ? int16_t op_class;
+    V int16_t op_class;
     V uint16_t repeats;
     V uint16_t rand_ival;
     V uint16_t duration;
@@ -4618,7 +4622,7 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     V uint8_t parallel;
     V uint8_t enable;
     V uint8_t request;
-    V uint8_t report;
+    U uint8_t report;
     V uint8_t mandatory_duration;
     V uint8_t expected_reports_count;
     V uint8_t use_optional_ssid;
@@ -4646,12 +4650,16 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     measurement_request_out.rand_ival = beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
     measurement_request_out.sta_mac   = beaconMetricsQuery->associated_sta_mac();
 
+    measurement_request_out.op_class = beaconMetricsQuery->operating_class();
+
+    // FixMe: not sure about this
+    measurement_request_out.report = beaconMetricsQuery->reporting_detail_value();
+
     // values based on https://github.com/prplfoundation/prplMesh/pull/1114#discussion_r406326546
     measurement_request_out.repeats            = 0;
     measurement_request_out.parallel           = 0;
     measurement_request_out.enable             = 0;
     measurement_request_out.request            = 1;
-    measurement_request_out.report             = 0;
     measurement_request_out.mandatory_duration = 0;
     measurement_request_out.use_optional_ssid  = 0;
 
@@ -4664,6 +4672,7 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     // FixMe:
     // here (I think) we need to copy m_ap_channel_reports_list from the 1905 beaconMetricsQuery
     // into ap_ch_report char array of the vs message (measurement_request_out)
+
     // currently not supported
     // if (0 != measurement_request_out.use_optional_ap_ch_report) {
     //    LOG(ERROR) << "unsupported optional channel report in the request";
@@ -4675,7 +4684,6 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     // end FixMe
 
     // FixMe:
-    // measurement_request_out.op_class = ??
     // measurement_request_out.use_optional_wide_band_ch_switch = ??
     // measurement_request_out.new_ch_width = ??
     // measurement_request_out.new_ch_center_freq_seg_0 = ??
