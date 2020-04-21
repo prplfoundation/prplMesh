@@ -34,6 +34,7 @@ cppcheck-diff:
   artifacts:
     paths:
       - cppcheck_results.txt
+      - cppcheck_existing_issues.txt
     expire_in: 4 weeks
     when: always
   tags:

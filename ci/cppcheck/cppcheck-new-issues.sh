@@ -21,8 +21,19 @@ do
     if ! grep -q -F "$i" "$rootdir"/ci/cppcheck/cppcheck_existing_issues.txt ; then
         status=1
         err "New issue:"
-        grep -F "$i" "$rootdir/cppcheck_results.txt"
+        "$i"
     fi
 done
+
+# Generate a new list of existing issues by removing the ones that are now solved
+comm -12 <(sort "$rootdir"/cppcheck_results.txt) <(sort "$rootdir"/ci/cppcheck/cppcheck_existing_issues.txt)  > "$rootdir"/cppcheck_existing_issues.txt
+
+mv "$rootdir"/cppcheck_existing_issues.txt "$rootdir"/ci/cppcheck/cppcheck_existing_issues.txt
+
+if ! git diff -U0 --exit-code -- "$rootdir"/ci/cppcheck/cppcheck_existing_issues.txt ; then
+    status=1
+    err "You solved at least one cppcheck issue! Please download cppcheck_existing_issues.txt from the artifacts and replace it in ci/cppcheck/cppcheck_existing_issues.txt"
+    err "If you ran cppcheck-new-issues.sh locally, the changes have already been applied for you."
+fi
 
 exit $status
