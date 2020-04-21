@@ -141,6 +141,13 @@ public:
         bool radar_affected = false;
 
         /**
+         * This channel does not initiate radiation, meaning it is supported only when radar
+         * detection is supported as well.
+         * Set to true if attribute NL80211_FREQUENCY_ATTR_NO_IR is present
+         */
+        bool no_ir = false;
+
+        /**
          * @brief Gets the maximum supported bandwidth by the channel.
          *
          * @return Maximum supported bandwidth

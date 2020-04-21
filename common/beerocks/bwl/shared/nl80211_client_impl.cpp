@@ -317,9 +317,9 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
                         return;
                     }
 
+                    // Ignore "channels" that are disabled or with no frequency.
                     if (!tb_freq[NL80211_FREQUENCY_ATTR_FREQ] ||
-                        tb_freq[NL80211_FREQUENCY_ATTR_DISABLED] ||
-                        tb_freq[__NL80211_FREQUENCY_ATTR_NO_IBSS]) {
+                        tb_freq[NL80211_FREQUENCY_ATTR_DISABLED]) {
                         continue;
                     }
 
@@ -366,10 +366,25 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
                             beerocks::eWiFiBandwidth::BANDWIDTH_160);
                     }
 
+                    if (tb_freq[NL80211_FREQUENCY_ATTR_NO_IR] ||
+                        tb_freq[__NL80211_FREQUENCY_ATTR_NO_IBSS]) {
+                        /**
+                         * NL80211_FREQUENCY_ATTR_NO_IR superseded NL80211_FREQUENCY_ATTR_NO_IBSS
+                         * for legacy kernels we still need to check
+                         * __NL80211_FREQUENCY_ATTR_NO_IBSS, for both attributes we use the no_ir.
+                         */
+                        channel.no_ir = true;
+                    }
+
                     if (tb_freq[NL80211_FREQUENCY_ATTR_DFS_STATE] &&
                         nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_DFS_STATE]) ==
                             NL80211_DFS_UNAVAILABLE) {
                         channel.radar_affected = true;
+                    }
+
+                    //Filter out chanels that are not DFS but still have the NO_IR flag
+                    if (!channel.is_dfs && channel.no_ir) {
+                        continue;
                     }
 
                     band.supported_channels[channel.number] = channel;
