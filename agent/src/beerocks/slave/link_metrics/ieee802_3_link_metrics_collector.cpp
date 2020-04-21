@@ -265,8 +265,6 @@ static bool get_link_metrics(const std::string &local_interface_name, sLinkMetri
     return result;
 }
 
-ieee802_3_link_metrics_collector::~ieee802_3_link_metrics_collector() {}
-
 bool ieee802_3_link_metrics_collector::get_link_metrics(
     const std::string &local_interface_name,
     [[gnu::unused]] const sMacAddr &neighbor_interface_address, sLinkMetrics &link_metrics)
