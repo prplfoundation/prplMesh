@@ -2248,8 +2248,8 @@ bool master_thread::autoconfig_wsc_parse_radio_caps(
         LOG(WARNING) << "operating class info list larger then maximum supported channels";
         operating_classes_list_length = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
     }
+    std::stringstream ss;
     for (int oc_idx = 0; oc_idx < operating_classes_list_length; oc_idx++) {
-        std::stringstream ss;
         auto operating_class_tuple = radio_caps->operating_classes_info_list(oc_idx);
         if (!std::get<0>(operating_class_tuple)) {
             LOG(ERROR) << "getting operating class entry has failed!";
@@ -2277,11 +2277,14 @@ bool master_thread::autoconfig_wsc_parse_radio_caps(
             non_operable_channels.push_back(*channel);
         }
         ss << " }" << std::endl;
-        //        LOG(DEBUG) << ss.str();
         // store operating class in the DB for this hostap
         database.add_hostap_supported_operating_class(
             radio_mac, operating_class, maximum_transmit_power_dbm, non_operable_channels);
     }
+    LOG(DEBUG) << "Radio basic capabilities:" << std::endl
+               << ss.str() << std::endl
+               << "Supported Channels:" << std::endl
+               << database.get_hostap_supported_channels_string(radio_mac);
 
     return true;
 }
