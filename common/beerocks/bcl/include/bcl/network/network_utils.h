@@ -111,6 +111,17 @@ public:
     static bool linux_iface_ctrl(const std::string &iface, bool up, std::string ip = "",
                                  const std::string &netmask = "");
     static bool linux_iface_get_mac(const std::string &iface, std::string &mac);
+
+    /**
+     * @brief Gets the interface name of the network interface with given MAC address.
+     *
+     * @param[in] mac MAC address of the network interface.
+     * @param[out] iface On success, name of the network interface. On error, empty string.
+     *
+     * @return True on success and false otherwise.
+     */
+    static bool linux_iface_get_name(const sMacAddr &mac, std::string &iface);
+
     static bool linux_iface_get_ip(const std::string &iface, std::string &ip);
     static bool linux_iface_get_pci_info(const std::string &iface, std::string &pci_id);
     static bool linux_iface_exists(const std::string &iface);
