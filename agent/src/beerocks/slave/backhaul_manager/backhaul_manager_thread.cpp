@@ -70,6 +70,7 @@
 #include <tlvf/wfa_map/tlvApVhtCapabilities.h>
 #include <tlvf/wfa_map/tlvAssociatedClients.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
+#include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvErrorCode.h>
@@ -104,6 +105,35 @@ namespace beerocks {
 
 #define FSM_IS_IN_STATE(eState) (m_eFSMState == EState::eState)
 #define FSM_CURR_STATE_STR s_arrStates[int(m_eFSMState)]
+
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// Helper Functions /////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+template <class SlavesContainer, class MAC>
+std::shared_ptr<backhaul_manager::sRadioInfo> findRadioInfo(const SlavesContainer &slave_container,
+                                                            const MAC &mac)
+{
+    // for each radio info in the container
+    //      for each associated client
+    //          find if there is an entry with the given mac within this associated client
+
+    for (const auto &slave : slave_container) {
+        if (slave) {
+            LOG(DEBUG) << "looking into radio info for (hostap_iface): " << slave->hostap_iface;
+
+            for (const auto &client : slave->associated_clients_map) {
+                LOG(DEBUG) << "client: " << client.first;
+
+                if (client.second.find(mac) != client.second.end()) {
+                    return slave;
+                }
+            }
+        }
+    }
+
+    return nullptr;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Static Members ///////////////////////////////
@@ -260,6 +290,7 @@ bool backhaul_manager::init()
             ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE,
             ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE,
             ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_QUERY_MESSAGE,
+            ieee1905_1::eMessageType::BEACON_METRICS_QUERY_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE,
             ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE,
@@ -1601,7 +1632,8 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
         // Handle the CMDU message. If the message was processed locally
         // (by the Backhaul Manager), this function will return 'true'.
         // Otherwise, it should be forwarded to the slaves.
-        if (handle_1905_1_message(cmdu_rx, src_mac)) {
+        Socket *destinationAP = nullptr;
+        if (handle_1905_1_message(cmdu_rx, src_mac, destinationAP)) {
             //function returns true if message doesn't need to be forwarded
             return true;
         }
@@ -1610,16 +1642,25 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
 
         // Message from controller (bus) to agent (uds)
         // Send the data (uds_header + cmdu) how it is on UDS, without changing it
+        //
 
-        // Forward cmdu to all slaves how it is on UDS, without changing it
         cmdu_rx.swap(); // swap back before forwarding
-        for (auto soc_iter : slaves_sockets) {
-            if (!message_com::forward_cmdu_to_uds(soc_iter->slave, cmdu_rx, length)) {
+
+        if (!destinationAP) {
+            // Forward cmdu to all slaves how it is on UDS, without changing it
+            for (auto soc_iter : slaves_sockets) {
+                if (!message_com::forward_cmdu_to_uds(soc_iter->slave, cmdu_rx, length)) {
+                    LOG(ERROR) << "forward_cmdu_to_uds() failed - " << print_cmdu_types(uds_header)
+                               << " sd=" << intptr_t(soc_iter->slave);
+                }
+            }
+        } else {
+            // Forward only to the desired destination
+            if (!message_com::forward_cmdu_to_uds(destinationAP, cmdu_rx, length)) {
                 LOG(ERROR) << "forward_cmdu_to_uds() failed - " << print_cmdu_types(uds_header)
-                           << " sd=" << intptr_t(soc_iter->slave);
+                           << " sd=" << intptr_t(destinationAP);
             }
         }
-
     } else { // from uds to bus or local handling (ACTION_BACKHAUL)
 
         // Check for local handling
@@ -2069,7 +2110,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 }
 
 bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                             const std::string &src_mac)
+                                             const std::string &src_mac, Socket *&forward_to)
 {
     /*
      * return values:
@@ -2118,11 +2159,13 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE: {
         return handle_multi_ap_policy_config_request(cmdu_rx, src_mac);
     }
+    case ieee1905_1::eMessageType::BEACON_METRICS_QUERY_MESSAGE: {
+        return handle_1905_beacon_metrics_query(cmdu_rx, src_mac, forward_to);
+    }
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
         return false;
-    }
     }
 }
 
@@ -3088,6 +3131,74 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
         LOG(TRACE) << "no state change";
     }
     return true;
+}
+
+bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                        const std::string &src_mac,
+                                                        Socket *&forward_to)
+{
+    LOG(INFO) << "now going to handle BEACON METRICS QUERY";
+
+    // extract the desired STA mac
+    auto tlvBeaconMetricsQuery = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
+    if (!tlvBeaconMetricsQuery) {
+        LOG(ERROR) << "handle_1905_beacon_metrics_query should handle only tlvBeaconMetrics, but "
+                      "got something else: 0x"
+                   << std::hex << (uint16_t)cmdu_rx.getMessageType();
+        return false;
+    }
+
+    const sMacAddr &requiredMac = tlvBeaconMetricsQuery->associated_sta_mac();
+
+    LOG(DEBUG) << "the requested STA mac is: " << requiredMac;
+
+    auto radio = findRadioInfo(slaves_sockets, requiredMac);
+
+    if (!radio) {
+        LOG(WARNING) << "couldn't find any agent for the requested mac: " << requiredMac;
+
+        // send ack with error to the controller
+
+        // build ACK message CMDU
+        const auto mid = cmdu_rx.getMessageId();
+
+        auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+        if (!cmdu_tx_header) {
+            LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+            return false;
+        }
+
+        // add an Error Code TLV
+        auto error_code_tlv = cmdu_tx.addClass<wfa_map::tlvErrorCode>();
+        if (!error_code_tlv) {
+            LOG(ERROR) << "addClass wfa_map::tlvErrorCode has failed";
+            return false;
+        }
+        error_code_tlv->reason_code() =
+            wfa_map::tlvErrorCode::STA_NOT_ASSOCIATED_WITH_ANY_BSS_OPERATED_BY_THE_AGENT;
+        error_code_tlv->sta_mac() = requiredMac;
+
+        // debug
+        std::stringstream errorSS;
+        auto error_tlv = cmdu_tx.getClass<wfa_map::tlvErrorCode>();
+        if (error_tlv) {
+            errorSS << "0x" << error_tlv->reason_code();
+        } else {
+            errorSS << "no error";
+        }
+        // end debug
+
+        LOG(DEBUG) << "sending ACK message to the originator with an error, mid: " << std::hex
+                   << int(mid) << " tlv error code: " << errorSS.str();
+        return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+    }
+
+    LOG(DEBUG) << "found the radio that has the sation. radio: " << radio->radio_mac
+               << "; station: " << requiredMac;
+    forward_to = radio->slave;
+
+    // more work to do at the caller
+    return false;
 }
 
 bool backhaul_manager::send_slaves_enable()
