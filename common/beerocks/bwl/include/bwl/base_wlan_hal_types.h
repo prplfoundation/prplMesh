@@ -55,9 +55,17 @@ struct WiFiChannel {
     bool radar_affected;
 };
 
+enum eVapType : uint8_t {
+    VAP_TYPE_FRONTHAUL = 0,
+    VAP_TYPE_BACKHAUL  = 1,
+    VAP_TYPE_HYBRID    = 3,
+    VAP_TYPE_INVALID   = 4,
+};
+
 struct VAPElement {
     std::string ssid;
     std::string mac;
+    eVapType type;
 
     virtual bool operator==(const VAPElement &other) const
     {
